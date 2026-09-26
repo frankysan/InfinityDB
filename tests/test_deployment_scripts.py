@@ -12,6 +12,10 @@ def _read(relative: str) -> str:
 def test_compose_supports_explicit_bind_address_and_host_port() -> None:
     compose = _read("compose.yaml")
     assert "${BIND_ADDRESS:-0.0.0.0}:${HTTP_PORT:-80}:80" in compose
+    assert (
+        "${METRICS_BIND_ADDRESS:-127.0.0.1}:${METRICS_PORT:-9090}:9090"
+        in compose
+    )
 
 
 def test_transferred_artifact_deployment_never_rebuilds_runtime_data() -> None:
@@ -27,6 +31,8 @@ def test_local_test_deployment_is_loopback_only_and_isolated() -> None:
     script = _read("scripts/deploy-local-test.sh")
     assert "COMPOSE_PROJECT_NAME=infinitydb-test" in script
     assert "BIND_ADDRESS=127.0.0.1" in script
+    assert "METRICS_BIND_ADDRESS=127.0.0.1" in script
+    assert 'METRICS_PORT="$metrics_port"' in script
     assert "DOMAIN=localhost" in script
     assert "PRUNE_APP_IMAGES=0" in script
     assert "sh ./scripts/deploy-transferred.sh" in script
@@ -90,3 +96,22 @@ def test_production_observability_disables_raw_access_logs_and_keeps_metrics_pri
     assert "@internal path /internal/*" in caddyfile
     assert "respond @internal 404" in caddyfile
     assert "reverse_proxy app:8000" in caddyfile
+    assert "http://:9090 {" in caddyfile
+    assert "handle /metrics" in caddyfile
+    assert "rewrite * /internal/metrics" in caddyfile
+    assert "handle /health" in caddyfile
+    assert "rewrite * /internal/health" in caddyfile
+
+
+def test_metrics_lan_binding_is_persisted_and_rejects_wildcard_addresses() -> None:
+    deploy = _read("scripts/deploy.sh")
+    installer = _read("scripts/install-or-update.sh")
+    transferred = _read("scripts/deploy-transferred.sh")
+
+    assert ': "${METRICS_BIND_ADDRESS:=127.0.0.1}"' in deploy
+    assert ': "${METRICS_PORT:=9090}"' in deploy
+    assert r"0.0.0.0|::|\[::\]" in deploy
+    assert "METRICS_BIND_ADDRESS=%s" in installer
+    assert "METRICS_PORT=%s" in installer
+    assert "config_value METRICS_BIND_ADDRESS" in transferred
+    assert "config_value METRICS_PORT" in transferred

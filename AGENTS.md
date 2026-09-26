@@ -206,10 +206,9 @@ When deriving structured facts from these materials:
 
 - record source version/date and printed-page citations for PDFs;
 - preserve the wiki source identity actually available to the current curated
-  contract, including snapshot-local path and snapshot date;
-- do not invent an exact timestamped archive identity/hash for legacy wiki
-  references before the downloader/packager and curated provenance contract are
-  migrated;
+  contract. Archived sources use the exact timestamped ZIP path/hash, acquisition
+  metadata, and snapshot-local member; pinned `oldid=` revisions remain URL-backed
+  when they are not members of that archive;
 - keep core rules, FAQ/errata, ITS season material, and historical sources
   distinct;
 - do not bulk-extract or serve copyrighted text or artwork.

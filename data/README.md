@@ -50,7 +50,7 @@ provenance/state, and build outputs.
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — generated `master.json`, normalized data, validation reports,
-  the browser-facing `infinity.db`, development-only `infinity.raw.db`, and the
+  the application `infinity.db`, development-only `infinity.raw.db`, and the
   separate curated-rules `rules.db`. Ignored by Git.
 
 Keeping raw inputs, generated provenance, and generated databases outside source
@@ -59,13 +59,13 @@ changes. Generated snapshot manifests are local provenance records rather than
 maintained project knowledge. They are retained until explicitly removed; the
 acquisition tools do not automatically prune either archives or manifests.
 
-Generated Army database data is replaceable. Builds create temporary frontend
+Generated Army database data is replaceable. Builds create temporary application
 and raw-archive siblings, validate both before publication, and replace each
 destination atomically. The pair is not yet one atomic transaction: recovery
 from interruption between the two replacements remains an explicit backlog item.
 
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
-curated-v3 rules contract records the local reviewed artifact plus its upstream
+current curated-v21 rules contract records the local reviewed artifact plus its upstream
 source URL. PDF citations use printed pages. Archived wiki sources bind to an
 exact timestamped ZIP/hash and citations use archive members; exact pinned wiki
 revisions remain URL-backed sources.

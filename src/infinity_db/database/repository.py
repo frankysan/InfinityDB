@@ -43,6 +43,10 @@ from .application_armies import (
 )
 from .application_catalogs import validate_application_catalogs
 from .application_domain_slugs import validate_application_domain_slugs
+from .fireteam_relationships import (
+    validate_application_fireteam_integrity,
+    validate_application_fireteams,
+)
 from .include_relationships import validate_include_relationships
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
 from .peripheral_relationships import validate_peripheral_relationships
@@ -671,9 +675,13 @@ class Database:
                 )
 
         reinforcement_parents: dict[int, list[int]] = {}
+        reinforcement_sections: dict[int, list[int]] = {}
         for row in reinforcement_rows:
             reinforcement_parents.setdefault(row["reinforcement_army_id"], []).append(
                 row["parent_army_id"]
+            )
+            reinforcement_sections.setdefault(row["parent_army_id"], []).append(
+                row["reinforcement_army_id"]
             )
 
         def faction_id_for(army_id: int) -> int | None:
@@ -712,6 +720,7 @@ class Database:
             "source_list_ids": source_list_ids,
             "source_kinds": source_kinds,
             "reinforcement_parents": reinforcement_parents,
+            "reinforcement_sections": reinforcement_sections,
         }
 
     @instance_lru_cache(maxsize=4)
@@ -862,8 +871,10 @@ class Database:
                 )
             identity_config = identity_config_from_connection(connection)
             validate_application_army_integrity(connection)
+            validate_application_fireteam_integrity(connection)
             if source_consistency:
                 validate_application_armies(connection, identity_config)
+                validate_application_fireteams(connection)
             validate_application_catalogs(connection, identity_config)
             validate_application_domain_slugs(connection)
             source_unit_count = connection.execute(
@@ -1363,8 +1374,8 @@ class Database:
             programs = [
                 dict(row)
                 for row in connection.execute(
-                    "SELECT position, name, attack_mod, opponent_mod, ps, burst, special "
-                    "FROM application_hacking_programs "
+                    "SELECT position, name, attack_mod, opponent_mod, ps, burst, special, "
+                    "source_extra_id FROM application_hacking_programs "
                     "ORDER BY position"
                 )
             ]
@@ -1507,10 +1518,234 @@ class Database:
                     "group_name": group.get("name") if group is not None else None,
                     "group_slug": group.get("slug") if group is not None else None,
                     "parent_army_ids": list(graph["reinforcement_parents"].get(army_id, [])),
+                    "parent_armies": [
+                        graph["identities"][parent_id]
+                        for parent_id in graph["reinforcement_parents"].get(army_id, [])
+                        if parent_id in graph["identities"]
+                    ],
+                    "reinforcement_sections": [
+                        graph["identities"][section_id]
+                        for section_id in graph["reinforcement_sections"].get(army_id, [])
+                        if section_id in graph["identities"]
+                    ],
                     "unit_count": len(logical_unit_ids.get(army_id, set())),
                 }
             )
         return items
+
+    @instance_lru_cache(maxsize=1)
+    def list_fireteam_armies(self) -> list[dict[str, Any]]:
+        """Return playable Armies that have player-facing Fireteam chart content."""
+
+        armies = {item["id"]: item for item in self.list_armies()}
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT c.application_army_id, COUNT(DISTINCT f.fireteam_id) AS fireteam_count, "
+                "MAX(CASE WHEN l.raw_limit > 0 THEN 1 ELSE 0 END) AS has_positive_limit, "
+                "CASE WHEN COALESCE(c.description, '') != '' THEN 1 ELSE 0 END "
+                "AS has_description "
+                "FROM application_fireteam_charts AS c "
+                "LEFT JOIN application_fireteams AS f "
+                "ON f.application_army_id = c.application_army_id "
+                "LEFT JOIN application_fireteam_chart_limits AS l "
+                "ON l.application_army_id = c.application_army_id "
+                "GROUP BY c.application_army_id, c.description "
+                "ORDER BY c.application_army_id"
+            ).fetchall()
+
+        result: list[dict[str, Any]] = []
+        for row in rows:
+            army = armies.get(int(row["application_army_id"]))
+            if army is None or not army["playable"]:
+                continue
+            if not (
+                int(row["fireteam_count"])
+                or bool(row["has_positive_limit"])
+                or bool(row["has_description"])
+            ):
+                continue
+            item = dict(army)
+            item["fireteam_count"] = int(row["fireteam_count"])
+            result.append(item)
+        return result
+
+    @instance_lru_cache(maxsize=256)
+    def get_fireteam_chart(self, army_ref: int | str) -> dict[str, Any] | None:
+        """Return one authoritative Army-scoped Fireteam chart projection."""
+
+        army_id = self.application_army_id(army_ref)
+        if army_id is None:
+            return None
+        army = next((item for item in self.list_armies() if item["id"] == army_id), None)
+        if army is None:
+            return None
+
+        with self._connect() as connection:
+            chart = connection.execute(
+                "SELECT application_army_id, source_army_id, source_kind, source_file, "
+                "source_sha256, description FROM application_fireteam_charts "
+                "WHERE application_army_id = ?",
+                (army_id,),
+            ).fetchone()
+            if chart is None:
+                return None
+            limits = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT fireteam_type, position, raw_limit "
+                    "FROM application_fireteam_chart_limits "
+                    "WHERE application_army_id = ? ORDER BY position, fireteam_type",
+                    (army_id,),
+                )
+            ]
+            team_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT fireteam_id, position, name, observation, source_army_id, "
+                    "source_fireteam_id, is_wildcard FROM application_fireteams "
+                    "WHERE application_army_id = ? ORDER BY position, fireteam_id",
+                    (army_id,),
+                )
+            ]
+            type_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT fireteam_id, position, fireteam_type "
+                    "FROM application_fireteam_types WHERE application_army_id = ? "
+                    "ORDER BY fireteam_id, position",
+                    (army_id,),
+                )
+            ]
+            member_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT m.fireteam_id, m.member_id, m.position, m.source_member_id, "
+                    "m.slug, m.name, m.comment, m.min_count, m.max_count, m.required, "
+                    "m.source_unit_id, m.logical_unit_id, m.resolution, m.fto_marker, "
+                    "lu.name AS logical_unit_name, uds.slug AS logical_unit_slug "
+                    "FROM application_fireteam_members AS m "
+                    "LEFT JOIN logical_units AS lu ON lu.id = m.logical_unit_id "
+                    "LEFT JOIN application_domain_slugs AS uds "
+                    "ON uds.domain = 'units' AND uds.application_id = m.logical_unit_id "
+                    "AND uds.status = 'resolved' "
+                    "WHERE m.application_army_id = ? "
+                    "ORDER BY m.fireteam_id, m.position, m.member_id",
+                    (army_id,),
+                )
+            ]
+            loadout_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT fireteam_id, member_id, position, loadout_payload_id, option_name, "
+                    "fto_marker FROM application_fireteam_member_loadouts "
+                    "WHERE application_army_id = ? "
+                    "ORDER BY fireteam_id, member_id, position",
+                    (army_id,),
+                )
+            ]
+            equivalence_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT fireteam_id, member_id, position, label "
+                    "FROM application_fireteam_member_equivalence_labels "
+                    "WHERE application_army_id = ? "
+                    "ORDER BY fireteam_id, member_id, position",
+                    (army_id,),
+                )
+            ]
+
+        types_by_team: dict[int, list[str]] = {}
+        for row in type_rows:
+            types_by_team.setdefault(int(row["fireteam_id"]), []).append(
+                str(row["fireteam_type"])
+            )
+        loadouts_by_member: dict[tuple[int, int], list[dict[str, Any]]] = {}
+        for row in loadout_rows:
+            loadouts_by_member.setdefault(
+                (int(row["fireteam_id"]), int(row["member_id"])), []
+            ).append(
+                {
+                    "position": int(row["position"]),
+                    "loadout_payload_id": int(row["loadout_payload_id"]),
+                    "name": row["option_name"],
+                    "fto_marker": row["fto_marker"],
+                }
+            )
+        equivalence_by_member: dict[tuple[int, int], list[str]] = {}
+        for row in equivalence_rows:
+            equivalence_by_member.setdefault(
+                (int(row["fireteam_id"]), int(row["member_id"])), []
+            ).append(str(row["label"]))
+        members_by_team: dict[int, list[dict[str, Any]]] = {}
+        for row in member_rows:
+            fireteam_id = int(row["fireteam_id"])
+            member_id = int(row["member_id"])
+            logical_unit_id = row["logical_unit_id"]
+            unit = None
+            if type(logical_unit_id) is int:
+                unit = {
+                    "id": logical_unit_id,
+                    "slug": row["logical_unit_slug"],
+                    "name": row["logical_unit_name"],
+                }
+            members_by_team.setdefault(fireteam_id, []).append(
+                {
+                    "id": member_id,
+                    "position": int(row["position"]),
+                    "source_member_id": int(row["source_member_id"]),
+                    "slug": row["slug"],
+                    "name": row["name"],
+                    "comment": row["comment"],
+                    "min_count": row["min_count"],
+                    "max_count": row["max_count"],
+                    "required": bool(row["required"]),
+                    "resolution": row["resolution"],
+                    "fto_marker": row["fto_marker"],
+                    "source_unit_id": row["source_unit_id"],
+                    "unit": unit,
+                    "loadouts": loadouts_by_member.get((fireteam_id, member_id), []),
+                    "equivalence_labels": equivalence_by_member.get(
+                        (fireteam_id, member_id), []
+                    ),
+                }
+            )
+
+        teams = []
+        for row in team_rows:
+            fireteam_id = int(row["fireteam_id"])
+            teams.append(
+                {
+                    "id": fireteam_id,
+                    "position": int(row["position"]),
+                    "name": row["name"],
+                    "observation": row["observation"],
+                    "source_army_id": int(row["source_army_id"]),
+                    "source_fireteam_id": int(row["source_fireteam_id"]),
+                    "is_wildcard": bool(row["is_wildcard"]),
+                    "types": types_by_team.get(fireteam_id, []),
+                    "members": members_by_team.get(fireteam_id, []),
+                }
+            )
+
+        return {
+            "army": dict(army),
+            "source": {
+                "army_id": int(chart["source_army_id"]),
+                "kind": chart["source_kind"],
+                "file": chart["source_file"],
+                "sha256": chart["source_sha256"],
+            },
+            "description": chart["description"],
+            "limits": [
+                {
+                    "type": row["fireteam_type"],
+                    "position": int(row["position"]),
+                    "max_count": int(row["raw_limit"]),
+                }
+                for row in limits
+            ],
+            "teams": teams,
+        }
 
     @instance_lru_cache(maxsize=1)
     def list_skill_extras(self) -> list[dict[str, Any]]:
@@ -2021,6 +2256,7 @@ class Database:
     def list_units(
         self,
         army_id: int | str | None = None,
+        declared_faction_id: int | None = None,
         search: str = "",
         skill_id: int | str | None = None,
         equipment_id: int | str | None = None,
@@ -2046,6 +2282,13 @@ class Database:
                     raise ArmySelectionError(
                         f"army_id {army_id} is a grouping-only identity, not a selectable army"
                     )
+        if declared_faction_id is not None and (
+            type(declared_faction_id) is not int
+            or not 0 <= declared_faction_id <= SQLITE_INTEGER_MAX
+        ):
+            raise ValueError(
+                "declared_faction_id must be a nonnegative SQLite signed 64-bit integer"
+            )
         rule_filters: dict[str, int | None] = {}
         for catalog, item_ref in {
             "skills": skill_id,
@@ -2113,6 +2356,11 @@ class Database:
         matching_requirements: list[tuple[frozenset[str], ...]] = []
         for group in groups:
             if unresolved_army_filter:
+                continue
+            if declared_faction_id is not None and not any(
+                declared_faction_id in declared_faction_ids_by_unit[source_id]
+                for source_id in group["source_ids"]
+            ):
                 continue
             if _logical_unit_ids is not None and group["id"] not in _logical_unit_ids:
                 continue
@@ -2186,13 +2434,33 @@ class Database:
             for group in grouped[offset : offset + limit]
         ]
         summary = availability_summary(matching_requirements, selected_flags)
-        return {
+        result = {
             "items": items,
             "total": total,
             "limit": limit,
             "offset": offset,
             "availability": summary,
         }
+        if declared_faction_id is not None:
+            application_armies = self._application_army_graph()
+            application_id = application_armies["source_to_application"].get(
+                declared_faction_id
+            )
+            identity = application_armies["armies"].get(application_id)
+            result["declared_faction"] = {
+                "source_faction_id": declared_faction_id,
+                "application_army_id": application_id,
+                "name": (
+                    identity["name"]
+                    if identity is not None
+                    else f"Faction {declared_faction_id}"
+                ),
+                "has_army_list": bool(
+                    identity is not None
+                    and application_id in application_armies["source_list_ids"]
+                ),
+            }
+        return result
 
     @instance_lru_cache(maxsize=32)
     def visible_unit_ids(
@@ -2227,6 +2495,7 @@ class Database:
         if group is None:
             return None
         identity_config = self._identity_config()
+        application_armies = self._application_army_graph()
         with self._connect() as connection:
             faction_groups = self._faction_groups()
             faction_identities = self._faction_identities()
@@ -2257,7 +2526,22 @@ class Database:
                     {
                         "id": occurrence["id"],
                         "name": occurrence["name"],
+                        "role": occurrence["role"],
                         "faction": faction_groups.get(occurrence["id"]),
+                        "parent_armies": [
+                            application_armies["identities"][parent_id]
+                            for parent_id in application_armies["reinforcement_parents"].get(
+                                occurrence["id"], []
+                            )
+                            if parent_id in application_armies["identities"]
+                        ],
+                        "reinforcement_sections": [
+                            application_armies["identities"][section_id]
+                            for section_id in application_armies["reinforcement_sections"].get(
+                                occurrence["id"], []
+                            )
+                            if section_id in application_armies["identities"]
+                        ],
                         "availability_flags": list(flags),
                         "profiles": [],
                         "loadouts": [],
@@ -2267,7 +2551,8 @@ class Database:
                 by_source_army[(source_id, occurrence["source_army_id"])] = army
             armies = list(armies_by_occurrence.values())
             profile_rows = connection.execute(
-                "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, pp.name, "
+                "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, "
+                "ppo.logo, pp.name, "
                 "t.name AS type, c.name AS classification, pp.move_1, pp.move_2, "
                 "pp.cc, pp.bs, pp.ph, pp.wip, pp.arm, pp.bts, pp.vitality, pp.silhouette, "
                 "pp.is_structure, ppo.ava "
@@ -2293,8 +2578,15 @@ class Database:
                 profile_item = {
                     key: profile[key]
                     for key in profile.keys()
-                    if key not in {"army_id", "unit_id"}
+                    if key
+                    not in {
+                        "army_id",
+                        "unit_id",
+                        "logo",
+                    }
                 }
+                profile_logo = profile["logo"]
+                profile_item["logo_urls"] = [profile_logo] if profile_logo else []
                 profile_item["display_name"] = strip_reinforcement_prefix(
                     profile["name"], identity_config
                 )
@@ -2322,6 +2614,9 @@ class Database:
                     merged_profiles[profile_key] = profile_item
                 else:
                     merge_profile_availability(existing, profile_item)
+                    for profile_logo in profile_item["logo_urls"]:
+                        if profile_logo not in existing["logo_urls"]:
+                            existing["logo_urls"].append(profile_logo)
             for occurrence_table, catalog_table, property_name, extras_table in (
                 (
                     "profile_payload_skills",
@@ -2469,9 +2764,42 @@ class Database:
                         },
                     )
 
+            profile_include_rows = connection.execute(
+                "SELECT i.unit_id, i.army_id, i.group_id, i.profile_id, "
+                "i.target_loadout_payload_id, i.quantity, lp.name AS target_name "
+                "FROM profile_occurrence_includes AS i "
+                "JOIN loadout_payloads AS lp ON lp.id = i.target_loadout_payload_id "
+                f"WHERE i.unit_id IN ({placeholders}) "
+                "ORDER BY i.army_id, i.group_id, i.profile_id, i.position, i.unit_id",
+                source_ids,
+            )
+            for include in profile_include_rows:
+                profile_key = profile_merge_keys_by_source.get(
+                    (
+                        include["unit_id"],
+                        include["army_id"],
+                        include["group_id"],
+                        include["profile_id"],
+                    )
+                )
+                profile_item = (
+                    merged_profiles.get(profile_key) if profile_key is not None else None
+                )
+                army = by_source_army.get((include["unit_id"], include["army_id"]))
+                if profile_item is not None and army is not None:
+                    append_unique_item(
+                        profile_item.setdefault("includes", []),
+                        {
+                            "loadout_payload_id": include["target_loadout_payload_id"],
+                            "name": include["target_name"],
+                            "quantity": include["quantity"],
+                            "army_id": army["id"],
+                        },
+                    )
+
             loadout_rows = connection.execute(
-                "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, lp.name, "
-                "lpo.points, lpo.swc, lp.minis, lp.disabled "
+                "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, "
+                "lpo.loadout_payload_id, lp.name, lpo.points, lpo.swc, lp.minis, lp.disabled "
                 "FROM loadout_payload_occurrences AS lpo "
                 "JOIN loadout_payloads AS lp ON lp.id = lpo.loadout_payload_id "
                 f"WHERE lpo.unit_id IN ({placeholders}) "
@@ -2487,8 +2815,9 @@ class Database:
                 loadout_item = {
                     key: loadout[key]
                     for key in loadout.keys()
-                    if key not in {"army_id", "unit_id"}
+                    if key not in {"army_id", "unit_id", "loadout_payload_id"}
                 }
+                loadout_item["loadout_payload_ids"] = [loadout["loadout_payload_id"]]
                 loadout_item["skills"] = []
                 loadout_item["equipment"] = []
                 loadout_item["weapons"] = []
@@ -2504,9 +2833,46 @@ class Database:
                         loadout["option_id"],
                     )
                 ] = loadout_key
-                if loadout_key not in loadout_items:
+                existing_loadout = loadout_items.get(loadout_key)
+                if existing_loadout is None:
                     army["loadouts"].append(loadout_item)
                     loadout_items[loadout_key] = loadout_item
+                elif loadout["loadout_payload_id"] not in existing_loadout["loadout_payload_ids"]:
+                    existing_loadout["loadout_payload_ids"].append(loadout["loadout_payload_id"])
+
+            loadout_include_rows = connection.execute(
+                "SELECT i.unit_id, i.army_id, i.group_id, i.option_id, "
+                "i.target_loadout_payload_id, i.quantity, lp.name AS target_name "
+                "FROM loadout_occurrence_includes AS i "
+                "JOIN loadout_payloads AS lp ON lp.id = i.target_loadout_payload_id "
+                f"WHERE i.unit_id IN ({placeholders}) "
+                "ORDER BY i.army_id, i.group_id, i.option_id, i.position, i.unit_id",
+                source_ids,
+            )
+            for include in loadout_include_rows:
+                loadout_key = loadout_keys_by_source.get(
+                    (
+                        include["unit_id"],
+                        include["army_id"],
+                        include["group_id"],
+                        include["option_id"],
+                    )
+                )
+                loadout_item = (
+                    loadout_items.get(loadout_key) if loadout_key is not None else None
+                )
+                army = by_source_army.get((include["unit_id"], include["army_id"]))
+                if loadout_item is not None and army is not None:
+                    append_unique_item(
+                        loadout_item.setdefault("includes", []),
+                        {
+                            "loadout_payload_id": include["target_loadout_payload_id"],
+                            "name": include["target_name"],
+                            "quantity": include["quantity"],
+                            "army_id": army["id"],
+                        },
+                    )
+
             order_rows = connection.execute(
                 "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, o.order_type, "
                 "o.list_count, o.total_count "
@@ -2664,6 +3030,48 @@ class Database:
                         },
                     )
 
+            unit_option_rows = connection.execute(
+                "SELECT u.unit_id, u.option_id, u.position AS option_position, u.name, "
+                "i.target_army_id, i.target_loadout_payload_id, i.quantity, "
+                "lp.name AS target_name "
+                "FROM unit_options AS u "
+                "JOIN unit_option_include_targets AS i "
+                "ON i.unit_id = u.unit_id AND i.option_id = u.option_id "
+                "JOIN loadout_payloads AS lp ON lp.id = i.target_loadout_payload_id "
+                f"WHERE u.unit_id IN ({placeholders}) "
+                "ORDER BY u.position, u.unit_id, u.option_id, i.target_army_id, i.position",
+                source_ids,
+            )
+            unit_option_items: dict[tuple[Any, ...], dict[str, Any]] = {}
+            for option in unit_option_rows:
+                army = by_source_army.get((option["unit_id"], option["target_army_id"]))
+                if army is None:
+                    continue
+                option_key = (
+                    army["_occurrence_key"],
+                    option["unit_id"],
+                    option["option_id"],
+                )
+                option_item = unit_option_items.get(option_key)
+                if option_item is None:
+                    option_item = {
+                        "option_id": option["option_id"],
+                        "name": option["name"],
+                        "source_unit_id": option["unit_id"],
+                        "includes": [],
+                    }
+                    unit_option_items[option_key] = option_item
+                    army.setdefault("unit_option_includes", []).append(option_item)
+                append_unique_item(
+                    option_item["includes"],
+                    {
+                        "loadout_payload_id": option["target_loadout_payload_id"],
+                        "name": option["target_name"],
+                        "quantity": option["quantity"],
+                        "army_id": army["id"],
+                    },
+                )
+
             access_rows = connection.execute(
                 "SELECT a.id, a.controller_kind, a.army_id, a.unit_id, a.group_id, "
                 "a.parent_id, a.type_id, a.relationship, t.target_logical_unit_id, "
@@ -2712,6 +3120,52 @@ class Database:
                         "id": access["target_logical_unit_id"],
                         "slug": access["target_slug"],
                         "name": access["target_name"],
+                    }
+                )
+
+            controller_rows = connection.execute(
+                "SELECT a.id, a.controller_kind, a.army_id, "
+                "a.type_id, a.relationship, lus.logical_unit_id AS controller_unit_id, "
+                "lu.name AS controller_name, ds.slug AS controller_slug, "
+                "CASE a.controller_kind WHEN 'profile' THEN pp.name ELSE lp.name END "
+                "AS controller_option_name "
+                "FROM application_peripheral_controller_targets AS t "
+                "JOIN application_peripheral_controller_access AS a ON a.id = t.access_id "
+                "JOIN logical_unit_sources AS lus ON lus.source_unit_id = a.unit_id "
+                "JOIN logical_units AS lu ON lu.id = lus.logical_unit_id "
+                "LEFT JOIN application_domain_slugs AS ds "
+                "ON ds.domain = 'units' AND ds.application_id = lus.logical_unit_id "
+                "LEFT JOIN profile_payload_occurrences AS ppo ON a.controller_kind = 'profile' "
+                "AND ppo.army_id = a.army_id AND ppo.unit_id = a.unit_id "
+                "AND ppo.group_id = a.group_id AND ppo.profile_id = a.parent_id "
+                "LEFT JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id "
+                "LEFT JOIN loadout_payload_occurrences AS lpo ON a.controller_kind = 'loadout' "
+                "AND lpo.army_id = a.army_id AND lpo.unit_id = a.unit_id "
+                "AND lpo.group_id = a.group_id AND lpo.option_id = a.parent_id "
+                "LEFT JOIN loadout_payloads AS lp ON lp.id = lpo.loadout_payload_id "
+                "WHERE t.target_logical_unit_id = ? "
+                "ORDER BY a.army_id, lu.name, a.controller_kind, a.group_id, a.parent_id, a.id",
+                (group["id"],),
+            ).fetchall()
+            peripheral_controllers = []
+            for row in controller_rows:
+                army_identity = faction_identities.get(row["army_id"])
+                peripheral_controllers.append(
+                    {
+                        "id": row["id"],
+                        "type_id": row["type_id"],
+                        "relationship": row["relationship"],
+                        "controller_kind": row["controller_kind"],
+                        "controller_option_name": row["controller_option_name"],
+                        "army": {
+                            "id": army_identity["id"] if army_identity else row["army_id"],
+                            "name": army_identity["name"] if army_identity else None,
+                        },
+                        "controller": {
+                            "id": row["controller_unit_id"],
+                            "slug": row["controller_slug"],
+                            "name": row["controller_name"],
+                        },
                     }
                 )
 
@@ -2831,6 +3285,45 @@ class Database:
                 }
                 member["dependencies"].append(target)
 
+            declared_memberships: dict[int, dict[str, Any]] = {}
+            concrete_army_ids = set(group["armies"])
+            for source_id in source_ids:
+                for source_faction_id in sorted(declared_faction_ids[source_id]):
+                    membership = declared_memberships.setdefault(
+                        source_faction_id,
+                        {
+                            "source_faction_id": source_faction_id,
+                            "source_unit_ids": [],
+                        },
+                    )
+                    if source_id not in membership["source_unit_ids"]:
+                        membership["source_unit_ids"].append(source_id)
+            declared_factions = []
+            for source_faction_id, membership in sorted(declared_memberships.items()):
+                application_id = application_armies["source_to_application"].get(
+                    source_faction_id
+                )
+                identity = application_armies["armies"].get(application_id)
+                declared_factions.append(
+                    {
+                        **membership,
+                        "application_army_id": application_id,
+                        "name": (
+                            identity["name"]
+                            if identity is not None
+                            else f"Faction {source_faction_id}"
+                        ),
+                        "has_army_list": bool(
+                            identity is not None
+                            and application_id in application_armies["source_list_ids"]
+                        ),
+                        "available": bool(
+                            application_id is not None
+                            and application_id in concrete_army_ids
+                        ),
+                    }
+                )
+
             main_faction = faction_groups.get(group["main_army_id"])
             display_faction = faction_identities.get(group["display_army_id"])
             for army in armies:
@@ -2853,10 +3346,13 @@ class Database:
             ),
             "display_faction": display_faction,
             "source_ids": source_ids,
+            "declared_factions": declared_factions,
             "armies": armies,
         }
         if peripheral_type_ids:
             result["peripheral_type_ids"] = peripheral_type_ids
+        if peripheral_controllers:
+            result["peripheral_controllers"] = peripheral_controllers
         if selection_constraints:
             result["selection_constraints"] = selection_constraints
         if group_dependencies:

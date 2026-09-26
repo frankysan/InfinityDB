@@ -381,6 +381,27 @@ def test_database_splits_lossless_source_from_published_application_data(
         ).fetchone()[0]
         assert json.loads(payload_loadout_skill_raw) == source_loadout_skill_raw
 
+        assert connection.execute(
+            "SELECT application_army_id, source_army_id, source_kind, source_spec "
+            "FROM application_fireteam_charts ORDER BY application_army_id"
+        ).fetchall() == [
+            (101, 101, "faction", '{"max":2}'),
+            (201, 201, "sectorial", "{}"),
+            (301, 301, None, "{}"),
+        ]
+        assert connection.execute(
+            "SELECT application_army_id, fireteam_id, name, source_army_id, is_wildcard "
+            "FROM application_fireteams"
+        ).fetchall() == [(101, 1, "Team", 101, 0)]
+        assert connection.execute(
+            "SELECT application_army_id, fireteam_id, member_id, source_unit_id, "
+            "logical_unit_id, resolution FROM application_fireteam_members"
+        ).fetchall() == [(101, 1, 1, 1, 1, "army")]
+        assert connection.execute(
+            "SELECT application_army_id, fireteam_id, position, fireteam_type "
+            "FROM application_fireteam_types"
+        ).fetchall() == [(101, 1, 1, "CORE")]
+
         indexes = {
             row[1]
             for table_name in PUBLISHED_DATABASE_TABLES
@@ -399,6 +420,36 @@ def test_database_splits_lossless_source_from_published_application_data(
     finally:
         connection.close()
         archive.close()
+
+
+def test_fireteam_repository_exposes_army_scoped_application_chart(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    armies = database.list_fireteam_armies()
+    assert [(army["id"], army["fireteam_count"]) for army in armies] == [(101, 1)]
+
+    chart = database.get_fireteam_chart("first-army")
+    assert chart is not None
+    assert chart["army"]["id"] == 101
+    assert chart["source"]["army_id"] == 101
+    assert chart["source"]["kind"] == "faction"
+    assert chart["limits"] == [
+        {"type": "MAX", "position": 1, "max_count": 2}
+    ]
+    assert len(chart["teams"]) == 1
+    team = chart["teams"][0]
+    assert team["name"] == "Team"
+    assert team["types"] == ["CORE"]
+    assert team["is_wildcard"] is False
+    assert len(team["members"]) == 1
+    member = team["members"][0]
+    assert member["name"] == "Alpha"
+    assert member["min_count"] == 1
+    assert member["unit"] == {"id": 1, "slug": "alpha", "name": "Álpha"}
 
 
 def test_published_database_validates_without_raw_sibling(
@@ -1181,6 +1232,28 @@ def test_unit_details_expose_backend_profile_display_name(
         assert profile["name"] == "REFUERZOS: Trooper"
         assert profile["display_name"] == "Trooper"
         assert profile["profile_identity"] == "trooper"
+
+
+def test_unit_details_expose_profile_logo_urls(
+    tmp_path: Path, normalized: dict
+) -> None:
+    expected: dict[int, str] = {}
+    for profile in normalized["tables"]["profiles"]:
+        if profile["unit_id"] != 1:
+            continue
+        logo = f"https://example.invalid/unit-{profile['army_id']}.svg"
+        profile["logo"] = logo
+        expected[profile["army_id"]] = logo
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    details = Database(path).get_unit(1)
+    assert details is not None
+    assert {
+        army["id"]: army["profiles"][0]["logo_urls"]
+        for army in details["armies"]
+    } == {army_id: [logo] for army_id, logo in expected.items()}
 
 
 def test_unit_details_expose_profile_structure_flag(
@@ -2556,6 +2629,35 @@ def test_profile_include_relationships_preserve_contextual_target_variants(
         ).fetchall() == [(101, 1), (201, 2)]
     finally:
         connection.close()
+
+
+def test_unit_details_present_contextual_include_relationships(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "include-details.sqlite3"
+    export_database(normalized, path)
+
+    details = Database(path).get_unit(1)
+
+    assert details is not None
+    for army in details["armies"]:
+        target = {
+            "loadout_payload_id": 1,
+            "name": "Rifle",
+            "quantity": 1,
+            "army_id": army["id"],
+        }
+        assert army["profiles"][0]["includes"] == [target]
+        assert army["loadouts"][0]["includes"] == [target]
+        assert army["loadouts"][0]["loadout_payload_ids"] == [1]
+        assert army["unit_option_includes"] == [
+            {
+                "option_id": 1,
+                "name": "Global",
+                "source_unit_id": 1,
+                "includes": [target],
+            }
+        ]
 
 
 def test_export_staging_rejects_invalid_materialized_include_relationship(

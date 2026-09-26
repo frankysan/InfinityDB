@@ -62,6 +62,10 @@ applicable:
 .infinity-db-deploy.env
 ```
 
+That file may include the public domain/image-retention settings plus the optional LAN metrics
+bind address and port. A metrics bind must be updated if the replacement server uses a different
+LAN address.
+
 The Caddy `caddy_data` and `caddy_config` named volumes are not InfinityDB build
 inputs, but copy or back them up when their runtime state matters. Configuration,
 accounts, or certificates owned by an external TLS reverse proxy are outside this
@@ -107,8 +111,10 @@ data/manifests/army-symbol-build.json
 image_overrides/
 ```
 
-The Army and SYMBOLS snapshot manifests bind the archives by SHA-256.
-`army-symbol-build.json` binds the pinned Army/SYMBOLS relationship and records
+Version-2 Army and SYMBOLS snapshot manifests record both the logical snapshot content hash and
+the exact archive-byte SHA-256. Migration and later-stage resume still require the exact pinned
+archive identity; equal logical content in a differently packed ZIP is not a substitute for that
+artifact. `army-symbol-build.json` binds the pinned Army/SYMBOLS relationship and records
 raw asset provenance, processing state, reports, settings, and final publication
 state. Local `image_overrides/` are authoritative build inputs and are ignored by
 Git, so they must be copied separately when present.

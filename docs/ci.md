@@ -73,11 +73,10 @@ complete tracked processed SVG publication.
 The workflow defines InfinityDB's required source-validation contract, while
 merge blocking remains a repository setting rather than a workflow-YAML property.
 The repository currently has an active `Protect main` branch ruleset targeting
-`main`. It requires pull requests with resolved review threads and an up-to-date
-set of required checks: the four `Source checks` matrix jobs, `deployment-smoke`,
-and `installed-wheel`. The `Cross-platform deterministic outputs` job is additionally
-mandatory for release acceptance and must remain part of the `Protect main` required
-checks. The ruleset blocks branch deletion and non-fast-forward updates and has no bypass
+`main`. It requires pull requests with resolved review threads and all seven maintained
+checks to be current and passing: the four `Source checks` matrix jobs,
+`Cross-platform deterministic outputs`, `deployment-smoke`, and `installed-wheel`.
+The ruleset also blocks branch deletion and non-fast-forward updates and has no bypass
 actors. These settings live on GitHub and therefore cannot be completed by workflow YAML
 alone.
 
@@ -173,8 +172,9 @@ content, so required source CI now uses `--assets required` directly from a clea
 checkout. A complete asset set is established by the generated publication inventory,
 not merely by the presence of SVG files. The validator checks every published path and
 SHA-256, rejects unexpected SVGs, and independently verifies that the browser-referenced
-subset is contained in the publication. Published variants that are not yet
-browser-referenced remain valid and required parts of the complete publication.
+subset is contained in the publication. The current processed publication is fully
+browser-addressable (806/806 SVGs); the separate subset contract still permits future
+preserved variants without excluding them from complete-publication validation.
 
 Asset-dependent pytest coverage remains marked `full_assets`; direct pytest excludes it
 by default, while the project runner includes it in `required` mode. Network/external-tool
@@ -220,7 +220,7 @@ full-asset workflow, protected-`main` ruleset, and focused standalone-tool regre
 coverage are implemented or configured. Hosted workflow results and the optional
 external-bundle environment configuration remain release-evidence/repository-
 administration work; see the backlog. These layers remain the baseline for the
-Milestone 2 consistency audit.
+0.10 end-to-end application consistency audit.
 
 Non-blocking CI follow-up remains in the backlog: validate checked-in snapshot notes
 routinely, configure the `full-assets` environment secrets with an authorized

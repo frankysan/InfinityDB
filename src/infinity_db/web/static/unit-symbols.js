@@ -1,3 +1,5 @@
+import { unitProfileSymbolSlug, unitSymbolSlug } from "./unit-symbol-map.js";
+
 function slugify(name) {
   return String(name)
     .normalize("NFKD")
@@ -8,12 +10,21 @@ function slugify(name) {
     .replace(/^-+|-+$/g, "");
 }
 
-export function unitSymbolPath(unitName) {
-  const slug = slugify(unitName);
-  const symbol = unitSymbolSlug(slug) || slug;
+function staticUnitSymbolPath(symbol) {
   const version = document.documentElement.dataset.staticVersion
     || document.documentElement.dataset.appVersion;
   return symbol && `/static/units/${encodeURI(symbol)}.svg?v=${encodeURIComponent(version)}`;
+}
+
+export function unitSymbolPath(unitName) {
+  const slug = slugify(unitName);
+  return staticUnitSymbolPath(unitSymbolSlug(slug) || slug);
+}
+
+export function unitProfileSymbolPath(profileLogo, unitName) {
+  const slug = slugify(unitName);
+  const symbol = unitProfileSymbolSlug(profileLogo) || unitSymbolSlug(slug) || slug;
+  return staticUnitSymbolPath(symbol);
 }
 
 export function unitSymbol(unitName, className = "") {
@@ -28,4 +39,3 @@ export function unitSymbol(unitName, className = "") {
   icon.addEventListener("error", () => icon.remove(), { once: true });
   return icon;
 }
-import { unitSymbolSlug } from "./unit-symbol-map.js";

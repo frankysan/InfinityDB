@@ -1,0 +1,495 @@
+{
+    "format": "InfinityDB curated reference",
+    "formatVersion": 21,
+    "collection": {
+        "id": "n5-hacking-programs-v5.3",
+        "title": "N5 Hacking Programs v5.3",
+        "domain": "hacking-programs",
+        "status": "current",
+        "effectiveFrom": "2026-08-10",
+        "authority": "secondary"
+    },
+    "vocabularySources": {
+        "skillTypes": [],
+        "labels": []
+    },
+    "skillTypes": [],
+    "labels": [],
+    "sources": [
+        {
+            "id": "wiki-en-20260918-130233",
+            "kind": "wiki",
+            "title": "Infinity Wiki snapshot (English)",
+            "version": "20260918-130233",
+            "acquiredAt": "2026-09-18T13:02:33+02:00",
+            "localPath": "data/wiki/WIKI-en 20260918-130233.zip",
+            "sha256": "aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a",
+            "language": "en",
+            "documentCount": 812,
+            "url": "https://infinitythewiki.com/",
+            "authority": "secondary"
+        }
+    ],
+    "records": [
+        {
+            "id": "hacking-program:assisted-fire",
+            "kind": "hacking-program",
+            "name": "Assisted Fire",
+            "summary": "Supportware that grants an allied REM Marksmanship while the Program remains active.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The target is an allied REM from the same Army List and is inside the user's Hacking Area."
+                ],
+                "effects": [
+                    "The target gains Marksmanship; after activation the sustained effect covers the entire game table."
+                ],
+                "restrictions": [
+                    "Normal Supportware exclusivity and cancellation rules apply."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Assisted_Fire",
+                    "heading": "Assisted Fire"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "hacking-program:carbonite",
+            "kind": "hacking-program",
+            "name": "Carbonite",
+            "summary": "Non-Lethal Comms Attack that can place Hackable Troopers or enemy Hackers in Immobilized-B State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The target is an enemy Hackable Trooper or an enemy Hacker."
+                ],
+                "effects": [
+                    "Failed BTS Saving Rolls caused by Carbonite place the target in Immobilized-B State."
+                ]
+            },
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:immobilized-b"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Carbonite",
+                    "heading": "Carbonite"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "hacking-program:controlled-jump",
+            "kind": "hacking-program",
+            "name": "Controlled Jump",
+            "summary": "Supportware that modifies Combat Jump PH Rolls for allied and enemy Troopers across the table.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "Allied Combat Jump Rolls receive +3 while enemy Combat Jump Rolls receive -3 while the Program is active."
+                ],
+                "restrictions": [
+                    "A player cannot have more than one Controlled Jump Program active."
+                ]
+            },
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:combat-jump"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Controlled_Jump",
+                    "heading": "Controlled Jump"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "hacking-program:cybermask",
+            "kind": "hacking-program",
+            "name": "Cybermask",
+            "summary": "No-Roll NFB Hacking Program that lets the Hacker enter Impersonation-2 State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The Hacker is outside the Line of Fire of enemy Troopers and Markers."
+                ],
+                "effects": [
+                    "The Hacker enters Impersonation-2 State and remains in it until revealed by that State's rules."
+                ]
+            },
+            "relations": [
+                {
+                    "type": "enters-state",
+                    "recordId": "state:impersonation-2"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Cybermask",
+                    "heading": "Cybermask"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "hacking-program:enhanced-reaction",
+            "kind": "hacking-program",
+            "name": "Enhanced Reaction",
+            "summary": "Supportware that gives an allied REM Burst 2 in ARO while the Program remains active.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The target is an allied REM from the same Army List and is inside the user's Hacking Area."
+                ],
+                "effects": [
+                    "The target REM gains Burst 2 in ARO; after activation the sustained effect covers the entire game table."
+                ],
+                "restrictions": [
+                    "Normal Supportware exclusivity and cancellation rules apply."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Enhanced_Reaction",
+                    "heading": "Enhanced Reaction"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "hacking-program:fairy-dust",
+            "kind": "hacking-program",
+            "name": "Fairy Dust",
+            "summary": "Supportware that grants Firewall (-3) protection to one chosen Hackable Troop Type in the user's Army List.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "Choose HI, REM, TAG, or VH from the same Army List as the user."
+                ],
+                "effects": [
+                    "Every Trooper of the chosen type in that Army List benefits from Firewall (-3) against Comms Attacks."
+                ],
+                "restrictions": [
+                    "Normal Supportware exclusivity and cancellation rules apply."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Fairy_Dust",
+                    "heading": "Fairy Dust"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "hacking-program:oblivion",
+            "kind": "hacking-program",
+            "name": "Oblivion",
+            "summary": "Non-Lethal AP Comms Attack that can place Hackable Troopers or enemy Hackers in Isolated State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The target is an enemy Hackable Trooper or an enemy Hacker."
+                ],
+                "effects": [
+                    "Failed Saving Rolls caused by Oblivion place the target in Isolated State."
+                ]
+            },
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:isolated"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Oblivion",
+                    "heading": "Oblivion"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "hacking-program:spotlight",
+            "kind": "hacking-program",
+            "name": "Spotlight",
+            "summary": "Non-Lethal AP Comms Attack that can place its target in Targeted State without requiring the Hackable Characteristic.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "Failed Saving Rolls caused by Spotlight place the target in Targeted State."
+                ],
+                "restrictions": [
+                    "The target does not need the Hackable Characteristic."
+                ]
+            },
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:targeted"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Spotlight",
+                    "heading": "Spotlight"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "hacking-program:total-control",
+            "kind": "hacking-program",
+            "name": "Total Control",
+            "summary": "Non-Lethal Comms Attack against TAGs that can impose or cancel Possessed State.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The target is an enemy TAG, or a TAG already in Possessed State."
+                ],
+                "effects": [
+                    "A failed Saving Roll places an enemy TAG in Possessed State; against a TAG already Possessed, a failed Saving Roll cancels that State and returns it to Normal State."
+                ]
+            },
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:possessed"
+                },
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:possessed"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Total_Control",
+                    "heading": "Total Control"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "hacking-program:trinity",
+            "kind": "hacking-program",
+            "name": "Trinity",
+            "summary": "Offensive Comms Attack against enemy Hackers with a positive WIP MOD and multiple Active-Turn Rolls.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The target is an enemy Hacker."
+                ],
+                "effects": [
+                    "Each failed BTS Saving Roll causes one Wound."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Trinity",
+                    "heading": "Trinity"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "hacking-program:white-noise",
+            "kind": "hacking-program",
+            "name": "White Noise",
+            "summary": "NFB Hacking Program that creates a temporary White Noise Zone inside the Hacker's Hacking Area.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The Hacker is the Active Trooper."
+                ],
+                "effects": [
+                    "On a successful Normal WIP Roll, place a Circular Template White Noise Zone fully inside the user's Hacking Area until the start of the States Phase."
+                ],
+                "restrictions": [
+                    "Troopers with Multispectral Visor or Marksmanship cannot draw Line of Fire through the White Noise Zone."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "White_Noise",
+                    "heading": "White Noise"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "hacking-program:zero-pain",
+            "kind": "hacking-program",
+            "name": "Zero Pain",
+            "summary": "Defensive Non-Lethal Comms Attack used to oppose and nullify enemy Comms Attacks.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "requirements": [
+                    "The user is the Active Trooper, or is entitled to declare an ARO in the Reactive Turn."
+                ],
+                "effects": [
+                    "The user rolls twice in the Face to Face Roll, imposes -3 on enemy Comms Attacks, and nullifies the attack if either user Roll wins."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Zero_Pain",
+                    "heading": "Zero Pain"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        }
+    ]
+}

@@ -51,6 +51,20 @@ domain="$(prompt 'Public domain (or localhost)' "${domain_default:-localhost}")"
 
 retain_default="$(config_value RETAIN_APP_IMAGES)"
 retain="$(prompt 'Number of app images to retain' "${retain_default:-3}")"
+
+metrics_bind_default="$(config_value METRICS_BIND_ADDRESS)"
+metrics_bind="$(prompt 'Metrics bind address (loopback or server LAN IP)' "${metrics_bind_default:-127.0.0.1}")"
+metrics_port_default="$(config_value METRICS_PORT)"
+metrics_port="$(prompt 'Metrics LAN port' "${metrics_port_default:-9090}")"
+case "$metrics_bind" in
+  0.0.0.0|::|\[::\]) fail "metrics bind address must not be a wildcard address." ;;
+esac
+case "$metrics_port" in
+  *[!0-9]* | '' | 0) fail "metrics port must be an integer between 1 and 65535." ;;
+esac
+if [ "$metrics_port" -gt 65535 ]; then
+  fail "metrics port must be an integer between 1 and 65535."
+fi
 case "$retain" in
   *[!0-9]* | '' | 0) fail "retention must be a positive integer." ;;
 esac
@@ -60,7 +74,8 @@ IFS= read -r save_answer || exit 1
 case "${save_answer:-Y}" in
   Y|y|yes|YES)
     umask 077
-    printf 'DOMAIN=%s\nRETAIN_APP_IMAGES=%s\n' "$domain" "$retain" > "$config_file"
+    printf 'DOMAIN=%s\nRETAIN_APP_IMAGES=%s\nMETRICS_BIND_ADDRESS=%s\nMETRICS_PORT=%s\n' \
+      "$domain" "$retain" "$metrics_bind" "$metrics_port" > "$config_file"
     echo "Saved deployment settings to $config_file."
     ;;
 esac
@@ -84,4 +99,5 @@ echo "Building the validated rules database image input..."
 
 echo "Deploying image app-$release_tag..."
 DOMAIN="$domain" IMAGE_TAG="app-$release_tag" RETAIN_APP_IMAGES="$retain" \
+METRICS_BIND_ADDRESS="$metrics_bind" METRICS_PORT="$metrics_port" \
   sh ./scripts/deploy.sh

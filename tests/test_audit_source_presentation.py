@@ -21,7 +21,7 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
 
     assert report["summary"]["sourceTableCount"] == 70
     assert report["summary"]["sourceFieldCount"] == 441
-    assert report["summary"]["confirmedGapCount"] == 8
+    assert report["summary"]["confirmedGapCount"] == 2
     assert report["summary"]["reviewQueueCount"] == 2
     assert sum(report["summary"]["fieldStatusCounts"].values()) == 441
     assert report["rawEvidence"]["status"] == "available"
@@ -35,22 +35,25 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
         == audit.EXPLICIT
     )
     assert _field(report, "army_skills", "item_id")["status"] == audit.NORMALIZATION
+    assert _field(report, "fireteams", "name")["status"] == audit.EXPLICIT
+    assert _field(report, "fireteam_members", "name")["status"] == audit.EXPLICIT
+    assert _field(report, "profile_includes", "target_group_id")["status"] == audit.EXPLICIT
+    assert _field(report, "option_includes", "target_option_id")["status"] == audit.EXPLICIT
+    assert _field(report, "unit_option_includes", "quantity")["status"] == audit.EXPLICIT
+    assert _field(report, "unit_factions", "faction_id")["status"] == audit.EXPLICIT
+    assert _field(report, "relations", "min_count")["status"] == audit.EXPLICIT
+    assert _field(report, "relation_dependencies", "min_dependant")["status"] == audit.EXPLICIT
+    assert _field(report, "relation_dependencies", "raw")["status"] == audit.REDUNDANT
+    assert _field(report, "profile_peripherals", "item_id")["status"] == audit.EXPLICIT
+    assert _field(report, "option_peripherals", "item_id")["status"] == audit.EXPLICIT
+    assert _field(report, "peripherals", "mercs")["status"] == audit.REDUNDANT
 
 
 def test_source_presentation_audit_records_expected_gap_families(tmp_path: Path) -> None:
     report = audit.audit_database(_runtime_database(tmp_path))
     gap_ids = {item["id"] for item in report["confirmedGaps"]}
 
-    assert gap_ids == {
-        "declared_faction_membership",
-        "fireteams",
-        "includes",
-        "peripheral_controller_links",
-        "reinforcement_parentage",
-        "selection_dependencies",
-        "unit_notes",
-        "unit_options",
-    }
+    assert gap_ids == {"unit_notes", "unit_options"}
     assert report["applicationEvidence"]["declaredFactionMembershipCount"] == 1
     assert report["applicationEvidence"]["unitOptionCount"] == 1
 

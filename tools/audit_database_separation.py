@@ -75,6 +75,7 @@ DERIVED_CANONICAL_TABLES = {
     "application_armies",
     "application_catalog_items",
     "application_domain_slugs",
+    "application_fireteams",
     "application_peripheral_entities",
     "application_peripheral_profiles",
     "loadout_payload_characteristics",

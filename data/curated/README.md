@@ -1,5 +1,7 @@
 # Curated data
 
+**Project domain:** Data processing
+
 `data/curated/` contains source-controlled, human-reviewed information derived
 from external sources. Curated material is distinct from immutable external
 inputs under `data/raw/`, `data/wiki/`, and `data/pdf/`, and from generated
@@ -45,9 +47,9 @@ Acquisition tooling never writes or consumes this subtree; see
 `enrichment-coverage/classifications.json` is the maintained release-scope policy for
 `tools/audit_enrichment_coverage.py`. Every gap code known to the audit must have an explicit
 default classification: `release-blocker`, `intentional-omission`, `supporting-identity`,
-or `later-product-work`. The checked-in 0.7.0 policy is deliberately conservative: detected
-user-facing coverage gaps block that release unless reviewed otherwise, while rules-only relation
-targets that already support an exposed item are classified separately as
+or `later-product-work`. The policy was introduced for the 0.7.0 enrichment gate and remains deliberately
+conservative: detected user-facing coverage gaps require explicit review, while rules-only
+relation targets that already support an exposed item are classified separately as
 `supporting-identity`.
 
 Item- or relation-specific `overrides` record reviewed exceptions with a reason. Overrides
@@ -156,9 +158,11 @@ a validation failure; stale coordinates or exact source-name drift are invalid. 
 name normalization (Unicode NFC, collapsed whitespace, and case-folding) is used only to
 group the review queue and never creates identity automatically.
 
-The current reviewed identity/access contract is complete for the pinned snapshot. The next
-Milestone 2B step is to materialize these curated-derived relationships into the application
-database/API without collapsing their source-context provenance.
+The current reviewed identity/access contract is complete for the pinned snapshot. Army
+database export materializes the validated identities, mappings, and Controller access pools
+into the application database while retaining their source-context provenance and the curated
+contract hash. Runtime repository/API/browser reads consume those materialized application
+tables and never open the working-tree Peripheral JSON.
 
 ### Reviewed historical relation endpoints
 

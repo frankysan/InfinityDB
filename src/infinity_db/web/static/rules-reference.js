@@ -53,6 +53,12 @@ function relationHref(record) {
       return `/traits/${encodeURIComponent(record.id.slice(prefix.length))}`;
     }
   }
+  if (record.kind === "hacking-program" && typeof record.id === "string") {
+    const prefix = "hacking-program:";
+    if (record.id.startsWith(prefix) && record.id.length > prefix.length) {
+      return `/hacking-programs/${encodeURIComponent(record.id.slice(prefix.length))}`;
+    }
+  }
   if (record.kind === "state" && typeof record.id === "string") {
     const prefix = "state:";
     if (record.id.startsWith(prefix) && record.id.length > prefix.length) {

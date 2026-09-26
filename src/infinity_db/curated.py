@@ -446,6 +446,125 @@ def _validate_peripheral_type_facts(facts: object, context: str) -> set[str]:
             )
     return skill_ids
 
+
+def _validate_fireteam_general_facts(facts: object, context: str) -> None:
+    if not isinstance(facts, dict):
+        raise ValueError(f"{context}: Fireteam general facts must be an object")
+    expected = {"category", "memberLimits", "types", "rules", "terminology"}
+    if set(facts) != expected:
+        raise ValueError(
+            f"{context}: Fireteam general facts must contain exactly {sorted(expected)}"
+        )
+    if facts["category"] != "fireteam-general":
+        raise ValueError(f"{context}.category: must be 'fireteam-general'")
+
+    limits = facts["memberLimits"]
+    if not isinstance(limits, dict) or set(limits) != {"min", "max"}:
+        raise ValueError(f"{context}.memberLimits: must contain only 'min' and 'max'")
+    _require_positive_int(limits.get("min"), "min", f"{context}.memberLimits")
+    _require_positive_int(limits.get("max"), "max", f"{context}.memberLimits")
+    if limits["min"] > limits["max"]:
+        raise ValueError(f"{context}.memberLimits: min must not exceed max")
+
+    types = facts["types"]
+    if not isinstance(types, list) or not types:
+        raise ValueError(f"{context}.types: must be a non-empty array")
+    seen_types: set[str] = set()
+    for index, item in enumerate(types):
+        item_context = f"{context}.types[{index}]"
+        if not isinstance(item, dict) or set(item) != {"type", "min", "max"}:
+            raise ValueError(
+                f"{item_context}: must contain only 'type', 'min', and 'max'"
+            )
+        fireteam_type = item.get("type")
+        if fireteam_type not in {"DUO", "HARIS", "CORE"}:
+            raise ValueError(
+                f"{item_context}.type: must be 'DUO', 'HARIS', or 'CORE'"
+            )
+        if fireteam_type in seen_types:
+            raise ValueError(f"{item_context}.type: duplicate {fireteam_type!r}")
+        seen_types.add(fireteam_type)
+        _require_positive_int(item.get("min"), "min", item_context)
+        _require_positive_int(item.get("max"), "max", item_context)
+        if item["min"] > item["max"]:
+            raise ValueError(f"{item_context}: min must not exceed max")
+    if seen_types != {"DUO", "HARIS", "CORE"}:
+        raise ValueError(
+            f"{context}.types: must define DUO, HARIS, and CORE exactly once"
+        )
+
+    rules = facts["rules"]
+    if (
+        not isinstance(rules, list)
+        or not rules
+        or any(not isinstance(rule, str) or not rule.strip() for rule in rules)
+        or len(set(rules)) != len(rules)
+    ):
+        raise ValueError(
+            f"{context}.rules: must be a unique non-empty array of non-empty strings"
+        )
+
+    terminology = facts["terminology"]
+    if not isinstance(terminology, list) or not terminology:
+        raise ValueError(f"{context}.terminology: must be a non-empty array")
+    seen_terms: set[str] = set()
+    for index, item in enumerate(terminology):
+        item_context = f"{context}.terminology[{index}]"
+        if not isinstance(item, dict) or set(item) != {"term", "provenance", "meaning"}:
+            raise ValueError(
+                f"{item_context}: must contain only 'term', 'provenance', and 'meaning'"
+            )
+        _require_string(item.get("term"), "term", item_context)
+        _require_string(item.get("meaning"), "meaning", item_context)
+        provenance = item.get("provenance")
+        if provenance not in {"historical-official", "community-historical"}:
+            raise ValueError(
+                f"{item_context}.provenance: unsupported value {provenance!r}"
+            )
+        term = str(item["term"]).casefold()
+        if term in seen_terms:
+            raise ValueError(f"{item_context}.term: duplicate term {item['term']!r}")
+        seen_terms.add(term)
+
+
+def _validate_fireteam_level_facts(facts: object, context: str) -> None:
+    if not isinstance(facts, dict):
+        raise ValueError(f"{context}: Fireteam Level facts must be an object")
+    expected = {"category", "basis", "cumulative", "levels"}
+    if set(facts) != expected:
+        raise ValueError(
+            f"{context}: Fireteam Level facts must contain exactly {sorted(expected)}"
+        )
+    if facts["category"] != "fireteam-level-bonuses":
+        raise ValueError(f"{context}.category: must be 'fireteam-level-bonuses'")
+    _require_string(facts.get("basis"), "basis", context)
+    if facts["cumulative"] is not True:
+        raise ValueError(f"{context}.cumulative: must be true")
+
+    levels = facts["levels"]
+    if not isinstance(levels, list) or len(levels) != 5:
+        raise ValueError(f"{context}.levels: must contain exactly five levels")
+    for index, item in enumerate(levels, start=1):
+        item_context = f"{context}.levels[{index - 1}]"
+        if not isinstance(item, dict) or set(item) != {"level", "requirement", "bonuses"}:
+            raise ValueError(
+                f"{item_context}: must contain only 'level', 'requirement', and 'bonuses'"
+            )
+        if item.get("level") != index:
+            raise ValueError(f"{item_context}.level: expected {index}")
+        _require_string(item.get("requirement"), "requirement", item_context)
+        bonuses = item.get("bonuses")
+        if (
+            not isinstance(bonuses, list)
+            or not bonuses
+            or any(not isinstance(bonus, str) or not bonus.strip() for bonus in bonuses)
+            or len(set(bonuses)) != len(bonuses)
+        ):
+            raise ValueError(
+                f"{item_context}.bonuses: must be a unique non-empty array of strings"
+            )
+
+
 def load_curated_document(path: Path) -> dict[str, Any]:
     """Load and validate one curated JSON document.
 
@@ -634,10 +753,16 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                     )
         if record["kind"] == "rule":
             facts = record.get("facts")
-            if isinstance(facts, dict) and facts.get("category") == "peripheral-type":
-                peripheral_type_skill_refs[record["id"]] = _validate_peripheral_type_facts(
-                    facts, f"{context}.facts"
-                )
+            if isinstance(facts, dict):
+                category = facts.get("category")
+                if category == "peripheral-type":
+                    peripheral_type_skill_refs[record["id"]] = _validate_peripheral_type_facts(
+                        facts, f"{context}.facts"
+                    )
+                elif category == "fireteam-general":
+                    _validate_fireteam_general_facts(facts, f"{context}.facts")
+                elif category == "fireteam-level-bonuses":
+                    _validate_fireteam_level_facts(facts, f"{context}.facts")
         if record["kind"] == "trait":
             facts = record.get("facts")
             if facts is not None:

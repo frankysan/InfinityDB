@@ -96,6 +96,15 @@ _register(
     ),
 )
 _register(
+    ["fireteams", "fireteam_types", "fireteam_members"],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Army-local Fireteam source relationships are projected into the canonical "
+        "application Fireteam model and presented through the Fireteam chart browser."
+    ),
+)
+_register(
     [
         "metadata_hacking_programs",
         "metadata_martial_arts",
@@ -112,7 +121,36 @@ _register(
     location=DOC_RULES,
 )
 _register(
-    ["metadata_factions", "metadata_skills", "metadata_equipment", "ammunition"],
+    ["profile_includes", "option_includes", "unit_option_includes"],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Profile, Loadout, and shared Unit-option include edges resolve to canonical loadout "
+        "targets and are presented on Unit detail surfaces with Army context."
+    ),
+)
+_register(
+    ["relations", "relation_units", "relation_dependencies"],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Reviewed selection-safe relation families and deterministic same-Unit profile-group "
+        "dependencies are projected into application relationship tables and presented on Unit "
+        "detail surfaces. Selector-ambiguous and reviewed-stale source rows remain intentional "
+        "source context rather than guessed application semantics."
+    ),
+)
+_register(
+    ["profile_peripherals", "option_peripherals"],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Peripheral attachments are projected through reviewed application identities and "
+        "presented on their owning Profile or Loadout surfaces."
+    ),
+)
+_register(
+    ["metadata_factions", "metadata_skills", "metadata_equipment", "ammunition", "peripherals"],
     REDUNDANT,
     SOURCE_PROVENANCE,
     reason=(
@@ -141,8 +179,16 @@ _register(
     ),
 )
 _register(
+    ["unit_factions"],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Source-declared faction membership is presented separately from concrete Army-list "
+        "availability and can be followed through the Unit explorer relationship filter."
+    ),
+)
+_register(
     [
-        "unit_factions",
         "unit_options",
         "unit_option_skills",
         "unit_option_skill_extras",
@@ -151,19 +197,7 @@ _register(
         "unit_option_weapons",
         "unit_option_weapon_extras",
         "unit_option_characteristics",
-        "unit_option_includes",
         "unit_option_orders",
-        "peripherals",
-        "profile_peripherals",
-        "option_peripherals",
-        "fireteams",
-        "fireteam_types",
-        "fireteam_members",
-        "relations",
-        "relation_units",
-        "relation_dependencies",
-        "profile_includes",
-        "option_includes",
     ],
     UNREPRESENTED,
     SOURCE_RELATIONSHIP,
@@ -208,22 +242,23 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
         "Source hash is build provenance.",
     ),
     ("army_lists", "fireteam_description"): _policy(
-        UNREPRESENTED,
+        EXPLICIT,
         SOURCE_RELATIONSHIP,
-        DOC_RULES,
-        "Fireteam chart notes are player-relevant and are not yet available in the web app.",
+        DOC_DATA_MODEL,
+        "Fireteam chart notes are projected into the Army-scoped Fireteam browser.",
     ),
     ("army_lists", "fireteam_spec"): _policy(
-        UNREPRESENTED,
+        EXPLICIT,
         SOURCE_RELATIONSHIP,
-        DOC_RULES,
-        "Fireteam chart specification is player-relevant and is not yet available in the web app.",
+        DOC_DATA_MODEL,
+        "Fireteam type limits are projected into the Army-scoped Fireteam browser.",
     ),
     ("army_lists", "legacy_fireteams"): _policy(
-        UNREPRESENTED,
-        SOURCE_RELATIONSHIP,
-        DOC_RULES,
-        "Legacy Fireteam source context remains part of the Fireteam presentation gap.",
+        REDUNDANT,
+        SOURCE_PROVENANCE,
+        DOC_DATA_MODEL,
+        "Legacy Fireteam source context is preserved in raw storage; the current chart "
+        "projection/browser is authoritative for player-facing Fireteam data.",
     ),
     ("units", "notes"): _policy(
         UNREPRESENTED,
@@ -261,81 +296,17 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
         DOC_DATA_MODEL,
         "The API retains the source disabled flag but the Unit UI does not interpret it.",
     ),
+    ("relation_dependencies", "raw"): _policy(
+        REDUNDANT,
+        SOURCE_PROVENANCE,
+        DOC_DATA_MODEL,
+        "Opaque raw dependency residue remains provenance; maintained dependency fields are "
+        "materialized and presented explicitly.",
+    ),
 }
 
 
 CONFIRMED_GAPS: tuple[dict[str, Any], ...] = (
-    {
-        "id": "fireteams",
-        "target": "0.8.x",
-        "layer": "raw_source_only",
-        "tables": ["fireteams", "fireteam_types", "fireteam_members"],
-        "reason": (
-            "Fireteam charts are audited source relationships but have no "
-            "application/web presentation."
-        ),
-    },
-    {
-        "id": "includes",
-        "target": "0.8.x",
-        "layer": "application_database_only",
-        "tables": [
-            "profile_occurrence_includes",
-            "loadout_occurrence_includes",
-            "unit_option_include_targets",
-        ],
-        "reason": (
-            "Canonical include relationships are materialized but not exposed on "
-            "Unit detail pages."
-        ),
-    },
-    {
-        "id": "peripheral_controller_links",
-        "target": "0.8.x",
-        "layer": "repository_api_only",
-        "tables": [
-            "profile_peripherals",
-            "option_peripherals",
-            "application_peripheral_controller_targets",
-        ],
-        "reason": (
-            "Peripheral attachments/access pools are available to the backend but "
-            "not rendered by unit.js."
-        ),
-    },
-    {
-        "id": "selection_dependencies",
-        "target": "0.8.x",
-        "layer": "repository_api_only",
-        "tables": [
-            "application_unit_constraints",
-            "application_unit_group_dependency_constraints",
-        ],
-        "reason": (
-            "Selection constraints and profile-group dependencies are returned by "
-            "get_unit() but not rendered."
-        ),
-    },
-    {
-        "id": "reinforcement_parentage",
-        "target": "0.8.x",
-        "layer": "repository_api_only",
-        "tables": ["application_army_reinforcement_parents"],
-        "reason": (
-            "Reinforcement Section parent relationships are modeled but not exposed "
-            "as navigable UI relationships."
-        ),
-    },
-    {
-        "id": "declared_faction_membership",
-        "target": "0.8.x",
-        "layer": "application_database_only",
-        "tables": ["unit_factions"],
-        "reason": (
-            "Broader source-declared faction membership is distinct from Army "
-            "availability but is not presented explicitly."
-        ),
-    },
     {
         "id": "unit_notes",
         "target": "0.9.x",
@@ -417,6 +388,11 @@ def _count(connection: sqlite3.Connection, table: str, where: str | None = None)
 
 def _gap_evidence(connection: sqlite3.Connection) -> dict[str, int | None]:
     return {
+        "applicationFireteamCount": _count(connection, "application_fireteams"),
+        "applicationFireteamMemberCount": _count(connection, "application_fireteam_members"),
+        "applicationFireteamFtoLoadoutCount": _count(
+            connection, "application_fireteam_member_loadouts"
+        ),
         "includeRelationshipCount": sum(
             value or 0
             for value in (

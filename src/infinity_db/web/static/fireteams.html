@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="description" content="Browse authoritative Infinity Fireteam charts by Army.">
+    <title>Fireteams · InfinityDB</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script type="module" src="/static/fireteams.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to Fireteam charts</a>
+    <!-- navigation -->
+    <main id="main" class="main" tabindex="-1">
+      <!-- page-header -->
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Connected game structure</p>
+          <h1 id="page-title">Fireteams<span>.</span></h1>
+          <p class="intro-copy">Browse each Army's current Fireteam chart, membership restrictions, FTO options, and Wildcards.</p>
+        </div>
+      </section>
+      <section class="explorer fireteam-explorer" aria-labelledby="fireteam-heading">
+        <div class="section-heading">
+          <h2 id="fireteam-heading">Army chart</h2>
+          <span id="fireteam-count" class="section-index">Loading…</span>
+        </div>
+        <div class="filters fireteam-filters">
+          <div class="field army-field">
+            <label for="fireteam-army">Army</label>
+            <select id="fireteam-army" disabled><option value="">Loading armies…</option></select>
+          </div>
+        </div>
+        <div id="fireteam-results" class="results fireteam-results" aria-busy="true">
+          <div id="fireteam-loading" class="state-panel"><span class="spinner" aria-hidden="true"></span><h3>Loading Fireteams</h3><p>Reading the selected Army chart.</p></div>
+          <div id="fireteam-error" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">!</span><h3>Fireteam chart could not be loaded</h3><p id="fireteam-error-message">Please try again.</p></div>
+          <div id="fireteam-empty" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">⌕</span><h3>No Fireteam chart content</h3><p>This Army has no player-facing Fireteam entries in the current snapshot.</p></div>
+          <div id="fireteam-content" class="fireteam-content" hidden>
+            <section id="fireteam-reference" class="fireteam-reference" aria-labelledby="fireteam-reference-heading" hidden>
+              <div class="fireteam-reference-heading">
+                <div>
+                  <p class="eyebrow">General Fireteam rules</p>
+                  <h3 id="fireteam-reference-heading">Fireteam quick reference</h3>
+                </div>
+              </div>
+              <div id="fireteam-reference-content"></div>
+            </section>
+            <section class="fireteam-chart-summary" aria-labelledby="fireteam-chart-name">
+              <div class="fireteam-chart-heading">
+                <div>
+                  <p class="eyebrow">Current Army chart</p>
+                  <h3 id="fireteam-chart-name"></h3>
+                </div>
+                <div id="fireteam-chart-limits" class="detail-badges" aria-label="Fireteam type limits"></div>
+              </div>
+              <p id="fireteam-chart-description" class="detail-copy" hidden></p>
+              <p id="fireteam-chart-source" class="detail-source"></p>
+              <p id="fireteam-chart-source-detail" class="detail-source developer-only"></p>
+            </section>
+            <div id="fireteam-list" class="fireteam-list"></div>
+          </div>
+        </div>
+      </section>
+      <!-- page-footer -->
+    </main>
+  </body>
+</html>

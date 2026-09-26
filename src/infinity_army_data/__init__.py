@@ -4,7 +4,7 @@ from os import environ
 from pathlib import Path
 from subprocess import DEVNULL, PIPE, TimeoutExpired, run
 
-__version__ = "0.7.2"
+__version__ = "0.8.0"
 
 
 def _repository_root() -> Path | None:

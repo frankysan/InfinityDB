@@ -42,11 +42,16 @@ def enrich_army_references(database: Database, value: dict[str, Any]) -> dict[st
                 if isinstance(item, dict):
                     attach_public_army_slug(database, item)
 
-            armies = node.get("armies")
-            if isinstance(armies, list):
-                for army in armies:
-                    if isinstance(army, dict):
-                        attach_public_army_slug(database, army)
+            for key in (
+                "armies",
+                "parent_armies",
+                "reinforcement_sections",
+            ):
+                armies = node.get(key)
+                if isinstance(armies, list):
+                    for army in armies:
+                        if isinstance(army, dict):
+                            attach_public_army_slug(database, army)
 
             for child in node.values():
                 walk(child)

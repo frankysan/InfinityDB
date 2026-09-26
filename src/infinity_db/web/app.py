@@ -25,6 +25,8 @@ from infinity_db.catalog_slugs import (
 from infinity_db.database import ArmySelectionError, Database
 from infinity_db.domain_slugs import require_domain_slug
 from infinity_db.equipment_catalog import EquipmentCatalog
+from infinity_db.fireteam_reference import fireteam_reference
+from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
@@ -52,10 +54,15 @@ ASSETS = {
     "/static/themed-logo.js": ("themed-logo.js", "text/javascript; charset=utf-8"),
     "/static/about.js": ("about.js", "text/javascript; charset=utf-8"),
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
+    "/static/fireteams.js": ("fireteams.js", "text/javascript; charset=utf-8"),
     "/static/catalog-list.js": ("catalog-list.js", "text/javascript; charset=utf-8"),
     "/static/skill.js": ("skill.js", "text/javascript; charset=utf-8"),
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
+    "/static/hacking-program-detail.js": (
+        "hacking-program-detail.js",
+        "text/javascript; charset=utf-8",
+    ),
     "/static/rules-reference.js": ("rules-reference.js", "text/javascript; charset=utf-8"),
     "/static/skill-categories.js": ("skill-categories.js", "text/javascript; charset=utf-8"),
     "/static/infinitydb-logo.svg": ("infinitydb-logo.svg", "image/svg+xml"),
@@ -83,6 +90,12 @@ WEAPON_PAGE_PATH = re.compile(rf"/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIE
 WEAPON_API_PATH = re.compile(rf"/api/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 STATE_PAGE_PATH = re.compile(rf"/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 STATE_API_PATH = re.compile(rf"/api/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+HACKING_PROGRAM_PAGE_PATH = re.compile(
+    rf"/hacking-programs/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
+)
+HACKING_PROGRAM_API_PATH = re.compile(
+    rf"/api/hacking-programs/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
+)
 TRAIT_PAGE_PATH = re.compile(rf"/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 TRAIT_API_PATH = re.compile(rf"/api/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']+)(?P=quote)')
@@ -106,7 +119,9 @@ def _metric_route(path: str) -> str:
         "/weapons",
         "/traits",
         "/states",
+        "/hacking-programs",
         "/skill-extras",
+        "/fireteams",
         "/api/version",
         "/api/armies",
         "/api/units",
@@ -116,7 +131,9 @@ def _metric_route(path: str) -> str:
         "/api/weapons",
         "/api/traits",
         "/api/states",
+        "/api/hacking-programs",
         "/api/skill-extras",
+        "/api/fireteams",
     }:
         return path
     for pattern, normalized in (
@@ -126,12 +143,14 @@ def _metric_route(path: str) -> str:
         (WEAPON_PAGE_PATH, "/weapons/:id"),
         (TRAIT_PAGE_PATH, "/traits/:id"),
         (STATE_PAGE_PATH, "/states/:id"),
+        (HACKING_PROGRAM_PAGE_PATH, "/hacking-programs/:id"),
         (UNIT_API_PATH, "/api/units/:id"),
         (SKILL_API_PATH, "/api/skills/:id"),
         (EQUIPMENT_API_PATH, "/api/equipment/:id"),
         (WEAPON_API_PATH, "/api/weapons/:id"),
         (TRAIT_API_PATH, "/api/traits/:id"),
         (STATE_API_PATH, "/api/states/:id"),
+        (HACKING_PROGRAM_API_PATH, "/api/hacking-programs/:id"),
     ):
         if pattern.fullmatch(path):
             return normalized
@@ -259,8 +278,16 @@ def _page(
             ' aria-current="page"' if active_page == "states" else "",
         )
         .replace(
+            "{{HACKING_PROGRAMS_CURRENT}}",
+            ' aria-current="page"' if active_page == "hacking-programs" else "",
+        )
+        .replace(
             "{{SKILL_EXTRAS_CURRENT}}",
             ' aria-current="page"' if active_page == "skill-extras" else "",
+        )
+        .replace(
+            "{{FIRETEAMS_CURRENT}}",
+            ' aria-current="page"' if active_page == "fireteams" else "",
         )
         .replace(
             "{{ABOUT_CURRENT}}",
@@ -359,10 +386,11 @@ def _domain_filter_identifier(params: dict, key: str) -> int | str | None:
 
 
 def _unit_query(query: str) -> dict:
-    params = parse_qs(query, keep_blank_values=True, max_num_fields=14)
+    params = parse_qs(query, keep_blank_values=True, max_num_fields=15)
     for key, values in params.items():
         if key not in {
             "army_id",
+            "declared_faction_id",
             "search",
             "skill_id",
             "equipment_id",
@@ -387,6 +415,9 @@ def _unit_query(query: str) -> dict:
         raise ValueError("order must be asc or desc")
     return {
         "army_id": _domain_filter_identifier(params, "army_id"),
+        "declared_faction_id": _integer(
+            params, "declared_faction_id", None, 0, 2**63 - 1
+        ),
         "search": search,
         "skill_id": _domain_filter_identifier(params, "skill_id"),
         "equipment_id": _domain_filter_identifier(params, "equipment_id"),
@@ -422,7 +453,11 @@ class Application:
         self.state_catalog = StateCatalog(self.rules_database)
         self.skill_catalog = SkillCatalog(self.database, self.rules_database)
         self.equipment_catalog = EquipmentCatalog(self.database, self.rules_database)
+        self.hacking_program_catalog = HackingProgramCatalog(
+            self.database, self.rules_database
+        )
         self.catalog_rules = CatalogRules(self.rules_database)
+        self.fireteam_rules_reference = fireteam_reference(self.rules_database)
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
             _snapshot_revision(self.rules_database.path)
@@ -619,6 +654,16 @@ class Application:
                 breadcrumbs=(("Database", "/"), ("Units", "/units"), ("Details", None)),
                 catalog_tag="Unit catalog",
             )
+        elif path == "/fireteams":
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                "fireteams.html",
+                active_page="fireteams",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
+                breadcrumbs=(("Database", "/"), ("Fireteams", None)),
+                catalog_tag="Fireteam charts",
+            )
         elif path == "/skill-extras":
             content_type = "text/html; charset=utf-8"
             body = _page(
@@ -629,7 +674,10 @@ class Application:
                 breadcrumbs=(("Database", "/"), ("Skill modifiers", None)),
                 catalog_tag="Reference data",
             )
-        elif path in {"/skills", "/equipment", "/weapons", "/traits", "/states"}:
+        elif path in {
+            "/skills", "/equipment", "/weapons", "/traits", "/states",
+            "/hacking-programs",
+        }:
             content_type = "text/html; charset=utf-8"
             catalog = path.removeprefix("/")
             body = _page(
@@ -638,7 +686,7 @@ class Application:
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), (catalog.replace("-", " ").title(), None)),
-                catalog_tag="Reference data",
+                catalog_tag="Rules reference",
             )
         elif SKILL_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
@@ -648,7 +696,7 @@ class Application:
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Skills", "/skills"), ("Details", None)),
-                catalog_tag="Reference data",
+                catalog_tag="Rules reference",
             )
         elif EQUIPMENT_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
@@ -662,7 +710,7 @@ class Application:
                     ("Equipment", "/equipment"),
                     ("Details", None),
                 ),
-                catalog_tag="Reference data",
+                catalog_tag="Rules reference",
             )
         elif WEAPON_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
@@ -676,7 +724,7 @@ class Application:
                     ("Weapons", "/weapons"),
                     ("Details", None),
                 ),
-                catalog_tag="Reference data",
+                catalog_tag="Rules reference",
             )
         elif TRAIT_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
@@ -690,7 +738,7 @@ class Application:
                     ("Traits", "/traits"),
                     ("Details", None),
                 ),
-                catalog_tag="Reference data",
+                catalog_tag="Rules reference",
             )
         elif STATE_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
@@ -702,6 +750,20 @@ class Application:
                 breadcrumbs=(
                     ("Database", "/"),
                     ("States", "/states"),
+                    ("Details", None),
+                ),
+                catalog_tag="Rules reference",
+            )
+        elif HACKING_PROGRAM_PAGE_PATH.fullmatch(path):
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                "hacking-program-detail.html",
+                active_page="hacking-programs",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
+                breadcrumbs=(
+                    ("Database", "/"),
+                    ("Hacking Programs", "/hacking-programs"),
                     ("Details", None),
                 ),
                 catalog_tag="Rules reference",
@@ -723,6 +785,31 @@ class Application:
                 "snapshot_revision": self.snapshot_revision,
             }
             cache_control = "no-store"
+        elif path == "/api/fireteams":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                params = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=True)
+                army_ref = _domain_filter_identifier(params, "army_id")
+                if army_ref is None:
+                    items = [dict(item) for item in self.database.list_fireteam_armies()]
+                    for item in items:
+                        attach_public_army_slug(self.database, item)
+                    payload = {"items": items, "reference": self.fireteam_rules_reference}
+                else:
+                    payload = self.database.get_fireteam_chart(army_ref)
+                    if payload is None:
+                        status = HTTPStatus.NOT_FOUND
+                        payload = {"error": "Fireteam chart not found"}
+                    else:
+                        attach_public_army_slug(self.database, payload["army"])
+                        payload["reference"] = self.fireteam_rules_reference
+            except ValueError as exc:
+                status = HTTPStatus.BAD_REQUEST
+                payload = {"error": str(exc)}
+            except (OSError, sqlite3.Error):
+                LOGGER.exception("Could not read Fireteam chart")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The Fireteam chart is unavailable. Please try again."}
         elif path == "/api/skill-extras":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
@@ -766,6 +853,14 @@ class Application:
                 LOGGER.exception("Could not read states")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The states are unavailable. Please try again."}
+        elif path == "/api/hacking-programs":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                payload = {"items": self.hacking_program_catalog.list_programs()}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Hacking Programs")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The Hacking Programs are unavailable. Please try again."}
         elif match := SKILL_API_PATH.fullmatch(path):
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
@@ -795,6 +890,11 @@ class Application:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
                 else:
+                    payload["hacking_programs"] = (
+                        self.hacking_program_catalog.programs_for_equipment(
+                            payload.get("slug") or payload["id"]
+                        )
+                    )
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("equipment", payload)
                     payload = enrich_nested_unit_slugs(self.database, payload)
@@ -853,13 +953,26 @@ class Application:
                 LOGGER.exception("Could not read state")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The state is unavailable. Please try again."}
+        elif match := HACKING_PROGRAM_API_PATH.fullmatch(path):
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                identifier = match.group("identifier")
+                program_ref = int(identifier) if identifier.isdigit() else identifier
+                payload = self.hacking_program_catalog.get_program(program_ref)
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "Hacking Program not found"}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Hacking Program")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The Hacking Program is unavailable. Please try again."}
         elif path == "/api/armies":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:
                 items = [dict(item) for item in self.database.list_armies()]
                 for item in items:
                     attach_public_army_slug(self.database, item)
-                payload = {"items": items}
+                payload = enrich_army_references(self.database, {"items": items})
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read armies")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

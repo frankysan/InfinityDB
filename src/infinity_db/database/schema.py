@@ -6,11 +6,11 @@ import sqlite3
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass
 
-SCHEMA_VERSION = 24
+SCHEMA_VERSION = 25
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 32
+DATABASE_COMPATIBILITY_VERSION = 33
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -254,6 +254,72 @@ DERIVED_TABLES = {
         "",
         ref("reinforcement_army_id", "application_armies", "id"),
         ref("parent_army_id", "application_armies", "id"),
+    ),
+    "application_fireteam_charts": table(
+        "application_army_id",
+        "source_army_id source_kind source_file source_sha256 description source_spec",
+        ref("application_army_id", "application_armies", "id"),
+        ref(
+            "application_army_id source_army_id",
+            "application_army_sources",
+            "application_army_id source_army_id",
+        ),
+    ),
+    "application_fireteam_chart_limits": table(
+        "application_army_id fireteam_type",
+        "position raw_limit",
+        ref("application_army_id", "application_fireteam_charts", "application_army_id"),
+    ),
+    "application_fireteams": table(
+        "application_army_id fireteam_id",
+        "position name observation source_army_id source_fireteam_id is_wildcard",
+        ref("application_army_id", "application_fireteam_charts", "application_army_id"),
+    ),
+    "application_fireteam_types": table(
+        "application_army_id fireteam_id position",
+        "fireteam_type",
+        ref(
+            "application_army_id fireteam_id",
+            "application_fireteams",
+            "application_army_id fireteam_id",
+        ),
+    ),
+    "application_fireteam_members": table(
+        "application_army_id fireteam_id member_id",
+        "position source_army_id source_fireteam_id source_member_id slug name comment "
+        "min_count max_count required source_unit_id logical_unit_id resolution fto_marker",
+        ref(
+            "application_army_id fireteam_id",
+            "application_fireteams",
+            "application_army_id fireteam_id",
+        ),
+        ref("source_unit_id", "units", "id"),
+        ref("logical_unit_id", "logical_units", "id"),
+    ),
+    "application_fireteam_member_loadouts": table(
+        "application_army_id fireteam_id member_id position",
+        "source_army_id source_unit_id group_id option_id loadout_payload_id option_name "
+        "fto_marker",
+        ref(
+            "application_army_id fireteam_id member_id",
+            "application_fireteam_members",
+            "application_army_id fireteam_id member_id",
+        ),
+        ref(
+            "source_army_id source_unit_id group_id option_id",
+            "loadout_payload_occurrences",
+            "army_id unit_id group_id option_id",
+        ),
+        ref("loadout_payload_id", "loadout_payloads", "id"),
+    ),
+    "application_fireteam_member_equivalence_labels": table(
+        "application_army_id fireteam_id member_id position",
+        "label",
+        ref(
+            "application_army_id fireteam_id member_id",
+            "application_fireteam_members",
+            "application_army_id fireteam_id member_id",
+        ),
     ),
     "application_catalog_items": table(
         "catalog id",
@@ -685,6 +751,21 @@ INDEXES = (
     ("unit_option_skills_item", "unit_option_skills", "item_id"),
     ("unit_option_equipment_item", "unit_option_equipment", "item_id"),
     ("unit_option_weapons_item", "unit_option_weapons", "item_id"),
+    (
+        "application_fireteams_army",
+        "application_fireteams",
+        "application_army_id, position, fireteam_id",
+    ),
+    (
+        "application_fireteam_members_logical",
+        "application_fireteam_members",
+        "logical_unit_id, application_army_id, fireteam_id, position",
+    ),
+    (
+        "application_fireteam_member_loadouts_payload",
+        "application_fireteam_member_loadouts",
+        "loadout_payload_id, application_army_id, fireteam_id, member_id",
+    ),
     (
         "application_peripheral_sources_entity",
         "application_peripheral_sources",

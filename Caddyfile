@@ -4,3 +4,17 @@ http://{$DOMAIN:localhost} {
     respond @internal 404
     reverse_proxy app:8000
 }
+
+http://:9090 {
+    handle /metrics {
+        rewrite * /internal/metrics
+        reverse_proxy app:8000
+    }
+    handle /health {
+        rewrite * /internal/health
+        reverse_proxy app:8000
+    }
+    handle {
+        respond 404
+    }
+}

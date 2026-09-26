@@ -24,6 +24,11 @@ model.
 - `README.md` is the user-facing project introduction, setup, and operations
   guide.
 - `docs/TODO.md` is the maintained backlog of unimplemented work.
+- `docs/080-connected-domain-audit.md` records the accepted 0.8.x game-data domain
+  boundary: Fireteams are the new first-class application domain; Hacking Programs are
+  promoted from their existing structured projection into a first-class rules/reference surface; Peripherals, includes,
+  constraints/dependencies, Reinforcement parentage, and cross-Army membership remain
+  relationships among existing identities.
 - `docs/CHANGELOG.md` records released and unreleased changes.
 
 Before changing a boundary or persistence behavior, read
@@ -107,7 +112,8 @@ and serves a read-only browser and same-origin HTTP API.
   `run_checks.py --assets off|auto|required` validates the complete generated
   publication inventory (`symbol-inventory.json`, path + SHA-256 for every
   published SVG) before enabling `full_assets`; it separately reports the
-  browser-referenced subset derived from current mappings/endpoints. Direct
+  browser-referenced subset derived from current mappings/endpoints; the current
+  processed publication is fully browser-addressable at 806/806 SVGs. Direct
   pytest is hermetic by default. `auto` may fall back only when the asset tree
   is entirely absent, never when it is partial/corrupt.
   Test stages use pytest-xdist `worksteal` scheduling with `--test-workers auto`
@@ -133,9 +139,9 @@ and serves a read-only browser and same-origin HTTP API.
   remains `auto`. VS Code is configured for workspace-wide diagnostics. GitHub's
   active `Protect main` ruleset requires pull requests,
   resolved review threads, the four source-check matrix jobs,
-  `deployment-smoke`, and `installed-wheel` to be current and passing before
-  `main` can advance; it also blocks deletion/non-fast-forward updates and has no
-  bypass actors.
+  `Cross-platform deterministic outputs`, `deployment-smoke`, and `installed-wheel`
+  to be current and passing before `main` can advance; it also blocks
+  deletion/non-fast-forward updates and has no bypass actors.
 - `Installed wheel smoke` is configured to build and install the wheel in a fresh virtual
   environment, validates installed `infinity-db` / `infinity-army` build commands
   and maintained config resources, then opens the generated Army/rules databases
@@ -232,7 +238,7 @@ and serves a read-only browser and same-origin HTTP API.
   Database creation additionally persists unambiguous reinforcement-to-standard
   matches using the pinned name-normalization policy. Repository queries do not
   rediscover generic, mercenary, or reinforcement identity at query time.
-  Frontend database creation resolves configured aliases
+  Application database creation resolves configured aliases
   plus persisted generic, mercenary, and reinforcement evidence into explicit
   `logical_units` / `logical_unit_sources` relations. Source rows remain
   unchanged; every source unit maps to exactly one logical unit, and repository
@@ -363,7 +369,7 @@ and serves a read-only browser and same-origin HTTP API.
   while materialized application layers and retained source/context rows coexist.
 - SQLite Army imports replace a complete snapshot. Future user-authored data
   must remain separate from that replaceable imported state.
-- Nested queryable values may remain JSON in the frontend DB; exact normalized
+- Nested queryable values may remain JSON in the application DB; exact normalized
   rows, including absent-versus-null distinctions, are preserved in the sibling
   raw archive.
 - Increment `DATABASE_COMPATIBILITY_VERSION` whenever existing generated Army
@@ -373,56 +379,33 @@ and serves a read-only browser and same-origin HTTP API.
 
 ### Current
 
-- Army, wiki, and symbol downloaders stage loose files temporarily and persist
-  complete timestamped `JSON`, `WIKI`, or `SYMBOLS` ZIP snapshots. Same-second
-  name collisions receive `-2`, `-3`, and so on rather than overwriting.
-- Raw snapshot archives are immutable after successful acquisition.
-- Wiki acquisition fails closed for required content but excludes optional site
-  chrome/project targets (`/favicon.ico` and the `Infinity:` project namespace)
-  from completeness. Failed/incomplete wiki runs publish no immutable snapshot
-  or provenance and preserve their local crawl work under `data/work/wiki/`;
-  successful runs remove that work directory after publication.
-- Each successful acquisition writes a version-1 generated provenance record
-  under `data/manifests/snapshots/`, labeled from the archive filename and
-  bound by its immutable SHA-256.
-  The record stores snapshot type, archive identity, acquisition time, source
-  URL, document count, optional language, and optional input-artifact identity.
-- Generated manifest paths are project-relative POSIX paths when the file is
-  inside the project root; machine-specific absolute paths are never persisted.
-- Generated snapshot manifests are ignored by Git, excluded from Docker build
-  context, and retained until explicitly removed. Rewriting different
-  provenance for an existing archive-labeled record fails. Identical bytes
-  reacquired under a different archive label may have another manifest with the
-  same authoritative SHA-256.
-- Human-authored snapshot descriptions, comparison targets, and notable-change
-  notes use the separate version-1 contract under
-  `data/curated/snapshot-notes/`, also keyed to snapshot SHA-256. Acquisition
-  tooling must never modify that subtree.
-- Corvus Belli's Army `metadata.json` remains source data, not project-generated
-  snapshot metadata.
-- Army JSON `version` is per-document source provenance, not a snapshot-wide
-  version. Observed values support interpreting the middle component as
-  two-digit year + ordinal day and the final component as a same-day data
-  revision/build, but that interpretation is not a documented upstream
-  contract. Preserve the raw value. Legitimate snapshots may contain multiple
-  source revisions; distinguish those from InfinityDB `acquiredAt` provenance.
-- Army snapshot coherence is verified independently of those revision strings.
-  `download_army_json.py` performs two complete passes over metadata and every
-  Army/reinforcement endpoint, requires byte-identical responses between passes,
-  and writes snapshot files only after verification succeeds. A changed endpoint
-  aborts the acquisition rather than publishing a potentially torn snapshot.
+- Army, wiki, and symbol acquisition publishes immutable timestamped ZIP snapshots only after
+  the acquisition-specific completeness/coherence checks pass. Normal builds never perform
+  implicit network acquisition.
+- Current downloader-generated `InfinityDB snapshot provenance` is **version 2**. It separates
+  logical snapshot-content identity (`snapshot.contentSha256`, based on normalized member paths
+  and bytes) from exact archive-byte integrity (`snapshot.archive.sha256`). Legacy version-1
+  manifests remain valid and carry only the exact archive hash.
+- Database/symbol deployment provenance that must bind one concrete Army artifact continues to
+  use the exact Army ZIP SHA-256; logical content identity does not silently substitute for an
+  artifact-level guard.
+- Human snapshot notes remain a separate version-1 curated contract keyed to the exact archive
+  SHA-256, not the version-2 logical content hash. Acquisition tooling never mutates them.
+- Current archived wiki-derived rules sources may bind to an exact timestamped wiki ZIP/hash and
+  cite archive members. Pinned `oldid=` revisions that are not present in that mirror remain
+  URL-backed sources.
+- Corvus Belli Army `metadata.json` is source data, not InfinityDB-generated provenance, and raw
+  per-document Army `version` strings remain source provenance rather than snapshot identity.
+
+The canonical generated-manifest and snapshot-note semantics are in `docs/data-model.md`; data
+locations/lifecycle are summarized in `data/README.md`. Do not duplicate their field-level schema
+here.
 
 ### Design direction
 
-- Future comparison tooling may emit structured generated diff/report data while
-  curated snapshot notes remain human interpretation.
-- Persistent generated project paths should remain portable and case-sensitive
-  internally; detect case-only collisions before publishing.
-
-Current curated wiki provenance predates the timestamped ZIP lifecycle. Do not
-invent exact archive/hash associations for legacy wiki references. Migrate them
-when the wiki downloader/packager and curated provenance contract are rewritten
-together.
+Future snapshot-comparison tooling may emit structured generated diff/report data while curated
+snapshot notes remain human interpretation. Persistent generated paths remain portable and
+case-sensitive internally; case-only collisions must fail before publication.
 
 External executable discovery should use explicit configuration/shared discovery
 helpers/`shutil.which()` rather than fixed installation paths. Subprocess-heavy
@@ -546,7 +529,11 @@ the generated browser maps into build state. Unit source profile slot
 `unit-symbol-map.js`; distinct later profile slots use deterministic one-based
 `--<group>-<profile>` suffixes. Distinct non-owner-army artwork is namespaced
 with `--army-<army-id>` before any profile suffix, while exact duplicates continue
-to share one canonical published file.
+to share one canonical published file. The same generated map now includes profile-logo
+overrides whenever an authoritative source profile resolves to artwork other than its
+Unit's primary browser symbol. Runtime Unit detail payloads preserve occurrence-level
+profile-logo URLs and use those overrides only for presentation; logo variation remains
+context, not canonical gameplay identity.
 
 The established processing direction is `resvg` for visual duplicate and
 compression validation, persistent `inkscape --shell` workers for text-to-path
@@ -612,14 +599,20 @@ compatibility references remain unambiguous JSON integers.
 - Search/display ordering is case-, accent-, and punctuation-insensitive.
 - Browser requests belong in `api.js`; shared unit rows in `unit-list.js`;
   page-specific rendering/state in the corresponding page module.
-- Frontend database data is immutable for a running application instance.
+- Application database data is immutable for a running application instance.
   Snapshot-aware ETags and `/api/version` distinguish new imported data from an
   application release.
 - Every browser route uses the shared server-rendered page shell. New static
   page documents retain the navigation/header/footer markers expected by
   `_page()`.
+- Same-origin soft navigation keeps the shared shell mounted and replaces only
+  `main#main`; it must synchronize title/description/body state and keep the parent
+  navigation item active for detail routes. Transient page modules bind fetch and
+  window-listener lifetime to `infinity:beforenavigation` so repeated soft navigation
+  cannot accumulate stale handlers.
 - Shared menus use the inline-sidebar / compact-topbar pattern.
-- User-selected browser settings persist for the current tab/session through
+- User-selected browser settings (distance unit, optional Unit categories, Fireteam Wildcard
+  inclusion, Developer mode, and cache bypass) persist for the current tab/session through
   `sessionStorage`; values loaded from persistent cookies must be mirrored into the session
   store before use. The **Remember settings** consent path additionally mirrors values to
   one-year SameSite cookies for later sessions; turning persistence off removes those
@@ -826,7 +819,7 @@ compatibility references remain unambiguous JSON integers.
   not numeric ID arithmetic. Classification, persisted mercenary-to-standard
   matching, and explicit availability provenance are now normalized before
   repository use.
-- 2026-09-17: Logical-unit identity is materialized during frontend database
+- 2026-09-17: Logical-unit identity is materialized during application database
   creation. Configured aliases and persisted generic, mercenary, and
   reinforcement matches are build-time identity evidence; the exporter resolves
   their transitive components into `logical_units` and `logical_unit_sources`.
@@ -993,7 +986,7 @@ compatibility references remain unambiguous JSON integers.
   identities. The maintained 0.7.0 Trait interaction scope consequently measures
   the 33 rules-native Traits rather than the raw Army property bucket.
 
-- 2026-09-20: Peripheral rule semantics belong in the existing curated v3
+- 2026-09-20: Peripheral rule semantics were assigned to the then-current curated v3
   `data/curated/rules/` -> `rules.db` pipeline, with the N5 rulebook as primary
   rules authority, the pinned Wiki archive as discovery/secondary provenance,
   and FAQ rulings kept as dated clarification records. Reviewed Army-local
@@ -1005,7 +998,7 @@ compatibility references remain unambiguous JSON integers.
   names with `mercs` variation, and 22 canonical loadout payloads with differing
   semantic attachment signatures.
 - 2026-09-22: The Peripheral rules-side foundation is implemented in that existing
-  curated v3 pipeline. Doctor and Engineer are reviewed `short-skill` records;
+  then-current curated v3 pipeline. Doctor and Engineer are reviewed `short-skill` records;
   Cyberplug and Peripheral are reviewed `automatic` records; Servant, Synchronized,
   Control, Ancillary, and Cyberplug are validated `peripheral-type` rule records.
   Controller eligibility uses only the reviewed `not-stated`, `hasSkill`, and
@@ -1040,11 +1033,12 @@ compatibility references remain unambiguous JSON integers.
   candidates plus raw relation/dependency adjacency remain review evidence rather than automatic
   Controller mappings.
 
-- 2026-09-22: **Release direction through 1.0.** Milestone 2B shipped in 0.6.3:
+- 2026-09-26: **Release direction through 1.0 rebalanced.** Milestone 2B shipped in 0.6.3:
   canonical relationships, the raw/application split, and the Army completeness
-  inventory are validated. 0.7.x adds rules/context to existing data; 0.8.x
-  exposes connected game relationships; 0.9.x closes remaining player-facing gaps and
-  focuses on search/navigation/mobile/accessibility/themes; 1.0.0 is the player-data-
+  inventory are validated. 0.7.x added rules/context to existing data; 0.8.x
+  exposed connected game relationships; 0.9.x closes remaining application-data gaps and
+  focuses on search/navigation/discoverability; 0.10.x audits the completed application model,
+  finishes frontend/theme architecture, and hardens CI/operations; 1.0.0 is the player-data-
   complete reference gate defined in `docs/releasing.md`. Minor-release scope is directional,
   while the 1.0 acceptance criteria are durable.
 - 2026-09-21: **Design direction — 0.7.0 is the rules-enriched catalog-data
@@ -1075,9 +1069,10 @@ compatibility references remain unambiguous JSON integers.
   creating parallel Peripheral entities. The reviewed contract v2 adds 17 source Unit mappings
   -> 10 logical Units, including Reinforcement variants, with type taken from the source
   `Peripheral` Skill subtype.
-- Concrete Cyberplug Controller links remain unresolved: Units 507/1884 can see same-Army
-  Ranters/Puzzlers candidates, but the current relation/dependency data does not select a
-  specific pairing. Same-Army co-occurrence is not sufficient to materialize a relationship.
+- **Initial review before access-pool modeling:** concrete Cyberplug Controller pairings were
+  unresolved. Units 507/1884 could see same-Army Ranters/Puzzlers candidates, but source
+  relation/dependency data selected no fixed pairing. This evidence led to the access-pool
+  interpretation documented immediately below rather than a Controller-ownership edge.
 - 2026-09-22: Reviewed Cyberplug Controller relationships are access/selection pools, not fixed
   Controller ownership. The current Army snapshot contains four Cyberplug-capable loadout
   occurrences (Med-Tech Obsidon in Armies 601/605 and two Gearhead options in Army 605), and the
@@ -1172,8 +1167,9 @@ compatibility references remain unambiguous JSON integers.
   general rules. Wildcards (52 teams / 51 Armies) have no Fireteam type rows. Bracketed equivalence
   wording appears on 406 member rows (453 references / 146 labels) and must not feed Unit identity.
 - `tools/audit_fireteam_semantics.py` is the deterministic read-only evidence tool for this
-  boundary. First-class Fireteam repository/API/browser presentation remains a separate
-  0.8.x connected-data task within the 1.0 completeness program.
+  boundary. The first-class `/api/fireteams` + `/fireteams` Army-chart surface now consumes
+  that canonical projection; general Fireteam rules and generated Level-bonus reference data
+  are now composed from the separate `rules.db` projection rather than stored in the Army DB.
 
 ### Milestone 2B normalization-link boundary (2026-09-22)
 
@@ -1187,8 +1183,8 @@ compatibility references remain unambiguous JSON integers.
   occurrence remains semantic/source data and must stay reconstructable.
 - Source-to-canonical mappings and canonical payload-occurrence links are not independent gameplay
   relationships, but do **not** classify them as disposable normalization. They preserve identity
-  evidence, traceability, and contextual deltas needed by the application model and by a future
-  frontend/`infinity.raw.db` split.
+  evidence, traceability, and contextual deltas needed by the current application/raw database
+  split.
 - Attachment/relationship joins (extras, includes, Army/faction membership, Peripherals, Fireteams,
   relation/dependency constraints, and similar scoped links) remain semantic unless a separate audit
   proves otherwise. `tools/audit_normalization_links.py` is the deterministic evidence tool for
@@ -1204,11 +1200,11 @@ compatibility references remain unambiguous JSON integers.
   raw artifact is planned. It now stores all 70 normalized source tables as queryable relational
   tables **and** exact JSON for every imported normalized row in `__infinity_raw_rows`, under the
   same pinned metadata as `infinity.db`.
-- The logical inventory now contains 28 canonical application tables, 47 contextual application
-  tables, and 47 source/provenance-only normalized tables. Published `infinity.db` contains only
-  `__infinity_metadata` plus the 74 retained application tables; the 47 source-only tables are
-  physically absent. Schema 24 adds the seven structured-reference application tables without
-  changing the raw-source boundary. Foreign keys targeting raw-only tables are omitted from the
+- At the schema-23 Milestone 2B boundary, the logical inventory contained 28 canonical
+  application tables, 47 contextual application tables, and 47 source/provenance-only normalized
+  tables. Published `infinity.db` then contained `__infinity_metadata` plus 74 retained application
+  tables; the 47 source-only tables were physically absent. Later schemas retain that physical
+  boundary while adding application projections; `docs/data-model.md` owns the current table counts. Foreign keys targeting raw-only tables are omitted from the
   published schema, while retained-to-retained foreign keys remain enforced.
 - Normal repository/API/web serving and runtime `Database.validate()` do not open
   `infinity.raw.db` and have zero raw-only table reads. Source-dependent semantic checks
@@ -1233,15 +1229,65 @@ compatibility references remain unambiguous JSON integers.
   Peripheral/Controller links, selection/dependency relationships, Reinforcement parentage,
   declared faction membership, source-attributed Unit notes, top-level composite Unit
   options, Structure/Wounds labeling, and structured Hacking/Martial Arts/Booty/
-  MetaChemistry reference data. Schema 24 / compatibility revision 32 closes the
-  structured-reference gap in 0.7.0, so the maintained inventory now reports 9 open
-  families; the remaining gaps belong to 0.8.x/0.9.x work rather than Milestone 2B.
+  MetaChemistry reference data. Schema 24 / compatibility revision 32 closed the
+  structured-reference gap in 0.7.0, and 0.7.2 closed the Structure/VITA-versus-STR
+  presentation gap. 0.8.0 closes Fireteams, Peripheral/Controller, include, reviewed
+  selection/dependency, Reinforcement-parentage, and declared-membership presentation.
+  The maintained inventory now reports only two confirmed gaps: source-attributed Unit notes
+  and top-level composite Unit options, both assigned to 0.9.0.
 - Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
   preserve the source values and do not invent presentation semantics before the domain
   meaning/scope is resolved.
-- Milestone 2B shipped in 0.6.3, and the rules-enriched catalog-data milestone shipped
-  in 0.7.0. The next active milestone is 0.8.0 connected game relationships, not further
-  canonicalization or expansion of the completed 0.7.0 release gate.
+- Milestone 2B shipped in 0.6.3, the rules-enriched catalog-data milestone shipped in
+  0.7.0, and 0.8.0 completed the connected game relationships milestone. The next active
+  milestone is 0.9.0 application completeness and discoverability.
+
+## 0.8.0 connected Unit relationships (2026-09-26)
+
+- Unit detail now presents reviewed Peripheral attachments and Controller access pools in both
+  directions without inventing fixed ownership.
+- Profile, Loadout, and shared Unit-option include relationships are served exclusively from the
+  schema-23 derived relationship tables. Profile/Loadout edges retain occurrence context; shared
+  Unit-option edges are projected per target Army; targets resolve by canonical Loadout payload.
+  Visible merged Loadout rows retain contributing payload IDs only for browser target navigation.
+  This does not make Includes part of payload identity and does not promote the broader top-level
+  Unit-option bundle semantics, which remain a later completeness item.
+- The runtime-surface audit now classifies all three derived include tables as intentional
+  contextual application dependencies; raw include tables remain outside normal serving.
+- Unit detail presents all 96 reviewed whole-Unit selection constraints with Army context and
+  stable Unit links, plus the 14 deterministic same-Unit profile-group dependencies with direct
+  profile-group/loadout anchors. Whole-Unit cardinality families are rendered semantically;
+  dependency direction is rendered directly, while still-opaque source selectors such as
+  `perParent`, dependency `group`, `min`, and `minDependant` remain visibly labeled source
+  parameters instead of being promoted into a general Army-list legality model.
+- Unit/API Army references now expose canonical Reinforcement Section parent/child relationships
+  in both directions. Unit detail keeps those links separate from profile-level concrete Army
+  availability and routes them back to the existing Army-filtered Unit Explorer.
+- Unit detail also exposes broader source-declared faction membership from `unit_factions`. A
+  dedicated `declared_faction_id` Unit Explorer filter follows that relationship independently of
+  `army_id`; source faction IDs with no current Army List remain numeric source identities rather
+  than being promoted into selectable application Armies.
+
+## 0.8.0 Fireteam application projection (2026-09-26)
+
+- Schema 25 / compatibility revision 33 materializes the audited Fireteam source semantics
+  into seven application-owned tables. One preferred Army-list source is selected per
+  application Army; non-selected source aliases remain losslessly in `infinity.raw.db`.
+- The projection preserves selected chart source/provenance, raw and normalized type limits,
+  team/type/member order, observations, min/max/required-choice context, Wildcard identity,
+  logical-Unit resolution, ordered Fireteam-Level equivalence labels, and Army-local FTO
+  eligibility resolved to canonical loadout payload occurrences.
+- Reinforcement parent/type/count context is deliberately not flattened into the Fireteam
+  rows. `application_army_reinforcement_parents` remains the canonical parent graph, so later
+  presentation combines the Section chart with the selected parent's limits without merging
+  Main- and Reinforcement-section member pools or implementing a legality engine.
+- Shared FTO/Wildcard/equivalence parsing now lives in `infinity_db.fireteam_semantics` and is
+  consumed by both the maintained Fireteam audit and the application materializer, preventing
+  audit/runtime semantic drift. `/api/fireteams` and `/fireteams` expose the Army-scoped chart
+  from that projection. `rules.db` separately owns curated `rule:fireteam-general` and
+  `rule:fireteam-level-bonuses` identities; the API composes those optional rules facts with the
+  chart and the browser generates the Level-bonus quick reference, sources, and provenance-aware
+  historical/community terminology from them rather than hard-coding a parallel rules table.
 
 ## 0.7.0 structured Army reference projections (2026-09-25)
 
@@ -1249,9 +1295,12 @@ compatibility references remain unambiguous JSON integers.
   Martial Arts, Booty, and MetaChemistry metadata into seven derived application tables
   while leaving the original normalized metadata tables in `infinity.raw.db`.
 - Hacking Program profiles preserve source order, Attack/Opponent MOD, PS, Burst, special
-  text, Device associations, targets, and declaration types. The Hacker Skill detail page
-  exposes the reference table without treating Programs as static Unit facts or inferring
-  Device ownership from names.
+  text, Device associations, targets, declaration types, and source Upgrade-extra provenance.
+  0.8 promotes those rows to `/hacking-programs` identities by composing them with reviewed
+  `hacking-program:*` records in `rules.db`. Army metadata remains authoritative for exact
+  profile fields and the baseline Device matrix; rules data supplies semantic effects/relations.
+  Hacker and Hacking Device surfaces cross-link the same identities, and Upgrade/source-specific
+  access remains distinct from baseline Device availability.
 - Martial Arts levels and Booty/MetaChemistry roll-result rows are exposed on their existing
   Skill detail surfaces. Random outcomes remain deployment/session reference data rather
   than being written onto Units or loadouts. Richer typed chart-result relationships remain

@@ -320,7 +320,9 @@ def _render_army_map(mapping: dict[int, str]) -> str:
     return "\n".join(lines)
 
 
-def _render_unit_map(mapping: dict[str, str]) -> str:
+def _render_unit_map(
+    mapping: dict[str, str], profile_mapping: dict[str, str]
+) -> str:
     lines = ["const unitSymbolSlugs = new Map(["]
     lines.extend(
         f"  [{json.dumps(key)}, {json.dumps(value)}],"
@@ -332,6 +334,21 @@ def _render_unit_map(mapping: dict[str, str]) -> str:
             "",
             "export function unitSymbolSlug(unitSlug) {",
             "  return unitSymbolSlugs.get(unitSlug);",
+            "}",
+            "",
+            "const unitProfileSymbolSlugs = new Map([",
+        ]
+    )
+    lines.extend(
+        f"  [{json.dumps(key)}, {json.dumps(value)}],"
+        for key, value in sorted(profile_mapping.items())
+    )
+    lines.extend(
+        [
+            "]);",
+            "",
+            "export function unitProfileSymbolSlug(profileLogo) {",
+            "  return unitProfileSymbolSlugs.get(profileLogo);",
             "}",
             "",
         ]
@@ -433,6 +450,7 @@ def _build_publication(
         tuple[int, str],
         list[tuple[tuple[int, int, int, int, int, int, int, str], str]],
     ] = defaultdict(list)
+    unit_profile_references: list[tuple[str, str, str]] = []
     static_mapping: dict[str, str] = {}
     for reference in manifest["references"]:
         if not reference.get("authoritative"):
@@ -476,6 +494,7 @@ def _build_publication(
             unit_mapping_candidates[(unit_id, key)].append(
                 (_reference_rank(reference, snapshot_index), browser_path)
             )
+            unit_profile_references.append((key, asset_url, browser_path))
         elif kind == "static":
             key = reference.get("staticKey")
             if not isinstance(key, str) or not key.strip():
@@ -495,6 +514,20 @@ def _build_publication(
         if previous != browser_path:
             raise ValueError(
                 f"Unit slug {key!r} resolves to conflicting symbols: "
+                f"{previous} vs {browser_path}"
+            )
+
+    unit_profile_mapping: dict[str, str] = {}
+    for key, asset_url, browser_path in unit_profile_references:
+        primary_path = unit_mapping.get(key)
+        if primary_path is None:
+            raise ValueError(f"Unit profile {key!r} has no primary browser symbol")
+        if browser_path == primary_path:
+            continue
+        previous = unit_profile_mapping.setdefault(asset_url, browser_path)
+        if previous != browser_path:
+            raise ValueError(
+                f"Profile logo {asset_url!r} resolves to conflicting symbols: "
                 f"{previous} vs {browser_path}"
             )
 
@@ -523,10 +556,15 @@ def _build_publication(
     unit_map = staging_static / SYMBOL_MAP
     inventory_path = staging_static / PUBLICATION_INVENTORY
     army_map.write_text(_render_army_map(army_mapping), encoding="utf-8", newline="\n")
-    unit_map.write_text(_render_unit_map(unit_mapping), encoding="utf-8", newline="\n")
+    unit_map.write_text(
+        _render_unit_map(unit_mapping, unit_profile_mapping),
+        encoding="utf-8",
+        newline="\n",
+    )
     browser_referenced_paths = {
         *(f"armies/{value}" for value in army_mapping.values()),
         *(f"units/{value}.svg" for value in unit_mapping.values()),
+        *(f"units/{value}.svg" for value in unit_profile_mapping.values()),
         *static_mapping.values(),
     }
     unreferenced_published_paths = set(published_sha256) - browser_referenced_paths
@@ -581,6 +619,10 @@ def _build_publication(
         },
         "unitSlugToPublishedPath": {
             key: f"units/{value}.svg" for key, value in sorted(unit_mapping.items())
+        },
+        "unitProfileLogoToPublishedPath": {
+            key: f"units/{value}.svg"
+            for key, value in sorted(unit_profile_mapping.items())
         },
         "staticKeyToPublishedPath": dict(sorted(static_mapping.items())),
         "publishedSha256ByPath": dict(sorted(published_sha256.items())),

@@ -51,11 +51,10 @@ application package or Docker build. Their text, images, and other contents must
 not be redistributed as MIT-licensed project material.
 
 Curated facts retain provenance appropriate to the source contract. PDF-derived
-facts use document edition/version/date and printed-page citations. Current
-wiki-derived record citations use snapshot-local path and snapshot date; legacy
-wiki provenance should not be relabeled as an exact timestamped archive/hash
-until that provenance is migrated by the downloader/packager and curated-data
-work.
+facts use document edition/version/date and printed-page citations. Archived
+wiki-derived records bind to an exact timestamped ZIP/hash and cite snapshot-local
+members. Exact pinned `oldid=` revisions remain URL-backed when they are not
+members of that archive; they must not be relabeled as archived snapshot members.
 
 ## Runtime and deployment dependencies
 

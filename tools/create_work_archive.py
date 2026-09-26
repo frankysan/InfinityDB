@@ -74,6 +74,20 @@ def _worktree_dirty(root: Path) -> bool:
     )
 
 
+def _publish_default_archive(archive: Path, final_archive: Path) -> Path:
+    """Publish a default archive without replacing identical existing output."""
+    if final_archive.exists():
+        if final_archive.read_bytes() != archive.read_bytes():
+            raise RuntimeError(
+                f"Refusing to replace existing work archive with different content: {final_archive}"
+            )
+        archive.unlink()
+        return final_archive.resolve()
+
+    archive.replace(final_archive)
+    return final_archive.resolve()
+
+
 def create_work_archive(root: Path, destination: Path | None = None) -> Path:
     """Create a deterministic work-tree ZIP without Git metadata or ignored files."""
     root = root.resolve()
@@ -116,8 +130,7 @@ def create_work_archive(root: Path, destination: Path | None = None) -> Path:
         final_archive = root.parent / f"InfinityDB-work-{revision}-dirty-{fingerprint}.zip"
     else:
         final_archive = root.parent / f"InfinityDB-work-{revision}.zip"
-    archive.replace(final_archive)
-    return final_archive.resolve()
+    return _publish_default_archive(archive, final_archive)
 
 
 def main() -> int:

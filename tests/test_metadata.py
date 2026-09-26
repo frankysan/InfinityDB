@@ -193,6 +193,8 @@ def test_metadata_rows_are_stored_but_do_not_create_armies(tmp_path: Path) -> No
             "group_name": None,
             "group_slug": None,
             "parent_army_ids": [],
+            "parent_armies": [],
+            "reinforcement_sections": [],
             "unit_count": 1,
         }
     ]
@@ -296,6 +298,12 @@ def test_army_roles_use_metadata_hierarchy_and_reinforcement_links(tmp_path: Pat
     assert armies[102]["group_name"] == "Official First"
     assert armies[198]["role"] == "reinforcement"
     assert armies[198]["parent_army_ids"] == [101]
+    assert armies[198]["parent_armies"] == [
+        {"id": 101, "name": "Official First", "slug": "source-slug"}
+    ]
+    assert armies[101]["reinforcement_sections"] == [
+        {"id": 198, "name": "First Reinforcements", "slug": "source-reinforcements"}
+    ]
     assert armies[902]["role"] == "non_aligned"
     assert armies[902]["group_id"] == 901
     assert armies[902]["group_name"] == "Non-Aligned Armies"
@@ -310,6 +318,8 @@ def test_army_roles_use_metadata_hierarchy_and_reinforcement_links(tmp_path: Pat
         "group_name": None,
         "group_slug": None,
         "parent_army_ids": [],
+        "parent_armies": [],
+        "reinforcement_sections": [],
         "unit_count": 1,
     }
     with pytest.raises(ValueError, match="grouping-only identity"):

@@ -284,21 +284,27 @@ def test_publication_preserves_distinct_unit_profile_symbols(tmp_path: Path) -> 
     assert report["unitSlugToPublishedPath"]["mech-engineer"] == primary_path
     assert summary["publishedAssetCount"] == 5
     assert report["browserUsageSummary"] == {
-        "browserReferencedAssetCount": 4,
-        "unreferencedPublishedAssetCount": 1,
+        "browserReferencedAssetCount": 5,
+        "unreferencedPublishedAssetCount": 0,
     }
     inventory = json.loads(
         (staging / "symbol-inventory.json").read_text(encoding="utf-8")
     )
     assert inventory["summary"]["publishedAssetCount"] == 5
-    assert inventory["summary"]["browserReferencedAssetCount"] == 4
-    assert inventory["summary"]["unreferencedPublishedAssetCount"] == 1
+    assert inventory["summary"]["browserReferencedAssetCount"] == 5
+    assert inventory["summary"]["unreferencedPublishedAssetCount"] == 0
     assert (staging / primary_path).is_file()
     assert (staging / alternate_path).is_file()
 
     unit_map = (staging / "unit-symbol-map.js").read_text(encoding="utf-8")
     assert '["mech-engineer", "panoceania/1-mech-engineer"]' in unit_map
-    assert "mech-engineer--2-1" not in unit_map
+    assert (
+        '["https://example.invalid/u1-alternate.svg", '
+        '"panoceania/1-mech-engineer--2-1"]' in unit_map
+    )
+    assert report["unitProfileLogoToPublishedPath"] == {
+        alternate_url: alternate_path,
+    }
 
 
 def test_publication_preserves_army_specific_primary_variant(tmp_path: Path) -> None:

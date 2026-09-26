@@ -26,6 +26,25 @@ if [ "$RETAIN_APP_IMAGES" -lt 1 ]; then
   exit 2
 fi
 
+: "${METRICS_BIND_ADDRESS:=127.0.0.1}"
+: "${METRICS_PORT:=9090}"
+case "$METRICS_BIND_ADDRESS" in
+  0.0.0.0|::|\[::\])
+    echo "METRICS_BIND_ADDRESS must be loopback or a specific trusted interface address; wildcard binds are refused." >&2
+    exit 2
+    ;;
+esac
+case "$METRICS_PORT" in
+  *[!0-9]* | '' | 0)
+    echo "METRICS_PORT must be an integer between 1 and 65535." >&2
+    exit 2
+    ;;
+esac
+if [ "$METRICS_PORT" -gt 65535 ]; then
+  echo "METRICS_PORT must be an integer between 1 and 65535." >&2
+  exit 2
+fi
+
 : "${PRUNE_APP_IMAGES:=1}"
 case "$PRUNE_APP_IMAGES" in
   0|1) ;;

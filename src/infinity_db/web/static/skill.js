@@ -10,6 +10,7 @@ const meta = document.getElementById("skill-meta");
 const status = document.getElementById("skill-status");
 const content = document.getElementById("skill-content");
 let currentSkill;
+const pageController = new AbortController();
 
 function displayWikiUrl(url) {
   try {
@@ -86,6 +87,13 @@ function structuredTable(titleText, headers, rows) {
   return section;
 }
 
+function hackingProgramLink(row) {
+  const link = document.createElement("a");
+  link.href = `/hacking-programs/${encodeURIComponent(row.slug || row.id || row.position)}`;
+  link.textContent = row.name;
+  return link;
+}
+
 function hackingDeviceLinks(devices) {
   if (!devices?.length) return "Upgrade / source-specific";
   const fragment = document.createDocumentFragment();
@@ -119,7 +127,7 @@ function structuredReferenceSection(reference) {
       reference.title,
       ["Program", "Attack MOD", "Opponent MOD", "PS", "B", "Target", "Skill type", "Device", "Special"],
       reference.rows.map((row) => [
-        row.name,
+        hackingProgramLink(row),
         row.attack_mod,
         row.opponent_mod,
         row.ps,
@@ -221,23 +229,35 @@ function render(skill) {
   content.hidden = false;
 }
 
+document.addEventListener(
+  "infinity:beforenavigation",
+  () => pageController.abort(),
+  { once: true },
+);
 initializeDistanceUnitToggle();
 window.addEventListener("distanceunitchange", () => {
   if (currentSkill) render(currentSkill);
-});
+}, { signal: pageController.signal });
 if (!skillId) {
   name.firstChild.textContent = "Skill unavailable";
   status.textContent = "The requested skill address is invalid.";
 } else {
-  getCatalogItem("skills", skillId).then((skill) => {
+  getCatalogItem("skills", skillId, pageController.signal).then((skill) => {
     currentSkill = skill;
     render(skill);
-    return visibleUnitIds().then((ids) => render(withVisibleUnits(skill, ids)));
+    return visibleUnitIds(pageController.signal)
+      .then((ids) => render(withVisibleUnits(skill, ids)));
   }).catch((error) => {
+    if (error.name === "AbortError") return;
     name.firstChild.textContent = "Skill unavailable";
     status.textContent = error.message || "Could not load this skill.";
   });
 }
 window.addEventListener("optionalunitschange", () => {
-  if (currentSkill) visibleUnitIds().then((ids) => render(withVisibleUnits(currentSkill, ids)));
-});
+  if (!currentSkill) return;
+  visibleUnitIds(pageController.signal)
+    .then((ids) => render(withVisibleUnits(currentSkill, ids)))
+    .catch((error) => {
+      if (error.name !== "AbortError") throw error;
+    });
+}, { signal: pageController.signal });

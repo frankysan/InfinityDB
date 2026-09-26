@@ -13,8 +13,17 @@ function isSameOriginPage(link) {
 
 function syncActiveNavigation(pathname) {
   document.querySelectorAll(".navigation-menu a[href]").forEach((link) => {
-    link.toggleAttribute("aria-current", new URL(link.href).pathname === pathname);
+    const linkPath = new URL(link.href).pathname;
+    const isCurrent = pathname === linkPath
+      || (linkPath !== "/" && pathname.startsWith(`${linkPath}/`));
+    link.toggleAttribute("aria-current", isCurrent);
   });
+}
+
+function syncDescription(nextDocument) {
+  const current = document.querySelector('meta[name="description"]');
+  const next = nextDocument.querySelector('meta[name="description"]');
+  if (current && next) current.setAttribute("content", next.getAttribute("content") || "");
 }
 
 function syncBody(nextBody) {
@@ -64,6 +73,7 @@ async function navigate(url, { replace = false, restoreScroll } = {}) {
 
   if (!replace) history.pushState({ scrollY: 0 }, "", url);
   document.title = nextDocument.title;
+  syncDescription(nextDocument);
   syncBody(nextDocument.body);
   currentMain.replaceWith(nextMain);
   syncActiveNavigation(new URL(url, window.location.href).pathname);

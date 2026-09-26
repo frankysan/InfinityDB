@@ -8,6 +8,7 @@ const elements = {
   table: byId("modifier-table-container"), list: byId("modifier-list"),
 };
 let items = [];
+const pageController = new AbortController();
 
 function show(panel) {
   for (const element of [elements.loading, elements.error, elements.empty, elements.table]) {
@@ -45,20 +46,26 @@ function renderItems(items) {
 async function load() {
   show(elements.loading);
   try {
-    const payload = await getSkillExtras();
+    const payload = await getSkillExtras(pageController.signal);
     items = payload.items;
     elements.count.textContent = `${items.length} combinations`;
     if (!items.length) return show(elements.empty);
     renderItems(items);
     show(elements.table);
   } catch (error) {
+    if (error.name === "AbortError") return;
     elements.errorMessage.textContent = error.message || "Could not load skill modifiers.";
     show(elements.error);
   }
 }
 
+document.addEventListener(
+  "infinity:beforenavigation",
+  () => pageController.abort(),
+  { once: true },
+);
 initializeDistanceUnitToggle();
 load();
 window.addEventListener("distanceunitchange", () => {
   if (!elements.table.hidden) renderItems(items);
-});
+}, { signal: pageController.signal });

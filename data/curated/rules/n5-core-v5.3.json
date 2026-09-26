@@ -1155,6 +1155,33 @@
             "url": "https://infinitythewiki.com/index.php?title=Hacker&oldid=3646",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
+        },
+        {
+            "id": "wiki-fireteams-basic-rules-oldid-4115",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Fireteams: Basic Rules revision 4115",
+            "version": "N5.3 / oldid 4115",
+            "url": "https://infinitythewiki.com/index.php?title=Fireteams:_Basic_Rules&oldid=4115",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-26"
+        },
+        {
+            "id": "wiki-fireteams-chart-oldid-4116",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Fireteams Chart revision 4116",
+            "version": "N5.3 / oldid 4116",
+            "url": "https://infinitythewiki.com/index.php?title=Fireteams_Chart&oldid=4116",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-26"
+        },
+        {
+            "id": "wiki-fireteam-bonuses-oldid-3933",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Fireteam Bonuses revision 3933",
+            "version": "N5.3 / oldid 3933",
+            "url": "https://infinitythewiki.com/index.php?title=Fireteam_Bonuses&oldid=3933",
+            "authority": "secondary",
+            "retrievedDate": "2026-09-26"
         }
     ],
     "records": [
@@ -13760,6 +13787,174 @@
                     "recordId": "equipment:hacking-device"
                 }
             ]
+        },
+        {
+            "id": "rule:fireteam-general",
+            "kind": "rule",
+            "name": "Fireteams: General Rules",
+            "summary": "The shared N5 rules for creating and operating Fireteams; Army-specific Fireteams Charts determine permitted teams and can override these defaults.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "aliases": [
+                "Fireteams: Basic Rules",
+                "General Rules of Fireteams"
+            ],
+            "facts": {
+                "category": "fireteam-general",
+                "memberLimits": {
+                    "min": 2,
+                    "max": 5
+                },
+                "types": [
+                    {
+                        "type": "DUO",
+                        "min": 2,
+                        "max": 2
+                    },
+                    {
+                        "type": "HARIS",
+                        "min": 3,
+                        "max": 3
+                    },
+                    {
+                        "type": "CORE",
+                        "min": 3,
+                        "max": 5
+                    }
+                ],
+                "rules": [
+                    "The Army's Fireteams Chart determines how many Fireteams of each Type may exist and which Troopers or options may form them.",
+                    "Members must observe Coherency with the Fireteam Leader, belong to the same Combat Group, and a Trooper cannot simultaneously belong to more than one Fireteam.",
+                    "Spending a Regular Order on a Fireteam member makes that Trooper the Fireteam Leader and activates the other members of the Fireteam.",
+                    "Army-chart conditions and notes can modify or override the general Fireteam rules."
+                ],
+                "terminology": [
+                    {
+                        "term": "Linkable",
+                        "provenance": "historical-official",
+                        "meaning": "Historical official shorthand for Fireteam participation. Current N5 eligibility is contextual to the Army Fireteams Chart rather than a universal Unit property."
+                    },
+                    {
+                        "term": "pure Fireteam",
+                        "provenance": "community-historical",
+                        "meaning": "Community shorthand rooted in earlier Fireteam Composition Bonuses. Current N5 instead uses Fireteam Level from same-Unit or chart-equivalent membership."
+                    }
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 132,
+                    "section": "Fireteams: Basic Rules"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 133,
+                    "section": "Fireteams Chart"
+                },
+                {
+                    "sourceId": "wiki-fireteams-basic-rules-oldid-4115",
+                    "heading": "General Rules for Fireteams"
+                },
+                {
+                    "sourceId": "wiki-fireteams-chart-oldid-4116",
+                    "heading": "Fireteams Chart"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
+        },
+        {
+            "id": "rule:fireteam-level-bonuses",
+            "kind": "rule",
+            "name": "Fireteam Level and Bonuses",
+            "summary": "Fireteam Level is calculated from same-Unit or chart-equivalent members and grants cumulative bonuses from Level 1 through Level 5.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "aliases": [
+                "Fireteam Bonuses",
+                "Fireteam Bonuses Chart",
+                "Fireteam Level Chart"
+            ],
+            "facts": {
+                "category": "fireteam-level-bonuses",
+                "basis": "Fireteam Level is based on how many members belong to the same Unit; matching bracketed or noted Fireteams Chart terms count as the same Unit for this calculation.",
+                "cumulative": true,
+                "levels": [
+                    {
+                        "level": 1,
+                        "requirement": "The Troopers may all belong to different Units.",
+                        "bonuses": [
+                            "Fireteam members activate with a single Regular Order."
+                        ]
+                    },
+                    {
+                        "level": 2,
+                        "requirement": "At least 2 Troopers belong to the same Unit.",
+                        "bonuses": [
+                            "BS Attack (+1 SD)"
+                        ]
+                    },
+                    {
+                        "level": 3,
+                        "requirement": "At least 3 Troopers belong to the same Unit.",
+                        "bonuses": [
+                            "+3 Discover",
+                            "+1 Dodge"
+                        ]
+                    },
+                    {
+                        "level": 4,
+                        "requirement": "At least 4 Troopers belong to the same Unit.",
+                        "bonuses": [
+                            "+1 BS"
+                        ]
+                    },
+                    {
+                        "level": 5,
+                        "requirement": "All 5 Troopers belong to the same Unit.",
+                        "bonuses": [
+                            "Sixth Sense"
+                        ]
+                    }
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 135,
+                    "section": "Fireteam Bonuses"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 136,
+                    "section": "Fireteam Bonuses"
+                },
+                {
+                    "sourceId": "wiki-fireteam-bonuses-oldid-3933",
+                    "heading": "Fireteam Bonuses"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-26"
+            }
         }
     ]
 }
