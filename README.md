@@ -5,7 +5,7 @@ data. While Infinity Army presents one army at a time, InfinityDB brings those
 views together into a game-wide reference for exploring units, profiles,
 equipment, skills, weapons, and relationships across armies.
 
-Current release: **0.7.2** (2026-09-26).
+Current release: **0.8.0** (2026-09-26).
 
 ## Guiding principles
 
@@ -30,7 +30,13 @@ Current release: **0.7.2** (2026-09-26).
   records into coherent unit views while preserving their distinct availability
   and army contexts.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
-  and Traits reference catalogs with reverse links to units that use them.
+  Traits, States, and Hacking Programs reference catalogs, with reverse Unit
+  usage links where that relationship applies.
+- Browses Army-scoped Fireteam charts with limits, member requirements,
+  Wildcards, FTO loadouts, equivalence labels, and N5 rules/bonus context.
+- Presents connected Unit relationships for Peripherals/Controllers, Includes,
+  selection/dependency constraints, Reinforcement parentage, and broader
+  source-declared faction membership.
 - Displays curated rules-reference information where available, including
   summaries, classifications, special weapon data, and source citations.
 - Supports centimetre/inch display preferences and a Developer mode for
@@ -69,10 +75,10 @@ documentation-label convention.
 
 The current direction is deliberately incremental:
 
-- **0.7.x — Rules & context:** enrich existing catalog/application data with concise
+- **0.7.x — Rules & context:** enriched existing catalog/application data with concise
   rules summaries, official references, classifications, and reviewed semantic
   relationships.
-- **0.8.x — Connect the game:** expose first-class relationships such as Fireteams,
+- **0.8.x — Connected game structure:** exposed first-class relationships such as Fireteams,
   Peripherals/Controllers, linked profiles/includes, selection/dependency constraints,
   Reinforcement parentage, and useful cross-army navigation.
 - **0.9.x — Complete & discover:** close the remaining application-data presentation
@@ -83,7 +89,7 @@ The current direction is deliberately incremental:
   InfinityDB has a maintained representation and a meaningful, usable place in the
   web reference.
 
-In short: **0.6 builds the foundation → 0.7 adds context → 0.8 connects the data →
+In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
 0.9 closes application gaps → 0.10 hardens and polishes → 1.0 completes the reference.**
 Exact minor-release scope may move as audits discover dependencies; the durable 1.0 gate is
 defined in [release process](docs/releasing.md).
@@ -323,7 +329,12 @@ profile definitions, asset modes, reports, and exit codes.
   future reference or product work.
 - [Data storage and provenance](data/README.md) — raw, curated, generated, and
   local processing artifacts.
-- [Development checks](docs/testing.md) — local and CI validation.
+- [Development checks](docs/testing.md) — local check-runner, pytest, asset-mode, and
+  benchmark guidance.
+- [Continuous integration](docs/ci.md) — hosted workflow, portability, asset, and
+  required-check policy.
+- [Curated data contracts](data/curated/README.md) — reviewed rules, identities,
+  relationship evidence, and snapshot annotations.
 - [Release process](docs/releasing.md) — mandatory release checklist and project-wide
   documentation audit.
 - [Linux deployment](docs/deployment.md) — production deployment and updates.

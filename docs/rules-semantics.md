@@ -465,8 +465,8 @@ linked Troopers must remain inside that Trooper's Zone of Control. The Reference
 Trooper is role/context dependent: examples include a Fireteam Team Leader and a
 Peripheral's Controller.
 
-This is useful semantic context for InfinityDB's Peripheral/controller and future
-Fireteam relationship work. `Controller`, `Team Leader`, and `Reference Trooper`
+This is useful semantic context for InfinityDB's Peripheral/controller and
+Fireteam relationship models. `Controller`, `Team Leader`, and `Reference Trooper`
 should not be collapsed into one identity relation: the first two can supply the
 reference role for particular rules, while Coherency describes the spatial
 constraint applied to that relationship.
@@ -1486,7 +1486,7 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Traits>
 - PDF: Infinity N5 V5.3, printed pages 174-175
 
-### RS-GSG-STATE-004 — Broad State interactions stay fail-closed until generic targets exist
+### RS-GSG-STATE-007 — Broad State interactions stay fail-closed until generic targets exist
 
 **Classification:** source-native cross-domain semantics with an interaction-modeling consequence.
 
@@ -1587,10 +1587,11 @@ Sources:
 
 Marksmanship ignores negative BS MODs from Partial Cover and Nanoscreen when used with
 a BS Attack. The current Marksmanship and Multispectral Visor rules also explicitly call
-out the same counter-elements: Albedo, Reflective effects, and White Noise Zones. Within
-the 0.7.0 catalog scope, Albedo and Reflective are directly representable as Equipment/
-Trait relationships; White Noise remains part of the planned post-0.7.0 Hacking Program
-expansion rather than being modeled prematurely as a catalog item.
+out the same counter-elements: Albedo, Reflective effects, and White Noise Zones. Albedo
+and Reflective are directly representable as Equipment/Trait relationships. White Noise
+is now a first-class Hacking Program, but the counter-interaction still depends on a
+temporary White Noise Zone and Line-of-Fire context that the current generic relation
+vocabulary cannot represent without flattening an important condition.
 
 InfinityDB therefore authors `imposes-modifiers-on` from Albedo to Marksmanship and
 Multispectral Visor because Albedo applies its listed negative Attribute MOD when those
@@ -3025,13 +3026,13 @@ two views of the Program model already established by the Combat audit. Army
 metadata also carries structured Hacking Program profile fields and explicit
 Device associations, which InfinityDB preserves in `metadata_hacking_programs`.
 
-InfinityDB now projects that source structure into the application database for exact
-Program profile data, including Device associations, targets, declaration types, PS,
-Burst, and source special text. The existing Hacker Skill detail surface renders the
-complete reference table without treating those Programs as static Unit facts or
-inferring Program sets from Equipment display names. A future first-class Hacking
-domain may add richer reviewed Program identities/relationships, especially for
-Upgrade Programs, without replacing this source-backed profile projection.
+InfinityDB projects that source structure into the application database for exact Program
+profile data, including Device associations, targets, declaration types, PS, Burst, and source
+special text. All 12 Programs are also first-class rules/reference identities whose curated
+records add reviewed effects and typed Skill/State relationships. The Hacker Skill detail surface
+and Program catalog compose those layers without treating Programs as static Unit facts or
+inferring Program sets from Equipment display names. Baseline Device associations remain
+Army-derived; Upgrade and other source-specific Program availability stays distinct.
 
 Sources:
 
@@ -3076,8 +3077,8 @@ upward Jump, or Lieutenant eligibility.
 These are useful explicit relationships for contextual reference and generated
 comparison/filter views. InfinityDB can link the affected Troop Type, Training,
 Equipment, or Skill to the restricted action/role without attempting to infer a
-complete `can declare X` result for arbitrary live game state. This closes the
-pending Troop-Type restrictions cross-check from `RR-BR-UP-001`.
+complete `can declare X` result for arbitrary live game state. This closes the earlier
+Unit Profile restrictions research question without creating a live legality engine.
 
 Sources:
 
@@ -3528,15 +3529,16 @@ Source:
 
 - Wiki: <https://infinitythewiki.com/TinBot>
 
-### RS-EQ-CORE-006 — Hacking Devices are reviewed even while Hacking Programs remain deferred
+### RS-EQ-CORE-006 — Hacking Device baseline Program grants remain Army-derived
 
 **Classification:** source-native Equipment-to-program semantics.
 
-Hacking Device, Hacking Device Plus, Killer Hacking Device, and EVO Hacking Device are valid
-reviewed Equipment identities in the 0.7.0 catalog. Their defining outgoing interactions are the
-Hacking Programs they grant, but the Hacking Program domain is outside the current 0.7.0 canonical
-rules set. Those grants therefore remain explicitly tracked in the future-interaction queue rather
-than being represented as unresolved current graph targets or omitted from the audit.
+Hacking Device, Hacking Device Plus, Killer Hacking Device, and EVO Hacking Device are reviewed
+Equipment identities, and all 12 Hacking Programs are now first-class rules/reference identities.
+The baseline Device-to-Program matrix is structured Army metadata, so InfinityDB generates and
+composes those associations instead of duplicating them as curated generic rules edges. Curated
+Program records own the reviewed effects and typed Skill/State relationships, while Upgrade and
+other source-specific Program availability remains distinct from the baseline Device matrix.
 
 Source:
 

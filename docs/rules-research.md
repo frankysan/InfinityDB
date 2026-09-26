@@ -36,25 +36,6 @@ turn an inference into a source-native rule.
 
 ## Basic Rules / Unit Profile
 
-### RR-BR-UP-001 — Troop Type carries specific rule restrictions
-
-**Scope:** core N5.
-
-The current Unit Profile wiki associates concrete restrictions with several
-Troop Types: TAG and VH cannot go Prone or declare Cautious Movement, while REM
-may not declare Cautious Movement or be chosen as Lieutenant.
-
-The completed Quick Reference pass confirms the full current Restrictions Chart
-and promotes the static cross-domain relationship pattern to `RS-QR-REST-001`.
-This entry remains as the provenance trail for why Troop Type restrictions were
-initially held back rather than inferred from the Unit Profile page alone.
-
-Sources:
-
-- Wiki: <https://infinitythewiki.com/Unit_Profile#Trooper_Characteristics>, live
-  N5.3 page
-- PDF: Infinity N5 V5.3, printed page 194, Restrictions Chart
-
 ### RR-BR-UP-002 — Game-term thesaurus can span domains without creating entities
 
 **Scope:** project research derived from source-native terminology.
@@ -198,7 +179,7 @@ Sources:
 
 **Scope:** core N5.
 
-The 23 current States are not one uniform mechanic. The audit exposes recurring
+The 24 current States are not one uniform mechanic. The audit exposes recurring
 families that may be useful as the State catalog expands or for a future thesaurus:
 
 - representation/hidden-information States: Camouflaged, Decoy, Hidden
@@ -256,7 +237,7 @@ Coordinated Orders.
 
 A future game/session model may therefore need transition rules over relationship
 edges, not just independent state flags on entities. This reinforces the value of
-keeping Peripheral/controller and future Fireteam relationships explicit.
+keeping Peripheral/controller and Fireteam relationships explicit.
 
 Sources:
 
@@ -408,26 +389,6 @@ Sources:
 
 - Wiki: relevant Special Skill pages under the Skills and Equipment module
 - PDF: Infinity N5 V5.3, printed pages 93-94, 106-109, and 112-115
-
-### RR-SE-HACK-001 — Equipment/Skill identities seed a Hacking relationship graph
-
-**Scope:** core N5; detailed semantics reconciled by the Combat audit.
-
-Hacker, Hacking Device variants, Firewall, Repeater, TinBot, and related
-Equipment establish cross-links between Troopers, devices, programs, Hacking
-Area, MODs, and defensive effects. The Skills and Equipment chapter establishes
-that those identities are related; the completed Combat audit records the actual
-program/target/range semantics and implementation-relevant boundaries.
-
-The original warning still applies: do not infer a complete Hacking graph from
-Equipment names/source links alone. Use the reviewed Combat findings and future
-curated relationships instead.
-
-Sources:
-
-- Wiki: <https://infinitythewiki.com/Hacking_Device>
-- Wiki: Firewall, Repeater, TinBot, and Hacker pages
-- PDF: Infinity N5 V5.3, printed pages 95 and 122-127
 
 ### RR-SE-REINF-001 — Live Special Skills navigation includes annex-scoped rules
 

@@ -86,7 +86,7 @@ proved that the singular value is the correct game-wide fact.
   slugs and currently prefer slugs. Normalization resolves them against the source
   weapon catalog before applying source name/profile fixes and exact metadata-row
   suppressions. Numeric authoring remains valid for ambiguity/provenance, and the
-  frontend database does not need these config files at runtime.
+  application database does not need these config files at runtime.
 - Current InfinityDB builds derive a unit's application `main_army_id` from
   the imported Army metadata parent for its canonical faction. Maintained
   canonical-faction overrides take precedence when explicitly configured. The
@@ -250,8 +250,8 @@ for the current reviewed relationship canonical source identity `1` displays as
 army `901`.
 
 The logical unit is an InfinityDB application abstraction rather than an Army
-source object. Its identity is now materialized during frontend SQLite creation
-while normalized/source records remain unchanged for provenance. The frontend
+source object. Its identity is now materialized during application SQLite creation
+while normalized/source records remain unchanged for provenance. The application
 relation contains both identity and the first application-owned unit
 payload/context layer:
 
@@ -527,7 +527,7 @@ rule be introduced.
 
 #### Initial empirical baseline
 
-The frontend database built from the Army snapshot acquired on 2026-09-18
+The application database built from the Army snapshot acquired on 2026-09-18
 contains substantial exact repetition even under a conservative comparison of
 complete profile/loadout payloads and their nested gameplay content.
 
@@ -561,7 +561,7 @@ equality rather than heuristic matching.
 #### Current baseline audit
 
 `tools/audit_semantic_deduplication.py` is the read-only development audit for
-this first exact-equality stage. It operates on an already-built frontend
+this first exact-equality stage. It operates on an already-built application
 `infinity.db`; it does not modify the database or participate in normal runtime
 queries.
 
@@ -660,7 +660,7 @@ python tools/audit_profile_semantics.py data/generated/infinity.db \
   --output reports/profile-semantics.json
 ```
 
-The 2026-09-18 frontend database contains:
+The 2026-09-18 application database contains:
 
 - 5,020 profile occurrences;
 - 1,137 distinct source profile keys;
@@ -796,7 +796,7 @@ unnecessary.
 
 ##### Current profile-payload materialization
 
-Schema version 12 materializes reusable **profile payloads** as derived frontend
+Schema version 12 materializes reusable **profile payloads** as derived application
 structure while retaining every normalized/source profile row unchanged. This
 does not introduce a new global semantic profile identity. A payload remains
 scoped to one existing `logical_unit`; two unrelated units are not merged merely
@@ -945,9 +945,9 @@ The materializer and database validation enforce all of the following:
   from a representative row;
 - profile-group context remains attached through the source occurrence key;
 - profile includes remain occurrence-scoped in `profile_occurrence_includes`, with
-  each target resolved to a canonical loadout payload; peripheral attachments remain
-  available through their contextual source relationships until their own
-  canonicalization stage;
+  each target resolved to a canonical loadout payload; reviewed Peripheral attachments are
+  materialized separately through the application Peripheral identity/relationship layer
+  rather than being folded into profile payload identity;
 - current source and raw tables are not rewritten or made lossy;
 - non-null `raw` fallback content participates in payload equality and can never
   be silently discarded;
@@ -960,13 +960,12 @@ while retaining army/profile-group context from the occurrence/source side. The
 public profile object shape, ordering, AVA handling, display-name normalization,
 and merged logical-source behavior are intentionally unchanged.
 
-The lossless `profiles` and nested `profile_*` source tables remain in the
-frontend database for provenance, validation, and contextual relationships that
-have not yet been canonicalized. Normal catalog reverse usage now expands the
-canonical profile/loadout occurrence layers instead. `get_unit()` no longer uses
-those source payload rows to assemble its
-profile objects. This is a staged read-path migration rather than permission to
-remove the source representation.
+The lossless `profiles` and nested `profile_*` source tables remain in build staging and
+`infinity.raw.db` for provenance, validation, and source-semantic review; schema 23 removed
+those raw payload tables from published `infinity.db`. Normal catalog reverse usage expands the
+canonical profile/loadout occurrence layers instead, and `get_unit()` does not use raw source
+payload rows to assemble its profile objects. The source representation is preserved in the raw
+sibling rather than being discarded.
 
 Behavioral regression coverage preserves the existing unit/API expectations and
 also verifies that mutating the legacy source profile payload rows after
@@ -1017,7 +1016,7 @@ python tools/audit_loadout_semantics.py data/generated/infinity.db \
   --output reports/loadout-semantics.json
 ```
 
-For the 2026-09-18 frontend database, the audit reports:
+For the 2026-09-18 application database, the audit reports:
 
 - 12,993 loadout occurrences;
 - 3,593 distinct source loadout keys;
@@ -1235,9 +1234,9 @@ loadout_payload_weapon_extras
 
 `loadout_payload_occurrences` is one-to-one with the current source
 `loadout_options` rows. Its composite source key stays `(army_id, unit_id,
-group_id, option_id)` and references exactly one reusable payload. The
-source `loadout_options` and nested `option_*` tables remain unchanged for
-provenance, lossless auditing, deferred relationships, and migration comparison.
+group_id, option_id)` and references exactly one reusable payload. The source `loadout_options` and nested `option_*` tables remain unchanged in build staging
+and `infinity.raw.db` for provenance, lossless auditing, deferred source semantics, and migration
+comparison; they are not republished as raw payload tables in `infinity.db`.
 
 Nested payload tables use payload-relative ordering instead of carrying
 normalization-only source `occurrence_id` or weapon `template_id` identities into
@@ -1313,9 +1312,9 @@ expected storage benefit while also exposing a read-path indexing requirement:
 - the legacy lossless loadout tables plus their indexes occupy about 5.54 MiB;
 - the canonical loadout payload/occurrence tables plus their indexes occupy about
   2.04 MiB, approximately 63.1% less for the corresponding application model;
-- while both representations coexist during migration, this is not yet a net
-  database-size saving; the physical benefit is realized only after source-only
-  tables move to `infinity.raw.db`;
+- at the time of this canonical-loadout audit, both representations still coexisted and
+  therefore did not yet provide a net database-size saving; schema 23 later realized the
+  physical benefit by moving source-only tables to `infinity.raw.db`;
 - before unit-oriented canonical-occurrence indexes were added, a diagnostic pass
   over all 920 source-unit `get_unit()` lookups took about 12.3-12.5 seconds on
   the acceptance environment, versus about 6.5-6.7 seconds for the preceding
@@ -1329,10 +1328,12 @@ performance guarantees or schema invariants. Query-plan regression tests require
 the canonical occurrence tables to use their unit-oriented indexes because unit
 detail assembly filters them by source unit.
 
-Peripheral identity, further representation normalization, and eventual movement
-of lossless source-only tables to `infinity.raw.db` remain separate
-evidence-driven decisions. Include target identity is now resolved by the derived
-occurrence relationship layer without promoting the attachment into payload identity.
+This audit intentionally treated Peripheral identity, further representation normalization,
+and physical source/application separation as independent evidence-driven decisions. Those
+later decisions are now materialized: Peripheral identity/relationships are reviewed and the
+schema-23+ application/raw split moves lossless source-only tables to `infinity.raw.db`.
+Include target identity is resolved by the derived occurrence relationship layer without
+promoting the attachment into payload identity.
 
 ### Logical-unit payload semantic classification audit
 
@@ -1423,11 +1424,10 @@ unit row:
 Thirty source units contain non-null `spectables`, but none belongs to a
 multi-source logical unit and the repository currently does not consume this
 field. It therefore remains a canonical-unit payload candidate with insufficient
-variant evidence and a likely 1.0 presentation gap to resolve rather than data
-that may be discarded. Top-level `unit_options` likewise require an explicit
-overlap/presentation decision because their complete source meaning is not
-currently returned by unit detail even though parts are used for search and
-catalog reverse lookup.
+variant evidence and an explicit 0.9 semantic-review/presentation decision rather than data
+that may be discarded. Top-level `unit_options` likewise remain a 0.9 completeness item
+because their complete source meaning is not currently returned by unit detail even though
+parts are used for search and catalog reverse lookup.
 
 The audit establishes the following design constraints for the next step:
 
@@ -1548,14 +1548,14 @@ than forced into the current counts. Database validation checks that canonical
 fields still equal the representative source and that the alias, note, and
 `spectables` context is complete relative to the retained source rows.
 
-#### Next implementation targets
+#### 0.6.1 completion context
 
 Canonical unit/profile/loadout payloads, their context mappings, application Army
 identity/hierarchy, application catalog identity, and the audited runtime read
-migrations were completed and released in 0.6.1 on 2026-09-20. The representative
-runtime benchmark, local/hosted acceptance, release tag, deployment, and deployed
-update verification are complete. Milestone 2B now covers broader relationships,
-source-only structures, the eventual `infinity.raw.db` split, and 1.0 completeness.
+migrations were completed and released in 0.6.1 on 2026-09-20. The subsequent
+Milestone 2B work completed broader relationship canonicalization and the physical
+`infinity.db` / `infinity.raw.db` split in 0.6.3. The remaining source-presentation
+gaps are maintained in the current 0.9 backlog rather than in this historical audit section.
 
 ### 0.6.1 runtime benchmark evidence
 
@@ -1770,19 +1770,19 @@ canonical loadout payloads and **34** with `minis = 0`). The source information 
 preserved while their correct player-facing interpretation is reviewed.
 
 The inventory records storage/presentation gaps; it does not redefine release scope.
-Rules-context work belongs to 0.7.x, connected relationship presentation to 0.8.x, and
-remaining presentation/scope cleanup to 0.9.x. The final source-by-source acceptance
+Rules-context work landed in 0.7.x, connected relationship presentation landed in 0.8.x,
+and remaining presentation/scope cleanup belongs to 0.9.x. The final source-by-source acceptance
 audit in `docs/releasing.md` remains the authoritative 1.0 gate.
 
-The 0.8.0 follow-up audit in `docs/080-connected-domain-audit.md` converts that
-inventory into application-domain decisions. Fireteams require a new canonical
+The 0.8.0 follow-up audit in `docs/080-connected-domain-audit.md` converted that
+inventory into application-domain decisions. It concluded that Fireteams required a new canonical
 application projection and first-class surface. Hacking Programs reuse their typed application
 projection as a first-class `/hacking-programs` rules/reference surface: source `hack` metadata
 remains authoritative for Program profiles, targets, declaration types, source Upgrade-extra
 provenance, and the baseline Device matrix, while `rules.db` contributes reviewed Program
 semantics and cross-rule relationships. Upgrade/source-specific access is not inferred from the
 baseline Device matrix.
-The other connected-data gap families above remain relationship presentation over
+The other connected-data gap families were implemented as relationship presentation over
 existing Unit/Army/Profile/Loadout identities rather than new catalogs. The deferred
 rules-interaction ledger is used as a boundary check, not as a mandate to create one
 domain per target type.
@@ -2235,7 +2235,7 @@ snapshot resolves all
 without collision or unavailable candidates; these counts are evidence only.
 
 Curated/application concepts that need an explicit namespace use typed IDs such as
-`skill:doctor`. Curated v3 records now validate that the prefix matches the record
+`skill:doctor`. Current curated records validate that the prefix matches the record
 kind and that every colon-separated segment follows the same slug grammar. Source
 numeric IDs remain provenance/foreign references rather than public identity.
 
@@ -2273,7 +2273,7 @@ This work does not:
 - require specialized final-form UI for every newly identified datapoint;
 - include ITS-specific data in the 1.0 scope.
 
-The work may change the frontend database schema, repository assembly, and API
+The work may change the application database schema, repository assembly, and API
 contracts where that produces a clearer canonical application model. Such
 changes must use the normal database compatibility/versioning process and carry
 regression coverage proving that meaningful source variation is preserved.
@@ -2281,7 +2281,7 @@ regression coverage proving that meaningful source variation is preserved.
 Legacy duplicate matching is now a build-compatibility concern. When older
 normalized inputs lack the persisted generic or mercenary evidence, database
 creation can use the retained legacy fallback before writing the materialized
-relation. Every newly built frontend database therefore exposes the same
+relation. Every newly built application database therefore exposes the same
 logical-unit contract regardless of which compatibility path produced it.
 
 Normal availability derived from declared `factions` and optional mercenary
@@ -2334,13 +2334,13 @@ Deployment compares it with the terminal symbol manifest's
 `snapshot.armyArtifact.sha256`, binding the runtime data and symbol publication
 without needing the raw archive at deployment time.
 
-`units.source_role` and `army_units.availability_kind` are explicit frontend
+`units.source_role` and `army_units.availability_kind` are explicit application
 schema fields rather than incidental dynamic columns. This makes the
 normalization-time availability classification part of the generated database
 contract; repository mercenary filtering consumes `availability_kind` directly
 for current snapshots.
 
-Frontend-only application-Army identity/provenance tables, `logical_units`,
+Application-only Army identity/provenance tables, `logical_units`,
 `logical_unit_sources`, logical-unit alias/note/`spectables` context, and
 canonical profile/loadout payload tables are derived application structure, not
 normalized source facts, and therefore do not rewrite the source tables.
@@ -2351,7 +2351,7 @@ while source-backed Army/relationship context that has not yet been canonicalize
 continues to use its reviewed source/context tables. The normal Army/faction and
 Skill/Equipment/Weapon metadata-overlap boundaries were resolved by the 0.6.1 read
 migrations. The normalized-input table registry remains separate from these
-derived frontend tables so generated application structure cannot be supplied as normalized
+derived application tables so generated application structure cannot be supplied as normalized
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
@@ -2359,7 +2359,7 @@ records its schema version. The current schema version is 25 and the application
 compatibility revision is 33. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
-frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite
+application export runs `ANALYZE` after loading and indexing data, preserving SQLite
 planner statistics in the immutable snapshot. Production/default exports then
 canonicalize the physical SQLite files with `VACUUM` plus header normalization for
 byte-level portability. Programmatic semantic-test callers may explicitly set
@@ -2378,11 +2378,11 @@ source coordinates, with the full source representation preserved in raw storage
 ### Current
 
 Timestamped `JSON`, `WIKI`, and `SYMBOLS` ZIP files are immutable acquisition
-artifacts. Each successful downloader run also writes one version-1 `InfinityDB
-snapshot provenance` JSON record under `data/manifests/snapshots/`, labeled
-from the archive filename and bound to the archive SHA-256.
+artifacts. Each successful downloader run writes one version-2 `InfinityDB snapshot
+provenance` JSON record under `data/manifests/snapshots/`, labeled from the archive
+filename. Version-1 manifests remain valid historical provenance.
 
-The generated manifest has this logical shape:
+The current generated manifest has this logical shape:
 
 ```text
 format / formatVersion
@@ -2390,31 +2390,38 @@ snapshot:
   type
   archive:
     name
-    sha256
-    path?          # project-relative POSIX form only
-  acquiredAt       # timezone-aware ISO-8601
+    sha256            # exact ZIP byte stream
+    path?             # project-relative POSIX form only
+  contentSha256       # normalized member paths + member bytes
+  acquiredAt          # timezone-aware ISO-8601
   documentCount
 source:
   url
-  language?        # Army snapshots
-inputArtifact?     # current symbol acquisition input
+  language?
+inputArtifact?        # symbol acquisition input; exact artifact bytes
   name
   sha256
-  path?            # project-relative POSIX form only
+  path?               # project-relative POSIX form only
 ```
 
-The archive SHA-256 is authoritative snapshot identity. Archive filenames and
-paths are labels/provenance and may change independently. Paths are omitted when
-the corresponding file is outside the project root so generated provenance
-never embeds machine-specific absolute paths. Loading a manifest can re-hash an
-archive and reject mismatches.
+Version 2 deliberately separates two identities. `snapshot.contentSha256` is the logical
+snapshot-content identity: it hashes normalized relative member paths, member sizes, and member
+bytes while ignoring ZIP timestamps, permissions, compression method/level, entry order,
+comments, and other container metadata. `snapshot.archive.sha256` is the integrity identity of
+the exact ZIP byte stream. Version-1 manifests have no logical content hash and continue to
+verify only their exact archive SHA-256.
 
-Manifest JSON is serialized deterministically. A second write of identical
-provenance for the same manifest label is idempotent; different provenance for
-that label is rejected. Reacquiring identical bytes under a different archive
-label may create another record with the same authoritative SHA-256. Generated
-manifests are ignored by Git, excluded from Docker build context, and not
-automatically pruned.
+Snapshot ZIP creation also normalizes member ordering, timestamps, permissions, comments, extra
+fields, and compression settings so identical inputs produced by the maintained implementation
+are byte-reproducible. The logical content hash remains intentionally independent of compressor
+implementation details. Paths are omitted for artifacts outside the project root so generated
+provenance never embeds machine-specific absolute paths.
+
+Manifest JSON serialization is deterministic. A second write of identical provenance for one
+archive label is idempotent; conflicting provenance for that label is rejected. Reacquiring the
+same logical files under another archive label may create another manifest with the same
+`contentSha256`, even if the exact archive SHA-256 differs. Generated manifests are ignored by
+Git, excluded from Docker build context, and not automatically pruned.
 
 Corvus Belli's Army `metadata.json` remains source data. It is distinct from
 InfinityDB-owned acquisition provenance.
@@ -2470,8 +2477,9 @@ than assigning either revision to the snapshot as a whole.
 Human-authored snapshot annotations use a separate version-1 `InfinityDB
 snapshot note` contract under `data/curated/snapshot-notes/`. Each note requires
 `snapshotSha256`, a human description, and an ordered `notableChanges` array; an
-optional `compareToSha256` may identify a different comparison snapshot.
-Acquisition tools never create, rewrite, or delete these curated notes.
+optional `compareToSha256` may identify a different comparison snapshot. This older note
+contract is keyed to the exact archive SHA-256 (`snapshot.archive.sha256`), not the version-2
+logical `contentSha256`. Acquisition tools never create, rewrite, or delete these curated notes.
 
 Snapshot notes are not rules-database inputs and do not become runtime
 application data. The current contract is a source-controlled annotation format
@@ -2831,9 +2839,9 @@ This classification deliberately excludes canonicalization/provenance mappings f
 `application_peripheral_sources`, and `application_peripheral_unit_sources` connect source
 identity/evidence to InfinityDB application abstractions. The link itself is not an additional
 gameplay relationship, but it preserves traceability and, for several occurrence/source tables,
-contextual values such as AVA/logo, points/SWC, source labels, or reviewed type evidence. Any
-future frontend/`infinity.raw.db` split must therefore preserve equivalent provenance/context
-rather than treating those links as disposable relational noise.
+contextual values such as AVA/logo, points/SWC, source labels, or reviewed type evidence. The
+current application/`infinity.raw.db` split therefore preserves equivalent provenance/context for
+those application mappings rather than treating the links as disposable relational noise.
 
 Semantic attachment tables remain outside this classification. A Skill/Equipment/Weapon extra
 attached to a particular occurrence, an include target, Unit faction/list membership, Peripheral
@@ -2843,5 +2851,6 @@ a join table. The presence of a link table alone is never evidence that its cont
 normalization-only.
 
 `tools/audit_normalization_links.py` records this boundary deterministically and fails when the
-maintained schema assumptions drift. The audit is classification evidence for completeness and the
-later raw/application database split; it does not itself remove tables or change runtime serving.
+maintained schema assumptions drift. The audit remains classification evidence for completeness;
+the raw/application database split is implemented separately by the exporter and does not derive
+its semantics from the existence of a link table alone.

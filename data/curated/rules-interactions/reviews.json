@@ -2275,7 +2275,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; preserve this until Hacking Programs and Upgrade Programs have canonical identities."
+      "reason": "Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; Hacking Programs are now first-class identities, but Upgrade Program identity and source-specific grant semantics remain unresolved."
     }
   ]
 }

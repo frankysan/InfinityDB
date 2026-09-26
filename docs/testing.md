@@ -81,9 +81,10 @@ without depending on the complete processed graphical publication.
 ## Parallel pytest execution
 
 The check runner uses `pytest-xdist` with automatic worker selection by default
-for every test stage. Benchmarking on the primary Windows development machine
-reduced the complete 687-test run from 59.67 seconds serially to 14.13 seconds
-with `auto`; four fixed workers took 19.41 seconds.
+for every test stage. In the recorded parallelization benchmark on the primary Windows development machine,
+the then-current 687-test suite fell from 59.67 seconds serially to 14.13 seconds
+with `auto`; four fixed workers took 19.41 seconds. These figures are historical
+evidence, not the size or expected duration of the current suite.
 
 ```powershell
 # Default: let pytest-xdist choose from the available physical CPU cores
@@ -188,49 +189,15 @@ the exact container contract and the equivalent manual command.
 
 ## Continuous integration
 
-The `Source checks` GitHub Actions workflow runs the check runner on clean
-Windows, Ubuntu/Linux, and macOS Python 3.11 checkouts on pull requests, pushes
-to `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. The
-Ubuntu/Python 3.11 leg owns the complete source gate (`--all`); the compatibility
-legs run pytest plus both database-build stages. This avoids repeating Ruff and
-Pyright on every operating system while preserving cross-platform runtime/build
-coverage.
+Hosted CI delegates source validation to the same `tools/run_checks.py` runner, but
+workflow triggers, platform/interpreter matrices, hosted worker-count exceptions,
+installed-wheel/container smoke coverage, required branch checks, and the optional
+external full-asset bundle are repository/CI policy rather than local check-runner
+semantics. They are maintained canonically in [the CI strategy](ci.md).
 
-Hosted Windows Actions explicitly uses `--test-workers 0`. Parallel pytest is
-still the local default, but `auto` regressed severely on the hosted Windows
-runner while the serial suite remained stable. Linux and macOS CI continue to
-use automatic xdist worker selection.
-
-Each source-check leg installs both the development and symbol Python dependency
-sets. This keeps the real fontTools/tinycss2/cssselect2/Pillow integration
-fixtures in required CI without requiring external renderers or third-party
-artwork. Ruff and Pyright run on the primary Ubuntu/Python 3.11 leg.
-
-The synthetic deployment fixture is the explicit Army build input because clean
-source checkouts intentionally contain no real raw Army snapshot. This workflow
-is network-hermetic: it does not acquire live data and validates the tracked processed
-Corvus Belli graphical publication directly from the checkout.
-
-For Python 3.11, each operating-system leg also builds a deterministic-output manifest.
-The manifest hashes representative Army and rules databases, normalized JSON/report
-outputs, a metadata-normalized snapshot archive, the work-archive export, and the
-checksum-bound publication metadata. A final Ubuntu job downloads the Windows/Linux/
-macOS manifests and fails if any artifact SHA-256 differs. This is the maintained
-byte-level portability gate; ordinary semantic equality is not sufficient.
-
-The separate configured `Installed wheel smoke` workflow builds a real wheel, installs
-it into a fresh virtual environment, and exercises installed build CLIs plus
-runtime startup from outside the source checkout.
-
-The processed SVG publication is tracked in the repository, so normal source CI now
-runs with `--assets required`. This validates the publication inventory and includes
-the `full_assets` pytest coverage directly from a clean checkout. The dispatch-only
-`Full-asset checks` workflow remains available as an independent validation of a
-checksum-pinned external publication bundle. It is restricted to `main`, uses the
-`full-assets` GitHub environment, stages the configured bundle through
-`tools/stage_full_asset_bundle.py`, and then runs the same required-asset project gate.
-Configure `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` before using that
-supplementary workflow.
+When reproducing a hosted failure locally, use the stage, target, worker, and asset
+controls documented above. Do not copy hosted workflow policy into this document;
+update `docs/ci.md` when the GitHub Actions or branch-protection contract changes.
 
 ## Reports
 

@@ -111,8 +111,10 @@ data/manifests/army-symbol-build.json
 image_overrides/
 ```
 
-The Army and SYMBOLS snapshot manifests bind the archives by SHA-256.
-`army-symbol-build.json` binds the pinned Army/SYMBOLS relationship and records
+Version-2 Army and SYMBOLS snapshot manifests record both the logical snapshot content hash and
+the exact archive-byte SHA-256. Migration and later-stage resume still require the exact pinned
+archive identity; equal logical content in a differently packed ZIP is not a substitute for that
+artifact. `army-symbol-build.json` binds the pinned Army/SYMBOLS relationship and records
 raw asset provenance, processing state, reports, settings, and final publication
 state. Local `image_overrides/` are authoritative build inputs and are ignored by
 Git, so they must be copied separately when present.

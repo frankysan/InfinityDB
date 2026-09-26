@@ -1,7 +1,7 @@
 # InfinityDB backlog
 
 This is the working implementation backlog. Every unchecked item belongs to exactly
-one release bucket: **0.8.0**, **0.9.0**, **0.10.0**, **1.0.0**, or **post-1.0**.
+one release bucket: **0.9.0**, **0.10.0**, **1.0.0**, or **post-1.0**.
 The buckets are planning commitments, not a promise that a minor release cannot move a
 low-risk item earlier or defer a non-gating item when evidence changes.
 
@@ -20,11 +20,10 @@ when all contained work shares the same owner.
 
 ## Current milestone
 
-The current milestone is **0.8.0 — connected game relationships**. It builds on the
-stable 0.7.x rules/context model by making already-modeled structural relationships
-directly useful to players: Fireteams, Peripheral/Controller structure, profile/loadout
-includes, selection/dependency relationships, Reinforcement parentage, and useful
-cross-army navigation.
+The current milestone is **0.9.0 — application completeness and discoverability**.
+It follows the completed 0.8.0 connected-data milestone by closing the remaining
+player-facing application-data gaps and making the resulting data searchable,
+navigable, and understandable.
 
 General performance/storage experiments, major pipeline refactors,
 persistent-user-data features, ITS tooling, and native applications are explicitly
@@ -32,7 +31,7 @@ post-1.0 unless they become necessary to correct a release-blocking defect.
 
 ## Release roadmap through 1.0
 
-- **0.8.x — Connect the game structure.** Finish Fireteams and expose the structural
+- **0.8.x — Connected game structure.** Added Fireteams and exposed the structural
   relationships already present in the canonical application data.
 - **0.9.x — Complete and make discoverable.** Close remaining player-facing
   application-data gaps and make the resulting data searchable, navigable, and
@@ -48,23 +47,9 @@ post-1.0 unless they become necessary to correct a release-blocking defect.
   user data, ITS/scenario tooling, native apps, historical-data features, pipeline
   refactors, and performance/storage experiments.
 
-The concise public framing remains: **0.6 built the foundation → 0.7 adds context →
-0.8 connects the data → 0.9 closes application gaps → 0.10 hardens and polishes →
+The concise public framing remains: **0.6 built the foundation → 0.7 added context →
+0.8 connected the data → 0.9 closes application gaps → 0.10 hardens and polishes →
 1.0 completes the reference.**
-
-## 0.8.0 — connected game relationships
-
-The completed connected-data domain audit is maintained in
-`docs/080-connected-domain-audit.md`. 0.8.0 should make those modeled relationships
-directly useful without becoming an Army-list legality engine or live game-state model.
-
-### Fireteams and connected application data
-
-No open implementation items remain in the 0.8.0 connected-data milestone. The maintained
-source-presentation and interaction audits have been rerun; their remaining player-facing gaps
-are explicitly assigned to later release buckets below. The focused 0.8 browser-shell and route
-consistency closeout is recorded in `docs/080-web-consistency-closeout.md`; it does not replace
-the broader production-baselined end-to-end audit reserved for 0.10.0.
 
 ## 0.9.0 — application completeness and discoverability
 
@@ -180,11 +165,12 @@ by the audit remain in scope.
     through `api.js` to match the documented boundary; static/HTML fetches are not
     part of that API-transport requirement.
   - [ ] Perform route-by-route parity checks for the Unit explorer and details;
-    Fireteams; Skill Modifiers; Skills, Equipment, Weapons, and Traits list/detail pages;
-    shared navigation/settings; and version refresh. Compare API output with
+    landing/About; Fireteams; Skill Modifiers; Skills, Equipment, Weapons, Traits,
+    States, and Hacking Programs list/detail pages; shared navigation/settings; and
+    version refresh. Compare API output with
     rendered behavior, including filtering, result counts, ordering, labels,
     deep-link state, cross-links, optional-unit behavior, source/rules links,
-    catalog-item unit usage, and symbol identity. Use a deliberate manual browser
+    catalog-item Unit usage where applicable, and symbol identity. Use a deliberate manual browser
     pass unless lightweight browser automation is added for a concrete audit need.
   - [x] Verify Fireteam source retention through the canonical application projection
     and first-class repository/API/browser chart surface. Keep the broader consistency
@@ -252,7 +238,7 @@ by the audit remain in scope.
 
 ### Release hardening, CI, and operations
 
-- [ ] Define a paired-export replacement policy. The frontend and raw archive
+- [ ] Define a paired-export replacement policy. The application and raw archive
   are currently built as temporary siblings; document and test recovery when a
   process stops between replacing either output.
 
@@ -298,7 +284,7 @@ by the audit remain in scope.
     multiple immutable app replicas behind Caddy over unbounded worker growth;
     re-run the test before changing worker counts or deployment resources.
 
-- [ ] Add a benchmark/health-check command that validates the frontend database,
+- [ ] Add a benchmark/health-check command that validates the application database,
   confirms its expected raw archive when requested, and reports schema and
   compatibility revisions.
 
@@ -460,7 +446,7 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 - [ ] Establish a reproducible build/export performance baseline on CI or a
   fixed development host. A 2026-09-14 generated-snapshot smoke export measured
-  8.45 seconds, 13.4 MB for the frontend DB, and 37.7 MB for the raw archive;
+  8.45 seconds, 13.4 MB for the application DB, and 37.7 MB for the raw archive;
   treat those numbers as provisional until repeated in a controlled environment.
 
 - [ ] Remove redundant whole-document work in the combined build/export path.
@@ -478,7 +464,7 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 - [ ] Provide a small development CLI for `infinity.raw.db`: inspect a raw row,
   list raw rows by normalized table, and verify that an archive matches its
-  frontend sibling's metadata.
+  application sibling's metadata.
 
 - [ ] Add database-size reporting to `infinity-db build` so snapshot growth is
   visible in build output and CI.

@@ -228,9 +228,9 @@ against the actual public Skill/Equipment/Trait/State identities rather than onl
 subset that already has curated rules records. A maintained release exception may keep an
 explicitly vetted catalog identity in that denominator while deferring its canonical definition
 to a distinct publication/domain scope; unclassified missing definitions remain pending, and
-stale exceptions fail validation once a current definition exists. States are part of the 0.7.0
-primary denominator; exact source variants and other independently modeled supporting identities
-remain separate.
+stale exceptions fail validation once a current definition exists. The maintained primary
+catalog denominator established for 0.7.0 includes States; exact source variants and other
+independently modeled supporting identities remain separate review identities.
 `data/curated/identities/` contains reviewed source-derived presentation
 relationships consumed during Army normalization. `data/curated/peripherals/` owns
 the independent reviewed mapping from Army-local Peripheral definitions and Unit-backed
@@ -366,47 +366,30 @@ Skill-extra distance semantics are split according to source authority. Army
 therefore marks `DISTANCE` extras directly and does not infer distance meaning from
 numeric text. Rule-derived presentation details live in curated skill records.
 
-Curated rules format v19 makes applicability, review state, contribution role, typed
+Current curated rules format v21 makes applicability, review state, contribution role, typed
 related-item edges, explicit catalog-variant inheritance, typed exact-source variants, and
 cross-domain declaration categories part of the record contract. Each record carries explicit
 `scope.game` / `scope.seasons`, review status/date, and a composition role of either
-`definition` or `supplement`; source publication provenance remains in the collection,
-source, and citation structures rather than being folded into semantic identity.
-Every semantic ID in the set of current collections must have exactly one definition.
-Additional current publications may contribute scoped supplements, but InfinityDB does
-not field-merge those contributions or assign implicit priority by filename, collection
-ID, effective date, or load order. If a ruling changes the effective base semantics, the
-maintained definition must be updated deliberately while the ruling remains a separately
-cited contribution. Runtime Army/catalog composition selects only collections with
-`status=current` by default; draft, superseded, or historical collections remain
-queryable for audit work but cannot alter normal user-facing enrichment merely by being
-present in `rules.db`.
+`definition` or `supplement`; source publication provenance remains in collection/source/citation
+structures rather than semantic identity. Every semantic ID across current collections must have
+exactly one definition. Current supplements retain their own cited contribution instead of being
+field-merged by filename, collection ID, effective date, or load order. Runtime composition uses
+only `status=current` collections by default. The exact JSON contract and format-version evolution
+are maintained canonically in `data/curated/README.md` rather than repeated here.
 
 Related rules concepts use typed one-way edges such as `enters-state`, `reveals-state`,
-`has-subtype`, and `controller-eligible-for`. Targets resolve by stable typed semantic ID,
-not display name. The rules database derives inbound/reverse navigation from those authored
-edges, so reciprocal rows are not maintained independently. Current edges must resolve to a
-current semantic record before `rules.db` can be published. Composed rule payloads add a
-`display_relations` graph projection with direction and resolved endpoint identity/Army
-links. The backend attaches the reviewed player-facing relation group and direction-aware
-label to that projection; it also supplies a semantic relation-order key so interactions
-that establish/provide/enable a condition can sort before cancellation or restriction within
-the same group. The shared browser renderer then sorts by group, semantic relation order,
-player-facing interaction label, and related-record name rather than translating raw relation
-types itself. Structural edges such as `variant-of` remain available
-to API consumers but intentionally receive no generic Related-rules presentation. Format v10 introduced the first gameplay-interaction edge,
-`reduces-modifiers-from`: Multispectral Visor authors that edge once toward Mimetism,
-and the Mimetism surface receives the derived inverse relationship automatically. Format
-v11 adds `ignores-modifiers-from` and `negates-effects-of`; Combat Instinct uses both
-against Surprise Attack and Stealth, while Sixth Sense independently negates Stealth.
-Format v12 adds `modifies-rolls-for` and `restricts-use-of`; Sensor uses those alongside
-existing `reveals-state` and `ignores-modifiers-from` edges so Discover, Camouflage,
-Camouflaged State, Hidden Deployment State, and Mimetism all expose the reverse
-interaction automatically. Format v13 adds `applies-effects-to` and
-`imposes-modifiers-on`; Reflective and Albedo use those edges toward Marksmanship and
-Multispectral Visor so both affected surfaces receive the reverse interaction. Format v14 adds `overrides-effects-of`; No Cover authors that precedence edge toward Limited Cover so the latter exposes the derived inverse relationship. Format v15 adds `cancels-state`; Doctor and Engineer author recovery edges once and State pages receive the derived inverse navigation. Format v16 adds `causes-state`; Forward Observer authors the Targeted activation edge once, while Targeted itself links the Skills whose rolls or declarations it changes; Disposable (X) also uses it for the item-specific Unloaded State. Format v17 adds `enables-use-of`; reviewed Camouflaged and Hidden Deployment States author that prerequisite edge toward Surprise Attack, and Stealth authors it toward Cautious Movement for the documented ZoC/Hacking Area exception. Both targets receive inverse navigation automatically without treating the edge as sufficient to satisfy all remaining requirements. Format v18 adds `uses-effects-of`; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior, so it does not incorrectly claim to enter that State. Format v19 makes full Skill definitions own ordered declaration categories through `facts.typeIds`. Format v20 adds `modifies-use-of`, `prevents-state-entry`, and `triggered-by-state-entry` so declaration transformations, State-entry prohibitions, and State-entry triggers can be linked without flattening those mechanics into generic enable/negate edges. Format v21 adds `equips-with` so a rule can explicitly provide Equipment without implying that the rule itself reuses the Equipment action or effects.
+`has-subtype`, `reduces-modifiers-from`, `restricts-use-of`, `uses-effects-of`, and
+`equips-with`. Targets resolve by stable typed semantic ID, not display name. Current edges must
+resolve to a current semantic record before `rules.db` can be published, and reverse navigation is
+derived rather than authored independently. Composed payloads expose a `display_relations`
+projection with direction, resolved endpoints, reviewed player-facing grouping/labels, and a
+backend-owned semantic order. Structural edges such as `variant-of` remain available to API
+consumers but intentionally receive no generic Related-rules presentation. Relation-vocabulary
+meaning and concrete reviewed interactions are documented in `data/curated/README.md` and
+`docs/rules-semantics.md`.
 
-### Design direction: 0.8.0 connected-data domains
+
+### Current: connected-data domains
 
 The 0.8.0 domain audit is maintained in `docs/080-connected-domain-audit.md`. Its
 accepted boundary is intentionally narrow: Fireteams become a new first-class
@@ -420,7 +403,7 @@ while `rules.db` owns reviewed semantic identity/effects and typed rules relatio
 Peripheral/Controller relationships, profile/loadout/unit-option includes, selection
 constraints, profile-group dependencies, Reinforcement parentage, and broader
 faction/cross-Army membership remain relationships among existing application
-identities and should be presented through those existing surfaces. Generic rules
+identities and are presented through those existing surfaces. Generic rules
 concepts, Attributes, Ammunition, and Training may remain supporting link targets unless
 a later completeness audit demonstrates an independent player-facing catalog need.
 A relationship target is not, by itself, justification for a new domain.
@@ -444,10 +427,8 @@ reference block.
 States are now a first-class rules-backed reference surface (`/states`, `/api/states`) rather
 than application/Army catalog rows. `StateCatalog` composes current `state` definitions
 directly from `rules.db`, preserving the boundary between static rules identities and any
-future per-game runtime state. This
-projection is the foundation for further 0.7.0 cross-rule gameplay interactions, while
-0.8.x remains focused on structural application relationships such as Fireteams,
-includes, and selection dependencies.
+future per-game runtime state. The same static projection participates in reviewed cross-rule
+gameplay relationships without becoming a live game-session state model.
 `Super-Jump` and `Forward Deployment` currently use
 `variantSemantics.occurrenceParameters` to state how a positive distance sign should be
 displayed. Exact source variants use `variantSemantics.sourceVariant`; format v9
@@ -513,32 +494,19 @@ data/manifests/snapshots/    = generated acquisition provenance
 data/curated/snapshot-notes/ = human-reviewed snapshot annotations
 ```
 
-Generated manifests are not maintained project knowledge. Each Army, wiki, or
-symbol acquisition writes a versioned `InfinityDB snapshot provenance` JSON
-record labeled from the archive filename and bound to the immutable archive
-SHA-256. The manifest stores the snapshot type, archive name and project-relative
-path when available, acquisition
-timestamp, source URL, document count, optional language, and optional
-input-artifact provenance. Symbol acquisition currently records the exact Army
-source artifact hash used by the downloader.
+Generated manifests are not maintained project knowledge. Current Army, wiki, and symbol
+acquisition writes version-2 `InfinityDB snapshot provenance`: `snapshot.contentSha256`
+identifies normalized member paths plus bytes independently of ZIP container metadata, while
+`snapshot.archive.sha256` identifies and verifies the exact immutable ZIP byte stream. Legacy
+version-1 manifests remain readable and carry only the exact archive hash. Archive-labeled
+records are immutable/idempotent, paths are portable project-relative values when available,
+and generated manifests remain ignored local state. The canonical field-level contract lives in
+`docs/data-model.md`; `data/README.md` owns its storage/lifecycle summary.
 
-Manifest serialization is deterministic and validation can re-hash the archive.
-Persistent paths are written only in project-relative POSIX form; external files
-retain name/hash identity without embedding machine-specific absolute paths. An
-archive-labeled record is immutable: identical regeneration is idempotent and
-conflicting provenance for the same manifest label fails rather than rewriting
-history. Reacquiring byte-identical content under a different archive label may
-therefore produce another provenance record with the same authoritative SHA-256.
-
-Generated snapshot manifests are ignored by Git, excluded from Docker build
-context, and retained until explicitly removed. Acquisition tooling never
-creates, rewrites, or deletes files under `data/curated/snapshot-notes/`.
-
-Human notes use the separately versioned `InfinityDB snapshot note` contract and
-bind to a snapshot by SHA-256. They may contain a description, an optional
-comparison snapshot SHA-256, and ordered notable-change notes. Snapshot notes
-are source-controlled human interpretation, not rules-database inputs or
-runtime application data.
+Human notes use the separate version-1 `InfinityDB snapshot note` contract and remain
+source-controlled interpretation rather than acquisition/runtime input. That older note contract
+is intentionally keyed to the exact archive SHA-256 (`snapshot.archive.sha256`), not the newer
+logical content hash. Acquisition tooling never creates, rewrites, or deletes those notes.
 
 Symbol refresh orchestration is explicit and snapshot-pinned.
 `tools/build_symbols.py` requires either `--snapshot` for an existing immutable
@@ -616,9 +584,10 @@ feed the materialized logical-unit identity consumed by repositories.
 A logical unit is an InfinityDB application abstraction: Army supplies source-unit
 records but no separate upstream `logical_unit` object corresponding to this
 relation. Logical-unit identity and the first canonical unit payload layer are
-materialized during frontend database creation. This does **not** merge or rewrite source rows:
+materialized during application database creation. This does **not** merge or rewrite source rows:
 source unit IDs, army occurrences, profiles, loadouts, options, and availability
-provenance remain attached to their original source unit. The exporter resolves
+provenance remain attached to their original source unit in build staging and
+`infinity.raw.db`. The exporter resolves
 configured unit aliases plus persisted generic and mercenary matches and the
 database-build reinforcement audit into `logical_units` / `logical_unit_sources`,
 then copies the representative-backed general fields onto `logical_units` while
@@ -626,19 +595,19 @@ materializing source-attributed aliases, notes, and opaque `spectables` context.
 Every source-defined unit still maps to exactly one logical unit. Unit list,
 search, and detail general fields now read that canonical layer; alternate
 source labels, including the existing derived `Unit <source id>` fallback for a
-missing source name, are materialized as traceable search aliases. Source rows
-remain available for relationships and repository paths that have not yet been
-canonicalized.
+missing source name, are materialized as traceable search aliases. Lossless source rows
+remain available in build staging and `infinity.raw.db` for provenance, validation, and
+source semantics that have not been promoted into the published application model; normal
+runtime repositories do not read those raw tables.
 
 ### Canonical application data and semantic deduplication
 
-InfinityDB is progressively separating its **lossless source model** from a
-**canonical application model**. Profile and loadout payloads are already
-materialized and consumed by unit-detail reads; canonical logical-unit fields
-and aliases are materialized and consumed by unit list/search/detail reads; and
-canonical application catalog identities for Skills/Equipment/Weapons are now
-materialized and consumed by normal catalog/detail reads. Wider relationship
-canonicalization remains in progress.
+InfinityDB separates its **lossless source model** from a **canonical application model**.
+Profile and loadout payloads, canonical logical-unit fields and aliases, application Army
+identity/hierarchy, application catalog identities, and the reviewed 0.8 relationship layer
+are materialized and consumed by normal runtime reads. The remaining source-presentation
+work is explicit 0.9 completeness work rather than an unfinished physical source/application
+database split.
 
 The merged and normalized source layers remain source-oriented and lossless.
 Repeated records in those layers are not inherently defects: repetition may
@@ -646,7 +615,7 @@ represent provenance, army context, source-document structure, or the way the
 Infinity Army API expresses relationships. Source rows must not be physically
 merged merely because their payloads appear equivalent.
 
-The frontend/application model has different requirements. It should represent
+The application model has different requirements. It should represent
 each distinct player-relevant fact once where that can be established safely,
 and represent genuine contextual differences explicitly rather than repeating
 complete payloads solely because the same information appeared in several
@@ -661,12 +630,12 @@ profile and loadout payload layers extend the same principle from **identity
 deduplication** to **semantic payload deduplication** for unit-detail data.
 Application Army identities and application catalog identities extend the model
 further into Army/faction presentation and rule-reference catalog serving. Milestone 2B
-completed the next relationship/storage boundary: include targets, reviewed Peripheral
+established the next relationship/storage boundary: include targets, reviewed Peripheral
 relationships, selection-safe Unit constraints, and profile-group dependencies are
 materialized. Schema 25 / compatibility revision 33 extends that boundary with the
-Army-scoped Fireteam application projection; its repository/API/browser presentation is
-the next 0.8.0 layer. Remaining source/context relationships stay explicit until their
-application presentation/model is justified.
+Army-scoped Fireteam application projection, whose repository/API/browser presentation
+completes the 0.8.0 connected-data layer. Remaining source/context relationships stay
+explicit until their application presentation/model is justified.
 
 Runtime-performance evidence for this work is collected separately from semantic
 acceptance. `tools/benchmark_runtime.py` measures representative repository read
@@ -737,15 +706,14 @@ traversing those legacy payload tables. Compatibility revision 19 also requires
 unit-oriented indexes on both canonical occurrence tables so this read-path split does not
 regress unit-detail query behavior.
 
-Milestone 2B now has a physical application/raw storage split. The logical inventory
-still classifies 28 tables as canonical application data, 40 as explicit contextual
-application data, and 47 normalized tables as source/provenance-only representation,
-but those 47 tables no longer ship in `infinity.db`. Export builds a complete temporary
-relational staging database, runs all source-to-canonical validation there, writes the
-normalized source schema plus exact lossless rows to `infinity.raw.db`, then publishes
-only the retained application schema. Foreign keys whose targets are raw-only are
-omitted from the published schema; retained-to-retained constraints remain enforced.
-Normal serving and runtime validation have no dependency on `infinity.raw.db`.
+Milestone 2B established the physical application/raw storage split. Export builds a complete
+temporary relational staging database, runs source-to-canonical validation there, writes the
+normalized source schema plus exact lossless rows to `infinity.raw.db`, then publishes only the
+retained application schema. Foreign keys whose targets are raw-only are omitted from the
+published schema; retained-to-retained constraints remain enforced. Normal serving and runtime
+validation have no dependency on `infinity.raw.db`. The current schema-specific table-role counts
+and retained/source-only inventory belong in `docs/data-model.md` and its separation audit rather
+than being duplicated here.
 
 ### General application-domain identifier contract
 
@@ -772,8 +740,7 @@ identifiers where application identity is intentionally not in scope.
 
 Source identity, internal application identity, and public navigation identity are
 separate layers. Corvus Belli numeric IDs remain source/provenance references, and
-current numeric application IDs remain implementation keys while route migration is
-in progress. InfinityDB-curated concepts use stable typed IDs such as `skill:doctor`
+current numeric application IDs remain supported implementation/compatibility keys. InfinityDB-curated concepts use stable typed IDs such as `skill:doctor`
 or `rule:peripheral-type:servant`; the prefix identifies the domain and is not a claim
 that one slug must be globally unique across unrelated domains.
 
@@ -790,8 +757,9 @@ these domains retain numeric compatibility routes, a digit-only candidate is als
 recorded as `unavailable`: the candidate remains visible for diagnostics, but it never
 receives a routable `slug` that could shadow the numeric namespace.
 
-The registry is the application identity foundation for a staged public-route
-migration. Existing Army/unit source/display slugs remain source/context data; they
+The registry is the application identity foundation for public routes. Numeric
+compatibility remains supported; any later retirement of numeric routes is a separate
+post-1.0 policy decision. Existing Army/unit source/display slugs remain source/context data; they
 may seed application candidates but are not automatically promoted to permanent
 public identifiers. Repository resolution is centralized at the application-domain
 boundary. One shared resolver accepts either a source/application numeric reference or a
@@ -850,7 +818,7 @@ The current reviewed 2026-09-18 snapshot resolves all initial registry candidate
 are snapshot evidence rather than permanent invariants.
 
 The Peripheral rules/identity work uses this project-wide identity architecture rather
-than a one-off slug scheme. The rules side is represented in the curated v5
+than a one-off slug scheme. The rules side is represented in the current curated
 rules collection: Doctor, Engineer, Cyberplug, and Peripheral are canonical Skill records
 and the five N5.3 Peripheral types are validated `rule` records with explicit controller-
 eligibility facts. The separate `data/curated/peripherals/army-identities.json` contract
@@ -861,59 +829,37 @@ the contract only when its pinned snapshot hash matches, stores the contract/has
 metadata, and materializes canonical application relationships so runtime repository reads
 never infer identity from Army labels or open curated JSON.
 
-## Snapshot acquisition and provenance
+## Snapshot acquisition lifecycle
 
 ### Current
 
-Standalone Army, wiki, and symbol acquisition uses a common immutable snapshot
-model. Downloaders stage loose files temporarily and persist complete timestamped
-archives named `JSON YYYYMMDD-HHMMSS.zip`,
-`WIKI-<language> YYYYMMDD-HHMMSS.zip`, or
-`SYMBOLS YYYYMMDD-HHMMSS.zip`. A same-second collision receives `-2`, `-3`, and
-so on rather than overwriting an existing archive.
+Standalone Army, wiki, and symbol acquisition uses one immutable timestamped-archive model.
+Downloaders stage loose files temporarily and publish `JSON YYYYMMDD-HHMMSS.zip`,
+`WIKI-<language> YYYYMMDD-HHMMSS.zip`, or `SYMBOLS YYYYMMDD-HHMMSS.zip`; same-second
+collisions receive `-2`, `-3`, and so on rather than overwriting an existing artifact.
 
-The archive is the durable acquisition artifact. Wiki acquisition fails closed
-for required content: every required eligible URL discovered by the crawl must
-be fetched successfully before the downloader creates a
-`WIKI-<language> ...zip` archive or provenance manifest. Optional site
-chrome/project targets outside the content contract—currently `/favicon.ico`
-and pages in the `Infinity:` MediaWiki project namespace—are ignored rather
-than treated as acquisition failures. English is the default crawl language and
-Spanish is an explicit alternative. Page links are restricted to the selected
-language tree, while assets outside that tree may still be mirrored when an
-included page directly references them. Failed runs report unresolved required
-URLs, leave no incomplete immutable snapshot, and preserve partial crawl work
-under `data/work/wiki/` for inspection; successful runs remove their work
-directory after publication.
+Army acquisition performs two complete API passes over metadata and every Army/Reinforcement
+endpoint and publishes only when corresponding responses are byte-identical. Wiki acquisition
+likewise fails closed for required crawl content: unresolved required URLs publish neither an
+immutable wiki snapshot nor provenance, while optional site chrome/project pages outside the
+mirror contract are reported separately. Failed wiki crawls preserve partial work for inspection;
+successful crawls remove it after publication. Normal database/application builds never perform
+implicit acquisition.
 
-Corvus Belli's Army `metadata.json` remains source data contained in or supplied
-alongside Army snapshots; it is not InfinityDB-owned snapshot metadata.
+Corvus Belli `metadata.json` remains source data contained in or supplied alongside Army
+snapshots; it is not InfinityDB provenance. Current archived wiki-derived curated records bind
+to the exact timestamped wiki ZIP/hash and member names, while pinned `oldid=` revisions that are
+not archive members remain URL-backed sources.
 
-Curated-v3 rules provenance distinguishes local artifacts from upstream source
-URLs. The checked-in N5 v5.3 collection binds archived wiki references to the
-exact English `WIKI-en 20260918-130233.zip` snapshot/hash; exact `oldid=` wiki
-revisions remain URL-backed sources because they are not members of that mirror.
-
-The downloaders also write generated provenance outside the immutable archive
-under `data/manifests/snapshots/`. Each version-1 record mirrors the archive
-label in its filename, binds to the archive SHA-256, and can verify that hash
-before use. Archive labels and portable project-relative paths are
-descriptive; the SHA-256 is authoritative identity.
-The manifest directory is generated local state and is not committed, included
-in Python package data, or shipped in the application container.
-
-Human interpretation has a separate lifecycle under
-`data/curated/snapshot-notes/`. Those versioned notes bind to the same immutable
-snapshot SHA-256 and are never modified by acquisition tooling.
+Generated snapshot provenance semantics are defined in `docs/data-model.md` and summarized with
+its storage lifecycle in `data/README.md`. In particular, version 2 distinguishes logical
+snapshot-content identity from exact archive-byte identity; human snapshot notes remain a
+separate version-1 exact-archive-hash contract.
 
 ### Design direction
 
-Automated snapshot-comparison output may later be recorded in generated
-manifests or reports while curated notes remain the human interpretation.
-Exact timestamped archive identity/hash for wiki-derived curated rules is also a
-design direction, not a current guarantee. Migrate the legacy wiki provenance
-when the wiki downloader/packager and curated provenance contract are rewritten
-together; do not fabricate that association in documentation alone.
+Future snapshot-comparison tooling may emit structured generated diff/report data while curated
+snapshot notes remain the human interpretation.
 
 ## Data flow
 
@@ -1114,23 +1060,13 @@ variants cannot weaken full-set validation. A detected
 partial/corrupt local asset tree is an error in `auto`/`required`, while a
 completely absent tree is valid for hermetic testing.
 
-The `Source checks` GitHub Actions workflow is configured to run the hermetic
-project check runner across clean Windows, Ubuntu/Linux, and macOS Python 3.11
-checkouts, with
-an additional Linux Python 3.14 compatibility leg. It uses the tracked synthetic Army fixture for database construction, performs no
-live acquisition, and validates the tracked processed graphical publication. `Installed wheel smoke` is configured to separately install
-the built wheel in a fresh virtual environment, verify installed build CLIs and
-runtime startup,
-and consumes maintained build configuration from
-`<sys.prefix>/share/infinity-db/config/` rather than repository-relative paths.
-The processed SVG publication is tracked release content, so required source CI runs
-with `--assets required` directly from the checkout. CI validates that approved
-published output rather than rerunning the network/external-tool-sensitive symbol
-pipeline. The configured container smoke test validates that the same publication
-survives deployment packaging when hosted CI executes it. The dispatch-only
-`Full-asset checks` workflow is retained as a separate checksum-pinned external-bundle
-validation path; it is supplementary rather than required to supply assets to normal
-source CI. See `docs/ci.md`.
+Hosted CI delegates validation to the same project check runner and controlled fixtures used
+locally. Required source CI is network-hermetic with respect to acquisition: it validates the
+tracked processed SVG publication directly instead of rebuilding it from Corvus Belli sources or
+external rendering tools. Installed-wheel and container smoke checks separately verify packaged
+resource paths and deployment behavior. Workflow triggers, platform/interpreter matrices,
+required branch checks, hosted worker exceptions, and the supplementary external-bundle asset
+workflow are maintained canonically in `docs/ci.md` rather than duplicated here.
 
 ## Portability and filesystem policy
 

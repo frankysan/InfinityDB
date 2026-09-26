@@ -70,8 +70,9 @@ precedence over general Fireteam rules and defines FTO/Wildcard semantics in the
 Schema 25 introduces that canonical **Fireteams** application domain with Army-context
 identity and provenance, and the first 0.8 browser/API slice now presents those authoritative
 Army charts directly. The model and presentation preserve chart source context rather than
-converting it into a generic army-list legality engine. General Fireteam rules/Level-bonus
-reference data remains separate follow-up work.
+converting it into a generic army-list legality engine. General Fireteam rules and cumulative
+Level-bonus reference data remain a separate `rules.db` projection composed alongside the Army
+chart; they are not stored in the Army application database.
 
 ### Hacking Programs: promote the existing projection to a first-class rules/reference surface
 

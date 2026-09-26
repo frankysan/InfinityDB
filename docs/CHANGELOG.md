@@ -7,14 +7,14 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
+## [0.8.0] - 2026-09-26
+
 ### Changed
 
-- **Web backend + Web frontend:** Complete a focused 0.8 web-consistency closeout pass:
-  align the shared shell and About page with the current connected-reference scope, classify
-  all rules catalog list/detail pages consistently, keep detail-page navigation active during
-  soft navigation,
-  synchronize page descriptions, and dispose transient page listeners/requests when the main
-  content is replaced.
+- **Web backend + Web frontend:** Align the shared shell and About page with the connected-reference
+  scope, classify rules catalog list/detail pages consistently, preserve active navigation on
+  detail routes, synchronize page descriptions, and dispose transient page listeners/requests
+  when soft navigation replaces the main content.
 - **Acquisition + Web backend + Web frontend:** Move Unit artwork from the detail-page
   title into the General profile header row and preserve source profile-logo provenance through
   the Unit API. Extend generated Unit symbol mappings with profile-specific overrides so secondary
@@ -22,11 +22,6 @@ New or materially revised entries use the project-domain labels defined in
   processed publication is now fully browser-addressable at 806/806 SVGs.
 - **Web frontend:** Keep ordinary Fireteam cards compact in non-Developer mode while
   retaining the full-width chart layout when Developer-only columns are visible.
-- **Project infrastructure:** Rebalance the pre-1.0 roadmap into explicit 0.8, 0.9, 0.10,
-  1.0, and post-1.0 release buckets. Keep 0.9 focused on application completeness and
-  discoverability; move the end-to-end consistency audit, frontend/theme restructuring, and
-  release/operations hardening into a dedicated 0.10 stabilization milestone; keep conditional
-  numeric-route retirement outside the 1.0 critical path.
 - **Web frontend:** Refine the Fireteam chart browser: mirror the Unit Explorer Army hierarchy
   in the selector, present the Army source sentinel `256` as an unlimited Fireteam type
   allowance, and move unavailable type limits plus FTO-profile/Notes columns behind Developer
@@ -77,16 +72,24 @@ New or materially revised entries use the project-domain labels defined in
   Army-local loadouts, retain Wildcard/equivalence context, and keep Reinforcement parent
   limits separate through the existing application Army graph. This advances the Army
   application database to schema 25 / compatibility revision 33, so generated databases
-  from 0.7.x must be rebuilt before running the 0.8 development branch.
-- **Data processing:** Complete the 0.8.0 connected-data domain audit: establish
-  Fireteams as the new first-class structural application domain, identify Hacking
-  Programs for promotion from their existing typed projection, and keep Peripherals,
-  includes, selection/dependency constraints, Reinforcement parentage, and cross-Army
-  membership as relationships over existing identities rather than duplicate catalogs.
+  from 0.7.x must be rebuilt before running or deploying 0.8.0.
 - **Deployment:** Add a narrow, loopback-by-default Caddy metrics listener that can be bound to a
   specific trusted LAN interface without publishing the application port or `/internal/*`; persist
   the bind/port in deployment configuration and add a dependency-free workstation CLI that turns
   the aggregate Prometheus metrics into a compact operator report.
+
+### Upgrade notes
+
+- Rebuild the generated Army databases before deploying 0.8.0. Schema 25 /
+  compatibility revision 33 adds the canonical Fireteam projection required by the
+  0.8 browser/API.
+- Rebuild `rules.db` from the tracked curated collections so the deployment includes
+  the reviewed Fireteam and Hacking Program reference data used by the new surfaces.
+- Deploy the application and tracked processed SVG publication from the same release
+  revision. The 0.8 Unit-symbol mapping includes profile-specific overrides and the
+  complete tracked publication is browser-addressable.
+- The new Caddy metrics listener is optional and loopback-only by default. Configure
+  its trusted bind address/port only when the workstation reporting workflow is needed.
 
 ## [0.7.2] - 2026-09-26
 
