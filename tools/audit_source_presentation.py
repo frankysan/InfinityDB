@@ -268,11 +268,15 @@ CONFIRMED_GAPS: tuple[dict[str, Any], ...] = (
     {
         "id": "fireteams",
         "target": "0.8.x",
-        "layer": "raw_source_only",
-        "tables": ["fireteams", "fireteam_types", "fireteam_members"],
+        "layer": "application_database_only",
+        "tables": [
+            "application_fireteams",
+            "application_fireteam_types",
+            "application_fireteam_members",
+        ],
         "reason": (
-            "Fireteam charts are audited source relationships but have no "
-            "application/web presentation."
+            "Canonical Fireteam charts are materialized in the application database but "
+            "do not yet have repository/API/browser presentation."
         ),
     },
     {
@@ -417,6 +421,11 @@ def _count(connection: sqlite3.Connection, table: str, where: str | None = None)
 
 def _gap_evidence(connection: sqlite3.Connection) -> dict[str, int | None]:
     return {
+        "applicationFireteamCount": _count(connection, "application_fireteams"),
+        "applicationFireteamMemberCount": _count(connection, "application_fireteam_members"),
+        "applicationFireteamFtoLoadoutCount": _count(
+            connection, "application_fireteam_member_loadouts"
+        ),
         "includeRelationshipCount": sum(
             value or 0
             for value in (

@@ -9,6 +9,13 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Data processing:** Materialize the first-class Fireteam application projection for
+  0.8.0: select one provenance-bound source chart per application Army, preserve chart
+  limits/types/members/notes, resolve members to logical Units, link FTO rows to canonical
+  Army-local loadouts, retain Wildcard/equivalence context, and keep Reinforcement parent
+  limits separate through the existing application Army graph. This advances the Army
+  application database to schema 25 / compatibility revision 33, so generated databases
+  from 0.7.x must be rebuilt before running the 0.8 development branch.
 - **Data processing:** Complete the 0.8.0 connected-data domain audit: establish
   Fireteams as the new first-class structural application domain, identify Hacking
   Programs for promotion from their existing typed projection, and keep Peripherals,

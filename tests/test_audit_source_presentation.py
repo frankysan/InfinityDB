@@ -51,6 +51,13 @@ def test_source_presentation_audit_records_expected_gap_families(tmp_path: Path)
         "unit_notes",
         "unit_options",
     }
+    fireteams = next(item for item in report["confirmedGaps"] if item["id"] == "fireteams")
+    assert fireteams["layer"] == "application_database_only"
+    assert fireteams["tables"] == [
+        "application_fireteams",
+        "application_fireteam_types",
+        "application_fireteam_members",
+    ]
     assert report["applicationEvidence"]["declaredFactionMembershipCount"] == 1
     assert report["applicationEvidence"]["unitOptionCount"] == 1
 

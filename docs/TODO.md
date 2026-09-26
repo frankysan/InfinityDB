@@ -133,15 +133,20 @@ The Milestone 2B completeness inventory makes these implementation families expl
 0.8.x work:
 
 - [ ] **Data processing + Web backend + Web frontend:** Add a rule-aware Fireteams
-  feature from the audited source semantics rather
-  than exposing raw chart rows directly. Present each Army's current Army-data chart
-  as authoritative for membership restrictions, min/max requirements, FTO/Wildcard
-  notes, and source provenance; pair it with concise general Fireteam rules while
-  keeping Army-specific chart exceptions separate. Generate Fireteam Level bonuses
-  from the same curated general-rule facts rather than hard-coding a second Quick
-  Reference table, and make historical/community vocabulary such as `Linkable` and
-  `pure Fireteam` discoverable as provenance-aware aliases/help rather than current
-  N5 terminology.
+  feature from the audited source semantics rather than exposing raw chart rows directly.
+  - [x] **Data processing:** Materialize the Army-scoped application Fireteam projection:
+    one preferred source chart per application Army, normalized type limits, team/type/member
+    rows, logical-Unit links, FTO-eligible canonical loadout links, required/min/max context,
+    Wildcard identity, equivalence labels, observations, and selected-source provenance. Keep
+    Reinforcement parent limits separate through the existing application Army graph rather
+    than merging Main- and Reinforcement-section charts.
+  - [ ] **Web backend + Web frontend:** Present each Army's current chart as authoritative for
+    membership restrictions, min/max requirements, FTO/Wildcard notes, and source provenance;
+    pair it with concise general Fireteam rules while keeping Army-specific chart exceptions
+    separate. Generate Fireteam Level bonuses from the same curated general-rule facts rather
+    than hard-coding a second Quick Reference table, and make historical/community vocabulary
+    such as `Linkable` and `pure Fireteam` discoverable as provenance-aware aliases/help rather
+    than current N5 terminology.
 - [ ] **Web backend + Web frontend:** Present canonical Peripheral attachments and
   Controller access pools with
   navigable links between Controllers and Peripheral targets.

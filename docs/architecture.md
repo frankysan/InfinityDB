@@ -424,6 +424,15 @@ concepts, Attributes, Ammunition, and Training may remain supporting link target
 a later completeness audit demonstrates an independent player-facing catalog need.
 A relationship target is not, by itself, justification for a new domain.
 
+Schema 25 / compatibility revision 33 implements the Fireteam data-processing half of
+that decision. `application_fireteam_charts` selects one provenance-bound Army-list
+source per application Army; related derived tables preserve type limits, team/type/member
+structure, logical-Unit resolution, Army-local FTO loadout eligibility, Wildcard identity,
+Fireteam-Level equivalence labels, and rule-bearing chart/team notes. Reinforcement parent
+limits remain separate in `application_army_reinforcement_parents`, so the projection does
+not pretend to be an army-list legality engine or merge Main- and Reinforcement-section
+member pools.
+
 States are now a first-class rules-backed reference surface (`/states`, `/api/states`) rather
 than application/Army catalog rows. `StateCatalog` composes current `state` definitions
 directly from `rules.db`, preserving the boundary between static rules identities and any
@@ -643,8 +652,10 @@ Application Army identities and application catalog identities extend the model
 further into Army/faction presentation and rule-reference catalog serving. Milestone 2B
 completed the next relationship/storage boundary: include targets, reviewed Peripheral
 relationships, selection-safe Unit constraints, and profile-group dependencies are
-materialized; Fireteams and remaining source/context relationships stay explicit until
-their later application presentation/model is justified.
+materialized. Schema 25 / compatibility revision 33 extends that boundary with the
+Army-scoped Fireteam application projection; its repository/API/browser presentation is
+the next 0.8.0 layer. Remaining source/context relationships stay explicit until their
+application presentation/model is justified.
 
 Runtime-performance evidence for this work is collected separately from semantic
 acceptance. `tools/benchmark_runtime.py` measures representative repository read
@@ -1038,6 +1049,8 @@ this non-commercial project, not a change in ownership or MIT-license scope.
 | Data processing | `infinity_db.domain_slugs` | Shared domain-local slug normalization, validation, and collision policy | Additional application/public identity domains |
 | Data processing | `infinity_db.database.schema` | Table definitions, composite keys, references, schema version | New normalized entities and future migration policy |
 | Data processing | `infinity_db.database.application_domain_slugs` | Materialize provisional application-domain slug assignments | Reviewed overrides and future domain expansion |
+| Data processing | `infinity_db.fireteam_semantics` | Shared source-label semantics for FTO, Wildcards, Fireteam-Level labels, and chart limits | Future reviewed Fireteam source-shape changes |
+| Data processing | `infinity_db.database.fireteam_relationships` | Materialize the Army-scoped canonical Fireteam projection | Fireteam repository/API presentation and future reviewed identity refinements |
 | Data processing | `infinity_db.database.importer` | Validate and store a complete snapshot | Alternative storage adapters, such as PostgreSQL |
 | Web backend | `infinity_db.database.repository` | Read-only application queries | Unit details, profile comparisons, catalog queries |
 | Web backend | `infinity_db.web.app` | Validate HTTP input and serialize query results | Additional routes and API resources |
@@ -1238,8 +1251,8 @@ the InfinityDB-generated acquisition provenance written under
 
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current Army
-application database has schema version 24 and database compatibility revision
-32; it rejects incompatible databases with a rebuild instruction. The importer
+application database has schema version 25 and database compatibility revision
+33; it rejects incompatible databases with a rebuild instruction. The importer
 validates a complete relational staging database, publishes a self-contained
 application database and a lossless sibling raw archive, creates read-path indexes
 after loading, and persists SQLite planner statistics. Migration of

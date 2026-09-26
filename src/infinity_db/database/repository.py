@@ -43,6 +43,10 @@ from .application_armies import (
 )
 from .application_catalogs import validate_application_catalogs
 from .application_domain_slugs import validate_application_domain_slugs
+from .fireteam_relationships import (
+    validate_application_fireteam_integrity,
+    validate_application_fireteams,
+)
 from .include_relationships import validate_include_relationships
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
 from .peripheral_relationships import validate_peripheral_relationships
@@ -862,8 +866,10 @@ class Database:
                 )
             identity_config = identity_config_from_connection(connection)
             validate_application_army_integrity(connection)
+            validate_application_fireteam_integrity(connection)
             if source_consistency:
                 validate_application_armies(connection, identity_config)
+                validate_application_fireteams(connection)
             validate_application_catalogs(connection, identity_config)
             validate_application_domain_slugs(connection)
             source_unit_count = connection.execute(

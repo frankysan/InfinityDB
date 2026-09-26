@@ -1653,9 +1653,9 @@ database boundary**, not about whether the underlying game data is important:
   serving and therefore eligible to live only in `infinity.raw.db` once schema and
   validation dependencies are removed.
 
-On the reviewed 2026-09-18 application database this inventory contains **122
-project tables** including `__infinity_metadata`: **28 canonical application**, **47
-contextual application**, and **47 source/provenance-only**. The 47 source-only tables
+Under schema 25 the inventory contains **129 project tables** including
+`__infinity_metadata`: **29 canonical application**, **53 contextual application**, and
+**47 source/provenance-only**. The 47 source-only tables
 contain 185,172 rows in this snapshot and no normal serving probe reads any of them.
 This class includes legacy profile/loadout source payloads, normalization-only filter
 joins and weapon-template storage, raw Fireteam/relation structures, and supplementary
@@ -1664,16 +1664,16 @@ source-only classification is not a declaration that Fireteams or another constr
 lack player value; it means their current normalized source shape is not the
 application representation that should be deployed long-term.
 
-Schema 24 / compatibility revision 32 retains the physical split established in
-schema 23 and adds derived application projections for structured Hacking Program,
-Martial Arts, Booty, and MetaChemistry reference data. Export uses three database
+Schema 25 / compatibility revision 33 retains the physical split established in
+schema 23, keeps the schema-24 structured Hacking/Martial Arts/Booty/MetaChemistry
+projections, and adds seven Fireteam application tables. Export uses three database
 roles during one build:
 
 1. a temporary **relational staging database** containing the complete normalized source
    schema plus all derived application tables;
 2. `infinity.raw.db`, which contains all 70 queryable normalized source tables plus
    `__infinity_raw_rows` with the exact JSON for every imported normalized row; and
-3. the published `infinity.db`, which contains only `__infinity_metadata` plus the 74
+3. the published `infinity.db`, which contains only `__infinity_metadata` plus the 81
    retained application tables.
 
 All source-to-canonical validation runs against staging before publication. The 47
@@ -1722,7 +1722,7 @@ SQLite reads: source-only rows may live exclusively in `infinity.raw.db`, canoni
 application facts may live in derived tables, and a fact may be preserved in the API
 without yet having a usable browser presentation.
 
-The maintained inventory now records **9 confirmed gap families** for later roadmap work:
+The maintained inventory now records **8 confirmed gap families** for later roadmap work:
 
 - Fireteam chart/type/member relationships;
 - profile/loadout/top-level Unit-option include relationships;
@@ -1731,8 +1731,7 @@ The maintained inventory now records **9 confirmed gap families** for later road
 - Reinforcement Section parentage;
 - broader source-declared faction membership distinct from concrete Army availability;
 - source-attributed Unit notes;
-- top-level composite Unit options; and
-- Structure-versus-Wounds vitality labeling.
+- top-level composite Unit options.
 
 The former structured-reference-metadata gap is closed in schema 24 / compatibility
 revision 32. Source `metadata_hacking_programs`, `metadata_martial_arts`,
@@ -1749,8 +1748,9 @@ that already have an application representation: **1,273** canonical include edg
 selection constraints, **14** profile-group dependency constraints, **46**
 Reinforcement-parent links, **2,094** declared faction memberships, **30**
 source-attributed Unit-note occurrences, **18** top-level Unit options, and **299**
-canonical profile payloads marked `is_structure`. Fireteams remain a raw-archive/source-model gap rather than an application-row gap;
-the structured lookup metadata now has the application projections described above.
+canonical profile payloads marked `is_structure`. Fireteams now have the schema-25 Army-scoped application projection described below, but
+remain a repository/API/browser presentation gap; the structured lookup metadata has the
+application projections described above.
 
 Two preserved constructs remain an explicit semantic review queue instead of being
 forced into a premature 1.0 requirement: **30** opaque `spectables` occurrences and
@@ -1932,6 +1932,23 @@ structured-reference tables without publishing their raw metadata source tables.
 `application_metachemistry_results` retain their source ordering/ranges and results for
 existing Skill-detail presentation. The source rows remain authoritative provenance in
 `infinity.raw.db`; the derived tables are the runtime-serving application contract.
+
+Schema version 25 / compatibility revision 33 adds the first-class Army-scoped Fireteam
+application projection without publishing the raw chart tables. `application_fireteam_charts`
+selects one preferred Army-list source for each application Army and keeps its source file/hash,
+source kind, description, and raw chart-spec provenance. `application_fireteam_chart_limits`
+normalizes the selected chart's type quotas without treating a Reinforcement Section's own zeros
+as standalone legality rules. `application_fireteams`, `application_fireteam_types`, and
+`application_fireteam_members` preserve team order, type membership, observations, member
+wording, min/max values, required-choice participation, Wildcard identity, source Unit
+resolution, and logical-Unit links. `application_fireteam_member_loadouts` resolves audited FTO
+markers only against Army-local canonical loadout occurrences, while
+`application_fireteam_member_equivalence_labels` retains ordered parenthetical Fireteam-Level
+wording. Multiple source Army aliases are not merged into a synthetic chart: application Army
+identity selects one preferred source chart, and non-selected source variants remain losslessly
+in `infinity.raw.db`. Reinforcement parent relationships remain in
+`application_army_reinforcement_parents` so Main- and Reinforcement-section charts stay separate
+for later presentation.
 
 Peripherals use a separate reviewed identity/relationship layer because Army combines
 several source mechanisms. The pinned 2026-09-18 snapshot has 279 embedded army-local
@@ -2305,8 +2322,8 @@ derived frontend tables so generated application structure cannot be supplied as
 source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
-records its schema version. The current schema version is 24 and the application
-compatibility revision is 32. Imports build temporary sibling files, check
+records its schema version. The current schema version is 25 and the application
+compatibility revision is 33. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite
@@ -2743,9 +2760,10 @@ must remain verbatim because chart notes can specialize the general Fireteam rul
 
 `tools/audit_fireteam_semantics.py` records these boundaries deterministically and reports future
 snapshot drift in chart shape, member resolution, FTO option matching, Reinforcement parent/type
-context, required-choice structure, Wildcards, equivalence labels, and rule-bearing notes. The
-audit does not yet introduce a first-class Fireteam repository/API/browser model; that presentation
-work is planned for the 0.8.x connected-data milestone within the 1.0 completeness program.
+context, required-choice structure, Wildcards, equivalence labels, and rule-bearing notes. Schema
+25 / compatibility revision 33 now materializes those audited semantics into the application-owned
+Fireteam projection described above. Repository/API/browser presentation remains the next 0.8.x
+Fireteam step within the 1.0 completeness program.
 
 #### Normalization-only link semantic evidence
 

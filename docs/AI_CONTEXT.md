@@ -1238,15 +1238,34 @@ compatibility references remain unambiguous JSON integers.
   Peripheral/Controller links, selection/dependency relationships, Reinforcement parentage,
   declared faction membership, source-attributed Unit notes, top-level composite Unit
   options, Structure/Wounds labeling, and structured Hacking/Martial Arts/Booty/
-  MetaChemistry reference data. Schema 24 / compatibility revision 32 closes the
-  structured-reference gap in 0.7.0, so the maintained inventory now reports 9 open
-  families; the remaining gaps belong to 0.8.x/0.9.x work rather than Milestone 2B.
+  MetaChemistry reference data. Schema 24 / compatibility revision 32 closed the
+  structured-reference gap in 0.7.0, and 0.7.2 closed the Structure/VITA-versus-STR
+  presentation gap. The maintained inventory therefore reports 8 open families; the
+  remaining gaps belong to 0.8.x/0.9.x work rather than Milestone 2B.
 - Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
   preserve the source values and do not invent presentation semantics before the domain
   meaning/scope is resolved.
 - Milestone 2B shipped in 0.6.3, and the rules-enriched catalog-data milestone shipped
   in 0.7.0. The next active milestone is 0.8.0 connected game relationships, not further
   canonicalization or expansion of the completed 0.7.0 release gate.
+
+## 0.8.0 Fireteam application projection (2026-09-26)
+
+- Schema 25 / compatibility revision 33 materializes the audited Fireteam source semantics
+  into seven application-owned tables. One preferred Army-list source is selected per
+  application Army; non-selected source aliases remain losslessly in `infinity.raw.db`.
+- The projection preserves selected chart source/provenance, raw and normalized type limits,
+  team/type/member order, observations, min/max/required-choice context, Wildcard identity,
+  logical-Unit resolution, ordered Fireteam-Level equivalence labels, and Army-local FTO
+  eligibility resolved to canonical loadout payload occurrences.
+- Reinforcement parent/type/count context is deliberately not flattened into the Fireteam
+  rows. `application_army_reinforcement_parents` remains the canonical parent graph, so later
+  presentation combines the Section chart with the selected parent's limits without merging
+  Main- and Reinforcement-section member pools or implementing a legality engine.
+- Shared FTO/Wildcard/equivalence parsing now lives in `infinity_db.fireteam_semantics` and is
+  consumed by both the maintained Fireteam audit and the application materializer, preventing
+  audit/runtime semantic drift. Repository/API/browser Fireteam presentation is the next 0.8.0
+  layer.
 
 ## 0.7.0 structured Army reference projections (2026-09-25)
 

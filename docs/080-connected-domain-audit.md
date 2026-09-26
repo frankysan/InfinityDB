@@ -165,6 +165,11 @@ ontology.
 
 ## 0.8.0 implementation order
 
+Schema 25 / compatibility revision 33 completes step 1 below: the Fireteam application
+projection is now materialized and validated from the audited source semantics. The remaining
+Fireteam work begins at repository/API/browser presentation; this document keeps the original
+order as the milestone contract.
+
 The audit establishes this order for the connected-data milestone:
 
 1. **Fireteams — Data processing:** materialize a first-class canonical Fireteam

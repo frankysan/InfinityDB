@@ -381,6 +381,27 @@ def test_database_splits_lossless_source_from_published_application_data(
         ).fetchone()[0]
         assert json.loads(payload_loadout_skill_raw) == source_loadout_skill_raw
 
+        assert connection.execute(
+            "SELECT application_army_id, source_army_id, source_kind, source_spec "
+            "FROM application_fireteam_charts ORDER BY application_army_id"
+        ).fetchall() == [
+            (101, 101, "faction", '{"max":2}'),
+            (201, 201, "sectorial", "{}"),
+            (301, 301, None, "{}"),
+        ]
+        assert connection.execute(
+            "SELECT application_army_id, fireteam_id, name, source_army_id, is_wildcard "
+            "FROM application_fireteams"
+        ).fetchall() == [(101, 1, "Team", 101, 0)]
+        assert connection.execute(
+            "SELECT application_army_id, fireteam_id, member_id, source_unit_id, "
+            "logical_unit_id, resolution FROM application_fireteam_members"
+        ).fetchall() == [(101, 1, 1, 1, 1, "army")]
+        assert connection.execute(
+            "SELECT application_army_id, fireteam_id, position, fireteam_type "
+            "FROM application_fireteam_types"
+        ).fetchall() == [(101, 1, 1, "CORE")]
+
         indexes = {
             row[1]
             for table_name in PUBLISHED_DATABASE_TABLES

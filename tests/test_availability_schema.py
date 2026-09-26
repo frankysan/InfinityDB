@@ -11,8 +11,8 @@ def test_availability_semantics_are_explicit_schema_fields() -> None:
     assert "source_role" in TABLES["units"].fields
     assert "display_army_id" in TABLES["units"].fields
     assert "availability_kind" in TABLES["army_units"].fields
-    assert SCHEMA_VERSION == 24
-    assert DATABASE_COMPATIBILITY_VERSION == 32
+    assert SCHEMA_VERSION == 25
+    assert DATABASE_COMPATIBILITY_VERSION == 33
 
 
 def test_logical_unit_identity_is_frontend_derived_schema() -> None:
@@ -22,6 +22,13 @@ def test_logical_unit_identity_is_frontend_derived_schema() -> None:
         "application_armies",
         "application_army_sources",
         "application_army_reinforcement_parents",
+        "application_fireteam_charts",
+        "application_fireteam_chart_limits",
+        "application_fireteams",
+        "application_fireteam_types",
+        "application_fireteam_members",
+        "application_fireteam_member_loadouts",
+        "application_fireteam_member_equivalence_labels",
         "application_catalog_items",
         "application_catalog_sources",
         "application_domain_slugs",
@@ -80,6 +87,20 @@ def test_logical_unit_identity_is_frontend_derived_schema() -> None:
     assert DERIVED_TABLES["application_army_reinforcement_parents"].key == (
         "reinforcement_army_id",
         "parent_army_id",
+    )
+    assert DERIVED_TABLES["application_fireteam_charts"].key == ("application_army_id",)
+    assert DERIVED_TABLES["application_fireteam_chart_limits"].key == (
+        "application_army_id",
+        "fireteam_type",
+    )
+    assert DERIVED_TABLES["application_fireteams"].key == (
+        "application_army_id",
+        "fireteam_id",
+    )
+    assert DERIVED_TABLES["application_fireteam_members"].key == (
+        "application_army_id",
+        "fireteam_id",
+        "member_id",
     )
     assert DERIVED_TABLES["application_catalog_items"].key == ("catalog", "id")
     assert DERIVED_TABLES["application_catalog_sources"].key == (
