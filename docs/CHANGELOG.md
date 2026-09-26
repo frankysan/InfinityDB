@@ -7,6 +7,13 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
+### Added
+
+- **Deployment:** Add a narrow, loopback-by-default Caddy metrics listener that can be bound to a
+  specific trusted LAN interface without publishing the application port or `/internal/*`; persist
+  the bind/port in deployment configuration and add a dependency-free workstation CLI that turns
+  the aggregate Prometheus metrics into a compact operator report.
+
 ## [0.7.2] - 2026-09-26
 
 ### Changed

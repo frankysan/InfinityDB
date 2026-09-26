@@ -35,6 +35,10 @@ image_tag="${IMAGE_TAG:-app-v$version}"
 domain="${DOMAIN:-$(config_value DOMAIN)}"
 retain="${RETAIN_APP_IMAGES:-$(config_value RETAIN_APP_IMAGES)}"
 retain="${retain:-3}"
+metrics_bind="${METRICS_BIND_ADDRESS:-$(config_value METRICS_BIND_ADDRESS)}"
+metrics_bind="${metrics_bind:-127.0.0.1}"
+metrics_port="${METRICS_PORT:-$(config_value METRICS_PORT)}"
+metrics_port="${metrics_port:-9090}"
 
 [ -n "$domain" ] || fail \
   "DOMAIN is not configured; set DOMAIN or save it in $config_file before deployment."
@@ -44,4 +48,5 @@ esac
 
 echo "Deploying transferred artifacts as $image_tag without rebuilding runtime data..."
 DOMAIN="$domain" IMAGE_TAG="$image_tag" RETAIN_APP_IMAGES="$retain" \
+METRICS_BIND_ADDRESS="$metrics_bind" METRICS_PORT="$metrics_port" \
   sh ./scripts/deploy.sh

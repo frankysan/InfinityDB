@@ -112,9 +112,11 @@ The production WSGI app implements this policy with a fixed-cardinality shared r
 registry. Gunicorn preloads the app before forking workers so counters are shared across the
 worker processes; routine Gunicorn access logging is disabled. `/internal/metrics` renders
 Prometheus text from the aggregate registry and `/internal/health` provides an uninstrumented
-health probe. Both are reachable on the app container network only because the public Caddy
-configuration rejects `/internal/*`. No dynamic identifier, raw URL, query value, or request
-header is admitted to the metric label vocabulary.
+health probe. The public Caddy site rejects `/internal/*`. A separate Caddy listener may expose
+only `/metrics` and `/health` on a specifically bound host/LAN interface; it defaults to host
+loopback and deployment tooling refuses wildcard metric binds. This narrow facade never publishes
+the application port or any other application route. No dynamic identifier, raw URL, query value,
+or request header is admitted to the metric label vocabulary.
 
 Data tools are a subsystem of InfinityDB. They remain usable independently for
 inspection, validation, and rebuilding snapshots. The standalone scripts in

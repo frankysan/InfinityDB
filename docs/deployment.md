@@ -237,10 +237,43 @@ visitor-identifying fields.
 
 The aggregate registry is exposed as Prometheus text at `/internal/metrics` on the app
 container's port 8000. `/internal/health` provides the container liveness/readiness probe and
-is excluded from usage metrics. Caddy returns 404 for `/internal/*`, so neither endpoint is
-part of the public site; a future monitoring service must scrape `app:8000` from the Docker
-network. The metrics are process-lifetime operational state and intentionally reset when the
-application container restarts.
+is excluded from usage metrics. The public Caddy site still returns 404 for `/internal/*`. A
+second Caddy listener exposes only `/metrics` and `/health`; Compose publishes that listener on
+`METRICS_BIND_ADDRESS` / `METRICS_PORT`, defaulting to `127.0.0.1:9090`. The application
+container itself remains unpublished. Deployment tooling rejects wildcard metrics binds such as
+`0.0.0.0` or `::`, so LAN access must name a specific trusted server interface address. The
+metrics are process-lifetime operational state and intentionally reset when the application
+container restarts.
+
+### LAN metrics access and workstation report
+
+For direct access from a trusted workstation on the local network, bind the metrics listener to
+the **server's LAN address**, not the workstation address. `install-or-update.sh` prompts for the
+setting and stores it in the ignored `.infinity-db-deploy.env`; transferred-artifact deployments
+reuse the same values. For example:
+
+```text
+METRICS_BIND_ADDRESS=192.168.1.20
+METRICS_PORT=9090
+```
+
+Do not use a wildcard address. If the server firewall filters LAN traffic, allow the selected TCP
+port only from the trusted local network/workstation. The public InfinityDB host remains separate
+and continues to reject `/internal/*`.
+
+From a Windows development checkout, set the metrics URL once for the PowerShell session and use
+the dependency-free report tool:
+
+```powershell
+$env:INFINITYDB_METRICS_URL = "http://192.168.1.20:9090/metrics"
+python tools/report_metrics.py
+```
+
+The report shows application/snapshot identity, active and completed requests, status-class
+counts, average and approximate p95 latency, average response size, and the busiest normalized
+routes. It consumes only the bounded aggregate Prometheus surface and therefore cannot reconstruct
+visitor histories. Use `python tools/report_metrics.py --raw` when the raw Prometheus exposition is
+needed for another local monitoring tool.
 
 Raw request logging is not enabled in normal operation. If it is temporarily required for a
 concrete incident, minimize and sanitize the fields, restrict access, and define short

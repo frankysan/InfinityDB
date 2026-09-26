@@ -62,6 +62,10 @@ applicable:
 .infinity-db-deploy.env
 ```
 
+That file may include the public domain/image-retention settings plus the optional LAN metrics
+bind address and port. A metrics bind must be updated if the replacement server uses a different
+LAN address.
+
 The Caddy `caddy_data` and `caddy_config` named volumes are not InfinityDB build
 inputs, but copy or back them up when their runtime state matters. Configuration,
 accounts, or certificates owned by an external TLS reverse proxy are outside this
