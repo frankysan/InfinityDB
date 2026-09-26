@@ -25,6 +25,7 @@ from infinity_db.catalog_slugs import (
 from infinity_db.database import ArmySelectionError, Database
 from infinity_db.domain_slugs import require_domain_slug
 from infinity_db.equipment_catalog import EquipmentCatalog
+from infinity_db.fireteam_reference import fireteam_reference
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
@@ -430,6 +431,7 @@ class Application:
         self.skill_catalog = SkillCatalog(self.database, self.rules_database)
         self.equipment_catalog = EquipmentCatalog(self.database, self.rules_database)
         self.catalog_rules = CatalogRules(self.rules_database)
+        self.fireteam_rules_reference = fireteam_reference(self.rules_database)
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
             _snapshot_revision(self.rules_database.path)
@@ -749,7 +751,7 @@ class Application:
                     items = [dict(item) for item in self.database.list_fireteam_armies()]
                     for item in items:
                         attach_public_army_slug(self.database, item)
-                    payload = {"items": items}
+                    payload = {"items": items, "reference": self.fireteam_rules_reference}
                 else:
                     payload = self.database.get_fireteam_chart(army_ref)
                     if payload is None:
@@ -757,6 +759,7 @@ class Application:
                         payload = {"error": "Fireteam chart not found"}
                     else:
                         attach_public_army_slug(self.database, payload["army"])
+                        payload["reference"] = self.fireteam_rules_reference
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}

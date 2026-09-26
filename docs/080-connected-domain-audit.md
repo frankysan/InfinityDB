@@ -166,10 +166,9 @@ ontology.
 
 ## 0.8.0 implementation order
 
-Schema 25 / compatibility revision 33 completes step 1 below: the Fireteam application
-projection is now materialized and validated from the audited source semantics. The remaining
-Fireteam work begins at repository/API/browser presentation; this document keeps the original
-order as the milestone contract.
+Schema 25 / compatibility revision 33 completed step 1 below, and the Army-scoped browser/API
+plus rules-backed generated Fireteam quick reference complete step 2. This document keeps the
+original order as the milestone contract; the active connected-data work continues at step 3.
 
 The audit establishes this order for the connected-data milestone:
 

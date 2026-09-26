@@ -56,25 +56,6 @@ directly useful without becoming an Army-list legality engine or live game-state
 
 ### Fireteams and connected application data
 
-- [ ] **Data processing + Web backend + Web frontend:** Add a rule-aware Fireteams
-  feature from the audited source semantics rather than exposing raw chart rows directly.
-  - [x] **Data processing:** Materialize the Army-scoped application Fireteam projection:
-    one preferred source chart per application Army, normalized type limits, team/type/member
-    rows, logical-Unit links, FTO-eligible canonical loadout links, required/min/max context,
-    Wildcard identity, equivalence labels, observations, and selected-source provenance. Keep
-    Reinforcement parent limits separate through the existing application Army graph rather
-    than merging Main- and Reinforcement-section charts.
-  - [x] **Web backend + Web frontend:** Add first-class Army-scoped Fireteam browsing from
-    the canonical projection. Expose only Armies with current player-facing chart content,
-    preserve authoritative chart limits/source provenance, render team/type/member ordering,
-    min/max/required context, FTO-eligible loadouts, Wildcards, equivalence labels, observations,
-    and links to resolved Units, and keep raw normalized chart tables out of runtime serving.
-  - [ ] **Data processing + Web frontend:** Pair the Army chart with concise general Fireteam
-    rules while keeping Army-specific chart exceptions separate. Generate Fireteam Level bonuses
-    from the same curated general-rule facts rather than hard-coding a second Quick Reference
-    table, and make historical/community vocabulary such as `Linkable` and `pure Fireteam`
-    discoverable as provenance-aware aliases/help rather than current N5 terminology.
-
 - [ ] **Web frontend:** Move Unit symbols out of the Unit-detail title and into the
   General profile presentation. Place the primary symbol at the top-right of the General
   profile card, preferably overlapping the card edge without obscuring profile data, and use

@@ -27,7 +27,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **28/28** complete, **0** pending.
+- Supporting semantic identities: **30/30** complete, **0** pending.
 - Current authored outgoing relations: **255**.
 - Explicitly tracked future/deferred interactions: **132**.
 
@@ -730,6 +730,15 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → BS Attack (`skill:bs-attack`)
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
   - `uses-effects-of` → Total Reaction (`skill:total-reaction`)
+
+### 0.8.0
+
+#### Rule (2/2)
+
+- [x] **Fireteam Level and Bonuses** (`rule:fireteam-level-bonuses`) — reviewed
+  - outgoing: none
+- [x] **Fireteams: General Rules** (`rule:fireteam-general`) — reviewed
+  - outgoing: none
 
 ## Future interaction queue
 

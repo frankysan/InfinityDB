@@ -2764,8 +2764,12 @@ snapshot drift in chart shape, member resolution, FTO option matching, Reinforce
 context, required-choice structure, Wildcards, equivalence labels, and rule-bearing notes. Schema
 25 / compatibility revision 33 now materializes those audited semantics into the application-owned
 Fireteam projection described above, and `/api/fireteams` + `/fireteams` provide the first
-repository/API/browser presentation over that projection. General Fireteam rules and generated
-Level-bonus reference data remain later 0.8.x work within the 1.0 completeness program.
+repository/API/browser presentation over that projection. General Fireteam rules are kept out
+of the Army database: `rules.db` owns the curated `rule:fireteam-general` and
+`rule:fireteam-level-bonuses` records, and the Fireteam API composes those optional rules facts
+with the Army chart. `/fireteams` generates the cumulative Level-bonus quick reference and
+provenance-aware `Linkable` / `pure Fireteam` help from that payload rather than duplicating the
+rules in frontend code.
 
 #### Normalization-only link semantic evidence
 

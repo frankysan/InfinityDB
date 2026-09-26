@@ -369,7 +369,9 @@ def test_fireteam_chart_page_and_api_use_application_projection(
 
     status, _, body = request(fireteam_app, "/api/fireteams")
     assert status == 200
-    armies = json.loads(body)["items"]
+    fireteam_index = json.loads(body)
+    assert fireteam_index["reference"] is None
+    armies = fireteam_index["items"]
     assert [(item["id"], item["public_slug"], item["fireteam_count"]) for item in armies] == [
         (101, "zulu-company", 1)
     ]
@@ -379,6 +381,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     )
     assert status == 200
     chart = json.loads(body)
+    assert chart["reference"] is None
     assert chart["army"]["public_slug"] == "zulu-company"
     assert chart["description"] == "Current chart note"
     assert chart["limits"] == [{"type": "CORE", "position": 1, "max_count": 1}]
@@ -387,6 +390,37 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     member = chart["teams"][0]["members"][0]
     assert member["unit"]["slug"] == "ranger-prototype"
     assert member["required"] is True
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(database_path, rules_database_path=rules_path)
+    status, _, body = request(rules_app, "/api/fireteams", query="army_id=zulu-company")
+    assert status == 200
+    reference = json.loads(body)["reference"]
+    assert reference["general"]["facts"]["category"] == "fireteam-general"
+    assert reference["general"]["facts"]["memberLimits"] == {"min": 2, "max": 5}
+    assert [item["type"] for item in reference["general"]["facts"]["types"]] == [
+        "DUO",
+        "HARIS",
+        "CORE",
+    ]
+    assert {
+        term["term"]: term["provenance"]
+        for term in reference["general"]["facts"]["terminology"]
+    } == {
+        "Linkable": "historical-official",
+        "pure Fireteam": "community-historical",
+    }
+    levels = reference["levels"]["facts"]
+    assert levels["cumulative"] is True
+    assert [level["level"] for level in levels["levels"]] == [1, 2, 3, 4, 5]
+    assert levels["levels"][1]["bonuses"] == ["BS Attack (+1 SD)"]
+    assert levels["levels"][4]["bonuses"] == ["Sixth Sense"]
+    assert any(
+        citation.get("source_url") and "Fireteam_Bonuses" in citation["source_url"]
+        for citation in reference["levels"]["citations"]
+    )
 
     status, _, script = request(fireteam_app, "/static/fireteams.js")
     assert status == 200
@@ -411,6 +445,15 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'if (wildcard) name.append(badge("Wildcard"));' in script
     assert b'appendMemberRow(member, { wildcard: true })' in script
     assert b'window.addEventListener("fireteamswildcardschange"' in script
+    assert b"function renderReference(reference)" in script
+    assert b"for (const level of levelFacts.levels || [])" in script
+    assert b"Historical official term" in script
+    assert b"Community / historical shorthand" in script
+
+    status, _, page = request(fireteam_app, "/fireteams")
+    assert status == 200
+    assert b'id="fireteam-reference"' in page
+    assert b'id="fireteam-reference-content"' in page
 
     status, _, styles = request(fireteam_app, "/static/styles.css")
     assert status == 200

@@ -3460,11 +3460,80 @@ tbody tr:hover {
   gap: 18px;
 }
 
+.fireteam-reference,
 .fireteam-chart-summary,
 .fireteam-card {
   border: 1px solid var(--color-border-default);
   background: var(--color-surface-subtle);
   box-shadow: var(--shadow-card);
+}
+
+.fireteam-reference {
+  width: min(820px, 100%);
+  padding: 16px 18px;
+}
+
+.fireteam-reference-heading h3,
+.fireteam-reference h4 {
+  margin: 0;
+}
+
+.fireteam-reference-heading + #fireteam-reference-content {
+  margin-top: 12px;
+}
+
+#fireteam-reference-content {
+  display: grid;
+  gap: 12px;
+}
+
+.fireteam-reference-types {
+  margin-top: -2px;
+}
+
+.fireteam-reference-rules,
+.fireteam-reference-sources {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.fireteam-reference-table {
+  width: min(720px, 100%);
+}
+
+.fireteam-reference-table table {
+  min-width: 560px;
+}
+
+.fireteam-reference-note {
+  margin: -4px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.fireteam-terminology {
+  display: grid;
+  gap: 8px;
+}
+
+.fireteam-terminology-item {
+  padding: 10px 12px;
+  border-left: 2px solid var(--color-border-default);
+}
+
+.fireteam-terminology-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fireteam-terminology-item p {
+  margin: 5px 0 0;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
 }
 
 .fireteam-chart-summary {

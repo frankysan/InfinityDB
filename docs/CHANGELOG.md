@@ -27,6 +27,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Add curated N5 Fireteam general rules and
+  cumulative Fireteam Level bonuses to `rules.db`, expose them as an optional reference payload
+  alongside the canonical Army chart, and generate the `/fireteams` quick reference from those
+  facts. Historical `Linkable` and community `pure Fireteam` terminology remains discoverable
+  with explicit provenance instead of being presented as current N5 terminology.
 - **Web backend + Web frontend:** Add first-class Army-scoped Fireteam browsing on
   `/fireteams` and `/api/fireteams`, backed only by the canonical schema-25 Fireteam projection.
   The browser presents authoritative chart limits, membership requirements, FTO-eligible

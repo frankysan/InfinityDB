@@ -1266,9 +1266,11 @@ compatibility references remain unambiguous JSON integers.
   Main- and Reinforcement-section member pools or implementing a legality engine.
 - Shared FTO/Wildcard/equivalence parsing now lives in `infinity_db.fireteam_semantics` and is
   consumed by both the maintained Fireteam audit and the application materializer, preventing
-  audit/runtime semantic drift. `/api/fireteams` and `/fireteams` now expose the Army-scoped
-  chart from that projection; general Fireteam rules/Level bonuses remain the next Fireteam
-  presentation layer.
+  audit/runtime semantic drift. `/api/fireteams` and `/fireteams` expose the Army-scoped chart
+  from that projection. `rules.db` separately owns curated `rule:fireteam-general` and
+  `rule:fireteam-level-bonuses` identities; the API composes those optional rules facts with the
+  chart and the browser generates the Level-bonus quick reference, sources, and provenance-aware
+  historical/community terminology from them rather than hard-coding a parallel rules table.
 
 ## 0.7.0 structured Army reference projections (2026-09-25)
 

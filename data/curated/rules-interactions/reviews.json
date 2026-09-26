@@ -1268,6 +1268,18 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
+    },
+    {
+      "recordId": "rule:fireteam-general",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "rule:fireteam-level-bonuses",
+      "targetRelease": "0.8.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-26"
     }
   ],
   "futureInteractions": [

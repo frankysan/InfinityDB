@@ -432,7 +432,13 @@ labels, and rule-bearing chart/team notes. `/api/fireteams` and `/fireteams` now
 application projection directly and never return to the raw normalized Fireteam tables during
 normal serving. Reinforcement parent limits remain separate in
 `application_army_reinforcement_parents`, so the projection/browser does not pretend to be an
-army-list legality engine or merge Main- and Reinforcement-section member pools.
+army-list legality engine or merge Main- and Reinforcement-section member pools. General
+Fireteam rules remain rules-domain data: `rules.db` owns `rule:fireteam-general` and
+`rule:fireteam-level-bonuses`, while `/api/fireteams` composes their bounded reference payload
+with each Army chart. The browser generates type/member guidance, cumulative Level bonuses,
+source links, and provenance-aware historical/community terminology from those curated facts;
+older compatible deployments without those rules records keep the Army chart and omit only the
+reference block.
 
 States are now a first-class rules-backed reference surface (`/states`, `/api/states`) rather
 than application/Army catalog rows. `StateCatalog` composes current `state` definitions

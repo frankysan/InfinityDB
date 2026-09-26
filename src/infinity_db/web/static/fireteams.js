@@ -12,6 +12,8 @@ const elements = {
   errorMessage: byId("fireteam-error-message"),
   empty: byId("fireteam-empty"),
   content: byId("fireteam-content"),
+  reference: byId("fireteam-reference"),
+  referenceContent: byId("fireteam-reference-content"),
   chartName: byId("fireteam-chart-name"),
   description: byId("fireteam-chart-description"),
   limits: byId("fireteam-chart-limits"),
@@ -255,8 +257,159 @@ function teamsForDisplay(chart) {
     .map((team) => ({ ...team, wildcard_members: wildcardMembers }));
 }
 
+function fireteamTypeLabel(type) {
+  const minimum = Number(type.min);
+  const maximum = Number(type.max);
+  return minimum === maximum
+    ? `${type.type}: ${minimum}`
+    : `${type.type}: ${minimum}–${maximum}`;
+}
+
+function provenanceLabel(provenance) {
+  if (provenance === "historical-official") return "Historical official term";
+  if (provenance === "community-historical") return "Community / historical shorthand";
+  return provenance || "Context term";
+}
+
+function appendReferenceSources(container, records) {
+  const sources = [];
+  const seen = new Set();
+  for (const record of records) {
+    for (const citation of record.citations || []) {
+      const sourceKey = citation.source_url || citation.source_id || "";
+      const key = `${sourceKey}:${citation.page || ""}:${citation.heading || ""}`;
+      if (!sourceKey || seen.has(key)) continue;
+      seen.add(key);
+      sources.push(citation);
+    }
+  }
+  if (!sources.length) return;
+  const heading = document.createElement("h4");
+  heading.textContent = "Sources";
+  const list = document.createElement("ul");
+  list.className = "fireteam-reference-sources";
+  for (const source of sources) {
+    const item = document.createElement("li");
+    const labelParts = [source.source_title || source.source_id || "Source"];
+    if (source.page) labelParts.push(`p. ${source.page}`);
+    if (source.heading) labelParts.push(source.heading);
+    if (source.source_url) {
+      const link = document.createElement("a");
+      link.href = source.source_url;
+      link.textContent = labelParts.join(" · ");
+      item.append(link);
+    } else {
+      item.textContent = labelParts.join(" · ");
+    }
+    list.append(item);
+  }
+  container.append(heading, list);
+}
+
+function renderReference(reference) {
+  elements.referenceContent.replaceChildren();
+  if (!reference?.general?.facts || !reference?.levels?.facts) {
+    elements.reference.hidden = true;
+    return;
+  }
+
+  const general = reference.general;
+  const levels = reference.levels;
+  const generalFacts = general.facts;
+  const levelFacts = levels.facts;
+  const fragment = document.createDocumentFragment();
+
+  const summary = document.createElement("p");
+  summary.className = "detail-copy";
+  summary.textContent = general.summary;
+  fragment.append(summary);
+
+  const typeBadges = document.createElement("div");
+  typeBadges.className = "detail-badges fireteam-reference-types";
+  for (const type of generalFacts.types || []) {
+    typeBadges.append(badge(fireteamTypeLabel(type)));
+  }
+  fragment.append(typeBadges);
+
+  const rules = document.createElement("ul");
+  rules.className = "fireteam-reference-rules";
+  for (const rule of generalFacts.rules || []) {
+    const item = document.createElement("li");
+    item.textContent = rule;
+    rules.append(item);
+  }
+  fragment.append(rules);
+
+  const levelHeading = document.createElement("h4");
+  levelHeading.textContent = levels.name;
+  const basis = document.createElement("p");
+  basis.className = "detail-copy";
+  basis.textContent = levelFacts.basis;
+  const tableContainer = document.createElement("div");
+  tableContainer.className = "table-container fireteam-reference-table";
+  const table = document.createElement("table");
+  const caption = document.createElement("caption");
+  caption.className = "sr-only";
+  caption.textContent = "Fireteam Level bonuses";
+  const head = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  for (const heading of ["Level", "Requirement", "Bonuses"]) {
+    const cell = document.createElement("th");
+    cell.scope = "col";
+    cell.textContent = heading;
+    headRow.append(cell);
+  }
+  head.append(headRow);
+  const body = document.createElement("tbody");
+  for (const level of levelFacts.levels || []) {
+    const row = document.createElement("tr");
+    const levelCell = document.createElement("th");
+    levelCell.scope = "row";
+    levelCell.textContent = String(level.level);
+    const requirement = document.createElement("td");
+    requirement.textContent = level.requirement;
+    const bonuses = document.createElement("td");
+    bonuses.textContent = (level.bonuses || []).join("; ");
+    row.append(levelCell, requirement, bonuses);
+    body.append(row);
+  }
+  table.append(caption, head, body);
+  tableContainer.append(table);
+  const cumulative = document.createElement("p");
+  cumulative.className = "fireteam-reference-note";
+  if (levelFacts.cumulative) cumulative.textContent = "Fireteam Level bonuses are cumulative.";
+  fragment.append(levelHeading, basis, tableContainer, cumulative);
+
+  const terminology = generalFacts.terminology || [];
+  if (terminology.length) {
+    const terminologyHeading = document.createElement("h4");
+    terminologyHeading.textContent = "Terminology";
+    const terminologyList = document.createElement("div");
+    terminologyList.className = "fireteam-terminology";
+    for (const term of terminology) {
+      const item = document.createElement("div");
+      item.className = "fireteam-terminology-item";
+      const title = document.createElement("div");
+      title.className = "fireteam-terminology-title";
+      const name = document.createElement("strong");
+      name.textContent = term.term;
+      title.append(name, badge(provenanceLabel(term.provenance)));
+      const meaning = document.createElement("p");
+      meaning.textContent = term.meaning;
+      item.append(title, meaning);
+      terminologyList.append(item);
+    }
+    fragment.append(terminologyHeading, terminologyList);
+  }
+
+  appendReferenceSources(fragment, [general, levels]);
+  elements.referenceContent.append(fragment);
+  elements.reference.hidden = false;
+}
+
 function renderChart(chart) {
   currentChart = chart;
+  renderReference(chart.reference);
   elements.chartName.textContent = chart.army.name;
   elements.description.textContent = chart.description || "";
   elements.description.hidden = !chart.description;
