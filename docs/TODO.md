@@ -203,6 +203,11 @@ by the audit remain in scope.
 
 ### Frontend architecture and theming
 
+- [ ] Move the **General Fireteam rules** / Fireteam quick-reference material off the
+  Army-specific `/fireteams` chart browser onto a dedicated rules/reference page. Keep
+  the Army chart focused on Army-specific composition data and link clearly between the
+  two surfaces rather than duplicating the maintained Fireteam rule facts.
+
 - [ ] Refactor the web layer toward the documented backend/frontend responsibility
   boundary without changing the current same-origin deployment model.
   - [ ] Split API handling, shared page-shell/static delivery, and top-level request

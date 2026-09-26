@@ -11,6 +11,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web frontend:** Keep Unit-detail Army relationship structure behind Developer mode;
+  the source-declared faction and Reinforcement parentage links remain available for data
+  inspection without adding player-facing detail that experienced players already know.
+- **Web frontend:** Rebalance the Fireteam Level bonuses table so the Level column is
+  compact and Requirement/Bonuses share the remaining width evenly.
 - **Web backend + Web frontend:** Align the shared shell and About page with the connected-reference
   scope, classify rules catalog list/detail pages consistently, preserve active navigation on
   detail routes, synchronize page descriptions, and dispose transient page listeners/requests

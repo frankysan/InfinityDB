@@ -460,6 +460,17 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert_css_rule(styles, ".fireteam-card", {"width": "min(640px, 100%)"})
     assert_css_rule(
         styles,
+        ".fireteam-reference-table table",
+        {"min-width": "560px", "table-layout": "fixed"},
+    )
+    assert_css_rule(styles, ".fireteam-reference-table th:first-child", {"width": "64px"})
+    assert_css_rule(
+        styles,
+        ".fireteam-reference-table th:nth-child(2),\n.fireteam-reference-table th:nth-child(3)",
+        {"width": "calc((100% - 64px) / 2)"},
+    )
+    assert_css_rule(
+        styles,
         'html[data-developer-mode="true"] .fireteam-card',
         {"width": "100%"},
     )
@@ -2178,6 +2189,7 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     assert status == 200
     assert b"function renderArmyRelationships(unit, armies)" in unit_js
     assert b'heading("Army relationships")' in unit_js
+    assert b'section.className = "detail-group army-relationships developer-only";' in unit_js
     assert b'link.href = `/units?army_id=${encodeURIComponent(identifier)}`;' in unit_js
     assert (
         b'link.href = `/units?declared_faction_id='

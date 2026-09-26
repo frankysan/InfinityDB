@@ -798,7 +798,7 @@ function renderArmyRelationships(unit, armies) {
   if (!reinforcementRelations.length && !declaredFactions.length) return null;
 
   const section = document.createElement("section");
-  section.className = "detail-group army-relationships";
+  section.className = "detail-group army-relationships developer-only";
   const title = heading("Army relationships");
   title.className = "detail-section-title detail-section-title--rule";
   section.append(title);

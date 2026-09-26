@@ -388,7 +388,6 @@ consumers but intentionally receive no generic Related-rules presentation. Relat
 meaning and concrete reviewed interactions are documented in `data/curated/README.md` and
 `docs/rules-semantics.md`.
 
-
 ### Current: connected-data domains
 
 The 0.8.0 domain audit is maintained in `docs/080-connected-domain-audit.md`. Its

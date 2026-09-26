@@ -3575,6 +3575,16 @@ tbody tr:hover {
 
 .fireteam-reference-table table {
   min-width: 560px;
+  table-layout: fixed;
+}
+
+.fireteam-reference-table th:first-child {
+  width: 64px;
+}
+
+.fireteam-reference-table th:nth-child(2),
+.fireteam-reference-table th:nth-child(3) {
+  width: calc((100% - 64px) / 2);
 }
 
 .fireteam-reference-note {
