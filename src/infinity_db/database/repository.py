@@ -675,9 +675,13 @@ class Database:
                 )
 
         reinforcement_parents: dict[int, list[int]] = {}
+        reinforcement_sections: dict[int, list[int]] = {}
         for row in reinforcement_rows:
             reinforcement_parents.setdefault(row["reinforcement_army_id"], []).append(
                 row["parent_army_id"]
+            )
+            reinforcement_sections.setdefault(row["parent_army_id"], []).append(
+                row["reinforcement_army_id"]
             )
 
         def faction_id_for(army_id: int) -> int | None:
@@ -716,6 +720,7 @@ class Database:
             "source_list_ids": source_list_ids,
             "source_kinds": source_kinds,
             "reinforcement_parents": reinforcement_parents,
+            "reinforcement_sections": reinforcement_sections,
         }
 
     @instance_lru_cache(maxsize=4)
@@ -1513,6 +1518,16 @@ class Database:
                     "group_name": group.get("name") if group is not None else None,
                     "group_slug": group.get("slug") if group is not None else None,
                     "parent_army_ids": list(graph["reinforcement_parents"].get(army_id, [])),
+                    "parent_armies": [
+                        graph["identities"][parent_id]
+                        for parent_id in graph["reinforcement_parents"].get(army_id, [])
+                        if parent_id in graph["identities"]
+                    ],
+                    "reinforcement_sections": [
+                        graph["identities"][section_id]
+                        for section_id in graph["reinforcement_sections"].get(army_id, [])
+                        if section_id in graph["identities"]
+                    ],
                     "unit_count": len(logical_unit_ids.get(army_id, set())),
                 }
             )
@@ -2241,6 +2256,7 @@ class Database:
     def list_units(
         self,
         army_id: int | str | None = None,
+        declared_faction_id: int | None = None,
         search: str = "",
         skill_id: int | str | None = None,
         equipment_id: int | str | None = None,
@@ -2266,6 +2282,13 @@ class Database:
                     raise ArmySelectionError(
                         f"army_id {army_id} is a grouping-only identity, not a selectable army"
                     )
+        if declared_faction_id is not None and (
+            type(declared_faction_id) is not int
+            or not 0 <= declared_faction_id <= SQLITE_INTEGER_MAX
+        ):
+            raise ValueError(
+                "declared_faction_id must be a nonnegative SQLite signed 64-bit integer"
+            )
         rule_filters: dict[str, int | None] = {}
         for catalog, item_ref in {
             "skills": skill_id,
@@ -2333,6 +2356,11 @@ class Database:
         matching_requirements: list[tuple[frozenset[str], ...]] = []
         for group in groups:
             if unresolved_army_filter:
+                continue
+            if declared_faction_id is not None and not any(
+                declared_faction_id in declared_faction_ids_by_unit[source_id]
+                for source_id in group["source_ids"]
+            ):
                 continue
             if _logical_unit_ids is not None and group["id"] not in _logical_unit_ids:
                 continue
@@ -2406,13 +2434,33 @@ class Database:
             for group in grouped[offset : offset + limit]
         ]
         summary = availability_summary(matching_requirements, selected_flags)
-        return {
+        result = {
             "items": items,
             "total": total,
             "limit": limit,
             "offset": offset,
             "availability": summary,
         }
+        if declared_faction_id is not None:
+            application_armies = self._application_army_graph()
+            application_id = application_armies["source_to_application"].get(
+                declared_faction_id
+            )
+            identity = application_armies["armies"].get(application_id)
+            result["declared_faction"] = {
+                "source_faction_id": declared_faction_id,
+                "application_army_id": application_id,
+                "name": (
+                    identity["name"]
+                    if identity is not None
+                    else f"Faction {declared_faction_id}"
+                ),
+                "has_army_list": bool(
+                    identity is not None
+                    and application_id in application_armies["source_list_ids"]
+                ),
+            }
+        return result
 
     @instance_lru_cache(maxsize=32)
     def visible_unit_ids(
@@ -2447,6 +2495,7 @@ class Database:
         if group is None:
             return None
         identity_config = self._identity_config()
+        application_armies = self._application_army_graph()
         with self._connect() as connection:
             faction_groups = self._faction_groups()
             faction_identities = self._faction_identities()
@@ -2477,7 +2526,22 @@ class Database:
                     {
                         "id": occurrence["id"],
                         "name": occurrence["name"],
+                        "role": occurrence["role"],
                         "faction": faction_groups.get(occurrence["id"]),
+                        "parent_armies": [
+                            application_armies["identities"][parent_id]
+                            for parent_id in application_armies["reinforcement_parents"].get(
+                                occurrence["id"], []
+                            )
+                            if parent_id in application_armies["identities"]
+                        ],
+                        "reinforcement_sections": [
+                            application_armies["identities"][section_id]
+                            for section_id in application_armies["reinforcement_sections"].get(
+                                occurrence["id"], []
+                            )
+                            if section_id in application_armies["identities"]
+                        ],
                         "availability_flags": list(flags),
                         "profiles": [],
                         "loadouts": [],
@@ -3221,6 +3285,45 @@ class Database:
                 }
                 member["dependencies"].append(target)
 
+            declared_memberships: dict[int, dict[str, Any]] = {}
+            concrete_army_ids = set(group["armies"])
+            for source_id in source_ids:
+                for source_faction_id in sorted(declared_faction_ids[source_id]):
+                    membership = declared_memberships.setdefault(
+                        source_faction_id,
+                        {
+                            "source_faction_id": source_faction_id,
+                            "source_unit_ids": [],
+                        },
+                    )
+                    if source_id not in membership["source_unit_ids"]:
+                        membership["source_unit_ids"].append(source_id)
+            declared_factions = []
+            for source_faction_id, membership in sorted(declared_memberships.items()):
+                application_id = application_armies["source_to_application"].get(
+                    source_faction_id
+                )
+                identity = application_armies["armies"].get(application_id)
+                declared_factions.append(
+                    {
+                        **membership,
+                        "application_army_id": application_id,
+                        "name": (
+                            identity["name"]
+                            if identity is not None
+                            else f"Faction {source_faction_id}"
+                        ),
+                        "has_army_list": bool(
+                            identity is not None
+                            and application_id in application_armies["source_list_ids"]
+                        ),
+                        "available": bool(
+                            application_id is not None
+                            and application_id in concrete_army_ids
+                        ),
+                    }
+                )
+
             main_faction = faction_groups.get(group["main_army_id"])
             display_faction = faction_identities.get(group["display_army_id"])
             for army in armies:
@@ -3243,6 +3346,7 @@ class Database:
             ),
             "display_faction": display_faction,
             "source_ids": source_ids,
+            "declared_factions": declared_factions,
             "armies": armies,
         }
         if peripheral_type_ids:

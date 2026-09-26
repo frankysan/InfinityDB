@@ -1275,6 +1275,13 @@ compatibility references remain unambiguous JSON integers.
   dependency direction is rendered directly, while still-opaque source selectors such as
   `perParent`, dependency `group`, `min`, and `minDependant` remain visibly labeled source
   parameters instead of being promoted into a general Army-list legality model.
+- Unit/API Army references now expose canonical Reinforcement Section parent/child relationships
+  in both directions. Unit detail keeps those links separate from profile-level concrete Army
+  availability and routes them back to the existing Army-filtered Unit Explorer.
+- Unit detail also exposes broader source-declared faction membership from `unit_factions`. A
+  dedicated `declared_faction_id` Unit Explorer filter follows that relationship independently of
+  `army_id`; source faction IDs with no current Army List remain numeric source identities rather
+  than being promoted into selectable application Armies.
 
 ## 0.8.0 Fireteam application projection (2026-09-26)
 

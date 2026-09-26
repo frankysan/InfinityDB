@@ -773,6 +773,108 @@ function appendRelationProvenance(item, relation) {
   item.append(provenance);
 }
 
+function armyExplorerLink(army) {
+  const link = document.createElement("a");
+  const identifier = army.public_slug || army.slug || army.id;
+  link.href = `/units?army_id=${encodeURIComponent(identifier)}`;
+  link.textContent = army.name || `Army ${army.id}`;
+  return link;
+}
+
+function declaredFactionLink(membership) {
+  const link = document.createElement("a");
+  link.href = `/units?declared_faction_id=${encodeURIComponent(membership.source_faction_id)}`;
+  link.textContent = membership.name || `Faction ${membership.source_faction_id}`;
+  return link;
+}
+
+function renderArmyRelationships(unit, armies) {
+  const uniqueArmies = [...new Map(armies.map((army) => [Number(army.id), army])).values()];
+  const reinforcementRelations = uniqueArmies.filter((army) => (
+    (army.parent_armies || []).length || (army.reinforcement_sections || []).length
+  ));
+  const declaredFactions = unit.declared_factions || [];
+  if (!reinforcementRelations.length && !declaredFactions.length) return null;
+
+  const section = document.createElement("section");
+  section.className = "detail-group army-relationships";
+  const title = heading("Army relationships");
+  title.className = "detail-section-title detail-section-title--rule";
+  section.append(title);
+
+  const surface = document.createElement("div");
+  surface.className = "explorer connected-unit-surface army-relationship-surface";
+  const intro = document.createElement("p");
+  intro.className = "army-relationship-intro";
+  intro.textContent = "Army availability is shown in the profile sections below. These links show "
+    + "Reinforcement parentage and broader source-declared faction membership separately.";
+  surface.append(intro);
+
+  if (reinforcementRelations.length) {
+    surface.append(subheading("Reinforcement Sections"));
+    const list = document.createElement("ul");
+    list.className = "detail-list connected-unit-list";
+    for (const army of reinforcementRelations) {
+      if ((army.parent_armies || []).length) {
+        const item = document.createElement("li");
+        item.append(armyExplorerLink(army), " is a Reinforcement Section for ");
+        army.parent_armies.forEach((parent, index) => {
+          if (index) item.append(index === army.parent_armies.length - 1 ? " and " : ", ");
+          item.append(armyExplorerLink(parent));
+        });
+        item.append(".");
+        list.append(item);
+      }
+      if ((army.reinforcement_sections || []).length) {
+        const item = document.createElement("li");
+        item.append(armyExplorerLink(army), " uses ");
+        army.reinforcement_sections.forEach((reinforcement, index) => {
+          if (index) {
+            item.append(index === army.reinforcement_sections.length - 1 ? " and " : ", ");
+          }
+          item.append(armyExplorerLink(reinforcement));
+        });
+        item.append(army.reinforcement_sections.length === 1
+          ? " as its Reinforcement Section."
+          : " as its Reinforcement Sections.");
+        list.append(item);
+      }
+    }
+    surface.append(list);
+  }
+
+  if (declaredFactions.length) {
+    surface.append(subheading("Declared faction membership"));
+    const explanation = document.createElement("p");
+    explanation.className = "army-relationship-note";
+    explanation.textContent = "This source relationship is broader than current Army-list "
+      + "availability. Follow a faction link to find other Units with the same declaration.";
+    surface.append(explanation);
+    const list = document.createElement("ul");
+    list.className = "detail-list connected-unit-list";
+    for (const membership of declaredFactions) {
+      const item = document.createElement("li");
+      item.append(declaredFactionLink(membership));
+      if (!membership.has_army_list) {
+        item.append(" — declared membership; this faction identity has no current Army list.");
+      } else if (!membership.available) {
+        item.append(" — declared membership only; no concrete current list occurrence for this Unit.");
+      } else {
+        item.append(" — also represented by current list availability below.");
+      }
+      const provenance = document.createElement("span");
+      provenance.className = "developer-only";
+      provenance.textContent = ` · Source faction #${membership.source_faction_id}`;
+      item.append(provenance);
+      list.append(item);
+    }
+    surface.append(list);
+  }
+
+  section.append(surface);
+  return section;
+}
+
 function renderSelectionRelationships(unit, armies) {
   const visibleArmyIds = new Set(armies.map((army) => Number(army.id)));
   const constraints = (unit.selection_constraints || []).filter((relation) => (
@@ -1266,6 +1368,8 @@ function render(unit) {
     generalProfilesSection.append(generalProfile);
   }
   content.append(generalProfilesSection);
+  const armyRelationships = renderArmyRelationships(unit, unit.armies);
+  if (armyRelationships) content.append(armyRelationships);
   const peripheralRelationships = renderPeripheralRelationships(unit);
   if (peripheralRelationships) content.append(peripheralRelationships);
   const selectionRelationships = renderSelectionRelationships(unit, armies);

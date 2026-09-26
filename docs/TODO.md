@@ -56,10 +56,6 @@ directly useful without becoming an Army-list legality engine or live game-state
 
 ### Fireteams and connected application data
 
-- [ ] **Web backend + Web frontend:** Present Reinforcement Section parentage and broader
-  declared faction membership
-  as navigable cross-Army relationships distinct from concrete list availability.
-
 - [ ] **Data processing + Web backend + Web frontend:** Promote the existing structured
   Hacking Program projection into first-class rules/reference identities and browser
   navigation, reusing the maintained Device/target/declaration data rather than creating

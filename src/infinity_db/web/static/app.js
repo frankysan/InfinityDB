@@ -11,6 +11,7 @@ const elements = {
   mercs: byId("mercs-filter"), specops: byId("specops-filter"), teamops: byId("teamops-filter"),
   reinforcement: byId("reinforcement-filter"),
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
+  declaredMembership: byId("declared-membership-context"),
   unitCountShown: byId("unit-count-shown-breakdown"),
   unitCountFiltered: byId("unit-count-filtered-breakdown"),
   unitCountFilteredTotal: byId("unit-count-filtered-total"),
@@ -43,7 +44,8 @@ let controller;
 let searchTimer;
 
 function hasActiveFilters() {
-  return state.armyId || state.search || state.skillId || state.equipmentId || state.weaponId;
+  return state.armyId || state.declaredFactionId || state.search
+    || state.skillId || state.equipmentId || state.weaponId;
 }
 
 function domainFilterIdentifier(value) {
@@ -54,11 +56,13 @@ function readLocation() {
   const params = new URLSearchParams(window.location.search);
   const offset = Number(params.get("offset") || 0);
   const armyId = params.get("army_id") || "";
+  const declaredFactionId = params.get("declared_faction_id") || "";
   const skillId = params.get("skill_id") || "";
   const equipmentId = params.get("equipment_id") || "";
   const weaponId = params.get("weapon_id") || "";
   return {
     armyId: domainFilterIdentifier(armyId),
+    declaredFactionId: /^\d+$/.test(declaredFactionId) ? declaredFactionId : "",
     skillId: domainFilterIdentifier(skillId),
     equipmentId: domainFilterIdentifier(equipmentId),
     weaponId: domainFilterIdentifier(weaponId),
@@ -75,8 +79,11 @@ function readLocation() {
 
 function writeLocation(replace = false) {
   const url = new URL(window.location.href);
-  for (const key of ["army_id", "search", "skill_id", "equipment_id", "weapon_id", "offset", "mercs", "specops", "teamops", "reinforcement", "order"]) url.searchParams.delete(key);
+  for (const key of ["army_id", "declared_faction_id", "search", "skill_id", "equipment_id", "weapon_id", "offset", "mercs", "specops", "teamops", "reinforcement", "order"]) url.searchParams.delete(key);
   if (state.armyId) url.searchParams.set("army_id", state.armyId);
+  if (state.declaredFactionId) {
+    url.searchParams.set("declared_faction_id", state.declaredFactionId);
+  }
   if (state.search) url.searchParams.set("search", state.search);
   if (state.skillId) url.searchParams.set("skill_id", state.skillId);
   if (state.equipmentId) url.searchParams.set("equipment_id", state.equipmentId);
@@ -226,9 +233,24 @@ function renderAvailabilitySummary(data) {
     : "No matching units are currently filtered out by availability.";
 }
 
+
+function renderDeclaredMembershipContext(data) {
+  if (!state.declaredFactionId) {
+    elements.declaredMembership.hidden = true;
+    elements.declaredMembership.textContent = "";
+    return;
+  }
+  const relationship = data.declared_faction;
+  const label = relationship?.name || `Faction ${state.declaredFactionId}`;
+  elements.declaredMembership.textContent = `Declared faction membership: ${label}. `
+    + "This relationship is broader than concrete current Army-list availability.";
+  elements.declaredMembership.hidden = false;
+}
+
 function renderUnits(data) {
   renderUnitRows(elements.list, data.items);
   renderAvailabilitySummary(data);
+  renderDeclaredMembershipContext(data);
   const hasFilters = Boolean(hasActiveFilters());
   if (!data.total) {
     elements.summary.textContent = "0 units found";
@@ -324,7 +346,7 @@ function applyFilters() {
 function clearFilters() {
   clearTimeout(searchTimer);
   state = {
-    ...state, armyId: "", search: "", offset: 0,
+    ...state, armyId: "", declaredFactionId: "", search: "", offset: 0,
     skillId: "", equipmentId: "", weaponId: "",
   };
   syncFilters();

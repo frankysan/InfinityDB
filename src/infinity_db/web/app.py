@@ -367,10 +367,11 @@ def _domain_filter_identifier(params: dict, key: str) -> int | str | None:
 
 
 def _unit_query(query: str) -> dict:
-    params = parse_qs(query, keep_blank_values=True, max_num_fields=14)
+    params = parse_qs(query, keep_blank_values=True, max_num_fields=15)
     for key, values in params.items():
         if key not in {
             "army_id",
+            "declared_faction_id",
             "search",
             "skill_id",
             "equipment_id",
@@ -395,6 +396,9 @@ def _unit_query(query: str) -> dict:
         raise ValueError("order must be asc or desc")
     return {
         "army_id": _domain_filter_identifier(params, "army_id"),
+        "declared_faction_id": _integer(
+            params, "declared_faction_id", None, 0, 2**63 - 1
+        ),
         "search": search,
         "skill_id": _domain_filter_identifier(params, "skill_id"),
         "equipment_id": _domain_filter_identifier(params, "equipment_id"),
@@ -903,7 +907,7 @@ class Application:
                 items = [dict(item) for item in self.database.list_armies()]
                 for item in items:
                     attach_public_army_slug(self.database, item)
-                payload = {"items": items}
+                payload = enrich_army_references(self.database, {"items": items})
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read armies")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

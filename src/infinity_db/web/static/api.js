@@ -59,9 +59,10 @@ export function getVersion(signal) {
   return get("/api/version", signal);
 }
 
-export function getUnits({ armyId, search, skillId, equipmentId, weaponId, limit, offset, mercs, specops, teamops, reinforcement, descending }, signal) {
+export function getUnits({ armyId, declaredFactionId, search, skillId, equipmentId, weaponId, limit, offset, mercs, specops, teamops, reinforcement, descending }, signal) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (armyId) params.set("army_id", armyId);
+  if (declaredFactionId) params.set("declared_faction_id", declaredFactionId);
   if (search) params.set("search", search);
   if (skillId) params.set("skill_id", skillId);
   if (equipmentId) params.set("equipment_id", equipmentId);

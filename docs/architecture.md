@@ -474,7 +474,10 @@ projection or the broader faction registry. Normal repository serving now reads
 that layer for Army identity, source-alias resolution, hierarchy, playability,
 unit faction/group presentation, and reinforcement relationships. Concrete
 availability still comes from `army_units`; `unit_factions` remains the separate
-game-wide declared-membership relation. The only normal-serving dependency on
+game-wide declared-membership relation. Unit detail presents that relation explicitly and the
+Unit Explorer's `declared_faction_id` filter follows it without reclassifying membership as Army
+availability; source faction IDs with no current list remain source-only identities. The only
+normal-serving dependency on
 `army_lists` is the legacy source-shape `kind` value, retained for API compatibility
 and as a reinforcement fallback for incomplete/legacy source relationships.
 `metadata_factions` is no longer a normal-serving dependency. Browser code

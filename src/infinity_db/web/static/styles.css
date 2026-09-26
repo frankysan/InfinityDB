@@ -3694,3 +3694,23 @@ html[data-developer-mode="true"] .fireteam-member-table table {
 .fireteam-loadout-list li + li {
   margin-top: 3px;
 }
+
+.relationship-filter-context {
+  margin: 12px 0 0;
+  border-left: 3px solid var(--color-accent);
+  padding: 9px 12px;
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.army-relationships {
+  width: min(760px, 100%);
+}
+
+.army-relationship-intro,
+.army-relationship-note {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}

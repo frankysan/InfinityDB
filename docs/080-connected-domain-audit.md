@@ -135,15 +135,20 @@ Wiki likewise defines the Reinforcement Section as a section of an Army List, sh
 a faction and constrained by both its own Fireteam chart and the selected parent Army's
 allowed Fireteam types/counts.
 
-0.8.0 should expose Reinforcement parent/child navigation and section context through the
-existing Army/Unit surfaces. No new Reinforcement catalog is required.
+0.8.0 now exposes Reinforcement parent/child navigation and section context through the
+existing Army/Unit surfaces. `/api/armies` and Unit detail carry the canonical application Army
+parent/child references, and the Unit browser links those references back to Army-filtered Unit
+exploration. No new Reinforcement catalog is required.
 
 ### Declared faction membership and cross-Army navigation: reuse Army/Unit identity
 
 The application model already distinguishes concrete Army availability from broader
-source-declared faction membership. Cross-Army discovery should expose those existing
-relationships from Units and Armies. A separate membership domain would only duplicate
-endpoints that already have stable identity.
+source-declared faction membership. Unit detail now exposes those declarations independently of
+its concrete Army occurrences, and the Unit Explorer accepts `declared_faction_id` as a dedicated
+relationship filter over `unit_factions`. This deliberately differs from `army_id`, which remains
+a concrete playable-List filter. Source faction IDs with no current Army List remain navigable by
+their exact source ID and are not promoted into application Army identities. A separate membership
+domain would only duplicate endpoints that already have stable identity.
 
 ### Deployable profiles: add a reference projection, not a top-level domain
 
@@ -174,10 +179,11 @@ ontology.
 ## 0.8.0 implementation order
 
 Schema 25 / compatibility revision 33 completed step 1 below, and the Army-scoped browser/API
-plus rules-backed generated Fireteam quick reference complete step 2. Step 3 is now partially
-complete: Peripheral/Controller and include relationships are presented. Selection/dependency,
-Reinforcement parentage, and broader faction/cross-Army relationships remain active. This
-document keeps the original order as the milestone contract.
+plus rules-backed generated Fireteam quick reference complete step 2. Step 3 is now complete:
+Peripheral/Controller, include, selection/dependency, Reinforcement-parent, and broader declared
+faction/cross-Army relationships are all presented through existing application identities. The
+next active implementation step is Hacking Programs. This document keeps the original order as
+the milestone contract.
 
 The audit establishes this order for the connected-data milestone:
 

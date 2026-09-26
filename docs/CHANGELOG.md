@@ -32,6 +32,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Web backend + Web frontend:** Expose Reinforcement Section parent/child Army relationships and
+  broader source-declared faction membership on Unit details. Reinforcement links navigate through
+  existing Army filters, while declared membership has its own cross-Unit filter so faction IDs
+  without a current Army List remain discoverable without being treated as concrete availability.
 - **Web backend + Web frontend:** Present reviewed Unit selection constraints and same-Unit
   profile-group dependencies on Unit details. Whole-Unit constraints link their affected Units;
   dependency edges link directly to the relevant profile groups and constrained loadouts while

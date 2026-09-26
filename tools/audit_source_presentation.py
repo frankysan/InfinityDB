@@ -179,8 +179,16 @@ _register(
     ),
 )
 _register(
+    ["unit_factions"],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Source-declared faction membership is presented separately from concrete Army-list "
+        "availability and can be followed through the Unit explorer relationship filter."
+    ),
+)
+_register(
     [
-        "unit_factions",
         "unit_options",
         "unit_option_skills",
         "unit_option_skill_extras",
@@ -299,26 +307,6 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
 
 
 CONFIRMED_GAPS: tuple[dict[str, Any], ...] = (
-    {
-        "id": "reinforcement_parentage",
-        "target": "0.8.x",
-        "layer": "repository_api_only",
-        "tables": ["application_army_reinforcement_parents"],
-        "reason": (
-            "Reinforcement Section parent relationships are modeled but not exposed "
-            "as navigable UI relationships."
-        ),
-    },
-    {
-        "id": "declared_faction_membership",
-        "target": "0.8.x",
-        "layer": "application_database_only",
-        "tables": ["unit_factions"],
-        "reason": (
-            "Broader source-declared faction membership is distinct from Army "
-            "availability but is not presented explicitly."
-        ),
-    },
     {
         "id": "unit_notes",
         "target": "0.9.x",

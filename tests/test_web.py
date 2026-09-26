@@ -524,6 +524,17 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
     assert armies[102]["group_id"] == 101
     assert armies[198]["role"] == "reinforcement"
     assert armies[198]["parent_army_ids"] == [101]
+    assert armies[198]["parent_armies"] == [
+        {"id": 101, "name": "Main Army", "slug": "main", "public_slug": "main"}
+    ]
+    assert armies[101]["reinforcement_sections"] == [
+        {
+            "id": 198,
+            "name": "Reinforcements",
+            "slug": "main-reinforcements",
+            "public_slug": "main-reinforcements",
+        }
+    ]
     assert armies[902]["role"] == "non_aligned"
     assert armies[902]["group_id"] == 901
     assert armies[901]["role"] == "grouping"
@@ -544,6 +555,23 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
         901: "non-aligned",
         902: "independent",
     }
+
+    status, _, body = request(role_app, "/api/units/1")
+    assert status == 200
+    detail = json.loads(body)
+    detail_armies = {army["id"]: army for army in detail["armies"]}
+    assert detail_armies[198]["role"] == "reinforcement"
+    assert detail_armies[198]["parent_armies"] == [
+        {"id": 101, "name": "Main Army", "slug": "main", "public_slug": "main"}
+    ]
+    assert detail_armies[101]["reinforcement_sections"] == [
+        {
+            "id": 198,
+            "name": "Reinforcements",
+            "slug": "main-reinforcements",
+            "public_slug": "main-reinforcements",
+        }
+    ]
 
     for army_ref in ("901", "non-aligned"):
         status, _, body = request(role_app, "/api/units", query=f"army_id={army_ref}")
@@ -568,6 +596,67 @@ def test_army_filter_uses_actual_occurrences(app: Callable) -> None:
         shared = next(item for item in payload["items"] if item["id"] == 1)
         assert set(shared["army_ids"]) == {101, 201}
         assert {army["id"] for army in shared["armies"]} == {101, 201}
+
+
+def test_declared_faction_membership_is_distinct_and_navigable(
+    tmp_path: Path, app_database_template: Path
+) -> None:
+    database_path = tmp_path / "declared-membership.db"
+    shutil.copy2(app_database_template, database_path)
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(
+            "INSERT INTO unit_factions (unit_id, faction_id, position) VALUES (?, ?, ?)",
+            (3, 907, 2),
+        )
+    _refresh_published_content_checksum(database_path)
+    membership_app = create_app(database_path)
+
+    status, _, body = request(membership_app, "/api/units/3")
+    assert status == 200
+    unit = json.loads(body)
+    memberships = {item["source_faction_id"]: item for item in unit["declared_factions"]}
+    assert memberships[201] == {
+        "source_faction_id": 201,
+        "source_unit_ids": [3],
+        "application_army_id": 201,
+        "name": "Alpha Company",
+        "has_army_list": True,
+        "available": False,
+    }
+    assert memberships[907] == {
+        "source_faction_id": 907,
+        "source_unit_ids": [3],
+        "application_army_id": None,
+        "name": "Faction 907",
+        "has_army_list": False,
+        "available": False,
+    }
+
+    status, _, body = request(
+        membership_app, "/api/units", query="declared_faction_id=201&mercs=1"
+    )
+    assert status == 200
+    payload = json.loads(body)
+    assert {item["id"] for item in payload["items"]} == {2, 3}
+    assert payload["declared_faction"] == {
+        "source_faction_id": 201,
+        "application_army_id": 201,
+        "name": "Alpha Company",
+        "has_army_list": True,
+    }
+
+    status, _, body = request(
+        membership_app, "/api/units", query="declared_faction_id=907&mercs=1"
+    )
+    assert status == 200
+    payload = json.loads(body)
+    assert [item["id"] for item in payload["items"]] == [3]
+    assert payload["declared_faction"] == {
+        "source_faction_id": 907,
+        "application_army_id": None,
+        "name": "Faction 907",
+        "has_army_list": False,
+    }
 
 
 def test_global_pagination_counts_unique_units(app: Callable) -> None:
@@ -1928,6 +2017,37 @@ def test_unit_details_frontend_presents_include_relationships(app: Callable) -> 
     assert b"details.open = true" in unit_js
     assert b"function unitOptionIncludeTable(options, anchorScope)" in unit_js
     assert b'section.append(subheading("Included loadouts"));' in unit_js
+
+
+def test_unit_frontend_presents_army_relationships_and_declared_membership_filter(
+    app: Callable,
+) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function renderArmyRelationships(unit, armies)" in unit_js
+    assert b'heading("Army relationships")' in unit_js
+    assert b'link.href = `/units?army_id=${encodeURIComponent(identifier)}`;' in unit_js
+    assert (
+        b'link.href = `/units?declared_faction_id='
+        b'${encodeURIComponent(membership.source_faction_id)}`;' in unit_js
+    )
+    assert b"broader source-declared faction membership separately" in unit_js
+    assert b"this faction identity has no current Army list" in unit_js
+
+    status, _, app_js = request(app, "/static/app.js")
+    assert status == 200
+    assert b'declaredFactionId = params.get("declared_faction_id") || ""' in app_js
+    assert b'url.searchParams.set("declared_faction_id", state.declaredFactionId)' in app_js
+    assert b"renderDeclaredMembershipContext(data)" in app_js
+    assert b"broader than concrete current Army-list availability" in app_js
+
+    status, _, api_js = request(app, "/static/api.js")
+    assert status == 200
+    assert b'params.set("declared_faction_id", declaredFactionId)' in api_js
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(styles, ".army-relationships", {"width": "min(760px, 100%)"})
 
 
 def test_unit_details_frontend_presents_selection_relationships(app: Callable) -> None:

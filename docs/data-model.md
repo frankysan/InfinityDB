@@ -1731,12 +1731,17 @@ SQLite reads: source-only rows may live exclusively in `infinity.raw.db`, canoni
 application facts may live in derived tables, and a fact may be preserved in the API
 without yet having a usable browser presentation.
 
-The maintained inventory now records **4 confirmed gap families** for later roadmap work:
+The maintained inventory now records **2 confirmed gap families** for later roadmap work:
 
-- Reinforcement Section parentage;
-- broader source-declared faction membership distinct from concrete Army availability;
 - source-attributed Unit notes;
 - top-level composite Unit options.
+
+Reinforcement Section parentage and broader source-declared faction membership are no longer
+presentation gaps. Unit/API Army references expose parent/child Reinforcement relationships,
+while Unit detail exposes declared membership separately from concrete availability. The Unit
+Explorer accepts `declared_faction_id` as a relationship filter over `unit_factions`, including
+source faction IDs that have no current application Army List; those IDs remain source faction
+identities rather than being promoted into selectable Armies.
 
 The former structured-reference-metadata gap is closed in schema 24 / compatibility
 revision 32. Source `metadata_hacking_programs`, `metadata_martial_arts`,
@@ -1753,9 +1758,9 @@ Peripheral occurrences plus **8** Controller-target edges, **96** Unit selection
 **14** profile-group dependency constraints, **46** Reinforcement-parent links, **2,094**
 declared faction memberships, **30** source-attributed Unit-note occurrences, **18** top-level
 Unit options, and **299** canonical profile payloads marked `is_structure`. Fireteam,
-Peripheral/Controller, include, and selection/dependency source facts are no longer open
-presentation gaps: their maintained application relationships are now consumed by player-facing
-browser/API surfaces.
+Peripheral/Controller, include, selection/dependency, Reinforcement-parent, and declared-faction
+source facts are no longer open presentation gaps: their maintained application relationships are
+now consumed by player-facing browser/API surfaces.
 The structured lookup metadata has the application projections described above.
 
 Two preserved constructs remain an explicit semantic review queue instead of being
