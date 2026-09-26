@@ -761,6 +761,77 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert json.loads(body)["error"] == "Unit not found"
 
 
+def test_unit_details_expose_bidirectional_peripheral_controller_links(
+    tmp_path: Path, app_database_template: Path
+) -> None:
+    database_path = tmp_path / "infinity.db"
+    shutil.copy2(app_database_template, database_path)
+    peripheral_app = create_app(database_path)
+
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(
+            "INSERT INTO application_peripheral_unit_sources "
+            "(source_unit_id, logical_unit_id, type_id, source_id, source_name) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (2, 2, "rule:peripheral-type:cyberplug", "test-source", "Beta Scout"),
+        )
+        connection.execute(
+            "INSERT INTO application_peripheral_controller_access "
+            "(id, source_id, controller_kind, army_id, unit_id, group_id, parent_id, "
+            "source_name, type_id, relationship) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                "peripheral-controller-access:test",
+                "test-source",
+                "loadout",
+                101,
+                1,
+                1,
+                1,
+                "Alpha Ranger",
+                "rule:peripheral-type:cyberplug",
+                "access-pool",
+            ),
+        )
+        connection.execute(
+            "INSERT INTO application_peripheral_controller_targets "
+            "(access_id, target_logical_unit_id) VALUES (?, ?)",
+            ("peripheral-controller-access:test", 2),
+        )
+
+    status, _, body = request(peripheral_app, "/api/units/ranger-prototype")
+    assert status == 200
+    controller = json.loads(body)
+    army = next(item for item in controller["armies"] if item["id"] == 101)
+    assert army["loadouts"][0]["peripheral_access"] == [
+        {
+            "id": "peripheral-controller-access:test",
+            "type_id": "rule:peripheral-type:cyberplug",
+            "relationship": "access-pool",
+            "targets": [{"id": 2, "slug": "beta-scout", "name": "Beta Scout"}],
+        }
+    ]
+
+    status, _, body = request(peripheral_app, "/api/units/2")
+    assert status == 200
+    target = json.loads(body)
+    assert target["peripheral_type_ids"] == ["rule:peripheral-type:cyberplug"]
+    assert target["peripheral_controllers"] == [
+        {
+            "id": "peripheral-controller-access:test",
+            "type_id": "rule:peripheral-type:cyberplug",
+            "relationship": "access-pool",
+            "controller_kind": "loadout",
+            "controller_option_name": "Rifle loadout",
+            "army": {"id": 101, "name": "Zulu Company"},
+            "controller": {
+                "id": 1,
+                "slug": "ranger-prototype",
+                "name": "Alpha Ranger",
+            },
+        }
+    ]
+
+
 @pytest.mark.parametrize(
     ("unit_id", "expected_flags"),
     [
@@ -1767,6 +1838,24 @@ def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callabl
     assert b"function profileItems(items, catalog, fallbackLabel)" in body
     assert b"const routeId = item.slug || item.id;" in body
     assert b"link.href = `/${catalog}/${encodeURIComponent(routeId)}`" in body
+
+
+def test_unit_details_frontend_presents_peripheral_relationships(app: Callable) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function appendPeripheralRows(rows, item, colSpan = null)" in unit_js
+    assert b'{ value: "Peripherals", header: true' in unit_js
+    assert b'{ value: "Controller access", header: true' in unit_js
+    assert b"group.append(unitLink(target));" in unit_js
+    assert b"function renderPeripheralRelationships(unit)" in unit_js
+    assert b"const controllers = unit.peripheral_controllers || [];" in unit_js
+    assert b"item.append(unitLink(access.controller));" in unit_js
+    assert b"no fixed ownership is implied" in unit_js
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(styles, ".peripheral-relationships", {"width": "min(760px, 100%)"})
+    assert_css_rule(styles, ".connected-unit-surface", {"padding": "14px 16px"})
 
 
 @pytest.mark.full_assets

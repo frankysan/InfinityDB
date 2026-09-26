@@ -539,6 +539,130 @@ function profileItems(items, catalog, fallbackLabel) {
   return result;
 }
 
+const peripheralTypeLabels = {
+  "rule:peripheral-type:servant": "Servant",
+  "rule:peripheral-type:synchronized": "Synchronized",
+  "rule:peripheral-type:control": "Control",
+  "rule:peripheral-type:ancillary": "Ancillary",
+  "rule:peripheral-type:cyberplug": "Cyberplug",
+};
+
+function peripheralTypeLabel(typeId) {
+  return peripheralTypeLabels[typeId] || String(typeId || "Peripheral").split(":").at(-1);
+}
+
+function unitLink(unit) {
+  const link = document.createElement("a");
+  const routeId = unit.slug || unit.id;
+  link.href = `/units/${encodeURIComponent(routeId)}`;
+  link.textContent = unit.name || `Unit #${text(unit.id)}`;
+  return link;
+}
+
+function peripheralItems(items) {
+  const result = document.createDocumentFragment();
+  items.forEach((item, index) => {
+    const quantity = item.quantity != null && Number(item.quantity) !== 1
+      ? ` ×${item.quantity}`
+      : "";
+    const label = `${item.name || "Peripheral"}${quantity} (${peripheralTypeLabel(item.type_id)})`;
+    if (index) result.append(", ");
+    result.append(document.createTextNode(label));
+  });
+  return result;
+}
+
+function peripheralAccessItems(accessItems) {
+  const result = document.createDocumentFragment();
+  accessItems.forEach((access, accessIndex) => {
+    if (accessIndex) result.append("; ");
+    const group = document.createElement("span");
+    if (access.relationship === "access-pool") {
+      group.title = "Access pool; this does not assign fixed Controller ownership.";
+    }
+    group.append(`${peripheralTypeLabel(access.type_id)}: `);
+    (access.targets || []).forEach((target, targetIndex) => {
+      if (targetIndex) group.append(", ");
+      group.append(unitLink(target));
+    });
+    result.append(group);
+  });
+  return result;
+}
+
+function appendPeripheralRows(rows, item, colSpan = null) {
+  if ((item.peripherals || []).length) {
+    rows.push([
+      { value: "Peripherals", header: true, className: "data-label profile-item-label" },
+      {
+        content: peripheralItems(item.peripherals),
+        className: "profile-item-list",
+        ...(colSpan ? { colSpan } : {}),
+      },
+    ]);
+  }
+  if ((item.peripheral_access || []).length) {
+    rows.push([
+      { value: "Controller access", header: true, className: "data-label profile-item-label" },
+      {
+        content: peripheralAccessItems(item.peripheral_access),
+        className: "profile-item-list",
+        ...(colSpan ? { colSpan } : {}),
+      },
+    ]);
+  }
+}
+
+function renderPeripheralRelationships(unit) {
+  const typeIds = unit.peripheral_type_ids || [];
+  const controllers = unit.peripheral_controllers || [];
+  if (!typeIds.length && !controllers.length) return null;
+
+  const section = document.createElement("section");
+  section.className = "detail-group peripheral-relationships";
+  const title = heading("Peripheral relationships");
+  title.className = "detail-section-title detail-section-title--rule";
+  section.append(title);
+
+  const surface = document.createElement("div");
+  surface.className = "explorer connected-unit-surface";
+  if (typeIds.length) {
+    const type = document.createElement("p");
+    type.className = "connected-unit-type";
+    const label = typeIds.map(peripheralTypeLabel).join(", ");
+    type.textContent = `Peripheral type: ${label}`;
+    surface.append(type);
+  }
+  if (controllers.length) {
+    surface.append(subheading("Controllers"));
+    const list = document.createElement("ul");
+    list.className = "detail-list connected-unit-list";
+    for (const access of controllers) {
+      const item = document.createElement("li");
+      item.append(unitLink(access.controller));
+      const context = [
+        access.army?.name,
+        access.controller_option_name
+          ? `${access.controller_kind === "profile" ? "Profile" : "Loadout"}: ${access.controller_option_name}`
+          : null,
+      ].filter(Boolean);
+      if (context.length) {
+        const detail = document.createElement("span");
+        detail.className = "connected-unit-context";
+        detail.textContent = ` — ${context.join(" · ")}`;
+        item.append(detail);
+      }
+      if (access.relationship === "access-pool") {
+        item.title = "This Controller can select this Peripheral from its access pool; no fixed ownership is implied.";
+      }
+      list.append(item);
+    }
+    surface.append(list);
+  }
+  section.append(surface);
+  return section;
+}
+
 function generalProfileTableRows(profiles) {
   const rows = [];
   for (const profile of profiles) {
@@ -603,6 +727,7 @@ function profileTableRows(profiles, generalByName) {
         },
       ]);
     }
+    appendPeripheralRows(rows, profile);
     return rows;
   });
 }
@@ -655,6 +780,7 @@ function loadoutTable(loadouts, sharedItems, generalOrderType) {
           },
         ]);
       }
+      appendPeripheralRows(rows, loadout, 2);
       return rows;
     }),
     "data-table--compact loadout-table",
@@ -828,6 +954,8 @@ function render(unit) {
     generalProfilesSection.append(generalProfile);
   }
   content.append(generalProfilesSection);
+  const peripheralRelationships = renderPeripheralRelationships(unit);
+  if (peripheralRelationships) content.append(peripheralRelationships);
   let standardArmyExpanded = false;
   for (const group of groupArmiesByFaction(armies)) {
     const section = document.createElement("section");

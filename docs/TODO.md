@@ -56,10 +56,6 @@ directly useful without becoming an Army-list legality engine or live game-state
 
 ### Fireteams and connected application data
 
-- [ ] **Web backend + Web frontend:** Present canonical Peripheral attachments and
-  Controller access pools with
-  navigable links between Controllers and Peripheral targets.
-
 - [ ] **Web backend + Web frontend:** Present profile/loadout/top-level Unit-option
   include relationships.
 

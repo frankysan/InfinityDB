@@ -1986,8 +1986,12 @@ There are no source relation/dependency edges selecting one Sartroid for one Con
 The full reviewed contract and hash are pinned into database metadata; database validation
 reconstructs these rows against the retained Army source context and fails on source-name,
 logical-identity, subtype, Controller, or target-pool drift. Repository Unit details expose
-canonical embedded attachments, Unit-backed type IDs, and Controller access targets without
-reading `data/curated/` at runtime. Rules semantics remain separately cited in `rules.db`;
+canonical embedded attachments, Unit-backed type IDs, per-profile/loadout Controller access
+targets, and reverse Controller occurrences on Unit-backed Peripheral targets without reading
+`data/curated/` at runtime. The browser renders the attachment/access relationship in its exact
+profile/loadout context and links Controller pools in both Unit directions while retaining the
+reviewed access-pool semantics rather than implying fixed ownership. Rules semantics remain
+separately cited in `rules.db`;
 `infinity.db` stores only the reviewed application relationship IDs needed to join them.
 
 #### Generic relation/dependency evidence

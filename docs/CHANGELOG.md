@@ -32,6 +32,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Web backend + Web frontend:** Present canonical Peripheral attachments and Controller access
+  pools on Unit profile/loadout surfaces. Controller access targets now link directly to their Unit
+  details, while Unit-backed Peripheral targets expose the reverse Controller occurrences with Army
+  and profile/loadout context without implying fixed ownership.
 - **Data processing + Web backend + Web frontend:** Add curated N5 Fireteam general rules and
   cumulative Fireteam Level bonuses to `rules.db`, expose them as an optional reference payload
   alongside the canonical Army chart, and generate the `/fireteams` quick reference from those

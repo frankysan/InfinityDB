@@ -2946,6 +2946,52 @@ class Database:
                     }
                 )
 
+            controller_rows = connection.execute(
+                "SELECT a.id, a.controller_kind, a.army_id, "
+                "a.type_id, a.relationship, lus.logical_unit_id AS controller_unit_id, "
+                "lu.name AS controller_name, ds.slug AS controller_slug, "
+                "CASE a.controller_kind WHEN 'profile' THEN pp.name ELSE lp.name END "
+                "AS controller_option_name "
+                "FROM application_peripheral_controller_targets AS t "
+                "JOIN application_peripheral_controller_access AS a ON a.id = t.access_id "
+                "JOIN logical_unit_sources AS lus ON lus.source_unit_id = a.unit_id "
+                "JOIN logical_units AS lu ON lu.id = lus.logical_unit_id "
+                "LEFT JOIN application_domain_slugs AS ds "
+                "ON ds.domain = 'units' AND ds.application_id = lus.logical_unit_id "
+                "LEFT JOIN profile_payload_occurrences AS ppo ON a.controller_kind = 'profile' "
+                "AND ppo.army_id = a.army_id AND ppo.unit_id = a.unit_id "
+                "AND ppo.group_id = a.group_id AND ppo.profile_id = a.parent_id "
+                "LEFT JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id "
+                "LEFT JOIN loadout_payload_occurrences AS lpo ON a.controller_kind = 'loadout' "
+                "AND lpo.army_id = a.army_id AND lpo.unit_id = a.unit_id "
+                "AND lpo.group_id = a.group_id AND lpo.option_id = a.parent_id "
+                "LEFT JOIN loadout_payloads AS lp ON lp.id = lpo.loadout_payload_id "
+                "WHERE t.target_logical_unit_id = ? "
+                "ORDER BY a.army_id, lu.name, a.controller_kind, a.group_id, a.parent_id, a.id",
+                (group["id"],),
+            ).fetchall()
+            peripheral_controllers = []
+            for row in controller_rows:
+                army_identity = faction_identities.get(row["army_id"])
+                peripheral_controllers.append(
+                    {
+                        "id": row["id"],
+                        "type_id": row["type_id"],
+                        "relationship": row["relationship"],
+                        "controller_kind": row["controller_kind"],
+                        "controller_option_name": row["controller_option_name"],
+                        "army": {
+                            "id": army_identity["id"] if army_identity else row["army_id"],
+                            "name": army_identity["name"] if army_identity else None,
+                        },
+                        "controller": {
+                            "id": row["controller_unit_id"],
+                            "slug": row["controller_slug"],
+                            "name": row["controller_name"],
+                        },
+                    }
+                )
+
             peripheral_type_ids = [
                 row[0]
                 for row in connection.execute(
@@ -3088,6 +3134,8 @@ class Database:
         }
         if peripheral_type_ids:
             result["peripheral_type_ids"] = peripheral_type_ids
+        if peripheral_controllers:
+            result["peripheral_controllers"] = peripheral_controllers
         if selection_constraints:
             result["selection_constraints"] = selection_constraints
         if group_dependencies:
