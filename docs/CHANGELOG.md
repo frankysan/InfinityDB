@@ -9,6 +9,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web frontend:** Keep ordinary Fireteam cards compact in non-Developer mode while
+  retaining the full-width chart layout when Developer-only columns are visible.
+- **Project infrastructure:** Restructure the implementation backlog into explicit 0.8,
+  0.9, 1.0, and post-1.0 release buckets so every open item has one planning horizon;
+  consolidate overlapping Hacking Program work under 0.8 and reserve broader current-rule
+  completeness plus the final acceptance gate for 1.0.
 - **Web frontend:** Refine the Fireteam chart browser: mirror the Unit Explorer Army hierarchy
   in the selector, present the Army source sentinel `256` as an unlimited Fireteam type
   allowance, and move unavailable type limits plus FTO-profile/Notes columns behind Developer
