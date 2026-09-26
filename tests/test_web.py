@@ -1507,7 +1507,7 @@ def test_unit_details_frontend_places_unit_symbols_on_general_profiles(
     assert b'unitProfileSymbolPath' in unit_js
     assert b'profile.logo_urls || []' in unit_js
     assert b'general-profile-symbols' in unit_js
-    assert b'general-profile--with-symbols' in unit_js
+    assert b'profileTitle(profile, profileSymbols)' in unit_js
     assert b'unitSymbol(unit.slug || unit.isc || unit.name' not in unit_js
 
     status, _, symbol_js = request(app, "/static/unit-symbols.js")
@@ -1519,6 +1519,13 @@ def test_unit_details_frontend_places_unit_symbols_on_general_profiles(
     assert status == 200
     assert b'.general-profile-symbols' in styles
     assert b'.general-profile-unit-symbol' in styles
+    assert_css_rule(
+        styles,
+        ".unit-symbol.general-profile-unit-symbol",
+        {"width": "56px", "height": "56px"},
+    )
+    assert b'--profile-symbol-title-space' not in unit_js
+    assert b'general-profile--with-symbols' not in unit_js
     assert b'.unit-symbol-detail' not in styles
 
 
@@ -1786,8 +1793,8 @@ def test_characteristic_symbols_are_served(app: Callable, symbol: str) -> None:
 def test_unit_details_frontend_renders_order_symbols_as_content(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
-    assert b"function profileTitle(profile)" in body
-    assert b"generalProfile.append(profileTitle(profile), table(" in body
+    assert b"function profileTitle(profile, profileSymbols = null)" in body
+    assert b"generalProfile.append(profileTitle(profile, profileSymbols), table(" in body
     assert b"nameWithOrderSymbols(loadout.name, symbolTypes)" in body
     assert b"function generalProfileOrderType(profiles, loadouts)" in body
     assert b'hasSkill(loadouts, "regular")' in body

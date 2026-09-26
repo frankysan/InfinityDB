@@ -1490,24 +1490,19 @@ h1>span {
 }
 
 .general-profile-symbols {
-  position: absolute;
-  z-index: 2;
-  top: -18px;
-  right: 18px;
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 8px;
+  margin-left: auto;
 }
 
-.general-profile-unit-symbol {
-  width: 48px;
-  height: 48px;
-  padding: 3px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 10px;
-  background: var(--color-surface-default);
-  box-shadow: 0 5px 12px #203b3520;
+.unit-symbol.general-profile-unit-symbol {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  object-fit: contain;
 }
 
 .data-label {
@@ -2109,8 +2104,12 @@ table {
 }
 
 .unit-detail .general-profile .profile-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin: 0;
-  padding: 16px 26px 13px;
+  padding: 8px 18px;
+  min-height: 72px;
   border-bottom: 1px solid var(--color-border-highlight);
   background: var(--color-surface-highlight);
   color: #2d4134;
@@ -2118,8 +2117,8 @@ table {
   font-weight: 600;
 }
 
-.unit-detail .general-profile--with-symbols .profile-title {
-  padding-right: 138px;
+.unit-detail .general-profile .profile-title-name {
+  min-width: 0;
 }
 
 @supports (color: color-mix(in srgb, white, transparent)) {
@@ -3236,25 +3235,20 @@ tbody tr:hover {
   }
 
   .unit-detail .general-profile .profile-title {
-    padding: 16px 16px 9px;
+    gap: 10px;
+    padding: 7px 12px;
+    min-height: 62px;
     font-size: 15px;
   }
 
-  .unit-detail .general-profile--with-symbols .profile-title {
-    padding-right: 112px;
-  }
-
   .general-profile-symbols {
-    top: -14px;
-    right: 12px;
     gap: 4px;
   }
 
-  .general-profile-unit-symbol {
-    width: 40px;
-    height: 40px;
-    padding: 2px;
-    border-radius: 8px;
+  .unit-symbol.general-profile-unit-symbol {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
   }
 
   .unit-detail .general-profile .profile-title .order-symbol {

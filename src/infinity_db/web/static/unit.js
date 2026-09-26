@@ -354,10 +354,14 @@ function generalProfileName(profile) {
   return nameWithOrderSymbols(profile.profileName, profile.symbolTypes);
 }
 
-function profileTitle(profile) {
+function profileTitle(profile, profileSymbols = null) {
   const title = document.createElement("h3");
   title.className = "profile-title";
-  title.append(generalProfileName(profile));
+  const name = document.createElement("span");
+  name.className = "profile-title-name";
+  name.append(generalProfileName(profile));
+  title.append(name);
+  if (profileSymbols) title.append(profileSymbols);
   return title;
 }
 
@@ -378,8 +382,8 @@ function generalProfileSymbols(profile, unitName) {
     icon.className = "unit-symbol general-profile-unit-symbol";
     icon.src = path;
     icon.alt = "";
-    icon.width = 48;
-    icon.height = 48;
+    icon.width = 56;
+    icon.height = 56;
     icon.loading = "lazy";
     icon.decoding = "async";
     icon.addEventListener("error", () => icon.remove(), { once: true });
@@ -816,11 +820,7 @@ function render(unit) {
     const profileSymbols = generalProfileSymbols(
       profile, unit.slug || unit.isc || unit.name,
     );
-    if (profileSymbols) {
-      generalProfile.classList.add("general-profile--with-symbols");
-      generalProfile.append(profileSymbols);
-    }
-    generalProfile.append(profileTitle(profile), table(
+    generalProfile.append(profileTitle(profile, profileSymbols), table(
       [],
       generalProfileTableRows([profile]),
       "statline",
