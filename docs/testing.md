@@ -107,6 +107,33 @@ template into each test's temporary directory before creating the application.
 This preserves mutation isolation while avoiding a full normalize/export cycle
 for every web test.
 
+### SQLite finalization in semantic tests
+
+The production Army and rules exporters canonicalize generated SQLite artifacts by
+default: they repack with `VACUUM` and normalize transaction-history-only header
+fields so release artifacts remain byte-deterministic. Export-heavy semantic tests
+that inspect database contents rather than final file bytes explicitly use
+`finalize=False` to avoid repeating that physical-file work. This optimization is
+limited to test callers; the CLI does not expose a non-finalized build mode.
+
+`tests/test_database.py` and `tests/test_rules_database.py` retain a comparison
+switch for measuring the finalization cost with the normal xdist scheduler. Set
+`INFINITYDB_TEST_FINALIZE_SQLITE=1` to force those fixtures back through canonical
+finalization for one run, then compare against the normal test path using the same
+machine and worker count:
+
+```powershell
+$env:INFINITYDB_TEST_FINALIZE_SQLITE = "1"
+python tools/run_checks.py --stage test --test-workers auto tests/test_database.py tests/test_rules_database.py
+Remove-Item Env:INFINITYDB_TEST_FINALIZE_SQLITE
+python tools/run_checks.py --stage test --test-workers auto tests/test_database.py tests/test_rules_database.py
+```
+
+Treat these timings as diagnostic evidence, not a pass/fail performance threshold.
+Shared CI runners can vary substantially, so record the platform, Python/SQLite
+versions, worker setting, and both measured durations when closing a performance
+audit.
+
 ## Targeted checks
 
 Positional targets are forwarded to pytest and Ruff. They are deliberately not

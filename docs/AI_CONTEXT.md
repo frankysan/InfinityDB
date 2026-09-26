@@ -115,7 +115,11 @@ and serves a read-only browser and same-origin HTTP API.
   benchmarking measured 687 tests at 59.67 s serial, 19.41 s with four workers,
   and 14.13 s with automatic worker selection. Web tests build one template
   database per module and copy it per test so mutating tests remain isolated
-  without repeating normalization/export work.
+  without repeating normalization/export work. Export-heavy Army/rules semantic
+  tests explicitly skip byte-level SQLite finalization; production/default
+  exporters still perform canonical `VACUUM` and header normalization. The
+  test-only `INFINITYDB_TEST_FINALIZE_SQLITE=1` switch restores canonical
+  finalization in those modules for before/after xdist measurement.
 - GitHub `Source checks` is configured to run hermetic checks on clean Windows,
   Ubuntu/Linux, and macOS Python 3.11 runners for pull requests, pushes to
   `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. It

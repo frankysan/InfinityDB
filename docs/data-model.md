@@ -2301,7 +2301,11 @@ compatibility revision is 32. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 frontend export runs `ANALYZE` after loading and indexing data, preserving SQLite
-planner statistics in the immutable snapshot.
+planner statistics in the immutable snapshot. Production/default exports then
+canonicalize the physical SQLite files with `VACUUM` plus header normalization for
+byte-level portability. Programmatic semantic-test callers may explicitly set
+`finalize=False`; that skips only this physical canonicalization and does not bypass
+input validation, integrity checks, schema creation, or atomic replacement.
 
 The physical application/raw split is now part of the generated-database contract.
 Normal repository/API/web serving requires only the self-contained `infinity.db`

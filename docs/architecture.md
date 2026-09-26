@@ -81,7 +81,10 @@ so the compared fixtures are byte-identical inputs. Generated SQLite artifacts l
 explicit page/file settings, are repacked with `VACUUM`, and normalize SQLite's
 transaction-history-only file-change/version-valid-for header counters after the database is
 closed. The normalized counters remain equal so SQLite can still trust the in-header database
-size; schema/user/application version fields and database contents are not rewritten.
+size; schema/user/application version fields and database contents are not rewritten. Army and
+rules exporters keep this canonical finalization enabled by default, including every CLI/release
+build. Programmatic callers may explicitly disable only the physical finalization step when a
+semantic test needs valid database contents but not byte-level artifact identity.
 
 ### Design direction: privacy-preserving observability
 

@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import sqlite3
 from pathlib import Path
 
 import pytest
 
+import infinity_db.database.importer as database_importer
 from infinity_army_data.normalize import main_army_id, normalize_master, validate_normalized
 from infinity_army_data.weapon_categories import WEAPON_CATEGORIES, weapon_category
 from infinity_army_data.weapon_config import (
@@ -21,7 +23,13 @@ from infinity_db.catalog_slugs import (
     enrich_nested_catalog_slugs,
 )
 from infinity_db.curated import load_curated_directory
-from infinity_db.database import Database, export_database, raw_database_path
+from infinity_db.database import (
+    Database,
+    raw_database_path,
+)
+from infinity_db.database import (
+    export_database as export_release_database,
+)
 from infinity_db.database.importer import BATCH_SIZE, batched, reinforcement_unit_matches
 from infinity_db.database.repository import (
     army_required_flags,
@@ -55,9 +63,28 @@ from infinity_db.identities import (
     load_identity_config,
     parse_identity_config,
 )
-from infinity_db.rules_database import RulesDatabase, export_rules_database
+from infinity_db.rules_database import (
+    RulesDatabase,
+)
+from infinity_db.rules_database import (
+    export_rules_database as export_release_rules_database,
+)
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.trait_catalog import TraitCatalog
+
+FINALIZE_TEST_DATABASES = os.environ.get("INFINITYDB_TEST_FINALIZE_SQLITE") == "1"
+
+
+def export_database(*args, **kwargs) -> None:
+    """Build semantic test fixtures without canonical SQLite finalization by default."""
+    kwargs.setdefault("finalize", FINALIZE_TEST_DATABASES)
+    export_release_database(*args, **kwargs)
+
+
+def export_rules_database(*args, **kwargs) -> None:
+    """Build semantic rules fixtures without canonical SQLite finalization by default."""
+    kwargs.setdefault("finalize", FINALIZE_TEST_DATABASES)
+    export_release_rules_database(*args, **kwargs)
 
 
 @pytest.fixture
@@ -177,6 +204,30 @@ def normalized() -> dict:
     data = normalize_master(master)
     validate_normalized(data)
     return data
+
+
+def test_export_database_finalization_is_default_and_can_be_skipped(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[str] = []
+
+    monkeypatch.setattr(
+        database_importer,
+        "vacuum_deterministic_sqlite",
+        lambda connection: calls.append("vacuum"),
+    )
+    monkeypatch.setattr(
+        database_importer,
+        "normalize_sqlite_header",
+        lambda path: calls.append("header"),
+    )
+
+    export_release_database(normalized, tmp_path / "canonical.sqlite3")
+    assert calls == ["vacuum", "header", "vacuum", "header"]
+
+    calls.clear()
+    export_release_database(normalized, tmp_path / "semantic.sqlite3", finalize=False)
+    assert calls == []
 
 
 def test_database_splits_lossless_source_from_published_application_data(

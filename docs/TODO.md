@@ -67,10 +67,14 @@ Project infrastructure
     result for the reviewed example: `Caused by: Unconscious State`; `Cancelled by: Impetuous`;
     `Cancelled by: Jump`; `Cancels state: Foxhole State`; `State entry prevented by: Aerial`;
     `State entry prevented by: Impetuous`; `State entry prevented by: Motorcycle`.
-  - [ ] **Data processing + Project infrastructure:** Measure the SQLite
-    canonical-finalization cost under pytest-xdist, especially on Linux CI, and avoid
-    repeated `VACUUM` work in tests that do not need byte-level artifact finalization while
-    preserving the release-build determinism guarantee.
+  - [ ] **Data processing + Project infrastructure:** Complete the SQLite test-finalization
+    performance pass while preserving the release-build determinism guarantee.
+    - [x] Let programmatic Army/rules exporters skip canonical `VACUUM`/header finalization
+      only when explicitly requested; production/CLI exports remain canonical by default.
+      The export-heavy semantic database/rules test modules use the fast path.
+    - [ ] Measure the before/after cost under pytest-xdist on Linux CI using the retained
+      `INFINITYDB_TEST_FINALIZE_SQLITE=1` comparison mode, then record the result and close
+      this item if the behavior remains stable.
   - [ ] **Deployment:** Replace the current routine raw Gunicorn access log with
     privacy-preserving aggregate request instrumentation before expanding production usage
     monitoring. Preserve operational error diagnostics without creating visitor-identifying

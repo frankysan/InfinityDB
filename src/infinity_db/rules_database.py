@@ -413,8 +413,17 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
         )
 
 
-def export_rules_database(documents: list[tuple[Path, dict[str, Any]]], path: Path) -> None:
-    """Atomically replace a rules database from validated curated documents."""
+def export_rules_database(
+    documents: list[tuple[Path, dict[str, Any]]],
+    path: Path,
+    *,
+    finalize: bool = True,
+) -> None:
+    """Atomically replace a rules database from validated curated documents.
+
+    ``finalize=False`` is intended for semantic tests that only need valid SQLite
+    contents. Production/release builds keep the default byte-canonical finalization.
+    """
     if not documents:
         raise ValueError("No curated documents supplied")
     _validate_documents(documents)
@@ -444,10 +453,12 @@ def export_rules_database(documents: list[tuple[Path, dict[str, Any]]], path: Pa
                     [(key, _json_text(value)) for key, value in metadata.items()],
                 )
                 connection.execute("ANALYZE")
-            vacuum_deterministic_sqlite(connection)
+            if finalize:
+                vacuum_deterministic_sqlite(connection)
         finally:
             connection.close()
-        normalize_sqlite_header(temporary)
+        if finalize:
+            normalize_sqlite_header(temporary)
         check = sqlite3.connect(temporary)
         try:
             if check.execute("PRAGMA quick_check").fetchone()[0] != "ok":
