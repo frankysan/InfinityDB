@@ -25,6 +25,7 @@ const elements = {
 let armies = [];
 let currentChart = null;
 let requestController = null;
+const pageController = new AbortController();
 
 function show(panel) {
   for (const element of [elements.loading, elements.error, elements.empty, elements.content]) {
@@ -450,7 +451,7 @@ async function loadChart(value) {
 async function initialize() {
   show(elements.loading);
   try {
-    const payload = await getFireteamArmies();
+    const payload = await getFireteamArmies(pageController.signal);
     populateArmies(payload.items || []);
     if (!armies.length) {
       elements.count.textContent = "0 armies";
@@ -458,19 +459,28 @@ async function initialize() {
     }
     await loadChart(normalizeSelection());
   } catch (error) {
+    if (error.name === "AbortError") return;
     elements.errorMessage.textContent = error.message || "Could not load Fireteam Armies.";
     show(elements.error);
   }
 }
 
+document.addEventListener("infinity:beforenavigation", () => {
+  pageController.abort();
+  requestController?.abort();
+}, { once: true });
 elements.army.addEventListener("change", () => {
   const value = elements.army.value;
   writeArmyLocation(value);
   loadChart(value);
-});
-window.addEventListener("popstate", () => loadChart(normalizeSelection()));
+}, { signal: pageController.signal });
+window.addEventListener(
+  "popstate",
+  () => loadChart(normalizeSelection()),
+  { signal: pageController.signal },
+);
 window.addEventListener("fireteamswildcardschange", () => {
   if (currentChart) renderChart(currentChart);
-});
+}, { signal: pageController.signal });
 
 initialize();

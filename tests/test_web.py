@@ -1148,11 +1148,14 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
 
 def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> None:
     for asset, helper in (
-        ("catalog-list.js", b"getCatalogItems(page)"),
-        ("catalog-detail.js", b"getCatalogItem(catalog, itemId)"),
-        ("hacking-program-detail.js", b'getCatalogItem("hacking-programs", itemId)'),
-        ("skill.js", b'getCatalogItem("skills", skillId)'),
-        ("skill-extras.js", b"getSkillExtras()"),
+        ("catalog-list.js", b"getCatalogItems(page, pageController.signal)"),
+        ("catalog-detail.js", b"getCatalogItem(catalog, itemId, pageController.signal)"),
+        (
+            "hacking-program-detail.js",
+            b'getCatalogItem("hacking-programs", itemId, pageController.signal)',
+        ),
+        ("skill.js", b'getCatalogItem("skills", skillId, pageController.signal)'),
+        ("skill-extras.js", b"getSkillExtras(pageController.signal)"),
         ("version-check.js", b"getVersion()"),
     ):
         status, _, body = request(app, f"/static/{asset}")
@@ -1174,6 +1177,13 @@ def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> N
         "/equipment/1",
         "/weapons",
         "/weapons/1",
+        "/traits",
+        "/traits/example",
+        "/states",
+        "/states/example",
+        "/hacking-programs",
+        "/hacking-programs/example",
+        "/fireteams",
         "/skill-extras",
         "/about",
     ],
@@ -1188,6 +1198,91 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert f"Version {__display_version__}".encode() in body
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/skills",
+        "/skills/example",
+        "/equipment",
+        "/equipment/example",
+        "/weapons",
+        "/weapons/example",
+        "/traits",
+        "/traits/example",
+        "/states",
+        "/states/example",
+        "/hacking-programs",
+        "/hacking-programs/example",
+    ],
+)
+def test_rules_reference_pages_share_the_same_shell_classification(
+    app: Callable, path: str
+) -> None:
+    status, _, body = request(app, path)
+
+    assert status == 200
+    assert (
+        b'<span class="catalog-tag"><span aria-hidden="true"></span> '
+        b'Rules reference</span>' in body
+    )
+
+
+@pytest.mark.parametrize(
+    ("path", "active_href"),
+    [
+        ("/units", "/units"),
+        ("/units/example", "/units"),
+        ("/skills", "/skills"),
+        ("/skills/example", "/skills"),
+        ("/equipment", "/equipment"),
+        ("/equipment/example", "/equipment"),
+        ("/weapons", "/weapons"),
+        ("/weapons/example", "/weapons"),
+        ("/traits", "/traits"),
+        ("/traits/example", "/traits"),
+        ("/states", "/states"),
+        ("/states/example", "/states"),
+        ("/hacking-programs", "/hacking-programs"),
+        ("/hacking-programs/example", "/hacking-programs"),
+        ("/fireteams", "/fireteams"),
+        ("/about", "/about"),
+    ],
+)
+def test_browser_routes_keep_their_parent_navigation_active(
+    app: Callable, path: str, active_href: str
+) -> None:
+    status, _, body = request(app, path)
+
+    assert status == 200
+    assert f'href="{active_href}" aria-current="page"'.encode() in body
+
+
+def test_every_browser_page_has_a_meta_description(app: Callable) -> None:
+    for path in (
+        "/",
+        "/units",
+        "/units/example",
+        "/skills",
+        "/skills/example",
+        "/equipment",
+        "/equipment/example",
+        "/weapons",
+        "/weapons/example",
+        "/traits",
+        "/traits/example",
+        "/states",
+        "/states/example",
+        "/hacking-programs",
+        "/hacking-programs/example",
+        "/fireteams",
+        "/skill-extras",
+        "/about",
+    ):
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b'<meta name="description"' in body
+
+
 def test_landing_page_states_independence_and_asset_permission(app: Callable) -> None:
     status, _, body = request(app, "/")
 
@@ -1199,6 +1294,16 @@ def test_landing_page_states_independence_and_asset_permission(app: Callable) ->
     assert b"permission to use and redistribute" in body
     assert b"Infinity graphical" in body
     assert b"assets used by the project" in body
+
+
+def test_landing_database_links_match_primary_navigation_order(app: Callable) -> None:
+    status, _, body = request(app, "/")
+
+    assert status == 200
+    navigation_links = re.findall(rb'<a class="nav-item" href="([^"]+)"', body)
+    landing_links = re.findall(rb'<a class="landing-link" href="([^"]+)"', body)
+    assert navigation_links[:-1] == landing_links
+    assert navigation_links[-1] == b"/about"
 
 
 def test_landing_page_links_to_fireteams(app: Callable) -> None:
@@ -1336,6 +1441,9 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'id="fireteams-include-wildcards-toggle" type="checkbox" checked' in body
     assert b'id="cookie-consent-dialog"' in body
     assert b"Allow cookies" in body
+    assert b"Remember settings with browser cookies" in body
+    assert b"Fireteam Wildcard" in body
+    assert b"InfinityDB / Player reference" in body
     assert b'<div class="menu settings-menu" data-menu>' in body
     assert b'aria-controls="settings-menu"' in body
     assert b'>Settings <span aria-hidden="true">' in body
@@ -1431,6 +1539,7 @@ def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> No
         "/states/unconscious",
         "/hacking-programs",
         "/hacking-programs/carbonite",
+        "/fireteams",
         "/about",
     )
     expected_csp = (
@@ -1510,6 +1619,35 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     assert b'window.addEventListener("pageshow", closeMenu)' in navigation
 
 
+def test_soft_navigation_preserves_shell_state_and_disposes_page_handlers(
+    app: Callable,
+) -> None:
+    status, _, page_navigation = request(app, "/static/page-navigation.js")
+    assert status == 200
+    assert b'pathname.startsWith(`${linkPath}/`)' in page_navigation
+    assert b"syncDescription(nextDocument)" in page_navigation
+    assert b'document.querySelector(\'meta[name="description"]\')' in page_navigation
+
+    for asset in (
+        "catalog-list.js",
+        "catalog-detail.js",
+        "skill.js",
+        "skill-extras.js",
+        "unit.js",
+        "fireteams.js",
+        "hacking-program-detail.js",
+    ):
+        status, _, script = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b"infinity:beforenavigation" in script
+        assert b"pageController.abort()" in script
+
+    for asset in ("catalog-detail.js", "skill.js", "skill-extras.js", "unit.js", "fireteams.js"):
+        status, _, script = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b"signal: pageController.signal" in script
+
+
 def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     status, headers, body = request(app, "/about")
 
@@ -1521,8 +1659,10 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert b"developed in the open" in body
     assert b"https://github.com/frankysan/InfinityDB" in body
     assert b"LLM code disclosure" in body
-    assert b"Version 0.7 focuses on rules context" in body
-    assert b"player-data-complete 1.0 reference" in body
+    assert b"Version 0.8 connects more of the game" in body
+    assert b"Version 0.9 closes the remaining application-presentation gaps" in body
+    assert b"0.10 is the consistency, presentation, and release-hardening pass" in body
+    assert b"1.0 completes the current rules/reference coverage" in body
     assert b"not affiliated with Corvus Belli S.L." in body
     assert b"explicitly permitted InfinityDB to use and redistribute" in body
     assert b'href="/about" aria-current="page"' in body
@@ -2225,7 +2365,7 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     status, _, body = request(app, "/static/catalog-list.js")
     assert status == 200
     assert b'from "./api.js"' in body
-    assert b"getCatalogItems(page)" in body
+    assert b"getCatalogItems(page, pageController.signal)" in body
     assert b"fetch(" not in body
     assert (
         b'["skills", "equipment", "weapons", "traits", "states", "hacking-programs"]'

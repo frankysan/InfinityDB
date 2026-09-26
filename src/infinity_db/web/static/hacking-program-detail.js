@@ -6,6 +6,7 @@ const name = document.getElementById("item-name");
 const meta = document.getElementById("item-meta");
 const content = document.getElementById("item-content");
 const status = document.getElementById("item-status");
+const pageController = new AbortController();
 
 function text(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
@@ -107,7 +108,15 @@ function render(program) {
   status.hidden = true;
 }
 
-getCatalogItem("hacking-programs", itemId).then(render).catch((error) => {
-  name.firstChild.textContent = "Hacking Program unavailable";
-  status.textContent = error.message || "Could not load this Hacking Program.";
-});
+document.addEventListener(
+  "infinity:beforenavigation",
+  () => pageController.abort(),
+  { once: true },
+);
+getCatalogItem("hacking-programs", itemId, pageController.signal)
+  .then(render)
+  .catch((error) => {
+    if (error.name === "AbortError") return;
+    name.firstChild.textContent = "Hacking Program unavailable";
+    status.textContent = error.message || "Could not load this Hacking Program.";
+  });

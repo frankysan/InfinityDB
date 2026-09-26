@@ -62,7 +62,9 @@ directly useful without becoming an Army-list legality engine or live game-state
 
 No open implementation items remain in the 0.8.0 connected-data milestone. The maintained
 source-presentation and interaction audits have been rerun; their remaining player-facing gaps
-are explicitly assigned to later release buckets below.
+are explicitly assigned to later release buckets below. The focused 0.8 browser-shell and route
+consistency closeout is recorded in `docs/080-web-consistency-closeout.md`; it does not replace
+the broader production-baselined end-to-end audit reserved for 0.10.0.
 
 ## 0.9.0 — application completeness and discoverability
 

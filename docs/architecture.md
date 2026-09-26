@@ -1159,6 +1159,13 @@ footer receives the application version. New pages should use the
 `<!-- navigation -->`, `<!-- page-header -->`, and `<!-- page-footer -->`
 markers so their shell stays synchronized with existing pages.
 
+Same-origin browser navigation keeps that shared shell mounted and replaces only
+`main#main`. The navigation layer synchronizes the document title, description
+metadata, body data attributes, and active parent navigation item before loading
+the next page module. Transient page modules that own fetches or window-level event
+listeners must dispose them on `infinity:beforenavigation`; persistent shell modules
+are intentionally exempt because their DOM survives the replacement.
+
 `static/styles.css` is the browser design-system entry point. Its root tokens
 define shared color roles, surfaces, borders, spacing, radii, control height,
 focus treatment, and shadows. Reuse these tokens and established components
@@ -1179,9 +1186,10 @@ colors as accents. Keep those accents within the shared token and gradient
 system so catalog-specific styling remains legible and consistent.
 
 Browser preferences are stored locally. User-selected distance-unit, optional-unit,
-Developer-mode, and cache-bypass values are stored in browser `sessionStorage`; values
-loaded from persistent cookies are mirrored there before use. Disabling persistent settings
-therefore does not reset them during the current tab/session. When the user enables
+**Fireteams include Wildcards**, Developer-mode, and cache-bypass values are stored in
+browser `sessionStorage`; values loaded from persistent cookies are mirrored there before
+use. Disabling persistent settings therefore does not reset them during the current
+tab/session. When the user enables
 **Remember settings** and accepts the cookie prompt, the same values are mirrored to
 one-year SameSite cookies for reuse in later browser sessions; disabling that option
 removes the persistent cookies without clearing the current session values. The Settings

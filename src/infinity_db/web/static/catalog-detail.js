@@ -16,6 +16,7 @@ const rangeModifierClasses = {
   "-6": "range-modifier-minus-6",
 };
 let currentItem;
+const pageController = new AbortController();
 
 function displayWikiUrl(url) {
   try {
@@ -366,19 +367,30 @@ function render(item) {
   status.hidden = true;
 }
 
+document.addEventListener(
+  "infinity:beforenavigation",
+  () => pageController.abort(),
+  { once: true },
+);
 initializeDistanceUnitToggle();
 window.addEventListener("distanceunitchange", () => {
   if (currentItem && catalog === "weapons") render(currentItem);
-});
-getCatalogItem(catalog, itemId).then((item) => {
+}, { signal: pageController.signal });
+getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
   currentItem = item;
   render(item);
   if (catalog === "states") return null;
-  return visibleUnitIds().then((ids) => render(withVisibleUnits(item, ids)));
+  return visibleUnitIds(pageController.signal).then((ids) => render(withVisibleUnits(item, ids)));
 }).catch((error) => {
+  if (error.name === "AbortError") return;
   name.firstChild.textContent = "Item unavailable";
   status.textContent = error.message || "Could not load this item.";
 });
 window.addEventListener("optionalunitschange", () => {
-  if (currentItem) visibleUnitIds().then((ids) => render(withVisibleUnits(currentItem, ids)));
-});
+  if (!currentItem) return;
+  visibleUnitIds(pageController.signal)
+    .then((ids) => render(withVisibleUnits(currentItem, ids)))
+    .catch((error) => {
+      if (error.name !== "AbortError") throw error;
+    });
+}, { signal: pageController.signal });

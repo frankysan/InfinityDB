@@ -9,6 +9,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web backend + Web frontend:** Complete a focused 0.8 web-consistency closeout pass:
+  align the shared shell and About page with the current connected-reference scope, classify
+  all rules catalog list/detail pages consistently, keep detail-page navigation active during
+  soft navigation,
+  synchronize page descriptions, and dispose transient page listeners/requests when the main
+  content is replaced.
 - **Acquisition + Web backend + Web frontend:** Move Unit artwork from the detail-page
   title into the General profile header row and preserve source profile-logo provenance through
   the Unit API. Extend generated Unit symbol mappings with profile-specific overrides so secondary

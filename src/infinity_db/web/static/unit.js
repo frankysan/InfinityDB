@@ -7,6 +7,7 @@ const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
 const status = document.getElementById("unit-status");
 const content = document.getElementById("unit-content");
+const pageController = new AbortController();
 const unitIdentifier = /^\/units\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(window.location.pathname)?.[1];
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
@@ -1394,16 +1395,26 @@ function render(unit) {
   content.hidden = false;
 }
 
+document.addEventListener(
+  "infinity:beforenavigation",
+  () => pageController.abort(),
+  { once: true },
+);
 initializeDistanceUnitToggle();
 
 if (!unitIdentifier) {
   status.textContent = "The requested unit address is invalid.";
 } else {
-  getUnit(unitIdentifier).then((unit) => {
+  getUnit(unitIdentifier, pageController.signal).then((unit) => {
     render(unit);
-    window.addEventListener("distanceunitchange", () => render(unit));
-    window.addEventListener("optionalunitschange", () => render(unit));
+    window.addEventListener("distanceunitchange", () => render(unit), {
+      signal: pageController.signal,
+    });
+    window.addEventListener("optionalunitschange", () => render(unit), {
+      signal: pageController.signal,
+    });
   }).catch((error) => {
+    if (error.name === "AbortError") return;
     name.textContent = "Unit unavailable";
     status.textContent = error.message || "Could not load this unit.";
   });

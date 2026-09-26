@@ -686,9 +686,7 @@ class Application:
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), (catalog.replace("-", " ").title(), None)),
-                catalog_tag=(
-                    "Rules reference" if catalog == "hacking-programs" else "Reference data"
-                ),
+                catalog_tag="Rules reference",
             )
         elif SKILL_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
@@ -698,7 +696,7 @@ class Application:
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Skills", "/skills"), ("Details", None)),
-                catalog_tag="Reference data",
+                catalog_tag="Rules reference",
             )
         elif EQUIPMENT_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
@@ -712,7 +710,7 @@ class Application:
                     ("Equipment", "/equipment"),
                     ("Details", None),
                 ),
-                catalog_tag="Reference data",
+                catalog_tag="Rules reference",
             )
         elif WEAPON_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
@@ -726,7 +724,7 @@ class Application:
                     ("Weapons", "/weapons"),
                     ("Details", None),
                 ),
-                catalog_tag="Reference data",
+                catalog_tag="Rules reference",
             )
         elif TRAIT_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"
@@ -740,7 +738,7 @@ class Application:
                     ("Traits", "/traits"),
                     ("Details", None),
                 ),
-                catalog_tag="Reference data",
+                catalog_tag="Rules reference",
             )
         elif STATE_PAGE_PATH.fullmatch(path):
             content_type = "text/html; charset=utf-8"

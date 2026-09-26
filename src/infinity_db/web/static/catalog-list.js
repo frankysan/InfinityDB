@@ -11,6 +11,7 @@ const categoryOrder = {
   "Scenario Skills": 30,
   "ITS Scenario Skills": 40,
 };
+const pageController = new AbortController();
 const byId = (id) => document.getElementById(id);
 const elements = {
   count: byId("catalog-count"), results: byId("catalog-results"), loading: byId("catalog-loading"),
@@ -101,7 +102,7 @@ function render() {
 async function load() {
   show(elements.loading);
   try {
-    const payload = await getCatalogItems(page);
+    const payload = await getCatalogItems(page, pageController.signal);
     items = payload.items.map(searchableItem).sort((left, right) => (
       (categoryOrder[left.categoryName] || 999) - (categoryOrder[right.categoryName] || 999)
       || left.categoryName.localeCompare(right.categoryName)
@@ -109,6 +110,7 @@ async function load() {
     ));
     render();
   } catch (error) {
+    if (error.name === "AbortError") return;
     elements.errorMessage.textContent = error.message || `Could not load ${title}.`;
     show(elements.error);
   }
@@ -118,5 +120,9 @@ elements.search.addEventListener("input", () => {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(render, 150);
 });
+document.addEventListener("infinity:beforenavigation", () => {
+  clearTimeout(searchTimer);
+  pageController.abort();
+}, { once: true });
 initializeDistanceUnitToggle();
 load();

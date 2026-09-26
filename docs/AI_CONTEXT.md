@@ -628,8 +628,14 @@ compatibility references remain unambiguous JSON integers.
 - Every browser route uses the shared server-rendered page shell. New static
   page documents retain the navigation/header/footer markers expected by
   `_page()`.
+- Same-origin soft navigation keeps the shared shell mounted and replaces only
+  `main#main`; it must synchronize title/description/body state and keep the parent
+  navigation item active for detail routes. Transient page modules bind fetch and
+  window-listener lifetime to `infinity:beforenavigation` so repeated soft navigation
+  cannot accumulate stale handlers.
 - Shared menus use the inline-sidebar / compact-topbar pattern.
-- User-selected browser settings persist for the current tab/session through
+- User-selected browser settings (distance unit, optional Unit categories, Fireteam Wildcard
+  inclusion, Developer mode, and cache bypass) persist for the current tab/session through
   `sessionStorage`; values loaded from persistent cookies must be mirrored into the session
   store before use. The **Remember settings** consent path additionally mirrors values to
   one-year SameSite cookies for later sessions; turning persistence off removes those
