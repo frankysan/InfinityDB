@@ -424,14 +424,15 @@ concepts, Attributes, Ammunition, and Training may remain supporting link target
 a later completeness audit demonstrates an independent player-facing catalog need.
 A relationship target is not, by itself, justification for a new domain.
 
-Schema 25 / compatibility revision 33 implements the Fireteam data-processing half of
-that decision. `application_fireteam_charts` selects one provenance-bound Army-list
-source per application Army; related derived tables preserve type limits, team/type/member
-structure, logical-Unit resolution, Army-local FTO loadout eligibility, Wildcard identity,
-Fireteam-Level equivalence labels, and rule-bearing chart/team notes. Reinforcement parent
-limits remain separate in `application_army_reinforcement_parents`, so the projection does
-not pretend to be an army-list legality engine or merge Main- and Reinforcement-section
-member pools.
+Schema 25 / compatibility revision 33 implements that Fireteam boundary.
+`application_fireteam_charts` selects one provenance-bound Army-list source per application
+Army; related derived tables preserve type limits, team/type/member structure, logical-Unit
+resolution, Army-local FTO loadout eligibility, Wildcard identity, Fireteam-Level equivalence
+labels, and rule-bearing chart/team notes. `/api/fireteams` and `/fireteams` now read that
+application projection directly and never return to the raw normalized Fireteam tables during
+normal serving. Reinforcement parent limits remain separate in
+`application_army_reinforcement_parents`, so the projection/browser does not pretend to be an
+army-list legality engine or merge Main- and Reinforcement-section member pools.
 
 States are now a first-class rules-backed reference surface (`/states`, `/api/states`) rather
 than application/Army catalog rows. `StateCatalog` composes current `state` definitions

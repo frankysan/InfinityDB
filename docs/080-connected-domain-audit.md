@@ -65,10 +65,11 @@ option-level condition, and Reinforcement Fireteams combine section-local compos
 with parent-Army type/count limits. The current Wiki also explicitly gives chart notes
 precedence over general Fireteam rules and defines FTO/Wildcard semantics in the chart.
 
-0.8.0 should therefore introduce a canonical **Fireteams** application domain with
-Army-context identity and provenance, plus first-class repository/API/browser surfaces.
-The model must preserve the chart as authoritative source context rather than converting
-it into a generic army-list legality engine.
+Schema 25 introduces that canonical **Fireteams** application domain with Army-context
+identity and provenance, and the first 0.8 browser/API slice now presents those authoritative
+Army charts directly. The model and presentation preserve chart source context rather than
+converting it into a generic army-list legality engine. General Fireteam rules/Level-bonus
+reference data remains separate follow-up work.
 
 ### Hacking Programs: promote the existing projection to a first-class rules/reference surface
 

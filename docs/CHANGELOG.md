@@ -9,6 +9,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Web backend + Web frontend:** Add first-class Army-scoped Fireteam browsing on
+  `/fireteams` and `/api/fireteams`, backed only by the canonical schema-25 Fireteam projection.
+  The browser presents authoritative chart limits, membership requirements, FTO-eligible
+  loadouts, Wildcards, equivalence labels, notes, source provenance, and links to resolved Units
+  without reading the raw normalized Fireteam tables at runtime.
 - **Data processing:** Materialize the first-class Fireteam application projection for
   0.8.0: select one provenance-bound source chart per application Army, preserve chart
   limits/types/members/notes, resolve members to logical Units, link FTO rows to canonical

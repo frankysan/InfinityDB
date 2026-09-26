@@ -1601,12 +1601,13 @@ rows back through their occurrence maps; source-specific unit display names are
 reconstructed from canonical logical-unit fields plus explicit name aliases.
 Top-level `unit_option_*` occurrences stay source-contextual by design.
 
-The current Milestone 2B trace covers **29 serving probes**, **62 tables**, and
-**269 distinct table-field pairs**. The role totals are **118 canonical-application
-fields**, **128 explicit contextual-application fields**, and **23 intentional-source
-fields**. The larger contextual total reflects the later materialized Peripheral,
-selection-constraint, and group-dependency relationships rather than a regression to
-legacy payload reads. All **269 / 269 observed fields have no open semantic issue**.
+The current 0.8 Fireteam-serving trace covers **35 serving probes**, **76 tables**, and
+**348 distinct table-field pairs**. The role totals are **146 canonical-application
+fields**, **179 explicit contextual-application fields**, and **23 intentional-source
+fields**. The larger contextual total now includes the Army-scoped Fireteam chart/provenance,
+membership, FTO-loadout, and equivalence projections alongside the earlier Peripheral,
+selection-constraint, and group-dependency relationships; it is not a regression to legacy
+payload reads. All **348 / 348 observed fields have no open semantic issue**.
 
 The application Army tables provide canonical identity/hierarchy and reviewed source
 mappings, while `application_catalog_items` / `application_catalog_sources` provide
@@ -1722,9 +1723,8 @@ SQLite reads: source-only rows may live exclusively in `infinity.raw.db`, canoni
 application facts may live in derived tables, and a fact may be preserved in the API
 without yet having a usable browser presentation.
 
-The maintained inventory now records **8 confirmed gap families** for later roadmap work:
+The maintained inventory now records **7 confirmed gap families** for later roadmap work:
 
-- Fireteam chart/type/member relationships;
 - profile/loadout/top-level Unit-option include relationships;
 - Peripheral attachments and Controller access pools;
 - selection constraints and profile-group dependencies;
@@ -1748,9 +1748,10 @@ that already have an application representation: **1,273** canonical include edg
 selection constraints, **14** profile-group dependency constraints, **46**
 Reinforcement-parent links, **2,094** declared faction memberships, **30**
 source-attributed Unit-note occurrences, **18** top-level Unit options, and **299**
-canonical profile payloads marked `is_structure`. Fireteams now have the schema-25 Army-scoped application projection described below, but
-remain a repository/API/browser presentation gap; the structured lookup metadata has the
-application projections described above.
+canonical profile payloads marked `is_structure`. Fireteam chart/type/member source facts are
+no longer an open presentation gap: schema 25 materializes the Army-scoped application
+projection and the `/fireteams` browser/API surface consumes it directly. The structured
+lookup metadata has the application projections described above.
 
 Two preserved constructs remain an explicit semantic review queue instead of being
 forced into a premature 1.0 requirement: **30** opaque `spectables` occurrences and
@@ -2762,8 +2763,9 @@ must remain verbatim because chart notes can specialize the general Fireteam rul
 snapshot drift in chart shape, member resolution, FTO option matching, Reinforcement parent/type
 context, required-choice structure, Wildcards, equivalence labels, and rule-bearing notes. Schema
 25 / compatibility revision 33 now materializes those audited semantics into the application-owned
-Fireteam projection described above. Repository/API/browser presentation remains the next 0.8.x
-Fireteam step within the 1.0 completeness program.
+Fireteam projection described above, and `/api/fireteams` + `/fireteams` provide the first
+repository/API/browser presentation over that projection. General Fireteam rules and generated
+Level-bonus reference data remain later 0.8.x work within the 1.0 completeness program.
 
 #### Normalization-only link semantic evidence
 

@@ -1519,6 +1519,220 @@ class Database:
         return items
 
     @instance_lru_cache(maxsize=1)
+    def list_fireteam_armies(self) -> list[dict[str, Any]]:
+        """Return playable Armies that have player-facing Fireteam chart content."""
+
+        armies = {item["id"]: item for item in self.list_armies()}
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT c.application_army_id, COUNT(DISTINCT f.fireteam_id) AS fireteam_count, "
+                "MAX(CASE WHEN l.raw_limit > 0 THEN 1 ELSE 0 END) AS has_positive_limit, "
+                "CASE WHEN COALESCE(c.description, '') != '' THEN 1 ELSE 0 END "
+                "AS has_description "
+                "FROM application_fireteam_charts AS c "
+                "LEFT JOIN application_fireteams AS f "
+                "ON f.application_army_id = c.application_army_id "
+                "LEFT JOIN application_fireteam_chart_limits AS l "
+                "ON l.application_army_id = c.application_army_id "
+                "GROUP BY c.application_army_id, c.description "
+                "ORDER BY c.application_army_id"
+            ).fetchall()
+
+        result: list[dict[str, Any]] = []
+        for row in rows:
+            army = armies.get(int(row["application_army_id"]))
+            if army is None or not army["playable"]:
+                continue
+            if not (
+                int(row["fireteam_count"])
+                or bool(row["has_positive_limit"])
+                or bool(row["has_description"])
+            ):
+                continue
+            item = dict(army)
+            item["fireteam_count"] = int(row["fireteam_count"])
+            result.append(item)
+        return result
+
+    @instance_lru_cache(maxsize=256)
+    def get_fireteam_chart(self, army_ref: int | str) -> dict[str, Any] | None:
+        """Return one authoritative Army-scoped Fireteam chart projection."""
+
+        army_id = self.application_army_id(army_ref)
+        if army_id is None:
+            return None
+        army = next((item for item in self.list_armies() if item["id"] == army_id), None)
+        if army is None:
+            return None
+
+        with self._connect() as connection:
+            chart = connection.execute(
+                "SELECT application_army_id, source_army_id, source_kind, source_file, "
+                "source_sha256, description FROM application_fireteam_charts "
+                "WHERE application_army_id = ?",
+                (army_id,),
+            ).fetchone()
+            if chart is None:
+                return None
+            limits = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT fireteam_type, position, raw_limit "
+                    "FROM application_fireteam_chart_limits "
+                    "WHERE application_army_id = ? ORDER BY position, fireteam_type",
+                    (army_id,),
+                )
+            ]
+            team_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT fireteam_id, position, name, observation, source_army_id, "
+                    "source_fireteam_id, is_wildcard FROM application_fireteams "
+                    "WHERE application_army_id = ? ORDER BY position, fireteam_id",
+                    (army_id,),
+                )
+            ]
+            type_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT fireteam_id, position, fireteam_type "
+                    "FROM application_fireteam_types WHERE application_army_id = ? "
+                    "ORDER BY fireteam_id, position",
+                    (army_id,),
+                )
+            ]
+            member_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT m.fireteam_id, m.member_id, m.position, m.source_member_id, "
+                    "m.slug, m.name, m.comment, m.min_count, m.max_count, m.required, "
+                    "m.source_unit_id, m.logical_unit_id, m.resolution, m.fto_marker, "
+                    "lu.name AS logical_unit_name, uds.slug AS logical_unit_slug "
+                    "FROM application_fireteam_members AS m "
+                    "LEFT JOIN logical_units AS lu ON lu.id = m.logical_unit_id "
+                    "LEFT JOIN application_domain_slugs AS uds "
+                    "ON uds.domain = 'units' AND uds.application_id = m.logical_unit_id "
+                    "AND uds.status = 'resolved' "
+                    "WHERE m.application_army_id = ? "
+                    "ORDER BY m.fireteam_id, m.position, m.member_id",
+                    (army_id,),
+                )
+            ]
+            loadout_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT fireteam_id, member_id, position, loadout_payload_id, option_name, "
+                    "fto_marker FROM application_fireteam_member_loadouts "
+                    "WHERE application_army_id = ? "
+                    "ORDER BY fireteam_id, member_id, position",
+                    (army_id,),
+                )
+            ]
+            equivalence_rows = [
+                dict(row)
+                for row in connection.execute(
+                    "SELECT fireteam_id, member_id, position, label "
+                    "FROM application_fireteam_member_equivalence_labels "
+                    "WHERE application_army_id = ? "
+                    "ORDER BY fireteam_id, member_id, position",
+                    (army_id,),
+                )
+            ]
+
+        types_by_team: dict[int, list[str]] = {}
+        for row in type_rows:
+            types_by_team.setdefault(int(row["fireteam_id"]), []).append(
+                str(row["fireteam_type"])
+            )
+        loadouts_by_member: dict[tuple[int, int], list[dict[str, Any]]] = {}
+        for row in loadout_rows:
+            loadouts_by_member.setdefault(
+                (int(row["fireteam_id"]), int(row["member_id"])), []
+            ).append(
+                {
+                    "position": int(row["position"]),
+                    "loadout_payload_id": int(row["loadout_payload_id"]),
+                    "name": row["option_name"],
+                    "fto_marker": row["fto_marker"],
+                }
+            )
+        equivalence_by_member: dict[tuple[int, int], list[str]] = {}
+        for row in equivalence_rows:
+            equivalence_by_member.setdefault(
+                (int(row["fireteam_id"]), int(row["member_id"])), []
+            ).append(str(row["label"]))
+        members_by_team: dict[int, list[dict[str, Any]]] = {}
+        for row in member_rows:
+            fireteam_id = int(row["fireteam_id"])
+            member_id = int(row["member_id"])
+            logical_unit_id = row["logical_unit_id"]
+            unit = None
+            if type(logical_unit_id) is int:
+                unit = {
+                    "id": logical_unit_id,
+                    "slug": row["logical_unit_slug"],
+                    "name": row["logical_unit_name"],
+                }
+            members_by_team.setdefault(fireteam_id, []).append(
+                {
+                    "id": member_id,
+                    "position": int(row["position"]),
+                    "source_member_id": int(row["source_member_id"]),
+                    "slug": row["slug"],
+                    "name": row["name"],
+                    "comment": row["comment"],
+                    "min_count": row["min_count"],
+                    "max_count": row["max_count"],
+                    "required": bool(row["required"]),
+                    "resolution": row["resolution"],
+                    "fto_marker": row["fto_marker"],
+                    "source_unit_id": row["source_unit_id"],
+                    "unit": unit,
+                    "loadouts": loadouts_by_member.get((fireteam_id, member_id), []),
+                    "equivalence_labels": equivalence_by_member.get(
+                        (fireteam_id, member_id), []
+                    ),
+                }
+            )
+
+        teams = []
+        for row in team_rows:
+            fireteam_id = int(row["fireteam_id"])
+            teams.append(
+                {
+                    "id": fireteam_id,
+                    "position": int(row["position"]),
+                    "name": row["name"],
+                    "observation": row["observation"],
+                    "source_army_id": int(row["source_army_id"]),
+                    "source_fireteam_id": int(row["source_fireteam_id"]),
+                    "is_wildcard": bool(row["is_wildcard"]),
+                    "types": types_by_team.get(fireteam_id, []),
+                    "members": members_by_team.get(fireteam_id, []),
+                }
+            )
+
+        return {
+            "army": dict(army),
+            "source": {
+                "army_id": int(chart["source_army_id"]),
+                "kind": chart["source_kind"],
+                "file": chart["source_file"],
+                "sha256": chart["source_sha256"],
+            },
+            "description": chart["description"],
+            "limits": [
+                {
+                    "type": row["fireteam_type"],
+                    "position": int(row["position"]),
+                    "max_count": int(row["raw_limit"]),
+                }
+                for row in limits
+            ],
+            "teams": teams,
+        }
+
+    @instance_lru_cache(maxsize=1)
     def list_skill_extras(self) -> list[dict[str, Any]]:
         """Return candidate distance-related skill and extra pairings."""
         with self._connect() as connection:

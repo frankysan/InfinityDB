@@ -52,6 +52,7 @@ ASSETS = {
     "/static/themed-logo.js": ("themed-logo.js", "text/javascript; charset=utf-8"),
     "/static/about.js": ("about.js", "text/javascript; charset=utf-8"),
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
+    "/static/fireteams.js": ("fireteams.js", "text/javascript; charset=utf-8"),
     "/static/catalog-list.js": ("catalog-list.js", "text/javascript; charset=utf-8"),
     "/static/skill.js": ("skill.js", "text/javascript; charset=utf-8"),
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
@@ -107,6 +108,7 @@ def _metric_route(path: str) -> str:
         "/traits",
         "/states",
         "/skill-extras",
+        "/fireteams",
         "/api/version",
         "/api/armies",
         "/api/units",
@@ -117,6 +119,7 @@ def _metric_route(path: str) -> str:
         "/api/traits",
         "/api/states",
         "/api/skill-extras",
+        "/api/fireteams",
     }:
         return path
     for pattern, normalized in (
@@ -261,6 +264,10 @@ def _page(
         .replace(
             "{{SKILL_EXTRAS_CURRENT}}",
             ' aria-current="page"' if active_page == "skill-extras" else "",
+        )
+        .replace(
+            "{{FIRETEAMS_CURRENT}}",
+            ' aria-current="page"' if active_page == "fireteams" else "",
         )
         .replace(
             "{{ABOUT_CURRENT}}",
@@ -619,6 +626,16 @@ class Application:
                 breadcrumbs=(("Database", "/"), ("Units", "/units"), ("Details", None)),
                 catalog_tag="Unit catalog",
             )
+        elif path == "/fireteams":
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                "fireteams.html",
+                active_page="fireteams",
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
+                breadcrumbs=(("Database", "/"), ("Fireteams", None)),
+                catalog_tag="Fireteam charts",
+            )
         elif path == "/skill-extras":
             content_type = "text/html; charset=utf-8"
             body = _page(
@@ -723,6 +740,30 @@ class Application:
                 "snapshot_revision": self.snapshot_revision,
             }
             cache_control = "no-store"
+        elif path == "/api/fireteams":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                params = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=True)
+                army_ref = _domain_filter_identifier(params, "army_id")
+                if army_ref is None:
+                    items = [dict(item) for item in self.database.list_fireteam_armies()]
+                    for item in items:
+                        attach_public_army_slug(self.database, item)
+                    payload = {"items": items}
+                else:
+                    payload = self.database.get_fireteam_chart(army_ref)
+                    if payload is None:
+                        status = HTTPStatus.NOT_FOUND
+                        payload = {"error": "Fireteam chart not found"}
+                    else:
+                        attach_public_army_slug(self.database, payload["army"])
+            except ValueError as exc:
+                status = HTTPStatus.BAD_REQUEST
+                payload = {"error": str(exc)}
+            except (OSError, sqlite3.Error):
+                LOGGER.exception("Could not read Fireteam chart")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The Fireteam chart is unavailable. Please try again."}
         elif path == "/api/skill-extras":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:

@@ -21,7 +21,7 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
 
     assert report["summary"]["sourceTableCount"] == 70
     assert report["summary"]["sourceFieldCount"] == 441
-    assert report["summary"]["confirmedGapCount"] == 8
+    assert report["summary"]["confirmedGapCount"] == 7
     assert report["summary"]["reviewQueueCount"] == 2
     assert sum(report["summary"]["fieldStatusCounts"].values()) == 441
     assert report["rawEvidence"]["status"] == "available"
@@ -35,6 +35,8 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
         == audit.EXPLICIT
     )
     assert _field(report, "army_skills", "item_id")["status"] == audit.NORMALIZATION
+    assert _field(report, "fireteams", "name")["status"] == audit.EXPLICIT
+    assert _field(report, "fireteam_members", "name")["status"] == audit.EXPLICIT
 
 
 def test_source_presentation_audit_records_expected_gap_families(tmp_path: Path) -> None:
@@ -43,7 +45,6 @@ def test_source_presentation_audit_records_expected_gap_families(tmp_path: Path)
 
     assert gap_ids == {
         "declared_faction_membership",
-        "fireteams",
         "includes",
         "peripheral_controller_links",
         "reinforcement_parentage",
@@ -51,13 +52,6 @@ def test_source_presentation_audit_records_expected_gap_families(tmp_path: Path)
         "unit_notes",
         "unit_options",
     }
-    fireteams = next(item for item in report["confirmedGaps"] if item["id"] == "fireteams")
-    assert fireteams["layer"] == "application_database_only"
-    assert fireteams["tables"] == [
-        "application_fireteams",
-        "application_fireteam_types",
-        "application_fireteam_members",
-    ]
     assert report["applicationEvidence"]["declaredFactionMembershipCount"] == 1
     assert report["applicationEvidence"]["unitOptionCount"] == 1
 

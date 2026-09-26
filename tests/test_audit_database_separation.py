@@ -63,7 +63,7 @@ def test_database_separation_audit_validates_lossless_raw_sibling(tmp_path: Path
     assert raw["status"] == "complete"
     assert raw["supportedNormalizedTableCount"] == 70
     assert raw["relationalNormalizedTableCount"] == 70
-    assert raw["importedNormalizedTableCount"] == 54
+    assert raw["importedNormalizedTableCount"] == 57
     assert raw["storedRowCount"] == sum(raw["losslessTableRowCounts"].values())
     assert raw["tableRowCounts"] == raw["losslessTableRowCounts"]
     assert raw["metadataMatchesApplication"] is True

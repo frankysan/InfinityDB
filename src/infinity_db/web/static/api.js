@@ -34,6 +34,15 @@ export function getArmies(signal) {
   return get("/api/armies", signal);
 }
 
+export function getFireteamArmies(signal) {
+  return get("/api/fireteams", signal);
+}
+
+export function getFireteamChart(armyId, signal) {
+  const params = new URLSearchParams({ army_id: armyId });
+  return get(`/api/fireteams?${params}`, signal);
+}
+
 export function getCatalogItems(catalog, signal) {
   return get(`/api/${encodeURIComponent(catalog)}`, signal);
 }

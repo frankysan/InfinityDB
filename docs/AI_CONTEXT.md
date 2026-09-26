@@ -1177,8 +1177,9 @@ compatibility references remain unambiguous JSON integers.
   general rules. Wildcards (52 teams / 51 Armies) have no Fireteam type rows. Bracketed equivalence
   wording appears on 406 member rows (453 references / 146 labels) and must not feed Unit identity.
 - `tools/audit_fireteam_semantics.py` is the deterministic read-only evidence tool for this
-  boundary. First-class Fireteam repository/API/browser presentation remains a separate
-  0.8.x connected-data task within the 1.0 completeness program.
+  boundary. The first-class `/api/fireteams` + `/fireteams` Army-chart surface now consumes
+  that canonical projection; general Fireteam rules and generated Level-bonus reference data
+  remain separate 0.8.x follow-up work within the 1.0 completeness program.
 
 ### Milestone 2B normalization-link boundary (2026-09-22)
 
@@ -1240,8 +1241,9 @@ compatibility references remain unambiguous JSON integers.
   options, Structure/Wounds labeling, and structured Hacking/Martial Arts/Booty/
   MetaChemistry reference data. Schema 24 / compatibility revision 32 closed the
   structured-reference gap in 0.7.0, and 0.7.2 closed the Structure/VITA-versus-STR
-  presentation gap. The maintained inventory therefore reports 8 open families; the
-  remaining gaps belong to 0.8.x/0.9.x work rather than Milestone 2B.
+  presentation gap. The first 0.8 Fireteam browser closes the Fireteam source-presentation
+  family, so the maintained inventory now reports 7 open families; the remaining gaps belong
+  to 0.8.x/0.9.x work rather than Milestone 2B.
 - Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
   preserve the source values and do not invent presentation semantics before the domain
   meaning/scope is resolved.
@@ -1264,8 +1266,9 @@ compatibility references remain unambiguous JSON integers.
   Main- and Reinforcement-section member pools or implementing a legality engine.
 - Shared FTO/Wildcard/equivalence parsing now lives in `infinity_db.fireteam_semantics` and is
   consumed by both the maintained Fireteam audit and the application materializer, preventing
-  audit/runtime semantic drift. Repository/API/browser Fireteam presentation is the next 0.8.0
-  layer.
+  audit/runtime semantic drift. `/api/fireteams` and `/fireteams` now expose the Army-scoped
+  chart from that projection; general Fireteam rules/Level bonuses remain the next Fireteam
+  presentation layer.
 
 ## 0.7.0 structured Army reference projections (2026-09-25)
 

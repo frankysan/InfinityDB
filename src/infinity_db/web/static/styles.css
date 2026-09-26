@@ -3441,3 +3441,100 @@ tbody tr:hover {
     scroll-behavior: auto !important;
   }
 }
+/* Fireteam chart browser */
+.fireteam-explorer {
+  width: min(1040px, 100%);
+}
+
+.fireteam-filters {
+  margin-bottom: 18px;
+}
+
+.fireteam-filters .army-field {
+  width: min(420px, 100%);
+}
+
+.fireteam-content,
+.fireteam-list {
+  display: grid;
+  gap: 18px;
+}
+
+.fireteam-chart-summary,
+.fireteam-card {
+  border: 1px solid var(--color-border-default);
+  background: var(--color-surface-subtle);
+  box-shadow: var(--shadow-card);
+}
+
+.fireteam-chart-summary {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+}
+
+.fireteam-chart-heading,
+.fireteam-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.fireteam-chart-heading h3,
+.fireteam-card-header h3,
+.fireteam-observation {
+  margin: 0;
+}
+
+.fireteam-card-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.fireteam-card-header h3 {
+  color: var(--color-text-primary);
+  font-size: 15px;
+}
+
+.fireteam-observation {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border-default);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.fireteam-member-table {
+  border: 0;
+}
+
+.fireteam-member-table table {
+  min-width: 760px;
+}
+
+.fireteam-member-table th:first-child {
+  min-width: 180px;
+}
+
+.fireteam-member-table td {
+  vertical-align: top;
+}
+
+.fireteam-member-note,
+.fireteam-member-developer {
+  display: block;
+  margin-top: 5px;
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.fireteam-loadout-list {
+  margin: 7px 0 0;
+  padding-left: 18px;
+}
+
+.fireteam-loadout-list li + li {
+  margin-top: 3px;
+}

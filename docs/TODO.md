@@ -140,13 +140,16 @@ The Milestone 2B completeness inventory makes these implementation families expl
     Wildcard identity, equivalence labels, observations, and selected-source provenance. Keep
     Reinforcement parent limits separate through the existing application Army graph rather
     than merging Main- and Reinforcement-section charts.
-  - [ ] **Web backend + Web frontend:** Present each Army's current chart as authoritative for
-    membership restrictions, min/max requirements, FTO/Wildcard notes, and source provenance;
-    pair it with concise general Fireteam rules while keeping Army-specific chart exceptions
-    separate. Generate Fireteam Level bonuses from the same curated general-rule facts rather
-    than hard-coding a second Quick Reference table, and make historical/community vocabulary
-    such as `Linkable` and `pure Fireteam` discoverable as provenance-aware aliases/help rather
-    than current N5 terminology.
+  - [x] **Web backend + Web frontend:** Add first-class Army-scoped Fireteam browsing from
+    the canonical projection. Expose only Armies with current player-facing chart content,
+    preserve authoritative chart limits/source provenance, render team/type/member ordering,
+    min/max/required context, FTO-eligible loadouts, Wildcards, equivalence labels, observations,
+    and links to resolved Units, and keep raw normalized chart tables out of runtime serving.
+  - [ ] **Data processing + Web frontend:** Pair the Army chart with concise general Fireteam
+    rules while keeping Army-specific chart exceptions separate. Generate Fireteam Level bonuses
+    from the same curated general-rule facts rather than hard-coding a second Quick Reference
+    table, and make historical/community vocabulary such as `Linkable` and `pure Fireteam`
+    discoverable as provenance-aware aliases/help rather than current N5 terminology.
 - [ ] **Web frontend:** Move Unit symbols out of the Unit-detail title and into the
   General profile presentation. Place the primary symbol at the top-right of the General
   profile card, preferably overlapping the card edge without obscuring profile data, and use
@@ -357,16 +360,16 @@ work is limited to:
     through `api.js` to match the documented boundary; static/HTML fetches are not
     part of that API-transport requirement.
   - [ ] Perform route-by-route parity checks for the Unit explorer and details;
-    Skill Modifiers; Skills, Equipment, Weapons, and Traits list/detail pages;
+    Fireteams; Skill Modifiers; Skills, Equipment, Weapons, and Traits list/detail pages;
     shared navigation/settings; and version refresh. Compare API output with
     rendered behavior, including filtering, result counts, ordering, labels,
     deep-link state, cross-links, optional-unit behavior, source/rules links,
     catalog-item unit usage, and symbol identity. Use a deliberate manual browser
     pass unless lightweight browser automation is added for a concrete audit need.
-  - [ ] Treat Fireteams as preserved source data whose 0.8.x presentation remains a
-    separate implementation task. Verify their imported data is retained, record
-    the current absence of a Fireteam repository/API/browser surface, and feed
-    confirmed player-relevant Fireteam information into the connected-data backlog.
+  - [x] Verify Fireteam source retention through the canonical application projection
+    and first-class repository/API/browser chart surface. Keep the broader consistency
+    audit responsible for route/API/render parity rather than reopening Fireteam domain
+    modeling that is already tracked in the 0.8 connected-data workstream.
   - [ ] Exercise degraded states deliberately: rules database available versus
     unavailable; asset validation disabled versus required; complete tracked published
     assets versus an intentionally asset-free specialized package/test layout; unknown
@@ -570,10 +573,11 @@ work against that contract.
     season-specific terms to the relevant rules/state references.
 - [ ] **Post-1.0 — Data processing + Web frontend:** Add a deployment-map SVG
   generator for scenario maps. The first iteration should accept a validated JSON map
-  definition and generate deterministic SVGs for the three standard table-size presets: 2×3
-  ft (24×36 in), 3×4 ft (36×48 in), and 4×4 ft (48×48 in). Keep the renderer itself
-  dimension-agnostic because archived ITS seasons also use sizes such as 24×32 and 32×48 in,
-  and future/scenario-specific formats must not require renderer changes.
+  definition and generate deterministic SVGs for the three officially supported table-size
+  presets: **24×32 in, 32×48 in, and 48×48 in**. Treat inches as the canonical geometry unit
+  in the schema rather than rounding dimensions to nominal feet. Keep the renderer itself
+  dimension-agnostic so historical, future, and scenario-specific formats do not require
+  renderer changes.
   - [ ] Define a flexible coordinate/geometry model with absolute and relative anchors to
     table edges, center lines, other objects, and repeated/mirrored placements; allow
     per-table-size overrides where geometry genuinely differs rather than scaling blindly.

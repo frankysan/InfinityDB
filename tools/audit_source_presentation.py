@@ -96,6 +96,15 @@ _register(
     ),
 )
 _register(
+    ["fireteams", "fireteam_types", "fireteam_members"],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Army-local Fireteam source relationships are projected into the canonical "
+        "application Fireteam model and presented through the Fireteam chart browser."
+    ),
+)
+_register(
     [
         "metadata_hacking_programs",
         "metadata_martial_arts",
@@ -156,9 +165,6 @@ _register(
         "peripherals",
         "profile_peripherals",
         "option_peripherals",
-        "fireteams",
-        "fireteam_types",
-        "fireteam_members",
         "relations",
         "relation_units",
         "relation_dependencies",
@@ -208,22 +214,23 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
         "Source hash is build provenance.",
     ),
     ("army_lists", "fireteam_description"): _policy(
-        UNREPRESENTED,
+        EXPLICIT,
         SOURCE_RELATIONSHIP,
-        DOC_RULES,
-        "Fireteam chart notes are player-relevant and are not yet available in the web app.",
+        DOC_DATA_MODEL,
+        "Fireteam chart notes are projected into the Army-scoped Fireteam browser.",
     ),
     ("army_lists", "fireteam_spec"): _policy(
-        UNREPRESENTED,
+        EXPLICIT,
         SOURCE_RELATIONSHIP,
-        DOC_RULES,
-        "Fireteam chart specification is player-relevant and is not yet available in the web app.",
+        DOC_DATA_MODEL,
+        "Fireteam type limits are projected into the Army-scoped Fireteam browser.",
     ),
     ("army_lists", "legacy_fireteams"): _policy(
-        UNREPRESENTED,
-        SOURCE_RELATIONSHIP,
-        DOC_RULES,
-        "Legacy Fireteam source context remains part of the Fireteam presentation gap.",
+        REDUNDANT,
+        SOURCE_PROVENANCE,
+        DOC_DATA_MODEL,
+        "Legacy Fireteam source context is preserved in raw storage; the current chart "
+        "projection/browser is authoritative for player-facing Fireteam data.",
     ),
     ("units", "notes"): _policy(
         UNREPRESENTED,
@@ -265,20 +272,6 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
 
 
 CONFIRMED_GAPS: tuple[dict[str, Any], ...] = (
-    {
-        "id": "fireteams",
-        "target": "0.8.x",
-        "layer": "application_database_only",
-        "tables": [
-            "application_fireteams",
-            "application_fireteam_types",
-            "application_fireteam_members",
-        ],
-        "reason": (
-            "Canonical Fireteam charts are materialized in the application database but "
-            "do not yet have repository/API/browser presentation."
-        ),
-    },
     {
         "id": "includes",
         "target": "0.8.x",

@@ -323,6 +323,79 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert {army["unit_count"] for army in armies.values()} == {1, 2, 4}
 
 
+def test_fireteam_chart_page_and_api_use_application_projection(
+    tmp_path: Path, app_database_template: Path
+) -> None:
+    database_path = tmp_path / "infinity.db"
+    shutil.copy2(app_database_template, database_path)
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(
+            "UPDATE application_fireteam_charts SET description = ? "
+            "WHERE application_army_id = 101",
+            ("Current chart note",),
+        )
+        connection.execute(
+            "INSERT INTO application_fireteam_chart_limits "
+            "(application_army_id, fireteam_type, position, raw_limit) "
+            "VALUES (101, 'CORE', 1, 1)"
+        )
+        connection.execute(
+            "INSERT INTO application_fireteams "
+            "(application_army_id, fireteam_id, position, name, observation, source_army_id, "
+            "source_fireteam_id, is_wildcard) "
+            "VALUES (101, 1, 1, 'Ranger Team', 'No Wildcards', 101, 1, 0)"
+        )
+        connection.execute(
+            "INSERT INTO application_fireteam_types "
+            "(application_army_id, fireteam_id, position, fireteam_type) "
+            "VALUES (101, 1, 1, 'CORE')"
+        )
+        connection.execute(
+            "INSERT INTO application_fireteam_members "
+            "(application_army_id, fireteam_id, member_id, position, source_army_id, "
+            "source_fireteam_id, source_member_id, slug, name, comment, min_count, max_count, "
+            "required, source_unit_id, logical_unit_id, resolution, fto_marker) "
+            "VALUES (101, 1, 1, 1, 101, 1, 1, 'ranger-prototype', 'Alpha Ranger', "
+            "'Line Trooper', 1, 2, 1, 1, 1, 'army', NULL)"
+        )
+    _refresh_published_content_checksum(database_path)
+    fireteam_app = create_app(database_path)
+
+    status, _, body = request(fireteam_app, "/fireteams")
+    assert status == 200
+    assert b"Fireteams" in body
+    assert b'/static/fireteams.js?v=' in body
+    assert b'href="/fireteams" aria-current="page"' in body
+
+    status, _, body = request(fireteam_app, "/api/fireteams")
+    assert status == 200
+    armies = json.loads(body)["items"]
+    assert [(item["id"], item["public_slug"], item["fireteam_count"]) for item in armies] == [
+        (101, "zulu-company", 1)
+    ]
+
+    status, _, body = request(
+        fireteam_app, "/api/fireteams", query="army_id=zulu-company"
+    )
+    assert status == 200
+    chart = json.loads(body)
+    assert chart["army"]["public_slug"] == "zulu-company"
+    assert chart["description"] == "Current chart note"
+    assert chart["limits"] == [{"type": "CORE", "position": 1, "max_count": 1}]
+    assert chart["teams"][0]["name"] == "Ranger Team"
+    assert chart["teams"][0]["types"] == ["CORE"]
+    member = chart["teams"][0]["members"][0]
+    assert member["unit"]["slug"] == "ranger-prototype"
+    assert member["required"] is True
+
+    status, _, script = request(fireteam_app, "/static/fireteams.js")
+    assert status == 200
+    assert b"getFireteamArmies" in script
+    assert b"getFireteamChart" in script
+    assert b"Counts as:" in script
+    assert b"Authoritative" in script
+
+
 def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> None:
     unit = {"id": 1, "name": "Shared Unit", "canonical": 101, "factions": [101]}
     documents = [

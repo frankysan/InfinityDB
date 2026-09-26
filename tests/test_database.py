@@ -422,6 +422,36 @@ def test_database_splits_lossless_source_from_published_application_data(
         archive.close()
 
 
+def test_fireteam_repository_exposes_army_scoped_application_chart(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    armies = database.list_fireteam_armies()
+    assert [(army["id"], army["fireteam_count"]) for army in armies] == [(101, 1)]
+
+    chart = database.get_fireteam_chart("first-army")
+    assert chart is not None
+    assert chart["army"]["id"] == 101
+    assert chart["source"]["army_id"] == 101
+    assert chart["source"]["kind"] == "faction"
+    assert chart["limits"] == [
+        {"type": "MAX", "position": 1, "max_count": 2}
+    ]
+    assert len(chart["teams"]) == 1
+    team = chart["teams"][0]
+    assert team["name"] == "Team"
+    assert team["types"] == ["CORE"]
+    assert team["is_wildcard"] is False
+    assert len(team["members"]) == 1
+    member = team["members"][0]
+    assert member["name"] == "Alpha"
+    assert member["min_count"] == 1
+    assert member["unit"] == {"id": 1, "slug": "alpha", "name": "Álpha"}
+
+
 def test_published_database_validates_without_raw_sibling(
     tmp_path: Path, normalized: dict
 ) -> None:
