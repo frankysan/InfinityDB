@@ -1201,6 +1201,14 @@ def test_landing_page_states_independence_and_asset_permission(app: Callable) ->
     assert b"assets used by the project" in body
 
 
+def test_landing_page_links_to_fireteams(app: Callable) -> None:
+    status, _, body = request(app, "/")
+
+    assert status == 200
+    assert b'<a class="landing-link" href="/fireteams">' in body
+    assert b'<strong>Fireteams</strong>' in body
+
+
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
     status, _, body = request(app, "/")
 
