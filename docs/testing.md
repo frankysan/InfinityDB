@@ -1,5 +1,7 @@
 # Development checks
 
+**Project domain:** Project infrastructure
+
 InfinityDB provides `tools/run_checks.py` as the standard local entry point for
 Python tests, Ruff linting, Pyright type checking, Army data-build validation,
 and curated rules-database validation. The runner only
@@ -104,6 +106,38 @@ The web tests build one template SQLite database per module, then copy that
 template into each test's temporary directory before creating the application.
 This preserves mutation isolation while avoiding a full normalize/export cycle
 for every web test.
+
+### SQLite finalization in semantic tests
+
+The production Army and rules exporters canonicalize generated SQLite artifacts by
+default: they repack with `VACUUM` and normalize transaction-history-only header
+fields so release artifacts remain byte-deterministic. Export-heavy semantic tests
+that inspect database contents rather than final file bytes explicitly use
+`finalize=False` to avoid repeating that physical-file work. This optimization is
+limited to test callers; the CLI does not expose a non-finalized build mode.
+
+`tests/test_database.py` and `tests/test_rules_database.py` retain a comparison
+switch for measuring the finalization cost with the normal xdist scheduler. Set
+`INFINITYDB_TEST_FINALIZE_SQLITE=1` to force those fixtures back through canonical
+finalization for one run, then compare against the normal test path using the same
+machine and worker count:
+
+```powershell
+$env:INFINITYDB_TEST_FINALIZE_SQLITE = "1"
+python tools/run_checks.py --stage test --test-workers auto tests/test_database.py tests/test_rules_database.py
+Remove-Item Env:INFINITYDB_TEST_FINALIZE_SQLITE
+python tools/run_checks.py --stage test --test-workers auto tests/test_database.py tests/test_rules_database.py
+```
+
+On the primary Windows development machine, the 182-test database/rules comparison
+with `--test-workers auto` and xdist `worksteal` measured 19.45 seconds with canonical
+finalization forced and 17.56 seconds with the semantic-test fast path: a 1.89-second,
+9.7% reduction in check-run wall time. Pytest's own reported duration improved from
+19.05 to 17.18 seconds (9.8%). Both runs passed all 182 tests.
+
+Treat these timings as diagnostic evidence, not a pass/fail performance threshold.
+Shared CI runners can vary substantially, so future comparisons should record the platform,
+worker setting, and both measured durations.
 
 ## Targeted checks
 

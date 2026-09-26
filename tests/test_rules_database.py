@@ -1,18 +1,56 @@
 import copy
+import os
 import sqlite3
 from pathlib import Path
 
 import pytest
 
+import infinity_db.rules_database as rules_database_module
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database
 from infinity_db.rules_database import (
     RULES_APPLICATION_ID,
     RULES_SCHEMA_VERSION,
     RulesDatabase,
-    export_rules_database,
+)
+from infinity_db.rules_database import (
+    export_rules_database as export_release_rules_database,
 )
 from infinity_db.skill_catalog import SkillCatalog
+
+FINALIZE_TEST_DATABASES = os.environ.get("INFINITYDB_TEST_FINALIZE_SQLITE") == "1"
+
+
+def export_rules_database(*args, **kwargs) -> None:
+    """Build semantic test fixtures without canonical SQLite finalization by default."""
+    kwargs.setdefault("finalize", FINALIZE_TEST_DATABASES)
+    export_release_rules_database(*args, **kwargs)
+
+
+def test_rules_export_finalization_is_default_and_can_be_skipped(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    calls: list[str] = []
+
+    monkeypatch.setattr(
+        rules_database_module,
+        "vacuum_deterministic_sqlite",
+        lambda connection: calls.append("vacuum"),
+    )
+    monkeypatch.setattr(
+        rules_database_module,
+        "normalize_sqlite_header",
+        lambda path: calls.append("header"),
+    )
+
+    export_release_rules_database(documents, tmp_path / "canonical.db")
+    assert calls == ["vacuum", "header"]
+
+    calls.clear()
+    export_release_rules_database(documents, tmp_path / "semantic.db", finalize=False)
+    assert calls == []
 
 
 def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path: Path) -> None:

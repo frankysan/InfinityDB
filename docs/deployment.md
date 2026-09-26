@@ -1,5 +1,7 @@
 # Linux deployment
 
+**Project domain:** Deployment
+
 InfinityDB is deployed as an immutable Docker image: it contains the web
 application, tracked static UI assets, and validated `infinity.db` and `rules.db`
 snapshots. Caddy listens on HTTP and proxies traffic to the application, which is not exposed
@@ -215,6 +217,35 @@ To update Army data, download or place the new raw snapshot and its required
 `metadata.json` in `data/raw/`, then run `sh ./scripts/install-or-update.sh`.
 The same deployment run rebuilds `rules.db` from the tracked collections under
 `data/curated/rules/`. Do not edit either SQLite file inside a running container.
+
+### Privacy and observability
+
+InfinityDB's accepted monitoring direction is aggregate-only observability: normalized
+route/request counts, status classes, latency distributions, response sizes, active
+requests, version identity, and host/container resource use. Production monitoring must
+not retain IP addresses, user agents/fingerprints, referrers, cookies/session or preference
+values, query strings/search terms, persistent visitor identifiers, or per-user request
+histories. See `docs/architecture.md` for the canonical policy.
+
+The production image disables Gunicorn's routine access log and retains the stderr error
+log for operational diagnostics. Gunicorn starts with `--preload`, allowing the fixed-size
+request registry created by the WSGI app to be inherited and shared by the existing worker
+processes. The registry records only normalized bounded route labels, status classes, latency
+and response-size histogram buckets, active-request counts, and build/snapshot identity. It
+does not read request IPs, user agents, referrers, cookies, query strings, or other
+visitor-identifying fields.
+
+The aggregate registry is exposed as Prometheus text at `/internal/metrics` on the app
+container's port 8000. `/internal/health` provides the container liveness/readiness probe and
+is excluded from usage metrics. Caddy returns 404 for `/internal/*`, so neither endpoint is
+part of the public site; a future monitoring service must scrape `app:8000` from the Docker
+network. The metrics are process-lifetime operational state and intentionally reset when the
+application container restarts.
+
+Raw request logging is not enabled in normal operation. If it is temporarily required for a
+concrete incident, minimize and sanitize the fields, restrict access, and define short
+retention before enabling it. Error logs and host/container health data remain appropriate
+when they do not embed request-identifying values.
 
 `deploy.sh` retains the current build and the two newest rollback builds by
 default. After Compose has successfully started and health-checked the new

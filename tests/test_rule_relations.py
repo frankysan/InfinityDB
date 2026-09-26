@@ -28,8 +28,53 @@ def test_every_gameplay_relation_has_complete_bidirectional_presentation() -> No
         assert outbound["group_id"] == inbound["group_id"]
         assert outbound["group_label"] == inbound["group_label"]
         assert outbound["group_order"] == inbound["group_order"]
+        assert outbound["relation_order"] == inbound["relation_order"]
         assert outbound["label"]
         assert inbound["label"]
+
+
+def test_establishing_relations_sort_before_other_interactions() -> None:
+    caused = relation_presentation("causes-state", "inbound")
+    cancelled = relation_presentation("cancels-state", "inbound")
+
+    assert caused is not None
+    assert cancelled is not None
+    assert caused["relation_order"] < cancelled["relation_order"]
+
+
+def test_state_relation_sort_contract_matches_player_facing_order() -> None:
+    items = [
+        ("prevents-state-entry", "inbound", "Aerial"),
+        ("cancels-state", "outbound", "Foxhole State"),
+        ("cancels-state", "inbound", "Impetuous"),
+        ("prevents-state-entry", "inbound", "Impetuous"),
+        ("cancels-state", "inbound", "Jump"),
+        ("prevents-state-entry", "inbound", "Motorcycle"),
+        ("causes-state", "inbound", "Unconscious State"),
+    ]
+    presented = []
+    for relation_type, direction, name in items:
+        presentation = relation_presentation(relation_type, direction)
+        assert presentation is not None
+        presented.append((presentation, name))
+
+    ordered = sorted(
+        presented,
+        key=lambda item: (
+            item[0]["relation_order"],
+            item[0]["label"],
+            item[1],
+        ),
+    )
+    assert [f"{presentation['label']}: {name}" for presentation, name in ordered] == [
+        "Caused by: Unconscious State",
+        "Cancelled by: Impetuous",
+        "Cancelled by: Jump",
+        "Cancels state: Foxhole State",
+        "State entry prevented by: Aerial",
+        "State entry prevented by: Impetuous",
+        "State entry prevented by: Motorcycle",
+    ]
 
 
 def test_variant_relationship_is_structural_and_not_generically_presented() -> None:

@@ -18,6 +18,9 @@
 3. **Transparency:** keep the project open source under the MIT License and
    clearly distinguish InfinityDB's work from outside data, quoted text, and
    image assets, which remain the property of their respective owners.
+4. **Privacy:** collect only the aggregate operational information needed to run
+   and improve the service. Do not identify, profile, or persistently track
+   visitors.
 
 ## Engineering principles
 
@@ -51,9 +54,10 @@
 8. **Build conservatively.** When validation or interpretation is uncertain,
    preserve source or existing valid data rather than guessing or
    destructively correcting it.
-9. **Separate stages and responsibilities.** Acquisition, validation,
-   normalization, processing, publishing, and deployment should remain
-   independently understandable and testable.
+9. **Separate stages and responsibilities.** Use the canonical project-domain
+   boundaries in `docs/project-domains.md`; acquisition, data processing,
+   deployment, web-backend, web-frontend, and project-infrastructure concerns
+   should remain independently understandable and testable.
 10. **Be deterministic and portable.** Given the same inputs, configuration,
    InfinityDB revision, and declared tool versions, persistent generated artifacts
    must be byte-identical on Windows, Linux, and macOS. Canonical text output uses
@@ -77,13 +81,58 @@ so the compared fixtures are byte-identical inputs. Generated SQLite artifacts l
 explicit page/file settings, are repacked with `VACUUM`, and normalize SQLite's
 transaction-history-only file-change/version-valid-for header counters after the database is
 closed. The normalized counters remain equal so SQLite can still trust the in-header database
-size; schema/user/application version fields and database contents are not rewritten.
+size; schema/user/application version fields and database contents are not rewritten. Army and
+rules exporters keep this canonical finalization enabled by default, including every CLI/release
+build. Programmatic callers may explicitly disable only the physical finalization step when a
+semantic test needs valid database contents but not byte-level artifact identity.
+
+### Design direction: privacy-preserving observability
+
+Production observability should be aggregate-first and must not require personal or
+visitor-identifying data. InfinityDB may collect bounded operational metrics such as
+normalized-route request counts, status classes, latency distributions, response sizes,
+active-request counts, application/database versions, and host/container resource use.
+Routes must be normalized before aggregation (for example `/units/:id`), query strings
+must not become metric labels, and all label vocabularies must remain bounded.
+
+Routine monitoring must not collect or retain IP addresses or derived geolocation, user
+agents or browser fingerprints, referrers, cookies, session or preference values, query
+strings or search terms, persistent visitor identifiers, or other data intended to
+correlate requests from the same person over time. InfinityDB therefore deliberately
+forgoes unique-visitor counts, returning-user analytics, geographic/demographic reports,
+and per-user navigation histories.
+
+Raw request logging is not the normal analytics path. If temporarily enabled to diagnose
+a concrete production incident, it must be minimized to the fields needed for that
+incident, sanitized where practical, access-restricted, and retained only briefly.
+Operational dashboards should derive from aggregate counters/histograms rather than from
+long-lived access-log archives.
+
+The production WSGI app implements this policy with a fixed-cardinality shared request
+registry. Gunicorn preloads the app before forking workers so counters are shared across the
+worker processes; routine Gunicorn access logging is disabled. `/internal/metrics` renders
+Prometheus text from the aggregate registry and `/internal/health` provides an uninstrumented
+health probe. Both are reachable on the app container network only because the public Caddy
+configuration rejects `/internal/*`. No dynamic identifier, raw URL, query value, or request
+header is admitted to the metric label vocabulary.
 
 Data tools are a subsystem of InfinityDB. They remain usable independently for
 inspection, validation, and rebuilding snapshots. The standalone scripts in
 `tools/` keep their own dedicated regression coverage under `tests/` so their
 filesystem safety, URL handling, and cross-platform naming remain validated
 independently from the core database and web pipeline.
+
+## Project domains
+
+InfinityDB uses six canonical project domains for engineering ownership and
+documentation: **Acquisition**, **Data processing**, **Deployment**, **Web backend**,
+**Web frontend**, and **Project infrastructure**. The definitions, boundaries, and
+documentation-label convention are maintained in `docs/project-domains.md`.
+
+These domains classify where a change or durable contract belongs; they do not
+replace the semantic game-data domains described by the data model. Cross-domain
+work should name multiple project domains only when it materially changes the
+contract between them.
 
 ## Documentation status
 
@@ -338,8 +387,11 @@ edges, so reciprocal rows are not maintained independently. Current edges must r
 current semantic record before `rules.db` can be published. Composed rule payloads add a
 `display_relations` graph projection with direction and resolved endpoint identity/Army
 links. The backend attaches the reviewed player-facing relation group and direction-aware
-label to that projection; the shared browser renderer consumes those semantics rather than
-translating raw relation types itself. Structural edges such as `variant-of` remain available
+label to that projection; it also supplies a semantic relation-order key so interactions
+that establish/provide/enable a condition can sort before cancellation or restriction within
+the same group. The shared browser renderer then sorts by group, semantic relation order,
+player-facing interaction label, and related-record name rather than translating raw relation
+types itself. Structural edges such as `variant-of` remain available
 to API consumers but intentionally receive no generic Related-rules presentation. Format v10 introduced the first gameplay-interaction edge,
 `reduces-modifiers-from`: Multispectral Visor authors that edge once toward Mimetism,
 and the Mimetism surface receives the derived inverse relationship automatically. Format
@@ -960,18 +1012,19 @@ this non-commercial project, not a change in ownership or MIT-license scope.
 
 ## Module boundaries
 
-| Layer | Responsibility | Extension point |
-| --- | --- | --- |
-| `infinity_army_data` | Interpret and validate source data | Source-format changes and additional normalization |
-| `infinity_db.domain_slugs` | Shared domain-local slug normalization, validation, and collision policy | Additional application/public identity domains |
-| `infinity_db.database.schema` | Table definitions, composite keys, references, schema version | New normalized entities and future migration policy |
-| `infinity_db.database.application_domain_slugs` | Materialize provisional application-domain slug assignments | Reviewed overrides and future domain expansion |
-| `infinity_db.database.importer` | Validate and store a complete snapshot | Alternative storage adapters, such as PostgreSQL |
-| `infinity_db.database.repository` | Read-only application queries | Unit details, profile comparisons, catalog queries |
-| `infinity_db.web.app` | Validate HTTP input and serialize query results | Additional routes and API resources |
-| `infinity_db.web.static` | UI, shared page-shell components, URL state, loading and error handling | New screens, filters, and catalogs |
-| standalone `tools/` | Explicit acquisition, validation, and asset-processing workflows | New independent build/input tools |
-| deployment scripts | Package and deploy validated application output | Additional deployment targets |
+| Project domain | Layer | Responsibility | Extension point |
+| --- | --- | --- | --- |
+| Data processing | `infinity_army_data` | Interpret and validate source data | Source-format changes and additional normalization |
+| Data processing | `infinity_db.domain_slugs` | Shared domain-local slug normalization, validation, and collision policy | Additional application/public identity domains |
+| Data processing | `infinity_db.database.schema` | Table definitions, composite keys, references, schema version | New normalized entities and future migration policy |
+| Data processing | `infinity_db.database.application_domain_slugs` | Materialize provisional application-domain slug assignments | Reviewed overrides and future domain expansion |
+| Data processing | `infinity_db.database.importer` | Validate and store a complete snapshot | Alternative storage adapters, such as PostgreSQL |
+| Web backend | `infinity_db.database.repository` | Read-only application queries | Unit details, profile comparisons, catalog queries |
+| Web backend | `infinity_db.web.app` | Validate HTTP input and serialize query results | Additional routes and API resources |
+| Web frontend | `infinity_db.web.static` | UI, shared page-shell components, URL state, loading and error handling | New screens, filters, and catalogs |
+| Acquisition | acquisition/asset `tools/` | Explicit source download, snapshot, archive, and asset-processing workflows | New independent source/asset tooling |
+| Project infrastructure | shared development `tools/` and `.github/` | Checks, CI, work archives, and repository-wide engineering support | New development/release automation |
+| Deployment | deployment scripts, Docker/Compose, server configuration | Package and operate validated application output | Additional deployment targets |
 
 Only the importer consumes normalized JSON. Read-only runtime imports must not
 load the importer, Army normalizer, or maintained build-policy configuration as a
@@ -981,7 +1034,10 @@ repository; browser code calls the API. Neither web layer parses raw Army files.
 requests live in `api.js`; shared unit-row rendering lives in `unit-list.js`;
 page-specific state and rendering live in the corresponding module (for
 example, `app.js` or `catalog-detail.js`). The current UI uses native modules
-and requires no JavaScript build step. When Corvus Belli graphical symbols are
+and requires no JavaScript build step. Browser pages execute only same-origin external
+modules: the HTTP Content Security Policy explicitly restricts scripts to `self`, and
+page-shell templates must not introduce inline script bodies or event-handler attributes.
+When Corvus Belli graphical symbols are
 published, army and unit symbols are addressed by stable ID-and-slug paths while
 JavaScript maps source identities to those paths. Corvus Belli has explicitly
 permitted InfinityDB to redistribute the processed graphical publication in the

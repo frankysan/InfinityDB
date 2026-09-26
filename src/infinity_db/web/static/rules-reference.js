@@ -66,7 +66,8 @@ function relationPresentation(relation) {
   const presentation = relation.presentation;
   const record = relation.record;
   if (!presentation?.label || !presentation?.group_id || !presentation?.group_label
-      || !Number.isFinite(presentation?.group_order) || !record?.name) return null;
+      || !Number.isFinite(presentation?.group_order)
+      || !Number.isFinite(presentation?.relation_order) || !record?.name) return null;
   return { relation, presentation, label: presentation.label, record };
 }
 
@@ -115,8 +116,9 @@ function appendRuleRelations(container, rule) {
     left.order - right.order || left.label.localeCompare(right.label)
   ))) {
     relationGroup.relations.sort((left, right) => (
-      left.record.name.localeCompare(right.record.name, undefined, { numeric: true })
+      left.presentation.relation_order - right.presentation.relation_order
       || left.label.localeCompare(right.label)
+      || left.record.name.localeCompare(right.record.name, undefined, { numeric: true })
     ));
 
     const relationGroupElement = document.createElement("div");

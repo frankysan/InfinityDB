@@ -673,6 +673,8 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines = [
         "# Rules interaction review checklist",
         "",
+        "**Project domain:** Data processing",
+        "",
         "This file is generated from the maintained public-catalog scope, interaction-review",
         "policy, and current curated rules graph. Do not edit it by hand. Regenerate it with:",
         "",

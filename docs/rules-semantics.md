@@ -1,5 +1,7 @@
 # Rules semantics
 
+**Project domain:** Data processing
+
 This document records source-authoritative Infinity rules semantics that already
 have a known use in InfinityDB's data interpretation, normalization, validation,
 relationships, querying/filtering, or presentation work.

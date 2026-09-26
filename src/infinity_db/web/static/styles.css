@@ -258,7 +258,7 @@ html:not([data-developer-mode="true"]) .id-column {
 
 .nav-label,
 .small-label {
-  font-size: 10px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1.8px;
   color: var(--color-nav-text-muted);
@@ -312,11 +312,11 @@ html:not([data-developer-mode="true"]) .id-column {
   gap: 12px;
   margin: 18px 12px 0;
   color: var(--color-nav-text);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .distance-toggle-label {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--color-nav-text-muted);
@@ -327,7 +327,7 @@ html:not([data-developer-mode="true"]) .id-column {
   align-items: center;
   gap: 5px;
   color: #8fa498;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .distance-toggle-options>span:first-child {
@@ -400,7 +400,7 @@ html[data-distance-unit="in"] .distance-toggle-options>span:last-child {
   justify-content: space-between;
   gap: 12px;
   color: var(--color-nav-text);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .8px;
   text-transform: uppercase;
 }
@@ -451,7 +451,7 @@ html[data-distance-unit="in"] .distance-toggle-options>span:last-child {
 .settings-group-label {
   margin: 0 12px;
   color: var(--color-nav-text-muted);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 550;
   letter-spacing: 1.2px;
   text-transform: uppercase;
@@ -465,7 +465,7 @@ html[data-distance-unit="in"] .distance-toggle-options>span:last-child {
   margin: 0;
   padding: 0 12px;
   color: var(--color-nav-text);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .4px;
   text-transform: uppercase;
 }
@@ -517,7 +517,7 @@ html[data-distance-unit="in"] .distance-toggle-options>span:last-child {
   justify-content: space-between;
   gap: 12px;
   color: var(--color-nav-text);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .8px;
   text-transform: uppercase;
 }
@@ -615,7 +615,7 @@ html[data-distance-unit="in"] .distance-toggle-options>span:last-child {
 .sidebar-footer .snapshot-date {
   margin: -10px 0 20px;
   color: #a8b8ad;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .2px;
   line-height: 1.5;
 }
@@ -626,7 +626,7 @@ html[data-distance-unit="in"] .distance-toggle-options>span:last-child {
 }
 
 .edition {
-  font-size: 10px;
+  font-size: 11px;
   color: #a8b8ad;
   padding-top: 21px;
   border-top: 1px solid #384b40;
@@ -861,7 +861,7 @@ html[data-distance-unit="in"] .distance-toggle-options>span:last-child {
   border: 1px solid var(--color-border-default);
   border-radius: 4px;
   padding: 6px 9px;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--color-text-secondary);
 }
 
@@ -879,7 +879,7 @@ html[data-distance-unit="in"] .distance-toggle-options>span:last-child {
 
 .eyebrow {
   margin: 0 0 13px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 650;
   letter-spacing: 1.6px;
   text-transform: uppercase;
@@ -1119,7 +1119,7 @@ h1>span {
 }
 
 .stat-label {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--color-text-secondary);
 }
 
@@ -1178,7 +1178,7 @@ h1>span {
 
 .unit-count-card h2 {
   margin: 0 0 8px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 650;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -1190,7 +1190,7 @@ h1>span {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 5px 14px;
   margin: 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .unit-count-card dt,
@@ -1206,7 +1206,7 @@ h1>span {
 .unit-count-filtered-total,
 .unit-count-note {
   margin: 0;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.45;
   color: var(--color-text-secondary);
 }
@@ -1338,7 +1338,7 @@ h1>span {
   border-radius: 4px;
   background: var(--color-text-secondary);
   color: var(--color-text-on-inverse);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: .25px;
@@ -1407,7 +1407,7 @@ h1>span {
 
 .rules-relation-group-heading {
   color: var(--color-text-tertiary);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: .5px;
   text-transform: uppercase;
@@ -1489,7 +1489,7 @@ h1>span {
 
 .data-label {
   color: #596a5b;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: .7px;
   text-transform: uppercase;
@@ -1528,6 +1528,16 @@ h1>span {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
+}
+
+.profile-symbol-link {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.profile-symbol-link .order-symbol {
+  display: block;
 }
 
 .order-symbol+.order-symbol {
@@ -1607,7 +1617,7 @@ h1>span {
 .badge {
   border-radius: 999px;
   padding: 3px 7px;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 650;
   letter-spacing: .35px;
   line-height: 1.2;
@@ -1728,7 +1738,7 @@ h1>span {
   padding: 12px 18px;
   border-top: 1px solid #e9ece3;
   color: #405b4d;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
   font-variant-numeric: tabular-nums;
 }
@@ -1746,7 +1756,7 @@ h1>span {
   padding: 12px 18px;
   background: var(--surface-data-header);
   color: #64715d;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 550;
   letter-spacing: 1.1px;
   text-transform: uppercase;
@@ -1757,7 +1767,7 @@ h1>span {
   padding: 12px 18px;
   border-left: 1px solid #e9ece3;
   color: #52634c;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
 }
 
@@ -1776,7 +1786,7 @@ h2 {
 }
 
 .section-index {
-  font-size: 9px;
+  font-size: 11px;
   color: #62725e;
   letter-spacing: 1.2px;
   font-family: Consolas, "Courier New", monospace;
@@ -1808,7 +1818,7 @@ h2 {
   padding-top: 16px;
   color: #435b3a;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 550;
 }
 
@@ -1830,7 +1840,7 @@ h2 {
 }
 
 .field label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 550;
   color: #566452;
 }
@@ -1844,7 +1854,7 @@ h2 {
 
 .availability-field legend {
   padding: 0;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 550;
   color: #566452;
 }
@@ -1921,7 +1931,7 @@ input::placeholder {
 .button {
   min-height: var(--control-height);
   border-radius: var(--radius-sm);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 550;
   border: 1px solid transparent;
   padding: 10px 14px;
@@ -1970,20 +1980,20 @@ input::placeholder {
 
 .results-toolbar p {
   margin: 0;
-  font-size: 11px;
+  font-size: 12px;
   color: #52634c;
   font-variant-numeric: tabular-nums;
 }
 
 .sort-label {
   color: #64745c;
-  font-size: 10px;
+  font-size: 11px;
   white-space: nowrap;
 }
 
 .sort-label span {
   margin-left: 10px;
-  font-size: 9px;
+  font-size: 11px;
   color: #647455;
 }
 
@@ -2045,7 +2055,7 @@ input::placeholder {
 table {
   --table-heading-padding: 16px 26px;
   --table-cell-padding: 18px 26px;
-  --table-heading-size: 9px;
+  --table-heading-size: 11px;
   --table-cell-size: inherit;
   --table-heading-spacing: 1.2px;
   width: auto;
@@ -2057,8 +2067,8 @@ table {
 .data-table--compact {
   --table-heading-padding: 10px 14px;
   --table-cell-padding: 11px 14px;
-  --table-heading-size: 8px;
-  --table-cell-size: 11px;
+  --table-heading-size: 11px;
+  --table-cell-size: 12px;
   --table-heading-spacing: 1px;
 }
 
@@ -2151,7 +2161,7 @@ tbody td {
 .unit-detail .army-profile .profile-details-table .profile-summary>th {
   width: auto;
   padding: 11px 14px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
 }
 
@@ -2165,7 +2175,7 @@ tbody td {
 .division-badge {
   color: #fff;
   padding: 2px 6px;
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .division-badge-surface {
@@ -2186,7 +2196,7 @@ tbody td {
   padding: 0 0 10px;
   border-bottom: 2px solid #405b4d;
   color: #405b4d;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -2241,7 +2251,7 @@ html[data-distance-unit="in"] .attribute-statline {
   display: block;
   margin-bottom: 3px;
   color: #64715d;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 550;
   letter-spacing: 1.2px;
   line-height: 1.2;
@@ -2267,7 +2277,7 @@ html[data-distance-unit="in"] .attribute-statline {
 }
 
 .unit-detail .army-profile .attribute-statline .attribute-label {
-  font-size: 8px;
+  font-size: 11px;
   letter-spacing: 1px;
 }
 
@@ -2292,7 +2302,7 @@ tbody tr:hover {
   padding-block: 10px;
   background: #edf4e7;
   color: #3a5547;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: .8px;
   text-transform: uppercase;
 }
@@ -2423,7 +2433,7 @@ tbody tr:hover {
   display: grid;
   grid-template-columns: repeat(var(--symbols-per-row), max-content);
   gap: 6px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .army-tags-compact {
@@ -2442,7 +2452,7 @@ tbody tr:hover {
   color: #536b42;
   padding: 4px 7px;
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
@@ -2466,13 +2476,13 @@ tbody tr:hover {
 .unit-id {
   min-width: 92px;
   font-family: Consolas, "Courier New", monospace;
-  font-size: 10px;
+  font-size: 11px;
   color: #64725c;
   white-space: nowrap;
 }
 
 .modifier-unit-links {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
@@ -2501,7 +2511,7 @@ tbody tr:hover {
 }
 
 .pagination>span {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
@@ -2554,7 +2564,7 @@ tbody tr:hover {
   border-color: var(--color-border-default);
   min-height: 34px;
   padding: 7px 11px;
-  font-size: 10px;
+  font-size: 11px;
   color: #435b3a;
   display: flex;
   align-items: center;
@@ -2571,7 +2581,7 @@ tbody tr:hover {
   justify-content: space-between;
   gap: 15px;
   padding: 26px 0 32px;
-  font-size: 10px;
+  font-size: 11px;
   color: #65715e;
 }
 
@@ -2604,6 +2614,45 @@ tbody tr:hover {
 
   #table-container thead th:last-child {
     width: 145px;
+  }
+}
+
+@media (min-width: 921px) {
+  .settings-menu>.menu-label {
+    display: none;
+  }
+
+  .settings-menu>.menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 14px 12px;
+    border: 0;
+    background: transparent;
+    color: var(--color-nav-text-muted);
+    font-size: 11px;
+    font-weight: 550;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+  }
+
+  .settings-menu>.compact-menu-panel {
+    display: none;
+  }
+
+  .settings-menu[data-open="true"]>.compact-menu-panel {
+    display: flex;
+  }
+
+  .settings-menu[data-open="true"]>.menu-button span {
+    transform: rotate(180deg);
+  }
+
+  body[data-catalog="equipment"] #catalog-table-container thead th:first-child,
+  body[data-catalog="weapons"] #catalog-table-container thead th:first-child,
+  body[data-catalog="traits"] #catalog-table-container thead th:first-child {
+    width: 68%;
   }
 }
 
@@ -3007,7 +3056,7 @@ tbody tr:hover {
   }
 
   .section-index {
-    font-size: 8px;
+    font-size: 11px;
     letter-spacing: .6px;
   }
 
@@ -3056,7 +3105,7 @@ tbody tr:hover {
   }
 
   .button-quiet {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .results-toolbar {
@@ -3070,7 +3119,7 @@ tbody tr:hover {
   table {
     --table-heading-padding: 14px 17px;
     --table-cell-padding: 16px 17px;
-    --table-heading-size: 8px;
+    --table-heading-size: 11px;
   }
 
   table.data-table--compact {
@@ -3117,7 +3166,7 @@ tbody tr:hover {
   }
 
   .army-tag {
-    font-size: 9px;
+    font-size: 11px;
     padding: 3px 5px;
   }
 
@@ -3149,7 +3198,7 @@ tbody tr:hover {
   .unit-detail .profile-summary>* {
     min-width: 0;
     padding: 8px 4px;
-    font-size: 10px;
+    font-size: 11px;
     overflow-wrap: anywhere;
   }
 
@@ -3165,7 +3214,7 @@ tbody tr:hover {
     display: block;
     margin-bottom: 3px;
     color: #64715d;
-    font-size: 8px;
+    font-size: 11px;
     font-weight: 550;
     letter-spacing: .6px;
     line-height: 1.2;
@@ -3225,7 +3274,7 @@ tbody tr:hover {
     grid-column: auto;
     padding-top: 8px;
     color: inherit;
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .profile-attributes-label {
@@ -3285,7 +3334,7 @@ tbody tr:hover {
     min-width: 0;
     padding: 8px 6px;
     border-bottom: 1px solid #e9ece3;
-    font-size: 10px;
+    font-size: 11px;
     overflow-wrap: anywhere;
   }
 
@@ -3294,7 +3343,7 @@ tbody tr:hover {
     display: block;
     margin-bottom: 3px;
     color: #64715d;
-    font-size: 8px;
+    font-size: 11px;
     font-weight: 550;
     letter-spacing: .6px;
     line-height: 1.2;
@@ -3328,7 +3377,7 @@ tbody tr:hover {
     display: table-cell;
     width: auto;
     padding: 9px 2px;
-    font-size: 9px;
+    font-size: 11px;
     text-align: center;
   }
 
@@ -3346,7 +3395,7 @@ tbody tr:hover {
   }
 
   .page-footer {
-    font-size: 9px;
+    font-size: 11px;
   }
 }
 

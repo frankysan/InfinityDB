@@ -1,5 +1,7 @@
 # Continuous integration strategy
 
+**Project domain:** Project infrastructure
+
 This document records the InfinityDB continuous-integration and automated
 validation contract. Sections explicitly marked design direction remain planned;
 the deployment smoke, required cross-platform source workflow, installed-wheel
@@ -73,11 +75,11 @@ merge blocking remains a repository setting rather than a workflow-YAML property
 The repository currently has an active `Protect main` branch ruleset targeting
 `main`. It requires pull requests with resolved review threads and an up-to-date
 set of required checks: the four `Source checks` matrix jobs, `deployment-smoke`,
-and `installed-wheel`. The 0.7.1 deterministic-output job is additionally mandatory
-for release acceptance; after its first hosted run establishes the check context, it
-must also be added to the `Protect main` required checks. The ruleset blocks branch
-deletion and non-fast-forward updates and has no bypass actors. These settings live
-on GitHub and therefore cannot be completed by workflow YAML alone.
+and `installed-wheel`. The `Cross-platform deterministic outputs` job is additionally
+mandatory for release acceptance and must remain part of the `Protect main` required
+checks. The ruleset blocks branch deletion and non-fast-forward updates and has no bypass
+actors. These settings live on GitHub and therefore cannot be completed by workflow YAML
+alone.
 
 ### Cross-platform CI (current)
 

@@ -254,6 +254,60 @@ def app(tmp_path: Path, app_database_template: Path) -> Callable:
     return create_app(database_path)
 
 
+def test_internal_metrics_use_bounded_normalized_route_labels(app: Callable) -> None:
+    status, _, _ = request(
+        app,
+        "/api/units/ranger-prototype",
+        query="search=private-search-term&visitor=private-id",
+    )
+    assert status == 200
+    status, _, _ = request(
+        app,
+        "/api/units/not-a-unit",
+        query="search=another-private-term",
+    )
+    assert status == 404
+
+    status, headers, body = request(app, "/internal/metrics")
+    assert status == 200
+    assert headers["content-type"].startswith("text/plain; version=0.0.4")
+    assert headers["cache-control"] == "no-store"
+    assert (
+        b'infinitydb_http_requests_total{route="/api/units/:id",status_class="2xx"} 1'
+        in body
+    )
+    assert (
+        b'infinitydb_http_requests_total{route="/api/units/:id",status_class="4xx"} 1'
+        in body
+    )
+    assert b'infinitydb_http_request_duration_seconds_bucket{route="/api/units/:id"' in body
+    assert b'infinitydb_http_response_size_bytes_bucket{route="/api/units/:id"' in body
+    assert b"ranger-prototype" not in body
+    assert b"not-a-unit" not in body
+    assert b"private-search-term" not in body
+    assert b"private-id" not in body
+    assert b"another-private-term" not in body
+
+
+def test_internal_health_and_metrics_do_not_instrument_themselves(app: Callable) -> None:
+    status, _, before = request(app, "/internal/metrics")
+    assert status == 200
+
+    status, headers, body = request(app, "/internal/health")
+    assert status == 200
+    assert headers["cache-control"] == "no-store"
+    assert body == b"ok\n"
+
+    status, headers, body = request(app, "/internal/metrics", method="POST")
+    assert status == 405
+    assert headers["allow"] == "GET, HEAD"
+    assert body == b"method not allowed\n"
+
+    status, _, after = request(app, "/internal/metrics")
+    assert status == 200
+    assert after == before
+
+
 def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     status, headers, body = request(app, "/api/armies")
     assert status == 200
@@ -904,6 +958,16 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
         ".compact-menu-panel",
         {"position": "static", "display": "flex"},
     )
+    assert_css_rule(
+        styles,
+        ".settings-menu>.compact-menu-panel",
+        {"display": "none"},
+    )
+    assert_css_rule(
+        styles,
+        '.settings-menu[data-open="true"]>.compact-menu-panel',
+        {"display": "flex"},
+    )
     assert_css_rule(styles, ".menu-label", {"display": "none"})
     assert_css_rule(styles, ".sidebar", {"position": "relative", "z-index": "4"})
     assert b".cookie-consent-dialog" in styles
@@ -926,6 +990,62 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b"if (persistent === undefined) return session;" in preferences
     assert b"setSessionValue(name, persistent);" in preferences
     assert b'new CustomEvent("developermodechange"' in preferences
+    assert b'const unit = savedUnit === "cm" ? "cm" : "in";' in preferences
+    assert preferences.count(b"defaultChecked: true") == 4
+    assert b'id="distance-unit-toggle" type="checkbox" checked' in body
+    for optional_id in (
+        b"mercs-filter",
+        b"specops-filter",
+        b"teamops-filter",
+        b"reinforcement-filter",
+    ):
+        assert b'id="' + optional_id + b'" type="checkbox" checked' in body
+
+    status, _, navigation = request(app, "/static/navigation.js")
+    assert status == 200
+    assert b'menu.classList.contains("settings-menu")' in navigation
+
+
+def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> None:
+    paths = (
+        "/",
+        "/units",
+        "/units/ranger-prototype",
+        "/skill-extras",
+        "/skills",
+        "/skills/11",
+        "/equipment",
+        "/equipment/21",
+        "/weapons",
+        "/weapons/31",
+        "/traits",
+        "/traits/suppressive-fire",
+        "/states",
+        "/states/unconscious",
+        "/about",
+    )
+    expected_csp = (
+        "default-src 'self'; script-src 'self'; object-src 'none'; "
+        "base-uri 'none'; frame-ancestors 'none'"
+    )
+
+    for path in paths:
+        status, headers, body = request(app, path)
+        assert status == 200
+        assert headers["content-security-policy"] == expected_csp
+        assert re.search(rb"\son[a-z]+\s*=", body, flags=re.IGNORECASE) is None
+
+        scripts = list(
+            re.finditer(
+                rb"<script\b(?P<attrs>[^>]*)>(?P<body>.*?)</script\s*>",
+                body,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+        )
+        assert scripts
+        for script in scripts:
+            assert re.search(rb"\bsrc\s*=", script.group("attrs"), flags=re.IGNORECASE)
+            assert not script.group("body").strip()
 
 
 def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> None:
@@ -1239,6 +1359,16 @@ def test_unit_details_frontend_places_attributes_in_a_separate_row(app: Callable
     assert b"attributeStatline(profile, generalStatsForProfile, true)" in body
 
 
+def test_unit_details_frontend_labels_vitality_as_vita_or_str(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'["VITA", (profile) => profile.vitality]' in body
+    assert b'["W", (profile) => profile.vitality]' not in body
+    assert b'profile.is_structure === true || Number(profile.is_structure) === 1' in body
+    assert b'label === "VITA" && isStructureProfile(profile) ? "STR" : label' in body
+    assert b'is_structure: mostCommon(profiles, "is_structure")' in body
+
+
 def test_unit_details_frontend_pluralizes_general_profile_heading(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
@@ -1335,7 +1465,7 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert_css_rule(
         styles,
         ".data-table--compact",
-        {"--table-cell-size": "11px"},
+        {"--table-cell-size": "12px", "--table-heading-size": "11px"},
     )
 
     for path in ["/static/unit.js", "/static/skill.js", "/static/catalog-detail.js"]:
@@ -2206,6 +2336,11 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"presentation?.group_id" in body
     assert b"presentation?.group_label" in body
     assert b"presentation?.group_order" in body
+    assert b"presentation?.relation_order" in body
+    assert b"left.presentation.relation_order - right.presentation.relation_order" in body
+    assert body.index(b"left.label.localeCompare(right.label)") < body.index(
+        b"left.record.name.localeCompare(right.record.name"
+    )
     assert b"groupHeading.textContent = relationGroup.label" in body
     assert b"relationLabels" not in body
     assert b"relationGroupOrder" not in body
@@ -2214,6 +2349,74 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"citation.source_url" in body
     assert b'link.target = "_blank"' in body
     assert b'link.rel = "noopener noreferrer"' in body
+
+
+def test_072_detail_and_catalog_presentation_contract(
+    app: Callable, tmp_path: Path
+) -> None:
+    for path in (
+        "/units/ranger-prototype",
+        "/skills/11",
+        "/equipment/21",
+        "/weapons/31",
+        "/traits/suppressive-fire",
+    ):
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b"intro-copy developer-only" in body
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+    status, _, body = request(rules_app, "/states/unconscious")
+    assert status == 200
+    assert b"intro-copy developer-only" in body
+
+    status, _, unit_script = request(app, "/static/unit.js")
+    assert status == 200
+    for code, label in (
+        (b"LI", b"Light Infantry"),
+        (b"MI", b"Medium Infantry"),
+        (b"HI", b"Heavy Infantry"),
+        (b"REM", b"Remote"),
+        (b"TAG", b"Tactical Armored Gear"),
+        (b"WB", b"Warband"),
+        (b"SK", b"Skirmisher"),
+        (b"VH", b"Vehicle"),
+    ):
+        assert code in unit_script
+        assert label in unit_script
+    assert b"troopTypeLabel(profile.type)" in unit_script
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".profile-symbol-link",
+        {"display": "inline-flex", "align-items": "center", "line-height": "0"},
+    )
+    assert_css_rule(
+        styles,
+        'body[data-catalog="equipment"] #catalog-table-container thead th:first-child, '
+        'body[data-catalog="weapons"] #catalog-table-container thead th:first-child, '
+        'body[data-catalog="traits"] #catalog-table-container thead th:first-child',
+        {"width": "68%"},
+    )
+    for undersized in (
+        b"font-size: 8px",
+        b"font-size: 9px",
+        b"font-size: 10px",
+        b"--table-heading-size: 8px",
+        b"--table-heading-size: 9px",
+    ):
+        assert undersized not in styles
+    assert_css_rule(styles, "table", {"--table-heading-size": "11px"})
+    assert_css_rule(
+        styles,
+        ".data-table--compact",
+        {"--table-heading-size": "11px", "--table-cell-size": "12px"},
+    )
 
 
 def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) -> None:

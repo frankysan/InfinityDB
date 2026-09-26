@@ -332,6 +332,8 @@ def _publish_application_database(
     destination: Path,
     data: dict[str, Any],
     metadata: Mapping[str, Any],
+    *,
+    finalize: bool,
 ) -> None:
     """Copy validated application tables from the full relational staging database."""
 
@@ -367,10 +369,12 @@ def _publish_application_database(
         violation = connection.execute("PRAGMA foreign_key_check").fetchone()
         if violation is not None:
             raise ValueError(f"Published database contains broken foreign keys: {tuple(violation)}")
-        vacuum_deterministic_sqlite(connection)
+        if finalize:
+            vacuum_deterministic_sqlite(connection)
     finally:
         connection.close()
-    normalize_sqlite_header(destination)
+    if finalize:
+        normalize_sqlite_header(destination)
     check = sqlite3.connect(destination)
     try:
         if check.execute("PRAGMA quick_check").fetchone()[0] != "ok":
@@ -385,6 +389,7 @@ def export_database(
     *,
     identity_config: IdentityConfig | None = None,
     peripheral_identities: PeripheralIdentityCurated | None = None,
+    finalize: bool = True,
 ) -> None:
     """Validate the full normalized model, then publish application and raw siblings.
 
@@ -393,6 +398,10 @@ def export_database(
     the self-contained application subset copied into ``path``. The sibling raw
     database preserves exact normalized rows, including absent versus null fields,
     for development, audit, and reconstruction use.
+
+    ``finalize=False`` is intended for semantic tests that only need valid SQLite
+    contents. Production/release builds keep the default and therefore repack the
+    generated siblings into InfinityDB's byte-deterministic canonical layout.
     """
     table_columns = validate_input(data)
     identity_config = resolve_identity_config(data, identity_config)
@@ -495,14 +504,16 @@ def export_database(
                 create_raw_archive(
                     archive_connection, data, identity_config, metadata=metadata
                 )
-            vacuum_deterministic_sqlite(archive_connection)
+            if finalize:
+                vacuum_deterministic_sqlite(archive_connection)
             if archive_connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Raw archive integrity check failed")
             if archive_connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
                 raise ValueError("Raw archive contains broken foreign keys")
         finally:
             archive_connection.close()
-        normalize_sqlite_header(archive_temporary)
+        if finalize:
+            normalize_sqlite_header(archive_temporary)
         archive_check = sqlite3.connect(archive_temporary)
         try:
             if archive_check.execute("PRAGMA quick_check").fetchone()[0] != "ok":
@@ -511,7 +522,7 @@ def export_database(
             archive_check.close()
 
         _publish_application_database(
-            staging_temporary, published_temporary, data, metadata
+            staging_temporary, published_temporary, data, metadata, finalize=finalize
         )
         Database(published_temporary).validate()
 

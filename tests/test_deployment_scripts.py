@@ -78,3 +78,15 @@ def test_container_verifier_separates_packaging_from_production_provenance() -> 
     assert 'if [ "$packaged_assets" -eq 1 ]; then' in verifier
     assert 'if [ "$published_assets" -eq 1 ]; then' in verifier
     assert "validate_database_symbol_provenance" in verifier
+
+
+def test_production_observability_disables_raw_access_logs_and_keeps_metrics_private() -> None:
+    dockerfile = _read("Dockerfile")
+    caddyfile = _read("Caddyfile")
+
+    assert '"--access-logfile"' not in dockerfile
+    assert '"--preload"' in dockerfile
+    assert "/internal/health" in dockerfile
+    assert "@internal path /internal/*" in caddyfile
+    assert "respond @internal 404" in caddyfile
+    assert "reverse_proxy app:8000" in caddyfile

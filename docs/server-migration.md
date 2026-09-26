@@ -1,5 +1,7 @@
 # Server migration
 
+**Project domain:** Deployment
+
 This guide identifies the repository-local state that must be transferred when
 moving an InfinityDB installation to another server. It distinguishes two goals:
 

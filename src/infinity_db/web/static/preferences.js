@@ -3,10 +3,10 @@ const DISTANCE_UNIT_KEY = "infinity-db-distance-unit";
 const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";
 const DISABLE_CACHE_KEY = "infinity-db-disable-cache";
 const OPTIONAL_UNIT_SETTINGS = [
-  { id: "mercs-filter", key: "infinity-db-mercs", defaultChecked: false },
+  { id: "mercs-filter", key: "infinity-db-mercs", defaultChecked: true },
   { id: "specops-filter", key: "infinity-db-specops", defaultChecked: true },
-  { id: "teamops-filter", key: "infinity-db-teamops", defaultChecked: false },
-  { id: "reinforcement-filter", key: "infinity-db-reinforcement", defaultChecked: false },
+  { id: "teamops-filter", key: "infinity-db-teamops", defaultChecked: true },
+  { id: "reinforcement-filter", key: "infinity-db-reinforcement", defaultChecked: true },
 ];
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 const DISTANCE_NUMBER_PATTERN = /[+-]?\d+(?:\.\d+)?/g;
@@ -86,7 +86,7 @@ export function initializeDistanceUnitToggle() {
 
   toggle.dataset.initialized = "true";
   const savedUnit = savedSetting(DISTANCE_UNIT_KEY);
-  const unit = savedUnit === "in" ? "in" : "cm";
+  const unit = savedUnit === "cm" ? "cm" : "in";
   document.documentElement.dataset.distanceUnit = unit;
   toggle.checked = unit === "in";
 

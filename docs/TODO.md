@@ -16,53 +16,20 @@ Keep completed substeps while their parent task is still open because they
 clarify progress and remaining scope. Once a standalone or parent task is
 complete, remove it after any durable outcome is recorded in `CHANGELOG.md`,
 architecture/data-model documentation, or another appropriate reference. Git
-history retains implementation detail.
+history retains implementation detail. New or materially revised work items use the
+canonical project-domain labels defined in `docs/project-domains.md`; section-level
+domain declarations may be used when all contained work shares the same owner.
 
 ## Current milestone
 
-The current milestone is **0.7.2 — UI/presentation cleanup**. Before
-starting the 0.8.0 feature work, generated artifacts and helper archives must be
-byte-identical across Windows, Linux, and macOS for the same inputs, configuration,
-InfinityDB revision, and declared tool versions. This is a correctness/portability
-maintenance release prompted by the 0.7.0 checksum-bound publication deployment
-issue.
+The current milestone is **0.8.0 — connected game relationships**. It builds on the
+stable 0.7.x rules/context model by making already-modeled structural relationships
+directly useful to players: Fireteams, Peripheral/Controller structure, profile/loadout
+includes, selection/dependency relationships, Reinforcement parentage, and useful
+cross-army navigation.
 
-0.8.0 — connected game relationships remains the next feature milestone after this
-maintenance gate. General performance and storage experiments remain deferred unless
-they become necessary to establish semantic correctness, losslessness, or acceptable
-application behavior.
-
-### 0.7.2 UI/presentation cleanup
-
-- [ ] Complete a focused UI/presentation maintenance pass after 0.7.1.
-  - [ ] Align Cube/Cube 2.0 characteristic symbols with the order-symbol row so the
-    symbols share a consistent baseline and spacing.
-  - [ ] Remove the remaining inline-script dependency that violates the current CSP;
-    keep the restrictive same-origin policy rather than adding `unsafe-inline`, a nonce,
-    or a fixed hash unless a concrete requirement makes that necessary. Add regression
-    coverage for the affected page shell/static loading path.
-  - [ ] Widen the Name column for Equipment, Weapons, and Traits so ordinary catalog
-    names are not unnecessarily compressed.
-  - [ ] Present Unit troop-type codes using their long forms in the UI, for example
-    `LI` as `Light Infantry`, while preserving the source code in stored/API data.
-  - [ ] Make Settings collapsible in the sidebar. When no persisted browser preferences
-    exist, default distances to inches and enable all optional Unit types; existing saved
-    preferences continue to override those defaults.
-  - [ ] Make the entire secondary metadata line beneath detail-page titles Developer-mode
-    only, rather than showing the line normally and hiding only its optional IDs.
-  - [ ] Raise the smallest UI font sizes and reduce unnecessary size variation across
-    ordinary body, metadata, table, and detail text; keep page titles intentionally
-    distinct.
-  - [ ] Make catalog relation ordering semantic and deterministic: relationships that
-    enable, cause, enter, or otherwise positively establish a condition come first;
-    within the remaining presentation groups sort alphabetically by interaction label,
-    then by related-record name. Preserve the intended result for the reviewed example:
-    `Caused by: Unconscious State`; `Cancelled by: Impetuous`; `Cancelled by: Jump`;
-    `Cancels state: Foxhole State`; `State entry prevented by: Aerial`;
-    `State entry prevented by: Impetuous`; `State entry prevented by: Motorcycle`.
-  - [ ] Measure the SQLite canonical-finalization cost under pytest-xdist, especially on
-    Linux CI, and avoid repeated `VACUUM` work in tests that do not need byte-level artifact
-    finalization while preserving the release-build determinism guarantee.
+General performance and storage experiments remain deferred unless they become necessary
+to establish semantic correctness, losslessness, or acceptable application behavior.
 
 ## Release roadmap through 1.0
 
@@ -447,15 +414,22 @@ work against that contract.
 
 ## Reliability and operations
 
-- [ ] Establish production load monitoring and a repeatable capacity test for
-  the Docker deployment.
+- [ ] Establish privacy-preserving production monitoring and a repeatable capacity test
+  for the Docker deployment.
   - [ ] Record host and container CPU, memory, swap, disk-space/inode, disk-I/O,
-    and network utilization; retain Docker restart/OOM events and Caddy and
-    Gunicorn error logs. Alert on sustained CPU saturation, memory pressure or
-    OOM kills, low disk space, elevated 5xx responses, and failed health checks.
-  - [ ] Publish Caddy access-log metrics (request rate, status code, latency, and
-    active connections) and application metrics for dynamic API latency. Keep
-    dashboards split between static assets and `/api/` requests.
+    and network utilization; retain Docker restart/OOM events and sanitized Caddy/Gunicorn
+    error diagnostics. Alert on sustained CPU saturation, memory pressure or OOM kills,
+    low disk space, elevated 5xx responses, and failed health checks.
+  - [x] Publish aggregate request counters/histograms using normalized bounded route
+    labels: request rate, status class, latency, response size, and active requests. Static
+    assets and `/api/` requests remain separately identifiable for future dashboards.
+  - [x] Do not collect IP/geolocation, user-agent/fingerprint, referrer, cookie/session/
+    preference values, query/search terms, persistent visitor IDs, unique/returning-user
+    analytics, or per-user navigation histories. Raw URLs and unbounded request values are
+    excluded from metric labels.
+  - [x] Disable the routine Gunicorn access-log stream while retaining stderr error logs.
+    If raw request logging is temporarily required for a concrete incident, minimize/sanitize
+    its fields, restrict access, and define short retention before enabling it.
   - [ ] Define a representative load-test scenario: browse the unit list, search,
     open unit/catalog details, and fetch API endpoints using a current
     production-like SQLite snapshot. Include a warm-cache steady-state run and

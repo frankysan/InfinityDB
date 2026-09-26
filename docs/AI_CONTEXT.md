@@ -53,6 +53,16 @@ itself establish game-wide ownership, army membership, availability, playability
 or canonical equality. Any new or changed InfinityDB abstraction must document
 its source inputs, derivation, assumptions/fallbacks, and limits.
 
+## Project-domain ownership
+
+Project work and maintained documentation use six canonical ownership domains:
+**Acquisition**, **Data processing**, **Deployment**, **Web backend**, **Web frontend**,
+and **Project infrastructure**. Their exact boundaries and documentation-label
+syntax are defined in `docs/project-domains.md`. Use those names rather than
+introducing overlapping subsystem labels. Tests and documentation normally inherit
+the domain of the behavior they cover; shared test/CI/release/documentation machinery
+is Project infrastructure.
+
 ## Purpose and subsystem boundaries
 
 InfinityDB builds validated local reference databases from Infinity source data
@@ -105,7 +115,11 @@ and serves a read-only browser and same-origin HTTP API.
   benchmarking measured 687 tests at 59.67 s serial, 19.41 s with four workers,
   and 14.13 s with automatic worker selection. Web tests build one template
   database per module and copy it per test so mutating tests remain isolated
-  without repeating normalization/export work.
+  without repeating normalization/export work. Export-heavy Army/rules semantic
+  tests explicitly skip byte-level SQLite finalization; production/default
+  exporters still perform canonical `VACUUM` and header normalization. The
+  test-only `INFINITYDB_TEST_FINALIZE_SQLITE=1` switch restores canonical
+  finalization in those modules for before/after xdist measurement.
 - GitHub `Source checks` is configured to run hermetic checks on clean Windows,
   Ubuntu/Linux, and macOS Python 3.11 runners for pull requests, pushes to
   `main`, and manual dispatch, plus a Linux Python 3.14 compatibility leg. It
@@ -642,6 +656,14 @@ compatibility references remain unambiguous JSON integers.
 
 ## Decision log
 
+- 2026-09-25: Production observability must be privacy-preserving and aggregate-first.
+  Normal monitoring uses a shared fixed-cardinality WSGI request registry exposed only at the
+  Docker-internal `/internal/metrics` endpoint; routine Gunicorn access logging is disabled.
+  Monitoring may use normalized-route request counts, status/latency/response-size metrics,
+  active requests, version identity, and host/container resource measurements, but must not collect
+  IP/geolocation, user-agent fingerprints, referrers, cookies/session/preference values,
+  query/search terms, persistent visitor IDs, or per-user histories. Raw request logging is
+  exceptional, minimized/sanitized, access-restricted, and short-retained.
 - 2026-09-25: MediKit and GizmoKit remain canonical Equipment even though each exposes
   a Short Skill action. Declaration category describes the Equipment-provided action; it
   does not create duplicate `skill:medikit` / `skill:gizmokit` identities. Paramedic

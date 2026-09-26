@@ -5,7 +5,7 @@ data. While Infinity Army presents one army at a time, InfinityDB brings those
 views together into a game-wide reference for exploring units, profiles,
 equipment, skills, weapons, and relationships across armies.
 
-Current release: **0.7.1** (2026-09-25).
+Current release: **0.7.2** (2026-09-26).
 
 ## Guiding principles
 
@@ -15,6 +15,8 @@ Current release: **0.7.1** (2026-09-25).
   keeping the application simple, fast, and customizable.
 - **Transparency:** keep InfinityDB open source and clearly distinguish project
   code from third-party data, quoted text, and graphical assets.
+- **Privacy:** collect only the aggregate operational information needed to run
+  and improve the service; do not build visitor profiles or persistent tracking.
 
 ## Current features
 
@@ -46,6 +48,22 @@ Current release: **0.7.1** (2026-09-25).
 For the technical meaning of imported and InfinityDB-derived concepts, see the
 [data model](docs/data-model.md). Architectural boundaries and design decisions
 are documented in [architecture](docs/architecture.md).
+
+## Project domains
+
+Engineering work is classified into six project domains so ownership stays clear
+across planning, architecture, release notes, and implementation:
+
+- **Acquisition:** download/source-snapshot and asset/archive tooling.
+- **Data processing:** curation, validation, normalization, and generated databases.
+- **Deployment:** hosted packaging, server operation, migration, and monitoring.
+- **Web backend:** server-side application, queries, routes, and API behavior.
+- **Web frontend:** browser UI, interaction, accessibility, and visual presentation.
+- **Project infrastructure:** CI, shared checks, packaging/release tooling, developer
+  workflow, and documentation conventions.
+
+See [project domains](docs/project-domains.md) for the canonical boundaries and the
+documentation-label convention.
 
 ## Roadmap to 1.0
 
@@ -292,6 +310,8 @@ profile definitions, asset modes, reports, and exit codes.
 
 - [Architecture](docs/architecture.md) — engineering principles, subsystem
   boundaries, current architecture, and accepted design direction.
+- [Project domains](docs/project-domains.md) — canonical ownership boundaries and
+  documentation labels for project work.
 - [Data model](docs/data-model.md) — source semantics, canonical/application
   semantics, persistence, and data-model invariants.
 - [Rules semantics](docs/rules-semantics.md) — audited rules meaning that already has a

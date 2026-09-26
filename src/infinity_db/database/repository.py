@@ -2270,7 +2270,7 @@ class Database:
                 "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, pp.name, "
                 "t.name AS type, c.name AS classification, pp.move_1, pp.move_2, "
                 "pp.cc, pp.bs, pp.ph, pp.wip, pp.arm, pp.bts, pp.vitality, pp.silhouette, "
-                "ppo.ava "
+                "pp.is_structure, ppo.ava "
                 "FROM profile_payload_occurrences AS ppo "
                 "JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id "
                 "LEFT JOIN troop_types AS t ON t.id = pp.type_id "
