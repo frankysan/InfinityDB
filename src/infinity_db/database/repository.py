@@ -1374,8 +1374,8 @@ class Database:
             programs = [
                 dict(row)
                 for row in connection.execute(
-                    "SELECT position, name, attack_mod, opponent_mod, ps, burst, special "
-                    "FROM application_hacking_programs "
+                    "SELECT position, name, attack_mod, opponent_mod, ps, burst, special, "
+                    "source_extra_id FROM application_hacking_programs "
                     "ORDER BY position"
                 )
             ]

@@ -25,8 +25,8 @@ model.
   guide.
 - `docs/TODO.md` is the maintained backlog of unimplemented work.
 - `docs/080-connected-domain-audit.md` records the accepted 0.8.x game-data domain
-  boundary: Fireteams are the new first-class application domain; Hacking Programs may
-  be promoted from their existing structured projection; Peripherals, includes,
+  boundary: Fireteams are the new first-class application domain; Hacking Programs are
+  promoted from their existing structured projection into a first-class rules/reference surface; Peripherals, includes,
   constraints/dependencies, Reinforcement parentage, and cross-Army membership remain
   relationships among existing identities.
 - `docs/CHANGELOG.md` records released and unreleased changes.
@@ -1310,9 +1310,12 @@ compatibility references remain unambiguous JSON integers.
   Martial Arts, Booty, and MetaChemistry metadata into seven derived application tables
   while leaving the original normalized metadata tables in `infinity.raw.db`.
 - Hacking Program profiles preserve source order, Attack/Opponent MOD, PS, Burst, special
-  text, Device associations, targets, and declaration types. The Hacker Skill detail page
-  exposes the reference table without treating Programs as static Unit facts or inferring
-  Device ownership from names.
+  text, Device associations, targets, declaration types, and source Upgrade-extra provenance.
+  0.8 promotes those rows to `/hacking-programs` identities by composing them with reviewed
+  `hacking-program:*` records in `rules.db`. Army metadata remains authoritative for exact
+  profile fields and the baseline Device matrix; rules data supplies semantic effects/relations.
+  Hacker and Hacking Device surfaces cross-link the same identities, and Upgrade/source-specific
+  access remains distinct from baseline Device availability.
 - Martial Arts levels and Booty/MetaChemistry roll-result rows are exposed on their existing
   Skill detail surfaces. Random outcomes remain deployment/session reference data rather
   than being written onto Units or loadouts. Richer typed chart-result relationships remain

@@ -56,15 +56,9 @@ directly useful without becoming an Army-list legality engine or live game-state
 
 ### Fireteams and connected application data
 
-- [ ] **Data processing + Web backend + Web frontend:** Promote the existing structured
-  Hacking Program projection into first-class rules/reference identities and browser
-  navigation, reusing the maintained Device/target/declaration data rather than creating
-  a parallel Program dataset. Connect reviewed Device/Skill/Program relationships as
-  their target semantics become canonical.
-  - [ ] Use the preserved structured Army `hack` metadata for exact Program profile
-    fields and generate the Hacking Device -> baseline Program matrix from explicit
-    source associations after semantic reconciliation; keep Upgrade Programs distinct
-    and cross-link Program targets/States/effects.
+No open implementation items remain in the 0.8.0 connected-data milestone. The maintained
+source-presentation and interaction audits have been rerun; their remaining player-facing gaps
+are explicitly assigned to later release buckets below.
 
 ## 0.9.0 — completeness, consistency, and polish
 

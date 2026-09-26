@@ -412,9 +412,10 @@ The 0.8.0 domain audit is maintained in `docs/080-connected-domain-audit.md`. It
 accepted boundary is intentionally narrow: Fireteams become a new first-class
 application domain because their Army-local chart identity, composition rules, member
 semantics, FTO/Wildcard context, notes, and Reinforcement interaction cannot be reduced
-to Unit edges. Hacking Programs may be promoted from their existing structured
+to Unit edges. Hacking Programs are now promoted from their existing structured
 application projection to a first-class rules/reference surface without duplicating
-that data.
+that data: Army metadata owns exact Program profiles and baseline Device associations,
+while `rules.db` owns reviewed semantic identity/effects and typed rules relationships.
 
 Peripheral/Controller relationships, profile/loadout/unit-option includes, selection
 constraints, profile-group dependencies, Reinforcement parentage, and broader

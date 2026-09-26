@@ -32,6 +32,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Promote Hacking Programs to a first-class
+  rules/reference surface. Program statlines, targets, declaration types, and baseline Hacking
+  Device associations remain generated from structured Army metadata; reviewed N5.3 semantic
+  records add effects and typed Skill/State relationships. Program pages cross-link baseline
+  Devices, Hacker's structured table links to Program details, and Hacking Device pages expose
+  the reverse baseline-Program matrix while Upgrade/source-specific availability remains distinct.
 - **Web backend + Web frontend:** Expose Reinforcement Section parent/child Army relationships and
   broader source-declared faction membership on Unit details. Reinforcement links navigate through
   existing Army filters, while declared membership has its own cross-Unit filter so faction IDs

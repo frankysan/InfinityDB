@@ -63,8 +63,8 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
     with sqlite3.connect(output) as connection:
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
-        assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 1
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 271
+        assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 283
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]

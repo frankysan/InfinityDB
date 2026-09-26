@@ -1080,6 +1080,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/units"' in body
     assert b'href="/traits"' in body
     assert b'href="/states"' in body
+    assert b'href="/hacking-programs"' in body
     assert b"Army snapshot downloaded" in body
     assert b"September 10, 2026" in body
     assert f'data-app-version="{__version__}"'.encode() in body
@@ -1149,6 +1150,7 @@ def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> N
     for asset, helper in (
         ("catalog-list.js", b"getCatalogItems(page)"),
         ("catalog-detail.js", b"getCatalogItem(catalog, itemId)"),
+        ("hacking-program-detail.js", b'getCatalogItem("hacking-programs", itemId)'),
         ("skill.js", b'getCatalogItem("skills", skillId)'),
         ("skill-extras.js", b"getSkillExtras()"),
         ("version-check.js", b"getVersion()"),
@@ -1419,6 +1421,8 @@ def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> No
         "/traits/suppressive-fire",
         "/states",
         "/states/unconscious",
+        "/hacking-programs",
+        "/hacking-programs/carbonite",
         "/about",
     )
     expected_csp = (
@@ -2215,9 +2219,34 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     assert b'from "./api.js"' in body
     assert b"getCatalogItems(page)" in body
     assert b"fetch(" not in body
-    assert b'["skills", "equipment", "weapons", "traits", "states"].includes(page)' in body
+    assert (
+        b'["skills", "equipment", "weapons", "traits", "states", "hacking-programs"]'
+        b'.includes(page)' in body
+    )
     assert b"const routeId = item.slug || item.id;" in body
     assert b"link.href = `/${page}/${encodeURIComponent(routeId)}`;" in body
+
+
+def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
+    status, headers, body = request(app, "/hacking-programs")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"Hacking Program catalog" in body
+    assert b'href="/hacking-programs" aria-current="page"' in body
+    assert b'<th scope="col">Uses</th>' not in body
+
+    status, _, body = request(app, "/api/hacking-programs")
+    assert status == 200
+    assert json.loads(body) == {"items": []}
+
+    status, headers, body = request(app, "/hacking-programs/carbonite")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"hacking-program-detail.js" in body
+
+    status, _, body = request(app, "/api/hacking-programs/carbonite")
+    assert status == 404
+    assert json.loads(body)["error"] == "Hacking Program not found"
 
 
 def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Path) -> None:

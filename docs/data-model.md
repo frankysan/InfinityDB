@@ -1607,7 +1607,7 @@ reconstructed from canonical logical-unit fields plus explicit name aliases.
 Top-level `unit_option_*` occurrences stay source-contextual by design.
 
 The current 0.8 connected-data serving trace covers **35 serving probes**, **79 tables**, and
-**371 distinct table-field pairs**. The role totals are **146 canonical-application
+**372 distinct table-field pairs**. The role totals are **147 canonical-application
 fields**, **200 explicit contextual-application fields**, and **25 intentional-source
 fields**. The larger contextual total includes the Army-scoped Fireteam chart/provenance,
 membership, FTO-loadout, equivalence, Peripheral, include-target, selection-constraint, and
@@ -1615,7 +1615,7 @@ group-dependency relationships; it is not a regression to legacy payload reads. 
 intentional-source fields are the shared Unit-option name/order context needed to label its
 include edge without promoting composite Unit options to reusable application identity.
 Profile-logo provenance remains presentation context rather than canonical profile identity.
-All **371 / 371 observed fields have no open semantic issue**.
+All **372 / 372 observed fields have no open semantic issue**.
 
 The application Army tables provide canonical identity/hierarchy and reviewed source
 mappings, while `application_catalog_items` / `application_catalog_sources` provide
@@ -1776,8 +1776,12 @@ audit in `docs/releasing.md` remains the authoritative 1.0 gate.
 
 The 0.8.0 follow-up audit in `docs/080-connected-domain-audit.md` converts that
 inventory into application-domain decisions. Fireteams require a new canonical
-application projection and first-class surface. Hacking Programs already have a typed
-application projection and may be promoted to a first-class rules/reference surface.
+application projection and first-class surface. Hacking Programs reuse their typed application
+projection as a first-class `/hacking-programs` rules/reference surface: source `hack` metadata
+remains authoritative for Program profiles, targets, declaration types, source Upgrade-extra
+provenance, and the baseline Device matrix, while `rules.db` contributes reviewed Program
+semantics and cross-rule relationships. Upgrade/source-specific access is not inferred from the
+baseline Device matrix.
 The other connected-data gap families above remain relationship presentation over
 existing Unit/Army/Profile/Loadout identities rather than new catalogs. The deferred
 rules-interaction ledger is used as a boundary check, not as a mandate to create one

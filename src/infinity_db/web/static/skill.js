@@ -86,6 +86,13 @@ function structuredTable(titleText, headers, rows) {
   return section;
 }
 
+function hackingProgramLink(row) {
+  const link = document.createElement("a");
+  link.href = `/hacking-programs/${encodeURIComponent(row.slug || row.id || row.position)}`;
+  link.textContent = row.name;
+  return link;
+}
+
 function hackingDeviceLinks(devices) {
   if (!devices?.length) return "Upgrade / source-specific";
   const fragment = document.createDocumentFragment();
@@ -119,7 +126,7 @@ function structuredReferenceSection(reference) {
       reference.title,
       ["Program", "Attack MOD", "Opponent MOD", "PS", "B", "Target", "Skill type", "Device", "Special"],
       reference.rows.map((row) => [
-        row.name,
+        hackingProgramLink(row),
         row.attack_mod,
         row.opponent_mod,
         row.ps,

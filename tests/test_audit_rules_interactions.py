@@ -20,9 +20,9 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 211
-    assert report["summary"]["authoredOutgoingRelationCount"] == 255
-    assert report["summary"]["futureInteractionCount"] == 132
+    assert report["summary"]["recordCount"] == 223
+    assert report["summary"]["authoredOutgoingRelationCount"] == 262
+    assert report["summary"]["futureInteractionCount"] == 115
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 209,
         "complete": 209,
@@ -32,10 +32,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "percentComplete": 100.0,
     }
     assert report["summary"]["releases"]["0.8.0"] == {
-        "total": 2,
-        "complete": 2,
+        "total": 14,
+        "complete": 14,
         "pending": 0,
-        "reviewed": 2,
+        "reviewed": 14,
         "inherited": 0,
         "percentComplete": 100.0,
     }
@@ -84,8 +84,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 30
-    assert report["summary"]["supporting"]["complete"] == 30
+    assert report["summary"]["supporting"]["total"] == 42
+    assert report["summary"]["supporting"]["complete"] == 42
     assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -353,7 +353,12 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "equipment:hacking-device-plus",
         "hacking-program:white-noise",
         "enables-use-of",
-    ) in future_keys
+    ) not in future_keys
+    assert ("state:possessed", "hacking-program:total-control", None) not in future_keys
+    assert set(items["hacking-program:total-control"]["relations"]) == {
+        ("causes-state", "state:possessed"),
+        ("cancels-state", "state:possessed"),
+    }
     assert ("skill:courage", "rule:guts-roll", "applies-effects-to") in future_keys
     assert ("skill:impetuous", "state:prone", "cancels-state") not in future_keys
     assert ("skill:impetuous", "state:prone", None) not in future_keys
@@ -480,7 +485,7 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 30/30 complete, 0 pending" in output
+    assert "Supporting identities: 42/42 complete, 0 pending" in output
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:

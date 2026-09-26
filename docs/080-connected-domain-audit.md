@@ -33,7 +33,7 @@ reviewed rules corpus and current Wiki structure:
 - the Milestone 2B source-to-presentation inventory and relationship evidence in
   `docs/data-model.md`;
 - the Fireteam semantic audit maintained by `tools/audit_fireteam_semantics.py`;
-- the 209-record interaction review and its 132 explicitly deferred interactions in
+- the 223-record interaction review and its 115 explicitly deferred interactions in
   `data/curated/rules-interactions/reviews.json`;
 - the cross-domain findings in `docs/rules-semantics.md`, including Fireteams,
   Hacking Programs, Reinforcements, deployables, declaration categories, and Quick
@@ -41,12 +41,14 @@ reviewed rules corpus and current Wiki structure:
 - current Infinity Wiki Fireteams Chart / Fireteams rules, Peripheral, Hacking Device,
   and Infinity Reinforcements reference pages.
 
-The deferred-interaction ledger is especially useful as a boundary check. Its 132
-entries target 34 distinct generic `rule:*` concepts, 11 Hacking Programs, six States,
-six Attributes, thirteen Skills, three Equipment identities, three Traits, two
-Ammunition identities, two Weapons, and one Training identity. Most of those targets
-do **not** justify new application domains; they demonstrate where supporting rules
-identity or richer relation semantics are still needed.
+The deferred-interaction ledger is especially useful as a boundary check. After the
+Hacking Program promotion, its 115 remaining entries target 34 distinct generic `rule:*`
+concepts, six States, six Attributes, thirteen Skills, three Equipment identities, three
+Traits, two Ammunition identities, two Weapons, and one Training identity. Hacking
+Programs are now reviewed supporting identities rather than deferred targets; the two
+remaining Program-originating White Noise interactions stay deferred because their
+zone/Line-of-Fire condition needs richer relation semantics. Most remaining targets do
+**not** justify new application domains.
 
 ## Domain decisions
 
@@ -75,16 +77,18 @@ reference data remains separate follow-up work.
 
 Hacking Programs already have independent identity and structured profile data in the
 application database: Devices, targets, declaration types, PS, Burst, and special text.
-The current UI exposes that projection only as a table on the Hacker Skill detail page.
-The deferred-interaction ledger also contains 17 links to 11 distinct Hacking Program
+0.8 now exposes that projection as first-class `/hacking-programs` list/detail identities while
+retaining the Hacker Skill table as a linked quick reference. The deferred-interaction ledger
+also contains 17 links to 11 distinct Hacking Program
 targets, and the current Hacking Device rules define Program access explicitly by
 Device.
 
-This is enough evidence for a first-class **Hacking Programs** rules/reference surface.
-Promotion should reuse `application_hacking_programs` and its relationship tables rather
-than inventing a parallel dataset. It is useful 0.8.x work because it turns existing
-cross-domain relationships into navigable identities, but it is not a prerequisite for
-the first Fireteam implementation and should not block structural relationship work.
+This evidence now backs the first-class **Hacking Programs** rules/reference surface.
+The implementation reuses `application_hacking_programs` and its relationship tables rather
+than inventing a parallel dataset. Army metadata owns exact profile fields, targets, declarations,
+baseline Device associations, and Upgrade-extra provenance; reviewed `rules.db` records add
+semantic identity/effects and typed rules relationships. Baseline Device links are generated from
+the source associations, while Upgrade/source-specific availability remains distinct.
 
 ### Peripherals and Controllers: no new domain
 
@@ -179,11 +183,15 @@ ontology.
 ## 0.8.0 implementation order
 
 Schema 25 / compatibility revision 33 completed step 1 below, and the Army-scoped browser/API
-plus rules-backed generated Fireteam quick reference complete step 2. Step 3 is now complete:
+plus rules-backed generated Fireteam quick reference complete step 2. Step 3 is complete:
 Peripheral/Controller, include, selection/dependency, Reinforcement-parent, and broader declared
-faction/cross-Army relationships are all presented through existing application identities. The
-next active implementation step is Hacking Programs. This document keeps the original order as
-the milestone contract.
+faction/cross-Army relationships are all presented through existing application identities.
+Hacking Programs complete step 4 by promoting the existing structured projection without a
+parallel dataset. Step 5 is also complete: the maintained source-presentation audit reports only
+the two already-scoped 0.9 gaps (`unit_notes` and composite `unit_options`), while the interaction
+audit reports all 14 0.8 supporting identities reviewed with no pending 0.8 review. The 0.8
+connected-data implementation contract is therefore complete; release validation remains the
+normal release-process concern.
 
 The audit establishes this order for the connected-data milestone:
 

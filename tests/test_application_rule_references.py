@@ -6,7 +6,10 @@ from pathlib import Path
 
 from infinity_army_data.metadata import decode_metadata
 from infinity_army_data.normalize import normalize_master, validate_normalized
+from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database
+from infinity_db.hacking_program_catalog import HackingProgramCatalog
+from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
 
 
@@ -110,6 +113,7 @@ def test_structured_reference_metadata_is_materialized_without_raw_tables(
     assert programs[0]["ps"] == "7"
     assert programs[0]["targets"] == ["TAG", "HI", "REM", "Hacker", "VH"]
     assert programs[0]["skill_types"] == ["short", "aro"]
+    assert programs[0]["source_extra_id"] == 13
     assert programs[0]["devices"] == [
         {
             "source_id": 100,
@@ -197,3 +201,47 @@ def test_structured_reference_metadata_is_attached_to_existing_skill_details(
 
     assert metachemistry is not None
     assert metachemistry["structured_reference"]["title"] == "MetaChemistry chart"
+
+
+def test_hacking_program_catalog_composes_army_profiles_with_rules_semantics(
+    tmp_path: Path,
+) -> None:
+    database = _reference_database(tmp_path)
+    rules_path = tmp_path / "rules.db"
+    root = Path(__file__).parents[1]
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    catalog = HackingProgramCatalog(database, RulesDatabase(rules_path))
+
+    programs = catalog.list_programs()
+    assert [program["slug"] for program in programs] == ["carbonite", "zero-pain"]
+    carbonite = catalog.get_program("carbonite")
+    assert carbonite is not None
+    assert carbonite["source_extra_id"] == 13
+    assert carbonite["rules"][0]["id"] == "hacking-program:carbonite"
+    assert {
+        relation["record"]["id"]
+        for relation in carbonite["rules"][0]["display_relations"]
+    } == {"state:immobilized-b"}
+
+    zero_pain = catalog.get_program(2)
+    assert zero_pain is not None
+    assert zero_pain["slug"] == "zero-pain"
+    assert zero_pain["devices"] == []
+    assert zero_pain["source_extra_id"] == 287
+
+    assert catalog.programs_for_equipment("hacking-device") == [
+        {"id": "carbonite", "slug": "carbonite", "name": "Carbonite"}
+    ]
+    assert catalog.programs_for_equipment("hacking-device-plus") == [
+        {"id": "carbonite", "slug": "carbonite", "name": "Carbonite"}
+    ]
+
+
+def test_hacking_program_catalog_remains_available_without_rules_database(
+    tmp_path: Path,
+) -> None:
+    catalog = HackingProgramCatalog(_reference_database(tmp_path), None)
+    carbonite = catalog.get_program("carbonite")
+    assert carbonite is not None
+    assert carbonite["description"] == "DA Ammo. State: IMM-B. Non-Lethal."
+    assert "rules" not in carbonite

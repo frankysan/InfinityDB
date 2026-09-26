@@ -305,6 +305,27 @@ function traitUsageSectionGroup(item) {
   return group;
 }
 
+
+function hackingProgramsSection(programs) {
+  const section = document.createElement("section");
+  section.className = "detail-group";
+  const heading = document.createElement("h2");
+  heading.className = "detail-section-title";
+  heading.textContent = "Baseline Hacking Programs";
+  const list = document.createElement("ul");
+  list.className = "detail-list";
+  for (const program of programs) {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = `/hacking-programs/${encodeURIComponent(program.slug || program.id)}`;
+    link.textContent = program.name;
+    item.append(link);
+    list.append(item);
+  }
+  section.append(heading, list);
+  return section;
+}
+
 function render(item) {
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
@@ -337,6 +358,8 @@ function render(item) {
       ? [weaponVariants(item.weapon_variants)] : []),
     ...(catalog === "equipment" && item.profiles?.length
       ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }])] : []),
+    ...(catalog === "equipment" && item.hacking_programs?.length
+      ? [hackingProgramsSection(item.hacking_programs)] : []),
     ...(sections.length ? [catalog === "traits" ? traitUsageSectionGroup(item) : usageSectionGroup(sections)] : []),
   );
   content.hidden = false;
