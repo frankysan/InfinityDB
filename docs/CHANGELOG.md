@@ -7,6 +7,8 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
+## [0.7.2] - 2026-09-26
+
 ### Changed
 
 - **Data processing + Project infrastructure:** Reduce repeated SQLite physical-file
@@ -31,6 +33,15 @@ New or materially revised entries use the project-domain labels defined in
 - **Web backend + Web frontend:** Harden the browser page shell so executable scripts
   remain same-origin external
   modules under an explicit Content Security Policy, without permitting inline scripts.
+
+### Upgrade notes
+
+- Redeploy the application image for 0.7.2. The production Gunicorn command, internal
+  health/metrics endpoints, and Caddy internal-route blocking are part of the release and
+  must move together. Routine Gunicorn access logging is intentionally disabled.
+- No Army or rules database schema/compatibility rebuild is required solely for 0.7.2;
+  existing 0.7.1-compatible generated databases remain usable. Rebuilding with 0.7.2 is
+  still valid and preserves the canonical deterministic SQLite export contract.
 
 ## [0.7.1] - 2026-09-25
 

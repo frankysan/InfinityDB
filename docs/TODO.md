@@ -22,54 +22,14 @@ domain declarations may be used when all contained work shares the same owner.
 
 ## Current milestone
 
-The current milestone is **0.7.2 — UI/presentation cleanup**. This maintenance pass
-focuses on presentation consistency, browser defaults, readability, CSP correctness,
-deterministic relation ordering, and privacy-preserving monitoring groundwork before
-the next larger relationship feature milestone.
+The current milestone is **0.8.0 — connected game relationships**. It builds on the
+stable 0.7.x rules/context model by making already-modeled structural relationships
+directly useful to players: Fireteams, Peripheral/Controller structure, profile/loadout
+includes, selection/dependency relationships, Reinforcement parentage, and useful
+cross-army navigation.
 
-0.8.0 — connected game relationships remains the next feature milestone after this
-maintenance pass. General performance and storage experiments remain deferred unless
-they become necessary to establish semantic correctness, losslessness, or acceptable
-application behavior.
-
-### 0.7.2 UI/presentation cleanup
-
-**Project domains:** Web frontend, Web backend, Deployment
-
-- [x] Complete a focused UI/presentation maintenance pass after 0.7.1.
-  - [x] **Web frontend:** Align Cube/Cube 2.0 characteristic symbols with the
-    order-symbol row so the symbols share a consistent baseline and spacing.
-  - [x] **Web backend + Web frontend:** Keep the browser page shell free of inline-script
-    execution dependencies and enforce an explicit same-origin `script-src` policy without
-    `unsafe-inline`, nonces, or fixed hashes. Regression coverage checks every browser route
-    for external-only script elements and inline event handlers.
-  - [x] **Web frontend:** Widen the Name column for Equipment, Weapons, and Traits so
-    ordinary catalog names are not unnecessarily compressed.
-  - [x] **Web frontend:** Present Unit troop-type codes using their long forms in the UI,
-    for example `LI` as `Light Infantry`, while preserving the source code in stored/API data.
-  - [x] **Web backend + Web frontend:** Label Unit health attributes as `VITA` by default
-    and `STR` for Structure profiles, using the canonical `is_structure` source flag rather
-    than a fixed `W` label.
-  - [x] **Web frontend:** Make Settings collapsible in the sidebar. When no persisted
-    browser preferences exist, default distances to inches and enable all optional Unit
-    types; existing saved preferences continue to override those defaults.
-  - [x] **Web frontend:** Make the entire secondary metadata line beneath detail-page
-    titles Developer-mode only, rather than showing the line normally and hiding only its
-    optional IDs.
-  - [x] **Web frontend:** Raise the smallest UI font sizes and reduce unnecessary size
-    variation across ordinary body, metadata, table, and detail text; keep page titles
-    intentionally distinct.
-  - [x] **Web backend + Web frontend:** Make catalog relation ordering semantic and
-    deterministic: relationships that enable, cause, enter, or otherwise positively
-    establish a condition come first; within the remaining presentation groups sort
-    alphabetically by interaction label, then by related-record name. Preserve the intended
-    result for the reviewed example: `Caused by: Unconscious State`; `Cancelled by: Impetuous`;
-    `Cancelled by: Jump`; `Cancels state: Foxhole State`; `State entry prevented by: Aerial`;
-    `State entry prevented by: Impetuous`; `State entry prevented by: Motorcycle`.
-  - [x] **Deployment:** Replace the routine raw Gunicorn access log with shared,
-    privacy-preserving aggregate request instrumentation. The internal metrics surface uses
-    bounded normalized routes and exposes request/status counts, latency/response-size
-    histograms, active requests, and build identity without visitor-identifying telemetry.
+General performance and storage experiments remain deferred unless they become necessary
+to establish semantic correctness, losslessness, or acceptable application behavior.
 
 ## Release roadmap through 1.0
 

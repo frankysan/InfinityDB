@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import multiprocessing
 from collections.abc import Callable
-from typing import cast
+from typing import Protocol, cast
 
 import pytest
 
@@ -41,14 +41,15 @@ def test_request_metrics_record_bounded_histograms() -> None:
     )
 
 
+class _ForkProcessContext(Protocol):
+    Process: Callable[..., multiprocessing.Process]
+
+
 def _fork_process(
     target: Callable[[RequestMetrics], None], metrics: RequestMetrics
 ) -> multiprocessing.Process:
-    context = multiprocessing.get_context("fork")
-    process_factory = cast(
-        Callable[..., multiprocessing.Process], context.Process
-    )
-    return process_factory(target=target, args=(metrics,))
+    context = cast(_ForkProcessContext, multiprocessing.get_context("fork"))
+    return context.Process(target=target, args=(metrics,))
 
 
 def test_request_metrics_are_shared_across_preloaded_fork_workers() -> None:
