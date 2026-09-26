@@ -2,6 +2,7 @@ const REMEMBER_SETTINGS_KEY = "infinity-db-remember-settings";
 const DISTANCE_UNIT_KEY = "infinity-db-distance-unit";
 const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";
 const DISABLE_CACHE_KEY = "infinity-db-disable-cache";
+const FIRETEAMS_INCLUDE_WILDCARDS_KEY = "infinity-db-fireteams-include-wildcards";
 const OPTIONAL_UNIT_SETTINGS = [
   { id: "mercs-filter", key: "infinity-db-mercs", defaultChecked: true },
   { id: "specops-filter", key: "infinity-db-specops", defaultChecked: true },
@@ -167,6 +168,23 @@ export function optionalUnitFilters() {
   ]));
 }
 
+export function fireteamsIncludeWildcards() {
+  return document.getElementById("fireteams-include-wildcards-toggle")?.checked ?? true;
+}
+
+export function initializeFireteamsIncludeWildcardsToggle() {
+  const toggle = document.getElementById("fireteams-include-wildcards-toggle");
+  if (!toggle || toggle.dataset.initialized === "true") return;
+
+  toggle.dataset.initialized = "true";
+  const saved = savedSetting(FIRETEAMS_INCLUDE_WILDCARDS_KEY);
+  toggle.checked = saved === undefined ? true : saved === "true";
+  toggle.addEventListener("change", () => {
+    saveSetting(FIRETEAMS_INCLUDE_WILDCARDS_KEY, String(toggle.checked));
+    window.dispatchEvent(new CustomEvent("fireteamswildcardschange", { detail: toggle.checked }));
+  });
+}
+
 export function initializeRememberSettingsToggle() {
   const toggle = document.getElementById("remember-settings-toggle");
   const dialog = document.getElementById("cookie-consent-dialog");
@@ -181,6 +199,7 @@ export function initializeRememberSettingsToggle() {
       removeCookie(DISTANCE_UNIT_KEY);
       removeCookie(DEVELOPER_MODE_KEY);
       removeCookie(DISABLE_CACHE_KEY);
+      removeCookie(FIRETEAMS_INCLUDE_WILDCARDS_KEY);
       OPTIONAL_UNIT_SETTINGS.forEach(({ key }) => removeCookie(key));
       return;
     }
@@ -199,6 +218,10 @@ export function initializeRememberSettingsToggle() {
     setCookie(DISTANCE_UNIT_KEY, document.getElementById("distance-unit-toggle")?.checked ? "in" : "cm");
     setCookie(DEVELOPER_MODE_KEY, String(document.getElementById("developer-mode-toggle")?.checked));
     setCookie(DISABLE_CACHE_KEY, String(document.getElementById("disable-cache-toggle")?.checked));
+    setCookie(
+      FIRETEAMS_INCLUDE_WILDCARDS_KEY,
+      String(document.getElementById("fireteams-include-wildcards-toggle")?.checked ?? true),
+    );
     OPTIONAL_UNIT_SETTINGS.forEach(({ id, key, defaultChecked }) => {
       setCookie(key, String(document.getElementById(id)?.checked ?? defaultChecked));
     });
@@ -208,5 +231,6 @@ export function initializeRememberSettingsToggle() {
 initializeRememberSettingsToggle();
 initializeDeveloperModeToggle();
 initializeDisableCacheToggle();
+initializeFireteamsIncludeWildcardsToggle();
 initializeOptionalUnitToggles();
 initializeDistanceUnitToggle();

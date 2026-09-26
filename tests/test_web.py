@@ -394,6 +394,37 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b"getFireteamChart" in script
     assert b"Counts as:" in script
     assert b"Authoritative" in script
+    assert b'army.role === "reinforcement"' in script
+    assert b'army.role === "sectorial" || army.role === "non_aligned"' in script
+    assert b"value === 256" in script
+    assert b'`${limit.type}: unlimited`' in script
+    assert b'element.classList.add("developer-only")' in script
+    assert b'["FTO Profiles", true]' in script
+    assert b'["Notes", true]' in script
+    assert script.count(b'fto.classList.add("developer-only")') == 1
+    assert script.count(b'note.classList.add("developer-only")') == 1
+    assert b"fireteamsIncludeWildcards" in script
+    assert b"const wildcardTeams = teams.filter((team) => team.is_wildcard);" in script
+    assert b"if (wildcardTeams.length !== 1) return teams;" in script
+    assert b".filter((team) => !team.is_wildcard)" in script
+    assert b"wildcard_members: wildcardMembers" in script
+    assert b'if (wildcard) name.append(badge("Wildcard"));' in script
+    assert b'appendMemberRow(member, { wildcard: true })' in script
+    assert b'window.addEventListener("fireteamswildcardschange"' in script
+
+    status, _, styles = request(fireteam_app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(styles, ".fireteam-member-table table", {"min-width": "520px"})
+    assert_css_rule(
+        styles,
+        'html[data-developer-mode="true"] .fireteam-member-table table',
+        {"min-width": "760px"},
+    )
+    assert_css_rule(
+        styles,
+        ".fireteam-member-table th:first-child .skill-category-badge",
+        {"margin-left": "8px", "vertical-align": "middle"},
+    )
 
 
 def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> None:
@@ -1007,6 +1038,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert status == 200
     assert b'id="developer-mode-toggle"' in body
     assert b'id="remember-settings-toggle"' in body
+    assert b'id="fireteams-include-wildcards-toggle" type="checkbox" checked' in body
     assert b'id="cookie-consent-dialog"' in body
     assert b"Allow cookies" in body
     assert b'<div class="menu settings-menu" data-menu>' in body
@@ -1050,6 +1082,13 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert status == 200
     assert b'const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";' in preferences
     assert b'const REMEMBER_SETTINGS_KEY = "infinity-db-remember-settings";' in preferences
+    assert (
+        b'const FIRETEAMS_INCLUDE_WILDCARDS_KEY = "infinity-db-fireteams-include-wildcards";'
+        in preferences
+    )
+    assert b"function initializeFireteamsIncludeWildcardsToggle()" in preferences
+    assert b"function fireteamsIncludeWildcards()" in preferences
+    assert b'new CustomEvent("fireteamswildcardschange"' in preferences
     assert b"function initializeDeveloperModeToggle()" in preferences
     assert b"function initializeRememberSettingsToggle()" in preferences
     assert b"dialog.showModal()" in preferences

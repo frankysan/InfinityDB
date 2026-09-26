@@ -1,5 +1,7 @@
 import { getFireteamArmies, getFireteamChart } from "./api.js";
+import { fireteamsIncludeWildcards } from "./preferences.js";
 
+const number = new Intl.NumberFormat();
 const byId = (id) => document.getElementById(id);
 const elements = {
   army: byId("fireteam-army"),
@@ -19,6 +21,7 @@ const elements = {
 };
 
 let armies = [];
+let currentChart = null;
 let requestController = null;
 
 function show(panel) {
@@ -47,10 +50,21 @@ function writeArmyLocation(value, { replace = false } = {}) {
 function populateArmies(items) {
   armies = items;
   elements.army.replaceChildren();
+  const shownGroups = new Set();
   for (const army of armies) {
+    if (army.role === "non_aligned" && army.group_id && !shownGroups.has(army.group_id)) {
+      const label = new Option(army.group_name || `Group ${army.group_id}`, "");
+      label.disabled = true;
+      elements.army.add(label);
+      shownGroups.add(army.group_id);
+    }
+    const indentLevel = army.role === "reinforcement"
+      ? 2
+      : Number(army.role === "sectorial" || army.role === "non_aligned");
+    const indent = "\u00a0\u00a0\u00a0\u00a0".repeat(indentLevel);
     const count = Number(army.fireteam_count || 0);
     elements.army.add(new Option(
-      `${army.name}${count ? ` (${count})` : ""}`,
+      `${indent}${army.name}${count ? ` (${number.format(count)})` : ""}`,
       armyValue(army),
     ));
   }
@@ -158,7 +172,7 @@ function renderTeam(team) {
     article.append(observation);
   }
 
-  if (!(team.members || []).length) {
+  if (!(team.members || []).length && !(team.wildcard_members || []).length) {
     const empty = document.createElement("p");
     empty.className = "detail-copy";
     empty.textContent = "No member rows are defined for this chart entry.";
@@ -174,24 +188,33 @@ function renderTeam(team) {
   caption.textContent = `${team.name || "Fireteam"} members`;
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
-  for (const heading of ["Member", "Requirements", "FTO profiles", "Notes"]) {
+  for (const [heading, developerOnly] of [
+    ["Member", false],
+    ["Requirements", false],
+    ["FTO Profiles", true],
+    ["Notes", true],
+  ]) {
     const cell = document.createElement("th");
     cell.scope = "col";
     cell.textContent = heading;
+    if (developerOnly) cell.classList.add("developer-only");
     headRow.append(cell);
   }
   head.append(headRow);
   const body = document.createElement("tbody");
-  for (const member of team.members) {
+  const appendMemberRow = (member, { wildcard = false } = {}) => {
     const row = document.createElement("tr");
     const name = document.createElement("th");
     name.scope = "row";
     name.append(memberName(member));
+    if (wildcard) name.append(badge("Wildcard"));
     const requirements = document.createElement("td");
     appendMemberDetails(requirements, member);
     const fto = document.createElement("td");
+    fto.classList.add("developer-only");
     appendFtoDetails(fto, member);
     const note = document.createElement("td");
+    note.classList.add("developer-only");
     note.textContent = member.comment || "—";
     const developer = document.createElement("span");
     developer.className = "developer-only fireteam-member-developer";
@@ -199,23 +222,47 @@ function renderTeam(team) {
     note.append(developer);
     row.append(name, requirements, fto, note);
     body.append(row);
-  }
+  };
+  for (const member of team.members || []) appendMemberRow(member);
+  for (const member of team.wildcard_members || []) appendMemberRow(member, { wildcard: true });
   table.append(caption, head, body);
   tableContainer.append(table);
   article.append(tableContainer);
   return article;
 }
 
+function fireteamLimitBadge(limit) {
+  const value = Number(limit.max_count);
+  let label;
+  if (value === 0) label = `${limit.type}: unavailable`;
+  else if (value === 256) label = `${limit.type}: unlimited`;
+  else label = `${limit.type}: max ${value}`;
+  const element = badge(label);
+  if (value === 0) element.classList.add("developer-only");
+  return element;
+}
+
+function teamsForDisplay(chart) {
+  const teams = chart.teams || [];
+  if (!fireteamsIncludeWildcards()) return teams;
+
+  const wildcardTeams = teams.filter((team) => team.is_wildcard);
+  if (wildcardTeams.length !== 1) return teams;
+
+  const wildcardMembers = wildcardTeams[0].members || [];
+  return teams
+    .filter((team) => !team.is_wildcard)
+    .map((team) => ({ ...team, wildcard_members: wildcardMembers }));
+}
+
 function renderChart(chart) {
+  currentChart = chart;
   elements.chartName.textContent = chart.army.name;
   elements.description.textContent = chart.description || "";
   elements.description.hidden = !chart.description;
   elements.limits.replaceChildren();
   for (const limit of chart.limits || []) {
-    const label = limit.max_count === 0
-      ? `${limit.type}: unavailable`
-      : `${limit.type}: max ${limit.max_count}`;
-    elements.limits.append(badge(label));
+    elements.limits.append(fireteamLimitBadge(limit));
   }
   const sourceKind = chart.source.kind
     ? chart.source.kind.replaceAll("_", " ")
@@ -225,9 +272,10 @@ function renderChart(chart) {
   if (chart.source.file) sourceDetails.push(chart.source.file);
   if (chart.source.sha256) sourceDetails.push(chart.source.sha256);
   elements.sourceDetail.textContent = sourceDetails.join(" · ");
-  elements.list.replaceChildren(...(chart.teams || []).map(renderTeam));
-  elements.count.textContent = `${(chart.teams || []).length} chart entries`;
-  show((chart.teams || []).length || (chart.limits || []).length || chart.description
+  const teams = teamsForDisplay(chart);
+  elements.list.replaceChildren(...teams.map(renderTeam));
+  elements.count.textContent = `${teams.length} chart entries`;
+  show(teams.length || (chart.limits || []).length || chart.description
     ? elements.content
     : elements.empty);
 }
@@ -268,5 +316,8 @@ elements.army.addEventListener("change", () => {
   loadChart(value);
 });
 window.addEventListener("popstate", () => loadChart(normalizeSelection()));
+window.addEventListener("fireteamswildcardschange", () => {
+  if (currentChart) renderChart(currentChart);
+});
 
 initialize();

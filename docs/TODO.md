@@ -597,6 +597,31 @@ work against that contract.
     definitions can evolve without silently changing old output.
   - [ ] Later, build a web-based editor/preview UI over the same schema and rendering engine rather
     than creating a separate browser-only map format.
+- [ ] **Post-1.0 — Web backend + Web frontend:** Add an interactive Fireteam builder within a
+  selected Army context. Build compositions from the canonical Fireteam projection and general
+  Fireteam-rule facts rather than duplicating chart logic in the client.
+  - [ ] Enforce Fireteam-local requirements and limits while composing a team: chart type,
+    minimum/maximum counts, required choices, FTO eligibility, Wildcards, equivalence/alias
+    semantics, and any other reviewed Army-local constraints represented by the canonical model.
+  - [ ] Resolve the resulting Fireteam type and Level, then show the applicable bonuses from the
+    same canonical Fireteam Level data used by the reference UI. Explain incomplete or invalid
+    compositions in terms of the specific local requirement that is not satisfied.
+  - [ ] Keep the tool narrower than a full Army-list legality engine. Unit availability and
+    Fireteam composition must come from InfinityDB's maintained snapshot, while the official Army
+    app/site remains authoritative for complete list legality.
+- [ ] **Post-1.0 — Project infrastructure + Web frontend:** Evaluate adapting InfinityDB into
+  native stand-alone Android and iOS applications. Compare BeeWare/Toga, Kivy, and other suitable
+  Python-capable or cross-platform frameworks before committing to an implementation.
+  - [ ] Evaluate candidates against InfinityDB-specific requirements: reuse of Python domain/data
+    logic, local/offline SQLite snapshots and rules data, UI/navigation reuse versus rewrite,
+    performance and startup cost, accessibility, platform-native integration, persistent storage,
+    snapshot/update delivery, package size, signing/store distribution, and CI/release burden.
+  - [ ] Build a small read-only proof of concept for at least one representative workflow (for
+    example Unit or Fireteam browsing) before choosing a framework, and record which existing web
+    assumptions would need to be separated into shared application services.
+  - [ ] If a native-client direction is accepted, keep the canonical data/rules artifacts and
+    semantics shared with the web application rather than creating a second interpretation layer;
+    revisit the project-domain taxonomy if a permanent native-frontend domain becomes warranted.
 - [ ] Add mission-aware list capability guidance once saved-list support exists.
   - [ ] Derive a transparent checklist from the selected ITS scenario and the
     imported profile data: ITS Specialist Troops, relevant equipment/skills,
@@ -615,8 +640,8 @@ work against that contract.
     replace the Online Tournament Manager.
   - [ ] Include setup aids from ITS documents while keeping organizer choices and
     local participant data clearly separate from official records.
-- [ ] Post-0.7.0: add generated rules-reference projections that build on the
-  enriched canonical data rather than duplicating its facts.
+- [ ] **Data processing + Web backend + Web frontend:** Extend generated rules-reference
+  projections that build on the enriched canonical data rather than duplicating its facts.
   - [ ] Add richer typed/cross-linked projections for the structured Martial Arts,
     Booty, and MetaChemistry reference rows now served in 0.7.0. Keep random outcomes
     as deployment/session overlays, preserve conditional branches (for example TAG

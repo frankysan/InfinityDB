@@ -7,6 +7,18 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
+### Changed
+
+- **Web frontend:** Refine the Fireteam chart browser: mirror the Unit Explorer Army hierarchy
+  in the selector, present the Army source sentinel `256` as an unlimited Fireteam type
+  allowance, and move unavailable type limits plus FTO-profile/Notes columns behind Developer
+  mode so the ordinary member table stays focused and more compact.
+- **Web frontend:** Add a persistent **Fireteams include Wildcards** setting, enabled by
+  default. When a chart has one Wildcard set, hide its standalone entry and append those members
+  to the bottom of every ordinary Fireteam table with a Wildcard indicator; disabling the setting
+  restores the source-style standalone table. Preserve multiple context-specific Wildcard sets as
+  separate entries rather than merging distinct source contexts.
+
 ### Added
 
 - **Web backend + Web frontend:** Add first-class Army-scoped Fireteam browsing on

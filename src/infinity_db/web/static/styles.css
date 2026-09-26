@@ -3510,11 +3510,20 @@ tbody tr:hover {
 }
 
 .fireteam-member-table table {
+  min-width: 520px;
+}
+
+html[data-developer-mode="true"] .fireteam-member-table table {
   min-width: 760px;
 }
 
 .fireteam-member-table th:first-child {
   min-width: 180px;
+}
+
+.fireteam-member-table th:first-child .skill-category-badge {
+  margin-left: 8px;
+  vertical-align: middle;
 }
 
 .fireteam-member-table td {
