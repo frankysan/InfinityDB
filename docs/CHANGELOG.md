@@ -32,6 +32,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Web backend + Web frontend:** Present Profile, Loadout, and shared Unit-option include
+  relationships on Unit detail surfaces. Included canonical Loadouts retain quantity and Army
+  context and link to their rendered Loadout rows, while shared Unit options expose only their
+  include relationship pending the broader composite-option review.
 - **Web backend + Web frontend:** Present canonical Peripheral attachments and Controller access
   pools on Unit profile/loadout surfaces. Controller access targets now link directly to their Unit
   details, while Unit-backed Peripheral targets expose the reverse Controller occurrences with Army

@@ -594,6 +594,82 @@ def test_global_pagination_counts_unique_units(app: Callable) -> None:
     assert [item["id"] for item in json.loads(body)["items"]] == list(reversed(expected_ids))
 
 
+def test_unit_details_api_exposes_include_relationships(
+    tmp_path: Path, app_database_template: Path
+) -> None:
+    database_path = tmp_path / "infinity.db"
+    shutil.copy2(app_database_template, database_path)
+
+    with sqlite3.connect(database_path) as connection:
+        payload_id = connection.execute(
+            "SELECT loadout_payload_id FROM loadout_payload_occurrences "
+            "WHERE army_id = 101 AND unit_id = 1 AND group_id = 1 AND option_id = 1"
+        ).fetchone()[0]
+        connection.execute(
+            "INSERT INTO profile_occurrence_includes "
+            "(army_id, unit_id, group_id, profile_id, position, "
+            "target_loadout_payload_id, quantity, raw) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (101, 1, 1, 1, 1, payload_id, 2, None),
+        )
+        connection.execute(
+            "INSERT INTO loadout_occurrence_includes "
+            "(army_id, unit_id, group_id, option_id, position, "
+            "target_loadout_payload_id, quantity, raw) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (101, 1, 1, 1, 1, payload_id, 1, None),
+        )
+        connection.execute(
+            "INSERT INTO unit_options "
+            "(unit_id, option_id, position, name) VALUES (?, ?, ?, ?)",
+            (1, 7, 1, "Ranger pair"),
+        )
+        connection.execute(
+            "INSERT INTO unit_option_include_targets "
+            "(unit_id, option_id, position, target_army_id, "
+            "target_loadout_payload_id, quantity, raw) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (1, 7, 1, 101, payload_id, 1, None),
+        )
+    _refresh_published_content_checksum(database_path)
+
+    include_app = create_app(database_path)
+    status, _, body = request(include_app, "/api/units/ranger-prototype")
+
+    assert status == 200
+    unit = json.loads(body)
+    army = next(item for item in unit["armies"] if item["id"] == 101)
+    assert army["profiles"][0]["includes"] == [
+        {
+            "loadout_payload_id": payload_id,
+            "name": "Rifle loadout",
+            "quantity": 2,
+            "army_id": 101,
+        }
+    ]
+    assert army["loadouts"][0]["includes"] == [
+        {
+            "loadout_payload_id": payload_id,
+            "name": "Rifle loadout",
+            "quantity": 1,
+            "army_id": 101,
+        }
+    ]
+    assert army["loadouts"][0]["loadout_payload_ids"] == [payload_id]
+    assert army["unit_option_includes"] == [
+        {
+            "option_id": 7,
+            "name": "Ranger pair",
+            "source_unit_id": 1,
+            "includes": [
+                {
+                    "loadout_payload_id": payload_id,
+                    "name": "Rifle loadout",
+                    "quantity": 1,
+                    "army_id": 101,
+                }
+            ],
+        }
+    ]
+
+
 def test_unit_rule_filters_match_profiles_and_loadouts(app: Callable) -> None:
     for parameter in (
         "skill_id=11",
@@ -1838,6 +1914,20 @@ def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callabl
     assert b"function profileItems(items, catalog, fallbackLabel)" in body
     assert b"const routeId = item.slug || item.id;" in body
     assert b"link.href = `/${catalog}/${encodeURIComponent(routeId)}`" in body
+
+
+def test_unit_details_frontend_presents_include_relationships(app: Callable) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+
+    assert status == 200
+    assert b"function includeTargetLink(target, anchorScope)" in unit_js
+    assert b'{ value: "Includes", header: true' in unit_js
+    assert b"loadout.loadout_payload_ids || []" in unit_js
+    assert b"anchoredPayloads.has(payloadId)" in unit_js
+    assert b'[army.id, ...(army.availability_flags || [])].join("-")' in unit_js
+    assert b"details.open = true" in unit_js
+    assert b"function unitOptionIncludeTable(options, anchorScope)" in unit_js
+    assert b'section.append(subheading("Included loadouts"));' in unit_js
 
 
 def test_unit_details_frontend_presents_peripheral_relationships(app: Callable) -> None:

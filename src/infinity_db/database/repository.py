@@ -2700,9 +2700,42 @@ class Database:
                         },
                     )
 
+            profile_include_rows = connection.execute(
+                "SELECT i.unit_id, i.army_id, i.group_id, i.profile_id, "
+                "i.target_loadout_payload_id, i.quantity, lp.name AS target_name "
+                "FROM profile_occurrence_includes AS i "
+                "JOIN loadout_payloads AS lp ON lp.id = i.target_loadout_payload_id "
+                f"WHERE i.unit_id IN ({placeholders}) "
+                "ORDER BY i.army_id, i.group_id, i.profile_id, i.position, i.unit_id",
+                source_ids,
+            )
+            for include in profile_include_rows:
+                profile_key = profile_merge_keys_by_source.get(
+                    (
+                        include["unit_id"],
+                        include["army_id"],
+                        include["group_id"],
+                        include["profile_id"],
+                    )
+                )
+                profile_item = (
+                    merged_profiles.get(profile_key) if profile_key is not None else None
+                )
+                army = by_source_army.get((include["unit_id"], include["army_id"]))
+                if profile_item is not None and army is not None:
+                    append_unique_item(
+                        profile_item.setdefault("includes", []),
+                        {
+                            "loadout_payload_id": include["target_loadout_payload_id"],
+                            "name": include["target_name"],
+                            "quantity": include["quantity"],
+                            "army_id": army["id"],
+                        },
+                    )
+
             loadout_rows = connection.execute(
-                "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, lp.name, "
-                "lpo.points, lpo.swc, lp.minis, lp.disabled "
+                "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, "
+                "lpo.loadout_payload_id, lp.name, lpo.points, lpo.swc, lp.minis, lp.disabled "
                 "FROM loadout_payload_occurrences AS lpo "
                 "JOIN loadout_payloads AS lp ON lp.id = lpo.loadout_payload_id "
                 f"WHERE lpo.unit_id IN ({placeholders}) "
@@ -2718,8 +2751,9 @@ class Database:
                 loadout_item = {
                     key: loadout[key]
                     for key in loadout.keys()
-                    if key not in {"army_id", "unit_id"}
+                    if key not in {"army_id", "unit_id", "loadout_payload_id"}
                 }
+                loadout_item["loadout_payload_ids"] = [loadout["loadout_payload_id"]]
                 loadout_item["skills"] = []
                 loadout_item["equipment"] = []
                 loadout_item["weapons"] = []
@@ -2735,9 +2769,46 @@ class Database:
                         loadout["option_id"],
                     )
                 ] = loadout_key
-                if loadout_key not in loadout_items:
+                existing_loadout = loadout_items.get(loadout_key)
+                if existing_loadout is None:
                     army["loadouts"].append(loadout_item)
                     loadout_items[loadout_key] = loadout_item
+                elif loadout["loadout_payload_id"] not in existing_loadout["loadout_payload_ids"]:
+                    existing_loadout["loadout_payload_ids"].append(loadout["loadout_payload_id"])
+
+            loadout_include_rows = connection.execute(
+                "SELECT i.unit_id, i.army_id, i.group_id, i.option_id, "
+                "i.target_loadout_payload_id, i.quantity, lp.name AS target_name "
+                "FROM loadout_occurrence_includes AS i "
+                "JOIN loadout_payloads AS lp ON lp.id = i.target_loadout_payload_id "
+                f"WHERE i.unit_id IN ({placeholders}) "
+                "ORDER BY i.army_id, i.group_id, i.option_id, i.position, i.unit_id",
+                source_ids,
+            )
+            for include in loadout_include_rows:
+                loadout_key = loadout_keys_by_source.get(
+                    (
+                        include["unit_id"],
+                        include["army_id"],
+                        include["group_id"],
+                        include["option_id"],
+                    )
+                )
+                loadout_item = (
+                    loadout_items.get(loadout_key) if loadout_key is not None else None
+                )
+                army = by_source_army.get((include["unit_id"], include["army_id"]))
+                if loadout_item is not None and army is not None:
+                    append_unique_item(
+                        loadout_item.setdefault("includes", []),
+                        {
+                            "loadout_payload_id": include["target_loadout_payload_id"],
+                            "name": include["target_name"],
+                            "quantity": include["quantity"],
+                            "army_id": army["id"],
+                        },
+                    )
+
             order_rows = connection.execute(
                 "SELECT lpo.unit_id, lpo.army_id, lpo.group_id, lpo.option_id, o.order_type, "
                 "o.list_count, o.total_count "
@@ -2894,6 +2965,48 @@ class Database:
                             "quantity": peripheral["quantity"],
                         },
                     )
+
+            unit_option_rows = connection.execute(
+                "SELECT u.unit_id, u.option_id, u.position AS option_position, u.name, "
+                "i.target_army_id, i.target_loadout_payload_id, i.quantity, "
+                "lp.name AS target_name "
+                "FROM unit_options AS u "
+                "JOIN unit_option_include_targets AS i "
+                "ON i.unit_id = u.unit_id AND i.option_id = u.option_id "
+                "JOIN loadout_payloads AS lp ON lp.id = i.target_loadout_payload_id "
+                f"WHERE u.unit_id IN ({placeholders}) "
+                "ORDER BY u.position, u.unit_id, u.option_id, i.target_army_id, i.position",
+                source_ids,
+            )
+            unit_option_items: dict[tuple[Any, ...], dict[str, Any]] = {}
+            for option in unit_option_rows:
+                army = by_source_army.get((option["unit_id"], option["target_army_id"]))
+                if army is None:
+                    continue
+                option_key = (
+                    army["_occurrence_key"],
+                    option["unit_id"],
+                    option["option_id"],
+                )
+                option_item = unit_option_items.get(option_key)
+                if option_item is None:
+                    option_item = {
+                        "option_id": option["option_id"],
+                        "name": option["name"],
+                        "source_unit_id": option["unit_id"],
+                        "includes": [],
+                    }
+                    unit_option_items[option_key] = option_item
+                    army.setdefault("unit_option_includes", []).append(option_item)
+                append_unique_item(
+                    option_item["includes"],
+                    {
+                        "loadout_payload_id": option["target_loadout_payload_id"],
+                        "name": option["target_name"],
+                        "quantity": option["quantity"],
+                        "army_id": army["id"],
+                    },
+                )
 
             access_rows = connection.execute(
                 "SELECT a.id, a.controller_kind, a.army_id, a.unit_id, a.group_id, "

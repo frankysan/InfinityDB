@@ -158,6 +158,18 @@ _register(
 )
 _register(
     [
+        "profile_occurrence_includes",
+        "loadout_occurrence_includes",
+        "unit_option_include_targets",
+    ],
+    CONTEXTUAL,
+    reason=(
+        "Canonical include targets retain exact Profile, Loadout, or shared Unit-option "
+        "parent context while resolving the included Loadout to application payload identity."
+    ),
+)
+_register(
+    [
         "application_peripheral_sources",
         "application_peripheral_unit_sources",
         "application_peripheral_controller_access",

@@ -130,15 +130,15 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
 
     assert report["summary"] == {
         "surfaceCount": 35,
-        "runtimeTableCount": 76,
-        "runtimeFieldCount": 349,
+        "runtimeTableCount": 79,
+        "runtimeFieldCount": 371,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 349,
+        "issue:none:fieldCount": 371,
         "role:canonical_application:fieldCount": 146,
-        "role:contextual_application:fieldCount": 180,
-        "role:intentional_source_representation:fieldCount": 23,
+        "role:contextual_application:fieldCount": 200,
+        "role:intentional_source_representation:fieldCount": 25,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
     assert report["openIssues"]["semanticOverlapTables"] == []
@@ -168,6 +168,9 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert _field(report, "logical_units", "name")["role"] == CANONICAL
     assert _field(report, "profile_payloads", "is_structure")["role"] == CANONICAL
     assert _field(report, "profile_payload_occurrences", "logo")["role"] == CONTEXTUAL
+    assert _field(report, "profile_occurrence_includes", "quantity")["role"] == CONTEXTUAL
+    assert _field(report, "loadout_occurrence_includes", "quantity")["role"] == CONTEXTUAL
+    assert _field(report, "unit_option_include_targets", "target_army_id")["role"] == CONTEXTUAL
     assert _field(report, "application_armies", "name")["role"] == CANONICAL
     assert _field(report, "application_army_sources", "source_army_id")["role"] == CONTEXTUAL
     assert _field(report, "application_catalog_items", "name")["role"] == CANONICAL

@@ -559,6 +559,48 @@ function unitLink(unit) {
   return link;
 }
 
+function loadoutAnchorId(anchorScope, payloadId) {
+  return `loadout-${anchorScope}-${payloadId}`;
+}
+
+function includeTargetLink(target, anchorScope) {
+  const link = document.createElement("a");
+  link.href = `#${loadoutAnchorId(anchorScope, target.loadout_payload_id)}`;
+  const quantity = target.quantity != null && Number(target.quantity) !== 1
+    ? ` ×${target.quantity}`
+    : "";
+  link.textContent = `${target.name || "Loadout"}${quantity}`;
+  link.addEventListener("click", () => {
+    const targetElement = document.getElementById(
+      loadoutAnchorId(anchorScope, target.loadout_payload_id),
+    );
+    const details = targetElement?.closest("details");
+    if (details) details.open = true;
+  });
+  return link;
+}
+
+function includeItems(items, anchorScope) {
+  const result = document.createDocumentFragment();
+  items.forEach((item, index) => {
+    if (index) result.append(", ");
+    result.append(includeTargetLink(item, anchorScope));
+  });
+  return result;
+}
+
+function appendIncludeRows(rows, item, anchorScope, colSpan = null) {
+  if (!(item.includes || []).length) return;
+  rows.push([
+    { value: "Includes", header: true, className: "data-label profile-item-label" },
+    {
+      content: includeItems(item.includes, anchorScope),
+      className: "profile-item-list",
+      ...(colSpan ? { colSpan } : {}),
+    },
+  ]);
+}
+
 function peripheralItems(items) {
   const result = document.createDocumentFragment();
   items.forEach((item, index) => {
@@ -698,7 +740,7 @@ function generalProfileTableRows(profiles) {
   return rows;
 }
 
-function profileTableRows(profiles, generalByName) {
+function profileTableRows(profiles, generalByName, anchorScope) {
   return profiles.flatMap((profile) => {
     const generalProfile = generalByName.get(profile.name || "");
     const generalStatsForProfile = generalProfile.stats;
@@ -727,6 +769,7 @@ function profileTableRows(profiles, generalByName) {
         },
       ]);
     }
+    appendIncludeRows(rows, profile, anchorScope);
     appendPeripheralRows(rows, profile);
     return rows;
   });
@@ -749,7 +792,7 @@ function profileNameWithDivisionBadge(profile) {
   return title;
 }
 
-function loadoutTable(loadouts, sharedItems, generalOrderType) {
+function loadoutTable(loadouts, sharedItems, generalOrderType, anchorScope, anchoredPayloads) {
   return table(
     ["Name", "Points", "SWC"],
     loadouts.flatMap((loadout, index) => {
@@ -760,7 +803,17 @@ function loadoutTable(loadouts, sharedItems, generalOrderType) {
         ...(hasSkill([loadout], "tactical awareness") ? ["tactical"] : []),
         ...Array(lieutenantOrderCount([loadout])).fill("lieutenant"),
       ].filter(Boolean);
-      const loadoutName = nameWithOrderSymbols(loadout.name, symbolTypes);
+      const loadoutName = document.createDocumentFragment();
+      for (const payloadId of loadout.loadout_payload_ids || []) {
+        if (anchoredPayloads.has(payloadId)) continue;
+        anchoredPayloads.add(payloadId);
+        const anchor = document.createElement("span");
+        anchor.id = loadoutAnchorId(anchorScope, payloadId);
+        anchor.className = "loadout-anchor";
+        anchor.setAttribute("aria-hidden", "true");
+        loadoutName.append(anchor);
+      }
+      loadoutName.append(nameWithOrderSymbols(loadout.name, symbolTypes));
       const loadoutRow = [{ content: loadoutName }, loadout.points, loadout.swc];
       loadoutRow.className = index ? "profile-summary loadout-start" : "profile-summary";
       const rows = [loadoutRow];
@@ -780,6 +833,7 @@ function loadoutTable(loadouts, sharedItems, generalOrderType) {
           },
         ]);
       }
+      appendIncludeRows(rows, loadout, anchorScope, 2);
       appendPeripheralRows(rows, loadout, 2);
       return rows;
     }),
@@ -845,8 +899,31 @@ function isEnabledArmy(army) {
   return (army.availability_flags || []).every((flag) => filters[flag]);
 }
 
+function unitOptionIncludeTable(options, anchorScope) {
+  return table(
+    ["Option", "Includes"],
+    options.map((option) => {
+      const optionName = document.createDocumentFragment();
+      optionName.append(document.createTextNode(text(option.name)));
+      const sourceId = document.createElement("span");
+      sourceId.className = "developer-only";
+      sourceId.textContent = ` (Unit #${option.source_unit_id}, option #${option.option_id})`;
+      optionName.append(sourceId);
+      return [
+        { content: optionName },
+        {
+          content: includeItems(option.includes || [], anchorScope),
+          className: "profile-item-list",
+        },
+      ];
+    }),
+    "data-table--compact unit-option-includes-table",
+  );
+}
+
 function renderArmyProfile(army, generalByName, expanded) {
   const section = document.createElement("details");
+  const anchorScope = [army.id, ...(army.availability_flags || [])].join("-");
   section.className = "explorer army-profile";
   section.open = expanded;
   const armyHeading = document.createElement("summary");
@@ -867,6 +944,11 @@ function renderArmyProfile(army, generalByName, expanded) {
   }
   armyHeading.append(availabilityBadges(army.availability_flags));
   section.append(armyHeading);
+  if ((army.unit_option_includes || []).length) {
+    section.append(subheading("Included loadouts"));
+    section.append(unitOptionIncludeTable(army.unit_option_includes, anchorScope));
+  }
+  const anchoredPayloads = new Set();
   for (const group of profileLoadoutGroups(army)) {
     if (group.profiles.length) {
       const profilesHeading = subheading("Profiles");
@@ -874,7 +956,7 @@ function renderArmyProfile(army, generalByName, expanded) {
       section.append(profilesHeading);
       section.append(table(
         [],
-        profileTableRows(group.profiles, generalByName),
+        profileTableRows(group.profiles, generalByName, anchorScope),
         "data-table--compact profile-details-table",
       ));
     }
@@ -884,6 +966,8 @@ function renderArmyProfile(army, generalByName, expanded) {
         group.loadouts,
         sharedItemsForProfileGroup(group.profiles, generalByName),
         generalByName.get(group.profiles[0]?.name || "")?.orderType,
+        anchorScope,
+        anchoredPayloads,
       ));
     }
   }

@@ -1188,12 +1188,12 @@ context while resolving the target to a canonical loadout payload. Top-level
 `unit_option_includes` remain source-context relationships, but
 `unit_option_include_targets` expands each shared include across the Army contexts in
 which its target occurs and records the corresponding canonical loadout payload.
-Peripherals remain losslessly available through the source tables until their reviewed
-identity model is complete. In particular, the diagnostic peripheral comparison by
-`name + mercs` is evidence that raw army-local IDs overstate variation; it is **not**
-yet sufficient to define a canonical peripheral key. The seven remaining
-peripheral-context variations, including `TURTLEMEK` `mercs` differences, must
-therefore remain explicit source context.
+Peripheral source rows remain losslessly available as provenance behind the reviewed
+application identity/relationship layer. The earlier diagnostic comparison by `name + mercs`
+was evidence that raw army-local IDs overstated variation; `mercs` is deliberately rejected as
+canonical identity data. Source-only ordering and `mercs` differences, including the observed
+`TURTLEMEK` variations, therefore remain provenance rather than creating duplicate Peripheral
+identities.
 
 The 16 candidate-payload variants among repeated source-loadout keys are retained
 conservatively: one exact equipment representation variant, one order-generation
@@ -1606,15 +1606,16 @@ rows back through their occurrence maps; source-specific unit display names are
 reconstructed from canonical logical-unit fields plus explicit name aliases.
 Top-level `unit_option_*` occurrences stay source-contextual by design.
 
-The current 0.8 Fireteam-serving trace covers **35 serving probes**, **76 tables**, and
-**349 distinct table-field pairs**. The role totals are **146 canonical-application
-fields**, **180 explicit contextual-application fields**, and **23 intentional-source
-fields**. The larger contextual total now includes the Army-scoped Fireteam chart/provenance,
-membership, FTO-loadout, and equivalence projections alongside the earlier Peripheral,
-selection-constraint, and group-dependency relationships; it is not a regression to legacy
-payload reads. Profile-logo provenance adds one contextual field to the Unit-detail projection; it
-remains presentation context rather than canonical profile identity. All **349 / 349
-observed fields have no open semantic issue**.
+The current 0.8 connected-data serving trace covers **35 serving probes**, **79 tables**, and
+**371 distinct table-field pairs**. The role totals are **146 canonical-application
+fields**, **200 explicit contextual-application fields**, and **25 intentional-source
+fields**. The larger contextual total includes the Army-scoped Fireteam chart/provenance,
+membership, FTO-loadout, equivalence, Peripheral, include-target, selection-constraint, and
+group-dependency relationships; it is not a regression to legacy payload reads. The two new
+intentional-source fields are the shared Unit-option name/order context needed to label its
+include edge without promoting composite Unit options to reusable application identity.
+Profile-logo provenance remains presentation context rather than canonical profile identity.
+All **371 / 371 observed fields have no open semantic issue**.
 
 The application Army tables provide canonical identity/hierarchy and reviewed source
 mappings, while `application_catalog_items` / `application_catalog_sources` provide
@@ -1636,10 +1637,10 @@ are not assumed redundant with profile/loadout payloads.
 The trace remains useful for scope control. Normal serving does **not** read the raw
 Fireteam chart tables, raw generic relation/dependency tables, legacy profile/loadout
 payload tables, normalization-only Army filter joins, or other source-only collections
-outside the traced surface. Canonical Peripheral and selection/dependency relationship
-tables are now read instead. Include relationships and `logical_unit_spectables` are
-materialized application data but remain outside the current serving probes because
-first-class presentation is still a later completeness task.
+outside the traced surface. Canonical Peripheral, include-target, and selection/dependency relationship tables are now
+read instead. `logical_unit_spectables` remains materialized application data outside the
+current serving probes because its player-facing semantics are still in the explicit review
+queue.
 
 The production counts above are evidence for this code/snapshot pair, not a permanent
 table-count contract. The audit fails on an unclassified newly-read table or an
@@ -1730,10 +1731,8 @@ SQLite reads: source-only rows may live exclusively in `infinity.raw.db`, canoni
 application facts may live in derived tables, and a fact may be preserved in the API
 without yet having a usable browser presentation.
 
-The maintained inventory now records **7 confirmed gap families** for later roadmap work:
+The maintained inventory now records **5 confirmed gap families** for later roadmap work:
 
-- profile/loadout/top-level Unit-option include relationships;
-- Peripheral attachments and Controller access pools;
 - selection constraints and profile-group dependencies;
 - Reinforcement Section parentage;
 - broader source-declared faction membership distinct from concrete Army availability;
@@ -1749,16 +1748,15 @@ levels, and Booty/MetaChemistry roll results. Those projections are served throu
 existing Hacker, Martial Arts, Booty, and MetaChemistry Skill detail surfaces rather
 than becoming static Unit facts.
 
-The reviewed production application database provides concrete evidence for the gaps
-that already have an application representation: **1,273** canonical include edges,
-**818** loadout Peripheral occurrences plus **8** Controller-target edges, **96** Unit
-selection constraints, **14** profile-group dependency constraints, **46**
-Reinforcement-parent links, **2,094** declared faction memberships, **30**
-source-attributed Unit-note occurrences, **18** top-level Unit options, and **299**
-canonical profile payloads marked `is_structure`. Fireteam chart/type/member source facts are
-no longer an open presentation gap: schema 25 materializes the Army-scoped application
-projection and the `/fireteams` browser/API surface consumes it directly. The structured
-lookup metadata has the application projections described above.
+The reviewed production application database provides concrete scale evidence for both closed
+and remaining relationship families: **1,273** canonical include edges, **818** loadout
+Peripheral occurrences plus **8** Controller-target edges, **96** Unit selection constraints,
+**14** profile-group dependency constraints, **46** Reinforcement-parent links, **2,094**
+declared faction memberships, **30** source-attributed Unit-note occurrences, **18** top-level
+Unit options, and **299** canonical profile payloads marked `is_structure`. Fireteam,
+Peripheral/Controller, and include source facts are no longer open presentation gaps: their
+maintained application relationships are now consumed by player-facing browser/API surfaces.
+The structured lookup metadata has the application projections described above.
 
 Two preserved constructs remain an explicit semantic review queue instead of being
 forced into a premature 1.0 requirement: **30** opaque `spectables` occurrences and
@@ -1931,6 +1929,16 @@ canonical payload while the included Loadout acquires an Army-contextual payload
 variant. Source-local target coordinates remain provenance in the retained source/raw
 representation; application relationships use canonical target identities while keeping
 all contextual parent attachment, quantity, and raw fallback data explicit.
+
+0.8.0 now serves those derived relationships directly on Unit detail surfaces without changing
+that identity boundary. Profile and Loadout include edges remain attached to their exact
+occurrence-derived presentation context; shared Unit-option include edges are grouped per target
+Army context and expose only the include relationship while broader composite-option semantics
+remain deferred. Included targets use canonical `loadout_payloads.id`; visible merged Loadout
+rows retain all contributing payload IDs solely so target links can resolve to the rendered
+canonical payload presentation. If multiple visible source occurrences reuse one payload, the
+browser anchors the first rendered occurrence to avoid duplicate fragment IDs. None of these
+links promotes include attachments into reusable payload identity.
 
 Schema version 24 / compatibility revision 32 adds seven derived
 structured-reference tables without publishing their raw metadata source tables.

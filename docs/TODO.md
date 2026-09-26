@@ -56,9 +56,6 @@ directly useful without becoming an Army-list legality engine or live game-state
 
 ### Fireteams and connected application data
 
-- [ ] **Web backend + Web frontend:** Present profile/loadout/top-level Unit-option
-  include relationships.
-
 - [ ] **Web backend + Web frontend:** Present selection constraints and profile-group
   dependency relationships in a
   way that explains the restriction without turning InfinityDB into a legality engine.

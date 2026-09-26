@@ -2631,6 +2631,35 @@ def test_profile_include_relationships_preserve_contextual_target_variants(
         connection.close()
 
 
+def test_unit_details_present_contextual_include_relationships(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "include-details.sqlite3"
+    export_database(normalized, path)
+
+    details = Database(path).get_unit(1)
+
+    assert details is not None
+    for army in details["armies"]:
+        target = {
+            "loadout_payload_id": 1,
+            "name": "Rifle",
+            "quantity": 1,
+            "army_id": army["id"],
+        }
+        assert army["profiles"][0]["includes"] == [target]
+        assert army["loadouts"][0]["includes"] == [target]
+        assert army["loadouts"][0]["loadout_payload_ids"] == [1]
+        assert army["unit_option_includes"] == [
+            {
+                "option_id": 1,
+                "name": "Global",
+                "source_unit_id": 1,
+                "includes": [target],
+            }
+        ]
+
+
 def test_export_staging_rejects_invalid_materialized_include_relationship(
     tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
 ) -> None:

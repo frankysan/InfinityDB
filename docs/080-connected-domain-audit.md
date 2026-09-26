@@ -93,19 +93,22 @@ Peripheral entities/profiles/source mappings plus Controller access and target e
 and Unit detail payloads already carry Peripheral attachments/access data. The current
 Wiki likewise defines Peripheral behavior through the Controller/Peripheral relationship.
 
-0.8.0 should make these edges navigable from existing Unit/Profile/Loadout surfaces.
-Creating a second top-level Peripheral catalog would duplicate the relationship model
-without adding an independent player-facing identity boundary. Unit-backed Peripherals
-continue to resolve to logical Units; non-Unit Peripheral entities remain relationship
-endpoints where needed.
+0.8.0 now makes these edges navigable from existing Unit/Profile/Loadout surfaces.
+Embedded attachments render in their owning Profile/Loadout context; Controller access pools
+link to their Unit-backed targets; those target Units expose the reverse Controller occurrences
+with Army and profile/loadout context. Creating a second top-level Peripheral catalog would
+duplicate the relationship model without adding an independent player-facing identity boundary.
+Unit-backed Peripherals continue to resolve to logical Units; non-Unit Peripheral entities
+remain relationship endpoints where needed.
 
 ### Profile/Loadout/Unit-option includes: no new domain
 
-The application database already materializes canonical include targets while retaining
-the parent occurrence and quantity/context needed for losslessness. Includes are edges
-between existing Profile/Loadout/Unit-option identities. They should be rendered as
-linked composition/contains information on the owning Unit detail surface and target
-loadout/profile presentation.
+The application database materializes canonical include targets while retaining the parent
+occurrence and quantity/context needed for losslessness. Includes are edges between existing
+Profile/Loadout/Unit-option identities. Unit detail now renders Profile and Loadout Includes in
+their owning context and shared Unit-option Includes per target Army; each canonical target links
+to the rendered Loadout presentation. Shared Unit options deliberately expose only this edge
+family here, leaving their broader composite-option semantics for the later completeness review.
 
 No independent "Includes" catalog is warranted.
 
@@ -167,8 +170,10 @@ ontology.
 ## 0.8.0 implementation order
 
 Schema 25 / compatibility revision 33 completed step 1 below, and the Army-scoped browser/API
-plus rules-backed generated Fireteam quick reference complete step 2. This document keeps the
-original order as the milestone contract; the active connected-data work continues at step 3.
+plus rules-backed generated Fireteam quick reference complete step 2. Step 3 is now partially
+complete: Peripheral/Controller and include relationships are presented. Selection/dependency,
+Reinforcement parentage, and broader faction/cross-Army relationships remain active. This
+document keeps the original order as the milestone contract.
 
 The audit establishes this order for the connected-data milestone:
 

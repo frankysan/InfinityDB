@@ -1247,14 +1247,28 @@ compatibility references remain unambiguous JSON integers.
   MetaChemistry reference data. Schema 24 / compatibility revision 32 closed the
   structured-reference gap in 0.7.0, and 0.7.2 closed the Structure/VITA-versus-STR
   presentation gap. The first 0.8 Fireteam browser closes the Fireteam source-presentation
-  family, so the maintained inventory now reports 7 open families; the remaining gaps belong
-  to 0.8.x/0.9.x work rather than Milestone 2B.
+  family; the subsequent Unit-detail work closes Peripheral/Controller and include presentation,
+  so the maintained inventory now reports 5 open families. The remaining gaps belong to
+  0.8.x/0.9.x work rather than Milestone 2B.
 - Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
   preserve the source values and do not invent presentation semantics before the domain
   meaning/scope is resolved.
 - Milestone 2B shipped in 0.6.3, and the rules-enriched catalog-data milestone shipped
   in 0.7.0. The next active milestone is 0.8.0 connected game relationships, not further
   canonicalization or expansion of the completed 0.7.0 release gate.
+
+## 0.8.0 connected Unit relationships (2026-09-26)
+
+- Unit detail now presents reviewed Peripheral attachments and Controller access pools in both
+  directions without inventing fixed ownership.
+- Profile, Loadout, and shared Unit-option include relationships are served exclusively from the
+  schema-23 derived relationship tables. Profile/Loadout edges retain occurrence context; shared
+  Unit-option edges are projected per target Army; targets resolve by canonical Loadout payload.
+  Visible merged Loadout rows retain contributing payload IDs only for browser target navigation.
+  This does not make Includes part of payload identity and does not promote the broader top-level
+  Unit-option bundle semantics, which remain a later completeness item.
+- The runtime-surface audit now classifies all three derived include tables as intentional
+  contextual application dependencies; raw include tables remain outside normal serving.
 
 ## 0.8.0 Fireteam application projection (2026-09-26)
 

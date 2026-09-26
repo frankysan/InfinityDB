@@ -121,7 +121,25 @@ _register(
     location=DOC_RULES,
 )
 _register(
-    ["metadata_factions", "metadata_skills", "metadata_equipment", "ammunition"],
+    ["profile_includes", "option_includes", "unit_option_includes"],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Profile, Loadout, and shared Unit-option include edges resolve to canonical loadout "
+        "targets and are presented on Unit detail surfaces with Army context."
+    ),
+)
+_register(
+    ["profile_peripherals", "option_peripherals"],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Peripheral attachments are projected through reviewed application identities and "
+        "presented on their owning Profile or Loadout surfaces."
+    ),
+)
+_register(
+    ["metadata_factions", "metadata_skills", "metadata_equipment", "ammunition", "peripherals"],
     REDUNDANT,
     SOURCE_PROVENANCE,
     reason=(
@@ -160,16 +178,10 @@ _register(
         "unit_option_weapons",
         "unit_option_weapon_extras",
         "unit_option_characteristics",
-        "unit_option_includes",
         "unit_option_orders",
-        "peripherals",
-        "profile_peripherals",
-        "option_peripherals",
         "relations",
         "relation_units",
         "relation_dependencies",
-        "profile_includes",
-        "option_includes",
     ],
     UNREPRESENTED,
     SOURCE_RELATIONSHIP,
@@ -272,34 +284,6 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
 
 
 CONFIRMED_GAPS: tuple[dict[str, Any], ...] = (
-    {
-        "id": "includes",
-        "target": "0.8.x",
-        "layer": "application_database_only",
-        "tables": [
-            "profile_occurrence_includes",
-            "loadout_occurrence_includes",
-            "unit_option_include_targets",
-        ],
-        "reason": (
-            "Canonical include relationships are materialized but not exposed on "
-            "Unit detail pages."
-        ),
-    },
-    {
-        "id": "peripheral_controller_links",
-        "target": "0.8.x",
-        "layer": "repository_api_only",
-        "tables": [
-            "profile_peripherals",
-            "option_peripherals",
-            "application_peripheral_controller_targets",
-        ],
-        "reason": (
-            "Peripheral attachments/access pools are available to the backend but "
-            "not rendered by unit.js."
-        ),
-    },
     {
         "id": "selection_dependencies",
         "target": "0.8.x",
