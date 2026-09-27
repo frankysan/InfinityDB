@@ -3812,6 +3812,9 @@ html[data-developer-mode="true"] .fireteam-card {
 }
 
 .fireteam-member-table {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
   border: 0;
 }
 
@@ -3875,6 +3878,32 @@ html[data-developer-mode="true"] .fireteam-member-table table {
 }
 
 @media (max-width: 600px) {
+  .fireteam-member-table table {
+    --table-heading-padding: 9px 10px;
+    --table-cell-padding: 12px 10px;
+    --table-heading-size: var(--font-size-xs);
+    --table-cell-size: var(--font-size-base);
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .fireteam-member-table th,
+  .fireteam-member-table td {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .fireteam-member-table th:first-child {
+    width: 54%;
+    min-width: 0;
+  }
+
+  .fireteam-member-table th:nth-child(2) {
+    width: 46%;
+  }
+
   .fireteam-card-header {
     flex-direction: column;
     align-items: stretch;
