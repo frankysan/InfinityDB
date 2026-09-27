@@ -1345,6 +1345,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
         assert filter_id in body
     for exact_filter in (b'ava-filter', b'points-filter', b'swc-filter'):
         assert b'<select id="' + exact_filter + b'" disabled>' in body
+    assert body.count(b'<option value="">Any</option>') >= 3
     assert b'id="extended-results" type="checkbox"' in body
     assert b'</details><label class="extended-results-control">' in body
     for range_filter in (b'ava', b'points', b'swc'):
@@ -1391,7 +1392,14 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert_css_rule(styles, ".double-range-slider", {"isolation": "isolate"})
+    assert_css_rule(
+        styles,
+        ".double-range-slider",
+        {"isolation": "isolate", "height": "58px"},
+    )
+    assert_css_rule(styles, ".range-slider-track", {"top": "18px"})
+    assert_css_rule(styles, ".range-input", {"top": "10px"})
+    assert_css_rule(styles, ".range-value-max", {"top": "36px"})
     assert_css_rule(styles, ".range-slider-selected", {"background": "#cbd4c8"})
     assert_css_rule(
         styles,

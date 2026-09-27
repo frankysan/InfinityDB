@@ -129,7 +129,7 @@ function exactNumericLabel(name, value) {
 function populateNumericFilter(name, metadata) {
   const control = numericRangeControls[name];
   if (!control) return;
-  control.exact.replaceChildren(new Option("Any exact value", ""));
+  control.exact.replaceChildren(new Option("Any", ""));
   const values = Array.isArray(metadata?.exact_values) ? metadata.exact_values : [];
   for (const value of values) {
     control.exact.add(new Option(exactNumericLabel(name, value), value));

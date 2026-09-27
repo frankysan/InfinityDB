@@ -2183,14 +2183,14 @@ h2 {
   --range-end: 100%;
   position: relative;
   isolation: isolate;
-  height: 72px;
+  height: 58px;
   min-width: 0;
 }
 
 .range-slider-track {
   position: absolute;
   z-index: 1;
-  top: 32px;
+  top: 18px;
   right: 0;
   left: 0;
   height: 6px;
@@ -2217,7 +2217,7 @@ h2 {
 .range-input {
   position: absolute;
   z-index: 3;
-  top: 24px;
+  top: 10px;
   left: 0;
   width: 100%;
   height: 22px;
@@ -2316,7 +2316,7 @@ h2 {
 }
 
 .range-value-max {
-  top: 50px;
+  top: 36px;
   left: clamp(18px, var(--range-end), calc(100% - 18px));
 }
 

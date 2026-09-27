@@ -38,6 +38,9 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web frontend:** Tighten the Unit Explorer numeric-filter row by shortening exact-value
+  dropdown placeholders to **Any** and vertically aligning the dual-handle range tracks with
+  their neighboring exact-value controls.
 - **Web frontend:** Make numeric range filters visibly distinguish active constraints from their
   full-span defaults, add per-stat range reset controls, and keep each exact-value dropdown
   strictly mutually exclusive with its range slider.
