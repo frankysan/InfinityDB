@@ -1346,6 +1346,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     for exact_filter in (b'ava-filter', b'points-filter', b'swc-filter'):
         assert b'<select id="' + exact_filter + b'" disabled>' in body
     assert b'id="extended-results" type="checkbox"' in body
+    assert b'</details><label class="extended-results-control">' in body
     for range_filter in (b'ava', b'points', b'swc'):
         assert b'data-range-filter="' + range_filter + b'"' in body
         assert b'id="' + range_filter + b'-min-filter" class="range-input range-input-min"' in body
@@ -1368,20 +1369,39 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'pointsMin: pointsExact ? ""' in script
     assert b'swcMin: swcExact ? ""' in script
     assert b'renderUnitRows(elements.list, data.items, { extended: state.extended })' in script
+    assert b'advancedFilters?.addEventListener("toggle"' not in script
+    assert b'extendedPreferenceTouched' not in script
     assert b'params.get("extended") === "1"' in script
 
     status, _, unit_list_script = request(app, "/static/unit-list.js")
     assert status == 200
     assert b'unit-extended-profile-subordinate' in unit_list_script
     assert b'unit-profile-availability-value' in unit_list_script
+    assert b'if (!extended && displayArmySymbol)' in unit_list_script
+    assert b'nameCell.colSpan = 2' in unit_list_script
+    assert b'row.append(nameCell, idCell)' in unit_list_script
+    assert b'unit-profile-characteristic-symbol' in unit_list_script
+    assert b'unit-profile-characteristic-fallback' in unit_list_script
+    assert b'unit-profile-troop-type-long' in unit_list_script
+    assert b'unit-profile-troop-type-short' in unit_list_script
+
+    status, _, app_script = request(app, "/static/app.js")
+    assert status == 200
+    assert b'(item) => troopTypeLabel(item.name)' in app_script
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
+    assert_css_rule(styles, ".double-range-slider", {"isolation": "isolate"})
     assert_css_rule(styles, ".range-slider-selected", {"background": "#cbd4c8"})
     assert_css_rule(
         styles,
         ".double-range-slider.is-active .range-slider-selected",
         {"background": "var(--color-action-primary)"},
+    )
+    assert_css_rule(
+        styles,
+        ".extended-results-control input",
+        {"width": "16px", "height": "16px", "min-height": "0"},
     )
 
 
@@ -1634,20 +1654,20 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
         styles,
         ".attribute-statline",
         {
-            "--movement-column-width": "60px",
+            "--movement-column-width": "68px",
             "grid-template-columns": ("var(--movement-column-width) repeat(8, minmax(0, 1fr))"),
         },
     )
     assert_css_rule(
         styles,
         'html[data-distance-unit="in"] .attribute-statline',
-        {"--movement-column-width": "52px"},
+        {"--movement-column-width": "56px"},
     )
     assert_css_rule(styles, ".attribute-statline > div", {"padding-inline": "4px"})
     assert_css_rule(
         styles,
         ".attribute-statline, .attribute-statline-with-availability",
-        {"grid-template-columns": "60px repeat(4, minmax(0, 1fr))"},
+        {"grid-template-columns": "68px repeat(4, minmax(0, 1fr))"},
     )
     assert_css_rule(
         styles,
@@ -1655,7 +1675,7 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
             'html[data-distance-unit="in"] .attribute-statline, '
             'html[data-distance-unit="in"] .attribute-statline-with-availability'
         ),
-        {"grid-template-columns": "52px repeat(4, minmax(0, 1fr))"},
+        {"grid-template-columns": "56px repeat(4, minmax(0, 1fr))"},
     )
 
 
@@ -3491,6 +3511,11 @@ def test_072_detail_and_catalog_presentation_contract(app: Callable, tmp_path: P
 
     status, _, unit_script = request(app, "/static/unit.js")
     assert status == 200
+    assert b"troopTypeLabel(profile.type)" in unit_script
+    assert b"formatMovement(profile.move_1, profile.move_2, distanceUnit())" in unit_script
+
+    status, _, presentation_script = request(app, "/static/unit-presentation.js")
+    assert status == 200
     for code, label in (
         (b"LI", b"Light Infantry"),
         (b"MI", b"Medium Infantry"),
@@ -3501,9 +3526,10 @@ def test_072_detail_and_catalog_presentation_contract(app: Callable, tmp_path: P
         (b"SK", b"Skirmisher"),
         (b"VH", b"Vehicle"),
     ):
-        assert code in unit_script
-        assert label in unit_script
-    assert b"troopTypeLabel(profile.type)" in unit_script
+        assert code in presentation_script
+        assert label in presentation_script
+    assert b'join("-")}\\"`' in presentation_script
+    assert b'`${values.join("-")} cm`' in presentation_script
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200

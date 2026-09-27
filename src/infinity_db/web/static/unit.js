@@ -1,5 +1,6 @@
 import { getUnit } from "./api.js";
 import { staticSymbolPath } from "./unit-symbols.js";
+import { formatMovement, troopTypeLabel } from "./unit-presentation.js";
 import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
@@ -10,21 +11,6 @@ const pageController = new AbortController();
 const unitIdentifier = /^\/units\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(window.location.pathname)?.[1];
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
-
-const troopTypeLabels = {
-  LI: "Light Infantry",
-  MI: "Medium Infantry",
-  HI: "Heavy Infantry",
-  REM: "Remote",
-  TAG: "Tactical Armored Gear",
-  WB: "Warband",
-  SK: "Skirmisher",
-  VH: "Vehicle",
-};
-
-function troopTypeLabel(value) {
-  return troopTypeLabels[value] || value;
-}
 
 function groupArmiesByFaction(armies) {
   const groups = new Map();
@@ -150,9 +136,7 @@ function heading(label) { const value = document.createElement("h2"); value.text
 function subheading(label) { const value = document.createElement("h4"); value.textContent = label; return value; }
 
 const statColumns = [
-  ["MOV", (profile) => distanceUnit() === "in"
-    ? `${inches(profile.move_1)}-${inches(profile.move_2)}`
-    : `${text(profile.move_1)}-${text(profile.move_2)}`],
+  ["MOV", (profile) => formatMovement(profile.move_1, profile.move_2, distanceUnit())],
   ["CC", (profile) => profile.cc], ["BS", (profile) => profile.bs],
   ["PH", (profile) => profile.ph], ["WIP", (profile) => profile.wip],
   ["ARM", (profile) => profile.arm], ["BTS", (profile) => profile.bts],
@@ -188,12 +172,6 @@ function mostCommon(profiles, property) {
     }
   }
   return selected;
-}
-
-function inches(centimeters) {
-  if (centimeters == null || centimeters === "") return "—";
-  const value = Number(centimeters) / 2.5;
-  return Number.isFinite(value) ? String(value) : "—";
 }
 
 function generalStats(profiles) {

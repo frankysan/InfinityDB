@@ -1423,20 +1423,28 @@ and an `availability` collection of application Army IDs with profile-specific A
 preserved as a first-class AVA display value. Negative ancillary/source AVA sentinels are not
 exposed numerically; attached profiles retain their Army context with no independent AVA value.
 
-The browser keeps the existing Unit row and Army-availability symbols as the primary result anchor,
-then renders the extended profile context directly beneath it. Every profile row repeats only its
-applicable currently visible Army symbols with the AVA value beneath each symbol. Multi-profile
-Units use visually attached subordinate rows rather than flattening independent profile statistics.
-Variants with the same semantic profile identity and statline are merged across Armies while their
-Army/AVA contexts accumulate; materially different statlines remain separate rows even when the
-source uses the same profile name. This preserves profile ownership of statistics, classification,
-characteristics, and AVA while still keeping the list scan-friendly.
+The browser keeps the existing Unit row as the primary result anchor, then renders the extended
+profile context directly beneath it. Parent Unit-row Army symbols are suppressed in extended mode
+because the profile rows already provide the relevant Army context; the Unit title spans that
+otherwise redundant availability column. Every profile row repeats only its applicable currently
+visible Army symbols with the AVA value beneath each symbol.
+Multi-profile Units use visually attached subordinate rows rather than flattening independent
+profile statistics. Troop Type uses its long form by default and may collapse to the canonical
+abbreviation on narrow screens. Characteristic values use the existing Order/Characteristic
+symbols where a canonical symbol exists, with a text fallback only for source characteristics that
+have no published symbol. MOV always includes the active distance-unit marker (`cm` or `"`) and
+reserves enough width to keep that marker inside the MOV column. Variants with the same semantic
+profile identity and statline are merged across Armies while their Army/AVA contexts accumulate;
+materially different statlines remain separate rows even when the source uses the same profile
+name. This preserves profile ownership of statistics, classification, characteristics, and AVA
+while still keeping the list scan-friendly.
 
 Extended mode is explicit, shareable presentation state: the browser checkbox writes `extended=1`
-to the URL and the API accepts the same flag. Opening Advanced Filters may enable extended mode as
-a convenience until the user explicitly changes that checkbox during the page session. The mode
-does not alter filter semantics or result counts, and switching distance units re-renders extended
-MOV values using the same application distance preference as Unit detail.
+to the URL and the API accepts the same flag. The control is independent of Advanced Filters and
+remains directly available beneath the collapsed/expanded filter disclosure; opening Advanced
+Filters must not silently change the presentation mode. The mode does not alter filter semantics
+or result counts, and switching distance units re-renders extended MOV values using the same
+application distance preference as Unit detail.
 
 #### Responsive shared navigation
 

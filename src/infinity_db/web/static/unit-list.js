@@ -1,5 +1,6 @@
 import { distanceUnit } from "./preferences.js";
 import { staticSymbolPath, unitSymbol } from "./unit-symbols.js";
+import { characteristicSymbol, formatMovement, troopTypeLabel } from "./unit-presentation.js";
 
 function displayArmies(armies) {
   return [...armies].sort((left, right) => left.id - right.id);
@@ -10,12 +11,7 @@ function text(value) {
 }
 
 function movement(profile) {
-  const values = [profile.move_1, profile.move_2];
-  if (values.some((value) => value == null || value === "")) return "—";
-  if (distanceUnit() === "in") {
-    return values.map((value) => Number(value) / 2.5).join("-") + '"';
-  }
-  return `${values.join("-")} cm`;
+  return formatMovement(profile.move_1, profile.move_2, distanceUnit());
 }
 
 function statline(profile) {
@@ -103,7 +99,21 @@ function extendedProfilesRow(unit, columnCount) {
     title.textContent = profile.name || unit.name;
     const meta = document.createElement("span");
     meta.className = "unit-extended-profile-meta";
-    meta.textContent = [profile.type, profile.classification].filter(Boolean).join(" · ") || "—";
+    if (profile.type) {
+      const troopType = document.createElement("span");
+      troopType.className = "unit-profile-troop-type";
+      const longType = document.createElement("span");
+      longType.className = "unit-profile-troop-type-long";
+      longType.textContent = troopTypeLabel(profile.type);
+      const shortType = document.createElement("span");
+      shortType.className = "unit-profile-troop-type-short";
+      shortType.textContent = profile.type;
+      troopType.append(longType, shortType);
+      meta.append(troopType);
+    }
+    if (profile.type && profile.classification) meta.append(" · ");
+    if (profile.classification) meta.append(profile.classification);
+    if (!meta.childNodes.length) meta.textContent = "—";
     heading.append(title, meta);
 
     const body = document.createElement("div");
@@ -112,11 +122,24 @@ function extendedProfilesRow(unit, columnCount) {
 
     const characteristics = document.createElement("div");
     characteristics.className = "unit-profile-characteristics";
+    characteristics.setAttribute("aria-label", "Characteristics");
     for (const characteristic of profile.characteristics || []) {
-      const badge = document.createElement("span");
-      badge.className = "unit-profile-characteristic";
-      badge.textContent = characteristic;
-      characteristics.append(badge);
+      const descriptor = characteristicSymbol(characteristic);
+      if (descriptor) {
+        const symbol = document.createElement("img");
+        symbol.className = "unit-profile-characteristic-symbol";
+        symbol.src = `/static/${descriptor.category}/${descriptor.type}.svg`;
+        symbol.alt = descriptor.label;
+        symbol.title = descriptor.label;
+        symbol.width = 18;
+        symbol.height = 18;
+        characteristics.append(symbol);
+        continue;
+      }
+      const fallback = document.createElement("span");
+      fallback.className = "unit-profile-characteristic-fallback";
+      fallback.textContent = characteristic;
+      characteristics.append(fallback);
     }
     if (!characteristics.childElementCount) characteristics.textContent = "No characteristics";
     body.append(characteristics, profileAvailability(profile, armiesById));
@@ -152,7 +175,7 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
     const nameContent = document.createElement("span");
     nameContent.className = "unit-name-content";
     const displayArmySymbol = staticSymbolPath(unit.display_army_symbol_path);
-    if (displayArmySymbol) {
+    if (!extended && displayArmySymbol) {
       const icon = document.createElement("img");
       icon.className = "army-symbol display-army-symbol";
       icon.src = displayArmySymbol;
@@ -199,7 +222,12 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
     const idCell = document.createElement("td");
     idCell.className = "unit-id id-column";
     idCell.textContent = unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ");
-    row.append(nameCell, armyCell, idCell);
+    if (extended) {
+      nameCell.colSpan = 2;
+      row.append(nameCell, idCell);
+    } else {
+      row.append(nameCell, armyCell, idCell);
+    }
     fragment.append(row);
     if (extended && unit.profiles?.length) fragment.append(extendedProfilesRow(unit, 3));
   }

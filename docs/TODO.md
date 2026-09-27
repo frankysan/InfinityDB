@@ -121,9 +121,10 @@ ontology decision until it is actually needed.
     context. Profile facts apply to loadouts in their profile group; loadout facts
     remain loadout-local. Unit-option facts remain Unit-wide because the source
     model does not attach them to a profile group.
-  - [x] Add an optional extended Unit-list mode, with Advanced Filters as a natural
-    entry point. Extended results expose base statistics, troop type, classification,
-    characteristics, and Army-specific AVA without requiring navigation to Unit detail.
+  - [x] Add an optional extended Unit-list mode as an independent presentation control
+    directly beneath Advanced Filters. Extended results expose base statistics, troop type,
+    classification, characteristics, and Army-specific AVA without requiring navigation to Unit
+    detail.
     Profile AVA is shown beneath the corresponding Army symbols; `Total` remains a
     first-class display value and negative ancillary/source sentinels are not exposed.
   - [x] Make multi-profile Units legible in extended mode. Profile variants render as

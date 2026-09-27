@@ -1,6 +1,7 @@
 import { getArmies, getCatalogItems, getUnitFilters, getUnits } from "./api.js";
 import { initializeDistanceUnitToggle, initializeOptionalUnitToggles } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
+import { troopTypeLabel } from "./unit-presentation.js";
 
 const PAGE_SIZE = 50;
 const number = new Intl.NumberFormat();
@@ -82,7 +83,6 @@ let armiesLoaded = false;
 let requestNumber = 0;
 let controller;
 let searchTimer;
-let extendedPreferenceTouched = false;
 
 function hasActiveFilters() {
   return state.armyId || state.declaredFactionId || state.search
@@ -436,9 +436,11 @@ function normalizeUnitFilterState(items, stateKey) {
   return true;
 }
 
-function populateCatalogFilter(element, items, label) {
+function populateCatalogFilter(element, items, label, displayName = (item) => item.name) {
   element.replaceChildren(new Option(`All ${label.toLowerCase()}`, ""));
-  for (const item of items) element.add(new Option(item.name, catalogFilterValue(item)));
+  for (const item of items) {
+    element.add(new Option(displayName(item), catalogFilterValue(item)));
+  }
   element.disabled = false;
 }
 
@@ -548,7 +550,10 @@ async function load() {
       populateCatalogFilter(elements.skill, skills.items, "Skills");
       populateCatalogFilter(elements.equipment, equipment.items, "Equipment");
       populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
-      populateCatalogFilter(elements.troopType, unitFilters.troop_types, "Troop types");
+      populateCatalogFilter(
+        elements.troopType, unitFilters.troop_types, "Troop types",
+        (item) => troopTypeLabel(item.name),
+      );
       populateCatalogFilter(elements.classification, unitFilters.classifications, "Classifications");
       populateCatalogFilter(elements.characteristic, unitFilters.characteristics, "Characteristics");
       populateNumericFilter("ava", unitFilters.numeric?.ava);
@@ -681,15 +686,7 @@ for (const control of Object.values(numericRangeControls)) {
 for (const filter of [elements.mercs, elements.specops, elements.teamops, elements.reinforcement]) {
   filter.addEventListener("change", applyFilters);
 }
-elements.extended.addEventListener("change", () => {
-  extendedPreferenceTouched = true;
-  applyFilters();
-});
-advancedFilters?.addEventListener("toggle", () => {
-  if (!advancedFilters.open || elements.extended.checked || extendedPreferenceTouched) return;
-  elements.extended.checked = true;
-  applyFilters();
-});
+elements.extended.addEventListener("change", applyFilters);
 elements.search.addEventListener("input", () => {
   clearTimeout(searchTimer);
   elements.clear.disabled = !hasActiveFilters();

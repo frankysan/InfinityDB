@@ -48,6 +48,7 @@ ASSETS = {
     "/static/app.js": ("app.js", "text/javascript; charset=utf-8"),
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
     "/static/unit-symbols.js": ("unit-symbols.js", "text/javascript; charset=utf-8"),
+    "/static/unit-presentation.js": ("unit-presentation.js", "text/javascript; charset=utf-8"),
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
     "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
     "/static/navigation.js": ("navigation.js", "text/javascript; charset=utf-8"),

@@ -41,6 +41,13 @@ New or materially revised entries use the project-domain labels defined in
 - **Web frontend:** Make numeric range filters visibly distinguish active constraints from their
   full-span defaults, add per-stat range reset controls, and keep each exact-value dropdown
   strictly mutually exclusive with its range slider.
+- **Web frontend:** Keep the Extended unit details toggle available directly beneath Advanced
+  Filters instead of hiding it inside the disclosure, decouple it from opening Advanced Filters,
+  and keep its checkbox compact on iOS.
+- **Web frontend:** Refine extended Unit Explorer rows by removing redundant parent-row Army
+  symbols, using Order/Characteristic symbols where available, showing long Troop Type names until
+  narrow layouts collapse them to abbreviations, and keeping MOV unit markers legible in both
+  centimeter and inch display modes. Troop Type filter options use the same long-form labels.
 - **Web frontend:** Keep the compact navigation bar on screen while scrolling and collapse its
   global search field to a search button on narrow viewports. Expanding search temporarily uses
   the available navigation-bar space, while the collapsed state preserves the full InfinityDB
@@ -68,6 +75,8 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Web frontend:** Keep compact Navigation and Settings popovers above dual-handle Unit filter
+  sliders by containing each slider's internal stacking layers within the slider component.
 - **Web frontend:** Let the Unit Explorer introduction wrap naturally at tablet widths instead of
   combining a narrow text column with a desktop-only forced line break.
 - **Web frontend:** Make ordinary Fireteam member tables fit narrow mobile viewports instead of
