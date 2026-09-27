@@ -1266,25 +1266,57 @@ function isEnabledArmy(army) {
   return (army.availability_flags || []).every((flag) => filters[flag]);
 }
 
-function unitOptionIncludeTable(options, anchorScope) {
+function compositeOptionOrderSummary(orders) {
+  return orders.map((order) => {
+    const count = Number(order.list) || Number(order.total) || 1;
+    const type = String(order.type || "").toLowerCase();
+    const singular = symbolLabels[type] || `${text(order.type)} Order`;
+    const label = count === 1 ? singular : singular.replace(/Order$/, "Orders");
+    return `${count} ${label}`;
+  }).join(", ");
+}
+
+function compositeOptionTable(options, anchorScope) {
   return table(
-    ["Option", "Includes"],
-    options.map((option) => {
+    ["Composite option", "PTS", "SWC"],
+    options.flatMap((option, index) => {
       const optionName = document.createDocumentFragment();
-      optionName.append(document.createTextNode(text(option.name)));
+      const symbolTypes = [...new Set((option.orders || [])
+        .map((order) => String(order.type || "").toLowerCase())
+        .filter((type) => symbolLabels[type]))];
+      optionName.append(nameWithOrderSymbols(option.name, symbolTypes));
       const sourceId = document.createElement("span");
       sourceId.className = "developer-only";
       sourceId.textContent = ` (Unit #${option.source_unit_id}, option #${option.option_id})`;
       optionName.append(sourceId);
-      return [
+      const rows = [[
         { content: optionName },
-        {
-          content: includeItems(option.includes || [], anchorScope),
-          className: "profile-item-list",
-        },
-      ];
+        option.points,
+        option.swc,
+      ]];
+      rows[0].className = index ? "profile-summary loadout-start" : "profile-summary";
+      if (option.minis != null) {
+        rows.push([
+          { value: "Miniatures", header: true, className: "data-label profile-item-label" },
+          { value: option.minis, colSpan: 2 },
+        ]);
+      }
+      if ((option.orders || []).length) {
+        rows.push([
+          { value: "Orders", header: true, className: "data-label profile-item-label" },
+          { value: compositeOptionOrderSummary(option.orders), colSpan: 2 },
+        ]);
+      }
+      appendIncludeRows(rows, option, anchorScope, 2);
+      if (option.disabled) {
+        rows.push([
+          { value: "Availability", header: true, className: "data-label profile-item-label" },
+          { value: "Unavailable in this source data", colSpan: 2 },
+        ]);
+      }
+      return rows;
     }),
-    "data-table--compact unit-option-includes-table",
+    "data-table--compact composite-option-table",
   );
 }
 
@@ -1311,9 +1343,9 @@ function renderArmyProfile(army, generalByName, expanded) {
   }
   armyHeading.append(availabilityBadges(army.availability_flags));
   section.append(armyHeading);
-  if ((army.unit_option_includes || []).length) {
-    section.append(subheading("Included loadouts"));
-    section.append(unitOptionIncludeTable(army.unit_option_includes, anchorScope));
+  if ((army.composite_options || []).length) {
+    section.append(subheading("Composite options"));
+    section.append(compositeOptionTable(army.composite_options, anchorScope));
   }
   const anchoredPayloads = new Set();
   for (const group of profileLoadoutGroups(army)) {

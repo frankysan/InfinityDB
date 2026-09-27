@@ -777,8 +777,16 @@ def test_unit_details_api_exposes_include_relationships(
             (101, 1, 1, 1, 1, payload_id, 1, None),
         )
         connection.execute(
-            "INSERT INTO unit_options (unit_id, option_id, position, name) VALUES (?, ?, ?, ?)",
-            (1, 7, 1, "Ranger pair"),
+            "INSERT INTO unit_options "
+            "(unit_id, option_id, position, name, points, swc, minis, disabled) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (1, 7, 1, "Ranger pair", 50, "1.5", 2, False),
+        )
+        connection.execute(
+            "INSERT INTO unit_option_orders "
+            "(unit_id, option_id, position, order_type, list_count, total_count) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (1, 7, 1, "REGULAR", 2, 2),
         )
         connection.execute(
             "INSERT INTO unit_option_include_targets "
@@ -816,6 +824,28 @@ def test_unit_details_api_exposes_include_relationships(
             "option_id": 7,
             "name": "Ranger pair",
             "source_unit_id": 1,
+            "includes": [
+                {
+                    "loadout_payload_id": payload_id,
+                    "name": "Rifle loadout",
+                    "quantity": 1,
+                    "army_id": 101,
+                }
+            ],
+        }
+    ]
+    assert army["composite_options"] == [
+        {
+            "option_id": 7,
+            "name": "Ranger pair",
+            "source_unit_id": 1,
+            "points": 50,
+            "swc": "1.5",
+            "minis": 2,
+            "disabled": False,
+            "compatible": None,
+            "habilities": None,
+            "orders": [{"type": "REGULAR", "list": 2, "total": 2}],
             "includes": [
                 {
                     "loadout_payload_id": payload_id,
@@ -2296,8 +2326,10 @@ def test_unit_details_frontend_presents_include_relationships(app: Callable) -> 
     assert b"anchoredPayloads.has(payloadId)" in unit_js
     assert b'[army.id, ...(army.availability_flags || [])].join("-")' in unit_js
     assert b"details.open = true" in unit_js
-    assert b"function unitOptionIncludeTable(options, anchorScope)" in unit_js
-    assert b'section.append(subheading("Included loadouts"));' in unit_js
+    assert b"function compositeOptionTable(options, anchorScope)" in unit_js
+    assert b'"Composite option", "PTS", "SWC"' in unit_js
+    assert b"function compositeOptionOrderSummary(orders)" in unit_js
+    assert b'section.append(subheading("Composite options"));' in unit_js
 
 
 def test_unit_frontend_presents_army_relationships_and_declared_membership_filter(

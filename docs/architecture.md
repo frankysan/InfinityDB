@@ -1245,7 +1245,7 @@ the InfinityDB-generated acquisition provenance written under
 SQLite is the initial backend because it runs locally without a separate
 service. Schema definitions are separate from ingestion code. The current Army
 application database has schema version 25 and database compatibility revision
-33; it rejects incompatible databases with a rebuild instruction. The importer
+34; it rejects incompatible databases with a rebuild instruction. The importer
 validates a complete relational staging database, publishes a self-contained
 application database and a lossless sibling raw archive, creates read-path indexes
 after loading, and persists SQLite planner statistics. Migration of
@@ -1388,7 +1388,11 @@ Returns one logical unit, including its general data and the profiles,
 loadouts, availability, skills, equipment, and weapons that apply to each army
 where it occurs. `source_notes` preserves every non-empty note with its source
 Unit label, source Unit ID, representative status, and applicable Army contexts;
-it does not promote a source-specific restriction into general Unit data. The
+it does not promote a source-specific restriction into general Unit data.
+Each Army occurrence's `composite_options` preserves its source-context bundle:
+cost, miniature count, order contribution, and resolved included loadouts. The
+response retains source variants separately rather than treating source-local
+option IDs as canonical identities. The
 response includes the same `main_faction` object used by unit summaries; each
 army occurrence also includes its derived `faction` object or null. Profile
 records include a backend-derived `profile_identity` used by the browser to

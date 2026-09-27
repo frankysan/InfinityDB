@@ -8,7 +8,7 @@ import sqlite3
 import threading
 import unicodedata
 import weakref
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from collections.abc import Callable, Collection, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from datetime import date
@@ -3090,20 +3090,81 @@ class Database:
                         },
                     )
 
-            unit_option_rows = connection.execute(
-                "SELECT u.unit_id, u.option_id, u.position AS option_position, u.name, "
-                "i.target_army_id, i.target_loadout_payload_id, i.quantity, "
-                "lp.name AS target_name "
-                "FROM unit_options AS u "
-                "JOIN unit_option_include_targets AS i "
-                "ON i.unit_id = u.unit_id AND i.option_id = u.option_id "
-                "JOIN loadout_payloads AS lp ON lp.id = i.target_loadout_payload_id "
-                f"WHERE u.unit_id IN ({placeholders}) "
-                "ORDER BY u.position, u.unit_id, u.option_id, i.target_army_id, i.position",
+            unit_option_order_rows = connection.execute(
+                "SELECT unit_id, option_id, order_type, list_count, total_count "
+                "FROM unit_option_orders "
+                f"WHERE unit_id IN ({placeholders}) "
+                "ORDER BY unit_id, option_id, position",
                 source_ids,
             )
+            unit_option_orders: dict[tuple[int, int], list[dict[str, Any]]] = defaultdict(list)
+            for order in unit_option_order_rows:
+                unit_option_orders[(order["unit_id"], order["option_id"])].append(
+                    {
+                        "type": order["order_type"],
+                        "list": order["list_count"],
+                        "total": order["total_count"],
+                    }
+                )
+
             unit_option_items: dict[tuple[Any, ...], dict[str, Any]] = {}
+            unit_option_include_items: dict[tuple[Any, ...], dict[str, Any]] = {}
+            unit_option_rows = connection.execute(
+                "SELECT unit_id, option_id, position, name, points, swc, minis, disabled, "
+                "compatible, habilities "
+                "FROM unit_options "
+                f"WHERE unit_id IN ({placeholders}) "
+                "ORDER BY position, unit_id, option_id",
+                source_ids,
+            )
             for option in unit_option_rows:
+                source_unit_id = option["unit_id"]
+                for (candidate_source_id, _), army in by_source_army.items():
+                    if candidate_source_id != source_unit_id:
+                        continue
+                    option_key = (
+                        army["_occurrence_key"],
+                        source_unit_id,
+                        option["option_id"],
+                    )
+                    if option_key in unit_option_items:
+                        continue
+                    includes: list[dict[str, Any]] = []
+                    option_item = {
+                        "option_id": option["option_id"],
+                        "name": option["name"],
+                        "source_unit_id": source_unit_id,
+                        "points": option["points"],
+                        "swc": option["swc"],
+                        "minis": option["minis"],
+                        "disabled": bool(option["disabled"]),
+                        "compatible": option["compatible"],
+                        "habilities": option["habilities"],
+                        "orders": unit_option_orders[(source_unit_id, option["option_id"])],
+                        "includes": includes,
+                    }
+                    unit_option_items[option_key] = option_item
+                    army.setdefault("composite_options", []).append(option_item)
+                    unit_option_include_items[option_key] = {
+                        "option_id": option["option_id"],
+                        "name": option["name"],
+                        "source_unit_id": source_unit_id,
+                        "includes": includes,
+                    }
+                    army.setdefault("unit_option_includes", []).append(
+                        unit_option_include_items[option_key]
+                    )
+
+            unit_option_include_rows = connection.execute(
+                "SELECT i.unit_id, i.option_id, i.target_army_id, "
+                "i.target_loadout_payload_id, i.quantity, lp.name AS target_name "
+                "FROM unit_option_include_targets AS i "
+                "JOIN loadout_payloads AS lp ON lp.id = i.target_loadout_payload_id "
+                f"WHERE i.unit_id IN ({placeholders}) "
+                "ORDER BY i.unit_id, i.option_id, i.target_army_id, i.position",
+                source_ids,
+            )
+            for option in unit_option_include_rows:
                 army = by_source_army.get((option["unit_id"], option["target_army_id"]))
                 if army is None:
                     continue
@@ -3114,14 +3175,7 @@ class Database:
                 )
                 option_item = unit_option_items.get(option_key)
                 if option_item is None:
-                    option_item = {
-                        "option_id": option["option_id"],
-                        "name": option["name"],
-                        "source_unit_id": option["unit_id"],
-                        "includes": [],
-                    }
-                    unit_option_items[option_key] = option_item
-                    army.setdefault("unit_option_includes", []).append(option_item)
+                    continue
                 append_unique_item(
                     option_item["includes"],
                     {

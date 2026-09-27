@@ -1419,15 +1419,17 @@ unit row:
   SCARFACE pair is an exact repeat, while EQUIPE MIRAGE-5 has the same option and
   nested orders/includes but a genuine points difference (`60` versus `51`).
   The comparison uses `(logical_unit_id, option_id)` only as an observational key;
-  `option_id` remains source-local and is not established canonical identity.
+  `option_id` remains source-local and is not established canonical identity. Unit
+  detail presents each composite bundle in its applicable Army context, including
+  cost, miniature count, order contribution, and resolved included loadouts.
 
 Thirty source units contain non-null `spectables`, but none belongs to a
 multi-source logical unit and the repository currently does not consume this
 field. It therefore remains a canonical-unit payload candidate with insufficient
 variant evidence and an explicit 0.9 semantic-review/presentation decision rather than data
-that may be discarded. Top-level `unit_options` likewise remain a 0.9 completeness item
-because their complete source meaning is not currently returned by unit detail even though
-parts are used for search and catalog reverse lookup.
+that may be discarded. Top-level `unit_options` are source-context payloads: their complete
+current bundle semantics are returned by Unit detail without being promoted to canonical
+logical-unit facts.
 
 The audit establishes the following design constraints for the next step:
 
@@ -1734,9 +1736,10 @@ SQLite reads: source-only rows may live exclusively in `infinity.raw.db`, canoni
 application facts may live in derived tables, and a fact may be preserved in the API
 without yet having a usable browser presentation.
 
-The maintained inventory now records **1 confirmed gap family** for later roadmap work:
-
-- top-level composite Unit options.
+The maintained inventory has **no confirmed application-data presentation gaps**. Composite
+Unit options are presented in their source/Army context with cost, miniature count, order
+contribution, and resolved loadout bundle links; source variants remain separate rather than
+being collapsed by their source-local option ID.
 
 Reinforcement Section parentage and broader source-declared faction membership are no longer
 presentation gaps. Unit/API Army references expose parent/child Reinforcement relationships,
@@ -1761,8 +1764,8 @@ Peripheral occurrences plus **8** Controller-target edges, **96** Unit selection
 declared faction memberships, **30** source-attributed Unit-note occurrences, **18** top-level
 Unit options, and **299** canonical profile payloads marked `is_structure`. Fireteam,
 Peripheral/Controller, include, selection/dependency, Reinforcement-parent, declared-faction,
-and source-note facts are no longer open presentation gaps: their maintained application
-relationships are now consumed by player-facing browser/API surfaces.
+source-note, and composite-option facts are no longer open presentation gaps: their maintained
+application relationships are now consumed by player-facing browser/API surfaces.
 The structured lookup metadata has the application projections described above.
 
 Two preserved constructs remain an explicit semantic review queue instead of being
@@ -2361,7 +2364,7 @@ source data.
 
 `PRAGMA application_id` identifies an InfinityDB file and `PRAGMA user_version`
 records its schema version. The current schema version is 25 and the application
-compatibility revision is 33. Imports build temporary sibling files, check
+compatibility revision is 34. Imports build temporary sibling files, check
 database integrity, then replace the destinations. Incompatible schemas or
 compatibility revisions require a rebuild from normalized JSON for now. The
 application export runs `ANALYZE` after loading and indexing data, preserving SQLite

@@ -82,9 +82,6 @@ operations hardening work reserved for 0.10.0.
     tokens, and add validation that prevents newly maintained text from silently
     reintroducing unmarked distance literals where they can be detected reliably.
 
-- [ ] Resolve and present the semantics of the 18 current top-level composite
-  `unit_options` rather than using their names only for search/catalog support.
-
 - [ ] Review opaque `spectables` and loadout `disabled` / `minis` semantics, then either
   present the in-scope information or document why it is deliberately outside 1.0.
 

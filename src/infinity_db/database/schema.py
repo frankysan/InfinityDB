@@ -10,7 +10,7 @@ SCHEMA_VERSION = 25
 # Increment this revision whenever a code change requires rebuilding an existing
 # database, even if the SQLite schema itself is unchanged.  It deliberately
 # does not track the user-facing application release version.
-DATABASE_COMPATIBILITY_VERSION = 33
+DATABASE_COMPATIBILITY_VERSION = 34
 APPLICATION_ID = 0x49444231
 ROW_JSON = "__row_json"
 RAW_ROWS_TABLE = "__infinity_raw_rows"
@@ -661,6 +661,7 @@ PUBLISHED_SOURCE_TABLES = frozenset(
         "unit_factions",
         "unit_option_equipment",
         "unit_option_equipment_extras",
+        "unit_option_orders",
         "unit_option_skill_extras",
         "unit_option_skills",
         "unit_option_weapon_extras",

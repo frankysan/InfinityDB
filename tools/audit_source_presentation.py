@@ -190,6 +190,17 @@ _register(
 _register(
     [
         "unit_options",
+        "unit_option_orders",
+    ],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Composite Unit options are presented in their source/Army context with their "
+        "cost, miniature count, order contribution, and resolved included loadouts."
+    ),
+)
+_register(
+    [
         "unit_option_skills",
         "unit_option_skill_extras",
         "unit_option_equipment",
@@ -197,7 +208,6 @@ _register(
         "unit_option_weapons",
         "unit_option_weapon_extras",
         "unit_option_characteristics",
-        "unit_option_orders",
     ],
     UNREPRESENTED,
     SOURCE_RELATIONSHIP,
@@ -261,10 +271,11 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
         "projection/browser is authoritative for player-facing Fireteam data.",
     ),
     ("units", "notes"): _policy(
-        UNREPRESENTED,
+        EXPLICIT,
         SOURCE_FACT,
         DOC_DATA_MODEL,
-        "Source-attributed Unit notes are preserved but the browser does not render them.",
+        "Source-attributed Unit notes are returned with source and Army context and rendered "
+        "on Unit detail.",
     ),
     ("units", "spectables"): _policy(
         UNREPRESENTED,
@@ -306,28 +317,7 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
 }
 
 
-CONFIRMED_GAPS: tuple[dict[str, Any], ...] = (
-    {
-        "id": "unit_notes",
-        "target": "0.9.x",
-        "layer": "repository_api_partial",
-        "tables": ["logical_unit_notes"],
-        "reason": (
-            "Source-attributed Unit notes are preserved; the browser renders none "
-            "and API detail selects only the representative note."
-        ),
-    },
-    {
-        "id": "unit_options",
-        "target": "0.9.x",
-        "layer": "operational_only",
-        "tables": ["unit_options"],
-        "reason": (
-            "Composite Unit options are used for search/catalog support but their "
-            "selectable bundle semantics are not presented."
-        ),
-    },
-)
+CONFIRMED_GAPS: tuple[dict[str, Any], ...] = ()
 
 REVIEW_QUEUE: tuple[dict[str, Any], ...] = (
     {

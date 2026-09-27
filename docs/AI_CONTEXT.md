@@ -1229,8 +1229,8 @@ compatibility references remain unambiguous JSON integers.
   structured-reference gap in 0.7.0, and 0.7.2 closed the Structure/VITA-versus-STR
   presentation gap. 0.8.0 closes Fireteams, Peripheral/Controller, include, reviewed
   selection/dependency, Reinforcement-parentage, and declared-membership presentation.
-  0.9.0 adds source-attributed Unit-note presentation. The maintained inventory now reports
-  only top-level composite Unit options as a confirmed remaining application-data gap.
+  0.9.0 adds source-attributed Unit-note and composite Unit-option presentation. The
+  maintained inventory now has no confirmed remaining application-data presentation gap.
 - Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
   preserve the source values and do not invent presentation semantics before the domain
   meaning/scope is resolved.

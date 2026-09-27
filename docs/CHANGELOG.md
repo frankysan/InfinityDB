@@ -15,12 +15,21 @@ New or materially revised entries use the project-domain labels defined in
 - **Web backend + Web frontend:** Present every source-specific Unit note with its
   source variant and applicable Army context, including notes that belong only to a
   non-representative variant.
+- **Web backend + Web frontend:** Present top-level composite Unit options in each
+  applicable Army context, including their costs, miniature count, orders, and linked
+  constituent loadouts. Source variants remain separate, so differing option costs
+  such as EQUIPE MIRAGE-5's normal and Reinforcement versions remain visible.
 
 ### Changed
 
 - **Web frontend:** Keep Unit selection-relationship diagnostics in Developer mode,
   and omit redundant Army-context lists from source notes that apply across all
   currently shown Armies.
+
+### Upgrade notes
+
+- Rebuild the generated Army database before deploying 0.9.0. Compatibility revision
+  34 publishes the source order rows required to present composite Unit options.
 
 ### Fixed
 
