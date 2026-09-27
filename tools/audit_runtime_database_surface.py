@@ -538,6 +538,7 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
         ("traits-usage", lambda db: db.trait_usage_index()),
         ("unit-filter-values", lambda db: db.list_unit_filter_values()),
         ("units-list", lambda db: db.list_units(limit=500)),
+        ("units-extended", lambda db: db.list_units(limit=500, extended=True)),
         ("units-search", lambda db: db.list_units(search="unit", limit=500)),
         ("units-army", lambda db: db.list_units(army_id=int(playable["id"]), limit=500)),
         ("units-mercs", lambda db: db.list_units(mercs=True, limit=500)),

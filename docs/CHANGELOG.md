@@ -23,6 +23,11 @@ New or materially revised entries use the project-domain labels defined in
 - **Web backend + Web frontend:** Make the expanded Unit-filter state bookmarkable and
   shareable through the URL, using stable public slugs for categorical filters where
   possible while continuing to accept legacy numeric identifiers for compatibility.
+- **Web backend + Web frontend:** Add an optional extended Unit Explorer result mode that
+  exposes profile statlines, Troop Type, Classification, Characteristics, and Army-specific AVA
+  directly in the result list. Multi-profile Units keep subordinate profile rows visibly attached
+  to their Unit, and per-profile AVA is shown beneath the applicable Army symbols. Extended mode
+  is shareable through `extended=1` and remains opt-in outside Advanced Filters.
 - **Web backend + Web frontend:** Present every source-specific Unit note with its
   source variant and applicable Army context, including notes that belong only to a
   non-representative variant.

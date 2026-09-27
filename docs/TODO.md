@@ -121,26 +121,24 @@ ontology decision until it is actually needed.
     context. Profile facts apply to loadouts in their profile group; loadout facts
     remain loadout-local. Unit-option facts remain Unit-wide because the source
     model does not attach them to a profile group.
-  - [ ] Add an optional extended Unit-list mode, with advanced filters as a natural
-    entry point. The extended result should expose the Unit's base statistics, troop
-    type, classification, characteristics, and Army-specific AVA without requiring
-    navigation to Unit detail. AVA may be rendered beneath or overlaid on the
-    existing Army-availability symbols; choose the final treatment during UI work.
-  - [ ] Make multi-profile Units legible in extended mode. Current design direction
-    is to add subordinate profile rows beneath the main Unit row, visually indented
-    or otherwise marked as attached profiles, rather than flattening independent
-    profile statistics into one ambiguous row. Validate that approach against
-    representative multi-profile Units before making it the presentation contract.
+  - [x] Add an optional extended Unit-list mode, with Advanced Filters as a natural
+    entry point. Extended results expose base statistics, troop type, classification,
+    characteristics, and Army-specific AVA without requiring navigation to Unit detail.
+    Profile AVA is shown beneath the corresponding Army symbols; `Total` remains a
+    first-class display value and negative ancillary/source sentinels are not exposed.
+  - [x] Make multi-profile Units legible in extended mode. Profile variants render as
+    attached rows beneath the Unit, with subordinate profiles visually indented rather
+    than flattening independent statistics into one ambiguous row. Profile variants that
+    differ by source Army retain their own statline and Army/AVA context.
 
 - [ ] Complete deep-linkable, shareable search and filter state for catalog and
   Unit views.
   - [x] Unit Explorer Army, declared-faction, name, Skill, Equipment, Weapon,
     pagination, and sort state already participate in URL state. Global search uses
     its own shareable `q` parameter.
-  - [x] Add the 0.9 Unit filters to the URL contract as they are implemented so
-    exact/range numeric filtering and categorical filtering remain reproducible in
-    shared links. Decide separately whether extended-results mode itself is
-    shareable state or a local presentation preference.
+  - [x] Add the 0.9 Unit filters and extended-results mode to the URL contract so
+    categorical/numeric filtering and the optional extended Unit presentation remain
+    reproducible in shared links. Extended presentation uses `extended=1`.
   - [ ] Make catalog-list search/filter state deep-linkable where it is still only
     local browser state.
   - [ ] Define how optional-unit preferences interact with reproducible shared Unit

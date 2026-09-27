@@ -944,6 +944,27 @@ def test_unit_numeric_filters_support_exact_values_and_ranges(app: Callable) -> 
         assert json.loads(body)["items"] == []
 
 
+
+def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Callable) -> None:
+    status, _, body = request(app, "/api/units")
+    assert status == 200
+    normal = next(item for item in json.loads(body)["items"] if item["id"] == 1)
+    assert "profiles" not in normal
+
+    status, _, body = request(app, "/api/units", query="extended=1")
+    assert status == 200
+    item = next(item for item in json.loads(body)["items"] if item["id"] == 1)
+    profile = item["profiles"][0]
+    assert profile["name"] == "Ranger Profile"
+    assert profile["type"] == "Line Trooper"
+    assert profile["classification"] == "Light Infantry"
+    assert {entry["army_id"] for entry in profile["availability"]} == {101, 201}
+    assert {entry["ava"] for entry in profile["availability"]} == {2}
+
+    status, _, body = request(app, "/api/units", query="extended=yes")
+    assert status == 400
+    assert json.loads(body)["error"] == "extended must be 0 or 1"
+
 def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     status, _, body = request(app, "/api/units", query="army_id=101")
     assert status == 200
@@ -1324,6 +1345,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
         assert filter_id in body
     for exact_filter in (b'ava-filter', b'points-filter', b'swc-filter'):
         assert b'<select id="' + exact_filter + b'" disabled>' in body
+    assert b'id="extended-results" type="checkbox"' in body
     for range_filter in (b'ava', b'points', b'swc'):
         assert b'data-range-filter="' + range_filter + b'"' in body
         assert b'id="' + range_filter + b'-min-filter" class="range-input range-input-min"' in body
@@ -1345,6 +1367,13 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'avaMin: avaExact ? ""' in script
     assert b'pointsMin: pointsExact ? ""' in script
     assert b'swcMin: swcExact ? ""' in script
+    assert b'renderUnitRows(elements.list, data.items, { extended: state.extended })' in script
+    assert b'params.get("extended") === "1"' in script
+
+    status, _, unit_list_script = request(app, "/static/unit-list.js")
+    assert status == 200
+    assert b'unit-extended-profile-subordinate' in unit_list_script
+    assert b'unit-profile-availability-value' in unit_list_script
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200

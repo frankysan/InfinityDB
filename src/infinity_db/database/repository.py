@@ -2738,6 +2738,7 @@ class Database:
         teamops: bool = False,
         reinforcement: bool = False,
         descending: bool = False,
+        extended: bool = False,
         _unbounded: bool = False,
         _logical_unit_ids: frozenset[int] | None = None,
     ) -> dict[str, Any]:
@@ -2833,6 +2834,8 @@ class Database:
             raise ValueError("offset must be a nonnegative integer at most 9223372036854775807")
         if type(descending) is not bool:
             raise ValueError("descending must be a boolean")
+        if type(extended) is not bool:
+            raise ValueError("extended must be a boolean")
         selected_flags = {
             flag
             for flag, enabled in {
@@ -2995,6 +2998,24 @@ class Database:
             }
             for group in grouped[offset : offset + limit]
         ]
+        if extended and items:
+            profiles_by_unit = self._unit_list_extended_profiles(
+                tuple(item["id"] for item in items)
+            )
+            for item in items:
+                visible_army_ids = set(item["army_ids"])
+                profiles = []
+                for profile in profiles_by_unit.get(item["id"], ()):
+                    availability = [
+                        entry
+                        for entry in profile["availability"]
+                        if entry["army_id"] in visible_army_ids
+                    ]
+                    if not availability:
+                        continue
+                    profiles.append({**profile, "availability": availability})
+                item["profiles"] = profiles
+
         summary = availability_summary(matching_requirements, selected_flags)
         result = {
             "items": items,
@@ -3022,6 +3043,157 @@ class Database:
                     and application_id in application_armies["source_list_ids"]
                 ),
             }
+        return result
+
+    @instance_lru_cache(maxsize=64)
+    def _unit_list_extended_profiles(
+        self, logical_unit_ids: tuple[int, ...]
+    ) -> dict[int, tuple[dict[str, Any], ...]]:
+        """Return compact profile variants for extended Unit-list presentation."""
+
+        if not logical_unit_ids:
+            return {}
+        placeholders = ", ".join("?" for _ in logical_unit_ids)
+        identity_config = self._identity_config()
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT lus.logical_unit_id, ppo.profile_payload_id, "
+                "ppo.army_id AS source_army_id, aas.application_army_id, "
+                "ppo.group_id, ppo.profile_id, ppo.position AS profile_position, "
+                "ppo.ava, pp.name, t.name AS type, "
+                "c.name AS classification, pp.move_1, pp.move_2, pp.cc, pp.bs, "
+                "pp.ph, pp.wip, pp.arm, pp.bts, pp.vitality, pp.silhouette, "
+                "pp.is_structure "
+                "FROM logical_unit_sources AS lus "
+                "JOIN profile_payload_occurrences AS ppo "
+                "ON ppo.unit_id = lus.source_unit_id "
+                "JOIN profile_payloads AS pp ON pp.id = ppo.profile_payload_id "
+                "JOIN profile_groups AS pg ON pg.army_id = ppo.army_id "
+                "AND pg.unit_id = ppo.unit_id AND pg.group_id = ppo.group_id "
+                "LEFT JOIN troop_types AS t ON t.id = pp.type_id "
+                "LEFT JOIN categories AS c ON c.id = pg.category_id "
+                "LEFT JOIN application_army_sources AS aas "
+                "ON aas.source_army_id = ppo.army_id "
+                f"WHERE lus.logical_unit_id IN ({placeholders}) "
+                "ORDER BY lus.logical_unit_id, ppo.group_id, ppo.position, "
+                "ppo.profile_id, ppo.unit_id",
+                logical_unit_ids,
+            ).fetchall()
+            payload_ids = sorted({int(row["profile_payload_id"]) for row in rows})
+            characteristics_by_payload: dict[int, list[str]] = {}
+            if payload_ids:
+                payload_placeholders = ", ".join("?" for _ in payload_ids)
+                characteristic_rows = connection.execute(
+                    "SELECT pc.profile_payload_id, c.name "
+                    "FROM profile_payload_characteristics AS pc "
+                    "JOIN characteristics AS c ON c.id = pc.characteristic_id "
+                    f"WHERE pc.profile_payload_id IN ({payload_placeholders}) "
+                    "ORDER BY pc.profile_payload_id, pc.position",
+                    payload_ids,
+                )
+                for characteristic in characteristic_rows:
+                    characteristics_by_payload.setdefault(
+                        int(characteristic["profile_payload_id"]), []
+                    ).append(str(characteristic["name"]))
+
+        profiles_by_unit: dict[int, OrderedDict[tuple[Any, ...], dict[str, Any]]] = {}
+        for row in rows:
+            logical_unit_id = int(row["logical_unit_id"])
+            payload_id = int(row["profile_payload_id"])
+            characteristics = tuple(characteristics_by_payload.get(payload_id, ()))
+            display_name = strip_reinforcement_prefix(row["name"], identity_config)
+            profile_identity = normalized_profile_identity(row["name"], identity_config)
+            stats = (
+                row["move_1"], row["move_2"], row["cc"], row["bs"], row["ph"],
+                row["wip"], row["arm"], row["bts"], row["vitality"],
+                row["silhouette"], row["is_structure"],
+            )
+            key = (
+                profile_identity, display_name.casefold(), row["type"], row["classification"],
+                *stats, characteristics,
+            )
+            profiles = profiles_by_unit.setdefault(logical_unit_id, OrderedDict())
+            profile = profiles.get(key)
+            order = (
+                int(row["group_id"] or 0),
+                int(row["profile_position"] or 0),
+                int(row["profile_id"] or 0),
+            )
+            if profile is None:
+                profile = {
+                    "name": display_name,
+                    "type": row["type"],
+                    "classification": row["classification"],
+                    "move_1": row["move_1"],
+                    "move_2": row["move_2"],
+                    "cc": row["cc"],
+                    "bs": row["bs"],
+                    "ph": row["ph"],
+                    "wip": row["wip"],
+                    "arm": row["arm"],
+                    "bts": row["bts"],
+                    "vitality": row["vitality"],
+                    "silhouette": row["silhouette"],
+                    "is_structure": bool(row["is_structure"]),
+                    "characteristics": list(characteristics),
+                    "availability": [],
+                    "_order": order,
+                }
+                profiles[key] = profile
+            elif order < profile["_order"]:
+                profile["_order"] = order
+
+            army_id = row["application_army_id"]
+            if army_id is None:
+                continue
+            raw_ava = row["ava"]
+            if raw_ava == 255 or (
+                isinstance(raw_ava, str)
+                and raw_ava.strip().casefold() in {"t", "total"}
+            ):
+                ava_value: int | str | None = "total"
+            elif isinstance(raw_ava, int) and raw_ava >= 0:
+                ava_value = raw_ava
+            else:
+                ava_value = None
+            existing = next(
+                (
+                    entry
+                    for entry in profile["availability"]
+                    if entry["army_id"] == army_id
+                ),
+                None,
+            )
+            if existing is None:
+                profile["availability"].append(
+                    {"army_id": int(army_id), "ava": ava_value}
+                )
+            else:
+                current = existing["ava"]
+                if current == "total":
+                    existing["ava"] = ava_value
+                elif isinstance(current, int) and isinstance(ava_value, int):
+                    existing["ava"] = min(current, ava_value)
+                elif current is None and ava_value is not None:
+                    existing["ava"] = ava_value
+
+        result: dict[int, tuple[dict[str, Any], ...]] = {}
+        for logical_unit_id, profiles in profiles_by_unit.items():
+            ordered = sorted(profiles.values(), key=lambda profile: profile["_order"])
+            cleaned = []
+            for profile in ordered:
+                availability = sorted(
+                    profile["availability"], key=lambda entry: entry["army_id"]
+                )
+                cleaned.append(
+                    {
+                        key: value
+                        for key, value in profile.items()
+                        if key != "_order"
+                    }
+                    | {"availability": availability}
+                )
+            result[logical_unit_id] = tuple(cleaned)
         return result
 
     @instance_lru_cache(maxsize=32)

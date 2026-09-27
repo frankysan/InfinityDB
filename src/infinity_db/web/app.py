@@ -508,6 +508,7 @@ def _unit_query(query: str) -> dict:
             "teamops",
             "reinforcement",
             "order",
+            "extended",
             "cache_bust",
         }:
             raise ValueError(f"Unknown query parameter: {key}")
@@ -566,6 +567,7 @@ def _unit_query(query: str) -> dict:
         "teamops": _flag(params, "teamops"),
         "reinforcement": _flag(params, "reinforcement"),
         "descending": order == "desc",
+        "extended": _flag(params, "extended"),
     }
 
 

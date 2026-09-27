@@ -1416,20 +1416,27 @@ group. This prevents a weapon or other loadout-specific fact from one option fro
 points/SWC constraint that is true only for an unrelated option. Focused repository/API tests
 pin exact/range inclusivity, special AVA/SWC values, and the loadout-coherence rule.
 
-The Unit list will gain an optional extended presentation mode. Its purpose is to expose enough
-profile context to evaluate filtered results without opening every Unit detail page: base
-statistics, troop type, classification, characteristics, and Army-specific AVA. The existing
-Army-availability symbols remain the ownership/availability anchor; per-Army AVA may be placed
-beneath or visually combined with those symbols once the final responsive treatment is chosen.
+The Unit list supports an optional extended presentation through `extended=1`. The normal Unit
+list payload remains compact; extended responses add a `profiles` collection to each result item.
+Each profile variant carries its base statistics, troop type, classification, characteristics,
+and an `availability` collection of application Army IDs with profile-specific AVA. `total` is
+preserved as a first-class AVA display value. Negative ancillary/source AVA sentinels are not
+exposed numerically; attached profiles retain their Army context with no independent AVA value.
 
-Multi-profile Units cannot be represented faithfully by collapsing all profile statistics into
-one extended row. The current presentation direction is to show subordinate profile rows beneath
-the main Unit row, indented or otherwise visually attached to the parent. That layout remains a
-presentation hypothesis until checked against representative multi-profile Units; the durable
-constraint is that profile-specific statistics and classification must remain visibly associated
-with the profile that owns them. Advanced-filter expansion is a natural way to enable extended
-mode, but whether that mode is URL/share state or a local display preference is intentionally
-left open until the UI interaction is finalized.
+The browser keeps the existing Unit row and Army-availability symbols as the primary result anchor,
+then renders the extended profile context directly beneath it. Every profile row repeats only its
+applicable currently visible Army symbols with the AVA value beneath each symbol. Multi-profile
+Units use visually attached subordinate rows rather than flattening independent profile statistics.
+Variants with the same semantic profile identity and statline are merged across Armies while their
+Army/AVA contexts accumulate; materially different statlines remain separate rows even when the
+source uses the same profile name. This preserves profile ownership of statistics, classification,
+characteristics, and AVA while still keeping the list scan-friendly.
+
+Extended mode is explicit, shareable presentation state: the browser checkbox writes `extended=1`
+to the URL and the API accepts the same flag. Opening Advanced Filters may enable extended mode as
+a convenience until the user explicitly changes that checkbox during the page session. The mode
+does not alter filter semantics or result counts, and switching distance units re-renders extended
+MOV values using the same application distance preference as Unit detail.
 
 #### Responsive shared navigation
 

@@ -17,7 +17,7 @@ const elements = {
   swc: byId("swc-filter"), swcMin: byId("swc-min-filter"), swcMax: byId("swc-max-filter"),
   swcMinValue: byId("swc-min-value"), swcMaxValue: byId("swc-max-value"),
   mercs: byId("mercs-filter"), specops: byId("specops-filter"), teamops: byId("teamops-filter"),
-  reinforcement: byId("reinforcement-filter"),
+  reinforcement: byId("reinforcement-filter"), extended: byId("extended-results"),
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
   declaredMembership: byId("declared-membership-context"),
   unitCountShown: byId("unit-count-shown-breakdown"),
@@ -82,6 +82,7 @@ let armiesLoaded = false;
 let requestNumber = 0;
 let controller;
 let searchTimer;
+let extendedPreferenceTouched = false;
 
 function hasActiveFilters() {
   return state.armyId || state.declaredFactionId || state.search
@@ -280,6 +281,7 @@ function readLocation() {
     teamops: elements.teamops.checked,
     reinforcement: elements.reinforcement.checked,
     descending: params.get("order") === "desc",
+    extended: params.get("extended") === "1",
     offset: Number.isSafeInteger(offset) && offset >= 0 ? Math.floor(offset / PAGE_SIZE) * PAGE_SIZE : 0,
     limit: PAGE_SIZE,
   };
@@ -287,7 +289,7 @@ function readLocation() {
 
 function writeLocation(replace = false) {
   const url = new URL(window.location.href);
-  for (const key of ["army_id", "declared_faction_id", "search", "skill_id", "equipment_id", "weapon_id", "troop_type", "classification", "characteristic", "ava", "ava_min", "ava_max", "points", "points_min", "points_max", "swc", "swc_min", "swc_max", "offset", "mercs", "specops", "teamops", "reinforcement", "order"]) url.searchParams.delete(key);
+  for (const key of ["army_id", "declared_faction_id", "search", "skill_id", "equipment_id", "weapon_id", "troop_type", "classification", "characteristic", "ava", "ava_min", "ava_max", "points", "points_min", "points_max", "swc", "swc_min", "swc_max", "offset", "mercs", "specops", "teamops", "reinforcement", "order", "extended"]) url.searchParams.delete(key);
   if (state.armyId) url.searchParams.set("army_id", state.armyId);
   if (state.declaredFactionId) {
     url.searchParams.set("declared_faction_id", state.declaredFactionId);
@@ -310,6 +312,7 @@ function writeLocation(replace = false) {
   if (state.swcMax) url.searchParams.set("swc_max", state.swcMax);
   if (state.offset) url.searchParams.set("offset", String(state.offset));
   if (state.descending) url.searchParams.set("order", "desc");
+  if (state.extended) url.searchParams.set("extended", "1");
   if (url.href !== window.location.href) {
     window.history[replace ? "replaceState" : "pushState"](null, "", url);
   }
@@ -324,6 +327,7 @@ function syncFilters() {
   elements.troopType.value = state.troopType;
   elements.classification.value = state.classification;
   elements.characteristic.value = state.characteristic;
+  elements.extended.checked = state.extended;
   elements.ava.value = state.ava;
   elements.points.value = state.points;
   elements.swc.value = state.swc;
@@ -484,7 +488,7 @@ function renderDeclaredMembershipContext(data) {
 }
 
 function renderUnits(data) {
-  renderUnitRows(elements.list, data.items);
+  renderUnitRows(elements.list, data.items, { extended: state.extended });
   renderAvailabilitySummary(data);
   renderDeclaredMembershipContext(data);
   const hasFilters = Boolean(hasActiveFilters());
@@ -609,6 +613,7 @@ function applyFilters() {
     ),
     mercs: elements.mercs.checked, specops: elements.specops.checked, teamops: elements.teamops.checked,
     reinforcement: elements.reinforcement.checked,
+    extended: elements.extended.checked,
   };
   if (Object.entries(next).every(([key, value]) => state[key] === value)) return;
   state = { ...state, ...next, offset: 0 };
@@ -676,6 +681,15 @@ for (const control of Object.values(numericRangeControls)) {
 for (const filter of [elements.mercs, elements.specops, elements.teamops, elements.reinforcement]) {
   filter.addEventListener("change", applyFilters);
 }
+elements.extended.addEventListener("change", () => {
+  extendedPreferenceTouched = true;
+  applyFilters();
+});
+advancedFilters?.addEventListener("toggle", () => {
+  if (!advancedFilters.open || elements.extended.checked || extendedPreferenceTouched) return;
+  elements.extended.checked = true;
+  applyFilters();
+});
 elements.search.addEventListener("input", () => {
   clearTimeout(searchTimer);
   elements.clear.disabled = !hasActiveFilters();
@@ -695,6 +709,9 @@ function onPopstate() {
 }
 
 window.addEventListener("popstate", onPopstate);
+window.addEventListener("distanceunitchange", () => {
+  if (state.extended) load();
+});
 document.addEventListener("infinity:beforenavigation", () => {
   clearTimeout(searchTimer);
   controller?.abort();

@@ -2836,6 +2836,48 @@ def test_unit_categorical_filters_use_stable_public_slugs(
     assert database.list_units(characteristic="missing")["items"] == []
 
 
+
+def test_extended_unit_list_exposes_compact_profile_context(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    normal = next(item for item in database.list_units(limit=50)["items"] if item["id"] == 1)
+    assert "profiles" not in normal
+
+    item = next(
+        item
+        for item in database.list_units(
+            extended=True, mercs=True, specops=True, teamops=True, reinforcement=True
+        )["items"]
+        if item["id"] == 1
+    )
+    assert item["profiles"] == [
+        {
+            "name": "Trooper",
+            "type": "type",
+            "classification": "category",
+            "move_1": 4,
+            "move_2": 4,
+            "cc": None,
+            "bs": None,
+            "ph": None,
+            "wip": None,
+            "arm": None,
+            "bts": None,
+            "vitality": None,
+            "silhouette": None,
+            "is_structure": False,
+            "characteristics": ["chars"],
+            "availability": [
+                {"army_id": 101, "ava": "total"},
+                {"army_id": 201, "ava": 1},
+            ],
+        }
+    ]
+
 def test_unit_numeric_filters_support_exact_values_and_inclusive_ranges(
     tmp_path: Path, normalized: dict
 ) -> None:
@@ -3029,6 +3071,7 @@ def test_database_with_different_compatibility_revision_requires_rebuild(
         {"swc": "0.5", "swc_min": 0.5},
         {"swc_min": -0.5},
         {"swc_min": 2.0, "swc_max": 1.0},
+        {"extended": 1},
     ],
 )
 def test_repository_rejects_invalid_query_arguments(tmp_path: Path, arguments: dict) -> None:
