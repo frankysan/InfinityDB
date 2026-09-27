@@ -291,8 +291,8 @@ and serves a read-only browser and same-origin HTTP API.
   have source-note variation, and four have a player-facing note only on a
   non-representative reinforcement row. Source faction/Army relationships and
   top-level unit options remain contextual. `spectables` is populated on 30
-  source units but only singleton logical units in this snapshot, so it must be
-  preserved while its canonical/presentation treatment remains unresolved.
+  source units but only singleton logical units in this snapshot; it is preserved
+  as Spec-Ops/Team-Ops list/session configuration rather than immutable Unit detail.
   Schema version 14 materializes representative-backed `name`, `isc`,
   `isc_abbr`, `slug`, `canonical_faction_id`, `main_army_id`, and
   `display_army_id` on the application-owned logical-unit row. The three faction/
@@ -300,7 +300,7 @@ and serves a read-only browser and same-origin HTTP API.
   does not make them canonical game-wide relationships. Every source mapping stays
   explicit; non-representative differing labels are source-attributed aliases;
   every non-empty source note remains source-attributed context; and `spectables`
-  is preserved as exact opaque source context rather than promoted from
+  is preserved as exact list/session configuration rather than promoted from
   singleton-only evidence. Top-level `unit_options` remain separate source-context
   payloads and source-local `option_id` is not canonical option identity. A clean
   rebuild of the 2026-09-18 normalized source materializes 737 canonical rows,
@@ -1231,9 +1231,10 @@ compatibility references remain unambiguous JSON integers.
   selection/dependency, Reinforcement-parentage, and declared-membership presentation.
   0.9.0 adds source-attributed Unit-note and composite Unit-option presentation. The
   maintained inventory now has no confirmed remaining application-data presentation gap.
-- Keep `spectables` and loadout `disabled` / `minis` in an explicit semantic review queue;
-  preserve the source values and do not invent presentation semantics before the domain
-  meaning/scope is resolved.
+- Keep `spectables` out of immutable Unit detail: the 30 current payloads are
+  Spec-Ops/Team-Ops list/session configuration. Preserve loadout `disabled` / `minis`
+  without inferring availability or miniature-count meaning until a reviewed source
+  contract or roster-builder use establishes the player-facing semantics.
 - Milestone 2B shipped in 0.6.3, the rules-enriched catalog-data milestone shipped in
   0.7.0, and 0.8.0 completed the connected game relationships milestone. The next active
   milestone is 0.9.0 application completeness and discoverability.

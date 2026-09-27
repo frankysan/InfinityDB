@@ -25,6 +25,13 @@ New or materially revised entries use the project-domain labels defined in
 - **Web frontend:** Keep Unit selection-relationship diagnostics in Developer mode,
   and omit redundant Army-context lists from source notes that apply across all
   currently shown Armies.
+- **Data processing:** Classify Spec-Ops/Team-Ops option charts as future list/session
+  configuration rather than immutable Unit detail. Preserve standalone loadout
+  `disabled` and `minis` source values without implying an availability or miniature-count
+  rule before their source meaning is established.
+- **Web frontend:** Mark a General-profile attribute when one or more Army profiles
+  differ, with an explanatory tooltip alongside the existing Army-profile difference
+  indicator.
 
 ### Upgrade notes
 

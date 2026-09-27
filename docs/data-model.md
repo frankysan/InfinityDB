@@ -596,8 +596,10 @@ The profile payload also includes the ordered nested content from:
 - `profile_includes`;
 - `profile_peripherals`.
 
-For loadout payloads, the top-level semantic fields are `name`, `points`, `swc`,
-`minis`, and `disabled`. The payload also includes the ordered nested content
+For loadout payloads, the top-level storage/equality fields are `name`, `points`, `swc`,
+`minis`, and `disabled`. This classification preserves exact source differences; it does
+not establish player-facing semantics for the standalone `minis` or `disabled` fields.
+The payload also includes the ordered nested content
 from:
 
 - `option_characteristics`;
@@ -1374,7 +1376,7 @@ Field evidence across the 167 multi-source logical units is:
 | `name` | representative-backed canonical fact | 131 | Canonical display value may come from the representative; alternate source names remain significant context. |
 | `slug` | representative-backed canonical fact | 167 | Every multi-source logical unit has source slug variation. |
 | `notes` | contextual delta | 6 | Genuine player-facing source-specific notes exist and must not be replaced by one representative value. |
-| `spectables` | canonical candidate, unproven across variants | 0 | 30 source units contain data, but all belong to singleton logical units; cross-source invariance is not demonstrated. |
+| `spectables` | list/session configuration | 0 | 30 source units contain option charts, all on singleton logical units; selections are not immutable Unit detail. |
 | `source_defined` | source/provenance | 0 | Distinguishes imported source rows from normalization placeholders. |
 | `source_role` | source/provenance | 49 | Standard versus mercenary-variant representation is occurrence provenance. |
 | `relation_reference_count` | relationship summary | 6 | Derived summary of source relations; underlying relationships are audited separately. |
@@ -1424,11 +1426,12 @@ unit row:
   cost, miniature count, order contribution, and resolved included loadouts.
 
 Thirty source units contain non-null `spectables`, but none belongs to a
-multi-source logical unit and the repository currently does not consume this
-field. It therefore remains a canonical-unit payload candidate with insufficient
-variant evidence and an explicit 0.9 semantic-review/presentation decision rather than data
-that may be discarded. Top-level `unit_options` are source-context payloads: their complete
-current bundle semantics are returned by Unit detail without being promoted to canonical
+multi-source logical unit. Inspection identifies these payloads as Spec-Ops/Team-Ops
+option charts: their selected upgrades belong to a saved list or game session, not to an
+immutable Unit record. InfinityDB therefore preserves the exact source-context payload
+without serving it as Unit detail; a future list/game model owns its structured selection
+semantics. This is distinct from top-level `unit_options`, whose complete bundle semantics
+are returned by Unit detail in their applicable Army context without promotion to canonical
 logical-unit facts.
 
 The audit establishes the following design constraints for the next step:
@@ -1443,8 +1446,8 @@ The audit establishes the following design constraints for the next step:
   replaced by the representative note;
 - source canonical-faction/main/display derivations, `unit_factions`, Army
   occurrences, availability, and top-level unit options remain contextual;
-- `spectables` must be preserved while its canonical/presentation treatment is
-  decided; and
+- `spectables` must be preserved as deferred list/session configuration rather
+  than presented as immutable Unit detail; and
 - `relation_reference_count` is not a canonical fact; the underlying
   relationships, not the summary count, are the semantic object to audit.
 
@@ -1517,12 +1520,12 @@ as an explicitly source-attributed value with its source Unit label and Army
 contexts; the player-facing presentation makes that scope clear rather than
 treating it as a general profile rule.
 
-`spectables` is likewise kept off the canonical row for the first
-implementation. The 30 current payloads are preserved exactly with
-logical/source attribution. Because all 30 occur only on singleton logical
-units, there is no evidence yet for either canonical promotion or cross-source
-deduplication. Treat the payload as opaque until its schema and presentation
-semantics are audited.
+`spectables` is likewise kept off the canonical row. The 30 current payloads are
+preserved exactly with logical/source attribution, but inspection identifies them as
+Spec-Ops/Team-Ops configurable option charts. They are deliberately outside immutable
+Unit detail: a future saved-list/game model must own selected options and transitions.
+The singleton-only evidence remains relevant to storage, but does not change that
+persistence boundary.
 
 Top-level `unit_options` and their nested relationships also remain separate
 source-context payloads. The first logical-unit materialization must not infer
@@ -1644,8 +1647,8 @@ Fireteam chart tables, raw generic relation/dependency tables, legacy profile/lo
 payload tables, normalization-only Army filter joins, or other source-only collections
 outside the traced surface. Canonical Peripheral, include-target, and selection/dependency relationship tables are now
 read instead. `logical_unit_spectables` remains materialized application data outside the
-current serving probes because its player-facing semantics are still in the explicit review
-queue.
+current serving probes because it is deferred list/session configuration, not player-facing
+immutable Unit detail.
 
 The production counts above are evidence for this code/snapshot pair, not a permanent
 table-count contract. The audit fails on an unclassified newly-read table or an
@@ -1768,11 +1771,13 @@ source-note, and composite-option facts are no longer open presentation gaps: th
 application relationships are now consumed by player-facing browser/API surfaces.
 The structured lookup metadata has the application projections described above.
 
-Two preserved constructs remain an explicit semantic review queue instead of being
-forced into a premature 1.0 requirement: **30** opaque `spectables` occurrences and
-the meaning/presentation of loadout `disabled` / `minis` (currently **155** disabled
-canonical loadout payloads and **34** with `minis = 0`). The source information stays
-preserved while their correct player-facing interpretation is reviewed.
+Two preserved source constructs are explicitly outside the 1.0 immutable-reference
+scope. The **30** `spectables` occurrences are Spec-Ops/Team-Ops option charts whose
+selections belong to list/session state. The standalone loadout `disabled` / `minis`
+fields (currently **155** disabled canonical loadout payloads and **34** with
+`minis = 0`) have no established player-reference meaning, so InfinityDB retains them
+without inferring availability or a miniature-count rule. This does not affect the
+separately presented miniature count on complete top-level composite Unit options.
 
 The inventory records storage/presentation gaps; it does not redefine release scope.
 Rules-context work landed in 0.7.x, connected relationship presentation landed in 0.8.x,

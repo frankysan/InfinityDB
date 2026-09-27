@@ -71,7 +71,12 @@ function cell(value) {
   return element;
 }
 
-function attributeStatline(stats, generalStats = null, includeAvailability = false) {
+function attributeStatline(
+  stats,
+  generalStats = null,
+  includeAvailability = false,
+  generalDifferenceLabels = null,
+) {
   const attributes = document.createElement("div");
   attributes.className = "attribute-statline";
   for (const [label, read] of statColumns) {
@@ -85,6 +90,15 @@ function attributeStatline(stats, generalStats = null, includeAvailability = fal
     attributeLabel.textContent = statLabel(label, stats);
     attributeValue.textContent = text(value);
     attribute.append(attributeLabel, attributeValue);
+    if (generalDifferenceLabels?.has(label)) {
+      const indicator = document.createElement("sup");
+      indicator.className = "general-stat-difference-indicator";
+      indicator.textContent = "*";
+      indicator.title = "One or more Army profiles differ from this General profile stat";
+      indicator.setAttribute("aria-label", indicator.title);
+      attribute.title = indicator.title;
+      attribute.append(indicator);
+    }
     if (generalStats && differsFromGeneral(stats, generalStats, label)) {
       attribute.classList.add("stat-different");
       attribute.title = "Differs from the general profile";
@@ -409,6 +423,7 @@ function generalProfiles(profiles, loadouts) {
     const row = {
       profileName,
       stats,
+      sourceProfiles: matchingProfiles,
       orderType: generalProfileOrderType(matchingProfiles, matchingLoadouts),
       type: mostCommon(matchingProfiles, "type"),
       classification: mostCommon(matchingProfiles, "classification"),
@@ -498,6 +513,14 @@ function differsFromGeneral(profile, general, label) {
     return true;
   }
   return profile[statProperties[label]] !== general[statProperties[label]];
+}
+
+function generalStatDifferenceLabels(profile) {
+  return new Set(statColumns
+    .filter(([label]) => profile.sourceProfiles.some((armyProfile) => (
+      differsFromGeneral(armyProfile, profile.stats, label)
+    )))
+    .map(([label]) => label));
 }
 
 function profileItems(items, catalog, fallbackLabel) {
@@ -1083,7 +1106,15 @@ function generalProfileTableRows(profiles) {
     );
     rows.push([
       { value: "Attributes", header: true, className: "data-label profile-attributes-label" },
-      { content: attributeStatline(profile.stats), className: "profile-attributes" },
+      {
+        content: attributeStatline(
+          profile.stats,
+          null,
+          false,
+          generalStatDifferenceLabels(profile),
+        ),
+        className: "profile-attributes",
+      },
     ]);
     for (const [label, property, fallbackLabel] of [
       ["Skills", "skills", "Skill"],

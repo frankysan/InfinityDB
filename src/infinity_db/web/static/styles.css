@@ -2547,6 +2547,14 @@ html[data-distance-unit="in"] .attribute-statline {
   box-shadow: inset 2px 0 var(--color-status-warning-indicator);
 }
 
+.general-stat-difference-indicator {
+  color: var(--color-status-warning-text);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  line-height: 1;
+  margin-left: 2px;
+}
+
 .unit-detail .army-profile .profile-attributes {
   padding-inline: 6px;
 }

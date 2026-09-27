@@ -82,9 +82,6 @@ operations hardening work reserved for 0.10.0.
     tokens, and add validation that prevents newly maintained text from silently
     reintroducing unmarked distance literals where they can be detected reliably.
 
-- [ ] Review opaque `spectables` and loadout `disabled` / `minis` semantics, then either
-  present the in-scope information or document why it is deliberately outside 1.0.
-
 - [ ] Add a rules glossary and profile-notation help layer to unit details.
   - [ ] Explain the existing profile fields and symbols in context: training/order,
     troop type, classification, ISC, Hackable, Peripheral, equipment versus
@@ -93,12 +90,6 @@ operations hardening work reserved for 0.10.0.
   - [ ] Make terminology such as Trooper, Peripheral, Marker, Token, Deployable,
     Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever it
     changes how profile data should be read.
-
-- [ ] Improve General profile versus Army-profile stat-difference signposting.
-  - [ ] Keep the existing indicator on an Army-profile stat when it differs from
-    the General profile.
-  - [ ] Also mark the General profile stat with a small superscript `*` and a
-    descriptive tooltip whenever one or more Army profiles differ from it.
 
 - [ ] Rich unit filtering: troop type, classification, availability, points,
   SWC, weapons, equipment, skills, and characteristics.
@@ -417,6 +408,19 @@ it should not introduce a large new product surface.
 
 These items are intentionally outside the 1.0 completeness gate. They may move earlier
 only when required to fix correctness, reproducibility, or release reliability.
+
+### List and session configuration
+
+- [ ] **Data processing + Web backend + Web frontend:** Model Spec-Ops/Team-Ops
+  `spectables` as structured configurable list/session data, preserving the distinction
+  between a Unit's base reference profile, a player's selected upgrades, and later
+  in-game profile transitions. Do not attach selected choices to the replaceable Army
+  snapshot or present the complete chart as immutable Unit detail.
+
+- [ ] **Data processing + Web backend + Web frontend:** Revisit loadout `disabled` and
+  `minis` only when a reviewed source contract or roster-builder use establishes their
+  player-facing meaning. Until then retain the source values without inferring either
+  current availability or a miniature-count rule.
 
 ### Routing and long-term compatibility
 

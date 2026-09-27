@@ -2083,10 +2083,8 @@ def test_unit_details_frontend_displays_high_ava_as_total(app: Callable) -> None
 def test_unit_details_frontend_places_attributes_in_a_separate_row(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
-    assert (
-        b"function attributeStatline(stats, generalStats = null, includeAvailability = false)"
-        in body
-    )
+    assert b"function attributeStatline(" in body
+    assert b"generalDifferenceLabels = null" in body
     assert b'className: "data-label profile-attributes-label"' in body
     assert b'className: "data-label general-item-label"' in body
     assert b'"data-table--compact profile-details-table"' in body
@@ -2109,6 +2107,22 @@ def test_unit_details_frontend_pluralizes_general_profile_heading(app: Callable)
     assert status == 200
     assert b'displayedGeneralProfiles.length === 1 ? "General profile" : "General profiles"' in body
     assert b"generalProfileTableRows([profile])" in body
+
+
+def test_unit_details_frontend_marks_general_stats_that_vary_by_army(app: Callable) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function generalStatDifferenceLabels(profile)" in body
+    assert b"general-stat-difference-indicator" in body
+    assert b"One or more Army profiles differ from this General profile stat" in body
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".general-stat-difference-indicator",
+        {"font-size": "var(--font-size-xs)", "margin-left": "2px"},
+    )
 
 
 def test_unit_details_frontend_marks_army_profile_section_headings(app: Callable) -> None:
