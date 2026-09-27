@@ -38,8 +38,8 @@ New or materially revised entries use the project-domain labels defined in
   strictly mutually exclusive with its range slider.
 - **Web frontend:** Keep the compact navigation bar on screen while scrolling and collapse its
   global search field to a search button on narrow viewports. Expanding search temporarily uses
-  the available navigation-bar space while the collapsed state preserves room for the InfinityDB
-  wordmark.
+  the available navigation-bar space, while the collapsed state preserves the full InfinityDB
+  wordmark until genuinely narrow phone widths require the logo-only fallback.
 - **Web backend:** Keep compound Unit filters semantically coherent when AVA, Points,
   or SWC is involved: profile/loadout-sensitive criteria must be satisfiable within a
   compatible Army/profile-group/loadout context instead of being assembled from unrelated

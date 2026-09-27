@@ -1869,6 +1869,10 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
         '.global-search[data-open="true"] .global-search-input',
         {"display": "block"},
     )
+    assert (
+        b"@media (max-width: 400px) {\n  .brand>span {\n    display: none;\n  }\n}"
+        in styles
+    )
     assert b'window.addEventListener("pageshow", closeMenu)' in navigation
     assert b'window.addEventListener("pageshow", closeGlobalSearch)' in navigation
 
