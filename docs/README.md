@@ -23,8 +23,9 @@ Release-specific audit records should identify their release in both the filenam
 The current durable audit records are:
 
 - `070-enrichment-presentation-audit.md`;
-- `080-connected-domain-audit.md`; and
-- `080-web-consistency-closeout.md`.
+- `080-connected-domain-audit.md`;
+- `080-web-consistency-closeout.md`; and
+- `081-release-documentation-audit.md`.
 
 ## Local audit workspace
 

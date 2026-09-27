@@ -167,7 +167,10 @@ algorithm or backlog.
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
 Belli graphical assets are not covered by InfinityDB's MIT License. Corvus Belli
-has explicitly permitted InfinityDB to redistribute the processed graphical
-publication used by this non-commercial project; raw Army/wiki/PDF/source-symbol
-archives remain separate local/provenance inputs by project policy. Review the
-repository's [third-party notices](../THIRD_PARTY_NOTICES.md) for the full boundary.
+has explicitly permitted redistribution of the processed graphical publication used by this
+non-commercial project. By project policy, the generated runtime databases are also distributed
+only as part of the non-commercial InfinityDB application/release and remain outside the MIT
+License. The tracked `data/generated/infinity.db` and `rules.db` are therefore release artifacts,
+while raw Army/wiki/PDF/source-symbol archives remain separate local provenance inputs. Review the
+repository's
+[third-party notices](../THIRD_PARTY_NOTICES.md) for the full boundary.

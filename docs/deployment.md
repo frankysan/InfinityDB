@@ -9,10 +9,11 @@ exposed directly on the host. Put Caddy behind an external TLS reverse proxy for
 HTTPS.
 
 Corvus Belli has explicitly permitted InfinityDB to use and redistribute the graphical
-assets and game data used by this non-commercial community project. InfinityDB keeps the
-raw Army/wiki/PDF/source-symbol archives outside the public repository by project policy;
-the processed SVG publication and the two runtime databases are tracked release artifacts
-and remain separate from InfinityDB's MIT-licensed original code. See
+assets used by this non-commercial community project. By project policy, the generated runtime
+databases are likewise distributed only as part of the non-commercial InfinityDB
+application/release and remain outside the MIT License. Raw Army/wiki/PDF/source-symbol archives
+stay outside the public repository; the processed SVG publication and two runtime databases are
+tracked release artifacts. See
 [third-party notices](../THIRD_PARTY_NOTICES.md).
 
 Deployment is intentionally **release-only**. Database and symbol generation happen in a
@@ -80,8 +81,8 @@ The terminal `data/manifests/army-symbol-build.json` remains ignored local build
 is useful for symbol processing/resume but is not part of the deployment contract. The tracked
 `symbol-publication.json` carries only the compact Army archive name/SHA-256 needed by deployment
 plus the published SVG hashes/mappings. Future symbol publication writes that provenance
-automatically. For the 0.8.1 transition of an already-published symbol set, run once in the
-development checkout:
+automatically. Only when preparing a legacy publication created before this provenance
+field was tracked, run the one-time migration in the development checkout:
 
 ```powershell
 python tools/migrate_symbol_publication_provenance.py

@@ -95,7 +95,10 @@ environment as closely as practical, including:
 - SVGO version;
 - Python and symbol-processing dependency versions.
 
-Do not commit or redistribute third-party fonts merely to make a rebuild portable.
+Do not commit or redistribute external system fonts used only by symbol text conversion
+merely to make a rebuild portable. This is separate from InfinityDB's intentionally bundled
+browser-font publication under `src/infinity_db/web/static/fonts/`, whose WOFF2 files and OFL
+notices are tracked and redistributable under their SIL Open Font License terms.
 
 ## State that does not need to move
 

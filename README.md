@@ -327,6 +327,8 @@ profile definitions, asset modes, reports, and exit codes.
   canonical-domain and relationship-surface boundaries for the connected-data milestone.
 - [0.8 web consistency closeout](docs/080-web-consistency-closeout.md) — durable
   release closeout for the focused 0.8 browser-consistency pass.
+- [0.8.1 release documentation audit](docs/081-release-documentation-audit.md) —
+  documentation closeout for the self-contained deployment and UI polish release.
 - [Rules semantics](docs/rules-semantics.md) — audited rules meaning that already has a
   concrete InfinityDB consumer.
 - [Rules research](docs/rules-research.md) — verified source findings retained for possible
@@ -342,8 +344,8 @@ profile definitions, asset modes, reports, and exit codes.
 - [Release process](docs/releasing.md) — mandatory release checklist and project-wide
   documentation audit.
 - [Linux deployment](docs/deployment.md) — production deployment and updates.
-- [Server migration](docs/server-migration.md) — exact transfer and rebuild
-  requirements.
+- [Server migration](docs/server-migration.md) — released-server and development/rebuild
+  migration requirements.
 - [Backlog](docs/TODO.md) — planned and unimplemented work.
 - [Changelog](docs/CHANGELOG.md) — release history and upgrade-relevant changes.
 

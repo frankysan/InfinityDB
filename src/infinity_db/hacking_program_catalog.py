@@ -6,9 +6,11 @@ from copy import deepcopy
 from typing import Any
 
 from infinity_db.database.repository import Database
-from infinity_db.domain_slugs import assign_domain_slugs, route_slug_from_typed_domain_id
+from infinity_db.domain_slugs import (
+    assign_domain_slugs,
+    route_slug_from_typed_domain_id,
+)
 from infinity_db.rules_database import RulesDatabase
-
 
 _HACKING_PROGRAM_DECLARATION_CATEGORIES = {
     "entire order": {"id": "long-skill", "name": "Long Skill"},
