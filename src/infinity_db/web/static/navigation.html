@@ -6,9 +6,12 @@
     <span>Infinity<span class="brand-suffix">DB</span></span>
   </a>
   <div class="sidebar-body">
-    <form class="global-search" action="/search" role="search">
+    <form class="global-search" action="/search" role="search" data-global-search>
       <label class="sr-only" for="global-search-query">Search InfinityDB</label>
-      <div class="search-input">
+      <button class="global-search-toggle" type="button" aria-expanded="false" aria-controls="global-search-query" aria-label="Open search">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="4.8"></circle><path d="m12 12 4.2 4.2"></path></svg>
+      </button>
+      <div class="search-input global-search-input">
         <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="4.8"></circle><path d="m12 12 4.2 4.2"></path></svg>
         <input id="global-search-query" name="q" type="search" placeholder="Search InfinityDB" autocomplete="off">
       </div>

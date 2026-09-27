@@ -1328,6 +1328,8 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
         assert b'data-range-filter="' + range_filter + b'"' in body
         assert b'id="' + range_filter + b'-min-filter" class="range-input range-input-min"' in body
         assert b'id="' + range_filter + b'-max-filter" class="range-input range-input-max"' in body
+        assert b'id="' + range_filter + b'-range-reset" class="numeric-range-reset"' in body
+        assert b'aria-label="Reset ' in body
 
     status, _, script = request(app, "/static/app.js")
     assert status == 200
@@ -1337,6 +1339,21 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b"summary.available" in script
     assert b'populateNumericFilter("ava", unitFilters.numeric?.ava)' in script
     assert b'updateNumericRangeFromInput(control, input)' in script
+    assert b'control.container.classList.toggle("is-active", isActive)' in script
+    assert b'control.reset.disabled = !isActive' in script
+    assert b'resetNumericRangeAndApply(control)' in script
+    assert b'avaMin: avaExact ? ""' in script
+    assert b'pointsMin: pointsExact ? ""' in script
+    assert b'swcMin: swcExact ? ""' in script
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(styles, ".range-slider-selected", {"background": "#cbd4c8"})
+    assert_css_rule(
+        styles,
+        ".double-range-slider.is-active .range-slider-selected",
+        {"background": "var(--color-action-primary)"},
+    )
 
 
 def test_browser_version_check_uses_an_uncached_server_version(app: Callable) -> None:
@@ -1692,7 +1709,11 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
         {"display": "flex"},
     )
     assert_css_rule(styles, ".menu-label", {"display": "none"})
-    assert_css_rule(styles, ".sidebar", {"position": "relative", "z-index": "4"})
+    assert_css_rule(
+        styles,
+        ".sidebar",
+        {"position": "sticky", "z-index": "4", "inset": "auto", "top": "0"},
+    )
     assert b".cookie-consent-dialog" in styles
     assert b"background: var(--color-surface-default);" in styles
 
@@ -1798,6 +1819,9 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     assert b'<p class="nav-label menu-label">Navigation</p>' in body
     assert b'aria-controls="compact-navigation-menu"' in body
     assert b'>Navigation <span aria-hidden="true">' in body
+    assert b'data-global-search' in body
+    assert b'class="global-search-toggle"' in body
+    assert b'aria-controls="global-search-query"' in body
 
     status, _, navigation = request(app, "/static/navigation.js")
     assert status == 200
@@ -1814,6 +1838,14 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     assert b"const menus = [...document.querySelectorAll" in navigation
     assert b'button.addEventListener("click"' in navigation
     assert b'window.matchMedia("(max-width: 920px)")' in navigation
+    assert b'window.matchMedia("(max-width: 700px)")' in navigation
+    assert b'setGlobalSearchOpen(!isOpen, { focus: !isOpen })' in navigation
+    assert b'globalSearchToggle.setAttribute("aria-expanded", String(open))' in navigation
+    assert (
+        b'globalSearchToggle.setAttribute("aria-label", open ? "Close search" : "Open search")'
+        in navigation
+    )
+    assert b'navigationShell.dataset.searchOpen = String(open)' in navigation
     assert b'document.addEventListener("touchstart", closeOnOutsideInteraction' in navigation
     assert b"menu.dataset.open = String(isOpen)" in navigation
     assert b'document.addEventListener("pointerdown"' in navigation
@@ -1831,7 +1863,14 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
         '.menu[data-open="true"] > .compact-menu-panel',
         {"display": "flex"},
     )
+    assert_css_rule(styles, ".sidebar", {"position": "sticky", "inset": "auto", "top": "0"})
+    assert_css_rule(
+        styles,
+        '.global-search[data-open="true"] .global-search-input',
+        {"display": "block"},
+    )
     assert b'window.addEventListener("pageshow", closeMenu)' in navigation
+    assert b'window.addEventListener("pageshow", closeGlobalSearch)' in navigation
 
 
 def test_soft_navigation_preserves_shell_state_and_disposes_page_handlers(

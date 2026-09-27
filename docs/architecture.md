@@ -1401,7 +1401,9 @@ SWC ranges apply only to ordinary nonnegative numeric costs and deliberately exc
 non-cost tokens. The browser presents exact numeric values through snapshot-driven dropdowns and
 ranges through one dual-handle slider per stat. Slider endpoints come from the observed ordinary
 numeric domain, current min/max values remain visible at the handles, and exact/range modes are
-mutually exclusive. The presentation does not alter the public URL/API contract: exact values
+mutually exclusive. A full-domain range is visually muted and semantically inactive; narrowing
+either endpoint switches the selected span to the active filter treatment and enables an explicit
+range reset. The presentation does not alter the public URL/API contract: exact values
 continue to use the single-value parameter and ranges continue to use the `_min`/`_max` pair.
 
 The backend retains the owning semantic context while evaluating contextual numeric filters:
@@ -1428,6 +1430,15 @@ constraint is that profile-specific statistics and classification must remain vi
 with the profile that owns them. Advanced-filter expansion is a natural way to enable extended
 mode, but whether that mode is URL/share state or a local display preference is intentionally
 left open until the UI interaction is finalized.
+
+#### Responsive shared navigation
+
+At compact/tablet widths the shared navigation becomes the page top bar and remains sticky while
+the document scrolls. On narrow viewports, global search collapses to an explicit search button
+and expands on demand, allowing the normal collapsed state to preserve the InfinityDB wordmark as
+long as the available width permits. Extremely narrow layouts may fall back to the logo mark only.
+The expanded search state may temporarily reduce other chrome, but must retain keyboard focus,
+Escape-to-close behavior, and an accessible expanded/collapsed state.
 
 ### `GET /api/units/{unit_id}`
 

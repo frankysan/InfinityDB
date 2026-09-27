@@ -33,6 +33,13 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web frontend:** Make numeric range filters visibly distinguish active constraints from their
+  full-span defaults, add per-stat range reset controls, and keep each exact-value dropdown
+  strictly mutually exclusive with its range slider.
+- **Web frontend:** Keep the compact navigation bar on screen while scrolling and collapse its
+  global search field to a search button on narrow viewports. Expanding search temporarily uses
+  the available navigation-bar space while the collapsed state preserves room for the InfinityDB
+  wordmark.
 - **Web backend:** Keep compound Unit filters semantically coherent when AVA, Points,
   or SWC is involved: profile/loadout-sensitive criteria must be satisfiable within a
   compatible Army/profile-group/loadout context instead of being assembled from unrelated

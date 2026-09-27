@@ -38,18 +38,21 @@ const numericRangeControls = {
   ava: {
     exact: elements.ava, minimum: elements.avaMin, maximum: elements.avaMax,
     minimumValue: elements.avaMinValue, maximumValue: elements.avaMaxValue,
+    reset: byId("ava-range-reset"),
     container: document.querySelector('[data-range-filter="ava"]'),
     minimumState: "avaMin", maximumState: "avaMax", metadata: null,
   },
   points: {
     exact: elements.points, minimum: elements.pointsMin, maximum: elements.pointsMax,
     minimumValue: elements.pointsMinValue, maximumValue: elements.pointsMaxValue,
+    reset: byId("points-range-reset"),
     container: document.querySelector('[data-range-filter="points"]'),
     minimumState: "pointsMin", maximumState: "pointsMax", metadata: null,
   },
   swc: {
     exact: elements.swc, minimum: elements.swcMin, maximum: elements.swcMax,
     minimumValue: elements.swcMinValue, maximumValue: elements.swcMaxValue,
+    reset: byId("swc-range-reset"),
     container: document.querySelector('[data-range-filter="swc"]'),
     minimumState: "swcMin", maximumState: "swcMax", metadata: null,
   },
@@ -143,6 +146,8 @@ function populateNumericFilter(name, metadata) {
     control.maximum.disabled = true;
     control.minimumValue.textContent = "—";
     control.maximumValue.textContent = "—";
+    control.container.classList.remove("is-active");
+    control.reset.disabled = true;
     return;
   }
   control.metadata = {
@@ -173,6 +178,9 @@ function updateNumericRangeVisuals(control) {
   control.container.style.setProperty("--range-end", `${Math.max(0, Math.min(100, end))}%`);
   control.minimumValue.textContent = rangeDisplayValue(minimum);
   control.maximumValue.textContent = rangeDisplayValue(maximum);
+  const isActive = minimum !== control.metadata.min || maximum !== control.metadata.max;
+  control.container.classList.toggle("is-active", isActive);
+  control.reset.disabled = !isActive;
 }
 
 function syncNumericRangeControl(control) {
@@ -242,9 +250,12 @@ function readLocation() {
   const points = params.get("points") || "";
   const pointsMin = params.get("points_min") || "";
   const pointsMax = params.get("points_max") || "";
-  const swc = params.get("swc") || "";
-  const swcMin = params.get("swc_min") || "";
-  const swcMax = params.get("swc_max") || "";
+  const swc = swcExactFilterValue(params.get("swc") || "");
+  const swcMin = decimalFilterValue(params.get("swc_min") || "");
+  const swcMax = decimalFilterValue(params.get("swc_max") || "");
+  const avaExact = avaExactFilterValue(ava);
+  const pointsExact = integerFilterValue(points);
+  const swcExact = swc;
   return {
     armyId: domainFilterIdentifier(armyId),
     declaredFactionId: /^\d+$/.test(declaredFactionId) ? declaredFactionId : "",
@@ -254,15 +265,15 @@ function readLocation() {
     troopType: domainFilterIdentifier(troopType),
     classification: domainFilterIdentifier(classification),
     characteristic: domainFilterIdentifier(characteristic),
-    ava: avaExactFilterValue(ava),
-    avaMin: integerFilterValue(avaMin, { max: 99 }),
-    avaMax: integerFilterValue(avaMax, { max: 99 }),
-    points: integerFilterValue(points),
-    pointsMin: integerFilterValue(pointsMin),
-    pointsMax: integerFilterValue(pointsMax),
-    swc: swcExactFilterValue(swc),
-    swcMin: decimalFilterValue(swcMin),
-    swcMax: decimalFilterValue(swcMax),
+    ava: avaExact,
+    avaMin: avaExact ? "" : integerFilterValue(avaMin, { max: 99 }),
+    avaMax: avaExact ? "" : integerFilterValue(avaMax, { max: 99 }),
+    points: pointsExact,
+    pointsMin: pointsExact ? "" : integerFilterValue(pointsMin),
+    pointsMax: pointsExact ? "" : integerFilterValue(pointsMax),
+    swc: swcExact,
+    swcMin: swcExact ? "" : swcMin,
+    swcMax: swcExact ? "" : swcMax,
     search: (params.get("search") || "").trim().slice(0, 200),
     mercs: elements.mercs.checked,
     specops: elements.specops.checked,
@@ -635,7 +646,12 @@ function toggleSortOrder() {
 }
 
 function applyNumericExactFilter(control) {
-  if (control.exact.value) resetNumericRangeControl(control);
+  resetNumericRangeControl(control);
+  applyFilters();
+}
+
+function resetNumericRangeAndApply(control) {
+  resetNumericRangeControl(control);
   applyFilters();
 }
 
@@ -649,6 +665,7 @@ for (const filter of [
 }
 for (const control of Object.values(numericRangeControls)) {
   control.exact.addEventListener("change", () => applyNumericExactFilter(control));
+  control.reset.addEventListener("click", () => resetNumericRangeAndApply(control));
   for (const input of [control.minimum, control.maximum]) {
     input.addEventListener("input", () => updateNumericRangeFromInput(control, input));
     input.addEventListener("change", applyFilters);

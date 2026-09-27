@@ -1,6 +1,57 @@
 /** Shared behavior for menus: expanded sidebar sections and compact top-bar popovers. */
 const menus = [...document.querySelectorAll("[data-menu]")];
 const compactMenuMedia = window.matchMedia("(max-width: 920px)");
+const compactSearchMedia = window.matchMedia("(max-width: 700px)");
+const globalSearch = document.querySelector("[data-global-search]");
+const globalSearchToggle = globalSearch?.querySelector(".global-search-toggle");
+const globalSearchInput = globalSearch?.querySelector("#global-search-query");
+const navigationShell = globalSearch?.closest(".sidebar");
+
+function setGlobalSearchOpen(isOpen, { focus = false } = {}) {
+  if (!globalSearch || !globalSearchToggle || !globalSearchInput) return;
+  const open = Boolean(isOpen && compactSearchMedia.matches);
+  globalSearch.dataset.open = String(open);
+  if (navigationShell) navigationShell.dataset.searchOpen = String(open);
+  globalSearchToggle.setAttribute("aria-expanded", String(open));
+  globalSearchToggle.setAttribute("aria-label", open ? "Close search" : "Open search");
+  if (open && focus) globalSearchInput.focus();
+}
+
+function closeGlobalSearch() {
+  setGlobalSearchOpen(false);
+}
+
+function syncGlobalSearchLayout() {
+  closeGlobalSearch();
+}
+
+compactSearchMedia.addEventListener("change", syncGlobalSearchLayout);
+setGlobalSearchOpen(false);
+
+if (globalSearch && globalSearchToggle && globalSearchInput) {
+  globalSearchToggle.addEventListener("click", () => {
+    const isOpen = globalSearch.dataset.open === "true";
+    setGlobalSearchOpen(!isOpen, { focus: !isOpen });
+  });
+
+  document.addEventListener("pointerdown", (event) => {
+    if (compactSearchMedia.matches
+      && globalSearch.dataset.open === "true"
+      && !globalSearch.contains(event.target)) {
+      closeGlobalSearch();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && globalSearch.dataset.open === "true") {
+      closeGlobalSearch();
+      globalSearchToggle.focus();
+    }
+  });
+
+  window.addEventListener("pagehide", closeGlobalSearch);
+  window.addEventListener("pageshow", closeGlobalSearch);
+}
 
 function setMenuOpen(menu, isOpen) {
   menu.dataset.open = String(isOpen);
