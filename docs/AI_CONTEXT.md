@@ -109,10 +109,10 @@ and serves a read-only browser and same-origin HTTP API.
   external processor versions remain environment-sensitive; see
   `docs/server-migration.md`.
 - Local tests separate hermetic and full-asset coverage explicitly.
-  `run_checks.py --assets off|auto|required` validates the complete generated
-  publication inventory (`symbol-inventory.json`, path + SHA-256 for every
+  `run_checks.py --assets off|auto|required` validates the complete tracked
+  `data/manifests/symbol-publication.json` contract (path + SHA-256 for every
   published SVG) before enabling `full_assets`; it separately reports the
-  browser-referenced subset derived from current mappings/endpoints; the current
+  browser-referenced subset defined by the manifest mappings; the current
   processed publication is fully browser-addressable at 806/806 SVGs. Direct
   pytest is hermetic by default. `auto` may fall back only when the asset tree
   is entirely absent, never when it is partial/corrupt.
@@ -422,8 +422,9 @@ including public Git repository/build-package inclusion and technical SVG
 optimization. The processed publication may therefore be tracked and distributed,
 but it remains Corvus Belli property and outside the MIT License. Raw Army, wiki,
 PDF, and source-symbol archives remain outside the public repository by project
-policy. The processed SVG trees and publication inventory are now tracked
-release content; local corrected image overrides remain ignored build inputs.
+policy. The processed SVG trees and canonical
+`data/manifests/symbol-publication.json` are tracked release content; local corrected
+image overrides remain ignored build inputs.
 
 Army-symbol acquisition is now source-semantic and URL/reference based.
 `tools/download_army_symbols.py` discovers every
@@ -490,15 +491,16 @@ compressor: balanced profile, resvg validation, p2-first/p3-rescue precision,
 pixel-difference threshold 8. The complete compressed tree and three compression
 reports are validated before atomic promotion. Final publication then consumes the
 same pinned Army snapshot, version-7 compressed tree, and authoritative build
-manifest; it generates the application asset tree plus `army-symbols.js` and
-`unit-symbol-map.js`, writes a complete source/canonical-to-published mapping, and
-promotes passed state to version 8. Loaders accept versions 2 through 8 as valid
+manifest; it generates the application asset tree and the canonical
+`data/manifests/symbol-publication.json`, writes the complete
+source/canonical-to-published mapping, and promotes passed state to version 8.
+Loaders accept versions 2 through 8 as valid
 historical/intermediate state, and earlier version-5 state without size metrics
 remains compatible. Promotion helpers are intentionally forward-only: preflight,
 deduplication, compression, and publication accept only their immediate source
 version, while failed-stage retry is explicit rather than implemented by silently
 demoting later passed state. Version 8 is terminal published state. The downloader
-still does not generate browser mappings; only the publisher does.
+does not assign application symbol paths; only the publisher does.
 
 Raw source resolution now follows this implemented order:
 
@@ -520,16 +522,16 @@ are reported.
 
 Symbol publication consumes the same pinned Army/SYMBOLS identities and the
 verified version-7 compressed work tree rather than selecting newer snapshots
-independently. The publisher alone assigns final application paths and generated
-`army-symbols.js` / `unit-symbol-map.js` mappings because only publication knows
-the final canonical asset after deduplication/conversion/compression. Successful
-publication is version 8 and binds the complete source-to-published mapping plus
-the generated browser maps into build state. Unit source profile slot
-`profileGroups[0].profiles[0]` retains the stable unsuffixed unit path used by
-`unit-symbol-map.js`; distinct later profile slots use deterministic one-based
-`--<group>-<profile>` suffixes. Distinct non-owner-army artwork is namespaced
+independently. The publisher alone assigns final application paths because only
+publication knows the final canonical asset after deduplication/conversion/compression.
+Successful publication is version 8 and SHA-binds
+`data/manifests/symbol-publication.json`, whose Army, Unit/profile, and static mappings
+are consumed by the backend `SymbolCatalog`. Unit source profile slot
+`profileGroups[0].profiles[0]` retains the stable unsuffixed unit path; distinct later
+profile slots use deterministic one-based `--<group>-<profile>` suffixes. Distinct
+non-owner-army artwork is namespaced
 with `--army-<army-id>` before any profile suffix, while exact duplicates continue
-to share one canonical published file. The same generated map now includes profile-logo
+to share one canonical published file. The publication manifest includes profile-logo
 overrides whenever an authoritative source profile resolves to artwork other than its
 Unit's primary browser symbol. Runtime Unit detail payloads preserve occurrence-level
 profile-logo URLs and use those overrides only for presentation; logo variation remains
@@ -828,16 +830,17 @@ compatibility references remain unambiguous JSON integers.
   identity discovery is retained only behind the builder for older normalized
   inputs.
 - 2026-09-19: Local production deployment with symbols is fail-closed. `deploy.sh`
-  requires a terminal v8 `army-symbol-build.json` whose SHA-bound inventory and
-  browser maps match the publication, verifies the complete published set, then
+  requires a terminal v8 `army-symbol-build.json` whose SHA-bound
+  `symbol-publication.json` matches the tracked publication, verifies the complete
+  published set, then
   validates the exact built image in `--published-assets` mode before Compose
   activation. The 0.7.0 tracked-asset migration later replaced the old
   asset-free/redistributable-image inverse contract with `--packaged-assets`
   verification for distributable container smoke tests.
 - 2026-09-19: Deployment artifact transfer is commit-bound. The 0.7.0 tracked-asset
   migration narrowed `tools/send_deployment_artifacts.py` to the ignored runtime
-  databases and terminal symbol manifest; the processed SVG publication, inventory,
-  and browser maps now travel through Git. The helper still uses one staged SSH
+  databases and terminal symbol manifest; the processed SVG publication and canonical
+  publication manifest travel through Git. The helper still uses one staged SSH
   session and refuses a remote checkout whose commit or tracked state differs from
   the clean local checkout.
 - 2026-09-20: Production deployment has two explicit data modes.

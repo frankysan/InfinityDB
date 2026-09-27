@@ -12,7 +12,8 @@ data/raw/
 data/generated/*
 !data/generated/infinity.db
 !data/generated/rules.db
-data/manifests/
+data/manifests/*
+!data/manifests/symbol-publication.json
 data/work/
 data/reports/
 data/logs/

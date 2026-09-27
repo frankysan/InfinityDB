@@ -885,13 +885,9 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
     assert preserved_manifest["processing"]["compression"] == compression
 
     publication_report = tmp_path / "publication-map.json"
-    inventory = tmp_path / "symbol-inventory.json"
-    army_map = tmp_path / "army-symbols.js"
-    unit_map = tmp_path / "unit-symbol-map.js"
+    publication_manifest = tmp_path / "symbol-publication.json"
     publication_report.write_text("{}\n", encoding="utf-8")
-    inventory.write_text("{}\n", encoding="utf-8")
-    army_map.write_text("map\n", encoding="utf-8")
-    unit_map.write_text("map\n", encoding="utf-8")
+    publication_manifest.write_text("{}\n", encoding="utf-8")
     published = add_publication(
         preserved_manifest,
         summary={
@@ -904,9 +900,7 @@ def test_duplicate_detection_persists_canonical_mapping(tmp_path: Path, monkeypa
             "publishedBytes": compression["summary"]["outputBytes"],
         },
         mapping_report=publication_report,
-        inventory=inventory,
-        army_map=army_map,
-        unit_map=unit_map,
+        publication_manifest=publication_manifest,
         project_root=tmp_path,
     )
     write_symbol_manifest(published, manifest_path)

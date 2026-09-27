@@ -44,16 +44,15 @@ data/generated/rules.db
 data/manifests/army-symbol-build.json
 ```
 
-The processed Corvus Belli SVG publication and `symbol-inventory.json` are tracked
-release content, so checking out the same Git revision supplies the exact published
-asset bytes; do not copy those tracked files separately during a normal migration.
+The processed Corvus Belli SVG publication and
+`data/manifests/symbol-publication.json` are tracked release content, so checking out
+the same Git revision supplies the exact published asset bytes and their canonical
+hash/mapping contract; do not copy those tracked files separately during a normal migration.
 The local terminal `army-symbol-build.json` is still required for a guarded production
 `--published-assets` deployment because it binds that tracked publication to its Army
-snapshot and processing state. The tracked `army-symbols.js` and `unit-symbol-map.js`
-files come from the same Git revision and must correspond to the publication. If an
-old installation has uncommitted modifications to any tracked publication/mapping file,
-preserve them separately for investigation rather than treating them as the canonical
-release state.
+snapshot and processing state. If an old installation has uncommitted modifications
+to any tracked publication SVG or `symbol-publication.json`, preserve them separately
+for investigation rather than treating them as the canonical release state.
 
 For the supported Compose deployment, also preserve local deployment state when
 applicable:
@@ -202,10 +201,10 @@ complete release-matched assets rather than allowing a hermetic fallback:
 python tools/run_checks.py --profile all --assets required --report
 ```
 
-A complete asset check validates the full tracked `symbol-inventory.json` publication,
-including published variants that the browser does not yet reference. Missing, extra,
-or hash-mismatched tracked symbols fail rather than silently downgrading to asset-free
-testing.
+A complete asset check validates the full tracked publication against
+`data/manifests/symbol-publication.json`, including published variants that the browser
+does not yet reference. Missing, extra, or hash-mismatched tracked symbols fail rather
+than silently downgrading to asset-free testing.
 
 For an exact transferred-runtime migration, deploy with
 `sh ./scripts/deploy-transferred.sh` after the validation above. For rebuild-mode

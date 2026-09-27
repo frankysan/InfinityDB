@@ -212,12 +212,6 @@ def test_build_publication_maps_many_references_to_canonical_assets(tmp_path: Pa
     assert (staging / "armies" / "panoceania" / "101-panoceania.svg").is_file()
     assert (staging / "characteristics" / "cube-2.svg").is_file()
 
-    army_map = (staging / "army-symbols.js").read_text(encoding="utf-8")
-    assert '[101, "panoceania/101-panoceania.svg"]' in army_map
-    assert '[102, "panoceania/101-panoceania.svg"]' in army_map
-    unit_map = (staging / "unit-symbol-map.js").read_text(encoding="utf-8")
-    assert '["mech-engineer", "panoceania/1-mech-engineer"]' in unit_map
-    assert '["chung-hee-jeong", "panoceania/1-mech-engineer"]' in unit_map
 
 def test_publication_preserves_distinct_unit_profile_symbols(tmp_path: Path) -> None:
     snapshot = tmp_path / "army.zip"
@@ -287,21 +281,10 @@ def test_publication_preserves_distinct_unit_profile_symbols(tmp_path: Path) -> 
         "browserReferencedAssetCount": 5,
         "unreferencedPublishedAssetCount": 0,
     }
-    inventory = json.loads(
-        (staging / "symbol-inventory.json").read_text(encoding="utf-8")
-    )
-    assert inventory["summary"]["publishedAssetCount"] == 5
-    assert inventory["summary"]["browserReferencedAssetCount"] == 5
-    assert inventory["summary"]["unreferencedPublishedAssetCount"] == 0
+    assert not (staging / "symbol-inventory.json").exists()
     assert (staging / primary_path).is_file()
     assert (staging / alternate_path).is_file()
 
-    unit_map = (staging / "unit-symbol-map.js").read_text(encoding="utf-8")
-    assert '["mech-engineer", "panoceania/1-mech-engineer"]' in unit_map
-    assert (
-        '["https://example.invalid/u1-alternate.svg", '
-        '"panoceania/1-mech-engineer--2-1"]' in unit_map
-    )
     assert report["unitProfileLogoToPublishedPath"] == {
         alternate_url: alternate_path,
     }
@@ -515,11 +498,13 @@ def test_publication_records_changes_and_backs_up_removed_symbols(
     characteristic.write_bytes(SVG)
 
     monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
-    monkeypatch.setattr(
-        reorganize_symbols,
-        "add_publication",
-        lambda document, **_kwargs: {**document, "formatVersion": 8},
-    )
+    publication_kwargs: dict[str, object] = {}
+
+    def capture_publication(document: dict[str, object], **kwargs: object) -> dict[str, object]:
+        publication_kwargs.update(kwargs)
+        return {**document, "formatVersion": 8}
+
+    monkeypatch.setattr(reorganize_symbols, "add_publication", capture_publication)
     monkeypatch.setattr(
         reorganize_symbols,
         "write_symbol_manifest",
@@ -557,10 +542,17 @@ def test_publication_records_changes_and_backs_up_removed_symbols(
     ]
 
     report = json.loads(result.mapping_report.read_text(encoding="utf-8"))
-    inventory = json.loads(result.inventory.read_text(encoding="utf-8"))
-    assert inventory["summary"]["publishedAssetCount"] == result.summary["publishedAssetCount"]
-    assert inventory["summary"]["publishedBytes"] == result.summary["publishedBytes"]
-    assert inventory["publishedSha256ByPath"] == report["publishedSha256ByPath"]
+    publication_manifest = tmp_path / "symbol-publication.json"
+    manifest_document = json.loads(publication_manifest.read_text(encoding="utf-8"))
+    assert manifest_document["publishedSha256ByPath"] == report["publishedSha256ByPath"]
+    assert "previousPublicationComparison" not in manifest_document
+    assert publication_kwargs["publication_manifest"] == publication_manifest
+
+    assert result.publication_manifest == publication_manifest
+    assert manifest_document["summary"]["publishedAssetCount"] == result.summary[
+        "publishedAssetCount"
+    ]
+    assert manifest_document["summary"]["publishedBytes"] == result.summary["publishedBytes"]
     comparison = report["previousPublicationComparison"]
     assert comparison["summary"] == result.changes
     assert [row["path"] for row in comparison["added"]] == [
@@ -642,9 +634,8 @@ def test_publication_failure_restores_previous_generated_tree(
     old_units = static / "units" / "old.svg"
     old_units.parent.mkdir(parents=True)
     old_units.write_bytes(b"old unit")
-    (static / "symbol-inventory.json").write_text("old inventory\n", encoding="utf-8")
-    (static / "army-symbols.js").write_text("old army map\n", encoding="utf-8")
-    (static / "unit-symbol-map.js").write_text("old unit map\n", encoding="utf-8")
+    publication_manifest = tmp_path / "symbol-publication.json"
+    publication_manifest.write_text("old publication manifest\n", encoding="utf-8")
 
     report = tmp_path / "reports" / "SYMBOLS test--aaaaaaaaaaaa" / "publication-map.json"
     report.parent.mkdir(parents=True, exist_ok=True)
@@ -671,9 +662,7 @@ def test_publication_failure_restores_previous_generated_tree(
     assert old_characteristics.read_bytes() == b"old characteristic"
     assert old_orders.read_bytes() == b"old order"
     assert old_units.read_bytes() == b"old unit"
-    assert (static / "symbol-inventory.json").read_text(encoding="utf-8") == "old inventory\n"
-    assert (static / "army-symbols.js").read_text(encoding="utf-8") == "old army map\n"
-    assert (static / "unit-symbol-map.js").read_text(encoding="utf-8") == "old unit map\n"
+    assert publication_manifest.read_text(encoding="utf-8") == "old publication manifest\n"
     assert report.read_text(encoding="utf-8") == "old report\n"
 
 
@@ -697,8 +686,6 @@ def test_publication_backup_failure_restores_already_moved_outputs(
         path = static / category / "old.svg"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(f"old {category}".encode())
-    (static / "army-symbols.js").write_text("old army map\n", encoding="utf-8")
-    (static / "unit-symbol-map.js").write_text("old unit map\n", encoding="utf-8")
 
     monkeypatch.setattr(reorganize_symbols, "load_symbol_manifest", lambda _path: manifest)
     original_replace = Path.replace
@@ -725,5 +712,3 @@ def test_publication_backup_failure_restores_already_moved_outputs(
     assert (static / "characteristics" / "old.svg").read_bytes() == b"old characteristics"
     assert (static / "orders" / "old.svg").read_bytes() == b"old orders"
     assert (static / "units" / "old.svg").read_bytes() == b"old units"
-    assert (static / "army-symbols.js").read_text(encoding="utf-8") == "old army map\n"
-    assert (static / "unit-symbol-map.js").read_text(encoding="utf-8") == "old unit map\n"

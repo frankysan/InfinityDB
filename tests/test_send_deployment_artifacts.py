@@ -29,7 +29,7 @@ def test_validate_paths_requires_complete_deployment_scope(tmp_path: Path) -> No
 
 
 def test_transfer_scope_excludes_tracked_symbol_publication() -> None:
-    assert PurePosixPath("src/infinity_db/web/static/symbol-inventory.json") not in {
+    assert PurePosixPath("data/manifests/symbol-publication.json") not in {
         PurePosixPath(path) for path in DEPLOYMENT_FILES
     }
     assert all(not path.startswith("src/infinity_db/web/static/") for path in DEPLOYMENT_FILES)

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +27,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = PROJECT_ROOT / "data" / "manifests" / "army-symbol-build.json"
 DEFAULT_STATIC_ROOT = PROJECT_ROOT / "src" / "infinity_db" / "web" / "static"
 DEFAULT_DATABASE = PROJECT_ROOT / "data" / "generated" / "infinity.db"
+DEFAULT_PUBLICATION_MANIFEST = PROJECT_ROOT / "data" / "manifests" / "symbol-publication.json"
 
 
 class DeploymentAssetError(ValueError):
@@ -75,26 +75,6 @@ def _require_bound_artifact(
         )
 
 
-def _inventory_summary(path: Path) -> dict[str, int]:
-    try:
-        document = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise DeploymentAssetError(
-            f"Could not read published symbol inventory {path}: {exc}"
-        ) from exc
-    summary = document.get("summary") if isinstance(document, dict) else None
-    if not isinstance(summary, dict):
-        raise DeploymentAssetError("Published symbol inventory has no summary")
-    result: dict[str, int] = {}
-    for field in ("publishedAssetCount", "publishedBytes"):
-        value = summary.get(field)
-        if type(value) is not int or value < 0:
-            raise DeploymentAssetError(
-                f"Published symbol inventory summary.{field} must be a non-negative integer"
-            )
-        result[field] = value
-    return result
-
 
 def verify_deployment_assets(
     manifest_path: Path = DEFAULT_MANIFEST,
@@ -102,6 +82,7 @@ def verify_deployment_assets(
     *,
     project_root: Path = PROJECT_ROOT,
     database_path: Path | None = None,
+    publication_manifest_path: Path | None = None,
 ) -> AssetSetValidation:
     """Validate local symbols against the terminal v8 build manifest and publication inventory."""
 
@@ -123,17 +104,20 @@ def verify_deployment_assets(
     if not isinstance(publication, dict) or publication.get("status") != "passed":
         raise DeploymentAssetError("Deployment requires a passed symbol publication stage")
 
-    inventory_path = static_root / "symbol-inventory.json"
-    army_map_path = static_root / "army-symbols.js"
-    unit_map_path = static_root / "unit-symbol-map.js"
-    for field, path in (
-        ("inventory", inventory_path),
-        ("armyMap", army_map_path),
-        ("unitMap", unit_map_path),
-    ):
-        _require_bound_artifact(publication, field, path, project_root=project_root)
+    publication_manifest_path = (
+        publication_manifest_path
+        or project_root / "data" / "manifests" / "symbol-publication.json"
+    )
+    _require_bound_artifact(
+        publication,
+        "publicationManifest",
+        publication_manifest_path,
+        project_root=project_root,
+    )
 
-    validation = validate_asset_set(static_root)
+    validation = validate_asset_set(
+        static_root, publication_manifest=publication_manifest_path
+    )
     if not validation.complete:
         details: list[str] = [validation.state]
         if validation.missing:
@@ -149,16 +133,6 @@ def verify_deployment_assets(
             + ", ".join(details)
             + ")"
         )
-
-    inventory_summary = _inventory_summary(inventory_path)
-    publication_summary = publication.get("summary")
-    if not isinstance(publication_summary, dict):
-        raise DeploymentAssetError("Published symbol manifest has no publication summary")
-    for field in ("publishedAssetCount", "publishedBytes"):
-        if publication_summary.get(field) != inventory_summary[field]:
-            raise DeploymentAssetError(
-                f"Published symbol manifest summary.{field} does not match symbol-inventory.json"
-            )
 
     validate_database_symbol_provenance(
         database_path or project_root / "data" / "generated" / "infinity.db", manifest

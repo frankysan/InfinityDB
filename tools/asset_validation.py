@@ -11,24 +11,8 @@ from pathlib import Path, PurePosixPath
 
 ASSET_MODES = ("off", "auto", "required")
 PUBLISHED_ASSET_CATEGORIES = ("armies", "characteristics", "orders", "units")
-PUBLICATION_INVENTORY = "symbol-inventory.json"
-PUBLICATION_INVENTORY_FORMAT = "InfinityDB published symbol inventory"
-PUBLICATION_INVENTORY_VERSION = 1
-ORDER_SYMBOL_NAMES = (
-    "regular",
-    "irregular",
-    "impetuous",
-    "tactical",
-    "lieutenant",
-)
-CHARACTERISTIC_SYMBOL_NAMES = (
-    "peripheral",
-    "hackable",
-    "cube",
-    "cube-2",
-)
-_ARMY_MAPPING = re.compile(r'\[\s*\d+\s*,\s*"([^"]+\.svg)"\s*\]')
-_UNIT_MAPPING = re.compile(r'\[\s*"[^"]+"\s*,\s*"([^"]+)"\s*\]')
+PUBLICATION_MANIFEST_FORMAT = "InfinityDB symbol publication mapping"
+PUBLICATION_MANIFEST_VERSION = 2
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 
 
@@ -80,121 +64,103 @@ class AssetModeSelection:
         return "auto -> off (no third-party graphical asset set detected)"
 
 
-def _safe_relative_svg(value: str, *, suffix: str = "") -> PurePosixPath:
-    path = PurePosixPath(f"{value}{suffix}")
-    if path.is_absolute() or ".." in path.parts or path.suffix != ".svg":
-        raise AssetValidationError(f"Invalid published symbol path in mapping: {value!r}")
-    return path
+def browser_asset_paths(publication_manifest: Path) -> tuple[PurePosixPath, ...]:
+    """Return every SVG referenced by the canonical browser/API symbol contract."""
+
+    _inventory, _summary, paths = _publication_manifest(publication_manifest)
+    return paths
 
 
-def browser_asset_paths(static_root: Path) -> tuple[PurePosixPath, ...]:
-    """Return every SVG currently referenced by browser mappings/endpoints."""
-
-    army_map = static_root / "army-symbols.js"
-    unit_map = static_root / "unit-symbol-map.js"
-    try:
-        army_source = army_map.read_text(encoding="utf-8")
-        unit_source = unit_map.read_text(encoding="utf-8")
-    except OSError as exc:
-        raise AssetValidationError(f"Could not read published symbol mapping: {exc}") from exc
-
-    army_values = _ARMY_MAPPING.findall(army_source)
-    unit_values = _UNIT_MAPPING.findall(unit_source)
-    if not army_values:
-        raise AssetValidationError(f"No army symbol mappings found in {army_map}")
-    if not unit_values:
-        raise AssetValidationError(f"No unit symbol mappings found in {unit_map}")
-
-    expected = {
-        PurePosixPath("armies") / _safe_relative_svg(value)
-        for value in army_values
-    }
-    expected.update(
-        PurePosixPath("units") / _safe_relative_svg(value, suffix=".svg")
-        for value in unit_values
-    )
-    expected.update(PurePosixPath("orders") / f"{name}.svg" for name in ORDER_SYMBOL_NAMES)
-    expected.update(
-        PurePosixPath("characteristics") / f"{name}.svg"
-        for name in CHARACTERISTIC_SYMBOL_NAMES
-    )
-    return tuple(sorted(expected, key=str))
-
-
-# Backward-compatible name for callers that previously treated this subset as the full set.
-def expected_asset_paths(static_root: Path) -> tuple[PurePosixPath, ...]:
-    return browser_asset_paths(static_root)
-
-
-def _publication_inventory(static_root: Path) -> tuple[dict[str, str], dict[str, int]]:
-    path = static_root / PUBLICATION_INVENTORY
+def _publication_manifest(
+    path: Path,
+) -> tuple[dict[str, str], dict[str, int], tuple[PurePosixPath, ...]]:
     try:
         document = json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError as exc:
-        raise AssetValidationError(f"Published symbol inventory is missing: {path}") from exc
+        raise AssetValidationError(f"Published symbol manifest is missing: {path}") from exc
     except (OSError, json.JSONDecodeError) as exc:
         raise AssetValidationError(
-            f"Could not read published symbol inventory {path}: {exc}"
+            f"Could not read published symbol manifest {path}: {exc}"
         ) from exc
 
     if not isinstance(document, dict):
-        raise AssetValidationError("Published symbol inventory must be a JSON object")
-    if document.get("format") != PUBLICATION_INVENTORY_FORMAT:
-        raise AssetValidationError("Published symbol inventory has an unexpected format")
-    if document.get("formatVersion") != PUBLICATION_INVENTORY_VERSION:
-        raise AssetValidationError("Published symbol inventory has an unsupported formatVersion")
+        raise AssetValidationError("Published symbol manifest must be a JSON object")
+    if document.get("format") != PUBLICATION_MANIFEST_FORMAT:
+        raise AssetValidationError("Published symbol manifest has an unexpected format")
+    if document.get("formatVersion") != PUBLICATION_MANIFEST_VERSION:
+        raise AssetValidationError("Published symbol manifest has an unsupported formatVersion")
+
     raw = document.get("publishedSha256ByPath")
+    usage = document.get("browserUsageSummary")
     if not isinstance(raw, dict) or not raw:
-        raise AssetValidationError("Published symbol inventory must contain publishedSha256ByPath")
-    summary = document.get("summary")
-    summary_fields = {
-        "publishedAssetCount",
-        "browserReferencedAssetCount",
-        "unreferencedPublishedAssetCount",
-        "publishedBytes",
-    }
-    if not isinstance(summary, dict) or set(summary) != summary_fields:
-        raise AssetValidationError("Published symbol inventory has an invalid summary")
-    for field in summary_fields:
-        if type(summary[field]) is not int or summary[field] < 0:
-            raise AssetValidationError(
-                f"Published symbol inventory summary.{field} must be a non-negative integer"
-            )
+        raise AssetValidationError("Published symbol manifest must contain publishedSha256ByPath")
+    if not isinstance(usage, dict):
+        raise AssetValidationError("Published symbol manifest must contain browserUsageSummary")
 
     inventory: dict[str, str] = {}
-    categories = set(PUBLISHED_ASSET_CATEGORIES)
     for relative, digest in raw.items():
         if not isinstance(relative, str) or not isinstance(digest, str):
-            raise AssetValidationError(
-                "Published symbol inventory paths and hashes must be strings"
-            )
+            raise AssetValidationError("Published symbol manifest paths and hashes must be strings")
         path_value = PurePosixPath(relative)
         if (
             path_value.is_absolute()
             or ".." in path_value.parts
             or len(path_value.parts) < 2
-            or path_value.parts[0] not in categories
+            or path_value.parts[0] not in PUBLISHED_ASSET_CATEGORIES
             or path_value.suffix != ".svg"
         ):
-            raise AssetValidationError(f"Invalid published symbol inventory path: {relative!r}")
+            raise AssetValidationError(f"Invalid published symbol manifest path: {relative!r}")
         if _SHA256.fullmatch(digest) is None:
             raise AssetValidationError(
-                f"Invalid published symbol inventory SHA-256 for {relative!r}"
+                f"Invalid published symbol manifest SHA-256 for {relative!r}"
             )
         inventory[relative] = digest
-    if summary["publishedAssetCount"] != len(inventory):
-        raise AssetValidationError(
-            "Published symbol inventory summary.publishedAssetCount does not match its paths"
-        )
-    if (
-        summary["browserReferencedAssetCount"]
-        + summary["unreferencedPublishedAssetCount"]
-        != summary["publishedAssetCount"]
+
+    browser_paths: set[str] = set()
+    for field in (
+        "factionIdToPublishedPath",
+        "unitSlugToPublishedPath",
+        "unitProfileLogoToPublishedPath",
+        "staticKeyToPublishedPath",
     ):
+        mapping = document.get(field)
+        if not isinstance(mapping, dict):
+            raise AssetValidationError(f"Published symbol manifest must contain {field}")
+        for relative in mapping.values():
+            if not isinstance(relative, str):
+                raise AssetValidationError(
+                    f"Published symbol manifest {field} values must be strings"
+                )
+            browser_paths.add(relative)
+
+    browser_count = usage.get("browserReferencedAssetCount")
+    unreferenced_count = usage.get("unreferencedPublishedAssetCount")
+    if browser_count != len(browser_paths):
         raise AssetValidationError(
-            "Published symbol inventory browser/unreferenced counts do not cover all assets"
+            "Published symbol manifest browserReferencedAssetCount does not match its mappings"
         )
-    return inventory, summary
+    if unreferenced_count != len(set(inventory) - browser_paths):
+        raise AssetValidationError(
+            "Published symbol manifest unreferencedPublishedAssetCount does not match its mappings"
+        )
+    summary = document.get("summary")
+    if not isinstance(summary, dict):
+        raise AssetValidationError("Published symbol manifest must contain summary")
+    published_bytes = summary.get("publishedBytes")
+    if type(published_bytes) is not int or published_bytes < 0:
+        raise AssetValidationError(
+            "Published symbol manifest summary.publishedBytes must be non-negative"
+        )
+    return (
+        inventory,
+        {
+            "publishedAssetCount": len(inventory),
+            "browserReferencedAssetCount": len(browser_paths),
+            "unreferencedPublishedAssetCount": len(set(inventory) - browser_paths),
+            "publishedBytes": published_bytes,
+        },
+        tuple(PurePosixPath(value) for value in sorted(browser_paths)),
+    )
 
 
 def _published_svg_files(static_root: Path) -> tuple[Path, ...]:
@@ -224,17 +190,19 @@ def _sha256_file(path: Path) -> str:
     return hasher.hexdigest()
 
 
-def validate_asset_set(static_root: Path) -> AssetSetValidation:
+def validate_asset_set(
+    static_root: Path, *, publication_manifest: Path
+) -> AssetSetValidation:
     """Validate the complete published set and the current browser-referenced subset."""
 
     present_files = _published_svg_files(static_root)
-    inventory_path = static_root / PUBLICATION_INVENTORY
-    if not present_files and not inventory_path.exists():
+    if not present_files and not publication_manifest.exists():
         return AssetSetValidation(state="absent", expected_count=0, present_count=0)
 
     try:
-        inventory, inventory_summary = _publication_inventory(static_root)
-        browser_expected = browser_asset_paths(static_root)
+        inventory, inventory_summary, browser_expected = _publication_manifest(
+            publication_manifest
+        )
     except AssetValidationError as exc:
         return AssetSetValidation(
             state="invalid",
@@ -263,24 +231,25 @@ def validate_asset_set(static_root: Path) -> AssetSetValidation:
             invalid.append(
                 f"{relative}: SHA-256 mismatch (expected {inventory[relative]}, got {actual})"
             )
-
     browser_paths = {path.as_posix() for path in browser_expected}
     browser_missing = sorted(browser_paths - expected_paths)
     browser_present_count = len(browser_paths & present_paths & expected_paths)
     unreferenced_count = len(expected_paths - browser_paths)
     if inventory_summary["browserReferencedAssetCount"] != len(browser_paths):
         invalid.append(
-            "symbol-inventory.json browserReferencedAssetCount does not match current mappings"
+            "publication browserReferencedAssetCount does not match current mappings"
         )
     if inventory_summary["unreferencedPublishedAssetCount"] != unreferenced_count:
         invalid.append(
-            "symbol-inventory.json unreferencedPublishedAssetCount does not match current mappings"
+            "publication unreferencedPublishedAssetCount does not match current mappings"
         )
     if not missing:
-        published_bytes = sum(present_by_relative[path].stat().st_size for path in expected_paths)
+        published_bytes = sum(
+            present_by_relative[path].stat().st_size for path in expected_paths
+        )
         if inventory_summary["publishedBytes"] != published_bytes:
             invalid.append(
-                "symbol-inventory.json publishedBytes does not match the published SVG files"
+                "publication publishedBytes does not match the published SVG files"
             )
 
     if invalid or unexpected or browser_missing:
@@ -319,7 +288,7 @@ def _validation_error(mode: str, validation: AssetSetValidation) -> AssetValidat
         sample = ", ".join(validation.browser_missing[:5])
         suffix = " ..." if len(validation.browser_missing) > 5 else ""
         details.append(
-            f"browser references outside publication inventory {len(validation.browser_missing)}: "
+            f"browser references outside publication manifest {len(validation.browser_missing)}: "
             f"{sample}{suffix}"
         )
     if validation.unexpected:
@@ -336,7 +305,12 @@ def _validation_error(mode: str, validation: AssetSetValidation) -> AssetValidat
     )
 
 
-def select_asset_mode(mode: str, static_root: Path) -> AssetModeSelection:
+def select_asset_mode(
+    mode: str,
+    static_root: Path,
+    *,
+    publication_manifest: Path,
+) -> AssetModeSelection:
     """Resolve off/auto/required into hermetic or full-asset pytest behavior."""
 
     if mode not in ASSET_MODES:
@@ -344,7 +318,9 @@ def select_asset_mode(mode: str, static_root: Path) -> AssetModeSelection:
     if mode == "off":
         return AssetModeSelection(requested=mode, effective="off", validation=None)
 
-    validation = validate_asset_set(static_root)
+    validation = validate_asset_set(
+        static_root, publication_manifest=publication_manifest
+    )
     if validation.complete:
         return AssetModeSelection(requested=mode, effective="full", validation=validation)
     if mode == "auto" and validation.state == "absent":

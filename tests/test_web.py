@@ -25,6 +25,7 @@ from infinity_db.database.publication import (
     published_content_sha256,
 )
 from infinity_db.rules_database import export_rules_database
+from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.web import create_app
 from infinity_db.web.app import STATIC_ASSET_REVISION, STATIC_ASSET_VERSION
 
@@ -82,24 +83,6 @@ def request(
 def _normalized_css_selector(selector: str) -> str:
     selector = re.sub(r"\s+", " ", selector.strip())
     return re.sub(r"\s*([>,+~])\s*", r"\1", selector)
-
-
-def _unit_symbol_mapping(source: bytes) -> dict[str, str]:
-    text = source.decode("utf-8")
-    entries = re.finditer(
-        r'\[\s*("(?:\\.|[^"\\])*")\s*,\s*("(?:\\.|[^"\\])*")\s*\]',
-        text,
-    )
-    return {json.loads(match.group(1)): json.loads(match.group(2)) for match in entries}
-
-
-def _army_symbol_mapping(source: bytes) -> dict[int, str]:
-    text = source.decode("utf-8")
-    entries = re.finditer(
-        r'\[\s*(\d+)\s*,\s*("(?:\\.|[^"\\])*")\s*\]',
-        text,
-    )
-    return {int(match.group(1)): json.loads(match.group(2)) for match in entries}
 
 
 def assert_css_rule(
@@ -1719,18 +1702,17 @@ def test_dynamic_symbol_routes_serve_project_owned_svg_fixtures(
 
 @pytest.mark.full_assets
 def test_army_symbol_is_served(app: Callable) -> None:
-    status, headers, body = request(app, "/static/army-symbols.js")
-    assert status == 200
-    assert headers["content-type"].startswith("text/javascript")
-    assert b"armySymbolPath" in body
-    mapping = _army_symbol_mapping(body)
+    catalog = SymbolCatalog()
     for army_id in [101, 605, 998, 1199]:
-        published = mapping[army_id]
-        status, headers, body = request(app, f"/static/armies/{published}")
+        published = catalog.army_path(army_id)
+        assert published is not None
+        status, headers, body = request(app, f"/static/{published}")
         assert status == 200
         assert headers["content-type"] == "image/svg+xml"
         assert b"<svg" in body
     status, _, _ = request(app, "/static/armies/panoceania/not-an-army.svg")
+    assert status == 404
+    status, _, _ = request(app, "/static/army-symbols.js")
     assert status == 404
 
 
@@ -1903,16 +1885,24 @@ def test_unit_details_frontend_places_unit_symbols_on_general_profiles(
 ) -> None:
     status, _, unit_js = request(app, "/static/unit.js")
     assert status == 200
-    assert b'unitProfileSymbolPath' in unit_js
-    assert b'profile.logo_urls || []' in unit_js
+    assert b'staticSymbolPath' in unit_js
+    assert b'profile.symbol_paths || []' in unit_js
     assert b'general-profile-symbols' in unit_js
     assert b'profileTitle(profile, profileSymbols)' in unit_js
-    assert b'unitSymbol(unit.slug || unit.isc || unit.name' not in unit_js
+    assert b'unitProfileSymbolPath' not in unit_js
 
     status, _, symbol_js = request(app, "/static/unit-symbols.js")
     assert status == 200
-    assert b'unitProfileSymbolSlug' in symbol_js
-    assert b'export function unitProfileSymbolPath' in symbol_js
+    assert b'export function staticSymbolPath' in symbol_js
+    assert b'unit-symbol-map.js' not in symbol_js
+    assert b'unitProfileSymbolSlug' not in symbol_js
+
+    status, _, list_js = request(app, "/static/unit-list.js")
+    assert status == 200
+    assert b'army-symbols.js' not in list_js
+    assert b'unit.display_army_symbol_path' in list_js
+    assert b'unit.symbol_path' in list_js
+    assert b'army.symbol_path' in list_js
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -2551,7 +2541,9 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
             "source_ids": [11],
             "use_count": 1,
             "slug": "stealth",
-            "categories": [{"name": "Unclassified", "source": None, "page": None}],
+            "categories": [
+                {"id": "unclassified", "name": "Unclassified", "source": None, "page": None}
+            ],
             "category": "Special Skills",
         },
         "equipment": {
@@ -2611,7 +2603,9 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
         "name": "Stealth",
         "wiki": None,
         "slug": "stealth",
-        "categories": [{"name": "Unclassified", "source": None, "page": None}],
+        "categories": [
+            {"id": "unclassified", "name": "Unclassified", "source": None, "page": None}
+        ],
         "variants": [
             {
                 "skill_id": 11,
@@ -2637,11 +2631,13 @@ def test_skill_details_page_and_api_are_served(app: Callable) -> None:
                                 "id": 101,
                                 "name": "Zulu Company",
                                 "public_slug": "zulu-company",
+                                "symbol_path": "armies/panoceania/101-panoceania.svg",
                             },
                             {
                                 "id": 201,
                                 "name": "Alpha Company",
                                 "public_slug": "alpha-company",
+                                "symbol_path": "armies/yu-jing/201-yu-jing.svg",
                             },
                         ],
                     }
@@ -2797,7 +2793,12 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert status == 200
     payload = json.loads(body)
     assert payload["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
+        {
+            "id": "automatic",
+            "name": "Automatic",
+            "source": "N5 Core Rules v5.3",
+            "page": 87,
+        }
     ]
     assert payload["rules"][0]["id"] == "skill:test-stealth-fixture"
     assert payload["rules"][0]["collection"]["id"] == "n5-core-v5.3"
@@ -2809,7 +2810,12 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert status == 200
     stealth = next(item for item in json.loads(body)["items"] if item["id"] == 11)
     assert stealth["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 87}
+        {
+            "id": "automatic",
+            "name": "Automatic",
+            "source": "N5 Core Rules v5.3",
+            "page": 87,
+        }
     ]
 
     status, _, body = request(rules_app, "/api/skills/alert")
@@ -2819,6 +2825,7 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert alert["category"] == "Common Skills"
     assert alert["categories"] == [
         {
+            "id": "automatic",
             "name": "Automatic",
             "source": "Infinity Wiki snapshot (English) v20260918-130233",
             "page": None,
@@ -3164,11 +3171,7 @@ def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) 
 
 @pytest.mark.full_assets
 def test_unit_symbol_is_served(app: Callable) -> None:
-    status, headers, body = request(app, "/static/unit-symbol-map.js")
-    assert status == 200
-    assert headers["content-type"].startswith("text/javascript")
-    assert b"unitSymbolSlug" in body
-    mapping = _unit_symbol_mapping(body)
+    catalog = SymbolCatalog()
     for slug in [
         "fusiliers",
         "clipper-dronbot",
@@ -3176,12 +3179,15 @@ def test_unit_symbol_is_served(app: Callable) -> None:
         "blur-spec-ops",
         "next-wave-team-ops",
     ]:
-        published = mapping[slug]
-        status, headers, body = request(app, f"/static/units/{published}.svg")
+        published = catalog.unit_path(slug)
+        assert published is not None
+        status, headers, body = request(app, f"/static/{published}")
         assert status == 200
         assert headers["content-type"] == "image/svg+xml"
         assert b"<svg" in body
     status, _, _ = request(app, "/static/units/unassigned/not-a-unit.svg")
+    assert status == 404
+    status, _, _ = request(app, "/static/unit-symbol-map.js")
     assert status == 404
 
 

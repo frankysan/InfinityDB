@@ -953,12 +953,13 @@ each canonical output path to its SHA-256, so later stages can verify the exact
 version-7 bytes. Compression failure leaves prior compressed output and version-6
 state intact. Final publication verifies and consumes that hash-bound version-7
 compressed work tree, the pinned Army snapshot, and the authoritative build
-manifest. It materializes a temporary application asset tree, generates the
-browser maps from authoritative references plus the canonical mapping, validates
-the complete result, transactionally replaces only the generated static symbol
-outputs, and advances successful state to version 8 with a SHA-bound complete
-publication mapping. Before replacement, publication compares the existing generated
-SVG inventory with the staged incoming inventory by path and SHA-256. Added, removed,
+manifest. It materializes a temporary application asset tree, derives the canonical
+Army, Unit/profile, and static mappings from authoritative references plus the
+canonical asset mapping, validates the complete result, transactionally replaces the
+generated static symbol outputs plus `data/manifests/symbol-publication.json`, and
+advances successful state to version 8 with that manifest SHA-bound into build state.
+Before replacement, publication compares the existing generated SVG set with the
+staged incoming set by path and SHA-256. Added, removed,
 changed, and unchanged counts plus path-level differences are recorded in the
 publication mapping; symbols present only in the previous publication are preserved in
 a timestamped `data/backups/symbols/` backup as part of the same transaction. Failed
@@ -984,14 +985,14 @@ in-memory retry transition and replaces persistent state only after the new resu
 validates.
 
 Production deployment with the processed third-party symbol publication is
-fail-closed. The approved SVG publication and `symbol-inventory.json` are tracked
-release content, so clean source/package validation verifies them directly by path,
-SVG parseability, byte count, and SHA-256. The host-side production deployment guard
-additionally requires terminal version-8 symbol-build state and verifies that its
-SHA-bound `symbol-inventory.json`, `army-symbols.js`, and `unit-symbol-map.js` artifacts
-match the files being packaged and that database/publication provenance agrees. After
+fail-closed. The approved SVG publication and
+`data/manifests/symbol-publication.json` are tracked release content, so clean
+source/package validation verifies the publication directly by path, SVG parseability,
+byte count, and SHA-256. The host-side production deployment guard additionally requires
+terminal version-8 symbol-build state and verifies its SHA-bound publication manifest
+against the tracked file while also checking database/publication provenance. After
 Docker builds the application image, the image verifier revalidates the installed
-package against that inventory and exercises one served asset from each publication
+package against that manifest and exercises one served asset from each publication
 namespace before Compose may replace the running service. Raw Army/wiki/PDF/source-
 symbol archives remain excluded from Git and routine packages; Corvus Belli's explicit
 permission covers redistribution of InfinityDB's processed graphical publication for
@@ -1049,11 +1050,12 @@ separate, intentional operations.
 
 Local test execution now separates hermetic and full-asset coverage explicitly.
 `run_checks.py --assets off|auto|required` validates the complete published
-symbol inventory before enabling `full_assets` tests; direct pytest excludes
-those tests by default. Publication writes a generated `symbol-inventory.json`
-that binds every published SVG path to its SHA-256. Validation separately derives
-the browser-referenced subset from the army/unit maps and static endpoints. The
-current processed publication is fully browser-addressable (806/806 SVGs); the
+symbol set before enabling `full_assets` tests; direct pytest excludes those tests
+by default. Final publication writes the tracked
+`data/manifests/symbol-publication.json`, which binds every published SVG path to its
+SHA-256 and owns the Army, Unit/profile, and static symbol mappings used by the
+backend. The current processed publication is fully browser-addressable
+(806/806 SVGs); the
 separate subset check remains part of the publication contract so future preserved
 variants cannot weaken full-set validation. A detected
 partial/corrupt local asset tree is an error in `auto`/`required`, while a

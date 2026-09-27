@@ -1,22 +1,3 @@
-const CATEGORY_TOKENS = new Map([
-  ["automatic", "automatic"],
-  ["automatic skill", "automatic"],
-  ["automatic skills", "automatic"],
-  ["deployment", "deployment"],
-  ["deployment skill", "deployment"],
-  ["deployment skills", "deployment"],
-  ["basic short skill", "basic-short"],
-  ["basic short skills", "basic-short"],
-  ["short skill", "short"],
-  ["short skills", "short"],
-  ["long skill", "long"],
-  ["long skills", "long"],
-  ["aro", "aro"],
-  ["aro skill", "aro"],
-  ["aro skills", "aro"],
-  ["unclassified", "unclassified"],
-]);
-
 export function skillCategoryToken(category) {
   const id = typeof category === "object" && category ? category.id : null;
   if (typeof id === "string") {
@@ -30,8 +11,7 @@ export function skillCategoryToken(category) {
     }[id];
     if (byId) return byId;
   }
-  const name = typeof category === "object" && category ? category.name : category;
-  return CATEGORY_TOKENS.get(String(name || "").trim().toLocaleLowerCase()) || "unclassified";
+  return "unclassified";
 }
 
 export function skillCategoryBadge(category, label = null) {

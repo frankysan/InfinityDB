@@ -97,22 +97,23 @@ project or run the production image-pruning policy.
 ## Published graphical symbols
 
 The deployment scripts do not acquire or regenerate Corvus Belli graphical assets.
-The processed `armies/`, `characteristics/`, `orders/`, and `units/` SVG trees,
-`src/infinity_db/web/static/symbol-inventory.json`, `army-symbols.js`, and
-`unit-symbol-map.js` are tracked release content and therefore come from the exact
-Git revision being deployed. Production additionally requires the local terminal
+The processed `armies/`, `characteristics/`, `orders/`, and `units/` SVG trees plus
+`data/manifests/symbol-publication.json` are tracked release content and therefore come
+from the exact Git revision being deployed. The manifest is the canonical hash/mapping
+contract; browser static files contain presentation code rather than generated symbol
+lookup data. Production additionally requires the local terminal
 version-8 `data/manifests/army-symbol-build.json` that promoted that publication;
-the manifest's SHA-bound inventory and browser maps must match the tracked files.
+its SHA-bound `publicationManifest` record must match the tracked canonical manifest.
 
 `deploy.sh` runs `tools/verify_deployment_assets.py` before Docker is allowed to
-build. That guard verifies the v8 manifest bindings and the complete inventory by
+build. That guard verifies the v8 manifest binding and the complete publication by
 path/hash rather than accepting merely non-empty directories. It then builds the
 application image, runs `scripts/verify-container-image.sh --published-assets` to
 revalidate the installed Python package and representative production symbol routes,
 and only then starts Compose with `--no-build`. The image that passed validation is
 therefore the image that is deployed. A missing manifest, partial publication,
-stale browser map, package-data omission, or symbol hash mismatch fails before the
-running service is replaced.
+package-data omission, or symbol hash mismatch fails before the running service is
+replaced.
 
 The runtime Army database must also carry the SHA-256 of the exact Army ZIP
 snapshot used by the terminal symbol manifest. The deployment guard,
@@ -129,8 +130,8 @@ publication.
 
 For routine deployment from a development checkout, `tools/send_deployment_artifacts.py`
 transfers only the ignored runtime databases and terminal symbol manifest. The symbol
-publication, inventory, and browser maps are already supplied by the exact matching Git
-commit. The helper validates the local databases, database-to-symbol snapshot provenance,
+publication and canonical publication manifest are already supplied by the exact matching
+Git commit. The helper validates the local databases, database-to-symbol snapshot provenance,
 and manifest-bound tracked publication first, requires the remote checkout to be at the
 exact same commit with no tracked edits, stages the incoming files, and uses one SSH
 session so password authentication prompts only once. Run a dry-run first to inspect
@@ -183,8 +184,9 @@ and non-root image user, and starts Gunicorn with a read-only root filesystem,
 `/tmp` tmpfs, and `no-new-privileges`. It waits for the image health check and
 then exercises Army, rules-enriched Skill, and version API endpoints.
 `--packaged-assets` requires the installed package to contain exactly the tracked
-`symbol-inventory.json` publication, re-hashes every SVG, verifies the published byte
-total, and requests one served symbol from each namespace. Production
+publication defined by the installed `symbol-publication.json`, re-hashes every SVG,
+verifies the published byte total, and requests one served symbol from each namespace.
+Production
 `--published-assets` performs the same package checks and additionally binds the
 runtime database to the ignored terminal symbol-build manifest, preserving the
 snapshot-provenance deployment guard.

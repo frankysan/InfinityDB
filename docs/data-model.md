@@ -2511,11 +2511,11 @@ compression report also records the SHA-256 of every canonical output SVG. The d
 compressed work tree contains exactly the canonical asset set and is replaced only
 after validation succeeds. Final publication verifies those per-file hashes before
 promoting passed version-7 state to version 8. Version 8 records published/mapping
-counts and byte totals and binds `publication-map.json`, the generated
-`symbol-inventory.json`, `army-symbols.js`, and `unit-symbol-map.js`. The inventory
-contains every published SVG path and SHA-256 and is the completeness contract for
-local/full-asset validation; browser mappings intentionally describe only the
-currently consumed subset. The report contains complete source-archive and
+counts and byte totals and binds `publication-map.json` plus the tracked
+`data/manifests/symbol-publication.json`. That canonical publication manifest contains
+every published SVG path and SHA-256 together with Army, Unit/profile, and static
+symbol mappings; it is the single completeness and lookup contract for local/full-asset
+validation and runtime symbol resolution. The report contains complete source-archive and
 canonical-archive mappings to published paths, published SVG hashes, and a
 comparison against the previous generated publication
 covering added, removed, changed, and unchanged symbols. Removed prior symbols are
