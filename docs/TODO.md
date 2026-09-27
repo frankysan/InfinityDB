@@ -58,8 +58,8 @@ data searchable, navigable, and understandable. It should finish the player-faci
 application model without absorbing the separate consistency, visual-architecture, and
 operations hardening work reserved for 0.10.0.
 
-The preferred execution order is: finish categorical Unit filters and their URL state;
-then define and implement contextual AVA/points/SWC filtering; close the existing structured
+The preferred execution order is: finish the Unit Explorer extended-results presentation now
+that categorical and contextual numeric filters are implemented; close the existing structured
 rules-reference link gaps; establish the maintained-text reference/token layer; and build the
 glossary/profile-help surface on top of that shared semantic-reference foundation. This order
 keeps the bounded Unit Explorer work moving while deferring the broader maintained-text
@@ -103,20 +103,20 @@ ontology decision until it is actually needed.
   framework rather than a separate browser-only filtering system.
   - [x] Skill, Equipment, and Weapon filters resolve public slugs through the
     backend and preserve legacy numeric identifiers only for compatibility.
-  - [ ] Add categorical filters for troop type, classification, and
-    characteristics. Prefer stable public semantic/sluggified identities in
-    shareable URLs rather than source-local numeric IDs where the domain supports
-    them.
-  - [ ] Add AVA, points, and SWC filtering. Numeric or mostly numeric fields must
-    support both an exact value and a bounded range. Preserve domain semantics
-    instead of coercing exceptional/source display values into an unsafe generic
-    numeric comparison; SWC in particular needs an explicit policy for ordinary
-    costs, bonuses such as `+1`/`+1.5`, and non-numeric display values.
-  - [ ] Define filter-conjunction semantics before adding loadout-sensitive numeric
-    filters. Decide explicitly which criteria may match anywhere on the logical
-    Unit and which must match within one compatible profile/group/loadout context,
-    so a weapon on one option cannot accidentally satisfy a points/SWC constraint
-    supplied only by an unrelated option.
+  - [x] Add categorical filters for troop type, classification, and
+    characteristics. These use stable public semantic/sluggified identities in
+    shareable URLs, with numeric IDs retained only as compatibility fallbacks.
+  - [x] Add AVA, points, and SWC filtering with both exact-value and inclusive
+    bounded-range modes. AVA exposes ordinary values from `0` through `99` plus
+    exact `Total`; negative ancillary/source sentinel values are not public AVA
+    filter values. SWC exact matching accepts ordinary costs, bonuses such as
+    `+1`/`+1.5`, and `-`; SWC ranges apply only to ordinary numeric costs.
+  - [x] Pin filter-conjunction semantics for loadout-sensitive numeric filters.
+    Once AVA/points/SWC participates in a query, profile/group/loadout-sensitive
+    criteria must be satisfiable in one compatible source Army/profile-group/loadout
+    context. Profile facts apply to loadouts in their profile group; loadout facts
+    remain loadout-local. Unit-option facts remain Unit-wide because the source
+    model does not attach them to a profile group.
   - [ ] Add an optional extended Unit-list mode, with advanced filters as a natural
     entry point. The extended result should expose the Unit's base statistics, troop
     type, classification, characteristics, and Army-specific AVA without requiring
@@ -133,10 +133,10 @@ ontology decision until it is actually needed.
   - [x] Unit Explorer Army, declared-faction, name, Skill, Equipment, Weapon,
     pagination, and sort state already participate in URL state. Global search uses
     its own shareable `q` parameter.
-  - [ ] Add every new 0.9 Unit filter to the URL contract as it is implemented so
-    filtering and deep-link work are completed together rather than in separate
-    passes. Decide whether extended-results mode itself is shareable state or a
-    local presentation preference.
+  - [x] Add the 0.9 Unit filters to the URL contract as they are implemented so
+    exact/range numeric filtering and categorical filtering remain reproducible in
+    shared links. Decide separately whether extended-results mode itself is
+    shareable state or a local presentation preference.
   - [ ] Make catalog-list search/filter state deep-linkable where it is still only
     local browser state.
   - [ ] Define how optional-unit preferences interact with reproducible shared Unit

@@ -85,6 +85,7 @@ SOURCE_UNIT_NAMES_CTE = (
     ")"
 )
 AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
+SWC_EXACT_RE = re.compile(r"(?:\+)?(?:0|[1-9]\d*)(?:\.\d+)?|-")
 
 
 class ArmySelectionError(ValueError):
@@ -514,6 +515,7 @@ def minimal_availability_requirements(
     canonical_factions: Mapping[int, int | None],
     declared_faction_ids_by_unit: Mapping[int, Collection[int]],
     army_id: int | None = None,
+    occurrence_keys: Collection[tuple[int, int]] | None = None,
 ) -> tuple[frozenset[str], ...]:
     """Return non-redundant optional-mode requirements for one logical unit.
 
@@ -526,6 +528,10 @@ def minimal_availability_requirements(
         if army_id is not None and occurrence["id"] != army_id:
             continue
         source_id = occurrence["source_id"]
+        if occurrence_keys is not None:
+            source_army_id = occurrence["source_army_id"]
+            if (source_id, source_army_id) not in occurrence_keys:
+                continue
         requirements.add(
             frozenset(
                 army_required_flags(
@@ -2011,6 +2017,263 @@ class Database:
                 raise ValueError(f"Unknown Unit filter vocabulary: {public_name}")
         return frozenset(int(row["logical_unit_id"]) for row in rows)
 
+    @staticmethod
+    def _validate_exact_range(
+        name: str,
+        exact: int | str | None,
+        minimum: int | float | None,
+        maximum: int | float | None,
+    ) -> None:
+        if exact is not None and (minimum is not None or maximum is not None):
+            raise ValueError(f"{name} exact value cannot be combined with a range")
+        if minimum is not None and maximum is not None and minimum > maximum:
+            raise ValueError(f"{name}_min must be less than or equal to {name}_max")
+
+    @staticmethod
+    def _validate_nonnegative_integer(name: str, value: int | None) -> None:
+        if value is None:
+            return
+        if type(value) is not int or not 0 <= value <= SQLITE_INTEGER_MAX:
+            raise ValueError(f"{name} must be a nonnegative SQLite signed 64-bit integer")
+
+    @staticmethod
+    def _validate_swc_bound(name: str, value: float | None) -> None:
+        if value is None:
+            return
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(f"{name} must be a nonnegative number")
+        numeric = float(value)
+        if numeric < 0 or numeric == float("inf") or numeric != numeric:
+            raise ValueError(f"{name} must be a finite nonnegative number")
+
+    @staticmethod
+    def _swc_numeric_condition(alias: str, expression: str | None = None) -> str:
+        value = expression or f"{alias}.swc"
+        return (
+            f"{value} <> '' AND {value} GLOB '*[0-9]*' "
+            f"AND {value} NOT GLOB '*[^0-9.]*' AND {value} NOT GLOB '*.*.*'"
+        )
+
+    def _contextual_unit_filter_matches(
+        self,
+        *,
+        army_id: int | None,
+        rule_source_ids: Mapping[str, tuple[int, ...]],
+        troop_type_id: int | None,
+        classification_id: int | None,
+        characteristic_id: int | None,
+        ava: int | str | None,
+        ava_min: int | None,
+        ava_max: int | None,
+        points: int | None,
+        points_min: int | None,
+        points_max: int | None,
+        swc: str | None,
+        swc_min: float | None,
+        swc_max: float | None,
+    ) -> dict[int, frozenset[tuple[int, int, int]]]:
+        """Return matching source Army/profile-group contexts for numeric filters.
+
+        Once a contextual numeric constraint is present, categorical and catalog
+        filters are evaluated against the same Army/profile-group/loadout context.
+        Profile-level facts apply to loadouts in their group, while a loadout-level
+        fact must belong to the matching loadout. Unit-option facts remain unit-wide
+        because the source model does not attach them to a profile group.
+        """
+
+        has_loadout_filter = any(
+            value is not None
+            for value in (points, points_min, points_max, swc, swc_min, swc_max)
+        )
+        base = "lpo" if has_loadout_filter else "ppo"
+        table = (
+            "loadout_payload_occurrences"
+            if has_loadout_filter
+            else "profile_payload_occurrences"
+        )
+        where: list[str] = []
+        parameters: list[Any] = []
+
+        if army_id is not None:
+            where.append(
+                "EXISTS (SELECT 1 FROM application_army_sources AS aas "
+                f"WHERE aas.source_army_id = {base}.army_id "
+                "AND aas.application_army_id = ? AND aas.has_army_list = 1)"
+            )
+            parameters.append(army_id)
+
+        def add_integer_conditions(
+            column: str, exact: int | None, minimum: int | None, maximum: int | None
+        ) -> None:
+            if exact is not None:
+                where.append(f"{column} = ?")
+                parameters.append(exact)
+            if minimum is not None:
+                where.append(f"{column} >= ?")
+                parameters.append(minimum)
+            if maximum is not None:
+                where.append(f"{column} <= ?")
+                parameters.append(maximum)
+
+        if has_loadout_filter:
+            add_integer_conditions("lpo.points", points, points_min, points_max)
+            if swc is not None:
+                if swc == "-":
+                    where.append("lpo.swc = '-'")
+                elif swc.startswith("+"):
+                    numeric = swc[1:]
+                    where.append(
+                        "lpo.swc LIKE '+%' AND "
+                        + self._swc_numeric_condition("lpo", "SUBSTR(lpo.swc, 2)")
+                        + " AND CAST(SUBSTR(lpo.swc, 2) AS REAL) = ?"
+                    )
+                    parameters.append(float(numeric))
+                else:
+                    where.append(
+                        "lpo.swc NOT LIKE '+%' AND lpo.swc <> '-' AND "
+                        + self._swc_numeric_condition("lpo")
+                        + " AND CAST(lpo.swc AS REAL) = ?"
+                    )
+                    parameters.append(float(swc))
+            if swc_min is not None or swc_max is not None:
+                where.append(
+                    "lpo.swc NOT LIKE '+%' AND lpo.swc <> '-' AND "
+                    + self._swc_numeric_condition("lpo")
+                )
+                if swc_min is not None:
+                    where.append("CAST(lpo.swc AS REAL) >= ?")
+                    parameters.append(float(swc_min))
+                if swc_max is not None:
+                    where.append("CAST(lpo.swc AS REAL) <= ?")
+                    parameters.append(float(swc_max))
+
+        def ava_condition(alias: str) -> tuple[str, list[Any]]:
+            clauses: list[str] = []
+            values: list[Any] = []
+            if ava is not None:
+                if ava == "total":
+                    clauses.append(f"{alias}.ava >= 100")
+                else:
+                    clauses.append(f"{alias}.ava = ?")
+                    values.append(ava)
+            if ava_min is not None:
+                clauses.append(f"{alias}.ava >= ?")
+                values.append(ava_min)
+            if ava_max is not None:
+                clauses.append(f"{alias}.ava <= ?")
+                values.append(ava_max)
+            return " AND ".join(clauses), values
+
+        if ava is not None or ava_min is not None or ava_max is not None:
+            condition, values = ava_condition("ap")
+            if has_loadout_filter:
+                where.append(
+                    "EXISTS (SELECT 1 FROM profile_payload_occurrences AS ap "
+                    "WHERE ap.army_id = lpo.army_id AND ap.unit_id = lpo.unit_id "
+                    "AND ap.group_id = lpo.group_id AND "
+                    + condition
+                    + ")"
+                )
+            else:
+                where.append(condition.replace("ap.", "ppo."))
+            parameters.extend(values)
+
+        def same_group_profile(predicate: str) -> str:
+            return (
+                "EXISTS (SELECT 1 FROM profile_payload_occurrences AS fp "
+                "JOIN profile_payloads AS fpp ON fpp.id = fp.profile_payload_id "
+                f"WHERE fp.army_id = {base}.army_id AND fp.unit_id = {base}.unit_id "
+                f"AND fp.group_id = {base}.group_id AND {predicate})"
+            )
+
+        if troop_type_id is not None:
+            where.append(same_group_profile("fpp.type_id = ?"))
+            parameters.append(troop_type_id)
+        if classification_id is not None:
+            where.append(
+                "EXISTS (SELECT 1 FROM profile_groups AS fg "
+                f"WHERE fg.army_id = {base}.army_id AND fg.unit_id = {base}.unit_id "
+                f"AND fg.group_id = {base}.group_id AND fg.category_id = ?)"
+            )
+            parameters.append(classification_id)
+        if characteristic_id is not None:
+            profile_clause = (
+                "EXISTS (SELECT 1 FROM profile_payload_occurrences AS cp "
+                "JOIN profile_payload_characteristics AS cpc "
+                "ON cpc.profile_payload_id = cp.profile_payload_id "
+                f"WHERE cp.army_id = {base}.army_id AND cp.unit_id = {base}.unit_id "
+                f"AND cp.group_id = {base}.group_id AND cpc.characteristic_id = ?)"
+            )
+            parameters.append(characteristic_id)
+            if has_loadout_filter:
+                loadout_clause = (
+                    "EXISTS (SELECT 1 FROM loadout_payload_characteristics AS cl "
+                    "WHERE cl.loadout_payload_id = lpo.loadout_payload_id "
+                    "AND cl.characteristic_id = ?)"
+                )
+            else:
+                loadout_clause = (
+                    "EXISTS (SELECT 1 FROM loadout_payload_occurrences AS clo "
+                    "JOIN loadout_payload_characteristics AS cl "
+                    "ON cl.loadout_payload_id = clo.loadout_payload_id "
+                    "WHERE clo.army_id = ppo.army_id AND clo.unit_id = ppo.unit_id "
+                    "AND clo.group_id = ppo.group_id AND cl.characteristic_id = ?)"
+                )
+            parameters.append(characteristic_id)
+            where.append(f"({profile_clause} OR {loadout_clause})")
+
+        for catalog, source_ids in rule_source_ids.items():
+            if not source_ids:
+                return {}
+            placeholders = ", ".join("?" for _ in source_ids)
+            profile_clause = (
+                "EXISTS (SELECT 1 FROM profile_payload_occurrences AS rp "
+                f"JOIN profile_payload_{catalog} AS ri "
+                "ON ri.profile_payload_id = rp.profile_payload_id "
+                f"WHERE rp.army_id = {base}.army_id AND rp.unit_id = {base}.unit_id "
+                f"AND rp.group_id = {base}.group_id AND ri.item_id IN ({placeholders}))"
+            )
+            parameters.extend(source_ids)
+            if has_loadout_filter:
+                loadout_clause = (
+                    f"EXISTS (SELECT 1 FROM loadout_payload_{catalog} AS li "
+                    "WHERE li.loadout_payload_id = lpo.loadout_payload_id "
+                    f"AND li.item_id IN ({placeholders}))"
+                )
+            else:
+                loadout_clause = (
+                    "EXISTS (SELECT 1 FROM loadout_payload_occurrences AS rl "
+                    f"JOIN loadout_payload_{catalog} AS li "
+                    "ON li.loadout_payload_id = rl.loadout_payload_id "
+                    "WHERE rl.army_id = ppo.army_id AND rl.unit_id = ppo.unit_id "
+                    "AND rl.group_id = ppo.group_id "
+                    f"AND li.item_id IN ({placeholders}))"
+                )
+            parameters.extend(source_ids)
+            option_clause = (
+                f"EXISTS (SELECT 1 FROM unit_option_{catalog} AS ui "
+                f"WHERE ui.unit_id = {base}.unit_id AND ui.item_id IN ({placeholders}))"
+            )
+            parameters.extend(source_ids)
+            where.append(f"({profile_clause} OR {loadout_clause} OR {option_clause})")
+
+        query = (
+            "SELECT DISTINCT lus.logical_unit_id, "
+            f"{base}.unit_id, {base}.army_id, {base}.group_id "
+            f"FROM {table} AS {base} "
+            f"JOIN logical_unit_sources AS lus ON lus.source_unit_id = {base}.unit_id"
+        )
+        if where:
+            query += " WHERE " + " AND ".join(where)
+        with self._connect() as connection:
+            rows = connection.execute(query, parameters).fetchall()
+        contexts: dict[int, set[tuple[int, int, int]]] = defaultdict(set)
+        for row in rows:
+            contexts[int(row["logical_unit_id"])].add(
+                (int(row["unit_id"]), int(row["army_id"]), int(row["group_id"]))
+            )
+        return {logical_id: frozenset(items) for logical_id, items in contexts.items()}
+
     @instance_lru_cache(maxsize=1)
     def trait_usage_index(self) -> dict[str, tuple[tuple[str, int], ...]]:
         """Return raw Army profile properties mapped to the catalog items carrying them."""
@@ -2383,6 +2646,15 @@ class Database:
         troop_type: int | str | None = None,
         classification: int | str | None = None,
         characteristic: int | str | None = None,
+        ava: int | str | None = None,
+        ava_min: int | None = None,
+        ava_max: int | None = None,
+        points: int | None = None,
+        points_min: int | None = None,
+        points_max: int | None = None,
+        swc: str | None = None,
+        swc_min: float | None = None,
+        swc_max: float | None = None,
         limit: int = 50,
         offset: int = 0,
         mercs: bool = False,
@@ -2419,18 +2691,56 @@ class Database:
         }.items():
             if item_ref is not None:
                 rule_filters[catalog] = self.application_catalog_id(catalog, item_ref)
-        logical_unit_filters = []
-        if _logical_unit_ids is not None:
-            logical_unit_filters.append(_logical_unit_ids)
-        for public_name, item_ref in {
+        unit_filter_refs = {
             "troop_types": troop_type,
             "classifications": classification,
             "characteristics": characteristic,
-        }.items():
+        }
+        unit_filter_ids = {
+            public_name: self._unit_filter_source_id(public_name, item_ref)
+            for public_name, item_ref in unit_filter_refs.items()
+            if item_ref is not None
+        }
+        logical_unit_filters = []
+        if _logical_unit_ids is not None:
+            logical_unit_filters.append(_logical_unit_ids)
+        for public_name, item_ref in unit_filter_refs.items():
             if item_ref is not None:
                 logical_unit_filters.append(
                     self._logical_unit_ids_for_unit_filter(public_name, item_ref)
                 )
+
+        if ava is not None:
+            if isinstance(ava, str):
+                if ava.casefold() != "total":
+                    raise ValueError("ava must be a nonnegative integer or 'total'")
+                ava = "total"
+            elif type(ava) is not int or not 0 <= ava <= 99:
+                raise ValueError("ava must be an integer from 0 to 99 or 'total'")
+        self._validate_nonnegative_integer("ava_min", ava_min)
+        self._validate_nonnegative_integer("ava_max", ava_max)
+        if ava_min is not None and ava_min > 99:
+            raise ValueError("ava_min must be between 0 and 99")
+        if ava_max is not None and ava_max > 99:
+            raise ValueError("ava_max must be between 0 and 99")
+        self._validate_exact_range("ava", ava, ava_min, ava_max)
+
+        for name, value in {
+            "points": points,
+            "points_min": points_min,
+            "points_max": points_max,
+        }.items():
+            self._validate_nonnegative_integer(name, value)
+        self._validate_exact_range("points", points, points_min, points_max)
+
+        if swc is not None:
+            if not isinstance(swc, str) or SWC_EXACT_RE.fullmatch(swc.strip()) is None:
+                raise ValueError("swc must be a numeric cost, +bonus, or '-'")
+            swc = swc.strip()
+        self._validate_swc_bound("swc_min", swc_min)
+        self._validate_swc_bound("swc_max", swc_max)
+        self._validate_exact_range("swc", swc, swc_min, swc_max)
+
         if not isinstance(search, str):
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
@@ -2458,15 +2768,17 @@ class Database:
             if enabled
         }
         matching_sources_by_rule: dict[str, set[int]] = {}
+        rule_source_ids: dict[str, tuple[int, ...]] = {}
         if rule_filters:
             with self._connect() as connection:
                 for catalog, application_id in rule_filters.items():
-                    graph = self._application_catalog_graph(catalog)
+                    catalog_graph = self._application_catalog_graph(catalog)
                     source_ids = (
                         ()
                         if application_id is None
-                        else graph["source_ids_by_item"].get(application_id, ())
+                        else catalog_graph["source_ids_by_item"].get(application_id, ())
                     )
+                    rule_source_ids[catalog] = tuple(source_ids)
                     if not source_ids:
                         matching_sources_by_rule[catalog] = set()
                         continue
@@ -2476,6 +2788,35 @@ class Database:
                         row["unit_id"]
                         for row in connection.execute(query, parameters)
                     }
+
+        has_numeric_filters = any(
+            value is not None
+            for value in (
+                ava, ava_min, ava_max,
+                points, points_min, points_max,
+                swc, swc_min, swc_max,
+            )
+        )
+        contextual_matches = (
+            self._contextual_unit_filter_matches(
+                army_id=army_id,
+                rule_source_ids=rule_source_ids,
+                troop_type_id=unit_filter_ids.get("troop_types"),
+                classification_id=unit_filter_ids.get("classifications"),
+                characteristic_id=unit_filter_ids.get("characteristics"),
+                ava=ava,
+                ava_min=ava_min,
+                ava_max=ava_max,
+                points=points,
+                points_min=points_min,
+                points_max=points_max,
+                swc=swc,
+                swc_min=swc_min,
+                swc_max=swc_max,
+            )
+            if has_numeric_filters
+            else None
+        )
         graph = self._unit_graph()
         faction_groups = self._faction_groups()
         faction_identities = self._faction_identities()
@@ -2519,11 +2860,22 @@ class Database:
                 if not matches_search:
                     continue
 
+            matching_occurrence_keys: frozenset[tuple[int, int]] | None = None
+            if contextual_matches is not None:
+                contexts = contextual_matches.get(group["id"], frozenset())
+                if not contexts:
+                    continue
+                matching_occurrence_keys = frozenset(
+                    (source_id, source_army_id)
+                    for source_id, source_army_id, _group_id in contexts
+                )
+
             requirements = minimal_availability_requirements(
                 group,
                 canonical_factions,
                 declared_faction_ids_by_unit,
                 army_id,
+                matching_occurrence_keys,
             )
             if not requirements:
                 continue

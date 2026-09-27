@@ -423,6 +423,46 @@ def _flag(params: dict, key: str) -> bool:
     return params[key][0] == "1"
 
 
+def _optional_integer(
+    params: dict, key: str, low: int = 0, high: int = 2**63 - 1
+) -> int | None:
+    if key not in params or params[key][0] == "":
+        return None
+    return _integer(params, key, None, low, high)
+
+
+def _optional_decimal(params: dict, key: str) -> float | None:
+    if key not in params or params[key][0] == "":
+        return None
+    raw = params[key][0]
+    if len(raw) > 32 or re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", raw) is None:
+        raise ValueError(f"{key} must be a nonnegative decimal number")
+    return float(raw)
+
+
+def _ava_exact(params: dict) -> int | str | None:
+    if "ava" not in params or params["ava"][0] == "":
+        return None
+    raw = params["ava"][0].strip().casefold()
+    if raw in {"t", "total"}:
+        return "total"
+    if re.fullmatch(r"[0-9]+", raw) is None:
+        raise ValueError("ava must be an integer from 0 to 99 or 'total'")
+    value = int(raw)
+    if not 0 <= value <= 99:
+        raise ValueError("ava must be an integer from 0 to 99 or 'total'")
+    return value
+
+
+def _swc_exact(params: dict) -> str | None:
+    if "swc" not in params or params["swc"][0] == "":
+        return None
+    raw = params["swc"][0].strip()
+    if re.fullmatch(r"(?:\+)?(?:0|[1-9]\d*)(?:\.[0-9]+)?|-", raw) is None:
+        raise ValueError("swc must be a numeric cost, +bonus, or '-'")
+    return raw
+
+
 def _domain_filter_identifier(params: dict, key: str) -> int | str | None:
     """Parse one domain filter as a numeric compatibility ID or public slug."""
 
@@ -440,7 +480,7 @@ def _domain_filter_identifier(params: dict, key: str) -> int | str | None:
 
 
 def _unit_query(query: str) -> dict:
-    params = parse_qs(query, keep_blank_values=True, max_num_fields=24)
+    params = parse_qs(query, keep_blank_values=True, max_num_fields=40)
     for key, values in params.items():
         if key not in {
             "army_id",
@@ -452,6 +492,15 @@ def _unit_query(query: str) -> dict:
             "troop_type",
             "classification",
             "characteristic",
+            "ava",
+            "ava_min",
+            "ava_max",
+            "points",
+            "points_min",
+            "points_max",
+            "swc",
+            "swc_min",
+            "swc_max",
             "limit",
             "offset",
             "mercs",
@@ -470,6 +519,25 @@ def _unit_query(query: str) -> dict:
     order = params.get("order", ["asc"])[0]
     if order not in {"asc", "desc"}:
         raise ValueError("order must be asc or desc")
+    ava = _ava_exact(params)
+    ava_min = _optional_integer(params, "ava_min", 0, 99)
+    ava_max = _optional_integer(params, "ava_max", 0, 99)
+    points = _optional_integer(params, "points")
+    points_min = _optional_integer(params, "points_min")
+    points_max = _optional_integer(params, "points_max")
+    swc = _swc_exact(params)
+    swc_min = _optional_decimal(params, "swc_min")
+    swc_max = _optional_decimal(params, "swc_max")
+    for name, exact, minimum, maximum in (
+        ("ava", ava, ava_min, ava_max),
+        ("points", points, points_min, points_max),
+        ("swc", swc, swc_min, swc_max),
+    ):
+        if exact is not None and (minimum is not None or maximum is not None):
+            raise ValueError(f"{name} exact value cannot be combined with a range")
+        if minimum is not None and maximum is not None and minimum > maximum:
+            raise ValueError(f"{name}_min must be less than or equal to {name}_max")
+
     return {
         "army_id": _domain_filter_identifier(params, "army_id"),
         "declared_faction_id": _integer(
@@ -482,6 +550,15 @@ def _unit_query(query: str) -> dict:
         "troop_type": _domain_filter_identifier(params, "troop_type"),
         "classification": _domain_filter_identifier(params, "classification"),
         "characteristic": _domain_filter_identifier(params, "characteristic"),
+        "ava": ava,
+        "ava_min": ava_min,
+        "ava_max": ava_max,
+        "points": points,
+        "points_min": points_min,
+        "points_max": points_max,
+        "swc": swc,
+        "swc_min": swc_min,
+        "swc_max": swc_max,
         "limit": _integer(params, "limit", 50, 1, 200),
         "offset": _integer(params, "offset", 0, 0, 2**63 - 1),
         "mercs": _flag(params, "mercs"),

@@ -67,7 +67,7 @@ export function getSearchResults(query, signal) {
   return get(`/api/search?${new URLSearchParams({ q: query })}`, signal);
 }
 
-export function getUnits({ armyId, declaredFactionId, search, skillId, equipmentId, weaponId, troopType, classification, characteristic, limit, offset, mercs, specops, teamops, reinforcement, descending }, signal) {
+export function getUnits({ armyId, declaredFactionId, search, skillId, equipmentId, weaponId, troopType, classification, characteristic, ava, avaMin, avaMax, points, pointsMin, pointsMax, swc, swcMin, swcMax, limit, offset, mercs, specops, teamops, reinforcement, descending }, signal) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (armyId) params.set("army_id", armyId);
   if (declaredFactionId) params.set("declared_faction_id", declaredFactionId);
@@ -78,6 +78,15 @@ export function getUnits({ armyId, declaredFactionId, search, skillId, equipment
   if (troopType) params.set("troop_type", troopType);
   if (classification) params.set("classification", classification);
   if (characteristic) params.set("characteristic", characteristic);
+  if (ava) params.set("ava", ava);
+  if (avaMin) params.set("ava_min", avaMin);
+  if (avaMax) params.set("ava_max", avaMax);
+  if (points) params.set("points", points);
+  if (pointsMin) params.set("points_min", pointsMin);
+  if (pointsMax) params.set("points_max", pointsMax);
+  if (swc) params.set("swc", swc);
+  if (swcMin) params.set("swc_min", swcMin);
+  if (swcMax) params.set("swc_max", swcMax);
   if (mercs) params.set("mercs", "1");
   if (specops) params.set("specops", "1");
   if (teamops) params.set("teamops", "1");

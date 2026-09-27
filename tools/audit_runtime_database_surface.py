@@ -575,6 +575,20 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
                 characteristic=str(characteristic["slug"]), limit=500
             ),
         ),
+        (
+            "units-contextual-numeric-filter",
+            lambda db: db.list_units(
+                army_id=int(playable["id"]),
+                skill_id=int(skill["id"]),
+                troop_type=str(troop_type["slug"]),
+                classification=str(classification["slug"]),
+                characteristic=str(characteristic["slug"]),
+                ava_min=0,
+                points_min=0,
+                swc_min=0,
+                limit=500,
+            ),
+        ),
         ("unit-detail", lambda db: db.get_unit(unit_id)),
         (
             "visible-unit-ids",

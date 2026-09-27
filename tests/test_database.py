@@ -2822,6 +2822,81 @@ def test_unit_categorical_filters_use_stable_public_slugs(
     assert database.list_units(characteristic="missing")["items"] == []
 
 
+def test_unit_numeric_filters_support_exact_values_and_inclusive_ranges(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    assert {item["id"] for item in database.list_units(army_id=101, ava="total")["items"]} == {1}
+    assert database.list_units(army_id=201, ava="total")["items"] == []
+    assert {item["id"] for item in database.list_units(army_id=201, ava=1)["items"]} == {1}
+    assert {item["id"] for item in database.list_units(ava_min=1, ava_max=1)["items"]} == {1}
+
+    assert {item["id"] for item in database.list_units(points=10)["items"]} == {1}
+    assert {
+        item["id"]
+        for item in database.list_units(points_min=10, points_max=10)["items"]
+    } == {1}
+    assert database.list_units(points_min=11)["items"] == []
+
+    assert {item["id"] for item in database.list_units(swc="0.5")["items"]} == {1}
+    assert {item["id"] for item in database.list_units(swc_min=0.5, swc_max=0.5)["items"]} == {1}
+    assert database.list_units(swc_min=1.0)["items"] == []
+
+
+def test_unit_numeric_filters_preserve_loadout_context(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["profile_weapons"] = []
+    normalized["tables"]["profile_weapon_extras"] = []
+    normalized["tables"]["unit_option_weapons"] = []
+    normalized["tables"]["unit_option_weapon_extras"] = []
+    normalized["tables"]["loadout_options"].append(
+        {
+            "army_id": 101,
+            "unit_id": 1,
+            "group_id": 1,
+            "option_id": 2,
+            "position": 2,
+            "name": "Cheap loadout",
+            "points": 5,
+            "swc": "0",
+            "minis": None,
+            "disabled": None,
+        }
+    )
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    assert {
+        item["id"]
+        for item in database.list_units(army_id=101, weapon_id=1, points=10)["items"]
+    } == {1}
+    assert database.list_units(army_id=101, weapon_id=1, points=5)["items"] == []
+
+
+def test_unit_swc_bonus_is_exact_only_not_an_ordinary_cost_range(
+    tmp_path: Path, normalized: dict
+) -> None:
+    army_101_loadout = next(
+        row
+        for row in normalized["tables"]["loadout_options"]
+        if row["army_id"] == 101
+    )
+    army_101_loadout["swc"] = "+1"
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    assert {item["id"] for item in database.list_units(army_id=101, swc="+1")["items"]} == {1}
+    assert database.list_units(army_id=101, swc_min=1, swc_max=1)["items"] == []
+
+
 def test_runtime_catalog_paths_use_canonical_profile_and_loadout_payloads(
     tmp_path: Path, normalized: dict
 ) -> None:
@@ -2928,6 +3003,18 @@ def test_database_with_different_compatibility_revision_requires_rebuild(
         {"army_id": 2**63},
         {"army_id": -(2**63) - 1},
         {"offset": 2**63},
+        {"ava": -1},
+        {"ava": 100},
+        {"ava": "unlimited"},
+        {"ava": 1, "ava_min": 1},
+        {"ava_min": 3, "ava_max": 2},
+        {"points": -1},
+        {"points": 10, "points_max": 10},
+        {"points_min": 2, "points_max": 1},
+        {"swc": "free"},
+        {"swc": "0.5", "swc_min": 0.5},
+        {"swc_min": -0.5},
+        {"swc_min": 2.0, "swc_max": 1.0},
     ],
 )
 def test_repository_rejects_invalid_query_arguments(tmp_path: Path, arguments: dict) -> None:

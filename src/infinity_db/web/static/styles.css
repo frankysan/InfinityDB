@@ -2056,6 +2056,55 @@ h2 {
   padding-top: 16px;
 }
 
+.advanced-numeric-filter-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  padding-top: 18px;
+}
+
+.numeric-filter {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.numeric-filter legend {
+  padding: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 550;
+  color: #566452;
+}
+
+.numeric-filter-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.numeric-filter-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  color: #6c7969;
+  font-size: var(--font-size-xs);
+}
+
+.numeric-filter-controls input {
+  min-width: 0;
+  padding: 8px 9px;
+}
+
+.advanced-filter-note {
+  margin: 12px 0 0;
+  color: #6c7969;
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -2997,6 +3046,11 @@ tbody tr:hover {
 }
 
 @media (max-width: 920px) {
+  .advanced-filter-row,
+  .advanced-numeric-filter-row {
+    grid-template-columns: 1fr;
+  }
+
   .sidebar {
     position: relative;
     z-index: 4;

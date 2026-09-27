@@ -12,6 +12,15 @@ New or materially revised entries use the project-domain labels defined in
 - **Web backend + Web frontend:** Add global search across Armies, Units, Skills,
   Equipment, Weapons, Traits, States, Hacking Programs, and Fireteam charts. Results
   label their domain and open the corresponding player-facing surface.
+- **Web backend + Web frontend:** Expand the Unit Explorer's Advanced Filters with
+  Troop Type, Classification, Characteristics, AVA, Points, and SWC alongside the
+  existing Skill, Equipment, and Weapon filters. AVA and Points accept exact values
+  or inclusive ranges; SWC supports exact ordinary costs, bonuses such as `+1`/`+1.5`,
+  the `-` display value, and inclusive ranges over ordinary numeric costs. AVA preserves
+  **Total** as a first-class value rather than exposing its internal numeric sentinel.
+- **Web backend + Web frontend:** Make the expanded Unit-filter state bookmarkable and
+  shareable through the URL, using stable public slugs for categorical filters where
+  possible while continuing to accept legacy numeric identifiers for compatibility.
 - **Web backend + Web frontend:** Present every source-specific Unit note with its
   source variant and applicable Army context, including notes that belong only to a
   non-representative variant.
@@ -22,6 +31,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web backend:** Keep compound Unit filters semantically coherent when AVA, Points,
+  or SWC is involved: profile/loadout-sensitive criteria must be satisfiable within a
+  compatible Army/profile-group/loadout context instead of being assembled from unrelated
+  options on the same logical Unit. Unit-level options remain Unit-wide where the source
+  model does not associate them with a profile group.
 - **Web frontend:** Keep Unit selection-relationship diagnostics in Developer mode,
   and omit redundant Army-context lists from source notes that apply across all
   currently shown Armies.

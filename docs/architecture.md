@@ -1382,22 +1382,33 @@ total above illustrates the response shape.
 - Unknown resources return 404; unsupported methods return 405; database read
   failures return 503 without exposing internal exception details.
 
-#### Planned 0.9 Unit Explorer filtering and extended-result contract
+#### 0.9 Unit Explorer filtering and extended-result contract
 
-The 0.9 Unit Explorer work extends the existing backend-owned filter contract rather than
+The 0.9 Unit Explorer extends the existing backend-owned filter contract rather than
 introducing a second browser-only interpretation of profile/loadout data. Categorical filters
-should resolve stable public identities where available, and every user-visible filter must have
-a defined URL representation so a filtered view can be shared and reproduced.
+resolve stable public identities where available, and every user-visible filter has a defined
+URL representation so a filtered view can be shared and reproduced. Troop Type,
+Classification, and Characteristics use public slugs with numeric IDs retained as compatibility
+fallbacks.
 
-Numeric or mostly numeric filters must support both exact-value matching and bounded ranges with consistently defined boundary semantics.
-The backend must retain the owning semantic context while evaluating them: AVA belongs to an
-Army/profile occurrence, while points and SWC belong to loadout occurrences. A compound query
-must not accidentally combine a weapon or other loadout-specific fact from one option with a
-points/SWC constraint that is satisfied only by an unrelated option. The exact conjunction
-rules are a 0.9 design decision and must be pinned by focused repository/API tests before the
-full numeric filter surface is exposed. SWC also requires domain-aware handling for ordinary
-numeric costs, bonuses such as `+1`/`+1.5`, and source values that are not ordinary costs; it
-must not be reduced to an unqualified floating-point range.
+AVA, points, and SWC support exact matching or an inclusive bounded range through `ava`,
+`ava_min`, `ava_max`, `points`, `points_min`, `points_max`, `swc`, `swc_min`, and `swc_max`.
+AVA exact matching accepts ordinary values from `0` through `99` and `total`; ranges cover
+ordinary numeric AVA only. Negative source values used for subordinate/ancillary profiles are
+not exposed as ordinary AVA filter values. Points use nonnegative integer exact/range values.
+SWC exact matching accepts ordinary numeric costs, bonus tokens such as `+1`/`+1.5`, and `-`;
+SWC ranges apply only to ordinary nonnegative numeric costs and deliberately exclude bonus and
+non-cost tokens.
+
+The backend retains the owning semantic context while evaluating contextual numeric filters:
+AVA belongs to an Army/profile occurrence, while points and SWC belong to loadout occurrences.
+When any AVA/points/SWC constraint participates in a query, other selected profile/group/loadout
+criteria must be satisfiable in the same source Army/profile-group/loadout context. Profile-level
+facts apply to the loadouts in their profile group; loadout-level facts remain loadout-local.
+Unit-option facts remain Unit-wide because the source model does not attach them to a profile
+group. This prevents a weapon or other loadout-specific fact from one option from satisfying a
+points/SWC constraint that is true only for an unrelated option. Focused repository/API tests
+pin exact/range inclusivity, special AVA/SWC values, and the loadout-coherence rule.
 
 The Unit list will gain an optional extended presentation mode. Its purpose is to expose enough
 profile context to evaluate filtered results without opening every Unit detail page: base

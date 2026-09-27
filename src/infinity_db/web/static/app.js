@@ -10,6 +10,9 @@ const elements = {
   skill: byId("skill-filter"), equipment: byId("equipment-filter"), weapon: byId("weapon-filter"),
   troopType: byId("troop-type-filter"), classification: byId("classification-filter"),
   characteristic: byId("characteristic-filter"),
+  ava: byId("ava-filter"), avaMin: byId("ava-min-filter"), avaMax: byId("ava-max-filter"),
+  points: byId("points-filter"), pointsMin: byId("points-min-filter"), pointsMax: byId("points-max-filter"),
+  swc: byId("swc-filter"), swcMin: byId("swc-min-filter"), swcMax: byId("swc-max-filter"),
   mercs: byId("mercs-filter"), specops: byId("specops-filter"), teamops: byId("teamops-filter"),
   reinforcement: byId("reinforcement-filter"),
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
@@ -40,6 +43,14 @@ elements.sort.classList.add("sortable-unit-name");
 elements.sort.replaceChildren(elements.sortButton);
 
 let state = readLocation();
+const advancedFilters = document.querySelector(".advanced-filters");
+if (advancedFilters && (state.skillId || state.equipmentId || state.weaponId
+  || state.troopType || state.classification || state.characteristic
+  || state.ava || state.avaMin || state.avaMax
+  || state.points || state.pointsMin || state.pointsMax
+  || state.swc || state.swcMin || state.swcMax)) {
+  advancedFilters.open = true;
+}
 let armiesLoaded = false;
 let requestNumber = 0;
 let controller;
@@ -48,11 +59,38 @@ let searchTimer;
 function hasActiveFilters() {
   return state.armyId || state.declaredFactionId || state.search
     || state.skillId || state.equipmentId || state.weaponId
-    || state.troopType || state.classification || state.characteristic;
+    || state.troopType || state.classification || state.characteristic
+    || state.ava || state.avaMin || state.avaMax
+    || state.points || state.pointsMin || state.pointsMax
+    || state.swc || state.swcMin || state.swcMax;
 }
 
 function domainFilterIdentifier(value) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? value : "";
+}
+
+function integerFilterValue(value, { max = Number.MAX_SAFE_INTEGER } = {}) {
+  if (!/^\d+$/.test(value)) return "";
+  const numeric = Number(value);
+  return Number.isSafeInteger(numeric) && numeric <= max ? String(numeric) : "";
+}
+
+function decimalFilterValue(value) {
+  if (!/^\d+(?:\.\d+)?$/.test(value)) return "";
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric >= 0 ? value : "";
+}
+
+function avaExactFilterValue(value) {
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "t" || normalized === "total") return "total";
+  return integerFilterValue(normalized, { max: 99 });
+}
+
+function swcExactFilterValue(value) {
+  const normalized = value.trim();
+  return /^(?:\+)?(?:0|[1-9]\d*)(?:\.\d+)?$/.test(normalized) || normalized === "-"
+    ? normalized : "";
 }
 
 function readLocation() {
@@ -66,6 +104,15 @@ function readLocation() {
   const troopType = params.get("troop_type") || "";
   const classification = params.get("classification") || "";
   const characteristic = params.get("characteristic") || "";
+  const ava = params.get("ava") || "";
+  const avaMin = params.get("ava_min") || "";
+  const avaMax = params.get("ava_max") || "";
+  const points = params.get("points") || "";
+  const pointsMin = params.get("points_min") || "";
+  const pointsMax = params.get("points_max") || "";
+  const swc = params.get("swc") || "";
+  const swcMin = params.get("swc_min") || "";
+  const swcMax = params.get("swc_max") || "";
   return {
     armyId: domainFilterIdentifier(armyId),
     declaredFactionId: /^\d+$/.test(declaredFactionId) ? declaredFactionId : "",
@@ -75,6 +122,15 @@ function readLocation() {
     troopType: domainFilterIdentifier(troopType),
     classification: domainFilterIdentifier(classification),
     characteristic: domainFilterIdentifier(characteristic),
+    ava: avaExactFilterValue(ava),
+    avaMin: integerFilterValue(avaMin, { max: 99 }),
+    avaMax: integerFilterValue(avaMax, { max: 99 }),
+    points: integerFilterValue(points),
+    pointsMin: integerFilterValue(pointsMin),
+    pointsMax: integerFilterValue(pointsMax),
+    swc: swcExactFilterValue(swc),
+    swcMin: decimalFilterValue(swcMin),
+    swcMax: decimalFilterValue(swcMax),
     search: (params.get("search") || "").trim().slice(0, 200),
     mercs: elements.mercs.checked,
     specops: elements.specops.checked,
@@ -88,7 +144,7 @@ function readLocation() {
 
 function writeLocation(replace = false) {
   const url = new URL(window.location.href);
-  for (const key of ["army_id", "declared_faction_id", "search", "skill_id", "equipment_id", "weapon_id", "troop_type", "classification", "characteristic", "offset", "mercs", "specops", "teamops", "reinforcement", "order"]) url.searchParams.delete(key);
+  for (const key of ["army_id", "declared_faction_id", "search", "skill_id", "equipment_id", "weapon_id", "troop_type", "classification", "characteristic", "ava", "ava_min", "ava_max", "points", "points_min", "points_max", "swc", "swc_min", "swc_max", "offset", "mercs", "specops", "teamops", "reinforcement", "order"]) url.searchParams.delete(key);
   if (state.armyId) url.searchParams.set("army_id", state.armyId);
   if (state.declaredFactionId) {
     url.searchParams.set("declared_faction_id", state.declaredFactionId);
@@ -100,6 +156,15 @@ function writeLocation(replace = false) {
   if (state.troopType) url.searchParams.set("troop_type", state.troopType);
   if (state.classification) url.searchParams.set("classification", state.classification);
   if (state.characteristic) url.searchParams.set("characteristic", state.characteristic);
+  if (state.ava) url.searchParams.set("ava", state.ava);
+  if (state.avaMin) url.searchParams.set("ava_min", state.avaMin);
+  if (state.avaMax) url.searchParams.set("ava_max", state.avaMax);
+  if (state.points) url.searchParams.set("points", state.points);
+  if (state.pointsMin) url.searchParams.set("points_min", state.pointsMin);
+  if (state.pointsMax) url.searchParams.set("points_max", state.pointsMax);
+  if (state.swc) url.searchParams.set("swc", state.swc);
+  if (state.swcMin) url.searchParams.set("swc_min", state.swcMin);
+  if (state.swcMax) url.searchParams.set("swc_max", state.swcMax);
   if (state.offset) url.searchParams.set("offset", String(state.offset));
   if (state.descending) url.searchParams.set("order", "desc");
   if (url.href !== window.location.href) {
@@ -116,6 +181,15 @@ function syncFilters() {
   elements.troopType.value = state.troopType;
   elements.classification.value = state.classification;
   elements.characteristic.value = state.characteristic;
+  elements.ava.value = state.ava;
+  elements.avaMin.value = state.avaMin;
+  elements.avaMax.value = state.avaMax;
+  elements.points.value = state.points;
+  elements.pointsMin.value = state.pointsMin;
+  elements.pointsMax.value = state.pointsMax;
+  elements.swc.value = state.swc;
+  elements.swcMin.value = state.swcMin;
+  elements.swcMax.value = state.swcMax;
   elements.mercs.checked = state.mercs;
   elements.specops.checked = state.specops;
   elements.teamops.checked = state.teamops;
@@ -365,6 +439,15 @@ function applyFilters() {
     skillId: elements.skill.value, equipmentId: elements.equipment.value, weaponId: elements.weapon.value,
     troopType: elements.troopType.value, classification: elements.classification.value,
     characteristic: elements.characteristic.value,
+    ava: avaExactFilterValue(elements.ava.value),
+    avaMin: integerFilterValue(elements.avaMin.value, { max: 99 }),
+    avaMax: integerFilterValue(elements.avaMax.value, { max: 99 }),
+    points: integerFilterValue(elements.points.value),
+    pointsMin: integerFilterValue(elements.pointsMin.value),
+    pointsMax: integerFilterValue(elements.pointsMax.value),
+    swc: swcExactFilterValue(elements.swc.value),
+    swcMin: decimalFilterValue(elements.swcMin.value),
+    swcMax: decimalFilterValue(elements.swcMax.value),
     mercs: elements.mercs.checked, specops: elements.specops.checked, teamops: elements.teamops.checked,
     reinforcement: elements.reinforcement.checked,
   };
@@ -381,6 +464,8 @@ function clearFilters() {
     ...state, armyId: "", declaredFactionId: "", search: "", offset: 0,
     skillId: "", equipmentId: "", weaponId: "",
     troopType: "", classification: "", characteristic: "",
+    ava: "", avaMin: "", avaMax: "", points: "", pointsMin: "", pointsMax: "",
+    swc: "", swcMin: "", swcMax: "",
   };
   syncFilters();
   writeLocation();
@@ -401,6 +486,16 @@ function toggleSortOrder() {
   load();
 }
 
+function applyNumericFilter(exact, minimum, maximum, changed) {
+  if (changed === exact && exact.value.trim()) {
+    minimum.value = "";
+    maximum.value = "";
+  } else if (changed !== exact && changed.value.trim()) {
+    exact.value = "";
+  }
+  applyFilters();
+}
+
 elements.filters.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); });
 elements.army.addEventListener("change", applyFilters);
 for (const filter of [
@@ -408,6 +503,15 @@ for (const filter of [
   elements.troopType, elements.classification, elements.characteristic,
 ]) {
   filter.addEventListener("change", applyFilters);
+}
+for (const [exact, minimum, maximum] of [
+  [elements.ava, elements.avaMin, elements.avaMax],
+  [elements.points, elements.pointsMin, elements.pointsMax],
+  [elements.swc, elements.swcMin, elements.swcMax],
+]) {
+  for (const filter of [exact, minimum, maximum]) {
+    filter.addEventListener("change", () => applyNumericFilter(exact, minimum, maximum, filter));
+  }
 }
 for (const filter of [elements.mercs, elements.specops, elements.teamops, elements.reinforcement]) {
   filter.addEventListener("change", applyFilters);

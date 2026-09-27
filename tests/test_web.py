@@ -135,6 +135,7 @@ def app_database_template(tmp_path_factory: pytest.TempPathFactory) -> Path:
                         "id": 1,
                         "name": "Ranger Profile",
                         "type": 1,
+                        "ava": 2,
                         "skills": [{"id": 11, "extra": [41]}],
                         "equip": [{"id": 21, "q": 2, "extra": [42]}],
                         "weapons": [{"id": 31, "extra": [43]}],
@@ -909,6 +910,26 @@ def test_unit_categorical_filters_are_exposed_and_filter_units(app: Callable) ->
     assert json.loads(body)["items"] == []
 
 
+def test_unit_numeric_filters_support_exact_values_and_ranges(app: Callable) -> None:
+    matching_queries = (
+        "ava=2",
+        "ava_min=1&ava_max=2",
+        "points=20",
+        "points_min=19&points_max=20",
+        "swc=0",
+        "swc_min=0&swc_max=0",
+    )
+    for query in matching_queries:
+        status, _, body = request(app, "/api/units", query=query)
+        assert status == 200
+        assert {item["id"] for item in json.loads(body)["items"]} == {1}
+
+    for query in ("ava=total", "ava_min=3", "points_max=19", "swc_min=0.5"):
+        status, _, body = request(app, "/api/units", query=query)
+        assert status == 200
+        assert json.loads(body)["items"] == []
+
+
 def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     status, _, body = request(app, "/api/units", query="army_id=101")
     assert status == 200
@@ -1212,6 +1233,15 @@ def test_unit_search_and_empty_results(
         "offset=9223372036854775808",
         "army_id=ABC",
         "army_id=9223372036854775808",
+        "ava=-1",
+        "ava=100",
+        "ava=1&ava_min=1",
+        "ava_min=3&ava_max=2",
+        "points=10&points_max=10",
+        "points_min=1.5",
+        "swc=free",
+        "swc_min=-1",
+        "swc_min=2&swc_max=1",
         urlencode({"search": "x" * 201}),
     ],
 )

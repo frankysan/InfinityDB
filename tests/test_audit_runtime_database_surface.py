@@ -129,7 +129,7 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     report = audit_database(_runtime_database(tmp_path), project_root=ROOT)
 
     assert report["summary"] == {
-        "surfaceCount": 40,
+        "surfaceCount": 41,
         "runtimeTableCount": 81,
         "runtimeFieldCount": 388,
         "tableWithOpenIssueCount": 0,
