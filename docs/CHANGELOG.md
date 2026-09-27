@@ -7,6 +7,8 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
+## [0.8.1] - 2026-09-27
+
 ### Changed
 
 - **Web backend + Web frontend:** Present Hacking Program profiles with the same

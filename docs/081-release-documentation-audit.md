@@ -94,9 +94,10 @@ paths. Searches for the retired transferred-artifact deployment workflow found o
 changelog material. Active deployment/reference documentation consistently treats
 `army-symbol-build.json` as local processing provenance rather than a production input.
 
-References to 0.8.0 were retained where they identify the released connected-data milestone or
-historical audit/release evidence. The current package version and README current-release line
-remain 0.8.0 intentionally until the release-metadata step described by `docs/releasing.md`.
+References to 0.8.0 are retained where they identify the released connected-data milestone or
+historical audit/release evidence. Release metadata is now finalized consistently at 0.8.1 in
+`pyproject.toml`, `src/infinity_army_data/__init__.py`, the README current-release line, and the
+dated changelog section.
 
 The release-artifact verifier also passed against the audited work state: both runtime databases
 were valid and snapshot-matched, with 806/806 published SVGs and 806/806 browser-referenced SVGs
@@ -104,8 +105,7 @@ verified against the tracked publication manifest.
 
 ## Remaining release preparation
 
-This audit closes the documentation-correctness pass, not the release itself. Before tagging
-0.8.1, finalize `Unreleased` into the dated 0.8.1 changelog section, update the package/application
-version and README current-release line together, rerun documentation checks affected by those
-metadata edits, and then execute the complete local and hosted release validation defined by
-`docs/releasing.md`.
+This audit closes the documentation-correctness and release-metadata passes, not the release
+itself. Before tagging 0.8.1, rerun the complete local release gate, confirm the required hosted
+workflows are green for the exact release commit, verify the working tree contains only intentional
+release changes, and then follow the tag/publish/deployment steps in `docs/releasing.md`.

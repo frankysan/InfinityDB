@@ -5,7 +5,7 @@ data. While Infinity Army presents one army at a time, InfinityDB brings those
 views together into a game-wide reference for exploring units, profiles,
 equipment, skills, weapons, and relationships across armies.
 
-Current release: **0.8.0** (2026-09-26).
+Current release: **0.8.1** (2026-09-27).
 
 ## Guiding principles
 
