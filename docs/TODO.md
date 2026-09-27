@@ -60,10 +60,6 @@ operations hardening work reserved for 0.10.0.
 
 ### Player-facing completeness and navigation
 
-- [ ] Add a global search field spanning **every database domain**. Each result must
-  show its domain explicitly and link to the correct domain-specific detail surface,
-  so identical or similar names across domains remain unambiguous.
-
 - [ ] Add a simple wiki-like internal-link syntax for **all maintained text fields**.
   A text value should be able to reference another semantic identity inline,
   for example: `Apply the [[skill:speculative-attack]] -6 MOD and Range MODs; other

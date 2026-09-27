@@ -2680,6 +2680,40 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
     assert json.loads(body)["items"] == [expected[catalog]]
 
 
+def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None:
+    status, headers, body = request(app, "/search?q=alpha")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"Every database domain" in body
+    assert b'action="/search" role="search"' in body
+    assert b"search.js" in body
+
+    status, _, body = request(app, "/api/search", query="q=alpha")
+    assert status == 200
+    items = json.loads(body)["items"]
+    assert {item["domain"] for item in items} >= {"Army", "Unit"}
+    assert {item["href"] for item in items} >= {
+        "/units?army_id=alpha-company",
+        "/units/ranger-prototype",
+    }
+
+    status, _, body = request(app, "/api/search", query="q=combi")
+    assert status == 200
+    assert {
+        "domain": "Weapon",
+        "name": "Combi Rifle",
+        "href": "/weapons/combi-rifle",
+    } in json.loads(body)["items"]
+
+    status, _, body = request(app, "/api/search", query="q=&unexpected=value")
+    assert status == 400
+    assert json.loads(body)["error"] == "Unknown query parameter: unexpected"
+
+    status, _, body = request(app, "/api/search", query="q=alpha&q=beta")
+    assert status == 400
+    assert json.loads(body)["error"] == "Provide q exactly once"
+
+
 def test_catalog_api_exposes_all_accepted_numeric_source_ids(app: Callable) -> None:
     with sqlite3.connect(app.database.path) as connection:
         connection.execute(

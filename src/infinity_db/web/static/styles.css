@@ -127,7 +127,7 @@
   --font-size-title-sm: 2.533333rem;
   --font-size-title-md: 2.8rem;
   --font-size-title: clamp(2.266667rem, 3.5vw, 3.4rem);
-  --font-size-hero-compact: clamp(2.533333rem, 11vw, 3.466667rem);
+  --font-size-hero-compact: clamp(2.4rem, 10vw, 3.2rem);
   --font-size-hero: clamp(2.8rem, 5vw, 4.533333rem);
   --shadow-card: 0 3px 12px rgb(32 59 53 / 4%);
   --shadow-surface: 0 3px 6px #203b3503;
@@ -318,6 +318,24 @@ html:not([data-developer-mode="true"]) .id-column {
 
 .sidebar-body {
   padding-top: 66px;
+}
+
+.global-search {
+  margin: 0 0 28px;
+}
+
+.global-search input {
+  border-color: #4a6054;
+  color: var(--color-nav-text-active);
+  background: #203832;
+}
+
+.global-search input::placeholder {
+  color: var(--color-nav-text-muted);
+}
+
+.global-search .search-input svg {
+  stroke: var(--color-nav-text-muted);
 }
 
 .menu {
@@ -2206,6 +2224,49 @@ input::placeholder {
   min-height: 310px;
 }
 
+.search-form {
+  align-items: end;
+}
+
+.search-form .button-primary {
+  margin: 0;
+}
+
+.search-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--color-border-default);
+}
+
+.search-result {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 18px 22px;
+  background: var(--color-surface-default);
+}
+
+.search-result>a {
+  min-width: 0;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.search-domain {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  letter-spacing: .7px;
+  text-transform: uppercase;
+}
+
 .state-panel {
   min-height: 310px;
   display: flex;
@@ -2951,6 +3012,11 @@ tbody tr:hover {
     padding: 0;
   }
 
+  .global-search {
+    width: min(270px, 35vw);
+    margin: 0 0 0 8px;
+  }
+
   .menu {
     position: relative;
     display: block;
@@ -3082,6 +3148,10 @@ tbody tr:hover {
 @media (max-width: 600px) {
   .sidebar {
     padding: 16px 18px;
+  }
+
+  .global-search {
+    width: min(190px, 40vw);
   }
 
   .brand {

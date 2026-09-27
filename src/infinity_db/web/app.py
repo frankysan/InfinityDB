@@ -29,6 +29,7 @@ from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.fireteam_reference import fireteam_reference
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.search_catalog import SearchCatalog
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.symbol_catalog import SymbolCatalog
@@ -59,6 +60,7 @@ ASSETS = {
     "/static/skill.js": ("skill.js", "text/javascript; charset=utf-8"),
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
+    "/static/search.js": ("search.js", "text/javascript; charset=utf-8"),
     "/static/hacking-program-detail.js": (
         "hacking-program-detail.js",
         "text/javascript; charset=utf-8",
@@ -156,6 +158,7 @@ def _metric_route(path: str) -> str:
         "/hacking-programs",
         "/skill-extras",
         "/fireteams",
+        "/search",
         "/api/version",
         "/api/armies",
         "/api/units",
@@ -168,6 +171,7 @@ def _metric_route(path: str) -> str:
         "/api/hacking-programs",
         "/api/skill-extras",
         "/api/fireteams",
+        "/api/search",
     }:
         return path
     for pattern, normalized in (
@@ -506,6 +510,14 @@ class Application:
         self.hacking_program_catalog = HackingProgramCatalog(
             self.database, self.rules_database
         )
+        self.search_catalog = SearchCatalog(
+            self.database,
+            self.skill_catalog,
+            self.equipment_catalog,
+            self.trait_catalog,
+            self.state_catalog,
+            self.hacking_program_catalog,
+        )
         self.catalog_rules = CatalogRules(self.rules_database)
         self.symbol_catalog = SymbolCatalog()
         self.fireteam_rules_reference = fireteam_reference(self.rules_database)
@@ -650,6 +662,16 @@ class Application:
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Units", None)),
                 catalog_tag="Unit catalog",
+            )
+        elif path == "/search":
+            content_type = "text/html; charset=utf-8"
+            body = _page(
+                "search.html",
+                source_data_changed_on=self.source_data_changed_on,
+                snapshot_downloaded_on=self.snapshot_downloaded_on,
+                snapshot_revision=self.snapshot_revision,
+                breadcrumbs=(("Database", "/"), ("Search", None)),
+                catalog_tag="Global search",
             )
         elif path in ASSETS:
             filename, content_type = ASSETS[path]
@@ -852,6 +874,30 @@ class Application:
                 "snapshot_revision": self.snapshot_revision,
             }
             cache_control = "no-store"
+        elif path == "/api/search":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                params = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=True)
+                unknown = sorted(set(params) - {"q", "cache_bust"})
+                if unknown:
+                    raise ValueError(f"Unknown query parameter: {unknown[0]}")
+                if len(params.get("q", [])) != 1:
+                    raise ValueError("Provide q exactly once")
+                query = params["q"][0].strip()
+                if not query:
+                    raise ValueError("q must not be empty")
+                if len(query) > 200:
+                    raise ValueError("q must be at most 200 characters")
+                if len(params.get("cache_bust", [])) > 1:
+                    raise ValueError("Provide cache_bust only once")
+                payload = {"items": self.search_catalog.search(query)}
+            except ValueError as exc:
+                status = HTTPStatus.BAD_REQUEST
+                payload = {"error": str(exc)}
+            except (OSError, sqlite3.Error):
+                LOGGER.exception("Could not search the database")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "Search is unavailable. Please try again."}
         elif path == "/api/fireteams":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:

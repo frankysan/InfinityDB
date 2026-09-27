@@ -7,6 +7,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
+### Added
+
+- **Web backend + Web frontend:** Add global search across Armies, Units, Skills,
+  Equipment, Weapons, Traits, States, Hacking Programs, and Fireteam charts. Results
+  label their domain and open the corresponding player-facing surface.
+
 ### Fixed
 
 - **Web frontend:** Make ordinary Fireteam member tables fit narrow mobile viewports instead of

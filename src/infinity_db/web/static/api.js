@@ -59,6 +59,10 @@ export function getVersion(signal) {
   return get("/api/version", signal);
 }
 
+export function getSearchResults(query, signal) {
+  return get(`/api/search?${new URLSearchParams({ q: query })}`, signal);
+}
+
 export function getUnits({ armyId, declaredFactionId, search, skillId, equipmentId, weaponId, limit, offset, mercs, specops, teamops, reinforcement, descending }, signal) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (armyId) params.set("army_id", armyId);

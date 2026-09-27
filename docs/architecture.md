@@ -1402,6 +1402,16 @@ When curated rules define skill parameter semantics, each item also carries the
 corresponding `parameter_semantics` display hint. The Skill Modifiers browser
 page consumes this endpoint.
 
+### `GET /api/search?q={name}`
+
+Returns `{ "items": [...] }` for a non-empty name search spanning every
+player-facing database domain: Armies, Units, Skills, Equipment, Weapons, Traits,
+States, Hacking Programs, and Fireteam charts. Each result carries its explicit
+`domain`, display `name`, and a route-backed `href`; consumers do not infer a target
+surface from a label. The endpoint composes the existing domain read models so public
+slugs, rules-only identities, and Army-scoped Fireteam charts remain resolved by their
+own canonical owners rather than by a separate search identity scheme.
+
 ### Rules-reference endpoints
 
 `GET /api/skills`, `GET /api/equipment`, and `GET /api/weapons` return
