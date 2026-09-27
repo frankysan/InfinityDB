@@ -3161,11 +3161,17 @@ def test_072_detail_and_catalog_presentation_contract(
         'body[data-catalog="traits"] #catalog-table-container thead th:first-child',
         {"width": "68%"},
     )
-    assert b"--font-size-xs: 11px" in styles
-    assert b"--font-size-base: 15px" in styles
-    assert b"--font-size-title: clamp(34px, 3.5vw, 51px)" in styles
+    assert b"--font-size-root: 93.75%" in styles
+    assert b"font-size: var(--font-size-root)" in styles
+    assert b"--font-size-xs: 0.733333rem" in styles
+    assert b"--font-size-base: 1rem" in styles
+    assert b"--font-size-title: clamp(2.266667rem, 3.5vw, 3.4rem)" in styles
     assert_css_rule(styles, ".intro-copy", {"font-size": "var(--font-size-base)"})
     stylesheet = styles.decode("utf-8")
+    token_values = re.findall(r"--font-size-(?!root)[\w-]+:\s*([^;]+);", stylesheet)
+    assert token_values
+    assert all("px" not in value for value in token_values)
+    assert all("rem" in value for value in token_values)
     font_sizes = re.findall(r"(?m)^\s*font-size:\s*([^;]+);", stylesheet)
     assert font_sizes
     assert all(value.startswith("var(") for value in font_sizes)

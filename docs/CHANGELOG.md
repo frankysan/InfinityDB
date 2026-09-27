@@ -9,10 +9,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
-- **Web frontend:** Standardize browser typography on a canonical shared font-size scale so
-  headings, body copy, metadata, and dense tables no longer carry page-local pixel sizes. Restore
-  introductory text below page titles to the normal body tier and contain the Fireteam general
-  rules table on narrow screens with its own horizontal scroll area and compact typography.
+- **Web frontend:** Standardize browser typography on a canonical shared font-size scale with one
+  browser-relative root size and `rem`-based tiers, so the interface can scale coherently without
+  page-local font sizes. Restore introductory text below page titles to the normal body tier and
+  make Fireteam rules, headers, and the Level-bonuses table wrap within narrow screens.
 - **Acquisition + Data processing + Web backend + Web frontend:** Advance snapshot provenance to
   format version 3 for new acquisitions. Army manifests now record the latest date encoded across
   all contained Army source versions; the sidebar presents that player-useful **Army data last

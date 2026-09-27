@@ -1118,11 +1118,14 @@ are intentionally exempt because their DOM survives the replacement.
 
 `static/styles.css` is the browser design-system entry point. Its root tokens
 define shared color roles, surfaces, borders, spacing, radii, control height,
-focus treatment, shadows, and the canonical typography scale. All component font sizes
-must use the shared `--font-size-*` tokens rather than literal pixel sizes or page-local
-clamps. Responsive typography changes should remap or select from that scale centrally;
-normal introductory/body copy uses the base tier while metadata and dense tables use the
-smaller tiers deliberately. Reuse these tokens and established components
+focus treatment, shadows, and the canonical typography scale. `--font-size-root` is the
+single base size; fixed `--font-size-*` tiers are expressed in `rem` so the whole interface
+scales coherently when that root changes. The root uses a percentage of the browser default
+rather than a fixed pixel value so user font-size preferences remain effective. Fluid title
+and hero tokens may use viewport interpolation inside `clamp()`, but their bounds remain
+`rem`-based. Components must use these shared tokens rather than literal sizes or page-local
+clamps. Normal introductory/body copy uses the base tier while metadata and dense tables use
+the smaller tiers deliberately. Reuse these tokens and established components
 such as `.main`, `.topbar`, `.explorer`, `.button`, and `.page-footer` rather
 than introducing page-local visual values. Detail pages use `.main-detail` to
 retain the common layout and responsive behavior. Detail renderers also reuse

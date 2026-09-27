@@ -26,23 +26,26 @@
   --space-3: 24px;
   --space-4: 32px;
   --control-height: 42px;
-  /* Canonical typography scale. Components use only these sizes so responsive
-     density can be adjusted centrally without page-specific pixel values. */
-  --font-size-xs: 11px;
-  --font-size-sm: 12px;
-  --font-size-md: 13px;
-  --font-size-base: 15px;
-  --font-size-lg: 17px;
-  --font-size-xl: 19px;
-  --font-size-2xl: 21px;
-  --font-size-3xl: 24px;
-  --font-size-4xl: 29px;
-  --font-size-5xl: 34px;
-  --font-size-title-sm: 38px;
-  --font-size-title-md: 42px;
-  --font-size-title: clamp(34px, 3.5vw, 51px);
-  --font-size-hero-compact: clamp(38px, 11vw, 52px);
-  --font-size-hero: clamp(42px, 5vw, 68px);
+  /* Canonical typography scale. The root scale is the only base size; fixed
+     tiers are rem ratios so changing it scales the interface coherently.
+     Percentage root sizing preserves the user's browser font-size preference. */
+  --font-size-root: 93.75%;
+  font-size: var(--font-size-root);
+  --font-size-xs: 0.733333rem;
+  --font-size-sm: 0.8rem;
+  --font-size-md: 0.866667rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.133333rem;
+  --font-size-xl: 1.266667rem;
+  --font-size-2xl: 1.4rem;
+  --font-size-3xl: 1.6rem;
+  --font-size-4xl: 1.933333rem;
+  --font-size-5xl: 2.266667rem;
+  --font-size-title-sm: 2.533333rem;
+  --font-size-title-md: 2.8rem;
+  --font-size-title: clamp(2.266667rem, 3.5vw, 3.4rem);
+  --font-size-hero-compact: clamp(2.533333rem, 11vw, 3.466667rem);
+  --font-size-hero: clamp(2.8rem, 5vw, 4.533333rem);
   --shadow-card: 0 3px 12px rgb(32 59 53 / 4%);
   --shadow-surface: 0 3px 6px #203b3503;
   --shadow-logo-hero: 0 14px 22px rgb(27 63 47 / 18%);
