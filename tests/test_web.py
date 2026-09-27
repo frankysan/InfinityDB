@@ -892,6 +892,20 @@ def test_unit_categorical_filters_are_exposed_and_filter_units(app: Callable) ->
             {"id": 1, "slug": "light-infantry", "name": "Light Infantry"}
         ],
         "characteristics": [],
+        "numeric": {
+            "ava": {
+                "exact_values": ["2"],
+                "range": {"min": 2, "max": 2, "step": 1},
+            },
+            "points": {
+                "exact_values": ["20"],
+                "range": {"min": 20, "max": 20, "step": 1},
+            },
+            "swc": {
+                "exact_values": ["0"],
+                "range": {"min": 0.0, "max": 0.0, "step": 0.5},
+            },
+        },
     }
 
     for query in (
@@ -1308,6 +1322,12 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
         b'characteristic-filter',
     ):
         assert filter_id in body
+    for exact_filter in (b'ava-filter', b'points-filter', b'swc-filter'):
+        assert b'<select id="' + exact_filter + b'" disabled>' in body
+    for range_filter in (b'ava', b'points', b'swc'):
+        assert b'data-range-filter="' + range_filter + b'"' in body
+        assert b'id="' + range_filter + b'-min-filter" class="range-input range-input-min"' in body
+        assert b'id="' + range_filter + b'-max-filter" class="range-input range-input-max"' in body
 
     status, _, script = request(app, "/static/app.js")
     assert status == 200
@@ -1315,6 +1335,8 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b"renderAvailabilitySummary(data)" in script
     assert b"summary.shown" in script
     assert b"summary.available" in script
+    assert b'populateNumericFilter("ava", unitFilters.numeric?.ava)' in script
+    assert b'updateNumericRangeFromInput(control, input)' in script
 
 
 def test_browser_version_check_uses_an_uncached_server_version(app: Callable) -> None:
@@ -3309,6 +3331,17 @@ def test_catalog_usage_summaries_wrap_variant_context_on_narrow_layouts(
         ".usage-section-group .army-profile-title>.section-index",
         {"margin-left": "auto", "text-align": "right"},
     )
+
+
+def test_unit_explorer_intro_disables_desktop_break_at_tablet_widths(app: Callable) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+
+    assert status == 200
+    tablet_media = styles.index(b"@media (max-width: 920px)")
+    mobile_media = styles.index(b"@media (max-width: 600px)")
+    desktop_break = styles.index(b".desktop-break {", tablet_media, mobile_media)
+    assert desktop_break > tablet_media
+    assert b"display: none" in styles[desktop_break:mobile_media]
 
 
 def test_skill_details_frontend_opens_wiki_links_in_a_new_tab(app: Callable) -> None:

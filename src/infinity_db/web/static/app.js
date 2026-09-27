@@ -11,8 +11,11 @@ const elements = {
   troopType: byId("troop-type-filter"), classification: byId("classification-filter"),
   characteristic: byId("characteristic-filter"),
   ava: byId("ava-filter"), avaMin: byId("ava-min-filter"), avaMax: byId("ava-max-filter"),
+  avaMinValue: byId("ava-min-value"), avaMaxValue: byId("ava-max-value"),
   points: byId("points-filter"), pointsMin: byId("points-min-filter"), pointsMax: byId("points-max-filter"),
+  pointsMinValue: byId("points-min-value"), pointsMaxValue: byId("points-max-value"),
   swc: byId("swc-filter"), swcMin: byId("swc-min-filter"), swcMax: byId("swc-max-filter"),
+  swcMinValue: byId("swc-min-value"), swcMaxValue: byId("swc-max-value"),
   mercs: byId("mercs-filter"), specops: byId("specops-filter"), teamops: byId("teamops-filter"),
   reinforcement: byId("reinforcement-filter"),
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
@@ -29,6 +32,27 @@ const elements = {
   previous: [byId("previous-page-top"), byId("previous-page-bottom")],
   next: [byId("next-page-top"), byId("next-page-bottom")],
   sort: document.querySelector("#table-container th"),
+};
+
+const numericRangeControls = {
+  ava: {
+    exact: elements.ava, minimum: elements.avaMin, maximum: elements.avaMax,
+    minimumValue: elements.avaMinValue, maximumValue: elements.avaMaxValue,
+    container: document.querySelector('[data-range-filter="ava"]'),
+    minimumState: "avaMin", maximumState: "avaMax", metadata: null,
+  },
+  points: {
+    exact: elements.points, minimum: elements.pointsMin, maximum: elements.pointsMax,
+    minimumValue: elements.pointsMinValue, maximumValue: elements.pointsMaxValue,
+    container: document.querySelector('[data-range-filter="points"]'),
+    minimumState: "pointsMin", maximumState: "pointsMax", metadata: null,
+  },
+  swc: {
+    exact: elements.swc, minimum: elements.swcMin, maximum: elements.swcMax,
+    minimumValue: elements.swcMinValue, maximumValue: elements.swcMaxValue,
+    container: document.querySelector('[data-range-filter="swc"]'),
+    minimumState: "swcMin", maximumState: "swcMax", metadata: null,
+  },
 };
 
 document.querySelector(".results-toolbar").remove();
@@ -91,6 +115,114 @@ function swcExactFilterValue(value) {
   const normalized = value.trim();
   return /^(?:\+)?(?:0|[1-9]\d*)(?:\.\d+)?$/.test(normalized) || normalized === "-"
     ? normalized : "";
+}
+
+function exactNumericLabel(name, value) {
+  if (name === "ava" && value === "total") return "Total";
+  return value;
+}
+
+function populateNumericFilter(name, metadata) {
+  const control = numericRangeControls[name];
+  if (!control) return;
+  control.exact.replaceChildren(new Option("Any exact value", ""));
+  const values = Array.isArray(metadata?.exact_values) ? metadata.exact_values : [];
+  for (const value of values) {
+    control.exact.add(new Option(exactNumericLabel(name, value), value));
+  }
+  const currentExact = state[name];
+  if (currentExact && !values.includes(currentExact)) {
+    control.exact.add(new Option(`${exactNumericLabel(name, currentExact)} (not present)`, currentExact));
+  }
+  control.exact.disabled = false;
+
+  const range = metadata?.range;
+  if (!range || !Number.isFinite(Number(range.min)) || !Number.isFinite(Number(range.max))) {
+    control.metadata = null;
+    control.minimum.disabled = true;
+    control.maximum.disabled = true;
+    control.minimumValue.textContent = "—";
+    control.maximumValue.textContent = "—";
+    return;
+  }
+  control.metadata = {
+    min: Number(range.min),
+    max: Number(range.max),
+    step: Number(range.step) || 1,
+  };
+  for (const input of [control.minimum, control.maximum]) {
+    input.min = String(control.metadata.min);
+    input.max = String(control.metadata.max);
+    input.step = String(control.metadata.step);
+    input.disabled = false;
+  }
+}
+
+function rangeDisplayValue(value) {
+  return String(Number(value));
+}
+
+function updateNumericRangeVisuals(control) {
+  if (!control.metadata) return;
+  const minimum = Number(control.minimum.value);
+  const maximum = Number(control.maximum.value);
+  const span = control.metadata.max - control.metadata.min;
+  const start = span ? ((minimum - control.metadata.min) / span) * 100 : 0;
+  const end = span ? ((maximum - control.metadata.min) / span) * 100 : 100;
+  control.container.style.setProperty("--range-start", `${Math.max(0, Math.min(100, start))}%`);
+  control.container.style.setProperty("--range-end", `${Math.max(0, Math.min(100, end))}%`);
+  control.minimumValue.textContent = rangeDisplayValue(minimum);
+  control.maximumValue.textContent = rangeDisplayValue(maximum);
+}
+
+function syncNumericRangeControl(control) {
+  if (!control.metadata) return;
+  const requestedMinimum = state[control.minimumState];
+  const requestedMaximum = state[control.maximumState];
+  const minimum = requestedMinimum === ""
+    ? control.metadata.min : Number(requestedMinimum);
+  const maximum = requestedMaximum === ""
+    ? control.metadata.max : Number(requestedMaximum);
+  control.minimum.value = String(Math.max(control.metadata.min, Math.min(control.metadata.max, minimum)));
+  control.maximum.value = String(Math.max(control.metadata.min, Math.min(control.metadata.max, maximum)));
+  updateNumericRangeVisuals(control);
+}
+
+function resetNumericRangeControl(control) {
+  if (!control.metadata) return;
+  control.minimum.value = String(control.metadata.min);
+  control.maximum.value = String(control.metadata.max);
+  updateNumericRangeVisuals(control);
+}
+
+function numericRangeStateValue(name, control, input, boundary) {
+  if (!control.metadata) return "";
+  const numeric = Number(input.value);
+  if (numeric === boundary) return "";
+  const value = String(numeric);
+  return name === "swc" ? decimalFilterValue(value) : integerFilterValue(value, { max: name === "ava" ? 99 : Number.MAX_SAFE_INTEGER });
+}
+
+function activateNumericRangeThumb(control, input) {
+  control.minimum.style.zIndex = input === control.minimum ? "5" : "3";
+  control.maximum.style.zIndex = input === control.maximum ? "5" : "4";
+}
+
+function updateNumericRangeFromInput(control, changed) {
+  let minimum = Number(control.minimum.value);
+  let maximum = Number(control.maximum.value);
+  if (minimum > maximum) {
+    if (changed === control.minimum) {
+      control.maximum.value = control.minimum.value;
+      maximum = minimum;
+    } else {
+      control.minimum.value = control.maximum.value;
+      minimum = maximum;
+    }
+  }
+  if (minimum <= maximum) control.exact.value = "";
+  activateNumericRangeThumb(control, changed);
+  updateNumericRangeVisuals(control);
 }
 
 function readLocation() {
@@ -182,14 +314,9 @@ function syncFilters() {
   elements.classification.value = state.classification;
   elements.characteristic.value = state.characteristic;
   elements.ava.value = state.ava;
-  elements.avaMin.value = state.avaMin;
-  elements.avaMax.value = state.avaMax;
   elements.points.value = state.points;
-  elements.pointsMin.value = state.pointsMin;
-  elements.pointsMax.value = state.pointsMax;
   elements.swc.value = state.swc;
-  elements.swcMin.value = state.swcMin;
-  elements.swcMax.value = state.swcMax;
+  for (const control of Object.values(numericRangeControls)) syncNumericRangeControl(control);
   elements.mercs.checked = state.mercs;
   elements.specops.checked = state.specops;
   elements.teamops.checked = state.teamops;
@@ -409,6 +536,9 @@ async function load() {
       populateCatalogFilter(elements.troopType, unitFilters.troop_types, "Troop types");
       populateCatalogFilter(elements.classification, unitFilters.classifications, "Classifications");
       populateCatalogFilter(elements.characteristic, unitFilters.characteristics, "Characteristics");
+      populateNumericFilter("ava", unitFilters.numeric?.ava);
+      populateNumericFilter("points", unitFilters.numeric?.points);
+      populateNumericFilter("swc", unitFilters.numeric?.swc);
       syncFilters();
       if (normalizedCatalogFilters) writeLocation(true);
       armiesLoaded = true;
@@ -440,14 +570,32 @@ function applyFilters() {
     troopType: elements.troopType.value, classification: elements.classification.value,
     characteristic: elements.characteristic.value,
     ava: avaExactFilterValue(elements.ava.value),
-    avaMin: integerFilterValue(elements.avaMin.value, { max: 99 }),
-    avaMax: integerFilterValue(elements.avaMax.value, { max: 99 }),
+    avaMin: numericRangeStateValue(
+      "ava", numericRangeControls.ava, elements.avaMin,
+      numericRangeControls.ava.metadata?.min,
+    ),
+    avaMax: numericRangeStateValue(
+      "ava", numericRangeControls.ava, elements.avaMax,
+      numericRangeControls.ava.metadata?.max,
+    ),
     points: integerFilterValue(elements.points.value),
-    pointsMin: integerFilterValue(elements.pointsMin.value),
-    pointsMax: integerFilterValue(elements.pointsMax.value),
+    pointsMin: numericRangeStateValue(
+      "points", numericRangeControls.points, elements.pointsMin,
+      numericRangeControls.points.metadata?.min,
+    ),
+    pointsMax: numericRangeStateValue(
+      "points", numericRangeControls.points, elements.pointsMax,
+      numericRangeControls.points.metadata?.max,
+    ),
     swc: swcExactFilterValue(elements.swc.value),
-    swcMin: decimalFilterValue(elements.swcMin.value),
-    swcMax: decimalFilterValue(elements.swcMax.value),
+    swcMin: numericRangeStateValue(
+      "swc", numericRangeControls.swc, elements.swcMin,
+      numericRangeControls.swc.metadata?.min,
+    ),
+    swcMax: numericRangeStateValue(
+      "swc", numericRangeControls.swc, elements.swcMax,
+      numericRangeControls.swc.metadata?.max,
+    ),
     mercs: elements.mercs.checked, specops: elements.specops.checked, teamops: elements.teamops.checked,
     reinforcement: elements.reinforcement.checked,
   };
@@ -486,13 +634,8 @@ function toggleSortOrder() {
   load();
 }
 
-function applyNumericFilter(exact, minimum, maximum, changed) {
-  if (changed === exact && exact.value.trim()) {
-    minimum.value = "";
-    maximum.value = "";
-  } else if (changed !== exact && changed.value.trim()) {
-    exact.value = "";
-  }
+function applyNumericExactFilter(control) {
+  if (control.exact.value) resetNumericRangeControl(control);
   applyFilters();
 }
 
@@ -504,13 +647,13 @@ for (const filter of [
 ]) {
   filter.addEventListener("change", applyFilters);
 }
-for (const [exact, minimum, maximum] of [
-  [elements.ava, elements.avaMin, elements.avaMax],
-  [elements.points, elements.pointsMin, elements.pointsMax],
-  [elements.swc, elements.swcMin, elements.swcMax],
-]) {
-  for (const filter of [exact, minimum, maximum]) {
-    filter.addEventListener("change", () => applyNumericFilter(exact, minimum, maximum, filter));
+for (const control of Object.values(numericRangeControls)) {
+  control.exact.addEventListener("change", () => applyNumericExactFilter(control));
+  for (const input of [control.minimum, control.maximum]) {
+    input.addEventListener("input", () => updateNumericRangeFromInput(control, input));
+    input.addEventListener("change", applyFilters);
+    input.addEventListener("pointerdown", () => activateNumericRangeThumb(control, input));
+    input.addEventListener("focus", () => activateNumericRangeThumb(control, input));
   }
 }
 for (const filter of [elements.mercs, elements.specops, elements.teamops, elements.reinforcement]) {

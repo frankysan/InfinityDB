@@ -1398,7 +1398,11 @@ ordinary numeric AVA only. Negative source values used for subordinate/ancillary
 not exposed as ordinary AVA filter values. Points use nonnegative integer exact/range values.
 SWC exact matching accepts ordinary numeric costs, bonus tokens such as `+1`/`+1.5`, and `-`;
 SWC ranges apply only to ordinary nonnegative numeric costs and deliberately exclude bonus and
-non-cost tokens.
+non-cost tokens. The browser presents exact numeric values through snapshot-driven dropdowns and
+ranges through one dual-handle slider per stat. Slider endpoints come from the observed ordinary
+numeric domain, current min/max values remain visible at the handles, and exact/range modes are
+mutually exclusive. The presentation does not alter the public URL/API contract: exact values
+continue to use the single-value parameter and ranges continue to use the `_min`/`_max` pair.
 
 The backend retains the owning semantic context while evaluating contextual numeric filters:
 AVA belongs to an Army/profile occurrence, while points and SWC belong to loadout occurrences.

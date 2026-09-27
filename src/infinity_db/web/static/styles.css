@@ -2079,23 +2079,195 @@ h2 {
 
 .numeric-filter-controls {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: minmax(0, 0.8fr) minmax(150px, 1.4fr);
+  gap: 14px;
+  align-items: start;
   margin-top: 8px;
 }
 
-.numeric-filter-controls label {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+.numeric-exact-control,
+.numeric-range-control {
   min-width: 0;
   color: #6c7969;
   font-size: var(--font-size-xs);
 }
 
-.numeric-filter-controls input {
+.numeric-exact-control {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.numeric-exact-control select {
   min-width: 0;
-  padding: 8px 9px;
+  width: 100%;
+}
+
+.numeric-range-control {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.numeric-range-label {
+  line-height: 1.2;
+}
+
+.double-range-slider {
+  --range-start: 0%;
+  --range-end: 100%;
+  position: relative;
+  height: 72px;
+  min-width: 0;
+}
+
+.range-slider-track {
+  position: absolute;
+  z-index: 1;
+  top: 32px;
+  right: 0;
+  left: 0;
+  height: 6px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 999px;
+  background: var(--color-surface-subtle);
+}
+
+.range-slider-selected {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: var(--range-start);
+  right: calc(100% - var(--range-end));
+  border-radius: inherit;
+  background: var(--color-action-primary);
+}
+
+.range-input {
+  position: absolute;
+  z-index: 3;
+  top: 24px;
+  left: 0;
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+}
+
+.range-input-max {
+  z-index: 4;
+}
+
+.range-input::-webkit-slider-runnable-track {
+  height: 6px;
+  border: 0;
+  background: transparent;
+}
+
+.range-input::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  margin-top: -7px;
+  appearance: none;
+  border: 3px solid var(--color-surface-default);
+  border-radius: 50%;
+  background: var(--color-action-primary);
+  box-shadow: 0 0 0 1px rgb(24 62 49 / 20%);
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.range-input::-moz-range-track {
+  height: 6px;
+  border: 0;
+  background: transparent;
+}
+
+.range-input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--color-surface-default);
+  border-radius: 50%;
+  background: var(--color-action-primary);
+  box-shadow: 0 0 0 1px rgb(24 62 49 / 20%);
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.range-input:focus-visible {
+  outline: none;
+}
+
+.range-input:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgb(36 94 76 / 22%);
+}
+
+.range-input:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 4px rgb(36 94 76 / 22%);
+}
+
+.range-input:active::-webkit-slider-thumb {
+  cursor: grabbing;
+}
+
+.range-input:active::-moz-range-thumb {
+  cursor: grabbing;
+}
+
+.range-input:disabled::-webkit-slider-thumb,
+.range-input:disabled::-moz-range-thumb {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.range-value-bubble {
+  position: absolute;
+  z-index: 5;
+  left: clamp(18px, var(--range-start), calc(100% - 18px));
+  min-width: 32px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--color-action-primary);
+  color: var(--color-surface-default);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  line-height: 1.2;
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.range-value-min {
+  top: 0;
+}
+
+.range-value-max {
+  top: 50px;
+  left: clamp(18px, var(--range-end), calc(100% - 18px));
+}
+
+.range-value-bubble::after {
+  position: absolute;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  content: "";
+  transform: translateX(-50%);
+}
+
+.range-value-min::after {
+  top: 100%;
+  border-top: 4px solid var(--color-action-primary);
+}
+
+.range-value-max::after {
+  bottom: 100%;
+  border-bottom: 4px solid var(--color-action-primary);
 }
 
 .advanced-filter-note {
@@ -3154,6 +3326,10 @@ tbody tr:hover {
     padding-bottom: 36px;
   }
 
+  .desktop-break {
+    display: none;
+  }
+
   .landing-hero-copy {
     column-gap: 32px;
   }
@@ -3365,10 +3541,6 @@ tbody tr:hover {
   .about-details {
     align-items: start;
     flex-direction: column;
-  }
-
-  .desktop-break {
-    display: none;
   }
 
   .catalog-stats {

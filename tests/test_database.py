@@ -2801,6 +2801,20 @@ def test_unit_categorical_filters_use_stable_public_slugs(
             {"id": 1, "slug": "category", "name": "category"}
         ],
         "characteristics": [{"id": 1, "slug": "chars", "name": "chars"}],
+        "numeric": {
+            "ava": {
+                "exact_values": ["1", "total"],
+                "range": {"min": 1, "max": 1, "step": 1},
+            },
+            "points": {
+                "exact_values": ["10"],
+                "range": {"min": 10, "max": 10, "step": 1},
+            },
+            "swc": {
+                "exact_values": ["0.5"],
+                "range": {"min": 0.5, "max": 0.5, "step": 0.5},
+            },
+        },
     }
     for result in (
         database.list_units(troop_type=1),

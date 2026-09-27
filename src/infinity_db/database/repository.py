@@ -1928,10 +1928,10 @@ class Database:
         return frozenset(int(row["logical_unit_id"]) for row in rows)
 
     @instance_lru_cache(maxsize=1)
-    def list_unit_filter_values(self) -> dict[str, list[dict[str, Any]]]:
-        """Return stable public values for categorical Unit Explorer filters."""
+    def list_unit_filter_values(self) -> dict[str, Any]:
+        """Return stable public values and numeric controls for Unit Explorer filters."""
 
-        result: dict[str, list[dict[str, Any]]] = {}
+        result: dict[str, Any] = {}
         with self._connect() as connection:
             for public_name, (table, domain) in UNIT_FILTER_VOCABULARIES.items():
                 rows = connection.execute(
@@ -1954,6 +1954,82 @@ class Database:
                     ],
                     key=lambda item: (unit_sort_key(item["name"]), item["id"]),
                 )
+
+            ordinary_ava: set[int] = set()
+            has_total_ava = False
+            for row in connection.execute(
+                "SELECT DISTINCT ava FROM profile_payload_occurrences "
+                "WHERE ava IS NOT NULL"
+            ):
+                raw_ava = row["ava"]
+                text_ava = str(raw_ava).strip()
+                if text_ava.casefold() in {"t", "total"}:
+                    has_total_ava = True
+                    continue
+                try:
+                    numeric_ava = int(text_ava)
+                except ValueError:
+                    continue
+                if 0 <= numeric_ava <= 99:
+                    ordinary_ava.add(numeric_ava)
+                elif numeric_ava >= 100:
+                    has_total_ava = True
+            sorted_ava = sorted(ordinary_ava)
+            ava_exact = [str(value) for value in sorted_ava]
+            if has_total_ava:
+                ava_exact.append("total")
+
+            point_values = sorted(
+                {
+                    int(row["points"])
+                    for row in connection.execute(
+                        "SELECT DISTINCT points FROM loadout_payload_occurrences "
+                        "WHERE points IS NOT NULL"
+                    )
+                    if str(row["points"]).strip().isdigit()
+                    and int(row["points"]) >= 0
+                }
+            )
+            swc_values = {
+                str(row["swc"]).strip()
+                for row in connection.execute(
+                    "SELECT DISTINCT swc FROM loadout_payload_occurrences "
+                    "WHERE swc IS NOT NULL AND TRIM(swc) <> ''"
+                )
+                if SWC_EXACT_RE.fullmatch(str(row["swc"]).strip()) is not None
+            }
+            ordinary_swc = sorted(
+                float(value)
+                for value in swc_values
+                if value != "-" and not value.startswith("+")
+            )
+
+            def range_metadata(values: list[int] | list[float], step: int | float) -> Any:
+                if not values:
+                    return None
+                return {"min": values[0], "max": values[-1], "step": step}
+
+            def swc_sort_key(value: str) -> tuple[int, float, str]:
+                if value == "-":
+                    return (2, 0.0, value)
+                if value.startswith("+"):
+                    return (1, float(value[1:]), value)
+                return (0, float(value), value)
+
+            result["numeric"] = {
+                "ava": {
+                    "exact_values": ava_exact,
+                    "range": range_metadata(sorted_ava, 1),
+                },
+                "points": {
+                    "exact_values": [str(value) for value in point_values],
+                    "range": range_metadata(point_values, 1),
+                },
+                "swc": {
+                    "exact_values": sorted(swc_values, key=swc_sort_key),
+                    "range": range_metadata(ordinary_swc, 0.5),
+                },
+            }
         return result
 
     def _unit_filter_source_id(self, public_name: str, item_ref: int | str) -> int | None:

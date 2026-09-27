@@ -14,10 +14,12 @@ New or materially revised entries use the project-domain labels defined in
   label their domain and open the corresponding player-facing surface.
 - **Web backend + Web frontend:** Expand the Unit Explorer's Advanced Filters with
   Troop Type, Classification, Characteristics, AVA, Points, and SWC alongside the
-  existing Skill, Equipment, and Weapon filters. AVA and Points accept exact values
-  or inclusive ranges; SWC supports exact ordinary costs, bonuses such as `+1`/`+1.5`,
-  the `-` display value, and inclusive ranges over ordinary numeric costs. AVA preserves
-  **Total** as a first-class value rather than exposing its internal numeric sentinel.
+  existing Skill, Equipment, and Weapon filters. Exact AVA, Points, and SWC values
+  are selected from database-driven dropdowns, while inclusive ranges use compact
+  dual-handle sliders with visible endpoints. SWC supports exact ordinary costs, bonuses
+  such as `+1`/`+1.5`, the `-` display value, and ranges over ordinary numeric costs.
+  AVA preserves **Total** as a first-class exact value rather than exposing its internal
+  numeric sentinel.
 - **Web backend + Web frontend:** Make the expanded Unit-filter state bookmarkable and
   shareable through the URL, using stable public slugs for categorical filters where
   possible while continuing to accept legacy numeric identifiers for compatibility.
@@ -54,6 +56,8 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Web frontend:** Let the Unit Explorer introduction wrap naturally at tablet widths instead of
+  combining a narrow text column with a desktop-only forced line break.
 - **Web frontend:** Make ordinary Fireteam member tables fit narrow mobile viewports instead of
   retaining their desktop minimum width; Developer mode keeps horizontal scrolling for its extra
   member-detail columns.

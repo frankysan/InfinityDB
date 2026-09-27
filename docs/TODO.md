@@ -107,7 +107,10 @@ ontology decision until it is actually needed.
     characteristics. These use stable public semantic/sluggified identities in
     shareable URLs, with numeric IDs retained only as compatibility fallbacks.
   - [x] Add AVA, points, and SWC filtering with both exact-value and inclusive
-    bounded-range modes. AVA exposes ordinary values from `0` through `99` plus
+    bounded-range modes. Exact values use database-driven dropdowns. Ranges use
+    dual-handle sliders with visible min/max values and the selected span highlighted;
+    exact and range modes are mutually exclusive for each stat while preserving the
+    existing URL/API contract. AVA exposes ordinary values from `0` through `99` plus
     exact `Total`; negative ancillary/source sentinel values are not public AVA
     filter values. SWC exact matching accepts ordinary costs, bonuses such as
     `+1`/`+1.5`, and `-`; SWC ranges apply only to ordinary numeric costs.
