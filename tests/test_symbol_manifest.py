@@ -12,6 +12,7 @@ from infinity_db.symbol_manifest import (
     add_duplicate_detection,
     add_font_audit,
     add_publication,
+    add_publication_manifest_binding,
     add_svg_preflight,
     add_text_conversion,
     build_symbol_manifest,
@@ -896,6 +897,31 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
     legacy_publication["armyMap"] = symbol_manifest.artifact_record(army_map, project_root=tmp_path)
     legacy_publication["unitMap"] = symbol_manifest.artifact_record(unit_map, project_root=tmp_path)
     validate_symbol_manifest(legacy_published)
+    rebound = add_publication_manifest_binding(
+        legacy_published,
+        publication_manifest=publication_manifest,
+        project_root=tmp_path,
+    )
+    assert rebound["processing"]["publication"]["publicationManifest"] == (
+        symbol_manifest.artifact_record(publication_manifest, project_root=tmp_path)
+    )
+    assert rebound["processing"]["publication"]["inventory"] == legacy_publication["inventory"]
+    assert rebound["processing"]["publication"]["armyMap"] == legacy_publication["armyMap"]
+    assert rebound["processing"]["publication"]["unitMap"] == legacy_publication["unitMap"]
+    with pytest.raises(SymbolManifestError, match="already bound"):
+        add_publication_manifest_binding(
+            rebound,
+            publication_manifest=publication_manifest,
+            project_root=tmp_path,
+        )
+    malformed_legacy = json.loads(json.dumps(legacy_published))
+    malformed_legacy["processing"]["publication"].pop("unitMap")
+    with pytest.raises(SymbolManifestError, match="complete legacy v8 publication"):
+        add_publication_manifest_binding(
+            malformed_legacy,
+            publication_manifest=publication_manifest,
+            project_root=tmp_path,
+        )
     assert_compression_rejects_later_state(
         published,
         report=compression_report,

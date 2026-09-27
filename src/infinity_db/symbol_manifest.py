@@ -352,6 +352,43 @@ def add_publication(
     validate_symbol_manifest(promoted)
     return promoted
 
+
+def add_publication_manifest_binding(
+    document: dict[str, Any],
+    *,
+    publication_manifest: Path,
+    project_root: Path,
+) -> dict[str, Any]:
+    """Bind a legacy terminal v8 publication to the tracked publication manifest."""
+
+    validate_symbol_manifest(document)
+    if document.get("formatVersion") != SYMBOL_BUILD_VERSION:
+        raise SymbolManifestError(
+            f"Publication-manifest binding requires version-{SYMBOL_BUILD_VERSION} state"
+        )
+
+    publication = document.get("processing", {}).get("publication")
+    if not isinstance(publication, dict) or publication.get("status") != "passed":
+        raise SymbolManifestError("Publication-manifest binding requires passed publication")
+    if "publicationManifest" in publication:
+        raise SymbolManifestError("Publication manifest is already bound")
+
+    legacy_fields = {"inventory", "armyMap", "unitMap"}
+    missing = legacy_fields - set(publication)
+    if missing:
+        raise SymbolManifestError(
+            "Publication-manifest binding requires a complete legacy v8 publication "
+            "record; missing " + ", ".join(sorted(missing))
+        )
+
+    rebound = json.loads(json.dumps(document))
+    rebound["processing"]["publication"]["publicationManifest"] = artifact_record(
+        publication_manifest, project_root=project_root
+    )
+    validate_symbol_manifest(rebound)
+    return rebound
+
+
 def write_symbol_manifest(document: dict[str, Any], path: Path) -> Path:
     """Atomically replace the generated current symbol-build manifest."""
     validate_symbol_manifest(document)

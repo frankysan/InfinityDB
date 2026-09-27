@@ -15,9 +15,15 @@ from typing import BinaryIO, cast
 from infinity_db.rules_database import RulesDatabase
 
 try:
-    from tools.verify_deployment_assets import verify_deployment_assets
+    from tools.verify_deployment_assets import (
+        upgrade_legacy_publication_binding,
+        verify_deployment_assets,
+    )
 except ImportError:  # pragma: no cover - direct script execution fallback
-    from verify_deployment_assets import verify_deployment_assets
+    from verify_deployment_assets import (  # type: ignore[no-redef]
+        upgrade_legacy_publication_binding,
+        verify_deployment_assets,
+    )
 
 DEPLOYMENT_FILES = (
     "data/generated/infinity.db",
@@ -107,13 +113,19 @@ def _validate_paths(project_root: Path, files: Iterable[PurePosixPath]) -> list[
     return selected
 
 
-def _validate_local_artifacts(project_root: Path) -> None:
+def _validate_local_artifacts(project_root: Path) -> bool:
+    upgraded = upgrade_legacy_publication_binding(
+        project_root / "data" / "manifests" / "army-symbol-build.json",
+        project_root / "src" / "infinity_db" / "web" / "static",
+        project_root=project_root,
+    )
     verify_deployment_assets(
         project_root / "data" / "manifests" / "army-symbol-build.json",
         project_root / "src" / "infinity_db" / "web" / "static",
         project_root=project_root,
     )
     RulesDatabase(project_root / "data" / "generated" / "rules.db").validate()
+    return upgraded
 
 
 def _normalized_tarinfo(info: tarfile.TarInfo) -> tarfile.TarInfo:
@@ -261,10 +273,16 @@ def main(argv: list[str] | None = None) -> int:
         root = _project_root(Path.cwd())
         commit = _require_clean_tracked_checkout(root)
         files = _validate_paths(root, _ignored_deployment_files(root))
-        _validate_local_artifacts(root)
+        upgraded_legacy_manifest = _validate_local_artifacts(root)
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
+
+    if upgraded_legacy_manifest:
+        print(
+            "Updated legacy v8 symbol manifest with the tracked "
+            "symbol-publication.json binding."
+        )
 
     total = _total_bytes(root, files)
     print(

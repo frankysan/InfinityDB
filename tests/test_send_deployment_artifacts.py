@@ -6,6 +6,7 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
+import tools.send_deployment_artifacts as deployment_sender
 from tools.send_deployment_artifacts import (
     DEPLOYMENT_FILES,
     DeploymentTransferError,
@@ -64,3 +65,30 @@ def test_remote_script_requires_matching_clean_checkout_and_stages_before_replac
     assert 'tar -xf - -C "$stage"' in script
     assert 'mv "$stage/data/generated/infinity.db" "$target"' in script
     assert "Deployment artifacts installed for commit" in script
+
+
+def test_local_validation_upgrades_legacy_manifest_before_verification(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[str] = []
+
+    def upgrade(*_args, **_kwargs) -> bool:
+        calls.append("upgrade")
+        return True
+
+    def verify(*_args, **_kwargs) -> None:
+        calls.append("verify")
+
+    class FakeRulesDatabase:
+        def __init__(self, _path: Path) -> None:
+            pass
+
+        def validate(self) -> None:
+            calls.append("rules")
+
+    monkeypatch.setattr(deployment_sender, "upgrade_legacy_publication_binding", upgrade)
+    monkeypatch.setattr(deployment_sender, "verify_deployment_assets", verify)
+    monkeypatch.setattr(deployment_sender, "RulesDatabase", FakeRulesDatabase)
+
+    assert deployment_sender._validate_local_artifacts(tmp_path)
+    assert calls == ["upgrade", "verify", "rules"]

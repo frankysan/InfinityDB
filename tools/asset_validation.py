@@ -71,6 +71,13 @@ def browser_asset_paths(publication_manifest: Path) -> tuple[PurePosixPath, ...]
     return paths
 
 
+def publication_manifest_summary(publication_manifest: Path) -> dict[str, int]:
+    """Return validated summary values from the canonical publication manifest."""
+
+    _inventory, summary, _paths = _publication_manifest(publication_manifest)
+    return dict(summary)
+
+
 def _publication_manifest(
     path: Path,
 ) -> tuple[dict[str, str], dict[str, int], tuple[PurePosixPath, ...]]:

@@ -7,6 +7,13 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
+### Fixed
+
+- **Deployment:** Upgrade complete legacy v8 symbol-build manifests with the tracked
+  `symbol-publication.json` binding during deployment artifact transfer when the local
+  publication validates and matches the legacy published asset count/bytes. Existing
+  bindings are never overwritten, and no SVG or symbol-package rebuild is required.
+
 ## [0.8.0] - 2026-09-26
 
 ### Changed

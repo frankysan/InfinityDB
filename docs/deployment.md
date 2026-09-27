@@ -146,8 +146,14 @@ the exact transfer set:
 ```
 
 SSH public-key authentication can be selected with `--identity-file` to make the same
-transfer non-interactive. The helper deliberately excludes raw snapshots, work trees,
-logs, reports, backups, caches, and other ignored development state. After transfer,
+transfer non-interactive. If an otherwise valid legacy v8 terminal symbol manifest predates
+the tracked `publicationManifest` binding, the sender upgrades that ignored manifest in
+place before verification. The repair is allowed only when the tracked publication manifest
+and complete local SVG set validate and their published asset count/bytes match the legacy
+publication summary; an existing but incorrect binding still fails closed. This metadata-only
+migration does not rebuild SVGs or require a new full-asset package. The helper deliberately
+excludes raw snapshots, work trees, logs, reports, backups, caches, and other ignored
+development state. After transfer,
 run the dedicated no-rebuild wrapper on the server:
 
 ```sh

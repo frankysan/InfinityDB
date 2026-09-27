@@ -15,13 +15,25 @@ from infinity_db.snapshot_provenance import sha256_file
 from infinity_db.symbol_manifest import (
     SYMBOL_BUILD_VERSION,
     SymbolManifestError,
+    add_publication_manifest_binding,
     load_symbol_manifest,
+    write_symbol_manifest,
 )
 
 try:
-    from tools.asset_validation import AssetSetValidation, AssetValidationError, validate_asset_set
+    from tools.asset_validation import (
+        AssetSetValidation,
+        AssetValidationError,
+        publication_manifest_summary,
+        validate_asset_set,
+    )
 except ImportError:  # pragma: no cover - direct script execution fallback
-    from asset_validation import AssetSetValidation, AssetValidationError, validate_asset_set
+    from asset_validation import (  # type: ignore[no-redef]
+        AssetSetValidation,
+        AssetValidationError,
+        publication_manifest_summary,
+        validate_asset_set,
+    )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = PROJECT_ROOT / "data" / "manifests" / "army-symbol-build.json"
@@ -75,6 +87,87 @@ def _require_bound_artifact(
         )
 
 
+def _require_complete_asset_set(validation: AssetSetValidation) -> None:
+    if validation.complete:
+        return
+    details: list[str] = [validation.state]
+    if validation.missing:
+        details.append(f"missing {len(validation.missing)}")
+    if validation.browser_missing:
+        details.append(f"browser-missing {len(validation.browser_missing)}")
+    if validation.unexpected:
+        details.append(f"unexpected {len(validation.unexpected)}")
+    if validation.invalid:
+        details.append(f"invalid {len(validation.invalid)}")
+    raise DeploymentAssetError(
+        "Published symbol set does not satisfy its publication/browser contract ("
+        + ", ".join(details)
+        + ")"
+    )
+
+
+def upgrade_legacy_publication_binding(
+    manifest_path: Path = DEFAULT_MANIFEST,
+    static_root: Path = DEFAULT_STATIC_ROOT,
+    *,
+    project_root: Path = PROJECT_ROOT,
+    publication_manifest_path: Path | None = None,
+) -> bool:
+    """Upgrade one complete legacy v8 publication record to the tracked manifest binding."""
+
+    try:
+        manifest = load_symbol_manifest(manifest_path)
+    except (OSError, SymbolManifestError) as exc:
+        raise DeploymentAssetError(
+            f"Could not load promoted symbol manifest {manifest_path}: {exc}"
+        ) from exc
+
+    if manifest.get("formatVersion") != SYMBOL_BUILD_VERSION:
+        raise DeploymentAssetError(
+            "Deployment requires a terminal published symbol manifest "
+            f"(version {SYMBOL_BUILD_VERSION})"
+        )
+
+    processing = manifest.get("processing")
+    publication = processing.get("publication") if isinstance(processing, dict) else None
+    if not isinstance(publication, dict) or publication.get("status") != "passed":
+        raise DeploymentAssetError("Deployment requires a passed symbol publication stage")
+    if "publicationManifest" in publication:
+        return False
+
+    publication_manifest_path = (
+        publication_manifest_path
+        or project_root / "data" / "manifests" / "symbol-publication.json"
+    )
+    validation = validate_asset_set(
+        static_root, publication_manifest=publication_manifest_path
+    )
+    _require_complete_asset_set(validation)
+
+    canonical_summary = publication_manifest_summary(publication_manifest_path)
+    build_summary = publication.get("summary")
+    if not isinstance(build_summary, dict):
+        raise DeploymentAssetError("Published symbol manifest has no publication summary")
+    for field in ("publishedAssetCount", "publishedBytes"):
+        if build_summary.get(field) != canonical_summary[field]:
+            raise DeploymentAssetError(
+                f"Legacy symbol manifest summary.{field} does not match "
+                "symbol-publication.json"
+            )
+
+    try:
+        rebound = add_publication_manifest_binding(
+            manifest,
+            publication_manifest=publication_manifest_path,
+            project_root=project_root,
+        )
+        write_symbol_manifest(rebound, manifest_path)
+    except (OSError, SymbolManifestError) as exc:
+        raise DeploymentAssetError(
+            f"Could not upgrade legacy symbol manifest {manifest_path}: {exc}"
+        ) from exc
+    return True
+
 
 def verify_deployment_assets(
     manifest_path: Path = DEFAULT_MANIFEST,
@@ -84,7 +177,7 @@ def verify_deployment_assets(
     database_path: Path | None = None,
     publication_manifest_path: Path | None = None,
 ) -> AssetSetValidation:
-    """Validate local symbols against the terminal v8 build manifest and publication inventory."""
+    """Validate local symbols against the terminal v8 build and publication manifests."""
 
     try:
         manifest = load_symbol_manifest(manifest_path)
@@ -118,21 +211,7 @@ def verify_deployment_assets(
     validation = validate_asset_set(
         static_root, publication_manifest=publication_manifest_path
     )
-    if not validation.complete:
-        details: list[str] = [validation.state]
-        if validation.missing:
-            details.append(f"missing {len(validation.missing)}")
-        if validation.browser_missing:
-            details.append(f"browser-missing {len(validation.browser_missing)}")
-        if validation.unexpected:
-            details.append(f"unexpected {len(validation.unexpected)}")
-        if validation.invalid:
-            details.append(f"invalid {len(validation.invalid)}")
-        raise DeploymentAssetError(
-            "Published symbol set does not satisfy its inventory/browser contract ("
-            + ", ".join(details)
-            + ")"
-        )
+    _require_complete_asset_set(validation)
 
     validate_database_symbol_provenance(
         database_path or project_root / "data" / "generated" / "infinity.db", manifest

@@ -12,7 +12,11 @@ from infinity_db.deployment_provenance import (
     DeploymentProvenanceError,
     validate_database_symbol_provenance,
 )
-from tools.verify_deployment_assets import DeploymentAssetError, verify_deployment_assets
+from tools.verify_deployment_assets import (
+    DeploymentAssetError,
+    upgrade_legacy_publication_binding,
+    verify_deployment_assets,
+)
 
 SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>'
 
@@ -100,6 +104,77 @@ def _write_publication(
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text("{}\n", encoding="utf-8")
     return manifest_path, static, manifest
+
+
+def _legacy_publication(manifest: dict) -> dict:
+    publication = manifest["processing"]["publication"]
+    publication.pop("publicationManifest", None)
+    for field in ("inventory", "armyMap", "unitMap"):
+        publication[field] = {
+            "name": f"{field}.legacy",
+            "path": f"legacy/{field}",
+            "sha256": "0" * 64,
+        }
+    return manifest
+
+
+def test_upgrade_legacy_publication_binding_writes_rebound_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest_path, static, manifest = _write_publication(tmp_path)
+    _legacy_publication(manifest)
+    monkeypatch.setattr(deployment_assets, "load_symbol_manifest", lambda path: manifest)
+
+    rebound = json.loads(json.dumps(manifest))
+    rebound["processing"]["publication"]["publicationManifest"] = {"sha256": "1" * 64}
+    monkeypatch.setattr(
+        deployment_assets,
+        "add_publication_manifest_binding",
+        lambda *args, **kwargs: rebound,
+    )
+    written: dict[str, object] = {}
+
+    def capture_write(document: dict, path: Path) -> Path:
+        written["document"] = document
+        written["path"] = path
+        return path
+
+    monkeypatch.setattr(deployment_assets, "write_symbol_manifest", capture_write)
+
+    assert upgrade_legacy_publication_binding(
+        manifest_path, static, project_root=tmp_path
+    )
+    assert written == {"document": rebound, "path": manifest_path}
+
+
+def test_upgrade_legacy_publication_binding_leaves_current_binding_untouched(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest_path, static, manifest = _write_publication(tmp_path)
+    monkeypatch.setattr(deployment_assets, "load_symbol_manifest", lambda path: manifest)
+    monkeypatch.setattr(
+        deployment_assets,
+        "write_symbol_manifest",
+        lambda *_args, **_kwargs: pytest.fail("current binding must not be rewritten"),
+    )
+
+    assert not upgrade_legacy_publication_binding(
+        manifest_path, static, project_root=tmp_path
+    )
+
+
+def test_upgrade_legacy_publication_binding_rejects_summary_mismatch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest_path, static, manifest = _write_publication(tmp_path)
+    _legacy_publication(manifest)
+    manifest["processing"]["publication"]["summary"]["publishedBytes"] += 1
+    monkeypatch.setattr(deployment_assets, "load_symbol_manifest", lambda path: manifest)
+
+    with pytest.raises(DeploymentAssetError, match="publishedBytes does not match"):
+        upgrade_legacy_publication_binding(
+            manifest_path, static, project_root=tmp_path
+        )
 
 
 def test_deployment_assets_require_manifest_bound_complete_publication(
