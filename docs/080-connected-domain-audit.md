@@ -124,7 +124,7 @@ No independent "Includes" catalog is warranted.
 
 The existing 96 Unit selection constraints and 14 profile-group dependency constraints
 are relationship objects whose purpose is to explain how existing choices depend on or
-exclude one another. Unit detail now renders the reviewed whole-Unit cardinality families with
+exclude one another. Developer mode on Unit detail renders the reviewed whole-Unit cardinality families with
 stable links to affected Units and renders deterministic same-Unit dependency edges with links
 to the exact profile groups and option-scoped loadouts. Army relation IDs remain developer
 provenance.

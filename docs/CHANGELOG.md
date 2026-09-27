@@ -12,6 +12,15 @@ New or materially revised entries use the project-domain labels defined in
 - **Web backend + Web frontend:** Add global search across Armies, Units, Skills,
   Equipment, Weapons, Traits, States, Hacking Programs, and Fireteam charts. Results
   label their domain and open the corresponding player-facing surface.
+- **Web backend + Web frontend:** Present every source-specific Unit note with its
+  source variant and applicable Army context, including notes that belong only to a
+  non-representative variant.
+
+### Changed
+
+- **Web frontend:** Keep Unit selection-relationship diagnostics in Developer mode,
+  and omit redundant Army-context lists from source notes that apply across all
+  currently shown Armies.
 
 ### Fixed
 

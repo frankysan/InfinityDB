@@ -2573,6 +2573,43 @@ class Database:
                 )
                 by_source_army[(source_id, occurrence["source_army_id"])] = army
             armies = list(armies_by_occurrence.values())
+            note_rows = connection.execute(
+                "SELECT n.source_unit_id, n.note, "
+                "CASE WHEN n.source_unit_id = lu.representative_unit_id "
+                "THEN COALESCE(NULLIF(lu.name, ''), 'Unit ' || lu.id) "
+                "ELSE COALESCE(NULLIF(a.value, ''), NULLIF(lu.name, ''), 'Unit ' || lu.id) "
+                "END AS source_name, "
+                "CASE WHEN n.source_unit_id = lu.representative_unit_id THEN 1 ELSE 0 END "
+                "AS is_representative "
+                "FROM logical_unit_notes AS n "
+                "JOIN logical_units AS lu ON lu.id = n.logical_unit_id "
+                "LEFT JOIN logical_unit_aliases AS a "
+                "ON a.logical_unit_id = n.logical_unit_id "
+                "AND a.source_unit_id = n.source_unit_id AND a.field = 'name' "
+                "WHERE n.logical_unit_id = ? "
+                "ORDER BY n.source_unit_id",
+                (group["id"],),
+            ).fetchall()
+            source_notes = []
+            for note in note_rows:
+                source_unit_id = int(note["source_unit_id"])
+                contexts = {
+                    (int(army["id"]), str(army["name"]))
+                    for (candidate_source_id, _), army in by_source_army.items()
+                    if candidate_source_id == source_unit_id
+                }
+                source_notes.append(
+                    {
+                        "source_unit_id": source_unit_id,
+                        "source_name": note["source_name"],
+                        "note": note["note"],
+                        "is_representative": bool(note["is_representative"]),
+                        "armies": [
+                            {"id": army_id, "name": army_name}
+                            for army_id, army_name in sorted(contexts)
+                        ],
+                    }
+                )
             profile_rows = connection.execute(
                 "SELECT ppo.unit_id, ppo.army_id, ppo.group_id, ppo.profile_id, "
                 "ppo.logo, pp.name, "
@@ -3358,6 +3395,7 @@ class Database:
             "slug": group["slug"],
             "isc_abbr": group["isc_abbr"],
             "notes": group["notes"],
+            "source_notes": source_notes,
             "main_army_id": group["main_army_id"],
             "main_army_name": army_names.get(group["main_army_id"]),
             "main_faction": main_faction,

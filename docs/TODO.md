@@ -82,9 +82,6 @@ operations hardening work reserved for 0.10.0.
     tokens, and add validation that prevents newly maintained text from silently
     reintroducing unmarked distance literals where they can be detected reliably.
 
-- [ ] Present source-attributed Unit notes, including meaningful variant-specific notes
-  that do not belong only to the representative source Unit.
-
 - [ ] Resolve and present the semantics of the 18 current top-level composite
   `unit_options` rather than using their names only for search/catalog support.
 

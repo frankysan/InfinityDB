@@ -995,6 +995,36 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert json.loads(body)["error"] == "Unit not found"
 
 
+def test_unit_details_expose_source_attributed_notes(app: Callable) -> None:
+    database_path = app.database.path
+    with sqlite3.connect(database_path) as connection:
+        connection.execute(
+            "UPDATE units SET notes = ? WHERE id = ?",
+            ("Only this source variant has this restriction.", 1),
+        )
+        connection.execute(
+            "INSERT INTO logical_unit_notes (logical_unit_id, source_unit_id, note) "
+            "VALUES (?, ?, ?) "
+            "ON CONFLICT(logical_unit_id, source_unit_id) DO UPDATE SET note = excluded.note",
+            (1, 1, "Only this source variant has this restriction."),
+        )
+    _refresh_published_content_checksum(database_path)
+    notes_app = create_app(database_path)
+
+    status, _, body = request(notes_app, "/api/units/ranger-prototype")
+
+    assert status == 200
+    unit = json.loads(body)
+    source_note = next(
+        item for item in unit["source_notes"] if item["source_unit_id"] == 1
+    )
+    assert source_note["source_name"] == "Alpha Ranger"
+    assert source_note["note"] == "Only this source variant has this restriction."
+    assert source_note["is_representative"] is True
+    assert {army["id"] for army in source_note["armies"]} == {101, 201}
+    assert all("public_slug" in army for army in source_note["armies"])
+
+
 def test_unit_details_expose_bidirectional_peripheral_controller_links(
     tmp_path: Path, app_database_template: Path
 ) -> None:
@@ -2302,12 +2332,26 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     assert_css_rule(styles, ".army-relationships", {"width": "min(760px, 100%)"})
 
 
+def test_unit_details_frontend_presents_source_attributed_notes(app: Callable) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+
+    assert status == 200
+    assert b"function renderSourceNotes(unit, armies)" in unit_js
+    assert b'heading("Source notes")' in unit_js
+    assert b"it is not a rule for every profile shown for this Unit" in unit_js
+    assert b'intro.className = "army-relationship-intro developer-only";' in unit_js
+    assert b"const appliesToAllShownArmies = shownArmyIds.size > 0" in unit_js
+    assert b"if (sourceNote.armies.length && !appliesToAllShownArmies)" in unit_js
+    assert b"item.append(armyExplorerLink(army));" in unit_js
+
+
 def test_unit_details_frontend_presents_selection_relationships(app: Callable) -> None:
     status, _, unit_js = request(app, "/static/unit.js")
 
     assert status == 200
     assert b"function renderSelectionRelationships(unit, armies)" in unit_js
     assert b'heading("Selection relationships")' in unit_js
+    assert b'section.className = "detail-group selection-relationships developer-only";' in unit_js
     assert b'if (relation.family === "same-logical-cross-context-exclusive")' in unit_js
     assert b'else if (relation.family === "cross-logical-shared-cardinality")' in unit_js
     assert b'else if (relation.family === "single-logical-cardinality")' in unit_js

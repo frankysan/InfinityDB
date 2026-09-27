@@ -1389,6 +1389,14 @@ def test_database_uses_persisted_generic_mapping(tmp_path: Path, normalized: dic
     assert details is not None
     assert details["id"] == 1
     assert details["source_ids"] == [1, 10_001]
+    source_note = next(
+        item for item in details["source_notes"] if item["source_unit_id"] == 10_001
+    )
+    assert source_note["source_unit_id"] == 10_001
+    assert source_note["source_name"] == "Different source label"
+    assert source_note["note"] == "Source-specific note"
+    assert source_note["is_representative"] is False
+    assert [army["id"] for army in source_note["armies"]] == [301]
 
     connection = sqlite3.connect(path)
     try:

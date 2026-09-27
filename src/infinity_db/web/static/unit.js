@@ -782,6 +782,55 @@ function declaredFactionLink(membership) {
   return link;
 }
 
+function renderSourceNotes(unit, armies) {
+  const sourceNotes = unit.source_notes || [];
+  if (!sourceNotes.length) return null;
+  const shownArmyIds = new Set(armies.map((army) => Number(army.id)));
+
+  const section = document.createElement("section");
+  section.className = "detail-group source-notes";
+  const title = heading("Source notes");
+  title.className = "detail-section-title detail-section-title--rule";
+  section.append(title);
+
+  const surface = document.createElement("div");
+  surface.className = "explorer connected-unit-surface source-notes-surface";
+  const intro = document.createElement("p");
+  intro.className = "army-relationship-intro developer-only";
+  intro.textContent = "Each note applies only to its named source variant and Army context; "
+    + "it is not a rule for every profile shown for this Unit.";
+  surface.append(intro);
+
+  const list = document.createElement("ul");
+  list.className = "detail-list connected-unit-list";
+  for (const sourceNote of sourceNotes) {
+    const item = document.createElement("li");
+    const sourceName = document.createElement("strong");
+    sourceName.textContent = sourceNote.source_name;
+    item.append(sourceName, ": ", sourceNote.note);
+    const noteArmyIds = new Set(sourceNote.armies.map((army) => Number(army.id)));
+    const appliesToAllShownArmies = shownArmyIds.size > 0
+      && [...shownArmyIds].every((armyId) => noteArmyIds.has(armyId));
+    if (sourceNote.armies.length && !appliesToAllShownArmies) {
+      item.append(" Applies in ");
+      sourceNote.armies.forEach((army, index) => {
+        if (index) item.append(index === sourceNote.armies.length - 1 ? " and " : ", ");
+        item.append(armyExplorerLink(army));
+      });
+      item.append(".");
+    }
+    const provenance = document.createElement("span");
+    provenance.className = "developer-only";
+    provenance.textContent = ` Â· Source Unit #${sourceNote.source_unit_id}`
+      + (sourceNote.is_representative ? " (representative)" : "");
+    item.append(provenance);
+    list.append(item);
+  }
+  surface.append(list);
+  section.append(surface);
+  return section;
+}
+
 function renderArmyRelationships(unit, armies) {
   const uniqueArmies = [...new Map(armies.map((army) => [Number(army.id), army])).values()];
   const reinforcementRelations = uniqueArmies.filter((army) => (
@@ -880,7 +929,7 @@ function renderSelectionRelationships(unit, armies) {
   if (!constraints.length && !dependencies.length) return null;
 
   const section = document.createElement("section");
-  section.className = "detail-group selection-relationships";
+  section.className = "detail-group selection-relationships developer-only";
   const title = heading("Selection relationships");
   title.className = "detail-section-title detail-section-title--rule";
   section.append(title);
@@ -1360,6 +1409,8 @@ function render(unit) {
     generalProfilesSection.append(generalProfile);
   }
   content.append(generalProfilesSection);
+  const sourceNotes = renderSourceNotes(unit, armies);
+  if (sourceNotes) content.append(sourceNotes);
   const armyRelationships = renderArmyRelationships(unit, unit.armies);
   if (armyRelationships) content.append(armyRelationships);
   const peripheralRelationships = renderPeripheralRelationships(unit);

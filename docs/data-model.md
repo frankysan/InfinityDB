@@ -1509,8 +1509,11 @@ Notes do not belong on the canonical logical-unit row. Every non-empty source
 note remains attached to the source occurrence that supplied it. The production
 snapshot contains 30 note occurrences across 28 logical units and 28 distinct
 `(logical_unit, note)` facts. This preserves both exact duplicate source
-evidence and the four currently hidden non-representative-only notes without
-asserting that a source-specific restriction applies universally.
+evidence and the four non-representative-only notes without asserting that a
+source-specific restriction applies universally. Unit detail exposes every note
+as an explicitly source-attributed value with its source Unit label and Army
+contexts; the player-facing presentation makes that scope clear rather than
+treating it as a general profile rule.
 
 `spectables` is likewise kept off the canonical row for the first
 implementation. The 30 current payloads are preserved exactly with
@@ -1731,9 +1734,8 @@ SQLite reads: source-only rows may live exclusively in `infinity.raw.db`, canoni
 application facts may live in derived tables, and a fact may be preserved in the API
 without yet having a usable browser presentation.
 
-The maintained inventory now records **2 confirmed gap families** for later roadmap work:
+The maintained inventory now records **1 confirmed gap family** for later roadmap work:
 
-- source-attributed Unit notes;
 - top-level composite Unit options.
 
 Reinforcement Section parentage and broader source-declared faction membership are no longer
@@ -1758,9 +1760,9 @@ Peripheral occurrences plus **8** Controller-target edges, **96** Unit selection
 **14** profile-group dependency constraints, **46** Reinforcement-parent links, **2,094**
 declared faction memberships, **30** source-attributed Unit-note occurrences, **18** top-level
 Unit options, and **299** canonical profile payloads marked `is_structure`. Fireteam,
-Peripheral/Controller, include, selection/dependency, Reinforcement-parent, and declared-faction
-source facts are no longer open presentation gaps: their maintained application relationships are
-now consumed by player-facing browser/API surfaces.
+Peripheral/Controller, include, selection/dependency, Reinforcement-parent, declared-faction,
+and source-note facts are no longer open presentation gaps: their maintained application
+relationships are now consumed by player-facing browser/API surfaces.
 The structured lookup metadata has the application projections described above.
 
 Two preserved constructs remain an explicit semantic review queue instead of being

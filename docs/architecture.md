@@ -1386,10 +1386,13 @@ total above illustrates the response shape.
 
 Returns one logical unit, including its general data and the profiles,
 loadouts, availability, skills, equipment, and weapons that apply to each army
-where it occurs. The response includes the same `main_faction` object used by
-unit summaries; each army occurrence also includes its derived `faction` object
-or null. Profile records include a backend-derived `profile_identity` used by
-the browser to group equivalent labels under the identity policy pinned into
+where it occurs. `source_notes` preserves every non-empty note with its source
+Unit label, source Unit ID, representative status, and applicable Army contexts;
+it does not promote a source-specific restriction into general Unit data. The
+response includes the same `main_faction` object used by unit summaries; each
+army occurrence also includes its derived `faction` object or null. Profile
+records include a backend-derived `profile_identity` used by the browser to
+group equivalent labels under the identity policy pinned into
 the database. A reinforcement-only source variant is folded into a uniquely
 matching standard unit. Current mercenary availability is evaluated from explicit normalized
 `availability_kind` source-occurrence provenance at repository-query time. Unknown unit IDs return 404.
