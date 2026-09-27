@@ -1,5 +1,4 @@
-import { armySymbolPath } from "./army-symbols.js";
-import { unitSymbol } from "./unit-symbols.js";
+import { staticSymbolPath, unitSymbol } from "./unit-symbols.js";
 
 function displayArmies(armies) {
   return [...armies].sort((left, right) => left.id - right.id);
@@ -27,7 +26,7 @@ export function renderUnitRows(container, units) {
     nameLink.textContent = unit.name;
     const nameContent = document.createElement("span");
     nameContent.className = "unit-name-content";
-    const displayArmySymbol = armySymbolPath(unit.display_army_id);
+    const displayArmySymbol = staticSymbolPath(unit.display_army_symbol_path);
     if (displayArmySymbol) {
       const icon = document.createElement("img");
       icon.className = "army-symbol display-army-symbol";
@@ -42,7 +41,7 @@ export function renderUnitRows(container, units) {
         || "Army symbol";
       nameContent.append(icon);
     }
-    nameContent.append(unitSymbol(unit.slug || unit.isc || unit.name), nameLink);
+    nameContent.append(unitSymbol(unit.symbol_path), nameLink);
     nameCell.append(nameContent);
     const armyCell = document.createElement("td");
     const armyList = document.createElement("div");
@@ -50,7 +49,7 @@ export function renderUnitRows(container, units) {
     const armies = displayArmies(unit.armies);
     if (armies.length > 12) armyList.classList.add("army-tags-compact");
     for (const army of armies) {
-      const symbol = armySymbolPath(army.id);
+      const symbol = staticSymbolPath(army.symbol_path);
       if (symbol) {
         const icon = document.createElement("img");
         icon.className = "army-symbol";

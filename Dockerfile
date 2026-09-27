@@ -22,8 +22,9 @@ COPY config/identity /app/config/identity
 COPY config/validation /app/config/validation
 COPY data/curated/identities /app/data/curated/identities
 COPY data/curated/peripherals /app/data/curated/peripherals
+COPY data/manifests/symbol-publication.json /app/data/manifests/symbol-publication.json
 RUN pip install --no-cache-dir ".[server]" \
-    && rm -rf /app/config /app/data/curated \
+    && rm -rf /app/config /app/data/curated /app/data/manifests \
     && useradd --create-home --uid 10001 appuser \
     && chown -R appuser:appuser /app
 

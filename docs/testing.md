@@ -55,12 +55,13 @@ complete and valid rather than silently ignoring a partial/corrupt installation.
 `required` always requires the complete set. The report header records the
 requested/effective asset mode.
 
-Completeness is checked against the generated `symbol-inventory.json` written
-by final symbol publication. Every inventoried SVG must exist, parse as SVG, and
-match its published SHA-256, and unlisted SVGs inside the generated asset
-categories are rejected. The validator separately derives the currently
-browser-referenced subset from `army-symbols.js`, `unit-symbol-map.js`, and the
-order/characteristic endpoints. This distinction is intentional even though the current processed publication is
+Completeness is checked against the tracked
+`data/manifests/symbol-publication.json` written by final symbol publication.
+Every published SVG named by that manifest must exist, parse as SVG, and match
+its SHA-256, and unlisted SVGs inside the generated asset categories are
+rejected. The same manifest also defines the currently browser-referenced
+subset through its Army, Unit/profile, and static mappings. This distinction is
+intentional even though the current processed publication is
 fully browser-addressable (806/806 SVGs): future preserved variants must remain
 part of the complete asset set rather than weakening validation. Check output
 therefore reports both the full published count and the browser-referenced count.

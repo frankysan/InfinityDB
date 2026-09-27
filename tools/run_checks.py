@@ -48,6 +48,7 @@ EXIT_RUNNER_ERROR = 2
 REPO_ROOT = Path(__file__).resolve().parents[1]
 REPORT_DIRECTORY = REPO_ROOT / "reports"
 STATIC_ROOT = REPO_ROOT / "src" / "infinity_db" / "web" / "static"
+PUBLICATION_MANIFEST = REPO_ROOT / "data" / "manifests" / "symbol-publication.json"
 MODULE_ROOT = Path(__file__).resolve().parents[1] / "src"
 
 
@@ -353,7 +354,13 @@ def main(argv: list[str] | None = None) -> int:
                 "install the project dev dependencies"
             )
         asset_selection = (
-            select_asset_mode(args.assets, STATIC_ROOT) if "test" in stage_names else None
+            select_asset_mode(
+                args.assets,
+                STATIC_ROOT,
+                publication_manifest=PUBLICATION_MANIFEST,
+            )
+            if "test" in stage_names
+            else None
         )
         stages = stage_definitions(
             stage_names,

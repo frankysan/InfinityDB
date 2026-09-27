@@ -126,9 +126,10 @@ terminal version-8 state.
 
 Each stage records the reports/settings needed by its successor. Version 7 binds
 every compressed canonical SVG through the SHA-bound compression report. Version
-8 binds the complete `symbol-inventory.json`, browser maps, publication report,
-and final byte/count accounting; the inventory covers all published SVGs, not
-only the subset currently referenced by the browser. Stage promotion is
+8 binds the canonical `symbol-publication.json` plus the publication report and
+final byte/count accounting. The publication manifest owns every published SVG
+path/SHA-256 together with the runtime Army, Unit/profile, and static mappings.
+Stage promotion is
 forward-only. Failed-stage retry is explicit where supported; later passed states
 are not silently rolled back to rerun an earlier helper. Loaders still accept
 versions 2 through 8 as valid historical/intermediate state for compatibility.

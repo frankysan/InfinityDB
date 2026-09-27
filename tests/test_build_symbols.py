@@ -224,8 +224,7 @@ def stub_post_acquisition(
     publication = SimpleNamespace(
         static_root=Path("static"),
         mapping_report=Path("reports/publication-map.json"),
-        army_map=Path("static/army-symbols.js"),
-        unit_map=Path("static/unit-symbol-map.js"),
+        publication_manifest=Path("data/manifests/symbol-publication.json"),
         status="passed",
         changes={
             "addedAssetCount": 0,

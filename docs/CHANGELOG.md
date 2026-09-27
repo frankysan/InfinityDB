@@ -11,6 +11,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Data processing + Web backend + Deployment:** Consolidate published symbol identity,
+  lookup mappings, and SHA-256 completeness into the tracked
+  `data/manifests/symbol-publication.json`. Browser code now receives symbol paths through
+  API payloads instead of generated static lookup files, while build, full-asset, cache,
+  package, and deployment verification consume the same canonical publication contract.
 - **Web frontend:** Keep Unit-detail Army relationship structure behind Developer mode;
   the source-declared faction and Reinforcement parentage links remain available for data
   inspection without adding player-facing detail that experienced players already know.

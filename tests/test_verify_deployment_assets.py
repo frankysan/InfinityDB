@@ -12,7 +12,6 @@ from infinity_db.deployment_provenance import (
     DeploymentProvenanceError,
     validate_database_symbol_provenance,
 )
-from tools.asset_validation import PUBLICATION_INVENTORY_FORMAT, PUBLICATION_INVENTORY_VERSION
 from tools.verify_deployment_assets import DeploymentAssetError, verify_deployment_assets
 
 SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>'
@@ -27,17 +26,6 @@ def _write_publication(
 ) -> tuple[Path, Path, dict]:
     static = project_root / "src" / "infinity_db" / "web" / "static"
     static.mkdir(parents=True)
-    army_map = static / "army-symbols.js"
-    unit_map = static / "unit-symbol-map.js"
-    army_map.write_text(
-        'const armySymbols = new Map([[101, "panoceania/101-test.svg"]]);\n',
-        encoding="utf-8",
-    )
-    unit_map.write_text(
-        'const unitSymbolSlugs = new Map([["test-unit", "panoceania/1-test-unit"]]);\n',
-        encoding="utf-8",
-    )
-
     expected = (
         "armies/panoceania/101-test.svg",
         "units/panoceania/1-test-unit.svg",
@@ -57,19 +45,29 @@ def _write_publication(
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(SVG, encoding="utf-8")
 
-    inventory = static / "symbol-inventory.json"
-    inventory.write_text(
+    publication_manifest = project_root / "data" / "manifests" / "symbol-publication.json"
+    publication_manifest.parent.mkdir(parents=True, exist_ok=True)
+    publication_manifest.write_text(
         json.dumps(
             {
-                "format": PUBLICATION_INVENTORY_FORMAT,
-                "formatVersion": PUBLICATION_INVENTORY_VERSION,
+                "format": "InfinityDB symbol publication mapping",
+                "formatVersion": 2,
                 "summary": {
                     "publishedAssetCount": len(expected),
-                    "browserReferencedAssetCount": len(expected),
-                    "unreferencedPublishedAssetCount": 0,
                     "publishedBytes": len(SVG.encode()) * len(expected),
                 },
+                "factionIdToPublishedPath": {"101": expected[0]},
+                "unitSlugToPublishedPath": {"test-unit": expected[1]},
+                "unitProfileLogoToPublishedPath": {},
+                "staticKeyToPublishedPath": {
+                    relative.rsplit("/", 1)[-1].removesuffix(".svg"): relative
+                    for relative in expected[2:]
+                },
                 "publishedSha256ByPath": {relative: digest for relative in expected},
+                "browserUsageSummary": {
+                    "browserReferencedAssetCount": len(expected),
+                    "unreferencedPublishedAssetCount": 0,
+                },
             },
             sort_keys=True,
         )
@@ -94,14 +92,12 @@ def _write_publication(
                     "publishedAssetCount": len(expected),
                     "publishedBytes": len(SVG.encode()) * len(expected),
                 },
-                "inventory": artifact(inventory),
-                "armyMap": artifact(army_map),
-                "unitMap": artifact(unit_map),
+                "publicationManifest": artifact(publication_manifest),
             }
         },
     }
     manifest_path = project_root / "data" / "manifests" / "army-symbol-build.json"
-    manifest_path.parent.mkdir(parents=True)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text("{}\n", encoding="utf-8")
     return manifest_path, static, manifest
 
@@ -135,15 +131,16 @@ def test_deployment_assets_reject_nonterminal_manifest(
         verify_deployment_assets(manifest_path, static, project_root=tmp_path)
 
 
-def test_deployment_assets_reject_tampered_manifest_bound_map(
+def test_deployment_assets_reject_tampered_publication_manifest(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     manifest_path, static, manifest = _write_publication(tmp_path)
     monkeypatch.setattr(deployment_assets, "load_symbol_manifest", lambda path: manifest)
     monkeypatch.setattr(deployment_assets, "validate_database_symbol_provenance", lambda *_: None)
-    (static / "army-symbols.js").write_text("tampered\n", encoding="utf-8")
+    publication_manifest = tmp_path / "data" / "manifests" / "symbol-publication.json"
+    publication_manifest.write_text("{}\n", encoding="utf-8")
 
-    with pytest.raises(DeploymentAssetError, match="armyMap SHA-256"):
+    with pytest.raises(DeploymentAssetError, match="publicationManifest SHA-256"):
         verify_deployment_assets(manifest_path, static, project_root=tmp_path)
 
 

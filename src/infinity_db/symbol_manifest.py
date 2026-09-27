@@ -310,10 +310,11 @@ def add_publication(
     *,
     summary: dict[str, int],
     mapping_report: Path,
-    inventory: Path,
-    army_map: Path,
-    unit_map: Path,
     project_root: Path,
+    publication_manifest: Path | None = None,
+    inventory: Path | None = None,
+    army_map: Path | None = None,
+    unit_map: Path | None = None,
 ) -> dict[str, Any]:
     """Promote compressed version-7 state to version 8 publication state."""
     validate_symbol_manifest(document)
@@ -331,10 +332,23 @@ def add_publication(
         "status": "passed",
         "summary": dict(sorted(summary.items())),
         "mappingReport": artifact_record(mapping_report, project_root=project_root),
-        "inventory": artifact_record(inventory, project_root=project_root),
-        "armyMap": artifact_record(army_map, project_root=project_root),
-        "unitMap": artifact_record(unit_map, project_root=project_root),
     }
+    if inventory is not None:
+        promoted["processing"]["publication"]["inventory"] = artifact_record(
+            inventory, project_root=project_root
+        )
+    if army_map is not None:
+        promoted["processing"]["publication"]["armyMap"] = artifact_record(
+            army_map, project_root=project_root
+        )
+    if unit_map is not None:
+        promoted["processing"]["publication"]["unitMap"] = artifact_record(
+            unit_map, project_root=project_root
+        )
+    if publication_manifest is not None:
+        promoted["processing"]["publication"]["publicationManifest"] = artifact_record(
+            publication_manifest, project_root=project_root
+        )
     validate_symbol_manifest(promoted)
     return promoted
 
@@ -969,7 +983,15 @@ def _publication(
     record = _object(value, context)
     _only_keys(
         record,
-        {"status", "summary", "mappingReport", "inventory", "armyMap", "unitMap"},
+        {
+            "status",
+            "summary",
+            "mappingReport",
+            "inventory",
+            "armyMap",
+            "unitMap",
+            "publicationManifest",
+        },
         context,
     )
     status = _string(record.get("status"), f"{context}.status")
@@ -1017,8 +1039,12 @@ def _publication(
     _artifact(record.get("mappingReport"), f"{context}.mappingReport")
     if "inventory" in record:
         _artifact(record["inventory"], f"{context}.inventory")
-    _artifact(record.get("armyMap"), f"{context}.armyMap")
-    _artifact(record.get("unitMap"), f"{context}.unitMap")
+    if "armyMap" in record:
+        _artifact(record["armyMap"], f"{context}.armyMap")
+    if "unitMap" in record:
+        _artifact(record["unitMap"], f"{context}.unitMap")
+    if "publicationManifest" in record:
+        _artifact(record["publicationManifest"], f"{context}.publicationManifest")
 
 def _duplicate_detection(value: Any, archive_paths: set[str], context: str) -> None:
     record = _object(value, context)

@@ -15,6 +15,7 @@ from pathlib import Path
 from time import perf_counter
 from urllib.parse import parse_qs
 
+from infinity_army_data.project_resources import maintained_manifest_path
 from infinity_db import __display_version__, __version__
 from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
 from infinity_db.catalog_rules import CatalogRules
@@ -30,6 +31,7 @@ from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
+from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.trait_catalog import TraitCatalog
 from infinity_db.unit_slugs import (
     attach_public_unit_slug,
@@ -44,9 +46,7 @@ ASSETS = {
     "/static/styles.css": ("styles.css", "text/css; charset=utf-8"),
     "/static/app.js": ("app.js", "text/javascript; charset=utf-8"),
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
-    "/static/army-symbols.js": ("army-symbols.js", "text/javascript; charset=utf-8"),
     "/static/unit-symbols.js": ("unit-symbols.js", "text/javascript; charset=utf-8"),
-    "/static/unit-symbol-map.js": ("unit-symbol-map.js", "text/javascript; charset=utf-8"),
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
     "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
     "/static/navigation.js": ("navigation.js", "text/javascript; charset=utf-8"),
@@ -102,9 +102,7 @@ STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']
 MODULE_IMPORT_URL = re.compile(
     r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])(?P<path>\./[^"\']+\.js)(?P=quote)'
 )
-STATIC_REVISION_FILES = tuple(
-    sorted({filename for filename, _ in ASSETS.values()} | {"symbol-inventory.json"})
-)
+STATIC_REVISION_FILES = tuple(sorted(filename for filename, _ in ASSETS.values()))
 
 
 def _metric_route(path: str) -> str:
@@ -170,7 +168,7 @@ def _metric_route(path: str) -> str:
 
 
 def _static_asset_revision() -> str:
-    """Fingerprint every cache-immutable browser asset and the symbol inventory."""
+    """Fingerprint cache-immutable browser assets and the canonical symbol contract."""
 
     static = files("infinity_db.web").joinpath("static")
     digest = sha256()
@@ -178,6 +176,10 @@ def _static_asset_revision() -> str:
         digest.update(filename.encode("utf-8"))
         digest.update(b"\0")
         digest.update(sha256(static.joinpath(filename).read_bytes()).digest())
+
+    publication_manifest = maintained_manifest_path("symbol-publication.json")
+    digest.update(b"data/manifests/symbol-publication.json\0")
+    digest.update(sha256(publication_manifest.read_bytes()).digest())
     return digest.hexdigest()[:16]
 
 
@@ -457,6 +459,7 @@ class Application:
             self.database, self.rules_database
         )
         self.catalog_rules = CatalogRules(self.rules_database)
+        self.symbol_catalog = SymbolCatalog()
         self.fireteam_rules_reference = fireteam_reference(self.rules_database)
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
@@ -816,6 +819,7 @@ class Application:
                 payload = {"items": self.skill_catalog.list_skill_extras()}
                 payload = enrich_nested_unit_slugs(self.database, payload)
                 payload = enrich_army_references(self.database, payload)
+                payload = self.symbol_catalog.enrich_nested_units(payload)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read skill modifiers")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -873,6 +877,7 @@ class Application:
                 else:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
+                    payload = self.symbol_catalog.enrich_nested_units(payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -899,6 +904,7 @@ class Application:
                     payload = self.catalog_rules.enrich_catalog_item("equipment", payload)
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
+                    payload = self.symbol_catalog.enrich_nested_units(payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -921,6 +927,7 @@ class Application:
                     payload = self.catalog_rules.enrich_catalog_item("weapons", payload)
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
+                    payload = self.symbol_catalog.enrich_nested_units(payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -938,6 +945,7 @@ class Application:
                 else:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
+                    payload = self.symbol_catalog.enrich_nested_units(payload)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read trait")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -973,6 +981,7 @@ class Application:
                 for item in items:
                     attach_public_army_slug(self.database, item)
                 payload = enrich_army_references(self.database, {"items": items})
+                self.symbol_catalog.enrich_armies(payload["items"])
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read armies")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -1017,6 +1026,7 @@ class Application:
                         "items": enrich_unit_items(self.database, payload["items"]),
                     }
                     payload = enrich_army_references(self.database, payload)
+                    self.symbol_catalog.enrich_units(payload["items"])
                 except ArmySelectionError as exc:
                     status = HTTPStatus.BAD_REQUEST
                     payload = {"error": str(exc)}
@@ -1040,6 +1050,7 @@ class Application:
                     )
                     attach_public_unit_slug(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
+                    self.symbol_catalog.enrich_unit(payload)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}

@@ -74,23 +74,25 @@ import json
 from importlib.resources import files
 from pathlib import Path, PurePosixPath
 
-root = Path(files("infinity_db.web").joinpath("static"))
-inventory_path = root / "symbol-inventory.json"
-try:
-    inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
-except (OSError, json.JSONDecodeError) as exc:
-    raise SystemExit(f"Installed published symbol inventory is unavailable: {exc}") from exc
+from infinity_army_data.project_resources import maintained_manifest_path
 
-if inventory.get("format") != "InfinityDB published symbol inventory":
-    raise SystemExit("Installed published symbol inventory has an unexpected format")
-if inventory.get("formatVersion") != 1:
-    raise SystemExit("Installed published symbol inventory has an unsupported formatVersion")
-expected = inventory.get("publishedSha256ByPath")
-summary = inventory.get("summary")
+root = Path(files("infinity_db.web").joinpath("static"))
+manifest_path = maintained_manifest_path("symbol-publication.json")
+try:
+    publication = json.loads(manifest_path.read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as exc:
+    raise SystemExit(f"Installed symbol publication manifest is unavailable: {exc}") from exc
+
+if publication.get("format") != "InfinityDB symbol publication mapping":
+    raise SystemExit("Installed symbol publication manifest has an unexpected format")
+if publication.get("formatVersion") != 2:
+    raise SystemExit("Installed symbol publication manifest has an unsupported formatVersion")
+expected = publication.get("publishedSha256ByPath")
+summary = publication.get("summary")
 if not isinstance(expected, dict) or not expected or not isinstance(summary, dict):
-    raise SystemExit("Installed published symbol inventory is incomplete")
+    raise SystemExit("Installed symbol publication manifest is incomplete")
 if summary.get("publishedAssetCount") != len(expected):
-    raise SystemExit("Installed published symbol inventory count does not match its paths")
+    raise SystemExit("Installed symbol publication manifest count does not match its paths")
 
 categories = {"armies", "characteristics", "orders", "units"}
 actual = set()
@@ -106,7 +108,7 @@ if actual != set(expected):
     missing = sorted(set(expected) - actual)
     unexpected = sorted(actual - set(expected))
     raise SystemExit(
-        f"Installed symbol set does not match inventory: missing={missing[:5]!r} "
+        f"Installed symbol set does not match publication manifest: missing={missing[:5]!r} "
         f"unexpected={unexpected[:5]!r}"
     )
 
@@ -120,7 +122,7 @@ for relative, digest in sorted(expected.items()):
         or portable.parts[0] not in categories
         or portable.suffix != ".svg"
     ):
-        raise SystemExit(f"Invalid installed symbol inventory path: {relative!r}")
+        raise SystemExit(f"Invalid installed symbol publication path: {relative!r}")
     path = root.joinpath(*portable.parts)
     data = path.read_bytes()
     published_bytes += len(data)
@@ -128,7 +130,7 @@ for relative, digest in sorted(expected.items()):
     if actual_digest != digest:
         raise SystemExit(f"Installed symbol SHA-256 mismatch: {relative}")
 if summary.get("publishedBytes") != published_bytes:
-    raise SystemExit("Installed symbol inventory byte total does not match installed files")
+    raise SystemExit("Installed symbol publication byte total does not match installed files")
 '
 fi
 
@@ -238,18 +240,19 @@ if expected_display_version:
 if [ "$packaged_assets" -eq 1 ]; then
   docker exec "$container" python -c '
 import json
-from importlib.resources import files
-from pathlib import Path
 from urllib.request import urlopen
 
-root = Path(files("infinity_db.web").joinpath("static"))
-inventory = json.loads((root / "symbol-inventory.json").read_text(encoding="utf-8"))
-paths = sorted(inventory["publishedSha256ByPath"])
+from infinity_army_data.project_resources import maintained_manifest_path
+
+publication = json.loads(
+    maintained_manifest_path("symbol-publication.json").read_text(encoding="utf-8")
+)
+paths = sorted(publication["publishedSha256ByPath"])
 for category in ("armies", "characteristics", "orders", "units"):
     try:
         relative = next(path for path in paths if path.startswith(category + "/"))
     except StopIteration as exc:
-        raise SystemExit(f"Installed symbol inventory has no {category} asset") from exc
+        raise SystemExit(f"Installed symbol publication has no {category} asset") from exc
     with urlopen(f"http://127.0.0.1:8000/static/{relative}", timeout=3) as response:
         if response.status != 200:
             raise SystemExit(f"Published symbol route returned {response.status}: {relative}")

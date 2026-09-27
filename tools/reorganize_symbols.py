@@ -3,9 +3,9 @@
 This is the final, non-destructive symbol-pipeline stage. It consumes a pinned
 Army snapshot, a version-7 compressed symbol build, and the complete compressed
 canonical work tree. It builds and validates a temporary publication tree,
-generates browser mappings from authoritative manifest references, and only
-then transactionally replaces the generated static symbol directories and maps.
-Raw snapshots and processing work trees are never moved or deleted.
+derives the canonical symbol mappings from authoritative manifest references, and only
+then transactionally replaces the generated static symbol directories and tracked
+publication manifest. Raw snapshots and processing work trees are never moved or deleted.
 """
 
 from __future__ import annotations
@@ -36,13 +36,9 @@ try:
 except ImportError:  # pragma: no cover - direct script execution fallback
     from path_sanitization import sanitize_filename
 
-SYMBOL_MAP = "unit-symbol-map.js"
-ARMY_MAP = "army-symbols.js"
-PUBLICATION_INVENTORY = "symbol-inventory.json"
-PUBLICATION_INVENTORY_FORMAT = "InfinityDB published symbol inventory"
-PUBLICATION_INVENTORY_VERSION = 1
 PUBLICATION_MAPPING_FORMAT = "InfinityDB symbol publication mapping"
 PUBLICATION_MAPPING_VERSION = 2
+PUBLICATION_MANIFEST = "symbol-publication.json"
 REMOVED_SYMBOL_BACKUP_FORMAT = "InfinityDB removed symbol backup"
 REMOVED_SYMBOL_BACKUP_VERSION = 1
 GENERATED_CATEGORIES = ("armies", "characteristics", "orders", "units")
@@ -67,9 +63,7 @@ class SnapshotIndex(NamedTuple):
 class PublicationResult(NamedTuple):
     static_root: Path
     mapping_report: Path
-    inventory: Path
-    army_map: Path
-    unit_map: Path
+    publication_manifest: Path
     summary: dict[str, int]
     browser_referenced_asset_count: int
     unreferenced_published_asset_count: int
@@ -299,63 +293,6 @@ def _reference_rank(
     return (2, 0, 0, 0, 0, 0, 0, str(key or ""))
 
 
-def _render_army_map(mapping: dict[int, str]) -> str:
-    lines = ["const armySymbols = new Map(["]
-    lines.extend(f'  [{key}, {json.dumps(value)}],' for key, value in sorted(mapping.items()))
-    lines.extend(
-        [
-            "]);",
-            "",
-            "export function armySymbolPath(armyId) {",
-            "  const symbol = armySymbols.get(armyId);",
-            "  const version = document.documentElement.dataset.appVersion;",
-            (
-                "  return symbol && `/static/armies/${encodeURI(symbol)}?v="
-                "${encodeURIComponent(version)}`;"
-            ),
-            "}",
-            "",
-        ]
-    )
-    return "\n".join(lines)
-
-
-def _render_unit_map(
-    mapping: dict[str, str], profile_mapping: dict[str, str]
-) -> str:
-    lines = ["const unitSymbolSlugs = new Map(["]
-    lines.extend(
-        f"  [{json.dumps(key)}, {json.dumps(value)}],"
-        for key, value in sorted(mapping.items())
-    )
-    lines.extend(
-        [
-            "]);",
-            "",
-            "export function unitSymbolSlug(unitSlug) {",
-            "  return unitSymbolSlugs.get(unitSlug);",
-            "}",
-            "",
-            "const unitProfileSymbolSlugs = new Map([",
-        ]
-    )
-    lines.extend(
-        f"  [{json.dumps(key)}, {json.dumps(value)}],"
-        for key, value in sorted(profile_mapping.items())
-    )
-    lines.extend(
-        [
-            "]);",
-            "",
-            "export function unitProfileSymbolSlug(profileLogo) {",
-            "  return unitProfileSymbolSlugs.get(profileLogo);",
-            "}",
-            "",
-        ]
-    )
-    return "\n".join(lines)
-
-
 def _has_active_text(root: ET.Element) -> bool:
     for element in root.iter():
         if element.tag.rsplit("}", 1)[-1] not in _TEXT_ROOT_TAGS:
@@ -552,15 +489,6 @@ def _build_publication(
         published_sha256[published] = sha256_file(destination)
         published_bytes += destination.stat().st_size
 
-    army_map = staging_static / ARMY_MAP
-    unit_map = staging_static / SYMBOL_MAP
-    inventory_path = staging_static / PUBLICATION_INVENTORY
-    army_map.write_text(_render_army_map(army_mapping), encoding="utf-8", newline="\n")
-    unit_map.write_text(
-        _render_unit_map(unit_mapping, unit_profile_mapping),
-        encoding="utf-8",
-        newline="\n",
-    )
     browser_referenced_paths = {
         *(f"armies/{value}" for value in army_mapping.values()),
         *(f"units/{value}.svg" for value in unit_mapping.values()),
@@ -568,27 +496,6 @@ def _build_publication(
         *static_mapping.values(),
     }
     unreferenced_published_paths = set(published_sha256) - browser_referenced_paths
-    inventory_path.write_text(
-        json.dumps(
-            {
-                "format": PUBLICATION_INVENTORY_FORMAT,
-                "formatVersion": PUBLICATION_INVENTORY_VERSION,
-                "summary": {
-                    "publishedAssetCount": len(published_sha256),
-                    "browserReferencedAssetCount": len(browser_referenced_paths),
-                    "unreferencedPublishedAssetCount": len(unreferenced_published_paths),
-                    "publishedBytes": published_bytes,
-                },
-                "publishedSha256ByPath": dict(sorted(published_sha256.items())),
-            },
-            ensure_ascii=False,
-            sort_keys=True,
-            indent=2,
-        )
-        + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
 
     actual_published = {
         path.relative_to(staging_static).as_posix()
@@ -884,6 +791,17 @@ def publish_symbols(
             compressed_root=compressed_root,
             staging_static=staging_static,
         )
+        publication_manifest = build_manifest_path.parent / PUBLICATION_MANIFEST
+        staged_publication_manifest = staging / PUBLICATION_MANIFEST
+        staged_publication_manifest.write_text(
+            json.dumps(
+                report_document, ensure_ascii=False, sort_keys=True, indent=2
+            )
+            + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+
         previous_inventory = _published_symbol_inventory(static_root)
         incoming_inventory = _published_symbol_inventory(staging_static)
         changes, change_summary = _publication_changes(previous_inventory, incoming_inventory)
@@ -926,15 +844,11 @@ def publish_symbols(
 
         destinations = [
             *(static_root / category for category in GENERATED_CATEGORIES),
-            static_root / PUBLICATION_INVENTORY,
-            static_root / ARMY_MAP,
-            static_root / SYMBOL_MAP,
+            publication_manifest,
         ]
         staged_paths = [
             *(staging_static / category for category in GENERATED_CATEGORIES),
-            staging_static / PUBLICATION_INVENTORY,
-            staging_static / ARMY_MAP,
-            staging_static / SYMBOL_MAP,
+            staged_publication_manifest,
         ]
         report_root.mkdir(parents=True, exist_ok=True)
         destinations.append(report_destination)
@@ -964,9 +878,7 @@ def publish_symbols(
                 manifest,
                 summary=summary,
                 mapping_report=report_destination,
-                inventory=static_root / PUBLICATION_INVENTORY,
-                army_map=static_root / ARMY_MAP,
-                unit_map=static_root / SYMBOL_MAP,
+                publication_manifest=publication_manifest,
                 project_root=project_root,
             )
             write_symbol_manifest(updated, build_manifest_path)
@@ -983,9 +895,7 @@ def publish_symbols(
         return PublicationResult(
             static_root=static_root,
             mapping_report=report_destination,
-            inventory=static_root / PUBLICATION_INVENTORY,
-            army_map=static_root / ARMY_MAP,
-            unit_map=static_root / SYMBOL_MAP,
+            publication_manifest=publication_manifest,
             summary=summary,
             browser_referenced_asset_count=report_document["browserUsageSummary"][
                 "browserReferencedAssetCount"

@@ -92,9 +92,9 @@ def build_manifest(project_root: Path) -> dict[str, Any]:
         artifacts["archives/snapshot.zip"] = sha256_file(snapshot)
         artifacts["archives/work.zip"] = sha256_file(work_archive)
 
-        static_root = project_root / "src" / "infinity_db" / "web" / "static"
-        for name in ("symbol-inventory.json", "army-symbols.js", "unit-symbol-map.js"):
-            artifacts[f"publication/{name}"] = sha256_file(static_root / name)
+        artifacts["publication/symbol-publication.json"] = sha256_file(
+            project_root / "data" / "manifests" / "symbol-publication.json"
+        )
 
         return {
             "format": FORMAT,

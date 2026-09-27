@@ -684,6 +684,7 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
     compression_candidates = artifact(tmp_path / "compression-candidates.csv", b"x")
     compression_run = artifact(tmp_path / "compression-run.json", b"{}")
     publication_report = artifact(tmp_path / "publication-map.json", b"{}")
+    publication_manifest = artifact(tmp_path / "symbol-publication.json", b"{}")
     inventory = artifact(tmp_path / "symbol-inventory.json", b"{}")
     army_map = artifact(tmp_path / "army-symbols.js", b"map")
     unit_map = artifact(tmp_path / "unit-symbol-map.js", b"map")
@@ -859,23 +860,25 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
             "publishedBytes": 0,
         },
         mapping_report=publication_report,
-        inventory=inventory,
-        army_map=army_map,
-        unit_map=unit_map,
+        publication_manifest=publication_manifest,
         project_root=tmp_path,
     )
 
     assert published["formatVersion"] == 8
     assert published["processing"]["publication"]["status"] == "passed"
-    assert published["processing"]["publication"]["inventory"]["path"] == "symbol-inventory.json"
+    assert (
+        published["processing"]["publication"]["publicationManifest"]["path"]
+        == "symbol-publication.json"
+    )
+    assert "inventory" not in published["processing"]["publication"]
+    assert "armyMap" not in published["processing"]["publication"]
+    assert "unitMap" not in published["processing"]["publication"]
     with pytest.raises(SymbolManifestError, match="version-7 compressed state"):
         add_publication(
             published,
             summary=published["processing"]["publication"]["summary"],
             mapping_report=publication_report,
-            inventory=inventory,
-            army_map=army_map,
-            unit_map=unit_map,
+            publication_manifest=publication_manifest,
             project_root=tmp_path,
         )
     published["processing"]["publication"]["summary"]["publishedBytes"] = 1
@@ -885,7 +888,13 @@ def test_publication_promotes_compressed_manifest_to_version_8(tmp_path: Path) -
         validate_symbol_manifest(published)
     published["processing"]["publication"]["summary"]["publishedBytes"] = 0
     legacy_published = json.loads(json.dumps(published))
-    legacy_published["processing"]["publication"].pop("inventory")
+    legacy_publication = legacy_published["processing"]["publication"]
+    legacy_publication.pop("publicationManifest")
+    legacy_publication["inventory"] = symbol_manifest.artifact_record(
+        inventory, project_root=tmp_path
+    )
+    legacy_publication["armyMap"] = symbol_manifest.artifact_record(army_map, project_root=tmp_path)
+    legacy_publication["unitMap"] = symbol_manifest.artifact_record(unit_map, project_root=tmp_path)
     validate_symbol_manifest(legacy_published)
     assert_compression_rejects_later_state(
         published,

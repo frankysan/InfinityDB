@@ -58,9 +58,12 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 "share/infinity-db/data/curated/peripherals" = [
   "data/curated/peripherals/army-identities.json",
 ]
+"share/infinity-db/data/manifests" = [
+  "data/manifests/symbol-publication.json",
+]
 
 [tool.setuptools.package-data]
-"infinity_db.web" = ["static/*.html", "static/*.css", "static/*.js", "static/*.json", "static/*.svg", "static/armies/**/*.svg", "static/characteristics/*.svg", "static/orders/*.svg", "static/units/**/*.svg"]
+"infinity_db.web" = ["static/*.html", "static/*.css", "static/*.js", "static/*.svg", "static/armies/**/*.svg", "static/characteristics/*.svg", "static/orders/*.svg", "static/units/**/*.svg"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

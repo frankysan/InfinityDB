@@ -1,36 +1,20 @@
-import { unitProfileSymbolSlug, unitSymbolSlug } from "./unit-symbol-map.js";
-
-function slugify(name) {
-  return String(name)
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function staticUnitSymbolPath(symbol) {
-  const version = document.documentElement.dataset.staticVersion
+function staticVersion() {
+  return document.documentElement.dataset.staticVersion
     || document.documentElement.dataset.appVersion;
-  return symbol && `/static/units/${encodeURI(symbol)}.svg?v=${encodeURIComponent(version)}`;
 }
 
-export function unitSymbolPath(unitName) {
-  const slug = slugify(unitName);
-  return staticUnitSymbolPath(unitSymbolSlug(slug) || slug);
+export function staticSymbolPath(symbolPath) {
+  const version = staticVersion();
+  return symbolPath && `/static/${encodeURI(symbolPath)}?v=${encodeURIComponent(version)}`;
 }
 
-export function unitProfileSymbolPath(profileLogo, unitName) {
-  const slug = slugify(unitName);
-  const symbol = unitProfileSymbolSlug(profileLogo) || unitSymbolSlug(slug) || slug;
-  return staticUnitSymbolPath(symbol);
-}
+export function unitSymbol(symbolPath, className = "") {
+  const path = staticSymbolPath(symbolPath);
+  if (!path) return document.createDocumentFragment();
 
-export function unitSymbol(unitName, className = "") {
   const icon = document.createElement("img");
   icon.className = `unit-symbol ${className}`.trim();
-  icon.src = unitSymbolPath(unitName);
+  icon.src = path;
   icon.alt = "";
   icon.width = 24;
   icon.height = 24;

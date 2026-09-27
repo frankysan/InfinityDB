@@ -18,14 +18,12 @@ from urllib.request import Request, urlopen
 
 try:
     from tools.asset_validation import (
-        PUBLICATION_INVENTORY,
         PUBLISHED_ASSET_CATEGORIES,
         AssetSetValidation,
         validate_asset_set,
     )
 except ModuleNotFoundError:  # Direct execution as tools/stage_full_asset_bundle.py.
     from asset_validation import (  # type: ignore[no-redef]
-        PUBLICATION_INVENTORY,
         PUBLISHED_ASSET_CATEGORIES,
         AssetSetValidation,
         validate_asset_set,
@@ -33,10 +31,12 @@ except ModuleNotFoundError:  # Direct execution as tools/stage_full_asset_bundle
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STATIC_ROOT = REPO_ROOT / "src" / "infinity_db" / "web" / "static"
+DEFAULT_PUBLICATION_MANIFEST = REPO_ROOT / "data" / "manifests" / "symbol-publication.json"
 DEFAULT_URL_ENV = "FULL_ASSET_BUNDLE_URL"
 DEFAULT_SHA256_ENV = "FULL_ASSET_BUNDLE_SHA256"
 DEFAULT_MAX_DOWNLOAD_MIB = 128
 DEFAULT_MAX_EXPANDED_MIB = 256
+LEGACY_PUBLICATION_INVENTORY = "symbol-inventory.json"
 _SHA256 = re.compile(r"[0-9a-fA-F]{64}")
 
 
@@ -133,15 +133,17 @@ def _validated_members(
             raise AssetBundleError(f"Bundle member escapes the asset root: {name!r}")
         if not relative.parts:
             continue
-        is_inventory = relative == PurePosixPath(PUBLICATION_INVENTORY)
-        if not is_inventory and relative.parts[0] not in categories:
+        is_legacy_inventory = relative == PurePosixPath(LEGACY_PUBLICATION_INVENTORY)
+        if not is_legacy_inventory and relative.parts[0] not in categories:
             raise AssetBundleError(
-                "Bundle member is outside published asset categories/inventory "
+                "Bundle member is outside published asset categories "
                 f"{sorted(categories)!r}: {name!r}"
             )
         if info.is_dir():
             continue
-        if not is_inventory and (len(relative.parts) < 2 or relative.suffix.lower() != ".svg"):
+        if not is_legacy_inventory and (
+            len(relative.parts) < 2 or relative.suffix.lower() != ".svg"
+        ):
             raise AssetBundleError(f"Bundle contains a non-SVG asset member: {name!r}")
         if info.flag_bits & 0x1:
             raise AssetBundleError(f"Bundle contains an encrypted member: {name!r}")
@@ -186,14 +188,12 @@ def _extract_bundle(archive_path: Path, staging_root: Path, *, max_expanded_byte
         raise AssetBundleError(f"Could not extract full-asset bundle: {exc}") from exc
 
 
-def _validate_staging(staging_root: Path, static_root: Path) -> AssetSetValidation:
-    for mapping_name in ("army-symbols.js", "unit-symbol-map.js"):
-        source = static_root / mapping_name
-        if not source.is_file():
-            raise AssetBundleError(f"Published symbol mapping is missing: {source}")
-        shutil.copy2(source, staging_root / mapping_name)
-
-    validation = validate_asset_set(staging_root)
+def _validate_staging(
+    staging_root: Path, publication_manifest: Path
+) -> AssetSetValidation:
+    validation = validate_asset_set(
+        staging_root, publication_manifest=publication_manifest
+    )
     if not validation.complete:
         detail = validation.state
         if validation.missing:
@@ -205,7 +205,7 @@ def _validate_staging(staging_root: Path, static_root: Path) -> AssetSetValidati
 
 
 def _install_staging(staging_root: Path, static_root: Path, backup_root: Path) -> None:
-    names = (*PUBLISHED_ASSET_CATEGORIES, PUBLICATION_INVENTORY)
+    names = PUBLISHED_ASSET_CATEGORIES
     moved_existing: list[str] = []
     installed: list[str] = []
     try:
@@ -238,6 +238,7 @@ def stage_asset_bundle(
     archive_path: Path,
     static_root: Path = DEFAULT_STATIC_ROOT,
     *,
+    publication_manifest: Path = DEFAULT_PUBLICATION_MANIFEST,
     max_expanded_bytes: int = DEFAULT_MAX_EXPANDED_MIB * 1024 * 1024,
 ) -> AssetSetValidation:
     """Validate a ZIP bundle and replace the local published asset categories atomically."""
@@ -254,7 +255,7 @@ def stage_asset_bundle(
                 staging_root,
                 max_expanded_bytes=max_expanded_bytes,
             )
-            validation = _validate_staging(staging_root, static_root)
+            validation = _validate_staging(staging_root, publication_manifest)
             _install_staging(staging_root, static_root, backup_root)
             return validation
 

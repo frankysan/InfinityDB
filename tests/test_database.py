@@ -2923,21 +2923,23 @@ def test_skill_catalog_uses_curated_declaration_categories(
 
     strategos = next(item for item in catalog.list_skills() if item["id"] == 69)
     assert strategos["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 113}
+        {"id": "automatic", "name": "Automatic", "source": "N5 Core Rules v5.3", "page": 113}
     ]
     detail = catalog.get_skill(70)
     assert detail is not None
     assert detail["categories"] == [
-        {"name": "Automatic", "source": "N5 Core Rules v5.3", "page": 113}
+        {"id": "automatic", "name": "Automatic", "source": "N5 Core Rules v5.3", "page": 113}
     ]
     multi = next(item for item in catalog.list_skills() if item["id"] == 89)
     assert multi["categories"] == [
         {
+            "id": "deployment-skill",
             "name": "Deployment",
             "source": "Infinity Wiki — Sapper revision 3286 vN5.3 / oldid 3286",
             "page": None,
         },
         {
+            "id": "long-skill",
             "name": "Long Skill",
             "source": "Infinity Wiki — Sapper revision 3286 vN5.3 / oldid 3286",
             "page": None,
@@ -2946,8 +2948,8 @@ def test_skill_catalog_uses_curated_declaration_categories(
     mixed = catalog.get_skill(278)
     assert mixed is not None
     assert mixed["categories"] == [
-        {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
-        {"name": "ARO", "source": "N5 Core Rules v5.3", "page": 40},
+        {"id": "short-skill", "name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
+        {"id": "aro", "name": "ARO", "source": "N5 Core Rules v5.3", "page": 40},
     ]
     bs_variants = {
         int(variant["skill_id"]): variant
@@ -2967,8 +2969,8 @@ def test_skill_catalog_uses_curated_declaration_categories(
     cc = catalog.get_skill(274)
     assert cc is not None
     assert cc["categories"] == [
-        {"name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 45},
-        {"name": "ARO", "source": "N5 Core Rules v5.3", "page": 45},
+        {"id": "short-skill", "name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 45},
+        {"id": "aro", "name": "ARO", "source": "N5 Core Rules v5.3", "page": 45},
     ]
     cc_variant = next(
         variant for variant in cc["variants"] if int(variant["skill_id"]) == 274
@@ -2981,7 +2983,7 @@ def test_skill_catalog_uses_curated_declaration_categories(
 
     unclassified = next(item for item in catalog.list_skills() if item["id"] == 260)
     assert unclassified["categories"] == [
-        {"name": "Unclassified", "source": None, "page": None}
+        {"id": "unclassified", "name": "Unclassified", "source": None, "page": None}
     ]
 
 
@@ -3129,6 +3131,7 @@ def test_skill_catalog_rules_view_excludes_known_non_skills_and_adds_rules_only_
     assert detail is not None
     assert detail["categories"] == [
         {
+            "id": "automatic",
             "name": "Automatic",
             "source": "Infinity Wiki snapshot (English) v20260918-130233",
             "page": None,
@@ -3166,7 +3169,7 @@ def test_skill_catalog_without_rules_database_does_not_embed_rule_knowledge(
 
     strategos = next(item for item in catalog.list_skills() if item["id"] == 69)
     assert strategos["categories"] == [
-        {"name": "Unclassified", "source": None, "page": None}
+        {"id": "unclassified", "name": "Unclassified", "source": None, "page": None}
     ]
 
 

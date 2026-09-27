@@ -12,7 +12,7 @@ from infinity_db.domain_slugs import assign_domain_slugs
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 from infinity_db.skill_config import load_skill_source_config
 
-UNCLASSIFIED_CATEGORY = {"name": "Unclassified", "source": None, "page": None}
+UNCLASSIFIED_CATEGORY = {"id": "unclassified", "name": "Unclassified", "source": None, "page": None}
 DECLARATION_KIND = "declaration-category"
 COMMON_SKILL_CATEGORY = "Common Skills"
 SPECIAL_SKILL_CATEGORY = "Special Skills"
@@ -93,6 +93,7 @@ class SkillCatalog:
         page = citation.get("page") if citation else None
         return [
             {
+                "id": skill_type["id"],
                 "name": skill_type.get("category_name", skill_type["name"]),
                 "source": source,
                 "page": page,
@@ -140,6 +141,7 @@ class SkillCatalog:
 
         return [
             {
+                "id": category["type_id"],
                 "name": category["name"],
                 "source": _source_label(category),
                 "page": category["page"],
@@ -227,6 +229,7 @@ class SkillCatalog:
         for skill_ref in self._army_refs_for_ids(skill_ids):
             for category in self._category_index.get(skill_ref, []):
                 item = {
+                    "id": category["type_id"],
                     "name": category["name"],
                     "source": _source_label(category),
                     "page": category["page"],

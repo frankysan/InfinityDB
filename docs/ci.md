@@ -167,10 +167,11 @@ The implemented local semantics are:
 - `required`: require a validated complete asset set and include `full_assets`
   integration coverage.
 
-The complete processed SVG publication and `symbol-inventory.json` are tracked release
-content, so required source CI now uses `--assets required` directly from a clean
-checkout. A complete asset set is established by the generated publication inventory,
-not merely by the presence of SVG files. The validator checks every published path and
+The complete processed SVG publication and
+`data/manifests/symbol-publication.json` are tracked release content, so required source
+CI uses `--assets required` directly from a clean checkout. A complete asset set is
+established by the canonical publication manifest, not merely by the presence of SVG
+files. The validator checks every published path and
 SHA-256, rejects unexpected SVGs, and independently verifies that the browser-referenced
 subset is contained in the publication. The current processed publication is fully
 browser-addressable (806/806 SVGs); the separate subset contract still permits future
@@ -187,7 +188,10 @@ GitHub environment. `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` ident
 checksum-pinned HTTPS ZIP. `tools/stage_full_asset_bundle.py` downloads that bundle
 without printing its URL, enforces download/expanded-size limits, rejects path traversal,
 symlinks, encrypted members, case-colliding names, and files outside the four published
-SVG namespaces plus the root `symbol-inventory.json`, then validates and stages that
+SVG namespaces. New private ZIPs contain SVGs only; a legacy root
+`symbol-inventory.json` member is accepted but ignored during staging so existing CI
+bundles remain compatible. The tracked `data/manifests/symbol-publication.json`
+supplies the expected hashes and mapping contract used to validate and stage that
 publication before running:
 
 ```text
