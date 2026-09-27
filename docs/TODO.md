@@ -58,6 +58,13 @@ data searchable, navigable, and understandable. It should finish the player-faci
 application model without absorbing the separate consistency, visual-architecture, and
 operations hardening work reserved for 0.10.0.
 
+The preferred execution order is: finish categorical Unit filters and their URL state;
+then define and implement contextual AVA/points/SWC filtering; close the existing structured
+rules-reference link gaps; establish the maintained-text reference/token layer; and build the
+glossary/profile-help surface on top of that shared semantic-reference foundation. This order
+keeps the bounded Unit Explorer work moving while deferring the broader maintained-text
+ontology decision until it is actually needed.
+
 ### Player-facing completeness and navigation
 
 - [ ] Add a simple wiki-like internal-link syntax for **all maintained text fields**.
@@ -91,14 +98,58 @@ operations hardening work reserved for 0.10.0.
     Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever it
     changes how profile data should be read.
 
-- [ ] Rich unit filtering: troop type, classification, availability, points,
-  SWC, weapons, equipment, skills, and characteristics.
+- [ ] Complete rich Unit Explorer filtering and the corresponding extended-results
+  presentation. Treat this as completion of the existing backend-driven filter
+  framework rather than a separate browser-only filtering system.
+  - [x] Skill, Equipment, and Weapon filters resolve public slugs through the
+    backend and preserve legacy numeric identifiers only for compatibility.
+  - [ ] Add categorical filters for troop type, classification, and
+    characteristics. Prefer stable public semantic/sluggified identities in
+    shareable URLs rather than source-local numeric IDs where the domain supports
+    them.
+  - [ ] Add AVA, points, and SWC filtering. Numeric or mostly numeric fields must
+    support both an exact value and a bounded range. Preserve domain semantics
+    instead of coercing exceptional/source display values into an unsafe generic
+    numeric comparison; SWC in particular needs an explicit policy for ordinary
+    costs, bonuses such as `+1`/`+1.5`, and non-numeric display values.
+  - [ ] Define filter-conjunction semantics before adding loadout-sensitive numeric
+    filters. Decide explicitly which criteria may match anywhere on the logical
+    Unit and which must match within one compatible profile/group/loadout context,
+    so a weapon on one option cannot accidentally satisfy a points/SWC constraint
+    supplied only by an unrelated option.
+  - [ ] Add an optional extended Unit-list mode, with advanced filters as a natural
+    entry point. The extended result should expose the Unit's base statistics, troop
+    type, classification, characteristics, and Army-specific AVA without requiring
+    navigation to Unit detail. AVA may be rendered beneath or overlaid on the
+    existing Army-availability symbols; choose the final treatment during UI work.
+  - [ ] Make multi-profile Units legible in extended mode. Current design direction
+    is to add subordinate profile rows beneath the main Unit row, visually indented
+    or otherwise marked as attached profiles, rather than flattening independent
+    profile statistics into one ambiguous row. Validate that approach against
+    representative multi-profile Units before making it the presentation contract.
 
-- [ ] Deep-linkable, shareable search and filter state for catalog and unit
-  views.
+- [ ] Complete deep-linkable, shareable search and filter state for catalog and
+  Unit views.
+  - [x] Unit Explorer Army, declared-faction, name, Skill, Equipment, Weapon,
+    pagination, and sort state already participate in URL state. Global search uses
+    its own shareable `q` parameter.
+  - [ ] Add every new 0.9 Unit filter to the URL contract as it is implemented so
+    filtering and deep-link work are completed together rather than in separate
+    passes. Decide whether extended-results mode itself is shareable state or a
+    local presentation preference.
+  - [ ] Make catalog-list search/filter state deep-linkable where it is still only
+    local browser state.
+  - [ ] Define how optional-unit preferences interact with reproducible shared Unit
+    URLs. Two users opening the same link should not silently receive materially
+    different result sets without the UI explaining the preference-dependent
+    difference.
 
-- [ ] Rules-reference cross-links from profiles, loadouts, skills, equipment,
-  and traits to their catalog detail pages.
+- [ ] Close the remaining rules-reference cross-link gaps from profiles, loadouts,
+  Skills, Equipment, Weapons, Traits, States, and Hacking Programs to their catalog
+  detail pages. Existing structured links already cover much of this surface; treat
+  the remaining work as an audit-and-close pass with focused regressions rather than
+  a new navigation system. Keep inline references inside maintained prose in the
+  separate maintained-text-link task above.
 
 ## 0.10.0 — consistency, presentation, and release hardening
 

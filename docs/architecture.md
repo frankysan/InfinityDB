@@ -1382,6 +1382,38 @@ total above illustrates the response shape.
 - Unknown resources return 404; unsupported methods return 405; database read
   failures return 503 without exposing internal exception details.
 
+#### Planned 0.9 Unit Explorer filtering and extended-result contract
+
+The 0.9 Unit Explorer work extends the existing backend-owned filter contract rather than
+introducing a second browser-only interpretation of profile/loadout data. Categorical filters
+should resolve stable public identities where available, and every user-visible filter must have
+a defined URL representation so a filtered view can be shared and reproduced.
+
+Numeric or mostly numeric filters must support both exact-value matching and bounded ranges with consistently defined boundary semantics.
+The backend must retain the owning semantic context while evaluating them: AVA belongs to an
+Army/profile occurrence, while points and SWC belong to loadout occurrences. A compound query
+must not accidentally combine a weapon or other loadout-specific fact from one option with a
+points/SWC constraint that is satisfied only by an unrelated option. The exact conjunction
+rules are a 0.9 design decision and must be pinned by focused repository/API tests before the
+full numeric filter surface is exposed. SWC also requires domain-aware handling for ordinary
+numeric costs, bonuses such as `+1`/`+1.5`, and source values that are not ordinary costs; it
+must not be reduced to an unqualified floating-point range.
+
+The Unit list will gain an optional extended presentation mode. Its purpose is to expose enough
+profile context to evaluate filtered results without opening every Unit detail page: base
+statistics, troop type, classification, characteristics, and Army-specific AVA. The existing
+Army-availability symbols remain the ownership/availability anchor; per-Army AVA may be placed
+beneath or visually combined with those symbols once the final responsive treatment is chosen.
+
+Multi-profile Units cannot be represented faithfully by collapsing all profile statistics into
+one extended row. The current presentation direction is to show subordinate profile rows beneath
+the main Unit row, indented or otherwise visually attached to the parent. That layout remains a
+presentation hypothesis until checked against representative multi-profile Units; the durable
+constraint is that profile-specific statistics and classification must remain visibly associated
+with the profile that owns them. Advanced-filter expansion is a natural way to enable extended
+mode, but whether that mode is URL/share state or a local display preference is intentionally
+left open until the UI interaction is finalized.
+
 ### `GET /api/units/{unit_id}`
 
 Returns one logical unit, including its general data and the profiles,
