@@ -2,6 +2,7 @@ import { formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./prefer
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 import { rulesReferenceSection } from "./rules-reference.js";
+import { skillCategoryBadge } from "./skill-categories.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
   || window.location.pathname.split("/").pop();
@@ -111,21 +112,21 @@ function hackingDeviceLinks(devices) {
   return fragment;
 }
 
-function skillTypeLabel(value) {
-  const labels = {
-    "entire order": "Entire Order",
-    short: "Short Skill",
-    aro: "ARO",
-  };
-  return labels[value] || value;
+function declarationCategoryBadges(categories) {
+  if (!categories?.length) return "—";
+  const badges = document.createElement("span");
+  badges.className = "detail-badges";
+  for (const category of categories) {
+    badges.append(skillCategoryBadge(category));
+  }
+  return badges;
 }
-
 function structuredReferenceSection(reference) {
   if (!reference?.rows?.length) return null;
   if (reference.kind === "hacking-programs") {
     return structuredTable(
       reference.title,
-      ["Program", "Attack MOD", "Opponent MOD", "PS", "B", "Target", "Skill type", "Device", "Special"],
+      ["Program", "Attack MOD", "Opponent MOD", "PS", "B", "Target", "Type(s)", "Device", "Special"],
       reference.rows.map((row) => [
         hackingProgramLink(row),
         row.attack_mod,
@@ -133,7 +134,7 @@ function structuredReferenceSection(reference) {
         row.ps,
         row.burst,
         row.targets?.length ? row.targets.join(", ") : "—",
-        row.skill_types?.length ? row.skill_types.map(skillTypeLabel).join(", ") : "—",
+        declarationCategoryBadges(row.declaration_categories),
         hackingDeviceLinks(row.devices),
         row.special,
       ]),

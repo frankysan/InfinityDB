@@ -2457,6 +2457,18 @@ def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"hacking-program-detail.js" in body
 
+    status, _, script = request(app, "/static/hacking-program-detail.js")
+    assert status == 200
+    assert b'detail-group rules-reference hacking-program-profile' in script
+    assert b'from "./rules-reference.js"' in script
+    assert b"rulesReferenceArticle(rule, { leadingContent })" in script
+    assert b'detail-card hacking-program-profile-card' not in script
+    assert b'from "./skill-categories.js"' in script
+    assert b"skillCategoryBadge(category)" in script
+    assert b"hacking-program-context-row" in script
+    assert b"rulesReferenceSection" not in script
+    assert b'"Entire Order"' not in script
+
     status, _, body = request(app, "/api/hacking-programs/carbonite")
     assert status == 404
     assert json.loads(body)["error"] == "Hacking Program not found"
@@ -3233,6 +3245,12 @@ def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) 
     assert b'from "./skill-categories.js"' in body
     assert b"skillCategoryBadge(category" in body
 
+    status, _, skill_script = request(app, "/static/skill.js")
+    assert status == 200
+    assert b'from "./skill-categories.js"' in skill_script
+    assert b"declarationCategoryBadges(row.declaration_categories)" in skill_script
+    assert b'"Entire Order"' not in skill_script
+
     status, _, body = request(app, "/static/skill-categories.js")
     assert status == 200
     for token in (b"automatic", b"deployment", b"basic-short", b"short", b"long", b"aro"):
@@ -3253,6 +3271,10 @@ def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) 
     assert b".skill-category-badge--aro" in body
     assert b"var(--color-skill-category-aro)" in body
     assert b".rules-reference" in body
+    assert b".hacking-program-profile-table" in body
+    assert b".detail-card" not in body
+    assert b".hacking-program-profile-card" not in body
+    assert b".hacking-program-context-row" in body
     assert b"margin-bottom: var(--space-2);" in body
 
 

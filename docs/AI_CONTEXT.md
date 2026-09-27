@@ -1288,6 +1288,8 @@ compatibility references remain unambiguous JSON integers.
   while leaving the original normalized metadata tables in `infinity.raw.db`.
 - Hacking Program profiles preserve source order, Attack/Opponent MOD, PS, Burst, special
   text, Device associations, targets, declaration types, and source Upgrade-extra provenance.
+  The raw Army declaration value `entire order` remains preserved, while composed API/browser
+  presentation normalizes it to the canonical `long-skill` / **Long Skill** identity used by Skills.
   0.8 promotes those rows to `/hacking-programs` identities by composing them with reviewed
   `hacking-program:*` records in `rules.db`. Army metadata remains authoritative for exact
   profile fields and the baseline Device matrix; rules data supplies semantic effects/relations.

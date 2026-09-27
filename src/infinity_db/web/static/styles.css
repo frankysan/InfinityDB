@@ -1442,6 +1442,32 @@ h1>span {
   background: var(--color-surface-subtle);
 }
 
+.hacking-program-profile-table,
+.hacking-program-profile-table table {
+  width: 100%;
+}
+
+.hacking-program-context-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.hacking-program-targets,
+.hacking-program-declaration-categories {
+  margin: 0;
+}
+
+.hacking-program-targets {
+  color: var(--color-text-secondary);
+}
+
+.hacking-program-targets strong {
+  color: var(--color-text-primary);
+}
+
 .rules-reference h3,
 .rules-reference h4,
 .rules-reference h5,

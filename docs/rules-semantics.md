@@ -1996,7 +1996,10 @@ The Hacking Programs chart defines Program profiles using **Attack MOD, Opponent
 MOD, PS, Burst, Target, Skill Type, and Special**. Targets may be Troop Types,
 Hackers, broader game elements, or effectively unrestricted depending on the
 Program. Program effects can invoke Ammunition, States, Supportware, profile
-changes, MODs, or non-damaging effects.
+changes, MODs, or non-damaging effects. Army's structured metadata still uses the
+legacy `entire order` declaration value for Long Skills; InfinityDB preserves that
+raw source value but composes it as the canonical **Long Skill** category, using the
+same declaration-category identity and presentation language as Skills.
 
 Hacking Programs should therefore become a rules-reference domain rather than be
 encoded as pseudo-Weapons or pseudo-Skills solely to reuse an existing schema.

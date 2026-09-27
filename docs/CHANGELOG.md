@@ -9,6 +9,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web backend + Web frontend:** Present Hacking Program profiles with the same declaration-category
+  language and detail-card structure used by Skills. Army's legacy `entire order` source value remains
+  preserved in the application data but renders canonically as **Long Skill**; the Army profile,
+  declaration badges, and curated rules semantics now form one unified Skill-style reference card.
 - **Web frontend + Project infrastructure:** Adopt a redistributable bundled browser type
   system: Audiowide for the InfinityDB wordmark, Oxanium for display headings, IBM Plex Sans
   for running/interface text, IBM Plex Sans Condensed for dense tables, and IBM Plex Mono for

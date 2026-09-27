@@ -1,5 +1,6 @@
 import { getCatalogItem } from "./api.js";
-import { rulesReferenceSection } from "./rules-reference.js";
+import { rulesReferenceArticle } from "./rules-reference.js";
+import { skillCategoryBadge } from "./skill-categories.js";
 
 const itemId = window.location.pathname.split("/").pop();
 const name = document.getElementById("item-name");
@@ -12,19 +13,19 @@ function text(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
 }
 
-function skillTypeLabel(value) {
-  const labels = { "entire order": "Entire Order", short: "Short Skill", aro: "ARO" };
-  return labels[value] || value;
+function categoryBadges(categories) {
+  const badges = document.createElement("p");
+  badges.className = "detail-badges hacking-program-declaration-categories";
+  for (const category of categories || []) {
+    badges.append(skillCategoryBadge(category));
+  }
+  return badges;
 }
 
-function profileSection(program) {
-  const section = document.createElement("section");
-  section.className = "detail-group";
-  const heading = document.createElement("h2");
-  heading.className = "detail-section-title";
-  heading.textContent = "Program profile";
+function programProfileContent(program) {
+  const nodes = [];
   const container = document.createElement("div");
-  container.className = "table-container";
+  container.className = "table-container hacking-program-profile-table";
   const table = document.createElement("table");
   table.className = "data-table--compact";
   table.innerHTML = "<thead><tr><th>Attack MOD</th><th>Opponent MOD</th><th>PS</th><th>B</th></tr></thead>";
@@ -39,27 +40,60 @@ function profileSection(program) {
   body.append(row);
   table.append(body);
   container.append(table);
-  section.append(heading, container);
+  nodes.push(container);
 
-  const facts = document.createElement("div");
-  facts.className = "detail-section";
-  for (const [label, value] of [
-    ["Targets", program.targets?.length ? program.targets.join(", ") : "—"],
-    ["Declaration", program.skill_types?.length ? program.skill_types.map(skillTypeLabel).join(" · ") : "—"],
-    ["Special", program.special || "—"],
-  ]) {
-    const group = document.createElement("div");
-    group.className = "detail-fact-group";
-    const title = document.createElement("h3");
+  const context = document.createElement("div");
+  context.className = "hacking-program-context-row";
+  const targets = document.createElement("p");
+  targets.className = "hacking-program-targets";
+  const targetsLabel = document.createElement("strong");
+  targetsLabel.textContent = "Targets";
+  targets.append(
+    targetsLabel,
+    ` ${program.targets?.length ? program.targets.join(", ") : "—"}`,
+  );
+  context.append(targets, categoryBadges(program.declaration_categories));
+  nodes.push(context);
+
+  if (program.special) {
+    const special = document.createElement("div");
+    special.className = "detail-fact-group";
+    const title = document.createElement("h4");
     title.className = "detail-fact-heading";
-    title.textContent = label;
+    title.textContent = "Special";
     const valueElement = document.createElement("p");
     valueElement.className = "detail-copy";
-    valueElement.textContent = value;
-    group.append(title, valueElement);
-    facts.append(group);
+    valueElement.textContent = program.special;
+    special.append(title, valueElement);
+    nodes.push(special);
   }
-  section.append(facts);
+  return nodes;
+}
+
+function fallbackProfileArticle(program, leadingContent) {
+  const article = document.createElement("article");
+  article.className = "detail-section";
+  const header = document.createElement("header");
+  header.className = "rules-card-header";
+  const title = document.createElement("h3");
+  title.textContent = program.name;
+  header.append(title);
+  article.append(header, ...leadingContent);
+  return article;
+}
+
+function profileSection(program) {
+  const section = document.createElement("section");
+  section.className = "detail-group rules-reference hacking-program-profile";
+  const heading = document.createElement("h2");
+  heading.className = "detail-section-title";
+  heading.textContent = "Program profile";
+  const leadingContent = programProfileContent(program);
+  const rule = program.rules?.[0];
+  const article = rule
+    ? rulesReferenceArticle(rule, { leadingContent })
+    : fallbackProfileArticle(program, leadingContent);
+  section.append(heading, article);
   return section;
 }
 
@@ -99,11 +133,7 @@ function render(program) {
   document.title = `${program.name} · InfinityDB`;
   name.firstChild.textContent = program.name;
   meta.textContent = `Army program #${program.position}${program.source_extra_id == null ? "" : ` · Upgrade extra #${program.source_extra_id}`}`;
-  content.replaceChildren(
-    profileSection(program),
-    devicesSection(program),
-    ...(program.rules?.length ? [rulesReferenceSection(program.rules)] : []),
-  );
+  content.replaceChildren(profileSection(program), devicesSection(program));
   content.hidden = false;
   status.hidden = true;
 }

@@ -1780,8 +1780,11 @@ application projection and first-class surface. Hacking Programs reuse their typ
 projection as a first-class `/hacking-programs` rules/reference surface: source `hack` metadata
 remains authoritative for Program profiles, targets, declaration types, source Upgrade-extra
 provenance, and the baseline Device matrix, while `rules.db` contributes reviewed Program
-semantics and cross-rule relationships. Upgrade/source-specific access is not inferred from the
-baseline Device matrix.
+semantics and cross-rule relationships. The application database preserves Army's raw declaration
+strings, including legacy `entire order`; the composed API additionally exposes canonical
+declaration-category identities so browser presentation uses **Long Skill**, **Short Skill**, and
+**ARO** consistently with Skills. Upgrade/source-specific access is not inferred from the baseline
+Device matrix.
 The other connected-data gap families were implemented as relationship presentation over
 existing Unit/Army/Profile/Loadout identities rather than new catalogs. The deferred
 rules-interaction ledger is used as a boundary check, not as a mandate to create one

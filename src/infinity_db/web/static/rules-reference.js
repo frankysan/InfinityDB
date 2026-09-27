@@ -224,37 +224,37 @@ function appendRuleDetails(container, rule, { includeBadges = true } = {}) {
   }
 }
 
+export function rulesReferenceArticle(rule, { leadingContent = [] } = {}) {
+  const article = document.createElement("article");
+  article.className = "detail-section";
+  const header = document.createElement("header");
+  header.className = "rules-card-header";
+  const title = document.createElement("h3");
+  title.textContent = rule.name;
+  header.append(title);
+  const badgeRow = ruleBadgeRow(rule);
+  if (badgeRow) header.append(badgeRow);
+  article.append(header, ...leadingContent);
+  appendRuleDetails(article, rule, { includeBadges: false });
+
+  for (const supplement of rule.supplements || []) {
+    const supplemental = document.createElement("div");
+    supplemental.className = "rules-supplement";
+    const supplementTitle = document.createElement("h4");
+    supplementTitle.textContent = "Additional rules context";
+    supplemental.append(supplementTitle);
+    appendRuleDetails(supplemental, supplement);
+    article.append(supplemental);
+  }
+  return article;
+}
+
 export function rulesReferenceSection(rules, headingText = "Rules reference") {
   const section = document.createElement("section");
   section.className = "detail-group rules-reference";
   const heading = document.createElement("h2");
   heading.className = "detail-section-title";
   heading.textContent = headingText;
-  section.append(heading);
-
-  for (const rule of rules) {
-    const article = document.createElement("article");
-    article.className = "detail-section";
-    const header = document.createElement("header");
-    header.className = "rules-card-header";
-    const title = document.createElement("h3");
-    title.textContent = rule.name;
-    header.append(title);
-    const badgeRow = ruleBadgeRow(rule);
-    if (badgeRow) header.append(badgeRow);
-    article.append(header);
-    appendRuleDetails(article, rule, { includeBadges: false });
-
-    for (const supplement of rule.supplements || []) {
-      const supplemental = document.createElement("div");
-      supplemental.className = "rules-supplement";
-      const supplementTitle = document.createElement("h4");
-      supplementTitle.textContent = "Additional rules context";
-      supplemental.append(supplementTitle);
-      appendRuleDetails(supplemental, supplement);
-      article.append(supplemental);
-    }
-    section.append(article);
-  }
+  section.append(heading, ...rules.map((rule) => rulesReferenceArticle(rule)));
   return section;
 }
