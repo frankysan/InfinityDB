@@ -835,13 +835,17 @@ compatibility references remain unambiguous JSON integers.
 - 2026-09-27: Runtime deployment became release-self-contained. The deterministic
   `data/generated/infinity.db` and `data/generated/rules.db` are tracked Git release
   artifacts; `install-or-update.sh` consumes them directly instead of rebuilding from
-  server-local raw data, and the old transferred-artifact workflow was retired.
-  `data/manifests/symbol-publication.json` now owns the compact Army source archive
-  name/SHA-256 needed for deployment provenance. `deploy.sh` validates the tracked
-  databases, complete SVG publication, and database/publication snapshot match before
-  building the image; installed-image validation repeats that provenance check using the
-  installed publication manifest. The terminal `army-symbol-build.json` remains useful
-  for local symbol processing/resume but is no longer a deployment input.
+  server-local raw data, and the old transferred-artifact workflow was retired. From
+  0.8.1 onward the updater first hands off to the installer shipped by the target release,
+  so old updater semantics cannot continue after checkout. The 0.8.0-to-0.8.1 transition
+  is the one exception and must bootstrap the 0.8.1 installer because the 0.8.0 script can
+  still rebuild the database after switching tags. `data/manifests/symbol-publication.json`
+  owns the compact Army source archive name/SHA-256 needed for deployment provenance.
+  `deploy.sh` validates the tracked databases, complete SVG publication, and
+  database/publication snapshot match before building the image; installed-image
+  validation repeats that provenance check using the installed publication manifest. The
+  terminal `army-symbol-build.json` remains useful for local symbol processing/resume but
+  is no longer a deployment input.
 
 - 2026-09-20: Containerized deployments preserve the checkout-derived browser display
   version explicitly instead of copying Git metadata into the image. `deploy.sh`

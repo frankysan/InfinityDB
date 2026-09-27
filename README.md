@@ -232,10 +232,13 @@ immutable image. Raw Army/wiki/PDF/source-symbol archives are not required on th
 sh ./scripts/install-or-update.sh
 ```
 
-The installer fetches release tags, checks out the selected release, validates the tracked
-`infinity.db`, `rules.db`, and `symbol-publication.json` contract, then builds and verifies
-the exact image that will be activated. Database generation remains a development/release
-workflow rather than a deployment step.
+The installer fetches release tags, hands off to the installer shipped by the target release,
+checks out that release, validates the tracked `infinity.db`, `rules.db`, and
+`symbol-publication.json` contract, then builds and verifies the exact image that will be
+activated. Database generation remains a development/release workflow rather than a deployment
+step. Upgrading an existing 0.8.0 server to 0.8.1 requires the one-time bootstrap documented in
+[Linux deployment](docs/deployment.md); do not invoke the 0.8.0 installer directly for that
+transition.
 
 For a deployment test on the server that must not be reachable from the LAN, use
 `sh ./scripts/deploy-local-test.sh`. It runs as a separate Compose project on

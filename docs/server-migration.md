@@ -39,6 +39,10 @@ After the checkout and deployment config are in place:
 sh ./scripts/install-or-update.sh
 ```
 
+For an existing server still running 0.8.0, first use the one-time 0.8.0-to-0.8.1 installer
+bootstrap in [Linux deployment](deployment.md); the 0.8.0 installer itself can rebuild the
+database after checking out the newer tag.
+
 The deployment guard validates the tracked databases and complete processed symbol publication and
 proves that `infinity.db` and `symbol-publication.json` name the same Army source ZIP SHA-256 before
 building/activating the image.

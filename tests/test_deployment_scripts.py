@@ -39,6 +39,17 @@ def test_release_installer_deploys_tracked_runtime_databases_without_rebuilding(
     assert "sh ./scripts/deploy.sh" in script
 
 
+def test_release_installer_hands_off_to_target_release_installer_before_prompts() -> None:
+    script = _read("scripts/install-or-update.sh")
+    handoff = 'git show "$release_tag:scripts/install-or-update.sh"'
+    prompt = "printf 'Continue with this release? [Y/n]: '"
+
+    assert "INFINITY_DB_INSTALLER_BOOTSTRAP_TAG" in script
+    assert handoff in script
+    assert 'INFINITY_DB_INSTALLER_BOOTSTRAP_TAG="$release_tag" sh "$bootstrap_script"' in script
+    assert script.index(handoff) < script.index(prompt)
+
+
 def test_local_test_deployment_is_loopback_only_and_isolated() -> None:
     script = _read("scripts/deploy-local-test.sh")
     assert "COMPOSE_PROJECT_NAME=infinitydb-test" in script

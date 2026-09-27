@@ -31,20 +31,39 @@ obtain or manage TLS certificates.
 
 ## Deploy or update
 
+### One-time 0.8.0 to 0.8.1 transition
+
+The 0.8.0 installer predates tracked runtime databases and continues executing its old logic
+after it checks out a newer tag. Do **not** start the 0.8.0-to-0.8.1 upgrade by invoking that
+old checkout's `scripts/install-or-update.sh` directly: it can rebuild `infinity.db` from local
+server source material and replace the release-matched database before the new deployment guard
+runs.
+
+After `v0.8.1` has been published, bootstrap the installer from the target tag instead:
+
+```sh
+tmp="$(mktemp)" && git fetch origin --tags --prune && git show v0.8.1:scripts/install-or-update.sh > "$tmp" && sh "$tmp"; status=$?; rm -f "$tmp"; [ "$status" -eq 0 ]
+```
+
+The 0.8.1 installer removes the legacy untracked database copies only when the target release
+owns tracked files at those paths, then checks out and deploys the exact release artifacts.
+
+### Normal updates from 0.8.1 onward
+
 From the server checkout:
 
 ```sh
 sh ./scripts/install-or-update.sh
 ```
 
-The interactive installer fetches release tags from `origin`, checks out the newest version
-tag in detached-HEAD mode, asks for the public domain, image-retention policy, and optional
-LAN metrics binding, installs the application into the local virtual environment, then
-deploys the tracked release artifacts without rebuilding them. It can save deployment
-settings in the ignored `.infinity-db-deploy.env` file. The script refuses to change tags
-while tracked local edits are present. On the first upgrade from a release where the runtime
-databases were ignored local files, the installer removes those legacy untracked copies only when
-the target tag supplies tracked files at the same paths, then checks out the release-owned bytes.
+The interactive installer fetches release tags from `origin`, loads the installer shipped by the
+newest release tag before any prompts or checkout-side effects, then checks out that tag in
+detached-HEAD mode. This handoff prevents obsolete updater behavior from continuing after a
+release checkout. The release installer asks for the public domain, image-retention policy, and
+optional LAN metrics binding, installs the application into the local virtual environment, then
+deploys the tracked release artifacts without rebuilding them. It can save deployment settings
+in the ignored `.infinity-db-deploy.env` file. The script refuses to change tags while tracked
+local edits are present.
 
 Every deploy requires these release-controlled files to be present in the checkout:
 
