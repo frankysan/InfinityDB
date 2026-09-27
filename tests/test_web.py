@@ -498,7 +498,46 @@ def test_fireteam_chart_page_and_api_use_application_projection(
         'html[data-developer-mode="true"] .fireteam-card',
         {"width": "100%"},
     )
+    assert_css_rule(
+        styles,
+        ".fireteam-member-table",
+        {"min-width": "0", "max-width": "100%", "overflow-x": "auto"},
+    )
     assert_css_rule(styles, ".fireteam-member-table table", {"min-width": "520px"})
+    assert (
+        b"""  .fireteam-member-table table {
+    --table-heading-padding: 9px 10px;
+    --table-cell-padding: 12px 10px;
+    --table-heading-size: var(--font-size-xs);
+    --table-cell-size: var(--font-size-base);
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+  }"""
+        in styles
+    )
+    assert (
+        b"""  .fireteam-member-table th,
+  .fireteam-member-table td {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }"""
+        in styles
+    )
+    assert (
+        b"""  .fireteam-member-table th:first-child {
+    width: 54%;
+    min-width: 0;
+  }"""
+        in styles
+    )
+    assert (
+        b"""  .fireteam-member-table th:nth-child(2) {
+    width: 46%;
+  }"""
+        in styles
+    )
     assert_css_rule(
         styles,
         'html[data-developer-mode="true"] .fireteam-member-table table',

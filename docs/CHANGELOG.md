@@ -7,6 +7,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
+### Fixed
+
+- **Web frontend:** Make ordinary Fireteam member tables fit narrow mobile viewports instead of
+  retaining their desktop minimum width; Developer mode keeps horizontal scrolling for its extra
+  member-detail columns.
+
 ## [0.8.1] - 2026-09-27
 
 ### Changed
