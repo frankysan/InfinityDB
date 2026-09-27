@@ -66,6 +66,42 @@ ASSETS = {
     "/static/rules-reference.js": ("rules-reference.js", "text/javascript; charset=utf-8"),
     "/static/skill-categories.js": ("skill-categories.js", "text/javascript; charset=utf-8"),
     "/static/infinitydb-logo.svg": ("infinitydb-logo.svg", "image/svg+xml"),
+    "/static/fonts/Audiowide/Audiowide-Regular.woff2": (
+        "fonts/Audiowide/Audiowide-Regular.woff2",
+        "font/woff2",
+    ),
+    "/static/fonts/Oxanium/Oxanium-Variable.woff2": (
+        "fonts/Oxanium/Oxanium-Variable.woff2",
+        "font/woff2",
+    ),
+    "/static/fonts/IBM_Plex_Sans/IBMPlexSans-Variable.woff2": (
+        "fonts/IBM_Plex_Sans/IBMPlexSans-Variable.woff2",
+        "font/woff2",
+    ),
+    "/static/fonts/IBM_Plex_Sans/IBMPlexSans-Italic-Variable.woff2": (
+        "fonts/IBM_Plex_Sans/IBMPlexSans-Italic-Variable.woff2",
+        "font/woff2",
+    ),
+    "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Regular.woff2": (
+        "fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Regular.woff2",
+        "font/woff2",
+    ),
+    "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Medium.woff2": (
+        "fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Medium.woff2",
+        "font/woff2",
+    ),
+    "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-SemiBold.woff2": (
+        "fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-SemiBold.woff2",
+        "font/woff2",
+    ),
+    "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Bold.woff2": (
+        "fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Bold.woff2",
+        "font/woff2",
+    ),
+    "/static/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.woff2": (
+        "fonts/IBM_Plex_Mono/IBMPlexMono-Regular.woff2",
+        "font/woff2",
+    ),
 }
 ARMY_SYMBOL_PATH = re.compile(r"/static/armies/[a-z0-9-]+/[a-z0-9-]+\.svg")
 UNIT_SYMBOL_PATH = re.compile(r"/static/units/[a-z0-9-]+/[a-z0-9-]+\.svg")
@@ -175,7 +211,7 @@ def _static_asset_revision() -> str:
     for filename in STATIC_REVISION_FILES:
         digest.update(filename.encode("utf-8"))
         digest.update(b"\0")
-        digest.update(sha256(static.joinpath(filename).read_bytes()).digest())
+        digest.update(sha256(static.joinpath(*filename.split("/")).read_bytes()).digest())
 
     publication_manifest = maintained_manifest_path("symbol-publication.json")
     digest.update(b"data/manifests/symbol-publication.json\0")
@@ -617,7 +653,9 @@ class Application:
             )
         elif path in ASSETS:
             filename, content_type = ASSETS[path]
-            body = files("infinity_db.web").joinpath("static", filename).read_bytes()
+            body = files("infinity_db.web").joinpath(
+                "static", *filename.split("/")
+            ).read_bytes()
             version = parse_qs(environ.get("QUERY_STRING", "")).get("v")
             if filename.endswith(".js") and version == [STATIC_ASSET_VERSION]:
                 body = _version_module_imports(body.decode("utf-8")).encode("utf-8")

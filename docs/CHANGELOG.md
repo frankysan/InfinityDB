@@ -9,6 +9,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web frontend + Project infrastructure:** Adopt a redistributable bundled browser type
+  system: Audiowide for the InfinityDB wordmark, Oxanium for display headings, IBM Plex Sans
+  for running/interface text, IBM Plex Sans Condensed for dense tables, and IBM Plex Mono for
+  identifiers/diagnostics. Canonical WOFF2 assets and OFL notices are tracked with a reproducible
+  TTF-to-WOFF2 preparation helper, while the full upstream TTF download set remains a build input.
 - **Web frontend:** Standardize browser typography on a canonical shared font-size scale with one
   browser-relative root size and `rem`-based tiers, so the interface can scale coherently without
   page-local font sizes. Restore introductory text below page titles to the normal body tier and

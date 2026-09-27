@@ -55,3 +55,7 @@ image_overrides/**/*
 Thumbs.db
 .tmp.drivedownload/**/*
 .tmp.driveupload/**/*
+
+# Local upstream web-font downloads; canonical WOFF2/OFL assets are tracked.
+src/infinity_db/web/static/fonts/**/*.ttf
+src/infinity_db/web/static/fonts/**/README.txt

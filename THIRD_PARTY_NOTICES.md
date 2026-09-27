@@ -58,6 +58,26 @@ wiki-derived records bind to an exact timestamped ZIP/hash and cite snapshot-loc
 members. Exact pinned `oldid=` revisions remain URL-backed when they are not
 members of that archive; they must not be relabeled as archived snapshot members.
 
+## Browser fonts
+
+InfinityDB redistributes a small browser-font publication under
+`src/infinity_db/web/static/fonts/`. The published WOFF2 files are generated from
+Google Fonts TTF distributions and retain their upstream SIL Open Font License 1.1
+terms. They are not relicensed under InfinityDB's MIT License. The complete OFL text
+for each family is stored beside the corresponding published font files.
+
+The bundled families are:
+
+- **Audiowide** — Copyright (c) 2012, Brian J. Bonislawsky DBA Astigmatic (AOETI),
+  with Reserved Font Names "Audiowide".
+- **Oxanium** — Copyright 2019 The Oxanium Project Authors.
+- **IBM Plex Sans**, **IBM Plex Sans Condensed**, and **IBM Plex Mono** —
+  Copyright © 2017 IBM Corp., with Reserved Font Name "Plex".
+
+`tools/prepare_web_fonts.py` performs only deterministic format conversion and
+selection of the browser faces; it does not change the font designs. Upstream TTF
+download collections are build inputs rather than repository/runtime assets.
+
 ## Runtime and deployment dependencies
 
 The optional Python server dependency, development tools, Python base image,

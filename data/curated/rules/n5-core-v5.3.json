@@ -533,8 +533,7 @@
             "url": "https://infinitythewiki.com/index.php?title=X-Visor&oldid=3193",
             "authority": "secondary",
             "retrievedDate": "2026-09-24"
-        }
-    ,
+        },
         {
             "id": "wiki-combat-jump-oldid-3456",
             "kind": "wiki",
@@ -1286,7 +1285,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "effects": [
                     "During the Deployment Phase, the user may deploy in Camouflaged State.",
                     "During the game, the user may enter Camouflaged State under that State's activation conditions."
@@ -1331,7 +1332,7 @@
                 "inheritance": "family"
             }
         },
-                {
+        {
             "id": "skill:discover",
             "kind": "skill",
             "name": "Discover",
@@ -1430,7 +1431,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "requirements": [],
                 "effects": [
                     "If Jump is declared as the first Basic Short Skill of the Order, Super-Jump turns Jump from a Long Skill into a Basic Short Skill and allows another compatible Basic Short or Short Skill in the same Order.",
@@ -1493,7 +1496,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["deployment-skill"],
+                "typeIds": [
+                    "deployment-skill"
+                ],
                 "requirements": [
                     "The user must deploy during the Deployment Phase."
                 ],
@@ -4870,7 +4875,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["short-skill"],
+                "typeIds": [
+                    "short-skill"
+                ],
                 "requirements": [
                     "The target must be a friendly VITA-based Trooper in Silhouette contact with the user."
                 ],
@@ -4935,7 +4942,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["short-skill"],
+                "typeIds": [
+                    "short-skill"
+                ],
                 "requirements": [
                     "The target must be a friendly STR-based Trooper, piece of Equipment, or Scenery item in Silhouette contact with the user."
                 ],
@@ -5020,7 +5029,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "requirements": [],
                 "effects": [
                     "The user has access to Peripheral (Cyberplug) Troopers as specified by the applicable profile."
@@ -5075,7 +5086,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "requirements": [],
                 "effects": [
                     "The rule defines the Controller and Peripheral behavior for the applicable Peripheral type."
@@ -5454,7 +5467,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "requirements": [
                     "The user must reach or be in Silhouette contact with the target and declare CC Attack."
                 ],
@@ -5517,7 +5532,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"]
+                "typeIds": [
+                    "automatic"
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -5572,7 +5589,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"]
+                "typeIds": [
+                    "automatic"
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -5627,7 +5646,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"]
+                "typeIds": [
+                    "automatic"
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -5682,7 +5703,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"]
+                "typeIds": [
+                    "automatic"
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -5737,7 +5760,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"]
+                "typeIds": [
+                    "automatic"
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -5792,7 +5817,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "requirements": [
                     "The user must be the army's Lieutenant."
                 ],
@@ -5848,7 +5875,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"]
+                "typeIds": [
+                    "automatic"
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -5903,7 +5932,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"]
+                "typeIds": [
+                    "automatic"
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -5958,7 +5989,10 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeIds": ["short-skill", "aro"],
+                "typeIds": [
+                    "short-skill",
+                    "aro"
+                ],
                 "requirements": [
                     "The user must select an eligible BS Weapon, Equipment item, or Skill and meet its targeting requirements."
                 ],
@@ -6014,7 +6048,10 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeIds": ["short-skill", "aro"]
+                "typeIds": [
+                    "short-skill",
+                    "aro"
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -6070,7 +6107,10 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeIds": ["short-skill", "aro"]
+                "typeIds": [
+                    "short-skill",
+                    "aro"
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -6126,7 +6166,10 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeIds": ["short-skill", "aro"],
+                "typeIds": [
+                    "short-skill",
+                    "aro"
+                ],
                 "requirements": [
                     "The user must be in Silhouette contact with the target and select an eligible CC Weapon or rule."
                 ],
@@ -6182,7 +6225,10 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeIds": ["short-skill", "aro"]
+                "typeIds": [
+                    "short-skill",
+                    "aro"
+                ]
             },
             "labelIds": [],
             "armyLinks": [
@@ -6709,7 +6755,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "effects": [
                     "Enemy BS Attacks that require LoF and Discover attempts against the user apply the Mimetism MOD listed in the Unit Profile.",
                     "The Mimetism MOD does not apply to CC Attacks."
@@ -6819,7 +6867,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "effects": [
                     "The user ignores Surprise Attack MODs imposed by attackers.",
                     "Stealth is not effective against the user."
@@ -6878,7 +6928,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "effects": [
                     "The user can respond to Attacks directed at them from outside LoF, using a 360° LoF arc for those attackers; this also allows LoF to outside attackers while Engaged.",
                     "When targeted by a BS Attack through a Zero Visibility Zone, the user ignores the -6 MOD caused by the resulting Poor Visibility Zone.",
@@ -6943,7 +6995,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "requirements": [
                     "The user must be in the Active Turn."
                 ],
@@ -7002,7 +7056,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "requirements": [
                     "The user must begin the Order in Marker form or Hidden Deployment.",
                     "The user must declare a CC Attack, BS Attack, or Comms Attack during the Active Turn."
@@ -7104,7 +7160,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["deployment-skill"],
+                "typeIds": [
+                    "deployment-skill"
+                ],
                 "effects": [
                     "During the Deployment Phase, the user may deploy in Hidden Deployment State."
                 ],
@@ -7162,7 +7220,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["short-skill"],
+                "typeIds": [
+                    "short-skill"
+                ],
                 "effects": [
                     "The user may make a Normal WIP+6 Roll to simultaneously Discover enemy Troopers, Weapons, or Equipment in Hidden Deployment or Camouflaged State inside the user's Zone of Control.",
                     "The Sensor Roll does not apply Range or Mimetism MODs and does not require LoF or a designated target.",
@@ -7242,7 +7302,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "requirements": [
                     "The user can benefit from Marksmanship only when declaring a BS Attack."
                 ],
@@ -7415,7 +7477,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "requirements": [
                     "The user must be the target of a CC Attack and must declare a CC Attack."
                 ],
@@ -7480,7 +7544,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "effects": [
                     "Attacks against the Trooper do not apply the -3 BS MOD granted by Partial Cover."
                 ],
@@ -7528,7 +7594,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "requirements": [],
                 "effects": [
                     "The user cannot be targeted by Hacking Attacks whose Requirements depend on the target having a specific Unit Type.",
@@ -7569,7 +7637,9 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["automatic"],
+                "typeIds": [
+                    "automatic"
+                ],
                 "effects": [
                     "The Trooper cannot benefit from any MODs granted by Partial Cover.",
                     "When No Cover and Limited Cover both apply, the more severe No Cover restriction takes precedence."
@@ -7625,7 +7695,10 @@
             },
             "facts": {
                 "category": "special-skill",
-                "typeIds": ["short-skill", "aro"],
+                "typeIds": [
+                    "short-skill",
+                    "aro"
+                ],
                 "requirements": [
                     "The user must be able to draw LoF to the target."
                 ],
@@ -7744,7 +7817,10 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeIds": ["short-skill", "aro"],
+                "typeIds": [
+                    "short-skill",
+                    "aro"
+                ],
                 "requirements": [
                     "The user must be the Active Trooper or be allowed to declare an ARO."
                 ],
@@ -7809,7 +7885,9 @@
             },
             "facts": {
                 "category": "common-skill",
-                "typeIds": ["long-skill"],
+                "typeIds": [
+                    "long-skill"
+                ],
                 "requirements": [],
                 "effects": [
                     "The Trooper may move up to the first MOV value without generating enemy AROs when the movement begins and ends outside the required enemy LoF, Zone of Control, and applicable Hacking Areas."
@@ -7842,10 +7920,187 @@
                 "inheritance": "family"
             }
         },
-        {"id":"skill:alert","kind":"skill","name":"Alert","summary":"An Automatic Common Skill that lets an eligible Trooper turn at the end of an Order after a nearby Attack.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["automatic"],"requirements":["The user or an Allied Trooper in its Zone of Control was the target of an Attack.","The user has not activated in the same Order."],"effects":["At the end of the Order, the user may turn on the spot without changing position or generating AROs."],"restrictions":[]},"labelIds":["optional","no-roll"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Alert","heading":"Alert"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
-        {"id":"skill:climb","kind":"skill","name":"Climb","summary":"A Long Common Skill used to move on vertical surfaces.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["long-skill"],"requirements":["The user must be in base contact with a vertical surface.","At least half of the user's base must remain in contact with the surface while moving.","The movement must finish on a surface at least as large as the base."],"effects":["The user moves on the vertical surface up to its first MOV value plus 2 inches; a Climb distance listed in the Unit Profile replaces the 2-inch bonus."],"restrictions":["Climb only permits movement on vertical surfaces and follows the General Movement Rules.","While holding onto a vertical surface, the Trooper cannot declare Skills other than Climb.","A Trooper performing Climb or holding onto a vertical surface cannot benefit from Partial Cover MODs."]},"labelIds":["movement","no-lof","no-roll"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Climb","heading":"Climb"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
-        {"id":"skill:idle","kind":"skill","name":"Idle","summary":"A Common Skill that spends the declared action without another effect.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["basic-short-skill"],"requirements":[],"effects":["The user performs no action, although the declaration still activates the Trooper and may generate AROs.","A declared Skill whose Requirements are not met is resolved as Idle instead."],"restrictions":[]},"labelIds":["no-roll"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Idle","heading":"Idle"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
-        {"id":"skill:intuitive-attack","kind":"skill","name":"Intuitive Attack","summary":"A Long Common Skill that uses a BS Weapon with the Intuitive Attack Trait against a target that normally cannot be attacked directly.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["long-skill"],"requirements":["The user must employ a BS Weapon with the Intuitive Attack Trait.","The target must be outside the user's LoF because of a Zero Visibility Zone, or be in a State that normally requires Discover before it can be attacked."],"effects":["The user makes an unmodified WIP Roll; on success, the user performs a single BS Attack Roll against the target with Burst 1."],"restrictions":["MODs from Partial Cover, Special Skills, Equipment, and other sources do not apply to the required WIP Roll.","After a failed WIP Roll, the user cannot attempt another Intuitive Attack against the same target until the next Active Turn."]},"labelIds":["bs-attack"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Intuitive_Attack","heading":"Intuitive Attack"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
+        {
+            "id": "skill:alert",
+            "kind": "skill",
+            "name": "Alert",
+            "summary": "An Automatic Common Skill that lets an eligible Trooper turn at the end of an Order after a nearby Attack.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "The user or an Allied Trooper in its Zone of Control was the target of an Attack.",
+                    "The user has not activated in the same Order."
+                ],
+                "effects": [
+                    "At the end of the Order, the user may turn on the spot without changing position or generating AROs."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "optional",
+                "no-roll"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Alert",
+                    "heading": "Alert"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "skill:climb",
+            "kind": "skill",
+            "name": "Climb",
+            "summary": "A Long Common Skill used to move on vertical surfaces.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "long-skill"
+                ],
+                "requirements": [
+                    "The user must be in base contact with a vertical surface.",
+                    "At least half of the user's base must remain in contact with the surface while moving.",
+                    "The movement must finish on a surface at least as large as the base."
+                ],
+                "effects": [
+                    "The user moves on the vertical surface up to its first MOV value plus 2 inches; a Climb distance listed in the Unit Profile replaces the 2-inch bonus."
+                ],
+                "restrictions": [
+                    "Climb only permits movement on vertical surfaces and follows the General Movement Rules.",
+                    "While holding onto a vertical surface, the Trooper cannot declare Skills other than Climb.",
+                    "A Trooper performing Climb or holding onto a vertical surface cannot benefit from Partial Cover MODs."
+                ]
+            },
+            "labelIds": [
+                "movement",
+                "no-lof",
+                "no-roll"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Climb",
+                    "heading": "Climb"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "skill:idle",
+            "kind": "skill",
+            "name": "Idle",
+            "summary": "A Common Skill that spends the declared action without another effect.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "basic-short-skill"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The user performs no action, although the declaration still activates the Trooper and may generate AROs.",
+                    "A declared Skill whose Requirements are not met is resolved as Idle instead."
+                ],
+                "restrictions": []
+            },
+            "labelIds": [
+                "no-roll"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Idle",
+                    "heading": "Idle"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "skill:intuitive-attack",
+            "kind": "skill",
+            "name": "Intuitive Attack",
+            "summary": "A Long Common Skill that uses a BS Weapon with the Intuitive Attack Trait against a target that normally cannot be attacked directly.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "long-skill"
+                ],
+                "requirements": [
+                    "The user must employ a BS Weapon with the Intuitive Attack Trait.",
+                    "The target must be outside the user's LoF because of a Zero Visibility Zone, or be in a State that normally requires Discover before it can be attacked."
+                ],
+                "effects": [
+                    "The user makes an unmodified WIP Roll; on success, the user performs a single BS Attack Roll against the target with Burst 1."
+                ],
+                "restrictions": [
+                    "MODs from Partial Cover, Special Skills, Equipment, and other sources do not apply to the required WIP Roll.",
+                    "After a failed WIP Roll, the user cannot attempt another Intuitive Attack against the same target until the next Active Turn."
+                ]
+            },
+            "labelIds": [
+                "bs-attack"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Intuitive_Attack",
+                    "heading": "Intuitive Attack"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
         {
             "id": "skill:jump",
             "kind": "skill",
@@ -7900,11 +8155,202 @@
                 }
             ]
         },
-        {"id":"skill:move","kind":"skill","name":"Move","summary":"A Common Skill used to move a Trooper up to its applicable MOV value.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["basic-short-skill"],"requirements":[],"effects":["The user moves up to the applicable MOV value."],"restrictions":["Movement must follow the general movement rules."]},"labelIds":["movement","no-lof","no-roll"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Move","heading":"Move"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
-        {"id":"skill:look-out","kind":"skill","name":"Look Out","summary":"An ARO Common Skill that lets the user warn other Troopers so they can turn to face an acting enemy.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["aro"],"requirements":["The user must have LoF to an enemy Trooper or Marker that declares or performs an Order."],"effects":["Other Troopers of the same player may modify their LoF by making Dodge (PH-3) Rolls in the same Order."],"restrictions":["An alerted Trooper may make the Dodge (PH-3) Roll only if it has not declared another ARO."]},"labelIds":["no-roll"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Look_Out","heading":"Look Out"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"},"relations":[{"type":"modifies-rolls-for","recordId":"skill:dodge"}]},
-        {"id":"skill:place-deployable","kind":"skill","name":"Place Deployable","summary":"A Common Skill used to place eligible Deployable Weapons, Equipment, or Peripheral (Ancillary) items on the table.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["short-skill","aro"],"requirements":["The user must have a Weapon or Equipment item with the Deployable Label, or a Peripheral (Ancillary).","In the Reactive Turn, the user must have LoF to the Active Trooper."],"effects":["The user places one eligible Token or Model without a Roll; it becomes active at the Conclusion of the Order."],"restrictions":["Placement must follow the active/reactive placement, support, and Deployment restrictions of Place Deployable.","A Deployable Weapon cannot be placed with an enemy Camouflaged Marker inside its Trigger Area unless the documented exception applies."]},"labelIds":["attack"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Place_Deployable","heading":"Place Deployable"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
-        {"id":"skill:reload","kind":"skill","name":"Reload","summary":"A Common Skill that cancels Unloaded State or restores expended Disposable uses when its requirements are met.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["short-skill","aro"],"requirements":["The user and the Allied Trooper or game element with Baggage must both be in non-Null States, and the user must be inside that Baggage holder's Zone of Control.","The user is in Unloaded State or has expended uses of a Disposable Weapon or piece of Equipment."],"effects":["Without a Roll, the user cancels Unloaded State or regains all expended uses of eligible Disposable Weapons or Equipment."],"restrictions":["Only one Allied Trooper can receive this effect per Order.","Recovering Disposable uses does not affect Weapons or Equipment already deployed on the table.","Non-Reloadable Weapons or Equipment cannot cancel Unloaded State or regain expended uses through Reload."]},"labelIds":["attack"],"relations":[{"type":"cancels-state","recordId":"state:unloaded"}],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Reload","heading":"Reload"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"}},
+        {
+            "id": "skill:move",
+            "kind": "skill",
+            "name": "Move",
+            "summary": "A Common Skill used to move a Trooper up to its applicable MOV value.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "basic-short-skill"
+                ],
+                "requirements": [],
+                "effects": [
+                    "The user moves up to the applicable MOV value."
+                ],
+                "restrictions": [
+                    "Movement must follow the general movement rules."
+                ]
+            },
+            "labelIds": [
+                "movement",
+                "no-lof",
+                "no-roll"
+            ],
+            "citations": [
                 {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Move",
+                    "heading": "Move"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "skill:look-out",
+            "kind": "skill",
+            "name": "Look Out",
+            "summary": "An ARO Common Skill that lets the user warn other Troopers so they can turn to face an acting enemy.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "aro"
+                ],
+                "requirements": [
+                    "The user must have LoF to an enemy Trooper or Marker that declares or performs an Order."
+                ],
+                "effects": [
+                    "Other Troopers of the same player may modify their LoF by making Dodge (PH-3) Rolls in the same Order."
+                ],
+                "restrictions": [
+                    "An alerted Trooper may make the Dodge (PH-3) Roll only if it has not declared another ARO."
+                ]
+            },
+            "labelIds": [
+                "no-roll"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Look_Out",
+                    "heading": "Look Out"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "relations": [
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "skill:dodge"
+                }
+            ]
+        },
+        {
+            "id": "skill:place-deployable",
+            "kind": "skill",
+            "name": "Place Deployable",
+            "summary": "A Common Skill used to place eligible Deployable Weapons, Equipment, or Peripheral (Ancillary) items on the table.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "short-skill",
+                    "aro"
+                ],
+                "requirements": [
+                    "The user must have a Weapon or Equipment item with the Deployable Label, or a Peripheral (Ancillary).",
+                    "In the Reactive Turn, the user must have LoF to the Active Trooper."
+                ],
+                "effects": [
+                    "The user places one eligible Token or Model without a Roll; it becomes active at the Conclusion of the Order."
+                ],
+                "restrictions": [
+                    "Placement must follow the active/reactive placement, support, and Deployment restrictions of Place Deployable.",
+                    "A Deployable Weapon cannot be placed with an enemy Camouflaged Marker inside its Trigger Area unless the documented exception applies."
+                ]
+            },
+            "labelIds": [
+                "attack"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Place_Deployable",
+                    "heading": "Place Deployable"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
+            "id": "skill:reload",
+            "kind": "skill",
+            "name": "Reload",
+            "summary": "A Common Skill that cancels Unloaded State or restores expended Disposable uses when its requirements are met.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "short-skill",
+                    "aro"
+                ],
+                "requirements": [
+                    "The user and the Allied Trooper or game element with Baggage must both be in non-Null States, and the user must be inside that Baggage holder's Zone of Control.",
+                    "The user is in Unloaded State or has expended uses of a Disposable Weapon or piece of Equipment."
+                ],
+                "effects": [
+                    "Without a Roll, the user cancels Unloaded State or regains all expended uses of eligible Disposable Weapons or Equipment."
+                ],
+                "restrictions": [
+                    "Only one Allied Trooper can receive this effect per Order.",
+                    "Recovering Disposable uses does not affect Weapons or Equipment already deployed on the table.",
+                    "Non-Reloadable Weapons or Equipment cannot cancel Unloaded State or regain expended uses through Reload."
+                ]
+            },
+            "labelIds": [
+                "attack"
+            ],
+            "relations": [
+                {
+                    "type": "cancels-state",
+                    "recordId": "state:unloaded"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Reload",
+                    "heading": "Reload"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            }
+        },
+        {
             "id": "skill:request-speedball",
             "kind": "skill",
             "name": "Request Speedball",
@@ -7954,7 +8400,58 @@
                 }
             ]
         },
-        {"id":"skill:speculative-attack","kind":"skill","name":"Speculative Attack","summary":"A Long Common Skill that uses a BS Weapon with the Speculative Attack Trait to attack without LoF.","composition":{"role":"definition"},"scope":{"game":"N5","seasons":["current"]},"facts":{"category":"common-skill","typeIds":["long-skill"],"requirements":["The user must employ a BS Weapon with the Speculative Attack Trait.","A valid trajectory must exist between the user and the chosen impact point."],"effects":["The user makes a single BS Attack with Burst 1 against a target outside LoF; eligible Circular Templates may use a separate impact point that still affects the Main Target."],"restrictions":["Apply the Speculative Attack -6 MOD and Range MODs; other negative MODs such as Mimetism, Partial Cover, and Visibility Zones are not applied.","A Circular Template impact point cannot be placed on a vertical surface or in the air."]},"labelIds":["bs-attack"],"citations":[{"sourceId":"wiki-en-20260918-130233","member":"Speculative_Attack","heading":"Speculative Attack"}],"review":{"status":"reviewed","reviewedOn":"2026-09-23"},"relations":[{"type":"ignores-modifiers-from","recordId":"skill:mimetism"}]},
+        {
+            "id": "skill:speculative-attack",
+            "kind": "skill",
+            "name": "Speculative Attack",
+            "summary": "A Long Common Skill that uses a BS Weapon with the Speculative Attack Trait to attack without LoF.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "long-skill"
+                ],
+                "requirements": [
+                    "The user must employ a BS Weapon with the Speculative Attack Trait.",
+                    "A valid trajectory must exist between the user and the chosen impact point."
+                ],
+                "effects": [
+                    "The user makes a single BS Attack with Burst 1 against a target outside LoF; eligible Circular Templates may use a separate impact point that still affects the Main Target."
+                ],
+                "restrictions": [
+                    "Apply the Speculative Attack -6 MOD and Range MODs; other negative MODs such as Mimetism, Partial Cover, and Visibility Zones are not applied.",
+                    "A Circular Template impact point cannot be placed on a vertical surface or in the air."
+                ]
+            },
+            "labelIds": [
+                "bs-attack"
+            ],
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "member": "Speculative_Attack",
+                    "heading": "Speculative Attack"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-23"
+            },
+            "relations": [
+                {
+                    "type": "ignores-modifiers-from",
+                    "recordId": "skill:mimetism"
+                }
+            ]
+        },
         {
             "id": "skill:suppressive-fire",
             "kind": "skill",
@@ -8554,7 +9051,7 @@
                 "inheritance": "family"
             }
         },
-                {
+        {
             "id": "equipment:biometric-visor",
             "kind": "equipment",
             "name": "Biometric Visor",
@@ -9625,9 +10122,7 @@
             "variantSemantics": {
                 "inheritance": "family"
             }
-        }
-
-    ,
+        },
         {
             "id": "skill:combat-jump",
             "kind": "skill",
@@ -13842,7 +14337,7 @@
                         "meaning": "Historical official shorthand for Fireteam participation. Current N5 eligibility is contextual to the Army Fireteams Chart rather than a universal Unit property."
                     },
                     {
-                        "term": "pure Fireteam",
+                        "term": "Pure Fireteam",
                         "provenance": "community-historical",
                         "meaning": "Community shorthand rooted in earlier Fireteam Composition Bonuses. Current N5 instead uses Fireteam Level from same-Unit or chart-equivalent membership."
                     }
