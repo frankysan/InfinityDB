@@ -260,6 +260,7 @@ _register(
 _register(
     [
         "unit_options",
+        "unit_option_orders",
         "unit_option_skills",
         "unit_option_skill_extras",
         "unit_option_equipment",

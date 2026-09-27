@@ -30,14 +30,14 @@ def test_database_separation_audit_classifies_complete_frontend_schema(tmp_path:
     report = audit_database(path, project_root=ROOT)
 
     assert report["summary"]["canonicalApplicationTableCount"] == 29
-    assert report["summary"]["contextualApplicationTableCount"] == 53
-    assert report["summary"]["sourceProvenanceOnlyTableCount"] == 47
+    assert report["summary"]["contextualApplicationTableCount"] == 54
+    assert report["summary"]["sourceProvenanceOnlyTableCount"] == 46
     assert report["summary"]["runtimeSourceOnlyViolationCount"] == 0
     assert report["summary"]["foreignKeyBlockerCount"] == 0
     assert report["summary"]["validationSourceOnlyDependencyCount"] == 0
     assert report["summary"]["sourceOnlyStorageBytes"] == 0
     assert len(report["inventory"]) == 129
-    assert report["database"]["tableCount"] == 82
+    assert report["database"]["tableCount"] == 83
     assert report["database"]["logicalInventoryTableCount"] == 129
 
     assert _item(report, "logical_units")["classification"] == CANONICAL
@@ -46,6 +46,7 @@ def test_database_separation_audit_classifies_complete_frontend_schema(tmp_path:
     assert _item(report, "application_fireteam_charts")["classification"] == CONTEXTUAL
     assert _item(report, "army_units")["classification"] == CONTEXTUAL
     assert _item(report, "units")["classification"] == CONTEXTUAL
+    assert _item(report, "unit_option_orders")["classification"] == CONTEXTUAL
     assert _item(report, "profiles")["classification"] == SOURCE_ONLY
     assert _item(report, "profiles")["published"] is False
     assert _item(report, "profiles")["rawStored"] is True
