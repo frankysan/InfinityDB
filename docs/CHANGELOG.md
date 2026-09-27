@@ -48,8 +48,10 @@ New or materially revised entries use the project-domain labels defined in
 
 - No Army or rules database rebuild is required solely for 0.8.1. The release starts tracking
   the existing deterministic `infinity.db` and `rules.db` runtime artifacts directly.
-- A normal server update through `scripts/install-or-update.sh` handles the transition from the
-  pre-0.8.1 ignored local database copies to the release-owned tracked files before checkout.
+- The 0.8.0 installer must not be used directly for the first 0.8.1 server upgrade: it predates
+  tracked runtime databases and can continue its old database-rebuild behavior after checking out
+  the new tag. Bootstrap `v0.8.1`'s installer with the one-time command in `docs/deployment.md`;
+  from 0.8.1 onward the installer hands off to the target release's own installer before checkout.
   Raw Army/wiki/PDF/source-symbol archives and `army-symbol-build.json` remain unnecessary on
   production servers.
 - The snapshot-provenance v3 change affects newly acquired Army snapshots. Version-1 and

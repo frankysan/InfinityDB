@@ -37,6 +37,26 @@ git fetch origin --tags --prune
 release_tag="$(git tag --sort=-version:refname | sed -n '1p')"
 [ -n "$release_tag" ] || fail "no Git tags are available from origin."
 
+# Always continue with the installer shipped by the target release. Without this
+# handoff, an updater started from an older checkout keeps executing the old
+# script after git checkout and can apply obsolete deployment behavior.
+if [ "${INFINITY_DB_INSTALLER_BOOTSTRAP_TAG:-}" != "$release_tag" ]; then
+  bootstrap_script="$(mktemp "${TMPDIR:-/tmp}/infinitydb-install-or-update.XXXXXX")" ||
+    fail "could not create a temporary installer."
+  if ! git show "$release_tag:scripts/install-or-update.sh" > "$bootstrap_script"; then
+    rm -f "$bootstrap_script"
+    fail "release $release_tag does not contain scripts/install-or-update.sh."
+  fi
+  echo "Restarting with installer from $release_tag..."
+  if INFINITY_DB_INSTALLER_BOOTSTRAP_TAG="$release_tag" sh "$bootstrap_script"; then
+    bootstrap_status=0
+  else
+    bootstrap_status=$?
+  fi
+  rm -f "$bootstrap_script"
+  exit "$bootstrap_status"
+fi
+
 echo "Latest release tag: $release_tag"
 printf 'Continue with this release? [Y/n]: '
 IFS= read -r continue_answer || exit 1

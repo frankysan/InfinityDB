@@ -73,19 +73,23 @@ surfaces.
 
 ## Corrections made by this audit
 
-The audit corrected four documentation inconsistencies:
+The audit corrected five documentation inconsistencies:
 
 - the README's server-migration description still referred generically to transfer/rebuild
   requirements even though released-server migration now consumes tracked release artifacts;
 - the server-migration guide's warning about redistributing symbol-processing system fonts was
   ambiguous after InfinityDB intentionally began redistributing OFL-licensed browser fonts;
 - `data/README.md` described the processed-SVG redistribution permission but did not state the
-  equivalent tracked-runtime-database release boundary explicitly; and
+  equivalent tracked-runtime-database release boundary explicitly;
 - the 0.8.1 changelog lacked upgrade notes explaining that the new tracked database model does
-  not itself require rebuilding databases and that older snapshot manifests remain supported.
+  not itself require rebuilding databases and that older snapshot manifests remain supported; and
+- the 0.8.0 installer can continue its obsolete server-side database rebuild after checking out
+  0.8.1, so the first upgrade needs to bootstrap the target installer before checkout.
 
 The legacy symbol-publication provenance helper remains documented as a one-time migration for
-pre-contract publications rather than as an ongoing production dependency.
+pre-contract publications rather than as an ongoing production dependency. The 0.8.1 installer
+now also hands off to each future target release's own installer before prompts or checkout-side
+effects, preventing older updater semantics from surviving a tag change.
 
 ## Audit checks
 
