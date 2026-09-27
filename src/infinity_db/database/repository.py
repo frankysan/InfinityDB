@@ -26,6 +26,7 @@ from infinity_db.domain_slugs import (
     APPLICATION_SLUG_DOMAINS,
     assign_domain_slugs,
     require_domain_slug,
+    resolve_domain_slug_candidates,
 )
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
@@ -67,6 +68,11 @@ from .schema import (
 
 SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
+UNIT_FILTER_VOCABULARIES = {
+    "troop_types": ("troop_types", "troop-types"),
+    "classifications": ("categories", "classifications"),
+    "characteristics": ("characteristics", "characteristics"),
+}
 SOURCE_UNIT_NAMES_CTE = (
     "source_unit_names AS ("
     "SELECT lus.source_unit_id AS unit_id, "
@@ -1916,6 +1922,96 @@ class Database:
         return frozenset(int(row["logical_unit_id"]) for row in rows)
 
     @instance_lru_cache(maxsize=1)
+    def list_unit_filter_values(self) -> dict[str, list[dict[str, Any]]]:
+        """Return stable public values for categorical Unit Explorer filters."""
+
+        result: dict[str, list[dict[str, Any]]] = {}
+        with self._connect() as connection:
+            for public_name, (table, domain) in UNIT_FILTER_VOCABULARIES.items():
+                rows = connection.execute(
+                    f"SELECT id, name FROM {quote(table)} "
+                    "WHERE name IS NOT NULL AND TRIM(name) <> '' ORDER BY id"
+                ).fetchall()
+                resolutions = resolve_domain_slug_candidates(
+                    ((int(row["id"]), row["name"]) for row in rows),
+                    domain=domain,
+                    reject_numeric=True,
+                )
+                result[public_name] = sorted(
+                    [
+                        {
+                            "id": int(row["id"]),
+                            "slug": resolutions[int(row["id"])].slug,
+                            "name": row["name"],
+                        }
+                        for row in rows
+                    ],
+                    key=lambda item: (unit_sort_key(item["name"]), item["id"]),
+                )
+        return result
+
+    def _unit_filter_source_id(self, public_name: str, item_ref: int | str) -> int | None:
+        if public_name not in UNIT_FILTER_VOCABULARIES:
+            raise ValueError(f"Unknown Unit filter vocabulary: {public_name}")
+        items = self.list_unit_filter_values()[public_name]
+        if type(item_ref) is int:
+            if not SQLITE_INTEGER_MIN <= item_ref <= SQLITE_INTEGER_MAX:
+                raise ValueError(
+                    f"{public_name} filter must be within SQLite's signed 64-bit range"
+                )
+            return item_ref if any(item["id"] == item_ref for item in items) else None
+        if not isinstance(item_ref, str):
+            raise ValueError(f"{public_name} filter must be an integer or slug")
+        slug = require_domain_slug(item_ref, context=f"{public_name} filter")
+        if slug.isdigit():
+            raise ValueError(
+                f"{public_name} numeric references must be integers, not strings"
+            )
+        item = next((item for item in items if item["slug"] == slug), None)
+        return None if item is None else int(item["id"])
+
+    @instance_lru_cache(maxsize=128)
+    def _logical_unit_ids_for_unit_filter(
+        self, public_name: str, item_ref: int | str
+    ) -> frozenset[int]:
+        item_id = self._unit_filter_source_id(public_name, item_ref)
+        if item_id is None:
+            return frozenset()
+        with self._connect() as connection:
+            if public_name == "troop_types":
+                rows = connection.execute(
+                    "SELECT DISTINCT logical_unit_id FROM profile_payloads "
+                    "WHERE type_id = ?",
+                    (item_id,),
+                ).fetchall()
+            elif public_name == "classifications":
+                rows = connection.execute(
+                    "SELECT DISTINCT p.logical_unit_id AS logical_unit_id "
+                    "FROM profile_payload_occurrences AS o "
+                    "JOIN profile_payloads AS p ON p.id = o.profile_payload_id "
+                    "JOIN profile_groups AS g ON g.army_id = o.army_id "
+                    "AND g.unit_id = o.unit_id AND g.group_id = o.group_id "
+                    "WHERE g.category_id = ?",
+                    (item_id,),
+                ).fetchall()
+            elif public_name == "characteristics":
+                rows = connection.execute(
+                    "SELECT DISTINCT p.logical_unit_id AS logical_unit_id "
+                    "FROM profile_payloads AS p "
+                    "JOIN profile_payload_characteristics AS c "
+                    "ON c.profile_payload_id = p.id WHERE c.characteristic_id = ? "
+                    "UNION "
+                    "SELECT DISTINCT l.logical_unit_id AS logical_unit_id "
+                    "FROM loadout_payloads AS l "
+                    "JOIN loadout_payload_characteristics AS c "
+                    "ON c.loadout_payload_id = l.id WHERE c.characteristic_id = ?",
+                    (item_id, item_id),
+                ).fetchall()
+            else:  # pragma: no cover - guarded above and by the fixed vocabulary map.
+                raise ValueError(f"Unknown Unit filter vocabulary: {public_name}")
+        return frozenset(int(row["logical_unit_id"]) for row in rows)
+
+    @instance_lru_cache(maxsize=1)
     def trait_usage_index(self) -> dict[str, tuple[tuple[str, int], ...]]:
         """Return raw Army profile properties mapped to the catalog items carrying them."""
         with self._connect() as connection:
@@ -2284,6 +2380,9 @@ class Database:
         skill_id: int | str | None = None,
         equipment_id: int | str | None = None,
         weapon_id: int | str | None = None,
+        troop_type: int | str | None = None,
+        classification: int | str | None = None,
+        characteristic: int | str | None = None,
         limit: int = 50,
         offset: int = 0,
         mercs: bool = False,
@@ -2320,6 +2419,18 @@ class Database:
         }.items():
             if item_ref is not None:
                 rule_filters[catalog] = self.application_catalog_id(catalog, item_ref)
+        logical_unit_filters = []
+        if _logical_unit_ids is not None:
+            logical_unit_filters.append(_logical_unit_ids)
+        for public_name, item_ref in {
+            "troop_types": troop_type,
+            "classifications": classification,
+            "characteristics": characteristic,
+        }.items():
+            if item_ref is not None:
+                logical_unit_filters.append(
+                    self._logical_unit_ids_for_unit_filter(public_name, item_ref)
+                )
         if not isinstance(search, str):
             raise ValueError("search must be a string")
         if type(_unbounded) is not bool:
@@ -2385,7 +2496,7 @@ class Database:
                 for source_id in group["source_ids"]
             ):
                 continue
-            if _logical_unit_ids is not None and group["id"] not in _logical_unit_ids:
+            if any(group["id"] not in allowed for allowed in logical_unit_filters):
                 continue
             if any(
                 not set(group["source_ids"]).intersection(source_ids)

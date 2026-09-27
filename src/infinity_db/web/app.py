@@ -440,7 +440,7 @@ def _domain_filter_identifier(params: dict, key: str) -> int | str | None:
 
 
 def _unit_query(query: str) -> dict:
-    params = parse_qs(query, keep_blank_values=True, max_num_fields=15)
+    params = parse_qs(query, keep_blank_values=True, max_num_fields=24)
     for key, values in params.items():
         if key not in {
             "army_id",
@@ -449,6 +449,9 @@ def _unit_query(query: str) -> dict:
             "skill_id",
             "equipment_id",
             "weapon_id",
+            "troop_type",
+            "classification",
+            "characteristic",
             "limit",
             "offset",
             "mercs",
@@ -476,6 +479,9 @@ def _unit_query(query: str) -> dict:
         "skill_id": _domain_filter_identifier(params, "skill_id"),
         "equipment_id": _domain_filter_identifier(params, "equipment_id"),
         "weapon_id": _domain_filter_identifier(params, "weapon_id"),
+        "troop_type": _domain_filter_identifier(params, "troop_type"),
+        "classification": _domain_filter_identifier(params, "classification"),
+        "characteristic": _domain_filter_identifier(params, "characteristic"),
         "limit": _integer(params, "limit", 50, 1, 200),
         "offset": _integer(params, "offset", 0, 0, 2**63 - 1),
         "mercs": _flag(params, "mercs"),
@@ -1113,6 +1119,14 @@ class Application:
                 payload = {"error": str(exc)}
             except (OSError, sqlite3.Error):
                 LOGGER.exception("Could not read visible unit IDs")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The database is unavailable. Please try again."}
+        elif path == "/api/unit-filters":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                payload = self.database.list_unit_filter_values()
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Unit filter values")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The database is unavailable. Please try again."}
         elif path == "/api/units":

@@ -880,6 +880,35 @@ def test_unit_rule_filters_match_profiles_and_loadouts(app: Callable) -> None:
     assert json.loads(body)["items"] == []
 
 
+def test_unit_categorical_filters_are_exposed_and_filter_units(app: Callable) -> None:
+    status, _, body = request(app, "/api/unit-filters")
+    assert status == 200
+    assert json.loads(body) == {
+        "troop_types": [
+            {"id": 1, "slug": "line-trooper", "name": "Line Trooper"}
+        ],
+        "classifications": [
+            {"id": 1, "slug": "light-infantry", "name": "Light Infantry"}
+        ],
+        "characteristics": [],
+    }
+
+    for query in (
+        "troop_type=1",
+        "troop_type=line-trooper",
+        "classification=1",
+        "classification=light-infantry",
+        "troop_type=line-trooper&classification=light-infantry",
+    ):
+        status, _, body = request(app, "/api/units", query=query)
+        assert status == 200
+        assert {item["id"] for item in json.loads(body)["items"]} == {1}
+
+    status, _, body = request(app, "/api/units", query="characteristic=hackable")
+    assert status == 200
+    assert json.loads(body)["items"] == []
+
+
 def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     status, _, body = request(app, "/api/units", query="army_id=101")
     assert status == 200
@@ -1243,6 +1272,12 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'id="unit-count-shown-breakdown"' in body
     assert b'id="unit-count-filtered-breakdown"' in body
     assert b"Optional availability categories may overlap" in body
+    for filter_id in (
+        b'troop-type-filter',
+        b'classification-filter',
+        b'characteristic-filter',
+    ):
+        assert filter_id in body
 
     status, _, script = request(app, "/static/app.js")
     assert status == 200
@@ -1966,11 +2001,20 @@ def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None
     assert b"skillId: domainFilterIdentifier(skillId)" in body
     assert b"equipmentId: domainFilterIdentifier(equipmentId)" in body
     assert b"weaponId: domainFilterIdentifier(weaponId)" in body
+    assert b"troopType: domainFilterIdentifier(troopType)" in body
+    assert b"classification: domainFilterIdentifier(classification)" in body
+    assert b"characteristic: domainFilterIdentifier(characteristic)" in body
     assert b"normalizeArmyFilterState(playableArmies)" in body
     for call in (
         b'normalizeCatalogFilterState(skills.items, "skillId")',
         b'normalizeCatalogFilterState(equipment.items, "equipmentId")',
         b'normalizeCatalogFilterState(weapons.items, "weaponId")',
+    ):
+        assert call in body
+    for call in (
+        b'normalizeUnitFilterState(unitFilters.troop_types, "troopType")',
+        b'normalizeUnitFilterState(unitFilters.classifications, "classification")',
+        b'normalizeUnitFilterState(unitFilters.characteristics, "characteristic")',
     ):
         assert call in body
     assert b"candidate.source_ids?.some((sourceId) => String(sourceId) === current)" in body

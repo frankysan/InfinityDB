@@ -51,6 +51,10 @@ export function getCatalogItem(catalog, itemId, signal) {
   return get(`/api/${encodeURIComponent(catalog)}/${encodeURIComponent(itemId)}`, signal);
 }
 
+export function getUnitFilters(signal) {
+  return get("/api/unit-filters", signal);
+}
+
 export function getSkillExtras(signal) {
   return get("/api/skill-extras", signal);
 }
@@ -63,7 +67,7 @@ export function getSearchResults(query, signal) {
   return get(`/api/search?${new URLSearchParams({ q: query })}`, signal);
 }
 
-export function getUnits({ armyId, declaredFactionId, search, skillId, equipmentId, weaponId, limit, offset, mercs, specops, teamops, reinforcement, descending }, signal) {
+export function getUnits({ armyId, declaredFactionId, search, skillId, equipmentId, weaponId, troopType, classification, characteristic, limit, offset, mercs, specops, teamops, reinforcement, descending }, signal) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (armyId) params.set("army_id", armyId);
   if (declaredFactionId) params.set("declared_faction_id", declaredFactionId);
@@ -71,6 +75,9 @@ export function getUnits({ armyId, declaredFactionId, search, skillId, equipment
   if (skillId) params.set("skill_id", skillId);
   if (equipmentId) params.set("equipment_id", equipmentId);
   if (weaponId) params.set("weapon_id", weaponId);
+  if (troopType) params.set("troop_type", troopType);
+  if (classification) params.set("classification", classification);
+  if (characteristic) params.set("characteristic", characteristic);
   if (mercs) params.set("mercs", "1");
   if (specops) params.set("specops", "1");
   if (teamops) params.set("teamops", "1");

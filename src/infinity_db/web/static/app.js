@@ -1,4 +1,4 @@
-import { getArmies, getCatalogItems, getUnits } from "./api.js";
+import { getArmies, getCatalogItems, getUnitFilters, getUnits } from "./api.js";
 import { initializeDistanceUnitToggle, initializeOptionalUnitToggles } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 
@@ -8,6 +8,8 @@ const byId = (id) => document.getElementById(id);
 const elements = {
   filters: byId("filters"), army: byId("army-filter"), search: byId("unit-search"),
   skill: byId("skill-filter"), equipment: byId("equipment-filter"), weapon: byId("weapon-filter"),
+  troopType: byId("troop-type-filter"), classification: byId("classification-filter"),
+  characteristic: byId("characteristic-filter"),
   mercs: byId("mercs-filter"), specops: byId("specops-filter"), teamops: byId("teamops-filter"),
   reinforcement: byId("reinforcement-filter"),
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
@@ -45,7 +47,8 @@ let searchTimer;
 
 function hasActiveFilters() {
   return state.armyId || state.declaredFactionId || state.search
-    || state.skillId || state.equipmentId || state.weaponId;
+    || state.skillId || state.equipmentId || state.weaponId
+    || state.troopType || state.classification || state.characteristic;
 }
 
 function domainFilterIdentifier(value) {
@@ -60,12 +63,18 @@ function readLocation() {
   const skillId = params.get("skill_id") || "";
   const equipmentId = params.get("equipment_id") || "";
   const weaponId = params.get("weapon_id") || "";
+  const troopType = params.get("troop_type") || "";
+  const classification = params.get("classification") || "";
+  const characteristic = params.get("characteristic") || "";
   return {
     armyId: domainFilterIdentifier(armyId),
     declaredFactionId: /^\d+$/.test(declaredFactionId) ? declaredFactionId : "",
     skillId: domainFilterIdentifier(skillId),
     equipmentId: domainFilterIdentifier(equipmentId),
     weaponId: domainFilterIdentifier(weaponId),
+    troopType: domainFilterIdentifier(troopType),
+    classification: domainFilterIdentifier(classification),
+    characteristic: domainFilterIdentifier(characteristic),
     search: (params.get("search") || "").trim().slice(0, 200),
     mercs: elements.mercs.checked,
     specops: elements.specops.checked,
@@ -79,7 +88,7 @@ function readLocation() {
 
 function writeLocation(replace = false) {
   const url = new URL(window.location.href);
-  for (const key of ["army_id", "declared_faction_id", "search", "skill_id", "equipment_id", "weapon_id", "offset", "mercs", "specops", "teamops", "reinforcement", "order"]) url.searchParams.delete(key);
+  for (const key of ["army_id", "declared_faction_id", "search", "skill_id", "equipment_id", "weapon_id", "troop_type", "classification", "characteristic", "offset", "mercs", "specops", "teamops", "reinforcement", "order"]) url.searchParams.delete(key);
   if (state.armyId) url.searchParams.set("army_id", state.armyId);
   if (state.declaredFactionId) {
     url.searchParams.set("declared_faction_id", state.declaredFactionId);
@@ -88,6 +97,9 @@ function writeLocation(replace = false) {
   if (state.skillId) url.searchParams.set("skill_id", state.skillId);
   if (state.equipmentId) url.searchParams.set("equipment_id", state.equipmentId);
   if (state.weaponId) url.searchParams.set("weapon_id", state.weaponId);
+  if (state.troopType) url.searchParams.set("troop_type", state.troopType);
+  if (state.classification) url.searchParams.set("classification", state.classification);
+  if (state.characteristic) url.searchParams.set("characteristic", state.characteristic);
   if (state.offset) url.searchParams.set("offset", String(state.offset));
   if (state.descending) url.searchParams.set("order", "desc");
   if (url.href !== window.location.href) {
@@ -101,6 +113,9 @@ function syncFilters() {
   elements.skill.value = state.skillId;
   elements.equipment.value = state.equipmentId;
   elements.weapon.value = state.weaponId;
+  elements.troopType.value = state.troopType;
+  elements.classification.value = state.classification;
+  elements.characteristic.value = state.characteristic;
   elements.mercs.checked = state.mercs;
   elements.specops.checked = state.specops;
   elements.teamops.checked = state.teamops;
@@ -193,6 +208,15 @@ function normalizeCatalogFilterState(items, stateKey) {
   const replacement = catalogFilterValue(item);
   if (replacement === current) return false;
   state[stateKey] = replacement;
+  return true;
+}
+
+function normalizeUnitFilterState(items, stateKey) {
+  const current = state[stateKey];
+  if (!current || !/^\d+$/.test(current)) return false;
+  const item = items.find((candidate) => String(candidate.id) === current);
+  if (!item?.slug || item.slug === current) return false;
+  state[stateKey] = item.slug;
   return true;
 }
 
@@ -292,8 +316,8 @@ async function load() {
   elements.summary.textContent = "Loading units…";
   try {
     if (!armiesLoaded) {
-      const [armies, skills, equipment, weapons] = await Promise.all([
-        getArmies(signal), getCatalogItems("skills", signal), getCatalogItems("equipment", signal), getCatalogItems("weapons", signal),
+      const [armies, skills, equipment, weapons, unitFilters] = await Promise.all([
+        getArmies(signal), getCatalogItems("skills", signal), getCatalogItems("equipment", signal), getCatalogItems("weapons", signal), getUnitFilters(signal),
       ]);
       if (currentRequest !== requestNumber) return;
       populateArmies(armies.items);
@@ -301,10 +325,16 @@ async function load() {
         normalizeCatalogFilterState(skills.items, "skillId"),
         normalizeCatalogFilterState(equipment.items, "equipmentId"),
         normalizeCatalogFilterState(weapons.items, "weaponId"),
+        normalizeUnitFilterState(unitFilters.troop_types, "troopType"),
+        normalizeUnitFilterState(unitFilters.classifications, "classification"),
+        normalizeUnitFilterState(unitFilters.characteristics, "characteristic"),
       ].some(Boolean);
       populateCatalogFilter(elements.skill, skills.items, "Skills");
       populateCatalogFilter(elements.equipment, equipment.items, "Equipment");
       populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
+      populateCatalogFilter(elements.troopType, unitFilters.troop_types, "Troop types");
+      populateCatalogFilter(elements.classification, unitFilters.classifications, "Classifications");
+      populateCatalogFilter(elements.characteristic, unitFilters.characteristics, "Characteristics");
       syncFilters();
       if (normalizedCatalogFilters) writeLocation(true);
       armiesLoaded = true;
@@ -333,6 +363,8 @@ function applyFilters() {
   const next = {
     armyId: elements.army.value, search: elements.search.value.trim(),
     skillId: elements.skill.value, equipmentId: elements.equipment.value, weaponId: elements.weapon.value,
+    troopType: elements.troopType.value, classification: elements.classification.value,
+    characteristic: elements.characteristic.value,
     mercs: elements.mercs.checked, specops: elements.specops.checked, teamops: elements.teamops.checked,
     reinforcement: elements.reinforcement.checked,
   };
@@ -348,6 +380,7 @@ function clearFilters() {
   state = {
     ...state, armyId: "", declaredFactionId: "", search: "", offset: 0,
     skillId: "", equipmentId: "", weaponId: "",
+    troopType: "", classification: "", characteristic: "",
   };
   syncFilters();
   writeLocation();
@@ -370,7 +403,10 @@ function toggleSortOrder() {
 
 elements.filters.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); });
 elements.army.addEventListener("change", applyFilters);
-for (const filter of [elements.skill, elements.equipment, elements.weapon]) {
+for (const filter of [
+  elements.skill, elements.equipment, elements.weapon,
+  elements.troopType, elements.classification, elements.characteristic,
+]) {
   filter.addEventListener("change", applyFilters);
 }
 for (const filter of [elements.mercs, elements.specops, elements.teamops, elements.reinforcement]) {

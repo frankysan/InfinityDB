@@ -2788,6 +2788,40 @@ def test_unit_catalog_filter_expands_logical_equipment_identity(
         assert {item["id"] for item in result["items"]} == expected_ids
 
 
+def test_unit_categorical_filters_use_stable_public_slugs(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    assert database.list_unit_filter_values() == {
+        "troop_types": [{"id": 1, "slug": "type", "name": "type"}],
+        "classifications": [
+            {"id": 1, "slug": "category", "name": "category"}
+        ],
+        "characteristics": [{"id": 1, "slug": "chars", "name": "chars"}],
+    }
+    for result in (
+        database.list_units(troop_type=1),
+        database.list_units(troop_type="type"),
+        database.list_units(classification=1),
+        database.list_units(classification="category"),
+        database.list_units(characteristic=1),
+        database.list_units(characteristic="chars"),
+        database.list_units(
+            troop_type="type",
+            classification="category",
+            characteristic="chars",
+        ),
+    ):
+        assert {item["id"] for item in result["items"]} == {1}
+
+    assert database.list_units(troop_type="missing")["items"] == []
+    assert database.list_units(classification="missing")["items"] == []
+    assert database.list_units(characteristic="missing")["items"] == []
+
+
 def test_runtime_catalog_paths_use_canonical_profile_and_loadout_payloads(
     tmp_path: Path, normalized: dict
 ) -> None:
