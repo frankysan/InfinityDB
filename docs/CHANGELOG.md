@@ -7,12 +7,21 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
-### Fixed
+### Changed
 
-- **Deployment:** Upgrade complete legacy v8 symbol-build manifests with the tracked
-  `symbol-publication.json` binding during deployment artifact transfer when the local
-  publication validates and matches the legacy published asset count/bytes. Existing
-  bindings are never overwritten, and no SVG or symbol-package rebuild is required.
+- **Deployment + Project infrastructure:** Make release tags self-contained for runtime
+  deployment by tracking deterministic `data/generated/infinity.db` and `rules.db`, retiring
+  the transferred-artifact/server-rebuild split, and deploying those exact databases from the
+  checked-out release. `army-symbol-build.json` is no longer a production dependency; the
+  tracked `symbol-publication.json` now carries the compact Army source snapshot identity used
+  to bind the runtime database and processed symbol publication.
+
+### Added
+
+- **Data processing + Deployment:** Add a one-time provenance migration helper for an existing
+  published symbol set. It copies the Army archive identity from local terminal symbol-build
+  state into the tracked publication manifest without rebuilding SVGs and refreshes the ignored
+  local binding for future symbol-pipeline work.
 
 ## [0.8.0] - 2026-09-26
 

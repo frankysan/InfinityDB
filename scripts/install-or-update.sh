@@ -27,7 +27,7 @@ git_root="$(git rev-parse --show-toplevel 2>/dev/null)" ||
 cd "$git_root"
 
 # A local tracked edit could be overwritten by changing tags. Untracked files,
-# including the optional deployment config and raw source data, are preserved.
+# including the optional deployment config and local raw source data, are preserved.
 if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
   fail "the checkout has tracked changes; commit, stash, or discard them first."
 fi
@@ -80,6 +80,19 @@ case "${save_answer:-Y}" in
     ;;
 esac
 
+prepare_tracked_release_file() {
+  path="$1"
+  if git cat-file -e "$release_tag:$path" 2>/dev/null \
+    && [ -e "$path" ] \
+    && ! git ls-files --error-unmatch -- "$path" >/dev/null 2>&1; then
+    echo "Removing legacy untracked $path; $release_tag supplies the tracked release copy."
+    rm -f "$path"
+  fi
+}
+
+prepare_tracked_release_file data/generated/infinity.db
+prepare_tracked_release_file data/generated/rules.db
+
 echo "Checking out $release_tag..."
 git checkout --detach "$release_tag"
 
@@ -91,13 +104,12 @@ fi
 echo "Installing application dependencies..."
 .venv/bin/pip install -e .
 
-echo "Building the validated Army database image input..."
-.venv/bin/infinity-db build --compact
+[ -f data/generated/infinity.db ] || fail \
+  "release $release_tag does not contain tracked data/generated/infinity.db."
+[ -f data/generated/rules.db ] || fail \
+  "release $release_tag does not contain tracked data/generated/rules.db."
 
-echo "Building the validated rules database image input..."
-.venv/bin/infinity-db build-rules
-
-echo "Deploying image app-$release_tag..."
+echo "Deploying tracked release artifacts as image app-$release_tag..."
 DOMAIN="$domain" IMAGE_TAG="app-$release_tag" RETAIN_APP_IMAGES="$retain" \
 METRICS_BIND_ADDRESS="$metrics_bind" METRICS_PORT="$metrics_port" \
   sh ./scripts/deploy.sh

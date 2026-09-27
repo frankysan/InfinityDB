@@ -2330,9 +2330,9 @@ incomplete provenance, incompatible schema, or post-build content drift fail clo
 
 When an Army database is built from a ZIP snapshot, normalized `_meta` and both
 database siblings retain `snapshotArchiveSha256`: the SHA-256 of that exact ZIP.
-Deployment compares it with the terminal symbol manifest's
-`snapshot.armyArtifact.sha256`, binding the runtime data and symbol publication
-without needing the raw archive at deployment time.
+Deployment compares it with the tracked symbol publication manifest's
+`sourceSnapshot.armyArtifact.sha256`, binding the runtime data and symbol publication
+without needing the raw archive or terminal symbol-build manifest at deployment time.
 
 `units.source_role` and `army_units.availability_kind` are explicit application
 schema fields rather than incidental dynamic columns. This makes the
@@ -2514,8 +2514,10 @@ promoting passed version-7 state to version 8. Version 8 records published/mappi
 counts and byte totals and binds `publication-map.json` plus the tracked
 `data/manifests/symbol-publication.json`. That canonical publication manifest contains
 every published SVG path and SHA-256 together with Army, Unit/profile, and static
-symbol mappings; it is the single completeness and lookup contract for local/full-asset
-validation and runtime symbol resolution. The report contains complete source-archive and
+symbol mappings plus the compact Army source-archive name/SHA-256 needed to bind the
+tracked runtime database to the publication. It is the single completeness, lookup, and
+deployment-provenance contract for the published symbol set. The report contains complete
+source-archive and
 canonical-archive mappings to published paths, published SVG hashes, and a
 comparison against the previous generated publication
 covering added, removed, changed, and unchanged symbols. Removed prior symbols are

@@ -133,12 +133,12 @@ build/ingestion commands intentionally consume the packaged maintained data.
 
 ### Deployment smoke (configured)
 
-The configured `Deployment smoke test` is a distinct Linux/container layer.
-It builds synthetic `infinity.db` and tracked `rules.db`, builds the application
-image with the tracked processed SVG publication, validates exact runtime database
-contents and packaged assets, starts the
-application under its production restrictions, and exercises representative API
-behavior.
+The configured `Deployment smoke test` is a distinct Linux/container layer. It builds
+the application image directly from the tracked release `infinity.db`, `rules.db`, and
+processed SVG publication, validates their installed bytes and Army-snapshot provenance,
+starts the application under its production restrictions, and exercises representative API
+behavior. Because deployment no longer rebuilds runtime data, this smoke layer deliberately
+tests the exact repository artifacts that a tagged server checkout will deploy.
 
 Read-only runtime imports are deliberately separated from build-time Army
 normalization and weapon-policy configuration. The installed application may

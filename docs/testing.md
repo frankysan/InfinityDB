@@ -171,19 +171,14 @@ failure is more useful.
 
 ## Deployment smoke test
 
-Docker deployment validation is intentionally separate from `run_checks.py`
-because it requires a Docker daemon. The configured GitHub Actions `Deployment smoke test`
-workflow builds the real application databases from a small synthetic Army
-fixture plus the tracked curated rules collection, builds the Docker image, and
-uses `scripts/verify-container-image.sh` to validate image contents and healthy
-production startup. The smoke workflow uses `--packaged-assets` to verify that the tracked processed
-SVG publication survives Docker/package installation with exact inventory hashes and
-working live symbol routes. Local production deployment uses `--published-assets`,
-which performs the same package checks after `tools/verify_deployment_assets.py` has
-bound the host publication to terminal symbol-build manifest state and additionally
-revalidates that database/publication provenance before Compose activation.
-The workflow stages its fixture databases and Docker context under the runner
-temporary directory; it never writes fixture data into checkout deployment paths.
+Docker deployment validation is intentionally separate from `run_checks.py` because it
+requires a Docker daemon. The configured GitHub Actions `Deployment smoke test` builds the
+application image directly from the tracked release `infinity.db`, `rules.db`, processed SVG
+publication, and `symbol-publication.json`, then uses `scripts/verify-container-image.sh` in
+`--published-assets` mode to validate exact installed assets, database/publication snapshot
+provenance, runtime database formats, and healthy production startup. This intentionally tests
+the same self-contained artifact model used by tagged production deployment rather than replacing
+the committed runtime databases with synthetic fixture outputs.
 
 See [the Linux deployment guide](deployment.md#deployment-smoke-validation) for
 the exact container contract and the equivalent manual command.

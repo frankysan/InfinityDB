@@ -148,6 +148,12 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
 
 ## 4. Run release validation
 
+- [ ] Rebuild and validate any release runtime database whose source/curated inputs changed,
+  then ensure `data/generated/infinity.db` and `data/generated/rules.db` are the intended
+  tracked release artifacts.
+- [ ] Run `python tools/verify_deployment_assets.py` and require the tracked Army database,
+  rules database, processed SVG publication, and publication snapshot provenance to pass as one
+  release set.
 - [ ] Run the complete local validation suite with `python tools/run_checks.py --all`.
 - [ ] When the release is intended for a local/full-asset deployment, validate the
   complete published asset set with the `required` asset mode as documented in
@@ -183,8 +189,8 @@ error with a subsequent release rather than silently moving a published tag.
 
 For releases that are deployed to the hosted InfinityDB instance:
 
-- [ ] Deploy using the appropriate documented workflow in `docs/deployment.md`; do
-  not mix server-rebuild and transferred-artifact deployment modes.
+- [ ] Deploy the tagged self-contained release using the workflow in `docs/deployment.md`;
+  production must not rebuild or substitute runtime databases after the tag is validated.
 - [ ] Verify the deployed application reports the intended release version and source
   snapshot.
 - [ ] Smoke-test the release's principal changed user-facing paths in the deployed

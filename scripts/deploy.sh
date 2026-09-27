@@ -63,7 +63,7 @@ if [ ! -x "$python" ]; then
   exit 2
 fi
 
-echo "Validating manifest-bound published symbol set..."
+echo "Validating tracked runtime databases and published symbol set..."
 "$python" tools/verify_deployment_assets.py
 
 display_version="$("$python" -c 'import infinity_db; print(infinity_db.__display_version__)')"

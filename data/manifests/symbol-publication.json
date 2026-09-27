@@ -873,6 +873,12 @@
     "units/yu-jing/766-k-nren-counter-insurgency-group--army-202.svg": "0ada72cf9ca7ce3ca73c32d7e817da71ff087396d005324df14655a1d7b4bd8e",
     "units/yu-jing/847-gu-feng-xi-zhuang--army-202.svg": "d77ca98426e190ae399a650ac875a7a3acbf2a560d25803eedc2f63eb8565737"
   },
+  "sourceSnapshot": {
+    "armyArtifact": {
+      "name": "JSON 20260925-092906.zip",
+      "sha256": "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75"
+    }
+  },
   "staticKeyToPublishedPath": {
     "cube": "characteristics/cube.svg",
     "cube2": "characteristics/cube-2.svg",

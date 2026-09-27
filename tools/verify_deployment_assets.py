@@ -1,90 +1,40 @@
 #!/usr/bin/env python3
-"""Verify that deployment symbols match one completed promoted symbol build."""
+"""Verify tracked runtime databases and the published symbol set for deployment."""
 
 from __future__ import annotations
 
 import argparse
+import sqlite3
 from pathlib import Path
-from typing import Any
 
 from infinity_db.deployment_provenance import (
     DeploymentProvenanceError,
     validate_database_symbol_provenance,
 )
-from infinity_db.snapshot_provenance import sha256_file
-from infinity_db.symbol_manifest import (
-    SYMBOL_BUILD_VERSION,
-    SymbolManifestError,
-    add_publication_manifest_binding,
-    load_symbol_manifest,
-    write_symbol_manifest,
-)
+from infinity_db.rules_database import RulesDatabase
 
 try:
     from tools.asset_validation import (
         AssetSetValidation,
         AssetValidationError,
-        publication_manifest_summary,
         validate_asset_set,
     )
 except ImportError:  # pragma: no cover - direct script execution fallback
     from asset_validation import (  # type: ignore[no-redef]
         AssetSetValidation,
         AssetValidationError,
-        publication_manifest_summary,
         validate_asset_set,
     )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MANIFEST = PROJECT_ROOT / "data" / "manifests" / "army-symbol-build.json"
 DEFAULT_STATIC_ROOT = PROJECT_ROOT / "src" / "infinity_db" / "web" / "static"
 DEFAULT_DATABASE = PROJECT_ROOT / "data" / "generated" / "infinity.db"
+DEFAULT_RULES_DATABASE = PROJECT_ROOT / "data" / "generated" / "rules.db"
 DEFAULT_PUBLICATION_MANIFEST = PROJECT_ROOT / "data" / "manifests" / "symbol-publication.json"
 
 
 class DeploymentAssetError(ValueError):
-    """Raised when local deployment symbols are not one complete promoted publication."""
-
-
-def _portable_project_path(path: Path, project_root: Path) -> str:
-    try:
-        return path.resolve().relative_to(project_root.resolve()).as_posix()
-    except ValueError as exc:
-        raise DeploymentAssetError(
-            f"Deployment asset path is outside the project root: {path}"
-        ) from exc
-
-
-def _require_bound_artifact(
-    publication: dict[str, Any],
-    field: str,
-    expected: Path,
-    *,
-    project_root: Path,
-) -> None:
-    record = publication.get(field)
-    if not isinstance(record, dict):
-        raise DeploymentAssetError(f"Published symbol manifest is missing {field}")
-
-    expected_relative = _portable_project_path(expected, project_root)
-    if record.get("path") != expected_relative:
-        raise DeploymentAssetError(
-            f"Published symbol manifest {field} path is {record.get('path')!r}; "
-            f"expected {expected_relative!r}"
-        )
-    if record.get("name") != expected.name:
-        raise DeploymentAssetError(
-            f"Published symbol manifest {field} name is {record.get('name')!r}; "
-            f"expected {expected.name!r}"
-        )
-    if not expected.is_file():
-        raise DeploymentAssetError(f"Published symbol artifact is missing: {expected}")
-
-    actual_digest = sha256_file(expected)
-    if record.get("sha256") != actual_digest:
-        raise DeploymentAssetError(
-            f"Published symbol manifest {field} SHA-256 does not match {expected_relative}"
-        )
+    """Raised when tracked deployment data or published symbols are incomplete."""
 
 
 def _require_complete_asset_set(validation: AssetSetValidation) -> None:
@@ -106,128 +56,27 @@ def _require_complete_asset_set(validation: AssetSetValidation) -> None:
     )
 
 
-def upgrade_legacy_publication_binding(
-    manifest_path: Path = DEFAULT_MANIFEST,
-    static_root: Path = DEFAULT_STATIC_ROOT,
-    *,
-    project_root: Path = PROJECT_ROOT,
-    publication_manifest_path: Path | None = None,
-) -> bool:
-    """Upgrade one complete legacy v8 publication record to the tracked manifest binding."""
-
-    try:
-        manifest = load_symbol_manifest(manifest_path)
-    except (OSError, SymbolManifestError) as exc:
-        raise DeploymentAssetError(
-            f"Could not load promoted symbol manifest {manifest_path}: {exc}"
-        ) from exc
-
-    if manifest.get("formatVersion") != SYMBOL_BUILD_VERSION:
-        raise DeploymentAssetError(
-            "Deployment requires a terminal published symbol manifest "
-            f"(version {SYMBOL_BUILD_VERSION})"
-        )
-
-    processing = manifest.get("processing")
-    publication = processing.get("publication") if isinstance(processing, dict) else None
-    if not isinstance(publication, dict) or publication.get("status") != "passed":
-        raise DeploymentAssetError("Deployment requires a passed symbol publication stage")
-    if "publicationManifest" in publication:
-        return False
-
-    publication_manifest_path = (
-        publication_manifest_path
-        or project_root / "data" / "manifests" / "symbol-publication.json"
-    )
-    validation = validate_asset_set(
-        static_root, publication_manifest=publication_manifest_path
-    )
-    _require_complete_asset_set(validation)
-
-    canonical_summary = publication_manifest_summary(publication_manifest_path)
-    build_summary = publication.get("summary")
-    if not isinstance(build_summary, dict):
-        raise DeploymentAssetError("Published symbol manifest has no publication summary")
-    for field in ("publishedAssetCount", "publishedBytes"):
-        if build_summary.get(field) != canonical_summary[field]:
-            raise DeploymentAssetError(
-                f"Legacy symbol manifest summary.{field} does not match "
-                "symbol-publication.json"
-            )
-
-    try:
-        rebound = add_publication_manifest_binding(
-            manifest,
-            publication_manifest=publication_manifest_path,
-            project_root=project_root,
-        )
-        write_symbol_manifest(rebound, manifest_path)
-    except (OSError, SymbolManifestError) as exc:
-        raise DeploymentAssetError(
-            f"Could not upgrade legacy symbol manifest {manifest_path}: {exc}"
-        ) from exc
-    return True
-
-
 def verify_deployment_assets(
-    manifest_path: Path = DEFAULT_MANIFEST,
     static_root: Path = DEFAULT_STATIC_ROOT,
     *,
-    project_root: Path = PROJECT_ROOT,
-    database_path: Path | None = None,
-    publication_manifest_path: Path | None = None,
+    database_path: Path = DEFAULT_DATABASE,
+    rules_database_path: Path = DEFAULT_RULES_DATABASE,
+    publication_manifest_path: Path = DEFAULT_PUBLICATION_MANIFEST,
 ) -> AssetSetValidation:
-    """Validate local symbols against the terminal v8 build and publication manifests."""
-
-    try:
-        manifest = load_symbol_manifest(manifest_path)
-    except (OSError, SymbolManifestError) as exc:
-        raise DeploymentAssetError(
-            f"Could not load promoted symbol manifest {manifest_path}: {exc}"
-        ) from exc
-
-    if manifest.get("formatVersion") != SYMBOL_BUILD_VERSION:
-        raise DeploymentAssetError(
-            "Deployment requires a terminal published symbol manifest "
-            f"(version {SYMBOL_BUILD_VERSION})"
-        )
-
-    processing = manifest.get("processing")
-    publication = processing.get("publication") if isinstance(processing, dict) else None
-    if not isinstance(publication, dict) or publication.get("status") != "passed":
-        raise DeploymentAssetError("Deployment requires a passed symbol publication stage")
-
-    publication_manifest_path = (
-        publication_manifest_path
-        or project_root / "data" / "manifests" / "symbol-publication.json"
-    )
-    _require_bound_artifact(
-        publication,
-        "publicationManifest",
-        publication_manifest_path,
-        project_root=project_root,
-    )
+    """Validate the release databases and symbols using tracked repository artifacts only."""
 
     validation = validate_asset_set(
         static_root, publication_manifest=publication_manifest_path
     )
     _require_complete_asset_set(validation)
 
-    validate_database_symbol_provenance(
-        database_path or project_root / "data" / "generated" / "infinity.db", manifest
-    )
-
+    validate_database_symbol_provenance(database_path, publication_manifest_path)
+    RulesDatabase(rules_database_path).validate()
     return validation
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--manifest",
-        type=Path,
-        default=DEFAULT_MANIFEST,
-        help="Terminal symbol build manifest (default: data/manifests/army-symbol-build.json)",
-    )
     parser.add_argument(
         "--static-root",
         type=Path,
@@ -235,7 +84,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Published browser static root (default: repository web/static directory)",
     )
     parser.add_argument(
-        "--database", type=Path, default=DEFAULT_DATABASE, help="Runtime infinity.db to bind"
+        "--database", type=Path, default=DEFAULT_DATABASE, help="Tracked runtime infinity.db"
+    )
+    parser.add_argument(
+        "--rules-database",
+        type=Path,
+        default=DEFAULT_RULES_DATABASE,
+        help="Tracked runtime rules.db",
+    )
+    parser.add_argument(
+        "--publication-manifest",
+        type=Path,
+        default=DEFAULT_PUBLICATION_MANIFEST,
+        help="Tracked canonical symbol publication manifest",
     )
     return parser
 
@@ -244,17 +105,26 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         validation = verify_deployment_assets(
-            args.manifest, args.static_root, database_path=args.database
+            args.static_root,
+            database_path=args.database,
+            rules_database_path=args.rules_database,
+            publication_manifest_path=args.publication_manifest,
         )
-    except (DeploymentAssetError, DeploymentProvenanceError, AssetValidationError) as exc:
+    except (
+        DeploymentAssetError,
+        DeploymentProvenanceError,
+        AssetValidationError,
+        sqlite3.Error,
+        ValueError,
+    ) as exc:
         print(f"ERROR: {exc}")
         return 1
 
     print(
-        "Deployment symbols verified: "
+        "Deployment release artifacts verified: "
         f"{validation.present_count}/{validation.expected_count} published SVGs; "
         f"{validation.browser_present_count}/{validation.browser_expected_count} "
-        "browser-referenced; manifest-bound publication v8"
+        "browser-referenced; runtime databases valid and snapshot-matched"
     )
     return 0
 

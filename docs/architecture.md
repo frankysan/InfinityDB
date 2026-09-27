@@ -212,6 +212,12 @@ data/curated/snapshot-notes/ = source-controlled human snapshot annotations
 data/generated/              = reproducible database/JSON build output
 ```
 
+`data/generated/infinity.db` and `data/generated/rules.db` are the deliberate tracked
+exception within generated output. They are byte-deterministic runtime release artifacts,
+committed with the release that serves them so deployment consumes exactly the databases
+validated during release preparation. `master.json`, normalized JSON, `infinity.raw.db`, and
+other intermediate/generated working products remain ignored.
+
 Aliases, mappings, filters, manual overrides, compatibility exceptions, static
 asset declarations, and similar maintained domain knowledge belong in
 validated, versioned configuration when they can change independently of the
@@ -539,7 +545,11 @@ without bypassing local overrides. Invalid matching overrides fail rather than
 falling through, and unused overrides plus URL/filename collisions are reported.
 The downloader remains raw-resolution only; `tools/build_symbols.py` owns the
 subsequent versioned processing stages and the publisher alone assigns final
-application paths.
+application paths. The terminal build manifest remains ignored local processing/cache
+provenance and is not a deployment input. Final publication copies only the Army source
+archive name/SHA-256 required for runtime provenance into the tracked
+`data/manifests/symbol-publication.json`; deployment binds the tracked `infinity.db`
+`snapshotArchiveSha256` directly to that compact publication identity.
 
 ### Current: army roles and logical-unit identity
 

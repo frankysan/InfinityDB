@@ -38,10 +38,13 @@ provenance/state, and build outputs.
   document count, optional language, and optional input-artifact provenance.
   Ignored by Git, excluded from Docker build context, and outside Python package
   data.
+- `manifests/symbol-publication.json` — tracked release manifest for the processed SVG
+  publication. It owns the published path/SHA-256 inventory, browser mappings, summary,
+  and compact Army source archive identity used to bind `infinity.db` during deployment.
 - `manifests/army-symbol-build.json` — generated current symbol-build state from
   acquisition version 2 through terminal publication version 8. It binds the
   pinned Army/SYMBOLS artifacts, stage reports/settings, canonical mapping, and
-  publication artifacts. Ignored by Git.
+  publication artifacts. Ignored by Git and not required for deployment.
 - `curated/rules/` — source-controlled, human-reviewed rules-reference
   collections consumed by `infinity-db build-rules`.
 - `curated/identities/` — source-controlled, reviewed source-derived identity and
@@ -51,13 +54,16 @@ provenance/state, and build outputs.
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — generated `master.json`, normalized data, validation reports,
   the application `infinity.db`, development-only `infinity.raw.db`, and the
-  separate curated-rules `rules.db`. Ignored by Git.
+  separate curated-rules `rules.db`. `infinity.db` and `rules.db` are tracked release
+  artifacts; the intermediate JSON/raw archive and other generated build products remain
+  ignored.
 
-Keeping raw inputs, generated provenance, and generated databases outside source
-control prevents large or machine-local snapshot state from obscuring code
-changes. Generated snapshot manifests are local provenance records rather than
-maintained project knowledge. They are retained until explicitly removed; the
-acquisition tools do not automatically prune either archives or manifests.
+Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
+source control so machine-local snapshot state does not obscure code changes. The two
+runtime SQLite databases are the deliberate exception: their deterministic bytes are
+reviewed/tracked with each release so a tagged checkout contains the exact runtime data that
+production will serve. Generated snapshot manifests remain local provenance records rather
+than maintained project knowledge.
 
 Generated Army database data is replaceable. Builds create temporary application
 and raw-archive siblings, validate both before publication, and replace each
@@ -128,8 +134,9 @@ Each stage records the reports/settings needed by its successor. Version 7 binds
 every compressed canonical SVG through the SHA-bound compression report. Version
 8 binds the canonical `symbol-publication.json` plus the publication report and
 final byte/count accounting. The publication manifest owns every published SVG
-path/SHA-256 together with the runtime Army, Unit/profile, and static mappings.
-Stage promotion is
+path/SHA-256 together with the runtime Army, Unit/profile, and static mappings plus the
+compact Army source archive name/SHA-256 used to bind the tracked runtime database during
+deployment. Stage promotion is
 forward-only. Failed-stage retry is explicit where supported; later passed states
 are not silently rolled back to rerun an earlier helper. Loaders still accept
 versions 2 through 8 as valid historical/intermediate state for compatibility.

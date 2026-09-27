@@ -100,13 +100,14 @@ and serves a read-only browser and same-origin HTTP API.
   unexpectedly.
 - Deployment remains separate from acquisition, normalization, database
   construction, rules curation, and asset processing.
-- Server migration distinguishes exact runtime transfer from rebuildability.
-  Exact runtime preservation checks out the same Git revision for the tracked
-  processed symbol publication and copies only the generated databases plus local
-  terminal symbol-build manifest; reproducible rebuilds additionally preserve
-  immutable Army/SYMBOLS snapshots, generated provenance, and local overrides.
-  Cross-machine SVG regeneration is not promised byte-identical because fonts and
-  external processor versions remain environment-sensitive; see
+- Tagged releases are self-contained for runtime deployment. `data/generated/infinity.db`
+  and `data/generated/rules.db` are tracked deterministic release artifacts alongside the
+  processed SVG publication and `data/manifests/symbol-publication.json`. Production does
+  not rebuild or transfer runtime databases separately. The ignored terminal
+  `army-symbol-build.json` remains processing/cache provenance only; the tracked publication
+  carries the compact Army archive name/SHA-256 used to bind `infinity.db` to the symbol
+  publication. Reproducible development rebuilds still require the ignored immutable
+  Army/SYMBOLS snapshots, generated provenance, and local overrides; see
   `docs/server-migration.md`.
 - Local tests separate hermetic and full-asset coverage explicitly.
   `run_checks.py --assets off|auto|required` validates the complete tracked
@@ -829,30 +830,16 @@ compatibility references remain unambiguous JSON integers.
   for provenance, and repository reads consume the materialized relation. Legacy
   identity discovery is retained only behind the builder for older normalized
   inputs.
-- 2026-09-19: Local production deployment with symbols is fail-closed. `deploy.sh`
-  requires a terminal v8 `army-symbol-build.json` whose SHA-bound
-  `symbol-publication.json` matches the tracked publication, verifies the complete
-  published set, then
-  validates the exact built image in `--published-assets` mode before Compose
-  activation. The 0.7.0 tracked-asset migration later replaced the old
-  asset-free/redistributable-image inverse contract with `--packaged-assets`
-  verification for distributable container smoke tests.
-- 2026-09-19: Deployment artifact transfer is commit-bound. The 0.7.0 tracked-asset
-  migration narrowed `tools/send_deployment_artifacts.py` to the ignored runtime
-  databases and terminal symbol manifest; the processed SVG publication and canonical
-  publication manifest travel through Git. The helper still uses one staged SSH
-  session and refuses a remote checkout whose commit or tracked state differs from
-  the clean local checkout.
-- 2026-09-20: Production deployment has two explicit data modes.
-  `install-or-update.sh` is the server-rebuild path and may replace generated runtime
-  databases from server-local raw source. `deploy-transferred.sh` is the no-rebuild
-  path for the commit-matched artifact bundle produced by
-  `send_deployment_artifacts.py`; it must preserve the transferred database/manifest
-  pairing with the tracked publication from that same commit. `deploy-local-test.sh`
-  reuses the no-rebuild path under a separate Compose
-  project, binds only to `127.0.0.1`, and disables production image pruning.
-  `stop-local-test.sh` is the matching teardown path: it always targets only the
-  `infinitydb-test` Compose project and retains its named volumes by default.
+- 2026-09-27: Runtime deployment became release-self-contained. The deterministic
+  `data/generated/infinity.db` and `data/generated/rules.db` are tracked Git release
+  artifacts; `install-or-update.sh` consumes them directly instead of rebuilding from
+  server-local raw data, and the old transferred-artifact workflow was retired.
+  `data/manifests/symbol-publication.json` now owns the compact Army source archive
+  name/SHA-256 needed for deployment provenance. `deploy.sh` validates the tracked
+  databases, complete SVG publication, and database/publication snapshot match before
+  building the image; installed-image validation repeats that provenance check using the
+  installed publication manifest. The terminal `army-symbol-build.json` remains useful
+  for local symbol processing/resume but is no longer a deployment input.
 
 - 2026-09-20: Containerized deployments preserve the checkout-derived browser display
   version explicitly instead of copying Git metadata into the image. `deploy.sh`

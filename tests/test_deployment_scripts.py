@@ -18,13 +18,25 @@ def test_compose_supports_explicit_bind_address_and_host_port() -> None:
     )
 
 
-def test_transferred_artifact_deployment_never_rebuilds_runtime_data() -> None:
-    script = _read("scripts/deploy-transferred.sh")
+def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
+    gitignore = _read(".gitignore")
+    attributes = _read(".gitattributes")
+
+    assert "!data/generated/infinity.db" in gitignore
+    assert "!data/generated/rules.db" in gitignore
+    assert "data/generated/infinity.db binary" in attributes
+    assert "data/generated/rules.db binary" in attributes
+
+
+def test_release_installer_deploys_tracked_runtime_databases_without_rebuilding() -> None:
+    script = _read("scripts/install-or-update.sh")
     assert "infinity-db build" not in script
     assert "build-rules" not in script
+    assert "data/generated/infinity.db" in script
+    assert "data/generated/rules.db" in script
+    assert 'git cat-file -e "$release_tag:$path"' in script
+    assert "Removing legacy untracked" in script
     assert "sh ./scripts/deploy.sh" in script
-    assert "app-v$version" in script
-    assert ".infinity-db-deploy.env" in script
 
 
 def test_local_test_deployment_is_loopback_only_and_isolated() -> None:
@@ -35,7 +47,7 @@ def test_local_test_deployment_is_loopback_only_and_isolated() -> None:
     assert 'METRICS_PORT="$metrics_port"' in script
     assert "DOMAIN=localhost" in script
     assert "PRUNE_APP_IMAGES=0" in script
-    assert "sh ./scripts/deploy-transferred.sh" in script
+    assert "sh ./scripts/deploy.sh" in script
 
 
 def test_stop_local_test_targets_only_isolated_compose_project() -> None:
@@ -77,13 +89,16 @@ def test_docker_build_copies_curated_wheel_data_inputs() -> None:
     assert "rm -rf /app/config /app/data/curated" in dockerfile
 
 
-def test_container_verifier_separates_packaging_from_production_provenance() -> None:
+def test_container_verifier_uses_installed_tracked_publication_provenance() -> None:
     verifier = _read("scripts/verify-container-image.sh")
 
     assert "--packaged-assets|--published-assets" in verifier
     assert 'if [ "$packaged_assets" -eq 1 ]; then' in verifier
     assert 'if [ "$published_assets" -eq 1 ]; then' in verifier
     assert "validate_database_symbol_provenance" in verifier
+    assert 'maintained_manifest_path("symbol-publication.json")' in verifier
+    assert "army-symbol-build.json" not in verifier
+    assert '-v "$(pwd)/data/manifests' not in verifier
 
 
 def test_production_observability_disables_raw_access_logs_and_keeps_metrics_private() -> None:
@@ -106,12 +121,12 @@ def test_production_observability_disables_raw_access_logs_and_keeps_metrics_pri
 def test_metrics_lan_binding_is_persisted_and_rejects_wildcard_addresses() -> None:
     deploy = _read("scripts/deploy.sh")
     installer = _read("scripts/install-or-update.sh")
-    transferred = _read("scripts/deploy-transferred.sh")
+    local_test = _read("scripts/deploy-local-test.sh")
 
     assert ': "${METRICS_BIND_ADDRESS:=127.0.0.1}"' in deploy
     assert ': "${METRICS_PORT:=9090}"' in deploy
     assert r"0.0.0.0|::|\[::\]" in deploy
     assert "METRICS_BIND_ADDRESS=%s" in installer
     assert "METRICS_PORT=%s" in installer
-    assert "config_value METRICS_BIND_ADDRESS" in transferred
-    assert "config_value METRICS_PORT" in transferred
+    assert "METRICS_BIND_ADDRESS=127.0.0.1" in local_test
+    assert 'METRICS_PORT="$metrics_port"' in local_test

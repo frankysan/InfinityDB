@@ -545,6 +545,12 @@ def test_publication_records_changes_and_backs_up_removed_symbols(
     publication_manifest = tmp_path / "symbol-publication.json"
     manifest_document = json.loads(publication_manifest.read_text(encoding="utf-8"))
     assert manifest_document["publishedSha256ByPath"] == report["publishedSha256ByPath"]
+    assert manifest_document["sourceSnapshot"] == {
+        "armyArtifact": {
+            "name": manifest["snapshot"]["armyArtifact"]["name"],
+            "sha256": manifest["snapshot"]["armyArtifact"]["sha256"],
+        }
+    }
     assert "previousPublicationComparison" not in manifest_document
     assert publication_kwargs["publication_manifest"] == publication_manifest
 

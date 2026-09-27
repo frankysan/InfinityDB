@@ -135,19 +135,19 @@ if summary.get("publishedBytes") != published_bytes:
 fi
 
 if [ "$published_assets" -eq 1 ]; then
-  # The manifest is an ignored deployment artifact, not image content. Bind it
-  # while validating the exact image so its embedded database is proven to be
-  # from the same Army ZIP as the published symbols.
+  # The installed publication manifest carries the compact Army snapshot identity
+  # needed to prove that the embedded database and published symbols match.
   docker run --rm \
-    -v "$(pwd)/data/manifests/army-symbol-build.json:/tmp/army-symbol-build.json:ro" \
     --entrypoint python "$image" -c '
 from pathlib import Path
 
+from infinity_army_data.project_resources import maintained_manifest_path
 from infinity_db.deployment_provenance import validate_database_symbol_provenance
-from infinity_db.symbol_manifest import load_symbol_manifest
 
-manifest = load_symbol_manifest(Path("/tmp/army-symbol-build.json"))
-validate_database_symbol_provenance(Path("/app/data/infinity.db"), manifest)
+validate_database_symbol_provenance(
+    Path("/app/data/infinity.db"),
+    maintained_manifest_path("symbol-publication.json"),
+)
 '
 fi
 
