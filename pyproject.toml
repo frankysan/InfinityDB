@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "infinity-db"
-version = "0.8.0"
+version = "0.8.1"
 description = "Infinity database, data ingestion tools, and extensible web unit browser"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -24,6 +24,7 @@ dev = [
 ]
 symbols = [
   "fonttools>=4.0",
+  "brotli>=1.1",
   "tinycss2>=1.4",
   "cssselect2>=0.8",
   "pillow>=10.0",
@@ -63,7 +64,19 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 ]
 
 [tool.setuptools.package-data]
-"infinity_db.web" = ["static/*.html", "static/*.css", "static/*.js", "static/*.svg", "static/armies/**/*.svg", "static/characteristics/*.svg", "static/orders/*.svg", "static/units/**/*.svg"]
+"infinity_db.web" = [
+  "static/*.html",
+  "static/*.css",
+  "static/*.js",
+  "static/*.svg",
+  "static/armies/**/*.svg",
+  "static/characteristics/*.svg",
+  "static/orders/*.svg",
+  "static/units/**/*.svg",
+  "static/fonts/**/*.woff2",
+  "static/fonts/**/OFL.txt",
+  "static/fonts/README.md",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

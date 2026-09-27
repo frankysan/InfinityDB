@@ -66,7 +66,11 @@ def test_main_writes_snapshot_provenance_and_reports_revisions(
     document = load_snapshot_manifest(manifests[0], archive=archives[0])
     assert document["snapshot"]["type"] == "army"
     assert document["snapshot"]["documentCount"] == 3
-    assert document["source"] == {"language": "en", "url": module.API_BASE_URL}
+    assert document["source"] == {
+        "dataChangedOn": "2026-09-03",
+        "language": "en",
+        "url": module.API_BASE_URL,
+    }
 
     output = capsys.readouterr().out
     assert "Downloaded 2 army lists and metadata" in output

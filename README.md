@@ -5,7 +5,7 @@ data. While Infinity Army presents one army at a time, InfinityDB brings those
 views together into a game-wide reference for exploring units, profiles,
 equipment, skills, weapons, and relationships across armies.
 
-Current release: **0.8.0** (2026-09-26).
+Current release: **0.8.1** (2026-09-27).
 
 ## Guiding principles
 
@@ -224,20 +224,18 @@ prevents replacement.
 
 ## Linux deployment
 
-The supported Docker Compose deployment packages the application and validated
-runtime databases into an immutable image. Production has two explicit data paths:
-`install-or-update.sh` rebuilds runtime databases from raw source already present on
-the server, while `deploy-transferred.sh` deploys commit-matched runtime databases and
-terminal symbol provenance transferred from a development checkout without rebuilding
-them. The processed symbol publication itself comes from that matching Git revision.
+The supported Docker Compose deployment packages the application, the tracked runtime
+databases, and the tracked processed symbol publication from one release tag into an
+immutable image. Raw Army/wiki/PDF/source-symbol archives are not required on the server.
 
 ```sh
-# Server-rebuild deployment
 sh ./scripts/install-or-update.sh
-
-# After tools/send_deployment_artifacts.py has transferred a matched artifact set
-sh ./scripts/deploy-transferred.sh
 ```
+
+The installer fetches release tags, checks out the selected release, validates the tracked
+`infinity.db`, `rules.db`, and `symbol-publication.json` contract, then builds and verifies
+the exact image that will be activated. Database generation remains a development/release
+workflow rather than a deployment step.
 
 For a deployment test on the server that must not be reachable from the LAN, use
 `sh ./scripts/deploy-local-test.sh`. It runs as a separate Compose project on
@@ -255,7 +253,7 @@ installation to another host.
 ## Project layout
 
 ```text
-docs/                       # Architecture, data model, deployment, testing, and project docs
+docs/                       # Tracked project docs; docs/audits/ is local audit evidence
 src/
   infinity_army_data/       # Army merge, normalization, metadata, and validation
   infinity_db/              # SQLite storage, application services, API, and browser
@@ -267,12 +265,12 @@ data/
   wiki/                     # Wiki research snapshots, ignored by Git
   pdf/                      # Local rules/FAQ/ITS research documents, ignored by Git
   curated/                  # Source-controlled reviewed rules, identities, and annotations
-  manifests/                # Generated provenance/build state, ignored by Git
+  manifests/                # Tracked symbol publication plus ignored build provenance
   work/                     # Rebuildable processing work, ignored by Git
   reports/                  # Generated processing reports, ignored by Git
   logs/                     # Verbose pipeline logs, ignored by Git
   backups/                  # Local retained processing/publication history, ignored by Git
-  generated/                # Databases and normalized build artifacts, ignored by Git
+  generated/                # Tracked runtime DBs plus ignored intermediate build artifacts
 image_overrides/            # Local authoritative symbol overrides, ignored by Git
 ```
 
@@ -315,14 +313,22 @@ profile definitions, asset modes, reports, and exit codes.
 
 ## Technical documentation
 
+- [Documentation layout](docs/README.md) — tracked reference/audit records versus the
+  gitignored local audit-evidence workspace.
 - [Architecture](docs/architecture.md) — engineering principles, subsystem
   boundaries, current architecture, and accepted design direction.
 - [Project domains](docs/project-domains.md) — canonical ownership boundaries and
   documentation labels for project work.
 - [Data model](docs/data-model.md) — source semantics, canonical/application
   semantics, persistence, and data-model invariants.
+- [0.7 enrichment presentation audit](docs/070-enrichment-presentation-audit.md) — durable
+  release record for the player-facing enrichment gate.
 - [0.8 connected-data domain audit](docs/080-connected-domain-audit.md) — accepted
   canonical-domain and relationship-surface boundaries for the connected-data milestone.
+- [0.8 web consistency closeout](docs/080-web-consistency-closeout.md) — durable
+  release closeout for the focused 0.8 browser-consistency pass.
+- [0.8.1 release documentation audit](docs/081-release-documentation-audit.md) —
+  documentation closeout for the self-contained deployment and UI polish release.
 - [Rules semantics](docs/rules-semantics.md) — audited rules meaning that already has a
   concrete InfinityDB consumer.
 - [Rules research](docs/rules-research.md) — verified source findings retained for possible
@@ -338,8 +344,8 @@ profile definitions, asset modes, reports, and exit codes.
 - [Release process](docs/releasing.md) — mandatory release checklist and project-wide
   documentation audit.
 - [Linux deployment](docs/deployment.md) — production deployment and updates.
-- [Server migration](docs/server-migration.md) — exact transfer and rebuild
-  requirements.
+- [Server migration](docs/server-migration.md) — released-server and development/rebuild
+  migration requirements.
 - [Backlog](docs/TODO.md) — planned and unimplemented work.
 - [Changelog](docs/CHANGELOG.md) — release history and upgrade-relevant changes.
 

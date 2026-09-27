@@ -176,9 +176,7 @@ def test_full_skill_categories_override_fallback_declarations(tmp_path: Path) ->
 
     document["records"].extend(
         [
-            declaration(
-                "declaration-category:automatic:p12", "automatic", 10, 12
-            ),
+            declaration("declaration-category:automatic:p12", "automatic", 10, 12),
             declaration("declaration-category:aro:p13", "aro", 20, 13),
         ]
     )
@@ -276,13 +274,10 @@ def test_load_curated_document_requires_typed_relations(tmp_path: Path) -> None:
         load_curated_document(path)
 
     document = valid_document()
-    document["records"][0]["relations"] = [
-        {"type": "maybe-related", "recordId": "state:example"}
-    ]
+    document["records"][0]["relations"] = [{"type": "maybe-related", "recordId": "state:example"}]
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="unsupported relation type"):
         load_curated_document(path)
-
 
 
 def test_load_curated_document_requires_variant_semantics_for_army_linked_rules(
@@ -307,8 +302,9 @@ def test_load_curated_document_requires_variant_semantics_for_army_linked_rules(
         ],
     }
     path.write_text(json.dumps(document), encoding="utf-8")
-    assert load_curated_document(path)["records"][0]["variantSemantics"] == (
-        document["records"][0]["variantSemantics"]
+    assert (
+        load_curated_document(path)["records"][0]["variantSemantics"]
+        == (document["records"][0]["variantSemantics"])
     )
 
 
@@ -324,6 +320,7 @@ def test_source_specific_variant_semantics_require_numeric_army_identity(
 
     with pytest.raises(ValueError, match="exact numeric Army source id"):
         load_curated_document(path)
+
 
 def test_source_specific_variant_semantics_require_typed_source_variant(
     tmp_path: Path,
@@ -348,8 +345,9 @@ def test_source_specific_variant_semantics_require_typed_source_variant(
         "label": "Profile variant",
     }
     path.write_text(json.dumps(document), encoding="utf-8")
-    assert load_curated_document(path)["records"][0]["variantSemantics"] == (
-        record["variantSemantics"]
+    assert (
+        load_curated_document(path)["records"][0]["variantSemantics"]
+        == (record["variantSemantics"])
     )
 
     record["variantSemantics"]["sourceVariant"] = {
@@ -363,8 +361,9 @@ def test_source_specific_variant_semantics_require_typed_source_variant(
 
     record["variantSemantics"]["sourceVariant"]["value"] = 12
     path.write_text(json.dumps(document), encoding="utf-8")
-    assert load_curated_document(path)["records"][0]["variantSemantics"] == (
-        record["variantSemantics"]
+    assert (
+        load_curated_document(path)["records"][0]["variantSemantics"]
+        == (record["variantSemantics"])
     )
 
 
@@ -584,12 +583,8 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert records["skill:camouflage"]["relations"] == [
         {"type": "enters-state", "recordId": "state:camouflaged"}
     ]
-    assert records["skill:camouflage"]["armyLinks"] == [
-        {"entity": "skill", "id": "camouflage"}
-    ]
-    assert records["skill:camouflage"]["variantSemantics"] == {
-        "inheritance": "family"
-    }
+    assert records["skill:camouflage"]["armyLinks"] == [{"entity": "skill", "id": "camouflage"}]
+    assert records["skill:camouflage"]["variantSemantics"] == {"inheritance": "family"}
     assert records["skill:super-jump"]["variantSemantics"] == {
         "inheritance": "family",
         "occurrenceParameters": [
@@ -614,9 +609,7 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert records["trait:concealed"]["relations"] == [
         {"type": "uses-effects-of", "recordId": "state:camouflaged"}
     ]
-    assert records["trait:disposable-x"]["facts"]["sourceIdentity"]["prefixes"] == [
-        "Disposable ("
-    ]
+    assert records["trait:disposable-x"]["facts"]["sourceIdentity"]["prefixes"] == ["Disposable ("]
     assert records["trait:disposable-x"]["relations"] == [
         {"type": "causes-state", "recordId": "state:unloaded"}
     ]
@@ -628,9 +621,7 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert records["weapon:armed-turret"]["armyLinks"] == [
         {"entity": "weapon", "id": "armed-turret"}
     ]
-    assert records["weapon:armed-turret"]["facts"]["specialProfile"]["skills"] == [
-        "Total Reaction"
-    ]
+    assert records["weapon:armed-turret"]["facts"]["specialProfile"]["skills"] == ["Total Reaction"]
     assert all(len(skill_type["labels"]) == 2 for skill_type in document["skillTypes"])
     assert all(
         set(skill_type["descriptions"]) == {"singular", "plural"}
@@ -703,6 +694,7 @@ def test_skill_parameter_semantics_are_validated(tmp_path: Path) -> None:
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="positiveSign"):
         load_curated_document(path)
+
 
 def test_load_curated_document_rejects_invalid_weapon_special_profile(tmp_path: Path) -> None:
     document = valid_document()
@@ -934,8 +926,7 @@ def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -
     assert servant["facts"]["maxPerController"] == 2
 
     source_servant = next(
-        record for record in document["records"]
-        if record["id"] == "rule:peripheral-type:servant"
+        record for record in document["records"] if record["id"] == "rule:peripheral-type:servant"
     )
     source_servant["facts"]["controllerEligibility"] = {"status": "unknown"}
     path.write_text(json.dumps(document), encoding="utf-8")
@@ -1006,9 +997,7 @@ def test_checked_in_n5_collection_has_peripheral_rules_foundation() -> None:
         "rule:peripheral-type:ancillary",
         "rule:peripheral-type:cyberplug",
     }
-    assert peripheral_types["rule:peripheral-type:servant"]["facts"][
-        "controllerEligibility"
-    ] == {
+    assert peripheral_types["rule:peripheral-type:servant"]["facts"]["controllerEligibility"] == {
         "anyOf": [
             {"hasSkill": "skill:doctor"},
             {"hasSkill": "skill:engineer"},
@@ -1076,8 +1065,7 @@ def test_checked_in_n5_collection_links_reviewed_trait_skill_interactions() -> N
 
     for trait_id, relations in expected.items():
         assert {
-            (relation["type"], relation["recordId"])
-            for relation in records[trait_id]["relations"]
+            (relation["type"], relation["recordId"]) for relation in records[trait_id]["relations"]
         } == relations
 
 
@@ -1114,8 +1102,7 @@ def test_checked_in_n5_collection_links_weapon_traits_to_required_common_skills(
 
     for trait_id, skill_id in expected_targets.items():
         assert {
-            (relation["type"], relation["recordId"])
-            for relation in records[trait_id]["relations"]
+            (relation["type"], relation["recordId"]) for relation in records[trait_id]["relations"]
         } == {("enables-use-of", skill_id)}
 
 
@@ -1164,8 +1151,7 @@ def test_checked_in_n5_collection_links_place_deployable_prerequisites() -> None
     )
     for source_id in expected_sources:
         assert {
-            (relation["type"], relation["recordId"])
-            for relation in records[source_id]["relations"]
+            (relation["type"], relation["recordId"]) for relation in records[source_id]["relations"]
         } == {("enables-use-of", "skill:place-deployable")}
 
 
@@ -1210,7 +1196,6 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
     assert "plus 4 inches" in super_jump["effects"][1]
 
 
-
 def test_checked_in_n5_collection_models_combat_reaction_skill_slice() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
@@ -1224,8 +1209,7 @@ def test_checked_in_n5_collection_models_combat_reaction_skill_slice() -> None:
         "skill:triangulated-fire": ["long-skill"],
     }
     assert {
-        record_id: records[record_id]["facts"]["typeIds"]
-        for record_id in expected_types
+        record_id: records[record_id]["facts"]["typeIds"] for record_id in expected_types
     } == expected_types
 
     assert records["skill:berserk"]["relations"] == [
@@ -1263,8 +1247,7 @@ def test_checked_in_n5_collection_models_mobility_environment_skill_slice() -> N
         "skill:warhorse": ["automatic"],
     }
     assert {
-        record_id: records[record_id]["facts"]["typeIds"]
-        for record_id in expected_types
+        record_id: records[record_id]["facts"]["typeIds"] for record_id in expected_types
     } == expected_types
 
     assert records["skill:aerial"]["relations"] == [
@@ -1304,8 +1287,7 @@ def test_checked_in_n5_collection_models_deployment_skill_and_state_slice() -> N
         "skill:strategic-deployment": ["deployment-skill"],
     }
     assert {
-        record_id: records[record_id]["facts"]["typeIds"]
-        for record_id in expected_types
+        record_id: records[record_id]["facts"]["typeIds"] for record_id in expected_types
     } == expected_types
 
     assert records["skill:decoy"]["relations"] == [
@@ -1355,8 +1337,7 @@ def test_checked_in_n5_collection_models_profile_runtime_identity_skill_slice() 
         "skill:transmutation": ["automatic"],
     }
     assert {
-        record_id: records[record_id]["facts"]["typeIds"]
-        for record_id in expected_types
+        record_id: records[record_id]["facts"]["typeIds"] for record_id in expected_types
     } == expected_types
     assert records["skill:g-jumper"]["labelIds"] == ["obligatory"]
     assert records["skill:infinity-spec-ops"]["labelIds"] == ["optional"]
@@ -1426,12 +1407,10 @@ def test_checked_in_n5_collection_models_morale_behavior_skill_slice() -> None:
         "skill:religious-troop": ["obligatory"],
     }
     assert {
-        record_id: records[record_id]["labelIds"]
-        for record_id in expected_labels
+        record_id: records[record_id]["labelIds"] for record_id in expected_labels
     } == expected_labels
     assert all(
-        records[record_id]["facts"]["typeIds"] == ["automatic"]
-        for record_id in expected_labels
+        records[record_id]["facts"]["typeIds"] == ["automatic"] for record_id in expected_labels
     )
     assert records["skill:frenzy"]["relations"] == [
         {"type": "uses-effects-of", "recordId": "skill:impetuous"},
@@ -1462,14 +1441,10 @@ def test_checked_in_n5_collection_keeps_sensor_category_source_faithful() -> Non
         record
         for record in document["records"]
         if record["kind"] == "declaration-category"
-        and any(
-            link == {"entity": "skill", "id": "sensor"}
-            for link in record.get("armyLinks", [])
-        )
+        and any(link == {"entity": "skill", "id": "sensor"} for link in record.get("armyLinks", []))
     ]
     assert [
-        (record["facts"]["typeId"], record["facts"]["order"])
-        for record in sensor_declarations
+        (record["facts"]["typeId"], record["facts"]["order"]) for record in sensor_declarations
     ] == [("short-skill", 40)]
 
 
@@ -1532,6 +1507,7 @@ def test_checked_in_n5_collection_models_state_recovery_relations() -> None:
         "state:targeted",
         "state:unconscious",
     }
+
 
 def test_checked_in_n5_collection_models_targeted_interaction_hub() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
@@ -1733,7 +1709,7 @@ def test_checked_in_n5_collection_models_fireteam_general_reference() -> None:
     ]
     assert {item["term"]: item["provenance"] for item in general["facts"]["terminology"]} == {
         "Linkable": "historical-official",
-        "pure Fireteam": "community-historical",
+        "Pure Fireteam": "community-historical",
     }
 
     levels = records["rule:fireteam-level-bonuses"]["facts"]

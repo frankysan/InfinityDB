@@ -17,27 +17,8 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v7
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.11"
-
-      - name: Install database build CLI
-        run: python -m pip install -e .
-
-      - name: Build deployment fixture databases
-        run: |
-          mkdir -p "$RUNNER_TEMP/deployment-smoke/generated"
-          infinity-db build tests/fixtures/deployment-smoke --output-dir "$RUNNER_TEMP/deployment-smoke/generated" --compact
-          infinity-db build-rules --output "$RUNNER_TEMP/deployment-smoke/generated/rules.db"
-
-      - name: Build application image with tracked assets
-        run: |
-          cp -R . "$RUNNER_TEMP/deployment-smoke/context"
-          mkdir -p "$RUNNER_TEMP/deployment-smoke/context/data/generated"
-          cp "$RUNNER_TEMP/deployment-smoke/generated/infinity.db" "$RUNNER_TEMP/deployment-smoke/context/data/generated/infinity.db"
-          cp "$RUNNER_TEMP/deployment-smoke/generated/rules.db" "$RUNNER_TEMP/deployment-smoke/context/data/generated/rules.db"
-          docker build --tag infinity-db:deployment-smoke "$RUNNER_TEMP/deployment-smoke/context"
+      - name: Build application image from tracked release artifacts
+        run: docker build --tag infinity-db:deployment-smoke .
 
       - name: Validate image and production startup
-        run: sh scripts/verify-container-image.sh infinity-db:deployment-smoke --packaged-assets
+        run: sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets

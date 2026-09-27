@@ -2,6 +2,9 @@
 
 **Project domains:** Web backend, Web frontend
 
+**Document status:** Durable release audit record. Local/generated audit evidence
+belongs under `docs/audits/` and is intentionally not tracked.
+
 ## Scope
 
 This is a focused browser-consistency pass before the 0.8.0 release. It checks the

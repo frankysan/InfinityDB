@@ -14,7 +14,8 @@ build/
 # Local check reports
 reports/
 
-# Local audit evidence may include environment- or deployment-specific details.
+# Local/transient audit evidence; durable conclusions are tracked under docs/.
+# See docs/README.md. Never store credentials or secrets here.
 docs/audits/
 
 # VS Code local overrides
@@ -28,6 +29,8 @@ data/raw/*
 !data/raw/.gitkeep
 data/generated/*
 !data/generated/.gitkeep
+!data/generated/infinity.db
+!data/generated/rules.db
 data/manifests/*
 !data/manifests/symbol-publication.json
 data/curated/*
@@ -52,3 +55,7 @@ image_overrides/**/*
 Thumbs.db
 .tmp.drivedownload/**/*
 .tmp.driveupload/**/*
+
+# Local upstream web-font downloads; canonical WOFF2/OFL assets are tracked.
+src/infinity_db/web/static/fonts/**/*.ttf
+src/infinity_db/web/static/fonts/**/README.txt

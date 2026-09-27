@@ -2,6 +2,9 @@
 
 **Project domain:** Data processing
 
+**Document status:** Durable release audit record. Local/generated audit evidence
+belongs under `docs/audits/` and is intentionally not tracked.
+
 This audit defines the semantic/application boundaries for InfinityDB's 0.8.0
 **connected game relationships** milestone. It is a design/completeness audit, not a
 second rules backlog. Current source semantics remain authoritative in

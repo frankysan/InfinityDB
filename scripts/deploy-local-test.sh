@@ -30,6 +30,14 @@ fi
 short_commit="$(git rev-parse --short=12 HEAD)"
 image_tag="app-test-$short_commit"
 
+if [ ! -x .venv/bin/python ]; then
+  echo "Creating Python virtual environment..."
+  python3 -m venv .venv
+fi
+
+echo "Installing application dependencies..."
+.venv/bin/pip install -e .
+
 echo "Starting loopback-only test deployment on http://localhost:$port ..."
 COMPOSE_PROJECT_NAME=infinitydb-test \
 DOMAIN=localhost \
@@ -40,7 +48,7 @@ METRICS_PORT="$metrics_port" \
 IMAGE_TAG="$image_tag" \
 RETAIN_APP_IMAGES=1 \
 PRUNE_APP_IMAGES=0 \
-  sh ./scripts/deploy-transferred.sh
+  sh ./scripts/deploy.sh
 
 printf 'Local test deployment ready: http://localhost:%s\n' "$port"
 printf 'Local test metrics: http://localhost:%s/metrics\n' "$metrics_port"

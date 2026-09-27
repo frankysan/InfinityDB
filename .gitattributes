@@ -7,3 +7,7 @@ src/infinity_db/web/static/armies/** binary
 src/infinity_db/web/static/characteristics/** binary
 src/infinity_db/web/static/orders/** binary
 src/infinity_db/web/static/units/** binary
+
+# Runtime SQLite databases are byte-deterministic release artifacts.
+data/generated/infinity.db binary
+data/generated/rules.db binary

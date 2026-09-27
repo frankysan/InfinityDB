@@ -212,6 +212,12 @@ data/curated/snapshot-notes/ = source-controlled human snapshot annotations
 data/generated/              = reproducible database/JSON build output
 ```
 
+`data/generated/infinity.db` and `data/generated/rules.db` are the deliberate tracked
+exception within generated output. They are byte-deterministic runtime release artifacts,
+committed with the release that serves them so deployment consumes exactly the databases
+validated during release preparation. `master.json`, normalized JSON, `infinity.raw.db`, and
+other intermediate/generated working products remain ignored.
+
 Aliases, mappings, filters, manual overrides, compatibility exceptions, static
 asset declarations, and similar maintained domain knowledge belong in
 validated, versioned configuration when they can change independently of the
@@ -494,13 +500,15 @@ data/curated/snapshot-notes/ = human-reviewed snapshot annotations
 ```
 
 Generated manifests are not maintained project knowledge. Current Army, wiki, and symbol
-acquisition writes version-2 `InfinityDB snapshot provenance`: `snapshot.contentSha256`
+acquisition writes version-3 `InfinityDB snapshot provenance`: `snapshot.contentSha256`
 identifies normalized member paths plus bytes independently of ZIP container metadata, while
-`snapshot.archive.sha256` identifies and verifies the exact immutable ZIP byte stream. Legacy
-version-1 manifests remain readable and carry only the exact archive hash. Archive-labeled
-records are immutable/idempotent, paths are portable project-relative values when available,
-and generated manifests remain ignored local state. The canonical field-level contract lives in
-`docs/data-model.md`; `data/README.md` owns its storage/lifecycle summary.
+`snapshot.archive.sha256` identifies and verifies the exact immutable ZIP byte stream. Army
+manifests additionally record `source.dataChangedOn`, derived from the latest encoded source date
+across the contained Army document versions. Legacy version-1 and version-2 manifests remain
+readable. Archive-labeled records are immutable/idempotent, paths are portable project-relative
+values when available, and generated manifests remain ignored local state. The canonical
+field-level contract lives in `docs/data-model.md`; `data/README.md` owns its storage/lifecycle
+summary.
 
 Human notes use the separate version-1 `InfinityDB snapshot note` contract and remain
 source-controlled interpretation rather than acquisition/runtime input. That older note contract
@@ -539,7 +547,11 @@ without bypassing local overrides. Invalid matching overrides fail rather than
 falling through, and unused overrides plus URL/filename collisions are reported.
 The downloader remains raw-resolution only; `tools/build_symbols.py` owns the
 subsequent versioned processing stages and the publisher alone assigns final
-application paths.
+application paths. The terminal build manifest remains ignored local processing/cache
+provenance and is not a deployment input. Final publication copies only the Army source
+archive name/SHA-256 required for runtime provenance into the tracked
+`data/manifests/symbol-publication.json`; deployment binds the tracked `infinity.db`
+`snapshotArchiveSha256` directly to that compact publication identity.
 
 ### Current: army roles and logical-unit identity
 
@@ -851,9 +863,10 @@ to the exact timestamped wiki ZIP/hash and member names, while pinned `oldid=` r
 not archive members remain URL-backed sources.
 
 Generated snapshot provenance semantics are defined in `docs/data-model.md` and summarized with
-its storage lifecycle in `data/README.md`. In particular, version 2 distinguishes logical
-snapshot-content identity from exact archive-byte identity; human snapshot notes remain a
-separate version-1 exact-archive-hash contract.
+its storage lifecycle in `data/README.md`. Version 2 introduced the distinction between logical
+snapshot-content identity and exact archive-byte identity; version 3 adds the derived Army
+source-data change date. Human snapshot notes remain a separate version-1 exact-archive-hash
+contract.
 
 ### Design direction
 
@@ -1105,7 +1118,24 @@ are intentionally exempt because their DOM survives the replacement.
 
 `static/styles.css` is the browser design-system entry point. Its root tokens
 define shared color roles, surfaces, borders, spacing, radii, control height,
-focus treatment, and shadows. Reuse these tokens and established components
+focus treatment, shadows, and the canonical typography system. Typography has two
+orthogonal contracts: semantic font-family roles and a shared size scale. Brand text uses
+Audiowide, display headings use Oxanium, normal interface/running text uses IBM Plex Sans,
+dense tabular data uses IBM Plex Sans Condensed, and developer/identifier text uses IBM Plex
+Mono. Components select `--font-family-brand`, `--font-family-display`,
+`--font-family-body`, `--font-family-compact`, or `--font-family-mono`; they must not name
+those concrete faces directly. The corresponding WOFF2 files are tracked presentation assets
+under `static/fonts/`, remain under their SIL OFL 1.1 licenses, and are generated from upstream
+Google Fonts TTF downloads with `tools/prepare_web_fonts.py`. Source TTF collections are not
+part of the runtime publication.
+
+`--font-size-root` is the single base size; fixed `--font-size-*` tiers are expressed in
+`rem` so the whole interface scales coherently when that root changes. The root uses a
+percentage of the browser default rather than a fixed pixel value so user font-size preferences
+remain effective. Fluid title and hero tokens may use viewport interpolation inside `clamp()`,
+but their bounds remain `rem`-based. Components must use these shared tokens rather than
+literal sizes or page-local clamps. Normal introductory/body copy uses the base tier while
+metadata and dense tables use the smaller tiers deliberately. Reuse these tokens and established components
 such as `.main`, `.topbar`, `.explorer`, `.button`, and `.page-footer` rather
 than introducing page-local visual values. Detail pages use `.main-detail` to
 retain the common layout and responsive behavior. Detail renderers also reuse

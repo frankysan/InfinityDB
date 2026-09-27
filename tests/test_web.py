@@ -224,6 +224,7 @@ def app_database_template(tmp_path_factory: pytest.TempPathFactory) -> Path:
     normalized["tables"]["metadata_equipment"] = [
         {"id": 21, "name": "Medikit", "wiki": "https://infinitythewiki.com/Medikit"}
     ]
+    normalized["_meta"]["sourceDataChangedOn"] = "2026-09-03"
     normalized["_meta"]["snapshotDownloadedOn"] = "2026-09-10"
     database_path = tmp_path_factory.mktemp("web-app") / "infinity.db"
     export_database(normalized, database_path)
@@ -255,14 +256,8 @@ def test_internal_metrics_use_bounded_normalized_route_labels(app: Callable) -> 
     assert status == 200
     assert headers["content-type"].startswith("text/plain; version=0.0.4")
     assert headers["cache-control"] == "no-store"
-    assert (
-        b'infinitydb_http_requests_total{route="/api/units/:id",status_class="2xx"} 1'
-        in body
-    )
-    assert (
-        b'infinitydb_http_requests_total{route="/api/units/:id",status_class="4xx"} 1'
-        in body
-    )
+    assert b'infinitydb_http_requests_total{route="/api/units/:id",status_class="2xx"} 1' in body
+    assert b'infinitydb_http_requests_total{route="/api/units/:id",status_class="4xx"} 1' in body
     assert b'infinitydb_http_request_duration_seconds_bucket{route="/api/units/:id"' in body
     assert b'infinitydb_http_response_size_bytes_bucket{route="/api/units/:id"' in body
     assert b"ranger-prototype" not in body
@@ -347,7 +342,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     status, _, body = request(fireteam_app, "/fireteams")
     assert status == 200
     assert b"Fireteams" in body
-    assert b'/static/fireteams.js?v=' in body
+    assert b"/static/fireteams.js?v=" in body
     assert b'href="/fireteams" aria-current="page"' in body
 
     status, _, body = request(fireteam_app, "/api/fireteams")
@@ -359,9 +354,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
         (101, "zulu-company", 1)
     ]
 
-    status, _, body = request(
-        fireteam_app, "/api/fireteams", query="army_id=zulu-company"
-    )
+    status, _, body = request(fireteam_app, "/api/fireteams", query="army_id=zulu-company")
     assert status == 200
     chart = json.loads(body)
     assert chart["reference"] is None
@@ -389,11 +382,10 @@ def test_fireteam_chart_page_and_api_use_application_projection(
         "CORE",
     ]
     assert {
-        term["term"]: term["provenance"]
-        for term in reference["general"]["facts"]["terminology"]
+        term["term"]: term["provenance"] for term in reference["general"]["facts"]["terminology"]
     } == {
         "Linkable": "historical-official",
-        "pure Fireteam": "community-historical",
+        "Pure Fireteam": "community-historical",
     }
     levels = reference["levels"]["facts"]
     assert levels["cumulative"] is True
@@ -414,7 +406,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'army.role === "reinforcement"' in script
     assert b'army.role === "sectorial" || army.role === "non_aligned"' in script
     assert b"value === 256" in script
-    assert b'`${limit.type}: unlimited`' in script
+    assert b"`${limit.type}: unlimited`" in script
     assert b'element.classList.add("developer-only")' in script
     assert b'["FTO Profiles", true]' in script
     assert b'["Notes", true]' in script
@@ -426,8 +418,9 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b".filter((team) => !team.is_wildcard)" in script
     assert b"wildcard_members: wildcardMembers" in script
     assert b'if (wildcard) name.append(badge("Wildcard"));' in script
-    assert b'appendMemberRow(member, { wildcard: true })' in script
+    assert b"appendMemberRow(member, { wildcard: true })" in script
     assert b'window.addEventListener("fireteamswildcardschange"' in script
+    assert b"detail-badges fireteam-card-types" in script
     assert b"function renderReference(reference)" in script
     assert b"for (const level of levelFacts.levels || [])" in script
     assert b"Historical official term" in script
@@ -443,8 +436,56 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert_css_rule(styles, ".fireteam-card", {"width": "min(640px, 100%)"})
     assert_css_rule(
         styles,
+        ".fireteam-content,\n.fireteam-list",
+        {"min-width": "0"},
+    )
+    assert_css_rule(styles, ".fireteam-reference", {"min-width": "0"})
+    assert_css_rule(styles, "#fireteam-reference-content", {"min-width": "0"})
+    assert b".fireteam-card-types {\n    width: 100%;\n    min-width: 0;" in styles
+    assert (
+        b".fireteam-card-header {\n    flex-direction: column;\n    align-items: stretch;" in styles
+    )
+    assert (
+        b"""  .fireteam-reference-table table {
+    --table-heading-padding: 9px 8px;
+    --table-cell-padding: 10px 8px;
+    --table-heading-size: var(--font-size-xs);
+    --table-cell-size: var(--font-size-sm);
+    width: 100%;
+    min-width: 0;
+  }"""
+        in styles
+    )
+    assert (
+        b"""  .fireteam-reference-table th,
+  .fireteam-reference-table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }"""
+        in styles
+    )
+    assert (
+        b"""  .fireteam-reference-table th:first-child {
+    width: 52px;
+  }"""
+        in styles
+    )
+    assert (
+        b"""  .fireteam-reference-table th:nth-child(2),
+  .fireteam-reference-table th:nth-child(3) {
+    width: calc((100% - 52px) / 2);
+  }"""
+        in styles
+    )
+    assert_css_rule(
+        styles,
         ".fireteam-reference-table table",
         {"min-width": "560px", "table-layout": "fixed"},
+    )
+    assert_css_rule(
+        styles,
+        ".fireteam-reference-table",
+        {"min-width": "0", "max-width": "100%", "overflow-x": "auto"},
     )
     assert_css_rule(styles, ".fireteam-reference-table th:first-child", {"width": "64px"})
     assert_css_rule(
@@ -626,9 +667,7 @@ def test_declared_faction_membership_is_distinct_and_navigable(
         "available": False,
     }
 
-    status, _, body = request(
-        membership_app, "/api/units", query="declared_faction_id=201&mercs=1"
-    )
+    status, _, body = request(membership_app, "/api/units", query="declared_faction_id=201&mercs=1")
     assert status == 200
     payload = json.loads(body)
     assert {item["id"] for item in payload["items"]} == {2, 3}
@@ -639,9 +678,7 @@ def test_declared_faction_membership_is_distinct_and_navigable(
         "has_army_list": True,
     }
 
-    status, _, body = request(
-        membership_app, "/api/units", query="declared_faction_id=907&mercs=1"
-    )
+    status, _, body = request(membership_app, "/api/units", query="declared_faction_id=907&mercs=1")
     assert status == 200
     payload = json.loads(body)
     assert [item["id"] for item in payload["items"]] == [3]
@@ -701,8 +738,7 @@ def test_unit_details_api_exposes_include_relationships(
             (101, 1, 1, 1, 1, payload_id, 1, None),
         )
         connection.execute(
-            "INSERT INTO unit_options "
-            "(unit_id, option_id, position, name) VALUES (?, ?, ?, ?)",
+            "INSERT INTO unit_options (unit_id, option_id, position, name) VALUES (?, ?, ?, ?)",
             (1, 7, 1, "Ranger pair"),
         )
         connection.execute(
@@ -1075,7 +1111,9 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/traits"' in body
     assert b'href="/states"' in body
     assert b'href="/hacking-programs"' in body
-    assert b"Army snapshot downloaded" in body
+    assert b"Army data last changed" in body
+    assert b"September 3, 2026" in body
+    assert b'class="snapshot-date developer-only">Snapshot downloaded' in body
     assert b"September 10, 2026" in body
     assert f'data-app-version="{__version__}"'.encode() in body
     assert f'data-static-version="{STATIC_ASSET_VERSION}"'.encode() in body
@@ -1216,8 +1254,7 @@ def test_rules_reference_pages_share_the_same_shell_classification(
 
     assert status == 200
     assert (
-        b'<span class="catalog-tag"><span aria-hidden="true"></span> '
-        b'Rules reference</span>' in body
+        b'<span class="catalog-tag"><span aria-hidden="true"></span> Rules reference</span>' in body
     )
 
 
@@ -1305,7 +1342,7 @@ def test_landing_page_links_to_fireteams(app: Callable) -> None:
 
     assert status == 200
     assert b'<a class="landing-link" href="/fireteams">' in body
-    assert b'<strong>Fireteams</strong>' in body
+    assert b"<strong>Fireteams</strong>" in body
 
 
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
@@ -1366,9 +1403,7 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
         ".attribute-statline",
         {
             "--movement-column-width": "60px",
-            "grid-template-columns": (
-                "var(--movement-column-width) repeat(8, minmax(0, 1fr))"
-            ),
+            "grid-template-columns": ("var(--movement-column-width) repeat(8, minmax(0, 1fr))"),
         },
     )
     assert_css_rule(
@@ -1402,8 +1437,7 @@ def test_very_narrow_detail_layout_wraps_titles_and_stacks_general_profiles(
     assert_css_rule(styles, "h1", {"overflow-wrap": "anywhere"})
     assert_css_rule(
         styles,
-        ".unit-detail .general-profile .statline, "
-        ".unit-detail .general-profile .statline tbody",
+        ".unit-detail .general-profile .statline, .unit-detail .general-profile .statline tbody",
         {"display": "block", "width": "100%"},
     )
     assert_css_rule(
@@ -1423,6 +1457,7 @@ def test_very_narrow_detail_layout_wraps_titles_and_stacks_general_profiles(
         ".unit-detail .general-profile .profile-attributes",
         {"padding": "4px 16px 12px"},
     )
+
 
 def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     app: Callable,
@@ -1618,9 +1653,9 @@ def test_soft_navigation_preserves_shell_state_and_disposes_page_handlers(
 ) -> None:
     status, _, page_navigation = request(app, "/static/page-navigation.js")
     assert status == 200
-    assert b'pathname.startsWith(`${linkPath}/`)' in page_navigation
+    assert b"pathname.startsWith(`${linkPath}/`)" in page_navigation
     assert b"syncDescription(nextDocument)" in page_navigation
-    assert b'document.querySelector(\'meta[name="description"]\')' in page_navigation
+    assert b"document.querySelector('meta[name=\"description\"]')" in page_navigation
 
     for asset in (
         "catalog-list.js",
@@ -1713,6 +1748,30 @@ def test_army_symbol_is_served(app: Callable) -> None:
     status, _, _ = request(app, "/static/armies/panoceania/not-an-army.svg")
     assert status == 404
     status, _, _ = request(app, "/static/army-symbols.js")
+    assert status == 404
+
+
+def test_browser_fonts_are_served_from_the_canonical_publication(app: Callable) -> None:
+    fonts = (
+        "/static/fonts/Audiowide/Audiowide-Regular.woff2",
+        "/static/fonts/Oxanium/Oxanium-Variable.woff2",
+        "/static/fonts/IBM_Plex_Sans/IBMPlexSans-Variable.woff2",
+        "/static/fonts/IBM_Plex_Sans/IBMPlexSans-Italic-Variable.woff2",
+        "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Regular.woff2",
+        "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Medium.woff2",
+        "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-SemiBold.woff2",
+        "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Bold.woff2",
+        "/static/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.woff2",
+    )
+    for path in fonts:
+        status, headers, body = request(app, path)
+        assert status == 200
+        assert headers["content-type"] == "font/woff2"
+        assert body.startswith(b"wOF2")
+
+    status, _, _ = request(app, "/static/fonts/Audiowide/OFL.txt")
+    assert status == 404
+    status, _, _ = request(app, "/static/fonts/Audiowide/not-a-font.woff2")
     assert status == 404
 
 
@@ -1847,10 +1906,7 @@ def test_unit_details_frontend_uses_backend_reinforcement_flags(app: Callable) -
     assert status == 200
     assert b"[98, 99]" not in body
     assert b"function isReinforcementArmy(" not in body
-    assert (
-        b'reinforcement: (army.availability_flags || []).includes("reinforcement"),'
-        in body
-    )
+    assert b'reinforcement: (army.availability_flags || []).includes("reinforcement"),' in body
 
 
 def test_unit_details_frontend_uses_backend_faction_metadata(app: Callable) -> None:
@@ -1885,37 +1941,37 @@ def test_unit_details_frontend_places_unit_symbols_on_general_profiles(
 ) -> None:
     status, _, unit_js = request(app, "/static/unit.js")
     assert status == 200
-    assert b'staticSymbolPath' in unit_js
-    assert b'profile.symbol_paths || []' in unit_js
-    assert b'general-profile-symbols' in unit_js
-    assert b'profileTitle(profile, profileSymbols)' in unit_js
-    assert b'unitProfileSymbolPath' not in unit_js
+    assert b"staticSymbolPath" in unit_js
+    assert b"profile.symbol_paths || []" in unit_js
+    assert b"general-profile-symbols" in unit_js
+    assert b"profileTitle(profile, profileSymbols)" in unit_js
+    assert b"unitProfileSymbolPath" not in unit_js
 
     status, _, symbol_js = request(app, "/static/unit-symbols.js")
     assert status == 200
-    assert b'export function staticSymbolPath' in symbol_js
-    assert b'unit-symbol-map.js' not in symbol_js
-    assert b'unitProfileSymbolSlug' not in symbol_js
+    assert b"export function staticSymbolPath" in symbol_js
+    assert b"unit-symbol-map.js" not in symbol_js
+    assert b"unitProfileSymbolSlug" not in symbol_js
 
     status, _, list_js = request(app, "/static/unit-list.js")
     assert status == 200
-    assert b'army-symbols.js' not in list_js
-    assert b'unit.display_army_symbol_path' in list_js
-    assert b'unit.symbol_path' in list_js
-    assert b'army.symbol_path' in list_js
+    assert b"army-symbols.js" not in list_js
+    assert b"unit.display_army_symbol_path" in list_js
+    assert b"unit.symbol_path" in list_js
+    assert b"army.symbol_path" in list_js
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert b'.general-profile-symbols' in styles
-    assert b'.general-profile-unit-symbol' in styles
+    assert b".general-profile-symbols" in styles
+    assert b".general-profile-unit-symbol" in styles
     assert_css_rule(
         styles,
         ".unit-symbol.general-profile-unit-symbol",
         {"width": "56px", "height": "56px"},
     )
-    assert b'--profile-symbol-title-space' not in unit_js
-    assert b'general-profile--with-symbols' not in unit_js
-    assert b'.unit-symbol-detail' not in styles
+    assert b"--profile-symbol-title-space" not in unit_js
+    assert b"general-profile--with-symbols" not in unit_js
+    assert b".unit-symbol-detail" not in styles
 
 
 def test_unit_details_frontend_displays_high_ava_as_total(app: Callable) -> None:
@@ -1944,7 +2000,7 @@ def test_unit_details_frontend_labels_vitality_as_vita_or_str(app: Callable) -> 
     assert status == 200
     assert b'["VITA", (profile) => profile.vitality]' in body
     assert b'["W", (profile) => profile.vitality]' not in body
-    assert b'profile.is_structure === true || Number(profile.is_structure) === 1' in body
+    assert b"profile.is_structure === true || Number(profile.is_structure) === 1" in body
     assert b'label === "VITA" && isStructureProfile(profile) ? "STR" : label' in body
     assert b'is_structure: mostCommon(profiles, "is_structure")' in body
 
@@ -2045,7 +2101,10 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert_css_rule(
         styles,
         ".data-table--compact",
-        {"--table-cell-size": "12px", "--table-heading-size": "11px"},
+        {
+            "--table-cell-size": "var(--font-size-sm)",
+            "--table-heading-size": "var(--font-size-xs)",
+        },
     )
 
     for path in ["/static/unit.js", "/static/skill.js", "/static/catalog-detail.js"]:
@@ -2180,10 +2239,10 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     assert b"function renderArmyRelationships(unit, armies)" in unit_js
     assert b'heading("Army relationships")' in unit_js
     assert b'section.className = "detail-group army-relationships developer-only";' in unit_js
-    assert b'link.href = `/units?army_id=${encodeURIComponent(identifier)}`;' in unit_js
+    assert b"link.href = `/units?army_id=${encodeURIComponent(identifier)}`;" in unit_js
     assert (
-        b'link.href = `/units?declared_faction_id='
-        b'${encodeURIComponent(membership.source_faction_id)}`;' in unit_js
+        b"link.href = `/units?declared_faction_id="
+        b"${encodeURIComponent(membership.source_faction_id)}`;" in unit_js
     )
     assert b"broader source-declared faction membership separately" in unit_js
     assert b"this faction identity has no current Army list" in unit_js
@@ -2214,8 +2273,8 @@ def test_unit_details_frontend_presents_selection_relationships(app: Callable) -
     assert b'else if (relation.family === "cross-logical-shared-cardinality")' in unit_js
     assert b'else if (relation.family === "single-logical-cardinality")' in unit_js
     assert b"appendUnitLinks(item, members);" in unit_js
-    assert b'profileGroupLink(army, member.group_id)' in unit_js
-    assert b'profileGroupLink(army, target.group_id)' in unit_js
+    assert b"profileGroupLink(army, member.group_id)" in unit_js
+    assert b"profileGroupLink(army, target.group_id)" in unit_js
     assert b"dependencyOptionLinks(army, target)" in unit_js
     assert b"Source parameters:" in unit_js
     assert b"InfinityDB does not validate complete Army Lists" in unit_js
@@ -2228,7 +2287,10 @@ def test_unit_details_frontend_presents_selection_relationships(app: Callable) -
     assert_css_rule(
         styles,
         ".selection-source-parameters",
-        {"color": "var(--color-text-secondary)", "font-size": "12px"},
+        {
+            "color": "var(--color-text-secondary)",
+            "font-size": "var(--font-size-sm)",
+        },
     )
 
 
@@ -2326,6 +2388,7 @@ def test_skill_distance_display_uses_api_parameter_semantics(app: Callable) -> N
         assert b"Super-Jump" not in body
         assert b"Forward Deployment" not in body
 
+
 def test_skill_extras_page_and_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/skill-extras")
     assert status == 200
@@ -2371,7 +2434,7 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     assert b"fetch(" not in body
     assert (
         b'["skills", "equipment", "weapons", "traits", "states", "hacking-programs"]'
-        b'.includes(page)' in body
+        b".includes(page)" in body
     )
     assert b"const routeId = item.slug || item.id;" in body
     assert b"link.href = `/${page}/${encodeURIComponent(routeId)}`;" in body
@@ -2393,6 +2456,18 @@ def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"hacking-program-detail.js" in body
+
+    status, _, script = request(app, "/static/hacking-program-detail.js")
+    assert status == 200
+    assert b'detail-group rules-reference hacking-program-profile' in script
+    assert b'from "./rules-reference.js"' in script
+    assert b"rulesReferenceArticle(rule, { leadingContent })" in script
+    assert b'detail-card hacking-program-profile-card' not in script
+    assert b'from "./skill-categories.js"' in script
+    assert b"skillCategoryBadge(category)" in script
+    assert b"hacking-program-context-row" in script
+    assert b"rulesReferenceSection" not in script
+    assert b'"Entire Order"' not in script
 
     status, _, body = request(app, "/api/hacking-programs/carbonite")
     assert status == 404
@@ -2491,9 +2566,7 @@ def test_cube_profile_characteristic_resolves_to_canonical_equipment(
     assert cube["id"] == "cube"
     assert cube["slug"] == "cube"
     assert cube["rules"][0]["id"] == "equipment:cube"
-    assert [unit["slug"] for unit in cube["variants"][0]["units"]] == [
-        "ranger-prototype"
-    ]
+    assert [unit["slug"] for unit in cube["variants"][0]["units"]] == ["ranger-prototype"]
 
     status, _, body = request(rules_app, "/api/units", query="equipment_id=cube")
     assert status == 200
@@ -2513,7 +2586,6 @@ def test_cube_profile_characteristic_resolves_to_canonical_equipment(
     ]
     assert references
     assert references[0] == {"id": "cube", "slug": "cube", "name": "Cube"}
-
 
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
@@ -2713,9 +2785,7 @@ def test_unit_page_hides_textual_training_rows(app: Callable) -> None:
     assert b"Training rules" not in body
 
 
-def test_trait_apis_compose_army_usage_with_curated_rules(
-    app: Callable, tmp_path: Path
-) -> None:
+def test_trait_apis_compose_army_usage_with_curated_rules(app: Callable, tmp_path: Path) -> None:
     with sqlite3.connect(app.database.path) as connection:
         connection.execute(
             "INSERT INTO metadata_weapons (position, id, type, name, properties) "
@@ -2769,9 +2839,7 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
     document = copy.deepcopy(documents[0][1])
-    source_skill = next(
-        record for record in document["records"] if record["kind"] == "skill"
-    )
+    source_skill = next(record for record in document["records"] if record["kind"] == "skill")
     skill_record = copy.deepcopy(source_skill)
     skill_record["id"] = "skill:test-stealth-fixture"
     skill_record["name"] = "Test Stealth Fixture"
@@ -2841,16 +2909,13 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
         "Short Skill",
         "ARO",
     ]
-    assert [
-        skill_type["category_name"]
-        for skill_type in reload["rules"][0]["skill_types"]
-    ] == ["Short Skill", "ARO"]
+    assert [skill_type["category_name"] for skill_type in reload["rules"][0]["skill_types"]] == [
+        "Short Skill",
+        "ARO",
+    ]
 
 
-
-def test_equipment_api_adds_curated_declaration_category(
-    app: Callable, tmp_path: Path
-) -> None:
+def test_equipment_api_adds_curated_declaration_category(app: Callable, tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
@@ -2867,8 +2932,8 @@ def test_equipment_api_adds_curated_declaration_category(
 
     status, _, body = request(rules_app, "/static/catalog-detail.js")
     assert status == 200
-    assert b'const categories = (item.categories || [])' in body
-    assert 'if (categories) meta.append(` · ${categories}`);'.encode() in body
+    assert b"const categories = (item.categories || [])" in body
+    assert "if (categories) meta.append(` · ${categories}`);".encode() in body
 
     status, _, body = request(rules_app, "/static/rules-reference.js")
     assert status == 200
@@ -2983,7 +3048,7 @@ def test_skill_detail_frontend_renders_structured_reference_tables(
     assert b'"martial-arts"' in body
     assert b'"random-chart"' in body
     assert b'"Hacking Programs"' not in body
-    assert b'hackingDeviceLinks(row.devices)' in body
+    assert b"hackingDeviceLinks(row.devices)" in body
 
 
 def test_catalog_usage_summaries_wrap_variant_context_on_narrow_layouts(
@@ -3021,7 +3086,7 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     for asset in ("skill.js", "catalog-detail.js"):
         status, _, body = request(app, f"/static/{asset}")
         assert status == 200
-        assert b'rulesReferenceSection' in body
+        assert b"rulesReferenceSection" in body
         assert b'from "./rules-reference.js"' in body
 
     status, _, body = request(app, "/static/rules-reference.js")
@@ -3033,18 +3098,15 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b'["requirements", "Requirements"]' in body
     assert b'["effects", "Effects"]' in body
     assert b'["restrictions", "Restrictions"]' in body
-    assert body.index(b'["requirements", "Requirements"]') < body.index(
-        b'["effects", "Effects"]'
-    )
+    assert body.index(b'["requirements", "Requirements"]') < body.index(b'["effects", "Effects"]')
     assert body.index(b"summary.textContent = rule.summary") < body.index(
         b"const applicability = applicabilityText(rule)"
     )
-    assert b'detail-fact-heading' in body
+    assert b"detail-fact-heading" in body
     assert b'heading.textContent = "Related rules"' in body
     assert b"const presentation = relation.presentation;" in body
     assert (
-        b'const catalogs = { skill: "skills", equipment: "equipment", '
-        b'weapon: "weapons" };' in body
+        b'const catalogs = { skill: "skills", equipment: "equipment", weapon: "weapons" };' in body
     )
     assert b"return `/${catalog}/${encodeURIComponent(link.id)}`;" in body
     assert b"presentation?.group_id" in body
@@ -3065,9 +3127,7 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b'link.rel = "noopener noreferrer"' in body
 
 
-def test_072_detail_and_catalog_presentation_contract(
-    app: Callable, tmp_path: Path
-) -> None:
+def test_072_detail_and_catalog_presentation_contract(app: Callable, tmp_path: Path) -> None:
     for path in (
         "/units/ranger-prototype",
         "/skills/11",
@@ -3117,6 +3177,38 @@ def test_072_detail_and_catalog_presentation_contract(
         'body[data-catalog="traits"] #catalog-table-container thead th:first-child',
         {"width": "68%"},
     )
+    assert b"--font-family-brand: \"Audiowide\"" in styles
+    assert b"--font-family-display: \"Oxanium\"" in styles
+    assert b"--font-family-body: \"IBM Plex Sans\"" in styles
+    assert b"--font-family-compact: \"IBM Plex Sans Condensed\"" in styles
+    assert b"--font-family-mono: \"IBM Plex Mono\"" in styles
+    assert_css_rule(styles, ".brand", {"font-family": "var(--font-family-brand)"})
+    assert_css_rule(
+        styles,
+        "h1,\nh2,\nh3,\nh4,\nh5,\nh6",
+        {"font-family": "var(--font-family-display)"},
+    )
+    assert_css_rule(styles, "table", {"font-family": "var(--font-family-compact)"})
+    assert b"font-family: var(--font-family-body)" in styles
+    assert b"font-family: var(--font-family-mono)" in styles
+    assert b"--font-size-root: 93.75%" in styles
+    assert b"font-size: var(--font-size-root)" in styles
+    assert b"--font-size-xs: 0.733333rem" in styles
+    assert b"--font-size-base: 1rem" in styles
+    assert b"--font-size-title: clamp(2.266667rem, 3.5vw, 3.4rem)" in styles
+    assert_css_rule(styles, ".intro-copy", {"font-size": "var(--font-size-base)"})
+    stylesheet = styles.decode("utf-8")
+    token_values = re.findall(r"--font-size-(?!root)[\w-]+:\s*([^;]+);", stylesheet)
+    assert token_values
+    assert all("px" not in value for value in token_values)
+    assert all("rem" in value for value in token_values)
+    font_sizes = re.findall(r"(?m)^\s*font-size:\s*([^;]+);", stylesheet)
+    assert font_sizes
+    assert all(value.startswith("var(") for value in font_sizes)
+    font_shorthands = re.findall(r"(?m)^\s*font:\s*([^;]+);", stylesheet)
+    assert all(
+        value == "inherit" or value.startswith("var(--font-size-") for value in font_shorthands
+    )
     for undersized in (
         b"font-size: 8px",
         b"font-size: 9px",
@@ -3125,11 +3217,18 @@ def test_072_detail_and_catalog_presentation_contract(
         b"--table-heading-size: 9px",
     ):
         assert undersized not in styles
-    assert_css_rule(styles, "table", {"--table-heading-size": "11px"})
+    assert_css_rule(
+        styles,
+        "table",
+        {"--table-heading-size": "var(--font-size-xs)"},
+    )
     assert_css_rule(
         styles,
         ".data-table--compact",
-        {"--table-heading-size": "11px", "--table-cell-size": "12px"},
+        {
+            "--table-heading-size": "var(--font-size-xs)",
+            "--table-cell-size": "var(--font-size-sm)",
+        },
     )
 
 
@@ -3139,12 +3238,18 @@ def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) 
     assert b'from "./skill-categories.js"' in body
     assert b'page === "skills" ? 4 : 3' in body
     assert b'types.className = "skill-category-cell"' in body
-    assert b'types.append(skillCategoryBadge(category))' in body
+    assert b"types.append(skillCategoryBadge(category))" in body
 
     status, _, body = request(app, "/static/rules-reference.js")
     assert status == 200
     assert b'from "./skill-categories.js"' in body
-    assert b'skillCategoryBadge(category' in body
+    assert b"skillCategoryBadge(category" in body
+
+    status, _, skill_script = request(app, "/static/skill.js")
+    assert status == 200
+    assert b'from "./skill-categories.js"' in skill_script
+    assert b"declarationCategoryBadges(row.declaration_categories)" in skill_script
+    assert b'"Entire Order"' not in skill_script
 
     status, _, body = request(app, "/static/skill-categories.js")
     assert status == 200
@@ -3166,6 +3271,10 @@ def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) 
     assert b".skill-category-badge--aro" in body
     assert b"var(--color-skill-category-aro)" in body
     assert b".rules-reference" in body
+    assert b".hacking-program-profile-table" in body
+    assert b".detail-card" not in body
+    assert b".hacking-program-profile-card" not in body
+    assert b".hacking-program-context-row" in body
     assert b"margin-bottom: var(--space-2);" in body
 
 
@@ -3278,9 +3387,7 @@ def test_weapon_api_adds_curated_special_profile_when_rules_database_is_availabl
     database_path = tmp_path / "infinity.db"
     rules_path = tmp_path / "rules.db"
     export_database(normalized, database_path)
-    documents = load_curated_directory(
-        Path(__file__).parents[1] / "data" / "curated" / "rules"
-    )
+    documents = load_curated_directory(Path(__file__).parents[1] / "data" / "curated" / "rules")
     export_rules_database(documents, rules_path)
     rules_app = create_app(database_path, rules_database_path=rules_path)
 

@@ -515,9 +515,16 @@ def _build_publication(
         "staticMappingCount": len(static_mapping),
         "publishedBytes": published_bytes,
     }
+    army_artifact = manifest["snapshot"]["armyArtifact"]
     report = {
         "format": PUBLICATION_MAPPING_FORMAT,
         "formatVersion": PUBLICATION_MAPPING_VERSION,
+        "sourceSnapshot": {
+            "armyArtifact": {
+                "name": army_artifact["name"],
+                "sha256": army_artifact["sha256"],
+            }
+        },
         "summary": dict(sorted(summary.items())),
         "sourceArchivePathToPublishedPath": source_to_published,
         "canonicalArchivePathToPublishedPath": dict(sorted(canonical_to_published.items())),

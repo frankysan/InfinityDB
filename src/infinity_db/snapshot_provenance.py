@@ -6,16 +6,16 @@ import hashlib
 import json
 import re
 import zipfile
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path, PurePosixPath
 from typing import Any
 
 SNAPSHOT_MANIFEST_FORMAT = "InfinityDB snapshot provenance"
-SNAPSHOT_MANIFEST_VERSION = 2
+SNAPSHOT_MANIFEST_VERSION = 3
 SNAPSHOT_NOTE_FORMAT = "InfinityDB snapshot note"
 SNAPSHOT_NOTE_VERSION = 1
 SNAPSHOT_TYPES = frozenset({"army", "wiki", "symbols"})
-_SUPPORTED_SNAPSHOT_MANIFEST_VERSIONS = frozenset({1, SNAPSHOT_MANIFEST_VERSION})
+_SUPPORTED_SNAPSHOT_MANIFEST_VERSIONS = frozenset({1, 2, SNAPSHOT_MANIFEST_VERSION})
 _SNAPSHOT_CONTENT_HASH_HEADER = b"InfinityDB snapshot content v1\0"
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
 
@@ -99,6 +99,7 @@ def build_snapshot_manifest(
     document_count: int,
     project_root: Path,
     language: str | None = None,
+    source_data_changed_on: date | None = None,
     input_artifact: Path | None = None,
 ) -> dict[str, Any]:
     """Create and validate one deterministic snapshot-provenance document."""
@@ -115,6 +116,12 @@ def build_snapshot_manifest(
     source: dict[str, Any] = {"url": source_url}
     if language is not None:
         source["language"] = language
+    if source_data_changed_on is not None:
+        source["dataChangedOn"] = source_data_changed_on.isoformat()
+    elif snapshot_type == "army":
+        raise SnapshotProvenanceError(
+            "Army snapshot provenance requires the latest encoded source data change date"
+        )
 
     document: dict[str, Any] = {
         "format": SNAPSHOT_MANIFEST_FORMAT,
@@ -152,6 +159,7 @@ def write_snapshot_manifest(
     document_count: int,
     project_root: Path,
     language: str | None = None,
+    source_data_changed_on: date | None = None,
     input_artifact: Path | None = None,
 ) -> Path:
     """Write one immutable archive-labeled manifest as deterministic JSON."""
@@ -163,6 +171,7 @@ def write_snapshot_manifest(
         document_count=document_count,
         project_root=project_root,
         language=language,
+        source_data_changed_on=source_data_changed_on,
         input_artifact=input_artifact,
     )
     path = manifest_directory / f"{archive.stem}.json"
@@ -194,7 +203,7 @@ def load_snapshot_manifest(path: Path, *, archive: Path | None = None) -> dict[s
 
 
 def validate_snapshot_manifest(document: Any, *, archive: Path | None = None) -> None:
-    """Validate generated snapshot provenance, including legacy version 1."""
+    """Validate current and supported legacy snapshot provenance."""
     root = _object(document, "snapshot manifest")
     _only_keys(
         root,
@@ -243,10 +252,20 @@ def validate_snapshot_manifest(document: Any, *, archive: Path | None = None) ->
     )
 
     source = _object(root.get("source"), "snapshot manifest.source")
-    _only_keys(source, {"url", "language"}, "snapshot manifest.source")
+    source_keys = {"url", "language"}
+    if format_version >= 3:
+        source_keys.add("dataChangedOn")
+    _only_keys(source, source_keys, "snapshot manifest.source")
     _string(source.get("url"), "snapshot manifest.source.url")
     if "language" in source:
         _string(source["language"], "snapshot manifest.source.language")
+    if format_version >= 3 and snapshot_type == "army":
+        _iso_date(
+            source.get("dataChangedOn"),
+            "snapshot manifest.source.dataChangedOn",
+        )
+    elif "dataChangedOn" in source:
+        _iso_date(source["dataChangedOn"], "snapshot manifest.source.dataChangedOn")
 
     if "inputArtifact" in root:
         _artifact_record(root["inputArtifact"], "snapshot manifest.inputArtifact")
@@ -366,6 +385,14 @@ def _artifact_record(value: Any, context: str) -> dict[str, Any]:
                 f"{context}.path must be a portable project-relative POSIX path"
             )
     return record
+
+
+def _iso_date(value: Any, context: str) -> date:
+    text = _string(value, context)
+    try:
+        return date.fromisoformat(text)
+    except ValueError as exc:
+        raise SnapshotProvenanceError(f"{context} must be an ISO date") from exc
 
 
 def _aware_datetime(value: str, context: str) -> datetime:

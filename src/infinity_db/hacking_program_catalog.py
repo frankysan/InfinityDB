@@ -6,8 +6,44 @@ from copy import deepcopy
 from typing import Any
 
 from infinity_db.database.repository import Database
-from infinity_db.domain_slugs import assign_domain_slugs, route_slug_from_typed_domain_id
+from infinity_db.domain_slugs import (
+    assign_domain_slugs,
+    route_slug_from_typed_domain_id,
+)
 from infinity_db.rules_database import RulesDatabase
+
+_HACKING_PROGRAM_DECLARATION_CATEGORIES = {
+    "entire order": {"id": "long-skill", "name": "Long Skill"},
+    "short": {"id": "short-skill", "name": "Short Skill"},
+    "aro": {"id": "aro", "name": "ARO"},
+}
+
+
+def hacking_program_declaration_categories(
+    skill_types: list[str] | tuple[str, ...],
+) -> list[dict[str, str]]:
+    """Map Army Hacking Program declaration labels to canonical Skill categories.
+
+    Army still emits the legacy ``entire order`` value. Preserve that raw source
+    field in the application database, but present it through the current N5
+    ``Long Skill`` semantic identity. Unknown future values remain visible as
+    unclassified rather than being guessed.
+    """
+
+    categories: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for raw_value in skill_types:
+        value = raw_value.strip()
+        normalized = value.casefold()
+        category = _HACKING_PROGRAM_DECLARATION_CATEGORIES.get(normalized)
+        if category is None:
+            category = {"id": "unclassified", "name": value or "Unclassified"}
+        key = (category["id"], category["name"])
+        if key in seen:
+            continue
+        seen.add(key)
+        categories.append(dict(category))
+    return categories
 
 
 class HackingProgramCatalog:
@@ -49,6 +85,9 @@ class HackingProgramCatalog:
                 "id": slug,
                 "slug": slug,
                 "description": record["summary"] if record is not None else row.get("special"),
+                "declaration_categories": hacking_program_declaration_categories(
+                    row.get("skill_types", [])
+                ),
             }
             if record is not None:
                 item["rules"] = [record]

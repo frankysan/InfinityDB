@@ -35,13 +35,18 @@ provenance/state, and build outputs.
   record is labeled from the archive filename, records both the logical snapshot
   content SHA-256 and exact archive SHA-256, and records the snapshot type,
   archive label/path when project-relative, acquisition time, source URL,
-  document count, optional language, and optional input-artifact provenance.
+  document count, optional language, and optional input-artifact provenance. Army
+  manifests also record the latest source-data date encoded by the contained Army
+  document versions.
   Ignored by Git, excluded from Docker build context, and outside Python package
   data.
+- `manifests/symbol-publication.json` — tracked release manifest for the processed SVG
+  publication. It owns the published path/SHA-256 inventory, browser mappings, summary,
+  and compact Army source archive identity used to bind `infinity.db` during deployment.
 - `manifests/army-symbol-build.json` — generated current symbol-build state from
   acquisition version 2 through terminal publication version 8. It binds the
   pinned Army/SYMBOLS artifacts, stage reports/settings, canonical mapping, and
-  publication artifacts. Ignored by Git.
+  publication artifacts. Ignored by Git and not required for deployment.
 - `curated/rules/` — source-controlled, human-reviewed rules-reference
   collections consumed by `infinity-db build-rules`.
 - `curated/identities/` — source-controlled, reviewed source-derived identity and
@@ -51,13 +56,16 @@ provenance/state, and build outputs.
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — generated `master.json`, normalized data, validation reports,
   the application `infinity.db`, development-only `infinity.raw.db`, and the
-  separate curated-rules `rules.db`. Ignored by Git.
+  separate curated-rules `rules.db`. `infinity.db` and `rules.db` are tracked release
+  artifacts; the intermediate JSON/raw archive and other generated build products remain
+  ignored.
 
-Keeping raw inputs, generated provenance, and generated databases outside source
-control prevents large or machine-local snapshot state from obscuring code
-changes. Generated snapshot manifests are local provenance records rather than
-maintained project knowledge. They are retained until explicitly removed; the
-acquisition tools do not automatically prune either archives or manifests.
+Raw inputs, generated acquisition/build provenance, and intermediate outputs stay outside
+source control so machine-local snapshot state does not obscure code changes. The two
+runtime SQLite databases are the deliberate exception: their deterministic bytes are
+reviewed/tracked with each release so a tagged checkout contains the exact runtime data that
+production will serve. Generated snapshot manifests remain local provenance records rather
+than maintained project knowledge.
 
 Generated Army database data is replaceable. Builds create temporary application
 and raw-archive siblings, validate both before publication, and replace each
@@ -72,9 +80,11 @@ revisions remain URL-backed sources.
 
 ## Snapshot provenance contract
 
-Army, wiki, and symbol downloaders write version-2 `InfinityDB snapshot
-provenance` documents under `manifests/snapshots/`. Version-1 manifests remain
-valid historical provenance and continue to verify their exact archive SHA-256.
+Army, wiki, and symbol downloaders write version-3 `InfinityDB snapshot
+provenance` documents under `manifests/snapshots/`. Version 3 retains the logical
+content and exact archive identities introduced in version 2 and adds
+`source.dataChangedOn` for Army snapshots. Version-1 and version-2 manifests remain
+valid historical provenance.
 Wiki acquisition is fail-closed for required content: if any required eligible
 URL discovered during the crawl cannot be fetched, the run reports the failed
 URLs, publishes neither a `WIKI-<language> ...zip` archive nor snapshot
@@ -88,7 +98,7 @@ references them. Only a complete successful crawl becomes an immutable wiki
 snapshot.
 
 The manifest filename mirrors the archive label with a `.json` suffix. Version 2
-stores two separate SHA-256 values:
+and later store two separate SHA-256 values:
 
 - `snapshot.contentSha256` identifies the logical snapshot from normalized
   relative member paths plus member bytes. ZIP timestamps, permissions,
@@ -128,8 +138,9 @@ Each stage records the reports/settings needed by its successor. Version 7 binds
 every compressed canonical SVG through the SHA-bound compression report. Version
 8 binds the canonical `symbol-publication.json` plus the publication report and
 final byte/count accounting. The publication manifest owns every published SVG
-path/SHA-256 together with the runtime Army, Unit/profile, and static mappings.
-Stage promotion is
+path/SHA-256 together with the runtime Army, Unit/profile, and static mappings plus the
+compact Army source archive name/SHA-256 used to bind the tracked runtime database during
+deployment. Stage promotion is
 forward-only. Failed-stage retry is explicit where supported; later passed states
 are not silently rolled back to rerun an earlier helper. Loaders still accept
 versions 2 through 8 as valid historical/intermediate state for compatibility.
@@ -156,7 +167,10 @@ algorithm or backlog.
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
 Belli graphical assets are not covered by InfinityDB's MIT License. Corvus Belli
-has explicitly permitted InfinityDB to redistribute the processed graphical
-publication used by this non-commercial project; raw Army/wiki/PDF/source-symbol
-archives remain separate local/provenance inputs by project policy. Review the
-repository's [third-party notices](../THIRD_PARTY_NOTICES.md) for the full boundary.
+has explicitly permitted redistribution of the processed graphical publication used by this
+non-commercial project. By project policy, the generated runtime databases are also distributed
+only as part of the non-commercial InfinityDB application/release and remain outside the MIT
+License. The tracked `data/generated/infinity.db` and `rules.db` are therefore release artifacts,
+while raw Army/wiki/PDF/source-symbol archives remain separate local provenance inputs. Review the
+repository's
+[third-party notices](../THIRD_PARTY_NOTICES.md) for the full boundary.

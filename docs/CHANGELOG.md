@@ -7,6 +7,57 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
+## [0.8.1] - 2026-09-27
+
+### Changed
+
+- **Web backend + Web frontend:** Present Hacking Program profiles with the same
+  declaration-category language and detail-card structure used by Skills. Army's legacy
+  `entire order` source value remains preserved in the application data but renders canonically
+  as **Long Skill**; the Army profile,
+  declaration badges, and curated rules semantics now form one unified Skill-style reference card.
+- **Web frontend + Project infrastructure:** Adopt a redistributable bundled browser type
+  system: Audiowide for the InfinityDB wordmark, Oxanium for display headings, IBM Plex Sans
+  for running/interface text, IBM Plex Sans Condensed for dense tables, and IBM Plex Mono for
+  identifiers/diagnostics. Canonical WOFF2 assets and OFL notices are tracked with a reproducible
+  TTF-to-WOFF2 preparation helper, while the full upstream TTF download set remains a build input.
+- **Web frontend:** Standardize browser typography on a canonical shared font-size scale with one
+  browser-relative root size and `rem`-based tiers, so the interface can scale coherently without
+  page-local font sizes. Restore introductory text below page titles to the normal body tier and
+  make Fireteam rules, headers, and the Level-bonuses table wrap within narrow screens.
+- **Acquisition + Data processing + Web backend + Web frontend:** Advance snapshot provenance to
+  format version 3 for new acquisitions. Army manifests now record the latest date encoded across
+  all contained Army source versions; the sidebar presents that player-useful **Army data last
+  changed** date while the later snapshot acquisition time is retained as Developer-mode
+  provenance. Version-1 and version-2 snapshot manifests remain readable.
+- **Deployment + Project infrastructure:** Make release tags self-contained for runtime
+  deployment by tracking deterministic `data/generated/infinity.db` and `rules.db`, retiring
+  the transferred-artifact/server-rebuild split, and deploying those exact databases from the
+  checked-out release. `army-symbol-build.json` is no longer a production dependency; the
+  tracked `symbol-publication.json` now carries the compact Army source snapshot identity used
+  to bind the runtime database and processed symbol publication.
+
+### Added
+
+- **Data processing + Deployment:** Add a one-time provenance migration helper for an existing
+  published symbol set. It copies the Army archive identity from local terminal symbol-build
+  state into the tracked publication manifest without rebuilding SVGs and refreshes the ignored
+  local binding for future symbol-pipeline work.
+
+### Upgrade notes
+
+- No Army or rules database rebuild is required solely for 0.8.1. The release starts tracking
+  the existing deterministic `infinity.db` and `rules.db` runtime artifacts directly.
+- A normal server update through `scripts/install-or-update.sh` handles the transition from the
+  pre-0.8.1 ignored local database copies to the release-owned tracked files before checkout.
+  Raw Army/wiki/PDF/source-symbol archives and `army-symbol-build.json` remain unnecessary on
+  production servers.
+- The snapshot-provenance v3 change affects newly acquired Army snapshots. Version-1 and
+  version-2 snapshot manifests remain readable, and existing compatible runtime databases can
+  derive the Army-data change date from their preserved source-version metadata.
+- Browser WOFF2 files and their OFL notices are tracked release content. The upstream TTF
+  downloads are regeneration inputs only and do not need to be present on deployed servers.
+
 ## [0.8.0] - 2026-09-26
 
 ### Changed

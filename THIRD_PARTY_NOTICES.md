@@ -39,9 +39,11 @@ PDF, and source-symbol archives outside the public repository by project policy.
 The processed graphical publication used by InfinityDB is tracked in the public
 repository and may be included in wheels, Docker images, releases, deployment
 packages, or other non-commercial InfinityDB distributions under that permission.
-Generated databases, the local terminal symbol-build manifest, raw snapshots, and
-other acquisition/provenance inputs remain replaceable local data rather than
-original MIT-licensed project material.
+The generated runtime databases `data/generated/infinity.db` and `rules.db` are tracked
+and may be redistributed as part of the non-commercial InfinityDB application/release. They
+contain or derive from Corvus Belli game data and are not relicensed under InfinityDB's MIT
+License. The local terminal symbol-build manifest, raw snapshots, wiki/PDF/source-symbol
+archives, and other acquisition/provenance inputs remain ignored local build/research state.
 
 ## Infinity Wiki and rules documents
 
@@ -55,6 +57,26 @@ facts use document edition/version/date and printed-page citations. Archived
 wiki-derived records bind to an exact timestamped ZIP/hash and cite snapshot-local
 members. Exact pinned `oldid=` revisions remain URL-backed when they are not
 members of that archive; they must not be relabeled as archived snapshot members.
+
+## Browser fonts
+
+InfinityDB redistributes a small browser-font publication under
+`src/infinity_db/web/static/fonts/`. The published WOFF2 files are generated from
+Google Fonts TTF distributions and retain their upstream SIL Open Font License 1.1
+terms. They are not relicensed under InfinityDB's MIT License. The complete OFL text
+for each family is stored beside the corresponding published font files.
+
+The bundled families are:
+
+- **Audiowide** — Copyright (c) 2012, Brian J. Bonislawsky DBA Astigmatic (AOETI),
+  with Reserved Font Names "Audiowide".
+- **Oxanium** — Copyright 2019 The Oxanium Project Authors.
+- **IBM Plex Sans**, **IBM Plex Sans Condensed**, and **IBM Plex Mono** —
+  Copyright © 2017 IBM Corp., with Reserved Font Name "Plex".
+
+`tools/prepare_web_fonts.py` performs only deterministic format conversion and
+selection of the browser faces; it does not change the font designs. Upstream TTF
+download collections are build inputs rather than repository/runtime assets.
 
 ## Runtime and deployment dependencies
 

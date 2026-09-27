@@ -1780,8 +1780,11 @@ application projection and first-class surface. Hacking Programs reuse their typ
 projection as a first-class `/hacking-programs` rules/reference surface: source `hack` metadata
 remains authoritative for Program profiles, targets, declaration types, source Upgrade-extra
 provenance, and the baseline Device matrix, while `rules.db` contributes reviewed Program
-semantics and cross-rule relationships. Upgrade/source-specific access is not inferred from the
-baseline Device matrix.
+semantics and cross-rule relationships. The application database preserves Army's raw declaration
+strings, including legacy `entire order`; the composed API additionally exposes canonical
+declaration-category identities so browser presentation uses **Long Skill**, **Short Skill**, and
+**ARO** consistently with Skills. Upgrade/source-specific access is not inferred from the baseline
+Device matrix.
 The other connected-data gap families were implemented as relationship presentation over
 existing Unit/Army/Profile/Loadout identities rather than new catalogs. The deferred
 rules-interaction ledger is used as a boundary check, not as a mandate to create one
@@ -2330,9 +2333,9 @@ incomplete provenance, incompatible schema, or post-build content drift fail clo
 
 When an Army database is built from a ZIP snapshot, normalized `_meta` and both
 database siblings retain `snapshotArchiveSha256`: the SHA-256 of that exact ZIP.
-Deployment compares it with the terminal symbol manifest's
-`snapshot.armyArtifact.sha256`, binding the runtime data and symbol publication
-without needing the raw archive at deployment time.
+Deployment compares it with the tracked symbol publication manifest's
+`sourceSnapshot.armyArtifact.sha256`, binding the runtime data and symbol publication
+without needing the raw archive or terminal symbol-build manifest at deployment time.
 
 `units.source_role` and `army_units.availability_kind` are explicit application
 schema fields rather than incidental dynamic columns. This makes the
@@ -2378,9 +2381,9 @@ source coordinates, with the full source representation preserved in raw storage
 ### Current
 
 Timestamped `JSON`, `WIKI`, and `SYMBOLS` ZIP files are immutable acquisition
-artifacts. Each successful downloader run writes one version-2 `InfinityDB snapshot
+artifacts. Each successful downloader run writes one version-3 `InfinityDB snapshot
 provenance` JSON record under `data/manifests/snapshots/`, labeled from the archive
-filename. Version-1 manifests remain valid historical provenance.
+filename. Version-1 and version-2 manifests remain valid historical provenance.
 
 The current generated manifest has this logical shape:
 
@@ -2398,18 +2401,20 @@ snapshot:
 source:
   url
   language?
+  dataChangedOn?      # required for v3 Army snapshots; latest encoded source date
 inputArtifact?        # symbol acquisition input; exact artifact bytes
   name
   sha256
   path?               # project-relative POSIX form only
 ```
 
-Version 2 deliberately separates two identities. `snapshot.contentSha256` is the logical
+Version 2 introduced two separate artifact identities. `snapshot.contentSha256` is the logical
 snapshot-content identity: it hashes normalized relative member paths, member sizes, and member
 bytes while ignoring ZIP timestamps, permissions, compression method/level, entry order,
 comments, and other container metadata. `snapshot.archive.sha256` is the integrity identity of
-the exact ZIP byte stream. Version-1 manifests have no logical content hash and continue to
-verify only their exact archive SHA-256.
+the exact ZIP byte stream. Version 3 retains both identities and, for Army snapshots, requires
+`source.dataChangedOn`. Version-1 manifests have no logical content hash; version-1 and
+version-2 manifests remain readable for historical/local provenance.
 
 Snapshot ZIP creation also normalizes member ordering, timestamps, permissions, comments, extra
 fields, and compression settings so identical inputs produced by the maintained implementation
@@ -2443,7 +2448,11 @@ revisions/builds on that date. The exact Corvus Belli semantics are
 undocumented, so this parsing is an evidence-backed InfinityDB interpretation
 rather than an upstream contract.
 Code must preserve and compare the raw string even if a parsed interpretation is
-shown to humans.
+shown to humans. For a coherent snapshot, InfinityDB decodes every observed Army document
+version and records the latest decoded date as `source.dataChangedOn` in version-3 snapshot
+provenance. If any source version does not match the supported encoding, acquisition fails closed
+rather than guessing a date. The application database persists this value when built from new
+normalized data and can derive it from preserved `sourceVersions` for older compatible databases.
 
 A coherent Army snapshot may legitimately contain more than one source data
 revision. The 2026-09-10 and 2026-09-18 acquisitions both contained 36 documents
@@ -2465,21 +2474,26 @@ error.
 
 When dates or versions are reported, keep these concepts distinct:
 
-- **snapshot acquisition date/time** — InfinityDB provenance from
-  `snapshot.acquiredAt` and the immutable archive/hash;
-- **Army source data revision** — the raw per-document Corvus Belli `version`,
-  optionally interpreted as its apparent source date plus revision/build.
+- **Army data last changed** — the maximum decoded date across all contained Army document
+  versions, stored as `source.dataChangedOn`; this is the player-facing freshness date shown in
+  the sidebar;
+- **snapshot acquisition date/time** — InfinityDB provenance from `snapshot.acquiredAt` and the
+  immutable archive/hash; this remains available as Developer-mode provenance rather than the
+  normal player-facing freshness indicator;
+- **Army source data revision** — the raw per-document Corvus Belli `version`, optionally
+  interpreted as its apparent source date plus revision/build.
 
-For example, describe the current material as an Army snapshot acquired on
-2026-09-18 containing source revisions `7.26246.158` and `7.26246.159`, rather
-than assigning either revision to the snapshot as a whole.
+For example, material acquired on 2026-09-18 containing source revisions `7.26246.158` and
+`7.26246.159` has an Army-data change date of 2026-09-03. Keep the raw revisions and acquisition
+time available for provenance without presenting the later download time as if the game data had
+changed then.
 
 Human-authored snapshot annotations use a separate version-1 `InfinityDB
 snapshot note` contract under `data/curated/snapshot-notes/`. Each note requires
 `snapshotSha256`, a human description, and an ordered `notableChanges` array; an
 optional `compareToSha256` may identify a different comparison snapshot. This older note
-contract is keyed to the exact archive SHA-256 (`snapshot.archive.sha256`), not the version-2
-logical `contentSha256`. Acquisition tools never create, rewrite, or delete these curated notes.
+contract is keyed to the exact archive SHA-256 (`snapshot.archive.sha256`), not the logical
+`contentSha256`. Acquisition tools never create, rewrite, or delete these curated notes.
 
 Snapshot notes are not rules-database inputs and do not become runtime
 application data. The current contract is a source-controlled annotation format
@@ -2514,8 +2528,10 @@ promoting passed version-7 state to version 8. Version 8 records published/mappi
 counts and byte totals and binds `publication-map.json` plus the tracked
 `data/manifests/symbol-publication.json`. That canonical publication manifest contains
 every published SVG path and SHA-256 together with Army, Unit/profile, and static
-symbol mappings; it is the single completeness and lookup contract for local/full-asset
-validation and runtime symbol resolution. The report contains complete source-archive and
+symbol mappings plus the compact Army source-archive name/SHA-256 needed to bind the
+tracked runtime database to the publication. It is the single completeness, lookup, and
+deployment-provenance contract for the published symbol set. The report contains complete
+source-archive and
 canonical-archive mappings to published paths, published SVG hashes, and a
 comparison against the previous generated publication
 covering added, removed, changed, and unchanged symbols. Removed prior symbols are
