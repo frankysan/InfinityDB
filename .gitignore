@@ -14,7 +14,8 @@ build/
 # Local check reports
 reports/
 
-# Local audit evidence may include environment- or deployment-specific details.
+# Local/transient audit evidence; durable conclusions are tracked under docs/.
+# See docs/README.md. Never store credentials or secrets here.
 docs/audits/
 
 # VS Code local overrides

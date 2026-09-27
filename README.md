@@ -255,7 +255,7 @@ installation to another host.
 ## Project layout
 
 ```text
-docs/                       # Architecture, data model, deployment, testing, and project docs
+docs/                       # Tracked project docs; docs/audits/ is local audit evidence
 src/
   infinity_army_data/       # Army merge, normalization, metadata, and validation
   infinity_db/              # SQLite storage, application services, API, and browser
@@ -315,14 +315,20 @@ profile definitions, asset modes, reports, and exit codes.
 
 ## Technical documentation
 
+- [Documentation layout](docs/README.md) — tracked reference/audit records versus the
+  gitignored local audit-evidence workspace.
 - [Architecture](docs/architecture.md) — engineering principles, subsystem
   boundaries, current architecture, and accepted design direction.
 - [Project domains](docs/project-domains.md) — canonical ownership boundaries and
   documentation labels for project work.
 - [Data model](docs/data-model.md) — source semantics, canonical/application
   semantics, persistence, and data-model invariants.
+- [0.7 enrichment presentation audit](docs/070-enrichment-presentation-audit.md) — durable
+  release record for the player-facing enrichment gate.
 - [0.8 connected-data domain audit](docs/080-connected-domain-audit.md) — accepted
   canonical-domain and relationship-surface boundaries for the connected-data milestone.
+- [0.8 web consistency closeout](docs/080-web-consistency-closeout.md) — durable
+  release closeout for the focused 0.8 browser-consistency pass.
 - [Rules semantics](docs/rules-semantics.md) — audited rules meaning that already has a
   concrete InfinityDB consumer.
 - [Rules research](docs/rules-research.md) — verified source findings retained for possible

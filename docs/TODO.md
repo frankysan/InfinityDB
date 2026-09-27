@@ -135,10 +135,12 @@ by the audit remain in scope.
   - [ ] Establish one pinned production audit baseline before inspecting behavior:
     the Git commit, Army snapshot/provenance, generated `infinity.db` and
     `rules.db`, local terminal symbol manifest, and the tracked release-matched
-    symbol publication manifest. Verify that the runtime database and symbol publication derive from the
-    same Army snapshot. Record the evidence and audit results in a durable audit
-    document (for example, `docs/audits/web-consistency-YYYY-MM.md`); do not mix
-    production observations with synthetic test fixtures.
+    symbol publication manifest. Verify that the runtime database and symbol
+    publication derive from the same Army snapshot. Keep raw/local evidence under
+    the gitignored `docs/audits/` workspace, then promote durable conclusions and
+    release-closeout decisions into a
+    tracked audit document under `docs/`; do not mix production observations with
+    synthetic test fixtures.
   - [ ] Create and maintain an explicit audit matrix for each concept, recording
     its semantic-provenance category, source meaning/evidence, storage
     representation, derivation or canonical/application interpretation, API

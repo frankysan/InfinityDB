@@ -2,6 +2,9 @@
 
 **Project domains:** Data processing, Web backend, Web frontend
 
+**Document status:** Durable release audit record. Local/generated audit evidence
+belongs under `docs/audits/` and is intentionally not tracked.
+
 This audit is the presentation gate for the rules-enrichment work in 0.7.0.
 Coverage and schema correctness are necessary but are not sufficient: the added
 information must help an Infinity player understand the game data they are
