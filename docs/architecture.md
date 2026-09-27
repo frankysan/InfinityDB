@@ -500,13 +500,15 @@ data/curated/snapshot-notes/ = human-reviewed snapshot annotations
 ```
 
 Generated manifests are not maintained project knowledge. Current Army, wiki, and symbol
-acquisition writes version-2 `InfinityDB snapshot provenance`: `snapshot.contentSha256`
+acquisition writes version-3 `InfinityDB snapshot provenance`: `snapshot.contentSha256`
 identifies normalized member paths plus bytes independently of ZIP container metadata, while
-`snapshot.archive.sha256` identifies and verifies the exact immutable ZIP byte stream. Legacy
-version-1 manifests remain readable and carry only the exact archive hash. Archive-labeled
-records are immutable/idempotent, paths are portable project-relative values when available,
-and generated manifests remain ignored local state. The canonical field-level contract lives in
-`docs/data-model.md`; `data/README.md` owns its storage/lifecycle summary.
+`snapshot.archive.sha256` identifies and verifies the exact immutable ZIP byte stream. Army
+manifests additionally record `source.dataChangedOn`, derived from the latest encoded source date
+across the contained Army document versions. Legacy version-1 and version-2 manifests remain
+readable. Archive-labeled records are immutable/idempotent, paths are portable project-relative
+values when available, and generated manifests remain ignored local state. The canonical
+field-level contract lives in `docs/data-model.md`; `data/README.md` owns its storage/lifecycle
+summary.
 
 Human notes use the separate version-1 `InfinityDB snapshot note` contract and remain
 source-controlled interpretation rather than acquisition/runtime input. That older note contract
@@ -861,9 +863,10 @@ to the exact timestamped wiki ZIP/hash and member names, while pinned `oldid=` r
 not archive members remain URL-backed sources.
 
 Generated snapshot provenance semantics are defined in `docs/data-model.md` and summarized with
-its storage lifecycle in `data/README.md`. In particular, version 2 distinguishes logical
-snapshot-content identity from exact archive-byte identity; human snapshot notes remain a
-separate version-1 exact-archive-hash contract.
+its storage lifecycle in `data/README.md`. Version 2 introduced the distinction between logical
+snapshot-content identity and exact archive-byte identity; version 3 adds the derived Army
+source-data change date. Human snapshot notes remain a separate version-1 exact-archive-hash
+contract.
 
 ### Design direction
 
@@ -1115,7 +1118,11 @@ are intentionally exempt because their DOM survives the replacement.
 
 `static/styles.css` is the browser design-system entry point. Its root tokens
 define shared color roles, surfaces, borders, spacing, radii, control height,
-focus treatment, and shadows. Reuse these tokens and established components
+focus treatment, shadows, and the canonical typography scale. All component font sizes
+must use the shared `--font-size-*` tokens rather than literal pixel sizes or page-local
+clamps. Responsive typography changes should remap or select from that scale centrally;
+normal introductory/body copy uses the base tier while metadata and dense tables use the
+smaller tiers deliberately. Reuse these tokens and established components
 such as `.main`, `.topbar`, `.explorer`, `.button`, and `.page-footer` rather
 than introducing page-local visual values. Detail pages use `.main-detail` to
 retain the common layout and responsive behavior. Detail renderers also reuse

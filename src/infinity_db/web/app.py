@@ -246,6 +246,7 @@ def _page(
     filename: str,
     *,
     active_page: str | None = None,
+    source_data_changed_on: date | None = None,
     snapshot_downloaded_on: date | None = None,
     snapshot_revision: str,
     breadcrumbs: tuple[tuple[str, str | None], ...],
@@ -296,16 +297,27 @@ def _page(
             ' aria-current="page"' if active_page == "about" else "",
         )
         .replace(
-            "{{SNAPSHOT_DOWNLOAD_DATE}}",
+            "{{ARMY_DATA_DATES}}",
             (
-                '<p class="snapshot-date">Army snapshot downloaded '
+                (
+                    '<p class="snapshot-date">Army data last changed '
+                    f'<time datetime="{source_data_changed_on.isoformat()}">'
+                    f"{source_data_changed_on:%B} {source_data_changed_on.day}, "
+                    f"{source_data_changed_on:%Y}"
+                    "</time></p>"
+                )
+                if source_data_changed_on
+                else ""
+            )
+            + (
+                '<p class="snapshot-date developer-only">Snapshot downloaded '
                 f'<time datetime="{snapshot_downloaded_on.isoformat()}">'
                 f"{snapshot_downloaded_on:%B} {snapshot_downloaded_on.day}, "
                 f"{snapshot_downloaded_on:%Y}"
                 "</time></p>"
-            )
-            if snapshot_downloaded_on
-            else "",
+                if snapshot_downloaded_on
+                else ""
+            ),
         )
     )
     breadcrumb_markup = "".join(
@@ -461,6 +473,7 @@ class Application:
         self.catalog_rules = CatalogRules(self.rules_database)
         self.symbol_catalog = SymbolCatalog()
         self.fireteam_rules_reference = fireteam_reference(self.rules_database)
+        self.source_data_changed_on = self.database.source_data_changed_on()
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
             _snapshot_revision(self.rules_database.path)
@@ -585,6 +598,7 @@ class Application:
             content_type = "text/html; charset=utf-8"
             body = _page(
                 "index.html",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("InfinityDB", None), ("Home", None)),
@@ -595,6 +609,7 @@ class Application:
             body = _page(
                 "units.html",
                 active_page="units",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Units", None)),
@@ -652,6 +667,7 @@ class Application:
             body = _page(
                 "unit.html",
                 active_page="units",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Units", "/units"), ("Details", None)),
@@ -662,6 +678,7 @@ class Application:
             body = _page(
                 "fireteams.html",
                 active_page="fireteams",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Fireteams", None)),
@@ -672,6 +689,7 @@ class Application:
             body = _page(
                 "skill-extras.html",
                 active_page="skill-extras",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Skill modifiers", None)),
@@ -686,6 +704,7 @@ class Application:
             body = _page(
                 f"{catalog}.html",
                 active_page=catalog,
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), (catalog.replace("-", " ").title(), None)),
@@ -696,6 +715,7 @@ class Application:
             body = _page(
                 "skill.html",
                 active_page="skills",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("Database", "/"), ("Skills", "/skills"), ("Details", None)),
@@ -706,6 +726,7 @@ class Application:
             body = _page(
                 "equipment-detail.html",
                 active_page="equipment",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(
@@ -720,6 +741,7 @@ class Application:
             body = _page(
                 "weapons-detail.html",
                 active_page="weapons",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(
@@ -734,6 +756,7 @@ class Application:
             body = _page(
                 "traits-detail.html",
                 active_page="traits",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(
@@ -748,6 +771,7 @@ class Application:
             body = _page(
                 "states-detail.html",
                 active_page="states",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(
@@ -762,6 +786,7 @@ class Application:
             body = _page(
                 "hacking-program-detail.html",
                 active_page="hacking-programs",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(
@@ -776,6 +801,7 @@ class Application:
             body = _page(
                 "about.html",
                 active_page="about",
+                source_data_changed_on=self.source_data_changed_on,
                 snapshot_downloaded_on=self.snapshot_downloaded_on,
                 snapshot_revision=self.snapshot_revision,
                 breadcrumbs=(("InfinityDB", "/"), ("About", None)),

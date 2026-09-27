@@ -224,6 +224,7 @@ def app_database_template(tmp_path_factory: pytest.TempPathFactory) -> Path:
     normalized["tables"]["metadata_equipment"] = [
         {"id": 21, "name": "Medikit", "wiki": "https://infinitythewiki.com/Medikit"}
     ]
+    normalized["_meta"]["sourceDataChangedOn"] = "2026-09-03"
     normalized["_meta"]["snapshotDownloadedOn"] = "2026-09-10"
     database_path = tmp_path_factory.mktemp("web-app") / "infinity.db"
     export_database(normalized, database_path)
@@ -428,6 +429,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'if (wildcard) name.append(badge("Wildcard"));' in script
     assert b'appendMemberRow(member, { wildcard: true })' in script
     assert b'window.addEventListener("fireteamswildcardschange"' in script
+    assert b'detail-badges fireteam-card-types' in script
     assert b"function renderReference(reference)" in script
     assert b"for (const level of levelFacts.levels || [])" in script
     assert b"Historical official term" in script
@@ -443,8 +445,42 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert_css_rule(styles, ".fireteam-card", {"width": "min(640px, 100%)"})
     assert_css_rule(
         styles,
+        ".fireteam-content,\n.fireteam-list",
+        {"min-width": "0"},
+    )
+    assert_css_rule(styles, ".fireteam-reference", {"min-width": "0"})
+    assert_css_rule(styles, "#fireteam-reference-content", {"min-width": "0"})
+    assert b".fireteam-card-types {\n    width: 100%;\n    min-width: 0;" in styles
+    assert b".fireteam-card-header {\n    flex-direction: column;\n    align-items: stretch;" in styles
+    assert b"""  .fireteam-reference-table table {
+    --table-heading-padding: 9px 8px;
+    --table-cell-padding: 10px 8px;
+    --table-heading-size: var(--font-size-xs);
+    --table-cell-size: var(--font-size-sm);
+    width: 100%;
+    min-width: 0;
+  }""" in styles
+    assert b"""  .fireteam-reference-table th,
+  .fireteam-reference-table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }""" in styles
+    assert b"""  .fireteam-reference-table th:first-child {
+    width: 52px;
+  }""" in styles
+    assert b"""  .fireteam-reference-table th:nth-child(2),
+  .fireteam-reference-table th:nth-child(3) {
+    width: calc((100% - 52px) / 2);
+  }""" in styles
+    assert_css_rule(
+        styles,
         ".fireteam-reference-table table",
         {"min-width": "560px", "table-layout": "fixed"},
+    )
+    assert_css_rule(
+        styles,
+        ".fireteam-reference-table",
+        {"min-width": "0", "max-width": "100%", "overflow-x": "auto"},
     )
     assert_css_rule(styles, ".fireteam-reference-table th:first-child", {"width": "64px"})
     assert_css_rule(
@@ -1075,7 +1111,9 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/traits"' in body
     assert b'href="/states"' in body
     assert b'href="/hacking-programs"' in body
-    assert b"Army snapshot downloaded" in body
+    assert b"Army data last changed" in body
+    assert b"September 3, 2026" in body
+    assert b'class="snapshot-date developer-only">Snapshot downloaded' in body
     assert b"September 10, 2026" in body
     assert f'data-app-version="{__version__}"'.encode() in body
     assert f'data-static-version="{STATIC_ASSET_VERSION}"'.encode() in body
@@ -2045,7 +2083,10 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert_css_rule(
         styles,
         ".data-table--compact",
-        {"--table-cell-size": "12px", "--table-heading-size": "11px"},
+        {
+            "--table-cell-size": "var(--font-size-sm)",
+            "--table-heading-size": "var(--font-size-xs)",
+        },
     )
 
     for path in ["/static/unit.js", "/static/skill.js", "/static/catalog-detail.js"]:
@@ -2228,7 +2269,10 @@ def test_unit_details_frontend_presents_selection_relationships(app: Callable) -
     assert_css_rule(
         styles,
         ".selection-source-parameters",
-        {"color": "var(--color-text-secondary)", "font-size": "12px"},
+        {
+            "color": "var(--color-text-secondary)",
+            "font-size": "var(--font-size-sm)",
+        },
     )
 
 
@@ -3117,6 +3161,19 @@ def test_072_detail_and_catalog_presentation_contract(
         'body[data-catalog="traits"] #catalog-table-container thead th:first-child',
         {"width": "68%"},
     )
+    assert b"--font-size-xs: 11px" in styles
+    assert b"--font-size-base: 15px" in styles
+    assert b"--font-size-title: clamp(34px, 3.5vw, 51px)" in styles
+    assert_css_rule(styles, ".intro-copy", {"font-size": "var(--font-size-base)"})
+    stylesheet = styles.decode("utf-8")
+    font_sizes = re.findall(r"(?m)^\s*font-size:\s*([^;]+);", stylesheet)
+    assert font_sizes
+    assert all(value.startswith("var(") for value in font_sizes)
+    font_shorthands = re.findall(r"(?m)^\s*font:\s*([^;]+);", stylesheet)
+    assert all(
+        value == "inherit" or value.startswith("var(--font-size-")
+        for value in font_shorthands
+    )
     for undersized in (
         b"font-size: 8px",
         b"font-size: 9px",
@@ -3125,11 +3182,18 @@ def test_072_detail_and_catalog_presentation_contract(
         b"--table-heading-size: 9px",
     ):
         assert undersized not in styles
-    assert_css_rule(styles, "table", {"--table-heading-size": "11px"})
+    assert_css_rule(
+        styles,
+        "table",
+        {"--table-heading-size": "var(--font-size-xs)"},
+    )
     assert_css_rule(
         styles,
         ".data-table--compact",
-        {"--table-heading-size": "11px", "--table-cell-size": "12px"},
+        {
+            "--table-heading-size": "var(--font-size-xs)",
+            "--table-cell-size": "var(--font-size-sm)",
+        },
     )
 
 

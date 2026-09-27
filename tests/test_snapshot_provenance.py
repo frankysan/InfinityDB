@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import zipfile
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import pytest
@@ -52,6 +52,9 @@ def test_write_snapshot_manifest_for_all_snapshot_types(
         archive,
         tmp_path / "data" / "manifests" / "snapshots",
         snapshot_type=snapshot_type,
+        source_data_changed_on=(
+            date(2026, 9, 3) if snapshot_type == "army" else None
+        ),
         acquired_at=ACQUIRED_AT,
         source_url=source_url,
         document_count=3,
@@ -77,6 +80,8 @@ def test_write_snapshot_manifest_for_all_snapshot_types(
     expected_source = {"url": source_url}
     if language is not None:
         expected_source["language"] = language
+    if snapshot_type == "army":
+        expected_source["dataChangedOn"] = "2026-09-03"
     assert document["source"] == expected_source
 
     payload = path.read_text(encoding="utf-8")
@@ -116,6 +121,7 @@ def test_manifest_load_rejects_changed_archive(tmp_path: Path) -> None:
         archive,
         tmp_path / "manifests",
         snapshot_type="army",
+        source_data_changed_on=date(2026, 9, 3),
         acquired_at=ACQUIRED_AT,
         source_url="https://api.corvusbelli.com/army",
         document_count=1,
@@ -134,6 +140,7 @@ def test_manifest_archive_label_is_not_authoritative_identity(tmp_path: Path) ->
         archive,
         tmp_path / "manifests",
         snapshot_type="army",
+        source_data_changed_on=date(2026, 9, 3),
         acquired_at=ACQUIRED_AT,
         source_url="https://api.corvusbelli.com/army",
         document_count=1,
@@ -157,6 +164,7 @@ def test_manifest_is_archive_labeled_and_not_rewritten_with_different_provenance
         archive,
         manifest_directory,
         snapshot_type="army",
+        source_data_changed_on=date(2026, 9, 3),
         acquired_at=ACQUIRED_AT,
         source_url="https://api.corvusbelli.com/army",
         document_count=1,
@@ -168,6 +176,7 @@ def test_manifest_is_archive_labeled_and_not_rewritten_with_different_provenance
             archive,
             manifest_directory,
             snapshot_type="army",
+        source_data_changed_on=date(2026, 9, 3),
             acquired_at=ACQUIRED_AT,
             source_url="https://api.corvusbelli.com/army",
             document_count=1,
@@ -181,6 +190,7 @@ def test_manifest_is_archive_labeled_and_not_rewritten_with_different_provenance
             archive,
             manifest_directory,
             snapshot_type="army",
+        source_data_changed_on=date(2026, 9, 3),
             acquired_at=datetime(2026, 9, 17, 16, 21, 30, tzinfo=UTC),
             source_url="https://api.corvusbelli.com/army",
             document_count=1,
@@ -250,6 +260,7 @@ def test_identical_archive_bytes_can_have_distinct_acquisition_records(tmp_path:
         first_archive,
         manifests,
         snapshot_type="army",
+        source_data_changed_on=date(2026, 9, 3),
         acquired_at=ACQUIRED_AT,
         source_url="https://api.corvusbelli.com/army",
         document_count=1,
@@ -259,6 +270,7 @@ def test_identical_archive_bytes_can_have_distinct_acquisition_records(tmp_path:
         second_archive,
         manifests,
         snapshot_type="army",
+        source_data_changed_on=date(2026, 9, 3),
         acquired_at=datetime(2026, 9, 17, 17, 20, 30, tzinfo=UTC),
         source_url="https://api.corvusbelli.com/army",
         document_count=1,
@@ -302,6 +314,35 @@ def test_manifest_loader_accepts_legacy_v1_without_content_hash(tmp_path: Path) 
     assert "contentSha256" not in document["snapshot"]
 
 
+
+def test_manifest_loader_accepts_legacy_v2_without_source_data_date(tmp_path: Path) -> None:
+    archive = tmp_path / "legacy-v2.zip"
+    _write_archive(archive, b"legacy v2")
+    manifest = tmp_path / "legacy-v2.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "format": SNAPSHOT_MANIFEST_FORMAT,
+                "formatVersion": 2,
+                "snapshot": {
+                    "type": "army",
+                    "archive": {"name": archive.name, "sha256": sha256_file(archive)},
+                    "contentSha256": snapshot_content_sha256(archive),
+                    "acquiredAt": "2026-09-17T16:20:30+00:00",
+                    "documentCount": 1,
+                },
+                "source": {"url": "https://api.corvusbelli.com/army", "language": "en"},
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    document = load_snapshot_manifest(manifest, archive=archive)
+
+    assert document["formatVersion"] == 2
+    assert "dataChangedOn" not in document["source"]
+
 def test_manifest_load_rejects_wrong_content_hash(tmp_path: Path) -> None:
     archive = tmp_path / "snapshot.zip"
     _write_archive(archive, b"snapshot")
@@ -309,6 +350,7 @@ def test_manifest_load_rejects_wrong_content_hash(tmp_path: Path) -> None:
         archive,
         tmp_path / "manifests",
         snapshot_type="army",
+        source_data_changed_on=date(2026, 9, 3),
         acquired_at=ACQUIRED_AT,
         source_url="https://api.corvusbelli.com/army",
         document_count=1,

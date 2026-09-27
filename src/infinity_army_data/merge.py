@@ -32,6 +32,7 @@ from pathlib import Path
 from typing import Any
 
 from .deterministic_io import write_json_lf
+from .source_version import latest_army_source_change_date
 
 SOURCE_NAME_RE = re.compile(r"^(?P<id>\d+)-(?P<slug>.+)\.json$", re.IGNORECASE)
 VARIANT_UNIT_FIELDS = frozenset({"profileGroups", "filters"})
@@ -200,22 +201,27 @@ def merge_sources(sources: Iterable[SourceDocument]) -> dict[str, Any]:
         army_lists[faction_key] = army_record
 
     versions = Counter(str(s.data.get("version")) for s in sources)
+    source_data_changed_on = latest_army_source_change_date(versions)
     regular_count = sum("reinforcements" in s.data for s in sources)
     reinforcement_count = len(sources) - regular_count
 
+    metadata = {
+        "format": "Infinity Army merged JSON",
+        "formatVersion": 1,
+        "sourceFileCount": len(sources),
+        "armyFileCount": regular_count,
+        "reinforcementFileCount": reinforcement_count,
+        "unitOccurrenceCount": sum(len(s.data["units"]) for s in sources),
+        "distinctUnitCount": len(units),
+        "sourceVersions": dict(sorted(versions.items())),
+        "unitIdentityField": "id",
+        "armyVariantFields": sorted(VARIANT_UNIT_FIELDS),
+    }
+    if source_data_changed_on is not None:
+        metadata["sourceDataChangedOn"] = source_data_changed_on.isoformat()
+
     return {
-        "_meta": {
-            "format": "Infinity Army merged JSON",
-            "formatVersion": 1,
-            "sourceFileCount": len(sources),
-            "armyFileCount": regular_count,
-            "reinforcementFileCount": reinforcement_count,
-            "unitOccurrenceCount": sum(len(s.data["units"]) for s in sources),
-            "distinctUnitCount": len(units),
-            "sourceVersions": dict(sorted(versions.items())),
-            "unitIdentityField": "id",
-            "armyVariantFields": sorted(VARIANT_UNIT_FIELDS),
-        },
+        "_meta": metadata,
         "armyLists": army_lists,
         "units": units,
     }

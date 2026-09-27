@@ -35,7 +35,9 @@ provenance/state, and build outputs.
   record is labeled from the archive filename, records both the logical snapshot
   content SHA-256 and exact archive SHA-256, and records the snapshot type,
   archive label/path when project-relative, acquisition time, source URL,
-  document count, optional language, and optional input-artifact provenance.
+  document count, optional language, and optional input-artifact provenance. Army
+  manifests also record the latest source-data date encoded by the contained Army
+  document versions.
   Ignored by Git, excluded from Docker build context, and outside Python package
   data.
 - `manifests/symbol-publication.json` — tracked release manifest for the processed SVG
@@ -78,9 +80,11 @@ revisions remain URL-backed sources.
 
 ## Snapshot provenance contract
 
-Army, wiki, and symbol downloaders write version-2 `InfinityDB snapshot
-provenance` documents under `manifests/snapshots/`. Version-1 manifests remain
-valid historical provenance and continue to verify their exact archive SHA-256.
+Army, wiki, and symbol downloaders write version-3 `InfinityDB snapshot
+provenance` documents under `manifests/snapshots/`. Version 3 retains the logical
+content and exact archive identities introduced in version 2 and adds
+`source.dataChangedOn` for Army snapshots. Version-1 and version-2 manifests remain
+valid historical provenance.
 Wiki acquisition is fail-closed for required content: if any required eligible
 URL discovered during the crawl cannot be fetched, the run reports the failed
 URLs, publishes neither a `WIKI-<language> ...zip` archive nor snapshot
@@ -94,7 +98,7 @@ references them. Only a complete successful crawl becomes an immutable wiki
 snapshot.
 
 The manifest filename mirrors the archive label with a `.json` suffix. Version 2
-stores two separate SHA-256 values:
+and later store two separate SHA-256 values:
 
 - `snapshot.contentSha256` identifies the logical snapshot from normalized
   relative member paths plus member bytes. ZIP timestamps, permissions,

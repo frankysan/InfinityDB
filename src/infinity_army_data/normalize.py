@@ -1319,6 +1319,7 @@ def normalize_master(
             "sourceFormatVersion": master["_meta"].get("formatVersion"),
             "sourceFileCount": master["_meta"].get("sourceFileCount"),
             "sourceVersions": master["_meta"].get("sourceVersions"),
+            "sourceDataChangedOn": master["_meta"].get("sourceDataChangedOn"),
             "snapshotDownloadedOn": master["_meta"].get("snapshotDownloadedOn"),
             "snapshotArchiveSha256": master["_meta"].get("snapshotArchiveSha256"),
             "tableCounts": {name: len(rows) for name, rows in tables.items()},

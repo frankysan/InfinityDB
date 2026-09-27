@@ -1,7 +1,7 @@
 import importlib.util
 import json
 import zipfile
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 import pytest
@@ -333,6 +333,7 @@ def test_main_writes_snapshot_and_build_manifests(tmp_path: Path, monkeypatch) -
         source,
         manifest_directory,
         snapshot_type="army",
+        source_data_changed_on=date(2026, 9, 3),
         acquired_at=datetime(2026, 9, 18, 8, 35, 9, tzinfo=UTC),
         source_url="https://api.corvusbelli.com/army",
         document_count=2,
@@ -438,6 +439,7 @@ def _single_asset_army_snapshot(tmp_path: Path, module, *, url: str) -> tuple[Pa
         source,
         manifest_directory,
         snapshot_type="army",
+        source_data_changed_on=date(2026, 9, 3),
         acquired_at=datetime(2026, 9, 18, 8, 35, 9, tzinfo=UTC),
         source_url="https://api.corvusbelli.com/army",
         document_count=2,

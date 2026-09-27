@@ -21,6 +21,7 @@ from infinity_army_data.availability import (
     STANDARD_AVAILABILITY,
 )
 from infinity_army_data.normalized_format import FORMAT_NAME, FORMAT_VERSION
+from infinity_army_data.source_version import latest_army_source_change_date
 from infinity_db.domain_slugs import (
     APPLICATION_SLUG_DOMAINS,
     assign_domain_slugs,
@@ -1039,8 +1040,30 @@ class Database:
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
                 raise ValueError("Database contains broken foreign keys")
 
+    def source_data_changed_on(self) -> date | None:
+        """Return the latest date encoded by the Army source revisions."""
+        with self._connect() as connection:
+            row = connection.execute(
+                f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?", ("_meta",)
+            ).fetchone()
+        try:
+            metadata = json.loads(row["value"]) if row else None
+            if not isinstance(metadata, dict):
+                return None
+            value = metadata.get("sourceDataChangedOn")
+            if isinstance(value, str):
+                return date.fromisoformat(value)
+            versions = metadata.get("sourceVersions")
+            return (
+                latest_army_source_change_date(versions)
+                if isinstance(versions, dict)
+                else None
+            )
+        except (TypeError, ValueError, json.JSONDecodeError):
+            return None
+
     def snapshot_downloaded_on(self) -> date | None:
-        """Return the raw snapshot's download date, when recorded by the build."""
+        """Return the raw snapshot's acquisition date, when recorded by the build."""
         with self._connect() as connection:
             row = connection.execute(
                 f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?", ("_meta",)

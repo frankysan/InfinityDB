@@ -383,15 +383,17 @@ and serves a read-only browser and same-origin HTTP API.
 - Army, wiki, and symbol acquisition publishes immutable timestamped ZIP snapshots only after
   the acquisition-specific completeness/coherence checks pass. Normal builds never perform
   implicit network acquisition.
-- Current downloader-generated `InfinityDB snapshot provenance` is **version 2**. It separates
-  logical snapshot-content identity (`snapshot.contentSha256`, based on normalized member paths
-  and bytes) from exact archive-byte integrity (`snapshot.archive.sha256`). Legacy version-1
-  manifests remain valid and carry only the exact archive hash.
+- Current downloader-generated `InfinityDB snapshot provenance` is **version 3**. It retains
+  the version-2 separation between logical snapshot-content identity (`snapshot.contentSha256`,
+  based on normalized member paths and bytes) and exact archive-byte integrity
+  (`snapshot.archive.sha256`), and Army manifests also record `source.dataChangedOn`: the latest
+  decoded source-data date across all contained Army document versions. Legacy version-1 and
+  version-2 manifests remain valid.
 - Database/symbol deployment provenance that must bind one concrete Army artifact continues to
   use the exact Army ZIP SHA-256; logical content identity does not silently substitute for an
   artifact-level guard.
 - Human snapshot notes remain a separate version-1 curated contract keyed to the exact archive
-  SHA-256, not the version-2 logical content hash. Acquisition tooling never mutates them.
+  SHA-256, not the snapshot logical content hash. Acquisition tooling never mutates them.
 - Current archived wiki-derived rules sources may bind to an exact timestamped wiki ZIP/hash and
   cite archive members. Pinned `oldid=` revisions that are not present in that mirror remain
   URL-backed sources.

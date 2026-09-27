@@ -162,7 +162,7 @@ function renderTeam(team) {
   const title = document.createElement("h3");
   title.textContent = team.name || `Fireteam ${team.id}`;
   const typeBadges = document.createElement("div");
-  typeBadges.className = "detail-badges";
+  typeBadges.className = "detail-badges fireteam-card-types";
   if (team.is_wildcard) typeBadges.append(badge("Wildcard"));
   for (const type of team.types || []) typeBadges.append(badge(type));
   header.append(title, typeBadges);

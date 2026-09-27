@@ -358,6 +358,7 @@ PROBED_DIRECT_METHODS = {
     "application_domain_id",
     "application_slug",
     "snapshot_downloaded_on",
+    "source_data_changed_on",
     "list_armies",
     "list_fireteam_armies",
     "get_fireteam_chart",
@@ -486,6 +487,7 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
 
     return [
         ("snapshot-metadata", lambda db: db.snapshot_downloaded_on()),
+        ("source-data-date", lambda db: db.source_data_changed_on()),
         ("armies", lambda db: db.list_armies()),
         ("fireteam-armies", lambda db: db.list_fireteam_armies()),
         (

@@ -4,6 +4,7 @@ import copy
 import json
 import os
 import sqlite3
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -3628,6 +3629,22 @@ def test_dual_identifier_contract_traits_keep_slug_owned_identity(
     assert catalog.reference("Continous Damage")["slug"] == "continuous-damage"
     assert catalog.get_trait("unknown-contract-trait") is None
     assert catalog.reference("Not Present In Army Data")["slug"] is None
+
+
+def test_database_derives_source_data_date_for_legacy_metadata(
+    tmp_path: Path, normalized: dict
+) -> None:
+    data = copy.deepcopy(normalized)
+    data["_meta"].pop("sourceDataChangedOn", None)
+    data["_meta"]["sourceVersions"] = {"7.26246.158": 36, "7.26246.159": 22}
+    data["_meta"]["snapshotDownloadedOn"] = "2026-09-25"
+    path = tmp_path / "army.sqlite3"
+    export_database(data, path)
+
+    database = Database(path)
+
+    assert database.source_data_changed_on() == date(2026, 9, 3)
+    assert database.snapshot_downloaded_on() == date(2026, 9, 25)
 
 
 def test_application_domain_slug_lookup_rejects_unknown_domains(

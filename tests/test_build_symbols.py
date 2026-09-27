@@ -2,7 +2,7 @@ import hashlib
 import importlib.util
 import json
 import zipfile
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -42,6 +42,7 @@ def army_snapshot(tmp_path: Path, *, language: str = "en") -> tuple[Path, Path]:
         archive,
         manifest_dir,
         snapshot_type="army",
+        source_data_changed_on=date(2026, 9, 3),
         acquired_at=datetime(2026, 9, 18, 12, 0, tzinfo=UTC),
         source_url="https://api.corvusbelli.com/army",
         document_count=2,

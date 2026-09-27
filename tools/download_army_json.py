@@ -23,6 +23,7 @@ from urllib.request import Request, urlopen
 
 from infinity_army_data.merge import decode_document
 from infinity_army_data.metadata import decode_metadata
+from infinity_army_data.source_version import latest_army_source_change_date
 from infinity_db.snapshot_provenance import load_snapshot_manifest, write_snapshot_manifest
 
 try:
@@ -200,6 +201,20 @@ def resolve_army_snapshot(
         )
 
     revisions = snapshot_source_revision_counts(archive)
+    source_data_changed_on = latest_army_source_change_date(revisions)
+    if source_data_changed_on is None:
+        raise ApiDownloadError(
+            "Army source revisions do not use the supported encoded date format"
+        )
+    manifest_changed_on = source.get("dataChangedOn")
+    if (
+        manifest_changed_on is not None
+        and manifest_changed_on != source_data_changed_on.isoformat()
+    ):
+        raise ApiDownloadError(
+            "Army snapshot source.dataChangedOn does not match source revisions: "
+            f"{manifest_changed_on!r} != {source_data_changed_on.isoformat()!r}"
+        )
     expected_documents = sum(revisions.values()) + 1
     if snapshot["documentCount"] != expected_documents:
         raise ApiDownloadError(
@@ -307,6 +322,11 @@ def acquire_army_snapshot(
                 timeout=timeout,
             )
             revisions = _source_revision_counts(files)
+            source_data_changed_on = latest_army_source_change_date(revisions)
+            if source_data_changed_on is None:
+                raise ApiDownloadError(
+                    "Army source revisions do not use the supported encoded date format"
+                )
             timestamp = acquired_at or datetime.now().astimezone()
             archive = archive_snapshot(files, destination, now=timestamp)
             manifest = write_snapshot_manifest(
@@ -318,6 +338,7 @@ def acquire_army_snapshot(
                 document_count=len(files),
                 project_root=project_root,
                 language=language,
+                source_data_changed_on=source_data_changed_on,
             )
     except Exception:
         if manifest is not None:
