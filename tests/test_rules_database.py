@@ -64,7 +64,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 283
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 293
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -149,6 +149,32 @@ def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
     )
     assert archived["member"] == "Camouflaged_State"
     assert archived["source_url"] == "https://infinitythewiki.com/"
+
+
+def test_unit_profile_help_returns_reviewed_profile_notation_entries(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+
+    items = RulesDatabase(output).unit_profile_help()
+
+    assert [item["key"] for item in items] == [
+        "unit-profile",
+        "attributes",
+        "training-orders",
+        "troop-type",
+        "classification",
+        "isc",
+        "hackable",
+        "peripheral",
+        "equipment-weapons",
+        "profile-options",
+    ]
+    assert items[2]["name"] == "Training and Orders"
+    assert "Regular and Irregular" in items[2]["summary"]
+    assert items[-1]["order"] == 100
 
 
 def test_training_classifies_normal_order_types_without_conflating_tactical_orders(

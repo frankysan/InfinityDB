@@ -20,7 +20,7 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 223
+    assert report["summary"]["recordCount"] == 233
     assert report["summary"]["authoredOutgoingRelationCount"] == 262
     assert report["summary"]["futureInteractionCount"] == 115
     assert report["summary"]["releases"]["0.7.0"] == {
@@ -36,6 +36,14 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "complete": 14,
         "pending": 0,
         "reviewed": 14,
+        "inherited": 0,
+        "percentComplete": 100.0,
+    }
+    assert report["summary"]["releases"]["0.9.0"] == {
+        "total": 10,
+        "complete": 10,
+        "pending": 0,
+        "reviewed": 10,
         "inherited": 0,
         "percentComplete": 100.0,
     }
@@ -84,8 +92,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 42
-    assert report["summary"]["supporting"]["complete"] == 42
+    assert report["summary"]["supporting"]["total"] == 52
+    assert report["summary"]["supporting"]["complete"] == 52
     assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -155,6 +163,20 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     items = {item["id"]: item for item in report["items"]}
     assert "declaration-category:skill:74:automatic" not in items
     assert items["skill:super-jump"]["status"] == "reviewed"
+    for record_id in {
+        "rule:profile-help:attributes",
+        "rule:profile-help:classification",
+        "rule:profile-help:equipment-weapons",
+        "rule:profile-help:hackable",
+        "rule:profile-help:isc",
+        "rule:profile-help:peripheral",
+        "rule:profile-help:profile-options",
+        "rule:profile-help:training-orders",
+        "rule:profile-help:troop-type",
+        "rule:profile-help:unit-profile",
+    }:
+        assert items[record_id]["status"] == "reviewed"
+        assert items[record_id]["targetRelease"] == "0.9.0"
     for record_id in {
         "skill:alert",
         "skill:bs-attack",
@@ -485,7 +507,7 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 42/42 complete, 0 pending" in output
+    assert "Supporting identities: 52/52 complete, 0 pending" in output
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:

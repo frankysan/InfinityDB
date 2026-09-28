@@ -27,7 +27,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **42/42** complete, **0** pending.
+- Supporting semantic identities: **52/52** complete, **0** pending.
 - Current authored outgoing relations: **262**.
 - Explicitly tracked future/deferred interactions: **115**.
 
@@ -751,6 +751,31 @@ review. `declaration-category` projection records are excluded.
 - [x] **Fireteam Level and Bonuses** (`rule:fireteam-level-bonuses`) — reviewed
   - outgoing: none
 - [x] **Fireteams: General Rules** (`rule:fireteam-general`) — reviewed
+  - outgoing: none
+
+### 0.9.0
+
+#### Rule (10/10)
+
+- [x] **Attributes** (`rule:profile-help:attributes`) — reviewed
+  - outgoing: none
+- [x] **Equipment and Weapons** (`rule:profile-help:equipment-weapons`) — reviewed
+  - outgoing: none
+- [x] **Hackable** (`rule:profile-help:hackable`) — reviewed
+  - outgoing: none
+- [x] **ISC** (`rule:profile-help:isc`) — reviewed
+  - outgoing: none
+- [x] **Peripheral** (`rule:profile-help:peripheral`) — reviewed
+  - outgoing: none
+- [x] **Profile and Loadout Rows** (`rule:profile-help:profile-options`) — reviewed
+  - outgoing: none
+- [x] **Training and Orders** (`rule:profile-help:training-orders`) — reviewed
+  - outgoing: none
+- [x] **Troop Type** (`rule:profile-help:troop-type`) — reviewed
+  - outgoing: none
+- [x] **Trooper Classification** (`rule:profile-help:classification`) — reviewed
+  - outgoing: none
+- [x] **Unit and Unit Profile** (`rule:profile-help:unit-profile`) — reviewed
   - outgoing: none
 
 ## Future interaction queue

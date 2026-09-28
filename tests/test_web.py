@@ -881,6 +881,36 @@ def test_unit_rule_filters_match_profiles_and_loadouts(app: Callable) -> None:
     assert json.loads(body)["items"] == []
 
 
+def test_unit_profile_help_is_rules_backed_and_optional(
+    app: Callable, tmp_path: Path,
+) -> None:
+    status, _, body = request(app, "/api/unit-profile-help")
+    assert status == 200
+    assert json.loads(body) == {"items": []}
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+
+    status, _, body = request(rules_app, "/api/unit-profile-help")
+    assert status == 200
+    items = json.loads(body)["items"]
+    assert [item["key"] for item in items] == [
+        "unit-profile",
+        "attributes",
+        "training-orders",
+        "troop-type",
+        "classification",
+        "isc",
+        "hackable",
+        "peripheral",
+        "equipment-weapons",
+        "profile-options",
+    ]
+    assert items[6]["name"] == "Hackable"
+
+
 def test_unit_categorical_filters_are_exposed_and_filter_units(app: Callable) -> None:
     status, _, body = request(app, "/api/unit-filters")
     assert status == 200
@@ -2632,8 +2662,8 @@ def test_unit_details_frontend_presents_peripheral_relationships(app: Callable) 
     status, _, unit_js = request(app, "/static/unit.js")
     assert status == 200
     assert b"function appendPeripheralRows(rows, item, colSpan = null)" in unit_js
-    assert b'{ value: "Peripherals", header: true' in unit_js
-    assert b'{ value: "Controller access", header: true' in unit_js
+    assert b'profileHelpLabel("Peripherals", "peripheral")' in unit_js
+    assert b'profileHelpLabel("Controller access", "peripheral")' in unit_js
     assert b"group.append(unitLink(target));" in unit_js
     assert b"function renderPeripheralRelationships(unit)" in unit_js
     assert b"const controllers = unit.peripheral_controllers || [];" in unit_js
@@ -3149,6 +3179,30 @@ def test_unit_api_adds_training_to_order_occurrences_only_when_rules_exist(
         for army in json.loads(body)["armies"]
         for loadout in army["loadouts"]
         for order in loadout["orders"]
+    )
+
+
+def test_unit_profile_help_links_are_rendered_from_rules_data(app: Callable) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"getUnitProfileHelp" in unit_js
+    assert b'"Profile notation"' in unit_js
+    assert b'profileHelpLabel("Type", "troop-type")' in unit_js
+    assert b'profileHelpLabel("Classification", "classification")' in unit_js
+    assert b'profileHelpLabel("Peripherals", "peripheral")' in unit_js
+    assert b'"training-orders"' in unit_js
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".profile-help-grid",
+        {"display": "grid", "grid-template-columns": "repeat(2, minmax(0, 1fr))"},
+    )
+    assert_css_rule(
+        styles,
+        ".profile-help-link",
+        {"text-decoration-style": "dotted"},
     )
 
 

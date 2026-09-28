@@ -569,6 +569,19 @@ def test_checked_in_n5_collection_is_valid() -> None:
         "faqs",
     }
     records = {record["id"]: record for record in document["records"]}
+    profile_help = records["rule:profile-help:troop-type"]
+    assert profile_help["facts"] == {
+        "category": "unit-profile-help",
+        "key": "troop-type",
+        "order": 40,
+    }
+    assert profile_help["citations"] == [
+        {
+            "sourceId": "n5-core-v5.3-pdf",
+            "page": 8,
+            "section": "Trooper Characteristics",
+        }
+    ]
     assert records["state:camouflaged"]["kind"] == "state"
     assert records["state:camouflaged"]["labelIds"] == ["marker"]
     assert records["state:camouflaged"]["review"]["status"] == "reviewed"

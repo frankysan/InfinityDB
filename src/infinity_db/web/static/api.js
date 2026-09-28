@@ -55,6 +55,10 @@ export function getUnitFilters(signal) {
   return get("/api/unit-filters", signal);
 }
 
+export function getUnitProfileHelp(signal) {
+  return get("/api/unit-profile-help", signal);
+}
+
 export function getSkillExtras(signal) {
   return get("/api/skill-extras", signal);
 }

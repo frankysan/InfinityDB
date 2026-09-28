@@ -837,6 +837,17 @@ inch measurements where they can be detected reliably. Physical component dimens
 55 mm Token sizes remain literal source terminology rather than following the player's gameplay
 distance preference. Tooltip previews are tokenized too, so distances inside previews remain
 preference-aware.
+
+Unit Profile help uses reviewed `rule` records in `rules.db` with
+`facts.category = "unit-profile-help"`. The records own stable help keys and authored display
+order; the web API exposes only the key, name, summary, and order required for presentation.
+Unit details render one collapsed **Profile notation** disclosure from that rules-backed data.
+Existing profile labels and relevant Order/Characteristic symbols link to entries in the same
+panel, so Training/Orders, Troop Type, Classification, ISC, Hackable, Peripheral,
+Equipment/Weapon domains, and profile/loadout structure remain discoverable without adding
+repeated explanatory text to every profile row. The panel remains optional when `rules.db` is
+not configured: Unit detail continues to render, but contextual help links degrade to ordinary
+labels rather than inventing uncited frontend definitions.
 This migration does not redirect numeric routes or declare derived slugs permanently
 frozen; per-domain freezing, reviewed overrides, aliases, and redirect/canonical-URL
 behavior remain required before numeric routes are retired or redirected.

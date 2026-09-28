@@ -1,4 +1,4 @@
-import { getUnit } from "./api.js";
+import { getUnit, getUnitProfileHelp } from "./api.js";
 import { staticSymbolPath } from "./unit-symbols.js";
 import { formatMovement, troopTypeLabel } from "./unit-presentation.js";
 import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
@@ -9,6 +9,7 @@ const status = document.getElementById("unit-status");
 const content = document.getElementById("unit-content");
 const pageController = new AbortController();
 const unitIdentifier = /^\/units\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(window.location.pathname)?.[1];
+let profileHelpEntries = new Map();
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
 
@@ -135,6 +136,75 @@ function heading(label) { const value = document.createElement("h2"); value.text
 
 function subheading(label) { const value = document.createElement("h4"); value.textContent = label; return value; }
 
+function profileHelpTargetId(key) {
+  return `profile-help-${key}`;
+}
+
+function openProfileHelpTarget(key) {
+  const target = document.getElementById(profileHelpTargetId(key));
+  const disclosure = target?.closest("details");
+  if (disclosure) disclosure.open = true;
+}
+
+function profileHelpAnchor(key, ariaLabel = null) {
+  if (!profileHelpEntries.has(key)) return null;
+  const link = document.createElement("a");
+  link.className = "profile-help-link";
+  link.href = `#${profileHelpTargetId(key)}`;
+  if (ariaLabel) link.setAttribute("aria-label", ariaLabel);
+  link.addEventListener("click", () => openProfileHelpTarget(key));
+  return link;
+}
+
+function profileHelpLabel(label, key) {
+  const link = profileHelpAnchor(key);
+  if (!link) return document.createTextNode(label);
+  link.textContent = label;
+  return link;
+}
+
+function renderProfileNotationHelp(items) {
+  if (!items.length) return null;
+  const disclosure = document.createElement("details");
+  disclosure.id = "profile-notation-help";
+  disclosure.className = "explorer profile-notation-help";
+
+  const summary = document.createElement("summary");
+  const title = document.createElement("span");
+  title.className = "profile-help-summary-title";
+  title.textContent = "Profile notation";
+  const hint = document.createElement("span");
+  hint.className = "profile-help-summary-hint";
+  hint.textContent = "How to read Unit Profiles";
+  summary.append(title, hint);
+  disclosure.append(summary);
+
+  const body = document.createElement("div");
+  body.className = "profile-help-body";
+  const intro = document.createElement("p");
+  intro.className = "profile-help-intro";
+  intro.textContent = "InfinityDB keeps profile domains separate rather than flattening "
+    + "the source notation. These notes explain the fields and symbols used below.";
+  body.append(intro);
+
+  const grid = document.createElement("div");
+  grid.className = "profile-help-grid";
+  for (const item of items) {
+    const entry = document.createElement("article");
+    entry.id = profileHelpTargetId(item.key);
+    entry.className = "profile-help-entry";
+    const heading = document.createElement("h3");
+    heading.textContent = item.name;
+    const copy = document.createElement("p");
+    copy.textContent = item.summary;
+    entry.append(heading, copy);
+    grid.append(entry);
+  }
+  body.append(grid);
+  disclosure.append(body);
+  return disclosure;
+}
+
 const statColumns = [
   ["MOV", (profile) => formatMovement(profile.move_1, profile.move_2, distanceUnit())],
   ["CC", (profile) => profile.cc], ["BS", (profile) => profile.bs],
@@ -230,6 +300,15 @@ const symbolCategories = {
   "cube-2": "characteristics",
 };
 
+const symbolHelpKeys = {
+  regular: "training-orders",
+  irregular: "training-orders",
+  tactical: "training-orders",
+  lieutenant: "training-orders",
+  peripheral: "peripheral",
+  hackable: "hackable",
+};
+
 function prominentOrderType(loadouts) {
   const counts = new Map(orderTypes.map((type) => [type, 0]));
   for (const loadout of loadouts) {
@@ -322,18 +401,27 @@ function nameWithOrderSymbols(nameText, symbolTypes) {
   name.className = "order-symbol-name";
   for (const descriptor of symbolTypes) {
     const symbolType = typeof descriptor === "string" ? descriptor : descriptor.type;
+    const href = typeof descriptor === "string" ? null : descriptor.href;
+    const helpKey = symbolHelpKeys[symbolType];
+    const helpLink = !href
+      ? profileHelpAnchor(helpKey, `${symbolLabels[symbolType]} profile help`)
+      : null;
     const symbol = document.createElement("img");
     symbol.className = "order-symbol";
     symbol.src = `/static/${symbolCategories[symbolType]}/${symbolType}.svg`;
-    symbol.alt = descriptor.href ? "" : symbolLabels[symbolType];
+    symbol.alt = href || helpLink ? "" : symbolLabels[symbolType];
     symbol.title = symbolLabels[symbolType];
-    if (descriptor.href) {
+    if (href) {
       const link = document.createElement("a");
       link.className = "profile-symbol-link";
-      link.href = descriptor.href;
+      link.href = href;
       link.setAttribute("aria-label", `${symbolLabels[symbolType]} equipment`);
       link.append(symbol);
       name.append(link);
+    } else if (helpLink) {
+      helpLink.classList.add("profile-symbol-help-link");
+      helpLink.append(symbol);
+      name.append(helpLink);
     } else {
       name.append(symbol);
     }
@@ -630,7 +718,7 @@ function peripheralAccessItems(accessItems) {
 function appendPeripheralRows(rows, item, colSpan = null) {
   if ((item.peripherals || []).length) {
     rows.push([
-      { value: "Peripherals", header: true, className: "data-label profile-item-label" },
+      { content: profileHelpLabel("Peripherals", "peripheral"), header: true, className: "data-label profile-item-label" },
       {
         content: peripheralItems(item.peripherals),
         className: "profile-item-list",
@@ -640,7 +728,7 @@ function appendPeripheralRows(rows, item, colSpan = null) {
   }
   if ((item.peripheral_access || []).length) {
     rows.push([
-      { value: "Controller access", header: true, className: "data-label profile-item-label" },
+      { content: profileHelpLabel("Controller access", "peripheral"), header: true, className: "data-label profile-item-label" },
       {
         content: peripheralAccessItems(item.peripheral_access),
         className: "profile-item-list",
@@ -1074,16 +1162,16 @@ function generalProfileTableRows(profiles) {
   for (const profile of profiles) {
     rows.push(
       [
-        { value: "Type", header: true, className: "data-label general-item-label" },
+        { content: profileHelpLabel("Type", "troop-type"), header: true, className: "data-label general-item-label" },
         { value: troopTypeLabel(profile.type), className: "general-item-list" },
       ],
       [
-        { value: "Classification", header: true, className: "data-label general-item-label" },
+        { content: profileHelpLabel("Classification", "classification"), header: true, className: "data-label general-item-label" },
         { value: profile.classification, className: "general-item-list" },
       ],
     );
     rows.push([
-      { value: "Attributes", header: true, className: "data-label profile-attributes-label" },
+      { content: profileHelpLabel("Attributes", "attributes"), header: true, className: "data-label profile-attributes-label" },
       {
         content: attributeStatline(
           profile.stats,
@@ -1101,7 +1189,13 @@ function generalProfileTableRows(profiles) {
     ]) {
       if (!profile.sharedItems[property].length) continue;
       rows.push([
-        { value: label, className: "data-label general-item-label" },
+        {
+          content: profileHelpLabel(
+            label,
+            ["Equipment", "Weapons"].includes(label) ? "equipment-weapons" : null,
+          ),
+          className: "data-label general-item-label",
+        },
         {
           content: profileItems(profile.sharedItems[property], property, fallbackLabel),
           className: "general-item-list",
@@ -1120,7 +1214,7 @@ function profileTableRows(profiles, generalByName, anchorScope) {
     const profileRow = [{ content: profileNameWithDivisionBadge(profile), header: true, colSpan: 2 }];
     profileRow.className = "profile-summary";
     const rows = [profileRow, [
-      { value: "Attributes", header: true, className: "data-label profile-attributes-label" },
+      { content: profileHelpLabel("Attributes", "attributes"), header: true, className: "data-label profile-attributes-label" },
       {
         content: attributeStatline(profile, generalStatsForProfile, true),
         className: "profile-attributes",
@@ -1134,7 +1228,14 @@ function profileTableRows(profiles, generalByName, anchorScope) {
       const items = withoutSharedItems(profile[property], sharedItems[property]);
       if (!items.length) continue;
       rows.push([
-        { value: label, header: true, className: "data-label profile-item-label" },
+        {
+          content: profileHelpLabel(
+            label,
+            ["Equipment", "Weapons"].includes(label) ? "equipment-weapons" : null,
+          ),
+          header: true,
+          className: "data-label profile-item-label",
+        },
         {
           content: profileItems(items, property, fallbackLabel),
           className: "profile-item-list",
@@ -1197,7 +1298,14 @@ function loadoutTable(loadouts, sharedItems, generalOrderType, anchorScope, anch
         const items = withoutSharedItems(loadout[property], sharedItems[property]);
         if (!items.length) continue;
         rows.push([
-          { value: label, header: true, className: "data-label profile-item-label" },
+          {
+          content: profileHelpLabel(
+            label,
+            ["Equipment", "Weapons"].includes(label) ? "equipment-weapons" : null,
+          ),
+          header: true,
+          className: "data-label profile-item-label",
+        },
           {
             content: profileItems(items, property, fallbackLabel),
             className: "profile-item-list",
@@ -1388,8 +1496,9 @@ function renderArmyProfile(army, generalByName, expanded) {
   return section;
 }
 
-function render(unit) {
+function render(unit, helpItems = []) {
   content.replaceChildren();
+  profileHelpEntries = new Map(helpItems.map((item) => [item.key, item]));
   document.title = `${unit.name} · InfinityDB`;
   name.textContent = unit.name;
   const displayArmySymbol = staticSymbolPath(unit.display_army_symbol_path);
@@ -1449,6 +1558,8 @@ function render(unit) {
     ));
     generalProfilesSection.append(generalProfile);
   }
+  const profileHelp = renderProfileNotationHelp(helpItems);
+  if (profileHelp) content.append(profileHelp);
   content.append(generalProfilesSection);
   const sourceNotes = renderSourceNotes(unit, armies);
   if (sourceNotes) content.append(sourceNotes);
@@ -1488,12 +1599,19 @@ initializeDistanceUnitToggle();
 if (!unitIdentifier) {
   status.textContent = "The requested unit address is invalid.";
 } else {
-  getUnit(unitIdentifier, pageController.signal).then((unit) => {
-    render(unit);
-    window.addEventListener("distanceunitchange", () => render(unit), {
+  Promise.all([
+    getUnit(unitIdentifier, pageController.signal),
+    getUnitProfileHelp(pageController.signal).catch((error) => {
+      if (error.name === "AbortError") throw error;
+      return { items: [] };
+    }),
+  ]).then(([unit, help]) => {
+    const helpItems = help.items || [];
+    render(unit, helpItems);
+    window.addEventListener("distanceunitchange", () => render(unit, helpItems), {
       signal: pageController.signal,
     });
-    window.addEventListener("optionalunitschange", () => render(unit), {
+    window.addEventListener("optionalunitschange", () => render(unit, helpItems), {
       signal: pageController.signal,
     });
   }).catch((error) => {

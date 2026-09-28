@@ -66,10 +66,12 @@ close the remaining catalog/share-state gaps.
 ### Player-facing completeness and navigation
 
 - [ ] Add a rules glossary and profile-notation help layer to unit details.
-  - [ ] Explain the existing profile fields and symbols in context: training/order,
+  - [x] Explain the existing profile fields and symbols in context: training/order,
     troop type, classification, ISC, Hackable, Peripheral, equipment versus
-    BS weapons, melee weapons, and profile/loadout separators. Use tooltips or a
-    linked glossary rather than making every profile row denser.
+    BS weapons, melee weapons, and profile/loadout separators. Unit details now
+    expose a collapsed, rules-backed Profile notation panel; relevant profile labels
+    and Order/Characteristic symbols link into that panel without making every row
+    denser.
   - [ ] Make terminology such as Trooper, Peripheral, Marker, Token, Deployable,
     Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever it
     changes how profile data should be read.

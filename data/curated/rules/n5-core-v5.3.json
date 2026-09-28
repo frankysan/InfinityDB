@@ -14450,6 +14450,321 @@
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
             }
+        },
+        {
+            "id": "rule:profile-help:unit-profile",
+            "kind": "rule",
+            "name": "Unit and Unit Profile",
+            "summary": "A Unit groups Troopers belonging to an Army. A Unit Profile provides the data used for those Troopers and can contain multiple selectable options with different Skills, Equipment, Weapons, and Cost.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "unit-profile",
+                "order": 10
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Unit Profile"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "rule:profile-help:attributes",
+            "kind": "rule",
+            "name": "Attributes",
+            "summary": "Attributes are the values in the profile statline. A dash means the game element does not have that Attribute; VITA and STR are alternative durability Attributes, and a dash for MOV means the Trooper is stationary.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "attributes",
+                "order": 20
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "rule:profile-help:training-orders",
+            "kind": "rule",
+            "name": "Training and Orders",
+            "summary": "Regular and Irregular are Training characteristics that determine the ordinary Order a Trooper contributes. Special Lieutenant Orders and Tactical Orders are separate generated Order types rather than additional Training values.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "training-orders",
+                "order": 30
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Trooper Characteristics"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 11,
+                    "section": "Types of Orders"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "rule:profile-help:troop-type",
+            "kind": "rule",
+            "name": "Troop Type",
+            "summary": "Troop Type is a rules category such as LI, MI, HI, REM, TAG, WB, SK, VH, or Peripheral. It is a separate axis from Trooper Classification and can be referenced by rules restrictions.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "troop-type",
+                "order": 40
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Trooper Characteristics"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "rule:profile-help:classification",
+            "kind": "rule",
+            "name": "Trooper Classification",
+            "summary": "Trooper Classification describes a Unit’s function and operational role. It is distinct from Troop Type and can matter to Army composition in missions or scenarios.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "classification",
+                "order": 50
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Trooper Characteristics"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "rule:profile-help:isc",
+            "kind": "rule",
+            "name": "ISC",
+            "summary": "ISC is the International Standard Code, a language-independent source nomenclature used for O-12 intelligence reporting. InfinityDB presents it as source metadata rather than using it as the Unit’s application identity.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "isc",
+                "order": 60
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Trooper Characteristics"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "rule:profile-help:hackable",
+            "kind": "rule",
+            "name": "Hackable",
+            "summary": "Hackable is a Trooper Characteristic shown in the Unit Profile. Rules that affect Hackable targets use this characteristic to determine whether the target is eligible.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "hackable",
+                "order": 70
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Trooper Characteristics"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "rule:profile-help:peripheral",
+            "kind": "rule",
+            "name": "Peripheral",
+            "summary": "A Peripheral is a special category of Trooper associated with a Controller. Unit Profile notation keeps Peripherals distinct from ordinary Weapons and Equipment instead of treating them as carried gear.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "peripheral",
+                "order": 80
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Unit Profile"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "rule:profile-help:equipment-weapons",
+            "kind": "rule",
+            "name": "Equipment and Weapons",
+            "summary": "Unit Profile notation separates Skills and Equipment from BS Weapons, Peripherals, and CC or other special melee weapons. These groups are different profile domains even when they appear close together in the source layout.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "equipment-weapons",
+                "order": 90
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Unit Profile"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "rule:profile-help:profile-options",
+            "kind": "rule",
+            "name": "Profile and Loadout Rows",
+            "summary": "The source profile distinguishes data common to a Unit Profile from option-specific Skills, Equipment, Weapons, Peripherals, SWC, and Cost. InfinityDB preserves that distinction by separating profile rows from selectable loadout rows.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "profile-options",
+                "order": 100
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Unit Profile"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
         }
     ]
 }

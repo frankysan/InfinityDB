@@ -1178,6 +1178,30 @@ class RulesDatabase:
             )
             return result
 
+    def unit_profile_help(self) -> list[dict[str, Any]]:
+        """Return reviewed Unit Profile notation help in authored display order."""
+
+        items: list[dict[str, Any]] = []
+        seen_keys: set[str] = set()
+        for record in self.composed_records_by_kind("rule"):
+            facts = record.get("facts")
+            if not isinstance(facts, dict) or facts.get("category") != "unit-profile-help":
+                continue
+            key = str(facts["key"])
+            if key in seen_keys:
+                raise ValueError(f"Duplicate current Unit Profile help key {key!r}")
+            seen_keys.add(key)
+            items.append(
+                {
+                    "id": record["id"],
+                    "key": key,
+                    "name": record["name"],
+                    "summary": record["summary"],
+                    "order": int(facts["order"]),
+                }
+            )
+        return sorted(items, key=lambda item: (item["order"], item["key"]))
+
     def training_by_order_type(self) -> dict[str, dict[str, Any]]:
         """Map reviewed Training to normal source Order-generation types only.
 

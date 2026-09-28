@@ -1409,6 +1409,104 @@ h1>span {
   width: 100%;
 }
 
+.profile-notation-help {
+  width: min(760px, 100%);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-surface-subtle);
+}
+
+.profile-notation-help>summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.profile-notation-help>summary::-webkit-details-marker {
+  display: none;
+}
+
+.profile-notation-help>summary::before {
+  content: "▸";
+  flex: 0 0 auto;
+  color: var(--color-action-primary);
+}
+
+.profile-notation-help[open]>summary::before {
+  content: "▾";
+}
+
+.profile-help-summary-title {
+  margin-right: auto;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-display);
+  font-weight: 600;
+}
+
+.profile-help-summary-hint,
+.profile-help-intro,
+.profile-help-entry p {
+  color: var(--color-text-secondary);
+}
+
+.profile-help-summary-hint {
+  font-size: var(--font-size-sm);
+}
+
+.profile-help-body {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--color-border-default);
+}
+
+.profile-help-intro {
+  margin: 14px 0 16px;
+  line-height: 1.6;
+}
+
+.profile-help-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 22px;
+}
+
+.profile-help-entry {
+  scroll-margin-top: 84px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-default);
+}
+
+.profile-help-entry h3 {
+  margin: 0 0 6px;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+}
+
+.profile-help-entry p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.profile-help-link {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+.profile-help-link:hover,
+.profile-help-link:focus-visible {
+  color: var(--color-action-primary);
+}
+
+.profile-symbol-help-link {
+  display: inline-flex;
+  text-decoration: none;
+}
+
 .usage-section-group {
   width: min(760px, 100%);
 }
@@ -4631,5 +4729,15 @@ html[data-developer-mode="true"] .fireteam-member-table table {
   .fireteam-reference-table th:nth-child(2),
   .fireteam-reference-table th:nth-child(3) {
     width: calc((100% - 52px) / 2);
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-help-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-help-summary-hint {
+    display: none;
   }
 }

@@ -9,6 +9,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Add a rules-backed **Profile notation**
+  help layer to Unit details. Reviewed N5 profile concepts explain Attributes, Training/Orders,
+  Troop Type, Classification, ISC, Hackable, Peripheral, Equipment/Weapon domains, and
+  profile/loadout structure; relevant profile labels and Order/Characteristic symbols link into
+  the collapsed help panel without making the profile tables denser.
 - **Web backend + Web frontend:** Add global search across Armies, Units, Skills,
   Equipment, Weapons, Traits, States, Hacking Programs, and Fireteam charts. Results
   label their domain and open the corresponding player-facing surface.

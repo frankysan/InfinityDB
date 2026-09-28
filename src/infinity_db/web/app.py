@@ -174,6 +174,7 @@ def _metric_route(path: str) -> str:
         "/api/states",
         "/api/hacking-programs",
         "/api/skill-extras",
+        "/api/unit-profile-help",
         "/api/fireteams",
         "/api/search",
     }:
@@ -1016,6 +1017,21 @@ class Application:
                 LOGGER.exception("Could not read Fireteam chart")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The Fireteam chart is unavailable. Please try again."}
+        elif path == "/api/unit-profile-help":
+            cache_control = "public, max-age=300, stale-while-revalidate=600"
+            try:
+                items = (
+                    self.rules_database.unit_profile_help()
+                    if self.rules_database is not None
+                    else []
+                )
+                payload = {"items": items}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Unit Profile help")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "Unit Profile help is unavailable. Please try again."
+                }
         elif path == "/api/skill-extras":
             cache_control = "public, max-age=300, stale-while-revalidate=600"
             try:

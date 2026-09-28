@@ -1352,6 +1352,66 @@
       "targetRelease": "0.8.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-26"
+    },
+    {
+      "recordId": "rule:profile-help:unit-profile",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-28"
+    },
+    {
+      "recordId": "rule:profile-help:attributes",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-28"
+    },
+    {
+      "recordId": "rule:profile-help:training-orders",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-28"
+    },
+    {
+      "recordId": "rule:profile-help:troop-type",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-28"
+    },
+    {
+      "recordId": "rule:profile-help:classification",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-28"
+    },
+    {
+      "recordId": "rule:profile-help:isc",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-28"
+    },
+    {
+      "recordId": "rule:profile-help:hackable",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-28"
+    },
+    {
+      "recordId": "rule:profile-help:peripheral",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-28"
+    },
+    {
+      "recordId": "rule:profile-help:equipment-weapons",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-28"
+    },
+    {
+      "recordId": "rule:profile-help:profile-options",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-28"
     }
   ],
   "futureInteractions": [
