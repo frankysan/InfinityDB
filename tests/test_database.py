@@ -675,7 +675,7 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
         "name": "Suppressive Fire (SF)",
         "use_count": 1,
         "description": (
-            "Allows the user to enter Suppressive Fire State and use its SF Mode profile."
+            "Allows the user to enter [[state:suppressive-fire]] and use its SF Mode profile."
         ),
     }
     detail = catalog.get_trait("continuous-damage")
@@ -3217,6 +3217,9 @@ def test_skill_catalog_full_definition_overrides_fallback_across_equivalent_army
     definition["name"] = "skills"
     definition["armyLinks"] = [{"entity": "skill", "id": "skills"}]
     definition["variantSemantics"] = {"inheritance": "family"}
+    definition["facts"]["requirements"][0] = definition["facts"]["requirements"][0].replace(
+        "Zone of Control", "[[trait:zone-of-control-zc|Zone of Control]]"
+    )
     document["records"].append(definition)
 
     fallback = copy.deepcopy(

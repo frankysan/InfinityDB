@@ -53,6 +53,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Data processing + Web frontend:** Begin the systematic maintained-rules semantic-link coverage
+  pass with canonical State references, so terms such as **Unconscious State** and **Dead State**
+  now behave as inline rules references. Rules builds now freeze the remaining pre-migration plain
+  reference candidates in a checked-in baseline and reject newly introduced unlinked canonical
+  names or aliases, allowing later domain-by-domain review without permitting new link debt.
 - **Web backend + Web frontend:** Complete the structured Related rules cross-link pass across
   Skills, Equipment, Weapons, Traits, States, and Hacking Programs. Detail APIs now publish
   backend-resolved catalog references: current source-specific Skill/Equipment/Weapon variants

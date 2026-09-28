@@ -827,6 +827,16 @@ resolved catalog route. Touch interaction uses an explicit two-tap contract: the
 summary preview, a second tap on the same reference follows the link, and tapping elsewhere closes
 the pinned preview. Mouse and keyboard navigation keep their normal single-activation behavior.
 
+Semantic links are mandatory for newly authored maintained rules prose whenever the named concept
+already has a player-routable identity. Because the pre-token corpus predates that rule, the rules
+build also audits plain text against the current canonical names and aliases using case-sensitive,
+longest-match detection. Existing legacy candidates are frozen in
+`data/curated/maintained-text-link-baseline.json`; a new or changed unlinked candidate fails the
+rules build. The baseline is migration debt rather than an exception mechanism and is expected only
+to shrink as manually reviewed domain batches replace plain mentions with typed tokens. Self-links
+are excluded, and ambiguous aliases remain in the migration queue until a reviewer selects the
+correct semantic target rather than relying on automated replacement.
+
 Gameplay distances embedded in maintained text are structural tokens such as
 `[[distance:+2:inch]]` or `[[distance:5:cm]]`. The parser normalizes them to centimeters in the
 API token while preserving whether a positive sign is semantically displayed; the browser uses

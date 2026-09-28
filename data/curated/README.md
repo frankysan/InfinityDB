@@ -33,6 +33,30 @@ identities.
 
 The sections below document the implemented `curated/rules/` contract.
 
+### Maintained rules-text semantic-link migration
+
+Maintained rules prose must use typed `[[kind:slug]]` references when it names an existing
+player-routable Skill, Equipment item, Weapon, Trait, State, or Hacking Program. The current
+pre-token corpus is being migrated in reviewed domain batches rather than by bulk replacement.
+`maintained-text-link-baseline.json` freezes the remaining legacy plain-reference candidates so
+new rules text cannot add unlinked canonical names or aliases while that migration is in progress.
+The baseline is temporary migration debt and should only shrink.
+
+Audit the current inventory with:
+
+```powershell
+python tools/audit_maintained_text_links.py
+```
+
+After a reviewed migration batch, regenerate the smaller baseline in the same change with:
+
+```powershell
+python tools/audit_maintained_text_links.py --write-baseline
+```
+
+Do not use `--write-baseline` to admit newly authored unlinked references; ambiguous candidates
+should be reviewed and linked to the correct semantic identity in a later migration batch.
+
 ## Other curated categories
 
 `data/curated/snapshot-notes/` defines the current versioned contract for

@@ -215,3 +215,9 @@ When deriving structured facts from these materials:
 
 Official Infinity Army data and current official publications remain
 authoritative where they supersede archived local material.
+
+Maintained rules prose must use the semantic maintained-text token syntax whenever it names an
+existing player-routable Skill, Equipment item, Weapon, Trait, State, or Hacking Program. The
+checked-in maintained-text link baseline exists only to grandfather pre-migration prose while the
+current corpus is reviewed domain by domain; do not regenerate or expand it to admit newly authored
+unlinked references. Each migration batch should shrink the remaining candidate inventory.

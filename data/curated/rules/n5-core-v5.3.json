@@ -178,7 +178,7 @@
         {
             "id": "non-reloadable",
             "name": "Non-Reloadable",
-            "description": "An Unloaded State cannot be canceled and expended uses cannot be regained."
+            "description": "An [[state:unloaded]] cannot be canceled and expended uses cannot be regained."
         },
         {
             "id": "no-roll",
@@ -1273,7 +1273,7 @@
             "aliases": [
                 "CAMO"
             ],
-            "summary": "An Automatic Special Skill that lets its user deploy in and later enter Camouflaged State.",
+            "summary": "An Automatic Special Skill that lets its user deploy in and later enter [[state:camouflaged]].",
             "composition": {
                 "role": "definition"
             },
@@ -1289,8 +1289,8 @@
                     "automatic"
                 ],
                 "effects": [
-                    "During the Deployment Phase, the user may deploy in Camouflaged State.",
-                    "During the game, the user may enter Camouflaged State under that State's activation conditions."
+                    "During the Deployment Phase, the user may deploy in [[state:camouflaged]].",
+                    "During the game, the user may enter [[state:camouflaged]] under that State's activation conditions."
                 ],
                 "requirements": [],
                 "restrictions": []
@@ -1850,7 +1850,7 @@
             "id": "trait:concealed",
             "kind": "trait",
             "name": "Concealed",
-            "summary": "Uses the effects of Camouflaged State; its concealing marker has Silhouette 2.",
+            "summary": "Uses the effects of [[state:camouflaged]]; its concealing marker has Silhouette 2.",
             "composition": {
                 "role": "definition"
             },
@@ -1881,7 +1881,7 @@
             "id": "trait:continuous-damage",
             "kind": "trait",
             "name": "Continuous Damage",
-            "summary": "After a failed Saving Roll, the target keeps making Saving Rolls until one succeeds or it enters Dead State.",
+            "summary": "After a failed Saving Roll, the target keeps making Saving Rolls until one succeeds or it enters [[state:dead]].",
             "composition": {
                 "role": "definition"
             },
@@ -2402,7 +2402,7 @@
             "id": "trait:suppressive-fire",
             "kind": "trait",
             "name": "Suppressive Fire (SF)",
-            "summary": "Allows the user to enter Suppressive Fire State and use its SF Mode profile.",
+            "summary": "Allows the user to enter [[state:suppressive-fire]] and use its SF Mode profile.",
             "composition": {
                 "role": "definition"
             },
@@ -6934,7 +6934,7 @@
                 "effects": [
                     "The user can respond to Attacks directed at them from outside LoF, using a 360° LoF arc for those attackers; this also allows LoF to outside attackers while Engaged.",
                     "When targeted by a BS Attack through a Zero Visibility Zone, the user ignores the -6 MOD caused by the resulting Poor Visibility Zone.",
-                    "Dodge and Reset ignore negative MODs except the specified Immobilized-A, Immobilized-B, and Isolated State penalties.",
+                    "Dodge and Reset ignore negative MODs except the specified Immobilized-A, Immobilized-B, and [[state:isolated]] penalties.",
                     "Stealth is not effective against the user."
                 ],
                 "requirements": [],
@@ -7148,7 +7148,7 @@
             "id": "skill:hidden-deployment",
             "kind": "skill",
             "name": "Hidden Deployment",
-            "summary": "An optional Deployment Special Skill that lets the user deploy in Hidden Deployment State.",
+            "summary": "An optional Deployment Special Skill that lets the user deploy in [[state:hidden-deployment]].",
             "composition": {
                 "role": "definition"
             },
@@ -7164,7 +7164,7 @@
                     "deployment-skill"
                 ],
                 "effects": [
-                    "During the Deployment Phase, the user may deploy in Hidden Deployment State."
+                    "During the Deployment Phase, the user may deploy in [[state:hidden-deployment]]."
                 ],
                 "requirements": [],
                 "restrictions": []
@@ -7224,9 +7224,9 @@
                     "short-skill"
                 ],
                 "effects": [
-                    "The user may make a Normal WIP+6 Roll to simultaneously Discover enemy Troopers, Weapons, or Equipment in Hidden Deployment or Camouflaged State inside the user's Zone of Control.",
+                    "The user may make a Normal WIP+6 Roll to simultaneously Discover enemy Troopers, Weapons, or Equipment in Hidden Deployment or [[state:camouflaged]] inside the user's Zone of Control.",
                     "The Sensor Roll does not apply Range or Mimetism MODs and does not require LoF or a designated target.",
-                    "Enemies with the Camouflage Special Skill cannot regain Camouflaged State inside the user's Zone of Control.",
+                    "Enemies with the Camouflage Special Skill cannot regain [[state:camouflaged]] inside the user's Zone of Control.",
                     "The user gains +6 WIP when declaring Discover against Camouflage Markers."
                 ],
                 "requirements": [],
@@ -7349,7 +7349,7 @@
                 "obligatory",
                 "no-roll"
             ],
-            "summary": "Automatic Equipment that lets nearby Allied Troopers reload eligible Disposable items and recover from Unloaded State.",
+            "summary": "Automatic Equipment that lets nearby Allied Troopers reload eligible Disposable items and recover from [[state:unloaded]].",
             "composition": {
                 "role": "definition"
             },
@@ -7364,12 +7364,12 @@
                     "The Baggage holder and the affected Allied Trooper must both be in non-Null States, and the affected Allied Trooper must be inside the Baggage holder's Zone of Control."
                 ],
                 "effects": [
-                    "The affected Trooper may use Reload to cancel Unloaded State or regain all expended uses of eligible Disposable Weapons or Equipment.",
+                    "The affected Trooper may use Reload to cancel [[state:unloaded]] or regain all expended uses of eligible Disposable Weapons or Equipment.",
                     "During the States Phase, each eligible Allied Trooper in range may automatically receive the same recovery."
                 ],
                 "restrictions": [
                     "Only one Allied Trooper can receive the Reload effect per Order.",
-                    "Non-Reloadable items cannot regain uses or cancel their Unloaded State through this effect.",
+                    "Non-Reloadable items cannot regain uses or cancel their [[state:unloaded]] through this effect.",
                     "Recovering uses does not affect items already deployed on the table."
                 ]
             },
@@ -7683,7 +7683,7 @@
             "id": "skill:forward-observer",
             "kind": "skill",
             "name": "Forward Observer",
-            "summary": "A Special Skill that makes a WIP-based BS Attack and places a successfully affected target in Targeted State.",
+            "summary": "A Special Skill that makes a WIP-based BS Attack and places a successfully affected target in [[state:targeted]].",
             "composition": {
                 "role": "definition"
             },
@@ -7703,7 +7703,7 @@
                     "The user must be able to draw LoF to the target."
                 ],
                 "effects": [
-                    "Forward Observer is a BS Attack using a BS Weapon (WIP); instead of forcing a Saving Roll, a successful attack causes the target to enter Targeted State."
+                    "Forward Observer is a BS Attack using a BS Weapon (WIP); instead of forcing a Saving Roll, a successful attack causes the target to enter [[state:targeted]]."
                 ],
                 "restrictions": []
             },
@@ -7741,7 +7741,7 @@
             "id": "skill:dodge",
             "kind": "skill",
             "name": "Dodge",
-            "summary": "A Common Skill used to evade Attacks, reposition slightly, and cancel Engaged or Immobilized-A State on a successful PH Roll.",
+            "summary": "A Common Skill used to evade Attacks, reposition slightly, and cancel Engaged or [[state:immobilized-a]] on a successful PH Roll.",
             "composition": {
                 "role": "definition"
             },
@@ -7762,7 +7762,7 @@
                 ],
                 "effects": [
                     "Dodge uses PH to evade enemy Attacks during the Order or ARO; a successful Dodge may also move the user up to [[distance:2:inch]].",
-                    "A successful Normal or Face to Face Dodge Roll cancels the user's Immobilized-A State, applying any State-specific MODs."
+                    "A successful Normal or Face to Face Dodge Roll cancels the user's [[state:immobilized-a]], applying any State-specific MODs."
                 ],
                 "restrictions": [
                     "Dodge does not evade Comms Attacks; Reset is used for those instead."
@@ -7805,7 +7805,7 @@
             "id": "skill:reset",
             "kind": "skill",
             "name": "Reset",
-            "summary": "A Common Skill used to oppose Comms Attacks and Guided attacks and to cancel Targeted, Immobilized-B, or Isolated State.",
+            "summary": "A Common Skill used to oppose Comms Attacks and Guided attacks and to cancel Targeted, Immobilized-B, or [[state:isolated]].",
             "composition": {
                 "role": "definition"
             },
@@ -7826,7 +7826,7 @@
                 ],
                 "effects": [
                     "Reset uses WIP to oppose enemy Comms Attacks and BS Attacks (Guided); otherwise it is a Normal WIP Roll.",
-                    "A successful Reset Roll cancels the user's Targeted, Immobilized-B, or Isolated State, applying any State-specific MODs."
+                    "A successful Reset Roll cancels the user's Targeted, Immobilized-B, or [[state:isolated]], applying any State-specific MODs."
                 ],
                 "restrictions": [
                     "Reset does not evade other types of Attacks; Dodge is used for those instead."
@@ -7893,7 +7893,7 @@
                     "The Trooper may move up to the first MOV value without generating enemy AROs when the movement begins and ends outside the required enemy LoF, Zone of Control, and applicable Hacking Areas."
                 ],
                 "restrictions": [
-                    "TAGs, Remotes, Vehicles, Troopers with Motorcycles, Troopers with Aerial, and Troopers in Targeted State cannot declare Cautious Movement."
+                    "TAGs, Remotes, Vehicles, Troopers with Motorcycles, Troopers with Aerial, and Troopers in [[state:targeted]] cannot declare Cautious Movement."
                 ]
             },
             "labelIds": [
@@ -8125,7 +8125,7 @@
                 ],
                 "effects": [
                     "The user may Jump up to its first MOV value plus [[distance:2:inch]]; a Jump distance listed in the Unit Profile replaces the [[distance:2:inch]] bonus.",
-                    "Declaring Jump automatically cancels Prone State."
+                    "Declaring Jump automatically cancels [[state:prone]]."
                 ],
                 "restrictions": [
                     "The trajectory and landing must follow the Jump and General Movement Rules.",
@@ -8300,7 +8300,7 @@
             "id": "skill:reload",
             "kind": "skill",
             "name": "Reload",
-            "summary": "A Common Skill that cancels Unloaded State or restores expended Disposable uses when its requirements are met.",
+            "summary": "A Common Skill that cancels [[state:unloaded]] or restores expended Disposable uses when its requirements are met.",
             "composition": {
                 "role": "definition"
             },
@@ -8318,15 +8318,15 @@
                 ],
                 "requirements": [
                     "The user and the Allied Trooper or game element with Baggage must both be in non-Null States, and the user must be inside that Baggage holder's Zone of Control.",
-                    "The user is in Unloaded State or has expended uses of a Disposable Weapon or piece of Equipment."
+                    "The user is in [[state:unloaded]] or has expended uses of a Disposable Weapon or piece of Equipment."
                 ],
                 "effects": [
-                    "Without a Roll, the user cancels Unloaded State or regains all expended uses of eligible Disposable Weapons or Equipment."
+                    "Without a Roll, the user cancels [[state:unloaded]] or regains all expended uses of eligible Disposable Weapons or Equipment."
                 ],
                 "restrictions": [
                     "Only one Allied Trooper can receive this effect per Order.",
                     "Recovering Disposable uses does not affect Weapons or Equipment already deployed on the table.",
-                    "Non-Reloadable Weapons or Equipment cannot cancel Unloaded State or regain expended uses through Reload."
+                    "Non-Reloadable Weapons or Equipment cannot cancel [[state:unloaded]] or regain expended uses through Reload."
                 ]
             },
             "labelIds": [
@@ -8456,7 +8456,7 @@
             "id": "skill:suppressive-fire",
             "kind": "skill",
             "name": "Suppressive Fire",
-            "summary": "A Long Common Skill that places the user in Suppressive Fire State with a selected weapon.",
+            "summary": "A Long Common Skill that places the user in [[state:suppressive-fire]] with a selected weapon.",
             "composition": {
                 "role": "definition"
             },
@@ -8475,7 +8475,7 @@
                     "The user must select a Weapon with the Suppressive Fire Trait."
                 ],
                 "effects": [
-                    "The user enters Suppressive Fire State using the selected Weapon."
+                    "The user enters [[state:suppressive-fire]] using the selected Weapon."
                 ],
                 "restrictions": []
             },
@@ -9070,12 +9070,12 @@
             },
             "facts": {
                 "effects": [
-                    "The user ignores the WIP -3 MOD imposed by Impersonation-1 State.",
-                    "A successful Discover Roll against a Trooper in Impersonation-1 State cancels that Impersonation State.",
+                    "The user ignores the WIP -3 MOD imposed by [[state:impersonation-1]].",
+                    "A successful Discover Roll against a Trooper in [[state:impersonation-1]] cancels that Impersonation State.",
                     "The user ignores Surprise Attack MODs from attackers benefiting from Impersonation or Holoecho States when the rule conditions are met."
                 ],
                 "restrictions": [
-                    "The Surprise Attack protection is conditional on the attacker benefiting from Impersonation or Holoecho State; LoF is normally required, except against qualifying CC Attacks."
+                    "The Surprise Attack protection is conditional on the attacker benefiting from Impersonation or [[state:holoecho]]; LoF is normally required, except against qualifying CC Attacks."
                 ]
             },
             "armyLinks": [
@@ -9689,7 +9689,7 @@
                 ],
                 "effects": [
                     "Remote use is a Non-Lethal BS Weapon; contact use spends a Short Skill without an attack Roll.",
-                    "On a successful target PH Roll, remove one Wound and cancel Unconscious State if applicable.",
+                    "On a successful target PH Roll, remove one Wound and cancel [[state:unconscious]] if applicable.",
                     "On a failed target PH Roll, the target receives a Wound instead."
                 ]
             },
@@ -9813,7 +9813,7 @@
             "labelIds": [
                 "optional"
             ],
-            "summary": "Optional Automatic Equipment that lets its user deploy in or enter HoloMask State.",
+            "summary": "Optional Automatic Equipment that lets its user deploy in or enter [[state:holomask]].",
             "composition": {
                 "role": "definition"
             },
@@ -9825,8 +9825,8 @@
             },
             "facts": {
                 "effects": [
-                    "During Deployment, the user may deploy in HoloMask State.",
-                    "During the game, the user may enter HoloMask State."
+                    "During Deployment, the user may deploy in [[state:holomask]].",
+                    "During the game, the user may enter [[state:holomask]]."
                 ]
             },
             "armyLinks": [
@@ -9864,7 +9864,7 @@
                 "optional",
                 "negative-feedback"
             ],
-            "summary": "Optional NFB Automatic Equipment that lets its user deploy in or enter Holoecho State.",
+            "summary": "Optional NFB Automatic Equipment that lets its user deploy in or enter [[state:holoecho]].",
             "composition": {
                 "role": "definition"
             },
@@ -9876,8 +9876,8 @@
             },
             "facts": {
                 "effects": [
-                    "When placed on the table, the bearer may deploy in Holoecho State.",
-                    "During the game, the user may enter Holoecho State."
+                    "When placed on the table, the bearer may deploy in [[state:holoecho]].",
+                    "During the game, the user may enter [[state:holoecho]]."
                 ]
             },
             "armyLinks": [
@@ -9955,7 +9955,7 @@
             "kind": "equipment",
             "name": "MediKit",
             "labelIds": [],
-            "summary": "Short-Skill Equipment that can recover allied Models with VITA from Unconscious State through a target PH Roll.",
+            "summary": "Short-Skill Equipment that can recover allied Models with VITA from [[state:unconscious]] through a target PH Roll.",
             "composition": {
                 "role": "definition"
             },
@@ -9967,13 +9967,13 @@
             },
             "facts": {
                 "requirements": [
-                    "The target is an Allied Model with the VITA Attribute in Unconscious State, unless a scenario rule says otherwise.",
+                    "The target is an Allied Model with the VITA Attribute in [[state:unconscious]], unless a scenario rule says otherwise.",
                     "Remote use requires LoF; contact use requires Silhouette contact."
                 ],
                 "effects": [
                     "Remote use is a Non-Lethal BS Weapon; contact use spends a Short Skill without an attack Roll.",
-                    "On a successful target PH Roll, remove one Wound and cancel Unconscious State.",
-                    "On a failed target PH Roll, the target enters Dead State."
+                    "On a successful target PH Roll, remove one Wound and cancel [[state:unconscious]].",
+                    "On a failed target PH Roll, the target enters [[state:dead]]."
                 ]
             },
             "armyLinks": [
@@ -10012,7 +10012,7 @@
             "kind": "equipment",
             "name": "Motorcycle",
             "labelIds": [],
-            "summary": "Automatic Equipment whose mounted movement rules restrict Climb, Cautious Movement, upward Jump movement, and entry into Prone State.",
+            "summary": "Automatic Equipment whose mounted movement rules restrict Climb, Cautious Movement, upward Jump movement, and entry into [[state:prone]].",
             "composition": {
                 "role": "definition"
             },
@@ -10024,7 +10024,7 @@
             },
             "facts": {
                 "restrictions": [
-                    "A mounted Trooper cannot enter Prone State.",
+                    "A mounted Trooper cannot enter [[state:prone]].",
                     "A mounted Trooper cannot declare Climb or use ladders.",
                     "A mounted Trooper cannot Jump vertically or diagonally upward; horizontal and downward Jump movement remains allowed.",
                     "A mounted Trooper cannot declare Cautious Movement."
@@ -10186,7 +10186,7 @@
             "labelIds": [
                 "optional"
             ],
-            "summary": "A Deployment Skill that lets the user deploy with false replicas represented through Decoy State.",
+            "summary": "A Deployment Skill that lets the user deploy with false replicas represented through [[state:decoy]].",
             "composition": {
                 "role": "definition"
             },
@@ -10203,7 +10203,7 @@
                 ],
                 "requirements": [],
                 "effects": [
-                    "When placed on the table, the user may deploy in Decoy State.",
+                    "When placed on the table, the user may deploy in [[state:decoy]].",
                     "The value shown with Decoy determines whether one or two replica Decoys may be placed."
                 ],
                 "restrictions": []
@@ -10260,9 +10260,9 @@
                 ],
                 "requirements": [],
                 "effects": [
-                    "The user may deploy outside the enemy Deployment Zone in Impersonation-1 State.",
+                    "The user may deploy outside the enemy Deployment Zone in [[state:impersonation-1]].",
                     "The user may attempt a WIP Roll to deploy inside the enemy Deployment Zone.",
-                    "A profile with Impersonation (IMP-2) deploys and activates only Impersonation-2 State."
+                    "A profile with Impersonation (IMP-2) deploys and activates only [[state:impersonation-2]]."
                 ],
                 "restrictions": [
                     "A failed WIP Roll places the user in their own Deployment Zone at the table edge as a Model and removes Deployables placed with the attempt.",
@@ -10330,7 +10330,7 @@
                 ],
                 "restrictions": [
                     "Infiltration cannot be used to deploy inside the enemy Deployment Zone.",
-                    "After a failed Infiltration Roll, the attempted deployment cannot remain in Marker or Hidden Deployment State."
+                    "After a failed Infiltration Roll, the attempted deployment cannot remain in Marker or [[state:hidden-deployment]]."
                 ]
             },
             "armyLinks": [
@@ -10469,7 +10469,7 @@
             "labelIds": [
                 "optional"
             ],
-            "summary": "A Deployment/Long Special Skill that lets its user begin or later enter Foxhole State.",
+            "summary": "A Deployment/Long Special Skill that lets its user begin or later enter [[state:foxhole]].",
             "composition": {
                 "role": "definition"
             },
@@ -10486,11 +10486,11 @@
                     "long-skill"
                 ],
                 "requirements": [
-                    "The space used to enter Foxhole State must accommodate that State's Silhouette."
+                    "The space used to enter [[state:foxhole]] must accommodate that State's Silhouette."
                 ],
                 "effects": [
-                    "During Deployment, the user may begin in Foxhole State.",
-                    "During the Active Turn, the user may spend a Long Skill to enter Foxhole State."
+                    "During Deployment, the user may begin in [[state:foxhole]].",
+                    "During the Active Turn, the user may spend a Long Skill to enter [[state:foxhole]]."
                 ],
                 "restrictions": [
                     "If the required space is unavailable, the attempted Active-Turn use becomes Idle instead."
@@ -10657,7 +10657,7 @@
                 ],
                 "effects": [
                     "The Model is replaced by an IMP-1 Marker and enemies perceive it as Allied.",
-                    "A normal successful Discover Roll against IMP-1 applies the State's WIP -3 MOD and changes the user to Impersonation-2 State."
+                    "A normal successful Discover Roll against IMP-1 applies the State's WIP -3 MOD and changes the user to [[state:impersonation-2]]."
                 ],
                 "requirements": [
                     "The Trooper can activate Impersonation-1 State through Impersonation or another qualifying rule."
@@ -10772,7 +10772,7 @@
                     "Foxhole State is entered through Sapper and requires space for the State's Silhouette."
                 ],
                 "restrictions": [
-                    "Entering Prone State cancels Foxhole State.",
+                    "Entering [[state:prone]] cancels Foxhole State.",
                     "In the Active Turn, declaring a Movement-labelled Skill or beginning a Dodge move can cancel Foxhole State before that movement."
                 ]
             },
@@ -11125,7 +11125,7 @@
                     "While Aerial is active, the user is never in Silhouette contact with other Models, Objectives, scenery items, or game elements, even if physically touching them."
                 ],
                 "restrictions": [
-                    "While Aerial is active, the user cannot be in Prone State or Engaged State.",
+                    "While Aerial is active, the user cannot be in [[state:prone]] or [[state:engaged]].",
                     "The user cannot declare Cautious Movement.",
                     "Guard cannot be used against the user unless the user is Unconscious.",
                     "Weapons with the Boost Trait do not activate against the user."
@@ -11323,8 +11323,8 @@
                 "requirements": [],
                 "effects": [
                     "The user is not affected by Loss of Lieutenant and remains Regular.",
-                    "The user is not affected by Retreat, remains Regular, and does not enter Retreat State.",
-                    "The user cannot enter Isolated State.",
+                    "The user is not affected by Retreat, remains Regular, and does not enter [[state:retreat|Retreat State]].",
+                    "The user cannot enter [[state:isolated]].",
                     "BS Attack (-X) Special Skill MODs have no effect against the user."
                 ],
                 "restrictions": []
@@ -11384,7 +11384,7 @@
                 "requirements": [],
                 "effects": [
                     "The user may choose to automatically pass any Guts Roll.",
-                    "The user is unaffected by Retreat situations, cannot enter Retreat State, and acts normally until the end of the game."
+                    "The user is unaffected by Retreat situations, cannot enter [[state:retreat|Retreat State]], and acts normally until the end of the game."
                 ],
                 "restrictions": [
                     "The user is still affected by Loss of Lieutenant, including during Retreat."
@@ -11433,7 +11433,7 @@
                     "automatic"
                 ],
                 "requirements": [
-                    "The user must directly inflict at least one Wound on an Enemy Trooper or cause that Trooper to enter Dead State."
+                    "The user must directly inflict at least one Wound on an Enemy Trooper or cause that Trooper to enter [[state:dead]]."
                 ],
                 "effects": [
                     "In the States Phase of the Player Turn where the Requirement is met, the user gains Impetuous and Limited Cover and retains them for the remainder of the game.",
@@ -11523,7 +11523,7 @@
                     "Movement-labelled Skills declared in the Impetuous Phase must follow the rule’s mandatory movement priorities and normally use the full corresponding MOV value."
                 ],
                 "restrictions": [
-                    "In the Impetuous Phase, Move, Jump, or Climb cancels Prone State and the user cannot enter Prone State at the end of the movement.",
+                    "In the Impetuous Phase, Move, Jump, or Climb cancels [[state:prone]] and the user cannot enter [[state:prone]] at the end of the movement.",
                     "Impetuous Troopers cannot enter Marker States or any other States that explicitly prohibit entry.",
                     "A player in Retreat does not carry out the Impetuous Phase."
                 ]
@@ -11592,7 +11592,7 @@
                 "effects": [
                     "The user automatically passes Guts Rolls and therefore normally holds position after surviving an Attack.",
                     "The user may instead make a WIP Roll; on success, they may apply the effects of failing the Guts Roll.",
-                    "The user is unaffected by Retreat situations, does not enter Retreat State, and acts normally until the end of the game."
+                    "The user is unaffected by Retreat situations, does not enter [[state:retreat|Retreat State]], and acts normally until the end of the game."
                 ],
                 "restrictions": [
                     "During Retreat, the user cannot voluntarily leave the game table unless scenario rules allow it.",
@@ -11883,7 +11883,7 @@
                     "Movement from Skills with the Movement Label and failed Guts Rolls is halved while Prone."
                 ],
                 "requirements": [
-                    "A Trooper may deploy Prone or change between Normal and Prone at the permitted points of Movement-labelled Skills or AROs; eligible Troopers also become Prone when entering Unconscious State."
+                    "A Trooper may deploy Prone or change between Normal and Prone at the permitted points of Movement-labelled Skills or AROs; eligible Troopers also become Prone when entering [[state:unconscious]]."
                 ],
                 "restrictions": [
                     "Jump cancels Prone State, and some troop types or Equipment cannot enter Prone State."
@@ -12126,7 +12126,7 @@
             "id": "skill:dogged",
             "kind": "skill",
             "name": "Dogged",
-            "summary": "An optional Automatic Special Skill that lets an Unconscious Trooper keep acting temporarily before entering Dead State.",
+            "summary": "An optional Automatic Special Skill that lets an Unconscious Trooper keep acting temporarily before entering [[state:dead]].",
             "composition": {
                 "role": "definition"
             },
@@ -12142,17 +12142,17 @@
                     "automatic"
                 ],
                 "requirements": [
-                    "The user must enter Unconscious State and declare Dogged immediately, in either the Active or Reactive Turn."
+                    "The user must enter [[state:unconscious]] and declare Dogged immediately, in either the Active or Reactive Turn."
                 ],
                 "effects": [
-                    "While Dogged is active, ignore the effects and Null Label of Unconscious State and treat the Trooper as being in Normal State for the rest of that Player Turn.",
-                    "In the States Phase of that Player Turn, the Trooper automatically enters Dead State.",
-                    "If the Trooper receives another Wound while Dogged is active, it enters Dead State directly.",
-                    "A Remote Presence Trooper with STR may activate Dogged when entering any level of Unconscious State."
+                    "While Dogged is active, ignore the effects and Null Label of [[state:unconscious]] and treat the Trooper as being in [[state:normal]] for the rest of that Player Turn.",
+                    "In the States Phase of that Player Turn, the Trooper automatically enters [[state:dead]].",
+                    "If the Trooper receives another Wound while Dogged is active, it enters [[state:dead]] directly.",
+                    "A Remote Presence Trooper with STR may activate Dogged when entering any level of [[state:unconscious]]."
                 ],
                 "restrictions": [
                     "Once Dogged is activated, the Trooper cannot be healed.",
-                    "A Remote Presence Trooper cannot activate Dogged merely because it was already in Unconscious State before the triggering event."
+                    "A Remote Presence Trooper cannot activate Dogged merely because it was already in [[state:unconscious]] before the triggering event."
                 ]
             },
             "labelIds": [
@@ -12220,18 +12220,18 @@
                     "automatic"
                 ],
                 "requirements": [
-                    "The user must enter Unconscious State and declare No Wound Incapacitation immediately, in either the Active or Reactive Turn."
+                    "The user must enter [[state:unconscious]] and declare No Wound Incapacitation immediately, in either the Active or Reactive Turn."
                 ],
                 "effects": [
-                    "While active, ignore the effects and Null Label of Unconscious State and treat the Trooper as being in Normal State.",
-                    "The user can be healed; removing one Wound returns it to Normal State and removes the NWI Token.",
-                    "A Remote Presence Trooper with STR may activate No Wound Incapacitation when entering any level of Unconscious State.",
+                    "While active, ignore the effects and Null Label of [[state:unconscious]] and treat the Trooper as being in [[state:normal]].",
+                    "The user can be healed; removing one Wound returns it to [[state:normal]] and removes the NWI Token.",
+                    "A Remote Presence Trooper with STR may activate No Wound Incapacitation when entering any level of [[state:unconscious]].",
                     "A user that also has Doctor or Engineer may use that Skill on itself, applying the corresponding Effects."
                 ],
                 "restrictions": [
-                    "If the user receives another Wound, it enters Dead State directly.",
-                    "If a Roll to heal the user fails, it enters Dead State directly.",
-                    "A Remote Presence Trooper cannot activate No Wound Incapacitation merely because it was already in Unconscious State before the triggering event."
+                    "If the user receives another Wound, it enters [[state:dead]] directly.",
+                    "If a Roll to heal the user fails, it enters [[state:dead]] directly.",
+                    "A Remote Presence Trooper cannot activate No Wound Incapacitation merely because it was already in [[state:unconscious]] before the triggering event."
                 ]
             },
             "labelIds": [
@@ -12296,8 +12296,8 @@
                 ],
                 "requirements": [],
                 "effects": [
-                    "A Remote Presence Trooper with STR has two distinct levels of Unconscious State before entering Dead State.",
-                    "From either Unconscious level, one successful Engineer WIP Roll or GizmoKit PH Roll removes all Wounds necessary to cancel Unconscious State.",
+                    "A Remote Presence Trooper with STR has two distinct levels of [[state:unconscious]] before entering [[state:dead]].",
+                    "From either Unconscious level, one successful Engineer WIP Roll or GizmoKit PH Roll removes all Wounds necessary to cancel [[state:unconscious]].",
                     "When Engineer or another rule explicitly permits it, Command Tokens may reroll the failed repair Roll.",
                     "Remote Presence remains active while its owner is in a Null State."
                 ],
@@ -12346,7 +12346,7 @@
             "id": "skill:shasvastii",
             "kind": "skill",
             "name": "Shasvastii",
-            "summary": "An obligatory Automatic Special Skill that changes how a Shasvastii Trooper's Unconscious State counts for Victory Point conditions during the game.",
+            "summary": "An obligatory Automatic Special Skill that changes how a Shasvastii Trooper's [[state:unconscious]] counts for Victory Point conditions during the game.",
             "composition": {
                 "role": "definition"
             },
@@ -12362,7 +12362,7 @@
                     "automatic"
                 ],
                 "requirements": [
-                    "The user must enter Unconscious State and activate Shasvastii immediately, in either the Active or Reactive Turn."
+                    "The user must enter [[state:unconscious]] and activate Shasvastii immediately, in either the Active or Reactive Turn."
                 ],
                 "effects": [
                     "While the Shasvastii-Embryo form is active, the Unconscious Trooper still counts when calculating Victory Points for Retreat and other scenario rules or conditions.",
@@ -12403,7 +12403,7 @@
             "id": "skill:regeneration",
             "kind": "skill",
             "name": "Regeneration",
-            "summary": "An optional States Phase Automatic Special Skill that makes a PH Roll to remove a Wound, potentially cancelling Unconscious State.",
+            "summary": "An optional States Phase Automatic Special Skill that makes a PH Roll to remove a Wound, potentially cancelling [[state:unconscious]].",
             "composition": {
                 "role": "definition"
             },
@@ -12421,7 +12421,7 @@
                 "requirements": [],
                 "effects": [
                     "During the States Phase, the user makes a Normal PH Roll.",
-                    "On success, remove one Wound and cancel Unconscious State if applicable.",
+                    "On success, remove one Wound and cancel [[state:unconscious]] if applicable.",
                     "On failure, the user receives one additional Wound.",
                     "Regeneration remains active while its owner is in a Null State."
                 ],
@@ -12655,7 +12655,7 @@
             "facts": {
                 "category": "command-token-use",
                 "effects": [
-                    "Strategic Use can alter Deployment, remove Regular Orders, limit enemy Command Token use, place a Trooper into Suppressive Fire State, or grant Speedball Tokens according to the selected option."
+                    "Strategic Use can alter Deployment, remove Regular Orders, limit enemy Command Token use, place a Trooper into [[state:suppressive-fire]], or grant Speedball Tokens according to the selected option."
                 ],
                 "requirements": [],
                 "restrictions": [
@@ -12966,7 +12966,7 @@
                 "effects": [
                     "Transfer the user's WIP value and Mnemonica to the chosen host; if the user was Lieutenant, transfer Lieutenant and its additional abilities as well.",
                     "The transfer completes automatically at the end of the Order in which the user entered the Null State.",
-                    "After the transfer, the original user enters Dead State and is removed from the game table."
+                    "After the transfer, the original user enters [[state:dead]] and is removed from the game table."
                 ],
                 "restrictions": [
                     "Troopers with Mnemonica are never considered to have a Cube."
@@ -13144,7 +13144,7 @@
                 ],
                 "requirements": [],
                 "effects": [
-                    "The user is equipped with a MediKit to recover allied Troopers from Unconscious State."
+                    "The user is equipped with a MediKit to recover allied Troopers from [[state:unconscious]]."
                 ],
                 "restrictions": []
             },
@@ -13201,13 +13201,13 @@
                     "An allied GizmoKit must successfully hit the user or be applied through Silhouette contact."
                 ],
                 "effects": [
-                    "A successful Normal PH Roll cancels all of the user’s States that Engineer can cancel, except Unconscious State.",
+                    "A successful Normal PH Roll cancels all of the user’s States that Engineer can cancel, except [[state:unconscious]].",
                     "A failed PH Roll has no negative consequence and the recovery can be tried again in a later Order.",
                     "If the user has a GizmoKit PH value listed in its Unit Profile, use that PH value when a GizmoKit is used on the user.",
                     "Tech-Recovery remains active while the user is in a Null State."
                 ],
                 "restrictions": [
-                    "Tech-Recovery does not cancel Unconscious State; resolve the GizmoKit using its normal Unconscious-recovery rules instead."
+                    "Tech-Recovery does not cancel [[state:unconscious]]; resolve the GizmoKit using its normal Unconscious-recovery rules instead."
                 ]
             },
             "labelIds": [
@@ -13283,14 +13283,14 @@
                     "automatic"
                 ],
                 "requirements": [
-                    "The user must be in Unconscious State."
+                    "The user must be in [[state:unconscious]]."
                 ],
                 "effects": [
-                    "Doctor, Engineer, MediKit, and GizmoKit may cancel the user’s Unconscious State regardless of whether the user has the VITA or STR Attribute.",
+                    "Doctor, Engineer, MediKit, and GizmoKit may cancel the user’s [[state:unconscious]] regardless of whether the user has the VITA or STR Attribute.",
                     "Technorganic remains active while the user is in a Null State."
                 ],
                 "restrictions": [
-                    "Outside Unconscious State, Technorganic does not extend those recovery methods beyond their normal VITA or STR applicability."
+                    "Outside [[state:unconscious]], Technorganic does not extend those recovery methods beyond their normal VITA or STR applicability."
                 ]
             },
             "labelIds": [
@@ -13409,7 +13409,7 @@
                 ],
                 "requirements": [
                     "The user must be part of a Fireteam.",
-                    "That Fireteam's current Team Leader must enter Isolated State or a Null State."
+                    "That Fireteam's current Team Leader must enter [[state:isolated]] or a Null State."
                 ],
                 "effects": [
                     "The user may automatically become the new Fireteam Team Leader.",
@@ -13698,7 +13698,7 @@
             "id": "skill:explode",
             "kind": "skill",
             "name": "Explode",
-            "summary": "An obligatory Automatic Attack Skill that detonates when the user enters Unconscious State, resolves a Shock Direct Template Attack, and then sends the user to Dead State.",
+            "summary": "An obligatory Automatic Attack Skill that detonates when the user enters [[state:unconscious]], resolves a Shock Direct Template Attack, and then sends the user to [[state:dead]].",
             "composition": {
                 "role": "definition"
             },
@@ -13714,18 +13714,18 @@
                     "automatic"
                 ],
                 "requirements": [
-                    "The user must be in Unconscious State for Explode to activate."
+                    "The user must be in [[state:unconscious]] for Explode to activate."
                 ],
                 "effects": [
-                    "Explode activates automatically when the user enters Unconscious State.",
+                    "Explode activates automatically when the user enters [[state:unconscious]].",
                     "At the end of that Order, before Guts Rolls, the user makes a Direct Template Attack centered on its base with PS 7 Shock Ammunition against ARM.",
                     "Enemy Troopers affected by the Attack that declared Dodge avoid it if they passed their PH Roll.",
-                    "After the Rolls are resolved, the user enters Dead State and is removed from the game table."
+                    "After the Rolls are resolved, the user enters [[state:dead]] and is removed from the game table."
                 ],
                 "restrictions": [
-                    "Explode does not activate if the user enters Dead State directly instead of entering Unconscious State.",
-                    "If the user activates Dogged or No Wound Incapacitation when entering Unconscious State, Explode does not activate.",
-                    "If the template would affect an allied Model or Marker, the Template Attack is canceled, but the user still enters Dead State."
+                    "Explode does not activate if the user enters [[state:dead]] directly instead of entering [[state:unconscious]].",
+                    "If the user activates Dogged or No Wound Incapacitation when entering [[state:unconscious]], Explode does not activate.",
+                    "If the template would affect an allied Model or Marker, the Template Attack is canceled, but the user still enters [[state:dead]]."
                 ]
             },
             "labelIds": [
@@ -13766,7 +13766,7 @@
             "id": "skill:exrah",
             "kind": "skill",
             "name": "Exrah",
-            "summary": "An obligatory Automatic Special Skill that causes an Exrah Trooper entering Unconscious State to pass directly to Dead State, preventing later recovery.",
+            "summary": "An obligatory Automatic Special Skill that causes an Exrah Trooper entering [[state:unconscious]] to pass directly to [[state:dead]], preventing later recovery.",
             "composition": {
                 "role": "definition"
             },
@@ -13783,8 +13783,8 @@
                 ],
                 "requirements": [],
                 "effects": [
-                    "If the user enters Unconscious State, it automatically passes directly to Dead State without receiving an additional Wound and is removed from the game table.",
-                    "Because the user passes directly to Dead State, it cannot subsequently be healed by Doctor, MediKit, Regeneration, or another recovery method.",
+                    "If the user enters [[state:unconscious]], it automatically passes directly to [[state:dead]] without receiving an additional Wound and is removed from the game table.",
+                    "Because the user passes directly to [[state:dead]], it cannot subsequently be healed by Doctor, MediKit, Regeneration, or another recovery method.",
                     "Exrah remains active while its owner is in a Null State."
                 ],
                 "restrictions": []
@@ -13963,13 +13963,13 @@
                     "The user is represented by several Proxy Models but provides only one Order regardless of how many Proxies are deployed.",
                     "During the Active Turn, the player chooses the Proxy that becomes Active when declaring the Order; only that Active Proxy can declare Orders.",
                     "During the Reactive Turn, only one eligible Proxy becomes Active for the Order and reacts normally; other reacting Proxies may only declare Dodge or Reset.",
-                    "If the Active Proxy enters Isolated State or any Null State, the Active Proxy may be moved to another Proxy that is not in one of those States at the end of the Order.",
+                    "If the Active Proxy enters [[state:isolated]] or any Null State, the Active Proxy may be moved to another Proxy that is not in one of those States at the end of the Order.",
                     "Marker and Hidden Deployment status are not canceled merely by placing or assigning the Active Proxy Token.",
                     "Moving the G: Jumper Trooper between Combat Groups moves all of its Proxies together."
                 ],
                 "restrictions": [
-                    "A Proxy in Isolated State or any Null State cannot be activated until that State is canceled.",
-                    "If all Proxies are in Isolated State or any Null State, the G: Jumper Trooper is treated as a casualty until at least one Proxy recovers."
+                    "A Proxy in [[state:isolated]] or any Null State cannot be activated until that State is canceled.",
+                    "If all Proxies are in [[state:isolated]] or any Null State, the G: Jumper Trooper is treated as a casualty until at least one Proxy recovers."
                 ]
             },
             "labelIds": [
@@ -14198,7 +14198,7 @@
                     "VITA or STR points and Wounds are shared across the user's Unit Profiles.",
                     "Applicable States are shared across the user's Unit Profiles.",
                     "Transmutation (X) changes to the second Unit Profile after the listed Wound threshold is reached.",
-                    "Transmutation (Escape System-X) follows the threshold transition and also places an Eclipse Special Ammo Circular Template; if the Trooper is Possessed when it changes profile, Possessed State is canceled.",
+                    "Transmutation (Escape System-X) follows the threshold transition and also places an Eclipse Special Ammo Circular Template; if the Trooper is Possessed when it changes profile, [[state:possessed]] is canceled.",
                     "Transmutation (Hatching) begins with a Seed-Embryo representation and changes to the Developed Form when its documented Movement or successful Dodge ARO trigger occurs.",
                     "Transmutation (Auto) allows deployment in either Unit Profile and profile switching at the start of Movement generated by a Skill with the Movement Label.",
                     "Transmutation (WIP) allows a WIP Roll before an Order or ARO to use the second Unit Profile for the rest of the Player Turn, returning to the first profile in the States Phase."

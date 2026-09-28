@@ -1325,7 +1325,9 @@ def test_fireteam_and_scenario_support_skills_are_composed(tmp_path: Path) -> No
     assert records["ft-master"]["label_ids"] == ["obligatory"]
     assert "Regular" in " ".join(records["ft-master"]["facts"]["effects"])
     assert records["number-2"]["label_ids"] == ["optional"]
-    assert "Isolated State" in " ".join(records["number-2"]["facts"]["requirements"])
+    assert "[[state:isolated]]" in " ".join(
+        records["number-2"]["facts"]["requirements"]
+    )
     assert "Specialist Troop" in " ".join(records["specialist-operative"]["facts"]["effects"])
     assert "Guts Rolls" in " ".join(records["journalist"]["facts"]["effects"])
     assert "Combat Group" in " ".join(records["tagcom"]["facts"]["effects"])

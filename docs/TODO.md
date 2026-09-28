@@ -65,6 +65,23 @@ close the remaining catalog/share-state gaps.
 
 ### Player-facing completeness and navigation
 
+- [ ] Complete the systematic semantic-link migration of all maintained rules prose. New rules
+  text is already gated by the checked-in legacy-candidate baseline; migration must therefore
+  proceed as reviewed batches that shrink the baseline rather than bulk-replacing text.
+  - [x] Establish canonical-name/alias candidate auditing and make new unlinked candidates fail
+    the rules build while grandfathering only the pre-migration corpus.
+  - [x] Batch 1: replace unambiguous full State names such as `Unconscious State`,
+    `Dead State`, and the reviewed `Retreat State` alias with typed `state:*` references.
+    The post-batch legacy inventory is 692 candidate occurrences across 186 semantic owners.
+  - [ ] Batch 2: review and link Hacking Program names.
+  - [ ] Batch 3: review and link Equipment names.
+  - [ ] Batch 4: review Trait names, with special care for generic terms such as `State`, `CC`,
+    `ARO`, and `Deployable`.
+  - [ ] Batch 5: review Skill names.
+  - [ ] Batch 6: resolve aliases/collisions (for example `Suppressive Fire` and
+    `Hidden Deployment`), then remove the legacy baseline when the candidate inventory reaches
+    zero.
+
 - [ ] Add a rules glossary and profile-notation help layer to unit details.
   - [x] Explain the existing profile fields and symbols in context: training/order,
     troop type, classification, ISC, Hackable, Peripheral, equipment versus
