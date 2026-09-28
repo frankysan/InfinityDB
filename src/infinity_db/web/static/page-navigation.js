@@ -16,7 +16,11 @@ function syncActiveNavigation(pathname) {
     const linkPath = new URL(link.href).pathname;
     const isCurrent = pathname === linkPath
       || (linkPath !== "/" && pathname.startsWith(`${linkPath}/`));
-    link.toggleAttribute("aria-current", isCurrent);
+    if (isCurrent) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
   });
 }
 

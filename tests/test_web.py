@@ -1946,6 +1946,9 @@ def test_soft_navigation_preserves_shell_state_and_disposes_page_handlers(
     status, _, page_navigation = request(app, "/static/page-navigation.js")
     assert status == 200
     assert b"pathname.startsWith(`${linkPath}/`)" in page_navigation
+    assert b'link.setAttribute("aria-current", "page")' in page_navigation
+    assert b'link.removeAttribute("aria-current")' in page_navigation
+    assert b'link.toggleAttribute("aria-current", isCurrent)' not in page_navigation
     assert b"syncDescription(nextDocument)" in page_navigation
     assert b"document.querySelector('meta[name=\"description\"]')" in page_navigation
 

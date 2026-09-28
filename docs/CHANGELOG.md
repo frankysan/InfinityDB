@@ -88,6 +88,9 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Web frontend:** Keep the sidebar Navigation highlight synchronized during soft/client-side
+  page transitions by updating `aria-current="page"` immediately instead of relying on a full
+  reload to restore the server-rendered active state.
 - **Web backend:** Merge Skill-detail variants whose distance extras differ only by source
   spelling, such as `7.5` versus `+7.5`, so converted values such as Super-Jump `3"`
   appear once with the combined Unit set while raw source extras remain preserved.
