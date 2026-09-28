@@ -53,15 +53,15 @@ The concise public framing remains: **0.6 built the foundation → 0.7 added con
 
 ## 0.9.0 — application completeness and discoverability
 
-0.9.0 closes the remaining application-data presentation gaps and makes the resulting
-data searchable, navigable, and understandable. It should finish the player-facing
-application model without absorbing the separate consistency, visual-architecture, and
-operations hardening work reserved for 0.10.0.
+0.9.0 completes discoverability and navigation around the player-facing application model
+without absorbing the separate consistency, frontend-architecture, theme, and operations
+hardening work reserved for 0.10.0. The maintained source-to-presentation inventory now has no
+confirmed application-data presentation gap.
 
-The Unit Explorer extended-results work, structured rules-reference cross-link pass, and
-maintained-text reference/token layer are complete. The preferred remaining execution order is:
-build the glossary/profile-help surface on top of that shared semantic reference foundation, then
-close the remaining catalog/share-state gaps.
+The Unit Explorer filtering/extended-results work, global search, structured rules-reference
+cross-link pass, Profile notation foundation, and maintained-text reference/token layer are
+complete. Remaining 0.9 work is concentrated in the reviewed maintained-prose link migration,
+the broader glossary terminology layer, and the remaining catalog/share-state gaps.
 
 ### Player-facing completeness and navigation
 
@@ -83,7 +83,7 @@ close the remaining catalog/share-state gaps.
     `Hidden Deployment`), then remove the legacy baseline when the candidate inventory reaches
     zero.
 
-- [ ] Add a rules glossary and profile-notation help layer to unit details.
+- [ ] Complete the rules glossary and profile-notation help layer on Unit details.
   - [x] Explain the existing profile fields and symbols in context: training/order,
     troop type, classification, ISC, Hackable, Peripheral, equipment versus
     BS weapons, melee weapons, and profile/loadout separators. Unit details now
@@ -93,40 +93,6 @@ close the remaining catalog/share-state gaps.
   - [ ] Make terminology such as Trooper, Peripheral, Marker, Token, Deployable,
     Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever it
     changes how profile data should be read.
-
-- [ ] Complete rich Unit Explorer filtering and the corresponding extended-results
-  presentation. Treat this as completion of the existing backend-driven filter
-  framework rather than a separate browser-only filtering system.
-  - [x] Skill, Equipment, and Weapon filters resolve public slugs through the
-    backend and preserve legacy numeric identifiers only for compatibility.
-  - [x] Add categorical filters for troop type, classification, and
-    characteristics. These use stable public semantic/sluggified identities in
-    shareable URLs, with numeric IDs retained only as compatibility fallbacks.
-  - [x] Add AVA, points, and SWC filtering with both exact-value and inclusive
-    bounded-range modes. Exact values use database-driven dropdowns. Ranges use
-    dual-handle sliders with visible min/max values. The selected span is deliberately muted
-    at its full-domain default, switches to the active filter color when narrowed, and has a
-    per-stat reset action. Exact and range modes are mutually exclusive for each stat while
-    preserving the existing URL/API contract. AVA exposes ordinary values from `0` through `99` plus
-    exact `Total`; negative ancillary/source sentinel values are not public AVA
-    filter values. SWC exact matching accepts ordinary costs, bonuses such as
-    `+1`/`+1.5`, and `-`; SWC ranges apply only to ordinary numeric costs.
-  - [x] Pin filter-conjunction semantics for loadout-sensitive numeric filters.
-    Once AVA/points/SWC participates in a query, profile/group/loadout-sensitive
-    criteria must be satisfiable in one compatible source Army/profile-group/loadout
-    context. Profile facts apply to loadouts in their profile group; loadout facts
-    remain loadout-local. Unit-option facts remain Unit-wide because the source
-    model does not attach them to a profile group.
-  - [x] Add an optional extended Unit-list mode as an independent presentation control
-    directly beneath Advanced Filters. Extended results expose base statistics, troop type,
-    classification, characteristics, and Army-specific AVA without requiring navigation to Unit
-    detail.
-    Profile AVA is shown beneath the corresponding Army symbols; `Total` remains a
-    first-class display value and negative ancillary/source sentinels are not exposed.
-  - [x] Make multi-profile Units legible in extended mode. Profile variants render as
-    attached rows beneath the Unit, with subordinate profiles visually indented rather
-    than flattening independent statistics into one ambiguous row. Profile variants that
-    differ by source Army retain their own statline and Army/AVA context.
 
 - [ ] Complete deep-linkable, shareable search and filter state for catalog and
   Unit views.
@@ -224,43 +190,20 @@ by the audit remain in scope.
   - [ ] Close with a second source-to-storage-to-browser matrix pass, complete
     normal project checks, and full-asset validation against the pinned production
     publication when it is available. Update canonical documentation, `TODO.md`,
-    and `CHANGELOG.md` for material findings before starting the later
-    visual-design, frontend-architecture, or theming work.
+    and `CHANGELOG.md` for material findings before closing the audit; feed any
+    resulting corrections into the remaining frontend-architecture or theming work.
 
 ### Frontend architecture and theming
-
-- [x] **Web frontend:** Audit the current browser design against
-  `docs/web-design-guidelines.md`. The source-level baseline is recorded in
-  `docs/010-web-design-audit.md`; it covers shared surfaces and titlebars, catalog/list and
-  detail table families, controls, responsive behavior, Developer mode, accessibility,
-  tokens/theme readiness, CSS ownership, and regression-test coupling.
-- [x] **Web frontend:** Refactor shared visual structures in the order established by the
-  0.10 design audit, preserving the current visual language while reducing independent
-  layout decisions.
-  - [x] Separate visual `surface` containment from catalog/detail layout geometry.
-  - [x] Establish a shared table-viewport primitive and make interactive-row behavior
-    explicit instead of inheriting hover/overflow behavior accidentally.
-  - [x] Converge Unit Explorer and catalog list tables on semantic primary, descriptor,
-    metric, and technical column roles; remove their positional width rules, keep short
-    columns compact, and let the viewport absorb Developer-mode width pressure.
-  - [x] Converge reusable secondary table families (catalog usage, stat/profile, and
-    Fireteam/reference tables) while retaining deliberate domain-specific responsive modes.
-  - [x] Consolidate recurring surface-titlebar/header structures and duplicated Settings
-    switches into shared primitives.
-  - [x] Normalize generated-table accessibility semantics and responsive overflow/wrapping,
-    and update regression tests to assert semantic behavior instead of obsolete selector
-    geometry.
-  - [x] Promote recurring hard-coded presentation colors into semantic tokens as affected
-    components are consolidated, keeping first-class Light/Dark theme implementation in its
-    dedicated task below. Shared component colors now resolve through semantic root roles, and
-    regression coverage prevents repeated component-level color literals from accumulating again.
-  - [x] Complete a manual browser acceptance matrix across representative desktop, compact,
-    and narrow widths with Developer mode off/on before closing the refactor.
 
 - [ ] Move the **General Fireteam rules** / Fireteam quick-reference material off the
   Army-specific `/fireteams` chart browser onto a dedicated rules/reference page. Keep
   the Army chart focused on Army-specific composition data and link clearly between the
   two surfaces rather than duplicating the maintained Fireteam rule facts.
+
+- [ ] **Web frontend + Project infrastructure:** Add a user-facing **Changes** page backed by
+  `docs/CHANGELOG.md`, which remains the canonical release-history source. Present current and
+  historical release notes in the browser without maintaining a second hand-edited copy of the
+  same content.
 
 - [ ] Refactor the web layer toward the documented backend/frontend responsibility
   boundary without changing the current same-origin deployment model.
@@ -281,28 +224,29 @@ by the audit remain in scope.
       labels/symbol roles out of page modules.
 
 - [ ] Implement first-class theme selection using the semantic theme contract documented in
-  `docs/architecture.md`, with Light and Dark as the initial themes rather than an architectural limit.
+  `docs/architecture.md`, with Light and Dark as the initial themes rather than an architectural
+  limit.
   - [ ] Separate semantic theme tokens from theme-neutral layout/component rules
     and remove remaining hard-coded light-theme assumptions.
   - [ ] Decide and document the default startup behavior (for example, operating-
     system preference versus a fixed project default); an explicit user choice wins.
   - [ ] Add a theme selector to Settings that is data-driven rather than hard-coded as a binary
-    Light/Dark switch, resolve the selected theme before first meaningful paint, and keep persistence
-    on the existing preference contract so additional themes can be added without new state logic.
+    Light/Dark switch, resolve the selected theme before first meaningful paint, and keep
+    persistence on the existing preference contract so additional themes can be added without new
+    state logic.
   - [ ] Audit contrast and distinguishability for status/range colors, links, focus,
-    muted text, tables, dialogs, menus, and faction accents in both themes.
+    muted text, tables, dialogs, menus, and faction accents in every shipped theme
+    (initially Light and Dark).
   - [ ] Add regression coverage for initialization, switching, persistence, and
-    representative core pages in both themes.
+    representative core pages across every shipped theme.
 
 - [ ] Add a project favicon derived from `infinitydb-logo.svg` and keep it legible
   in light and dark browser chrome where practical.
 
-- [ ] Refactor the frontend design-system structure after the theme contract is
-  implemented: separate foundational tokens, theme values, shared components/layout,
-  and page-specific exceptions where that improves ownership without adding a CSS
-  build step. Promote recurring patterns to shared primitives and preserve the
-  established shared shell, navigation, detail, table-density, badge, and Settings
-  behavior during the migration.
+- [ ] Reorganize frontend design-system ownership after first-class themes are implemented:
+  keep foundational tokens, per-theme values, shared components/layout, and page-specific
+  exceptions visibly separate where that improves maintenance, without adding a CSS build step
+  or reworking the shared visual primitives that are already established.
 
 ### Release hardening, CI, and operations
 

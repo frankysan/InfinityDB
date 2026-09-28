@@ -14,147 +14,75 @@ New or materially revised entries use the project-domain labels defined in
   Troop Type, Classification, ISC, Hackable, Peripheral, Equipment/Weapon domains, and
   profile/loadout structure; relevant profile labels and Order/Characteristic symbols link into
   the collapsed help panel without making the profile tables denser.
-- **Web backend + Web frontend:** Add global search across Armies, Units, Skills,
-  Equipment, Weapons, Traits, States, Hacking Programs, and Fireteam charts. Results
-  label their domain and open the corresponding player-facing surface.
-- **Web frontend:** Keep maintained-text reference previews inside the visible viewport by
-  clamping horizontal placement and flipping them below the referenced term when there is not
-  enough space above.
-- **Data processing + Web backend + Web frontend:** Add maintained-text semantic links and
-  preference-aware distance tokens to curated rules text. Inline references resolve through the
-  same canonical Skill, Equipment, Weapon, Trait, State, and Hacking Program routes used elsewhere,
-  expose summary previews on hover/focus, use tap-once-to-preview/tap-again-to-follow interaction
-  on touch displays, and keep typed distances synchronized with the user's cm/in setting. Current
-  gameplay-distance prose has been migrated to typed tokens, while malformed,
-  unresolved, or newly reintroduced literal cm/in references are rejected during validation.
-- **Web backend + Web frontend:** Expand the Unit Explorer's Advanced Filters with
-  Troop Type, Classification, Characteristics, AVA, Points, and SWC alongside the
-  existing Skill, Equipment, and Weapon filters. Exact AVA, Points, and SWC values
-  are selected from database-driven dropdowns, while inclusive ranges use compact
-  dual-handle sliders with visible endpoints. SWC supports exact ordinary costs, bonuses
-  such as `+1`/`+1.5`, the `-` display value, and ranges over ordinary numeric costs.
-  AVA preserves **Total** as a first-class exact value rather than exposing its internal
-  numeric sentinel.
-- **Web backend + Web frontend:** Make the expanded Unit-filter state bookmarkable and
-  shareable through the URL, using stable public slugs for categorical filters where
-  possible while continuing to accept legacy numeric identifiers for compatibility.
-- **Web backend + Web frontend:** Add an optional extended Unit Explorer result mode that
-  exposes profile statlines, Troop Type, Classification, Characteristics, and Army-specific AVA
-  directly in the result list. Multi-profile Units keep subordinate profile rows visibly attached
-  to their Unit, and per-profile AVA is shown beneath the applicable Army symbols. Extended mode
-  is shareable through `extended=1` and remains opt-in outside Advanced Filters.
-- **Web backend + Web frontend:** Present every source-specific Unit note with its
-  source variant and applicable Army context, including notes that belong only to a
-  non-representative variant.
-- **Web backend + Web frontend:** Present top-level composite Unit options in each
-  applicable Army context, including their costs, miniature count, orders, and linked
-  constituent loadouts. Source variants remain separate, so differing option costs
-  such as EQUIPE MIRAGE-5's normal and Reinforcement versions remain visible.
+- **Web backend + Web frontend:** Add global search across Armies, Units, Skills, Equipment,
+  Weapons, Traits, States, Hacking Programs, and Fireteam charts. Results identify their domain
+  and open the corresponding player-facing surface; compact navigation keeps search available as
+  an expandable button on narrow screens.
+- **Data processing + Web backend + Web frontend:** Add semantic links and preference-aware
+  distance tokens to maintained rules text. Canonical Skill, Equipment, Weapon, Trait, State,
+  and Hacking Program references can show viewport-bounded summary previews and navigate to
+  their detail pages; touch interaction previews before following, and typed distances follow the
+  user's cm/in preference. Current State and Hacking Program references have begun the reviewed
+  prose migration, while validation prevents new unresolved references or literal gameplay-distance
+  debt from being introduced.
+- **Web backend + Web frontend:** Expand the Unit Explorer with Troop Type, Classification,
+  Characteristics, AVA, Points, and SWC filters plus an optional extended result mode. Exact
+  numeric values and inclusive ranges coexist with the existing Skill, Equipment, and Weapon
+  filters; AVA preserves **Total**, SWC preserves source display forms such as bonuses and `-`,
+  and range controls expose active/reset state while showing endpoint values only when useful.
+  Extended results show profile statlines and Army-specific AVA, keep multi-profile Units visibly
+  grouped, and the complete expanded filter/presentation state is bookmarkable through the URL.
+- **Web backend + Web frontend:** Present source-specific Unit notes and top-level composite Unit
+  options with their applicable Army/source context. Composite options expose costs, miniature
+  count, Orders, and linked constituent loadouts without collapsing source variants that differ.
 
 ### Changed
 
-- **Web backend:** Separate the same-origin web runtime into explicit WSGI dispatch,
-  browser/static presentation, JSON API handling, shared route identities, and response-value
-  concerns without changing public URLs or deployment topology. Focused regression coverage now
-  pins page/API ownership while preserving existing caching, ETag, metrics, health, and static
-  asset behavior.
-- **Data processing + Web backend + Web frontend:** Restore canonical Labels on Hacking
-  Program details by reusing the current core Label vocabulary across rules collections.
-  Supportware, No Roll, Comms Attack, and Negative Feedback (NFB) now appear from curated
-  program semantics without duplicating Label definitions; Non-Lethal remains a Trait rather
-  than being misclassified as a Label.
-- **Web frontend:** Stabilize Unit Explorer and rules-catalog table geometry around shared
-  semantic column roles: primary titles use available width, descriptor/metric/developer
-  columns stay compact, narrow Developer-mode tables scroll instead of hiding technical IDs,
-  and row hover is limited to tables that are actually interactive.
-- **Web frontend:** Apply the same semantic table behavior to catalog usage, Hacking Program,
-  Weapon, Skill Modifier, Fireteam reference, and Unit-detail tables. Compact comparison metrics
-  remain stable, dense tables scroll through their own viewport when needed, Developer mode no
-  longer widens or clips narrow Fireteam content or relies on positional column sizing, and generated
-  tables expose consistent captions/header scopes while narrow layouts avoid premature word breaking.
-- **Web frontend:** Tighten Fireteam and Hacking Program detail presentation: constrain the current
-  Army chart summary to the same content width as Fireteam cards, move Hacking Program Skill-type
-  badges into the rules-card title bar, place Targets in the Program profile table, and keep baseline
-  Hacking Devices inside the Program card immediately before Related rules.
-- **Web backend + Project infrastructure:** Cache composed Skill and State rules records per
-  catalog instance, avoiding repeated SQLite composition work during catalog lookups and
-  enrichment audits while preserving mutation isolation for returned detail data.
-- **Project infrastructure:** Reuse one read-only current rules-database fixture across
-  rules query tests instead of rebuilding the same curated SQLite snapshot for each test, while
-  retaining isolated builds for mutation and exporter-validation coverage.
-- **Data processing + Web frontend:** Begin the systematic maintained-rules semantic-link coverage
-  pass with canonical State references, so terms such as **Unconscious State** and **Dead State**
-  now behave as inline rules references. Rules builds now freeze the remaining pre-migration plain
-  reference candidates in a checked-in baseline and reject newly introduced unlinked canonical
-  names or aliases, allowing later domain-by-domain review without permitting new link debt.
-- **Data processing + Web frontend:** Continue the maintained-rules semantic-link migration with
-  Hacking Programs, replacing all 21 currently unambiguous program-name occurrences with typed
-  `hacking-program:*` references and shrinking the reviewed legacy baseline to 671 candidates
-  across 183 semantic owners.
-- **Web backend + Web frontend:** Complete the structured Related rules cross-link pass across
-  Skills, Equipment, Weapons, Traits, States, and Hacking Programs. Detail APIs now publish
-  backend-resolved catalog references: current source-specific Skill/Equipment/Weapon variants
-  resolve to their canonical application slug, while stale source-only variants remain plain
-  text instead of producing dead links. Rules-owned Trait, State, Hacking Program, and
-  rules-only Skill identities continue to link through their semantic IDs.
-- **Web frontend:** Tighten the Unit Explorer numeric-filter row by shortening exact-value
-  dropdown placeholders to **Any**, aligning dual-handle range tracks with their neighboring
-  exact-value controls, and showing endpoint bubbles only while a range is active or being
-  interacted with so the controls remain compact without clipping their values.
-- **Web frontend:** Make numeric range filters visibly distinguish active constraints from their
-  full-span defaults, add per-stat range reset controls, and keep each exact-value dropdown
-  strictly mutually exclusive with its range slider.
-- **Web frontend:** Keep the Extended unit details toggle available directly beneath Advanced
-  Filters instead of hiding it inside the disclosure, decouple it from opening Advanced Filters,
-  and keep its checkbox compact on iOS.
-- **Web frontend:** Refine extended Unit Explorer rows by removing redundant parent-row Army
-  symbols, using Order/Characteristic symbols where available, showing long Troop Type names until
-  narrow layouts collapse them to abbreviations, and keeping MOV unit markers legible in both
-  centimeter and inch display modes. Troop Type filter options use the same long-form labels.
-- **Web frontend:** Hide negative/source-absence Characteristics such as `No Cube`,
-  `Non Hackable`, and `Not Impetuous` from normal extended Unit rows while preserving
-  them in Developer Mode for source inspection.
-
-- **Web frontend:** Keep the compact navigation bar on screen while scrolling and collapse its
-  global search field to a search button on narrow viewports. Expanding search temporarily uses
-  the available navigation-bar space, while the collapsed state preserves the full InfinityDB
-  wordmark until genuinely narrow phone widths require the logo-only fallback.
-- **Web backend:** Keep compound Unit filters semantically coherent when AVA, Points,
-  or SWC is involved: profile/loadout-sensitive criteria must be satisfiable within a
-  compatible Army/profile-group/loadout context instead of being assembled from unrelated
-  options on the same logical Unit. Unit-level options remain Unit-wide where the source
-  model does not associate them with a profile group.
-- **Web frontend:** Keep Unit selection-relationship diagnostics in Developer mode,
-  and omit redundant Army-context lists from source notes that apply across all
-  currently shown Armies.
-- **Data processing:** Classify Spec-Ops/Team-Ops option charts as future list/session
-  configuration rather than immutable Unit detail. Preserve standalone loadout
-  `disabled` and `minis` source values without implying an availability or miniature-count
-  rule before their source meaning is established.
-- **Web frontend:** Mark a General-profile attribute when one or more Army profiles
-  differ, with an explanatory tooltip alongside the existing Army-profile difference
-  indicator.
-
-### Upgrade notes
-
-- Rebuild the generated Army database before deploying 0.9.0. Compatibility revision
-  34 publishes the source order rows required to present composite Unit options.
+- **Web frontend:** Standardize responsive visual behavior across Unit Explorer, catalog,
+  reference, Unit-detail, Hacking Program, Weapon, and Fireteam surfaces. Shared surfaces,
+  titlebars, Settings controls, and semantic table-column roles now keep compact data compact,
+  give primary labels available width, preserve technical columns through scoped horizontal
+  scrolling in Developer mode, and provide consistent generated-table accessibility semantics.
+- **Web frontend:** Tighten Fireteam and Hacking Program presentation. The current-Army summary
+  follows the Fireteam card width, Hacking Program Skill-type badges live in the titlebar,
+  Targets lead the Program profile table, and baseline Hacking Devices sit inside the Program
+  card immediately before Related rules.
+- **Web backend + Web frontend:** Complete structured **Related rules** cross-linking across
+  Skills, Equipment, Weapons, Traits, States, and Hacking Programs. Current application
+  identities resolve to their canonical detail routes; stale source-only variants remain plain
+  text instead of producing dead links.
+- **Data processing + Web frontend:** Keep unresolved list/session concepts out of immutable Unit
+  semantics: Spec-Ops/Team-Ops option charts remain future list/session configuration, and raw
+  loadout `disabled` / `minis` values remain preserved without inventing availability or
+  miniature-count meaning. Unit detail keeps selection-relationship diagnostics in Developer
+  mode and marks General-profile attributes when Army profiles differ.
 
 ### Fixed
 
-- **Web frontend:** Keep the sidebar Navigation highlight synchronized during soft/client-side
-  page transitions by updating `aria-current="page"` immediately instead of relying on a full
-  reload to restore the server-rendered active state.
+- **Data processing + Web backend + Web frontend:** Restore canonical Labels on Hacking Program
+  details. Supportware, No Roll, Comms Attack, and Negative Feedback (NFB) reuse the current core
+  Label vocabulary; Non-Lethal remains correctly modeled as a Trait.
+- **Web backend:** Keep compound Unit filters semantically coherent when AVA, Points, or SWC is
+  involved: profile/loadout-sensitive criteria must be satisfiable within one compatible
+  Army/profile-group/loadout context rather than being assembled from unrelated options on the
+  same logical Unit.
 - **Web backend:** Merge Skill-detail variants whose distance extras differ only by source
-  spelling, such as `7.5` versus `+7.5`, so converted values such as Super-Jump `3"`
-  appear once with the combined Unit set while raw source extras remain preserved.
-- **Web frontend:** Keep compact Navigation and Settings popovers above dual-handle Unit filter
-  sliders by containing each slider's internal stacking layers within the slider component.
-- **Web frontend:** Let the Unit Explorer introduction wrap naturally at tablet widths instead of
-  combining a narrow text column with a desktop-only forced line break.
-- **Web frontend:** Make ordinary Fireteam member tables fit narrow mobile viewports instead of
-  retaining their desktop minimum width; Developer mode keeps horizontal scrolling for its extra
-  member-detail columns.
+  spelling, such as `7.5` versus `+7.5`, so converted values such as Super-Jump `3"` appear once
+  with the combined Unit set while raw source extras remain preserved.
+- **Web frontend:** Correct existing narrow/soft-navigation regressions: sidebar active-state
+  highlighting updates immediately during client-side navigation, the Unit Explorer introduction
+  wraps naturally at tablet widths, and ordinary Fireteam member tables fit narrow screens while
+  Developer mode retains scrollable technical columns.
+
+### Upgrade notes
+
+- 0.9.0 requires the release-matched tracked runtime databases. Compatibility revision 34 adds
+  the source Order rows used by composite Unit options, and the tracked `rules.db` includes the
+  new reviewed reference content. Release preparation must rebuild and commit either runtime
+  database whenever its Army or curated-rules inputs changed.
+- Normal server upgrades from 0.8.1 onward do **not** rebuild databases in production. Deploy the
+  exact `data/generated/infinity.db` and `data/generated/rules.db` shipped by the tagged release;
+  raw Army/wiki/PDF inputs remain development/release inputs only.
 
 ## [0.8.1] - 2026-09-27
 
