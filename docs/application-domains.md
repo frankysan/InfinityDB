@@ -1,0 +1,274 @@
+# Application domains
+
+**Project domains:** Data processing, Web backend, Web frontend
+
+This document defines the planned **application-domain** structure used to organize InfinityDB's
+player-facing game/reference information. Application domains are distinct from the engineering
+ownership labels in `docs/project-domains.md`.
+
+The goal is to give canonical concepts a stable home without forcing every concept type into the
+same UI. Data identity, semantic ownership, search/glossary participation, and browser presentation
+are related concerns, but they are not the same concern.
+
+Unless stated otherwise, this document is **Design direction**. Concrete implementation work remains
+in `docs/TODO.md`.
+
+## Principles
+
+1. **One canonical owner.** A concept should have one semantic home. Cross-links, glossary entries,
+   tooltips, search results, and alternate views reuse that identity rather than duplicating the
+   definition.
+2. **Presentation follows usefulness.** A typed identity does not imply a catalog page or individual
+   detail route. The UI exists only when it helps a player browse or understand the data.
+3. **Domains expose capabilities, not one mandatory template.** A domain may provide a catalog,
+   overview, scoped view, detail pages, glossary/search participation, navigation, or only embedded
+   semantics.
+4. **Cross-domain views do not become owners.** Glossary and global search index canonical concepts;
+   they do not maintain competing definitions.
+5. **Prefer a natural domain over the catch-all.** General Rules is the deliberate fallback for
+   rules/reference concepts with no clearer owner. It must not become a miscellaneous bucket for
+   concepts that already belong elsewhere.
+6. **Stable identity is separate from domain placement.** Existing typed IDs may remain stable when
+   presentation/ownership is clarified. Moving Fireteam reference material into the Fireteams
+   domain, for example, does not require renaming a stable `rule:*` identity solely to
+   match a route.
+7. **Scaffold before exhaustive population.** InfinityDB may establish a domain and its contracts
+   before every current rules item has been modeled. Missing coverage remains explicit backlog work
+   rather than a reason to delay the shared structure.
+
+## Domain presentation vocabulary
+
+InfinityDB uses three primary presentation levels.
+
+### Top-level domains
+
+Top-level domains have a player-facing landing surface and appear in the application's navigational
+or discovery model when sufficiently populated. They may use different presentation modes:
+
+- **Catalog:** a browsable collection, usually with filters/search and optional item detail pages.
+- **Overview:** a domain landing page that summarizes or routes to useful content without requiring
+  one detail page per item.
+- **Scoped view:** a stable domain surface whose content changes when a meaningful scope is
+  selected.
+
+A domain can combine these modes. Fireteams, for example, use an overview landing state and an
+army-scoped view rather than a conventional item catalog.
+
+### Embedded vocabularies
+
+Embedded vocabularies contain canonical typed concepts that are useful for semantic links, tooltips,
+glossary entries, filtering, or search, but do not warrant their own catalog/detail browser.
+
+Attributes are the first explicit example. Identities such as `attribute:mov`, `attribute:bs`, and
+`attribute:wip` can own definitions and relationships without creating `/attributes` or individual
+Attribute pages. Their primary presentation can remain contextual help/tooltips plus glossary/search
+results.
+
+Other finite vocabularies may use the same model when a player-facing catalog would add little
+value.
+Do not promote a vocabulary to a top-level domain merely because it has typed identities.
+
+### Cross-domain views
+
+**Glossary** and **global search** are projections across canonical concepts rather than application
+domains of their own.
+
+- Search returns concepts from their owning domains and identifies that domain in the result.
+- Glossary provides a terminology-oriented view across both top-level domains and embedded
+  vocabularies.
+- A glossary entry backed by a browsable concept links to that concept's normal detail surface.
+- An embedded concept can present its definition/context directly in Glossary or a tooltip without
+  inventing an otherwise-useless detail route.
+
+This keeps the glossary useful without creating a second source of truth for rules text.
+
+## Planned top-level domain set
+
+The planned top-level domain set through 1.0 is:
+
+- **Armies** (`armies`) — overview/navigation domain.
+- **Units** (`units`) — Unit Explorer plus Unit detail.
+- **Skills** (`skills`) — catalog plus detail.
+- **Equipment** (`equipment`) — catalog plus detail.
+- **Weapons** (`weapons`) — catalog plus detail.
+- **Ammunition** (`ammunition`) — rules/reference catalog plus detail.
+- **Traits** (`traits`) — catalog plus detail.
+- **States** (`states`) — catalog plus detail.
+- **Hacking Programs** (`hacking-programs`) — catalog plus detail.
+- **Fireteams** (`fireteams`) — overview plus army-scoped reference/chart view.
+- **Labels** (`labels`) — rules/reference catalog plus detail.
+- **General Rules** (`rules`) — catch-all rules/reference domain for concepts without a clearer
+  top-level owner.
+
+This is a planned skeleton, not a requirement that every domain immediately be fully populated or
+visible in primary navigation. Future evidence may justify another domain, but new top-level domains
+should require a concrete player-facing browsing/use case rather than only a new data type.
+
+## Domain capability registry
+
+The application should maintain one canonical registry describing domain identity and presentation
+capabilities. The exact storage/schema is an implementation decision, but the registry must be able
+to express at least:
+
+- stable public domain slug and singular/plural display names;
+- the concept/record kinds owned or presented by the domain;
+- whether the domain participates in navigation, global search, and Glossary;
+- whether it provides a landing/overview surface, catalog/list surface, scoped views, or detail
+  pages;
+- whether the surface is currently publishable/player-visible or only scaffolded for future use; and
+- any cross-domain navigation target needed by the domain.
+
+These capabilities must be independent. In particular, `identity: yes` must not imply
+`detail page: yes`, and `top-level domain` must not imply `catalog`.
+
+## Shared domain interaction contract
+
+Player-facing domains should use the same high-level state vocabulary even when their content
+differs.
+
+### Landing state
+
+The unscoped canonical domain URL presents the domain itself: heading, domain-level context where
+useful, stable controls, and the natural overview or complete catalog.
+
+### Scoped state
+
+A meaningful selection/filter can produce a scoped view. Controls and domain identity stay in a
+stable position while scoped content replaces or narrows landing content. Domain-wide explanatory
+content may be landing-only when repeating it in every scoped state would add noise.
+
+The scoped state must be reproducible in the URL when it materially changes what the user sees.
+
+### Detail state
+
+Domains with individually browsable records may expose detail pages. Detail surfaces reuse the same
+canonical identities and link back to the relevant landing/scoped context rather than maintaining a
+parallel definition.
+
+### Reset state
+
+Clearing a scope returns to the canonical landing state. It should not leave an ambiguous empty or
+partially scoped page.
+
+This state model is shared vocabulary, not a requirement that every domain implement all four
+states.
+
+## Armies
+
+Armies are a top-level **overview** domain rather than a conventional catalog/detail domain.
+
+`/armies` should present one concise maintained entry per playable army with:
+
+- army symbol;
+- canonical display name;
+- a short maintained description; and
+- a link to Unit Explorer with the corresponding Army filter already applied.
+
+The overview reuses canonical Army identities/slugs and existing symbol relationships. Descriptive
+prose is maintained presentation content; it must not be inferred automatically from Unit
+composition.
+
+Individual `/armies/<slug>` detail pages are not required unless a future player-facing use case
+justifies them. The pre-filtered Unit Explorer URL is the shareable destination for browsing an
+army's Units.
+
+## Fireteams
+
+Fireteams are a top-level domain with an **overview landing state** and an **army-scoped view**.
+
+The intended behavior is:
+
+```text
+/fireteams
+    domain heading
+    army selector
+    general Fireteam rules summary
+
+/fireteams?army=<slug>
+    domain heading
+    army selector
+    selected Army's Fireteam chart/reference content
+```
+
+The general Fireteam rules summary belongs to the Fireteams domain itself. It is shown on the
+unscoped landing state and hidden when an Army is selected, rather than repeated above every Army
+chart. Clearing the Army selection returns to the unscoped summary.
+
+The selected Army must be URL-addressable/shareable. Loading a scoped URL should render the scoped
+state directly without first depending on presentation of the general summary.
+
+General Fireteam reference records remain globally searchable/linkable even when the landing summary
+is hidden in an Army-scoped view. Stable record IDs need not be renamed merely because Fireteams is
+now their canonical presentation domain.
+
+## Ammunition and Labels
+
+Ammunition and Labels are the first new top-level domains to establish after the domain framework.
+They intentionally exercise different existing data shapes.
+
+### Ammunition
+
+Ammunition becomes a first-class rules/reference domain with canonical `ammunition:*` identities,
+a catalog, and detail surfaces. The initial 0.9 work should establish the domain and useful current
+entries without requiring every Ammunition interaction to be exhaustively modeled.
+
+The 1.0 completeness pass can then finish deeper semantics such as base/combined Ammunition
+relationships, Saving Roll interactions, State effects, and other rules-reference links where they
+serve the application model.
+
+### Labels
+
+Labels become a first-class rules/reference domain backed by the canonical rules Label vocabulary
+already used by Skills, States, Hacking Programs, and other references. The browser should expose
+those existing identities rather than copying Label definitions into generic rule records.
+
+Typed Label identity is important because surface terms can legitimately overlap other concept kinds
+(for example a term can exist as both a Label and a Trait/Characteristic). Domain/kind information
+must therefore remain part of semantic identity and linking.
+
+## General Rules
+
+`rules` is the generic top-level fallback for rules/reference concepts that do not have a clearer
+canonical top-level domain.
+
+A concept belongs here because **General Rules is its best semantic owner**, not merely because the
+concept is inconvenient to classify. If a later domain provides a natural home, presentation/domain
+ownership should move there while preserving stable identities and relationships where practical.
+
+General Rules should not absorb embedded vocabularies solely to give them pages. Concepts such as
+Attributes can remain canonical and glossary/searchable without becoming generic rule-detail pages.
+
+## Glossary usage
+
+Glossary should answer “what does this term mean here?” across InfinityDB rather than behave as a
+separate rules catalog.
+
+The implementation should:
+
+- derive entries from canonical top-level domains and embedded vocabularies;
+- preserve concept kind/domain so identical surface text is not merged incorrectly;
+- link browsable concepts to their owning detail surfaces;
+- present embedded-only definitions inline or through contextual help/tooltips;
+- support aliases/synonyms without creating duplicate canonical concepts; and
+- remain compatible with the typed maintained-text reference layer so authored prose links to the
+  same concepts Glossary exposes.
+
+Profile notation help is a contextual consumer of this framework, not a competing glossary dataset.
+Where a profile term has a canonical concept identity, tooltips/help should reuse it.
+
+## Population and publication strategy
+
+The domain registry and route/navigation contracts should be established before exhaustive content
+population. A scaffolded domain may exist internally without appearing in primary navigation until
+its minimum useful player-facing content is ready.
+
+The initial sequence is:
+
+1. establish the application-domain registry/capability model and planned top-level skeleton;
+2. expose Labels and Ammunition as the first newly browsable domains;
+3. add the Armies overview and normalize Fireteams to the landing/scoped interaction contract;
+4. build Glossary as a federated projection over those canonical domains plus embedded vocabularies;
+5. continue filling semantic relationships and domain coverage through the 1.0 completeness work.
+
+This sequence deliberately creates the reusable structure first so later domains do not need to
+invent independent navigation, catalog, glossary, or scoped-view conventions.

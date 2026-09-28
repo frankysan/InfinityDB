@@ -136,6 +136,20 @@ replace the semantic game-data domains described by the data model. Cross-domain
 work should name multiple project domains only when it materially changes the
 contract between them.
 
+## Application domains
+
+**Design direction.** Player-facing game/reference information is organized through a
+capability-based application-domain model described in `docs/application-domains.md`.
+Canonical semantic identity and UI presentation are deliberately separate: a concept may be
+searchable, glossary-visible, or available for contextual help without requiring its own catalog
+or detail route. Conversely, top-level domains may use catalog, overview, or scoped-view
+presentations rather than one mandatory page template.
+
+Glossary and global search are cross-domain projections, not canonical data owners. General Rules
+is the fallback domain only for rules/reference concepts with no clearer semantic owner. The planned
+domain skeleton is established before exhaustive population so later additions reuse shared routing,
+navigation, glossary, and presentation contracts rather than inventing parallel structures.
+
 ## Documentation status
 
 This document records both implemented architecture and accepted architectural

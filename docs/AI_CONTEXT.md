@@ -16,6 +16,8 @@ model.
   direction.
 - `docs/data-model.md` is authoritative for normalized data semantics and
   persistence structure.
+- `docs/application-domains.md` defines the accepted player-facing game/reference domain skeleton,
+  presentation capabilities, and Glossary/search ownership model.
 - `docs/web-design-guidelines.md` defines the target browser visual/interaction contract,
   shared design vocabulary, and reusable UI-structure rules. It is intentionally a desired
   design rather than a snapshot of the current implementation.

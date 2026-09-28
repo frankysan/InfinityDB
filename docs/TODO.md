@@ -60,8 +60,10 @@ confirmed application-data presentation gap.
 
 The Unit Explorer filtering/extended-results work, global search, structured rules-reference
 cross-link pass, Profile notation foundation, and maintained-text reference/token layer are
-complete. Remaining 0.9 work is concentrated in the reviewed maintained-prose link migration,
-the broader glossary terminology layer, and the remaining catalog/share-state gaps.
+complete. Remaining 0.9 work is concentrated in the application-domain/discoverability framework,
+the reviewed maintained-prose link migration, the federated glossary terminology layer, and the
+remaining catalog/share-state gaps. `docs/application-domains.md` defines the accepted domain
+skeleton and interaction model.
 
 ### Player-facing completeness and navigation
 
@@ -83,13 +85,44 @@ the broader glossary terminology layer, and the remaining catalog/share-state ga
     `Hidden Deployment`), then remove the legacy baseline when the candidate inventory reaches
     zero.
 
-- [ ] Complete the rules glossary and profile-notation help layer on Unit details.
+- [ ] **Data processing + Web backend + Web frontend:** Establish the application-domain
+  framework and planned top-level domain skeleton described
+  in `docs/application-domains.md` before adding more one-off catalog/navigation structures.
+  - [ ] Add one canonical capability registry that separates semantic identity from navigation,
+    search, Glossary participation, overview/catalog/scoped presentation, and detail-page support.
+  - [ ] Scaffold the planned top-level domains: Armies, Units, Skills, Equipment, Weapons,
+    Ammunition, Traits, States, Hacking Programs, Fireteams, Labels, and General Rules. A
+    scaffolded/incomplete domain does not need primary-navigation visibility yet.
+  - [ ] Promote Ammunition and Labels first. Reuse the canonical Label vocabulary already present
+    in rules data; establish useful Ammunition identities/catalog/detail surfaces without making
+    exhaustive Ammunition interaction modeling a 0.9 gate.
+  - [ ] Add `/armies` as an overview surface with each Army's symbol, short maintained description,
+    and a link to Unit Explorer pre-filtered by the canonical Army identity. Do not add per-Army
+    detail pages without a separate player-facing use case.
+  - [ ] Normalize `/fireteams` to the shared landing/scoped contract: the unscoped page shows the
+    Army selector plus general Fireteam rules summary; selecting an Army hides that summary and
+    shows the Army-scoped chart/reference content; clearing the selection returns to the landing
+    state; scoped state remains URL-addressable/shareable.
+  - [ ] Establish Attributes as an embedded canonical vocabulary for semantic links, tooltips,
+    Glossary/search, and related metadata without adding an `/attributes` catalog or individual
+    Attribute detail pages.
+  - [ ] Keep General Rules as the explicit fallback only for rules/reference concepts with no
+    clearer top-level owner; do not use it to manufacture pages for embedded vocabularies.
+
+- [ ] **Data processing + Web backend + Web frontend:** Complete the rules Glossary and
+  profile-notation help layer as a cross-domain projection,
+  not as a second source of canonical definitions.
   - [x] Explain the existing profile fields and symbols in context: training/order,
     troop type, classification, ISC, Hackable, Peripheral, equipment versus
     BS weapons, melee weapons, and profile/loadout separators. Unit details now
     expose a collapsed, rules-backed Profile notation panel; relevant profile labels
     and Order/Characteristic symbols link into that panel without making every row
     denser.
+  - [ ] Build Glossary entries from canonical top-level domains and embedded vocabularies. Link
+    browsable concepts to their owning detail surfaces; render embedded-only concepts through
+    Glossary/contextual help without inventing dedicated detail routes.
+  - [ ] Preserve concept kind/domain in glossary/search identity so same-name concepts such as a
+    Label, Trait, Characteristic, State, or general term cannot be merged by display text alone.
   - [ ] Make terminology such as Trooper, Peripheral, Marker, Token, Deployable,
     Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever it
     changes how profile data should be read.
