@@ -12,6 +12,7 @@ from collections import OrderedDict, defaultdict
 from collections.abc import Callable, Collection, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from datetime import date
+from decimal import Decimal, InvalidOperation
 from functools import wraps
 from pathlib import Path
 from typing import Any, Protocol
@@ -306,6 +307,19 @@ def append_unique_item(items: list[dict[str, Any]], item: dict[str, Any]) -> Non
     """Add an item unless a merged source already contributed the same one."""
     if item not in items:
         items.append(item)
+
+
+def skill_extra_variant_key(extra: Mapping[str, Any]) -> tuple[Any, ...]:
+    """Return a semantic grouping key for one Skill extra."""
+    if extra.get("is_distance"):
+        try:
+            value = Decimal(str(extra.get("name", "")).strip())
+        except InvalidOperation:
+            pass
+        else:
+            if value.is_finite():
+                return ("distance", value.normalize())
+    return ("source", extra.get("id"), extra.get("name"))
 
 def _canonical_usage_select(
     payload_kind: str,
@@ -2680,7 +2694,7 @@ class Database:
             extras = occurrence["extras"]
             key = (
                 occurrence["skill_id"],
-                tuple((extra["id"], extra["name"]) for extra in extras),
+                tuple(skill_extra_variant_key(extra) for extra in extras),
             )
             variant = variants.setdefault(
                 key,

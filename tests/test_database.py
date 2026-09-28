@@ -1155,6 +1155,30 @@ def test_missing_mine_profiles_have_import_overrides(
     )
 
 
+def test_skill_detail_merges_equivalent_distance_extra_spellings(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["extras"][0].update(
+        {"name": "+7.5", "type": "DISTANCE"}
+    )
+    normalized["tables"]["extras"].append(
+        {"id": 2, "name": "7.5", "type": "DISTANCE", "source_defined": True}
+    )
+    normalized["tables"]["profile_skill_extras"][1]["extra_id"] = 2
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    detail = Database(path).get_skill(1)
+
+    assert detail is not None
+    assert len(detail["variants"]) == 1
+    assert detail["variants"][0]["extras"] == [
+        {"id": 1, "name": "+7.5", "is_distance": True}
+    ]
+    assert len(detail["variants"][0]["units"]) == 1
+
+
 def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normalized: dict) -> None:
     normalized["tables"]["skills"].extend(
         [

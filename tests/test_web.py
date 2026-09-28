@@ -2843,6 +2843,12 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
         for relation in state["rules"][0]["display_relations"]
         if relation["type"] == "cancels-state" and relation["direction"] == "inbound"
     } == {"Doctor", "Engineer", "GizmoKit", "MediKit", "Regeneration"}
+    doctor = next(
+        relation["record"]
+        for relation in state["rules"][0]["display_relations"]
+        if relation["record"]["name"] == "Doctor"
+    )
+    assert doctor["public_reference"] == {"catalog": "skills", "id": "doctor"}
 
     status, _, body = request(rules_app, "/api/states/not-a-state")
     assert status == 404
@@ -3481,10 +3487,9 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"detail-fact-heading" in body
     assert b'heading.textContent = "Related rules"' in body
     assert b"const presentation = relation.presentation;" in body
-    assert (
-        b'const catalogs = { skill: "skills", equipment: "equipment", weapon: "weapons" };' in body
-    )
-    assert b"return `/${catalog}/${encodeURIComponent(link.id)}`;" in body
+    assert b"const reference = record.public_reference;" in body
+    assert b"if (!reference?.catalog || !reference?.id) return null;" in body
+    assert b"return `/${reference.catalog}/${encodeURIComponent(reference.id)}`;" in body
     assert b"presentation?.group_id" in body
     assert b"presentation?.group_label" in body
     assert b"presentation?.group_order" in body

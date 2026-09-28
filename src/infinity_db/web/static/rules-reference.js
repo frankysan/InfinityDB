@@ -34,38 +34,9 @@ function applicabilityText(rule) {
 }
 
 function relationHref(record) {
-  const catalogs = { skill: "skills", equipment: "equipment", weapon: "weapons" };
-  const armyLinks = record.army_links || [];
-  for (const link of armyLinks) {
-    const catalog = catalogs[link.entity];
-    if (!catalog || typeof link.id !== "string" || /^\d+$/.test(link.id)) continue;
-    return `/${catalog}/${encodeURIComponent(link.id)}`;
-  }
-  if (record.kind === "skill" && armyLinks.length === 0 && typeof record.id === "string") {
-    const prefix = "skill:";
-    if (record.id.startsWith(prefix) && record.id.length > prefix.length) {
-      return `/skills/${encodeURIComponent(record.id.slice(prefix.length))}`;
-    }
-  }
-  if (record.kind === "trait" && typeof record.id === "string") {
-    const prefix = "trait:";
-    if (record.id.startsWith(prefix) && record.id.length > prefix.length) {
-      return `/traits/${encodeURIComponent(record.id.slice(prefix.length))}`;
-    }
-  }
-  if (record.kind === "hacking-program" && typeof record.id === "string") {
-    const prefix = "hacking-program:";
-    if (record.id.startsWith(prefix) && record.id.length > prefix.length) {
-      return `/hacking-programs/${encodeURIComponent(record.id.slice(prefix.length))}`;
-    }
-  }
-  if (record.kind === "state" && typeof record.id === "string") {
-    const prefix = "state:";
-    if (record.id.startsWith(prefix) && record.id.length > prefix.length) {
-      return `/states/${encodeURIComponent(record.id.slice(prefix.length))}`;
-    }
-  }
-  return null;
+  const reference = record.public_reference;
+  if (!reference?.catalog || !reference?.id) return null;
+  return `/${reference.catalog}/${encodeURIComponent(reference.id)}`;
 }
 
 function relationPresentation(relation) {

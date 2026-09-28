@@ -802,6 +802,14 @@ routable. Scalar Army fields use `main_army_slug` / `display_army_slug`; structu
 objects retain source/context `slug` and add `public_slug`; Trait usage variants add
 `item_slug`; and Skill Modifier rows add `skill_slug`. Source/provenance-only IDs are not
 relabeled as canonical slugs.
+Structured rules relations follow the same boundary. Detail APIs attach a
+`public_reference` only when the relation endpoint has a valid player-facing catalog route.
+Numeric Army source references for Skill/Equipment/Weapon variants are resolved through the
+current application catalog and published as the canonical application slug; stale numeric
+source variants remain plain text rather than becoming dead links. Rules-owned Trait, State,
+Hacking Program, and rules-only Skill identities project their typed semantic ID directly to
+the corresponding rules-reference route. The browser renders that backend-owned reference and
+does not reinterpret Army IDs or rules namespaces to invent links.
 This migration does not redirect numeric routes or declare derived slugs permanently
 frozen; per-domain freezing, reviewed overrides, aliases, and redirect/canonical-URL
 behavior remain required before numeric routes are retired or redirected.

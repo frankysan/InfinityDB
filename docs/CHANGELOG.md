@@ -38,6 +38,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web backend + Web frontend:** Complete the structured Related rules cross-link pass across
+  Skills, Equipment, Weapons, Traits, States, and Hacking Programs. Detail APIs now publish
+  backend-resolved catalog references: current source-specific Skill/Equipment/Weapon variants
+  resolve to their canonical application slug, while stale source-only variants remain plain
+  text instead of producing dead links. Rules-owned Trait, State, Hacking Program, and
+  rules-only Skill identities continue to link through their semantic IDs.
 - **Web frontend:** Tighten the Unit Explorer numeric-filter row by shortening exact-value
   dropdown placeholders to **Any** and vertically aligning the dual-handle range tracks with
   their neighboring exact-value controls.
@@ -82,6 +88,9 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Web backend:** Merge Skill-detail variants whose distance extras differ only by source
+  spelling, such as `7.5` versus `+7.5`, so converted values such as Super-Jump `3"`
+  appear once with the combined Unit set while raw source extras remain preserved.
 - **Web frontend:** Keep compact Navigation and Settings popovers above dual-handle Unit filter
   sliders by containing each slider's internal stacking layers within the slider component.
 - **Web frontend:** Let the Unit Explorer introduction wrap naturally at tablet widths instead of

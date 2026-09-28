@@ -58,12 +58,12 @@ data searchable, navigable, and understandable. It should finish the player-faci
 application model without absorbing the separate consistency, visual-architecture, and
 operations hardening work reserved for 0.10.0.
 
-The preferred execution order is: finish the Unit Explorer extended-results presentation now
-that categorical and contextual numeric filters are implemented; close the existing structured
-rules-reference link gaps; establish the maintained-text reference/token layer; and build the
-glossary/profile-help surface on top of that shared semantic-reference foundation. This order
-keeps the bounded Unit Explorer work moving while deferring the broader maintained-text
-ontology decision until it is actually needed.
+The Unit Explorer extended-results work and the structured rules-reference cross-link pass are
+complete. The preferred remaining execution order is: establish the maintained-text
+reference/token layer; build the glossary/profile-help surface on top of that shared semantic
+reference foundation; then close the remaining catalog/share-state gaps. This keeps the broad
+maintained-text ontology decision in one shared layer rather than adding more page-local link
+logic.
 
 ### Player-facing completeness and navigation
 
@@ -146,13 +146,6 @@ ontology decision until it is actually needed.
     URLs. Two users opening the same link should not silently receive materially
     different result sets without the UI explaining the preference-dependent
     difference.
-
-- [ ] Close the remaining rules-reference cross-link gaps from profiles, loadouts,
-  Skills, Equipment, Weapons, Traits, States, and Hacking Programs to their catalog
-  detail pages. Existing structured links already cover much of this surface; treat
-  the remaining work as an audit-and-close pass with focused regressions rather than
-  a new navigation system. Keep inline references inside maintained prose in the
-  separate maintained-text-link task above.
 
 ## 0.10.0 — consistency, presentation, and release hardening
 

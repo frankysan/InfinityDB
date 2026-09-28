@@ -24,6 +24,7 @@ from infinity_db.catalog_slugs import (
     enrich_nested_catalog_slugs,
 )
 from infinity_db.database import ArmySelectionError, Database
+from infinity_db.domain_references import enrich_rule_relation_references
 from infinity_db.domain_slugs import require_domain_slug
 from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.fireteam_reference import fireteam_reference
@@ -1074,6 +1075,7 @@ class Application:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
+                    payload = enrich_rule_relation_references(self.database, payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -1101,6 +1103,7 @@ class Application:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
+                    payload = enrich_rule_relation_references(self.database, payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -1124,6 +1127,7 @@ class Application:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
+                    payload = enrich_rule_relation_references(self.database, payload)
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -1142,6 +1146,7 @@ class Application:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
+                    payload = enrich_rule_relation_references(self.database, payload)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read trait")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -1153,6 +1158,8 @@ class Application:
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "State not found"}
+                else:
+                    payload = enrich_rule_relation_references(self.database, payload)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read state")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -1166,6 +1173,8 @@ class Application:
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Hacking Program not found"}
+                else:
+                    payload = enrich_rule_relation_references(self.database, payload)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Hacking Program")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

@@ -8,6 +8,7 @@ from infinity_army_data.metadata import decode_metadata
 from infinity_army_data.normalize import normalize_master, validate_normalized
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database
+from infinity_db.domain_references import enrich_rule_relation_references
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
@@ -100,6 +101,81 @@ def _reference_database(tmp_path: Path) -> Database:
     path = tmp_path / "infinity.db"
     export_database(normalized, path)
     return Database(path)
+
+
+def test_rules_relation_references_project_source_variants_to_public_routes(
+    tmp_path: Path,
+) -> None:
+    database = _reference_database(tmp_path)
+    payload = {
+        "rules": [
+            {
+                "display_relations": [
+                    {
+                        "record": {
+                            "id": "skill:martial-arts-l2",
+                            "kind": "skill",
+                            "name": "Martial Arts L2",
+                            "army_links": [{"entity": "skill", "id": "20"}],
+                        }
+                    },
+                    {
+                        "record": {
+                            "id": "equipment:hacking-device",
+                            "kind": "equipment",
+                            "name": "Hacking Device",
+                            "army_links": [{"entity": "equipment", "id": "100"}],
+                        }
+                    },
+                    {
+                        "record": {
+                            "id": "skill:stale-source-variant",
+                            "kind": "skill",
+                            "name": "Stale source variant",
+                            "army_links": [{"entity": "skill", "id": "999"}],
+                        }
+                    },
+                    {
+                        "record": {
+                            "id": "state:unconscious",
+                            "kind": "state",
+                            "name": "Unconscious State",
+                            "army_links": [],
+                        }
+                    },
+                    {
+                        "record": {
+                            "id": "rule:loss-of-lieutenant",
+                            "kind": "rule",
+                            "name": "Loss of Lieutenant",
+                            "army_links": [],
+                        }
+                    },
+                ]
+            }
+        ]
+    }
+
+    result = enrich_rule_relation_references(database, payload)
+    records = [
+        relation["record"]
+        for relation in result["rules"][0]["display_relations"]
+    ]
+
+    assert records[0]["public_reference"] == {
+        "catalog": "skills",
+        "id": "martial-arts",
+    }
+    assert records[1]["public_reference"] == {
+        "catalog": "equipment",
+        "id": "hacking-device",
+    }
+    assert "public_reference" not in records[2]
+    assert records[3]["public_reference"] == {
+        "catalog": "states",
+        "id": "unconscious",
+    }
+    assert "public_reference" not in records[4]
 
 
 def test_structured_reference_metadata_is_materialized_without_raw_tables(
