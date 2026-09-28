@@ -124,6 +124,15 @@ In the 2026-09-28 serial Linux benchmark, this reduced `tests/test_rules_databas
 from 5.14 seconds to 2.27 seconds while retaining all 45 tests. Treat the timing as
 diagnostic evidence rather than a test threshold.
 
+Tests in `tests/test_database.py` that only need the unchanged normalized Army fixture share
+one module-scoped application-database template and copy that template into each test's
+temporary directory. The raw sibling is copied with it, so validation tests keep the same
+artifact shape while retaining per-test mutation isolation. Tests that alter normalized source
+data, exercise exporter behavior, or verify deterministic/staging behavior continue to build
+their own databases. In paired 2026-09-28 serial Linux runs, this reduced the 162-test module
+by roughly 13-16% without changing the test count. Treat the timing as diagnostic evidence
+rather than a test threshold.
+
 ### SQLite finalization in semantic tests
 
 The production Army and rules exporters canonicalize generated SQLite artifacts by
