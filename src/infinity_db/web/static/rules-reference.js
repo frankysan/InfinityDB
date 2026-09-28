@@ -206,7 +206,7 @@ export function rulesReferenceArticle(
   { leadingContent = [], headerContent = [], beforeRelations = [] } = {},
 ) {
   const article = document.createElement("article");
-  article.className = "detail-section";
+  article.className = "surface surface--subtle detail-section";
   const header = document.createElement("header");
   header.className = "surface-titlebar surface-titlebar--ruled rules-card-titlebar";
   const title = document.createElement("h3");

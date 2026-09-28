@@ -76,9 +76,16 @@ The shared heading/control pass now narrows the visual vocabulary further:
 - Settings now composes `.setting-row` and `.setting-switch` for every binary preference, with the
   distance-unit control using a variable-driven choice variant instead of duplicating switch CSS.
 
-The remaining work is intentionally broader: finish generated-table accessibility/responsive
-normalization outside the families already touched, rationalize affected presentation tokens,
-classify remaining one-off surface-like containers, and complete the manual browser matrix.
+The generated-table accessibility/responsive pass is now complete at source level: Unit-detail
+builders own hidden captions and explicit column scopes, existing stat/reference builders retain
+those semantics, ordinary names/content use normal wrapping with a defensive `break-word` fallback
+instead of `anywhere`, and atomic Army tags stay intact. Rules cards, profile-notation help, and
+Fireteam cards/reference summaries now compose shared surface variants instead of redrawing the
+same border/fill/shadow contract. Landing navigation cards remain intentionally distinct because
+interaction and navigation affordance, not generic containment, owns their hover/elevation behavior.
+
+The remaining implementation work is narrower: rationalize affected presentation tokens and
+complete the manual browser matrix.
 
 ## Overall assessment
 
@@ -154,11 +161,12 @@ compose `surface` and `content-frame` when they need both roles. Domain-specific
 as `.fireteam-explorer` remain free to define meaningful page geometry without also redrawing
 the common surface.
 
-**Remaining:** several specialized containers still restate surface-like
-border/background/shadow behavior, including landing links, rules-reference sections, profile
-notation help, and Fireteam cards or summaries. Not every one must become the same component,
-but each should be classified as a real surface variant or a genuinely different structure
-rather than maintaining accidental parallel implementations.
+Rules-reference cards, profile-notation help, and Fireteam reference/summary/member cards now
+compose the shared surface contract. A shared raised-surface modifier owns the stronger card
+shadow where that distinction is meaningful. Landing links remain a deliberate navigation-card
+pattern: their large-radius geometry, motion, and hover elevation communicate navigation rather
+than generic containment and therefore should not be folded into `.surface` merely to reduce
+selector count.
 
 ### Header vocabulary now has explicit shared ownership
 
@@ -303,26 +311,21 @@ global table default.
 
 ## Responsive design audit
 
-The current implementation contains several good content-priority decisions. Unit profile
-and loadout data deliberately transform at narrow widths, and weapon profile/stat structures
-have page-specific narrow representations rather than simply shrinking every cell. Fireteam
-reference/member tables already recognize that dense tables need special handling.
+The implementation keeps the useful content-priority transformations in Unit profile/loadout,
+Weapon profile, and Fireteam families. Dense reference tables preserve their comparison geometry
+through a table viewport when needed, while intentionally stacked Unit/Weapon mobile layouts retain
+responsive labels.
 
-The problem is consistency and ownership:
+Ordinary titles, profile content, search results, and linked-unit prose now use normal wrapping with
+`overflow-wrap: break-word` only as a fallback for pathological unbroken source strings. Atomic
+Army tags are explicitly non-wrapping. This avoids the min-content pressure caused by
+`overflow-wrap: anywhere`, which could trigger premature line breaks even when adjacent compact
+columns or the viewport policy could absorb the width instead.
 
-- responsive behavior is distributed across fourteen media-query blocks in one stylesheet,
-  including repeated `max-width: 600px` and `max-width: 400px` blocks;
-- several narrow layouts depend on positional column selectors and fixed percentages;
-- `overflow-wrap: anywhere` is used on ordinary profile/table content as an emergency fit
-  mechanism;
-- some tables switch from scrollable desktop behavior to squeezed fixed-layout mobile
-  behavior even when the semantic comparison structure would benefit from preserved widths.
-
-**Target:** keep the existing useful specialized transformations, but move breakpoint
-behavior into the component/family that owns it. Resolve width pressure in the order defined
-by the guideline: remove wasted space, preserve compact columns, allow sensible prose wraps,
-scroll when comparison geometry matters, and only then use an intentionally designed stacked
-representation.
+Repeated media-query blocks are not inherently a defect when they remain colocated with the
+component family they modify. Future cleanup should consolidate a breakpoint only when doing so
+improves ownership or removes duplicated decisions, rather than gathering unrelated responsive
+rules into a monolithic block.
 
 ## Developer-mode audit
 
@@ -340,22 +343,17 @@ ordinary column widths or hide a technical field only because the viewport is na
 
 ## Accessibility and semantic-markup audit
 
-Static catalog and Fireteam tables provide a good semantic baseline. Dynamic table creation
-is less consistent:
+Generated tables now follow the same semantic baseline as static catalogs. The generic Unit
+table helper owns hidden-caption creation and `scope="col"` for generated column headers, with
+all current Unit table callers supplying a contextual caption. Row-label cells created through
+the existing structured-cell path retain `scope="row"`, and header-driven cells continue to get
+responsive `data-label` values.
 
-- the generic Unit table helper creates column-header `<th>` elements without explicit
-  `scope="col"` and does not provide a caption contract;
-- Hacking Program profile headers are generated without `scope` or a table caption;
-- weapon stat/range tables are generated without captions and without explicit column scope;
-- Skill structured/reference tables correctly set column scope, showing that this can be
-  handled by a shared builder rather than per-call markup.
-
-A visible section heading can provide context for sighted users, but equivalent generated
-tables should expose equivalent semantics to assistive technology.
-
-**Target:** shared table constructors/family helpers should own caption strategy, header
-scope, row-header scope where applicable, and responsive labels. Accessibility semantics
-should be harder to omit than to include.
+Hacking Program, Weapon stat/range, Skill reference/usage, and Fireteam table builders already
+provide captions and explicit column/row scopes, so the pass keeps those contracts rather than
+introducing another parallel builder solely for identical DOM calls. New shared constructors
+should continue to make caption/scope/label semantics the default whenever a family genuinely
+shares construction logic.
 
 ## CSS and regression-test architecture
 

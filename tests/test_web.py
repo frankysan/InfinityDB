@@ -1732,6 +1732,32 @@ def test_listing_tables_use_semantic_column_layout(app: Callable) -> None:
     assert b"if (armies.length > 12)" in unit_list
 
 
+def test_generated_tables_own_accessible_semantics_and_normal_wrapping(app: Callable) -> None:
+    status, _, unit_js = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'caption.className = "sr-only";' in unit_js
+    assert b'th.scope = "col";' in unit_js
+    assert b'"Loadouts",' in unit_js
+    assert b'"Composite options",' in unit_js
+    assert b'"Profiles",' in unit_js
+    assert b'`${profile.name || "Unit"} general profile`' in unit_js
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(styles, ".unit-name", {"overflow-wrap": "break-word"})
+    assert_css_rule(styles, ".army-tag", {"white-space": "nowrap"})
+    assert_css_rule(
+        styles,
+        ".unit-detail .profile-summary>*",
+        {"overflow-wrap": "break-word"},
+    )
+    assert_css_rule(
+        styles,
+        ".weapon-profile tbody td",
+        {"overflow-wrap": "break-word"},
+    )
+
+
 def test_secondary_tables_use_shared_semantic_layout(app: Callable) -> None:
     status, _, styles = request(app, "/static/styles.css")
 
@@ -1827,7 +1853,7 @@ def test_very_narrow_detail_layout_wraps_titles_and_stacks_general_profiles(
 
     assert status == 200
     assert b"@media (max-width: 400px)" in styles
-    assert_css_rule(styles, "h1", {"overflow-wrap": "anywhere"})
+    assert_css_rule(styles, "h1", {"overflow-wrap": "break-word"})
     assert_css_rule(
         styles,
         ".unit-detail .general-profile .statline, .unit-detail .general-profile .statline tbody",
@@ -2595,6 +2621,11 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     )
     assert_css_rule(
         styles,
+        ".surface--raised",
+        {"box-shadow": "var(--shadow-card)"},
+    )
+    assert_css_rule(
+        styles,
         ".data-table--compact",
         {
             "--table-cell-size": "var(--font-size-sm)",
@@ -2668,6 +2699,22 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
         ".unit-detail .general-profile .profile-title",
         {"background": "var(--color-surface-highlight)"},
     )
+
+    status, _, fireteams = request(app, "/fireteams")
+    assert status == 200
+    assert b"surface surface--subtle surface--raised fireteam-reference" in fireteams
+    assert b"surface surface--subtle surface--raised fireteam-chart-summary" in fireteams
+
+    status, _, fireteam_js = request(app, "/static/fireteams.js")
+    assert status == 200
+    assert (
+        b'article.className = "surface surface--subtle surface--raised fireteam-card";'
+        in fireteam_js
+    )
+
+    status, _, rules_js = request(app, "/static/rules-reference.js")
+    assert status == 200
+    assert b'article.className = "surface surface--subtle detail-section";' in rules_js
 
     status, _, body = request(app, "/about")
     assert status == 200

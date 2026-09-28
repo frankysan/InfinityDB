@@ -247,7 +247,7 @@ by the audit remain in scope.
     Fireteam/reference tables) while retaining deliberate domain-specific responsive modes.
   - [x] Consolidate recurring surface-titlebar/header structures and duplicated Settings
     switches into shared primitives.
-  - [ ] Normalize generated-table accessibility semantics and responsive overflow/wrapping,
+  - [x] Normalize generated-table accessibility semantics and responsive overflow/wrapping,
     and update regression tests to assert semantic behavior instead of obsolete selector
     geometry.
   - [ ] Promote recurring hard-coded presentation colors into semantic tokens as affected

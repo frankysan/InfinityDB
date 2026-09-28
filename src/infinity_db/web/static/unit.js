@@ -107,13 +107,24 @@ function attributeStatline(
   return attributes;
 }
 
-function table(headers, rows, className = "") {
+function table(headers, rows, className = "", captionText = "") {
   const element = document.createElement("table");
   element.className = className;
+  if (captionText) {
+    const caption = document.createElement("caption");
+    caption.className = "sr-only";
+    caption.textContent = captionText;
+    element.append(caption);
+  }
   if (headers.length) {
     const head = document.createElement("thead");
     const headerRow = document.createElement("tr");
-    for (const header of headers) { const th = document.createElement("th"); th.textContent = header; headerRow.append(th); }
+    for (const header of headers) {
+      const th = document.createElement("th");
+      th.scope = "col";
+      th.textContent = header;
+      headerRow.append(th);
+    }
     head.append(headerRow);
     element.append(head);
   }
@@ -167,7 +178,7 @@ function renderProfileNotationHelp(items) {
   if (!items.length) return null;
   const disclosure = document.createElement("details");
   disclosure.id = "profile-notation-help";
-  disclosure.className = "surface surface--clipped content-frame profile-notation-help";
+  disclosure.className = "surface surface--subtle surface--clipped content-frame profile-notation-help";
 
   const summary = document.createElement("summary");
   const title = document.createElement("span");
@@ -1318,6 +1329,7 @@ function loadoutTable(loadouts, sharedItems, generalOrderType, anchorScope, anch
       return rows;
     }),
     "data-table--compact loadout-table",
+    "Loadouts",
   );
 }
 
@@ -1434,6 +1446,7 @@ function compositeOptionTable(options, anchorScope) {
       return rows;
     }),
     "data-table--compact composite-option-table",
+    "Composite options",
   );
 }
 
@@ -1478,6 +1491,7 @@ function renderArmyProfile(army, generalByName, expanded) {
         [],
         profileTableRows(group.profiles, generalByName, anchorScope),
         "data-table--compact profile-details-table",
+        "Profiles",
       ));
     }
     if (group.loadouts.length) {
@@ -1555,6 +1569,7 @@ function render(unit, helpItems = []) {
       [],
       generalProfileTableRows([profile]),
       "statline",
+      `${profile.name || "Unit"} general profile`,
     ));
     generalProfilesSection.append(generalProfile);
   }

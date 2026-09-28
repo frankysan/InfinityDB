@@ -157,7 +157,7 @@ function appendFtoDetails(cell, member) {
 
 function renderTeam(team) {
   const article = document.createElement("article");
-  article.className = "fireteam-card";
+  article.className = "surface surface--subtle surface--raised fireteam-card";
   const header = document.createElement("header");
   header.className = "surface-titlebar surface-titlebar--ruled fireteam-card-titlebar";
   const title = document.createElement("h3");
