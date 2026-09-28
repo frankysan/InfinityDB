@@ -250,9 +250,10 @@ by the audit remain in scope.
   - [x] Normalize generated-table accessibility semantics and responsive overflow/wrapping,
     and update regression tests to assert semantic behavior instead of obsolete selector
     geometry.
-  - [ ] Promote recurring hard-coded presentation colors into semantic tokens as affected
+  - [x] Promote recurring hard-coded presentation colors into semantic tokens as affected
     components are consolidated, keeping first-class Light/Dark theme implementation in its
-    dedicated task below.
+    dedicated task below. Shared component colors now resolve through semantic root roles, and
+    regression coverage prevents repeated component-level color literals from accumulating again.
   - [ ] Complete a manual browser acceptance matrix across representative desktop, compact,
     and narrow widths with Developer mode off/on before closing the refactor.
 

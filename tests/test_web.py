@@ -7,6 +7,7 @@ import re
 import shutil
 import sqlite3
 import sys
+from collections import Counter
 from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 from typing import Any
@@ -1422,7 +1423,11 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert_css_rule(styles, ".range-slider-track", {"top": "18px"})
     assert_css_rule(styles, ".range-input", {"top": "10px"})
     assert_css_rule(styles, ".range-value-max", {"top": "36px"})
-    assert_css_rule(styles, ".range-slider-selected", {"background": "#cbd4c8"})
+    assert_css_rule(
+        styles,
+        ".range-slider-selected",
+        {"background": "var(--color-range-selection-muted)"},
+    )
     assert_css_rule(
         styles,
         ".double-range-slider.is-active .range-slider-selected",
@@ -1695,7 +1700,7 @@ def test_listing_tables_use_semantic_column_layout(app: Callable) -> None:
         styles,
         "tbody .table-column--technical",
         {
-            "color": "#64725c",
+            "color": "var(--color-text-technical)",
             "font-family": "var(--font-family-mono)",
             "font-size": "var(--font-size-xs)",
         },
@@ -1703,7 +1708,7 @@ def test_listing_tables_use_semantic_column_layout(app: Callable) -> None:
     assert_css_rule(
         styles,
         ".data-table--interactive tbody tr:hover",
-        {"background": "#f8f9f3"},
+        {"background": "var(--color-surface-interactive-hover)"},
     )
     assert b"\ntbody tr:hover {" not in styles
     assert b"  .id-column {\n    display: none;\n  }" not in styles
@@ -2559,6 +2564,36 @@ def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> Non
     assert b".detail-section-title" not in styles
 
 
+def test_recurring_presentation_colors_use_semantic_tokens(app: Callable) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+
+    css = styles.decode("utf-8")
+    root = re.search(r":root\s*\{.*?\n\}", css, flags=re.DOTALL)
+    assert root is not None
+
+    component_css = css[: root.start()] + css[root.end() :]
+    color_literals = re.findall(
+        r"#[0-9a-fA-F]{3,8}\b|(?:rgb|rgba)\([^)]*\)",
+        component_css,
+    )
+    counts = Counter(literal.lower() for literal in color_literals)
+    repeated = {literal: count for literal, count in counts.items() if count > 1}
+    assert repeated == {}
+
+    for token in [
+        "--color-surface-data-header",
+        "--color-surface-interactive-hover",
+        "--color-text-heading",
+        "--color-text-tertiary",
+        "--color-text-technical",
+        "--color-border-subtle",
+        "--color-control-border",
+        "--color-link-hover",
+    ]:
+        assert f"{token}:".encode() in styles
+
+
 def test_weapon_range_tables_always_include_canonical_bands(app: Callable) -> None:
     status, _, body = request(app, "/static/catalog-detail.js")
 
@@ -2603,6 +2638,16 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
         {"width": "fit-content", "max-width": "100%"},
     )
     assert_css_rule(styles, ".surface--clipped", {"overflow": "hidden"})
+    assert_css_rule(
+        styles,
+        ".section-heading",
+        {"column-gap": "var(--space-2)"},
+    )
+    assert_css_rule(
+        styles,
+        ".section-index",
+        {"flex": "0 0 auto", "white-space": "nowrap"},
+    )
 
     for path in ["/units", "/skills", "/fireteams"]:
         status, _, body = request(app, path)
@@ -2617,7 +2662,7 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert_css_rule(
         styles,
         ".surface--highlighted",
-        {"background": "var(--surface-highlight)"},
+        {"background": "var(--color-surface-highlight)"},
     )
     assert_css_rule(
         styles,
@@ -2672,13 +2717,13 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert_css_rule(
         styles,
         ".weapon-data-value",
-        {"border-left": "1px solid #e9ece3"},
+        {"border-left": "1px solid var(--color-border-subtle)"},
     )
-    assert b"--surface-data-header: #fafbf8" in styles
+    assert b"--color-surface-data-header: #fafbf8" in styles
     assert_css_rule(
         styles,
         "thead th",
-        {"background": "var(--surface-data-header)"},
+        {"background": "var(--color-surface-data-header)"},
     )
     assert_css_rule(
         styles,

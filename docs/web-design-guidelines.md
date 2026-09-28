@@ -58,7 +58,7 @@ Reusable structures must remain usable with keyboard navigation, visible focus, 
 
 ### Keep theme and layout concerns separate
 
-Themes define semantic color and appearance roles. Layout primitives define structure, spacing, sizing, and interaction behavior. Components should consume both without baking a particular theme into geometry or duplicating layout for light and dark variants.
+Themes define semantic color and appearance roles. Layout primitives define structure, spacing, sizing, and interaction behavior. Components should consume both without baking a particular theme into geometry or duplicating layout for individual theme variants.
 
 ## Design vocabulary
 
@@ -275,7 +275,13 @@ Where technical detail cannot fit without harming the normal layout, prefer a de
 
 ## Typography and tokens
 
-Typography, spacing, radii, border treatment, focus styling, color roles, and component density should come from shared design tokens or primitives. Literal visual values should be introduced only when they represent a deliberate new shared role or an unavoidable unique asset constraint.
+Typography, spacing, radii, border treatment, focus styling, color roles, shadows, and component density should come from shared design tokens or primitives. Literal visual values should be introduced only when they represent a deliberate new shared role or an unavoidable unique asset constraint.
+
+Theme-facing tokens describe **meaning**, not a particular hue or page. Prefer roles such as default/subtle/data surfaces, primary/secondary/technical text, normal/strong/subtle borders, actions, focus, controls, status, and data emphasis. Components consume those roles; they should not copy a light-theme color merely because it currently looks correct. A component-local custom property may adapt a shared role for geometry or state, but its visual value should come from the semantic theme layer.
+
+When the same literal presentation color recurs, treat that as a signal to identify the shared role rather than repeat the value. Unique literals may remain for genuinely local presentation while their meaning is still unique; if the role recurs, promote it. Domain-identity colors such as faction or rules-category accents remain explicit semantic data tokens rather than being folded into generic interface colors.
+
+Each theme should therefore replace semantic token values, not duplicate component/layout rules. Light and Dark are the initial first-class themes, not an architectural limit: additional themes should plug into the same semantic token contract. Theme work may need theme-specific contrast-safe values for domain accents, but should preserve the component contract and non-color meaning.
 
 Text hierarchy should communicate function: identity/title, section heading, normal content, compact/tabular content, metadata, and technical identifiers are different semantic roles. Pages should not invent new type sizes or weights merely to make one local element appear important.
 

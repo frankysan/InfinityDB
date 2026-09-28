@@ -70,7 +70,8 @@ The shared heading/control pass now narrows the visual vocabulary further:
 
 - major page/catalog regions continue to use the existing `.section-heading` role;
 - record/card headers compose the shared `.surface-titlebar` primitive, with visual modifiers for
-  subtle filled titlebars and ruled titlebars instead of separate data/rules/Fireteam layout systems;
+  subtle filled titlebars and ruled titlebars instead of separate data/rules/Fireteam layout
+  systems;
 - detail-flow subsection headings use `.detail-heading`, keeping them distinct from surface-owned
   titlebars; and
 - Settings now composes `.setting-row` and `.setting-switch` for every binary preference, with the
@@ -84,8 +85,11 @@ Fireteam cards/reference summaries now compose shared surface variants instead o
 same border/fill/shadow contract. Landing navigation cards remain intentionally distinct because
 interaction and navigation affordance, not generic containment, owns their hover/elevation behavior.
 
-The remaining implementation work is narrower: rationalize affected presentation tokens and
-complete the manual browser matrix.
+The recurring presentation-token pass is now complete at source level. Shared surfaces, text
+roles, data/table emphasis, controls, links, Settings switches, and range-slider effects consume
+semantic root tokens rather than repeating the same light-theme literals. The remaining refactor
+work is the manual browser matrix; theme selection and the initial Light/Dark value sets remain the
+separate theming workstream. The token architecture is intended to support additional themes later.
 
 ## Overall assessment
 
@@ -192,21 +196,27 @@ Preference IDs continue to own behavior and persistence in `preferences.js`; vis
 now belong to the shared setting primitives. New binary Settings preferences should compose the
 same row/switch contract rather than add a preference-named CSS component.
 
-### Visual tokens are only partially authoritative
+### Recurring presentation colors now have semantic ownership
 
-The root stylesheet already contains semantic page/surface/text/action/border/focus tokens,
-font roles, type scale, spacing primitives, radii, and several domain colors. That is the
-right foundation for future themes.
+The root stylesheet owns semantic page/surface/text/action/border/focus/control tokens, font
+roles, type scale, spacing primitives, radii, shared shadows, and explicit domain colors. Shared
+components now consume those roles instead of repeating the same presentation literals. Legacy
+`--surface-*` aliases have also been removed in favor of the canonical `--color-*` names.
 
-The implementation still bypasses it frequently. A static count of the audited stylesheet
-finds roughly 190 literal color occurrences outside `:root`, with many repeated values. Some
-are legitimate domain-specific accents, but many are ordinary text, border, hover, surface,
-or control-state colors that duplicate existing semantic roles or indicate missing ones.
+The pass deliberately does **not** turn every unique literal into a token. A regression assertion
+requires repeated color literals outside `:root` to be promoted, while allowing genuinely local
+values to remain until they acquire a reusable semantic role. This keeps the token layer semantic
+rather than becoming a palette of one-use variable names.
 
-**Target:** promote recurring semantic roles into tokens as components are touched. Do not
-mechanically replace every literal with a variable; first decide what the color means. Theme
-work should consume that semantic layer rather than adding dark-mode overrides around
-hard-coded light-theme component values.
+Settings switch states and range-slider shadows follow the same contract through root tokens,
+and the previously referenced `--color-text-tertiary` role is now explicitly defined. Domain
+identity colors such as faction and rules-category accents remain separate from ordinary interface
+roles.
+
+Theme implementation is intentionally still pending. The first pass should supply Light/Dark
+values for this semantic layer, decide startup/persistence behavior, and audit contrast without
+duplicating component geometry or reintroducing page-local theme overrides. The same mechanism
+should remain open to additional themes without component-specific CSS forks.
 
 ## Table audit
 
@@ -396,8 +406,8 @@ design system.
    better width/overflow policy exists; ensure generated tables get consistent captions,
    scopes, labels, focus behavior, and narrow-screen semantics.
 6. **Improve token/theme readiness as components are consolidated.** Replace recurring
-   hard-coded presentation colors with semantic roles and leave first-class Light/Dark theme
-   implementation for its existing dedicated workstream.
+   hard-coded presentation colors with semantic roles and leave theme selection plus the initial
+   Light/Dark implementations for the existing dedicated theming workstream.
 7. **Finish with a browser acceptance matrix.** Exercise representative pages at desktop,
    compact, and narrow widths, normal and Developer modes, with long names, dense badges,
    empty states, and the widest table families. Record intentional exceptions rather than
