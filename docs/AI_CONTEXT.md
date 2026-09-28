@@ -133,7 +133,9 @@ and serves a read-only browser and same-origin HTTP API.
   the full suite remains the authoritative final gate and `full_assets` remains an
   orthogonal asset-availability marker. Windows
   benchmarking measured 687 tests at 59.67 s serial, 19.41 s with four workers,
-  and 14.13 s with automatic worker selection. Web tests build one template
+  and 14.13 s with automatic worker selection. Re-measure the current local optimum with
+  `tools/benchmark_test_workers.py` rather than assuming historical `auto` remains fastest;
+  the benchmark records comparable repeated runs through the normal check runner. Web tests build one template
   database per module and copy it per test so mutating tests remain isolated
   without repeating normalization/export work. Export-heavy Army/rules semantic
   tests explicitly skip byte-level SQLite finalization; production/default

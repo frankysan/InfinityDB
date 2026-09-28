@@ -74,6 +74,7 @@
     "ops": {
       "description": "Development checks, deployment, archive/report tooling, and operational helpers.",
       "modules": [
+        "test_benchmark_test_workers",
         "test_compare_determinism_manifests",
         "test_compare_runtime_benchmarks",
         "test_create_work_archive",

@@ -133,6 +133,34 @@ to one worker. `pytest-xdist` is part of the `dev` dependency set. Serial mode
 remains available for debugging ordering, isolation, or concurrency-sensitive
 failures.
 
+### Tuning local pytest worker count
+
+Do not assume that xdist `auto` is optimal on every development machine. CPU topology,
+Windows process startup, antivirus/filesystem behavior, and SQLite temporary-file contention
+can change the best worker count as the suite evolves. Benchmark candidate counts through the
+normal check runner:
+
+```powershell
+python tools/benchmark_test_workers.py --workers 0 4 6 8 auto --repeat 2
+```
+
+The benchmark defaults to hermetic assets (`--assets off`), uses the same `run_checks.py`
+test path and `worksteal` scheduler as normal development checks, and alternates worker-order
+direction between repetitions to reduce systematic warm-cache bias. It writes an ignored JSON
+report under `reports/` with the Git revision, platform, Python version, logical CPU count,
+individual runs, and median/min/max timings. A specific maintained section can be profiled with
+`--test-section`, for example:
+
+```powershell
+python tools/benchmark_test_workers.py --workers 4 6 8 auto --repeat 2 --test-section model
+```
+
+Use full-suite measurements when deciding whether to change the local default. Section-only
+measurements are useful for diagnosing scheduler behavior, but their fastest worker count need
+not be the fastest configuration for the complete test stage. Keep hosted CI tuning separate:
+the hosted Windows runner deliberately remains serial because its xdist behavior differs from
+the primary local Windows workstation.
+
 The web tests build one template SQLite database per module, then copy that
 template into each test's temporary directory before creating the application.
 This preserves mutation isolation while avoiding a full normalize/export cycle
