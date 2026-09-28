@@ -294,6 +294,9 @@ def test_hacking_program_catalog_composes_army_profiles_with_rules_semantics(
     assert carbonite is not None
     assert carbonite["source_extra_id"] == 13
     assert carbonite["rules"][0]["id"] == "hacking-program:carbonite"
+    assert [label["name"] for label in carbonite["rules"][0]["labels"]] == [
+        "Comms Attack"
+    ]
     assert {
         relation["record"]["id"]
         for relation in carbonite["rules"][0]["display_relations"]

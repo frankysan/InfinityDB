@@ -266,6 +266,13 @@ heading.
 `vocabularySources` follows the same locator rules instead of forcing wiki
 references to carry PDF page numbers.
 
+Current Label IDs form one canonical vocabulary across current collections. A record may
+therefore reuse a `labelIds` entry defined by another current collection rather than
+duplicating that Label definition locally. If the same Label ID is carried by more than
+one current collection, its name and description must agree exactly. Rules export rejects
+unresolved current Label references and conflicting current Label definitions, while
+historical collections remain self-contained.
+
 Do not bulk-copy PDF or wiki text, images, or page markup. Keep core rules,
 FAQs/errata, and ITS seasons in separate collections so versions cannot be
 blended accidentally.

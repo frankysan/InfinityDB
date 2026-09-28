@@ -175,6 +175,7 @@ def _create_schema(connection: sqlite3.Connection) -> None:
 def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
     collection_ids: set[str] = set()
     current_records: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
+    current_labels: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
     for path, document in documents:
         collection_id = document["collection"]["id"]
         if collection_id in collection_ids:
@@ -182,8 +183,31 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
         collection_ids.add(collection_id)
         if document["collection"]["status"] != "current":
             continue
+        for label in document["labels"]:
+            current_labels.setdefault(label["id"], []).append((path, label))
         for record in document["records"]:
             current_records.setdefault(record["id"], []).append((path, record))
+
+    for label_id, definitions in current_labels.items():
+        semantics = {(label["name"], label["description"]) for _, label in definitions}
+        if len(semantics) > 1:
+            sources = ", ".join(str(path) for path, _ in definitions)
+            raise ValueError(
+                f"Current rules label {label_id!r} has conflicting canonical "
+                f"definitions across {sources}"
+            )
+
+    current_label_ids = set(current_labels)
+    for path, document in documents:
+        if document["collection"]["status"] != "current":
+            continue
+        for record in document["records"]:
+            for label_id in record.get("labelIds", []):
+                if label_id not in current_label_ids:
+                    raise ValueError(
+                        f"Current rules label reference {label_id!r} in {path}:{record['id']} "
+                        "does not resolve to a current canonical Label"
+                    )
 
     current_ids = set(current_records)
     definitions_by_id: dict[str, tuple[Path, dict[str, Any]]] = {}
@@ -610,13 +634,34 @@ class RulesDatabase:
             }
             label_ids = record["label_ids"]
             if label_ids:
-                placeholders = ", ".join("?" for _ in label_ids)
-                label_rows = connection.execute(
-                    "SELECT id, name, description FROM labels "
-                    "WHERE collection_id = ? AND id IN (" + placeholders + ")",
-                    (row["collection_id"], *label_ids),
-                ).fetchall()
-                record["labels"] = [dict(label) for label in label_rows]
+                labels_by_id = {
+                    label["id"]: dict(label)
+                    for label in connection.execute(
+                        "SELECT id, name, description FROM labels "
+                        "WHERE collection_id = ? AND id IN ("
+                        + ", ".join("?" for _ in label_ids)
+                        + ")",
+                        (row["collection_id"], *label_ids),
+                    ).fetchall()
+                }
+                if collection["status"] == "current":
+                    missing_ids = [
+                        label_id for label_id in label_ids if label_id not in labels_by_id
+                    ]
+                    if missing_ids:
+                        placeholders = ", ".join("?" for _ in missing_ids)
+                        for label in connection.execute(
+                            "SELECT l.id, l.name, l.description FROM labels AS l "
+                            "JOIN collections AS c ON c.id = l.collection_id "
+                            "WHERE c.status = 'current' AND l.id IN (" + placeholders + ")",
+                            tuple(missing_ids),
+                        ).fetchall():
+                            labels_by_id[label["id"]] = dict(label)
+                record["labels"] = [
+                    labels_by_id[label_id]
+                    for label_id in label_ids
+                    if label_id in labels_by_id
+                ]
             facts = record["facts"]
             if isinstance(facts, dict):
                 type_ids = facts.get("typeIds")

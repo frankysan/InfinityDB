@@ -53,6 +53,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Data processing + Web backend + Web frontend:** Restore canonical Labels on Hacking
+  Program details by reusing the current core Label vocabulary across rules collections.
+  Supportware, No Roll, Comms Attack, and Negative Feedback (NFB) now appear from curated
+  program semantics without duplicating Label definitions; Non-Lethal remains a Trait rather
+  than being misclassified as a Label.
 - **Web frontend:** Stabilize Unit Explorer and rules-catalog table geometry around shared
   semantic column roles: primary titles use available width, descriptor/metric/developer
   columns stay compact, narrow Developer-mode tables scroll instead of hiding technical IDs,

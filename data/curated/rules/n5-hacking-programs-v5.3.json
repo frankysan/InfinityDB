@@ -66,7 +66,11 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "supportware",
+                "no-roll"
+            ]
         },
         {
             "id": "hacking-program:carbonite",
@@ -106,7 +110,10 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "comms-attack"
+            ]
         },
         {
             "id": "hacking-program:controlled-jump",
@@ -146,7 +153,11 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "supportware",
+                "no-roll"
+            ]
         },
         {
             "id": "hacking-program:cybermask",
@@ -186,7 +197,11 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "negative-feedback",
+                "no-roll"
+            ]
         },
         {
             "id": "hacking-program:enhanced-reaction",
@@ -223,7 +238,11 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "supportware",
+                "no-roll"
+            ]
         },
         {
             "id": "hacking-program:fairy-dust",
@@ -260,7 +279,11 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "supportware",
+                "no-roll"
+            ]
         },
         {
             "id": "hacking-program:oblivion",
@@ -300,7 +323,10 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "comms-attack"
+            ]
         },
         {
             "id": "hacking-program:spotlight",
@@ -340,7 +366,10 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "comms-attack"
+            ]
         },
         {
             "id": "hacking-program:total-control",
@@ -384,7 +413,10 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "comms-attack"
+            ]
         },
         {
             "id": "hacking-program:trinity",
@@ -418,7 +450,10 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "comms-attack"
+            ]
         },
         {
             "id": "hacking-program:white-noise",
@@ -455,7 +490,10 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "negative-feedback"
+            ]
         },
         {
             "id": "hacking-program:zero-pain",
@@ -489,7 +527,10 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-26"
-            }
+            },
+            "labelIds": [
+                "comms-attack"
+            ]
         }
     ]
 }

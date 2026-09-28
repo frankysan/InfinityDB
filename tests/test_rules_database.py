@@ -133,6 +133,30 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         ).fetchone() == ("n5-core-v5.3-pdf", 87)
 
 
+def test_hacking_programs_reuse_canonical_current_labels(
+    current_rules_database: RulesDatabase,
+) -> None:
+    programs = {
+        record["id"]: record
+        for record in current_rules_database.records_by_kind("hacking-program")
+    }
+
+    assert [label["name"] for label in programs["hacking-program:assisted-fire"]["labels"]] == [
+        "Supportware",
+        "No Roll",
+    ]
+    assert [label["name"] for label in programs["hacking-program:carbonite"]["labels"]] == [
+        "Comms Attack"
+    ]
+    assert [label["name"] for label in programs["hacking-program:cybermask"]["labels"]] == [
+        "Negative Feedback (NFB)",
+        "No Roll",
+    ]
+    assert [label["name"] for label in programs["hacking-program:white-noise"]["labels"]] == [
+        "Negative Feedback (NFB)"
+    ]
+
+
 def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
@@ -554,6 +578,40 @@ def test_export_rejects_ambiguous_current_definitions(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="exactly one definition contribution"):
         export_rules_database(
             [(current_path, current), (root / "annex.json", duplicate)],
+            tmp_path / "rules.db",
+        )
+
+
+def test_export_rejects_unresolved_current_label_reference(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current, (hacking_path, hacking_programs) = (
+        _current_core_with_hacking_programs(root)
+    )
+    document = copy.deepcopy(hacking_programs)
+    document["records"][0]["labelIds"] = ["missing-label"]
+
+    with pytest.raises(ValueError, match="does not resolve to a current canonical Label"):
+        export_rules_database(
+            [(current_path, current), (hacking_path, document)],
+            tmp_path / "rules.db",
+        )
+
+
+def test_export_rejects_conflicting_current_label_definition(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    current_path, current, (hacking_path, hacking_programs) = (
+        _current_core_with_hacking_programs(root)
+    )
+    document = copy.deepcopy(hacking_programs)
+    supportware = copy.deepcopy(
+        next(label for label in current["labels"] if label["id"] == "supportware")
+    )
+    supportware["description"] = "Conflicting test definition."
+    document["labels"] = [supportware]
+
+    with pytest.raises(ValueError, match="conflicting canonical definitions"):
+        export_rules_database(
+            [(current_path, current), (hacking_path, document)],
             tmp_path / "rules.db",
         )
 
