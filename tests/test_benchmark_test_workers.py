@@ -29,14 +29,26 @@ def test_normalize_workers_preserves_order_and_deduplicates() -> None:
         benchmark_test_workers.normalize_workers(["-1"])
 
 
-def test_benchmark_order_reverses_even_repetitions() -> None:
-    assert benchmark_test_workers.benchmark_order(("0", "4", "auto"), 2) == (
-        (1, "0"),
-        (1, "4"),
+def test_benchmark_order_balances_candidates_across_positions() -> None:
+    assert benchmark_test_workers.benchmark_order(("6", "8", "auto"), 6) == (
+        (1, "6"),
+        (1, "8"),
         (1, "auto"),
+        (2, "8"),
         (2, "auto"),
-        (2, "4"),
-        (2, "0"),
+        (2, "6"),
+        (3, "auto"),
+        (3, "6"),
+        (3, "8"),
+        (4, "auto"),
+        (4, "8"),
+        (4, "6"),
+        (5, "8"),
+        (5, "6"),
+        (5, "auto"),
+        (6, "6"),
+        (6, "auto"),
+        (6, "8"),
     )
 
 

@@ -144,12 +144,14 @@ normal check runner:
 python tools/benchmark_test_workers.py --workers 0 4 6 8 auto --repeat 2
 ```
 
-The benchmark defaults to hermetic assets (`--assets off`), uses the same `run_checks.py`
-test path and `worksteal` scheduler as normal development checks, and alternates worker-order
-direction between repetitions to reduce systematic warm-cache bias. It writes an ignored JSON
-report under `reports/` with the Git revision, platform, Python version, logical CPU count,
-individual runs, and median/min/max timings. A specific maintained section can be profiled with
-`--test-section`, for example:
+The benchmark defaults to hermetic assets (`--assets off`) and uses the same `run_checks.py`
+test path and `worksteal` scheduler as normal development checks. Repetitions rotate candidates
+through benchmark positions and reverse each complete rotation cycle so one candidate cannot
+always inherit the same warm-cache/process-startup position. For exact position balance, use a
+repeat count equal to or a multiple of the number of candidates being compared. The tool writes
+an ignored JSON report under `reports/` with the Git revision, platform, Python version, logical
+CPU count, individual runs, and median/min/max timings. A specific maintained section can be
+profiled with `--test-section`, for example:
 
 ```powershell
 python tools/benchmark_test_workers.py --workers 4 6 8 auto --repeat 2 --test-section model

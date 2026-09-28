@@ -69,8 +69,9 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=1,
         help=(
-            "Number of runs per worker count. Repeated runs alternate worker-order direction "
-            "to reduce systematic warm-cache bias. Default: 1."
+            "Number of runs per worker count. Repeated runs rotate candidates through benchmark "
+            "positions and reverse each complete rotation cycle to reduce systematic warm-cache "
+            "bias. Default: 1."
         ),
     )
     parser.add_argument(
@@ -119,13 +120,17 @@ def normalize_workers(values: list[str]) -> tuple[str, ...]:
 
 
 def benchmark_order(workers: tuple[str, ...], repeat: int) -> tuple[tuple[int, str], ...]:
-    """Return deterministic runs, reversing every second repetition to reduce cache bias."""
+    """Return deterministic runs with candidates balanced across benchmark positions."""
 
     if repeat < 1:
         raise ValueError("repeat must be at least 1")
     scheduled: list[tuple[int, str]] = []
-    for repetition in range(1, repeat + 1):
-        ordered = workers if repetition % 2 else tuple(reversed(workers))
+    candidate_count = len(workers)
+    for repetition_index in range(repeat):
+        cycle, offset = divmod(repetition_index, candidate_count)
+        base = workers if cycle % 2 == 0 else tuple(reversed(workers))
+        ordered = base[offset:] + base[:offset]
+        repetition = repetition_index + 1
         scheduled.extend((repetition, worker) for worker in ordered)
     return tuple(scheduled)
 
