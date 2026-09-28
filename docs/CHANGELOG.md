@@ -51,6 +51,10 @@ New or materially revised entries use the project-domain labels defined in
   symbols, using Order/Characteristic symbols where available, showing long Troop Type names until
   narrow layouts collapse them to abbreviations, and keeping MOV unit markers legible in both
   centimeter and inch display modes. Troop Type filter options use the same long-form labels.
+- **Web frontend:** Hide negative/source-absence Characteristics such as `No Cube`,
+  `Non Hackable`, and `Not Impetuous` from normal extended Unit rows while preserving
+  them in Developer Mode for source inspection.
+
 - **Web frontend:** Keep the compact navigation bar on screen while scrolling and collapse its
   global search field to a search button on narrow viewports. Expanding search temporarily uses
   the available navigation-bar space, while the collapsed state preserves the full InfinityDB

@@ -9,6 +9,12 @@ const TROOP_TYPE_LABELS = {
   VH: "Vehicle",
 };
 
+const DEVELOPER_ONLY_CHARACTERISTICS = new Set([
+  "no cube",
+  "non hackable",
+  "not impetuous",
+]);
+
 const CHARACTERISTIC_SYMBOLS = {
   regular: { category: "orders", type: "regular", label: "Regular Order" },
   irregular: { category: "orders", type: "irregular", label: "Irregular Order" },
@@ -25,6 +31,10 @@ export function troopTypeLabel(value) {
 
 export function characteristicSymbol(value) {
   return CHARACTERISTIC_SYMBOLS[String(value || "").trim().toLowerCase()] || null;
+}
+
+export function developerOnlyCharacteristic(value) {
+  return DEVELOPER_ONLY_CHARACTERISTICS.has(String(value || "").trim().toLowerCase());
 }
 
 export function formatMovement(move1, move2, unit) {

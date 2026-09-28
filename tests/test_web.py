@@ -1383,8 +1383,14 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'row.append(nameCell, idCell)' in unit_list_script
     assert b'unit-profile-characteristic-symbol' in unit_list_script
     assert b'unit-profile-characteristic-fallback' in unit_list_script
+    assert b'developerOnlyCharacteristic(characteristic)' in unit_list_script
     assert b'unit-profile-troop-type-long' in unit_list_script
     assert b'unit-profile-troop-type-short' in unit_list_script
+
+    status, _, unit_presentation_script = request(app, "/static/unit-presentation.js")
+    assert status == 200
+    for characteristic in (b"no cube", b"non hackable", b"not impetuous"):
+        assert characteristic in unit_presentation_script
 
     status, _, app_script = request(app, "/static/app.js")
     assert status == 200

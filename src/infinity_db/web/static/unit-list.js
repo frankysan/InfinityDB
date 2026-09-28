@@ -1,6 +1,11 @@
 import { distanceUnit } from "./preferences.js";
 import { staticSymbolPath, unitSymbol } from "./unit-symbols.js";
-import { characteristicSymbol, formatMovement, troopTypeLabel } from "./unit-presentation.js";
+import {
+  characteristicSymbol,
+  developerOnlyCharacteristic,
+  formatMovement,
+  troopTypeLabel,
+} from "./unit-presentation.js";
 
 function displayArmies(armies) {
   return [...armies].sort((left, right) => left.id - right.id);
@@ -128,6 +133,7 @@ function extendedProfilesRow(unit, columnCount) {
       if (descriptor) {
         const symbol = document.createElement("img");
         symbol.className = "unit-profile-characteristic-symbol";
+        if (developerOnlyCharacteristic(characteristic)) symbol.classList.add("developer-only");
         symbol.src = `/static/${descriptor.category}/${descriptor.type}.svg`;
         symbol.alt = descriptor.label;
         symbol.title = descriptor.label;
@@ -138,6 +144,7 @@ function extendedProfilesRow(unit, columnCount) {
       }
       const fallback = document.createElement("span");
       fallback.className = "unit-profile-characteristic-fallback";
+      if (developerOnlyCharacteristic(characteristic)) fallback.classList.add("developer-only");
       fallback.textContent = characteristic;
       characteristics.append(fallback);
     }
