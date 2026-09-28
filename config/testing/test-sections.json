@@ -61,6 +61,7 @@
         "test_cli",
         "test_deterministic_io",
         "test_download_army_json",
+        "test_download_wiki_history",
         "test_download_wiki_snapshot",
         "test_merge",
         "test_metadata",
