@@ -1195,17 +1195,22 @@ remain effective. Fluid title and hero tokens may use viewport interpolation ins
 but their bounds remain `rem`-based. Components must use these shared tokens rather than
 literal sizes or page-local clamps. Normal introductory/body copy uses the base tier while
 metadata and dense tables use the smaller tiers deliberately. Reuse these tokens and established components
-such as `.main`, `.topbar`, `.explorer`, `.button`, and `.page-footer` rather
+such as `.main`, `.topbar`, `.surface`, `.content-frame`, `.button`, and `.page-footer` rather
 than introducing page-local visual values. Detail pages use `.main-detail` to
 retain the common layout and responsive behavior. Detail renderers also reuse
-`.detail-group`, `.detail-section-title`, `.data-surface-header`, `.data-label`,
-and `.badge`; use their modifiers for semantic variants instead of duplicating
-detail-table geometry or type treatments.
+`.detail-group`, `.detail-heading`, `.surface-titlebar`, `.data-label`, and `.badge`;
+use their modifiers for semantic variants instead of duplicating detail-table geometry or
+type treatments.
 
-Surface hierarchy uses `.surface` with default, `--subtle`, or `--highlighted`
-variants. Tables use the comfortable default or `.data-table--compact` for
-detail and usage data; retain those variants instead of adding page-specific
-cell padding or header type rules.
+Surface hierarchy uses `.surface` with default, `--subtle`, `--highlighted`, or explicit
+`--clipped` variants while `.content-frame` owns intrinsic/bounded geometry. Shared contained
+headers compose `.surface-titlebar`; `.surface-titlebar--subtle` provides the filled data-header
+treatment and `.surface-titlebar--ruled` provides a shared separating rule. Major page/catalog
+regions use `.section-heading`, while `.detail-heading` remains a detail-flow subsection heading
+rather than a surface-owned titlebar. Tables use the comfortable default or
+`.data-table--compact` for detail and usage data, and `.table-viewport` owns horizontal table
+overflow; retain those shared roles instead of adding page-specific cell padding, header type,
+or overflow rules.
 
 Unit-list and general-profile surfaces may use the unit's derived display-faction
 colors as accents. Keep those accents within the shared token and gradient
@@ -1219,8 +1224,10 @@ tab/session. When the user enables
 **Remember settings** and accepts the cookie prompt, the same values are mirrored to
 one-year SameSite cookies for reuse in later browser sessions; disabling that option
 removes the persistent cookies without clearing the current session values. The Settings
-sidebar exposes those controls; on compact screens it becomes a top-bar menu beside
-Navigation. New sidebar or top-bar menus should use this same inline-sidebar and
+sidebar exposes those controls through shared `.setting-row` and `.setting-switch` primitives;
+related preferences may be grouped with `.settings-group`. Preference-specific IDs own browser
+state and persistence, not switch geometry. On compact screens Settings becomes a top-bar menu
+beside Navigation. New sidebar or top-bar menus should use this same inline-sidebar and
 compact-dropdown pattern. Developer mode sets `data-developer-mode` on the document
 root; use `.developer-only` for inline technical details and `.id-column` for table
 columns so they remain hidden in the player-facing view by default.

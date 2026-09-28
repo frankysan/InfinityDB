@@ -66,9 +66,19 @@ parallel sizing layer:
 - Developer mode no longer expands an entire Fireteam card merely because technical member columns
   are visible.
 
-The remaining work is intentionally broader: consolidate titlebars and controls, finish generated
-table accessibility/responsive normalization outside the families already touched, rationalize
-affected presentation tokens, and complete the manual browser matrix.
+The shared heading/control pass now narrows the visual vocabulary further:
+
+- major page/catalog regions continue to use the existing `.section-heading` role;
+- record/card headers compose the shared `.surface-titlebar` primitive, with visual modifiers for
+  subtle filled titlebars and ruled titlebars instead of separate data/rules/Fireteam layout systems;
+- detail-flow subsection headings use `.detail-heading`, keeping them distinct from surface-owned
+  titlebars; and
+- Settings now composes `.setting-row` and `.setting-switch` for every binary preference, with the
+  distance-unit control using a variable-driven choice variant instead of duplicating switch CSS.
+
+The remaining work is intentionally broader: finish generated-table accessibility/responsive
+normalization outside the families already touched, rationalize affected presentation tokens,
+classify remaining one-off surface-like containers, and complete the manual browser matrix.
 
 ## Overall assessment
 
@@ -150,28 +160,29 @@ notation help, and Fireteam cards or summaries. Not every one must become the sa
 but each should be classified as a real surface variant or a genuinely different structure
 rather than maintaining accidental parallel implementations.
 
-### Header vocabulary has not yet converged in implementation
+### Header vocabulary now has explicit shared ownership
 
-The stylesheet contains overlapping concepts such as `.section-heading`,
-`.data-surface-header`, `.detail-section-title`, `.rules-card-header`, and
-`.fireteam-card-header`. Some differences are meaningful, but their responsibilities are not
-yet explicit enough to tell which one should be reused for a new surface.
+The implementation now uses three recurring heading roles that match the design vocabulary:
+`.section-heading` introduces major page/catalog regions, `.surface-titlebar` owns headings
+inside contained record/card surfaces, and `.detail-heading` introduces subsections in the
+detail flow. The old parallel `.data-surface-header` and `.detail-section-title` primitives
+have been retired. Rules and Fireteam cards keep narrow domain classes only for their real
+content differences while composing the same titlebar layout and ruled-boundary primitive.
 
-**Target:** reduce these to a small hierarchy such as page/section heading, surface titlebar,
-and detail subsection heading, with domain-specific additions layered on those roles. The
-Hacking Program and Skills placement work should use those roles instead of creating a new
-header treatment for each catalog.
+This is the intended ownership model for new work. Domain-specific additions may change content
+or a justified local alignment/detail, but should not recreate the titlebar mechanism.
 
-### Shared controls are less reusable than their appearance suggests
+### Settings switches now use one control primitive
 
-Buttons and ordinary fields have useful shared primitives, but Settings switches are
-implemented several times. Developer mode, optional-unit settings, and remember-settings
-use nearly identical switch geometry and state styling in separate selectors; the distance
-unit switch is a closely related variant with another copy of the same mechanism.
+Developer mode, cache bypass, optional-unit preferences, Fireteam Wildcards, and
+Remember settings now share `.setting-row` plus `.setting-switch`. The distance-unit choice
+uses the same switch implementation with a variable-driven choice modifier for its slightly
+larger labeled `cm / in` presentation. The repeated switch drawing/state selectors have been
+removed.
 
-**Target:** establish one switch/control primitive with semantic modifiers where a real size
-or labeling difference exists. Keep preference meaning in the owning setting, not in the
-mechanics of drawing the switch.
+Preference IDs continue to own behavior and persistence in `preferences.js`; visual mechanics
+now belong to the shared setting primitives. New binary Settings preferences should compose the
+same row/switch contract rather than add a preference-named CSS component.
 
 ### Visual tokens are only partially authoritative
 

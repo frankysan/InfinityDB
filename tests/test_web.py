@@ -451,7 +451,9 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert_css_rule(styles, "#fireteam-reference-content", {"min-width": "0"})
     assert b".fireteam-card-types {\n    width: 100%;\n    min-width: 0;" in styles
     assert (
-        b".fireteam-card-header {\n    flex-direction: column;\n    align-items: stretch;" in styles
+        b".fireteam-card-titlebar {\n    flex-direction: column;\n"
+        b"    align-items: stretch;"
+        in styles
     )
     assert (
         b"""  .fireteam-reference-table table {
@@ -1858,7 +1860,11 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert status == 200
     assert b'id="developer-mode-toggle"' in body
     assert b'id="remember-settings-toggle"' in body
-    assert b'id="fireteams-include-wildcards-toggle" type="checkbox" checked' in body
+    assert (
+        b'id="fireteams-include-wildcards-toggle" class="setting-switch" '
+        b'type="checkbox" checked'
+        in body
+    )
     assert b'id="cookie-consent-dialog"' in body
     assert b"Allow cookies" in body
     assert b"Remember settings with browser cookies" in body
@@ -1866,6 +1872,10 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b"InfinityDB / Player reference" in body
     assert b'<div class="menu settings-menu" data-menu>' in body
     assert b'aria-controls="settings-menu"' in body
+    assert body.count(b'class="setting-switch') == 9
+    assert b'class="setting-row setting-row--choice"' in body
+    assert b'class="setting-row developer-only"' in body
+    assert b'class="settings-group"' in body
     assert b'>Settings <span aria-hidden="true">' in body
     assert body.index(b"compact-navigation-menu") < body.index(b"settings-menu")
     assert b'<th class="id-column table-column--technical" scope="col">Unit ID</th>' in body
@@ -1881,6 +1891,25 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
         {"display": "none"},
     )
     assert_css_rule(styles, ".settings-menu", {"margin-top": "32px"})
+    assert_css_rule(
+        styles,
+        ".setting-row",
+        {"display": "flex", "justify-content": "space-between"},
+    )
+    assert_css_rule(
+        styles,
+        ".setting-switch",
+        {"appearance": "none", "width": "var(--setting-switch-width)"},
+    )
+    assert_css_rule(
+        styles,
+        ".setting-switch--choice",
+        {"--setting-switch-width": "29px", "--setting-switch-height": "16px"},
+    )
+    assert b".developer-toggle" not in styles
+    assert b".optional-unit-toggle" not in styles
+    assert b".remember-settings-toggle" not in styles
+    assert b".distance-toggle" not in styles
     assert_css_rule(
         styles,
         ".compact-menu-panel",
@@ -1931,14 +1960,21 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'new CustomEvent("developermodechange"' in preferences
     assert b'const unit = savedUnit === "cm" ? "cm" : "in";' in preferences
     assert preferences.count(b"defaultChecked: true") == 4
-    assert b'id="distance-unit-toggle" type="checkbox" checked' in body
+    assert (
+        b'id="distance-unit-toggle" class="setting-switch setting-switch--choice" '
+        b'type="checkbox" checked'
+        in body
+    )
     for optional_id in (
         b"mercs-filter",
         b"specops-filter",
         b"teamops-filter",
         b"reinforcement-filter",
     ):
-        assert b'id="' + optional_id + b'" type="checkbox" checked' in body
+        assert (
+            b'id="' + optional_id + b'" class="setting-switch" type="checkbox" checked'
+            in body
+        )
 
     status, _, navigation = request(app, "/static/navigation.js")
     assert status == 200
@@ -2479,8 +2515,9 @@ def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> Non
     assert status == 200
     for selector in [
         b".detail-group",
-        b".detail-section-title",
-        b".data-surface-header",
+        b".detail-heading",
+        b".surface-titlebar",
+        b".surface-titlebar--subtle",
         b".data-label",
         b".badge",
     ]:
@@ -2490,7 +2527,10 @@ def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> Non
         status, _, body = request(app, path)
         assert status == 200
         assert b"detail-group" in body
-        assert b"data-surface-header" in body
+        assert b"surface-titlebar surface-titlebar--subtle" in body
+
+    assert b".data-surface-header" not in styles
+    assert b".detail-section-title" not in styles
 
 
 def test_weapon_range_tables_always_include_canonical_bands(app: Callable) -> None:
@@ -2579,7 +2619,7 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert b'class=\\"table-column--metric\\" scope=\\"col\\">PS</th>' in weapon_detail
     assert b'["PS", profile.damage, "metric"]' in weapon_detail
     assert b"<th>DAM</th>" not in weapon_detail
-    assert b'title.className = "data-surface-header";' in weapon_detail
+    assert b'title.className = "surface-titlebar surface-titlebar--subtle";' in weapon_detail
     assert b"headingText" not in weapon_detail
     assert b"variantTitle" not in weapon_detail
     assert b'profileHeading.textContent = "Profile";' in weapon_detail
@@ -2839,7 +2879,7 @@ def test_developer_cache_toggle_is_served(app: Callable) -> None:
     status, _, body = request(app, "/units")
     assert status == 200
     assert b'id="disable-cache-toggle"' in body
-    assert b"developer-toggle developer-only" in body
+    assert b"setting-row developer-only" in body
 
 
 def test_skill_distance_display_uses_api_parameter_semantics(app: Callable) -> None:
@@ -3490,7 +3530,7 @@ def test_equipment_api_adds_curated_declaration_category(app: Callable, tmp_path
     status, _, body = request(rules_app, "/static/rules-reference.js")
     assert status == 200
     assert b"rule.declaration_categories || []" in body
-    assert b'className = "rules-card-header"' in body
+    assert b'className = "surface-titlebar surface-titlebar--ruled rules-card-titlebar"' in body
 
 
 def test_infinity_wiki_link_labels_omit_query_strings(app: Callable) -> None:

@@ -245,7 +245,7 @@ by the audit remain in scope.
     columns compact, and let the viewport absorb Developer-mode width pressure.
   - [x] Converge reusable secondary table families (catalog usage, stat/profile, and
     Fireteam/reference tables) while retaining deliberate domain-specific responsive modes.
-  - [ ] Consolidate recurring surface-titlebar/header structures and duplicated Settings
+  - [x] Consolidate recurring surface-titlebar/header structures and duplicated Settings
     switches into shared primitives.
   - [ ] Normalize generated-table accessibility semantics and responsive overflow/wrapping,
     and update regression tests to assert semantic behavior instead of obsolete selector

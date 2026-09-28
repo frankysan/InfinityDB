@@ -110,7 +110,7 @@ function fallbackProfileArticle(program, leadingContent, headerContent, beforeRe
   const article = document.createElement("article");
   article.className = "detail-section";
   const header = document.createElement("header");
-  header.className = "rules-card-header";
+  header.className = "surface-titlebar surface-titlebar--ruled rules-card-titlebar";
   const title = document.createElement("h3");
   title.textContent = program.name;
   header.append(title, ...headerContent);
@@ -122,7 +122,7 @@ function profileSection(program) {
   const section = document.createElement("section");
   section.className = "detail-group rules-reference hacking-program-profile";
   const heading = document.createElement("h2");
-  heading.className = "detail-section-title";
+  heading.className = "detail-heading";
   heading.textContent = "Program profile";
   const leadingContent = programProfileContent(program);
   const headerContent = program.declaration_categories?.length

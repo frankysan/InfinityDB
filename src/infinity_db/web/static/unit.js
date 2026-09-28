@@ -879,7 +879,7 @@ function renderSourceNotes(unit, armies) {
   const section = document.createElement("section");
   section.className = "detail-group source-notes";
   const title = heading("Source notes");
-  title.className = "detail-section-title detail-section-title--rule";
+  title.className = "detail-heading detail-heading--rule";
   section.append(title);
 
   const surface = document.createElement("div");
@@ -931,7 +931,7 @@ function renderArmyRelationships(unit, armies) {
   const section = document.createElement("section");
   section.className = "detail-group army-relationships developer-only";
   const title = heading("Army relationships");
-  title.className = "detail-section-title detail-section-title--rule";
+  title.className = "detail-heading detail-heading--rule";
   section.append(title);
 
   const surface = document.createElement("div");
@@ -1020,7 +1020,7 @@ function renderSelectionRelationships(unit, armies) {
   const section = document.createElement("section");
   section.className = "detail-group selection-relationships developer-only";
   const title = heading("Selection relationships");
-  title.className = "detail-section-title detail-section-title--rule";
+  title.className = "detail-heading detail-heading--rule";
   section.append(title);
 
   const surface = document.createElement("div");
@@ -1115,7 +1115,7 @@ function renderPeripheralRelationships(unit) {
   const section = document.createElement("section");
   section.className = "detail-group peripheral-relationships";
   const title = heading("Peripheral relationships");
-  title.className = "detail-section-title detail-section-title--rule";
+  title.className = "detail-heading detail-heading--rule";
   section.append(title);
 
   const surface = document.createElement("div");
@@ -1443,7 +1443,7 @@ function renderArmyProfile(army, generalByName, expanded) {
   section.className = "surface surface--clipped content-frame army-profile";
   section.open = expanded;
   const armyHeading = document.createElement("summary");
-  armyHeading.className = "data-surface-header army-profile-title";
+  armyHeading.className = "surface-titlebar surface-titlebar--subtle army-profile-title";
   armyHeading.textContent = army.name;
   const symbol = staticSymbolPath(army.symbol_path);
   if (symbol) {
@@ -1545,7 +1545,7 @@ function render(unit, helpItems = []) {
   const generalHeading = heading(
     displayedGeneralProfiles.length === 1 ? "General profile" : "General profiles",
   );
-  generalHeading.className = "detail-section-title detail-section-title--rule";
+  generalHeading.className = "detail-heading detail-heading--rule";
   generalProfilesSection.append(generalHeading);
   for (const profile of displayedGeneralProfiles) {
     const generalProfile = document.createElement("section");
@@ -1574,7 +1574,7 @@ function render(unit, helpItems = []) {
     const section = document.createElement("section");
     section.className = "detail-group faction-profile-group";
     const groupHeading = heading(group.name);
-    groupHeading.className = "detail-section-title detail-section-title--rule";
+    groupHeading.className = "detail-heading detail-heading--rule";
     section.append(groupHeading);
     const profiles = document.createElement("div");
     profiles.className = "detail-group faction-profile-grid";

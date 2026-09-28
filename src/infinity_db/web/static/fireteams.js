@@ -159,7 +159,7 @@ function renderTeam(team) {
   const article = document.createElement("article");
   article.className = "fireteam-card";
   const header = document.createElement("header");
-  header.className = "fireteam-card-header";
+  header.className = "surface-titlebar surface-titlebar--ruled fireteam-card-titlebar";
   const title = document.createElement("h3");
   title.textContent = team.name || `Fireteam ${team.id}`;
   const typeBadges = document.createElement("div");

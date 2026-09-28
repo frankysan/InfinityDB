@@ -71,10 +71,15 @@ Use these terms when discussing, documenting, or implementing the browser UI.
 - **Surface** — a visually grouped container for related content. A card is a kind of surface, but `surface` is the general design term. A surface owns visual containment, not page width or overflow policy.
 - **Content frame** — a layout role for a bounded or intrinsic block of structured content. It may be combined with a surface, but owns geometry only: it does not draw the box or clip descendants.
 - **Clipped surface** — an explicit surface variant used when edge-to-edge child backgrounds must stay inside the surface boundary. Clipping is opt-in and must not substitute for a table viewport or responsive overflow policy.
-- **Surface header / titlebar** — the heading area owned by a surface. Record-wide classification, actions, and compact metadata may live here when they describe the whole surface rather than one row.
+- **Section heading** — the heading row that introduces a major page section or catalog region. It may carry a compact index/count beside the heading, but it is not owned by a nested record surface.
+- **Surface titlebar** — the heading area owned by a surface. Record-wide classification, actions, and compact metadata may live here when they describe the whole surface rather than one row.
+- **Detail heading** — a heading inside the detail flow that introduces a subsection or group without creating a new surface titlebar.
 - **Detail group** — a reusable grouping of related fields or subsections within a detail page.
 - **Catalog surface** — the complete reusable structure for browsing one catalog: title/context, controls or filters, result state, and catalog table/list.
 - **Control bar** — a grouped row or responsive cluster of filters, search, sorting, display options, or actions associated with a surface.
+- **Settings group** — a labeled collection of related persistent/session preferences.
+- **Setting row** — one preference row pairing its label/context with the control that changes it.
+- **Switch** — the shared binary-control primitive used when a setting represents an immediate on/off choice. Visual size variants are acceptable only when the interaction context genuinely differs.
 - **Badge** — a compact labeled semantic value, category, state, or role. A badge is treated as one visual token and should not break internally.
 - **Metadata** — secondary descriptive information that supports the main content without becoming its primary identity.
 - **Technical metadata** — internal identifiers, diagnostics, provenance, or implementation-facing information intended primarily for developer mode.
@@ -125,7 +130,9 @@ Surfaces should group information that belongs together and establish a clear re
 
 Visual containment and layout geometry must remain separate responsibilities. A surface decides how a grouped region is drawn; a content frame or owning page/component decides whether that region is intrinsic, bounded, full-width, or otherwise constrained. Neither role should silently own unrelated overflow behavior. When visual edge containment genuinely requires clipping, use an explicit clipped-surface variant; data overflow still belongs to the structure that owns the data, such as a table viewport.
 
-Surface headers should contain information that applies to the whole surface. For example, a record-wide type/classification belongs naturally with the record title when it does not vary by row. Row-specific values belong in the table or detail structure that owns those rows.
+Section headings, surface titlebars, and detail headings have distinct ownership. A section heading introduces the surrounding page region; a surface titlebar belongs to one contained record/card; a detail heading introduces a subsection within the detail flow. Do not create page-specific heading classes merely because the same role appears in a different domain.
+
+Surface titlebars should contain information that applies to the whole surface. For example, a record-wide type/classification belongs naturally with the record title when it does not vary by row. Row-specific values belong in the table or detail structure that owns those rows.
 
 Equivalent catalog/detail pages should place equivalent concepts consistently. A user moving from Skills to Hacking Programs or Equipment should not have to relearn where identity, classification, related rules, usage, or technical metadata appear unless the data genuinely differs.
 
@@ -245,7 +252,9 @@ Responsive transformations must preserve reading order, labels, relationships, k
 
 Controls that perform equivalent actions should use equivalent visual structures, labels, spacing, and states across pages. Search, filtering, sorting, settings, expand/collapse behavior, and mode switches should not each invent new control geometry.
 
-Control groups should remain visually associated with the surface they affect. A control should not appear to apply globally when it only changes one catalog or detail group.
+Settings should compose shared setting rows and switch controls rather than styling each preference independently. Preference-specific classes or IDs should own behavior/state only; they should not redraw the same switch. A labeled choice such as `cm / in` may specialize the shared switch through a semantic size/context modifier, but the switch mechanism remains one primitive.
+
+Control groups should remain visually associated with the surface they affect. A control should not appear to apply globally when it only changes one catalog or detail group. Related persistent/session preferences may be grouped under a settings-group label; standalone settings should keep the same row alignment and control treatment.
 
 Interactive state changes should preserve surrounding geometry where practical. Loading, empty, error, and disabled states should not cause avoidable layout shifts or remove context needed to understand what changed.
 

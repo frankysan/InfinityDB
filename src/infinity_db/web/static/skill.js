@@ -62,7 +62,7 @@ function structuredTable(titleText, columns, rows) {
   const section = document.createElement("section");
   section.className = "detail-group";
   const title = document.createElement("h2");
-  title.className = "detail-section-title";
+  title.className = "detail-heading";
   title.textContent = titleText;
   const container = document.createElement("div");
   container.className = "table-viewport";
@@ -187,7 +187,7 @@ function variantSection(variant, parameterSemantics) {
   const section = document.createElement("details");
   section.className = "surface surface--clipped content-frame army-profile";
   const heading = document.createElement("summary");
-  heading.className = "data-surface-header army-profile-title";
+  heading.className = "surface-titlebar surface-titlebar--subtle army-profile-title";
   const title = document.createElement("h2");
   title.textContent = formatVariantName(variant, parameterSemantics);
   const count = document.createElement("span");

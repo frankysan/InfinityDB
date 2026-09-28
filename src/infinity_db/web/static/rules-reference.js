@@ -208,7 +208,7 @@ export function rulesReferenceArticle(
   const article = document.createElement("article");
   article.className = "detail-section";
   const header = document.createElement("header");
-  header.className = "rules-card-header";
+  header.className = "surface-titlebar surface-titlebar--ruled rules-card-titlebar";
   const title = document.createElement("h3");
   title.textContent = rule.name;
   header.append(title);
@@ -234,7 +234,7 @@ export function rulesReferenceSection(rules, headingText = "Rules reference") {
   const section = document.createElement("section");
   section.className = "detail-group rules-reference";
   const heading = document.createElement("h2");
-  heading.className = "detail-section-title";
+  heading.className = "detail-heading";
   heading.textContent = headingText;
   section.append(heading, ...rules.map((rule) => rulesReferenceArticle(rule)));
   return section;

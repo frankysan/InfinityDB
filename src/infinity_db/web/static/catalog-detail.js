@@ -84,7 +84,7 @@ function traitDescription(description) {
   const section = document.createElement("section");
   section.className = "surface surface--clipped content-frame";
   const heading = document.createElement("h2");
-  heading.className = "data-surface-header";
+  heading.className = "surface-titlebar surface-titlebar--subtle";
   heading.textContent = "Rules summary";
   const text = document.createElement("p");
   text.className = "weapon-profile-stats";
@@ -114,7 +114,7 @@ function specialWeaponProfile(profile) {
   const card = document.createElement("section");
   card.className = "surface surface--clipped content-frame weapon-profile special-weapon-profile";
   const title = document.createElement("h4");
-  title.className = "data-surface-header";
+  title.className = "surface-titlebar surface-titlebar--subtle";
   title.textContent = "Armed Turret profile";
   card.append(title);
 
@@ -173,7 +173,7 @@ function weaponVariants(variants) {
       card.className = "surface surface--clipped content-frame weapon-profile";
       const profileTitle = profile.mode || profile.name || variant.name;
       const title = document.createElement("h4");
-      title.className = "data-surface-header";
+      title.className = "surface-titlebar surface-titlebar--subtle";
       title.textContent = profileTitle;
       card.append(title);
 
@@ -280,7 +280,7 @@ function usageSections(item) {
       const section = document.createElement("details");
       section.className = "surface surface--clipped content-frame army-profile";
       const summary = document.createElement("summary");
-      summary.className = "data-surface-header army-profile-title";
+      summary.className = "surface-titlebar surface-titlebar--subtle army-profile-title";
       const title = document.createElement("h2");
       title.textContent = label(item, variant);
       const count = document.createElement("span");
@@ -343,7 +343,7 @@ function hackingProgramsSection(programs) {
   const section = document.createElement("section");
   section.className = "detail-group";
   const heading = document.createElement("h2");
-  heading.className = "detail-section-title";
+  heading.className = "detail-heading";
   heading.textContent = "Baseline Hacking Programs";
   const list = document.createElement("ul");
   list.className = "detail-list";

@@ -62,44 +62,44 @@
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="settings-menu">Settings <span aria-hidden="true">⌄</span></button>
       <p class="nav-label menu-label">Settings</p>
       <div id="settings-menu" class="compact-menu-panel" aria-label="Settings">
-        <label class="distance-toggle" for="distance-unit-toggle">
-          <span class="distance-toggle-label">Distance</span>
-          <span class="distance-toggle-options"><span>cm</span><input id="distance-unit-toggle" type="checkbox" checked aria-label="Use inches for movement distances"><span>in</span></span>
+        <label class="setting-row setting-row--choice" for="distance-unit-toggle">
+          <span class="setting-label">Distance</span>
+          <span class="setting-choice"><span>cm</span><input id="distance-unit-toggle" class="setting-switch setting-switch--choice" type="checkbox" checked aria-label="Use inches for movement distances"><span>in</span></span>
         </label>
-        <div id="optional-unit-settings">
+        <div id="optional-unit-settings" class="settings-group">
           <span class="settings-group-label">Include optional units</span>
-          <label class="optional-unit-toggle" for="mercs-filter">
-            <span>Mercenaries</span>
-            <input id="mercs-filter" type="checkbox" checked>
+          <label class="setting-row" for="mercs-filter">
+            <span class="setting-label">Mercenaries</span>
+            <input id="mercs-filter" class="setting-switch" type="checkbox" checked>
           </label>
-          <label class="optional-unit-toggle" for="specops-filter">
-            <span>Spec-Ops</span>
-            <input id="specops-filter" type="checkbox" checked>
+          <label class="setting-row" for="specops-filter">
+            <span class="setting-label">Spec-Ops</span>
+            <input id="specops-filter" class="setting-switch" type="checkbox" checked>
           </label>
-          <label class="optional-unit-toggle" for="teamops-filter">
-            <span>Team Operations</span>
-            <input id="teamops-filter" type="checkbox" checked>
+          <label class="setting-row" for="teamops-filter">
+            <span class="setting-label">Team Operations</span>
+            <input id="teamops-filter" class="setting-switch" type="checkbox" checked>
           </label>
-          <label class="optional-unit-toggle" for="reinforcement-filter">
-            <span>Reinforcements</span>
-            <input id="reinforcement-filter" type="checkbox" checked>
+          <label class="setting-row" for="reinforcement-filter">
+            <span class="setting-label">Reinforcements</span>
+            <input id="reinforcement-filter" class="setting-switch" type="checkbox" checked>
           </label>
         </div>
-        <label class="optional-unit-toggle" for="fireteams-include-wildcards-toggle">
-          <span>Fireteams include Wildcards</span>
-          <input id="fireteams-include-wildcards-toggle" type="checkbox" checked>
+        <label class="setting-row" for="fireteams-include-wildcards-toggle">
+          <span class="setting-label">Fireteams include Wildcards</span>
+          <input id="fireteams-include-wildcards-toggle" class="setting-switch" type="checkbox" checked>
         </label>
-        <label class="developer-toggle" for="developer-mode-toggle">
-          <span>Developer mode</span>
-          <input id="developer-mode-toggle" type="checkbox" aria-label="Show database IDs and developer details">
+        <label class="setting-row" for="developer-mode-toggle">
+          <span class="setting-label">Developer mode</span>
+          <input id="developer-mode-toggle" class="setting-switch" type="checkbox" aria-label="Show database IDs and developer details">
         </label>
-        <label class="developer-toggle developer-only" for="disable-cache-toggle">
-          <span>Disable cache</span>
-          <input id="disable-cache-toggle" type="checkbox" aria-label="Disable cached API responses">
+        <label class="setting-row developer-only" for="disable-cache-toggle">
+          <span class="setting-label">Disable cache</span>
+          <input id="disable-cache-toggle" class="setting-switch" type="checkbox" aria-label="Disable cached API responses">
         </label>
-        <label class="remember-settings-toggle" for="remember-settings-toggle">
-          <span>Remember settings</span>
-          <input id="remember-settings-toggle" type="checkbox" aria-label="Remember settings with browser cookies">
+        <label class="setting-row" for="remember-settings-toggle">
+          <span class="setting-label">Remember settings</span>
+          <input id="remember-settings-toggle" class="setting-switch" type="checkbox" aria-label="Remember settings with browser cookies">
         </label>
       </div>
     </div>
