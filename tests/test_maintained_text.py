@@ -112,6 +112,21 @@ def test_canonical_state_names_are_semantic_links() -> None:
     assert remaining == []
 
 
+def test_hacking_program_names_are_semantic_links() -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    candidates = collect_unlinked_reference_candidates(documents)
+
+    remaining = [
+        (text, targets)
+        for values in candidates.values()
+        for (_, text, targets), count in values.items()
+        for _ in range(count)
+        if any(target.startswith("hacking-program:") for target in targets)
+    ]
+    assert remaining == []
+
+
 def test_unlinked_reference_candidates_use_aliases_longest_match_and_ignore_tokens() -> None:
     document = {
         "collection": {"id": "test", "status": "current"},

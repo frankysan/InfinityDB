@@ -27,6 +27,21 @@ def export_rules_database(*args, **kwargs) -> None:
     export_release_rules_database(*args, **kwargs)
 
 
+def _current_core_with_hacking_programs(
+    root: Path,
+) -> tuple[Path, dict, tuple[Path, dict]]:
+    documents = load_curated_directory(root / "data" / "curated")
+    current_path, current = next(
+        item for item in documents if item[1]["collection"]["id"] == "n5-core-v5.3"
+    )
+    hacking_programs = next(
+        item
+        for item in documents
+        if item[1]["collection"]["id"] == "n5-hacking-programs-v5.3"
+    )
+    return current_path, current, hacking_programs
+
+
 def test_rules_export_finalization_is_default_and_can_be_skipped(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -428,7 +443,7 @@ def test_current_declaration_categories_match_reviewed_n5_3_semantics(
 
 def test_army_link_records_use_current_collections_by_default(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
-    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    current_path, current, hacking_programs = _current_core_with_hacking_programs(root)
     superseded = copy.deepcopy(current)
     superseded["collection"] = {
         **superseded["collection"],
@@ -439,7 +454,11 @@ def test_army_link_records_use_current_collections_by_default(tmp_path: Path) ->
     }
     output = tmp_path / "rules.db"
     export_rules_database(
-        [(current_path, current), (root / "n5-core-v5.2.json", superseded)],
+        [
+            (current_path, current),
+            hacking_programs,
+            (root / "n5-core-v5.2.json", superseded),
+        ],
         output,
     )
 
@@ -462,7 +481,7 @@ def test_composed_records_attach_current_supplements_without_field_merging(
     tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    current_path, current, hacking_programs = _current_core_with_hacking_programs(root)
     supplement = copy.deepcopy(current)
     supplement["collection"] = {
         **supplement["collection"],
@@ -485,7 +504,12 @@ def test_composed_records_attach_current_supplements_without_field_merging(
     ]
     output = tmp_path / "rules.db"
     export_rules_database(
-        [(current_path, current), (root / "n5-faq-v0.1.json", supplement)], output
+        [
+            (current_path, current),
+            hacking_programs,
+            (root / "n5-faq-v0.1.json", supplement),
+        ],
+        output,
     )
 
     raw = RulesDatabase(output).records_for_army_link("skill", "camouflage")
@@ -1515,7 +1539,7 @@ def test_rules_database_preserves_variant_inheritance_and_variant_links(
     tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    current_path, current, hacking_programs = _current_core_with_hacking_programs(root)
     document = copy.deepcopy(current)
     common = {
         "kind": "skill",
@@ -1552,7 +1576,7 @@ def test_rules_database_preserves_variant_inheritance_and_variant_links(
         ]
     )
     output = tmp_path / "rules.db"
-    export_rules_database([(current_path, document)], output)
+    export_rules_database([(current_path, document), hacking_programs], output)
 
     database = RulesDatabase(output)
     family = database.composed_records_for_army_link("skill", "variant-family-test")
@@ -1581,7 +1605,7 @@ def test_export_rejects_source_specific_variant_without_family_relation(
     tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    current_path, current, hacking_programs = _current_core_with_hacking_programs(root)
     document = copy.deepcopy(current)
     document["records"].append(
         {
@@ -1604,7 +1628,10 @@ def test_export_rejects_source_specific_variant_without_family_relation(
     )
 
     with pytest.raises(ValueError, match="requires exactly one 'variant-of' relation"):
-        export_rules_database([(current_path, document)], tmp_path / "rules.db")
+        export_rules_database(
+            [(current_path, document), hacking_programs], tmp_path / "rules.db"
+        )
+
 
 def test_targeted_interaction_hub_is_bidirectional(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]

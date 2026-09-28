@@ -72,8 +72,9 @@ close the remaining catalog/share-state gaps.
     the rules build while grandfathering only the pre-migration corpus.
   - [x] Batch 1: replace unambiguous full State names such as `Unconscious State`,
     `Dead State`, and the reviewed `Retreat State` alias with typed `state:*` references.
-    The post-batch legacy inventory is 692 candidate occurrences across 186 semantic owners.
-  - [ ] Batch 2: review and link Hacking Program names.
+  - [x] Batch 2: review and link all unambiguous Hacking Program names. The post-batch
+    legacy inventory is 671 candidate occurrences across 183 semantic owners, with no remaining
+    `hacking-program:*` candidates.
   - [ ] Batch 3: review and link Equipment names.
   - [ ] Batch 4: review Trait names, with special care for generic terms such as `State`, `CC`,
     `ARO`, and `Deployable`.

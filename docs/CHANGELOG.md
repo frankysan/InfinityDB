@@ -58,6 +58,10 @@ New or materially revised entries use the project-domain labels defined in
   now behave as inline rules references. Rules builds now freeze the remaining pre-migration plain
   reference candidates in a checked-in baseline and reject newly introduced unlinked canonical
   names or aliases, allowing later domain-by-domain review without permitting new link debt.
+- **Data processing + Web frontend:** Continue the maintained-rules semantic-link migration with
+  Hacking Programs, replacing all 21 currently unambiguous program-name occurrences with typed
+  `hacking-program:*` references and shrinking the reviewed legacy baseline to 671 candidates
+  across 183 semantic owners.
 - **Web backend + Web frontend:** Complete the structured Related rules cross-link pass across
   Skills, Equipment, Weapons, Traits, States, and Hacking Programs. Detail APIs now publish
   backend-resolved catalog references: current source-specific Skill/Equipment/Weapon variants

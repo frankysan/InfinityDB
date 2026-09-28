@@ -773,7 +773,17 @@ def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
 
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    document = copy.deepcopy(documents[0][1])
+    current = next(
+        document
+        for _, document in documents
+        if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    hacking_programs = next(
+        item
+        for item in documents
+        if item[1]["collection"]["id"] == "n5-hacking-programs-v5.3"
+    )
+    document = copy.deepcopy(current)
     record = next(
         record
         for record in document["records"]
@@ -781,7 +791,9 @@ def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
     )
     record["name"] = "Persistent Damage"
     rules_path = tmp_path / "rules.db"
-    export_rules_database([(root / "curated.json", document)], rules_path)
+    export_rules_database(
+        [(root / "curated.json", document), hacking_programs], rules_path
+    )
     catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
 
     reference = catalog.reference("Continous Damage")

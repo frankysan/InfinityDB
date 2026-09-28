@@ -3266,7 +3266,17 @@ def test_trait_apis_compose_army_usage_with_curated_rules(app: Callable, tmp_pat
 def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    document = copy.deepcopy(documents[0][1])
+    current = next(
+        document
+        for _, document in documents
+        if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    hacking_programs = next(
+        item
+        for item in documents
+        if item[1]["collection"]["id"] == "n5-hacking-programs-v5.3"
+    )
+    document = copy.deepcopy(current)
     source_skill = next(record for record in document["records"] if record["kind"] == "skill")
     skill_record = copy.deepcopy(source_skill)
     skill_record["id"] = "skill:test-stealth-fixture"
@@ -3281,7 +3291,9 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     )
     declaration["armyLinks"].append({"entity": "skill", "id": 11})
     rules_path = tmp_path / "rules.db"
-    export_rules_database([(root / "curated.json", document)], rules_path)
+    export_rules_database(
+        [(root / "curated.json", document), hacking_programs], rules_path
+    )
     rules_app = create_app(app.database.path, rules_path)
 
     status, _, body = request(rules_app, "/api/skills/11")

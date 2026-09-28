@@ -5,8 +5,8 @@
     "n5-core-v5.3",
     "n5-hacking-programs-v5.3"
   ],
-  "candidateOwners": 186,
-  "candidateOccurrences": 692,
+  "candidateOwners": 183,
+  "candidateOccurrences": 671,
   "owners": {
     "n5-core-v5.3|declaration-category:aro:p103": {
       "candidateCount": 1,
@@ -80,10 +80,6 @@
       "candidateCount": 2,
       "sha256": "1778f9b26927f1de61f7d76becc7a99bd0db9d096961131161eed70122bb66ce"
     },
-    "n5-core-v5.3|equipment:evo-hacking-device": {
-      "candidateCount": 4,
-      "sha256": "420f20bc919f964dd06721f69df32d9430866c646949be0f79b0d653384458ae"
-    },
     "n5-core-v5.3|equipment:fastpanda": {
       "candidateCount": 7,
       "sha256": "8b71ac8fe31eb50da764db6187c68cf41b888a72418c5aac041d981cfd97110d"
@@ -92,17 +88,9 @@
       "candidateCount": 1,
       "sha256": "2c748c10bdf6051151e9a2d3c9aea0e85007329d9d41a794892d542f64cfcb03"
     },
-    "n5-core-v5.3|equipment:hacking-device": {
-      "candidateCount": 4,
-      "sha256": "50e04d58cc4befecb6c73c0c8a7649a03778906d3e6fc394a54afe6a3c5da53e"
-    },
     "n5-core-v5.3|equipment:hacking-device-plus": {
-      "candidateCount": 9,
-      "sha256": "90e91fdd471807ee79ffa37f2ae770fd9ff03c21f3c236073d48563bc95cd704"
-    },
-    "n5-core-v5.3|equipment:killer-hacking-device": {
-      "candidateCount": 4,
-      "sha256": "e01e77525ee298ad66dad88f938036100d1f9d13a746d65ba449fffb185f7f85"
+      "candidateCount": 1,
+      "sha256": "ae0626de7edc6805b420d11a013e0b9f003757d95dc2840ff0380fd076b0efac"
     },
     "n5-core-v5.3|equipment:medikit": {
       "candidateCount": 1,
@@ -645,8 +633,8 @@
       "sha256": "f2746bd5454c2a5b579ede73235823ca0dae0cdd625ef212c4ad2c5eab7ebbd9"
     },
     "n5-core-v5.3|state:possessed": {
-      "candidateCount": 3,
-      "sha256": "49b2cff41d5db34da2357fae9f07f9f38c6a058090a2d22e0bb65630dd31abb7"
+      "candidateCount": 2,
+      "sha256": "bc3b7dd8ea533794e7ee053bc17cf4639fc65b289bb5ec7154824591d0cee509"
     },
     "n5-core-v5.3|state:prone": {
       "candidateCount": 3,

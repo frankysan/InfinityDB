@@ -9643,7 +9643,7 @@
             },
             "facts": {
                 "effects": [
-                    "Allows the use of Assisted Fire, Controlled Jump, Enhanced Reaction, and Fairy Dust Hacking Programs."
+                    "Allows the use of [[hacking-program:assisted-fire]], [[hacking-program:controlled-jump]], [[hacking-program:enhanced-reaction]], and [[hacking-program:fairy-dust]] Hacking Programs."
                 ]
             },
             "armyLinks": [
@@ -9739,7 +9739,7 @@
             },
             "facts": {
                 "effects": [
-                    "Allows the use of Carbonite, Oblivion, Spotlight, and Total Control Hacking Programs."
+                    "Allows the use of [[hacking-program:carbonite]], [[hacking-program:oblivion]], [[hacking-program:spotlight]], and [[hacking-program:total-control]] Hacking Programs."
                 ]
             },
             "armyLinks": [
@@ -9770,7 +9770,7 @@
             "labelIds": [
                 "comms-equipment"
             ],
-            "summary": "Automatic Comms Equipment that expands the standard Hacking Device program set with Cybermask and White Noise.",
+            "summary": "Automatic Comms Equipment that expands the standard Hacking Device program set with [[hacking-program:cybermask]] and [[hacking-program:white-noise]].",
             "composition": {
                 "role": "definition"
             },
@@ -9782,7 +9782,7 @@
             },
             "facts": {
                 "effects": [
-                    "Allows the use of Carbonite, Cybermask, Oblivion, Spotlight, Total Control, and White Noise Hacking Programs."
+                    "Allows the use of [[hacking-program:carbonite]], [[hacking-program:cybermask]], [[hacking-program:oblivion]], [[hacking-program:spotlight]], [[hacking-program:total-control]], and [[hacking-program:white-noise]] Hacking Programs."
                 ]
             },
             "armyLinks": [
@@ -9914,7 +9914,7 @@
             "labelIds": [
                 "comms-equipment"
             ],
-            "summary": "Automatic Comms Equipment specialized for Cybermask and Trinity Hacking Programs.",
+            "summary": "Automatic Comms Equipment specialized for [[hacking-program:cybermask]] and [[hacking-program:trinity]] Hacking Programs.",
             "composition": {
                 "role": "definition"
             },
@@ -9926,7 +9926,7 @@
             },
             "facts": {
                 "effects": [
-                    "Allows the use of Cybermask and Trinity Hacking Programs."
+                    "Allows the use of [[hacking-program:cybermask]] and [[hacking-program:trinity]] Hacking Programs."
                 ]
             },
             "armyLinks": [
@@ -11935,7 +11935,7 @@
                     "A successful Attack, Effect, Hacking Program, scenario rule, or other game condition capable of causing Possessed State affects the Trooper."
                 ],
                 "restrictions": [
-                    "The owning player may cancel Possessed State with a Command Token in the specified Tactical Phase step, and Total Control can also cancel it."
+                    "The owning player may cancel Possessed State with a Command Token in the specified Tactical Phase step, and [[hacking-program:total-control]] can also cancel it."
                 ]
             },
             "labelIds": [
