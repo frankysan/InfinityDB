@@ -127,7 +127,11 @@ and serves a read-only browser and same-origin HTTP API.
   pytest is hermetic by default. `auto` may fall back only when the asset tree
   is entirely absent, never when it is partial/corrupt.
   Test stages use pytest-xdist `worksteal` scheduling with `--test-workers auto`
-  by default; `--test-workers 0` forces serial execution for debugging. Windows
+  by default; `--test-workers 0` forces serial execution for debugging. Maintained
+  local pytest sections (`model`, `web`, `build`, `ops`, `assets`) are assigned from
+  `config/testing/test-sections.json` and selected with repeatable `--test-section`;
+  the full suite remains the authoritative final gate and `full_assets` remains an
+  orthogonal asset-availability marker. Windows
   benchmarking measured 687 tests at 59.67 s serial, 19.41 s with four workers,
   and 14.13 s with automatic worker selection. Web tests build one template
   database per module and copy it per test so mutating tests remain isolated

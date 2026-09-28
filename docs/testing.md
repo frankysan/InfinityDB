@@ -79,6 +79,35 @@ because it validates the asset set before enabling them. Hermetic web tests use
 project-owned temporary SVG fixtures to retain coverage of dynamic SVG serving
 without depending on the complete processed graphical publication.
 
+## Focused local test sections
+
+The complete pytest suite remains the authoritative final gate, but routine iteration can run
+one or more maintained sections instead of reconstructing ad-hoc file lists. Section ownership is
+kept in `config/testing/test-sections.json`; pytest assigns the corresponding markers during
+collection and fails if a repository test module is not classified.
+
+The current sections are:
+
+- `model` — data model, canonical rules, semantic audits, and database behavior;
+- `web` — web application, HTTP/API behavior, browser-facing runtime, and web metrics;
+- `build` — Army acquisition, normalization, deterministic build, provenance, and ingestion;
+- `ops` — development checks, deployment, archives/reports, and operational tooling;
+- `assets` — symbol/SVG/font tooling and processed graphical-asset publication.
+
+Use the check runner so section selection continues to respect the normal full-asset policy:
+
+```powershell
+python tools/run_checks.py --stage test --test-section web
+python tools/run_checks.py --stage test --test-section model --test-section web
+python tools/run_checks.py --stage test --test-section assets --assets required
+```
+
+`--test-section` may be repeated to union sections. Omitting it runs the complete suite. The
+`full_assets` marker remains an orthogonal availability requirement rather than a test section, so
+`--assets off|auto|required` retains its existing meaning. For direct pytest debugging, combine the
+section marker with the desired asset policy explicitly, for example
+`python -m pytest -m "(not full_assets) and section_web" -q`.
+
 ## Parallel pytest execution
 
 The check runner uses `pytest-xdist` with automatic worker selection by default

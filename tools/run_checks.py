@@ -22,12 +22,14 @@ try:
         AssetModeSelection,
         select_asset_mode,
     )
+    from tools.test_sections import load_test_sections
 except ModuleNotFoundError:  # Direct execution as tools/run_checks.py.
     from asset_validation import (  # type: ignore[no-redef]
         ASSET_MODES,
         AssetModeSelection,
         select_asset_mode,
     )
+    from test_sections import load_test_sections  # type: ignore[no-redef]
 
 STAGE_ORDER = ("test", "lint", "type", "build", "rules")
 PROFILES = {
@@ -36,6 +38,8 @@ PROFILES = {
     "all": STAGE_ORDER,
 }
 DEFAULT_TEST_WORKERS = "auto"
+TEST_SECTIONS = load_test_sections()
+TEST_SECTION_NAMES = tuple(TEST_SECTIONS)
 DEFAULT_LINT_TARGETS = (
     "src/infinity_db",
     "src/infinity_army_data",
@@ -149,6 +153,15 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--test-section",
+        action="append",
+        choices=TEST_SECTION_NAMES,
+        help=(
+            "Run one maintained pytest section; repeat to combine sections. "
+            "Available sections: " + ", ".join(TEST_SECTION_NAMES) + "."
+        ),
+    )
+    parser.add_argument(
         "--report",
         nargs="?",
         const=True,
@@ -183,6 +196,7 @@ def stage_definitions(
     build_source: Path | None,
     include_full_assets: bool = False,
     test_workers: str = DEFAULT_TEST_WORKERS,
+    test_sections: tuple[str, ...] = (),
 ) -> list[Stage]:
     python = sys.executable
     stages: list[Stage] = []
@@ -193,7 +207,16 @@ def stage_definitions(
                 command.extend(("-n", test_workers, "--dist", "worksteal"))
             if targets:
                 command.extend(targets)
-            marker = "full_assets or not full_assets" if include_full_assets else "not full_assets"
+            asset_marker = (
+                "full_assets or not full_assets" if include_full_assets else "not full_assets"
+            )
+            if test_sections:
+                section_marker = " or ".join(
+                    TEST_SECTIONS[section].marker for section in test_sections
+                )
+                marker = f"({asset_marker}) and ({section_marker})"
+            else:
+                marker = asset_marker
             command.extend(("-m", marker, "-q"))
         elif name == "lint":
             command = [python, "-m", "ruff", "check"]
@@ -335,6 +358,8 @@ def main(argv: list[str] | None = None) -> int:
             build_parser().error("--build-source requires the build stage")
         if args.test_workers is not None and "test" not in stage_names:
             build_parser().error("--test-workers requires the test stage")
+        if args.test_section and "test" not in stage_names:
+            build_parser().error("--test-section requires the test stage")
         test_workers = (
             args.test_workers
             if args.test_workers is not None
@@ -362,6 +387,7 @@ def main(argv: list[str] | None = None) -> int:
             if "test" in stage_names
             else None
         )
+        test_sections = tuple(dict.fromkeys(args.test_section or ()))
         stages = stage_definitions(
             stage_names,
             args.targets,
@@ -370,6 +396,7 @@ def main(argv: list[str] | None = None) -> int:
                 asset_selection is not None and asset_selection.include_full_assets
             ),
             test_workers=test_workers,
+            test_sections=test_sections,
         )
     except SystemExit as exc:
         exit_code = exc.code

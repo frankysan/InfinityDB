@@ -319,15 +319,6 @@ by the audit remain in scope.
   confirms its expected raw archive when requested, and reports schema and
   compatibility revisions.
 
-- [ ] Split the growing pytest stage into marker-based local sections (for example
-  data/model, web/API, build/ingestion, operations/tooling, and assets) so
-  developers can run the relevant slice during iteration. Keep the complete suite
-  as the authoritative final gate. Parallel pytest execution now defaults to
-  `--test-workers auto` after the primary Windows benchmark reduced the 687-test
-  stage from 59.67 s serially to 14.13 s; the shared web fixture also no longer
-  rebuilds its database per test. Retain marker-based slices as the complementary
-  fast-iteration path for focused development.
-
 ## 1.0.0 — current-reference completeness gate
 
 1.0.0 is the final completeness release for the supported current reference data. It

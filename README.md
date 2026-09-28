@@ -295,6 +295,10 @@ python tools/run_checks.py --all
 python tools/run_checks.py --stage test tests/test_availability.py
 python tools/run_checks.py --stage lint src/infinity_army_data/availability.py tests/test_availability.py
 
+# Maintained local test slices
+python tools/run_checks.py --stage test --test-section model
+python tools/run_checks.py --stage test --test-section web
+
 # Keep a timestamped local report
 python tools/run_checks.py --profile code --report
 ```

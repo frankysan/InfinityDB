@@ -84,6 +84,11 @@ testpaths = ["tests"]
 addopts = ["--basetemp=.pytest-tmp", "-m", "not full_assets"]
 markers = [
   "full_assets: requires the complete validated local Corvus Belli graphical asset set",
+  "section_model: data model, canonical rules, semantic audits, and database behavior",
+  "section_web: web application, HTTP/API behavior, browser runtime, and web metrics",
+  "section_build: Army acquisition, normalization, deterministic build, and ingestion",
+  "section_ops: development checks, deployment, archives, reports, and operational tooling",
+  "section_assets: symbols, SVG/font tooling, and processed graphical asset publication",
 ]
 cache_dir = ".cache/pytest"
 
