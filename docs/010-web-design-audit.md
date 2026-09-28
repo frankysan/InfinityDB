@@ -87,9 +87,18 @@ interaction and navigation affordance, not generic containment, owns their hover
 
 The recurring presentation-token pass is now complete at source level. Shared surfaces, text
 roles, data/table emphasis, controls, links, Settings switches, and range-slider effects consume
-semantic root tokens rather than repeating the same light-theme literals. The remaining refactor
-work is the manual browser matrix; theme selection and the initial Light/Dark value sets remain the
-separate theming workstream. The token architecture is intended to support additional themes later.
+semantic root tokens rather than repeating the same light-theme literals. Theme selection and the
+initial Light/Dark value sets remain the separate theming workstream, while the token architecture is
+intended to support additional themes later.
+
+The browser acceptance matrix is also complete for this refactor. Representative list/detail, Unit
+Explorer, Hacking Program, Weapon, Fireteam, and Skill surfaces were exercised at desktop, compact,
+and narrow widths with Developer mode both off and on. The pass included long names, dense badges,
+technical columns, responsive profile tables, and scrollable Fireteam tables. One narrow Developer-mode
+Fireteam defect was found: an implicit CSS Grid min-content track let long technical provenance widen
+the reference/card column behind the clipped explorer surface. The Fireteam content/list grids now use
+`minmax(0, 1fr)` so the surface remains viewport-bounded while explicit table viewports continue to own
+horizontal overflow. No other page-level horizontal overflow was observed in the matrix.
 
 ## Overall assessment
 
@@ -99,15 +108,11 @@ badges, rules-reference renderer, and compact-table density modifier all move in
 direction. The strongest reuse is currently in JavaScript/data presentation: equivalent
 catalog pages generally share renderers instead of reimplementing domain logic.
 
-The principal mismatch is **ownership of visual behavior in CSS**. Shared concepts exist,
-but several of them are mixed with page geometry or overridden positionally. As a result,
-the cascade rather than the semantic structure often decides width, wrapping, overflow, and
-responsive behavior. The immediate catalog-column issue is one symptom of that broader
-problem.
-
-The first refactor should therefore preserve the current visual language while making its
-structures explicit. Do not begin by redesigning colors, typography, or individual pages.
-First make common behavior reusable enough that later visual changes have one owner.
+The audit identified **ownership of visual behavior in CSS** as the principal mismatch: shared
+concepts existed, but several were mixed with page geometry or overridden positionally, so the cascade
+rather than semantic structure often decided width, wrapping, overflow, and responsive behavior. The
+0.10 refactor addressed that mismatch while preserving the established visual language. Future visual
+changes should continue to build on the shared structures rather than reintroducing page-local geometry.
 
 ## What is already aligned
 

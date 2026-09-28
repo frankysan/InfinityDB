@@ -234,7 +234,7 @@ by the audit remain in scope.
   `docs/010-web-design-audit.md`; it covers shared surfaces and titlebars, catalog/list and
   detail table families, controls, responsive behavior, Developer mode, accessibility,
   tokens/theme readiness, CSS ownership, and regression-test coupling.
-- [ ] **Web frontend:** Refactor shared visual structures in the order established by the
+- [x] **Web frontend:** Refactor shared visual structures in the order established by the
   0.10 design audit, preserving the current visual language while reducing independent
   layout decisions.
   - [x] Separate visual `surface` containment from catalog/detail layout geometry.
@@ -254,7 +254,7 @@ by the audit remain in scope.
     components are consolidated, keeping first-class Light/Dark theme implementation in its
     dedicated task below. Shared component colors now resolve through semantic root roles, and
     regression coverage prevents repeated component-level color literals from accumulating again.
-  - [ ] Complete a manual browser acceptance matrix across representative desktop, compact,
+  - [x] Complete a manual browser acceptance matrix across representative desktop, compact,
     and narrow widths with Developer mode off/on before closing the refactor.
 
 - [ ] Move the **General Fireteam rules** / Fireteam quick-reference material off the
@@ -272,14 +272,15 @@ by the audit remain in scope.
   - [ ] Add focused contract/regression coverage as responsibilities move so domain
     interpretation cannot silently migrate back into browser code.
 
-- [ ] Implement first-class Light and Dark themes using the semantic theme contract
-  documented in `docs/architecture.md`.
+- [ ] Implement first-class theme selection using the semantic theme contract documented in
+  `docs/architecture.md`, with Light and Dark as the initial themes rather than an architectural limit.
   - [ ] Separate semantic theme tokens from theme-neutral layout/component rules
     and remove remaining hard-coded light-theme assumptions.
   - [ ] Decide and document the default startup behavior (for example, operating-
     system preference versus a fixed project default); an explicit user choice wins.
-  - [ ] Add the theme selector to Settings, resolve the selected theme before first
-    meaningful paint, and keep persistence on the existing preference contract.
+  - [ ] Add a theme selector to Settings that is data-driven rather than hard-coded as a binary
+    Light/Dark switch, resolve the selected theme before first meaningful paint, and keep persistence
+    on the existing preference contract so additional themes can be added without new state logic.
   - [ ] Audit contrast and distinguishability for status/range colors, links, focus,
     muted text, tables, dialogs, menus, and faction accents in both themes.
   - [ ] Add regression coverage for initialization, switching, persistence, and

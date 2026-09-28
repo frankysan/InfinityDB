@@ -4389,6 +4389,7 @@ html[data-distance-unit="in"] .unit-extended-statline {
 .fireteam-content,
 .fireteam-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   gap: 18px;
 }
@@ -4475,7 +4476,9 @@ html[data-distance-unit="in"] .unit-extended-statline {
 
 .fireteam-chart-summary {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   width: min(640px, 100%);
+  min-width: 0;
   gap: 10px;
   padding: 16px 18px;
 }

@@ -65,8 +65,8 @@ New or materially revised entries use the project-domain labels defined in
 - **Web frontend:** Apply the same semantic table behavior to catalog usage, Hacking Program,
   Weapon, Skill Modifier, Fireteam reference, and Unit-detail tables. Compact comparison metrics
   remain stable, dense tables scroll through their own viewport when needed, Developer mode no
-  longer widens whole Fireteam cards or relies on positional column sizing, and generated tables
-  expose consistent captions/header scopes while narrow layouts avoid premature word breaking.
+  longer widens or clips narrow Fireteam content or relies on positional column sizing, and generated
+  tables expose consistent captions/header scopes while narrow layouts avoid premature word breaking.
 - **Web frontend:** Tighten Fireteam and Hacking Program detail presentation: constrain the current
   Army chart summary to the same content width as Fireteam cards, move Hacking Program Skill-type
   badges into the rules-card title bar, place Targets in the Program profile table, and keep baseline

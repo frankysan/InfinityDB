@@ -442,11 +442,19 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     status, _, styles = request(fireteam_app, "/static/styles.css")
     assert status == 200
     assert_css_rule(styles, ".fireteam-card", {"width": "min(640px, 100%)"})
-    assert_css_rule(styles, ".fireteam-chart-summary", {"width": "min(640px, 100%)"})
+    assert_css_rule(
+        styles,
+        ".fireteam-chart-summary",
+        {
+            "grid-template-columns": "minmax(0, 1fr)",
+            "width": "min(640px, 100%)",
+            "min-width": "0",
+        },
+    )
     assert_css_rule(
         styles,
         ".fireteam-content,\n.fireteam-list",
-        {"min-width": "0"},
+        {"grid-template-columns": "minmax(0, 1fr)", "min-width": "0"},
     )
     assert_css_rule(styles, ".fireteam-reference", {"min-width": "0"})
     assert_css_rule(styles, "#fireteam-reference-content", {"min-width": "0"})
