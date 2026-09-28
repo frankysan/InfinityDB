@@ -243,7 +243,7 @@ by the audit remain in scope.
   - [x] Converge Unit Explorer and catalog list tables on semantic primary, descriptor,
     metric, and technical column roles; remove their positional width rules, keep short
     columns compact, and let the viewport absorb Developer-mode width pressure.
-  - [ ] Converge reusable secondary table families (catalog usage, stat/profile, and
+  - [x] Converge reusable secondary table families (catalog usage, stat/profile, and
     Fireteam/reference tables) while retaining deliberate domain-specific responsive modes.
   - [ ] Consolidate recurring surface-titlebar/header structures and duplicated Settings
     switches into shared primitives.

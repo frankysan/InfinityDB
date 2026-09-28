@@ -409,10 +409,16 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b"value === 256" in script
     assert b"`${limit.type}: unlimited`" in script
     assert b'element.classList.add("developer-only")' in script
-    assert b'["FTO Profiles", true]' in script
-    assert b'["Notes", true]' in script
-    assert script.count(b'fto.classList.add("developer-only")') == 1
-    assert script.count(b'note.classList.add("developer-only")') == 1
+    assert b'["FTO Profiles", true, "table-column--descriptor"]' in script
+    assert b'["Notes", true, "table-column--descriptor"]' in script
+    assert b'fto.className = "developer-only table-column--descriptor";' in script
+    assert b'note.className = "developer-only table-column--descriptor";' in script
+    assert b'table.className = "data-table--reference";' in script
+    assert b'name.className = "table-column--primary";' in script
+    assert (
+        b'requirements.className = "table-column--descriptor fireteam-member-requirements";'
+        in script
+    )
     assert b"fireteamsIncludeWildcards" in script
     assert b"const wildcardTeams = teams.filter((team) => team.is_wildcard);" in script
     assert b"if (wildcardTeams.length !== 1) return teams;" in script
@@ -458,27 +464,6 @@ def test_fireteam_chart_page_and_api_use_application_projection(
   }"""
         in styles
     )
-    assert (
-        b"""  .fireteam-reference-table th,
-  .fireteam-reference-table td {
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }"""
-        in styles
-    )
-    assert (
-        b"""  .fireteam-reference-table th:first-child {
-    width: 52px;
-  }"""
-        in styles
-    )
-    assert (
-        b"""  .fireteam-reference-table th:nth-child(2),
-  .fireteam-reference-table th:nth-child(3) {
-    width: calc((100% - 52px) / 2);
-  }"""
-        in styles
-    )
     assert_css_rule(
         styles,
         ".fireteam-reference-table table",
@@ -487,34 +472,35 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert_css_rule(
         styles,
         ".fireteam-reference-table",
-        {"min-width": "0", "max-width": "100%", "overflow-x": "auto"},
+        {"width": "min(720px, 100%)"},
     )
-    assert_css_rule(styles, ".fireteam-reference-table th:first-child", {"width": "64px"})
     assert_css_rule(
         styles,
-        ".fireteam-reference-table th:nth-child(2),\n.fireteam-reference-table th:nth-child(3)",
+        ".fireteam-reference-table .table-column--metric",
+        {"width": "64px", "text-align": "center"},
+    )
+    assert_css_rule(
+        styles,
+        ".fireteam-reference-table .table-column--descriptor",
         {"width": "calc((100% - 64px) / 2)"},
     )
-    assert_css_rule(
-        styles,
-        'html[data-developer-mode="true"] .fireteam-card',
-        {"width": "100%"},
-    )
-    assert_css_rule(
-        styles,
-        ".fireteam-member-table",
-        {"min-width": "0", "max-width": "100%", "overflow-x": "auto"},
-    )
+    assert b'html[data-developer-mode="true"] .fireteam-card {' not in styles
+    assert_css_rule(styles, ".fireteam-member-table", {"border": "0"})
     assert_css_rule(styles, ".fireteam-member-table table", {"min-width": "520px"})
+    assert (
+        b"""  html:not([data-developer-mode="true"]) .fireteam-member-table table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+  }"""
+        in styles
+    )
     assert (
         b"""  .fireteam-member-table table {
     --table-heading-padding: 9px 10px;
     --table-cell-padding: 12px 10px;
     --table-heading-size: var(--font-size-xs);
     --table-cell-size: var(--font-size-base);
-    width: 100%;
-    min-width: 0;
-    table-layout: fixed;
   }"""
         in styles
     )
@@ -523,20 +509,13 @@ def test_fireteam_chart_page_and_api_use_application_projection(
   .fireteam-member-table td {
     min-width: 0;
     white-space: normal;
-    overflow-wrap: anywhere;
   }"""
         in styles
     )
     assert (
-        b"""  .fireteam-member-table th:first-child {
+        b"""  html:not([data-developer-mode="true"]) .fireteam-member-table .table-column--primary {
     width: 54%;
     min-width: 0;
-  }"""
-        in styles
-    )
-    assert (
-        b"""  .fireteam-member-table th:nth-child(2) {
-    width: 46%;
   }"""
         in styles
     )
@@ -547,9 +526,13 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     )
     assert_css_rule(
         styles,
-        ".fireteam-member-table th:first-child .skill-category-badge",
+        ".fireteam-member-table .table-column--primary .skill-category-badge",
         {"margin-left": "8px", "vertical-align": "middle"},
     )
+    assert b".fireteam-member-table th:first-child" not in styles
+    assert b".fireteam-member-table th:nth-child" not in styles
+    assert b".fireteam-reference-table th:first-child" not in styles
+    assert b".fireteam-reference-table th:nth-child" not in styles
 
 
 def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> None:
@@ -1747,6 +1730,60 @@ def test_listing_tables_use_semantic_column_layout(app: Callable) -> None:
     assert b"if (armies.length > 12)" in unit_list
 
 
+def test_secondary_tables_use_shared_semantic_layout(app: Callable) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".data-table--reference, .data-table--profile",
+        {"width": "100%"},
+    )
+    assert_css_rule(
+        styles,
+        ".data-table--profile .table-column--descriptor",
+        {"width": "100%"},
+    )
+    assert_css_rule(
+        styles,
+        ".data-table--profile .table-column--metric",
+        {"width": "1%", "text-align": "center"},
+    )
+
+    status, _, skill = request(app, "/static/skill.js")
+    assert status == 200
+    assert b'data-table--compact data-table--reference' in skill
+    assert b'data-table--compact data-table--listing data-table--interactive' in skill
+    assert b'{ label: "Program", role: "primary" }' in skill
+    assert b'{ label: "Attack MOD", role: "metric" }' in skill
+    assert b'{ label: "Target", role: "descriptor" }' in skill
+
+    status, _, catalog_detail = request(app, "/static/catalog-detail.js")
+    assert status == 200
+    assert b"function tableViewport(table, className = \"\")" in catalog_detail
+    assert b'data-table--compact data-table--profile weapon-statline' in catalog_detail
+    assert b'data-table--compact data-table--listing data-table--interactive' in catalog_detail
+    assert b'cell.className = "table-column--metric";' in catalog_detail
+
+    status, _, hacking = request(app, "/static/hacking-program-detail.js")
+    assert status == 200
+    assert b'table.className = "data-table--compact data-table--profile";' in hacking
+    assert b'"Targets", program.targets?.length' in hacking
+    assert b'"descriptor"' in hacking
+    assert b'"metric"' in hacking
+
+    status, _, modifiers = request(app, "/skill-extras")
+    assert status == 200
+    assert b'class="data-table--reference skill-modifier-table"' in modifiers
+    assert b'class="table-column--primary" scope="col">Skill</th>' in modifiers
+    assert b"skill-modifier-units" in modifiers
+
+    assert b".fireteam-member-table th:first-child" not in styles
+    assert b".fireteam-member-table th:nth-child" not in styles
+    assert b".fireteam-reference-table th:first-child" not in styles
+    assert b".fireteam-reference-table th:nth-child" not in styles
+
+
 def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) -> None:
     status, _, styles = request(app, "/static/styles.css")
 
@@ -2537,8 +2574,10 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
         in weapon_detail
     )
     assert b"const profileTitle = profile.mode || profile.name || variant.name;" in weapon_detail
-    assert b"<th>Ammunition</th><th>B</th><th>PS</th><th>Saving</th>" in weapon_detail
-    assert b'["PS", profile.damage]' in weapon_detail
+    assert b'data-table--compact data-table--profile weapon-statline' in weapon_detail
+    assert b'class=\\"table-column--descriptor\\" scope=\\"col\\">Ammunition</th>' in weapon_detail
+    assert b'class=\\"table-column--metric\\" scope=\\"col\\">PS</th>' in weapon_detail
+    assert b'["PS", profile.damage, "metric"]' in weapon_detail
     assert b"<th>DAM</th>" not in weapon_detail
     assert b'title.className = "data-surface-header";' in weapon_detail
     assert b"headingText" not in weapon_detail
@@ -2603,11 +2642,7 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
         ".usage-section-group",
         {"width": "min(760px, 100%)"},
     )
-    assert_css_rule(
-        styles,
-        ".usage-section-group table.data-table--compact",
-        {"width": "100%"},
-    )
+    assert b".usage-section-group table.data-table--compact" not in styles
 
 
 def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable) -> None:
@@ -2901,7 +2936,10 @@ def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     assert b'from "./skill-categories.js"' in script
     assert b"skillCategoryBadge(category)" in script
     assert b"baselineDevicesGroup(program)" in script
-    assert b"[\"Targets\", program.targets?.length ? program.targets.join(\", \") : null]" in script
+    assert (
+        b"[\"Targets\", program.targets?.length ? program.targets.join(\", \") : null, "
+        b"\"descriptor\"]" in script
+    )
     assert b"headerContent" in script
     assert b"beforeRelations" in script
     assert b"rulesReferenceSection" not in script

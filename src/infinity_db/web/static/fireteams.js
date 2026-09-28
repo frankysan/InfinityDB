@@ -187,20 +187,22 @@ function renderTeam(team) {
   const tableContainer = document.createElement("div");
   tableContainer.className = "table-viewport fireteam-member-table";
   const table = document.createElement("table");
+  table.className = "data-table--reference";
   const caption = document.createElement("caption");
   caption.className = "sr-only";
   caption.textContent = `${team.name || "Fireteam"} members`;
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
-  for (const [heading, developerOnly] of [
-    ["Member", false],
-    ["Requirements", false],
-    ["FTO Profiles", true],
-    ["Notes", true],
+  for (const [heading, developerOnly, columnClass] of [
+    ["Member", false, "table-column--primary"],
+    ["Requirements", false, "table-column--descriptor fireteam-member-requirements"],
+    ["FTO Profiles", true, "table-column--descriptor"],
+    ["Notes", true, "table-column--descriptor"],
   ]) {
     const cell = document.createElement("th");
     cell.scope = "col";
     cell.textContent = heading;
+    cell.className = columnClass;
     if (developerOnly) cell.classList.add("developer-only");
     headRow.append(cell);
   }
@@ -210,15 +212,17 @@ function renderTeam(team) {
     const row = document.createElement("tr");
     const name = document.createElement("th");
     name.scope = "row";
+    name.className = "table-column--primary";
     name.append(memberName(member));
     if (wildcard) name.append(badge("Wildcard"));
     const requirements = document.createElement("td");
+    requirements.className = "table-column--descriptor fireteam-member-requirements";
     appendMemberDetails(requirements, member);
     const fto = document.createElement("td");
-    fto.classList.add("developer-only");
+    fto.className = "developer-only table-column--descriptor";
     appendFtoDetails(fto, member);
     const note = document.createElement("td");
-    note.classList.add("developer-only");
+    note.className = "developer-only table-column--descriptor";
     note.textContent = member.comment || "—";
     const developer = document.createElement("span");
     developer.className = "developer-only fireteam-member-developer";
@@ -350,14 +354,20 @@ function renderReference(reference) {
   const tableContainer = document.createElement("div");
   tableContainer.className = "table-viewport fireteam-reference-table";
   const table = document.createElement("table");
+  table.className = "data-table--reference";
   const caption = document.createElement("caption");
   caption.className = "sr-only";
   caption.textContent = "Fireteam Level bonuses";
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
-  for (const heading of ["Level", "Requirement", "Bonuses"]) {
+  for (const [heading, columnClass] of [
+    ["Level", "table-column--metric"],
+    ["Requirement", "table-column--descriptor"],
+    ["Bonuses", "table-column--descriptor"],
+  ]) {
     const cell = document.createElement("th");
     cell.scope = "col";
+    cell.className = columnClass;
     cell.textContent = heading;
     headRow.append(cell);
   }
@@ -367,14 +377,17 @@ function renderReference(reference) {
     const row = document.createElement("tr");
     const levelCell = document.createElement("th");
     levelCell.scope = "row";
+    levelCell.className = "table-column--metric";
     levelCell.textContent = String(level.level);
     const requirement = document.createElement("td");
+    requirement.className = "table-column--descriptor";
     appendMaintainedText(
       requirement,
       levels.fact_tokens?.levels?.[body.children.length]?.requirement,
       level.requirement
     );
     const bonuses = document.createElement("td");
+    bonuses.className = "table-column--descriptor";
     for (const [bonusIndex, bonus] of (level.bonuses || []).entries()) {
       if (bonusIndex) bonuses.append("; ");
       appendMaintainedText(

@@ -23,13 +23,15 @@ function renderItems(items) {
     const row = document.createElement("tr");
     const skill = document.createElement("th");
     skill.scope = "row";
+    skill.className = "table-column--primary";
     skill.textContent = item.skill_name;
     const extra = document.createElement("td");
+    extra.className = "table-column--descriptor skill-modifier-extra";
     extra.textContent = item.is_distance
       ? formatSkillDistanceExtra(item.extra_name, item.parameter_semantics)
       : item.extra_name;
     const units = document.createElement("td");
-    units.className = "modifier-unit-links";
+    units.className = "modifier-unit-links table-column--descriptor skill-modifier-units";
     for (const [index, unit] of (item.units || []).entries()) {
       if (index) units.append(", ");
       const link = document.createElement("a");

@@ -27,18 +27,24 @@ function programProfileContent(program) {
   const container = document.createElement("div");
   container.className = "table-viewport hacking-program-profile-table";
   const table = document.createElement("table");
-  table.className = "data-table--compact";
+  table.className = "data-table--compact data-table--profile";
   table.innerHTML =
-    "<thead><tr><th>Targets</th><th>Attack MOD</th><th>Opponent MOD</th><th>PS</th><th>B</th></tr></thead>";
+    "<caption class=\"sr-only\">Hacking Program profile</caption>"
+    + "<thead><tr><th class=\"table-column--descriptor\" scope=\"col\">Targets</th>"
+    + "<th class=\"table-column--metric\" scope=\"col\">Attack MOD</th>"
+    + "<th class=\"table-column--metric\" scope=\"col\">Opponent MOD</th>"
+    + "<th class=\"table-column--metric\" scope=\"col\">PS</th>"
+    + "<th class=\"table-column--metric\" scope=\"col\">B</th></tr></thead>";
   const row = document.createElement("tr");
-  for (const [label, value] of [
-    ["Targets", program.targets?.length ? program.targets.join(", ") : null],
-    ["Attack MOD", program.attack_mod],
-    ["Opponent MOD", program.opponent_mod],
-    ["PS", program.ps],
-    ["B", program.burst],
+  for (const [label, value, role] of [
+    ["Targets", program.targets?.length ? program.targets.join(", ") : null, "descriptor"],
+    ["Attack MOD", program.attack_mod, "metric"],
+    ["Opponent MOD", program.opponent_mod, "metric"],
+    ["PS", program.ps, "metric"],
+    ["B", program.burst, "metric"],
   ]) {
     const cell = document.createElement("td");
+    cell.className = `table-column--${role}`;
     cell.dataset.label = label;
     cell.textContent = text(value);
     row.append(cell);

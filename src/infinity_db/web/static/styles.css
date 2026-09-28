@@ -1558,10 +1558,6 @@ h1>span {
   scroll-margin-top: 20px;
 }
 
-.usage-section-group table.data-table--compact {
-  width: 100%;
-}
-
 .detail-section-title {
   margin: 0;
   color: #3a5547;
@@ -1593,8 +1589,7 @@ h1>span {
   background: var(--color-surface-subtle);
 }
 
-.hacking-program-profile-table,
-.hacking-program-profile-table table {
+.hacking-program-profile-table {
   width: 100%;
 }
 
@@ -2077,10 +2072,6 @@ h1>span {
   table-layout: auto;
 }
 
-.weapon-profile thead th {
-  width: auto;
-}
-
 .weapon-ranges {
   border-top: 1px solid #e9ece3;
 }
@@ -2092,11 +2083,6 @@ h1>span {
 
 .weapon-ranges th,
 .weapon-ranges td {
-  width: auto;
-}
-
-.weapon-profile .weapon-ranges th:first-child,
-.weapon-profile .weapon-ranges th:last-child {
   width: auto;
 }
 
@@ -2760,6 +2746,29 @@ input::placeholder {
 
 .data-table--listing {
   width: 100%;
+}
+
+.data-table--reference,
+.data-table--profile {
+  width: 100%;
+}
+
+.data-table--profile .table-column--descriptor {
+  width: 100%;
+}
+
+.data-table--profile .table-column--metric {
+  width: 1%;
+  text-align: center;
+}
+
+.skill-modifier-table .table-column--primary,
+.skill-modifier-table .skill-modifier-extra {
+  min-width: 12rem;
+}
+
+.skill-modifier-table .skill-modifier-units {
+  min-width: 20rem;
 }
 
 .data-table--listing .table-column--primary {
@@ -4478,9 +4487,6 @@ html[data-distance-unit="in"] .unit-extended-statline {
 
 .fireteam-reference-table {
   width: min(720px, 100%);
-  min-width: 0;
-  max-width: 100%;
-  overflow-x: auto;
 }
 
 .fireteam-reference-table table {
@@ -4488,12 +4494,12 @@ html[data-distance-unit="in"] .unit-extended-statline {
   table-layout: fixed;
 }
 
-.fireteam-reference-table th:first-child {
+.fireteam-reference-table .table-column--metric {
   width: 64px;
+  text-align: center;
 }
 
-.fireteam-reference-table th:nth-child(2),
-.fireteam-reference-table th:nth-child(3) {
+.fireteam-reference-table .table-column--descriptor {
   width: calc((100% - 64px) / 2);
 }
 
@@ -4552,10 +4558,6 @@ html[data-distance-unit="in"] .unit-extended-statline {
   width: min(640px, 100%);
 }
 
-html[data-developer-mode="true"] .fireteam-card {
-  width: 100%;
-}
-
 .fireteam-card-header {
   padding: 14px 16px;
   border-bottom: 1px solid var(--color-border-default);
@@ -4574,9 +4576,6 @@ html[data-developer-mode="true"] .fireteam-card {
 }
 
 .fireteam-member-table {
-  min-width: 0;
-  max-width: 100%;
-  overflow-x: auto;
   border: 0;
 }
 
@@ -4588,11 +4587,11 @@ html[data-developer-mode="true"] .fireteam-member-table table {
   min-width: 760px;
 }
 
-.fireteam-member-table th:first-child {
+.fireteam-member-table .table-column--primary {
   min-width: 180px;
 }
 
-.fireteam-member-table th:first-child .skill-category-badge {
+.fireteam-member-table .table-column--primary .skill-category-badge {
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -4645,6 +4644,9 @@ html[data-developer-mode="true"] .fireteam-member-table table {
     --table-cell-padding: 12px 10px;
     --table-heading-size: var(--font-size-xs);
     --table-cell-size: var(--font-size-base);
+  }
+
+  html:not([data-developer-mode="true"]) .fireteam-member-table table {
     width: 100%;
     min-width: 0;
     table-layout: fixed;
@@ -4654,15 +4656,15 @@ html[data-developer-mode="true"] .fireteam-member-table table {
   .fireteam-member-table td {
     min-width: 0;
     white-space: normal;
-    overflow-wrap: anywhere;
   }
 
-  .fireteam-member-table th:first-child {
+  html:not([data-developer-mode="true"]) .fireteam-member-table .table-column--primary {
     width: 54%;
     min-width: 0;
   }
 
-  .fireteam-member-table th:nth-child(2) {
+  html:not([data-developer-mode="true"])
+    .fireteam-member-table .fireteam-member-requirements {
     width: 46%;
   }
 
@@ -4696,15 +4698,13 @@ html[data-developer-mode="true"] .fireteam-member-table table {
   .fireteam-reference-table th,
   .fireteam-reference-table td {
     white-space: normal;
-    overflow-wrap: anywhere;
   }
 
-  .fireteam-reference-table th:first-child {
+  .fireteam-reference-table .table-column--metric {
     width: 52px;
   }
 
-  .fireteam-reference-table th:nth-child(2),
-  .fireteam-reference-table th:nth-child(3) {
+  .fireteam-reference-table .table-column--descriptor {
     width: calc((100% - 52px) / 2);
   }
 }

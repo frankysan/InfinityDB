@@ -49,10 +49,26 @@ and Fireteam containers and generated Unit/catalog detail cards now compose thos
 legacy edge clipping is retained only through an explicit `.surface--clipped` variant where the old
 container actually clipped content.
 
-The remaining work is intentionally broader: converge the secondary table families, consolidate
-titlebars and controls, normalize generated
-accessibility/responsive behavior, rationalize affected presentation tokens, and complete the
-manual browser matrix.
+The reusable secondary-table pass now builds on the same vocabulary instead of adding another
+parallel sizing layer:
+
+- Skill/catalog usage tables reuse the listing-table family and its primary, descriptor, technical,
+  and interactive-row behavior rather than maintaining a visually similar one-off layout;
+- compact Hacking Program and Weapon profile tables use one profile-table family in which
+  descriptive content receives flexible space and short comparison metrics remain compact;
+- structured rules-reference, Skill Modifier, and Fireteam tables use a shared reference-table
+  family while retaining their domain-specific width/responsive rules;
+- Weapon stat/range tables now sit inside the common table viewport and generated comparison
+  columns carry explicit semantic roles and table scopes/captions;
+- Fireteam member/reference sizing no longer depends on `first-child`/`nth-child` selectors, and
+  the narrow two-column Fireteam member transformation is limited to normal mode so Developer mode
+  can preserve the wide reference table and scroll it instead; and
+- Developer mode no longer expands an entire Fireteam card merely because technical member columns
+  are visible.
+
+The remaining work is intentionally broader: consolidate titlebars and controls, finish generated
+table accessibility/responsive normalization outside the families already touched, rationalize
+affected presentation tokens, and complete the manual browser matrix.
 
 ## Overall assessment
 
