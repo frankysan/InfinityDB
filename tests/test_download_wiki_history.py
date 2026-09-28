@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import urllib.error
 import urllib.parse
 import zipfile
 from datetime import datetime
+from email.message import Message
 from pathlib import Path
 from typing import Any
 
@@ -16,9 +18,63 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 
+def test_fetch_bytes_retries_transient_http_errors(monkeypatch) -> None:
+    attempts = 0
+    sleeps: list[float] = []
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+        def read(self) -> bytes:
+            return b"ok"
+
+    def fake_urlopen(request, timeout=30):
+        nonlocal attempts
+        attempts += 1
+        if attempts < 3:
+            raise urllib.error.HTTPError(
+                request.full_url, 502, "Bad Gateway", hdrs=Message(), fp=None
+            )
+        return Response()
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(module.time, "sleep", sleeps.append)
+
+    assert module.fetch_bytes(module.ROOT_URL) == b"ok"
+    assert attempts == 3
+    assert sleeps == [1.0, 2.0]
+
+
+def test_fetch_bytes_does_not_retry_non_transient_http_error(monkeypatch) -> None:
+    attempts = 0
+
+    def fake_urlopen(request, timeout=30):
+        nonlocal attempts
+        attempts += 1
+        raise urllib.error.HTTPError(
+            request.full_url, 404, "Not Found", hdrs=Message(), fp=None
+        )
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+
+    try:
+        module.fetch_bytes(module.ROOT_URL)
+    except urllib.error.HTTPError as exc:
+        assert exc.code == 404
+    else:
+        raise AssertionError("expected HTTPError")
+    assert attempts == 1
+
+
 def test_history_is_opt_in() -> None:
     assert module.parse_args([]).include_history is False
     assert module.parse_args(["--include-history"]).include_history is True
+    resume = module.parse_args(["--resume-work", "preserved.work"])
+    assert resume.resume_work == Path("preserved.work")
 
 
 def test_current_crawl_records_mediawiki_page_identity(
@@ -173,6 +229,42 @@ def test_download_history_keeps_raw_oldid_pages_and_writes_index(
         module.oldid_url("BS Attack", 10, language="en"),
         module.oldid_url("BS Attack", 20, language="en"),
     ]
+
+
+def test_download_history_reuses_existing_oldid_file(
+    tmp_path: Path, monkeypatch
+) -> None:
+    page = module.WikiPage(
+        url="https://infinitythewiki.com/BS_Attack",
+        path="BS_Attack",
+        title="BS_Attack",
+    )
+    revisions = (
+        module.WikiRevision(10, 0, "2024-12-01T00:00:00Z"),
+        module.WikiRevision(20, 10, "2025-01-01T00:00:00Z"),
+    )
+    monkeypatch.setattr(
+        module,
+        "fetch_page_revisions",
+        lambda _page, *, language="en": ("BS Attack", revisions),
+    )
+    existing = tmp_path / "_history" / "oldid" / "10.html"
+    existing.parent.mkdir(parents=True)
+    existing.write_bytes(b"already downloaded")
+    fetched: list[str] = []
+
+    def fake_fetch(url: str, *, language: str = "en") -> bytes:
+        fetched.append(url)
+        return b"new revision"
+
+    monkeypatch.setattr(module, "fetch_bytes", fake_fetch)
+
+    result = module.download_wiki_history((page,), tmp_path)
+
+    assert result.failures == ()
+    assert result.revision_count == 2
+    assert existing.read_bytes() == b"already downloaded"
+    assert fetched == [module.oldid_url("BS Attack", 20, language="en")]
 
 
 def test_history_archive_has_distinct_identity(tmp_path: Path) -> None:

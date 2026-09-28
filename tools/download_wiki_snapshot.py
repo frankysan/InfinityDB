@@ -15,6 +15,8 @@ import json
 import re
 import shutil
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections import deque
@@ -62,6 +64,9 @@ LANGUAGE_INDEX_URLS = {
 HISTORY_DIRECTORY = "_history"
 HISTORY_INDEX_FORMAT = "InfinityDB wiki revision history"
 HISTORY_INDEX_VERSION = 1
+FETCH_ATTEMPTS = 5
+FETCH_RETRY_DELAYS = (1.0, 2.0, 4.0, 8.0)
+RETRYABLE_HTTP_STATUS = frozenset({408, 425, 429, 500, 502, 503, 504})
 LANGUAGE_ACCEPT_HEADERS = {
     "en": "en-US,en;q=0.9",
     "es": "es-ES,es;q=0.9,en;q=0.5",
@@ -442,18 +447,22 @@ def download_wiki_history(
             relative = f"{HISTORY_DIRECTORY}/oldid/{revision.oldid}.html"
             target = destination / relative
             if revision.oldid not in saved_oldids:
-                try:
-                    payload = fetch_bytes(source_url, language=language)
-                except Exception as exc:  # pragma: no cover - live network failure path.
-                    failures.append(
-                        WikiDownloadFailure(
-                            url=source_url, error=f"{type(exc).__name__}: {exc}"
+                if target.is_file():
+                    files.add(target)
+                    saved_oldids.add(revision.oldid)
+                else:
+                    try:
+                        payload = fetch_bytes(source_url, language=language)
+                    except Exception as exc:  # pragma: no cover - live network failure path.
+                        failures.append(
+                            WikiDownloadFailure(
+                                url=source_url, error=f"{type(exc).__name__}: {exc}"
+                            )
                         )
-                    )
-                    continue
-                write_bytes(target, payload)
-                files.add(target)
-                saved_oldids.add(revision.oldid)
+                        continue
+                    write_bytes(target, payload)
+                    files.add(target)
+                    saved_oldids.add(revision.oldid)
 
             revision_records.append(
                 {
@@ -655,6 +664,12 @@ def rewrite_html_links(
     return pattern.sub(replace, html_text)
 
 
+def _retryable_fetch_error(exc: BaseException) -> bool:
+    if isinstance(exc, urllib.error.HTTPError):
+        return exc.code in RETRYABLE_HTTP_STATUS
+    return isinstance(exc, (urllib.error.URLError, TimeoutError, ConnectionError))
+
+
 def fetch_bytes(url: str, *, language: str = "en") -> bytes:
     request = urllib.request.Request(
         url,
@@ -665,8 +680,15 @@ def fetch_bytes(url: str, *, language: str = "en") -> bytes:
             "Connection": "keep-alive",
         },
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        return response.read()
+    for attempt in range(FETCH_ATTEMPTS):
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return response.read()
+        except Exception as exc:
+            if not _retryable_fetch_error(exc) or attempt >= FETCH_ATTEMPTS - 1:
+                raise
+            time.sleep(FETCH_RETRY_DELAYS[attempt])
+    raise AssertionError("fetch retry loop exhausted unexpectedly")
 
 
 def write_bytes(path: Path, payload: bytes) -> None:
@@ -863,6 +885,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--resume-work",
+        type=Path,
+        help=(
+            "Reuse a preserved wiki work directory from an incomplete run; existing "
+            "oldid files are not downloaded again"
+        ),
+    )
+    parser.add_argument(
         "--manifest-dir",
         type=Path,
         default=Path("data/manifests/snapshots"),
@@ -885,12 +915,19 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         started_at = datetime.now().astimezone()
-        staging_path = create_wiki_work_directory(
-            work_root,
-            language=args.language,
-            now=started_at,
-            include_history=args.include_history,
-        )
+        if args.resume_work is not None:
+            resume_path = (Path.cwd() / args.resume_work).resolve()
+            if not resume_path.is_dir():
+                raise ValueError(f"Wiki resume work directory does not exist: {resume_path}")
+            staging_path = resume_path
+        else:
+            staging_path = create_wiki_work_directory(
+                work_root,
+                language=args.language,
+                now=started_at,
+                include_history=args.include_history,
+            )
+        assert staging_path is not None
         try:
             result = download_wiki(
                 root_url,
@@ -975,6 +1012,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Preserved wiki work -> {staging_path}", file=sys.stderr)
         return 1
 
+    assert staging_path is not None
     try:
         shutil.rmtree(staging_path)
     except OSError as exc:
