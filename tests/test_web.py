@@ -2224,12 +2224,24 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert b"about.js" in body
 
 
+def test_web_route_handlers_keep_presentation_and_api_ownership_separate(app: Callable) -> None:
+    page = app.presentation.handle("/units", "")
+    assert page is not None
+    assert page.content_type == "text/html; charset=utf-8"
+    assert app.presentation.handle("/api/version", "") is None
+
+    api = app.api.handle("/api/version", "")
+    assert api is not None
+    assert api.content_type == "application/json; charset=utf-8"
+    assert app.api.handle("/units", "") is None
+
+
 def test_dynamic_symbol_routes_serve_project_owned_svg_fixtures(
     app: Callable,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    web_app = importlib.import_module("infinity_db.web.app")
+    web_presentation = importlib.import_module("infinity_db.web.presentation")
     package_root = tmp_path / "package"
     fixture_paths = (
         "static/armies/test/101-test.svg",
@@ -2243,7 +2255,7 @@ def test_dynamic_symbol_routes_serve_project_owned_svg_fixtures(
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(svg)
 
-    monkeypatch.setattr(web_app, "files", lambda _: package_root)
+    monkeypatch.setattr(web_presentation, "files", lambda _: package_root)
 
     for url in (
         "/static/armies/test/101-test.svg",

@@ -383,6 +383,7 @@ PROBED_DIRECT_METHODS = {
 }
 RUNTIME_MODULES = (
     "src/infinity_db/web/app.py",
+    "src/infinity_db/web/api_handler.py",
     "src/infinity_db/army_slugs.py",
     "src/infinity_db/catalog_slugs.py",
     "src/infinity_db/domain_references.py",

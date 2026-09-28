@@ -53,6 +53,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web backend:** Separate the same-origin web runtime into explicit WSGI dispatch,
+  browser/static presentation, JSON API handling, shared route identities, and response-value
+  concerns without changing public URLs or deployment topology. Focused regression coverage now
+  pins page/API ownership while preserving existing caching, ETag, metrics, health, and static
+  asset behavior.
 - **Data processing + Web backend + Web frontend:** Restore canonical Labels on Hacking
   Program details by reusing the current core Label vocabulary across rules collections.
   Supportware, No Roll, Comms Attack, and Negative Feedback (NFB) now appear from curated

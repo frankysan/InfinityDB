@@ -1,267 +1,29 @@
-"""Small WSGI application serving the unit API and bundled browser assets."""
+"""Small WSGI application composing API, browser presentation, and HTTP dispatch."""
 
 from __future__ import annotations
 
-import json
 import logging
-import re
 import sqlite3
-from datetime import date
 from hashlib import file_digest, sha256
-from html import escape
 from http import HTTPStatus
-from importlib.resources import files
 from pathlib import Path
 from time import perf_counter
-from urllib.parse import parse_qs
 
-from infinity_army_data.project_resources import maintained_manifest_path
 from infinity_db import __display_version__, __version__
-from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
-from infinity_db.catalog_rules import CatalogRules
-from infinity_db.catalog_slugs import (
-    attach_public_catalog_slug,
-    enrich_nested_catalog_slugs,
-)
-from infinity_db.database import ArmySelectionError, Database
-from infinity_db.domain_references import enrich_rule_relation_references
-from infinity_db.domain_slugs import require_domain_slug
-from infinity_db.equipment_catalog import EquipmentCatalog
-from infinity_db.fireteam_reference import fireteam_reference
-from infinity_db.hacking_program_catalog import HackingProgramCatalog
-from infinity_db.maintained_text_references import enrich_maintained_text_references
+from infinity_db.database import Database
 from infinity_db.rules_database import RulesDatabase
-from infinity_db.search_catalog import SearchCatalog
-from infinity_db.skill_catalog import SkillCatalog
-from infinity_db.state_catalog import StateCatalog
-from infinity_db.symbol_catalog import SymbolCatalog
-from infinity_db.trait_catalog import TraitCatalog
-from infinity_db.unit_slugs import (
-    attach_public_unit_slug,
-    enrich_nested_unit_slugs,
-    enrich_unit_items,
-)
+from infinity_db.web.api_handler import ApiHandler
 from infinity_db.web.metrics import RequestMetrics
+from infinity_db.web.presentation import ASSETS, STATIC_ASSET_REVISION, PresentationHandler
+from infinity_db.web.presentation import STATIC_ASSET_VERSION as STATIC_ASSET_VERSION
+from infinity_db.web.response import WebResponse
+from infinity_db.web.routes import metric_route
 
 LOGGER = logging.getLogger(__name__)
-ASSETS = {
-    "/static/version-check.js": ("version-check.js", "text/javascript; charset=utf-8"),
-    "/static/styles.css": ("styles.css", "text/css; charset=utf-8"),
-    "/static/app.js": ("app.js", "text/javascript; charset=utf-8"),
-    "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
-    "/static/unit-symbols.js": ("unit-symbols.js", "text/javascript; charset=utf-8"),
-    "/static/unit-presentation.js": ("unit-presentation.js", "text/javascript; charset=utf-8"),
-    "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
-    "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
-    "/static/navigation.js": ("navigation.js", "text/javascript; charset=utf-8"),
-    "/static/page-navigation.js": ("page-navigation.js", "text/javascript; charset=utf-8"),
-    "/static/themed-logo.js": ("themed-logo.js", "text/javascript; charset=utf-8"),
-    "/static/about.js": ("about.js", "text/javascript; charset=utf-8"),
-    "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
-    "/static/fireteams.js": ("fireteams.js", "text/javascript; charset=utf-8"),
-    "/static/catalog-list.js": ("catalog-list.js", "text/javascript; charset=utf-8"),
-    "/static/skill.js": ("skill.js", "text/javascript; charset=utf-8"),
-    "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
-    "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
-    "/static/search.js": ("search.js", "text/javascript; charset=utf-8"),
-    "/static/hacking-program-detail.js": (
-        "hacking-program-detail.js",
-        "text/javascript; charset=utf-8",
-    ),
-    "/static/maintained-text.js": ("maintained-text.js", "text/javascript; charset=utf-8"),
-    "/static/rules-reference.js": ("rules-reference.js", "text/javascript; charset=utf-8"),
-    "/static/skill-categories.js": ("skill-categories.js", "text/javascript; charset=utf-8"),
-    "/static/infinitydb-logo.svg": ("infinitydb-logo.svg", "image/svg+xml"),
-    "/static/fonts/Audiowide/Audiowide-Regular.woff2": (
-        "fonts/Audiowide/Audiowide-Regular.woff2",
-        "font/woff2",
-    ),
-    "/static/fonts/Oxanium/Oxanium-Variable.woff2": (
-        "fonts/Oxanium/Oxanium-Variable.woff2",
-        "font/woff2",
-    ),
-    "/static/fonts/IBM_Plex_Sans/IBMPlexSans-Variable.woff2": (
-        "fonts/IBM_Plex_Sans/IBMPlexSans-Variable.woff2",
-        "font/woff2",
-    ),
-    "/static/fonts/IBM_Plex_Sans/IBMPlexSans-Italic-Variable.woff2": (
-        "fonts/IBM_Plex_Sans/IBMPlexSans-Italic-Variable.woff2",
-        "font/woff2",
-    ),
-    "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Regular.woff2": (
-        "fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Regular.woff2",
-        "font/woff2",
-    ),
-    "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Medium.woff2": (
-        "fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Medium.woff2",
-        "font/woff2",
-    ),
-    "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-SemiBold.woff2": (
-        "fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-SemiBold.woff2",
-        "font/woff2",
-    ),
-    "/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Bold.woff2": (
-        "fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Bold.woff2",
-        "font/woff2",
-    ),
-    "/static/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.woff2": (
-        "fonts/IBM_Plex_Mono/IBMPlexMono-Regular.woff2",
-        "font/woff2",
-    ),
-}
-ARMY_SYMBOL_PATH = re.compile(r"/static/armies/[a-z0-9-]+/[a-z0-9-]+\.svg")
-UNIT_SYMBOL_PATH = re.compile(r"/static/units/[a-z0-9-]+/[a-z0-9-]+\.svg")
-ORDER_SYMBOL_PATH = re.compile(
-    r"/static/orders/(regular|irregular|impetuous|tactical|lieutenant)\.svg"
+_CONTENT_SECURITY_POLICY = (
+    "default-src 'self'; script-src 'self'; object-src 'none'; "
+    "base-uri 'none'; frame-ancestors 'none'"
 )
-CHARACTERISTIC_SYMBOL_PATH = re.compile(
-    r"/static/characteristics/(peripheral|hackable|cube|cube-2)\.svg"
-)
-DOMAIN_ROUTE_IDENTIFIER = r"[a-z0-9]+(?:-[a-z0-9]+)*"
-UNIT_PAGE_PATH = re.compile(rf"/units/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
-UNIT_API_PATH = re.compile(rf"/api/units/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
-SKILL_PAGE_PATH = re.compile(rf"/skills/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
-SKILL_API_PATH = re.compile(rf"/api/skills/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
-EQUIPMENT_PAGE_PATH = re.compile(
-    rf"/equipment/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
-)
-EQUIPMENT_API_PATH = re.compile(
-    rf"/api/equipment/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
-)
-WEAPON_PAGE_PATH = re.compile(rf"/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
-WEAPON_API_PATH = re.compile(rf"/api/weapons/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
-STATE_PAGE_PATH = re.compile(rf"/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
-STATE_API_PATH = re.compile(rf"/api/states/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
-HACKING_PROGRAM_PAGE_PATH = re.compile(
-    rf"/hacking-programs/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
-)
-HACKING_PROGRAM_API_PATH = re.compile(
-    rf"/api/hacking-programs/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
-)
-TRAIT_PAGE_PATH = re.compile(rf"/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
-TRAIT_API_PATH = re.compile(rf"/api/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
-STATIC_URL = re.compile(r'\b(?:src|href)=(?P<quote>["\'])(?P<path>/static/[^"\']+)(?P=quote)')
-MODULE_IMPORT_URL = re.compile(
-    r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])(?P<path>\./[^"\']+\.js)(?P=quote)'
-)
-STATIC_REVISION_FILES = tuple(sorted(filename for filename, _ in ASSETS.values()))
-
-
-def _metric_route(path: str) -> str:
-    """Normalize one request path to the fixed observability route vocabulary."""
-
-    if path in {
-        "/",
-        "/about",
-        "/units",
-        "/skills",
-        "/equipment",
-        "/weapons",
-        "/traits",
-        "/states",
-        "/hacking-programs",
-        "/skill-extras",
-        "/fireteams",
-        "/search",
-        "/api/version",
-        "/api/armies",
-        "/api/units",
-        "/api/visible-unit-ids",
-        "/api/skills",
-        "/api/equipment",
-        "/api/weapons",
-        "/api/traits",
-        "/api/states",
-        "/api/hacking-programs",
-        "/api/skill-extras",
-        "/api/unit-profile-help",
-        "/api/fireteams",
-        "/api/search",
-    }:
-        return path
-    for pattern, normalized in (
-        (UNIT_PAGE_PATH, "/units/:id"),
-        (SKILL_PAGE_PATH, "/skills/:id"),
-        (EQUIPMENT_PAGE_PATH, "/equipment/:id"),
-        (WEAPON_PAGE_PATH, "/weapons/:id"),
-        (TRAIT_PAGE_PATH, "/traits/:id"),
-        (STATE_PAGE_PATH, "/states/:id"),
-        (HACKING_PROGRAM_PAGE_PATH, "/hacking-programs/:id"),
-        (UNIT_API_PATH, "/api/units/:id"),
-        (SKILL_API_PATH, "/api/skills/:id"),
-        (EQUIPMENT_API_PATH, "/api/equipment/:id"),
-        (WEAPON_API_PATH, "/api/weapons/:id"),
-        (TRAIT_API_PATH, "/api/traits/:id"),
-        (STATE_API_PATH, "/api/states/:id"),
-        (HACKING_PROGRAM_API_PATH, "/api/hacking-programs/:id"),
-    ):
-        if pattern.fullmatch(path):
-            return normalized
-    if path in ASSETS:
-        return "/static/:asset"
-    if any(
-        pattern.fullmatch(path)
-        for pattern in (
-            ARMY_SYMBOL_PATH,
-            UNIT_SYMBOL_PATH,
-            ORDER_SYMBOL_PATH,
-            CHARACTERISTIC_SYMBOL_PATH,
-        )
-    ):
-        return "/static/:symbol"
-    return "/other"
-
-
-def _static_asset_revision() -> str:
-    """Fingerprint cache-immutable browser assets and the canonical symbol contract."""
-
-    static = files("infinity_db.web").joinpath("static")
-    digest = sha256()
-    for filename in STATIC_REVISION_FILES:
-        digest.update(filename.encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(sha256(static.joinpath(*filename.split("/")).read_bytes()).digest())
-
-    publication_manifest = maintained_manifest_path("symbol-publication.json")
-    digest.update(b"data/manifests/symbol-publication.json\0")
-    digest.update(sha256(publication_manifest.read_bytes()).digest())
-    return digest.hexdigest()[:16]
-
-
-STATIC_ASSET_REVISION = _static_asset_revision()
-STATIC_ASSET_VERSION = f"{__version__}-{STATIC_ASSET_REVISION}"
-
-
-def _version_static_urls(document: str) -> str:
-    """Give page assets a content-derived immutable URL."""
-
-    return STATIC_URL.sub(
-        lambda match: (
-            f"{match.group(0)[:-1]}?v={STATIC_ASSET_VERSION}{match.group('quote')}"
-        ),
-        document,
-    )
-
-
-def _asset_cache_control(query: str) -> str:
-    """Cache fingerprinted assets forever and imported modules briefly."""
-
-    version = parse_qs(query).get("v")
-    if version == [STATIC_ASSET_VERSION]:
-        return "public, max-age=31536000, immutable"
-    return "public, max-age=300, stale-while-revalidate=600"
-
-
-def _version_module_imports(source: str) -> str:
-    """Keep an ES module and every relative dependency in the same release."""
-
-    return MODULE_IMPORT_URL.sub(
-        lambda match: (
-            f"{match.group('prefix')}{match.group('quote')}"
-            f"{match.group('path')}?v={STATIC_ASSET_VERSION}{match.group('quote')}"
-        ),
-        source,
-    )
 
 
 def _snapshot_revision(path: Path) -> str:
@@ -287,296 +49,9 @@ def _etag_matches(header: str | None, etag: str) -> bool:
     return False
 
 
-def _page(
-    filename: str,
-    *,
-    active_page: str | None = None,
-    source_data_changed_on: date | None = None,
-    snapshot_downloaded_on: date | None = None,
-    snapshot_revision: str,
-    breadcrumbs: tuple[tuple[str, str | None], ...],
-    catalog_tag: str,
-) -> bytes:
-    """Render a page with the project-wide navigation and page shell."""
-    static = files("infinity_db.web").joinpath("static")
-    navigation = static.joinpath("navigation.html").read_text(encoding="utf-8")
-    navigation = (
-        navigation.replace(
-            "{{UNIT_EXPLORER_CURRENT}}",
-            ' aria-current="page"' if active_page == "units" else "",
-        )
-        .replace(
-            "{{SKILLS_CURRENT}}",
-            ' aria-current="page"' if active_page == "skills" else "",
-        )
-        .replace(
-            "{{EQUIPMENT_CURRENT}}",
-            ' aria-current="page"' if active_page == "equipment" else "",
-        )
-        .replace(
-            "{{WEAPONS_CURRENT}}",
-            ' aria-current="page"' if active_page == "weapons" else "",
-        )
-        .replace(
-            "{{TRAITS_CURRENT}}",
-            ' aria-current="page"' if active_page == "traits" else "",
-        )
-        .replace(
-            "{{STATES_CURRENT}}",
-            ' aria-current="page"' if active_page == "states" else "",
-        )
-        .replace(
-            "{{HACKING_PROGRAMS_CURRENT}}",
-            ' aria-current="page"' if active_page == "hacking-programs" else "",
-        )
-        .replace(
-            "{{SKILL_EXTRAS_CURRENT}}",
-            ' aria-current="page"' if active_page == "skill-extras" else "",
-        )
-        .replace(
-            "{{FIRETEAMS_CURRENT}}",
-            ' aria-current="page"' if active_page == "fireteams" else "",
-        )
-        .replace(
-            "{{ABOUT_CURRENT}}",
-            ' aria-current="page"' if active_page == "about" else "",
-        )
-        .replace(
-            "{{ARMY_DATA_DATES}}",
-            (
-                (
-                    '<p class="snapshot-date">Army data last changed '
-                    f'<time datetime="{source_data_changed_on.isoformat()}">'
-                    f"{source_data_changed_on:%B} {source_data_changed_on.day}, "
-                    f"{source_data_changed_on:%Y}"
-                    "</time></p>"
-                )
-                if source_data_changed_on
-                else ""
-            )
-            + (
-                '<p class="snapshot-date developer-only">Snapshot downloaded '
-                f'<time datetime="{snapshot_downloaded_on.isoformat()}">'
-                f"{snapshot_downloaded_on:%B} {snapshot_downloaded_on.day}, "
-                f"{snapshot_downloaded_on:%Y}"
-                "</time></p>"
-                if snapshot_downloaded_on
-                else ""
-            ),
-        )
-    )
-    breadcrumb_markup = "".join(
-        (
-            f'<a href="{escape(href, quote=True)}">{escape(label)}</a>'
-            if href
-            else f"<strong>{escape(label)}</strong>"
-        )
-        + ('<span aria-hidden="true">/</span>' if index < len(breadcrumbs) - 1 else "")
-        for index, (label, href) in enumerate(breadcrumbs)
-    )
-    page_header = (
-        static.joinpath("page-header.html")
-        .read_text(encoding="utf-8")
-        .replace("{{BREADCRUMBS}}", breadcrumb_markup)
-        .replace("{{CATALOG_TAG}}", escape(catalog_tag))
-    )
-    page_footer = (
-        static.joinpath("page-footer.html")
-        .read_text(encoding="utf-8")
-        .replace("{{VERSION}}", escape(__display_version__))
-    )
-    document = static.joinpath(filename).read_text(encoding="utf-8")
-    return _version_static_urls(
-        document.replace(
-            '<html lang="en">',
-            f'<html lang="en" data-app-version="{__version__}" '
-            f'data-static-version="{STATIC_ASSET_VERSION}" '
-            f'data-static-revision="{STATIC_ASSET_REVISION}" '
-            f'data-snapshot-revision="{snapshot_revision}">',
-        )
-        .replace(
-            "</head>",
-            (
-                '<script type="module" '
-                f'src="/static/version-check.js?v={STATIC_ASSET_VERSION}"></script>'
-                "</head>"
-            ),
-        )
-        .replace("<!-- navigation -->", navigation)
-        .replace("<!-- page-header -->", page_header)
-        .replace("<!-- page-footer -->", page_footer)
-    ).encode("utf-8")
-
-
-def _integer(params: dict, key: str, default: int | None, low: int, high: int) -> int | None:
-    if key not in params:
-        return default
-    raw = params[key][0]
-    if len(raw) > 19 or not re.fullmatch(r"[0-9]+", raw):
-        raise ValueError(f"{key} must be an integer between {low} and {high}")
-    value = int(raw)
-    if not low <= value <= high:
-        raise ValueError(f"{key} must be between {low} and {high}")
-    return value
-
-
-def _flag(params: dict, key: str) -> bool:
-    if key not in params:
-        return False
-    if params[key][0] not in {"0", "1"}:
-        raise ValueError(f"{key} must be 0 or 1")
-    return params[key][0] == "1"
-
-
-def _optional_integer(
-    params: dict, key: str, low: int = 0, high: int = 2**63 - 1
-) -> int | None:
-    if key not in params or params[key][0] == "":
-        return None
-    return _integer(params, key, None, low, high)
-
-
-def _optional_decimal(params: dict, key: str) -> float | None:
-    if key not in params or params[key][0] == "":
-        return None
-    raw = params[key][0]
-    if len(raw) > 32 or re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", raw) is None:
-        raise ValueError(f"{key} must be a nonnegative decimal number")
-    return float(raw)
-
-
-def _ava_exact(params: dict) -> int | str | None:
-    if "ava" not in params or params["ava"][0] == "":
-        return None
-    raw = params["ava"][0].strip().casefold()
-    if raw in {"t", "total"}:
-        return "total"
-    if re.fullmatch(r"[0-9]+", raw) is None:
-        raise ValueError("ava must be an integer from 0 to 99 or 'total'")
-    value = int(raw)
-    if not 0 <= value <= 99:
-        raise ValueError("ava must be an integer from 0 to 99 or 'total'")
-    return value
-
-
-def _swc_exact(params: dict) -> str | None:
-    if "swc" not in params or params["swc"][0] == "":
-        return None
-    raw = params["swc"][0].strip()
-    if re.fullmatch(r"(?:\+)?(?:0|[1-9]\d*)(?:\.[0-9]+)?|-", raw) is None:
-        raise ValueError("swc must be a numeric cost, +bonus, or '-'")
-    return raw
-
-
-def _domain_filter_identifier(params: dict, key: str) -> int | str | None:
-    """Parse one domain filter as a numeric compatibility ID or public slug."""
-
-    if key not in params or params[key][0] == "":
-        return None
-    raw = params[key][0]
-    if raw.isdigit():
-        if len(raw) > 19:
-            raise ValueError(f"{key} must be a valid domain identifier")
-        value = int(raw)
-        if value > 2**63 - 1:
-            raise ValueError(f"{key} must be a valid domain identifier")
-        return value
-    return require_domain_slug(raw, context=key)
-
-
-def _unit_query(query: str) -> dict:
-    params = parse_qs(query, keep_blank_values=True, max_num_fields=40)
-    for key, values in params.items():
-        if key not in {
-            "army_id",
-            "declared_faction_id",
-            "search",
-            "skill_id",
-            "equipment_id",
-            "weapon_id",
-            "troop_type",
-            "classification",
-            "characteristic",
-            "ava",
-            "ava_min",
-            "ava_max",
-            "points",
-            "points_min",
-            "points_max",
-            "swc",
-            "swc_min",
-            "swc_max",
-            "limit",
-            "offset",
-            "mercs",
-            "specops",
-            "teamops",
-            "reinforcement",
-            "order",
-            "extended",
-            "cache_bust",
-        }:
-            raise ValueError(f"Unknown query parameter: {key}")
-        if len(values) != 1:
-            raise ValueError(f"Provide {key} only once")
-    search = params.get("search", [""])[0].strip()
-    if len(search) > 200:
-        raise ValueError("search must be at most 200 characters")
-    order = params.get("order", ["asc"])[0]
-    if order not in {"asc", "desc"}:
-        raise ValueError("order must be asc or desc")
-    ava = _ava_exact(params)
-    ava_min = _optional_integer(params, "ava_min", 0, 99)
-    ava_max = _optional_integer(params, "ava_max", 0, 99)
-    points = _optional_integer(params, "points")
-    points_min = _optional_integer(params, "points_min")
-    points_max = _optional_integer(params, "points_max")
-    swc = _swc_exact(params)
-    swc_min = _optional_decimal(params, "swc_min")
-    swc_max = _optional_decimal(params, "swc_max")
-    for name, exact, minimum, maximum in (
-        ("ava", ava, ava_min, ava_max),
-        ("points", points, points_min, points_max),
-        ("swc", swc, swc_min, swc_max),
-    ):
-        if exact is not None and (minimum is not None or maximum is not None):
-            raise ValueError(f"{name} exact value cannot be combined with a range")
-        if minimum is not None and maximum is not None and minimum > maximum:
-            raise ValueError(f"{name}_min must be less than or equal to {name}_max")
-
-    return {
-        "army_id": _domain_filter_identifier(params, "army_id"),
-        "declared_faction_id": _integer(
-            params, "declared_faction_id", None, 0, 2**63 - 1
-        ),
-        "search": search,
-        "skill_id": _domain_filter_identifier(params, "skill_id"),
-        "equipment_id": _domain_filter_identifier(params, "equipment_id"),
-        "weapon_id": _domain_filter_identifier(params, "weapon_id"),
-        "troop_type": _domain_filter_identifier(params, "troop_type"),
-        "classification": _domain_filter_identifier(params, "classification"),
-        "characteristic": _domain_filter_identifier(params, "characteristic"),
-        "ava": ava,
-        "ava_min": ava_min,
-        "ava_max": ava_max,
-        "points": points,
-        "points_min": points_min,
-        "points_max": points_max,
-        "swc": swc,
-        "swc_min": swc_min,
-        "swc_max": swc_max,
-        "limit": _integer(params, "limit", 50, 1, 200),
-        "offset": _integer(params, "offset", 0, 0, 2**63 - 1),
-        "mercs": _flag(params, "mercs"),
-        "specops": _flag(params, "specops"),
-        "teamops": _flag(params, "teamops"),
-        "reinforcement": _flag(params, "reinforcement"),
-        "descending": order == "desc",
-        "extended": _flag(params, "extended"),
-    }
-
-
 class Application:
+    """Top-level WSGI dispatch and observability around focused route handlers."""
+
     def __init__(self, database_path: Path, rules_database_path: Path | None = None) -> None:
         self.database = Database(database_path)
         self.database.validate()
@@ -593,28 +68,7 @@ class Application:
                 self.rules_database = rules_database
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.warning("Ignoring invalid rules database: %s", candidate_rules_path)
-        self.trait_catalog = TraitCatalog(self.database, self.rules_database)
-        self.state_catalog = StateCatalog(self.rules_database)
-        self.skill_catalog = SkillCatalog(self.database, self.rules_database)
-        self.equipment_catalog = EquipmentCatalog(self.database, self.rules_database)
-        self.hacking_program_catalog = HackingProgramCatalog(
-            self.database, self.rules_database
-        )
-        self.search_catalog = SearchCatalog(
-            self.database,
-            self.skill_catalog,
-            self.equipment_catalog,
-            self.trait_catalog,
-            self.state_catalog,
-            self.hacking_program_catalog,
-        )
-        self.catalog_rules = CatalogRules(self.rules_database)
-        self.symbol_catalog = SymbolCatalog()
-        self.fireteam_rules_reference = fireteam_reference(self.rules_database)
-        if self.fireteam_rules_reference is not None:
-            self.fireteam_rules_reference = enrich_maintained_text_references(
-                self.database, self.rules_database, self.fireteam_rules_reference
-            )
+
         self.source_data_changed_on = self.database.source_data_changed_on()
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
@@ -625,6 +79,28 @@ class Application:
         self.snapshot_revision = sha256(
             f"{_snapshot_revision(self.database.path)}:{rules_revision}".encode()
         ).hexdigest()
+        self.presentation = PresentationHandler(
+            source_data_changed_on=self.source_data_changed_on,
+            snapshot_downloaded_on=self.snapshot_downloaded_on,
+            snapshot_revision=self.snapshot_revision,
+        )
+        self.api = ApiHandler(
+            self.database,
+            self.rules_database,
+            static_revision=STATIC_ASSET_REVISION,
+            snapshot_revision=self.snapshot_revision,
+        )
+        # Preserve the existing Application service attributes while request ownership moves
+        # behind the API handler. They remain internal compatibility aliases, not dispatch logic.
+        self.trait_catalog = self.api.trait_catalog
+        self.state_catalog = self.api.state_catalog
+        self.skill_catalog = self.api.skill_catalog
+        self.equipment_catalog = self.api.equipment_catalog
+        self.hacking_program_catalog = self.api.hacking_program_catalog
+        self.search_catalog = self.api.search_catalog
+        self.catalog_rules = self.api.catalog_rules
+        self.symbol_catalog = self.api.symbol_catalog
+        self.fireteam_rules_reference = self.api.fireteam_rules_reference
         self.request_metrics = RequestMetrics()
 
     def _snapshot_etag(self, path: str, query: str) -> str:
@@ -637,58 +113,11 @@ class Application:
         method = environ.get("REQUEST_METHOD", "GET")
         path = environ.get("PATH_INFO", "/")
 
-        if path in {"/internal/metrics", "/internal/health"} and method not in {"GET", "HEAD"}:
-            body = b"method not allowed\n"
-            start_response(
-                "405 Method Not Allowed",
-                [
-                    ("Content-Type", "text/plain; charset=utf-8"),
-                    ("Content-Length", str(len(body))),
-                    ("Cache-Control", "no-store"),
-                    ("Allow", "GET, HEAD"),
-                    ("X-Content-Type-Options", "nosniff"),
-                ],
-            )
-            return [body]
+        internal_response = self._internal_response(path, method)
+        if internal_response is not None:
+            return self._send_internal_response(internal_response, method, start_response)
 
-        if path == "/internal/metrics":
-            body = self.request_metrics.render_prometheus(
-                version=__display_version__, snapshot_revision=self.snapshot_revision
-            )
-            start_response(
-                "200 OK",
-                [
-                    ("Content-Type", "text/plain; version=0.0.4; charset=utf-8"),
-                    ("Content-Length", str(len(body))),
-                    ("Cache-Control", "no-store"),
-                    ("X-Content-Type-Options", "nosniff"),
-                ],
-            )
-            return [] if method == "HEAD" else [body]
-
-        if path == "/internal/health":
-            try:
-                self.database.list_armies()
-                if self.rules_database is not None:
-                    self.state_catalog.list_states()
-            except (OSError, ValueError, sqlite3.Error):
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                body = b"unavailable\n"
-            else:
-                status = HTTPStatus.OK
-                body = b"ok\n"
-            start_response(
-                f"{status.value} {status.phrase}",
-                [
-                    ("Content-Type", "text/plain; charset=utf-8"),
-                    ("Content-Length", str(len(body))),
-                    ("Cache-Control", "no-store"),
-                    ("X-Content-Type-Options", "nosniff"),
-                ],
-            )
-            return [] if method == "HEAD" else [body]
-
-        route = _metric_route(path)
+        route = metric_route(path, ASSETS)
         started = perf_counter()
         response_status = HTTPStatus.INTERNAL_SERVER_ERROR.value
         response_size = 0
@@ -720,632 +149,102 @@ class Application:
         )
         return result
 
+    def _internal_response(self, path: str, method: str) -> WebResponse | None:
+        if path not in {"/internal/metrics", "/internal/health"}:
+            return None
+        if method not in {"GET", "HEAD"}:
+            return WebResponse(
+                status=HTTPStatus.METHOD_NOT_ALLOWED,
+                body=b"method not allowed\n",
+                content_type="text/plain; charset=utf-8",
+                cache_control="no-store",
+                headers=[("Allow", "GET, HEAD")],
+            )
+        if path == "/internal/metrics":
+            return WebResponse(
+                body=self.request_metrics.render_prometheus(
+                    version=__display_version__, snapshot_revision=self.snapshot_revision
+                ),
+                content_type="text/plain; version=0.0.4; charset=utf-8",
+                cache_control="no-store",
+            )
+        try:
+            self.api.validate_health()
+        except (OSError, ValueError, sqlite3.Error):
+            return WebResponse(
+                status=HTTPStatus.SERVICE_UNAVAILABLE,
+                body=b"unavailable\n",
+                content_type="text/plain; charset=utf-8",
+                cache_control="no-store",
+            )
+        return WebResponse(
+            body=b"ok\n",
+            content_type="text/plain; charset=utf-8",
+            cache_control="no-store",
+        )
+
+    @staticmethod
+    def _send_internal_response(response: WebResponse, method: str, start_response):
+        headers = [
+            ("Content-Type", response.content_type),
+            ("Content-Length", str(len(response.body))),
+            ("Cache-Control", response.cache_control),
+            ("X-Content-Type-Options", "nosniff"),
+            *response.headers,
+        ]
+        start_response(f"{response.status.value} {response.status.phrase}", headers)
+        return [] if method == "HEAD" else [response.body]
+
+    def _dispatch(self, method: str, path: str, query: str) -> WebResponse:
+        if method not in {"GET", "HEAD"}:
+            return WebResponse.json(
+                {"error": "Use GET or HEAD for this resource"},
+                status=HTTPStatus.METHOD_NOT_ALLOWED,
+                headers=[("Allow", "GET, HEAD")],
+            )
+
+        response = self.presentation.handle(path, query)
+        if response is not None:
+            return response
+        response = self.api.handle(path, query)
+        if response is not None:
+            return response
+        return WebResponse.json({"error": "Resource not found"}, status=HTTPStatus.NOT_FOUND)
+
     def _serve_request(self, environ: dict, start_response):
         method = environ.get("REQUEST_METHOD", "GET")
         path = environ.get("PATH_INFO", "/")
-        extra_headers = []
-        status = HTTPStatus.OK
-        content_type = "application/json; charset=utf-8"
-        # Pages contain a small amount of release-specific information, while API
-        # data and versioned assets are immutable for the lifetime of a release.
-        cache_control = "no-cache"
-        payload = None
-        body = b""
+        query = environ.get("QUERY_STRING", "")
+        response = self._dispatch(method, path, query)
 
-        if method not in {"GET", "HEAD"}:
-            status = HTTPStatus.METHOD_NOT_ALLOWED
-            payload = {"error": "Use GET or HEAD for this resource"}
-            extra_headers.append(("Allow", "GET, HEAD"))
-        elif path == "/":
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "index.html",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(("InfinityDB", None), ("Home", None)),
-                catalog_tag="Player reference",
-            )
-        elif path == "/units":
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "units.html",
-                active_page="units",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(("Database", "/"), ("Units", None)),
-                catalog_tag="Unit catalog",
-            )
-        elif path == "/search":
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "search.html",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(("Database", "/"), ("Search", None)),
-                catalog_tag="Global search",
-            )
-        elif path in ASSETS:
-            filename, content_type = ASSETS[path]
-            body = files("infinity_db.web").joinpath(
-                "static", *filename.split("/")
-            ).read_bytes()
-            version = parse_qs(environ.get("QUERY_STRING", "")).get("v")
-            if filename.endswith(".js") and version == [STATIC_ASSET_VERSION]:
-                body = _version_module_imports(body.decode("utf-8")).encode("utf-8")
-            cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
-        elif ARMY_SYMBOL_PATH.fullmatch(path):
-            filename = path.removeprefix("/static/armies/")
-            asset = files("infinity_db.web").joinpath("static", "armies", filename)
-            if asset.is_file():
-                body = asset.read_bytes()
-                content_type = "image/svg+xml"
-                cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
-            else:
-                status = HTTPStatus.NOT_FOUND
-                payload = {"error": "Resource not found"}
-        elif match := ORDER_SYMBOL_PATH.fullmatch(path):
-            asset = files("infinity_db.web").joinpath("static", "orders", f"{match.group(1)}.svg")
-            if asset.is_file():
-                body = asset.read_bytes()
-                content_type = "image/svg+xml"
-                cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
-            else:
-                status = HTTPStatus.NOT_FOUND
-                payload = {"error": "Resource not found"}
-        elif match := CHARACTERISTIC_SYMBOL_PATH.fullmatch(path):
-            asset = files("infinity_db.web").joinpath(
-                "static", "characteristics", f"{match.group(1)}.svg"
-            )
-            if asset.is_file():
-                body = asset.read_bytes()
-                content_type = "image/svg+xml"
-                cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
-            else:
-                status = HTTPStatus.NOT_FOUND
-                payload = {"error": "Resource not found"}
-        elif UNIT_SYMBOL_PATH.fullmatch(path):
-            filename = path.removeprefix("/static/units/")
-            asset = files("infinity_db.web").joinpath("static", "units", filename)
-            if asset.is_file():
-                body = asset.read_bytes()
-                content_type = "image/svg+xml"
-                cache_control = _asset_cache_control(environ.get("QUERY_STRING", ""))
-            else:
-                status = HTTPStatus.NOT_FOUND
-                payload = {"error": "Resource not found"}
-        elif UNIT_PAGE_PATH.fullmatch(path):
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "unit.html",
-                active_page="units",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(("Database", "/"), ("Units", "/units"), ("Details", None)),
-                catalog_tag="Unit catalog",
-            )
-        elif path == "/fireteams":
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "fireteams.html",
-                active_page="fireteams",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(("Database", "/"), ("Fireteams", None)),
-                catalog_tag="Fireteam charts",
-            )
-        elif path == "/skill-extras":
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "skill-extras.html",
-                active_page="skill-extras",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(("Database", "/"), ("Skill modifiers", None)),
-                catalog_tag="Reference data",
-            )
-        elif path in {
-            "/skills", "/equipment", "/weapons", "/traits", "/states",
-            "/hacking-programs",
-        }:
-            content_type = "text/html; charset=utf-8"
-            catalog = path.removeprefix("/")
-            body = _page(
-                f"{catalog}.html",
-                active_page=catalog,
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(("Database", "/"), (catalog.replace("-", " ").title(), None)),
-                catalog_tag="Rules reference",
-            )
-        elif SKILL_PAGE_PATH.fullmatch(path):
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "skill.html",
-                active_page="skills",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(("Database", "/"), ("Skills", "/skills"), ("Details", None)),
-                catalog_tag="Rules reference",
-            )
-        elif EQUIPMENT_PAGE_PATH.fullmatch(path):
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "equipment-detail.html",
-                active_page="equipment",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(
-                    ("Database", "/"),
-                    ("Equipment", "/equipment"),
-                    ("Details", None),
-                ),
-                catalog_tag="Rules reference",
-            )
-        elif WEAPON_PAGE_PATH.fullmatch(path):
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "weapons-detail.html",
-                active_page="weapons",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(
-                    ("Database", "/"),
-                    ("Weapons", "/weapons"),
-                    ("Details", None),
-                ),
-                catalog_tag="Rules reference",
-            )
-        elif TRAIT_PAGE_PATH.fullmatch(path):
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "traits-detail.html",
-                active_page="traits",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(
-                    ("Database", "/"),
-                    ("Traits", "/traits"),
-                    ("Details", None),
-                ),
-                catalog_tag="Rules reference",
-            )
-        elif STATE_PAGE_PATH.fullmatch(path):
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "states-detail.html",
-                active_page="states",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(
-                    ("Database", "/"),
-                    ("States", "/states"),
-                    ("Details", None),
-                ),
-                catalog_tag="Rules reference",
-            )
-        elif HACKING_PROGRAM_PAGE_PATH.fullmatch(path):
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "hacking-program-detail.html",
-                active_page="hacking-programs",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(
-                    ("Database", "/"),
-                    ("Hacking Programs", "/hacking-programs"),
-                    ("Details", None),
-                ),
-                catalog_tag="Rules reference",
-            )
-        elif path == "/about":
-            content_type = "text/html; charset=utf-8"
-            body = _page(
-                "about.html",
-                active_page="about",
-                source_data_changed_on=self.source_data_changed_on,
-                snapshot_downloaded_on=self.snapshot_downloaded_on,
-                snapshot_revision=self.snapshot_revision,
-                breadcrumbs=(("InfinityDB", "/"), ("About", None)),
-                catalog_tag="Player reference",
-            )
-        elif path == "/api/version":
-            payload = {
-                "version": __version__,
-                "static_revision": STATIC_ASSET_REVISION,
-                "snapshot_revision": self.snapshot_revision,
-            }
-            cache_control = "no-store"
-        elif path == "/api/search":
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                params = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=True)
-                unknown = sorted(set(params) - {"q", "cache_bust"})
-                if unknown:
-                    raise ValueError(f"Unknown query parameter: {unknown[0]}")
-                if len(params.get("q", [])) != 1:
-                    raise ValueError("Provide q exactly once")
-                query = params["q"][0].strip()
-                if not query:
-                    raise ValueError("q must not be empty")
-                if len(query) > 200:
-                    raise ValueError("q must be at most 200 characters")
-                if len(params.get("cache_bust", [])) > 1:
-                    raise ValueError("Provide cache_bust only once")
-                payload = {"items": self.search_catalog.search(query)}
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
-                LOGGER.exception("Could not search the database")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "Search is unavailable. Please try again."}
-        elif path == "/api/fireteams":
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                params = parse_qs(environ.get("QUERY_STRING", ""), keep_blank_values=True)
-                army_ref = _domain_filter_identifier(params, "army_id")
-                if army_ref is None:
-                    items = [dict(item) for item in self.database.list_fireteam_armies()]
-                    for item in items:
-                        attach_public_army_slug(self.database, item)
-                    payload = {"items": items, "reference": self.fireteam_rules_reference}
-                else:
-                    payload = self.database.get_fireteam_chart(army_ref)
-                    if payload is None:
-                        status = HTTPStatus.NOT_FOUND
-                        payload = {"error": "Fireteam chart not found"}
-                    else:
-                        attach_public_army_slug(self.database, payload["army"])
-                        payload["reference"] = self.fireteam_rules_reference
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
-                LOGGER.exception("Could not read Fireteam chart")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The Fireteam chart is unavailable. Please try again."}
-        elif path == "/api/unit-profile-help":
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                items = (
-                    self.rules_database.unit_profile_help()
-                    if self.rules_database is not None
-                    else []
-                )
-                payload = {"items": items}
-            except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read Unit Profile help")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {
-                    "error": "Unit Profile help is unavailable. Please try again."
-                }
-        elif path == "/api/skill-extras":
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                payload = {"items": self.skill_catalog.list_skill_extras()}
-                payload = enrich_nested_unit_slugs(self.database, payload)
-                payload = enrich_army_references(self.database, payload)
-                payload = self.symbol_catalog.enrich_nested_units(payload)
-            except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read skill modifiers")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The skill modifiers are unavailable. Please try again."}
-        elif path in {"/api/skills", "/api/equipment", "/api/weapons"}:
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                catalog = path.removeprefix("/api/")
-                if catalog == "skills":
-                    items = self.skill_catalog.list_skills()
-                elif catalog == "equipment":
-                    items = self.equipment_catalog.list_equipment()
-                else:
-                    items = self.database.list_catalog_items(catalog)
-                    for item in items:
-                        attach_public_catalog_slug(self.database, catalog, item)
-                payload = {"items": items}
-            except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read catalog")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The catalog is unavailable. Please try again."}
-        elif path == "/api/traits":
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                payload = {"items": self.trait_catalog.list_traits()}
-            except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read traits")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The traits are unavailable. Please try again."}
-        elif path == "/api/states":
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                payload = {"items": self.state_catalog.list_states()}
-            except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read states")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The states are unavailable. Please try again."}
-        elif path == "/api/hacking-programs":
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                payload = {"items": self.hacking_program_catalog.list_programs()}
-            except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read Hacking Programs")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The Hacking Programs are unavailable. Please try again."}
-        elif match := SKILL_API_PATH.fullmatch(path):
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                identifier = match.group("identifier")
-                skill_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.skill_catalog.get_skill(skill_ref)
-                if payload is None:
-                    status = HTTPStatus.NOT_FOUND
-                    payload = {"error": "Skill not found"}
-                else:
-                    payload = enrich_nested_unit_slugs(self.database, payload)
-                    payload = enrich_army_references(self.database, payload)
-                    payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
-                    payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
-                    )
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
-                LOGGER.exception("Could not read skill")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The skill is unavailable. Please try again."}
-        elif match := EQUIPMENT_API_PATH.fullmatch(path):
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                identifier = match.group("identifier")
-                item_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.equipment_catalog.get_equipment(item_ref)
-                if payload is None:
-                    status = HTTPStatus.NOT_FOUND
-                    payload = {"error": "Reference item not found"}
-                else:
-                    payload["hacking_programs"] = (
-                        self.hacking_program_catalog.programs_for_equipment(
-                            payload.get("slug") or payload["id"]
-                        )
-                    )
-                    payload = self.trait_catalog.enrich_catalog_item(payload)
-                    payload = self.catalog_rules.enrich_catalog_item("equipment", payload)
-                    payload = enrich_nested_unit_slugs(self.database, payload)
-                    payload = enrich_army_references(self.database, payload)
-                    payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
-                    payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
-                    )
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
-                LOGGER.exception("Could not read reference item")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The reference item is unavailable. Please try again."}
-        elif match := WEAPON_API_PATH.fullmatch(path):
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                identifier = match.group("identifier")
-                item_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.database.get_catalog_item("weapons", item_ref)
-                if payload is None:
-                    status = HTTPStatus.NOT_FOUND
-                    payload = {"error": "Reference item not found"}
-                else:
-                    attach_public_catalog_slug(self.database, "weapons", payload)
-                    payload = self.trait_catalog.enrich_catalog_item(payload)
-                    payload = self.catalog_rules.enrich_catalog_item("weapons", payload)
-                    payload = enrich_nested_unit_slugs(self.database, payload)
-                    payload = enrich_army_references(self.database, payload)
-                    payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
-                    payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
-                    )
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
-                LOGGER.exception("Could not read reference item")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The reference item is unavailable. Please try again."}
-        elif match := TRAIT_API_PATH.fullmatch(path):
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                payload = self.trait_catalog.get_trait(match.group("identifier"))
-                if payload is None:
-                    status = HTTPStatus.NOT_FOUND
-                    payload = {"error": "Trait not found"}
-                else:
-                    payload = enrich_nested_unit_slugs(self.database, payload)
-                    payload = enrich_army_references(self.database, payload)
-                    payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
-                    payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
-                    )
-            except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read trait")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The trait is unavailable. Please try again."}
-        elif match := STATE_API_PATH.fullmatch(path):
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                payload = self.state_catalog.get_state(match.group("identifier"))
-                if payload is None:
-                    status = HTTPStatus.NOT_FOUND
-                    payload = {"error": "State not found"}
-                else:
-                    payload = enrich_rule_relation_references(self.database, payload)
-                    payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
-                    )
-            except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read state")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The state is unavailable. Please try again."}
-        elif match := HACKING_PROGRAM_API_PATH.fullmatch(path):
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                identifier = match.group("identifier")
-                program_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.hacking_program_catalog.get_program(program_ref)
-                if payload is None:
-                    status = HTTPStatus.NOT_FOUND
-                    payload = {"error": "Hacking Program not found"}
-                else:
-                    payload = enrich_rule_relation_references(self.database, payload)
-                    payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
-                    )
-            except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read Hacking Program")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The Hacking Program is unavailable. Please try again."}
-        elif path == "/api/armies":
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                items = [dict(item) for item in self.database.list_armies()]
-                for item in items:
-                    attach_public_army_slug(self.database, item)
-                payload = enrich_army_references(self.database, {"items": items})
-                self.symbol_catalog.enrich_armies(payload["items"])
-            except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read armies")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
-        elif path == "/api/visible-unit-ids":
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                filters = _unit_query(environ.get("QUERY_STRING", ""))
-                payload = {
-                    "ids": self.database.visible_unit_ids(
-                        mercs=filters["mercs"],
-                        specops=filters["specops"],
-                        teamops=filters["teamops"],
-                        reinforcement=filters["reinforcement"],
-                    )
-                }
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
-                LOGGER.exception("Could not read visible unit IDs")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
-        elif path == "/api/unit-filters":
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                payload = self.database.list_unit_filter_values()
-            except (OSError, ValueError, sqlite3.Error):
-                LOGGER.exception("Could not read Unit filter values")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
-        elif path == "/api/units":
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                query = _unit_query(environ.get("QUERY_STRING", ""))
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            else:
-                try:
-                    logical_unit_ids = self.equipment_catalog.logical_unit_ids_for_filter(
-                        query.get("equipment_id")
-                    )
-                    if logical_unit_ids is not None:
-                        query["equipment_id"] = None
-                        query["_logical_unit_ids"] = logical_unit_ids
-                    payload = self.database.list_units(**query)
-                    payload = {
-                        **payload,
-                        "items": enrich_unit_items(self.database, payload["items"]),
-                    }
-                    payload = enrich_army_references(self.database, payload)
-                    self.symbol_catalog.enrich_units(payload["items"])
-                except ArmySelectionError as exc:
-                    status = HTTPStatus.BAD_REQUEST
-                    payload = {"error": str(exc)}
-                except (OSError, ValueError, sqlite3.Error):
-                    LOGGER.exception("Could not read units")
-                    status = HTTPStatus.SERVICE_UNAVAILABLE
-                    payload = {"error": "The database is unavailable. Please try again."}
-        elif match := UNIT_API_PATH.fullmatch(path):
-            cache_control = "public, max-age=300, stale-while-revalidate=600"
-            try:
-                identifier = match.group("identifier")
-                unit_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.database.get_unit(unit_ref)
-                if payload is not None:
-                    payload = self.skill_catalog.enrich_unit(payload)
-                    payload = self.equipment_catalog.enrich_unit(payload)
-                    payload = enrich_nested_catalog_slugs(
-                        self.database,
-                        payload,
-                        frozenset({"equipment", "weapons"}),
-                    )
-                    attach_public_unit_slug(self.database, payload)
-                    payload = enrich_army_references(self.database, payload)
-                    self.symbol_catalog.enrich_unit(payload)
-                if payload is None:
-                    status = HTTPStatus.NOT_FOUND
-                    payload = {"error": "Unit not found"}
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
-                LOGGER.exception("Could not read unit")
-                status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
-        else:
-            status = HTTPStatus.NOT_FOUND
-            payload = {"error": "Resource not found"}
-
-        if payload is not None:
-            body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         etag = (
-            self._snapshot_etag(path, environ.get("QUERY_STRING", ""))
-            if path.startswith("/api/") and status == HTTPStatus.OK
+            self._snapshot_etag(path, query)
+            if path.startswith("/api/") and response.status == HTTPStatus.OK
             else None
         )
+        status = response.status
+        body = response.body
         if etag and _etag_matches(environ.get("HTTP_IF_NONE_MATCH"), etag):
             status = HTTPStatus.NOT_MODIFIED
             body = b""
-        etag_headers = [("ETag", etag)] if etag else []
+
         headers = [
-            ("Cache-Control", cache_control),
+            ("Cache-Control", response.cache_control),
             ("X-Content-Type-Options", "nosniff"),
-            (
-                "Content-Security-Policy",
-                "default-src 'self'; script-src 'self'; object-src 'none'; "
-                "base-uri 'none'; frame-ancestors 'none'",
-            ),
-            *etag_headers,
-            *extra_headers,
+            ("Content-Security-Policy", _CONTENT_SECURITY_POLICY),
+            *([("ETag", etag)] if etag else []),
+            *response.headers,
         ]
         if status != HTTPStatus.NOT_MODIFIED:
-            headers[:0] = [("Content-Type", content_type), ("Content-Length", str(len(body)))]
+            headers[:0] = [
+                ("Content-Type", response.content_type),
+                ("Content-Length", str(len(body))),
+            ]
         start_response(f"{status.value} {status.phrase}", headers)
         return [] if method == "HEAD" else [body]
 
 
 def create_app(database_path: Path, rules_database_path: Path | None = None) -> Application:
     """Create the app after verifying the database, without starting a server."""
+
     return Application(database_path, rules_database_path)

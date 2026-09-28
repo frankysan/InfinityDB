@@ -264,13 +264,21 @@ by the audit remain in scope.
 
 - [ ] Refactor the web layer toward the documented backend/frontend responsibility
   boundary without changing the current same-origin deployment model.
-  - [ ] Split API handling, shared page-shell/static delivery, and top-level request
-    dispatch into visibly separate Python concerns while preserving existing URLs.
+  - [x] Split API handling, shared page-shell/static delivery, and top-level request
+    dispatch into visibly separate Python concerns while preserving existing URLs. The WSGI
+    composition/instrumentation layer now delegates browser/static delivery to
+    `web/presentation.py` and JSON/domain handling to `web/api_handler.py`, with shared route
+    identities and response values kept separate from both.
   - [ ] Organize browser code around explicit API transport, preferences/theme
     state, reusable view/components, and page modules; keep JSON API access routed
     through `api.js`.
   - [ ] Add focused contract/regression coverage as responsibilities move so domain
     interpretation cannot silently migrate back into browser code.
+    - [x] Pin Python route ownership so presentation handling does not absorb `/api/*` and API
+      handling does not absorb browser pages, and keep packaged-symbol tests coupled to the
+      presentation concern rather than top-level WSGI dispatch.
+    - [ ] Add browser/backend semantic-boundary coverage while moving remaining inferred domain
+      labels/symbol roles out of page modules.
 
 - [ ] Implement first-class theme selection using the semantic theme contract documented in
   `docs/architecture.md`, with Light and Dark as the initial themes rather than an architectural limit.

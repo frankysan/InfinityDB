@@ -1266,12 +1266,19 @@ semantic API data into views. API payloads should expose semantic roles, states,
 identities, labels, and relationships rather than CSS classes, literal colors, layout
 instructions, or page-specific markup.
 
-The same-origin deployment model remains appropriate. As the web layer is refactored,
-separate API handling, page-shell/static delivery, and top-level request dispatch more
-clearly on the Python side, and organize browser code around explicit API transport,
-preferences/theme state, reusable view/components, and page modules. Browser JSON API
-access continues through `api.js`; new page scripts should not accumulate independent
-transport or domain-interpretation logic.
+The same-origin deployment model remains appropriate. The Python web layer keeps its HTTP
+responsibilities explicit: `web/app.py` owns application composition, top-level WSGI dispatch,
+common HTTP policy, ETags, and request instrumentation; `web/presentation.py` owns the shared
+page shell plus packaged static/symbol delivery; `web/api_handler.py` owns JSON request
+validation and domain/API projection; `web/routes.py` owns shared route identities used across
+those concerns; and `web/response.py` carries handler results back to WSGI dispatch. These are
+internal ownership boundaries, not separate deployment services, and existing public URLs remain
+stable.
+
+Continue the same separation in browser code around explicit API transport, preferences/theme
+state, reusable view/components, and page modules. Browser JSON API access continues through
+`api.js`; new page scripts should not accumulate independent transport or domain-interpretation
+logic.
 
 ### Design direction: theming
 
