@@ -56,6 +56,9 @@ New or materially revised entries use the project-domain labels defined in
 - **Web backend + Project infrastructure:** Cache composed Skill and State rules records per
   catalog instance, avoiding repeated SQLite composition work during catalog lookups and
   enrichment audits while preserving mutation isolation for returned detail data.
+- **Project infrastructure:** Reuse one read-only current rules-database fixture across
+  rules query tests instead of rebuilding the same curated SQLite snapshot for each test, while
+  retaining isolated builds for mutation and exporter-validation coverage.
 - **Data processing + Web frontend:** Begin the systematic maintained-rules semantic-link coverage
   pass with canonical State references, so terms such as **Unconscious State** and **Dead State**
   now behave as inline rules references. Rules builds now freeze the remaining pre-migration plain

@@ -27,6 +27,17 @@ def export_rules_database(*args, **kwargs) -> None:
     export_release_rules_database(*args, **kwargs)
 
 
+@pytest.fixture(scope="module")
+def current_rules_database(tmp_path_factory: pytest.TempPathFactory) -> RulesDatabase:
+    """Build the unchanged current rules corpus once for read-only query tests."""
+    root = Path(__file__).parents[1]
+    output = tmp_path_factory.mktemp("rules-database-current") / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    database = RulesDatabase(output)
+    database.validate()
+    return database
+
+
 def _current_core_with_hacking_programs(
     root: Path,
 ) -> tuple[Path, dict, tuple[Path, dict]]:
@@ -167,13 +178,10 @@ def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
 
 
 def test_unit_profile_help_returns_reviewed_profile_notation_entries(
-    tmp_path: Path,
+    current_rules_database: RulesDatabase,
 ) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
 
-    items = RulesDatabase(output).unit_profile_help()
+    items = current_rules_database.unit_profile_help()
 
     assert [item["key"] for item in items] == [
         "unit-profile",
@@ -214,11 +222,11 @@ def test_training_classifies_normal_order_types_without_conflating_tactical_orde
     assert database.training_by_order_type() == {}
 
 
-def test_training_enrichment_preserves_all_other_orders(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    catalog = SkillCatalog(Database(tmp_path / "unused.db"), RulesDatabase(output))
+def test_training_enrichment_preserves_all_other_orders(
+    tmp_path: Path,
+    current_rules_database: RulesDatabase,
+) -> None:
+    catalog = SkillCatalog(Database(tmp_path / "unused.db"), current_rules_database)
     unit = {
         "armies": [
             {
@@ -288,12 +296,11 @@ def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> Non
     }
 
 
-def test_rules_database_returns_reviewed_source_variant_semantics(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+def test_rules_database_returns_reviewed_source_variant_semantics(
+    current_rules_database: RulesDatabase,
+) -> None:
 
-    variants = RulesDatabase(output).catalog_source_variant_semantics("skill")
+    variants = current_rules_database.catalog_source_variant_semantics("skill")
 
     assert variants[19] == {"kind": "level", "value": 1}
     assert variants[23] == {"kind": "level", "value": 5}
@@ -315,7 +322,7 @@ def test_rules_database_returns_reviewed_source_variant_semantics(tmp_path: Path
         "value": 21,
     }
 
-    equipment_variants = RulesDatabase(output).catalog_source_variant_semantics(
+    equipment_variants = current_rules_database.catalog_source_variant_semantics(
         "equipment"
     )
     assert equipment_variants[169] == {"kind": "named", "label": "Firewall"}
@@ -406,12 +413,9 @@ def test_rules_database_returns_equipment_declaration_categories(tmp_path: Path)
 
 
 def test_current_declaration_categories_match_reviewed_n5_3_semantics(
-    tmp_path: Path,
+    current_rules_database: RulesDatabase,
 ) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+    database = current_rules_database
 
     skill_categories: dict[object, list[str]] = {}
     for category in database.declaration_categories("skill"):
@@ -619,11 +623,10 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
 
 
 
-def test_reviewed_trait_skill_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_reviewed_trait_skill_interactions_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     records = {
         record["id"]: record
@@ -653,11 +656,10 @@ def test_reviewed_trait_skill_interactions_are_bidirectional(tmp_path: Path) -> 
         }
 
 
-def test_weapon_trait_skill_prerequisites_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_weapon_trait_skill_prerequisites_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def record(kind: str, record_id: str) -> dict:
         return next(
@@ -688,11 +690,10 @@ def test_weapon_trait_skill_prerequisites_are_bidirectional(tmp_path: Path) -> N
         }
 
 
-def test_skill_roll_modifier_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_skill_roll_modifier_interactions_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     records = {
         record["id"]: record for record in database.composed_records_by_kind("skill")
@@ -720,11 +721,10 @@ def test_skill_roll_modifier_interactions_are_bidirectional(tmp_path: Path) -> N
         }
 
 
-def test_place_deployable_prerequisites_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_place_deployable_prerequisites_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     records = {
         record["id"]: record
@@ -749,11 +749,8 @@ def test_place_deployable_prerequisites_are_bidirectional(tmp_path: Path) -> Non
         }
 
 
-def test_common_skill_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_common_skill_interactions_are_bidirectional(current_rules_database: RulesDatabase) -> None:
+    database = current_rules_database
 
     records = {
         record["id"]: record for record in database.composed_records_by_kind("skill")
@@ -779,11 +776,10 @@ def test_common_skill_interactions_are_bidirectional(tmp_path: Path) -> None:
         }
 
 
-def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_mimetism_modifier_interactions_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def skill_rule(slug: str, record_id: str) -> dict:
         return next(
@@ -835,11 +831,10 @@ def test_mimetism_modifier_interactions_are_bidirectional(tmp_path: Path) -> Non
         }
 
 
-def test_mobility_environment_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_mobility_environment_interactions_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def record(record_id: str) -> dict:
         kind = record_id.split(":", 1)[0]
@@ -876,11 +871,10 @@ def test_mobility_environment_interactions_are_bidirectional(tmp_path: Path) -> 
     }
 
 
-def test_morale_behavior_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_morale_behavior_interactions_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def record(record_id: str) -> dict:
         kind = record_id.split(":", 1)[0]
@@ -914,11 +908,10 @@ def test_morale_behavior_interactions_are_bidirectional(tmp_path: Path) -> None:
     }
 
 
-def test_silent_dodge_modifier_interaction_is_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_silent_dodge_modifier_interaction_is_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     silent = next(
         item
@@ -941,11 +934,10 @@ def test_silent_dodge_modifier_interaction_is_bidirectional(tmp_path: Path) -> N
     }
 
 
-def test_disposable_causes_item_specific_unloaded_state(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_disposable_causes_item_specific_unloaded_state(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     disposable = next(
         item
@@ -968,11 +960,10 @@ def test_disposable_causes_item_specific_unloaded_state(tmp_path: Path) -> None:
     }
 
 
-def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_stealth_counter_interactions_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def skill_rule(slug: str, record_id: str) -> dict:
         return next(
@@ -1026,11 +1017,8 @@ def test_stealth_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
     assert ("enables-use-of", "inbound", "Hidden Deployment State") in surprise_relations
 
 
-def test_sensor_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_sensor_interactions_are_bidirectional(current_rules_database: RulesDatabase) -> None:
+    database = current_rules_database
 
     def record(kind: str, record_id: str) -> dict:
         return next(
@@ -1096,11 +1084,10 @@ def test_sensor_interactions_are_bidirectional(tmp_path: Path) -> None:
     }
 
 
-def test_marksmanship_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_marksmanship_counter_interactions_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     marksmanship = next(
         item
@@ -1150,11 +1137,10 @@ def test_marksmanship_counter_interactions_are_bidirectional(tmp_path: Path) -> 
             ("imposes-modifiers-on", "inbound", "Albedo"),
         }
 
-def test_natural_born_warrior_counter_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_natural_born_warrior_counter_interactions_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def skill_rule(slug: str, record_id: str) -> dict:
         return next(
@@ -1188,11 +1174,10 @@ def test_natural_born_warrior_counter_interactions_are_bidirectional(tmp_path: P
 
 
 
-def test_no_cover_override_interaction_is_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_no_cover_override_interaction_is_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def skill_rule(slug: str, record_id: str) -> dict:
         return next(
@@ -1213,11 +1198,10 @@ def test_no_cover_override_interaction_is_bidirectional(tmp_path: Path) -> None:
         for relation in limited_cover["display_relations"]
     }
 
-def test_state_recovery_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_state_recovery_interactions_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     doctor = next(
         item
@@ -1325,11 +1309,10 @@ def test_state_recovery_interactions_are_bidirectional(tmp_path: Path) -> None:
     }
 
 
-def test_fireteam_and_scenario_support_skills_are_composed(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_fireteam_and_scenario_support_skills_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     records = {
         slug: next(
@@ -1358,11 +1341,10 @@ def test_fireteam_and_scenario_support_skills_are_composed(tmp_path: Path) -> No
     assert all(not record.get("display_relations") for record in records.values())
 
 
-def test_profile_runtime_identity_skills_are_composed(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_profile_runtime_identity_skills_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     records = {
         slug: next(
@@ -1416,11 +1398,10 @@ def test_profile_runtime_identity_skills_are_composed(tmp_path: Path) -> None:
         }
 
 
-def test_final_semantic_link_cleanup_is_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_final_semantic_link_cleanup_is_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def record(record_id: str) -> dict:
         kind = record_id.split(":", 1)[0]
@@ -1455,11 +1436,8 @@ def test_final_semantic_link_cleanup_is_bidirectional(tmp_path: Path) -> None:
         }
 
 
-def test_hacker_skill_is_composed(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_hacker_skill_is_composed(current_rules_database: RulesDatabase) -> None:
+    database = current_rules_database
 
     hacker = next(
         item
@@ -1479,11 +1457,8 @@ def test_hacker_skill_is_composed(tmp_path: Path) -> None:
     } == {("enables-use-of", "outbound", "Hacking Device")}
 
 
-def test_damage_resilience_skills_are_composed(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_damage_resilience_skills_are_composed(current_rules_database: RulesDatabase) -> None:
+    database = current_rules_database
 
     records = {
         slug: next(
@@ -1633,11 +1608,8 @@ def test_export_rejects_source_specific_variant_without_family_relation(
         )
 
 
-def test_targeted_interaction_hub_is_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_targeted_interaction_hub_is_bidirectional(current_rules_database: RulesDatabase) -> None:
+    database = current_rules_database
 
     def skill(slug: str, record_id: str) -> dict:
         return next(
@@ -1680,11 +1652,10 @@ def test_targeted_interaction_hub_is_bidirectional(tmp_path: Path) -> None:
     }
 
 
-def test_state_self_recovery_relations_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_state_self_recovery_relations_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def skill(slug: str, record_id: str) -> dict:
         return next(
@@ -1726,11 +1697,10 @@ def test_state_self_recovery_relations_are_bidirectional(tmp_path: Path) -> None
     }
 
 
-def test_equipment_roll_interactions_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_equipment_roll_interactions_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def equipment_rule(slug: str, record_id: str) -> dict:
         return next(
@@ -1787,11 +1757,10 @@ def test_equipment_roll_interactions_are_bidirectional(tmp_path: Path) -> None:
         }
 
 
-def test_second_equipment_slice_relations_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_second_equipment_slice_relations_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def equipment_rule(slug: str, record_id: str) -> dict:
         return next(
@@ -1867,11 +1836,10 @@ def test_second_equipment_slice_relations_are_bidirectional(tmp_path: Path) -> N
     }
 
 
-def test_remaining_equipment_slice_relations_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_remaining_equipment_slice_relations_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     def equipment_rule(slug: str, record_id: str) -> dict:
         return next(
@@ -1952,11 +1920,10 @@ def test_remaining_equipment_slice_relations_are_bidirectional(tmp_path: Path) -
         for relation in tinbot_repeater["display_relations"]
     }
 
-def test_command_order_skill_relations_are_bidirectional(tmp_path: Path) -> None:
-    root = Path(__file__).parents[1]
-    output = tmp_path / "rules.db"
-    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
-    database = RulesDatabase(output)
+def test_command_order_skill_relations_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
 
     records = {
         item["id"]: item

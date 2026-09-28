@@ -117,6 +117,13 @@ In the 2026-09-28 serial Linux benchmark, this reduced
 `tests/test_audit_enrichment_coverage.py` from 14.57 seconds to 2.54 seconds.
 Treat the timing as diagnostic evidence rather than a test threshold.
 
+Read-only rules-database query tests also share one module-scoped build of the unchanged
+current curated corpus instead of rebuilding identical SQLite files for every test. Tests
+that intentionally mutate or validate export behavior continue to build isolated databases.
+In the 2026-09-28 serial Linux benchmark, this reduced `tests/test_rules_database.py`
+from 5.14 seconds to 2.27 seconds while retaining all 45 tests. Treat the timing as
+diagnostic evidence rather than a test threshold.
+
 ### SQLite finalization in semantic tests
 
 The production Army and rules exporters canonicalize generated SQLite artifacts by
