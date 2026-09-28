@@ -3467,6 +3467,80 @@ def test_skill_details_frontend_opens_wiki_links_in_a_new_tab(app: Callable) -> 
     assert b'link.rel = "noopener noreferrer"' in body
 
 
+def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
+    app: Callable, tmp_path: Path
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+
+    status, _, body = request(rules_app, "/api/skills/super-jump")
+    assert status == 200
+    rule = json.loads(body)["rules"][0]
+    reference = next(
+        token for token in rule["summary_tokens"] if token["type"] == "reference"
+    )
+    assert reference == {
+        "type": "reference",
+        "target": "skill:jump",
+        "label": "Jump",
+        "public_reference": {"catalog": "skills", "id": "jump"},
+        "preview_tokens": [
+            {
+                "type": "text",
+                "text": "A Long Common Skill used to clear obstacles and move through the air.",
+            }
+        ],
+    }
+    distances = [
+        token
+        for token in rule["fact_tokens"]["effects"][1]
+        if token["type"] == "distance"
+    ]
+    assert distances == [
+        {"type": "distance", "centimeters": 10, "positive_sign": False},
+        {"type": "distance", "centimeters": 5, "positive_sign": False},
+    ]
+
+    status, _, renderer = request(rules_app, "/static/maintained-text.js")
+    assert status == 200
+    assert b'from "./preferences.js"' in renderer
+    assert b'node.className = "maintained-distance"' in renderer
+    assert b'wrapper.className = "maintained-reference-wrap"' in renderer
+    assert b'tooltip.role = "tooltip"' in renderer
+    assert b'{ interactive: false }' in renderer
+    assert b'link.setAttribute("aria-describedby", tooltip.id)' in renderer
+    assert b'event.pointerType !== "touch"' in renderer
+    assert b'follow: activeTouchReference === link' in renderer
+    assert b'if (!pendingTouchReference.follow) openTouchPreview(link)' in renderer
+    assert b'event.preventDefault()' in renderer
+    assert b'openTouchPreview(link)' in renderer
+    assert b'const viewportGutter = 12' in renderer
+    assert b'wrapper.dataset.tooltipPlacement = "below"' in renderer
+    assert b'--maintained-tooltip-shift-x' in renderer
+    assert (
+        b'link.addEventListener("pointerenter", () => positionReferenceTooltip(link))'
+        in renderer
+    )
+    assert b'link.addEventListener("focus", () => positionReferenceTooltip(link))' in renderer
+    assert b'document.addEventListener("click", (event) =>' in renderer
+    assert b'document.addEventListener("infinity:beforenavigation", closeTouchPreview)' in renderer
+    assert b'window.addEventListener("resize", () =>' in renderer
+    assert b'window.addEventListener("scroll", () =>' in renderer
+    assert b'window.addEventListener("distanceunitchange", refreshDistances)' in renderer
+
+    status, _, styles = request(rules_app, "/static/styles.css")
+    assert status == 200
+    assert b".maintained-reference-tooltip" in styles
+    assert b".maintained-reference-wrap:focus-within .maintained-reference-tooltip" in styles
+    assert b'.maintained-reference-wrap[data-touch-open="true"]' in styles
+    assert b'.maintained-reference-wrap[data-tooltip-placement="below"]' in styles
+    assert b'calc(100vw - 24px)' in styles
+    assert b'--maintained-tooltip-shift-x' in styles
+    assert b"@media (hover: hover)" in styles
+
+
 def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) -> None:
     for asset in ("skill.js", "catalog-detail.js"):
         status, _, body = request(app, f"/static/{asset}")
@@ -3484,9 +3558,9 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b'["effects", "Effects"]' in body
     assert b'["restrictions", "Restrictions"]' in body
     assert body.index(b'["requirements", "Requirements"]') < body.index(b'["effects", "Effects"]')
-    assert body.index(b"summary.textContent = rule.summary") < body.index(
-        b"const applicability = applicabilityText(rule)"
-    )
+    assert body.index(
+        b"appendMaintainedText(summary, rule.summary_tokens, rule.summary)"
+    ) < body.index(b"const applicability = applicabilityText(rule)")
     assert b"detail-fact-heading" in body
     assert b'heading.textContent = "Related rules"' in body
     assert b"const presentation = relation.presentation;" in body

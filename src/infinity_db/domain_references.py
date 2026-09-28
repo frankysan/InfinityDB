@@ -32,7 +32,7 @@ _RULE_ROUTE_CATALOGS: dict[str, tuple[str, str]] = {
 }
 
 
-def _rule_relation_public_reference(
+def rule_record_public_reference(
     database: Database,
     record: dict[str, Any],
 ) -> dict[str, str] | None:
@@ -99,7 +99,7 @@ def enrich_rule_relation_references(
                     record = relation.get("record")
                     if not isinstance(record, dict):
                         continue
-                    reference = _rule_relation_public_reference(database, record)
+                    reference = rule_record_public_reference(database, record)
                     if reference is not None:
                         record["public_reference"] = reference
             for child in node.values():

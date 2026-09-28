@@ -810,6 +810,33 @@ source variants remain plain text rather than becoming dead links. Rules-owned T
 Hacking Program, and rules-only Skill identities project their typed semantic ID directly to
 the corresponding rules-reference route. The browser renders that backend-owned reference and
 does not reinterpret Army IDs or rules namespaces to invent links.
+
+Maintained rules text uses the same semantic boundary. Curated editorial fields accept a small
+wiki-like token syntax: `[[skill:jump]]` references a canonical typed rules identity,
+`[[skill:jump:plural]]` requests the plural display form, `[[skill:jump|Jump Skill]]` supplies
+explicit display text, and `\[[...]]` escapes a literal token. Link namespaces are the existing
+player-routable semantic domains (`skill`, `equipment`, `weapon`, `trait`, `state`, and
+`hacking-program`); InfinityDB does not invent a parallel generic `rule:` alias namespace for
+concepts that do not yet have a player-facing route. Curated loading validates token syntax, the
+rules build rejects references that do not resolve to a current semantic record, and the web
+backend resolves the final player route. API payloads preserve the authored string and add parsed
+`summary_tokens` / `fact_tokens`; browser code renders those backend-owned tokens and never parses
+or resolves maintained-text identities itself. Inline references use the target name by default,
+provide an accessible hover/focus summary preview, and retain ordinary navigation through the
+resolved catalog route. Touch interaction uses an explicit two-tap contract: the first tap pins the
+summary preview, a second tap on the same reference follows the link, and tapping elsewhere closes
+the pinned preview. Mouse and keyboard navigation keep their normal single-activation behavior.
+
+Gameplay distances embedded in maintained text are structural tokens such as
+`[[distance:+2:inch]]` or `[[distance:5:cm]]`. The parser normalizes them to centimeters in the
+API token while preserving whether a positive sign is semantically displayed; the browser uses
+the same distance-formatting preference as Unit/profile presentation and refreshes rendered
+values on `distanceunitchange`. Maintained current rules text has migrated its gameplay cm/in
+distances to this representation, and curated validation rejects newly introduced literal cm or
+inch measurements where they can be detected reliably. Physical component dimensions such as
+55 mm Token sizes remain literal source terminology rather than following the player's gameplay
+distance preference. Tooltip previews are tokenized too, so distances inside previews remain
+preference-aware.
 This migration does not redirect numeric routes or declare derived slugs permanently
 frozen; per-domain freezing, reviewed overrides, aliases, and redirect/canonical-URL
 behavior remain required before numeric routes are retired or redirected.

@@ -1,4 +1,5 @@
 import { getFireteamArmies, getFireteamChart } from "./api.js";
+import { appendMaintainedText } from "./maintained-text.js";
 import { fireteamsIncludeWildcards } from "./preferences.js";
 
 const number = new Intl.NumberFormat();
@@ -322,7 +323,7 @@ function renderReference(reference) {
 
   const summary = document.createElement("p");
   summary.className = "detail-copy";
-  summary.textContent = general.summary;
+  appendMaintainedText(summary, general.summary_tokens, general.summary);
   fragment.append(summary);
 
   const typeBadges = document.createElement("div");
@@ -334,9 +335,9 @@ function renderReference(reference) {
 
   const rules = document.createElement("ul");
   rules.className = "fireteam-reference-rules";
-  for (const rule of generalFacts.rules || []) {
+  for (const [index, rule] of (generalFacts.rules || []).entries()) {
     const item = document.createElement("li");
-    item.textContent = rule;
+    appendMaintainedText(item, general.fact_tokens?.rules?.[index], rule);
     rules.append(item);
   }
   fragment.append(rules);
@@ -345,7 +346,7 @@ function renderReference(reference) {
   levelHeading.textContent = levels.name;
   const basis = document.createElement("p");
   basis.className = "detail-copy";
-  basis.textContent = levelFacts.basis;
+  appendMaintainedText(basis, levels.fact_tokens?.basis, levelFacts.basis);
   const tableContainer = document.createElement("div");
   tableContainer.className = "table-container fireteam-reference-table";
   const table = document.createElement("table");
@@ -368,9 +369,20 @@ function renderReference(reference) {
     levelCell.scope = "row";
     levelCell.textContent = String(level.level);
     const requirement = document.createElement("td");
-    requirement.textContent = level.requirement;
+    appendMaintainedText(
+      requirement,
+      levels.fact_tokens?.levels?.[body.children.length]?.requirement,
+      level.requirement
+    );
     const bonuses = document.createElement("td");
-    bonuses.textContent = (level.bonuses || []).join("; ");
+    for (const [bonusIndex, bonus] of (level.bonuses || []).entries()) {
+      if (bonusIndex) bonuses.append("; ");
+      appendMaintainedText(
+        bonuses,
+        levels.fact_tokens?.levels?.[body.children.length]?.bonuses?.[bonusIndex],
+        bonus
+      );
+    }
     row.append(levelCell, requirement, bonuses);
     body.append(row);
   }
@@ -396,7 +408,11 @@ function renderReference(reference) {
       name.textContent = term.term;
       title.append(name, badge(provenanceLabel(term.provenance)));
       const meaning = document.createElement("p");
-      meaning.textContent = term.meaning;
+      appendMaintainedText(
+        meaning,
+        general.fact_tokens?.terminology?.[terminologyList.children.length],
+        term.meaning
+      );
       item.append(title, meaning);
       terminologyList.append(item);
     }

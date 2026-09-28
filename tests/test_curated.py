@@ -1193,7 +1193,7 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
 
     super_jump = records["skill:super-jump"]["facts"]
     assert "Basic Short Skill" in super_jump["effects"][0]
-    assert "plus 4 inches" in super_jump["effects"][1]
+    assert "plus [[distance:4:inch]]" in super_jump["effects"][1]
 
 
 def test_checked_in_n5_collection_models_combat_reaction_skill_slice() -> None:

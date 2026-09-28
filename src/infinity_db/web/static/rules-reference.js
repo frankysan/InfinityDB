@@ -1,3 +1,4 @@
+import { appendMaintainedText } from "./maintained-text.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 
 function citationLabel(citation) {
@@ -145,7 +146,7 @@ function ruleBadgeRow(rule) {
 function appendRuleDetails(container, rule, { includeBadges = true } = {}) {
   const summary = document.createElement("p");
   summary.className = "detail-copy";
-  summary.textContent = rule.summary;
+  appendMaintainedText(summary, rule.summary_tokens, rule.summary);
   container.append(summary);
 
   const badgeRow = includeBadges ? ruleBadgeRow(rule) : null;
@@ -165,9 +166,9 @@ function appendRuleDetails(container, rule, { includeBadges = true } = {}) {
     heading.textContent = label;
     const list = document.createElement("ul");
     list.className = "detail-list";
-    for (const fact of facts[key]) {
+    for (const [index, fact] of facts[key].entries()) {
       const item = document.createElement("li");
-      item.textContent = fact;
+      appendMaintainedText(item, rule.fact_tokens?.[key]?.[index], fact);
       list.append(item);
     }
     group.append(heading, list);

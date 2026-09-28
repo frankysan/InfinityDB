@@ -1419,7 +1419,7 @@
                 "movement",
                 "optional"
             ],
-            "summary": "A Special Skill that modifies Jump and can add a listed Unit Profile distance to a Jump.",
+            "summary": "A Special Skill that modifies [[skill:jump]] and can add a listed Unit Profile distance to a Jump.",
             "composition": {
                 "role": "definition"
             },
@@ -1436,8 +1436,8 @@
                 ],
                 "requirements": [],
                 "effects": [
-                    "If Jump is declared as the first Basic Short Skill of the Order, Super-Jump turns Jump from a Long Skill into a Basic Short Skill and allows another compatible Basic Short or Short Skill in the same Order.",
-                    "A Long Skill Jump uses the first MOV value plus 4 inches; when Super-Jump has a Unit Profile distance, a Short Skill Jump adds that distance instead of Jump's usual 2 inches."
+                    "If [[skill:jump]] is declared as the first Basic Short Skill of the Order, Super-Jump turns Jump from a Long Skill into a Basic Short Skill and allows another compatible Basic Short or Short Skill in the same Order.",
+                    "A Long Skill [[skill:jump|Jump]] uses the first MOV value plus [[distance:4:inch]]; when Super-Jump has a Unit Profile distance, a Short Skill Jump adds that distance instead of Jump's usual [[distance:2:inch]]."
                 ],
                 "restrictions": [
                     "Jump can be declared as a Basic Short Skill only once per Order, and the user cannot benefit from Partial Cover MODs while declaring Jump."
@@ -2493,7 +2493,7 @@
             "id": "trait:zone-of-control-zc",
             "kind": "trait",
             "name": "Zone of Control (ZoC)",
-            "summary": "Its range is the user's Zone of Control (8 inches).",
+            "summary": "Its range is the user's Zone of Control ([[distance:8:inch]]).",
             "composition": {
                 "role": "definition"
             },
@@ -7761,7 +7761,7 @@
                     "The user must be the Active Trooper or be allowed to declare an ARO."
                 ],
                 "effects": [
-                    "Dodge uses PH to evade enemy Attacks during the Order or ARO; a successful Dodge may also move the user up to 2 inches.",
+                    "Dodge uses PH to evade enemy Attacks during the Order or ARO; a successful Dodge may also move the user up to [[distance:2:inch]].",
                     "A successful Normal or Face to Face Dodge Roll cancels the user's Immobilized-A State, applying any State-specific MODs."
                 ],
                 "restrictions": [
@@ -7989,7 +7989,7 @@
                     "The movement must finish on a surface at least as large as the base."
                 ],
                 "effects": [
-                    "The user moves on the vertical surface up to its first MOV value plus 2 inches; a Climb distance listed in the Unit Profile replaces the 2-inch bonus."
+                    "The user moves on the vertical surface up to its first MOV value plus [[distance:2:inch]]; a Climb distance listed in the Unit Profile replaces the [[distance:2:inch]] bonus."
                 ],
                 "restrictions": [
                     "Climb only permits movement on vertical surfaces and follows the General Movement Rules.",
@@ -8124,7 +8124,7 @@
                     "The user must be able to reach a horizontal landing surface at least as large as its base."
                 ],
                 "effects": [
-                    "The user may Jump up to its first MOV value plus 2 inches; a Jump distance listed in the Unit Profile replaces the 2-inch bonus.",
+                    "The user may Jump up to its first MOV value plus [[distance:2:inch]]; a Jump distance listed in the Unit Profile replaces the [[distance:2:inch]] bonus.",
                     "Declaring Jump automatically cancels Prone State."
                 ],
                 "restrictions": [
@@ -10548,8 +10548,8 @@
                     "The user must be the first Fireteam member deployed and must deploy as that Fireteam's Team Leader."
                 ],
                 "effects": [
-                    "The user and the rest of their Fireteam deploy as if they had Forward Deployment (+4 inches).",
-                    "If a scenario or tournament rule already grants Forward Deployment (+4 inches) to a Fireteam member, the Fireteam instead applies Forward Deployment (+8 inches)."
+                    "The user and the rest of their Fireteam deploy as if they had [[skill:forward-deployment]] ([[distance:+4:inch]]).",
+                    "If a scenario or tournament rule already grants [[skill:forward-deployment]] ([[distance:+4:inch]]) to a Fireteam member, the Fireteam instead applies Forward Deployment ([[distance:+8:inch]])."
                 ],
                 "restrictions": []
             },
@@ -11271,7 +11271,7 @@
                     "The Terrain area must match a Terrain Type listed by the user’s Terrain Special Skill."
                 ],
                 "effects": [
-                    "When declaring a Skill with the Movement Label inside a matching Terrain area, the user gains +1 inch to the first value of its MOV Attribute.",
+                    "When declaring a Skill with the Movement Label inside a matching Terrain area, the user gains [[distance:+1:inch]] to the first value of its MOV Attribute.",
                     "The user may move normally through matching Terrain areas without applying that Terrain area’s movement restrictions.",
                     "If several Terrain Types are listed, the player chooses one when placing the Trooper on the game table.",
                     "Terrain (Total) applies these effects to every Terrain Type defined by the rules."
@@ -12100,7 +12100,7 @@
             "facts": {
                 "category": "state",
                 "effects": [
-                    "Enemies within 24 inches apply a -3 MOD to their Attribute in Face to Face Rolls against the Trooper.",
+                    "Enemies within [[distance:24:inch]] apply a -3 MOD to their Attribute in Face to Face Rolls against the Trooper.",
                     "The selected weapon uses its Suppressive Fire Mode and may react in ARO with the full B3 against one target."
                 ],
                 "requirements": [
@@ -12829,7 +12829,7 @@
                     "If the user is Lieutenant, on the table, and not in a Null State, all Order-providing Troopers gain Regular Training and Courage except that Religious Troop does not receive the granted Courage effect.",
                     "The Special Lieutenant Order may be used to declare a Coordinated Order including the user without the normal Command Token or extra Order expenditure.",
                     "The army is unaffected by Retreat! while the active Lieutenant conditions are met.",
-                    "A qualifying all-Regular Fireteam containing the user receives a +2 inch Team Leader Zone of Control bonus for Coherency Checks."
+                    "A qualifying all-Regular Fireteam containing the user receives a [[distance:+2:inch]] Team Leader Zone of Control bonus for Coherency Checks."
                 ],
                 "restrictions": [
                     "The Fireteam Coherency bonus is not cumulative with another Team Leader Zone of Control bonus."
@@ -13358,7 +13358,7 @@
                 ],
                 "effects": [
                     "During Order Count, all members of the user's Fireteam are Regular while the user is part of that Fireteam.",
-                    "If every Fireteam member already has the Regular Characteristic, add 2 inches to the Team Leader's Zone of Control for Fireteam Coherency Checks."
+                    "If every Fireteam member already has the Regular Characteristic, add [[distance:2:inch]] to the Team Leader's Zone of Control for Fireteam Coherency Checks."
                 ],
                 "restrictions": [
                     "The Coherency bonus is not cumulative with another bonus to the Team Leader's Zone of Control.",

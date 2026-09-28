@@ -1562,6 +1562,68 @@ h1>span {
   line-height: 1.55;
 }
 
+.maintained-reference-wrap {
+  position: relative;
+  display: inline;
+}
+
+.maintained-reference {
+  text-decoration-color: var(--color-border-strong);
+  text-decoration-style: dotted;
+  text-underline-offset: .16em;
+}
+
+.maintained-reference:hover,
+.maintained-reference:focus-visible {
+  text-decoration-style: solid;
+}
+
+.maintained-reference-tooltip {
+  position: absolute;
+  z-index: 3;
+  inset-inline-start: 50%;
+  bottom: calc(100% + 8px);
+  width: max-content;
+  max-width: min(320px, calc(100vw - 24px));
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-default);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: start;
+  transform: translateX(calc(-50% + var(--maintained-tooltip-shift-x, 0px)));
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.maintained-reference-wrap[data-tooltip-placement="below"] .maintained-reference-tooltip {
+  top: calc(100% + 8px);
+  bottom: auto;
+}
+
+.maintained-reference-wrap:focus-within .maintained-reference-tooltip,
+.maintained-reference-wrap[data-touch-open="true"] .maintained-reference-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .maintained-reference-wrap:hover .maintained-reference-tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
+.maintained-distance {
+  white-space: nowrap;
+}
+
 .detail-badges {
   display: flex;
   flex-wrap: wrap;
@@ -2307,7 +2369,7 @@ h2 {
   font-size: var(--font-size-xs);
   line-height: 1.2;
   text-align: center;
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% + var(--maintained-tooltip-shift-x, 0px)));
   pointer-events: none;
 }
 
@@ -2328,7 +2390,7 @@ h2 {
   border-right: 4px solid transparent;
   border-left: 4px solid transparent;
   content: "";
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% + var(--maintained-tooltip-shift-x, 0px)));
 }
 
 .range-value-min::after {

@@ -654,6 +654,12 @@ compatibility references remain unambiguous JSON integers.
 
 ## Decision log
 
+- 2026-09-28: Maintained curated rules prose uses backend-validated semantic tokens rather than
+  browser-parsed link syntax. Inline references use canonical typed rules identities and are
+  published with backend-resolved player routes; gameplay cm/in distances use structural
+  `[[distance:<value>:cm|inch]]` tokens and render through the shared distance preference.
+  Browser code renders the published token contract and must not infer semantic identities from
+  maintained prose. Physical dimensions such as mm Token/base sizes remain literal source terms.
 - 2026-09-25: Production observability must be privacy-preserving and aggregate-first.
   Normal monitoring uses a shared fixed-cardinality WSGI request registry exposed only at the
   Docker-internal `/internal/metrics` endpoint; routine Gunicorn access logging is disabled.

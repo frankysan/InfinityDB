@@ -12,6 +12,16 @@ New or materially revised entries use the project-domain labels defined in
 - **Web backend + Web frontend:** Add global search across Armies, Units, Skills,
   Equipment, Weapons, Traits, States, Hacking Programs, and Fireteam charts. Results
   label their domain and open the corresponding player-facing surface.
+- **Web frontend:** Keep maintained-text reference previews inside the visible viewport by
+  clamping horizontal placement and flipping them below the referenced term when there is not
+  enough space above.
+- **Data processing + Web backend + Web frontend:** Add maintained-text semantic links and
+  preference-aware distance tokens to curated rules text. Inline references resolve through the
+  same canonical Skill, Equipment, Weapon, Trait, State, and Hacking Program routes used elsewhere,
+  expose summary previews on hover/focus, use tap-once-to-preview/tap-again-to-follow interaction
+  on touch displays, and keep typed distances synchronized with the user's cm/in setting. Current
+  gameplay-distance prose has been migrated to typed tokens, while malformed,
+  unresolved, or newly reintroduced literal cm/in references are rejected during validation.
 - **Web backend + Web frontend:** Expand the Unit Explorer's Advanced Filters with
   Troop Type, Classification, Characteristics, AVA, Points, and SWC alongside the
   existing Skill, Equipment, and Weapon filters. Exact AVA, Points, and SWC values

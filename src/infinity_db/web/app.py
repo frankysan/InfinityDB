@@ -29,6 +29,7 @@ from infinity_db.domain_slugs import require_domain_slug
 from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.fireteam_reference import fireteam_reference
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
+from infinity_db.maintained_text_references import enrich_maintained_text_references
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.search_catalog import SearchCatalog
 from infinity_db.skill_catalog import SkillCatalog
@@ -67,6 +68,7 @@ ASSETS = {
         "hacking-program-detail.js",
         "text/javascript; charset=utf-8",
     ),
+    "/static/maintained-text.js": ("maintained-text.js", "text/javascript; charset=utf-8"),
     "/static/rules-reference.js": ("rules-reference.js", "text/javascript; charset=utf-8"),
     "/static/skill-categories.js": ("skill-categories.js", "text/javascript; charset=utf-8"),
     "/static/infinitydb-logo.svg": ("infinitydb-logo.svg", "image/svg+xml"),
@@ -608,6 +610,10 @@ class Application:
         self.catalog_rules = CatalogRules(self.rules_database)
         self.symbol_catalog = SymbolCatalog()
         self.fireteam_rules_reference = fireteam_reference(self.rules_database)
+        if self.fireteam_rules_reference is not None:
+            self.fireteam_rules_reference = enrich_maintained_text_references(
+                self.database, self.rules_database, self.fireteam_rules_reference
+            )
         self.source_data_changed_on = self.database.source_data_changed_on()
         self.snapshot_downloaded_on = self.database.snapshot_downloaded_on()
         rules_revision = (
@@ -1076,6 +1082,9 @@ class Application:
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
                     payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_maintained_text_references(
+                        self.database, self.rules_database, payload
+                    )
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -1104,6 +1113,9 @@ class Application:
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
                     payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_maintained_text_references(
+                        self.database, self.rules_database, payload
+                    )
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -1128,6 +1140,9 @@ class Application:
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
                     payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_maintained_text_references(
+                        self.database, self.rules_database, payload
+                    )
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -1147,6 +1162,9 @@ class Application:
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
                     payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_maintained_text_references(
+                        self.database, self.rules_database, payload
+                    )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read trait")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -1160,6 +1178,9 @@ class Application:
                     payload = {"error": "State not found"}
                 else:
                     payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_maintained_text_references(
+                        self.database, self.rules_database, payload
+                    )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read state")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -1175,6 +1196,9 @@ class Application:
                     payload = {"error": "Hacking Program not found"}
                 else:
                     payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_maintained_text_references(
+                        self.database, self.rules_database, payload
+                    )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Hacking Program")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

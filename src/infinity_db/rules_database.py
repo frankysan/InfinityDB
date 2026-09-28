@@ -12,6 +12,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
+from infinity_db.maintained_text import maintained_text_fields, maintained_text_targets
 from infinity_db.rule_relations import relation_presentation
 from infinity_db.sqlite_determinism import (
     configure_deterministic_sqlite,
@@ -203,6 +204,19 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
                     raise ValueError(
                         f"Current rules relation {record_id!r} -> {target_id!r} in {path} "
                         "does not resolve to a current semantic record"
+                    )
+
+    for path, document in documents:
+        if document["collection"]["status"] != "current":
+            continue
+        for text_context, text in maintained_text_fields(document):
+            for target_id in maintained_text_targets(
+                text, context=f"{path}:{text_context}"
+            ):
+                if target_id not in current_ids:
+                    raise ValueError(
+                        f"Maintained-text reference {target_id!r} in "
+                        f"{path}:{text_context} does not resolve to a current semantic record"
                     )
 
     for record_id, (path, definition) in definitions_by_id.items():
@@ -848,6 +862,27 @@ class RulesDatabase:
             records = self._compose_records(self._records_from_rows(connection, rows))
             self._attach_reverse_relations(connection, records)
             return records
+
+    def composed_record(self, record_id: str) -> dict[str, Any] | None:
+        """Return one current semantic record with supplements attached."""
+
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT r.* FROM records AS r JOIN collections AS c "
+                "ON c.id = r.collection_id "
+                "WHERE r.id = ? AND c.status = 'current' "
+                "ORDER BY r.collection_id",
+                (record_id,),
+            ).fetchall()
+            if not rows:
+                return None
+            records = self._compose_records(self._records_from_rows(connection, rows))
+            self._attach_reverse_relations(connection, records)
+            if len(records) != 1:
+                raise ValueError(
+                    f"Current rules identity {record_id!r} resolved to {len(records)} records"
+                )
+            return records[0]
 
     def composed_records_by_kind(self, kind: str) -> list[dict[str, Any]]:
         """Return current semantic records of one kind with supplements attached."""

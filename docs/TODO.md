@@ -58,36 +58,12 @@ data searchable, navigable, and understandable. It should finish the player-faci
 application model without absorbing the separate consistency, visual-architecture, and
 operations hardening work reserved for 0.10.0.
 
-The Unit Explorer extended-results work and the structured rules-reference cross-link pass are
-complete. The preferred remaining execution order is: establish the maintained-text
-reference/token layer; build the glossary/profile-help surface on top of that shared semantic
-reference foundation; then close the remaining catalog/share-state gaps. This keeps the broad
-maintained-text ontology decision in one shared layer rather than adding more page-local link
-logic.
+The Unit Explorer extended-results work, structured rules-reference cross-link pass, and
+maintained-text reference/token layer are complete. The preferred remaining execution order is:
+build the glossary/profile-help surface on top of that shared semantic reference foundation, then
+close the remaining catalog/share-state gaps.
 
 ### Player-facing completeness and navigation
-
-- [ ] Add a simple wiki-like internal-link syntax for **all maintained text fields**.
-  A text value should be able to reference another semantic identity inline,
-  for example: `Apply the [[skill:speculative-attack]] -6 MOD and Range MODs; other
-  negative MODs such as [[skill:mimetism]], [[rule:partial-cover]], and
-  [[rule:visibility-zone:plural]] are not applied.` Display-form modifiers such as
-  `:plural` should be supported where useful. The exact namespace vocabulary still
-  needs design—the example `rule:` namespace is only a placeholder, not an accepted
-  ontology decision. Render resolved links with subtle visual emphasis and a
-  small summary tooltip/popover so users can inspect the target without leaving the
-  current context. Define escaping, unresolved-link validation, plural/display-text
-  behavior, accessibility/keyboard interaction, and which semantic identity resolver
-  owns each namespace before implementation.
-  - Treat dynamic distances as typed inline tokens handled by the same maintained-text
-    rendering layer, for example: `a successful Dodge may also move the user up to
-    [[distance:2:inch]].` Every distance embedded in a maintained text field must be marked
-    structurally rather than stored only as display text so it can render according to the
-    user's current cm/in toggle. Reuse the application's canonical distance-conversion and
-    formatting policy rather than introducing parser-local conversion rules. The eventual
-    migration should inventory existing text fields, convert literal distances to typed
-    tokens, and add validation that prevents newly maintained text from silently
-    reintroducing unmarked distance literals where they can be detected reliably.
 
 - [ ] Add a rules glossary and profile-notation help layer to unit details.
   - [ ] Explain the existing profile fields and symbols in context: training/order,

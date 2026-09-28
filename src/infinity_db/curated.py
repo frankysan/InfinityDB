@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
+from infinity_db.maintained_text import validate_maintained_text_syntax
 from infinity_db.rule_relations import RULE_RELATION_TYPES
 
 CURATED_FORMAT = "InfinityDB curated reference"
@@ -999,5 +1000,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 f"Peripheral type {record_id!r} requires a 'has-subtype' relation "
                 "from 'skill:peripheral'"
             )
+
+    validate_maintained_text_syntax(document)
 
     return document
