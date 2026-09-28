@@ -13718,7 +13718,7 @@
                 ],
                 "effects": [
                     "Explode activates automatically when the user enters [[state:unconscious]].",
-                    "At the end of that Order, before Guts Rolls, the user makes a Direct Template Attack centered on its base with PS 7 Shock Ammunition against ARM.",
+                    "At the end of that Order, before Guts Rolls, the user makes a Direct Template Attack centered on its base with PS 7 [[ammunition:shock|Shock Ammunition]] against ARM.",
                     "Enemy Troopers affected by the Attack that declared Dodge avoid it if they passed their PH Roll.",
                     "After the Rolls are resolved, the user enters [[state:dead]] and is removed from the game table."
                 ],
@@ -14759,6 +14759,292 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 8,
                     "section": "Unit Profile"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "ammunition:normal",
+            "kind": "ammunition",
+            "name": "Normal (N) Ammunition",
+            "summary": "Conventional Ammunition that uses the weapon’s listed Saving Roll Attribute and has no additional special effect.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Normal (N) Ammunition",
+                    "member": "Normal_(N)_Ammunition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "ammunition:ap",
+            "kind": "ammunition",
+            "name": "Armor Piercing (AP) Ammunition",
+            "summary": "Armor-piercing Ammunition that reduces the target’s applicable ARM or BTS value by half for its Saving Roll.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Armor Piercing (AP) Ammunition",
+                    "member": "Armor_Piercing_(AP)_Ammunition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "ammunition:da",
+            "kind": "ammunition",
+            "name": "Double Action (DA) Ammunition",
+            "summary": "High-impact Ammunition that requires two Saving Rolls for each successful hit.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Double Action (DA) Ammunition",
+                    "member": "Double_Action_(DA)_Ammunition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "ammunition:eclipse",
+            "kind": "ammunition",
+            "name": "Eclipse Ammunition",
+            "summary": "A Smoke variant that creates a visibility-blocking zone which also affects Multispectral Visors.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Eclipse Ammunition",
+                    "member": "Eclipse_Ammunition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "ammunition:em",
+            "kind": "ammunition",
+            "name": "Electromagnetic (E/M) Ammunition",
+            "summary": "Electromagnetic Ammunition that forces multiple reduced-BTS Saving Rolls and can disable affected targets.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Electromagnetic (E/M) Ammunition",
+                    "member": "Electromagnetic_(E_M)_Ammunition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "ammunition:exp",
+            "kind": "ammunition",
+            "name": "Explosive (EXP) Ammunition",
+            "summary": "Explosive Ammunition that requires three Saving Rolls for each successful hit.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Explosive (EXP) Ammunition",
+                    "member": "Explosive_(EXP)_Ammunition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "ammunition:para",
+            "kind": "ammunition",
+            "name": "Paralysis (PARA) Ammunition",
+            "summary": "Non-lethal Ammunition that uses a modified PH Saving Roll and can immobilize affected targets.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Paralysis (PARA) Ammunition",
+                    "member": "Paralysis_(PARA)_Ammunition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "ammunition:shock",
+            "kind": "ammunition",
+            "name": "Shock Ammunition",
+            "summary": "Lethal Ammunition that can bypass incapacitation for vulnerable one-Vitality targets.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Shock Ammunition",
+                    "member": "Shock_Ammunition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "ammunition:smoke",
+            "kind": "ammunition",
+            "name": "Smoke Ammunition",
+            "summary": "Non-lethal Ammunition that creates a Zero Visibility Zone and can oppose attacks whose Line of Fire crosses it.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Smoke Ammunition",
+                    "member": "Smoke_Ammunition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "ammunition:stun",
+            "kind": "ammunition",
+            "name": "Stun Ammunition",
+            "summary": "Non-lethal Ammunition that can impose a disabling effect and force the target to fail its subsequent Guts Roll.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "Stun Ammunition",
+                    "member": "Stun_Ammunition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-28"
+            }
+        },
+        {
+            "id": "ammunition:t2",
+            "kind": "ammunition",
+            "name": "T2 Ammunition",
+            "summary": "High-damage Ammunition whose failed Saving Rolls normally inflict two Wounds.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-en-20260918-130233",
+                    "heading": "T2 Ammunition",
+                    "member": "T2_Ammunition"
                 }
             ],
             "review": {

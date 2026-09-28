@@ -30,7 +30,7 @@ Current release: **0.8.1** (2026-09-27).
   records into coherent unit views while preserving their distinct availability
   and army contexts.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
-  Traits, States, and Hacking Programs reference catalogs, with reverse Unit
+  Ammunition, Traits, Labels, States, and Hacking Programs reference catalogs, with reverse Unit
   usage links where that relationship applies.
 - Browses Army-scoped Fireteam charts with limits, member requirements,
   Wildcards, FTO loadouts, equivalence labels, and N5 rules/bonus context.

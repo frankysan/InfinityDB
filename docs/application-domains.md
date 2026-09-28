@@ -10,8 +10,11 @@ The goal is to give canonical concepts a stable home without forcing every conce
 same UI. Data identity, semantic ownership, search/glossary participation, and browser presentation
 are related concerns, but they are not the same concern.
 
-Unless stated otherwise, this document is **Design direction**. Concrete implementation work remains
-in `docs/TODO.md`.
+The capability registry described below is **Current** in
+`src/infinity_db/application_domains.py`. Ammunition and Labels are the first new domains published
+through that registry. Armies, Fireteams normalization, Attributes, General Rules publication, and
+the federated Glossary remain **Design direction** unless their sections state otherwise. Concrete
+unfinished work remains in `docs/TODO.md`.
 
 ## Principles
 
@@ -106,9 +109,10 @@ should require a concrete player-facing browsing/use case rather than only a new
 
 ## Domain capability registry
 
-The application should maintain one canonical registry describing domain identity and presentation
-capabilities. The exact storage/schema is an implementation decision, but the registry must be able
-to express at least:
+**Current.** `src/infinity_db/application_domains.py` is the canonical capability registry for the
+planned domain skeleton. It separates semantic ownership from publication/presentation and is used
+by public rules-reference routing so route ownership is not duplicated in a second kind-to-route
+mapping. The registry expresses at least:
 
 - stable public domain slug and singular/plural display names;
 - the concept/record kinds owned or presented by the domain;
@@ -203,14 +207,15 @@ now their canonical presentation domain.
 
 ## Ammunition and Labels
 
-Ammunition and Labels are the first new top-level domains to establish after the domain framework.
-They intentionally exercise different existing data shapes.
+**Current.** Ammunition and Labels are the first new top-level domains published through the shared
+domain framework. They intentionally exercise different existing data shapes.
 
 ### Ammunition
 
-Ammunition becomes a first-class rules/reference domain with canonical `ammunition:*` identities,
-a catalog, and detail surfaces. The initial 0.9 work should establish the domain and useful current
-entries without requiring every Ammunition interaction to be exhaustively modeled.
+Ammunition is a first-class rules/reference domain with canonical `ammunition:*` identities, a
+catalog, detail surfaces, global-search participation, and typed maintained-text links. The initial
+0.9 population establishes the eleven N5.3 base Ammunition types and concise reviewed reference
+text without requiring every Ammunition interaction to be exhaustively modeled.
 
 The 1.0 completeness pass can then finish deeper semantics such as base/combined Ammunition
 relationships, Saving Roll interactions, State effects, and other rules-reference links where they
@@ -218,9 +223,10 @@ serve the application model.
 
 ### Labels
 
-Labels become a first-class rules/reference domain backed by the canonical rules Label vocabulary
-already used by Skills, States, Hacking Programs, and other references. The browser should expose
-those existing identities rather than copying Label definitions into generic rule records.
+Labels are a first-class rules/reference domain backed directly by the canonical current rules
+Label vocabulary already used by Skills, States, Hacking Programs, and other references. The
+browser exposes those existing identities through catalog/detail/search surfaces rather than copying
+Label definitions into generic rule records.
 
 Typed Label identity is important because surface terms can legitimately overlap other concept kinds
 (for example a term can exist as both a Label and a Trait/Characteristic). Domain/kind information
@@ -262,10 +268,11 @@ The domain registry and route/navigation contracts should be established before 
 population. A scaffolded domain may exist internally without appearing in primary navigation until
 its minimum useful player-facing content is ready.
 
-The initial sequence is:
+The implementation sequence is:
 
-1. establish the application-domain registry/capability model and planned top-level skeleton;
-2. expose Labels and Ammunition as the first newly browsable domains;
+1. **Current:** establish the application-domain registry/capability model and planned top-level
+   skeleton;
+2. **Current:** expose Labels and Ammunition as the first newly browsable domains;
 3. add the Armies overview and normalize Fireteams to the landing/scoped interaction contract;
 4. build Glossary as a federated projection over those canonical domains plus embedded vocabularies;
 5. continue filling semantic relationships and domain coverage through the 1.0 completeness work.

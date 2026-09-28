@@ -9,14 +9,20 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Add first-class **Ammunition** and **Labels**
+  reference domains. The browser now exposes the eleven N5.3 base Ammunition types and the canonical
+  current Label vocabulary through searchable catalog/detail surfaces, while a shared application-
+  domain registry establishes presentation capabilities for the broader domain skeleton without
+  requiring every typed concept to have its own page.
 - **Data processing + Web backend + Web frontend:** Add a rules-backed **Profile notation**
   help layer to Unit details. Reviewed N5 profile concepts explain Attributes, Training/Orders,
   Troop Type, Classification, ISC, Hackable, Peripheral, Equipment/Weapon domains, and
   profile/loadout structure; relevant profile labels and Order/Characteristic symbols link into
   the collapsed help panel without making the profile tables denser.
 - **Web backend + Web frontend:** Add global search across Armies, Units, Skills, Equipment,
-  Weapons, Traits, States, Hacking Programs, and Fireteam charts. Results identify their domain
-  and open the corresponding player-facing surface; compact navigation keeps search available as
+  Weapons, Ammunition, Traits, Labels, States, Hacking Programs, and Fireteam charts. Results
+  identify their domain and open the corresponding player-facing surface; compact navigation keeps
+  search available as
   an expandable button on narrow screens.
 - **Data processing + Web backend + Web frontend:** Add semantic links and preference-aware
   distance tokens to maintained rules text. Canonical Skill, Equipment, Weapon, Trait, State,

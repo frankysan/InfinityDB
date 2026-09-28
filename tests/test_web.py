@@ -1326,7 +1326,9 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b"in one place." in body
     assert b'aria-label="Project navigation"' in body
     assert b'href="/units"' in body
+    assert b'href="/ammunition"' in body
     assert b'href="/traits"' in body
+    assert b'href="/labels"' in body
     assert b'href="/states"' in body
     assert b'href="/hacking-programs"' in body
     assert b"Army data last changed" in body
@@ -1535,8 +1537,12 @@ def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> N
         "/equipment/1",
         "/weapons",
         "/weapons/1",
+        "/ammunition",
+        "/ammunition/example",
         "/traits",
         "/traits/example",
+        "/labels",
+        "/labels/example",
         "/states",
         "/states/example",
         "/hacking-programs",
@@ -1567,6 +1573,8 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
         "/weapons/example",
         "/traits",
         "/traits/example",
+        "/labels",
+        "/labels/example",
         "/states",
         "/states/example",
         "/hacking-programs",
@@ -1595,8 +1603,12 @@ def test_rules_reference_pages_share_the_same_shell_classification(
         ("/equipment/example", "/equipment"),
         ("/weapons", "/weapons"),
         ("/weapons/example", "/weapons"),
+        ("/ammunition", "/ammunition"),
+        ("/ammunition/example", "/ammunition"),
         ("/traits", "/traits"),
         ("/traits/example", "/traits"),
+        ("/labels", "/labels"),
+        ("/labels/example", "/labels"),
         ("/states", "/states"),
         ("/states/example", "/states"),
         ("/hacking-programs", "/hacking-programs"),
@@ -1627,6 +1639,8 @@ def test_every_browser_page_has_a_meta_description(app: Callable) -> None:
         "/weapons/example",
         "/traits",
         "/traits/example",
+        "/labels",
+        "/labels/example",
         "/states",
         "/states/example",
         "/hacking-programs",
@@ -2063,8 +2077,12 @@ def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> No
         "/equipment/21",
         "/weapons",
         "/weapons/31",
+        "/ammunition",
+        "/ammunition/shock",
         "/traits",
         "/traits/suppressive-fire",
+        "/labels",
+        "/labels/hackable",
         "/states",
         "/states/unconscious",
         "/hacking-programs",
@@ -3089,6 +3107,88 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     assert b"const routeId = item.slug || item.id;" in body
     assert b"link.href = `/${page}/${encodeURIComponent(routeId)}`;" in body
 
+
+def test_ammunition_and_label_pages_and_rules_backed_apis_are_served(
+    app: Callable, tmp_path: Path
+) -> None:
+    for path, heading, current_href in (
+        ("/ammunition", b"Ammunition catalog", b"/ammunition"),
+        ("/labels", b"Labels catalog", b"/labels"),
+    ):
+        status, headers, body = request(app, path)
+        assert status == 200
+        assert headers["content-type"].startswith("text/html")
+        assert heading in body
+        assert b'href="' + current_href + b'" aria-current="page"' in body
+        assert b"reference-catalog.js" in body
+
+    for path in ("/api/ammunition", "/api/labels"):
+        status, _, body = request(app, path)
+        assert status == 200
+        assert json.loads(body) == {"items": []}
+
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_path)
+
+    status, _, body = request(rules_app, "/api/ammunition")
+    assert status == 200
+    ammunition = {item["slug"]: item for item in json.loads(body)["items"]}
+    assert len(ammunition) == 11
+    assert ammunition["ap"]["name"] == "Armor Piercing (AP) Ammunition"
+    assert ammunition["shock"]["name"] == "Shock Ammunition"
+
+    status, headers, body = request(rules_app, "/ammunition/shock")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"reference-detail.js" in body
+
+    status, _, body = request(rules_app, "/api/ammunition/shock")
+    assert status == 200
+    shock = json.loads(body)
+    assert shock["slug"] == "shock"
+    assert shock["rules"][0]["id"] == "ammunition:shock"
+    assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20260918-130233"
+
+    status, _, body = request(rules_app, "/api/labels")
+    assert status == 200
+    labels = {item["slug"]: item for item in json.loads(body)["items"]}
+    assert len(labels) == 24
+    assert labels["hackable"]["name"] == "Hackable"
+
+    status, _, body = request(rules_app, "/api/labels/non-reloadable")
+    assert status == 200
+    label = json.loads(body)
+    assert label["name"] == "Non-Reloadable"
+    reference = next(
+        token for token in label["description_tokens"] if token["type"] == "reference"
+    )
+    assert reference["target"] == "state:unloaded"
+    assert reference["public_reference"] == {"catalog": "states", "id": "unloaded"}
+
+    status, _, body = request(rules_app, "/api/search", query="q=Shock")
+    assert status == 200
+    assert {
+        (item["domain"], item["name"], item["href"])
+        for item in json.loads(body)["items"]
+    } >= {("Ammunition type", "Shock Ammunition", "/ammunition/shock")}
+
+    status, _, body = request(rules_app, "/api/search", query="q=Hackable")
+    assert status == 200
+    assert {
+        (item["domain"], item["name"], item["href"])
+        for item in json.loads(body)["items"]
+    } >= {("Label", "Hackable", "/labels/hackable")}
+
+    status, _, script = request(rules_app, "/static/reference-detail.js")
+    assert status == 200
+    assert b'from "./maintained-text.js"' in script
+    assert b"appendMaintainedText(" in script
+
+    status, _, renderer = request(rules_app, "/static/rules-reference.js")
+    assert status == 200
+    assert b'element.href = `/labels/${encodeURIComponent(label.id)}`' in renderer
 
 def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/hacking-programs")

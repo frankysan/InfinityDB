@@ -18,7 +18,11 @@ from infinity_db.domain_slugs import require_domain_slug
 from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.fireteam_reference import fireteam_reference
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
-from infinity_db.maintained_text_references import enrich_maintained_text_references
+from infinity_db.maintained_text_references import (
+    enrich_maintained_text_references,
+    maintained_text_tokens,
+)
+from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.search_catalog import SearchCatalog
 from infinity_db.skill_catalog import SkillCatalog
@@ -32,8 +36,10 @@ from infinity_db.unit_slugs import (
 )
 from infinity_db.web.response import WebResponse
 from infinity_db.web.routes import (
+    AMMUNITION_API_PATH,
     EQUIPMENT_API_PATH,
     HACKING_PROGRAM_API_PATH,
+    LABEL_API_PATH,
     SKILL_API_PATH,
     STATE_API_PATH,
     TRAIT_API_PATH,
@@ -233,6 +239,8 @@ class ApiHandler:
         self.skill_catalog = SkillCatalog(database, rules_database)
         self.equipment_catalog = EquipmentCatalog(database, rules_database)
         self.hacking_program_catalog = HackingProgramCatalog(database, rules_database)
+        self.ammunition_catalog = RulesRecordCatalog(rules_database, "ammunition")
+        self.label_catalog = LabelCatalog(rules_database)
         self.search_catalog = SearchCatalog(
             database,
             self.skill_catalog,
@@ -240,6 +248,8 @@ class ApiHandler:
             self.trait_catalog,
             self.state_catalog,
             self.hacking_program_catalog,
+            self.ammunition_catalog,
+            self.label_catalog,
         )
         self.catalog_rules = CatalogRules(rules_database)
         self.symbol_catalog = SymbolCatalog()
@@ -388,6 +398,21 @@ class ApiHandler:
                 LOGGER.exception("Could not read Hacking Programs")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The Hacking Programs are unavailable. Please try again."}
+        elif path in {"/api/ammunition", "/api/labels"}:
+            cache_control = API_CACHE_CONTROL
+            try:
+                catalog = (
+                    self.ammunition_catalog
+                    if path == "/api/ammunition"
+                    else self.label_catalog
+                )
+                payload = {"items": catalog.list_items()}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read rules-reference catalog")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "The reference catalog is unavailable. Please try again."
+                }
         elif match := SKILL_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
@@ -523,6 +548,41 @@ class ApiHandler:
                 LOGGER.exception("Could not read Hacking Program")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The Hacking Program is unavailable. Please try again."}
+        elif match := AMMUNITION_API_PATH.fullmatch(path):
+            cache_control = API_CACHE_CONTROL
+            try:
+                payload = self.ammunition_catalog.get_item(match.group("identifier"))
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "Ammunition not found"}
+                else:
+                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_maintained_text_references(
+                        self.database, self.rules_database, payload
+                    )
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Ammunition")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "The Ammunition reference is unavailable. Please try again."
+                }
+        elif match := LABEL_API_PATH.fullmatch(path):
+            cache_control = API_CACHE_CONTROL
+            try:
+                payload = self.label_catalog.get_item(match.group("identifier"))
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "Label not found"}
+                else:
+                    payload["description_tokens"] = maintained_text_tokens(
+                        self.database, self.rules_database, payload["description"]
+                    )
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Label")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "The Label reference is unavailable. Please try again."
+                }
         elif path == "/api/armies":
             cache_control = API_CACHE_CONTROL
             try:

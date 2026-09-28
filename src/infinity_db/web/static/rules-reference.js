@@ -124,7 +124,7 @@ function ruleBadgeRow(rule) {
     seenCategories.add(key);
     categories.push(category);
   }
-  const labels = (rule.labels || []).map((label) => label.name);
+  const labels = rule.labels || [];
   if (!categories.length && !labels.length) return null;
 
   const badgeRow = document.createElement("p");
@@ -135,9 +135,10 @@ function ruleBadgeRow(rule) {
     );
   }
   for (const label of labels) {
-    const element = document.createElement("span");
-    element.className = "badge";
-    element.textContent = label;
+    const element = document.createElement(label.id ? "a" : "span");
+    element.className = label.id ? "badge maintained-reference" : "badge";
+    element.textContent = label.name;
+    if (label.id) element.href = `/labels/${encodeURIComponent(label.id)}`;
     badgeRow.append(element);
   }
   return badgeRow;

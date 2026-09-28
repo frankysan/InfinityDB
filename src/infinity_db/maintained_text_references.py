@@ -114,6 +114,18 @@ def _enrich_rule_record(record: dict[str, Any], resolver: _Resolver) -> None:
         record["fact_tokens"] = fact_tokens
 
 
+def maintained_text_tokens(
+    database: Database,
+    rules_database: RulesDatabase | None,
+    value: str,
+) -> list[dict[str, Any]] | None:
+    """Resolve one maintained-text value for a non-record reference surface."""
+
+    if rules_database is None:
+        return None
+    return _Resolver(database, rules_database).tokens(value)
+
+
 def enrich_maintained_text_references(
     database: Database,
     rules_database: RulesDatabase | None,

@@ -5,10 +5,12 @@ from __future__ import annotations
 from typing import Any
 from urllib.parse import quote
 
+from infinity_db.application_domains import application_domain
 from infinity_db.database.repository import Database, accent_insensitive_key
 from infinity_db.domain_references import public_slug_for_reference
 from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
+from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.trait_catalog import TraitCatalog
@@ -25,6 +27,8 @@ class SearchCatalog:
         trait_catalog: TraitCatalog,
         state_catalog: StateCatalog,
         hacking_program_catalog: HackingProgramCatalog,
+        ammunition_catalog: RulesRecordCatalog,
+        label_catalog: LabelCatalog,
     ) -> None:
         self.database = database
         self.skill_catalog = skill_catalog
@@ -32,6 +36,8 @@ class SearchCatalog:
         self.trait_catalog = trait_catalog
         self.state_catalog = state_catalog
         self.hacking_program_catalog = hacking_program_catalog
+        self.ammunition_catalog = ammunition_catalog
+        self.label_catalog = label_catalog
 
     @staticmethod
     def _result(domain: str, item: dict[str, Any], href: str) -> dict[str, str]:
@@ -81,6 +87,16 @@ class SearchCatalog:
             ("Trait", "traits", self.trait_catalog.list_traits()),
             ("State", "states", self.state_catalog.list_states()),
             ("Hacking Program", "hacking-programs", self.hacking_program_catalog.list_programs()),
+            (
+                application_domain("ammunition").singular_name,
+                "ammunition",
+                self.ammunition_catalog.list_items(),
+            ),
+            (
+                application_domain("labels").singular_name,
+                "labels",
+                self.label_catalog.list_items(),
+            ),
         )
         for domain, route, items in catalog_sources:
             for item in items:

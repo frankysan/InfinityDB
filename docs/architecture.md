@@ -138,17 +138,22 @@ contract between them.
 
 ## Application domains
 
-**Design direction.** Player-facing game/reference information is organized through a
-capability-based application-domain model described in `docs/application-domains.md`.
-Canonical semantic identity and UI presentation are deliberately separate: a concept may be
-searchable, glossary-visible, or available for contextual help without requiring its own catalog
-or detail route. Conversely, top-level domains may use catalog, overview, or scoped-view
-presentations rather than one mandatory page template.
+**Current.** `src/infinity_db/application_domains.py` defines the capability-based
+application-domain registry described in `docs/application-domains.md`. Canonical semantic identity
+and UI presentation
+are deliberately separate: a concept may be searchable, glossary-visible, or available for
+contextual help without requiring its own catalog or detail route. Conversely, top-level domains may
+use catalog, overview, or scoped-view presentations rather than one mandatory page template.
+Published rules-record route ownership is derived from this registry rather than maintained in a
+second kind-to-route mapping. Ammunition and Labels are the first new domains published through the
+shared framework.
 
-Glossary and global search are cross-domain projections, not canonical data owners. General Rules
-is the fallback domain only for rules/reference concepts with no clearer semantic owner. The planned
-domain skeleton is established before exhaustive population so later additions reuse shared routing,
-navigation, glossary, and presentation contracts rather than inventing parallel structures.
+**Design direction.** Glossary is a cross-domain projection rather than a canonical data owner;
+global search already follows that projection model for published domains. General Rules is the
+fallback domain only for rules/reference concepts with no clearer semantic owner. Scaffolded domains
+may remain unpublished until their player-facing surfaces are useful, so later additions reuse the
+shared routing, navigation, glossary, and presentation contracts rather than inventing parallel
+structures.
 
 ## Documentation status
 
@@ -422,10 +427,11 @@ while `rules.db` owns reviewed semantic identity/effects and typed rules relatio
 Peripheral/Controller relationships, profile/loadout/unit-option includes, selection
 constraints, profile-group dependencies, Reinforcement parentage, and broader
 faction/cross-Army membership remain relationships among existing application
-identities and are presented through those existing surfaces. Generic rules
-concepts, Attributes, Ammunition, and Training may remain supporting link targets unless
-a later completeness audit demonstrates an independent player-facing catalog need.
-A relationship target is not, by itself, justification for a new domain.
+identities and are presented through those existing surfaces. Generic rules concepts, Attributes,
+and Training may remain supporting link targets unless a later completeness audit demonstrates an
+independent player-facing catalog need. Ammunition has
+since become a first-class rules/reference catalog under the application-domain framework. A
+relationship target is not, by itself, justification for a new domain.
 
 Schema 25 / compatibility revision 33 implements that Fireteam boundary.
 `application_fireteam_charts` selects one provenance-bound Army-list source per application
@@ -1572,8 +1578,8 @@ page consumes this endpoint.
 ### `GET /api/search?q={name}`
 
 Returns `{ "items": [...] }` for a non-empty name search spanning every
-player-facing database domain: Armies, Units, Skills, Equipment, Weapons, Traits,
-States, Hacking Programs, and Fireteam charts. Each result carries its explicit
+player-facing database domain: Armies, Units, Skills, Equipment, Weapons, Ammunition, Traits,
+Labels, States, Hacking Programs, and Fireteam charts. Each result carries its explicit
 `domain`, display `name`, and a route-backed `href`; consumers do not infer a target
 surface from a label. The endpoint composes the existing domain read models so public
 slugs, rules-only identities, and Army-scoped Fireteam charts remain resolved by their

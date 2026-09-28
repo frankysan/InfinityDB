@@ -13,12 +13,15 @@ from urllib.parse import parse_qs
 
 from infinity_army_data.project_resources import maintained_manifest_path
 from infinity_db import __display_version__, __version__
+from infinity_db.application_domains import application_domain
 from infinity_db.web.response import WebResponse
 from infinity_db.web.routes import (
+    AMMUNITION_PAGE_PATH,
     ARMY_SYMBOL_PATH,
     CHARACTERISTIC_SYMBOL_PATH,
     EQUIPMENT_PAGE_PATH,
     HACKING_PROGRAM_PAGE_PATH,
+    LABEL_PAGE_PATH,
     ORDER_SYMBOL_PATH,
     SKILL_PAGE_PATH,
     STATE_PAGE_PATH,
@@ -44,6 +47,14 @@ ASSETS = {
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
     "/static/fireteams.js": ("fireteams.js", "text/javascript; charset=utf-8"),
     "/static/catalog-list.js": ("catalog-list.js", "text/javascript; charset=utf-8"),
+    "/static/reference-catalog.js": (
+        "reference-catalog.js",
+        "text/javascript; charset=utf-8",
+    ),
+    "/static/reference-detail.js": (
+        "reference-detail.js",
+        "text/javascript; charset=utf-8",
+    ),
     "/static/skill.js": ("skill.js", "text/javascript; charset=utf-8"),
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
@@ -110,6 +121,29 @@ class PageSpec:
     breadcrumbs: tuple[tuple[str, str | None], ...]
     catalog_tag: str
     active_page: str | None = None
+    template_values: tuple[tuple[str, str], ...] = ()
+
+
+def _reference_page_values(
+    domain_slug: str,
+    *,
+    intro: str,
+    meta_description: str,
+    detail_meta_description: str,
+    summary_heading: str = "Definition",
+) -> tuple[tuple[str, str], ...]:
+    domain = application_domain(domain_slug)
+    return (
+        ("DOMAIN_SLUG", domain.slug),
+        ("DOMAIN_TITLE", domain.plural_name),
+        ("DOMAIN_SINGULAR", domain.singular_name),
+        ("DOMAIN_SINGULAR_LOWER", domain.singular_name.lower()),
+        ("DOMAIN_PLURAL_LOWER", domain.plural_name.lower()),
+        ("INTRO_COPY", intro),
+        ("META_DESCRIPTION", meta_description),
+        ("DETAIL_META_DESCRIPTION", detail_meta_description),
+        ("SUMMARY_HEADING", summary_heading),
+    )
 
 
 _FIXED_PAGES = {
@@ -177,6 +211,34 @@ _FIXED_PAGES = {
         "Rules reference",
         "hacking-programs",
     ),
+    "/ammunition": PageSpec(
+        "reference-catalog.html",
+        (("Database", "/"), ("Ammunition", None)),
+        "Rules reference",
+        "ammunition",
+        _reference_page_values(
+            "ammunition",
+            intro="Browse the current N5.3 Ammunition types and their core rules effects.",
+            meta_description="Browse Infinity N5.3 Ammunition types and concise rules references.",
+            detail_meta_description="View Infinity N5.3 Ammunition rules details.",
+            summary_heading="Rules reference",
+        ),
+    ),
+    "/labels": PageSpec(
+        "reference-catalog.html",
+        (("Database", "/"), ("Labels", None)),
+        "Rules reference",
+        "labels",
+        _reference_page_values(
+            "labels",
+            intro=(
+                "Browse the canonical Labels used to classify Skills, Equipment, and "
+                "rules effects."
+            ),
+            meta_description="Browse Infinity rules Labels and their canonical definitions.",
+            detail_meta_description="View the canonical definition of an Infinity rules Label.",
+        ),
+    ),
     "/about": PageSpec(
         "about.html",
         (("InfinityDB", "/"), ("About", None)),
@@ -237,6 +299,44 @@ _DETAIL_PAGES = (
             (("Database", "/"), ("States", "/states"), ("Details", None)),
             "Rules reference",
             "states",
+        ),
+    ),
+    (
+        AMMUNITION_PAGE_PATH,
+        PageSpec(
+            "reference-detail.html",
+            (("Database", "/"), ("Ammunition", "/ammunition"), ("Details", None)),
+            "Rules reference",
+            "ammunition",
+            _reference_page_values(
+                "ammunition",
+                intro="Browse the current N5.3 Ammunition types and their core rules effects.",
+                meta_description=(
+                    "Browse Infinity N5.3 Ammunition types and concise rules references."
+                ),
+                detail_meta_description="View Infinity N5.3 Ammunition rules details.",
+                summary_heading="Rules reference",
+            ),
+        ),
+    ),
+    (
+        LABEL_PAGE_PATH,
+        PageSpec(
+            "reference-detail.html",
+            (("Database", "/"), ("Labels", "/labels"), ("Details", None)),
+            "Rules reference",
+            "labels",
+            _reference_page_values(
+                "labels",
+                intro=(
+                    "Browse the canonical Labels used to classify Skills, Equipment, and "
+                    "rules effects."
+                ),
+                meta_description="Browse Infinity rules Labels and their canonical definitions.",
+                detail_meta_description=(
+                    "View the canonical definition of an Infinity rules Label."
+                ),
+            ),
         ),
     ),
     (
@@ -326,6 +426,8 @@ def _render_page(
         "traits": "TRAITS_CURRENT",
         "states": "STATES_CURRENT",
         "hacking-programs": "HACKING_PROGRAMS_CURRENT",
+        "ammunition": "AMMUNITION_CURRENT",
+        "labels": "LABELS_CURRENT",
         "skill-extras": "SKILL_EXTRAS_CURRENT",
         "fireteams": "FIRETEAMS_CURRENT",
         "about": "ABOUT_CURRENT",
@@ -379,6 +481,8 @@ def _render_page(
         .replace("{{VERSION}}", escape(__display_version__))
     )
     document = static.joinpath(spec.filename).read_text(encoding="utf-8")
+    for key, value in spec.template_values:
+        document = document.replace(f"{{{{{key}}}}}", escape(value, quote=True))
     return _version_static_urls(
         document.replace(
             '<html lang="en">',

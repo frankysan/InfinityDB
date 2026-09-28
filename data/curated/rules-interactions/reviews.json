@@ -1412,6 +1412,72 @@
       "targetRelease": "0.9.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-28"
+    },
+    {
+      "recordId": "ammunition:ap",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "ammunition:da",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "ammunition:eclipse",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "ammunition:em",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "ammunition:exp",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "ammunition:normal",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "ammunition:para",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "ammunition:shock",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "ammunition:smoke",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "ammunition:stun",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "ammunition:t2",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
     }
   ],
   "futureInteractions": [
@@ -1571,17 +1637,17 @@
       "sourceRecordId": "trait:bioweapon",
       "targetRecordId": "ammunition:da",
       "relationType": "uses-effects-of",
-      "targetRelease": "post-0.7.0",
+      "targetRelease": "1.0.0",
       "status": "planned",
-      "reason": "BioWeapon explicitly applies DA together with Shock Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain."
+      "reason": "BioWeapon explicitly applies DA together with Shock Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass."
     },
     {
       "sourceRecordId": "trait:bioweapon",
       "targetRecordId": "ammunition:shock",
       "relationType": "uses-effects-of",
-      "targetRelease": "post-0.7.0",
+      "targetRelease": "1.0.0",
       "status": "planned",
-      "reason": "BioWeapon explicitly applies Shock together with DA Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain."
+      "reason": "BioWeapon explicitly applies Shock together with DA Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass."
     },
     {
       "sourceRecordId": "trait:bs-weapon-ph",
@@ -1917,9 +1983,9 @@
       "sourceRecordId": "skill:dogged",
       "targetRecordId": "ammunition:shock",
       "relationType": null,
-      "targetRelease": "post-0.7.0",
+      "targetRelease": "1.0.0",
       "status": "planned",
-      "reason": "Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain."
+      "reason": "Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass."
     },
     {
       "sourceRecordId": "skill:no-wound-incapacitation",
@@ -1949,9 +2015,9 @@
       "sourceRecordId": "skill:no-wound-incapacitation",
       "targetRecordId": "ammunition:shock",
       "relationType": null,
-      "targetRelease": "post-0.7.0",
+      "targetRelease": "1.0.0",
       "status": "planned",
-      "reason": "Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain."
+      "reason": "Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass."
     },
     {
       "sourceRecordId": "skill:remote-presence",
@@ -1981,9 +2047,9 @@
       "sourceRecordId": "skill:shasvastii",
       "targetRecordId": "ammunition:shock",
       "relationType": null,
-      "targetRelease": "post-0.7.0",
+      "targetRelease": "1.0.0",
       "status": "planned",
-      "reason": "Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain."
+      "reason": "Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass."
     },
     {
       "sourceRecordId": "skill:regeneration",
@@ -2133,9 +2199,9 @@
       "sourceRecordId": "skill:explode",
       "targetRecordId": "ammunition:shock",
       "relationType": "uses-effects-of",
-      "targetRelease": "post-0.7.0",
+      "targetRelease": "1.0.0",
       "status": "planned",
-      "reason": "Explode explicitly resolves its Direct Template Attack with Shock Ammunition; materialize this edge when Ammunition is a canonical rules domain."
+      "reason": "Explode explicitly resolves its Direct Template Attack with Shock Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass."
     },
     {
       "sourceRecordId": "skill:explode",

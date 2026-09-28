@@ -85,17 +85,8 @@ skeleton and interaction model.
     `Hidden Deployment`), then remove the legacy baseline when the candidate inventory reaches
     zero.
 
-- [ ] **Data processing + Web backend + Web frontend:** Establish the application-domain
-  framework and planned top-level domain skeleton described
-  in `docs/application-domains.md` before adding more one-off catalog/navigation structures.
-  - [ ] Add one canonical capability registry that separates semantic identity from navigation,
-    search, Glossary participation, overview/catalog/scoped presentation, and detail-page support.
-  - [ ] Scaffold the planned top-level domains: Armies, Units, Skills, Equipment, Weapons,
-    Ammunition, Traits, States, Hacking Programs, Fireteams, Labels, and General Rules. A
-    scaffolded/incomplete domain does not need primary-navigation visibility yet.
-  - [ ] Promote Ammunition and Labels first. Reuse the canonical Label vocabulary already present
-    in rules data; establish useful Ammunition identities/catalog/detail surfaces without making
-    exhaustive Ammunition interaction modeling a 0.9 gate.
+- [ ] **Data processing + Web backend + Web frontend:** Continue the application-domain framework
+  established in `docs/application-domains.md` without adding one-off catalog/navigation structures.
   - [ ] Add `/armies` as an overview surface with each Army's symbol, short maintained description,
     and a link to Unit Explorer pre-filtered by the canonical Army identity. Do not add per-Army
     detail pages without a separate player-facing use case.
@@ -106,7 +97,7 @@ skeleton and interaction model.
   - [ ] Establish Attributes as an embedded canonical vocabulary for semantic links, tooltips,
     Glossary/search, and related metadata without adding an `/attributes` catalog or individual
     Attribute detail pages.
-  - [ ] Keep General Rules as the explicit fallback only for rules/reference concepts with no
+  - [ ] Publish General Rules only as the explicit fallback for rules/reference concepts with no
     clearer top-level owner; do not use it to manufacture pages for embedded vocabularies.
 
 - [ ] **Data processing + Web backend + Web frontend:** Complete the rules Glossary and

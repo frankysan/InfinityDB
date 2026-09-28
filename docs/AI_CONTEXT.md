@@ -46,11 +46,21 @@ marked **Design direction**. The decision log may record an accepted decision
 before implementation, but the current sections and `TODO.md` remain
 responsible for implementation status.
 
+## Application-domain capability registry
+
+The canonical application-domain skeleton lives in `src/infinity_db/application_domains.py`.
+Semantic identity and player-facing capabilities are independent: navigation, search, Glossary,
+landing/catalog/scoped/detail presentation, and publication are explicit capabilities rather than
+consequences of having a typed identity. New rules-reference route ownership should reuse this
+registry instead of introducing another kind-to-route map. Glossary remains a projection over
+canonical domains and embedded vocabularies rather than a definition owner.
+
 ## Maintained rules-text link policy
 
 All newly authored maintained rules prose must use typed semantic tokens for existing player-facing
-Skills, Equipment, Weapons, Traits, States, and Hacking Programs. The checked-in unlinked-reference
-baseline is temporary migration debt for text that predates this policy: new candidate occurrences
+Skills, Equipment, Weapons, Ammunition, Traits, States, and Hacking Programs. The checked-in
+unlinked-reference baseline is temporary migration debt for text that predates this policy: new
+candidate occurrences
 must not be admitted to it, and reviewed migration batches should only reduce the inventory.
 Automated discovery is an audit aid, not permission to bulk-rewrite ambiguous names or aliases;
 resolve those manually.

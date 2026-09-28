@@ -28,6 +28,14 @@ HACKING_PROGRAM_PAGE_PATH = re.compile(
 HACKING_PROGRAM_API_PATH = re.compile(
     rf"/api/hacking-programs/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
 )
+AMMUNITION_PAGE_PATH = re.compile(
+    rf"/ammunition/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
+)
+AMMUNITION_API_PATH = re.compile(
+    rf"/api/ammunition/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
+)
+LABEL_PAGE_PATH = re.compile(rf"/labels/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+LABEL_API_PATH = re.compile(rf"/api/labels/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 TRAIT_PAGE_PATH = re.compile(rf"/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 TRAIT_API_PATH = re.compile(rf"/api/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 
@@ -51,6 +59,8 @@ _METRIC_FIXED_PATHS = frozenset(
         "/traits",
         "/states",
         "/hacking-programs",
+        "/ammunition",
+        "/labels",
         "/skill-extras",
         "/fireteams",
         "/search",
@@ -64,6 +74,8 @@ _METRIC_FIXED_PATHS = frozenset(
         "/api/traits",
         "/api/states",
         "/api/hacking-programs",
+        "/api/ammunition",
+        "/api/labels",
         "/api/skill-extras",
         "/api/unit-profile-help",
         "/api/fireteams",
@@ -78,6 +90,8 @@ _METRIC_PARAMETERIZED_PATHS: tuple[tuple[Pattern[str], str], ...] = (
     (TRAIT_PAGE_PATH, "/traits/:id"),
     (STATE_PAGE_PATH, "/states/:id"),
     (HACKING_PROGRAM_PAGE_PATH, "/hacking-programs/:id"),
+    (AMMUNITION_PAGE_PATH, "/ammunition/:id"),
+    (LABEL_PAGE_PATH, "/labels/:id"),
     (UNIT_API_PATH, "/api/units/:id"),
     (SKILL_API_PATH, "/api/skills/:id"),
     (EQUIPMENT_API_PATH, "/api/equipment/:id"),
@@ -85,6 +99,8 @@ _METRIC_PARAMETERIZED_PATHS: tuple[tuple[Pattern[str], str], ...] = (
     (TRAIT_API_PATH, "/api/traits/:id"),
     (STATE_API_PATH, "/api/states/:id"),
     (HACKING_PROGRAM_API_PATH, "/api/hacking-programs/:id"),
+    (AMMUNITION_API_PATH, "/api/ammunition/:id"),
+    (LABEL_API_PATH, "/api/labels/:id"),
 )
 _SYMBOL_PATHS = (
     ARMY_SYMBOL_PATH,

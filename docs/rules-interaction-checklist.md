@@ -27,7 +27,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **52/52** complete, **0** pending.
+- Supporting semantic identities: **52/63** complete, **11** pending.
 - Current authored outgoing relations: **262**.
 - Explicitly tracked future/deferred interactions: **115**.
 
@@ -107,7 +107,7 @@ review. `declaration-category` projection records are excluded.
   - `applies-effects-to` → Remote Presence (`skill:remote-presence`)
   - `negates-effects-of` → Explode (`skill:explode`)
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:healing` — Dogged prevents all healing after activation, but the current relation vocabulary cannot express a healing-only restriction without overbroadly negating every effect of Doctor, MediKit, Regeneration, and similar rules.
-  - future [post-0.7.0; planned]: `relation type TBD` → `ammunition:shock` — Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+  - future [1.0.0; planned]: `relation type TBD` → Shock Ammunition (`ammunition:shock`) — Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass.
 - [x] **Engineer** (`skill:engineer`) — reviewed
   - `controller-eligible-for` → Peripheral (Servant) (`rule:peripheral-type:servant`)
   - `cancels-state` → Disconnected State (`state:disconnected`)
@@ -120,7 +120,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Explode** (`skill:explode`) — reviewed
   - `enters-state` → Dead State (`state:dead`)
   - `triggered-by-state-entry` → Unconscious State (`state:unconscious`)
-  - future [post-0.7.0; planned]: `uses-effects-of` → `ammunition:shock` — Explode explicitly resolves its Direct Template Attack with Shock Ammunition; materialize this edge when Ammunition is a canonical rules domain.
+  - future [1.0.0; planned]: `uses-effects-of` → Shock Ammunition (`ammunition:shock`) — Explode explicitly resolves its Direct Template Attack with Shock Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
   - future [post-0.7.0; planned]: `uses-effects-of` → `rule:direct-template-attack` — Explode explicitly performs a Direct Template Attack; retain the dependency until Direct Template Attack has a canonical rules identity.
 - [x] **Exrah** (`skill:exrah`) — reviewed
   - `overrides-effects-of` → Unconscious State (`state:unconscious`)
@@ -258,7 +258,7 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → Doctor (`skill:doctor`) — A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor.
   - future [post-0.7.0; deferred]: `relation type TBD` → Engineer (`skill:engineer`) — A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer.
   - future [post-0.7.0; deferred]: `relation type TBD` → Dead State (`state:dead`) — An additional Wound or a failed healing Roll while NWI is active sends the Trooper directly to Dead State; keep the outcome conditional rather than authoring an unconditional enters-state edge.
-  - future [post-0.7.0; planned]: `relation type TBD` → `ammunition:shock` — Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+  - future [1.0.0; planned]: `relation type TBD` → Shock Ammunition (`ammunition:shock`) — Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass.
 - [x] **Non-Hackable** (`skill:non-hackable`) — reviewed: No current graph edge: its targeting restriction depends on Hacking Attack Requirements and Unit Type predicates that are not yet canonical interaction targets.
   - outgoing: none
 - [x] **Number 2** (`skill:number-2`) — reviewed
@@ -318,7 +318,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Shasvastii** (`skill:shasvastii`) — reviewed
   - `overrides-effects-of` → Unconscious State (`state:unconscious`)
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:retreat-situation` — A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State.
-  - future [post-0.7.0; planned]: `relation type TBD` → `ammunition:shock` — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
+  - future [1.0.0; planned]: `relation type TBD` → Shock Ammunition (`ammunition:shock`) — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass.
 - [x] **Sixth Sense** (`skill:sixth-sense`) — reviewed
   - `negates-effects-of` → Stealth (`skill:stealth`)
   - `modifies-rolls-for` → Dodge (`skill:dodge`)
@@ -478,8 +478,8 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **BioWeapon** (`trait:bioweapon`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; planned]: `uses-effects-of` → `ammunition:da` — BioWeapon explicitly applies DA together with Shock Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
-  - future [post-0.7.0; planned]: `uses-effects-of` → `ammunition:shock` — BioWeapon explicitly applies Shock together with DA Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
+  - future [1.0.0; planned]: `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`) — BioWeapon explicitly applies DA together with Shock Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
+  - future [1.0.0; planned]: `uses-effects-of` → Shock Ammunition (`ammunition:shock`) — BioWeapon explicitly applies Shock together with DA Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
 - [x] **Boost** (`trait:boost`) — reviewed
   - outgoing: none
 - [x] **BS Weapon (PH)** (`trait:bs-weapon-ph`) — reviewed
@@ -778,8 +778,41 @@ review. `declaration-category` projection records are excluded.
 - [x] **Unit and Unit Profile** (`rule:profile-help:unit-profile`) — reviewed
   - outgoing: none
 
+### 1.0.0
+
+#### Ammunition (0/11)
+
+- [ ] **Armor Piercing (AP) Ammunition** (`ammunition:ap`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+  - outgoing: none
+- [ ] **Double Action (DA) Ammunition** (`ammunition:da`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+  - outgoing: none
+- [ ] **Eclipse Ammunition** (`ammunition:eclipse`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+  - outgoing: none
+- [ ] **Electromagnetic (E/M) Ammunition** (`ammunition:em`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+  - outgoing: none
+- [ ] **Explosive (EXP) Ammunition** (`ammunition:exp`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+  - outgoing: none
+- [ ] **Normal (N) Ammunition** (`ammunition:normal`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+  - outgoing: none
+- [ ] **Paralysis (PARA) Ammunition** (`ammunition:para`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+  - outgoing: none
+- [ ] **Shock Ammunition** (`ammunition:shock`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+  - outgoing: none
+- [ ] **Smoke Ammunition** (`ammunition:smoke`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+  - outgoing: none
+- [ ] **Stun Ammunition** (`ammunition:stun`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+  - outgoing: none
+- [ ] **T2 Ammunition** (`ammunition:t2`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+  - outgoing: none
+
 ## Future interaction queue
 
+- [ ] Dogged (`skill:dogged`) → Shock Ammunition (`ammunition:shock`); `relation type TBD`; **1.0.0 / planned** — Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass.
+- [ ] Explode (`skill:explode`) → Shock Ammunition (`ammunition:shock`); `uses-effects-of`; **1.0.0 / planned** — Explode explicitly resolves its Direct Template Attack with Shock Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
+- [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Shock Ammunition (`ammunition:shock`); `relation type TBD`; **1.0.0 / planned** — Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass.
+- [ ] Shasvastii (`skill:shasvastii`) → Shock Ammunition (`ammunition:shock`); `relation type TBD`; **1.0.0 / planned** — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass.
+- [ ] BioWeapon (`trait:bioweapon`) → Double Action (DA) Ammunition (`ammunition:da`); `uses-effects-of`; **1.0.0 / planned** — BioWeapon explicitly applies DA together with Shock Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
+- [ ] BioWeapon (`trait:bioweapon`) → Shock Ammunition (`ammunition:shock`); `uses-effects-of`; **1.0.0 / planned** — BioWeapon explicitly applies Shock together with DA Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
 - [ ] Cube 2.0 (`equipment:cube-2`) → `weapon:sepsitor`; `modifies-rolls-for`; **post-0.7.0 / planned** — Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph.
 - [ ] Cube 2.0 (`equipment:cube-2`) → `weapon:sepsitor-plus`; `modifies-rolls-for`; **post-0.7.0 / planned** — Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
@@ -799,9 +832,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] Combat Jump (`skill:combat-jump`) → `rule:partial-cover`; `relation type TBD`; **post-0.7.0 / deferred** — Combat Jump explicitly denies Partial Cover during the Order, but Partial Cover is not yet a canonical rules identity and the current relation vocabulary cannot represent temporary loss of the benefit precisely.
 - [ ] Courage (`skill:courage`) → `rule:guts-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Courage lets its user choose to automatically pass Guts Rolls; materialize this edge once Guts Roll is a canonical rules identity.
 - [ ] Courage (`skill:courage`) → `rule:retreat`; `relation type TBD`; **post-0.7.0 / planned** — Courage makes its user unaffected by Retreat and prevents Retreat State; model this once Retreat has canonical situation/state identities and an appropriate relation.
-- [ ] Dogged (`skill:dogged`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Unconscious State being overridden by Dogged and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [ ] Dogged (`skill:dogged`) → `rule:healing`; `relation type TBD`; **post-0.7.0 / deferred** — Dogged prevents all healing after activation, but the current relation vocabulary cannot express a healing-only restriction without overbroadly negating every effect of Doctor, MediKit, Regeneration, and similar rules.
-- [ ] Explode (`skill:explode`) → `ammunition:shock`; `uses-effects-of`; **post-0.7.0 / planned** — Explode explicitly resolves its Direct Template Attack with Shock Ammunition; materialize this edge when Ammunition is a canonical rules domain.
 - [ ] Explode (`skill:explode`) → `rule:direct-template-attack`; `uses-effects-of`; **post-0.7.0 / planned** — Explode explicitly performs a Direct Template Attack; retain the dependency until Direct Template Attack has a canonical rules identity.
 - [ ] Exrah (`skill:exrah`) → `rule:healing`; `relation type TBD`; **post-0.7.0 / deferred** — Exrah prevents later healing by sending the Trooper directly from Unconscious to Dead State; model the general recovery prohibition once healing/recovery has a canonical interaction abstraction.
 - [ ] Frenzy (`skill:frenzy`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — Frenzy cancels any Marker State when it grants Impetuous and prevents re-entry; current canonical Marker States are linked individually, while the generic all-Marker-State/prevention rule needs a Marker-form abstraction and a precise state-entry restriction relation.
@@ -844,7 +875,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:ph`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's PH value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
 - [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:str`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan explicitly excludes targets with STR; Attributes are not yet canonical rules identities and the relation is a target restriction rather than an effect on STR.
 - [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:vita`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan target eligibility requires the VITA Attribute; Attributes are not yet canonical rules identities and the relation is a target requirement rather than an effect on VITA.
-- [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Unconscious State being overridden by NWI and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Doctor (`skill:doctor`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Engineer (`skill:engineer`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — An additional Wound or a failed healing Roll while NWI is active sends the Trooper directly to Dead State; keep the outcome conditional rather than authoring an unconditional enters-state edge.
@@ -861,7 +891,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] Remote Presence (`skill:remote-presence`) → `rule:command-token`; `relation type TBD`; **post-0.7.0 / planned** — Remote Presence allows Command Tokens to reroll qualifying failed Engineer repairs, but Command Token expenditure is not yet a canonical interaction target.
 - [ ] Remote Presence (`skill:remote-presence`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Remote Presence changes the Wound threshold for entering Dead State by inserting a second Unconscious level; the current graph lacks a precise state-entry-threshold relation.
 - [ ] `skill:request-specball` → Combat Jump (`skill:combat-jump`); `uses-effects-of`; **post-0.7.0 / planned** — Request SpecBall explicitly deploys the SpecBall by applying Combat Jump rules; materialize this edge when Request SpecBall receives its own canonical action identity.
-- [ ] Shasvastii (`skill:shasvastii`) → `ammunition:shock`; `relation type TBD`; **post-0.7.0 / planned** — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; retain this until ammunition has a canonical interaction domain.
 - [ ] Shasvastii (`skill:shasvastii`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State.
 - [ ] Specialist Operative (`skill:specialist-operative`) → `rule:specialist-troop`; `uses-effects-of`; **post-0.7.0 / planned** — Specialist Operative makes its user count as a Specialist Troop for mission/scenario rules; materialize the edge once Specialist Troop is a canonical scenario-role identity.
 - [ ] Stealth (`skill:stealth`) → Idle (`skill:idle`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.
@@ -887,8 +916,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] Stunned State (`state:stunned`) → `rule:attack-declaration`; `restricts-use-of`; **post-0.7.0 / planned** — Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical.
 - [ ] Stunned State (`state:stunned`) → `rule:roll`; `modifies-rolls-for`; **post-0.7.0 / planned** — Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception.
 - [ ] Suppressive Fire State (`state:suppressive-fire`) → `rule:face-to-face-roll`; `imposes-modifiers-on`; **post-0.7.0 / planned** — Suppressive Fire imposes -3 on enemy Face to Face Rolls within 24 inches; defer until the graph can preserve the range condition.
-- [ ] BioWeapon (`trait:bioweapon`) → `ammunition:da`; `uses-effects-of`; **post-0.7.0 / planned** — BioWeapon explicitly applies DA together with Shock Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
-- [ ] BioWeapon (`trait:bioweapon`) → `ammunition:shock`; `uses-effects-of`; **post-0.7.0 / planned** — BioWeapon explicitly applies Shock together with DA Special Ammunition; materialize the reuse edge when Ammunition becomes a canonical rules domain.
 - [ ] BS Weapon (PH) (`trait:bs-weapon-ph`) → `skill:bs-attack-guided`; `restricts-use-of`; **post-0.7.0 / planned** — BS Attack (Guided) cannot use weapons with the BS Weapon (PH) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity.
 - [ ] BS Weapon (WIP) (`trait:bs-weapon-wip`) → `skill:bs-attack-guided`; `restricts-use-of`; **post-0.7.0 / planned** — BS Attack (Guided) cannot use weapons with the BS Weapon (WIP) Trait; retain the restriction until that exact BS Attack form has a canonical rules identity.
 - [ ] BS Weapon (WIP) (`trait:bs-weapon-wip`) → `skill:bs-attack-shock`; `restricts-use-of`; **post-0.7.0 / planned** — The BS Weapon (WIP) Trait explicitly prevents use with BS Attack (Shock); retain the restriction until that exact BS Attack form has a canonical rules identity.

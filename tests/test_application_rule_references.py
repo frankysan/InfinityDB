@@ -6,10 +6,16 @@ from pathlib import Path
 
 from infinity_army_data.metadata import decode_metadata
 from infinity_army_data.normalize import normalize_master, validate_normalized
+from infinity_db.application_domains import (
+    APPLICATION_DOMAINS,
+    application_domain,
+    public_rule_domain,
+)
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database
 from infinity_db.domain_references import enrich_rule_relation_references
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
+from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
 
@@ -103,6 +109,115 @@ def _reference_database(tmp_path: Path) -> Database:
     return Database(path)
 
 
+def test_application_domain_registry_separates_identity_from_presentation() -> None:
+    assert len({domain.slug for domain in APPLICATION_DOMAINS}) == len(APPLICATION_DOMAINS)
+    assert {domain.slug for domain in APPLICATION_DOMAINS if domain.level == "top-level"} == {
+        "armies",
+        "units",
+        "skills",
+        "equipment",
+        "weapons",
+        "ammunition",
+        "traits",
+        "states",
+        "hacking-programs",
+        "fireteams",
+        "labels",
+        "rules",
+    }
+
+    ammunition = application_domain("ammunition")
+    assert ammunition.presentation == "catalog"
+    assert ammunition.record_kinds == ("ammunition",)
+    assert ammunition.navigation is True
+    assert ammunition.search is True
+    assert ammunition.glossary is True
+    assert ammunition.catalog is True
+    assert ammunition.detail is True
+    assert ammunition.published is True
+
+    labels = application_domain("labels")
+    assert labels.presentation == "catalog"
+    assert labels.record_kinds == ()
+    assert labels.navigation is True
+    assert labels.glossary is True
+    assert labels.published is True
+
+    armies = application_domain("armies")
+    assert armies.presentation == "overview"
+    assert armies.landing is True
+    assert armies.catalog is False
+    assert armies.detail is False
+    assert armies.published is False
+    assert armies.route is None
+
+    fireteams = application_domain("fireteams")
+    assert fireteams.presentation == "scoped"
+    assert fireteams.landing is True
+    assert fireteams.scoped is True
+    assert fireteams.catalog is False
+    assert fireteams.detail is False
+
+    attributes = application_domain("attributes")
+    assert attributes.level == "embedded"
+    assert attributes.glossary is True
+    assert attributes.search is True
+    assert attributes.route is None
+    assert attributes.catalog is False
+    assert attributes.detail is False
+
+    general_rules = application_domain("rules")
+    assert general_rules.published is False
+    assert general_rules.route is None
+
+    assert public_rule_domain("ammunition") == ammunition
+    assert public_rule_domain("attribute") is None
+    assert public_rule_domain("rule") is None
+
+
+def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_database = RulesDatabase(rules_path)
+
+    ammunition = RulesRecordCatalog(rules_database, "ammunition")
+    ammunition_items = ammunition.list_items()
+    assert len(ammunition_items) == 11
+    assert {item["slug"] for item in ammunition_items} == {
+        "normal",
+        "ap",
+        "da",
+        "eclipse",
+        "em",
+        "exp",
+        "para",
+        "shock",
+        "smoke",
+        "stun",
+        "t2",
+    }
+    shock = ammunition.get_item("shock")
+    assert shock is not None
+    assert shock["name"] == "Shock Ammunition"
+    assert shock["rules"][0]["id"] == "ammunition:shock"
+
+    labels = LabelCatalog(rules_database)
+    label_items = labels.list_items()
+    assert len(label_items) == 24
+    assert {item["slug"] for item in label_items} >= {
+        "hackable",
+        "negative-feedback",
+        "supportware",
+    }
+    hackable = labels.get_item("hackable")
+    assert hackable is not None
+    assert hackable["name"] == "Hackable"
+    assert "Hacking Programs" in hackable["description"]
+
+    assert RulesRecordCatalog(None, "ammunition").list_items() == []
+    assert LabelCatalog(None).list_items() == []
+
 def test_rules_relation_references_project_source_variants_to_public_routes(
     tmp_path: Path,
 ) -> None:
@@ -145,6 +260,14 @@ def test_rules_relation_references_project_source_variants_to_public_routes(
                     },
                     {
                         "record": {
+                            "id": "ammunition:shock",
+                            "kind": "ammunition",
+                            "name": "Shock Ammunition",
+                            "army_links": [],
+                        }
+                    },
+                    {
+                        "record": {
                             "id": "rule:loss-of-lieutenant",
                             "kind": "rule",
                             "name": "Loss of Lieutenant",
@@ -175,7 +298,11 @@ def test_rules_relation_references_project_source_variants_to_public_routes(
         "catalog": "states",
         "id": "unconscious",
     }
-    assert "public_reference" not in records[4]
+    assert records[4]["public_reference"] == {
+        "catalog": "ammunition",
+        "id": "shock",
+    }
+    assert "public_reference" not in records[5]
 
 
 def test_structured_reference_metadata_is_materialized_without_raw_tables(

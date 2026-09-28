@@ -5,6 +5,8 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any
 
+from infinity_db.application_domains import public_rule_domain
+
 if TYPE_CHECKING:
     from infinity_db.database.repository import Database
 
@@ -22,16 +24,6 @@ def public_slug_for_reference(
     return database.application_slug(domain, application_id)
 
 
-_RULE_ROUTE_CATALOGS: dict[str, tuple[str, str]] = {
-    "skill": ("skills", "skill"),
-    "equipment": ("equipment", "equipment"),
-    "weapon": ("weapons", "weapon"),
-    "trait": ("traits", "trait"),
-    "state": ("states", "state"),
-    "hacking-program": ("hacking-programs", "hacking-program"),
-}
-
-
 def rule_record_public_reference(
     database: Database,
     record: dict[str, Any],
@@ -41,10 +33,11 @@ def rule_record_public_reference(
     kind = record.get("kind")
     if not isinstance(kind, str):
         return None
-    route = _RULE_ROUTE_CATALOGS.get(kind)
-    if route is None:
+    domain = public_rule_domain(kind)
+    if domain is None:
         return None
-    catalog, typed_prefix = route
+    catalog = domain.slug
+    typed_prefix = kind
 
     if kind in {"skill", "equipment", "weapon"}:
         entity = kind
