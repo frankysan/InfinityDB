@@ -435,6 +435,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     status, _, styles = request(fireteam_app, "/static/styles.css")
     assert status == 200
     assert_css_rule(styles, ".fireteam-card", {"width": "min(640px, 100%)"})
+    assert_css_rule(styles, ".fireteam-chart-summary", {"width": "min(640px, 100%)"})
     assert_css_rule(
         styles,
         ".fireteam-content,\n.fireteam-list",
@@ -2825,11 +2826,17 @@ def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     assert status == 200
     assert b'detail-group rules-reference hacking-program-profile' in script
     assert b'from "./rules-reference.js"' in script
-    assert b"rulesReferenceArticle(rule, { leadingContent })" in script
+    assert (
+        b"rulesReferenceArticle(rule, { leadingContent, headerContent, beforeRelations })"
+        in script
+    )
     assert b'detail-card hacking-program-profile-card' not in script
     assert b'from "./skill-categories.js"' in script
     assert b"skillCategoryBadge(category)" in script
-    assert b"hacking-program-context-row" in script
+    assert b"baselineDevicesGroup(program)" in script
+    assert b"[\"Targets\", program.targets?.length ? program.targets.join(\", \") : null]" in script
+    assert b"headerContent" in script
+    assert b"beforeRelations" in script
     assert b"rulesReferenceSection" not in script
     assert b'"Entire Order"' not in script
 
@@ -3804,7 +3811,7 @@ def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) 
     assert b".hacking-program-profile-table" in body
     assert b".detail-card" not in body
     assert b".hacking-program-profile-card" not in body
-    assert b".hacking-program-context-row" in body
+    assert b".hacking-program-context-row" not in body
     assert b"margin-bottom: var(--space-2);" in body
 
 

@@ -143,7 +143,11 @@ function ruleBadgeRow(rule) {
   return badgeRow;
 }
 
-function appendRuleDetails(container, rule, { includeBadges = true } = {}) {
+function appendRuleDetails(
+  container,
+  rule,
+  { includeBadges = true, beforeRelations = [] } = {},
+) {
   const summary = document.createElement("p");
   summary.className = "detail-copy";
   appendMaintainedText(summary, rule.summary_tokens, rule.summary);
@@ -175,6 +179,7 @@ function appendRuleDetails(container, rule, { includeBadges = true } = {}) {
     container.append(group);
   }
 
+  container.append(...beforeRelations);
   appendRuleRelations(container, rule);
 
   const applicability = applicabilityText(rule);
@@ -196,7 +201,10 @@ function appendRuleDetails(container, rule, { includeBadges = true } = {}) {
   }
 }
 
-export function rulesReferenceArticle(rule, { leadingContent = [] } = {}) {
+export function rulesReferenceArticle(
+  rule,
+  { leadingContent = [], headerContent = [], beforeRelations = [] } = {},
+) {
   const article = document.createElement("article");
   article.className = "detail-section";
   const header = document.createElement("header");
@@ -206,8 +214,9 @@ export function rulesReferenceArticle(rule, { leadingContent = [] } = {}) {
   header.append(title);
   const badgeRow = ruleBadgeRow(rule);
   if (badgeRow) header.append(badgeRow);
+  header.append(...headerContent);
   article.append(header, ...leadingContent);
-  appendRuleDetails(article, rule, { includeBadges: false });
+  appendRuleDetails(article, rule, { includeBadges: false, beforeRelations });
 
   for (const supplement of rule.supplements || []) {
     const supplemental = document.createElement("div");

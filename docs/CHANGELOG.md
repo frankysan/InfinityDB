@@ -53,6 +53,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web frontend:** Tighten Fireteam and Hacking Program detail presentation: constrain the current
+  Army chart summary to the same content width as Fireteam cards, move Hacking Program Skill-type
+  badges into the rules-card title bar, place Targets in the Program profile table, and keep baseline
+  Hacking Devices inside the Program card immediately before Related rules.
 - **Web backend + Project infrastructure:** Cache composed Skill and State rules records per
   catalog instance, avoiding repeated SQLite composition work during catalog lookups and
   enrichment audits while preserving mutation isolation for returned detail data.
