@@ -25,6 +25,28 @@ This is a structural/source audit, not a claim that every viewport and data comb
 been visually accepted. The implementation work should include a deliberate browser matrix
 at desktop, compact, and narrow widths with Developer mode both off and on.
 
+## Implementation progress
+
+The first table-foundation pass has now implemented the shared parts needed by the catalog/list
+family without redesigning its appearance:
+
+- `.table-viewport` is the shared overflow owner around tabular content;
+- Unit Explorer and all six rules catalog lists use one `data-table--listing` family with
+  semantic primary, descriptor, metric, and technical column roles;
+- generic first/last-column width rules and catalog-specific percentage overrides have been
+  removed from that family;
+- technical ID columns remain compact and can stay available in Developer mode on narrow
+  screens, with insufficient width handled by the table viewport instead of an unconditional
+  mobile hide;
+- interactive row hover is explicit rather than applying to every table body; and
+- catalog group-row spans derive from the active header shape instead of a page-name special
+  case.
+
+The remaining work is intentionally broader: separate surface containment from layout geometry,
+converge the secondary table families, consolidate titlebars and controls, normalize generated
+accessibility/responsive behavior, rationalize affected presentation tokens, and complete the
+manual browser matrix.
+
 ## Overall assessment
 
 The frontend already has a good shared foundation. The persistent page shell, semantic font
@@ -151,8 +173,10 @@ hard-coded light-theme component values.
 
 ## Table audit
 
-Tables are the clearest current divergence from the design contract and should be the first
-implementation workstream.
+At the audit baseline, tables were the clearest divergence from the design contract and were
+therefore selected as the first implementation workstream. The findings below remain useful as
+rationale; the implementation-progress section above records which shared-listing issues have
+already been addressed.
 
 ### Global positional sizing drives unrelated tables
 

@@ -269,7 +269,7 @@ function usageSections(item) {
         renderUnitRows(body, variant.units);
         table.append(body);
         const container = document.createElement("div");
-        container.className = "table-container";
+        container.className = "table-viewport";
         container.append(table);
         if (variant.rules?.length) {
           section.append(rulesReferenceSection(variant.rules, "Variant rules"));

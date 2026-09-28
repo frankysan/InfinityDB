@@ -185,7 +185,7 @@ function renderTeam(team) {
   }
 
   const tableContainer = document.createElement("div");
-  tableContainer.className = "table-container fireteam-member-table";
+  tableContainer.className = "table-viewport fireteam-member-table";
   const table = document.createElement("table");
   const caption = document.createElement("caption");
   caption.className = "sr-only";
@@ -348,7 +348,7 @@ function renderReference(reference) {
   basis.className = "detail-copy";
   appendMaintainedText(basis, levels.fact_tokens?.basis, levelFacts.basis);
   const tableContainer = document.createElement("div");
-  tableContainer.className = "table-container fireteam-reference-table";
+  tableContainer.className = "table-viewport fireteam-reference-table";
   const table = document.createElement("table");
   const caption = document.createElement("caption");
   caption.className = "sr-only";

@@ -64,7 +64,7 @@ function structuredTable(titleText, headers, rows) {
   title.className = "detail-section-title";
   title.textContent = titleText;
   const container = document.createElement("div");
-  container.className = "table-container";
+  container.className = "table-viewport";
   const table = document.createElement("table");
   table.className = "data-table--compact";
   const head = document.createElement("thead");
@@ -184,7 +184,7 @@ function variantSection(variant, parameterSemantics) {
     renderUnitRows(body, variant.units);
     table.append(body);
     const container = document.createElement("div");
-    container.className = "table-container";
+    container.className = "table-viewport";
     container.append(table);
     if (variant.rules?.length) {
       section.append(rulesReferenceSection(variant.rules, "Variant rules"));

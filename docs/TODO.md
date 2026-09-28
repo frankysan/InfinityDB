@@ -237,11 +237,12 @@ by the audit remain in scope.
 - [ ] **Web frontend:** Refactor shared visual structures in the order established by the
   0.10 design audit, preserving the current visual language while reducing independent
   layout decisions.
-  - [ ] Separate visual `surface` containment from catalog/detail layout geometry, establish
-    a real table-viewport primitive, and make interactive-row behavior explicit.
-  - [ ] Converge Unit Explorer and catalog list tables on semantic primary, descriptor,
-    metric, and technical column roles; remove positional width rules and keep core geometry
-    stable when Developer mode changes.
+  - [ ] Separate visual `surface` containment from catalog/detail layout geometry.
+  - [x] Establish a shared table-viewport primitive and make interactive-row behavior
+    explicit instead of inheriting hover/overflow behavior accidentally.
+  - [x] Converge Unit Explorer and catalog list tables on semantic primary, descriptor,
+    metric, and technical column roles; remove their positional width rules, keep short
+    columns compact, and let the viewport absorb Developer-mode width pressure.
   - [ ] Converge reusable secondary table families (catalog usage, stat/profile, and
     Fireteam/reference tables) while retaining deliberate domain-specific responsive modes.
   - [ ] Consolidate recurring surface-titlebar/header structures and duplicated Settings

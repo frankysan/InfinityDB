@@ -175,7 +175,7 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
     });
     const nameCell = document.createElement("th");
     nameCell.scope = "row";
-    nameCell.className = "unit-name";
+    nameCell.className = "unit-name table-column--primary";
     const nameLink = document.createElement("a");
     nameLink.href = `/units/${unit.public_slug || unit.id}`;
     nameLink.textContent = unit.name;
@@ -199,6 +199,7 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
     nameContent.append(unitSymbol(unit.symbol_path), nameLink);
     nameCell.append(nameContent);
     const armyCell = document.createElement("td");
+    armyCell.className = "table-column--descriptor";
     const armyList = document.createElement("div");
     armyList.className = "army-tags";
     const armies = displayArmies(unit.armies);
@@ -227,7 +228,7 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
     if (!unit.armies.length) armyList.textContent = "—";
     armyCell.append(armyList);
     const idCell = document.createElement("td");
-    idCell.className = "unit-id id-column";
+    idCell.className = "id-column table-column--technical";
     idCell.textContent = unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ");
     if (extended) {
       nameCell.colSpan = 2;

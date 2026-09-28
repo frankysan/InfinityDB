@@ -2749,6 +2749,51 @@ input::placeholder {
   }
 }
 
+.table-viewport {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.data-table--listing {
+  width: 100%;
+}
+
+.data-table--listing .table-column--primary {
+  width: 100%;
+}
+
+.data-table--listing .table-column--descriptor,
+.data-table--listing .table-column--metric,
+.data-table--listing .table-column--technical {
+  width: 1%;
+}
+
+.table-column--metric,
+.table-column--technical {
+  white-space: nowrap;
+}
+
+.table-column--metric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-column--technical {
+  text-align: right;
+}
+
+tbody .table-column--technical {
+  color: #64725c;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+.data-table--interactive tbody tr:hover {
+  background: #f8f9f3;
+}
+
 table {
   --table-heading-padding: 16px 26px;
   --table-cell-padding: 18px 26px;
@@ -2821,19 +2866,6 @@ thead th {
   font-weight: 550;
   padding: var(--table-heading-padding);
   border-bottom: 1px solid var(--color-border-default);
-}
-
-thead th:first-child {
-  width: 43%;
-}
-
-thead th:last-child {
-  width: 115px;
-}
-
-.usage-section-group thead th:first-child,
-.usage-section-group thead th:last-child {
-  width: auto;
 }
 
 tbody th,
@@ -3002,14 +3034,6 @@ html[data-distance-unit="in"] .attribute-statline {
 
 tbody tr:last-child>* {
   border-bottom: 0;
-}
-
-tbody tr:hover {
-  background: #f8f9f3;
-}
-
-.catalog-category-row:hover {
-  background: transparent;
 }
 
 .catalog-category-row th {
@@ -3347,14 +3371,6 @@ html[data-distance-unit="in"] .unit-extended-statline {
   text-align: right;
 }
 
-.unit-id {
-  min-width: 92px;
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-xs);
-  color: #64725c;
-  white-space: nowrap;
-}
-
 .modifier-unit-links {
   font-size: var(--font-size-sm);
   line-height: 1.6;
@@ -3481,16 +3497,6 @@ html[data-distance-unit="in"] .unit-extended-statline {
   }
 }
 
-@media (min-width: 601px) {
-  #table-container thead th:first-child {
-    width: 65%;
-  }
-
-  #table-container thead th:last-child {
-    width: 145px;
-  }
-}
-
 @media (min-width: 921px) {
   .settings-menu>.menu-label {
     display: none;
@@ -3523,11 +3529,6 @@ html[data-distance-unit="in"] .unit-extended-statline {
     transform: rotate(180deg);
   }
 
-  body[data-catalog="equipment"] #catalog-table-container thead th:first-child,
-  body[data-catalog="weapons"] #catalog-table-container thead th:first-child,
-  body[data-catalog="traits"] #catalog-table-container thead th:first-child {
-    width: 68%;
-  }
 }
 
 @media (max-width: 1150px) {
@@ -3787,6 +3788,12 @@ html[data-distance-unit="in"] .unit-extended-statline {
 
   .sidebar[data-search-open="true"] .brand>span {
     display: none;
+  }
+}
+
+@media (min-width: 601px) {
+  .data-table--listing .table-column--primary {
+    white-space: nowrap;
   }
 }
 
@@ -4096,18 +4103,6 @@ html[data-distance-unit="in"] .unit-extended-statline {
   table.data-table--compact {
     --table-heading-padding: 10px 12px;
     --table-cell-padding: 10px 12px;
-  }
-
-  thead th:first-child {
-    width: auto;
-  }
-
-  thead th:last-child {
-    width: 156px;
-  }
-
-  .id-column {
-    display: none;
   }
 
   .unit-name {

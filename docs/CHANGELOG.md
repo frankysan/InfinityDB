@@ -53,6 +53,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web frontend:** Stabilize Unit Explorer and rules-catalog table geometry around shared
+  semantic column roles: primary titles use available width, descriptor/metric/developer
+  columns stay compact, narrow Developer-mode tables scroll instead of hiding technical IDs,
+  and row hover is limited to tables that are actually interactive.
 - **Web frontend:** Tighten Fireteam and Hacking Program detail presentation: constrain the current
   Army chart summary to the same content width as Fireteam cards, move Hacking Program Skill-type
   badges into the rules-card title bar, place Targets in the Program profile table, and keep baseline

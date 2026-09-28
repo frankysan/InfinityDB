@@ -25,7 +25,7 @@ function categoryBadges(categories) {
 function programProfileContent(program) {
   const nodes = [];
   const container = document.createElement("div");
-  container.className = "table-container hacking-program-profile-table";
+  container.className = "table-viewport hacking-program-profile-table";
   const table = document.createElement("table");
   table.className = "data-table--compact";
   table.innerHTML =

@@ -1666,13 +1666,70 @@ def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -
     assert_css_rule(styles, ".landing-hero-content", {"grid-column": "1 / -1"})
 
 
-def test_mobile_unit_list_prioritizes_the_unit_name_column(
-    app: Callable,
-) -> None:
+def test_listing_tables_use_semantic_column_layout(app: Callable) -> None:
     status, _, styles = request(app, "/static/styles.css")
 
     assert status == 200
-    assert_css_rule(styles, "thead th:last-child", {"width": "156px"})
+    assert_css_rule(
+        styles,
+        ".table-viewport",
+        {
+            "width": "100%",
+            "min-width": "0",
+            "max-width": "100%",
+            "overflow-x": "auto",
+        },
+    )
+    assert_css_rule(styles, ".data-table--listing", {"width": "100%"})
+    assert_css_rule(
+        styles,
+        ".data-table--listing .table-column--primary",
+        {"width": "100%"},
+    )
+    assert_css_rule(
+        styles,
+        (
+            ".data-table--listing .table-column--descriptor, "
+            ".data-table--listing .table-column--metric, "
+            ".data-table--listing .table-column--technical"
+        ),
+        {"width": "1%"},
+    )
+    assert_css_rule(
+        styles,
+        ".table-column--metric, .table-column--technical",
+        {"white-space": "nowrap"},
+    )
+    assert_css_rule(
+        styles,
+        ".table-column--metric",
+        {"text-align": "right", "font-variant-numeric": "tabular-nums"},
+    )
+    assert_css_rule(styles, ".table-column--technical", {"text-align": "right"})
+    assert_css_rule(
+        styles,
+        "tbody .table-column--technical",
+        {
+            "color": "#64725c",
+            "font-family": "var(--font-family-mono)",
+            "font-size": "var(--font-size-xs)",
+        },
+    )
+    assert_css_rule(
+        styles,
+        ".data-table--interactive tbody tr:hover",
+        {"background": "#f8f9f3"},
+    )
+    assert b"\ntbody tr:hover {" not in styles
+    assert b"  .id-column {\n    display: none;\n  }" not in styles
+
+    status, _, units = request(app, "/units")
+    assert status == 200
+    assert b'class="data-table--listing data-table--interactive"' in units
+    assert b'class="table-column--primary" scope="col">Unit</th>' in units
+    assert b'class="table-column--descriptor" scope="col">Available in</th>' in units
+    assert b'class="id-column table-column--technical" scope="col">Unit ID</th>' in units
+
     assert_css_rule(styles, ".army-tags", {"--symbols-per-row": "4"})
     assert_css_rule(
         styles,
@@ -1774,7 +1831,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'aria-controls="settings-menu"' in body
     assert b'>Settings <span aria-hidden="true">' in body
     assert body.index(b"compact-navigation-menu") < body.index(b"settings-menu")
-    assert b'<th scope="col" class="id-column">Unit ID</th>' in body
+    assert b'<th class="id-column table-column--technical" scope="col">Unit ID</th>' in body
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -2536,11 +2593,6 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
         ".usage-section-group table.data-table--compact",
         {"width": "100%"},
     )
-    assert_css_rule(
-        styles,
-        ".usage-section-group thead th:first-child, .usage-section-group thead th:last-child",
-        {"width": "auto"},
-    )
 
 
 def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable) -> None:
@@ -2811,7 +2863,7 @@ def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"Hacking Program catalog" in body
     assert b'href="/hacking-programs" aria-current="page"' in body
-    assert b'<th scope="col">Uses</th>' not in body
+    assert b'>Uses</th>' not in body
 
     status, _, body = request(app, "/api/hacking-programs")
     assert status == 200
@@ -2851,7 +2903,7 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
     assert headers["content-type"].startswith("text/html")
     assert b"States catalog" in body
     assert b'href="/states" aria-current="page"' in body
-    assert b'<th scope="col">Uses</th>' not in body
+    assert b'>Uses</th>' not in body
 
     status, _, body = request(app, "/api/states")
     assert status == 200
@@ -2972,11 +3024,11 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
     assert headers["content-type"].startswith("text/html")
     assert b"catalog-list.js" in body
     assert f'href="/{catalog}" aria-current="page"'.encode() in body
-    assert b'<th scope="col">Uses</th>' in body
+    assert b'class="table-column--metric" scope="col">Uses</th>' in body
     if catalog == "skills":
-        assert b'<th scope="col">Type(s)</th>' in body
+        assert b'class="table-column--descriptor" scope="col">Type(s)</th>' in body
     else:
-        assert b'<th scope="col">Type(s)</th>' not in body
+        assert b'>Type(s)</th>' not in body
     assert b"Reference</th>" not in body
 
     status, headers, body = request(app, f"/api/{catalog}")
@@ -3709,10 +3761,8 @@ def test_072_detail_and_catalog_presentation_contract(app: Callable, tmp_path: P
     )
     assert_css_rule(
         styles,
-        'body[data-catalog="equipment"] #catalog-table-container thead th:first-child, '
-        'body[data-catalog="weapons"] #catalog-table-container thead th:first-child, '
-        'body[data-catalog="traits"] #catalog-table-container thead th:first-child',
-        {"width": "68%"},
+        ".data-table--listing .table-column--primary",
+        {"width": "100%"},
     )
     assert b"--font-family-brand: \"Audiowide\"" in styles
     assert b"--font-family-display: \"Oxanium\"" in styles
@@ -3773,8 +3823,9 @@ def test_skill_category_presentation_uses_shared_semantic_colors(app: Callable) 
     status, _, body = request(app, "/static/catalog-list.js")
     assert status == 200
     assert b'from "./skill-categories.js"' in body
-    assert b'page === "skills" ? 4 : 3' in body
-    assert b'types.className = "skill-category-cell"' in body
+    assert b'const catalogColumnCount = elements.table.querySelectorAll("thead th").length;' in body
+    assert b"categoryCell.colSpan = catalogColumnCount;" in body
+    assert b'types.className = "skill-category-cell table-column--descriptor"' in body
     assert b"types.append(skillCategoryBadge(category))" in body
 
     status, _, body = request(app, "/static/rules-reference.js")
