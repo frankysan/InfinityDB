@@ -11,7 +11,7 @@ material, while only the conclusions that must survive a checkout belong in Git.
 Files tracked directly under `docs/` are maintained project records. They include:
 
 - authoritative reference documentation such as `architecture.md`, `data-model.md`,
-  `deployment.md`, and `testing.md`;
+  `web-design-guidelines.md`, `deployment.md`, and `testing.md`;
 - planning and release records such as `TODO.md`, `CHANGELOG.md`, and `releasing.md`;
 - durable release-specific audit or closeout records whose conclusions are useful after
   the original working evidence has been discarded; and

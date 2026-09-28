@@ -1172,9 +1172,12 @@ the next page module. Transient page modules that own fetches or window-level ev
 listeners must dispose them on `infinity:beforenavigation`; persistent shell modules
 are intentionally exempt because their DOM survives the replacement.
 
-`static/styles.css` is the browser design-system entry point. Its root tokens
-define shared color roles, surfaces, borders, spacing, radii, control height,
-focus treatment, shadows, and the canonical typography system. Typography has two
+`docs/web-design-guidelines.md` defines the target browser visual and interaction
+contract, including the shared design vocabulary and reusable-structure rules. It is
+normative design direction rather than a snapshot of current CSS; implementation should
+converge on it as frontend work is performed. `static/styles.css` is the design-system
+implementation entry point. Its root tokens define shared color roles, surfaces, borders,
+spacing, radii, control height, focus treatment, shadows, and the canonical typography system. Typography has two
 orthogonal contracts: semantic font-family roles and a shared size scale. Brand text uses
 Audiowide, display headings use Oxanium, normal interface/running text uses IBM Plex Sans,
 dense tabular data uses IBM Plex Sans Condensed, and developer/identifier text uses IBM Plex

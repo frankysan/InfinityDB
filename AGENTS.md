@@ -23,6 +23,10 @@ Before making substantial changes, read:
   context.
 - `docs/testing.md` — standard development-check orchestration and reporting.
 
+For browser visual, layout, responsive, or interaction changes, also read
+`docs/web-design-guidelines.md`; it defines the target UI vocabulary and reusable
+design contract.
+
 The engineering principles in `docs/architecture.md` are authoritative for
 technical design decisions.
 

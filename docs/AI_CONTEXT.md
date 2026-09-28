@@ -16,6 +16,9 @@ model.
   direction.
 - `docs/data-model.md` is authoritative for normalized data semantics and
   persistence structure.
+- `docs/web-design-guidelines.md` defines the target browser visual/interaction contract,
+  shared design vocabulary, and reusable UI-structure rules. It is intentionally a desired
+  design rather than a snapshot of the current implementation.
 - `docs/rules-semantics.md` records audited, implementation-relevant game-rule
   semantics and the maintained source/audit baseline. `docs/rules-research.md`
   holds verified findings without a current application consumer.
@@ -637,9 +640,10 @@ compatibility references remain unambiguous JSON integers.
   store before use. The **Remember settings** consent path additionally mirrors values to
   one-year SameSite cookies for later sessions; turning persistence off removes those
   cookies but must not reset current-session choices.
-- `styles.css` is the design-system source of truth. Reuse established tokens,
-  surfaces, table density, detail-group primitives, and badges rather than
-  adding page-local equivalents.
+- `docs/web-design-guidelines.md` owns the target design contract; `styles.css` is its
+  implementation entry point. Prefer semantic reusable structures, simplify and deduplicate
+  recurring behavior, and avoid page-local equivalents for shared surfaces, table behavior,
+  detail groups, badges, controls, and responsive patterns.
 - Developer mode is default-off. Technical inline fields use `.developer-only`
   and ID table columns use `.id-column`.
 

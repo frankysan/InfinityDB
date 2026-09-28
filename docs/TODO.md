@@ -229,6 +229,14 @@ by the audit remain in scope.
 
 ### Frontend architecture and theming
 
+- [ ] **Web frontend:** Audit existing browser tables against
+  `docs/web-design-guidelines.md` and consolidate them around shared semantic table
+  structures before making further isolated width fixes. Inventory each table family,
+  width policy, column roles, wrapping behavior, developer-mode behavior, and narrow-screen
+  strategy; then remove positional/duplicated CSS where a shared role can own the behavior.
+  Catalog lists should converge on one reusable family so title columns, compact metadata,
+  whitespace, and developer columns behave consistently across domains.
+
 - [ ] Move the **General Fireteam rules** / Fireteam quick-reference material off the
   Army-specific `/fireteams` chart browser onto a dedicated rules/reference page. Keep
   the Army chart focused on Army-specific composition data and link clearly between the
