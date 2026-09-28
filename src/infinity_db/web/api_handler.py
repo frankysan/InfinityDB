@@ -9,6 +9,7 @@ from http import HTTPStatus
 from urllib.parse import parse_qs
 
 from infinity_db import __version__
+from infinity_db.army_overview import army_overview_description, army_overview_group
 from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
@@ -323,7 +324,6 @@ class ApiHandler:
                         payload = {"error": "Fireteam chart not found"}
                     else:
                         attach_public_army_slug(self.database, payload["army"])
-                        payload["reference"] = self.fireteam_rules_reference
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -587,8 +587,15 @@ class ApiHandler:
             cache_control = API_CACHE_CONTROL
             try:
                 items = [dict(item) for item in self.database.list_armies()]
+                armies_by_id = {item["id"]: item for item in items}
                 for item in items:
                     attach_public_army_slug(self.database, item)
+                    item["overview_group"] = army_overview_group(
+                        item, armies_by_id=armies_by_id
+                    )
+                    item["overview_description"] = army_overview_description(
+                        item, armies_by_id=armies_by_id
+                    )
                 payload = enrich_army_references(self.database, {"items": items})
                 self.symbol_catalog.enrich_armies(payload["items"])
             except (OSError, ValueError, sqlite3.Error):

@@ -35,6 +35,7 @@ ASSETS = {
     "/static/version-check.js": ("version-check.js", "text/javascript; charset=utf-8"),
     "/static/styles.css": ("styles.css", "text/css; charset=utf-8"),
     "/static/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/static/armies.js": ("armies.js", "text/javascript; charset=utf-8"),
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
     "/static/unit-symbols.js": ("unit-symbols.js", "text/javascript; charset=utf-8"),
     "/static/unit-presentation.js": ("unit-presentation.js", "text/javascript; charset=utf-8"),
@@ -151,6 +152,12 @@ _FIXED_PAGES = {
         "index.html",
         (("InfinityDB", None), ("Home", None)),
         "Player reference",
+    ),
+    "/armies": PageSpec(
+        "armies.html",
+        (("Database", "/"), ("Armies", None)),
+        "Army overview",
+        "armies",
     ),
     "/units": PageSpec(
         "units.html",
@@ -419,6 +426,7 @@ def _render_page(
     static = files("infinity_db.web").joinpath("static")
     navigation = static.joinpath("navigation.html").read_text(encoding="utf-8")
     navigation_markers = {
+        "armies": "ARMIES_CURRENT",
         "units": "UNIT_EXPLORER_CURRENT",
         "skills": "SKILLS_CURRENT",
         "equipment": "EQUIPMENT_CURRENT",

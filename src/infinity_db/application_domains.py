@@ -42,10 +42,10 @@ APPLICATION_DOMAINS: tuple[ApplicationDomain, ...] = (
         "Armies",
         "top-level",
         "overview",
-        navigation=False,
+        navigation=True,
         search=True,
         landing=True,
-        published=False,
+        published=True,
     ),
     ApplicationDomain(
         "units",

@@ -145,8 +145,8 @@ are deliberately separate: a concept may be searchable, glossary-visible, or ava
 contextual help without requiring its own catalog or detail route. Conversely, top-level domains may
 use catalog, overview, or scoped-view presentations rather than one mandatory page template.
 Published rules-record route ownership is derived from this registry rather than maintained in a
-second kind-to-route mapping. Ammunition and Labels are the first new domains published through the
-shared framework.
+second kind-to-route mapping. Ammunition and Labels are published catalog domains, Armies is a
+published overview domain, and Fireteams uses the shared landing/scoped interaction contract.
 
 **Design direction.** Glossary is a cross-domain projection rather than a canonical data owner;
 global search already follows that projection model for published domains. General Rules is the

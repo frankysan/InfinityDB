@@ -52,6 +52,7 @@ _METRIC_FIXED_PATHS = frozenset(
     {
         "/",
         "/about",
+        "/armies",
         "/units",
         "/skills",
         "/equipment",

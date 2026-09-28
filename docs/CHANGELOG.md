@@ -9,6 +9,9 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Web backend + Web frontend:** Add an **Armies** overview with current Army symbols, concise
+  structural descriptions, and direct links into Unit Explorer with the selected Army already
+  applied.
 - **Data processing + Web backend + Web frontend:** Add first-class **Ammunition** and **Labels**
   reference domains. The browser now exposes the eleven N5.3 base Ammunition types and the canonical
   current Label vocabulary through searchable catalog/detail surfaces, while a shared application-
@@ -44,6 +47,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web backend + Web frontend:** Normalize **Fireteams** around the shared domain landing/scoped
+  interaction: `/fireteams` now shows the Army selector with the general Fireteam rules summary,
+  while selecting an Army replaces that summary with the shareable Army-scoped chart and clearing
+  the selection returns to the domain landing state.
 - **Web frontend:** Standardize responsive visual behavior across Unit Explorer, catalog,
   reference, Unit-detail, Hacking Program, Weapon, and Fireteam surfaces. Shared surfaces,
   titlebars, Settings controls, and semantic table-column roles now keep compact data compact,

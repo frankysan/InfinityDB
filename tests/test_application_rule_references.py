@@ -145,11 +145,12 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
 
     armies = application_domain("armies")
     assert armies.presentation == "overview"
+    assert armies.navigation is True
     assert armies.landing is True
     assert armies.catalog is False
     assert armies.detail is False
-    assert armies.published is False
-    assert armies.route is None
+    assert armies.published is True
+    assert armies.route == "/armies"
 
     fireteams = application_domain("fireteams")
     assert fireteams.presentation == "scoped"

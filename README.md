@@ -29,11 +29,14 @@ Current release: **0.8.1** (2026-09-27).
 - Groups equivalent standard, reinforcement, and optional-mercenary source
   records into coherent unit views while preserving their distinct availability
   and army contexts.
+- Includes an Army overview with symbols, concise role/context summaries, and direct links into
+  pre-filtered Unit Explorer rosters.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
   Ammunition, Traits, Labels, States, and Hacking Programs reference catalogs, with reverse Unit
   usage links where that relationship applies.
-- Browses Army-scoped Fireteam charts with limits, member requirements,
-  Wildcards, FTO loadouts, equivalence labels, and N5 rules/bonus context.
+- Uses `/fireteams` as a general Fireteam-rules landing page and switches to Army-scoped charts when
+  an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, equivalence
+  labels, and N5 rules/bonus context.
 - Presents connected Unit relationships for Peripherals/Controllers, Includes,
   selection/dependency constraints, Reinforcement parentage, and broader
   source-declared faction membership.

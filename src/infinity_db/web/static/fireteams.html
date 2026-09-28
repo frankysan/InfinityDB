@@ -23,7 +23,7 @@
       </section>
       <section class="surface surface--clipped content-frame fireteam-explorer" aria-labelledby="fireteam-heading">
         <div class="section-heading">
-          <h2 id="fireteam-heading">Army chart</h2>
+          <h2 id="fireteam-heading">Fireteam reference</h2>
           <span id="fireteam-count" class="section-index">Loading…</span>
         </div>
         <div class="filters fireteam-filters">
@@ -33,11 +33,11 @@
           </div>
         </div>
         <div id="fireteam-results" class="results fireteam-results" aria-busy="true">
-          <div id="fireteam-loading" class="state-panel"><span class="spinner" aria-hidden="true"></span><h3>Loading Fireteams</h3><p>Reading the selected Army chart.</p></div>
-          <div id="fireteam-error" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">!</span><h3>Fireteam chart could not be loaded</h3><p id="fireteam-error-message">Please try again.</p></div>
-          <div id="fireteam-empty" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">⌕</span><h3>No Fireteam chart content</h3><p>This Army has no player-facing Fireteam entries in the current snapshot.</p></div>
-          <div id="fireteam-content" class="fireteam-content" hidden>
-            <section id="fireteam-reference" class="surface surface--subtle surface--raised fireteam-reference" aria-labelledby="fireteam-reference-heading" hidden>
+          <div id="fireteam-loading" class="state-panel"><span class="spinner" aria-hidden="true"></span><h3>Loading Fireteams</h3><p>Reading Fireteam reference data.</p></div>
+          <div id="fireteam-error" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">!</span><h3>Fireteam reference could not be loaded</h3><p id="fireteam-error-message">Please try again.</p></div>
+          <div id="fireteam-empty" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">⌕</span><h3>No Fireteam reference content</h3><p>No general reference or selected Army chart content is available.</p></div>
+          <div id="fireteam-landing" class="fireteam-landing" hidden>
+            <section id="fireteam-reference" class="surface surface--subtle surface--raised fireteam-reference" aria-labelledby="fireteam-reference-heading">
               <div class="fireteam-reference-heading">
                 <div>
                   <p class="eyebrow">General Fireteam rules</p>
@@ -46,6 +46,8 @@
               </div>
               <div id="fireteam-reference-content"></div>
             </section>
+          </div>
+          <div id="fireteam-content" class="fireteam-content" hidden>
             <section class="surface surface--subtle surface--raised fireteam-chart-summary" aria-labelledby="fireteam-chart-name">
               <div class="surface-titlebar fireteam-chart-heading">
                 <div>

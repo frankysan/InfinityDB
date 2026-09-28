@@ -299,8 +299,43 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert armies[101]["public_slug"] == "zulu-company"
     assert armies[101]["name"]
     assert armies[101]["kind"] == "army"
+    assert armies[101]["overview_description"]
+    assert armies[101]["overview_group"] == {"id": 101, "name": "Zulu Company"}
     assert armies[198]["kind"] == "reinforcement"
+    assert armies[198]["overview_description"]
+    assert armies[198]["overview_group"]
     assert {army["unit_count"] for army in armies.values()} == {1, 2, 4}
+
+
+
+def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) -> None:
+    status, headers, body = request(app, "/armies")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"Current armies" in body
+    assert b'/static/armies.js?v=' in body
+    assert b'href="/armies" aria-current="page"' in body
+
+    status, _, script = request(app, "/static/armies.js")
+    assert status == 200
+    assert b'from "./api.js"' in script
+    assert b'from "./unit-symbols.js"' in script
+    assert b"getArmies" in script
+    assert b"army.overview_description" in script
+    assert b"staticSymbolPath(army.symbol_path)" in script
+    assert b"new URLSearchParams({ army_id: armyValue(army) })" in script
+    assert b"army.overview_group" in script
+    assert b"groupIdentity" not in script
+    assert b"infinity:beforenavigation" in script
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(styles, ".army-overview", {"width": "min(1040px, 100%)"})
+    assert_css_rule(
+        styles,
+        ".army-overview-grid",
+        {"display": "grid", "grid-template-columns": "repeat(auto-fit, minmax(280px, 1fr))"},
+    )
 
 
 def test_fireteam_chart_page_and_api_use_application_projection(
@@ -359,7 +394,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     status, _, body = request(fireteam_app, "/api/fireteams", query="army_id=zulu-company")
     assert status == 200
     chart = json.loads(body)
-    assert chart["reference"] is None
+    assert "reference" not in chart
     assert chart["army"]["public_slug"] == "zulu-company"
     assert chart["description"] == "Current chart note"
     assert chart["limits"] == [{"type": "CORE", "position": 1, "max_count": 1}]
@@ -373,7 +408,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     rules_path = tmp_path / "rules.db"
     export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
     rules_app = create_app(database_path, rules_database_path=rules_path)
-    status, _, body = request(rules_app, "/api/fireteams", query="army_id=zulu-company")
+    status, _, body = request(rules_app, "/api/fireteams")
     assert status == 200
     reference = json.loads(body)["reference"]
     assert reference["general"]["facts"]["category"] == "fireteam-general"
@@ -398,6 +433,10 @@ def test_fireteam_chart_page_and_api_use_application_projection(
         citation.get("source_url") and "Fireteam_Bonuses" in citation["source_url"]
         for citation in reference["levels"]["citations"]
     )
+
+    status, _, body = request(rules_app, "/api/fireteams", query="army_id=zulu-company")
+    assert status == 200
+    assert "reference" not in json.loads(body)
 
     status, _, script = request(fireteam_app, "/static/fireteams.js")
     assert status == 200
@@ -430,12 +469,17 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'window.addEventListener("fireteamswildcardschange"' in script
     assert b"detail-badges fireteam-card-types" in script
     assert b"function renderReference(reference)" in script
+    assert 'new Option("Select an Army…", "")'.encode() in script
+    assert b"function renderOverview()" in script
+    assert b"currentReference = payload.reference || null;" in script
+    assert b"renderReference(chart.reference)" not in script
     assert b"for (const level of levelFacts.levels || [])" in script
     assert b"Historical official term" in script
     assert b"Community / historical shorthand" in script
 
     status, _, page = request(fireteam_app, "/fireteams")
     assert status == 200
+    assert b'id="fireteam-landing"' in page
     assert b'id="fireteam-reference"' in page
     assert b'id="fireteam-reference-content"' in page
 
@@ -453,7 +497,7 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     )
     assert_css_rule(
         styles,
-        ".fireteam-content,\n.fireteam-list",
+        ".fireteam-landing,\n.fireteam-content,\n.fireteam-list",
         {"grid-template-columns": "minmax(0, 1fr)", "min-width": "0"},
     )
     assert_css_rule(styles, ".fireteam-reference", {"min-width": "0"})
@@ -1325,6 +1369,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b"Your Infinity reference," in body
     assert b"in one place." in body
     assert b'aria-label="Project navigation"' in body
+    assert b'href="/armies"' in body
     assert b'href="/units"' in body
     assert b'href="/ammunition"' in body
     assert b'href="/traits"' in body
@@ -1529,6 +1574,7 @@ def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> N
     "path",
     [
         "/",
+        "/armies",
         "/units",
         "/units/1",
         "/skills",
@@ -1595,6 +1641,7 @@ def test_rules_reference_pages_share_the_same_shell_classification(
 @pytest.mark.parametrize(
     ("path", "active_href"),
     [
+        ("/armies", "/armies"),
         ("/units", "/units"),
         ("/units/example", "/units"),
         ("/skills", "/skills"),
@@ -1629,6 +1676,7 @@ def test_browser_routes_keep_their_parent_navigation_active(
 def test_every_browser_page_has_a_meta_description(app: Callable) -> None:
     for path in (
         "/",
+        "/armies",
         "/units",
         "/units/example",
         "/skills",

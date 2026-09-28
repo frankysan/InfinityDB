@@ -11,10 +11,11 @@ same UI. Data identity, semantic ownership, search/glossary participation, and b
 are related concerns, but they are not the same concern.
 
 The capability registry described below is **Current** in
-`src/infinity_db/application_domains.py`. Ammunition and Labels are the first new domains published
-through that registry. Armies, Fireteams normalization, Attributes, General Rules publication, and
-the federated Glossary remain **Design direction** unless their sections state otherwise. Concrete
-unfinished work remains in `docs/TODO.md`.
+`src/infinity_db/application_domains.py`. Ammunition and Labels are published catalog domains,
+Armies is a published overview domain, and Fireteams now follows the shared landing/scoped
+interaction contract. Attributes, General Rules publication, and the federated Glossary remain
+**Design direction** unless their sections state otherwise. Concrete unfinished work remains in
+`docs/TODO.md`.
 
 ## Principles
 
@@ -159,18 +160,20 @@ states.
 
 ## Armies
 
-Armies are a top-level **overview** domain rather than a conventional catalog/detail domain.
+**Current.** Armies are a top-level **overview** domain rather than a conventional catalog/detail
+domain.
 
-`/armies` should present one concise maintained entry per playable army with:
+`/armies` presents one concise entry per playable army with:
 
 - army symbol;
 - canonical display name;
 - a short maintained description; and
 - a link to Unit Explorer with the corresponding Army filter already applied.
 
-The overview reuses canonical Army identities/slugs and existing symbol relationships. Descriptive
-prose is maintained presentation content; it must not be inferred automatically from Unit
-composition.
+The overview reuses canonical Army identities/slugs and existing symbol relationships. The initial
+short descriptions are structural summaries derived from canonical Army role/group relationships;
+they deliberately do not infer lore or play style from Unit composition. Richer reviewed
+presentation copy can replace those summaries later without changing the domain contract.
 
 Individual `/armies/<slug>` detail pages are not required unless a future player-facing use case
 justifies them. The pre-filtered Unit Explorer URL is the shareable destination for browsing an
@@ -178,7 +181,8 @@ army's Units.
 
 ## Fireteams
 
-Fireteams are a top-level domain with an **overview landing state** and an **army-scoped view**.
+**Current.** Fireteams are a top-level domain with an **overview landing state** and an
+**army-scoped view**.
 
 The intended behavior is:
 
@@ -196,7 +200,9 @@ The intended behavior is:
 
 The general Fireteam rules summary belongs to the Fireteams domain itself. It is shown on the
 unscoped landing state and hidden when an Army is selected, rather than repeated above every Army
-chart. Clearing the Army selection returns to the unscoped summary.
+chart. Clearing the Army selection returns to the unscoped summary. The scoped API response likewise
+contains only the Army chart projection; the domain-wide rules summary is returned by the unscoped
+Fireteams API.
 
 The selected Army must be URL-addressable/shareable. Loading a scoped URL should render the scoped
 state directly without first depending on presentation of the general summary.
@@ -273,7 +279,8 @@ The implementation sequence is:
 1. **Current:** establish the application-domain registry/capability model and planned top-level
    skeleton;
 2. **Current:** expose Labels and Ammunition as the first newly browsable domains;
-3. add the Armies overview and normalize Fireteams to the landing/scoped interaction contract;
+3. **Current:** publish the Armies overview and normalize Fireteams to the landing/scoped
+   interaction contract;
 4. build Glossary as a federated projection over those canonical domains plus embedded vocabularies;
 5. continue filling semantic relationships and domain coverage through the 1.0 completeness work.
 

@@ -87,10 +87,10 @@ skeleton and interaction model.
 
 - [ ] **Data processing + Web backend + Web frontend:** Continue the application-domain framework
   established in `docs/application-domains.md` without adding one-off catalog/navigation structures.
-  - [ ] Add `/armies` as an overview surface with each Army's symbol, short maintained description,
-    and a link to Unit Explorer pre-filtered by the canonical Army identity. Do not add per-Army
-    detail pages without a separate player-facing use case.
-  - [ ] Normalize `/fireteams` to the shared landing/scoped contract: the unscoped page shows the
+  - [x] Add `/armies` as an overview surface with each Army's symbol, concise structural
+    description, and a link to Unit Explorer pre-filtered by the canonical Army identity. Do not add
+    per-Army detail pages without a separate player-facing use case.
+  - [x] Normalize `/fireteams` to the shared landing/scoped contract: the unscoped page shows the
     Army selector plus general Fireteam rules summary; selecting an Army hides that summary and
     shows the Army-scoped chart/reference content; clearing the selection returns to the landing
     state; scoped state remains URL-addressable/shareable.
@@ -218,11 +218,6 @@ by the audit remain in scope.
     resulting corrections into the remaining frontend-architecture or theming work.
 
 ### Frontend architecture and theming
-
-- [ ] Move the **General Fireteam rules** / Fireteam quick-reference material off the
-  Army-specific `/fireteams` chart browser onto a dedicated rules/reference page. Keep
-  the Army chart focused on Army-specific composition data and link clearly between the
-  two surfaces rather than duplicating the maintained Fireteam rule facts.
 
 - [ ] **Web frontend + Project infrastructure:** Add a user-facing **Changes** page backed by
   `docs/CHANGELOG.md`, which remains the canonical release-history source. Present current and
