@@ -229,13 +229,31 @@ by the audit remain in scope.
 
 ### Frontend architecture and theming
 
-- [ ] **Web frontend:** Audit existing browser tables against
-  `docs/web-design-guidelines.md` and consolidate them around shared semantic table
-  structures before making further isolated width fixes. Inventory each table family,
-  width policy, column roles, wrapping behavior, developer-mode behavior, and narrow-screen
-  strategy; then remove positional/duplicated CSS where a shared role can own the behavior.
-  Catalog lists should converge on one reusable family so title columns, compact metadata,
-  whitespace, and developer columns behave consistently across domains.
+- [x] **Web frontend:** Audit the current browser design against
+  `docs/web-design-guidelines.md`. The source-level baseline is recorded in
+  `docs/010-web-design-audit.md`; it covers shared surfaces and titlebars, catalog/list and
+  detail table families, controls, responsive behavior, Developer mode, accessibility,
+  tokens/theme readiness, CSS ownership, and regression-test coupling.
+- [ ] **Web frontend:** Refactor shared visual structures in the order established by the
+  0.10 design audit, preserving the current visual language while reducing independent
+  layout decisions.
+  - [ ] Separate visual `surface` containment from catalog/detail layout geometry, establish
+    a real table-viewport primitive, and make interactive-row behavior explicit.
+  - [ ] Converge Unit Explorer and catalog list tables on semantic primary, descriptor,
+    metric, and technical column roles; remove positional width rules and keep core geometry
+    stable when Developer mode changes.
+  - [ ] Converge reusable secondary table families (catalog usage, stat/profile, and
+    Fireteam/reference tables) while retaining deliberate domain-specific responsive modes.
+  - [ ] Consolidate recurring surface-titlebar/header structures and duplicated Settings
+    switches into shared primitives.
+  - [ ] Normalize generated-table accessibility semantics and responsive overflow/wrapping,
+    and update regression tests to assert semantic behavior instead of obsolete selector
+    geometry.
+  - [ ] Promote recurring hard-coded presentation colors into semantic tokens as affected
+    components are consolidated, keeping first-class Light/Dark theme implementation in its
+    dedicated task below.
+  - [ ] Complete a manual browser acceptance matrix across representative desktop, compact,
+    and narrow widths with Developer mode off/on before closing the refactor.
 
 - [ ] Move the **General Fireteam rules** / Fireteam quick-reference material off the
   Army-specific `/fireteams` chart browser onto a dedicated rules/reference page. Keep

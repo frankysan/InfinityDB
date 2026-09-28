@@ -13,19 +13,22 @@ Files tracked directly under `docs/` are maintained project records. They includ
 - authoritative reference documentation such as `architecture.md`, `data-model.md`,
   `web-design-guidelines.md`, `deployment.md`, and `testing.md`;
 - planning and release records such as `TODO.md`, `CHANGELOG.md`, and `releasing.md`;
-- durable release-specific audit or closeout records whose conclusions are useful after
-  the original working evidence has been discarded; and
+- durable audit or closeout records whose conclusions are useful after the original
+  working evidence has been discarded; and
 - maintained cross-release trackers such as `rules-interaction-checklist.md`.
 
 Release audit records describe the accepted state at a particular milestone. They do not
 override current authoritative reference documentation when the project later changes.
 Release-specific audit records should identify their release in both the filename and title.
-The current durable audit records are:
+A long-lived refactor may also keep a current tracked audit baseline when its findings guide
+ongoing work; that document should state its status explicitly and be closed or superseded
+when the work finishes. The current durable audit records are:
 
 - `070-enrichment-presentation-audit.md`;
 - `080-connected-domain-audit.md`;
-- `080-web-consistency-closeout.md`; and
-- `081-release-documentation-audit.md`.
+- `080-web-consistency-closeout.md`;
+- `081-release-documentation-audit.md`; and
+- `010-web-design-audit.md` (current 0.10 design-refactor baseline).
 
 ## Local audit workspace
 
