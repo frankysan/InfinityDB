@@ -2206,7 +2206,6 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 20px;
 }
 
 .numeric-range-label {
@@ -2241,21 +2240,28 @@ h2 {
   --range-start: 0%;
   --range-end: 100%;
   position: relative;
+  z-index: 1;
   isolation: isolate;
-  height: 58px;
+  box-sizing: border-box;
+  height: var(--control-height);
   min-width: 0;
+  overflow: visible;
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-default);
 }
 
 .range-slider-track {
   position: absolute;
   z-index: 1;
-  top: 18px;
-  right: 0;
-  left: 0;
+  top: 50%;
+  right: 10px;
+  left: 10px;
   height: 6px;
   border: 1px solid var(--color-border-default);
   border-radius: 999px;
   background: var(--color-surface-subtle);
+  transform: translateY(-50%);
 }
 
 .range-slider-selected {
@@ -2276,7 +2282,7 @@ h2 {
 .range-input {
   position: absolute;
   z-index: 3;
-  top: 10px;
+  top: 50%;
   left: 0;
   width: 100%;
   height: 22px;
@@ -2284,6 +2290,7 @@ h2 {
   padding: 0;
   appearance: none;
   background: transparent;
+  transform: translateY(-50%);
   pointer-events: none;
 }
 
@@ -2355,7 +2362,7 @@ h2 {
 
 .range-value-bubble {
   position: absolute;
-  z-index: 5;
+  z-index: 6;
   left: clamp(18px, var(--range-start), calc(100% - 18px));
   min-width: 32px;
   padding: 3px 7px;
@@ -2366,8 +2373,18 @@ h2 {
   font-size: var(--font-size-xs);
   line-height: 1.2;
   text-align: center;
+  opacity: 0;
+  visibility: hidden;
   transform: translateX(calc(-50% + var(--maintained-tooltip-shift-x, 0px)));
+  transition: opacity 120ms ease, visibility 120ms ease;
   pointer-events: none;
+}
+
+.double-range-slider.is-active .range-value-bubble,
+.double-range-slider:hover .range-value-bubble,
+.double-range-slider:focus-within .range-value-bubble {
+  opacity: 1;
+  visibility: visible;
 }
 
 .range-value-min {
@@ -2375,7 +2392,7 @@ h2 {
 }
 
 .range-value-max {
-  top: 36px;
+  top: 30px;
   left: clamp(18px, var(--range-end), calc(100% - 18px));
 }
 

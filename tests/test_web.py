@@ -1418,11 +1418,42 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert_css_rule(
         styles,
         ".double-range-slider",
-        {"isolation": "isolate", "height": "58px"},
+        {
+            "z-index": "1",
+            "isolation": "isolate",
+            "height": "var(--control-height)",
+            "overflow": "visible",
+            "border": "1px solid var(--color-control-border)",
+            "border-radius": "var(--radius-sm)",
+            "background": "var(--color-surface-default)",
+        },
     )
-    assert_css_rule(styles, ".range-slider-track", {"top": "18px"})
-    assert_css_rule(styles, ".range-input", {"top": "10px"})
-    assert_css_rule(styles, ".range-value-max", {"top": "36px"})
+    assert_css_rule(
+        styles,
+        ".range-slider-track",
+        {
+            "top": "50%",
+            "right": "10px",
+            "left": "10px",
+            "transform": "translateY(-50%)",
+        },
+    )
+    assert_css_rule(
+        styles,
+        ".range-input",
+        {"top": "50%", "transform": "translateY(-50%)"},
+    )
+    assert_css_rule(
+        styles,
+        ".range-value-bubble",
+        {"z-index": "6", "opacity": "0", "visibility": "hidden"},
+    )
+    assert_css_rule(styles, ".range-value-max", {"top": "30px"})
+    assert (
+        b".double-range-slider.is-active .range-value-bubble,"
+        b"\n.double-range-slider:hover .range-value-bubble,"
+        b"\n.double-range-slider:focus-within .range-value-bubble {"
+    ) in styles
     assert_css_rule(
         styles,
         ".range-slider-selected",

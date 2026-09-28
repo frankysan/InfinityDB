@@ -93,8 +93,9 @@ New or materially revised entries use the project-domain labels defined in
   text instead of producing dead links. Rules-owned Trait, State, Hacking Program, and
   rules-only Skill identities continue to link through their semantic IDs.
 - **Web frontend:** Tighten the Unit Explorer numeric-filter row by shortening exact-value
-  dropdown placeholders to **Any** and vertically aligning the dual-handle range tracks with
-  their neighboring exact-value controls.
+  dropdown placeholders to **Any**, aligning dual-handle range tracks with their neighboring
+  exact-value controls, and showing endpoint bubbles only while a range is active or being
+  interacted with so the controls remain compact without clipping their values.
 - **Web frontend:** Make numeric range filters visibly distinguish active constraints from their
   full-span defaults, add per-stat range reset controls, and keep each exact-value dropdown
   strictly mutually exclusive with its range slider.
