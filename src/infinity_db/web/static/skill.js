@@ -161,7 +161,7 @@ function structuredReferenceSection(reference) {
 
 function variantSection(variant, parameterSemantics) {
   const section = document.createElement("details");
-  section.className = "explorer army-profile";
+  section.className = "surface surface--clipped content-frame army-profile";
   const heading = document.createElement("summary");
   heading.className = "data-surface-header army-profile-title";
   const title = document.createElement("h2");

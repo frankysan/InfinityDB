@@ -237,7 +237,7 @@ by the audit remain in scope.
 - [ ] **Web frontend:** Refactor shared visual structures in the order established by the
   0.10 design audit, preserving the current visual language while reducing independent
   layout decisions.
-  - [ ] Separate visual `surface` containment from catalog/detail layout geometry.
+  - [x] Separate visual `surface` containment from catalog/detail layout geometry.
   - [x] Establish a shared table-viewport primitive and make interactive-row behavior
     explicit instead of inheriting hover/overflow behavior accidentally.
   - [x] Converge Unit Explorer and catalog list tables on semantic primary, descriptor,

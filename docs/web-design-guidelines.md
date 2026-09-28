@@ -68,7 +68,9 @@ Use these terms when discussing, documenting, or implementing the browser UI.
 
 - **Page shell** — the persistent shared navigation, header, footer, and page frame surrounding route-specific content.
 - **Main content** — the route-specific content area inside the page shell.
-- **Surface** — a visually grouped container for related content. A card is a kind of surface, but `surface` is the general design term.
+- **Surface** — a visually grouped container for related content. A card is a kind of surface, but `surface` is the general design term. A surface owns visual containment, not page width or overflow policy.
+- **Content frame** — a layout role for a bounded or intrinsic block of structured content. It may be combined with a surface, but owns geometry only: it does not draw the box or clip descendants.
+- **Clipped surface** — an explicit surface variant used when edge-to-edge child backgrounds must stay inside the surface boundary. Clipping is opt-in and must not substitute for a table viewport or responsive overflow policy.
 - **Surface header / titlebar** — the heading area owned by a surface. Record-wide classification, actions, and compact metadata may live here when they describe the whole surface rather than one row.
 - **Detail group** — a reusable grouping of related fields or subsections within a detail page.
 - **Catalog surface** — the complete reusable structure for browsing one catalog: title/context, controls or filters, result state, and catalog table/list.
@@ -120,6 +122,8 @@ If several page-specific rules converge on the same behavior, replace them with 
 ## Surface and information hierarchy
 
 Surfaces should group information that belongs together and establish a clear reading order. Nesting is acceptable when it communicates real hierarchy, but repeated borders, backgrounds, or padding should not create unnecessary visual boxes.
+
+Visual containment and layout geometry must remain separate responsibilities. A surface decides how a grouped region is drawn; a content frame or owning page/component decides whether that region is intrinsic, bounded, full-width, or otherwise constrained. Neither role should silently own unrelated overflow behavior. When visual edge containment genuinely requires clipping, use an explicit clipped-surface variant; data overflow still belongs to the structure that owns the data, such as a table viewport.
 
 Surface headers should contain information that applies to the whole surface. For example, a record-wide type/classification belongs naturally with the record title when it does not vary by row. Row-specific values belong in the table or detail structure that owns those rows.
 

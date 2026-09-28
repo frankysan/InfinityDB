@@ -167,7 +167,7 @@ function renderProfileNotationHelp(items) {
   if (!items.length) return null;
   const disclosure = document.createElement("details");
   disclosure.id = "profile-notation-help";
-  disclosure.className = "explorer profile-notation-help";
+  disclosure.className = "surface surface--clipped content-frame profile-notation-help";
 
   const summary = document.createElement("summary");
   const title = document.createElement("span");
@@ -883,7 +883,7 @@ function renderSourceNotes(unit, armies) {
   section.append(title);
 
   const surface = document.createElement("div");
-  surface.className = "explorer connected-unit-surface source-notes-surface";
+  surface.className = "surface surface--clipped content-frame connected-unit-surface source-notes-surface";
   const intro = document.createElement("p");
   intro.className = "army-relationship-intro developer-only";
   intro.textContent = "Each note applies only to its named source variant and Army context; "
@@ -935,7 +935,7 @@ function renderArmyRelationships(unit, armies) {
   section.append(title);
 
   const surface = document.createElement("div");
-  surface.className = "explorer connected-unit-surface army-relationship-surface";
+  surface.className = "surface surface--clipped content-frame connected-unit-surface army-relationship-surface";
   const intro = document.createElement("p");
   intro.className = "army-relationship-intro";
   intro.textContent = "Army availability is shown in the profile sections below. These links show "
@@ -1024,7 +1024,7 @@ function renderSelectionRelationships(unit, armies) {
   section.append(title);
 
   const surface = document.createElement("div");
-  surface.className = "explorer connected-unit-surface selection-relationship-surface";
+  surface.className = "surface surface--clipped content-frame connected-unit-surface selection-relationship-surface";
   const intro = document.createElement("p");
   intro.className = "selection-relationship-intro";
   intro.textContent = "These source-defined relationships explain linked choices only; "
@@ -1119,7 +1119,7 @@ function renderPeripheralRelationships(unit) {
   section.append(title);
 
   const surface = document.createElement("div");
-  surface.className = "explorer connected-unit-surface";
+  surface.className = "surface surface--clipped content-frame connected-unit-surface";
   if (typeIds.length) {
     const type = document.createElement("p");
     type.className = "connected-unit-type";
@@ -1440,7 +1440,7 @@ function compositeOptionTable(options, anchorScope) {
 function renderArmyProfile(army, generalByName, expanded) {
   const section = document.createElement("details");
   const anchorScope = [army.id, ...(army.availability_flags || [])].join("-");
-  section.className = "explorer army-profile";
+  section.className = "surface surface--clipped content-frame army-profile";
   section.open = expanded;
   const armyHeading = document.createElement("summary");
   armyHeading.className = "data-surface-header army-profile-title";
@@ -1549,7 +1549,7 @@ function render(unit, helpItems = []) {
   generalProfilesSection.append(generalHeading);
   for (const profile of displayedGeneralProfiles) {
     const generalProfile = document.createElement("section");
-    generalProfile.className = "explorer general-profile";
+    generalProfile.className = "surface content-frame general-profile";
     const profileSymbols = generalProfileSymbols(profile);
     generalProfile.append(profileTitle(profile, profileSymbols), table(
       [],

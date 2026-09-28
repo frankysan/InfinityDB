@@ -42,8 +42,15 @@ family without redesigning its appearance:
 - catalog group-row spans derive from the active header shape instead of a page-name special
   case.
 
-The remaining work is intentionally broader: separate surface containment from layout geometry,
-converge the secondary table families, consolidate titlebars and controls, normalize generated
+Surface containment and intrinsic content geometry are now separate shared primitives: `.surface`
+owns the visual box while `.content-frame` owns bounded/intrinsic width, and the old overloaded
+`.explorer` primitive no longer clips descendants or doubles as a surface. Static catalog, search,
+and Fireteam containers and generated Unit/catalog detail cards now compose those roles explicitly;
+legacy edge clipping is retained only through an explicit `.surface--clipped` variant where the old
+container actually clipped content.
+
+The remaining work is intentionally broader: converge the secondary table families, consolidate
+titlebars and controls, normalize generated
 accessibility/responsive behavior, rationalize affected presentation tokens, and complete the
 manual browser matrix.
 
@@ -107,30 +114,25 @@ These are foundations to keep while the component structure is simplified.
 
 ## Structural mismatches
 
-### Surface and layout responsibilities are mixed
+### Surface and layout responsibilities were mixed
 
-`.surface` and `.explorer` share the same border, background, radius, and shadow, but
-`.explorer` additionally owns `width: fit-content`, `max-width: 100%`, and
-`overflow: hidden`. The code then uses `.explorer` for several different concepts:
+The baseline implementation made `.surface` and `.explorer` both draw the same box while
+`.explorer` also owned intrinsic width and descendant clipping. That ambiguity is now removed:
+`.surface` owns visual containment and `.content-frame` owns bounded/intrinsic geometry. The
+former generic `.explorer` primitive has been retired, and overflow is no longer hidden as a
+side effect of choosing that layout role. Existing edge containment is expressed explicitly through
+`.surface--clipped` instead.
 
-- catalog containers;
-- Unit detail/profile containers;
-- collapsible usage sections;
-- connected-data sections; and
-- notation/help surfaces.
+Static catalog/search/Fireteam containers and generated Unit/catalog detail cards explicitly
+compose `surface` and `content-frame` when they need both roles. Domain-specific classes such
+as `.fireteam-explorer` remain free to define meaningful page geometry without also redrawing
+the common surface.
 
-Some generated weapon/detail cards use both `explorer surface`, which is a clear sign that
-the two abstractions do not have distinct ownership in the markup.
-
-**Target:** `surface` should own visual containment; catalog/detail/layout structures should
-own geometry. An element should not need two classes that both mean "draw the box", and a
-visual surface primitive should not silently decide that all descendants must be clipped.
-
-Several specialized containers also restate surface-like border/background/shadow behavior,
-including landing links, rules-reference sections, profile notation help, and Fireteam cards
-or summaries. Not every one must become the same component, but each should be classified as
-a real surface variant or a genuinely different structure rather than maintaining accidental
-parallel implementations.
+**Remaining:** several specialized containers still restate surface-like
+border/background/shadow behavior, including landing links, rules-reference sections, profile
+notation help, and Fireteam cards or summaries. Not every one must become the same component,
+but each should be classified as a real surface variant or a genuinely different structure
+rather than maintaining accidental parallel implementations.
 
 ### Header vocabulary has not yet converged in implementation
 

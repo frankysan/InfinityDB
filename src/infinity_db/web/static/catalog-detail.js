@@ -75,7 +75,7 @@ function weaponTraitLinks(traits) {
 
 function traitDescription(description) {
   const section = document.createElement("section");
-  section.className = "explorer surface";
+  section.className = "surface surface--clipped content-frame";
   const heading = document.createElement("h2");
   heading.className = "data-surface-header";
   heading.textContent = "Rules summary";
@@ -105,7 +105,7 @@ function rangeBandLabel(maximum) {
 
 function specialWeaponProfile(profile) {
   const card = document.createElement("section");
-  card.className = "explorer surface weapon-profile special-weapon-profile";
+  card.className = "surface surface--clipped content-frame weapon-profile special-weapon-profile";
   const title = document.createElement("h4");
   title.className = "data-surface-header";
   title.textContent = "Armed Turret profile";
@@ -156,7 +156,7 @@ function weaponVariants(variants) {
 
     for (const profile of variant.profiles) {
       const card = document.createElement("section");
-      card.className = "explorer surface weapon-profile";
+      card.className = "surface surface--clipped content-frame weapon-profile";
       const profileTitle = profile.mode || profile.name || variant.name;
       const title = document.createElement("h4");
       title.className = "data-surface-header";
@@ -246,7 +246,7 @@ function usageSections(item) {
     .sort((a, b) => label(item, a).localeCompare(label(item, b), undefined, { numeric: true }))
     .map((variant) => {
       const section = document.createElement("details");
-      section.className = "explorer army-profile";
+      section.className = "surface surface--clipped content-frame army-profile";
       const summary = document.createElement("summary");
       summary.className = "data-surface-header army-profile-title";
       const title = document.createElement("h2");

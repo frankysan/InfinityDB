@@ -2491,9 +2491,21 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert status == 200
     assert_css_rule(
         styles,
-        ".surface, .explorer",
+        ".surface",
         {"background": "var(--color-surface-default)"},
     )
+    assert_css_rule(
+        styles,
+        ".content-frame",
+        {"width": "fit-content", "max-width": "100%"},
+    )
+    assert_css_rule(styles, ".surface--clipped", {"overflow": "hidden"})
+
+    for path in ["/units", "/skills", "/fireteams"]:
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b'class="surface surface--clipped content-frame' in body
+
     assert_css_rule(
         styles,
         ".surface--subtle",
@@ -2520,7 +2532,10 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
 
     status, _, weapon_detail = request(app, "/static/catalog-detail.js")
     assert status == 200
-    assert b'card.className = "explorer surface weapon-profile"' in weapon_detail
+    assert (
+        b'card.className = "surface surface--clipped content-frame weapon-profile"'
+        in weapon_detail
+    )
     assert b"const profileTitle = profile.mode || profile.name || variant.name;" in weapon_detail
     assert b"<th>Ammunition</th><th>B</th><th>PS</th><th>Saving</th>" in weapon_detail
     assert b'["PS", profile.damage]' in weapon_detail
@@ -2568,7 +2583,7 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
 
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
-    assert b'generalProfile.className = "explorer general-profile"' in body
+    assert b'generalProfile.className = "surface content-frame general-profile"' in body
     assert_css_rule(
         styles,
         ".unit-detail .general-profile .profile-title",
