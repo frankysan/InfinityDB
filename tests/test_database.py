@@ -6,6 +6,7 @@ import os
 import sqlite3
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -4029,3 +4030,32 @@ def test_skill_catalog_attaches_common_rule_to_same_named_army_skill(
     assert next(item for item in catalog.list_skills() if item["id"] == 24)[
         "category"
     ] == "Common Skills"
+
+
+def test_skill_catalog_caches_composed_skill_records(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    normalized["tables"]["skills"].append(
+        {"id": 24, "name": "Climb", "source_defined": True}
+    )
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules = RulesDatabase(rules_path)
+    original = rules.composed_records_by_kind
+    calls = 0
+
+    def composed_records_by_kind(kind: str) -> list[dict[str, Any]]:
+        nonlocal calls
+        calls += 1
+        return original(kind)
+
+    monkeypatch.setattr(rules, "composed_records_by_kind", composed_records_by_kind)
+    catalog = SkillCatalog(Database(database_path), rules)
+
+    catalog.list_skills()
+    assert catalog.get_skill(24) is not None
+    assert catalog.get_skill(24) is not None
+    assert calls == 1

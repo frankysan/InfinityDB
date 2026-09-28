@@ -51,6 +51,17 @@ class SkillCatalog:
         self._source_variant_index: dict[ArmyLinkRef, dict[str, Any]] | None = None
         self._training_index: dict[str, dict[str, Any]] | None = None
         self._excluded_rules_catalog_ids: set[int] | None = None
+        self._skill_records_cache: list[dict[str, Any]] | None = None
+
+    def _skill_records(self) -> list[dict[str, Any]]:
+        """Return composed Skill rules, cached for this immutable catalog view."""
+        if self._skill_records_cache is None:
+            self._skill_records_cache = (
+                []
+                if self.rules_database is None
+                else self.rules_database.composed_records_by_kind("skill")
+            )
+        return self._skill_records_cache
 
     def _rules_catalog_excluded_source_ids(self) -> set[int]:
         """Return Army skill-like application identities excluded from rules Skills."""
@@ -261,7 +272,7 @@ class SkillCatalog:
         ]
         definition_records: list[dict[str, Any]] = []
         if self.rules_database is not None:
-            for record in self.rules_database.composed_records_by_kind("skill"):
+            for record in self._skill_records():
                 if (record.get("variant_semantics") or {}).get("inheritance") == "source":
                     continue
                 if record.get("facts", {}).get("category") not in {
@@ -366,10 +377,10 @@ class SkillCatalog:
                         "use_count": 0,
                         "category": _skill_category(record),
                         "categories": self._categories_for_record(record),
-                        "rules": [record],
+                        "rules": [deepcopy(record)],
                         "variants": [],
                     }
-                    for record in self.rules_database.composed_records_by_kind("skill")
+                    for record in self._skill_records()
                     if record["id"] == record_id
                     and record.get("facts", {}).get("category")
                     in {"common-skill", "special-skill"}
@@ -430,7 +441,7 @@ class SkillCatalog:
             common_rule = next(
                 (
                     record
-                    for record in rules_database.composed_records_by_kind("skill")
+                    for record in self._skill_records()
                     if record.get("facts", {}).get("category") == "common-skill"
                     and (record.get("variant_semantics") or {}).get("inheritance")
                     != "source"
@@ -440,7 +451,7 @@ class SkillCatalog:
                 None,
             )
             if common_rule is not None:
-                family_rules.setdefault(common_rule["id"], common_rule)
+                family_rules.setdefault(common_rule["id"], deepcopy(common_rule))
 
             if family_rules:
                 result["rules"] = list(family_rules.values())

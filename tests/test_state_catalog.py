@@ -1,4 +1,7 @@
 from pathlib import Path
+from typing import Any
+
+import pytest
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import RulesDatabase, export_rules_database
@@ -63,6 +66,38 @@ def test_state_catalog_exposes_reviewed_states_and_reverse_relations(tmp_path: P
     assert ("enters-state", "inbound", "skill:suppressive-fire") in suppressive_relations
     assert ("cancels-state", "inbound", "state:dead") in suppressive_relations
     assert ("cancels-state", "inbound", "state:retreat") in suppressive_relations
+
+
+def test_state_catalog_caches_composed_records_and_isolates_detail_results(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules = RulesDatabase(rules_path)
+    original = rules.composed_records_by_kind
+    calls = 0
+
+    def composed_records_by_kind(kind: str) -> list[dict[str, Any]]:
+        nonlocal calls
+        calls += 1
+        return original(kind)
+
+    monkeypatch.setattr(rules, "composed_records_by_kind", composed_records_by_kind)
+    catalog = StateCatalog(rules)
+
+    catalog.list_states()
+    first = catalog.get_state("unconscious")
+    second = catalog.get_state("unconscious")
+
+    assert calls == 1
+    assert first is not None
+    assert second is not None
+    first["rules"][0]["name"] = "mutated"
+    assert second["rules"][0]["name"] == "Unconscious State"
+    third = catalog.get_state("unconscious")
+    assert third is not None
+    assert third["rules"][0]["name"] == "Unconscious State"
 
 
 def test_state_catalog_without_rules_is_empty() -> None:

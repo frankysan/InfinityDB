@@ -109,6 +109,14 @@ template into each test's temporary directory before creating the application.
 This preserves mutation isolation while avoiding a full normalize/export cycle
 for every web test.
 
+Rules-backed Skill and State catalogs cache their composed current records for the
+lifetime of each catalog instance. The underlying runtime rules database is immutable,
+so repeated lookups do not need to rerun the same composition queries. Detail surfaces
+still copy cached records before returning them, preserving caller mutation isolation.
+In the 2026-09-28 serial Linux benchmark, this reduced
+`tests/test_audit_enrichment_coverage.py` from 14.57 seconds to 2.54 seconds.
+Treat the timing as diagnostic evidence rather than a test threshold.
+
 ### SQLite finalization in semantic tests
 
 The production Army and rules exporters canonicalize generated SQLite artifacts by
