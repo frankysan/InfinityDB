@@ -20,12 +20,18 @@ from infinity_army_data.merge import make_source, merge_sources
 from infinity_army_data.normalize import normalize_master
 from infinity_db import __display_version__, __version__
 from infinity_db.army_overview import army_overview_out_of_catalog
+from infinity_db.army_overview_copy import (
+    ArmyOverviewCopyError,
+    load_army_overview_copy,
+    parse_army_overview_copy,
+)
 from infinity_db.curated import load_curated_directory
-from infinity_db.database import export_database
+from infinity_db.database import Database, export_database
 from infinity_db.database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
 )
+from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.rules_database import export_rules_database
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.web import create_app
@@ -289,6 +295,34 @@ def test_internal_health_and_metrics_do_not_instrument_themselves(app: Callable)
     assert after == before
 
 
+def test_curated_army_overview_copy_covers_tracked_player_facing_armies() -> None:
+    summaries = load_army_overview_copy()
+    database = Database(Path("data/generated/infinity.db"))
+    current = {
+        database.application_slug("armies", item["id"]) or item["slug"]
+        for item in database.list_armies()
+        if item["role"] != "grouping"
+    }
+    legacy = {army.slug for army in load_legacy_armies()}
+
+    assert set(summaries) == current | legacy
+    assert len(summaries) == 58
+
+
+def test_curated_army_overview_copy_rejects_duplicate_slugs() -> None:
+    document = {
+        "format": "InfinityDB curated Army overview copy",
+        "formatVersion": 1,
+        "armies": [
+            {"slug": "test-army", "summary": "First summary."},
+            {"slug": "test-army", "summary": "Second summary."},
+        ],
+    }
+
+    with pytest.raises(ArmyOverviewCopyError, match="duplicated"):
+        parse_army_overview_copy(document)
+
+
 def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     status, headers, body = request(app, "/api/armies")
     assert status == 200
@@ -300,7 +334,9 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert armies[101]["public_slug"] == "zulu-company"
     assert armies[101]["name"]
     assert armies[101]["kind"] == "army"
-    assert armies[101]["overview_description"]
+    assert armies[101]["overview_description"] == (
+        "Browse the current Zulu Company roster in Unit Explorer."
+    )
     assert armies[101]["overview_group"] == {"id": 101, "name": "Zulu Company"}
     assert armies[198]["kind"] == "reinforcement"
     assert armies[198]["overview_description"]
@@ -308,6 +344,7 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert {armies[army_id]["unit_count"] for army_id in (101, 198, 201)} == {1, 2, 4}
     assert armies[906]["name"] == "Spiral Corps"
     assert armies[906]["legacy"] is True
+    assert armies[906]["overview_description"].startswith("A legacy Tohaa-linked mercenary force")
     assert armies[906]["playable"] is False
     assert armies[906]["overview_group"] == {"id": 901, "name": "Non-Aligned Armies"}
     assert armies[907]["name"] == "Foreign Company"
@@ -321,6 +358,9 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"Army lists" in body
+    assert b"Main armies and Sectorials" in body
+    assert b"Generic Army Lists" in body
+    assert b'richer <a href="/fireteams">Fireteam</a> charts' in body
     assert b'/static/armies.js?v=' in body
     assert b'href="/armies" aria-current="page"' in body
 
@@ -330,6 +370,7 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b'from "./unit-symbols.js"' in script
     assert b"getArmies" in script
     assert b"army.overview_description" in script
+    assert b'if (army.role === "main") return "Main army";' in script
     assert b"staticSymbolPath(army.symbol_path)" in script
     assert b"new URLSearchParams({ army_id: armyValue(army) })" in script
     assert b"army.overview_group" in script

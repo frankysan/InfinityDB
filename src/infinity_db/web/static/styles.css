@@ -4527,6 +4527,19 @@ html[data-distance-unit="in"] .unit-extended-statline {
   width: min(1040px, 100%);
 }
 
+.army-overview-guide {
+  padding: 0 24px 20px;
+}
+
+.army-overview-guide h3 {
+  margin: 0 0 6px;
+}
+
+.army-overview-guide p {
+  margin: 0;
+  max-width: 76ch;
+}
+
 .army-overview-groups {
   display: grid;
   gap: 28px;
@@ -4814,6 +4827,10 @@ html[data-developer-mode="true"] .fireteam-member-table table {
 }
 
 @media (max-width: 600px) {
+  .army-overview-guide {
+    padding: 0 16px 16px;
+  }
+
   .army-overview-groups {
     padding: 16px;
   }

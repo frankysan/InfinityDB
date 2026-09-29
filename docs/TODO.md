@@ -167,15 +167,14 @@ tagging the release and remains part of the 0.9 gate. Broader hardening still be
 - [x] **Web frontend:** Increase Army symbols on `/armies`.
 - [x] **Web frontend:** Normalize `/armies` card heading geometry so symbols, Army-type labels, and
   Army names stay aligned when names wrap to multiple lines.
-- [ ] **Data processing + Web frontend:** Replace structural `/armies` descriptions with concise,
-  mostly gameplay-focused summaries of what distinguishes each Army. Use Human Sphere's main-
-  faction/Army pages as secondary inspiration, verify against current Infinity sources where
-  practical, and keep the copy original and short.
-- [ ] **Documentation + Web frontend:** Add a concise player-facing explanation of main armies
-  versus Sectorials: main armies generally offer a broader roster, while Sectorials are more
-  focused/specialized and generally gain broader Fireteam access. Verify the wording against the
-  current rulebook/wiki before publication and state it as project guidance where the official
-  sources do not define the distinction explicitly.
+- [x] **Data processing + Web frontend:** Replace structural `/armies` descriptions with concise,
+  mostly gameplay-focused summaries of what distinguishes each Army. The summaries are maintained
+  as validated editorial copy keyed by public Army slug, informed by current Army/rules data and
+  secondary faction background without becoming game semantics.
+- [x] **Documentation + Web frontend:** Explain main armies versus Sectorials on `/armies`. The UI
+  identifies main armies with the rules' **Generic Army List** terminology, summarizes the official
+  roster/AVA distinction, and presents richer Sectorial Fireteam charts as an observation of the
+  current N5 Army data rather than a universal rules guarantee.
 - [ ] **Web frontend + Web backend:** Replace verbose share-state query strings with a single
   versioned URL token that serializes all supported page options into one compact value. Evaluate
   deterministic compression/encoding (for example base64url over compact structured state) against

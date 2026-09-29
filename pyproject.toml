@@ -55,6 +55,7 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 ]
 "share/infinity-db/data/curated/identities" = [
   "data/curated/identities/army-display.json",
+  "data/curated/identities/army-overview.json",
   "data/curated/identities/legacy-armies.json",
 ]
 "share/infinity-db/data/curated/peripherals" = [

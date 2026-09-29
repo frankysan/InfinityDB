@@ -276,6 +276,10 @@ and serves a read-only browser and same-origin HTTP API.
   not promote them into `application_armies` or Unit Explorer selectability. Their
   ignored `image_overrides/factions` SVGs enter the normal symbol pipeline through
   curated authoritative faction-logo references.
+- `/armies` gameplay summaries are maintained editorial copy in
+  `data/curated/identities/army-overview.json`, keyed by public Army slug. They are presentation
+  guidance synthesized from current Army/rules data with secondary background references; they
+  must not be used as rules, legality, identity, or availability input.
 - Rules semantics refine the `reinforcement` application role: the linked
   identity represents a faction-shared Reinforcement Section/pool attached to an
   ordinary Army List, not a standalone legal Army. For reinforcement rows,

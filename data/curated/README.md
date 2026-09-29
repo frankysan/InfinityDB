@@ -12,6 +12,9 @@ provenance under `data/manifests/`.
 - `rules/` contains validated rules-reference collections consumed by `infinity-db build-rules`.
 - `identities/` contains reviewed source-derived presentation and historical identity
   relationships consumed by the Army build/runtime surfaces that own them.
+  `army-overview.json` contains short editorial gameplay summaries keyed by public Army slug;
+  the copy is synthesized from current Army/rules data with external faction background used only
+  as secondary context, and is kept separate from source-derived identity semantics.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship
   endpoints that cannot be resolved from the current Army snapshot alone.

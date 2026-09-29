@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any, TypedDict
 
 
@@ -59,8 +60,13 @@ def army_overview_description(
     army: dict[str, Any],
     *,
     armies_by_id: dict[int, dict[str, Any]],
+    summaries: Mapping[str, str] | None = None,
 ) -> str:
-    """Return concise structural overview copy without inventing Army lore."""
+    """Return maintained Army summary copy, with a structural fallback."""
+
+    slug = str(army.get("public_slug") or army.get("slug") or "")
+    if summaries is not None and (summary := summaries.get(slug)):
+        return summary
 
     name = str(army.get("name") or "This Army")
     role = army.get("role")

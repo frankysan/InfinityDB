@@ -26,7 +26,7 @@ function armyValue(army) {
 }
 
 function roleLabel(army) {
-  if (army.role === "main") return "Main faction";
+  if (army.role === "main") return "Main army";
   if (army.role === "sectorial") return "Sectorial";
   if (army.role === "non_aligned") return "Non-Aligned Army";
   if (army.role === "reinforcement") return "Reinforcements";

@@ -247,6 +247,10 @@ sharing the same Reinforcement Section does not make the section globally out of
 catalog. Historical source identities 906 (Spiral Corps) and 907 (Foreign
 Company) are maintained as curated reference-only overview entries. They are not
 promoted into `application_armies`, selectable filters, or N5 playability.
+Player-facing Army gameplay summaries are maintained separately in
+`data/curated/identities/army-overview.json` and joined by public Army slug at API presentation
+time. This editorial copy is not persisted as canonical Army data and does not affect rules,
+availability, grouping, playability, or catalog status.
 
 ### Current logical-unit materialization
 

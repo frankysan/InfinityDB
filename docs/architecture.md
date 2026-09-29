@@ -263,7 +263,9 @@ independently modeled supporting identities remain separate review identities.
 historical identity relationships. `army-display.json` is consumed during Army
 normalization; `legacy-armies.json` is a separate player-facing historical-reference
 contract consumed by the Army overview and symbol discovery without making those
-identities selectable. `data/curated/peripherals/` owns
+identities selectable. `army-overview.json` is a separate validated editorial-copy contract
+keyed by public Army slug; it may describe gameplay focus but does not become Army identity,
+availability, legality, or rules semantics. `data/curated/peripherals/` owns
 the independent reviewed mapping from Army-local Peripheral definitions and Unit-backed
 Peripheral occurrences to canonical application identities. It is consumed during Army
 database export when its pinned snapshot provenance matches the normalized source; the

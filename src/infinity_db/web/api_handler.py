@@ -15,6 +15,7 @@ from infinity_db.army_overview import (
     army_overview_group,
     army_overview_out_of_catalog,
 )
+from infinity_db.army_overview_copy import load_army_overview_copy
 from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
@@ -282,6 +283,7 @@ class ApiHandler:
         self.catalog_rules = CatalogRules(rules_database)
         self.symbol_catalog = SymbolCatalog()
         self.legacy_armies = load_legacy_armies()
+        self.army_overview_summaries = load_army_overview_copy()
         self.fireteam_rules_reference = fireteam_reference(rules_database)
         if self.fireteam_rules_reference is not None:
             self.fireteam_rules_reference = enrich_maintained_text_references(
@@ -704,7 +706,9 @@ class ApiHandler:
                         item, armies_by_id=armies_by_id
                     )
                     item["overview_description"] = army_overview_description(
-                        item, armies_by_id=armies_by_id
+                        item,
+                        armies_by_id=armies_by_id,
+                        summaries=self.army_overview_summaries,
                     )
                 payload = enrich_army_references(self.database, {"items": items})
                 self.symbol_catalog.enrich_armies(payload["items"])

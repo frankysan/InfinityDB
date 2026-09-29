@@ -9,6 +9,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Data processing + Web frontend:** Make the **Armies** overview more useful for choosing a
+  force. Each current and legacy Army now has a short gameplay-focused summary, and the page
+  explains how broad main/Generic Army Lists differ from focused Sectorials, including the current
+  pattern of richer Sectorial Fireteam charts.
 - **Web frontend:** Polish pre-release navigation and Army presentation. Rules cards now place Labels
   before Skill/declaration categories, the desktop sidebar compresses vertical spacing on shorter
   displays, `/armies` uses larger consistently aligned symbols/headings, and Unit Explorer remembers
