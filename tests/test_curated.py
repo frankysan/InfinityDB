@@ -232,6 +232,34 @@ def test_training_requires_reviewed_order_type(tmp_path: Path, facts: dict) -> N
         load_curated_document(path)
 
 
+def test_term_requires_scoped_embedded_vocabulary_facts(tmp_path: Path) -> None:
+    document = valid_document()
+    term = document["records"][0]
+    term.update(
+        id="term:marker",
+        kind="term",
+        name="Marker",
+        facts={"scope": "game-element"},
+    )
+    term.pop("labelIds")
+    path = tmp_path / "term.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    assert load_curated_document(path)["records"][0]["facts"] == {
+        "scope": "game-element"
+    }
+
+    term["facts"] = {}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="term 'facts'.*scope"):
+        load_curated_document(path)
+
+    term["facts"] = {"scope": "Game Element"}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="facts.scope"):
+        load_curated_document(path)
+
+
 def test_training_cannot_masquerade_as_army_skill(tmp_path: Path) -> None:
     document = valid_document()
     training = document["records"][0]
@@ -569,6 +597,19 @@ def test_checked_in_n5_collection_is_valid() -> None:
         "faqs",
     }
     records = {record["id"]: record for record in document["records"]}
+    profile_help = records["rule:profile-help:troop-type"]
+    assert profile_help["facts"] == {
+        "category": "unit-profile-help",
+        "key": "troop-type",
+        "order": 40,
+    }
+    assert profile_help["citations"] == [
+        {
+            "sourceId": "n5-core-v5.3-pdf",
+            "page": 8,
+            "section": "Trooper Characteristics",
+        }
+    ]
     assert records["state:camouflaged"]["kind"] == "state"
     assert records["state:camouflaged"]["labelIds"] == ["marker"]
     assert records["state:camouflaged"]["review"]["status"] == "reviewed"
@@ -1185,15 +1226,15 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
 
     martial_arts = records["skill:martial-arts"]["facts"]
     assert "Silhouette contact" in martial_arts["requirements"][0]
-    assert "declare CC Attack" in martial_arts["requirements"][0]
+    assert "declare [[skill:cc-attack]]" in martial_arts["requirements"][0]
 
     strategos = records["skill:strategos"]["facts"]
-    assert strategos["requirements"] == ["The user must be the army's Lieutenant."]
+    assert strategos["requirements"] == ["The user must be the army's [[skill:lieutenant]]."]
     assert "Order Count" in strategos["effects"][0]
 
     super_jump = records["skill:super-jump"]["facts"]
     assert "Basic Short Skill" in super_jump["effects"][0]
-    assert "plus 4 inches" in super_jump["effects"][1]
+    assert "plus [[distance:4:inch]]" in super_jump["effects"][1]
 
 
 def test_checked_in_n5_collection_models_combat_reaction_skill_slice() -> None:
@@ -1387,7 +1428,7 @@ def test_checked_in_n5_collection_models_hacker_core_skill() -> None:
     assert hacker["labelIds"] == ["obligatory"]
     assert hacker["armyLinks"] == [{"entity": "skill", "id": "hacker"}]
     effects = " ".join(hacker["facts"]["effects"])
-    assert "Hacking Device" in effects
+    assert "[[equipment:hacking-device]]" in effects
     assert "Upgrade Programs" in effects
     assert "Null State" in effects
     assert hacker["relations"] == [
@@ -1455,7 +1496,7 @@ def test_checked_in_n5_collection_keeps_new_common_skill_facts_source_faithful()
 
     look_out = records["skill:look-out"]["facts"]
     assert "LoF" in look_out["requirements"][0]
-    assert "Dodge (PH-3)" in look_out["effects"][0]
+    assert "[[skill:dodge]] (PH-3)" in look_out["effects"][0]
 
     speedball = records["skill:request-speedball"]["facts"]
     assert speedball["requirements"] == ["The player must have two Speedball Tokens."]
@@ -1715,5 +1756,5 @@ def test_checked_in_n5_collection_models_fireteam_general_reference() -> None:
     levels = records["rule:fireteam-level-bonuses"]["facts"]
     assert levels["cumulative"] is True
     assert [item["level"] for item in levels["levels"]] == [1, 2, 3, 4, 5]
-    assert levels["levels"][1]["bonuses"] == ["BS Attack (+1 SD)"]
-    assert levels["levels"][4]["bonuses"] == ["Sixth Sense"]
+    assert levels["levels"][1]["bonuses"] == ["[[skill:bs-attack]] (+1 SD)"]
+    assert levels["levels"][4]["bonuses"] == ["[[skill:sixth-sense]]"]

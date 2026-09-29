@@ -3,6 +3,7 @@ const DISTANCE_UNIT_KEY = "infinity-db-distance-unit";
 const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";
 const DISABLE_CACHE_KEY = "infinity-db-disable-cache";
 const FIRETEAMS_INCLUDE_WILDCARDS_KEY = "infinity-db-fireteams-include-wildcards";
+const UNIT_ADVANCED_FILTERS_KEY = "infinity-db-unit-advanced-filters";
 const OPTIONAL_UNIT_SETTINGS = [
   { id: "mercs-filter", key: "infinity-db-mercs", defaultChecked: true },
   { id: "specops-filter", key: "infinity-db-specops", defaultChecked: true },
@@ -162,10 +163,26 @@ export function initializeOptionalUnitToggles() {
   }
 }
 
+export function optionalUnitDefaultFilters() {
+  return Object.fromEntries(OPTIONAL_UNIT_SETTINGS.map(({ key, defaultChecked }) => [
+    key.replace("infinity-db-", ""), defaultChecked,
+  ]));
+}
+
 export function optionalUnitFilters() {
   return Object.fromEntries(OPTIONAL_UNIT_SETTINGS.map(({ id, key, defaultChecked }) => [
     key.replace("infinity-db-", ""), document.getElementById(id)?.checked ?? defaultChecked,
   ]));
+}
+
+
+export function unitAdvancedFiltersOpen() {
+  const saved = savedSetting(UNIT_ADVANCED_FILTERS_KEY);
+  return saved === undefined ? null : saved === "true";
+}
+
+export function saveUnitAdvancedFiltersOpen(open) {
+  saveSetting(UNIT_ADVANCED_FILTERS_KEY, String(Boolean(open)));
 }
 
 export function fireteamsIncludeWildcards() {
@@ -200,6 +217,7 @@ export function initializeRememberSettingsToggle() {
       removeCookie(DEVELOPER_MODE_KEY);
       removeCookie(DISABLE_CACHE_KEY);
       removeCookie(FIRETEAMS_INCLUDE_WILDCARDS_KEY);
+      removeCookie(UNIT_ADVANCED_FILTERS_KEY);
       OPTIONAL_UNIT_SETTINGS.forEach(({ key }) => removeCookie(key));
       return;
     }
@@ -222,6 +240,8 @@ export function initializeRememberSettingsToggle() {
       FIRETEAMS_INCLUDE_WILDCARDS_KEY,
       String(document.getElementById("fireteams-include-wildcards-toggle")?.checked ?? true),
     );
+    const advancedFilters = document.querySelector(".advanced-filters");
+    if (advancedFilters) setCookie(UNIT_ADVANCED_FILTERS_KEY, String(advancedFilters.open));
     OPTIONAL_UNIT_SETTINGS.forEach(({ id, key, defaultChecked }) => {
       setCookie(key, String(document.getElementById(id)?.checked ?? defaultChecked));
     });

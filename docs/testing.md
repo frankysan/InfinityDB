@@ -2,277 +2,216 @@
 
 **Project domain:** Project infrastructure
 
-InfinityDB provides `tools/run_checks.py` as the standard local entry point for
-Python tests, Ruff linting, Pyright type checking, Army data-build validation,
-and curated rules-database validation. The runner only
-orchestrates the existing authoritative tools; it does not replace pytest,
-Ruff, or `infinity-db build`.
+`tools/run_checks.py` is the canonical local validation entry point. It keeps pytest, Ruff,
+Pyright, Army database-build validation, rules-database validation, asset policy, worker selection,
+and optional reporting under one command contract.
 
-Run it with the project virtual-environment Python:
+Use the project virtual-environment interpreter when available:
 
 ```powershell
-# Code checks: pytest, Ruff, then Pyright
-python tools/run_checks.py --profile code
-
-# Data/build validation (`infinity.db`, `infinity.raw.db`, and `rules.db`)
-python tools/run_checks.py --profile data
-
-# Tests, lint, type checking, Army data build, and rules database build
-python tools/run_checks.py --all
+.\.venv\Scripts\python.exe tools\run_checks.py --profile code
 ```
 
-The available stages are `test`, `lint`, `type`, `build`, and `rules`. The `type`
-stage runs Pyright over the maintained `src/`, `tools/`, and `tests/` trees. The
-`build` stage builds `infinity.db` and `infinity.raw.db`; the `rules` stage builds
-`rules.db` from the tracked curated rules collections. Both use isolated system
-temporary output directories: check execution never writes `data/generated/`.
-The named profiles are
-`code` (`test` + `lint` + `type`), `data` (`build` + `rules`), and `all`.
+On Linux/macOS use `.venv/bin/python` instead.
 
-## Graphical asset test modes
+## Profiles and stages
 
-The test stage has an explicit policy for the tracked Corvus Belli graphical
-publication. The validated processed publication is release content under Corvus
-Belli's explicit non-commercial permission; raw acquisition archives remain excluded
-from Git:
+The runner exposes five stages:
+
+- `test` — pytest;
+- `lint` — Ruff;
+- `type` — Pyright;
+- `build` — Army data/database build validation;
+- `rules` — curated rules validation/database build.
+
+Named profiles are:
 
 ```powershell
-# Hermetic tests only; explicitly skip asset-dependent integration coverage
-python tools/run_checks.py --stage test --assets off
+# pytest + Ruff + Pyright
+python tools\run_checks.py --profile code
 
-# Local default: use full-asset tests when a complete valid set exists
-python tools/run_checks.py --stage test --assets auto
+# Army build + rules build
+python tools\run_checks.py --profile data
 
-# Require the complete valid published asset set
-python tools/run_checks.py --stage test --assets required
+# all stages
+python tools\run_checks.py --all
 ```
 
-`run_checks.py` defaults to `--assets auto`. In a normal source checkout the tracked
-publication is present, so `auto` resolves to full-asset validation. In a specialized
-package/test layout with no third-party SVG tree, `auto` falls back to the hermetic
-suite. If any published third-party SVGs are present, `auto` requires the set to be
-complete and valid rather than silently ignoring a partial/corrupt installation.
-`required` always requires the complete set. The report header records the
-requested/effective asset mode.
+`--profile all` is equivalent to `--all`.
 
-Completeness is checked against the tracked
-`data/manifests/symbol-publication.json` written by final symbol publication.
-Every published SVG named by that manifest must exist, parse as SVG, and match
-its SHA-256, and unlisted SVGs inside the generated asset categories are
-rejected. The same manifest also defines the currently browser-referenced
-subset through its Army, Unit/profile, and static mappings. This distinction is
-intentional even though the current processed publication is
-fully browser-addressable (806/806 SVGs): future preserved variants must remain
-part of the complete asset set rather than weakening validation. Check output
-therefore reports both the full published count and the browser-referenced count.
-
-Asset-dependent tests carry the `full_assets` pytest marker. Direct pytest runs
-exclude that marker by default, so a clean checkout is green:
-
-```powershell
-python -m pytest -q
-```
-
-Use `python -m pytest -m full_assets -q` only when debugging those integration
-tests directly. Normal development/handoff runs should prefer `run_checks.py`
-because it validates the asset set before enabling them. Hermetic web tests use
-project-owned temporary SVG fixtures to retain coverage of dynamic SVG serving
-without depending on the complete processed graphical publication.
-
-## Parallel pytest execution
-
-The check runner uses `pytest-xdist` with automatic worker selection by default
-for every test stage. In the recorded parallelization benchmark on the primary Windows development machine,
-the then-current 687-test suite fell from 59.67 seconds serially to 14.13 seconds
-with `auto`; four fixed workers took 19.41 seconds. These figures are historical
-evidence, not the size or expected duration of the current suite.
-
-```powershell
-# Default: let pytest-xdist choose from the available physical CPU cores
-python tools/run_checks.py --stage test
-
-# Explicit fixed worker count
-python tools/run_checks.py --stage test --test-workers 4
-
-# Explicit serial/debugging mode
-python tools/run_checks.py --stage test --test-workers 0
-```
-
-Parallel runs use xdist's `worksteal` scheduler so the relatively expensive
-database tests can be rebalanced instead of pinning an entire large test module
-to one worker. `pytest-xdist` is part of the `dev` dependency set. Serial mode
-remains available for debugging ordering, isolation, or concurrency-sensitive
-failures.
-
-The web tests build one template SQLite database per module, then copy that
-template into each test's temporary directory before creating the application.
-This preserves mutation isolation while avoiding a full normalize/export cycle
-for every web test.
-
-### SQLite finalization in semantic tests
-
-The production Army and rules exporters canonicalize generated SQLite artifacts by
-default: they repack with `VACUUM` and normalize transaction-history-only header
-fields so release artifacts remain byte-deterministic. Export-heavy semantic tests
-that inspect database contents rather than final file bytes explicitly use
-`finalize=False` to avoid repeating that physical-file work. This optimization is
-limited to test callers; the CLI does not expose a non-finalized build mode.
-
-`tests/test_database.py` and `tests/test_rules_database.py` retain a comparison
-switch for measuring the finalization cost with the normal xdist scheduler. Set
-`INFINITYDB_TEST_FINALIZE_SQLITE=1` to force those fixtures back through canonical
-finalization for one run, then compare against the normal test path using the same
-machine and worker count:
-
-```powershell
-$env:INFINITYDB_TEST_FINALIZE_SQLITE = "1"
-python tools/run_checks.py --stage test --test-workers auto tests/test_database.py tests/test_rules_database.py
-Remove-Item Env:INFINITYDB_TEST_FINALIZE_SQLITE
-python tools/run_checks.py --stage test --test-workers auto tests/test_database.py tests/test_rules_database.py
-```
-
-On the primary Windows development machine, the 182-test database/rules comparison
-with `--test-workers auto` and xdist `worksteal` measured 19.45 seconds with canonical
-finalization forced and 17.56 seconds with the semantic-test fast path: a 1.89-second,
-9.7% reduction in check-run wall time. Pytest's own reported duration improved from
-19.05 to 17.18 seconds (9.8%). Both runs passed all 182 tests.
-
-Treat these timings as diagnostic evidence, not a pass/fail performance threshold.
-Shared CI runners can vary substantially, so future comparisons should record the platform,
-worker setting, and both measured durations.
+Requested stages continue after a failure by default so one run can report the complete failure set.
+Use `--fail-fast` when the first failure is sufficient.
 
 ## Targeted checks
 
-Positional targets are forwarded to pytest and Ruff. They are deliberately not
-interpreted as source-file-to-test mappings.
+For ordinary development, prefer the smallest check that exercises the changed contract before
+running broader validation:
 
 ```powershell
-python tools/run_checks.py --stage test tests/test_availability.py
-python tools/run_checks.py --stage lint src/infinity_army_data/availability.py tests/test_availability.py
+python tools\run_checks.py --stage test tests/test_availability.py
+python tools\run_checks.py --stage test tests/test_web.py -k fireteam
+python tools\run_checks.py --stage lint src/infinity_db/web tests/test_web.py
+python tools\run_checks.py --stage type
 ```
 
-When no target is supplied, pytest runs the full suite and Ruff checks the full
-maintained `tools/` tree along with `src/` and `tests/`. The type stage always
-uses the project Pyright configuration; positional targets remain specific to
-pytest and Ruff. The build and rules stages ignore positional targets; use
-`--build-source PATH` to
-select an Army source directory
-or ZIP for the Army build. The rules stage
-always uses the normal curated-rules defaults.
+Positional targets are passed to pytest/Ruff for their respective stages. Build/rules stages ignore
+those targets.
+
+Direct tool commands remain appropriate when debugging the tool itself:
 
 ```powershell
-python tools/run_checks.py --stage build --build-source "data/raw/JSON 20260918-204434.zip"
-python tools/run_checks.py --stage rules
+python -m pytest tests\test_specific.py -q
+python -m ruff check path\to\file.py
+python -m pyright
 ```
 
-By default, requested stages continue after a failed stage so one run can show
-the complete repository state. Use `--fail-fast` when stopping at the first
-failure is more useful.
+Do not report Ruff/Pyright as run when those tools are unavailable in the active environment.
 
-## Deployment smoke test
+## Maintained pytest sections
 
-Docker deployment validation is intentionally separate from `run_checks.py` because it
-requires a Docker daemon. The configured GitHub Actions `Deployment smoke test` builds the
-application image directly from the tracked release `infinity.db`, `rules.db`, processed SVG
-publication, and `symbol-publication.json`, then uses `scripts/verify-container-image.sh` in
-`--published-assets` mode to validate exact installed assets, database/publication snapshot
-provenance, runtime database formats, and healthy production startup. This intentionally tests
-the same self-contained artifact model used by tagged production deployment rather than replacing
-the committed runtime databases with synthetic fixture outputs.
+`config/testing/test-sections.json` defines coarse, maintained slices of the test suite. The current
+sections are:
 
-See [the Linux deployment guide](deployment.md#deployment-smoke-validation) for
-the exact container contract and the equivalent manual command.
+- `model` — data/model/repository semantics;
+- `web` — API/browser/web presentation;
+- `build` — acquisition/build/export/tooling;
+- `ops` — deployment/packaging/operations;
+- `assets` — graphical publication processing/validation.
 
-## Continuous integration
+Run one or combine several:
 
-Hosted CI delegates source validation to the same `tools/run_checks.py` runner, but
-workflow triggers, platform/interpreter matrices, hosted worker-count exceptions,
-installed-wheel/container smoke coverage, required branch checks, and the optional
-external full-asset bundle are repository/CI policy rather than local check-runner
-semantics. They are maintained canonically in [the CI strategy](ci.md).
+```powershell
+python tools\run_checks.py --stage test --test-section model
+python tools\run_checks.py --stage test --test-section web --test-section ops
+```
 
-When reproducing a hosted failure locally, use the stage, target, worker, and asset
-controls documented above. Do not copy hosted workflow policy into this document;
-update `docs/ci.md` when the GitHub Actions or branch-protection contract changes.
+The section file is maintained source, not a generated test-count ledger. Tests may move between
+sections as ownership changes; documentation should not hard-code current counts.
+
+## Pytest workers
+
+Test stages default to pytest-xdist automatic worker selection:
+
+```powershell
+python tools\run_checks.py --stage test --test-workers auto
+```
+
+Use a fixed worker count when diagnosing scheduling/resource behavior, or `0` for serial execution:
+
+```powershell
+python tools\run_checks.py --stage test --test-workers 4
+python tools\run_checks.py --stage test --test-workers 0
+```
+
+Worker choice is an execution policy, not a correctness difference. Tests must remain valid under
+parallel execution unless they are explicitly serialized by their own fixture/contract.
+
+Hosted Windows CI intentionally uses serial pytest because automatic xdist scheduling was unstable
+for that runner class; this does not change the normal local default. See `docs/ci.md`.
+
+## Graphical asset modes
+
+Asset-dependent coverage is controlled explicitly:
+
+```text
+--assets off
+--assets auto
+--assets required
+```
+
+- `off` runs hermetic tests and skips `full_assets` integration coverage.
+- `auto` uses the complete tracked/local publication when it validates; a detected partial/corrupt
+  publication is an error rather than a silent downgrade.
+- `required` fails unless the complete publication validates and includes `full_assets` tests.
+
+Examples:
+
+```powershell
+# Hermetic source-focused tests
+python tools\run_checks.py --stage test --assets off
+
+# Normal local behavior
+python tools\run_checks.py --stage test --assets auto
+
+# Release/full-publication validation
+python tools\run_checks.py --stage test --assets required
+```
+
+The publication contract comes from `data/manifests/symbol-publication.json`, not from counting SVG
+files. Validation checks paths/hashes, rejects unexpected publication members, and verifies the
+browser-referenced subset against the same manifest.
+
+## Build source
+
+The Army build stage accepts an explicit source directory/ZIP:
+
+```powershell
+python tools\run_checks.py --stage build --build-source tests\fixtures\deployment-smoke
+```
+
+Required CI uses a controlled fixture rather than network acquisition or a developer's `data/raw/`
+contents. Normal checks must not fetch upstream data implicitly.
+
+## SQLite finalization in tests
+
+Release/default Army and rules exports perform canonical SQLite physical finalization so generated
+files are byte-stable. Some semantic tests may explicitly use exporter APIs with physical
+finalization disabled to avoid repeatedly paying for `VACUUM`/header canonicalization when the test
+only asserts logical database contents.
+
+That optimization skips only physical finalization. It must not bypass source validation, schema
+creation, integrity checks, semantic materialization, or atomic destination replacement.
+Determinism/release tests continue to exercise the canonical finalized path.
 
 ## Reports
 
-Console output can also be written verbatim to a UTF-8 text report.
+Use `--report` to retain the complete check transcript:
 
 ```powershell
-# Automatically named, repository-local report
-python tools/run_checks.py --profile code --report
+# reports/CHECKS YYYYMMDD-HHMMSS.txt
+python tools\run_checks.py --profile code --report
 
-# Explicit path/name
-python tools/run_checks.py --profile code --report reports/custom-check.txt
+# explicit destination
+python tools\run_checks.py --all --report reports\release-checks.txt
 ```
 
-With `--report` and no path, the runner writes to:
+Generated reports are local evidence and are normally ignored by Git.
 
-```text
-reports/CHECKS YYYYMMDD-HHMMSS.txt
-```
+## Exit status
 
-The filename uses the same local run-start timestamp recorded in the report
-header, making the output deterministic for that run. The `reports/` directory
-is ignored by Git. Supplying a path explicitly preserves that path instead.
+The runner returns success only when every requested stage succeeds. Configuration/argument errors
+also fail the command. With the default continue-on-failure behavior, later requested stages still
+run and the final status remains failed if any earlier stage failed.
 
-The report header records the run start, current Git branch and commit, selected
-stages, and any targets. Each stage records its command, streamed output, result,
-and duration, followed by an overall summary.
+## Deployment smoke
 
-## Exit codes
+Local/source validation and production packaging are separate contracts. The container smoke path
+builds an image from the tracked runtime artifacts and validates production startup through
+`scripts/verify-container-image.sh`. Hosted execution is described in `docs/ci.md`.
 
-- `0`: every requested stage passed.
-- `1`: at least one requested check stage failed.
-- `2`: runner/configuration error or a stage could not be started.
+For a server-side isolated test deployment use the workflow in `docs/deployment.md`; it is not a
+substitute for source tests.
 
-Direct pytest, Ruff, or Pyright commands remain useful when debugging one tool in
-isolation, but normal development and handoff checks should prefer this runner
-so the command set and reporting format stay consistent.
+## Benchmark tooling
 
-## Runtime repository benchmark
+Benchmarks are diagnostic evidence, not stable documentation constants. Record the exact commit,
+source/database snapshot, platform, Python/SQLite versions, worker configuration, and command with
+each result instead of copying timing numbers into this file.
 
-The 0.6.1 canonicalization release gate used a local repository-read benchmark
-rather than a CI timing threshold. The benchmark remains available for later
-before/after work; run it against an already-built production-like Army database:
+Available tools include:
 
 ```powershell
-python tools/benchmark_runtime.py data\generated\infinity.db
+python tools\benchmark_runtime.py --help
+python tools\compare_runtime_benchmarks.py --help
+python tools\benchmark_test_workers.py --help
 ```
 
-Use `--json` when results need to be archived or compared mechanically. For a
-before/after comparison, use the same Army source snapshot, machine, Python
-environment, and iteration counts. The command reports cold and warm median/p95
-latencies for representative Army, unit, catalog, and Trait read paths plus the
-database size. CI does not assert timing because shared-runner variance would make
-that evidence misleading.
+Use runtime benchmarks for repository/query performance and the worker benchmark for deciding whether
+a different local pytest worker setting is warranted. Generated benchmark reports belong in ignored
+report/audit storage unless a specific result is needed as release evidence.
 
-The **before** benchmark must execute with the pre-change implementation. Do not
-open an older-schema database with the current repository merely to obtain a
-number: runtime validation intentionally rejects incompatible databases. Build
-the same Army snapshot in the pre-change checkout and run the same
-`benchmark_runtime.py` script with that checkout's `src` directory first on
-`PYTHONPATH`. On PowerShell, one reproducible approach is:
+## CI and release validation
 
-```powershell
-$before = (Resolve-Path "..\InfinityDB-before").Path
-$env:PYTHONPATH = (Join-Path $before "src")
-python .\tools\benchmark_runtime.py (Join-Path $before "data\benchmark-before\infinity.db") --json > .\reports\BENCHMARK-before.json
-Remove-Item Env:PYTHONPATH
-```
-
-Generate the after report normally from the current checkout, then compare the
-two reports:
-
-```powershell
-python tools\benchmark_runtime.py data\generated\infinity.db --json > reports\BENCHMARK-after.json
-python tools\compare_runtime_benchmarks.py reports\BENCHMARK-before.json reports\BENCHMARK-after.json
-python tools\compare_runtime_benchmarks.py reports\BENCHMARK-before.json reports\BENCHMARK-after.json --json > reports\BENCHMARK-comparison.json
-```
-
-The comparison requires the same case set and cold/warm iteration counts. It
-reports database-size change and per-case median/p95 percentage deltas; negative
-timing deltas are faster and positive deltas are slower. It deliberately does
-not impose a pass/fail performance threshold: release review should interpret
-the measured tradeoffs alongside semantic correctness and losslessness.
+`docs/ci.md` owns the hosted workflow contract. `docs/releasing.md` owns the release gate. Do not
+copy required-check names, branch-protection settings, or release acceptance steps into this file
+unless they directly affect how local checks are invoked.

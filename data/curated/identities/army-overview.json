@@ -1,0 +1,238 @@
+{
+  "format": "InfinityDB curated Army overview copy",
+  "formatVersion": 1,
+  "armies": [
+    {
+      "slug": "panoceania",
+      "summary": "A broad high-tech force built around excellent gunfighters, advanced equipment and powerful armored units, with specialists for most battlefield roles."
+    },
+    {
+      "slug": "shock-army-of-acontecimento",
+      "summary": "A mobile combined-arms force with dependable line troops, strong medium infantry, airborne options and capable armored support."
+    },
+    {
+      "slug": "military-orders",
+      "summary": "An aggressive elite force centered on heavily armored knights, resilient direct-action troops and strong close-combat threats."
+    },
+    {
+      "slug": "neoterran-capitaline-army",
+      "summary": "PanOceania's technology showcase, combining elite shooters, advanced remotes, heavy armor and efficient specialists for precise firepower."
+    },
+    {
+      "slug": "varuna-immediate-reaction-division",
+      "summary": "A rapid-response force emphasizing stealth, reconnaissance and layered defense, backed by elite marksmen and powerful armored support."
+    },
+    {
+      "slug": "svalarheima-s-winter-force",
+      "summary": "A hard-hitting force for hostile terrain, mixing resilient heavy infantry, strong ranged combatants and aggressive hunters."
+    },
+    {
+      "slug": "kestrel-colonial-force",
+      "summary": "A flexible colonial force combining reconnaissance, forward and airborne deployment, strong gunfighters and specialist support adapted to harsh frontier warfare."
+    },
+    {
+      "slug": "code-capital",
+      "summary": "PanOceania's fast-response reinforcement force, bringing elite Neoterran troops, armored support and flexible crisis-response specialists."
+    },
+    {
+      "slug": "yu-jing",
+      "summary": "A broad combined-arms roster with excellent heavy infantry, camouflage and infiltration, capable specialists and flexible command tools."
+    },
+    {
+      "slug": "imperial-service",
+      "summary": "A control-oriented security force mixing elite Imperial agents, expendable troops and specialized counter-insurgency pieces for strong board control."
+    },
+    {
+      "slug": "invincible-army",
+      "summary": "An armored assault force dominated by heavy infantry, using resilient gunfighters, efficient command pieces and sustained forward pressure."
+    },
+    {
+      "slug": "white-banner",
+      "summary": "A flexible mountain-warfare force blending camouflage and infiltration with monks, advanced heavy infantry and mobile attack pieces."
+    },
+    {
+      "slug": "daebak-force",
+      "summary": "Yu Jing's Korean rapid-response force, combining swift crisis deployment with specialized assault, cyberwarfare and support troops."
+    },
+    {
+      "slug": "ariadna",
+      "summary": "A broad low-tech force built around camouflage, infiltration, inexpensive troops and hard-hitting specialists, favoring board presence over advanced electronics."
+    },
+    {
+      "slug": "caledonian-highlander-army",
+      "summary": "An aggressive close-range force of Highlanders, Volunteers and Dog-Warriors, backed by infiltration and powerful melee threats."
+    },
+    {
+      "slug": "force-de-reponse-rapide-merovingienne",
+      "summary": "A mobile reaction force emphasizing airborne troops, camouflage and specialized medium infantry for flexible attacks from unexpected directions."
+    },
+    {
+      "slug": "usariadna",
+      "summary": "A tough frontier force with plentiful Rangers, airborne troops and durable gunfighters, favoring straightforward firepower and aggressive midfield play."
+    },
+    {
+      "slug": "tartary",
+      "summary": "A veteran Kazak force specializing in camouflage, ambushes and resilient attack pieces, with strong long-range pressure and midfield presence."
+    },
+    {
+      "slug": "kosmoflot",
+      "summary": "An expeditionary force mixing Ariadnan veterans from several nations with mobile assault units, close-combat threats and flexible support."
+    },
+    {
+      "slug": "l-equipe-argent",
+      "summary": "Ariadna's reinforcement force, adding rapid-response veterans and specialized support when eligible armies need extra mobility or hitting power."
+    },
+    {
+      "slug": "haqqislam",
+      "summary": "A flexible force with excellent specialists, asymmetric deployment and strong medical support, balancing inexpensive troops with elite precision pieces."
+    },
+    {
+      "slug": "hassassin-bahram",
+      "summary": "A covert-action force built around infiltration, impersonation and lethal specialists, using deception and asymmetric pressure to reach key targets."
+    },
+    {
+      "slug": "qapu-khalqi",
+      "summary": "A naval-security force with a broad mercenary mix, combining flexible teams, specialists and diverse equipment from several sources."
+    },
+    {
+      "slug": "ramah-taskforce",
+      "summary": "Haqqislam's elite rapid-response force, favoring mobile and resilient troops, strong specialists and fast attack pieces backed by advanced medicine."
+    },
+    {
+      "slug": "melek-reaction-group",
+      "summary": "Haqqislam's veteran reaction force, combining Qapu Khalqi troops and mobile support for fast crisis response in remote areas."
+    },
+    {
+      "slug": "nomads",
+      "summary": "A versatile high-tech force with exceptional hacking, strong remotes, camouflage and unconventional specialists drawn from all three motherships."
+    },
+    {
+      "slug": "corregidor",
+      "summary": "A tough professional force built around mobility, airborne deployment and practical engineering, with reliable gunfighters and aggressive close-range options."
+    },
+    {
+      "slug": "bakunin",
+      "summary": "An unpredictable experimental force mixing radical technology, warbands, Observance troops and excellent skirmishers for disruptive board control."
+    },
+    {
+      "slug": "tunguska",
+      "summary": "A precise security force centered on elite hackers, hardened gunfighters and advanced remotes, combining information warfare with disciplined firepower."
+    },
+    {
+      "slug": "vipera-pursuit-force",
+      "summary": "A pursuit-and-recovery reinforcement force mixing Nomad specialists and veterans for rapid intervention, retrieval missions and protection of sensitive technology."
+    },
+    {
+      "slug": "combined-army",
+      "summary": "The EI's broadest force combines advanced alien technology, elite attack pieces, infiltration and asymmetric tools drawn from multiple subject races."
+    },
+    {
+      "slug": "morat",
+      "summary": "A brutally direct military force of resilient soldiers, heavy weapons and aggressive assault troops that rewards sustained pressure."
+    },
+    {
+      "slug": "shasvastii",
+      "summary": "A deception-heavy expeditionary force built around camouflage, impersonation and hidden deployment, with flexible specialists and dangerous surprise attacks."
+    },
+    {
+      "slug": "onyx",
+      "summary": "A compact EI strike force combining elite command pieces, advanced Batroids and selected alien specialists for efficient high-tech offense."
+    },
+    {
+      "slug": "next-wave",
+      "summary": "A hybrid assault force mixing human veterans with alien technology, mobile attack pieces and unconventional Combined Army tools."
+    },
+    {
+      "slug": "the-exrah-comissariat",
+      "summary": "The Combined Army reinforcement force, adding Exrah and EI support assets for mobile, high-technology intervention alongside eligible armies."
+    },
+    {
+      "slug": "aleph",
+      "summary": "A compact elite force of powerful synthetic troops, advanced remotes and exceptional specialists, with high individual quality and flexible roles."
+    },
+    {
+      "slug": "steel-phalanx",
+      "summary": "ALEPH's assault arm, built around fast elite warriors, smoke-supported attacks and strong close combat backed by cohesive Fireteams."
+    },
+    {
+      "slug": "operations",
+      "summary": "A precise special-operations force emphasizing hacking, infiltration, advanced specialists and efficient remotes for controlled combined-arms play."
+    },
+    {
+      "slug": "ank-program",
+      "summary": "ALEPH's compact rapid-response program, using highly capable operatives and advanced support units to reinforce critical situations quickly."
+    },
+    {
+      "slug": "tohaa",
+      "summary": "A biotechnology-driven force built around Symbiont Armor, Viral weaponry and coordinated teams, combining resilience, mobility and unusual support interactions."
+    },
+    {
+      "slug": "deras-kaar",
+      "summary": "Tohaa's reinforcement force, a compact reserve of specialized teams intended to stabilize difficult situations and recover momentum."
+    },
+    {
+      "slug": "druze",
+      "summary": "A hard-edged mercenary security force centered on Druze Shock Teams, mixing strong mid-range gunfighting, hacking and hired specialists."
+    },
+    {
+      "slug": "ikari",
+      "summary": "An aggressive mercenary force favoring inexpensive bodies, warbands and hard-hitting borrowed units, trading finesse for pressure and raw violence."
+    },
+    {
+      "slug": "starco-free-company-of-the-star",
+      "summary": "A professional Nomad-rooted mercenary force with flexible specialists, airborne and skirmishing options, and reliable mixed-team support."
+    },
+    {
+      "slug": "spiral-corps",
+      "summary": "A legacy Tohaa-linked mercenary force built around deception, biotechnology and coordinated teams; retained for reference but not playable in N5."
+    },
+    {
+      "slug": "foreign-company",
+      "summary": "A legacy elite mercenary company built around premium specialists and mixed high-quality troops; retained for reference but not playable in N5."
+    },
+    {
+      "slug": "dahshat",
+      "summary": "A broad mercenary force combining Haqqislamite and Yu Jing equipment, with strong remotes, armor and flexible hired specialists."
+    },
+    {
+      "slug": "white-company",
+      "summary": "A compact elite contractor force blending PanOceanian and Yu Jing troops, with strong gunfighters, advanced specialists and flexible mixed teams."
+    },
+    {
+      "slug": "contracted-back-up",
+      "summary": "The shared Non-Aligned reinforcement pool, gathering hired specialists and contingency assets that can supplement eligible mercenary forces."
+    },
+    {
+      "slug": "o-12",
+      "summary": "A compact elite force with strong specialists, advanced law-enforcement technology and versatile gunfighters built for controlled, mission-focused play."
+    },
+    {
+      "slug": "starmada",
+      "summary": "O-12's naval police force, combining mobile security units, cyberwarfare and specialized close-quarters tools for rapid intervention."
+    },
+    {
+      "slug": "torchlight-brigade",
+      "summary": "A frontier intervention force built around self-sufficient troops, reconnaissance assets and mobile heavy support for remote and demanding deployments."
+    },
+    {
+      "slug": "teams-gladius",
+      "summary": "O-12's reinforcement teams combine investigators, intelligence assets and dependable direct-action troops for rapid tactical intervention."
+    },
+    {
+      "slug": "jsa",
+      "summary": "A fast aggressive force with excellent close combat, stealth and forward pressure, backed by disciplined gunfighters and distinctive heavy armor."
+    },
+    {
+      "slug": "shindenbutai",
+      "summary": "A Shinju frontier force blending samurai assault troops with advanced reconnaissance, hackers and mobile specialists adapted to harsh contested terrain."
+    },
+    {
+      "slug": "oban",
+      "summary": "A fast strike force built around motorcycles, infiltration and veteran close-combat troops, emphasizing speed, flanking and decisive short-range attacks."
+    },
+    {
+      "slug": "hayabusa",
+      "summary": "JSA's rapid-response reinforcement force, combining veteran close-quarters fighters and quantronic specialists for fast deployment against emerging threats."
+    }
+  ]
+}

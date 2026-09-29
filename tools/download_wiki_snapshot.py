@@ -2,17 +2,21 @@
 """Download one timestamped local mirror snapshot of the Infinity wiki.
 
 The downloader stages the mirror in a local work directory, rewrites local links,
-then stores the complete result as a timestamped ZIP archive. Successful runs remove
-their work directory; incomplete runs preserve it for inspection.
+then stores the complete result as a timestamped ZIP archive. Optional history mode
+also retains every revision advertised by MediaWiki for each mirrored page. Successful
+runs remove their work directory; incomplete runs preserve it for inspection.
 """
 
 from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import re
 import shutil
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections import deque
@@ -49,6 +53,20 @@ LANGUAGE_ROOT_URLS = {
     "en": ROOT_URL,
     "es": urllib.parse.urljoin(ROOT_URL, "es/"),
 }
+LANGUAGE_API_URLS = {
+    "en": urllib.parse.urljoin(ROOT_URL, "api.php"),
+    "es": urllib.parse.urljoin(ROOT_URL, "wiki-es/api.php"),
+}
+LANGUAGE_INDEX_URLS = {
+    "en": urllib.parse.urljoin(ROOT_URL, "index.php"),
+    "es": urllib.parse.urljoin(ROOT_URL, "wiki-es/index.php"),
+}
+HISTORY_DIRECTORY = "_history"
+HISTORY_INDEX_FORMAT = "InfinityDB wiki revision history"
+HISTORY_INDEX_VERSION = 1
+FETCH_ATTEMPTS = 5
+FETCH_RETRY_DELAYS = (1.0, 2.0, 4.0, 8.0)
+RETRYABLE_HTTP_STATUS = frozenset({408, 425, 429, 500, 502, 503, 504})
 LANGUAGE_ACCEPT_HEADERS = {
     "en": "en-US,en;q=0.9",
     "es": "es-ES,es;q=0.9,en;q=0.5",
@@ -95,12 +113,37 @@ class WikiIgnoredURL(NamedTuple):
     reason: str
 
 
+class WikiPage(NamedTuple):
+    """One mirrored wiki page with its source identity."""
+
+    url: str
+    path: str
+    title: str
+
+
+class WikiRevision(NamedTuple):
+    """One MediaWiki revision advertised for a mirrored page."""
+
+    oldid: int
+    parentid: int
+    timestamp: str
+
+
 class WikiDownloadResult(NamedTuple):
     """Complete crawl result retained until snapshot publication."""
 
     files: tuple[Path, ...]
     failures: tuple[WikiDownloadFailure, ...]
     ignored: tuple[WikiIgnoredURL, ...] = ()
+    pages: tuple[WikiPage, ...] = ()
+
+
+class WikiHistoryResult(NamedTuple):
+    """Optional historical revision acquisition retained until publication."""
+
+    files: tuple[Path, ...]
+    failures: tuple[WikiDownloadFailure, ...]
+    revision_count: int
 
 
 class WikiCrawlProgress(NamedTuple):
@@ -112,6 +155,16 @@ class WikiCrawlProgress(NamedTuple):
     queued: int
     url: str
     ignored: int = 0
+
+
+class WikiHistoryProgress(NamedTuple):
+    """One progress update emitted before fetching an old revision."""
+
+    page: int
+    pages: int
+    saved: int
+    failed: int
+    url: str
 
 
 class ConsoleProgressReporter:
@@ -145,6 +198,36 @@ class ConsoleProgressReporter:
             self._last_length = 0
 
 
+class ConsoleHistoryProgressReporter:
+    """Render compact historical-revision progress."""
+
+    def __init__(self, stream: TextIO | None = None) -> None:
+        self.stream = stream if stream is not None else sys.stdout
+        self._last_length = 0
+
+    def __call__(self, progress: WikiHistoryProgress) -> None:
+        message = (
+            f"Wiki history: page {progress.page}/{progress.pages} | "
+            f"saved {progress.saved} | failed {progress.failed} | {progress.url}"
+        )
+        if self.stream.isatty():
+            width = max(1, shutil.get_terminal_size(fallback=(120, 24)).columns - 1)
+            visible = message[:width]
+            padding = " " * max(0, self._last_length - len(visible))
+            print(f"\r{visible}{padding}", end="", file=self.stream, flush=True)
+            self._last_length = len(visible)
+            return
+
+        if progress.saved == 0 or progress.saved % 100 == 0:
+            print(message, file=self.stream, flush=True)
+
+    def finish(self) -> None:
+        """Terminate an interactive in-place progress line cleanly."""
+        if self.stream.isatty() and self._last_length:
+            print(file=self.stream, flush=True)
+            self._last_length = 0
+
+
 class LinkExtractor(HTMLParser):
     """Collect page links and explicitly referenced assets from one HTML page."""
 
@@ -158,6 +241,265 @@ class LinkExtractor(HTMLParser):
                 continue
             asset = name == "src" or tag.lower() == "link" or is_asset_url(value)
             self.links.append(WikiLink(value=value, asset=asset))
+
+
+def page_title_from_html(html_text: str) -> str | None:
+    """Extract the MediaWiki source title from a rendered page footer link."""
+    parser = LinkExtractor()
+    parser.feed(html_text)
+    valid_paths = {
+        urllib.parse.urlsplit(url).path for url in LANGUAGE_INDEX_URLS.values()
+    }
+    for link in reversed(parser.links):
+        candidate = urllib.parse.urljoin(ROOT_URL, link.value)
+        parsed = urllib.parse.urlsplit(candidate)
+        if (parsed.hostname or "").lower() != "infinitythewiki.com":
+            continue
+        if parsed.path not in valid_paths:
+            continue
+        query = urllib.parse.parse_qs(parsed.query)
+        if query.get("oldid") and query.get("title"):
+            return query["title"][0]
+    return None
+
+
+def page_title_from_url(url: str, *, language: str) -> str:
+    """Derive a MediaWiki title from a language-scoped pretty URL."""
+    if language not in SUPPORTED_LANGUAGES:
+        raise ValueError(f"Unsupported wiki language: {language}")
+    path = urllib.parse.unquote(urllib.parse.urlsplit(url).path).strip("/")
+    if language == "es" and path.casefold() == "es":
+        return "Página principal"
+    if language == "es" and path.casefold().startswith("es/"):
+        path = path[3:]
+    if not path:
+        return "Main Page" if language == "en" else "Página principal"
+    return path
+
+
+def revision_query_url(
+    title: str,
+    *,
+    language: str,
+    continuation: str | None = None,
+) -> str:
+    """Build one MediaWiki API request that enumerates page revisions."""
+    if language not in SUPPORTED_LANGUAGES:
+        raise ValueError(f"Unsupported wiki language: {language}")
+    params = {
+        "action": "query",
+        "format": "json",
+        "formatversion": "2",
+        "prop": "revisions",
+        "titles": title,
+        "rvprop": "ids|timestamp",
+        "rvlimit": "max",
+        "rvdir": "newer",
+    }
+    if continuation is not None:
+        params["rvcontinue"] = continuation
+    return f"{LANGUAGE_API_URLS[language]}?{urllib.parse.urlencode(params)}"
+
+
+def oldid_url(title: str, oldid: int, *, language: str) -> str:
+    """Build the rendered source URL for one exact MediaWiki revision."""
+    if language not in SUPPORTED_LANGUAGES:
+        raise ValueError(f"Unsupported wiki language: {language}")
+    query = urllib.parse.urlencode(
+        {"title": title, "oldid": str(oldid), "redirect": "no"}
+    )
+    return f"{LANGUAGE_INDEX_URLS[language]}?{query}"
+
+
+def fetch_page_revisions(
+    page: WikiPage,
+    *,
+    language: str,
+) -> tuple[str, tuple[WikiRevision, ...]]:
+    """Return every public revision advertised for one mirrored page."""
+    continuation: str | None = None
+    revisions: list[WikiRevision] = []
+    canonical_title: str | None = None
+
+    while True:
+        url = revision_query_url(page.title, language=language, continuation=continuation)
+        payload = fetch_bytes(url, language=language)
+        try:
+            document = json.loads(payload)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid MediaWiki revision response for {page.url}: {exc}") from exc
+        if not isinstance(document, dict):
+            raise ValueError(f"Invalid MediaWiki revision response for {page.url}")
+        query = document.get("query")
+        page_records = query.get("pages") if isinstance(query, dict) else None
+        if not isinstance(page_records, list) or len(page_records) != 1:
+            raise ValueError(f"MediaWiki revision response did not identify {page.url}")
+        page_record = page_records[0]
+        if not isinstance(page_record, dict) or "missing" in page_record:
+            raise ValueError(f"MediaWiki page not found while reading history: {page.url}")
+        title = page_record.get("title")
+        if not isinstance(title, str) or not title:
+            raise ValueError(f"MediaWiki revision response has no title for {page.url}")
+        if canonical_title is None:
+            canonical_title = title
+        elif canonical_title != title:
+            raise ValueError(f"MediaWiki revision title changed while reading {page.url}")
+
+        batch = page_record.get("revisions", [])
+        if not isinstance(batch, list):
+            raise ValueError(f"MediaWiki revision list is invalid for {page.url}")
+        for record in batch:
+            if not isinstance(record, dict):
+                raise ValueError(f"MediaWiki revision entry is invalid for {page.url}")
+            oldid = record.get("revid")
+            parentid = record.get("parentid")
+            timestamp = record.get("timestamp")
+            if (
+                type(oldid) is not int
+                or type(parentid) is not int
+                or not isinstance(timestamp, str)
+                or not timestamp
+            ):
+                raise ValueError(f"MediaWiki revision entry is incomplete for {page.url}")
+            revisions.append(
+                WikiRevision(oldid=oldid, parentid=parentid, timestamp=timestamp)
+            )
+
+        continuation_record = document.get("continue")
+        if not isinstance(continuation_record, dict):
+            break
+        next_continuation = continuation_record.get("rvcontinue")
+        if not isinstance(next_continuation, str) or not next_continuation:
+            raise ValueError(f"MediaWiki revision continuation is invalid for {page.url}")
+        continuation = next_continuation
+
+    if canonical_title is None or not revisions:
+        raise ValueError(f"MediaWiki returned no revisions for {page.url}")
+    return canonical_title, tuple(revisions)
+
+
+def _history_index_payload(
+    *,
+    language: str,
+    pages: list[dict[str, object]],
+    revision_count: int,
+) -> bytes:
+    document = {
+        "format": HISTORY_INDEX_FORMAT,
+        "formatVersion": HISTORY_INDEX_VERSION,
+        "language": language,
+        "pages": pages,
+        "revisionCount": revision_count,
+        "source": {
+            "apiUrl": LANGUAGE_API_URLS[language],
+            "indexUrl": LANGUAGE_INDEX_URLS[language],
+        },
+    }
+    return (
+        json.dumps(document, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+    ).encode("utf-8")
+
+
+def download_wiki_history(
+    pages: tuple[WikiPage, ...],
+    destination: Path,
+    *,
+    language: str = "en",
+    progress: Callable[[WikiHistoryProgress], None] | None = None,
+) -> WikiHistoryResult:
+    """Download all rendered oldid revisions for the mirrored current pages."""
+    if language not in SUPPORTED_LANGUAGES:
+        raise ValueError(f"Unsupported wiki language: {language}")
+    if not pages:
+        raise ValueError("Historical wiki acquisition requires at least one mirrored page")
+
+    files: set[Path] = set()
+    failures: list[WikiDownloadFailure] = []
+    history_pages: list[dict[str, object]] = []
+    saved_oldids: set[int] = set()
+
+    for page_number, page in enumerate(pages, start=1):
+        try:
+            canonical_title, revisions = fetch_page_revisions(page, language=language)
+        except Exception as exc:  # pragma: no cover - live network failure path.
+            failures.append(
+                WikiDownloadFailure(
+                    url=revision_query_url(page.title, language=language),
+                    error=f"{type(exc).__name__}: {exc}",
+                )
+            )
+            continue
+
+        revision_records: list[dict[str, object]] = []
+        for revision in revisions:
+            source_url = oldid_url(canonical_title, revision.oldid, language=language)
+            if progress is not None:
+                progress(
+                    WikiHistoryProgress(
+                        page=page_number,
+                        pages=len(pages),
+                        saved=len(saved_oldids),
+                        failed=len(failures),
+                        url=source_url,
+                    )
+                )
+
+            relative = f"{HISTORY_DIRECTORY}/oldid/{revision.oldid}.html"
+            target = destination / relative
+            if revision.oldid not in saved_oldids:
+                if target.is_file():
+                    files.add(target)
+                    saved_oldids.add(revision.oldid)
+                else:
+                    try:
+                        payload = fetch_bytes(source_url, language=language)
+                    except Exception as exc:  # pragma: no cover - live network failure path.
+                        failures.append(
+                            WikiDownloadFailure(
+                                url=source_url, error=f"{type(exc).__name__}: {exc}"
+                            )
+                        )
+                        continue
+                    write_bytes(target, payload)
+                    files.add(target)
+                    saved_oldids.add(revision.oldid)
+
+            revision_records.append(
+                {
+                    "oldid": revision.oldid,
+                    "parentid": revision.parentid,
+                    "path": relative,
+                    "timestamp": revision.timestamp,
+                    "url": source_url,
+                }
+            )
+
+        history_pages.append(
+            {
+                "currentPath": page.path,
+                "currentUrl": page.url,
+                "revisions": revision_records,
+                "title": canonical_title,
+            }
+        )
+
+    index_path = destination / HISTORY_DIRECTORY / "index.json"
+    write_bytes(
+        index_path,
+        _history_index_payload(
+            language=language,
+            pages=history_pages,
+            revision_count=len(saved_oldids),
+        ),
+    )
+    files.add(index_path)
+    return WikiHistoryResult(
+        files=tuple(
+            sorted(files, key=lambda path: mirror_path_sort_key(path, destination))
+        ),
+        failures=tuple(failures),
+        revision_count=len(saved_oldids),
+    )
 
 
 def ignored_url_reason(url: str) -> str | None:
@@ -322,6 +664,12 @@ def rewrite_html_links(
     return pattern.sub(replace, html_text)
 
 
+def _retryable_fetch_error(exc: BaseException) -> bool:
+    if isinstance(exc, urllib.error.HTTPError):
+        return exc.code in RETRYABLE_HTTP_STATUS
+    return isinstance(exc, (urllib.error.URLError, TimeoutError, ConnectionError))
+
+
 def fetch_bytes(url: str, *, language: str = "en") -> bytes:
     request = urllib.request.Request(
         url,
@@ -332,8 +680,15 @@ def fetch_bytes(url: str, *, language: str = "en") -> bytes:
             "Connection": "keep-alive",
         },
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        return response.read()
+    for attempt in range(FETCH_ATTEMPTS):
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return response.read()
+        except Exception as exc:
+            if not _retryable_fetch_error(exc) or attempt >= FETCH_ATTEMPTS - 1:
+                raise
+            time.sleep(FETCH_RETRY_DELAYS[attempt])
+    raise AssertionError("fetch retry loop exhausted unexpectedly")
 
 
 def write_bytes(path: Path, payload: bytes) -> None:
@@ -366,6 +721,7 @@ def download_wiki(
     queue: deque[tuple[str, bool]] = deque([(canonical_base_url, False)])
     discovered: set[str] = {canonical_base_url}
     saved: set[Path] = set()
+    pages: dict[str, WikiPage] = {}
     failures: list[WikiDownloadFailure] = []
     ignored: dict[str, WikiIgnoredURL] = {}
     attempted = 0
@@ -413,6 +769,11 @@ def download_wiki(
         if not any(token in text.lower() for token in ("<html", "<body", "href=", "src=")):
             continue
 
+        pages[url] = WikiPage(
+            url=url,
+            path=relative,
+            title=page_title_from_html(text) or page_title_from_url(url, language=language),
+        )
         rewritten_text = rewrite_html_links(text, url, language=language)
         write_bytes(target, rewritten_text.encode("utf-8"))
 
@@ -444,6 +805,7 @@ def download_wiki(
         ),
         failures=tuple(failures),
         ignored=tuple(ignored[url] for url in sorted(ignored)),
+        pages=tuple(sorted(pages.values(), key=lambda page: page.path)),
     )
 
 
@@ -452,6 +814,7 @@ def create_wiki_work_directory(
     *,
     language: str,
     now: datetime | None = None,
+    include_history: bool = False,
 ) -> Path:
     """Create a collision-safe work directory retained when acquisition fails."""
     if language not in SUPPORTED_LANGUAGES:
@@ -459,10 +822,11 @@ def create_wiki_work_directory(
 
     root.mkdir(parents=True, exist_ok=True)
     timestamp = (now or datetime.now().astimezone()).strftime("%Y%m%d-%H%M%S")
-    candidate = root / f"WIKI-{language} {timestamp}.work"
+    prefix = f"WIKI-{language}-history" if include_history else f"WIKI-{language}"
+    candidate = root / f"{prefix} {timestamp}.work"
     counter = 2
     while candidate.exists():
-        candidate = root / f"WIKI-{language} {timestamp}-{counter}.work"
+        candidate = root / f"{prefix} {timestamp}-{counter}.work"
         counter += 1
     candidate.mkdir()
     return candidate
@@ -475,6 +839,7 @@ def archive_wiki(
     root: Path,
     language: str = "en",
     now: datetime | None = None,
+    include_history: bool = False,
 ) -> Path:
     """Store one language-labeled wiki snapshot in a timestamped ZIP file."""
     if language not in SUPPORTED_LANGUAGES:
@@ -482,7 +847,7 @@ def archive_wiki(
     return create_timestamped_archive(
         files,
         destination,
-        prefix=f"WIKI-{language}",
+        prefix=(f"WIKI-{language}-history" if include_history else f"WIKI-{language}"),
         root=root,
         now=now,
     )
@@ -512,6 +877,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Wiki language to mirror (default: en)",
     )
     parser.add_argument(
+        "--include-history",
+        action="store_true",
+        help=(
+            "Also archive every rendered MediaWiki oldid revision for each mirrored "
+            "page; this can be substantially larger and slower than a normal snapshot"
+        ),
+    )
+    parser.add_argument(
+        "--resume-work",
+        type=Path,
+        help=(
+            "Reuse a preserved wiki work directory from an incomplete run; existing "
+            "oldid files are not downloaded again"
+        ),
+    )
+    parser.add_argument(
         "--manifest-dir",
         type=Path,
         default=Path("data/manifests/snapshots"),
@@ -528,16 +909,25 @@ def main(argv: list[str] | None = None) -> int:
     archive: Path | None = None
     manifest: Path | None = None
     staging_path: Path | None = None
+    history_result: WikiHistoryResult | None = None
     progress = ConsoleProgressReporter()
     root_url = LANGUAGE_ROOT_URLS[args.language]
 
     try:
         started_at = datetime.now().astimezone()
-        staging_path = create_wiki_work_directory(
-            work_root,
-            language=args.language,
-            now=started_at,
-        )
+        if args.resume_work is not None:
+            resume_path = (Path.cwd() / args.resume_work).resolve()
+            if not resume_path.is_dir():
+                raise ValueError(f"Wiki resume work directory does not exist: {resume_path}")
+            staging_path = resume_path
+        else:
+            staging_path = create_wiki_work_directory(
+                work_root,
+                language=args.language,
+                now=started_at,
+                include_history=args.include_history,
+            )
+        assert staging_path is not None
         try:
             result = download_wiki(
                 root_url,
@@ -570,6 +960,29 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Preserved wiki work -> {staging_path}", file=sys.stderr)
             return 1
 
+        if args.include_history:
+            history_progress = ConsoleHistoryProgressReporter()
+            try:
+                history_result = download_wiki_history(
+                    result.pages,
+                    staging_path,
+                    language=args.language,
+                    progress=history_progress,
+                )
+            finally:
+                history_progress.finish()
+            if history_result.failures:
+                print(
+                    f"Wiki history incomplete: {len(history_result.failures)} required "
+                    "revision request(s) failed.",
+                    file=sys.stderr,
+                )
+                for failure in history_result.failures:
+                    print(f"  {failure.url}: {failure.error}", file=sys.stderr)
+                print(f"Preserved wiki work -> {staging_path}", file=sys.stderr)
+                return 1
+            files.extend(history_result.files)
+
         acquired_at = datetime.now().astimezone()
         archive = archive_wiki(
             files,
@@ -577,6 +990,7 @@ def main(argv: list[str] | None = None) -> int:
             root=staging_path,
             language=args.language,
             now=acquired_at,
+            include_history=args.include_history,
         )
         manifest = write_snapshot_manifest(
             archive,
@@ -598,12 +1012,19 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Preserved wiki work -> {staging_path}", file=sys.stderr)
         return 1
 
+    assert staging_path is not None
     try:
         shutil.rmtree(staging_path)
     except OSError as exc:
         print(f"WARNING: could not remove wiki work directory {staging_path}: {exc}")
 
-    print(f"Downloaded {len(files)} wiki files -> {archive}")
+    if history_result is not None:
+        print(
+            f"Downloaded {len(result.files)} current wiki files + "
+            f"{history_result.revision_count} historical revisions -> {archive}"
+        )
+    else:
+        print(f"Downloaded {len(files)} wiki files -> {archive}")
     if result.ignored:
         print(f"Ignored {len(result.ignored)} optional site URL(s).")
     print(f"Snapshot provenance -> {manifest}")

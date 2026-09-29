@@ -10,8 +10,11 @@ provenance under `data/manifests/`.
 ## Current curated data
 
 - `rules/` contains validated rules-reference collections consumed by `infinity-db build-rules`.
-- `identities/` contains reviewed source-derived presentation relationships consumed
-  during Army normalization.
+- `identities/` contains reviewed source-derived presentation and historical identity
+  relationships consumed by the Army build/runtime surfaces that own them.
+  `army-overview.json` contains short editorial gameplay summaries keyed by public Army slug;
+  the copy is synthesized from current Army/rules data with external faction background used only
+  as secondary context, and is kept separate from source-derived identity semantics.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship
   endpoints that cannot be resolved from the current Army snapshot alone.
@@ -33,14 +36,39 @@ identities.
 
 The sections below document the implemented `curated/rules/` contract.
 
-## Other curated categories
+### Maintained rules-text semantic-link policy
 
-`data/curated/snapshot-notes/` defines the current versioned contract for
-human-maintained snapshot descriptions, comparison targets, and notable-change
-notes associated with immutable snapshots by SHA-256. Those notes remain
-separate from generated snapshot provenance and are not rules-database inputs.
-Acquisition tooling never writes or consumes this subtree; see
-[`snapshot-notes/README.md`](snapshot-notes/README.md).
+Maintained rules prose must use typed `[[kind:slug]]` references when it names an existing
+player-routable Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program, or
+Attribute. The pre-token migration is complete: `maintained-text-link-reviews.json` records explicit
+completed review coverage for every supported reference namespace, and the rules build rejects any
+new plain semantic candidate directly.
+
+Completed scopes receive a case-insensitive scan with conservative plural matching. A residual is an
+error: link it when the meaning is clear, or replace it with `review-needed` when it is not. If a
+colliding surface is confidently ordinary text rather than a reference to that namespace, record it
+under that batch's `reviewedPlainSurfaces` with a reusable reason plus audit-derived occurrence
+fingerprints. Each fingerprint binds the decision to an exact maintained-text passage, field, match
+span, and semantic target set; changed or newly worded occurrences reopen review. Owner identity is
+not part of the fingerprint, so an unchanged passage cloned into a synthetic/derived record inherits
+the same reviewed meaning. A reviewed plain surface suppresses only that batch namespace, not
+same-text candidates in another namespace.
+
+Audit the current inventory with:
+
+```powershell
+python tools\audit_maintained_text_links.py
+```
+
+The audit prints unlinked candidates, reviewed-batch residuals, and explicit `review-needed` markers.
+The first two inventories must remain zero. When a passage is ambiguous or its source meaning is not
+clear enough to choose a semantic target, use
+`[[review-needed:<reason>|<visible text>]]` rather than guessing. Reason codes are lowercase
+kebab-case; prefer reusable codes such as `ambiguous-target`, `unclear-source-meaning`,
+`source-conflict`, or `scope-unclear`. `[[review-needed:<reason>]]` is valid for a standalone marker.
+The audit lists all review-needed markers separately so reviewed uncertainty remains easy to locate
+and cannot disappear into ordinary prose. Resolve each marker to a typed semantic reference, or to
+ordinary text when manual review proves it is not a reference.
 
 ### Rules-enrichment coverage classifications
 
@@ -134,10 +162,10 @@ profile must belong to the mapped entity. Unit-backed mappings additionally pin 
 logical Unit and reviewed Peripheral type so source-name, logical-identity, or subtype drift
 fails closed. Controller access additionally pins source occurrence name, reviewed Peripheral
 type, and the complete canonical target pool so source/controller/target drift fails closed.
-Unknown fields fail closed; notably `mercs` is not accepted as identity data. The checked-in
-current-snapshot contract contains 56 embedded entities, 279 embedded mappings, 17 Unit-backed
-source mappings resolving to 10 logical Units, and four reviewed Cyberplug Controller access
-pools targeting two canonical logical Units.
+Unknown fields fail closed; notably `mercs` is not accepted as identity data. Do not duplicate
+current entity/mapping counts in this reference: the curated file plus
+`infinity-db validate-peripheral-identities --database ...` are the authoritative current
+inventory and coverage check.
 
 Validate the authored contract with:
 
@@ -192,6 +220,14 @@ relationship maps canonical source identity `1` to display army `901`.
 `normalized.json`. Database export revalidates that pinned relationship. Runtime
 code consumes the persisted field and does not reload this curated file.
 
+`identities/legacy-armies.json` separately records historical Army identities that
+remain useful for player-facing reference but have no current N5 Army list. These
+entries are not normalization aliases and are never promoted into selectable
+`application_armies`. The Army overview loads them as explicit non-playable legacy
+references, while symbol discovery uses their historical logo URLs so maintained
+`image_overrides/factions` assets pass through the normal symbol processing and
+publication pipeline.
+
 ## Curated rules reference data
 
 This directory is the handoff from local wiki/PDF research to rules-data
@@ -242,6 +278,13 @@ heading.
 `vocabularySources` follows the same locator rules instead of forcing wiki
 references to carry PDF page numbers.
 
+Current Label IDs form one canonical vocabulary across current collections. A record may
+therefore reuse a `labelIds` entry defined by another current collection rather than
+duplicating that Label definition locally. If the same Label ID is carried by more than
+one current collection, its name and description must agree exactly. Rules export rejects
+unresolved current Label references and conflicting current Label definitions, while
+historical collections remain self-contained.
+
 Do not bulk-copy PDF or wiki text, images, or page markup. Keep core rules,
 FAQs/errata, and ITS seasons in separate collections so versions cannot be
 blended accidentally.
@@ -250,15 +293,14 @@ Every record declares `composition.role` as `definition` or `supplement`. Across
 current collections, each semantic record ID has exactly one definition; supplements
 retain their own scope, facts, citations, relations, and publication provenance rather
 than being field-merged by load order. Related concepts use typed one-way `relations`;
-reverse navigation is derived by `rules.db`. Format v10 introduced the gameplay-
-interaction edge `reduces-modifiers-from`; format v11 extends that closed vocabulary
-with `ignores-modifiers-from` and `negates-effects-of` so counter-rules can describe
-ignored MODs separately from effects that become ineffective. Format v12 adds
-`modifies-rolls-for` and `restricts-use-of` for rules such as Sensor that alter another
-Skill's Roll or constrain one specific use without implying that the whole target rule
-is negated. Format v13 adds `applies-effects-to` and `imposes-modifiers-on` so rules such
-as Reflective and Albedo can expose who they affect without collapsing those different
-mechanics into a generic related-item edge. Format v14 adds `overrides-effects-of` for explicit precedence such as No Cover taking priority over Limited Cover when both restrictions apply. Format v15 adds `cancels-state` for reviewed recovery/removal rules such as Doctor and Engineer; State definitions remain rules/reference identities rather than runtime game-session state. Format v16 adds `causes-state` for explicit activation paths such as Forward Observer causing Targeted State and Disposable (X) causing the item-specific Unloaded State, while existing roll/restriction relations make the affected State useful from both directions. Format v17 adds `enables-use-of` when a reviewed rule or State satisfies a documented prerequisite for another rule without claiming that all of the target rule's requirements are met. Format v18 adds `uses-effects-of` when a rule reuses another rule's effects without claiming that it enters the target State; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior. Format v19 replaces the singular Skill-definition `facts.typeId` with ordered `facts.typeIds`, allowing every full Skill definition to own one or more declaration categories directly. Format v20 adds `modifies-use-of` for rules that change how another rule is used without simply enabling or restricting it, `prevents-state-entry` for explicit prohibitions on entering a State, and `triggered-by-state-entry` for rules that activate when a State is entered. Format v21 adds `equips-with` for rules such as Paramedic that explicitly provide a piece of Equipment without claiming to reuse that Equipment's effects.
+reverse navigation is derived by `rules.db`.
+
+The current closed relation vocabulary is defined by `src/infinity_db/rule_relations.py`. It
+distinguishes creation/enabling, State transitions, MOD/effect changes, cancellation/restriction,
+and structural variant relationships rather than collapsing every connection into a generic
+"related" edge. Curated loading fails closed on unsupported relation types. Add or change a relation
+type in the canonical Python vocabulary and its validation/presentation tests before using it in
+curated data.
 
 Reviewed `training` definitions use `facts: {"orderType": "regular"}` or
 `{"orderType": "irregular"}` and canonical IDs `training:regular` /
@@ -266,8 +308,7 @@ Reviewed `training` definitions use `facts: {"orderType": "regular"}` or
 loadout Order-generation entries reference these records in the Unit API and
 browser, with citations; Lieutenant/Tactical Orders and source skill-like
 compatibility rows must not be treated as further Training values. Training
-supplements may add scoped facts but cannot redefine `orderType`. This is an
-additive v7 record-kind contract; it does not alter the `rules.db` schema.
+supplements may add scoped facts but cannot redefine `orderType`.
 
 ### Document shape
 
@@ -339,9 +380,14 @@ The main collection structure is:
 ```
 
 Supported record kinds include `rule`, `skill`, `declaration-category`,
-`equipment`, `weapon`, `ammunition`, `trait`, `state`, `glossary`, `interaction`, `fireteam`,
-`faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
+`equipment`, `weapon`, `ammunition`, `trait`, `state`, `attribute`, `term`, `glossary`,
+`interaction`, `fireteam`, `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
+
+Embedded `term` records own source-backed Game terminology that does not warrant a standalone
+catalog/detail route. They require `facts.scope` with a stable slug such as `game-element`,
+`alignment`, `profile`, `scoring`, or `state-classification`; the scope prevents same-name concepts
+from being collapsed merely because their display text matches a Label, Trait, or another domain.
 
 Weapon records may use `facts.specialProfile` for rulebook-defined deployable
 profiles that are not fully represented by Army weapon metadata. The special

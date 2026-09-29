@@ -1,6 +1,11 @@
-import { getArmies, getCatalogItems, getUnits } from "./api.js";
-import { initializeDistanceUnitToggle, initializeOptionalUnitToggles } from "./preferences.js";
+import { getArmies, getCatalogItems, getUnitFilters, getUnits } from "./api.js";
+import {
+  initializeDistanceUnitToggle, initializeOptionalUnitToggles, optionalUnitDefaultFilters,
+  optionalUnitFilters, saveUnitAdvancedFiltersOpen, unitAdvancedFiltersOpen,
+} from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
+import { readShareState, writeShareState } from "./share-state.js";
+import { troopTypeLabel } from "./unit-presentation.js";
 
 const PAGE_SIZE = 50;
 const number = new Intl.NumberFormat();
@@ -8,8 +13,17 @@ const byId = (id) => document.getElementById(id);
 const elements = {
   filters: byId("filters"), army: byId("army-filter"), search: byId("unit-search"),
   skill: byId("skill-filter"), equipment: byId("equipment-filter"), weapon: byId("weapon-filter"),
-  mercs: byId("mercs-filter"), specops: byId("specops-filter"), teamops: byId("teamops-filter"),
-  reinforcement: byId("reinforcement-filter"),
+  troopType: byId("troop-type-filter"), classification: byId("classification-filter"),
+  characteristic: byId("characteristic-filter"),
+  ava: byId("ava-filter"), avaMin: byId("ava-min-filter"), avaMax: byId("ava-max-filter"),
+  avaMinValue: byId("ava-min-value"), avaMaxValue: byId("ava-max-value"),
+  points: byId("points-filter"), pointsMin: byId("points-min-filter"), pointsMax: byId("points-max-filter"),
+  pointsMinValue: byId("points-min-value"), pointsMaxValue: byId("points-max-value"),
+  swc: byId("swc-filter"), swcMin: byId("swc-min-filter"), swcMax: byId("swc-max-filter"),
+  swcMinValue: byId("swc-min-value"), swcMaxValue: byId("swc-max-value"),
+  mercs: byId("unit-mercs-filter"), specops: byId("unit-specops-filter"),
+  teamops: byId("unit-teamops-filter"), reinforcement: byId("unit-reinforcement-filter"),
+  optionalUnitContext: byId("optional-unit-context"), extended: byId("extended-results"),
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
   declaredMembership: byId("declared-membership-context"),
   unitCountShown: byId("unit-count-shown-breakdown"),
@@ -26,9 +40,31 @@ const elements = {
   sort: document.querySelector("#table-container th"),
 };
 
+const numericRangeControls = {
+  ava: {
+    exact: elements.ava, minimum: elements.avaMin, maximum: elements.avaMax,
+    minimumValue: elements.avaMinValue, maximumValue: elements.avaMaxValue,
+    reset: byId("ava-range-reset"),
+    container: document.querySelector('[data-range-filter="ava"]'),
+    minimumState: "avaMin", maximumState: "avaMax", metadata: null,
+  },
+  points: {
+    exact: elements.points, minimum: elements.pointsMin, maximum: elements.pointsMax,
+    minimumValue: elements.pointsMinValue, maximumValue: elements.pointsMaxValue,
+    reset: byId("points-range-reset"),
+    container: document.querySelector('[data-range-filter="points"]'),
+    minimumState: "pointsMin", maximumState: "pointsMax", metadata: null,
+  },
+  swc: {
+    exact: elements.swc, minimum: elements.swcMin, maximum: elements.swcMax,
+    minimumValue: elements.swcMinValue, maximumValue: elements.swcMaxValue,
+    reset: byId("swc-range-reset"),
+    container: document.querySelector('[data-range-filter="swc"]'),
+    minimumState: "swcMin", maximumState: "swcMax", metadata: null,
+  },
+};
+
 document.querySelector(".results-toolbar").remove();
-const availabilityField = document.querySelector(".availability-field");
-availabilityField?.remove();
 initializeDistanceUnitToggle();
 initializeOptionalUnitToggles();
 elements.sortButton = document.createElement("button");
@@ -37,62 +73,301 @@ elements.sortButton.type = "button";
 elements.sort.classList.add("sortable-unit-name");
 elements.sort.replaceChildren(elements.sortButton);
 
+const OPTIONAL_UNIT_KEYS = ["mercs", "specops", "teamops", "reinforcement"];
+
 let state = readLocation();
+const advancedFilters = document.querySelector(".advanced-filters");
+if (advancedFilters) {
+  const savedAdvancedFiltersOpen = unitAdvancedFiltersOpen();
+  const hasAdvancedFilterState = state.skillId || state.equipmentId || state.weaponId
+    || state.troopType || state.classification || state.characteristic
+    || state.ava || state.avaMin || state.avaMax
+    || state.points || state.pointsMin || state.pointsMax
+    || state.swc || state.swcMin || state.swcMax;
+  advancedFilters.open = savedAdvancedFiltersOpen ?? Boolean(hasAdvancedFilterState);
+  advancedFilters.addEventListener("toggle", () => {
+    saveUnitAdvancedFiltersOpen(advancedFilters.open);
+  });
+}
 let armiesLoaded = false;
 let requestNumber = 0;
 let controller;
 let searchTimer;
 
+function readOptionalUnitLocation(params) {
+  const hasExplicitState = OPTIONAL_UNIT_KEYS.some((key) => params.has(key));
+  if (!hasExplicitState) {
+    return { filters: optionalUnitFilters(), source: "preferences", invalid: false };
+  }
+
+  const defaults = optionalUnitDefaultFilters();
+  let invalid = false;
+  const filters = Object.fromEntries(OPTIONAL_UNIT_KEYS.map((key) => {
+    const value = params.get(key);
+    if (value === null) return [key, defaults[key]];
+    if (value === "0" || value === "1") return [key, value === "1"];
+    invalid = true;
+    return [key, defaults[key]];
+  }));
+  return { filters, source: "url", invalid };
+}
+
+function optionalUnitStateMatchesPreferences() {
+  const preferences = optionalUnitFilters();
+  return OPTIONAL_UNIT_KEYS.every((key) => state[key] === preferences[key]);
+}
+
+function renderOptionalUnitContext() {
+  const context = elements.optionalUnitContext;
+  if (!context) return;
+  if (state.optionalUnitInvalid) {
+    context.textContent = "Unsupported optional-unit URL values were reset to their default included state. The corrected choices are now recorded in this URL.";
+    context.hidden = false;
+    return;
+  }
+  if (state.optionalUnitSource === "preferences") {
+    context.textContent = "Optional-unit filters were initialized from your Settings. Their current values are now recorded in this URL, so sharing it reproduces this result set.";
+    context.hidden = false;
+    return;
+  }
+  if (!optionalUnitStateMatchesPreferences()) {
+    context.textContent = "This shared view uses optional-unit filters recorded in the URL rather than your Settings. Your saved Settings were not changed.";
+    context.hidden = false;
+    return;
+  }
+  context.hidden = true;
+  context.textContent = "";
+}
+
 function hasActiveFilters() {
   return state.armyId || state.declaredFactionId || state.search
-    || state.skillId || state.equipmentId || state.weaponId;
+    || state.skillId || state.equipmentId || state.weaponId
+    || state.troopType || state.classification || state.characteristic
+    || state.ava || state.avaMin || state.avaMax
+    || state.points || state.pointsMin || state.pointsMax
+    || state.swc || state.swcMin || state.swcMax
+    || OPTIONAL_UNIT_KEYS.some((key) => !state[key]);
 }
 
 function domainFilterIdentifier(value) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) ? value : "";
 }
 
+function integerFilterValue(value, { max = Number.MAX_SAFE_INTEGER } = {}) {
+  if (!/^\d+$/.test(value)) return "";
+  const numeric = Number(value);
+  return Number.isSafeInteger(numeric) && numeric <= max ? String(numeric) : "";
+}
+
+function decimalFilterValue(value) {
+  if (!/^\d+(?:\.\d+)?$/.test(value)) return "";
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric >= 0 ? value : "";
+}
+
+function avaExactFilterValue(value) {
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "t" || normalized === "total") return "total";
+  return integerFilterValue(normalized, { max: 99 });
+}
+
+function swcExactFilterValue(value) {
+  const normalized = value.trim();
+  return /^(?:\+)?(?:0|[1-9]\d*)(?:\.\d+)?$/.test(normalized) || normalized === "-"
+    ? normalized : "";
+}
+
+function exactNumericLabel(name, value) {
+  if (name === "ava" && value === "total") return "Total";
+  return value;
+}
+
+function populateNumericFilter(name, metadata) {
+  const control = numericRangeControls[name];
+  if (!control) return;
+  control.exact.replaceChildren(new Option("Any", ""));
+  const values = Array.isArray(metadata?.exact_values) ? metadata.exact_values : [];
+  for (const value of values) {
+    control.exact.add(new Option(exactNumericLabel(name, value), value));
+  }
+  const currentExact = state[name];
+  if (currentExact && !values.includes(currentExact)) {
+    control.exact.add(new Option(`${exactNumericLabel(name, currentExact)} (not present)`, currentExact));
+  }
+  control.exact.disabled = false;
+
+  const range = metadata?.range;
+  if (!range || !Number.isFinite(Number(range.min)) || !Number.isFinite(Number(range.max))) {
+    control.metadata = null;
+    control.minimum.disabled = true;
+    control.maximum.disabled = true;
+    control.minimumValue.textContent = "—";
+    control.maximumValue.textContent = "—";
+    control.container.classList.remove("is-active");
+    control.reset.disabled = true;
+    return;
+  }
+  control.metadata = {
+    min: Number(range.min),
+    max: Number(range.max),
+    step: Number(range.step) || 1,
+  };
+  for (const input of [control.minimum, control.maximum]) {
+    input.min = String(control.metadata.min);
+    input.max = String(control.metadata.max);
+    input.step = String(control.metadata.step);
+    input.disabled = false;
+  }
+}
+
+function rangeDisplayValue(value) {
+  return String(Number(value));
+}
+
+function updateNumericRangeVisuals(control) {
+  if (!control.metadata) return;
+  const minimum = Number(control.minimum.value);
+  const maximum = Number(control.maximum.value);
+  const span = control.metadata.max - control.metadata.min;
+  const start = span ? ((minimum - control.metadata.min) / span) * 100 : 0;
+  const end = span ? ((maximum - control.metadata.min) / span) * 100 : 100;
+  control.container.style.setProperty("--range-start", `${Math.max(0, Math.min(100, start))}%`);
+  control.container.style.setProperty("--range-end", `${Math.max(0, Math.min(100, end))}%`);
+  control.minimumValue.textContent = rangeDisplayValue(minimum);
+  control.maximumValue.textContent = rangeDisplayValue(maximum);
+  const isActive = minimum !== control.metadata.min || maximum !== control.metadata.max;
+  control.container.classList.toggle("is-active", isActive);
+  control.reset.disabled = !isActive;
+}
+
+function syncNumericRangeControl(control) {
+  if (!control.metadata) return;
+  const requestedMinimum = state[control.minimumState];
+  const requestedMaximum = state[control.maximumState];
+  const minimum = requestedMinimum === ""
+    ? control.metadata.min : Number(requestedMinimum);
+  const maximum = requestedMaximum === ""
+    ? control.metadata.max : Number(requestedMaximum);
+  control.minimum.value = String(Math.max(control.metadata.min, Math.min(control.metadata.max, minimum)));
+  control.maximum.value = String(Math.max(control.metadata.min, Math.min(control.metadata.max, maximum)));
+  updateNumericRangeVisuals(control);
+}
+
+function resetNumericRangeControl(control) {
+  if (!control.metadata) return;
+  control.minimum.value = String(control.metadata.min);
+  control.maximum.value = String(control.metadata.max);
+  updateNumericRangeVisuals(control);
+}
+
+function numericRangeStateValue(name, control, input, boundary) {
+  if (!control.metadata) return "";
+  const numeric = Number(input.value);
+  if (numeric === boundary) return "";
+  const value = String(numeric);
+  return name === "swc" ? decimalFilterValue(value) : integerFilterValue(value, { max: name === "ava" ? 99 : Number.MAX_SAFE_INTEGER });
+}
+
+function activateNumericRangeThumb(control, input) {
+  control.minimum.style.zIndex = input === control.minimum ? "5" : "3";
+  control.maximum.style.zIndex = input === control.maximum ? "5" : "4";
+}
+
+function updateNumericRangeFromInput(control, changed) {
+  let minimum = Number(control.minimum.value);
+  let maximum = Number(control.maximum.value);
+  if (minimum > maximum) {
+    if (changed === control.minimum) {
+      control.maximum.value = control.minimum.value;
+      maximum = minimum;
+    } else {
+      control.minimum.value = control.maximum.value;
+      minimum = maximum;
+    }
+  }
+  if (minimum <= maximum) control.exact.value = "";
+  activateNumericRangeThumb(control, changed);
+  updateNumericRangeVisuals(control);
+}
+
 function readLocation() {
-  const params = new URLSearchParams(window.location.search);
+  const { params } = readShareState("units");
+  const optionalUnits = readOptionalUnitLocation(params);
   const offset = Number(params.get("offset") || 0);
   const armyId = params.get("army_id") || "";
   const declaredFactionId = params.get("declared_faction_id") || "";
   const skillId = params.get("skill_id") || "";
   const equipmentId = params.get("equipment_id") || "";
   const weaponId = params.get("weapon_id") || "";
+  const troopType = params.get("troop_type") || "";
+  const classification = params.get("classification") || "";
+  const characteristic = params.get("characteristic") || "";
+  const ava = params.get("ava") || "";
+  const avaMin = params.get("ava_min") || "";
+  const avaMax = params.get("ava_max") || "";
+  const points = params.get("points") || "";
+  const pointsMin = params.get("points_min") || "";
+  const pointsMax = params.get("points_max") || "";
+  const swc = swcExactFilterValue(params.get("swc") || "");
+  const swcMin = decimalFilterValue(params.get("swc_min") || "");
+  const swcMax = decimalFilterValue(params.get("swc_max") || "");
+  const avaExact = avaExactFilterValue(ava);
+  const pointsExact = integerFilterValue(points);
+  const swcExact = swc;
   return {
     armyId: domainFilterIdentifier(armyId),
     declaredFactionId: /^\d+$/.test(declaredFactionId) ? declaredFactionId : "",
     skillId: domainFilterIdentifier(skillId),
     equipmentId: domainFilterIdentifier(equipmentId),
     weaponId: domainFilterIdentifier(weaponId),
+    troopType: domainFilterIdentifier(troopType),
+    classification: domainFilterIdentifier(classification),
+    characteristic: domainFilterIdentifier(characteristic),
+    ava: avaExact,
+    avaMin: avaExact ? "" : integerFilterValue(avaMin, { max: 99 }),
+    avaMax: avaExact ? "" : integerFilterValue(avaMax, { max: 99 }),
+    points: pointsExact,
+    pointsMin: pointsExact ? "" : integerFilterValue(pointsMin),
+    pointsMax: pointsExact ? "" : integerFilterValue(pointsMax),
+    swc: swcExact,
+    swcMin: swcExact ? "" : swcMin,
+    swcMax: swcExact ? "" : swcMax,
     search: (params.get("search") || "").trim().slice(0, 200),
-    mercs: elements.mercs.checked,
-    specops: elements.specops.checked,
-    teamops: elements.teamops.checked,
-    reinforcement: elements.reinforcement.checked,
+    ...optionalUnits.filters,
+    optionalUnitSource: optionalUnits.source,
+    optionalUnitInvalid: optionalUnits.invalid,
     descending: params.get("order") === "desc",
+    extended: params.get("extended") === "1",
     offset: Number.isSafeInteger(offset) && offset >= 0 ? Math.floor(offset / PAGE_SIZE) * PAGE_SIZE : 0,
     limit: PAGE_SIZE,
   };
 }
 
 function writeLocation(replace = false) {
-  const url = new URL(window.location.href);
-  for (const key of ["army_id", "declared_faction_id", "search", "skill_id", "equipment_id", "weapon_id", "offset", "mercs", "specops", "teamops", "reinforcement", "order"]) url.searchParams.delete(key);
-  if (state.armyId) url.searchParams.set("army_id", state.armyId);
-  if (state.declaredFactionId) {
-    url.searchParams.set("declared_faction_id", state.declaredFactionId);
-  }
-  if (state.search) url.searchParams.set("search", state.search);
-  if (state.skillId) url.searchParams.set("skill_id", state.skillId);
-  if (state.equipmentId) url.searchParams.set("equipment_id", state.equipmentId);
-  if (state.weaponId) url.searchParams.set("weapon_id", state.weaponId);
-  if (state.offset) url.searchParams.set("offset", String(state.offset));
-  if (state.descending) url.searchParams.set("order", "desc");
-  if (url.href !== window.location.href) {
-    window.history[replace ? "replaceState" : "pushState"](null, "", url);
-  }
+  const params = new URLSearchParams();
+  if (state.armyId) params.set("army_id", state.armyId);
+  if (state.declaredFactionId) params.set("declared_faction_id", state.declaredFactionId);
+  if (state.search) params.set("search", state.search);
+  if (state.skillId) params.set("skill_id", state.skillId);
+  if (state.equipmentId) params.set("equipment_id", state.equipmentId);
+  if (state.weaponId) params.set("weapon_id", state.weaponId);
+  if (state.troopType) params.set("troop_type", state.troopType);
+  if (state.classification) params.set("classification", state.classification);
+  if (state.characteristic) params.set("characteristic", state.characteristic);
+  if (state.ava) params.set("ava", state.ava);
+  if (state.avaMin) params.set("ava_min", state.avaMin);
+  if (state.avaMax) params.set("ava_max", state.avaMax);
+  if (state.points) params.set("points", state.points);
+  if (state.pointsMin) params.set("points_min", state.pointsMin);
+  if (state.pointsMax) params.set("points_max", state.pointsMax);
+  if (state.swc) params.set("swc", state.swc);
+  if (state.swcMin) params.set("swc_min", state.swcMin);
+  if (state.swcMax) params.set("swc_max", state.swcMax);
+  if (state.offset) params.set("offset", String(state.offset));
+  for (const key of OPTIONAL_UNIT_KEYS) params.set(key, state[key] ? "1" : "0");
+  if (state.descending) params.set("order", "desc");
+  if (state.extended) params.set("extended", "1");
+  writeShareState("units", params, { replace });
 }
 
 function syncFilters() {
@@ -101,6 +376,14 @@ function syncFilters() {
   elements.skill.value = state.skillId;
   elements.equipment.value = state.equipmentId;
   elements.weapon.value = state.weaponId;
+  elements.troopType.value = state.troopType;
+  elements.classification.value = state.classification;
+  elements.characteristic.value = state.characteristic;
+  elements.extended.checked = state.extended;
+  elements.ava.value = state.ava;
+  elements.points.value = state.points;
+  elements.swc.value = state.swc;
+  for (const control of Object.values(numericRangeControls)) syncNumericRangeControl(control);
   elements.mercs.checked = state.mercs;
   elements.specops.checked = state.specops;
   elements.teamops.checked = state.teamops;
@@ -196,9 +479,20 @@ function normalizeCatalogFilterState(items, stateKey) {
   return true;
 }
 
-function populateCatalogFilter(element, items, label) {
+function normalizeUnitFilterState(items, stateKey) {
+  const current = state[stateKey];
+  if (!current || !/^\d+$/.test(current)) return false;
+  const item = items.find((candidate) => String(candidate.id) === current);
+  if (!item?.slug || item.slug === current) return false;
+  state[stateKey] = item.slug;
+  return true;
+}
+
+function populateCatalogFilter(element, items, label, displayName = (item) => item.name) {
   element.replaceChildren(new Option(`All ${label.toLowerCase()}`, ""));
-  for (const item of items) element.add(new Option(item.name, catalogFilterValue(item)));
+  for (const item of items) {
+    element.add(new Option(displayName(item), catalogFilterValue(item)));
+  }
   element.disabled = false;
 }
 
@@ -248,7 +542,7 @@ function renderDeclaredMembershipContext(data) {
 }
 
 function renderUnits(data) {
-  renderUnitRows(elements.list, data.items);
+  renderUnitRows(elements.list, data.items, { extended: state.extended });
   renderAvailabilitySummary(data);
   renderDeclaredMembershipContext(data);
   const hasFilters = Boolean(hasActiveFilters());
@@ -292,8 +586,8 @@ async function load() {
   elements.summary.textContent = "Loading units…";
   try {
     if (!armiesLoaded) {
-      const [armies, skills, equipment, weapons] = await Promise.all([
-        getArmies(signal), getCatalogItems("skills", signal), getCatalogItems("equipment", signal), getCatalogItems("weapons", signal),
+      const [armies, skills, equipment, weapons, unitFilters] = await Promise.all([
+        getArmies(signal), getCatalogItems("skills", signal), getCatalogItems("equipment", signal), getCatalogItems("weapons", signal), getUnitFilters(signal),
       ]);
       if (currentRequest !== requestNumber) return;
       populateArmies(armies.items);
@@ -301,10 +595,22 @@ async function load() {
         normalizeCatalogFilterState(skills.items, "skillId"),
         normalizeCatalogFilterState(equipment.items, "equipmentId"),
         normalizeCatalogFilterState(weapons.items, "weaponId"),
+        normalizeUnitFilterState(unitFilters.troop_types, "troopType"),
+        normalizeUnitFilterState(unitFilters.classifications, "classification"),
+        normalizeUnitFilterState(unitFilters.characteristics, "characteristic"),
       ].some(Boolean);
       populateCatalogFilter(elements.skill, skills.items, "Skills");
       populateCatalogFilter(elements.equipment, equipment.items, "Equipment");
       populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
+      populateCatalogFilter(
+        elements.troopType, unitFilters.troop_types, "Troop types",
+        (item) => troopTypeLabel(item.name),
+      );
+      populateCatalogFilter(elements.classification, unitFilters.classifications, "Classifications");
+      populateCatalogFilter(elements.characteristic, unitFilters.characteristics, "Characteristics");
+      populateNumericFilter("ava", unitFilters.numeric?.ava);
+      populateNumericFilter("points", unitFilters.numeric?.points);
+      populateNumericFilter("swc", unitFilters.numeric?.swc);
       syncFilters();
       if (normalizedCatalogFilters) writeLocation(true);
       armiesLoaded = true;
@@ -333,12 +639,48 @@ function applyFilters() {
   const next = {
     armyId: elements.army.value, search: elements.search.value.trim(),
     skillId: elements.skill.value, equipmentId: elements.equipment.value, weaponId: elements.weapon.value,
+    troopType: elements.troopType.value, classification: elements.classification.value,
+    characteristic: elements.characteristic.value,
+    ava: avaExactFilterValue(elements.ava.value),
+    avaMin: numericRangeStateValue(
+      "ava", numericRangeControls.ava, elements.avaMin,
+      numericRangeControls.ava.metadata?.min,
+    ),
+    avaMax: numericRangeStateValue(
+      "ava", numericRangeControls.ava, elements.avaMax,
+      numericRangeControls.ava.metadata?.max,
+    ),
+    points: integerFilterValue(elements.points.value),
+    pointsMin: numericRangeStateValue(
+      "points", numericRangeControls.points, elements.pointsMin,
+      numericRangeControls.points.metadata?.min,
+    ),
+    pointsMax: numericRangeStateValue(
+      "points", numericRangeControls.points, elements.pointsMax,
+      numericRangeControls.points.metadata?.max,
+    ),
+    swc: swcExactFilterValue(elements.swc.value),
+    swcMin: numericRangeStateValue(
+      "swc", numericRangeControls.swc, elements.swcMin,
+      numericRangeControls.swc.metadata?.min,
+    ),
+    swcMax: numericRangeStateValue(
+      "swc", numericRangeControls.swc, elements.swcMax,
+      numericRangeControls.swc.metadata?.max,
+    ),
     mercs: elements.mercs.checked, specops: elements.specops.checked, teamops: elements.teamops.checked,
     reinforcement: elements.reinforcement.checked,
+    extended: elements.extended.checked,
   };
   if (Object.entries(next).every(([key, value]) => state[key] === value)) return;
-  state = { ...state, ...next, offset: 0 };
+  const optionalChanged = OPTIONAL_UNIT_KEYS.some((key) => state[key] !== next[key]);
+  state = {
+    ...state, ...next, offset: 0,
+    optionalUnitSource: optionalChanged ? "url" : state.optionalUnitSource,
+    optionalUnitInvalid: false,
+  };
   elements.clear.disabled = !hasActiveFilters();
+  renderOptionalUnitContext();
   writeLocation();
   load();
 }
@@ -348,8 +690,14 @@ function clearFilters() {
   state = {
     ...state, armyId: "", declaredFactionId: "", search: "", offset: 0,
     skillId: "", equipmentId: "", weaponId: "",
+    troopType: "", classification: "", characteristic: "",
+    ava: "", avaMin: "", avaMax: "", points: "", pointsMin: "", pointsMax: "",
+    swc: "", swcMin: "", swcMax: "",
+    mercs: true, specops: true, teamops: true, reinforcement: true,
+    optionalUnitSource: "url", optionalUnitInvalid: false,
   };
   syncFilters();
+  renderOptionalUnitContext();
   writeLocation();
   load();
 }
@@ -368,14 +716,38 @@ function toggleSortOrder() {
   load();
 }
 
+function applyNumericExactFilter(control) {
+  resetNumericRangeControl(control);
+  applyFilters();
+}
+
+function resetNumericRangeAndApply(control) {
+  resetNumericRangeControl(control);
+  applyFilters();
+}
+
 elements.filters.addEventListener("submit", (event) => { event.preventDefault(); applyFilters(); });
 elements.army.addEventListener("change", applyFilters);
-for (const filter of [elements.skill, elements.equipment, elements.weapon]) {
+for (const filter of [
+  elements.skill, elements.equipment, elements.weapon,
+  elements.troopType, elements.classification, elements.characteristic,
+]) {
   filter.addEventListener("change", applyFilters);
+}
+for (const control of Object.values(numericRangeControls)) {
+  control.exact.addEventListener("change", () => applyNumericExactFilter(control));
+  control.reset.addEventListener("click", () => resetNumericRangeAndApply(control));
+  for (const input of [control.minimum, control.maximum]) {
+    input.addEventListener("input", () => updateNumericRangeFromInput(control, input));
+    input.addEventListener("change", applyFilters);
+    input.addEventListener("pointerdown", () => activateNumericRangeThumb(control, input));
+    input.addEventListener("focus", () => activateNumericRangeThumb(control, input));
+  }
 }
 for (const filter of [elements.mercs, elements.specops, elements.teamops, elements.reinforcement]) {
   filter.addEventListener("change", applyFilters);
 }
+elements.extended.addEventListener("change", applyFilters);
 elements.search.addEventListener("input", () => {
   clearTimeout(searchTimer);
   elements.clear.disabled = !hasActiveFilters();
@@ -391,16 +763,38 @@ function onPopstate() {
   clearTimeout(searchTimer);
   state = readLocation();
   syncFilters();
+  renderOptionalUnitContext();
+  load();
+}
+
+function onOptionalUnitsChange(event) {
+  const filters = event.detail || optionalUnitFilters();
+  if (OPTIONAL_UNIT_KEYS.every((key) => state[key] === filters[key])) {
+    renderOptionalUnitContext();
+    return;
+  }
+  state = {
+    ...state, ...filters, offset: 0, optionalUnitSource: "preferences", optionalUnitInvalid: false,
+  };
+  syncFilters();
+  renderOptionalUnitContext();
+  writeLocation();
   load();
 }
 
 window.addEventListener("popstate", onPopstate);
+window.addEventListener("optionalunitschange", onOptionalUnitsChange);
+window.addEventListener("distanceunitchange", () => {
+  if (state.extended) load();
+});
 document.addEventListener("infinity:beforenavigation", () => {
   clearTimeout(searchTimer);
   controller?.abort();
   window.removeEventListener("popstate", onPopstate);
+  window.removeEventListener("optionalunitschange", onOptionalUnitsChange);
 }, { once: true });
 
 syncFilters();
+renderOptionalUnitContext();
 writeLocation(true);
 load();

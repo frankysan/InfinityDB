@@ -56,6 +56,13 @@ function text(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
 }
 
+function tableViewport(table, className = "") {
+  const container = document.createElement("div");
+  container.className = `table-viewport${className ? ` ${className}` : ""}`;
+  container.append(table);
+  return container;
+}
+
 function weaponTraitLinks(traits) {
   const fragment = document.createDocumentFragment();
   for (const [index, trait] of traits.entries()) {
@@ -75,9 +82,9 @@ function weaponTraitLinks(traits) {
 
 function traitDescription(description) {
   const section = document.createElement("section");
-  section.className = "explorer surface";
+  section.className = "surface surface--clipped content-frame";
   const heading = document.createElement("h2");
-  heading.className = "data-surface-header";
+  heading.className = "surface-titlebar surface-titlebar--subtle";
   heading.textContent = "Rules summary";
   const text = document.createElement("p");
   text.className = "weapon-profile-stats";
@@ -105,22 +112,29 @@ function rangeBandLabel(maximum) {
 
 function specialWeaponProfile(profile) {
   const card = document.createElement("section");
-  card.className = "explorer surface weapon-profile special-weapon-profile";
+  card.className = "surface surface--clipped content-frame weapon-profile special-weapon-profile";
   const title = document.createElement("h4");
-  title.className = "data-surface-header";
+  title.className = "surface-titlebar surface-titlebar--subtle";
   title.textContent = "Armed Turret profile";
   card.append(title);
 
   const statTable = document.createElement("table");
-  statTable.className = "data-table--compact weapon-statline special-weapon-statline";
+  statTable.className =
+    "data-table--compact data-table--profile weapon-statline special-weapon-statline";
+  const caption = document.createElement("caption");
+  caption.className = "sr-only";
+  caption.textContent = "Armed Turret profile attributes";
   const header = document.createElement("thead");
   const headerRow = document.createElement("tr");
   const valueRow = document.createElement("tr");
   for (const [statLabel, value] of profile.stats) {
     const heading = document.createElement("th");
+    heading.scope = "col";
+    heading.className = "table-column--metric";
     heading.textContent = statLabel;
     headerRow.append(heading);
     const cell = document.createElement("td");
+    cell.className = "table-column--metric";
     cell.dataset.label = statLabel;
     if (statLabel === "MOV") cell.classList.add("movement-value");
     cell.textContent = value;
@@ -129,8 +143,8 @@ function specialWeaponProfile(profile) {
   header.append(headerRow);
   const body = document.createElement("tbody");
   body.append(valueRow);
-  statTable.append(header, body);
-  card.append(statTable);
+  statTable.append(caption, header, body);
+  card.append(tableViewport(statTable));
 
   for (const [label, items] of [["Equipment", profile.equipment], ["Special Skills", profile.skills]]) {
     const row = document.createElement("p");
@@ -156,55 +170,73 @@ function weaponVariants(variants) {
 
     for (const profile of variant.profiles) {
       const card = document.createElement("section");
-      card.className = "explorer surface weapon-profile";
+      card.className = "surface surface--clipped content-frame weapon-profile";
       const profileTitle = profile.mode || profile.name || variant.name;
       const title = document.createElement("h4");
-      title.className = "data-surface-header";
+      title.className = "surface-titlebar surface-titlebar--subtle";
       title.textContent = profileTitle;
       card.append(title);
 
-    const statTable = document.createElement("table");
-    statTable.className = "data-table--compact weapon-statline";
-    statTable.innerHTML = "<thead><tr><th>Ammunition</th><th>B</th><th>PS</th><th>Saving</th></tr></thead>";
-    const statRow = document.createElement("tr");
-    const saving = [profile.saving, profile.saving_num].filter((value) => value !== null && value !== undefined && value !== "").join(" × ");
-    for (const [statLabel, value] of [["Ammunition", profile.ammunition], ["B", profile.burst], ["PS", profile.damage], ["Saving", saving]]) {
-      const cell = document.createElement("td");
-      cell.dataset.label = statLabel;
-      cell.textContent = text(value);
-      statRow.append(cell);
-    }
-    const statBody = document.createElement("tbody");
-    statBody.append(statRow);
-    statTable.append(statBody);
-    card.append(statTable);
-
-    const modifiers = rangeBands.map((maximum) => rangeModifier(profile.ranges, maximum));
-    if (modifiers.some(Boolean)) {
-      const rangeTable = document.createElement("table");
-      rangeTable.className = "data-table--compact weapon-ranges";
-      const rangeHeader = document.createElement("thead");
-      const headerRow = document.createElement("tr");
-      for (const maximum of rangeBands) {
-        const cell = document.createElement("th");
-        cell.textContent = rangeBandLabel(maximum);
-        headerRow.append(cell);
-      }
-      rangeHeader.append(headerRow);
-      const rangeBody = document.createElement("tbody");
-      const rangeRow = document.createElement("tr");
-      for (const [index, maximum] of rangeBands.entries()) {
+      const statTable = document.createElement("table");
+      statTable.className = "data-table--compact data-table--profile weapon-statline";
+      const statCaption = document.createElement("caption");
+      statCaption.className = "sr-only";
+      statCaption.textContent = `${profileTitle} statistics`;
+      statTable.innerHTML = "<thead><tr><th class=\"table-column--descriptor\" scope=\"col\">Ammunition</th><th class=\"table-column--metric\" scope=\"col\">B</th><th class=\"table-column--metric\" scope=\"col\">PS</th><th class=\"table-column--metric\" scope=\"col\">Saving</th></tr></thead>";
+      statTable.prepend(statCaption);
+      const statRow = document.createElement("tr");
+      const saving = [profile.saving, profile.saving_num]
+        .filter((value) => value !== null && value !== undefined && value !== "")
+        .join(" × ");
+      for (const [statLabel, value, role] of [
+        ["Ammunition", profile.ammunition, "descriptor"],
+        ["B", profile.burst, "metric"],
+        ["PS", profile.damage, "metric"],
+        ["Saving", saving, "metric"],
+      ]) {
         const cell = document.createElement("td");
-        cell.dataset.label = rangeBandLabel(maximum);
-        const modifier = modifiers[index];
-        cell.textContent = modifier;
-        if (rangeModifierClasses[modifier]) cell.classList.add(rangeModifierClasses[modifier]);
-        rangeRow.append(cell);
+        cell.className = `table-column--${role}`;
+        cell.dataset.label = statLabel;
+        cell.textContent = text(value);
+        statRow.append(cell);
       }
-      rangeBody.append(rangeRow);
-      rangeTable.append(rangeHeader, rangeBody);
-      card.append(rangeTable);
-    }
+      const statBody = document.createElement("tbody");
+      statBody.append(statRow);
+      statTable.append(statBody);
+      card.append(tableViewport(statTable));
+
+      const modifiers = rangeBands.map((maximum) => rangeModifier(profile.ranges, maximum));
+      if (modifiers.some(Boolean)) {
+        const rangeTable = document.createElement("table");
+        rangeTable.className = "data-table--compact weapon-ranges";
+        const rangeCaption = document.createElement("caption");
+        rangeCaption.className = "sr-only";
+        rangeCaption.textContent = `${profileTitle} range modifiers`;
+        const rangeHeader = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+        for (const maximum of rangeBands) {
+          const cell = document.createElement("th");
+          cell.scope = "col";
+          cell.className = "table-column--metric";
+          cell.textContent = rangeBandLabel(maximum);
+          headerRow.append(cell);
+        }
+        rangeHeader.append(headerRow);
+        const rangeBody = document.createElement("tbody");
+        const rangeRow = document.createElement("tr");
+        for (const [index, maximum] of rangeBands.entries()) {
+          const cell = document.createElement("td");
+          cell.className = "table-column--metric";
+          cell.dataset.label = rangeBandLabel(maximum);
+          const modifier = modifiers[index];
+          cell.textContent = modifier;
+          if (rangeModifierClasses[modifier]) cell.classList.add(rangeModifierClasses[modifier]);
+          rangeRow.append(cell);
+        }
+        rangeBody.append(rangeRow);
+        rangeTable.append(rangeCaption, rangeHeader, rangeBody);
+        card.append(tableViewport(rangeTable));
+      }
 
       if (profile.profile) {
         const profileRow = document.createElement("div");
@@ -246,9 +278,9 @@ function usageSections(item) {
     .sort((a, b) => label(item, a).localeCompare(label(item, b), undefined, { numeric: true }))
     .map((variant) => {
       const section = document.createElement("details");
-      section.className = "explorer army-profile";
+      section.className = "surface surface--clipped content-frame army-profile";
       const summary = document.createElement("summary");
-      summary.className = "data-surface-header army-profile-title";
+      summary.className = "surface-titlebar surface-titlebar--subtle army-profile-title";
       const title = document.createElement("h2");
       title.textContent = label(item, variant);
       const count = document.createElement("span");
@@ -263,13 +295,13 @@ function usageSections(item) {
       section.addEventListener("toggle", () => {
         if (!section.open || section.dataset.loaded) return;
         const table = document.createElement("table");
-        table.className = "data-table--compact";
-        table.innerHTML = "<thead><tr><th>Unit</th><th>Armies</th><th class=\"id-column\">ID</th></tr></thead>";
+        table.className = "data-table--compact data-table--listing data-table--interactive";
+        table.innerHTML = "<caption class=\"sr-only\">Units using this catalog variant</caption><thead><tr><th class=\"table-column--primary\" scope=\"col\">Unit</th><th class=\"table-column--descriptor\" scope=\"col\">Armies</th><th class=\"id-column table-column--technical\" scope=\"col\">ID</th></tr></thead>";
         const body = document.createElement("tbody");
         renderUnitRows(body, variant.units);
         table.append(body);
         const container = document.createElement("div");
-        container.className = "table-container";
+        container.className = "table-viewport";
         container.append(table);
         if (variant.rules?.length) {
           section.append(rulesReferenceSection(variant.rules, "Variant rules"));
@@ -311,7 +343,7 @@ function hackingProgramsSection(programs) {
   const section = document.createElement("section");
   section.className = "detail-group";
   const heading = document.createElement("h2");
-  heading.className = "detail-section-title";
+  heading.className = "detail-heading";
   heading.textContent = "Baseline Hacking Programs";
   const list = document.createElement("ul");
   list.className = "detail-list";

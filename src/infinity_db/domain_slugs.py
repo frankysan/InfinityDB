@@ -159,3 +159,22 @@ def route_slug_from_typed_domain_id(
             f"{expected_domain!r}"
         )
     return require_domain_slug(parts[1], context=f"{context} route slug")
+
+
+def route_slug_from_qualified_typed_domain_id(
+    value: object, *, expected_domain: str, context: str
+) -> str:
+    """Project a qualified typed identity onto one explicit flat route slug.
+
+    This is reserved for catalogs such as General Rules whose canonical records
+    intentionally use qualified IDs (for example ``rule:peripheral-type:servant``).
+    Callers that expose a collection must still reject collisions between the
+    flattened route slugs.
+    """
+
+    identifier = validate_typed_domain_id(
+        value, expected_domain=expected_domain, context=context
+    )
+    parts = identifier.split(":")
+    route_slug = "-".join(parts[1:])
+    return require_domain_slug(route_slug, context=f"{context} route slug")

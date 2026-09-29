@@ -21,14 +21,19 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
 
     assert report["summary"]["sourceTableCount"] == 70
     assert report["summary"]["sourceFieldCount"] == 441
-    assert report["summary"]["confirmedGapCount"] == 2
-    assert report["summary"]["reviewQueueCount"] == 2
+    assert report["summary"]["confirmedGapCount"] == 0
+    assert report["summary"]["deferredOutOfScopeCount"] == 2
     assert sum(report["summary"]["fieldStatusCounts"].values()) == 441
     assert report["rawEvidence"]["status"] == "available"
     assert report["rawEvidence"]["normalizedTableCount"] == 70
 
     assert _field(report, "profiles", "move_1")["status"] == audit.EXPLICIT
-    assert _field(report, "units", "notes")["status"] == audit.UNREPRESENTED
+    assert _field(report, "units", "notes")["status"] == audit.EXPLICIT
+    assert _field(report, "units", "spectables")["status"] == audit.OUT_OF_SCOPE
+    assert _field(report, "loadout_options", "disabled")["status"] == audit.OUT_OF_SCOPE
+    assert _field(report, "loadout_options", "minis")["status"] == audit.OUT_OF_SCOPE
+    assert _field(report, "unit_options", "points")["status"] == audit.EXPLICIT
+    assert _field(report, "unit_option_orders", "order_type")["status"] == audit.EXPLICIT
     assert _field(report, "profiles", "is_structure")["status"] == audit.EXPLICIT
     assert (
         _field(report, "metadata_hacking_programs", "position")["status"]
@@ -53,7 +58,7 @@ def test_source_presentation_audit_records_expected_gap_families(tmp_path: Path)
     report = audit.audit_database(_runtime_database(tmp_path))
     gap_ids = {item["id"] for item in report["confirmedGaps"]}
 
-    assert gap_ids == {"unit_notes", "unit_options"}
+    assert gap_ids == set()
     assert report["applicationEvidence"]["declaredFactionMembershipCount"] == 1
     assert report["applicationEvidence"]["unitOptionCount"] == 1
 
@@ -77,4 +82,6 @@ def test_source_presentation_cli_writes_report(
     captured = capsys.readouterr().out
     assert audit.FORMAT in captured
     assert "70 tables | 441 fields" in captured
-    assert json.loads(output.read_text(encoding="utf-8"))["formatVersion"] == 1
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["formatVersion"] == 2
+    assert payload["summary"]["deferredOutOfScopeCount"] == 2

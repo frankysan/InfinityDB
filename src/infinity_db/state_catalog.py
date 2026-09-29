@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Any
 
 from infinity_db.domain_slugs import route_slug_from_typed_domain_id
@@ -19,11 +20,16 @@ class StateCatalog:
 
     def __init__(self, rules_database: RulesDatabase | None) -> None:
         self.rules_database = rules_database
+        self._records_cache: list[dict[str, Any]] | None = None
 
     def _records(self) -> list[dict[str, Any]]:
-        if self.rules_database is None:
-            return []
-        return self.rules_database.composed_records_by_kind("state")
+        if self._records_cache is None:
+            self._records_cache = (
+                []
+                if self.rules_database is None
+                else self.rules_database.composed_records_by_kind("state")
+            )
+        return self._records_cache
 
     def list_states(self) -> list[dict[str, Any]]:
         """Return player-facing State identities available in the current rules DB."""
@@ -49,6 +55,6 @@ class StateCatalog:
                 "slug": slug,
                 "name": record["name"],
                 "description": record["summary"],
-                "rules": [record],
+                "rules": [deepcopy(record)],
             }
         return None

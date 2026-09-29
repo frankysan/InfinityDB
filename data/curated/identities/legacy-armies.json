@@ -1,0 +1,28 @@
+{
+  "format": "InfinityDB curated legacy armies",
+  "formatVersion": 1,
+  "armies": [
+    {
+      "id": 906,
+      "name": "Spiral Corps",
+      "slug": "spiral-corps",
+      "role": "non_aligned",
+      "groupId": 901,
+      "groupName": "Non-Aligned Armies",
+      "groupSlug": "non-aligned-armies",
+      "logo": "https://assets.corvusbelli.net/army/img/logo/factions/spiral-corps.svg",
+      "reason": "Historical Non-Aligned Army identity removed from the current N5 Army list data."
+    },
+    {
+      "id": 907,
+      "name": "Foreign Company",
+      "slug": "foreign-company",
+      "role": "non_aligned",
+      "groupId": 901,
+      "groupName": "Non-Aligned Armies",
+      "groupSlug": "non-aligned-armies",
+      "logo": "https://assets.corvusbelli.net/army/img/logo/factions/foreign-company.svg",
+      "reason": "Historical Non-Aligned Army identity removed from the current N5 Army list data."
+    }
+  ]
+}

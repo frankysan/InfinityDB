@@ -6,10 +6,24 @@
     <span>Infinity<span class="brand-suffix">DB</span></span>
   </a>
   <div class="sidebar-body">
+    <form class="global-search" action="/search" role="search" data-global-search>
+      <label class="sr-only" for="global-search-query">Search InfinityDB</label>
+      <button class="global-search-toggle" type="button" aria-expanded="false" aria-controls="global-search-query" aria-label="Open search">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="4.8"></circle><path d="m12 12 4.2 4.2"></path></svg>
+      </button>
+      <div class="search-input global-search-input">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="4.8"></circle><path d="m12 12 4.2 4.2"></path></svg>
+        <input id="global-search-query" name="q" type="search" placeholder="Search InfinityDB" autocomplete="off">
+      </div>
+    </form>
     <div class="menu navigation-menu" data-menu>
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="compact-navigation-menu">Navigation <span aria-hidden="true">⌄</span></button>
       <p class="nav-label menu-label">Navigation</p>
       <nav id="compact-navigation-menu" class="compact-menu-panel" aria-label="Main">
+        <a class="nav-item" href="/armies"{{ARMIES_CURRENT}}>
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="6" r="3"/><path d="M4 17c.5-4 2.5-6 6-6s5.5 2 6 6"/></svg>
+          Armies
+        </a>
         <a class="nav-item" href="/units"{{UNIT_EXPLORER_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="12" y="3" width="5" height="5" rx="1"/><rect x="3" y="12" width="5" height="5" rx="1"/><rect x="12" y="12" width="5" height="5" rx="1"/></svg>
           Unit explorer
@@ -26,9 +40,17 @@
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 10h10l3-3 1 1-3 3 3 3-1 1-3-3H3z"/><path d="M6 10V6"/></svg>
           Weapons
         </a>
+        <a class="nav-item" href="/ammunition"{{AMMUNITION_CURRENT}}>
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M7 3h6v5l2 3v6H5v-6l2-3z"/><path d="M7 8h6M7 12h6"/></svg>
+          Ammunition
+        </a>
         <a class="nav-item" href="/traits"{{TRAITS_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m4 5 5-2 7 7-6 6-7-7z"/><circle cx="6.5" cy="6.5" r="1"/></svg>
           Traits
+        </a>
+        <a class="nav-item" href="/labels"{{LABELS_CURRENT}}>
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 5h12v10H4z"/><path d="M7 8h6M7 11h4"/></svg>
+          Labels
         </a>
         <a class="nav-item" href="/states"{{STATES_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="M10 6v4l3 2"/></svg>
@@ -42,6 +64,14 @@
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="6" cy="7" r="2"/><circle cx="14" cy="7" r="2"/><circle cx="10" cy="14" r="2"/><path d="M7.6 8.2 9 12M12.4 8.2 11 12M8 7h4"/></svg>
           Fireteams
         </a>
+        <a class="nav-item" href="/rules"{{RULES_CURRENT}}>
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 3h10v14H5z"/><path d="M8 7h4M8 10h4M8 13h3"/></svg>
+          General Rules
+        </a>
+        <a class="nav-item" href="/glossary"{{GLOSSARY_CURRENT}}>
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 4h5a3 3 0 0 1 3 3v9H7a3 3 0 0 0-3 1z"/><path d="M16 4h-2a3 3 0 0 0-2 1v11h1a3 3 0 0 1 3 1z"/></svg>
+          Glossary
+        </a>
         <a class="nav-item" href="/about"{{ABOUT_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 9v4"/><path d="M10 6.5h.01"/></svg>
           About InfinityDB
@@ -52,44 +82,44 @@
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="settings-menu">Settings <span aria-hidden="true">⌄</span></button>
       <p class="nav-label menu-label">Settings</p>
       <div id="settings-menu" class="compact-menu-panel" aria-label="Settings">
-        <label class="distance-toggle" for="distance-unit-toggle">
-          <span class="distance-toggle-label">Distance</span>
-          <span class="distance-toggle-options"><span>cm</span><input id="distance-unit-toggle" type="checkbox" checked aria-label="Use inches for movement distances"><span>in</span></span>
+        <label class="setting-row setting-row--choice" for="distance-unit-toggle">
+          <span class="setting-label">Distance</span>
+          <span class="setting-choice"><span>cm</span><input id="distance-unit-toggle" class="setting-switch setting-switch--choice" type="checkbox" checked aria-label="Use inches for movement distances"><span>in</span></span>
         </label>
-        <div id="optional-unit-settings">
+        <div id="optional-unit-settings" class="settings-group">
           <span class="settings-group-label">Include optional units</span>
-          <label class="optional-unit-toggle" for="mercs-filter">
-            <span>Mercenaries</span>
-            <input id="mercs-filter" type="checkbox" checked>
+          <label class="setting-row" for="mercs-filter">
+            <span class="setting-label">Mercenaries</span>
+            <input id="mercs-filter" class="setting-switch" type="checkbox" checked>
           </label>
-          <label class="optional-unit-toggle" for="specops-filter">
-            <span>Spec-Ops</span>
-            <input id="specops-filter" type="checkbox" checked>
+          <label class="setting-row" for="specops-filter">
+            <span class="setting-label">Spec-Ops</span>
+            <input id="specops-filter" class="setting-switch" type="checkbox" checked>
           </label>
-          <label class="optional-unit-toggle" for="teamops-filter">
-            <span>Team Operations</span>
-            <input id="teamops-filter" type="checkbox" checked>
+          <label class="setting-row" for="teamops-filter">
+            <span class="setting-label">Team Operations</span>
+            <input id="teamops-filter" class="setting-switch" type="checkbox" checked>
           </label>
-          <label class="optional-unit-toggle" for="reinforcement-filter">
-            <span>Reinforcements</span>
-            <input id="reinforcement-filter" type="checkbox" checked>
+          <label class="setting-row" for="reinforcement-filter">
+            <span class="setting-label">Reinforcements</span>
+            <input id="reinforcement-filter" class="setting-switch" type="checkbox" checked>
           </label>
         </div>
-        <label class="optional-unit-toggle" for="fireteams-include-wildcards-toggle">
-          <span>Fireteams include Wildcards</span>
-          <input id="fireteams-include-wildcards-toggle" type="checkbox" checked>
+        <label class="setting-row" for="fireteams-include-wildcards-toggle">
+          <span class="setting-label">Fireteams include Wildcards</span>
+          <input id="fireteams-include-wildcards-toggle" class="setting-switch" type="checkbox" checked>
         </label>
-        <label class="developer-toggle" for="developer-mode-toggle">
-          <span>Developer mode</span>
-          <input id="developer-mode-toggle" type="checkbox" aria-label="Show database IDs and developer details">
+        <label class="setting-row" for="developer-mode-toggle">
+          <span class="setting-label">Developer mode</span>
+          <input id="developer-mode-toggle" class="setting-switch" type="checkbox" aria-label="Show database IDs and developer details">
         </label>
-        <label class="developer-toggle developer-only" for="disable-cache-toggle">
-          <span>Disable cache</span>
-          <input id="disable-cache-toggle" type="checkbox" aria-label="Disable cached API responses">
+        <label class="setting-row developer-only" for="disable-cache-toggle">
+          <span class="setting-label">Disable cache</span>
+          <input id="disable-cache-toggle" class="setting-switch" type="checkbox" aria-label="Disable cached API responses">
         </label>
-        <label class="remember-settings-toggle" for="remember-settings-toggle">
-          <span>Remember settings</span>
-          <input id="remember-settings-toggle" type="checkbox" aria-label="Remember settings with browser cookies">
+        <label class="setting-row" for="remember-settings-toggle">
+          <span class="setting-label">Remember settings</span>
+          <input id="remember-settings-toggle" class="setting-switch" type="checkbox" aria-label="Remember settings with browser cookies">
         </label>
       </div>
     </div>

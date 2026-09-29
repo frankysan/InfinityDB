@@ -1,5 +1,8 @@
-import { getUnit } from "./api.js";
+import { getUnit, getUnitProfileHelp } from "./api.js";
+import { maintainedTextFragment } from "./maintained-text.js";
+import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
+import { formatMovement, troopTypeLabel } from "./unit-presentation.js";
 import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
@@ -8,22 +11,23 @@ const status = document.getElementById("unit-status");
 const content = document.getElementById("unit-content");
 const pageController = new AbortController();
 const unitIdentifier = /^\/units\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(window.location.pathname)?.[1];
+const requestedArmyIdentifier = readShareState("unit").params.get("army_id") || "";
+writeShareState("unit", requestedArmyIdentifier ? { army_id: requestedArmyIdentifier } : {}, { replace: true });
+let profileHelpEntries = new Map();
+let attributeHelpEntries = new Map();
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
 
-const troopTypeLabels = {
-  LI: "Light Infantry",
-  MI: "Medium Infantry",
-  HI: "Heavy Infantry",
-  REM: "Remote",
-  TAG: "Tactical Armored Gear",
-  WB: "Warband",
-  SK: "Skirmisher",
-  VH: "Vehicle",
-};
-
-function troopTypeLabel(value) {
-  return troopTypeLabels[value] || value;
+function attributeReferenceLabel(label) {
+  const item = attributeHelpEntries.get(label);
+  if (!item) return document.createTextNode(label);
+  return maintainedTextFragment([{
+    type: "reference",
+    target: item.id,
+    label,
+    public_reference: { href: item.href },
+    preview_tokens: [{ type: "text", text: item.description }],
+  }]);
 }
 
 function groupArmiesByFaction(armies) {
@@ -71,7 +75,12 @@ function cell(value) {
   return element;
 }
 
-function attributeStatline(stats, generalStats = null, includeAvailability = false) {
+function attributeStatline(
+  stats,
+  generalStats = null,
+  includeAvailability = false,
+  generalDifferenceLabels = null,
+) {
   const attributes = document.createElement("div");
   attributes.className = "attribute-statline";
   for (const [label, read] of statColumns) {
@@ -82,9 +91,18 @@ function attributeStatline(stats, generalStats = null, includeAvailability = fal
     const attributeValue = document.createElement("span");
     attributeValue.className = "attribute-value";
     const value = displayStatlineValue(read(stats));
-    attributeLabel.textContent = statLabel(label, stats);
+    attributeLabel.append(attributeReferenceLabel(statLabel(label, stats)));
     attributeValue.textContent = text(value);
     attribute.append(attributeLabel, attributeValue);
+    if (generalDifferenceLabels?.has(label)) {
+      const indicator = document.createElement("sup");
+      indicator.className = "general-stat-difference-indicator";
+      indicator.textContent = "*";
+      indicator.title = "One or more Army profiles differ from this General profile stat";
+      indicator.setAttribute("aria-label", indicator.title);
+      attribute.title = indicator.title;
+      attribute.append(indicator);
+    }
     if (generalStats && differsFromGeneral(stats, generalStats, label)) {
       attribute.classList.add("stat-different");
       attribute.title = "Differs from the general profile";
@@ -98,7 +116,7 @@ function attributeStatline(stats, generalStats = null, includeAvailability = fal
     const attributeValue = document.createElement("span");
     attributeLabel.className = "attribute-label";
     attributeValue.className = "attribute-value";
-    attributeLabel.textContent = "AVA";
+    attributeLabel.append(attributeReferenceLabel("AVA"));
     attributeValue.textContent = text(displayAvailability(stats.ava));
     attribute.append(attributeLabel, attributeValue);
     attributes.append(attribute);
@@ -106,13 +124,24 @@ function attributeStatline(stats, generalStats = null, includeAvailability = fal
   return attributes;
 }
 
-function table(headers, rows, className = "") {
+function table(headers, rows, className = "", captionText = "") {
   const element = document.createElement("table");
   element.className = className;
+  if (captionText) {
+    const caption = document.createElement("caption");
+    caption.className = "sr-only";
+    caption.textContent = captionText;
+    element.append(caption);
+  }
   if (headers.length) {
     const head = document.createElement("thead");
     const headerRow = document.createElement("tr");
-    for (const header of headers) { const th = document.createElement("th"); th.textContent = header; headerRow.append(th); }
+    for (const header of headers) {
+      const th = document.createElement("th");
+      th.scope = "col";
+      th.textContent = header;
+      headerRow.append(th);
+    }
     head.append(headerRow);
     element.append(head);
   }
@@ -135,10 +164,77 @@ function heading(label) { const value = document.createElement("h2"); value.text
 
 function subheading(label) { const value = document.createElement("h4"); value.textContent = label; return value; }
 
+function profileHelpTargetId(key) {
+  return `profile-help-${key}`;
+}
+
+function openProfileHelpTarget(key) {
+  const target = document.getElementById(profileHelpTargetId(key));
+  const disclosure = target?.closest("details");
+  if (disclosure) disclosure.open = true;
+}
+
+function profileHelpAnchor(key, ariaLabel = null) {
+  if (!profileHelpEntries.has(key)) return null;
+  const link = document.createElement("a");
+  link.className = "profile-help-link";
+  link.href = `#${profileHelpTargetId(key)}`;
+  if (ariaLabel) link.setAttribute("aria-label", ariaLabel);
+  link.addEventListener("click", () => openProfileHelpTarget(key));
+  return link;
+}
+
+function profileHelpLabel(label, key) {
+  const link = profileHelpAnchor(key);
+  if (!link) return document.createTextNode(label);
+  link.textContent = label;
+  return link;
+}
+
+function renderProfileNotationHelp(items) {
+  if (!items.length) return null;
+  const disclosure = document.createElement("details");
+  disclosure.id = "profile-notation-help";
+  disclosure.className = "surface surface--subtle surface--clipped content-frame profile-notation-help";
+
+  const summary = document.createElement("summary");
+  const title = document.createElement("span");
+  title.className = "profile-help-summary-title";
+  title.textContent = "Profile notation";
+  const hint = document.createElement("span");
+  hint.className = "profile-help-summary-hint";
+  hint.textContent = "How to read Unit Profiles";
+  summary.append(title, hint);
+  disclosure.append(summary);
+
+  const body = document.createElement("div");
+  body.className = "profile-help-body";
+  const intro = document.createElement("p");
+  intro.className = "profile-help-intro";
+  intro.textContent = "InfinityDB keeps profile domains separate rather than flattening "
+    + "the source notation. These notes explain the fields and symbols used below.";
+  body.append(intro);
+
+  const grid = document.createElement("div");
+  grid.className = "profile-help-grid";
+  for (const item of items) {
+    const entry = document.createElement("article");
+    entry.id = profileHelpTargetId(item.key);
+    entry.className = "profile-help-entry";
+    const heading = document.createElement("h3");
+    heading.textContent = item.name;
+    const copy = document.createElement("p");
+    copy.textContent = item.summary;
+    entry.append(heading, copy);
+    grid.append(entry);
+  }
+  body.append(grid);
+  disclosure.append(body);
+  return disclosure;
+}
+
 const statColumns = [
-  ["MOV", (profile) => distanceUnit() === "in"
-    ? `${inches(profile.move_1)}-${inches(profile.move_2)}`
-    : `${text(profile.move_1)}-${text(profile.move_2)}`],
+  ["MOV", (profile) => formatMovement(profile.move_1, profile.move_2, distanceUnit())],
   ["CC", (profile) => profile.cc], ["BS", (profile) => profile.bs],
   ["PH", (profile) => profile.ph], ["WIP", (profile) => profile.wip],
   ["ARM", (profile) => profile.arm], ["BTS", (profile) => profile.bts],
@@ -174,12 +270,6 @@ function mostCommon(profiles, property) {
     }
   }
   return selected;
-}
-
-function inches(centimeters) {
-  if (centimeters == null || centimeters === "") return "—";
-  const value = Number(centimeters) / 2.5;
-  return Number.isFinite(value) ? String(value) : "—";
 }
 
 function generalStats(profiles) {
@@ -236,6 +326,15 @@ const symbolCategories = {
   hackable: "characteristics",
   cube: "characteristics",
   "cube-2": "characteristics",
+};
+
+const symbolHelpKeys = {
+  regular: "training-orders",
+  irregular: "training-orders",
+  tactical: "training-orders",
+  lieutenant: "training-orders",
+  peripheral: "peripheral",
+  hackable: "hackable",
 };
 
 function prominentOrderType(loadouts) {
@@ -330,18 +429,27 @@ function nameWithOrderSymbols(nameText, symbolTypes) {
   name.className = "order-symbol-name";
   for (const descriptor of symbolTypes) {
     const symbolType = typeof descriptor === "string" ? descriptor : descriptor.type;
+    const href = typeof descriptor === "string" ? null : descriptor.href;
+    const helpKey = symbolHelpKeys[symbolType];
+    const helpLink = !href
+      ? profileHelpAnchor(helpKey, `${symbolLabels[symbolType]} profile help`)
+      : null;
     const symbol = document.createElement("img");
     symbol.className = "order-symbol";
     symbol.src = `/static/${symbolCategories[symbolType]}/${symbolType}.svg`;
-    symbol.alt = descriptor.href ? "" : symbolLabels[symbolType];
+    symbol.alt = href || helpLink ? "" : symbolLabels[symbolType];
     symbol.title = symbolLabels[symbolType];
-    if (descriptor.href) {
+    if (href) {
       const link = document.createElement("a");
       link.className = "profile-symbol-link";
-      link.href = descriptor.href;
+      link.href = href;
       link.setAttribute("aria-label", `${symbolLabels[symbolType]} equipment`);
       link.append(symbol);
       name.append(link);
+    } else if (helpLink) {
+      helpLink.classList.add("profile-symbol-help-link");
+      helpLink.append(symbol);
+      name.append(helpLink);
     } else {
       name.append(symbol);
     }
@@ -409,6 +517,7 @@ function generalProfiles(profiles, loadouts) {
     const row = {
       profileName,
       stats,
+      sourceProfiles: matchingProfiles,
       orderType: generalProfileOrderType(matchingProfiles, matchingLoadouts),
       type: mostCommon(matchingProfiles, "type"),
       classification: mostCommon(matchingProfiles, "classification"),
@@ -498,6 +607,14 @@ function differsFromGeneral(profile, general, label) {
     return true;
   }
   return profile[statProperties[label]] !== general[statProperties[label]];
+}
+
+function generalStatDifferenceLabels(profile) {
+  return new Set(statColumns
+    .filter(([label]) => profile.sourceProfiles.some((armyProfile) => (
+      differsFromGeneral(armyProfile, profile.stats, label)
+    )))
+    .map(([label]) => label));
 }
 
 function profileItems(items, catalog, fallbackLabel) {
@@ -629,7 +746,7 @@ function peripheralAccessItems(accessItems) {
 function appendPeripheralRows(rows, item, colSpan = null) {
   if ((item.peripherals || []).length) {
     rows.push([
-      { value: "Peripherals", header: true, className: "data-label profile-item-label" },
+      { content: profileHelpLabel("Peripherals", "peripheral"), header: true, className: "data-label profile-item-label" },
       {
         content: peripheralItems(item.peripherals),
         className: "profile-item-list",
@@ -639,7 +756,7 @@ function appendPeripheralRows(rows, item, colSpan = null) {
   }
   if ((item.peripheral_access || []).length) {
     rows.push([
-      { value: "Controller access", header: true, className: "data-label profile-item-label" },
+      { content: profileHelpLabel("Controller access", "peripheral"), header: true, className: "data-label profile-item-label" },
       {
         content: peripheralAccessItems(item.peripheral_access),
         className: "profile-item-list",
@@ -770,16 +887,65 @@ function appendRelationProvenance(item, relation) {
 function armyExplorerLink(army) {
   const link = document.createElement("a");
   const identifier = army.public_slug || army.slug || army.id;
-  link.href = `/units?army_id=${encodeURIComponent(identifier)}`;
+  link.href = shareStateHref("/units", "units", { army_id: identifier });
   link.textContent = army.name || `Army ${army.id}`;
   return link;
 }
 
 function declaredFactionLink(membership) {
   const link = document.createElement("a");
-  link.href = `/units?declared_faction_id=${encodeURIComponent(membership.source_faction_id)}`;
+  link.href = shareStateHref("/units", "units", { declared_faction_id: membership.source_faction_id });
   link.textContent = membership.name || `Faction ${membership.source_faction_id}`;
   return link;
+}
+
+function renderSourceNotes(unit, armies) {
+  const sourceNotes = unit.source_notes || [];
+  if (!sourceNotes.length) return null;
+  const shownArmyIds = new Set(armies.map((army) => Number(army.id)));
+
+  const section = document.createElement("section");
+  section.className = "detail-group source-notes";
+  const title = heading("Source notes");
+  title.className = "detail-heading detail-heading--rule";
+  section.append(title);
+
+  const surface = document.createElement("div");
+  surface.className = "surface surface--clipped content-frame connected-unit-surface source-notes-surface";
+  const intro = document.createElement("p");
+  intro.className = "army-relationship-intro developer-only";
+  intro.textContent = "Each note applies only to its named source variant and Army context; "
+    + "it is not a rule for every profile shown for this Unit.";
+  surface.append(intro);
+
+  const list = document.createElement("ul");
+  list.className = "detail-list connected-unit-list";
+  for (const sourceNote of sourceNotes) {
+    const item = document.createElement("li");
+    const sourceName = document.createElement("strong");
+    sourceName.textContent = sourceNote.source_name;
+    item.append(sourceName, ": ", sourceNote.note);
+    const noteArmyIds = new Set(sourceNote.armies.map((army) => Number(army.id)));
+    const appliesToAllShownArmies = shownArmyIds.size > 0
+      && [...shownArmyIds].every((armyId) => noteArmyIds.has(armyId));
+    if (sourceNote.armies.length && !appliesToAllShownArmies) {
+      item.append(" Applies in ");
+      sourceNote.armies.forEach((army, index) => {
+        if (index) item.append(index === sourceNote.armies.length - 1 ? " and " : ", ");
+        item.append(armyExplorerLink(army));
+      });
+      item.append(".");
+    }
+    const provenance = document.createElement("span");
+    provenance.className = "developer-only";
+    provenance.textContent = ` Â· Source Unit #${sourceNote.source_unit_id}`
+      + (sourceNote.is_representative ? " (representative)" : "");
+    item.append(provenance);
+    list.append(item);
+  }
+  surface.append(list);
+  section.append(surface);
+  return section;
 }
 
 function renderArmyRelationships(unit, armies) {
@@ -793,11 +959,11 @@ function renderArmyRelationships(unit, armies) {
   const section = document.createElement("section");
   section.className = "detail-group army-relationships developer-only";
   const title = heading("Army relationships");
-  title.className = "detail-section-title detail-section-title--rule";
+  title.className = "detail-heading detail-heading--rule";
   section.append(title);
 
   const surface = document.createElement("div");
-  surface.className = "explorer connected-unit-surface army-relationship-surface";
+  surface.className = "surface surface--clipped content-frame connected-unit-surface army-relationship-surface";
   const intro = document.createElement("p");
   intro.className = "army-relationship-intro";
   intro.textContent = "Army availability is shown in the profile sections below. These links show "
@@ -880,13 +1046,13 @@ function renderSelectionRelationships(unit, armies) {
   if (!constraints.length && !dependencies.length) return null;
 
   const section = document.createElement("section");
-  section.className = "detail-group selection-relationships";
+  section.className = "detail-group selection-relationships developer-only";
   const title = heading("Selection relationships");
-  title.className = "detail-section-title detail-section-title--rule";
+  title.className = "detail-heading detail-heading--rule";
   section.append(title);
 
   const surface = document.createElement("div");
-  surface.className = "explorer connected-unit-surface selection-relationship-surface";
+  surface.className = "surface surface--clipped content-frame connected-unit-surface selection-relationship-surface";
   const intro = document.createElement("p");
   intro.className = "selection-relationship-intro";
   intro.textContent = "These source-defined relationships explain linked choices only; "
@@ -977,11 +1143,11 @@ function renderPeripheralRelationships(unit) {
   const section = document.createElement("section");
   section.className = "detail-group peripheral-relationships";
   const title = heading("Peripheral relationships");
-  title.className = "detail-section-title detail-section-title--rule";
+  title.className = "detail-heading detail-heading--rule";
   section.append(title);
 
   const surface = document.createElement("div");
-  surface.className = "explorer connected-unit-surface";
+  surface.className = "surface surface--clipped content-frame connected-unit-surface";
   if (typeIds.length) {
     const type = document.createElement("p");
     type.className = "connected-unit-type";
@@ -1024,17 +1190,25 @@ function generalProfileTableRows(profiles) {
   for (const profile of profiles) {
     rows.push(
       [
-        { value: "Type", header: true, className: "data-label general-item-label" },
+        { content: profileHelpLabel("Type", "troop-type"), header: true, className: "data-label general-item-label" },
         { value: troopTypeLabel(profile.type), className: "general-item-list" },
       ],
       [
-        { value: "Classification", header: true, className: "data-label general-item-label" },
+        { content: profileHelpLabel("Classification", "classification"), header: true, className: "data-label general-item-label" },
         { value: profile.classification, className: "general-item-list" },
       ],
     );
     rows.push([
-      { value: "Attributes", header: true, className: "data-label profile-attributes-label" },
-      { content: attributeStatline(profile.stats), className: "profile-attributes" },
+      { content: profileHelpLabel("Attributes", "attributes"), header: true, className: "data-label profile-attributes-label" },
+      {
+        content: attributeStatline(
+          profile.stats,
+          null,
+          false,
+          generalStatDifferenceLabels(profile),
+        ),
+        className: "profile-attributes",
+      },
     ]);
     for (const [label, property, fallbackLabel] of [
       ["Skills", "skills", "Skill"],
@@ -1043,7 +1217,13 @@ function generalProfileTableRows(profiles) {
     ]) {
       if (!profile.sharedItems[property].length) continue;
       rows.push([
-        { value: label, className: "data-label general-item-label" },
+        {
+          content: profileHelpLabel(
+            label,
+            ["Equipment", "Weapons"].includes(label) ? "equipment-weapons" : null,
+          ),
+          className: "data-label general-item-label",
+        },
         {
           content: profileItems(profile.sharedItems[property], property, fallbackLabel),
           className: "general-item-list",
@@ -1062,7 +1242,7 @@ function profileTableRows(profiles, generalByName, anchorScope) {
     const profileRow = [{ content: profileNameWithDivisionBadge(profile), header: true, colSpan: 2 }];
     profileRow.className = "profile-summary";
     const rows = [profileRow, [
-      { value: "Attributes", header: true, className: "data-label profile-attributes-label" },
+      { content: profileHelpLabel("Attributes", "attributes"), header: true, className: "data-label profile-attributes-label" },
       {
         content: attributeStatline(profile, generalStatsForProfile, true),
         className: "profile-attributes",
@@ -1076,7 +1256,14 @@ function profileTableRows(profiles, generalByName, anchorScope) {
       const items = withoutSharedItems(profile[property], sharedItems[property]);
       if (!items.length) continue;
       rows.push([
-        { value: label, header: true, className: "data-label profile-item-label" },
+        {
+          content: profileHelpLabel(
+            label,
+            ["Equipment", "Weapons"].includes(label) ? "equipment-weapons" : null,
+          ),
+          header: true,
+          className: "data-label profile-item-label",
+        },
         {
           content: profileItems(items, property, fallbackLabel),
           className: "profile-item-list",
@@ -1139,7 +1326,14 @@ function loadoutTable(loadouts, sharedItems, generalOrderType, anchorScope, anch
         const items = withoutSharedItems(loadout[property], sharedItems[property]);
         if (!items.length) continue;
         rows.push([
-          { value: label, header: true, className: "data-label profile-item-label" },
+          {
+          content: profileHelpLabel(
+            label,
+            ["Equipment", "Weapons"].includes(label) ? "equipment-weapons" : null,
+          ),
+          header: true,
+          className: "data-label profile-item-label",
+        },
           {
             content: profileItems(items, property, fallbackLabel),
             className: "profile-item-list",
@@ -1152,6 +1346,7 @@ function loadoutTable(loadouts, sharedItems, generalOrderType, anchorScope, anch
       return rows;
     }),
     "data-table--compact loadout-table",
+    "Loadouts",
   );
 }
 
@@ -1212,40 +1407,78 @@ function isStandardArmy(army) {
   return !flags.includes("mercs") && !flags.includes("reinforcement");
 }
 
+function isRequestedArmy(army) {
+  if (!requestedArmyIdentifier) return false;
+  return [army.public_slug, army.slug, String(army.id)].includes(requestedArmyIdentifier);
+}
+
 function isEnabledArmy(army) {
   const filters = optionalUnitFilters();
   return (army.availability_flags || []).every((flag) => filters[flag]);
 }
 
-function unitOptionIncludeTable(options, anchorScope) {
+function compositeOptionOrderSummary(orders) {
+  return orders.map((order) => {
+    const count = Number(order.list) || Number(order.total) || 1;
+    const type = String(order.type || "").toLowerCase();
+    const singular = symbolLabels[type] || `${text(order.type)} Order`;
+    const label = count === 1 ? singular : singular.replace(/Order$/, "Orders");
+    return `${count} ${label}`;
+  }).join(", ");
+}
+
+function compositeOptionTable(options, anchorScope) {
   return table(
-    ["Option", "Includes"],
-    options.map((option) => {
+    ["Composite option", "PTS", "SWC"],
+    options.flatMap((option, index) => {
       const optionName = document.createDocumentFragment();
-      optionName.append(document.createTextNode(text(option.name)));
+      const symbolTypes = [...new Set((option.orders || [])
+        .map((order) => String(order.type || "").toLowerCase())
+        .filter((type) => symbolLabels[type]))];
+      optionName.append(nameWithOrderSymbols(option.name, symbolTypes));
       const sourceId = document.createElement("span");
       sourceId.className = "developer-only";
       sourceId.textContent = ` (Unit #${option.source_unit_id}, option #${option.option_id})`;
       optionName.append(sourceId);
-      return [
+      const rows = [[
         { content: optionName },
-        {
-          content: includeItems(option.includes || [], anchorScope),
-          className: "profile-item-list",
-        },
-      ];
+        option.points,
+        option.swc,
+      ]];
+      rows[0].className = index ? "profile-summary loadout-start" : "profile-summary";
+      if (option.minis != null) {
+        rows.push([
+          { value: "Miniatures", header: true, className: "data-label profile-item-label" },
+          { value: option.minis, colSpan: 2 },
+        ]);
+      }
+      if ((option.orders || []).length) {
+        rows.push([
+          { value: "Orders", header: true, className: "data-label profile-item-label" },
+          { value: compositeOptionOrderSummary(option.orders), colSpan: 2 },
+        ]);
+      }
+      appendIncludeRows(rows, option, anchorScope, 2);
+      if (option.disabled) {
+        rows.push([
+          { value: "Availability", header: true, className: "data-label profile-item-label" },
+          { value: "Unavailable in this source data", colSpan: 2 },
+        ]);
+      }
+      return rows;
     }),
-    "data-table--compact unit-option-includes-table",
+    "data-table--compact composite-option-table",
+    "Composite options",
   );
 }
 
 function renderArmyProfile(army, generalByName, expanded) {
   const section = document.createElement("details");
   const anchorScope = [army.id, ...(army.availability_flags || [])].join("-");
-  section.className = "explorer army-profile";
+  section.className = "surface surface--clipped content-frame army-profile";
   section.open = expanded;
   const armyHeading = document.createElement("summary");
-  armyHeading.className = "data-surface-header army-profile-title";
+  armyHeading.className = "surface-titlebar surface-titlebar--subtle army-profile-title";
   armyHeading.textContent = army.name;
   const symbol = staticSymbolPath(army.symbol_path);
   if (symbol) {
@@ -1262,9 +1495,9 @@ function renderArmyProfile(army, generalByName, expanded) {
   }
   armyHeading.append(availabilityBadges(army.availability_flags));
   section.append(armyHeading);
-  if ((army.unit_option_includes || []).length) {
-    section.append(subheading("Included loadouts"));
-    section.append(unitOptionIncludeTable(army.unit_option_includes, anchorScope));
+  if ((army.composite_options || []).length) {
+    section.append(subheading("Composite options"));
+    section.append(compositeOptionTable(army.composite_options, anchorScope));
   }
   const anchoredPayloads = new Set();
   for (const group of profileLoadoutGroups(army)) {
@@ -1280,6 +1513,7 @@ function renderArmyProfile(army, generalByName, expanded) {
         [],
         profileTableRows(group.profiles, generalByName, anchorScope),
         "data-table--compact profile-details-table",
+        "Profiles",
       ));
     }
     if (group.loadouts.length) {
@@ -1298,8 +1532,13 @@ function renderArmyProfile(army, generalByName, expanded) {
   return section;
 }
 
-function render(unit) {
+function render(unit, helpItems = [], attributeItems = []) {
   content.replaceChildren();
+  profileHelpEntries = new Map(helpItems.map((item) => [item.key, item]));
+  attributeHelpEntries = new Map(attributeItems.map((item) => [
+    item.id.split(":").at(-1).toUpperCase(),
+    item,
+  ]));
   document.title = `${unit.name} · InfinityDB`;
   name.textContent = unit.name;
   const displayArmySymbol = staticSymbolPath(unit.display_army_symbol_path);
@@ -1326,7 +1565,8 @@ function render(unit) {
   unitIds.textContent = `${unitMetadata.length ? " · " : ""}Unit ${unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ")}`;
   meta.append(unitIds);
   status.hidden = true;
-  const armies = unit.armies.filter(isEnabledArmy);
+  const requestedArmy = unit.armies.find(isRequestedArmy);
+  const armies = unit.armies.filter((army) => isEnabledArmy(army) || army === requestedArmy);
   const allProfiles = armies.flatMap((army) => army.profiles.map((profile) => ({
     ...profile,
     armyId: army.id,
@@ -1346,20 +1586,25 @@ function render(unit) {
   const generalHeading = heading(
     displayedGeneralProfiles.length === 1 ? "General profile" : "General profiles",
   );
-  generalHeading.className = "detail-section-title detail-section-title--rule";
+  generalHeading.className = "detail-heading detail-heading--rule";
   generalProfilesSection.append(generalHeading);
   for (const profile of displayedGeneralProfiles) {
     const generalProfile = document.createElement("section");
-    generalProfile.className = "explorer general-profile";
+    generalProfile.className = "surface content-frame general-profile";
     const profileSymbols = generalProfileSymbols(profile);
     generalProfile.append(profileTitle(profile, profileSymbols), table(
       [],
       generalProfileTableRows([profile]),
       "statline",
+      `${profile.name || "Unit"} general profile`,
     ));
     generalProfilesSection.append(generalProfile);
   }
+  const profileHelp = renderProfileNotationHelp(helpItems);
+  if (profileHelp) content.append(profileHelp);
   content.append(generalProfilesSection);
+  const sourceNotes = renderSourceNotes(unit, armies);
+  if (sourceNotes) content.append(sourceNotes);
   const armyRelationships = renderArmyRelationships(unit, unit.armies);
   if (armyRelationships) content.append(armyRelationships);
   const peripheralRelationships = renderPeripheralRelationships(unit);
@@ -1367,17 +1612,20 @@ function render(unit) {
   const selectionRelationships = renderSelectionRelationships(unit, armies);
   if (selectionRelationships) content.append(selectionRelationships);
   let standardArmyExpanded = false;
+  const hasRequestedArmy = Boolean(requestedArmy);
   for (const group of groupArmiesByFaction(armies)) {
     const section = document.createElement("section");
     section.className = "detail-group faction-profile-group";
     const groupHeading = heading(group.name);
-    groupHeading.className = "detail-section-title detail-section-title--rule";
+    groupHeading.className = "detail-heading detail-heading--rule";
     section.append(groupHeading);
     const profiles = document.createElement("div");
     profiles.className = "detail-group faction-profile-grid";
     for (const army of group.armies) {
-      const expanded = !standardArmyExpanded && isStandardArmy(army);
-      if (expanded) standardArmyExpanded = true;
+      const expanded = hasRequestedArmy
+        ? army === requestedArmy
+        : !standardArmyExpanded && isStandardArmy(army);
+      if (!hasRequestedArmy && expanded) standardArmyExpanded = true;
       profiles.append(renderArmyProfile(army, generalByName, expanded));
     }
     section.append(profiles);
@@ -1396,12 +1644,20 @@ initializeDistanceUnitToggle();
 if (!unitIdentifier) {
   status.textContent = "The requested unit address is invalid.";
 } else {
-  getUnit(unitIdentifier, pageController.signal).then((unit) => {
-    render(unit);
-    window.addEventListener("distanceunitchange", () => render(unit), {
+  Promise.all([
+    getUnit(unitIdentifier, pageController.signal),
+    getUnitProfileHelp(pageController.signal).catch((error) => {
+      if (error.name === "AbortError") throw error;
+      return { items: [] };
+    }),
+  ]).then(([unit, help]) => {
+    const helpItems = help.items || [];
+    const attributeItems = help.attributes || [];
+    render(unit, helpItems, attributeItems);
+    window.addEventListener("distanceunitchange", () => render(unit, helpItems, attributeItems), {
       signal: pageController.signal,
     });
-    window.addEventListener("optionalunitschange", () => render(unit), {
+    window.addEventListener("optionalunitschange", () => render(unit, helpItems, attributeItems), {
       signal: pageController.signal,
     });
   }).catch((error) => {

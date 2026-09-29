@@ -12,6 +12,11 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
+from infinity_db.maintained_text import maintained_text_fields, maintained_text_targets
+from infinity_db.maintained_text_policy import (
+    inferred_review_policy_path,
+    validate_maintained_text_link_coverage,
+)
 from infinity_db.rule_relations import relation_presentation
 from infinity_db.sqlite_determinism import (
     configure_deterministic_sqlite,
@@ -170,6 +175,7 @@ def _create_schema(connection: sqlite3.Connection) -> None:
 def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
     collection_ids: set[str] = set()
     current_records: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
+    current_labels: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
     for path, document in documents:
         collection_id = document["collection"]["id"]
         if collection_id in collection_ids:
@@ -177,8 +183,31 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
         collection_ids.add(collection_id)
         if document["collection"]["status"] != "current":
             continue
+        for label in document["labels"]:
+            current_labels.setdefault(label["id"], []).append((path, label))
         for record in document["records"]:
             current_records.setdefault(record["id"], []).append((path, record))
+
+    for label_id, definitions in current_labels.items():
+        semantics = {(label["name"], label["description"]) for _, label in definitions}
+        if len(semantics) > 1:
+            sources = ", ".join(str(path) for path, _ in definitions)
+            raise ValueError(
+                f"Current rules label {label_id!r} has conflicting canonical "
+                f"definitions across {sources}"
+            )
+
+    current_label_ids = set(current_labels)
+    for path, document in documents:
+        if document["collection"]["status"] != "current":
+            continue
+        for record in document["records"]:
+            for label_id in record.get("labelIds", []):
+                if label_id not in current_label_ids:
+                    raise ValueError(
+                        f"Current rules label reference {label_id!r} in {path}:{record['id']} "
+                        "does not resolve to a current canonical Label"
+                    )
 
     current_ids = set(current_records)
     definitions_by_id: dict[str, tuple[Path, dict[str, Any]]] = {}
@@ -203,6 +232,19 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
                     raise ValueError(
                         f"Current rules relation {record_id!r} -> {target_id!r} in {path} "
                         "does not resolve to a current semantic record"
+                    )
+
+    for path, document in documents:
+        if document["collection"]["status"] != "current":
+            continue
+        for text_context, text in maintained_text_fields(document):
+            for target_id in maintained_text_targets(
+                text, context=f"{path}:{text_context}"
+            ):
+                if target_id not in current_ids:
+                    raise ValueError(
+                        f"Maintained-text reference {target_id!r} in "
+                        f"{path}:{text_context} does not resolve to a current semantic record"
                     )
 
     for record_id, (path, definition) in definitions_by_id.items():
@@ -238,6 +280,10 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
                 f"Source-specific rules record {record_id!r} requires family target "
                 f"{family_id!r} to declare family inheritance"
             )
+
+    review_policy_path = inferred_review_policy_path(documents)
+    if review_policy_path is not None:
+        validate_maintained_text_link_coverage(documents, review_policy_path)
 
 
 def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -> None:
@@ -588,13 +634,34 @@ class RulesDatabase:
             }
             label_ids = record["label_ids"]
             if label_ids:
-                placeholders = ", ".join("?" for _ in label_ids)
-                label_rows = connection.execute(
-                    "SELECT id, name, description FROM labels "
-                    "WHERE collection_id = ? AND id IN (" + placeholders + ")",
-                    (row["collection_id"], *label_ids),
-                ).fetchall()
-                record["labels"] = [dict(label) for label in label_rows]
+                labels_by_id = {
+                    label["id"]: dict(label)
+                    for label in connection.execute(
+                        "SELECT id, name, description FROM labels "
+                        "WHERE collection_id = ? AND id IN ("
+                        + ", ".join("?" for _ in label_ids)
+                        + ")",
+                        (row["collection_id"], *label_ids),
+                    ).fetchall()
+                }
+                if collection["status"] == "current":
+                    missing_ids = [
+                        label_id for label_id in label_ids if label_id not in labels_by_id
+                    ]
+                    if missing_ids:
+                        placeholders = ", ".join("?" for _ in missing_ids)
+                        for label in connection.execute(
+                            "SELECT l.id, l.name, l.description FROM labels AS l "
+                            "JOIN collections AS c ON c.id = l.collection_id "
+                            "WHERE c.status = 'current' AND l.id IN (" + placeholders + ")",
+                            tuple(missing_ids),
+                        ).fetchall():
+                            labels_by_id[label["id"]] = dict(label)
+                record["labels"] = [
+                    labels_by_id[label_id]
+                    for label_id in label_ids
+                    if label_id in labels_by_id
+                ]
             facts = record["facts"]
             if isinstance(facts, dict):
                 type_ids = facts.get("typeIds")
@@ -734,7 +801,7 @@ class RulesDatabase:
             return {}
         placeholders = ", ".join("?" for _ in record_ids)
         rows = connection.execute(
-            "SELECT r.collection_id, r.id, r.kind, r.name "
+            "SELECT r.collection_id, r.id, r.kind, r.name, r.facts_json "
             "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
             "WHERE r.id IN (" + placeholders + ") "
             "AND r.composition_role = 'definition' AND c.status = 'current' "
@@ -761,6 +828,11 @@ class RulesDatabase:
                 "name": row["name"],
                 "army_links": links,
             }
+            if row["kind"] == "rule":
+                facts = _decode_json(row["facts_json"], {})
+                category = facts.get("category") if isinstance(facts, dict) else None
+                if isinstance(category, str):
+                    endpoints[row["id"]]["facts"] = {"category": category}
         return endpoints
 
     @classmethod
@@ -849,6 +921,62 @@ class RulesDatabase:
             self._attach_reverse_relations(connection, records)
             return records
 
+    @staticmethod
+    def _attach_current_army_links(
+        connection: sqlite3.Connection, records: list[dict[str, Any]]
+    ) -> None:
+        """Attach current Army/application links to composed semantic records."""
+
+        for record in records:
+            links = connection.execute(
+                "SELECT l.entity, l.external_id, l.external_name "
+                "FROM record_army_links AS l JOIN collections AS c "
+                "ON c.id = l.collection_id "
+                "WHERE l.record_id = ? AND c.status = 'current' "
+                "ORDER BY l.collection_id, l.position",
+                (record["id"],),
+            ).fetchall()
+            if not links:
+                continue
+            army_links: list[dict[str, str]] = []
+            for link in links:
+                item = {"entity": str(link["entity"])}
+                if link["external_id"] is not None:
+                    item["id"] = str(link["external_id"])
+                if link["external_name"] is not None:
+                    item["name"] = str(link["external_name"])
+                army_links.append(item)
+            record["army_links"] = army_links
+
+    def composed_record(
+        self, record_id: str, *, include_army_links: bool = False
+    ) -> dict[str, Any] | None:
+        """Return one current semantic record with supplements attached.
+
+        Army/application links remain opt-in so ordinary rules payloads stay bounded.
+        Consumers that must resolve a public application route can request them.
+        """
+
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT r.* FROM records AS r JOIN collections AS c "
+                "ON c.id = r.collection_id "
+                "WHERE r.id = ? AND c.status = 'current' "
+                "ORDER BY r.collection_id",
+                (record_id,),
+            ).fetchall()
+            if not rows:
+                return None
+            records = self._compose_records(self._records_from_rows(connection, rows))
+            self._attach_reverse_relations(connection, records)
+            if include_army_links:
+                self._attach_current_army_links(connection, records)
+            if len(records) != 1:
+                raise ValueError(
+                    f"Current rules identity {record_id!r} resolved to {len(records)} records"
+                )
+            return records[0]
+
     def composed_records_by_kind(self, kind: str) -> list[dict[str, Any]]:
         """Return current semantic records of one kind with supplements attached."""
         with self._connect() as connection:
@@ -861,6 +989,42 @@ class RulesDatabase:
             ).fetchall()
             records = self._compose_records(self._records_from_rows(connection, rows))
             self._attach_reverse_relations(connection, records)
+            return records
+
+    def composed_records_using_label(self, label_id: str) -> list[dict[str, Any]]:
+        """Return current semantic records whose contributions use one Label.
+
+        Army links are attached only for this reverse-reference projection so public
+        application routes can be resolved without widening ordinary rules payloads.
+        """
+
+        with self._connect() as connection:
+            candidate_rows = connection.execute(
+                "SELECT r.id, r.label_ids_json FROM records AS r "
+                "JOIN collections AS c ON c.id = r.collection_id "
+                "WHERE c.status = 'current' ORDER BY r.id, r.collection_id"
+            ).fetchall()
+            record_ids = sorted(
+                {
+                    row["id"]
+                    for row in candidate_rows
+                    if label_id in _decode_json(row["label_ids_json"], [])
+                }
+            )
+            if not record_ids:
+                return []
+
+            placeholders = ", ".join("?" for _ in record_ids)
+            rows = connection.execute(
+                "SELECT r.* FROM records AS r JOIN collections AS c "
+                "ON c.id = r.collection_id "
+                f"WHERE r.id IN ({placeholders}) AND c.status = 'current' "
+                "ORDER BY r.id, r.collection_id",
+                record_ids,
+            ).fetchall()
+            records = self._compose_records(self._records_from_rows(connection, rows))
+            self._attach_reverse_relations(connection, records)
+            self._attach_current_army_links(connection, records)
             return records
 
     def current_labels(self) -> list[dict[str, Any]]:
@@ -1142,6 +1306,30 @@ class RulesDatabase:
                 )
             )
             return result
+
+    def unit_profile_help(self) -> list[dict[str, Any]]:
+        """Return reviewed Unit Profile notation help in authored display order."""
+
+        items: list[dict[str, Any]] = []
+        seen_keys: set[str] = set()
+        for record in self.composed_records_by_kind("rule"):
+            facts = record.get("facts")
+            if not isinstance(facts, dict) or facts.get("category") != "unit-profile-help":
+                continue
+            key = str(facts["key"])
+            if key in seen_keys:
+                raise ValueError(f"Duplicate current Unit Profile help key {key!r}")
+            seen_keys.add(key)
+            items.append(
+                {
+                    "id": record["id"],
+                    "key": key,
+                    "name": record["name"],
+                    "summary": record["summary"],
+                    "order": int(facts["order"]),
+                }
+            )
+        return sorted(items, key=lambda item: (item["order"], item["key"]))
 
     def training_by_order_type(self) -> dict[str, dict[str, Any]]:
         """Map reviewed Training to normal source Order-generation types only.

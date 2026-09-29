@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Browse canonical Infinity terminology across InfinityDB domains.">
+  <title>Glossary · InfinityDB</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script type="module" src="/static/app.js"></script>
+  <script type="module" src="/static/glossary.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to glossary</a>
+  <!-- navigation -->
+  <main id="main" class="main" tabindex="-1">
+    <!-- page-header -->
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Rules reference</p>
+        <h1 id="page-title">Glossary<span>.</span></h1>
+        <p class="intro-copy">Canonical terminology from InfinityDB's rules domains and embedded vocabularies, without duplicating their definitions.</p>
+      </div>
+    </section>
+    <section class="surface surface--clipped content-frame glossary-explorer" aria-labelledby="glossary-heading">
+      <div class="section-heading">
+        <h2 id="glossary-heading">Terms</h2>
+        <span id="glossary-count" class="section-index">Loading…</span>
+      </div>
+      <form class="filters search-form" action="/glossary" role="search">
+        <div class="field search-field">
+          <label for="glossary-search">Search glossary</label>
+          <input id="glossary-search" name="q" type="search" placeholder="Search terms, aliases, or definitions" autocomplete="off">
+        </div>
+        <button class="button button-primary" type="submit">Search</button>
+      </form>
+      <div id="glossary-results" class="results" aria-busy="true">
+        <div id="glossary-loading" class="state-panel">
+          <span class="spinner" aria-hidden="true"></span>
+          <h3>Loading glossary</h3>
+          <p>Gathering canonical definitions.</p>
+        </div>
+        <div id="glossary-error" class="state-panel" hidden>
+          <span class="state-symbol" aria-hidden="true">!</span>
+          <h3>Glossary could not be loaded</h3>
+          <p id="glossary-error-message">Please try again.</p>
+        </div>
+        <div id="glossary-empty" class="state-panel" hidden>
+          <span class="state-symbol" aria-hidden="true">⌕</span>
+          <h3>No glossary terms found</h3>
+          <p>Try a different search.</p>
+        </div>
+        <div id="glossary-list" class="glossary-list" hidden></div>
+      </div>
+    </section>
+    <!-- page-footer -->
+    <noscript><p class="noscript">Enable JavaScript to browse the glossary.</p></noscript>
+  </main>
+</body>
+</html>

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "infinity-db"
-version = "0.8.1"
+version = "0.9.0"
 description = "Infinity database, data ingestion tools, and extensible web unit browser"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -55,6 +55,8 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 ]
 "share/infinity-db/data/curated/identities" = [
   "data/curated/identities/army-display.json",
+  "data/curated/identities/army-overview.json",
+  "data/curated/identities/legacy-armies.json",
 ]
 "share/infinity-db/data/curated/peripherals" = [
   "data/curated/peripherals/army-identities.json",
@@ -84,6 +86,11 @@ testpaths = ["tests"]
 addopts = ["--basetemp=.pytest-tmp", "-m", "not full_assets"]
 markers = [
   "full_assets: requires the complete validated local Corvus Belli graphical asset set",
+  "section_model: data model, canonical rules, semantic audits, and database behavior",
+  "section_web: web application, HTTP/API behavior, browser runtime, and web metrics",
+  "section_build: Army acquisition, normalization, deterministic build, and ingestion",
+  "section_ops: development checks, deployment, archives, reports, and operational tooling",
+  "section_assets: symbols, SVG/font tooling, and processed graphical asset publication",
 ]
 cache_dir = ".cache/pytest"
 

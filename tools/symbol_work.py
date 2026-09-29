@@ -8,6 +8,7 @@ import json
 import re
 import shutil
 import tempfile
+import time
 import xml.etree.ElementTree as ET
 import zipfile
 from collections import Counter
@@ -151,6 +152,7 @@ def load_materialized_symbol_work(
             "Pinned symbol provenance Army input does not match army-symbol-build.json"
         )
 
+    work_base = work_base.resolve()
     destination = work_base / _work_name(archive, archive_sha)
     raw_root = destination / "raw"
     if not raw_root.is_dir():
@@ -195,6 +197,21 @@ def load_materialized_symbol_work(
         asset_count=len(expected),
         build_manifest=manifest,
     )
+
+
+def _replace_materialized_directory(staging: Path, destination: Path) -> None:
+    """Promote staging while tolerating transient filesystem locks."""
+    max_attempts = 12
+    for attempt in range(max_attempts):
+        try:
+            if destination.exists():
+                shutil.rmtree(destination)
+            staging.replace(destination)
+            return
+        except PermissionError:
+            if attempt == max_attempts - 1:
+                raise
+            time.sleep(min(0.05 * (2**attempt), 0.5))
 
 
 def materialize_symbol_archive(
@@ -254,6 +271,7 @@ def materialize_symbol_archive(
         )
 
     work_base.mkdir(parents=True, exist_ok=True)
+    work_base = work_base.resolve()
     destination = work_base / _work_name(archive, archive_sha)
     staging = Path(tempfile.mkdtemp(prefix=f".{destination.name}-", dir=work_base))
     raw_root = staging / "raw"
@@ -302,9 +320,7 @@ def materialize_symbol_archive(
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(body)
 
-        if destination.exists():
-            shutil.rmtree(destination)
-        staging.replace(destination)
+        _replace_materialized_directory(staging, destination)
     except zipfile.BadZipFile as exc:
         shutil.rmtree(staging, ignore_errors=True)
         raise ValueError(f"Invalid symbol archive {archive}: {exc}") from exc

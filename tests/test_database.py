@@ -3,9 +3,11 @@ from __future__ import annotations
 import copy
 import json
 import os
+import shutil
 import sqlite3
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -88,9 +90,8 @@ def export_rules_database(*args, **kwargs) -> None:
     export_release_rules_database(*args, **kwargs)
 
 
-@pytest.fixture
-def normalized() -> dict:
-    """Exercise the real normalizer, including every table it can generate."""
+def _normalized_fixture_data() -> dict:
+    """Build the normalized fixture using the real normalizer."""
     reference = {"id": 1, "order": 2, "q": 1, "extra": [1], "future": {"enabled": True}}
     nested = {
         "skills": [reference],
@@ -205,6 +206,34 @@ def normalized() -> dict:
     data = normalize_master(master)
     validate_normalized(data)
     return data
+
+
+@pytest.fixture
+def normalized() -> dict:
+    """Exercise the real normalizer, including every table it can generate."""
+    return _normalized_fixture_data()
+
+
+@pytest.fixture(scope="module")
+def canonical_database_template(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Build the unchanged canonical Army fixture once per test module/worker."""
+    directory = tmp_path_factory.mktemp("canonical-army-database")
+    path = directory / "army.sqlite3"
+    export_database(_normalized_fixture_data(), path)
+    return path
+
+
+@pytest.fixture
+def canonical_database_path(
+    tmp_path: Path, canonical_database_template: Path
+) -> Path:
+    """Copy the canonical Army fixture so each test retains mutation isolation."""
+    path = tmp_path / "army.sqlite3"
+    shutil.copy2(canonical_database_template, path)
+    raw_template = raw_database_path(canonical_database_template)
+    if raw_template.exists():
+        shutil.copy2(raw_template, raw_database_path(path))
+    return path
 
 
 def test_export_database_finalization_is_default_and_can_be_skipped(
@@ -424,10 +453,9 @@ def test_database_splits_lossless_source_from_published_application_data(
 
 
 def test_fireteam_repository_exposes_army_scoped_application_chart(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
     database = Database(path)
 
     armies = database.list_fireteam_armies()
@@ -454,10 +482,9 @@ def test_fireteam_repository_exposes_army_scoped_application_chart(
 
 
 def test_published_database_validates_without_raw_sibling(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
 
     raw_database_path(path).unlink()
 
@@ -479,11 +506,11 @@ def _query_plan(connection: sqlite3.Connection, sql: str, parameters: tuple[obje
     ],
 )
 def test_unit_detail_queries_use_unit_indexes(
-    tmp_path: Path, normalized: dict, index_name: str, table_name: str
+    canonical_database_path: Path,
+    index_name: str, table_name: str
 ) -> None:
     """Keep cold unit-detail lookups from degrading into table scans."""
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
     connection = sqlite3.connect(path)
     try:
         plan = _query_plan(
@@ -505,11 +532,11 @@ def test_unit_detail_queries_use_unit_indexes(
     ],
 )
 def test_catalog_detail_queries_use_item_indexes(
-    tmp_path: Path, normalized: dict, index_name: str, table_name: str
+    canonical_database_path: Path,
+    index_name: str, table_name: str
 ) -> None:
     """Keep reverse catalog lookups from degrading into table scans."""
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
     connection = sqlite3.connect(path)
     try:
         plan = _query_plan(
@@ -675,7 +702,7 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
         "name": "Suppressive Fire (SF)",
         "use_count": 1,
         "description": (
-            "Allows the user to enter Suppressive Fire State and use its SF Mode profile."
+            "Allows the user to enter [[state:suppressive-fire]] and use its SF Mode profile."
         ),
     }
     detail = catalog.get_trait("continuous-damage")
@@ -773,7 +800,17 @@ def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
 
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    document = copy.deepcopy(documents[0][1])
+    current = next(
+        document
+        for _, document in documents
+        if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    hacking_programs = next(
+        item
+        for item in documents
+        if item[1]["collection"]["id"] == "n5-hacking-programs-v5.3"
+    )
+    document = copy.deepcopy(current)
     record = next(
         record
         for record in document["records"]
@@ -781,7 +818,9 @@ def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
     )
     record["name"] = "Persistent Damage"
     rules_path = tmp_path / "rules.db"
-    export_rules_database([(root / "curated.json", document)], rules_path)
+    export_rules_database(
+        [(root / "curated.json", document), hacking_programs], rules_path
+    )
     catalog = TraitCatalog(Database(database_path), RulesDatabase(rules_path))
 
     reference = catalog.reference("Continous Damage")
@@ -920,10 +959,9 @@ def test_armed_turret_uses_its_base_name_with_visible_metadata_profile(
 
 
 def test_queries_use_actual_army_membership_and_unique_source_units(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
     database = Database(path)
     armies = database.list_armies()
     assert {row["id"]: row["unit_count"] for row in armies} == {101: 2, 201: 2, 301: 0}
@@ -1155,6 +1193,30 @@ def test_missing_mine_profiles_have_import_overrides(
     )
 
 
+def test_skill_detail_merges_equivalent_distance_extra_spellings(
+    tmp_path: Path, normalized: dict
+) -> None:
+    normalized["tables"]["extras"][0].update(
+        {"name": "+7.5", "type": "DISTANCE"}
+    )
+    normalized["tables"]["extras"].append(
+        {"id": 2, "name": "7.5", "type": "DISTANCE", "source_defined": True}
+    )
+    normalized["tables"]["profile_skill_extras"][1]["extra_id"] = 2
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+
+    detail = Database(path).get_skill(1)
+
+    assert detail is not None
+    assert len(detail["variants"]) == 1
+    assert detail["variants"][0]["extras"] == [
+        {"id": 1, "name": "+7.5", "is_distance": True}
+    ]
+    assert len(detail["variants"][0]["units"]) == 1
+
+
 def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normalized: dict) -> None:
     normalized["tables"]["skills"].extend(
         [
@@ -1186,10 +1248,10 @@ def test_skill_catalog_and_details_merge_numeric_variants(tmp_path: Path, normal
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
 def test_catalog_use_count_matches_detail_variant_unit_totals(
-    tmp_path: Path, normalized: dict, catalog: str
+    canonical_database_path: Path,
+    catalog: str
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
 
     database = Database(path)
     detail = database.get_skill(1) if catalog == "skills" else database.get_catalog_item(catalog, 1)
@@ -1389,6 +1451,14 @@ def test_database_uses_persisted_generic_mapping(tmp_path: Path, normalized: dic
     assert details is not None
     assert details["id"] == 1
     assert details["source_ids"] == [1, 10_001]
+    source_note = next(
+        item for item in details["source_notes"] if item["source_unit_id"] == 10_001
+    )
+    assert source_note["source_unit_id"] == 10_001
+    assert source_note["source_name"] == "Different source label"
+    assert source_note["note"] == "Source-specific note"
+    assert source_note["is_representative"] is False
+    assert [army["id"] for army in source_note["armies"]] == [301]
 
     connection = sqlite3.connect(path)
     try:
@@ -2229,10 +2299,9 @@ def test_secondary_indexes_are_created_after_schema_setup() -> None:
 
 
 def test_database_validation_rejects_incomplete_logical_unit_mapping(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
     connection = sqlite3.connect(path)
     try:
         connection.execute("DELETE FROM logical_unit_sources WHERE source_unit_id = 1")
@@ -2633,10 +2702,9 @@ def test_profile_include_relationships_preserve_contextual_target_variants(
 
 
 def test_unit_details_present_contextual_include_relationships(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
 ) -> None:
-    path = tmp_path / "include-details.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
 
     details = Database(path).get_unit(1)
 
@@ -2681,10 +2749,9 @@ def test_export_staging_rejects_invalid_materialized_include_relationship(
 
 
 def test_unit_profile_read_path_uses_materialized_canonical_payloads(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
     expected = Database(path).get_unit(1)
     assert expected is not None
 
@@ -2710,10 +2777,9 @@ def test_unit_profile_read_path_uses_materialized_canonical_payloads(
 
 
 def test_unit_loadout_read_path_uses_materialized_canonical_payloads(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
     expected = Database(path).get_unit(1)
     assert expected is not None
 
@@ -2780,11 +2846,173 @@ def test_unit_catalog_filter_expands_logical_equipment_identity(
         assert {item["id"] for item in result["items"]} == expected_ids
 
 
-def test_runtime_catalog_paths_use_canonical_profile_and_loadout_payloads(
+def test_unit_categorical_filters_use_stable_public_slugs(
+    canonical_database_path: Path,
+) -> None:
+    path = canonical_database_path
+    database = Database(path)
+
+    assert database.list_unit_filter_values() == {
+        "troop_types": [{"id": 1, "slug": "type", "name": "type"}],
+        "classifications": [
+            {"id": 1, "slug": "category", "name": "category"}
+        ],
+        "characteristics": [{"id": 1, "slug": "chars", "name": "chars"}],
+        "numeric": {
+            "ava": {
+                "exact_values": ["1", "total"],
+                "range": {"min": 1, "max": 1, "step": 1},
+            },
+            "points": {
+                "exact_values": ["10"],
+                "range": {"min": 10, "max": 10, "step": 1},
+            },
+            "swc": {
+                "exact_values": ["0.5"],
+                "range": {"min": 0.5, "max": 0.5, "step": 0.5},
+            },
+        },
+    }
+    for result in (
+        database.list_units(troop_type=1),
+        database.list_units(troop_type="type"),
+        database.list_units(classification=1),
+        database.list_units(classification="category"),
+        database.list_units(characteristic=1),
+        database.list_units(characteristic="chars"),
+        database.list_units(
+            troop_type="type",
+            classification="category",
+            characteristic="chars",
+        ),
+    ):
+        assert {item["id"] for item in result["items"]} == {1}
+
+    assert database.list_units(troop_type="missing")["items"] == []
+    assert database.list_units(classification="missing")["items"] == []
+    assert database.list_units(characteristic="missing")["items"] == []
+
+
+
+def test_extended_unit_list_exposes_compact_profile_context(
+    canonical_database_path: Path,
+) -> None:
+    path = canonical_database_path
+    database = Database(path)
+
+    normal = next(item for item in database.list_units(limit=50)["items"] if item["id"] == 1)
+    assert "profiles" not in normal
+
+    item = next(
+        item
+        for item in database.list_units(
+            extended=True, mercs=True, specops=True, teamops=True, reinforcement=True
+        )["items"]
+        if item["id"] == 1
+    )
+    assert item["profiles"] == [
+        {
+            "name": "Trooper",
+            "type": "type",
+            "classification": "category",
+            "move_1": 4,
+            "move_2": 4,
+            "cc": None,
+            "bs": None,
+            "ph": None,
+            "wip": None,
+            "arm": None,
+            "bts": None,
+            "vitality": None,
+            "silhouette": None,
+            "is_structure": False,
+            "characteristics": ["chars"],
+            "availability": [
+                {"army_id": 101, "ava": "total"},
+                {"army_id": 201, "ava": 1},
+            ],
+        }
+    ]
+
+
+def test_unit_numeric_filters_support_exact_values_and_inclusive_ranges(
+    canonical_database_path: Path,
+) -> None:
+    path = canonical_database_path
+    database = Database(path)
+
+    assert {item["id"] for item in database.list_units(army_id=101, ava="total")["items"]} == {1}
+    assert database.list_units(army_id=201, ava="total")["items"] == []
+    assert {item["id"] for item in database.list_units(army_id=201, ava=1)["items"]} == {1}
+    assert {item["id"] for item in database.list_units(ava_min=1, ava_max=1)["items"]} == {1}
+
+    assert {item["id"] for item in database.list_units(points=10)["items"]} == {1}
+    assert {
+        item["id"]
+        for item in database.list_units(points_min=10, points_max=10)["items"]
+    } == {1}
+    assert database.list_units(points_min=11)["items"] == []
+
+    assert {item["id"] for item in database.list_units(swc="0.5")["items"]} == {1}
+    assert {item["id"] for item in database.list_units(swc_min=0.5, swc_max=0.5)["items"]} == {1}
+    assert database.list_units(swc_min=1.0)["items"] == []
+
+
+def test_unit_numeric_filters_preserve_loadout_context(
     tmp_path: Path, normalized: dict
 ) -> None:
+    normalized["tables"]["profile_weapons"] = []
+    normalized["tables"]["profile_weapon_extras"] = []
+    normalized["tables"]["unit_option_weapons"] = []
+    normalized["tables"]["unit_option_weapon_extras"] = []
+    normalized["tables"]["loadout_options"].append(
+        {
+            "army_id": 101,
+            "unit_id": 1,
+            "group_id": 1,
+            "option_id": 2,
+            "position": 2,
+            "name": "Cheap loadout",
+            "points": 5,
+            "swc": "0",
+            "minis": None,
+            "disabled": None,
+        }
+    )
+
     path = tmp_path / "army.sqlite3"
     export_database(normalized, path)
+    database = Database(path)
+
+    assert {
+        item["id"]
+        for item in database.list_units(army_id=101, weapon_id=1, points=10)["items"]
+    } == {1}
+    assert database.list_units(army_id=101, weapon_id=1, points=5)["items"] == []
+
+
+def test_unit_swc_bonus_is_exact_only_not_an_ordinary_cost_range(
+    tmp_path: Path, normalized: dict
+) -> None:
+    army_101_loadout = next(
+        row
+        for row in normalized["tables"]["loadout_options"]
+        if row["army_id"] == 101
+    )
+    army_101_loadout["swc"] = "+1"
+
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    database = Database(path)
+
+    assert {item["id"] for item in database.list_units(army_id=101, swc="+1")["items"]} == {1}
+    assert database.list_units(army_id=101, swc_min=1, swc_max=1)["items"] == []
+
+
+def test_runtime_catalog_paths_use_canonical_profile_and_loadout_payloads(
+    canonical_database_path: Path,
+) -> None:
+    path = canonical_database_path
     database = Database(path)
     expected = {
         "profile_search": database.list_units(search="Trooper"),
@@ -2837,10 +3065,9 @@ def test_runtime_catalog_paths_use_canonical_profile_and_loadout_payloads(
 
 
 def test_database_validation_rejects_published_content_drift(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
     connection = sqlite3.connect(path)
     try:
         connection.execute(
@@ -2855,10 +3082,9 @@ def test_database_validation_rejects_published_content_drift(
 
 
 def test_database_with_different_compatibility_revision_requires_rebuild(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
     connection = sqlite3.connect(path)
     try:
         connection.execute(
@@ -2886,6 +3112,19 @@ def test_database_with_different_compatibility_revision_requires_rebuild(
         {"army_id": 2**63},
         {"army_id": -(2**63) - 1},
         {"offset": 2**63},
+        {"ava": -1},
+        {"ava": 100},
+        {"ava": "unlimited"},
+        {"ava": 1, "ava_min": 1},
+        {"ava_min": 3, "ava_max": 2},
+        {"points": -1},
+        {"points": 10, "points_max": 10},
+        {"points_min": 2, "points_max": 1},
+        {"swc": "free"},
+        {"swc": "0.5", "swc_min": 0.5},
+        {"swc_min": -0.5},
+        {"swc_min": 2.0, "swc_max": 1.0},
+        {"extended": 1},
     ],
 )
 def test_repository_rejects_invalid_query_arguments(tmp_path: Path, arguments: dict) -> None:
@@ -2989,10 +3228,10 @@ def test_skill_catalog_uses_curated_declaration_categories(
 
 
 def test_skill_catalog_full_definition_overrides_fallback_across_equivalent_army_refs(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
+    tmp_path: Path
 ) -> None:
-    database_path = tmp_path / "army.sqlite3"
-    export_database(normalized, database_path)
+    database_path = canonical_database_path
     database = Database(database_path)
     assert database.application_slug("skills", 1) == "skills"
 
@@ -3004,9 +3243,12 @@ def test_skill_catalog_full_definition_overrides_fallback_across_equivalent_army
         next(record for record in document["records"] if record["id"] == "skill:alert")
     )
     definition["id"] = "skill:cross-reference-test"
-    definition["name"] = "skills"
+    definition["name"] = "Cross Reference Test"
     definition["armyLinks"] = [{"entity": "skill", "id": "skills"}]
     definition["variantSemantics"] = {"inheritance": "family"}
+    definition["facts"]["requirements"][0] = definition["facts"]["requirements"][0].replace(
+        "Zone of Control", "[[trait:zone-of-control-zc|Zone of Control]]"
+    )
     document["records"].append(definition)
 
     fallback = copy.deepcopy(
@@ -3175,10 +3417,9 @@ def test_skill_catalog_without_rules_database_does_not_embed_rule_knowledge(
 
 
 def test_application_domain_slugs_are_separate_from_source_slugs(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
     database = Database(path)
 
     assert database.list_armies()[0]["slug"] == "first_army"
@@ -3648,10 +3889,9 @@ def test_database_derives_source_data_date_for_legacy_metadata(
 
 
 def test_application_domain_slug_lookup_rejects_unknown_domains(
-    tmp_path: Path, normalized: dict
+    canonical_database_path: Path,
 ) -> None:
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
+    path = canonical_database_path
     database = Database(path)
 
     with pytest.raises(ValueError, match="Unknown slug domain"):
@@ -3804,3 +4044,32 @@ def test_skill_catalog_attaches_common_rule_to_same_named_army_skill(
     assert next(item for item in catalog.list_skills() if item["id"] == 24)[
         "category"
     ] == "Common Skills"
+
+
+def test_skill_catalog_caches_composed_skill_records(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    normalized["tables"]["skills"].append(
+        {"id": 24, "name": "Climb", "source_defined": True}
+    )
+    database_path = tmp_path / "army.sqlite3"
+    export_database(normalized, database_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules = RulesDatabase(rules_path)
+    original = rules.composed_records_by_kind
+    calls = 0
+
+    def composed_records_by_kind(kind: str) -> list[dict[str, Any]]:
+        nonlocal calls
+        calls += 1
+        return original(kind)
+
+    monkeypatch.setattr(rules, "composed_records_by_kind", composed_records_by_kind)
+    catalog = SkillCatalog(Database(database_path), rules)
+
+    catalog.list_skills()
+    assert catalog.get_skill(24) is not None
+    assert catalog.get_skill(24) is not None
+    assert calls == 1

@@ -171,11 +171,57 @@ def test_test_stage_can_force_serial_execution() -> None:
     )
 
 
+def test_test_stage_can_select_one_maintained_section() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",),
+        [],
+        build_source=None,
+        test_workers="0",
+        test_sections=("web",),
+    )
+
+    assert stage.command == (
+        sys.executable,
+        "-m",
+        "pytest",
+        "-m",
+        "(not full_assets) and (section_web)",
+        "-q",
+    )
+
+
+def test_test_stage_can_combine_maintained_sections_and_assets() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("test",),
+        [],
+        build_source=None,
+        include_full_assets=True,
+        test_workers="0",
+        test_sections=("model", "assets"),
+    )
+
+    assert stage.command == (
+        sys.executable,
+        "-m",
+        "pytest",
+        "-m",
+        "(full_assets or not full_assets) and (section_model or section_assets)",
+        "-q",
+    )
+
+
 def test_test_workers_require_test_stage(capsys: pytest.CaptureFixture[str]) -> None:
     result = run_checks.main(["--stage", "lint", "--test-workers", "2"])
 
     assert result == run_checks.EXIT_RUNNER_ERROR
     assert "--test-workers requires the test stage" in capsys.readouterr().err
+
+
+def test_test_sections_require_test_stage(capsys: pytest.CaptureFixture[str]) -> None:
+    result = run_checks.main(["--stage", "lint", "--test-section", "web"])
+
+    assert result == run_checks.EXIT_RUNNER_ERROR
+    assert "--test-section requires the test stage" in capsys.readouterr().err
 
 
 def test_default_parallel_test_workers_require_xdist(

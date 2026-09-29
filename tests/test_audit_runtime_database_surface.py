@@ -129,16 +129,16 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     report = audit_database(_runtime_database(tmp_path), project_root=ROOT)
 
     assert report["summary"] == {
-        "surfaceCount": 36,
-        "runtimeTableCount": 79,
-        "runtimeFieldCount": 372,
+        "surfaceCount": 42,
+        "runtimeTableCount": 81,
+        "runtimeFieldCount": 388,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 372,
-        "role:canonical_application:fieldCount": 147,
+        "issue:none:fieldCount": 388,
+        "role:canonical_application:fieldCount": 151,
         "role:contextual_application:fieldCount": 200,
-        "role:intentional_source_representation:fieldCount": 25,
+        "role:intentional_source_representation:fieldCount": 37,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
     assert report["openIssues"]["semanticOverlapTables"] == []
@@ -167,6 +167,10 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert _field(report, "logical_units", "display_army_id")["role"] == CONTEXTUAL
     assert _field(report, "logical_units", "name")["role"] == CANONICAL
     assert _field(report, "profile_payloads", "is_structure")["role"] == CANONICAL
+    assert (
+        _field(report, "loadout_payload_characteristics", "characteristic_id")["role"]
+        == CANONICAL
+    )
     assert _field(report, "profile_payload_occurrences", "logo")["role"] == CONTEXTUAL
     assert _field(report, "profile_occurrence_includes", "quantity")["role"] == CONTEXTUAL
     assert _field(report, "loadout_occurrence_includes", "quantity")["role"] == CONTEXTUAL
@@ -206,6 +210,7 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert "metadata_factions" not in observed_tables
     assert _field(report, "unit_options", "name")["role"] == SOURCE
     assert _field(report, "unit_options", "name")["issue"] == NO_ISSUE
+    assert _field(report, "unit_option_orders", "order_type")["role"] == SOURCE
     assert "metadata_skills" not in observed_tables
     assert "metadata_equipment" not in observed_tables
     assert _field(report, "metadata_weapons", "name")["role"] == CONTEXTUAL
@@ -242,6 +247,7 @@ def test_runtime_method_discovery_matches_current_runtime_helpers() -> None:
         "list_metachemistry_results",
         "list_skill_extras",
         "list_traits",
+        "list_unit_filter_values",
         "list_units",
         "skill_source_ids",
         "snapshot_downloaded_on",

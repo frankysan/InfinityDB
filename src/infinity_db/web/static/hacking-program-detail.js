@@ -25,13 +25,26 @@ function categoryBadges(categories) {
 function programProfileContent(program) {
   const nodes = [];
   const container = document.createElement("div");
-  container.className = "table-container hacking-program-profile-table";
+  container.className = "table-viewport hacking-program-profile-table";
   const table = document.createElement("table");
-  table.className = "data-table--compact";
-  table.innerHTML = "<thead><tr><th>Attack MOD</th><th>Opponent MOD</th><th>PS</th><th>B</th></tr></thead>";
+  table.className = "data-table--compact data-table--profile";
+  table.innerHTML =
+    "<caption class=\"sr-only\">Hacking Program profile</caption>"
+    + "<thead><tr><th class=\"table-column--descriptor\" scope=\"col\">Targets</th>"
+    + "<th class=\"table-column--metric\" scope=\"col\">Attack MOD</th>"
+    + "<th class=\"table-column--metric\" scope=\"col\">Opponent MOD</th>"
+    + "<th class=\"table-column--metric\" scope=\"col\">PS</th>"
+    + "<th class=\"table-column--metric\" scope=\"col\">B</th></tr></thead>";
   const row = document.createElement("tr");
-  for (const [label, value] of [["Attack MOD", program.attack_mod], ["Opponent MOD", program.opponent_mod], ["PS", program.ps], ["B", program.burst]]) {
+  for (const [label, value, role] of [
+    ["Targets", program.targets?.length ? program.targets.join(", ") : null, "descriptor"],
+    ["Attack MOD", program.attack_mod, "metric"],
+    ["Opponent MOD", program.opponent_mod, "metric"],
+    ["PS", program.ps, "metric"],
+    ["B", program.burst, "metric"],
+  ]) {
     const cell = document.createElement("td");
+    cell.className = `table-column--${role}`;
     cell.dataset.label = label;
     cell.textContent = text(value);
     row.append(cell);
@@ -41,19 +54,6 @@ function programProfileContent(program) {
   table.append(body);
   container.append(table);
   nodes.push(container);
-
-  const context = document.createElement("div");
-  context.className = "hacking-program-context-row";
-  const targets = document.createElement("p");
-  targets.className = "hacking-program-targets";
-  const targetsLabel = document.createElement("strong");
-  targetsLabel.textContent = "Targets";
-  targets.append(
-    targetsLabel,
-    ` ${program.targets?.length ? program.targets.join(", ") : "—"}`,
-  );
-  context.append(targets, categoryBadges(program.declaration_categories));
-  nodes.push(context);
 
   if (program.special) {
     const special = document.createElement("div");
@@ -70,47 +70,24 @@ function programProfileContent(program) {
   return nodes;
 }
 
-function fallbackProfileArticle(program, leadingContent) {
-  const article = document.createElement("article");
-  article.className = "detail-section";
-  const header = document.createElement("header");
-  header.className = "rules-card-header";
-  const title = document.createElement("h3");
-  title.textContent = program.name;
-  header.append(title);
-  article.append(header, ...leadingContent);
-  return article;
-}
-
-function profileSection(program) {
-  const section = document.createElement("section");
-  section.className = "detail-group rules-reference hacking-program-profile";
-  const heading = document.createElement("h2");
-  heading.className = "detail-section-title";
-  heading.textContent = "Program profile";
-  const leadingContent = programProfileContent(program);
-  const rule = program.rules?.[0];
-  const article = rule
-    ? rulesReferenceArticle(rule, { leadingContent })
-    : fallbackProfileArticle(program, leadingContent);
-  section.append(heading, article);
-  return section;
-}
-
-function devicesSection(program) {
-  const section = document.createElement("section");
-  section.className = "detail-group";
-  const heading = document.createElement("h2");
-  heading.className = "detail-section-title";
+function baselineDevicesGroup(program) {
+  const group = document.createElement("div");
+  group.className = "detail-fact-group hacking-program-devices";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
   heading.textContent = "Baseline Hacking Devices";
-  section.append(heading);
+  group.append(heading);
+
   if (!program.devices?.length) {
     const note = document.createElement("p");
     note.className = "detail-copy";
-    note.textContent = "No baseline Device association is declared by Army. This Program is available through Upgrade/source-specific associations instead.";
-    section.append(note);
-    return section;
+    note.textContent =
+      "No baseline Device association is declared by Army. This Program is available through "
+      + "Upgrade/source-specific associations instead.";
+    group.append(note);
+    return group;
   }
+
   const list = document.createElement("ul");
   list.className = "detail-list";
   for (const device of program.devices) {
@@ -125,7 +102,38 @@ function devicesSection(program) {
     }
     list.append(item);
   }
-  section.append(list);
+  group.append(list);
+  return group;
+}
+
+function fallbackProfileArticle(program, leadingContent, headerContent, beforeRelations) {
+  const article = document.createElement("article");
+  article.className = "surface surface--subtle detail-section";
+  const header = document.createElement("header");
+  header.className = "surface-titlebar surface-titlebar--ruled rules-card-titlebar";
+  const title = document.createElement("h3");
+  title.textContent = program.name;
+  header.append(title, ...headerContent);
+  article.append(header, ...leadingContent, ...beforeRelations);
+  return article;
+}
+
+function profileSection(program) {
+  const section = document.createElement("section");
+  section.className = "detail-group rules-reference hacking-program-profile";
+  const heading = document.createElement("h2");
+  heading.className = "detail-heading";
+  heading.textContent = "Program profile";
+  const leadingContent = programProfileContent(program);
+  const headerContent = program.declaration_categories?.length
+    ? [categoryBadges(program.declaration_categories)]
+    : [];
+  const beforeRelations = [baselineDevicesGroup(program)];
+  const rule = program.rules?.[0];
+  const article = rule
+    ? rulesReferenceArticle(rule, { leadingContent, headerContent, beforeRelations })
+    : fallbackProfileArticle(program, leadingContent, headerContent, beforeRelations);
+  section.append(heading, article);
   return section;
 }
 
@@ -133,7 +141,7 @@ function render(program) {
   document.title = `${program.name} · InfinityDB`;
   name.firstChild.textContent = program.name;
   meta.textContent = `Army program #${program.position}${program.source_extra_id == null ? "" : ` · Upgrade extra #${program.source_extra_id}`}`;
-  content.replaceChildren(profileSection(program), devicesSection(program));
+  content.replaceChildren(profileSection(program));
   content.hidden = false;
   status.hidden = true;
 }

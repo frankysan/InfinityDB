@@ -5,7 +5,7 @@ data. While Infinity Army presents one army at a time, InfinityDB brings those
 views together into a game-wide reference for exploring units, profiles,
 equipment, skills, weapons, and relationships across armies.
 
-Current release: **0.8.1** (2026-09-27).
+Current release: **0.9.0** (2026-09-29).
 
 ## Guiding principles
 
@@ -23,17 +23,25 @@ Current release: **0.8.1** (2026-09-27).
 - Imports validated Infinity Army snapshots into a local SQLite database and
   serves a read-only browser and HTTP API.
 - Browses units across armies with name search, pagination, and filters for
-  skills, equipment, weapons, and optional availability.
+  skills, equipment, weapons, and optional availability. Unit Explorer filter state is shareable;
+  optional-unit Settings seed a new view but the effective availability choices are recorded in the
+  URL without overwriting another user's saved preferences.
 - Shows a consolidated **General profile** alongside faction- and army-specific
   profiles, loadouts, availability, skills, equipment, and weapons.
 - Groups equivalent standard, reinforcement, and optional-mercenary source
   records into coherent unit views while preserving their distinct availability
   and army contexts.
+- Includes an Army overview with symbols, concise role/context summaries, catalog-status labels,
+  legacy Army references, and direct links into pre-filtered Unit Explorer rosters.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
-  Traits, States, and Hacking Programs reference catalogs, with reverse Unit
-  usage links where that relationship applies.
-- Browses Army-scoped Fireteam charts with limits, member requirements,
-  Wildcards, FTO loadouts, equivalence labels, and N5 rules/bonus context.
+  Ammunition, Traits, Labels, States, Hacking Programs, and General Rules reference
+  catalogs, with reverse Unit usage links where that relationship applies. Search and filter state
+  uses compact self-contained share links while legacy explicit query parameters remain readable.
+- Includes global search and a federated Glossary across player-facing reference domains, with
+  embedded Attributes and scoped Game terms routed back to their canonical owning surfaces.
+- Uses `/fireteams` as a general Fireteam-rules landing page and switches to Army-scoped charts when
+  an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, equivalence
+  labels, and N5 rules/bonus context.
 - Presents connected Unit relationships for Peripherals/Controllers, Includes,
   selection/dependency constraints, Reinforcement parentage, and broader
   source-declared faction membership.
@@ -81,8 +89,8 @@ The current direction is deliberately incremental:
 - **0.8.x — Connected game structure:** exposed first-class relationships such as Fireteams,
   Peripherals/Controllers, linked profiles/includes, selection/dependency constraints,
   Reinforcement parentage, and useful cross-army navigation.
-- **0.9.x — Complete & discover:** close the remaining application-data presentation
-  gaps and make the result searchable, navigable, and understandable.
+- **0.9.x — Complete & discover:** closed the remaining application-data presentation
+  gaps and made the result searchable, navigable, and understandable.
 - **0.10.x — Stabilize & harden:** audit the completed application model end to end,
   finish the frontend/theme architecture, and harden release and operations workflows.
 - **1.0.0 — Player data-complete:** every useful in-scope game datum collected by
@@ -90,7 +98,7 @@ The current direction is deliberately incremental:
   web reference.
 
 In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
-0.9 closes application gaps → 0.10 hardens and polishes → 1.0 completes the reference.**
+0.9 closed application gaps → 0.10 hardens and polishes → 1.0 completes the reference.**
 Exact minor-release scope may move as audits discover dependencies; the durable 1.0 gate is
 defined in [release process](docs/releasing.md).
 
@@ -157,10 +165,11 @@ inputs. Human-reviewed rules collections live under `data/curated/rules/`.
 
 Graphical assets are optional for source development but required for a complete
 local graphical deployment. Use the symbol orchestrator with an existing pinned
-Army snapshot:
+Army snapshot (replace the timestamp with the immutable local snapshot you intend
+to use):
 
 ```powershell
-python tools/build_symbols.py --snapshot "data/raw/JSON 20260918-204434.zip"
+python tools/build_symbols.py --snapshot "data/raw/JSON YYYYMMDD-HHMMSS.zip"
 ```
 
 Or intentionally fetch a fresh Army snapshot first:
@@ -191,9 +200,12 @@ python tools/download_wiki_snapshot.py --language es
 
 ## Common commands
 
+The snapshot filename below is a pattern; replace the timestamp with the local
+immutable Army ZIP you intend to process.
+
 ```powershell
 # Run individual Army-data stages
-infinity-db merge "data/raw/JSON 20260918-204434.zip" data/generated/master.json --compact
+infinity-db merge "data/raw/JSON YYYYMMDD-HHMMSS.zip" data/generated/master.json --compact
 infinity-db normalize data/generated/master.json data/generated/normalized.json --compact
 infinity-db export data/generated/normalized.json data/generated/infinity.db
 
@@ -295,6 +307,10 @@ python tools/run_checks.py --all
 python tools/run_checks.py --stage test tests/test_availability.py
 python tools/run_checks.py --stage lint src/infinity_army_data/availability.py tests/test_availability.py
 
+# Maintained local test slices
+python tools/run_checks.py --stage test --test-section model
+python tools/run_checks.py --stage test --test-section web
+
 # Keep a timestamped local report
 python tools/run_checks.py --profile code --report
 ```
@@ -308,7 +324,7 @@ python tools/run_checks.py --stage test --test-workers 0
 ```
 
 See [development checks](docs/testing.md) for worker-selection guidance and the
-measured serial/parallel baseline.
+current test-runner contract.
 
 Requested stages continue after a failure by default; add `--fail-fast` to stop
 at the first failure. See [development checks](docs/testing.md) for stage and
@@ -316,41 +332,29 @@ profile definitions, asset modes, reports, and exit codes.
 
 ## Technical documentation
 
-- [Documentation layout](docs/README.md) — tracked reference/audit records versus the
-  gitignored local audit-evidence workspace.
-- [Architecture](docs/architecture.md) — engineering principles, subsystem
-  boundaries, current architecture, and accepted design direction.
-- [Project domains](docs/project-domains.md) — canonical ownership boundaries and
-  documentation labels for project work.
-- [Data model](docs/data-model.md) — source semantics, canonical/application
-  semantics, persistence, and data-model invariants.
-- [0.7 enrichment presentation audit](docs/070-enrichment-presentation-audit.md) — durable
-  release record for the player-facing enrichment gate.
-- [0.8 connected-data domain audit](docs/080-connected-domain-audit.md) — accepted
-  canonical-domain and relationship-surface boundaries for the connected-data milestone.
-- [0.8 web consistency closeout](docs/080-web-consistency-closeout.md) — durable
-  release closeout for the focused 0.8 browser-consistency pass.
-- [0.8.1 release documentation audit](docs/081-release-documentation-audit.md) —
-  documentation closeout for the self-contained deployment and UI polish release.
-- [Rules semantics](docs/rules-semantics.md) — audited rules meaning that already has a
-  concrete InfinityDB consumer.
-- [Rules research](docs/rules-research.md) — verified source findings retained for possible
-  future reference or product work.
-- [Data storage and provenance](data/README.md) — raw, curated, generated, and
-  local processing artifacts.
-- [Development checks](docs/testing.md) — local check-runner, pytest, asset-mode, and
-  benchmark guidance.
-- [Continuous integration](docs/ci.md) — hosted workflow, portability, asset, and
-  required-check policy.
-- [Curated data contracts](data/curated/README.md) — reviewed rules, identities,
-  relationship evidence, and snapshot annotations.
-- [Release process](docs/releasing.md) — mandatory release checklist and project-wide
-  documentation audit.
-- [Linux deployment](docs/deployment.md) — production deployment and updates.
-- [Server migration](docs/server-migration.md) — released-server and development/rebuild
-  migration requirements.
-- [Backlog](docs/TODO.md) — planned and unimplemented work.
-- [Changelog](docs/CHANGELOG.md) — release history and upgrade-relevant changes.
+Start with the [documentation map](docs/README.md), which identifies the canonical owner for each
+kind of project information. The main current-state references are:
+
+- [Architecture](docs/architecture.md) — system boundaries, engineering principles, and durable
+  cross-layer contracts.
+- [Data model](docs/data-model.md) — source/application semantics, identities, persistence, and
+  query invariants.
+- [Application domains](docs/application-domains.md) — player-facing domain ownership and
+  publication capabilities.
+- [Web design guidelines](docs/web-design-guidelines.md) — browser surfaces, tables, controls,
+  responsive behavior, accessibility, typography, and theming.
+- [Project domains](docs/project-domains.md) — engineering ownership labels.
+- [Data storage and provenance](data/README.md) and
+  [curated data contracts](data/curated/README.md).
+- [Rules semantics](docs/rules-semantics.md), [rules research](docs/rules-research.md), and the
+  generated [rules interaction checklist](docs/rules-interaction-checklist.md).
+- [Development checks](docs/testing.md) and [continuous integration](docs/ci.md).
+- [Release process](docs/releasing.md), [Linux deployment](docs/deployment.md), and
+  [server migration](docs/server-migration.md).
+- [Backlog](docs/TODO.md) and [changelog](docs/CHANGELOG.md).
+
+Completed audit/closeout narratives are retained by Git history rather than kept as parallel
+current-state references unless they contain unique rationale that still guides active work.
 
 ## LLM code disclosure
 

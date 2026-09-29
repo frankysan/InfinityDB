@@ -14,7 +14,7 @@ from infinity_db.database.paths import raw_database_path
 from infinity_db.database.schema import METADATA_TABLE, TABLES, quote
 
 FORMAT = "InfinityDB source-to-presentation completeness audit"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
 
 EXPLICIT = "explicitly_presented"
 IMPLICIT = "implicitly_represented"
@@ -22,6 +22,7 @@ OPERATIONAL = "operationally_consumed"
 REDUNDANT = "redundant_source_representation"
 NORMALIZATION = "normalization_only_structure"
 UNREPRESENTED = "unrepresented_player_information"
+OUT_OF_SCOPE = "intentionally_out_of_player_reference_scope"
 
 SOURCE_FACT = "source_native_fact"
 SOURCE_RELATIONSHIP = "source_native_relationship"
@@ -190,6 +191,17 @@ _register(
 _register(
     [
         "unit_options",
+        "unit_option_orders",
+    ],
+    EXPLICIT,
+    SOURCE_RELATIONSHIP,
+    reason=(
+        "Composite Unit options are presented in their source/Army context with their "
+        "cost, miniature count, order contribution, and resolved included loadouts."
+    ),
+)
+_register(
+    [
         "unit_option_skills",
         "unit_option_skill_extras",
         "unit_option_equipment",
@@ -197,7 +209,6 @@ _register(
         "unit_option_weapons",
         "unit_option_weapon_extras",
         "unit_option_characteristics",
-        "unit_option_orders",
     ],
     UNREPRESENTED,
     SOURCE_RELATIONSHIP,
@@ -261,16 +272,18 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
         "projection/browser is authoritative for player-facing Fireteam data.",
     ),
     ("units", "notes"): _policy(
-        UNREPRESENTED,
+        EXPLICIT,
         SOURCE_FACT,
         DOC_DATA_MODEL,
-        "Source-attributed Unit notes are preserved but the browser does not render them.",
+        "Source-attributed Unit notes are returned with source and Army context and rendered "
+        "on Unit detail.",
     ),
     ("units", "spectables"): _policy(
-        UNREPRESENTED,
+        OUT_OF_SCOPE,
         SOURCE_FACT,
         DOC_DATA_MODEL,
-        "Opaque spectables are preserved but require scope/semantic review before presentation.",
+        "Spec-Ops/Team-Ops option charts are list/session configuration, not immutable Unit "
+        "reference data. Preserve the source payload for a future list/game model.",
     ),
     ("profiles", "notes"): _policy(
         UNREPRESENTED,
@@ -285,16 +298,18 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
         "Profile-group notes have no current browser representation if the source supplies them.",
     ),
     ("loadout_options", "minis"): _policy(
-        UNREPRESENTED,
+        OUT_OF_SCOPE,
         SOURCE_FACT,
         DOC_DATA_MODEL,
-        "The API retains loadout miniature count but the Unit UI does not display/interpret it.",
+        "This source-client field has no established player-reference semantics. Preserve it "
+        "without presenting a guessed miniature-count meaning.",
     ),
     ("loadout_options", "disabled"): _policy(
-        UNREPRESENTED,
+        OUT_OF_SCOPE,
         SOURCE_FACT,
         DOC_DATA_MODEL,
-        "The API retains the source disabled flag but the Unit UI does not interpret it.",
+        "This source-client field has no established player-reference semantics. Preserve it "
+        "without presenting a guessed availability meaning.",
     ),
     ("relation_dependencies", "raw"): _policy(
         REDUNDANT,
@@ -306,44 +321,25 @@ FIELD_OVERRIDES: dict[tuple[str, str], dict[str, str]] = {
 }
 
 
-CONFIRMED_GAPS: tuple[dict[str, Any], ...] = (
-    {
-        "id": "unit_notes",
-        "target": "0.9.x",
-        "layer": "repository_api_partial",
-        "tables": ["logical_unit_notes"],
-        "reason": (
-            "Source-attributed Unit notes are preserved; the browser renders none "
-            "and API detail selects only the representative note."
-        ),
-    },
-    {
-        "id": "unit_options",
-        "target": "0.9.x",
-        "layer": "operational_only",
-        "tables": ["unit_options"],
-        "reason": (
-            "Composite Unit options are used for search/catalog support but their "
-            "selectable bundle semantics are not presented."
-        ),
-    },
-)
+CONFIRMED_GAPS: tuple[dict[str, Any], ...] = ()
 
-REVIEW_QUEUE: tuple[dict[str, Any], ...] = (
+DEFERRED_OUT_OF_SCOPE: tuple[dict[str, Any], ...] = (
     {
         "id": "spectables",
         "tables": ["logical_unit_spectables"],
+        "scope": "post-1.0 list/session configuration",
         "reason": (
-            "30 preserved opaque spectables occurrences need scope/semantic review "
-            "before deciding the 1.0 presentation requirement."
+            "The 30 current payloads are Spec-Ops/Team-Ops option charts. Their selections "
+            "belong to a saved list or game session, not immutable Unit detail."
         ),
     },
     {
         "id": "loadout_disabled_and_minis",
         "tables": ["loadout_payloads"],
+        "scope": "post-1.0 source-contract or roster-builder work",
         "reason": (
-            "The source flags are preserved/API-visible but the UI ignores their "
-            "semantics; review before classifying the correct presentation behavior."
+            "The source-client flags lack an established player-reference meaning. They stay "
+            "preserved without implying availability or a miniature-count rule."
         ),
     },
 )
@@ -456,6 +452,7 @@ def audit_database(path: Path) -> dict[str, Any]:
         REDUNDANT: 0,
         NORMALIZATION: 0,
         UNREPRESENTED: 0,
+        OUT_OF_SCOPE: 0,
     }
     for table in sorted(TABLES):
         table_policy = TABLE_POLICY[table]
@@ -484,12 +481,12 @@ def audit_database(path: Path) -> dict[str, Any]:
             "sourceTableCount": len(TABLES),
             "sourceFieldCount": sum(len(item) for item in fields.values()),
             "confirmedGapCount": len(CONFIRMED_GAPS),
-            "reviewQueueCount": len(REVIEW_QUEUE),
+            "deferredOutOfScopeCount": len(DEFERRED_OUT_OF_SCOPE),
             "fieldStatusCounts": counts,
         },
         "inventory": inventory,
         "confirmedGaps": list(CONFIRMED_GAPS),
-        "reviewQueue": list(REVIEW_QUEUE),
+        "deferredOutOfScope": list(DEFERRED_OUT_OF_SCOPE),
         "applicationEvidence": evidence,
         "rawEvidence": _raw_evidence(path),
     }
@@ -512,7 +509,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     print(
         f"Completeness: {report['summary']['confirmedGapCount']} confirmed gap families | "
-        f"{report['summary']['reviewQueueCount']} review items"
+        f"{report['summary']['deferredOutOfScopeCount']} explicit scope decisions"
     )
     return 0
 

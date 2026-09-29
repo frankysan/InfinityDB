@@ -156,6 +156,50 @@ def test_complete_discovery_preserves_every_reference_and_unique_url() -> None:
     assert all(row["authoritative"] is False for row in resume_refs)
 
 
+def test_legacy_army_logos_are_authoritative_faction_references() -> None:
+    module = load_module()
+    legacy = module.LegacyArmy(
+        id=906,
+        name="Spiral Corps",
+        slug="spiral-corps",
+        role="non_aligned",
+        group_id=901,
+        group_name="Non-Aligned Armies",
+        group_slug="non-aligned-armies",
+        logo=faction_url("spiral-corps"),
+        reason="Historical test identity.",
+    )
+
+    discovery = module.discover_symbols(
+        source_documents(module),
+        static_symbols=[],
+        static_source="config/symbols/static-symbols.json",
+        legacy_armies=(legacy,),
+        legacy_source="data/curated/identities/legacy-armies.json",
+    )
+
+    legacy_refs = [
+        row
+        for row in discovery.references
+        if row.get("factionId") == 906 and row.get("kind") == "faction"
+    ]
+    assert legacy_refs == [
+        {
+            "kind": "faction",
+            "authoritative": True,
+            "sourceDocument": "data/curated/identities/legacy-armies.json",
+            "jsonPath": "$.armies[0].logo",
+            "assetUrl": faction_url("spiral-corps"),
+            "factionId": 906,
+            "factionSlug": "spiral-corps",
+        }
+    ]
+    assert discovery.audit["factionReferenceCount"] == 3
+    assert faction_url("spiral-corps") in discovery.authoritative_urls
+    plan = module.override_resolution_plan(discovery)
+    assert plan.override_paths[faction_url("spiral-corps")] == "factions/spiral-corps.svg"
+
+
 def test_unknown_svg_source_field_fails_closed() -> None:
     module = load_module()
     documents = source_documents(module)
@@ -352,6 +396,7 @@ def test_main_writes_snapshot_and_build_manifests(tmp_path: Path, monkeypatch) -
             return b"<svg/>"
 
     monkeypatch.setattr(module, "urlopen", lambda *_args, **_kwargs: Response())
+    monkeypatch.setattr(module, "load_legacy_armies", lambda _path: ())
 
     assert (
         module.main(
@@ -507,6 +552,7 @@ def test_matching_override_suppresses_cache_and_network(tmp_path: Path) -> None:
         manifest.parent,
         build_manifest,
         static_symbols_path=static,
+        legacy_armies_path=None,
         delay=0,
         project_root=tmp_path,
         opener=fail_network,
@@ -547,6 +593,7 @@ def test_invalid_matching_override_fails_without_network(tmp_path: Path) -> None
             manifest.parent,
             tmp_path / "army-symbol-build.json",
             static_symbols_path=static,
+            legacy_armies_path=None,
             delay=0,
             project_root=tmp_path,
             opener=fail_network,
@@ -572,6 +619,7 @@ def test_network_404_is_recorded_and_acquisition_continues(tmp_path: Path) -> No
         manifest.parent,
         tmp_path / "army-symbol-build.json",
         static_symbols_path=static,
+        legacy_armies_path=None,
         delay=0,
         project_root=tmp_path,
         opener=missing,
@@ -618,6 +666,7 @@ def test_non_404_network_error_still_aborts_acquisition(tmp_path: Path) -> None:
             manifest.parent,
             tmp_path / "army-symbol-build.json",
             static_symbols_path=static,
+            legacy_armies_path=None,
             delay=0,
             project_root=tmp_path,
             opener=server_error,
@@ -718,6 +767,7 @@ def test_validated_prior_symbol_snapshot_is_used_as_cache(tmp_path: Path) -> Non
         manifest.parent,
         build_manifest,
         static_symbols_path=static,
+        legacy_armies_path=None,
         delay=0,
         project_root=tmp_path,
         opener=fail_network,
@@ -760,6 +810,7 @@ def test_refresh_symbols_bypasses_cache(tmp_path: Path, monkeypatch) -> None:
         manifest.parent,
         tmp_path / "army-symbol-build.json",
         static_symbols_path=static,
+        legacy_armies_path=None,
         delay=0,
         project_root=tmp_path,
         opener=lambda *_args, **_kwargs: Response(),

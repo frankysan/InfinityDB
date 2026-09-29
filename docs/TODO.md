@@ -1,7 +1,7 @@
 # InfinityDB backlog
 
 This is the working implementation backlog. Every unchecked item belongs to exactly
-one release bucket: **0.9.0**, **0.10.0**, **1.0.0**, or **post-1.0**.
+one release bucket: **0.10.0**, **1.0.0**, or **post-1.0**.
 The buckets are planning commitments, not a promise that a minor release cannot move a
 low-risk item earlier or defer a non-gating item when evidence changes.
 
@@ -20,104 +20,18 @@ when all contained work shares the same owner.
 
 ## Current milestone
 
-The current milestone is **0.9.0 — application completeness and discoverability**.
-It follows the completed 0.8.0 connected-data milestone by closing the remaining
-player-facing application-data gaps and making the resulting data searchable,
-navigable, and understandable.
+The current milestone is **0.10.0 — consistency, presentation, and release hardening**.
+It follows the completed 0.9.0 application-completeness/discoverability milestone by auditing the
+finished application model end to end, completing the frontend/theme architecture, and hardening
+release and operations workflows before the 1.0 data-completeness gate.
 
 General performance/storage experiments, major pipeline refactors,
 persistent-user-data features, ITS tooling, and native applications are explicitly
 post-1.0 unless they become necessary to correct a release-blocking defect.
 
-## Release roadmap through 1.0
-
-- **0.8.x — Connected game structure.** Added Fireteams and exposed the structural
-  relationships already present in the canonical application data.
-- **0.9.x — Complete and make discoverable.** Close remaining player-facing
-  application-data gaps and make the resulting data searchable, navigable, and
-  understandable.
-- **0.10.x — Audit, present, and harden.** Run the end-to-end consistency audit,
-  finish the intended frontend/theme architecture, and harden CI/operations without
-  adding another major game-data domain.
-- **1.0.0 — Player data-complete.** Close the remaining current rules/reference gaps
-  and pass the final source-to-storage-to-browser completeness gate. A full ITS
-  scenario library, list builder, and other broader product tooling are not part of
-  the 1.0 gate.
-- **Post-1.0 — Expand and optimize.** Pursue optional product features, persistent
-  user data, ITS/scenario tooling, native apps, historical-data features, pipeline
-  refactors, and performance/storage experiments.
-
-The concise public framing remains: **0.6 built the foundation → 0.7 added context →
-0.8 connected the data → 0.9 closes application gaps → 0.10 hardens and polishes →
-1.0 completes the reference.**
-
-## 0.9.0 — application completeness and discoverability
-
-0.9.0 closes the remaining application-data presentation gaps and makes the resulting
-data searchable, navigable, and understandable. It should finish the player-facing
-application model without absorbing the separate consistency, visual-architecture, and
-operations hardening work reserved for 0.10.0.
-
-### Player-facing completeness and navigation
-
-- [ ] Add a global search field spanning **every database domain**. Each result must
-  show its domain explicitly and link to the correct domain-specific detail surface,
-  so identical or similar names across domains remain unambiguous.
-
-- [ ] Add a simple wiki-like internal-link syntax for **all maintained text fields**.
-  A text value should be able to reference another semantic identity inline,
-  for example: `Apply the [[skill:speculative-attack]] -6 MOD and Range MODs; other
-  negative MODs such as [[skill:mimetism]], [[rule:partial-cover]], and
-  [[rule:visibility-zone:plural]] are not applied.` Display-form modifiers such as
-  `:plural` should be supported where useful. The exact namespace vocabulary still
-  needs design—the example `rule:` namespace is only a placeholder, not an accepted
-  ontology decision. Render resolved links with subtle visual emphasis and a
-  small summary tooltip/popover so users can inspect the target without leaving the
-  current context. Define escaping, unresolved-link validation, plural/display-text
-  behavior, accessibility/keyboard interaction, and which semantic identity resolver
-  owns each namespace before implementation.
-  - Treat dynamic distances as typed inline tokens handled by the same maintained-text
-    rendering layer, for example: `a successful Dodge may also move the user up to
-    [[distance:2:inch]].` Every distance embedded in a maintained text field must be marked
-    structurally rather than stored only as display text so it can render according to the
-    user's current cm/in toggle. Reuse the application's canonical distance-conversion and
-    formatting policy rather than introducing parser-local conversion rules. The eventual
-    migration should inventory existing text fields, convert literal distances to typed
-    tokens, and add validation that prevents newly maintained text from silently
-    reintroducing unmarked distance literals where they can be detected reliably.
-
-- [ ] Present source-attributed Unit notes, including meaningful variant-specific notes
-  that do not belong only to the representative source Unit.
-
-- [ ] Resolve and present the semantics of the 18 current top-level composite
-  `unit_options` rather than using their names only for search/catalog support.
-
-- [ ] Review opaque `spectables` and loadout `disabled` / `minis` semantics, then either
-  present the in-scope information or document why it is deliberately outside 1.0.
-
-- [ ] Add a rules glossary and profile-notation help layer to unit details.
-  - [ ] Explain the existing profile fields and symbols in context: training/order,
-    troop type, classification, ISC, Hackable, Peripheral, equipment versus
-    BS weapons, melee weapons, and profile/loadout separators. Use tooltips or a
-    linked glossary rather than making every profile row denser.
-  - [ ] Make terminology such as Trooper, Peripheral, Marker, Token, Deployable,
-    Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever it
-    changes how profile data should be read.
-
-- [ ] Improve General profile versus Army-profile stat-difference signposting.
-  - [ ] Keep the existing indicator on an Army-profile stat when it differs from
-    the General profile.
-  - [ ] Also mark the General profile stat with a small superscript `*` and a
-    descriptive tooltip whenever one or more Army profiles differ from it.
-
-- [ ] Rich unit filtering: troop type, classification, availability, points,
-  SWC, weapons, equipment, skills, and characteristics.
-
-- [ ] Deep-linkable, shareable search and filter state for catalog and unit
-  views.
-
-- [ ] Rules-reference cross-links from profiles, loadouts, skills, equipment,
-  and traits to their catalog detail pages.
+The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
+definition lives in `docs/releasing.md`. The sections below contain only
+implementation work that remains open.
 
 ## 0.10.0 — consistency, presentation, and release hardening
 
@@ -136,11 +50,10 @@ by the audit remain in scope.
     the Git commit, tracked `infinity.db` and `rules.db`, tracked release-matched symbol
     publication manifest, and the local raw/provenance evidence used to build them.
     Verify that the runtime database and symbol publication derive from the same Army
-    snapshot. Keep raw/local evidence under
-    the gitignored `docs/audits/` workspace, then promote durable conclusions and
-    release-closeout decisions into a
-    tracked audit document under `docs/`; do not mix production observations with
-    synthetic test fixtures.
+    snapshot. Keep raw/local evidence and the working audit matrix under the gitignored
+    `docs/audits/` workspace, then promote durable conclusions into their canonical
+    documentation owners and release-visible outcomes into `CHANGELOG.md`; do not mix production
+    observations with synthetic test fixtures.
   - [ ] Create and maintain an explicit audit matrix for each concept, recording
     its semantic-provenance category, source meaning/evidence, storage
     representation, derivation or canonical/application interpretation, API
@@ -192,56 +105,67 @@ by the audit remain in scope.
     incomplete or mismatched databases/assets. Passing one context does not establish
     the others.
   - [ ] Fix discovered inconsistencies incrementally and add focused regression
-    coverage where practical. Record intentional deferrals in the audit document
-    and TODO rather than silently leaving them unresolved. Keep CI hardening,
+    coverage where practical. Record intentional deferrals in the working audit evidence and
+    `TODO.md` rather than silently leaving them unresolved. Keep CI hardening,
     unrelated storage experiments, the Changes page, visual theming, and broader
     UI restructuring outside this audit unless required for a minimal correctness
     or 1.0-completeness fix.
   - [ ] Close with a second source-to-storage-to-browser matrix pass, complete
     normal project checks, and full-asset validation against the pinned production
     publication when it is available. Update canonical documentation, `TODO.md`,
-    and `CHANGELOG.md` for material findings before starting the later
-    visual-design, frontend-architecture, or theming work.
+    and `CHANGELOG.md` for material findings before closing the audit; feed any
+    resulting corrections into the remaining frontend-architecture or theming work.
 
 ### Frontend architecture and theming
 
-- [ ] Move the **General Fireteam rules** / Fireteam quick-reference material off the
-  Army-specific `/fireteams` chart browser onto a dedicated rules/reference page. Keep
-  the Army chart focused on Army-specific composition data and link clearly between the
-  two surfaces rather than duplicating the maintained Fireteam rule facts.
+- [ ] **Web frontend + Project infrastructure:** Add a user-facing **Changes** page backed by
+  `docs/CHANGELOG.md`, which remains the canonical release-history source. Present current and
+  historical release notes in the browser without maintaining a second hand-edited copy of the
+  same content.
 
 - [ ] Refactor the web layer toward the documented backend/frontend responsibility
   boundary without changing the current same-origin deployment model.
-  - [ ] Split API handling, shared page-shell/static delivery, and top-level request
-    dispatch into visibly separate Python concerns while preserving existing URLs.
+  - [x] Split API handling, shared page-shell/static delivery, and top-level request
+    dispatch into visibly separate Python concerns while preserving existing URLs. The WSGI
+    composition/instrumentation layer now delegates browser/static delivery to
+    `src/infinity_db/web/presentation.py` and JSON/domain handling to
+    `src/infinity_db/web/api_handler.py`, with shared route
+    identities and response values kept separate from both.
   - [ ] Organize browser code around explicit API transport, preferences/theme
     state, reusable view/components, and page modules; keep JSON API access routed
     through `api.js`.
   - [ ] Add focused contract/regression coverage as responsibilities move so domain
     interpretation cannot silently migrate back into browser code.
+    - [x] Pin Python route ownership so presentation handling does not absorb `/api/*` and API
+      handling does not absorb browser pages, and keep packaged-symbol tests coupled to the
+      presentation concern rather than top-level WSGI dispatch.
+    - [ ] Add browser/backend semantic-boundary coverage while moving remaining inferred domain
+      labels/symbol roles out of page modules.
 
-- [ ] Implement first-class Light and Dark themes using the semantic theme contract
-  documented in `docs/architecture.md`.
+- [ ] Implement first-class theme selection using the semantic theme contract documented in
+  `docs/architecture.md`, with Light and Dark as the initial themes rather than an architectural
+  limit.
   - [ ] Separate semantic theme tokens from theme-neutral layout/component rules
     and remove remaining hard-coded light-theme assumptions.
   - [ ] Decide and document the default startup behavior (for example, operating-
     system preference versus a fixed project default); an explicit user choice wins.
-  - [ ] Add the theme selector to Settings, resolve the selected theme before first
-    meaningful paint, and keep persistence on the existing preference contract.
+  - [ ] Add a theme selector to Settings that is data-driven rather than hard-coded as a binary
+    Light/Dark switch, resolve the selected theme before first meaningful paint, and keep
+    persistence on the existing preference contract so additional themes can be added without new
+    state logic.
   - [ ] Audit contrast and distinguishability for status/range colors, links, focus,
-    muted text, tables, dialogs, menus, and faction accents in both themes.
+    muted text, tables, dialogs, menus, and faction accents in every shipped theme
+    (initially Light and Dark).
   - [ ] Add regression coverage for initialization, switching, persistence, and
-    representative core pages in both themes.
+    representative core pages across every shipped theme.
 
 - [ ] Add a project favicon derived from `infinitydb-logo.svg` and keep it legible
   in light and dark browser chrome where practical.
 
-- [ ] Refactor the frontend design-system structure after the theme contract is
-  implemented: separate foundational tokens, theme values, shared components/layout,
-  and page-specific exceptions where that improves ownership without adding a CSS
-  build step. Promote recurring patterns to shared primitives and preserve the
-  established shared shell, navigation, detail, table-density, badge, and Settings
-  behavior during the migration.
+- [ ] Reorganize frontend design-system ownership after first-class themes are implemented:
+  keep foundational tokens, per-theme values, shared components/layout, and page-specific
+  exceptions visibly separate where that improves maintenance, without adding a CSS build step
+  or reworking the shared visual primitives that are already established.
 
 ### Release hardening, CI, and operations
 
@@ -295,15 +219,6 @@ by the audit remain in scope.
   confirms its expected raw archive when requested, and reports schema and
   compatibility revisions.
 
-- [ ] Split the growing pytest stage into marker-based local sections (for example
-  data/model, web/API, build/ingestion, operations/tooling, and assets) so
-  developers can run the relevant slice during iteration. Keep the complete suite
-  as the authoritative final gate. Parallel pytest execution now defaults to
-  `--test-workers auto` after the primary Windows benchmark reduced the 687-test
-  stage from 59.67 s serially to 14.13 s; the shared web fixture also no longer
-  rebuilds its database per test. Retain marker-based slices as the complementary
-  fast-iteration path for focused development.
-
 ## 1.0.0 — current-reference completeness gate
 
 1.0.0 is the final completeness release for the supported current reference data. It
@@ -319,19 +234,20 @@ it should not introduce a large new product surface.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not
-    recreate Hacking Program facts already promoted by the 0.8 connected-data work.
+    duplicate Hacking Program facts already owned by the current Hacking Program
+    domain.
   - [ ] Generate an Orders/AROs declaration matrix from the reconciled cross-domain
     relationships and use it as a completeness check for missing, invalid, or
     contradictory declaration categories rather than maintaining a second hard-coded
     chart. Make the projection source/scope-aware so scenario-only Skills/AROs can be
     represented without appearing in the core N5 matrix or being flagged as missing
     core categories.
-  - [ ] Model Ammunition rules as first-class cited identities and relationships.
-    Distinguish the eleven base Ammunition types from source-defined combined
-    forms, preserve component relationships for combined Ammunition, and keep
-    Ammunition composition separate from Combined Saving Roll notation. Link
-    state/Attribute/Saving-Roll effects explicitly instead of deriving them from
-    Ammunition display names.
+  - [ ] Deepen the existing first-class Ammunition model with explicit typed
+    relationships. Preserve the eleven published base Ammunition identities, distinguish
+    source-defined combined forms, preserve component relationships for Combined
+    Ammunition, and keep Ammunition composition separate from Combined Saving Roll
+    notation. Link State, Attribute, and Saving-Roll effects explicitly instead of
+    deriving them from display names.
   - [ ] Include scenario-defined catalog concepts needed for the general rules
     reference, including scenario-only Skills, Equipment when present, contextual
     roles such as Specialist Troop, and the scenario elements those concepts act
@@ -378,8 +294,8 @@ it should not introduce a large new product surface.
 
 - [ ] **Data processing + Web backend + Web frontend:** Extend generated rules-reference
   projections that build on the enriched canonical data rather than duplicating its facts.
-  - [ ] Add richer typed/cross-linked projections for the structured Martial Arts,
-    Booty, and MetaChemistry reference rows now served in 0.7.0. Keep random outcomes
+  - [ ] Add richer typed/cross-linked projections for the existing structured Martial Arts,
+    Booty, and MetaChemistry reference rows. Keep random outcomes
     as deployment/session overlays, preserve conditional branches (for example TAG
     versus other Troop Types), and cross-link resolvable outcomes to canonical Skills,
     Equipment, Weapons, and Attributes without rewriting Unit profiles.
@@ -428,11 +344,25 @@ it should not introduce a large new product surface.
 These items are intentionally outside the 1.0 completeness gate. They may move earlier
 only when required to fix correctness, reproducibility, or release reliability.
 
+### List and session configuration
+
+- [ ] **Data processing + Web backend + Web frontend:** Model Spec-Ops/Team-Ops
+  `spectables` as structured configurable list/session data, preserving the distinction
+  between a Unit's base reference profile, a player's selected upgrades, and later
+  in-game profile transitions. Do not attach selected choices to the replaceable Army
+  snapshot or present the complete chart as immutable Unit detail.
+
+- [ ] **Data processing + Web backend + Web frontend:** Revisit loadout `disabled` and
+  `minis` only when a reviewed source contract or roster-builder use establishes their
+  player-facing meaning. Until then retain the source values without inferring either
+  current availability or a miniature-count rule.
+
 ### Routing and long-term compatibility
 
-- [ ] Before retiring or redirecting numeric routes, define and implement the
+- [ ] Before retiring or redirecting numeric routes, define and implement a
   per-domain slug-freezing, reviewed-override, alias/redirect, and canonical-URL
-  compatibility policy documented as future work in `docs/architecture.md`.
+  compatibility policy. Until then, preserve the current contract: canonical generated
+  links prefer stable domain slugs while numeric routes remain accepted compatibility forms.
 
 ### Performance, storage, and build tooling
 
@@ -452,9 +382,9 @@ only when required to fix correctness, reproducibility, or release reliability.
   deciding whether a storage/query abstraction is justified.
 
 - [ ] Establish a reproducible build/export performance baseline on CI or a
-  fixed development host. A 2026-09-14 generated-snapshot smoke export measured
-  8.45 seconds, 13.4 MB for the application DB, and 37.7 MB for the raw archive;
-  treat those numbers as provisional until repeated in a controlled environment.
+  fixed development host. Record the exact source snapshot, toolchain, generated artifact
+  sizes, and timing methodology with each result instead of carrying provisional benchmark
+  numbers in the backlog.
 
 - [ ] Remove redundant whole-document work in the combined build/export path.
   Export validation serializes the complete normalized object to reject invalid
@@ -463,11 +393,10 @@ only when required to fix correctness, reproducibility, or release reliability.
   or an in-memory hand-off that skips only the duplicate build-path pass; the
   standalone `export` command must retain full untrusted-input validation.
 
-- [ ] Evaluate artifact-level deduplication for development builds. The raw
-  archive contains 24.9 MB of row JSON, nearly the 25.2 MB normalized input,
-  so retaining `normalized.json` and `infinity.raw.db` duplicates the same
-  lossless data. Decide whether post-export development workflows need both,
-  or document one as a regenerable/transient artifact.
+- [ ] Evaluate artifact-level deduplication for development builds. `normalized.json` and
+  `infinity.raw.db` intentionally retain overlapping lossless source structure today; measure
+  the duplication on a controlled build, then decide whether post-export workflows need both
+  or whether one should be documented as a regenerable/transient artifact.
 
 - [ ] Provide a small development CLI for `infinity.raw.db`: inspect a raw row,
   list raw rows by normalized table, and verify that an archive matches its

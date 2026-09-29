@@ -2,7 +2,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from copy import deepcopy
+from typing import TYPE_CHECKING, Any
+
+from infinity_db.application_domains import (
+    public_rule_record_domain,
+    semantic_record_domain,
+)
+from infinity_db.domain_slugs import (
+    route_slug_from_qualified_typed_domain_id,
+    route_slug_from_typed_domain_id,
+)
 
 if TYPE_CHECKING:
     from infinity_db.database.repository import Database
@@ -19,3 +29,113 @@ def public_slug_for_reference(
     if application_id is None:
         return None
     return database.application_slug(domain, application_id)
+
+
+def rule_record_public_reference(
+    database: Database,
+    record: dict[str, Any],
+) -> dict[str, str] | None:
+    """Return the player-facing reference for one rules-relation endpoint.
+
+    Route-backed domains use their normal catalog/detail URL contract. Embedded
+    vocabularies intentionally have no detail route, so their canonical public
+    destination is the corresponding Glossary entry.
+    """
+
+    kind = record.get("kind")
+    if not isinstance(kind, str):
+        return None
+    domain = public_rule_record_domain(record)
+    if domain is None:
+        semantic_domain = semantic_record_domain(kind)
+        if (
+            semantic_domain is None
+            or semantic_domain.level != "embedded"
+            or not semantic_domain.glossary
+        ):
+            return None
+        record_id = record.get("id")
+        try:
+            route_id = route_slug_from_typed_domain_id(
+                record_id,
+                expected_domain=kind,
+                context=f"curated {semantic_domain.singular_name.lower()} id",
+            )
+        except ValueError:
+            return None
+        return {"href": f"/glossary#{kind}-{route_id}"}
+    catalog = domain.slug
+    typed_prefix = kind
+
+    if kind in {"skill", "equipment", "weapon"}:
+        entity = kind
+        has_army_link = False
+        for link in record.get("army_links", []):
+            if link.get("entity") != entity:
+                continue
+            has_army_link = True
+            raw_ref = link.get("id")
+            if not isinstance(raw_ref, str) or not raw_ref:
+                continue
+            if raw_ref.isdigit():
+                slug = public_slug_for_reference(database, catalog, int(raw_ref))
+                if slug is None:
+                    continue
+                return {"catalog": catalog, "id": slug}
+            return {"catalog": catalog, "id": raw_ref}
+
+        if has_army_link or kind != "skill":
+            return None
+
+    record_id = record.get("id")
+    try:
+        slugger = (
+            route_slug_from_qualified_typed_domain_id
+            if domain.record_categories
+            else route_slug_from_typed_domain_id
+        )
+        route_id = slugger(
+            record_id,
+            expected_domain=typed_prefix,
+            context=f"curated {domain.singular_name.lower()} id",
+        )
+    except ValueError:
+        return None
+    return {"catalog": catalog, "id": route_id}
+
+
+def enrich_rule_relation_references(
+    database: Database,
+    value: dict[str, Any],
+) -> dict[str, Any]:
+    """Attach browser-routable references to structured rules relations.
+
+    Numeric Army source IDs are projected through the current application catalog
+    before publication so stale source-only variants do not become dead browser links.
+    Rules-owned Trait, State, Hacking Program, and rules-only Skill identities retain
+    their typed semantic ID as the route source.
+    """
+
+    result = deepcopy(value)
+
+    def walk(node: Any) -> None:
+        if isinstance(node, dict):
+            relations = node.get("display_relations")
+            if isinstance(relations, list):
+                for relation in relations:
+                    if not isinstance(relation, dict):
+                        continue
+                    record = relation.get("record")
+                    if not isinstance(record, dict):
+                        continue
+                    reference = rule_record_public_reference(database, record)
+                    if reference is not None:
+                        record["public_reference"] = reference
+            for child in node.values():
+                walk(child)
+        elif isinstance(node, list):
+            for child in node:
+                walk(child)
+
+    walk(result)
+    return result

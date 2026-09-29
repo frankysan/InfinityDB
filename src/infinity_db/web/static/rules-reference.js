@@ -1,3 +1,4 @@
+import { appendMaintainedText, maintainedTextFragment } from "./maintained-text.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 
 function citationLabel(citation) {
@@ -34,38 +35,10 @@ function applicabilityText(rule) {
 }
 
 function relationHref(record) {
-  const catalogs = { skill: "skills", equipment: "equipment", weapon: "weapons" };
-  const armyLinks = record.army_links || [];
-  for (const link of armyLinks) {
-    const catalog = catalogs[link.entity];
-    if (!catalog || typeof link.id !== "string" || /^\d+$/.test(link.id)) continue;
-    return `/${catalog}/${encodeURIComponent(link.id)}`;
-  }
-  if (record.kind === "skill" && armyLinks.length === 0 && typeof record.id === "string") {
-    const prefix = "skill:";
-    if (record.id.startsWith(prefix) && record.id.length > prefix.length) {
-      return `/skills/${encodeURIComponent(record.id.slice(prefix.length))}`;
-    }
-  }
-  if (record.kind === "trait" && typeof record.id === "string") {
-    const prefix = "trait:";
-    if (record.id.startsWith(prefix) && record.id.length > prefix.length) {
-      return `/traits/${encodeURIComponent(record.id.slice(prefix.length))}`;
-    }
-  }
-  if (record.kind === "hacking-program" && typeof record.id === "string") {
-    const prefix = "hacking-program:";
-    if (record.id.startsWith(prefix) && record.id.length > prefix.length) {
-      return `/hacking-programs/${encodeURIComponent(record.id.slice(prefix.length))}`;
-    }
-  }
-  if (record.kind === "state" && typeof record.id === "string") {
-    const prefix = "state:";
-    if (record.id.startsWith(prefix) && record.id.length > prefix.length) {
-      return `/states/${encodeURIComponent(record.id.slice(prefix.length))}`;
-    }
-  }
-  return null;
+  const reference = record.public_reference;
+  if (reference?.href) return reference.href;
+  if (!reference?.catalog || !reference?.id) return null;
+  return `/${reference.catalog}/${encodeURIComponent(reference.id)}`;
 }
 
 function relationPresentation(relation) {
@@ -152,29 +125,49 @@ function ruleBadgeRow(rule) {
     seenCategories.add(key);
     categories.push(category);
   }
-  const labels = (rule.labels || []).map((label) => label.name);
+  const labels = rule.labels || [];
   if (!categories.length && !labels.length) return null;
 
   const badgeRow = document.createElement("p");
   badgeRow.className = "detail-badges";
+  for (const label of labels) {
+    if (!label.id) {
+      const element = document.createElement("span");
+      element.className = "badge";
+      element.textContent = label.name;
+      badgeRow.append(element);
+      continue;
+    }
+
+    const previewTokens = Array.isArray(label.description_tokens)
+      ? label.description_tokens
+      : (label.description ? [{ type: "text", text: label.description }] : []);
+    const fragment = maintainedTextFragment([{
+      type: "reference",
+      target: `label:${label.id}`,
+      label: label.name,
+      public_reference: { href: `/labels/${encodeURIComponent(label.id)}` },
+      preview_tokens: previewTokens,
+    }]);
+    fragment.querySelector(".maintained-reference")?.classList.add("badge");
+    badgeRow.append(fragment);
+  }
   for (const category of categories) {
     badgeRow.append(
       skillCategoryBadge(category, category.category_name || category.name)
     );
   }
-  for (const label of labels) {
-    const element = document.createElement("span");
-    element.className = "badge";
-    element.textContent = label;
-    badgeRow.append(element);
-  }
   return badgeRow;
 }
 
-function appendRuleDetails(container, rule, { includeBadges = true } = {}) {
+function appendRuleDetails(
+  container,
+  rule,
+  { includeBadges = true, beforeRelations = [] } = {},
+) {
   const summary = document.createElement("p");
   summary.className = "detail-copy";
-  summary.textContent = rule.summary;
+  appendMaintainedText(summary, rule.summary_tokens, rule.summary);
   container.append(summary);
 
   const badgeRow = includeBadges ? ruleBadgeRow(rule) : null;
@@ -194,15 +187,16 @@ function appendRuleDetails(container, rule, { includeBadges = true } = {}) {
     heading.textContent = label;
     const list = document.createElement("ul");
     list.className = "detail-list";
-    for (const fact of facts[key]) {
+    for (const [index, fact] of facts[key].entries()) {
       const item = document.createElement("li");
-      item.textContent = fact;
+      appendMaintainedText(item, rule.fact_tokens?.[key]?.[index], fact);
       list.append(item);
     }
     group.append(heading, list);
     container.append(group);
   }
 
+  container.append(...beforeRelations);
   appendRuleRelations(container, rule);
 
   const applicability = applicabilityText(rule);
@@ -224,18 +218,22 @@ function appendRuleDetails(container, rule, { includeBadges = true } = {}) {
   }
 }
 
-export function rulesReferenceArticle(rule, { leadingContent = [] } = {}) {
+export function rulesReferenceArticle(
+  rule,
+  { leadingContent = [], headerContent = [], beforeRelations = [] } = {},
+) {
   const article = document.createElement("article");
-  article.className = "detail-section";
+  article.className = "surface surface--subtle detail-section";
   const header = document.createElement("header");
-  header.className = "rules-card-header";
+  header.className = "surface-titlebar surface-titlebar--ruled rules-card-titlebar";
   const title = document.createElement("h3");
   title.textContent = rule.name;
   header.append(title);
   const badgeRow = ruleBadgeRow(rule);
   if (badgeRow) header.append(badgeRow);
+  header.append(...headerContent);
   article.append(header, ...leadingContent);
-  appendRuleDetails(article, rule, { includeBadges: false });
+  appendRuleDetails(article, rule, { includeBadges: false, beforeRelations });
 
   for (const supplement of rule.supplements || []) {
     const supplemental = document.createElement("div");
@@ -253,7 +251,7 @@ export function rulesReferenceSection(rules, headingText = "Rules reference") {
   const section = document.createElement("section");
   section.className = "detail-group rules-reference";
   const heading = document.createElement("h2");
-  heading.className = "detail-section-title";
+  heading.className = "detail-heading";
   heading.textContent = headingText;
   section.append(heading, ...rules.map((rule) => rulesReferenceArticle(rule)));
   return section;

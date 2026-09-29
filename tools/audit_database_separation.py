@@ -62,6 +62,7 @@ SOURCE_CONTEXTUAL_TABLES = {
     "unit_factions",
     "unit_option_equipment",
     "unit_option_equipment_extras",
+    "unit_option_orders",
     "unit_option_skill_extras",
     "unit_option_skills",
     "unit_option_weapon_extras",

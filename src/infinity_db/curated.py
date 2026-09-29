@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
+from infinity_db.maintained_text import validate_maintained_text_syntax
 from infinity_db.rule_relations import RULE_RELATION_TYPES
 
 CURATED_FORMAT = "InfinityDB curated reference"
@@ -763,6 +764,27 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                     _validate_fireteam_general_facts(facts, f"{context}.facts")
                 elif category == "fireteam-level-bonuses":
                     _validate_fireteam_level_facts(facts, f"{context}.facts")
+                elif category == "unit-profile-help":
+                    if set(facts) != {"category", "key", "order"}:
+                        raise ValueError(
+                            f"{context}: unit-profile-help facts must contain only "
+                            "'category', 'key', and 'order'"
+                        )
+                    require_domain_slug(
+                        facts["key"], context=f"{context}.facts.key"
+                    )
+                    if type(facts["order"]) is not int or facts["order"] < 0:
+                        raise ValueError(
+                            f"{context}: unit-profile-help 'order' must be a "
+                            "nonnegative integer"
+                        )
+        if record["kind"] == "term":
+            facts = record.get("facts")
+            if not isinstance(facts, dict) or set(facts) != {"scope"}:
+                raise ValueError(
+                    f"{context}: term 'facts' must contain only 'scope'"
+                )
+            require_domain_slug(facts["scope"], context=f"{context}.facts.scope")
         if record["kind"] == "trait":
             facts = record.get("facts")
             if facts is not None:
@@ -999,5 +1021,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 f"Peripheral type {record_id!r} requires a 'has-subtype' relation "
                 "from 'skill:peripheral'"
             )
+
+    validate_maintained_text_syntax(document)
 
     return document

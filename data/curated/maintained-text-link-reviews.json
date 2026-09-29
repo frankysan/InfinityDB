@@ -1,0 +1,699 @@
+{
+  "formatVersion": 2,
+  "policy": "reviewed-maintained-text-link-batches",
+  "batches": [
+    {
+      "id": "batch-1-state-canonical-names",
+      "namespace": "state",
+      "includeAliases": false,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Retrospective coverage gate for the completed canonical State-name pass. State aliases remain intentionally deferred to the alias/collision batch.",
+      "extraSurfaces": [
+        {
+          "target": "state:retreat",
+          "text": "Retreat State"
+        }
+      ]
+    },
+    {
+      "id": "batch-2-hacking-program-names",
+      "namespace": "hacking-program",
+      "includeAliases": true,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Retrospective coverage gate for the completed Hacking Program name/alias pass."
+    },
+    {
+      "id": "batch-3-equipment-names",
+      "namespace": "equipment",
+      "includeAliases": true,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Retrospective coverage gate for the completed Equipment name/alias pass, including conservative plural and case-only variants."
+    },
+    {
+      "id": "batch-4-trait-names",
+      "namespace": "trait",
+      "includeAliases": true,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Trait-name pass. Plain generic rules vocabulary and cross-domain name collisions that are confidently not Trait references are fingerprinted below. The former Deployable, Direct Template, and Perimeter review-needed queue was manually source-reviewed on 2026-09-29; semantic Trait uses are linked and Direct Template attack-rule uses are retained as reviewed plain text.",
+      "reviewedPlainSurfaces": [
+        {
+          "text": "ARO",
+          "reason": "game-action-not-trait",
+          "occurrenceSha256s": [
+            "035b73c70bc3c6e8a7b527c2d4f92125a6fad47ae4cfc9c1ba0ffb1c70460e4d",
+            "09d6db034c18a59463b48beebbf360f524b81a812f07655f76462a2ce55d6268",
+            "0c2c6b5e2f3c78d191f3a24f51f0c4a58dee1e28d38c51fb225baa749f2bfc2e",
+            "0c9f5d8f22d3db624edcca9a6d6ef3b494d64f479660d8b82bea6e45d3db059d",
+            "1114b954358190bb213389b6901cc45ac0baf0a4fddaf33dda86026d075b40a5",
+            "15434549f930668bdada6d5b1e4d7c266552b63094f647f42d78286e1f471c28",
+            "224bda0d5e2a467290a9ff90cfbe7f82a9f7d4770c76a73a7e2c391b817c6777",
+            "2faf0dd3d0ac84c07ac10b8989303b31a3d57eda5f5055eb3c4fd4e1236ac557",
+            "3aaae64d1c533f4dba103ecd709a9da3e5b63eb81636ace9c77aa98974e6c437",
+            "3d6b0e509d1afc73aba44c60f2e0f337c67629f784135346029b061784f13084",
+            "47a2a7bdfbee9894e08f620e7840786c57c8b673a337418ef071fb2df99eddb6",
+            "4a5c0b287927723e68684a91102da16a327b422eb65f6876b711c258fb10b440",
+            "4b60bc9f394383c396e8598058c2499a2deca9e573e0a0bee3534332e4853322",
+            "4d5a7583f28d8f977318848f4dff05086785adcf33ae94716a302324bc200560",
+            "4e5fb55f99b18b967ef9cd8a4e68463044fbd7331dd46e0cc865907a7575d681",
+            "7c2116f02c768842b6238f0e650555147bc007519ff6422c5c03932bb2935f99",
+            "8d13d723c219343c0b9879b7683c3a403a850713013094dadc31a36b2210ede7",
+            "8f544f450c76060353bbdf0a86bc7bd6370833c9bf89d5fbce0e73f287e2c154",
+            "9c1bbd72f25bb3333a2b36db50457618b109d10f686cdb8cda2b8cb82e90e3fe",
+            "a98e85a3c31843530632334308c23bec95fcf5d41c2a92c0c8c3e050e67cb579",
+            "bd0c4193f1217329ce8d3e2d8bacd003c2be432a39300e3dcf2a9f147d2cba13",
+            "cf933ac0e10b76e8bdf0e80f2e892007796e8db9e9cfed00f9cb6c058a283dbe",
+            "d0bf701bc8d055745660818d9100d00b127b242046b866a354e8b6342ccfebf9",
+            "d0d97e3ff535967042f442b8348337fc800ab1ffc9451223a51fa94e7023827b",
+            "d39fdfc921997a2b91028c8608bc2d37d76e3d8903fc3c004bb3e064c8cd0619",
+            "d6c143b45987351ef4480cde48ed9aff593cdedb4da339eaca4283d5ac224ea7",
+            "e0adcfc3b901ee56a7d9eb4f9a9d476bf8003a2100092b5157fb725674fd23ff",
+            "e5898940ac2bc58c1f67a67bc74a17c18f1deda1a3e2005184d4332707e7f1b6"
+          ]
+        },
+        {
+          "text": "AROs",
+          "reason": "game-action-not-trait",
+          "occurrenceSha256s": [
+            "0cdc61ab70ce0f1c03dcc23321b11c302e13aa0d662c0bd08ddcaff5660cc300",
+            "3543eba899790df0f3d339c1fe1cefd144dd339b665f8cf8f93f690f76ff79f4",
+            "480c7b9d5cc8ae22af412c76098cc1bd810a6ee069ff2456b9b98ece12998ece",
+            "5bc40e12e924ef25f29dfbe7e6ae2c778a640302c46d57a36789bf7d53c3db00",
+            "5cc707b528b8bbb0e44e8f4f5ab48de6a1bed01d51d3409e6f2589e80ad7cbcc",
+            "6208521d51c7855216e998443fb02d0928d2660cf7c2f4ed64714b6ac7eb3c90",
+            "6ba0b1daeb56e1fa6a48a83b0826175117879ce2b2cdf7bd92fbd09dd90d2c42",
+            "8203e0ae41d24726623fc90704fb3d37bab595525608034c61346002f39115dd",
+            "8cf2465d30793f9d1a6aff2ada973427a7c264ddfff7d813559569e82d6bc6af",
+            "9a3ec3298d90d51d3c95f6941a68a859173518abf5de10d4947ed5663bc1ea28",
+            "9bfc5cf80064c1bf071031f4537b0da5603c2b6bc6158fbaa44d304ceed3555a",
+            "a089a7ad9ccc02358864f09f5b362252ac8a26adabdbde07999fda9a1f90ecec",
+            "ac496470a0673d9469628879fb650c7a9b52a5ea9337d14cca5532c5ae188a81",
+            "b0695bc429689cb4af885d198f2a2299f361639016f1b4dc138b8cadede10ccd"
+          ]
+        },
+        {
+          "text": "CC",
+          "reason": "combat-term-not-trait",
+          "occurrenceSha256s": [
+            "0688c585ec0e7e986eb227ddf64fcb8cfb8aa652fd27262dcf945f2785249b5b",
+            "19055daf82d098405bb39910c95273eff8855f8b01971ed64258ca83d2e63ebe",
+            "240ede8b2cf71ee524ca19e5bf1de872c09dd5e5e94faa502672a7f4e4ad2ff6",
+            "25035fe58b40e7ee7521c844dfbae15446b27bf0b763ff6322b11585519c9dc5",
+            "30e4e84a1a6906d11bd2616cb223fd05eec240bb5f9b22d7e72caadcdadfdab3",
+            "342022f9a0c83944a9d9d9ad30a951969a9aa99549a5cbe0e418649f3a17edeb",
+            "34562f7b3a425fb935fdedf428e805e2ff0f2894fc9d1322fdfba607672baccc",
+            "3b4077c976769b1dd5a935a9079b63138a85f081cb5510a5d393890316b17961",
+            "46cd6e67bef33a02f953a0837b1f706123d5c60015df671b2147071e5db9f4cb",
+            "5fe813ac5f8db8b1d36b5bf314a3888973181908f7fe8911d068ea4041e8950d",
+            "6021c3b8c7afc08659de24c9b864f4f09175b9f7f2477a76c809e3b14c102bbd",
+            "7b8d4e761c167924694be5fcbc9a0a0daa7f13a996a098de099221e6b286b013",
+            "7b99a8c7000f742073a1d5f0bc5827ed6c58fa7112dc7680e84a85d280528915",
+            "7c11ed65078c948e17ba1c516aa148c3dee1c850e445a932546e4bf9bf81e846",
+            "979dc2a0b1e1c338b9963a4e2251831c0b79c1ad2727b7628c532ec273edc35f",
+            "cfefeeff1974c5724c98589dc5ae6fcfe776ef1fdc7e235e7771993e0a214963",
+            "ed7432ae5730ef637c250b4d6f0e0a32749ec12085836b6ff227c531081dbed6"
+          ]
+        },
+        {
+          "text": "Deployable",
+          "reason": "cross-domain-name-not-trait",
+          "occurrenceSha256s": [
+            "1b43ab0462d82c8886b0680141240866e60142e65330a19bdbeafc12d7282d06",
+            "3b7506b770ab9b725d59d3310ff952605b9a8840cfea039575fd078b814b4279",
+            "82eef7dcaf2b2a03b0bcc13363ed41f9ba0e6ff0966c686c504ab6078ed10fe6",
+            "9e73cb252eaaba0520b840af2c83ac271e7f6c8e94c6be001f0e4b6ebddc978e",
+            "b560737e71ffc0afdece1a1c4f980e0774bce3c071b79093cc2ae2b8ff594232",
+            "c8ad026c8d6ba9255687b726f3c7ce10f886b742780367022c0701a6cf2708d3",
+            "d8fc1dc4a0e01a6549ed2c3055e942c28040ba3480df08dbb0ca332dc77bdd40"
+          ]
+        },
+        {
+          "text": "Intuitive Attack",
+          "reason": "skill-name-not-trait",
+          "occurrenceSha256s": [
+            "c9f0fa6a48562c583f52f63d5439bea2a93ebb12661fec0df521ae6baea52d6d"
+          ]
+        },
+        {
+          "text": "Non-lethal",
+          "reason": "descriptive-adjective-not-trait",
+          "occurrenceSha256s": [
+            "2c26a0757f4bef37b2bc757b0adac0427750042f4c8b6db6df6ff4140c16fcc7",
+            "358ce6052b1e361f109decda62cd1b44863e2ac484fb32379d3a4cc2e73e9e2c",
+            "af2aba68bd3468a0de18073cd78a4f4de6c883fc7e2c282dda45a314aab7eef4"
+          ]
+        },
+        {
+          "text": "Speculative Attack",
+          "reason": "skill-name-not-trait",
+          "occurrenceSha256s": [
+            "632cbe60a5cc4f3535c97de1cbcd6509b3969d79810522d80a4fc4dae0c8677c"
+          ]
+        },
+        {
+          "text": "State",
+          "reason": "game-state-term-not-trait",
+          "occurrenceSha256s": [
+            "0030af3b513bbde73f31374da98630cbc9f9b801dc499d25aaef8fbc7e9a2bc6",
+            "00eb70c74285964bfe8ab14d4d8a325f215c4ad90053b8b45ab39d41f162658c",
+            "0b7f62f5abfc27b02b379b21fd6730b499c79ef41ccba51e9487087bc3ba5e87",
+            "1029a139f525aec813598ebb73225e4989cfbca6a05953f951fcdaa3652dd8bc",
+            "15587a83f41c6df5cec8dc2ee16c200871e62f6b3755c0ec58c0776f538b99cc",
+            "16e9c74439ba72e1597a4ad01a2924043776c972722607a2465d7433339eafdd",
+            "1819d9977f67cfbba904413b4a3015410d5cb8a780fe60100b3b1022597d3cea",
+            "18e1baf7397d370b1745e96a5bca35a228c28d706e29ff6f9b0a5e8f069f8c28",
+            "18fd13b972519a2b60fec50dc78f373fc2b4c3a8abeebd8dd01579b9977ba628",
+            "20dda4f3a08d7aa66ec06118d8949a30b4120fb832e033eb1dc14d0c857a539d",
+            "226aadf4281ae6759dc5aa945f76af6b30b6163b4e7cc0629a55ff4e827d3f22",
+            "2a6d5306a4e8de312dd962bb2c831da2c69a7753b68ca1c36ce7225b79d0130a",
+            "2c23e4f2f951bb785061037c9951e0f18707f71a3126da5e473a9b799f8c7190",
+            "2c590860d694b5b2dfc72e95755bfc5de916e6a5118ec6111769dcf3fa6fa3b2",
+            "2e39603dfe0af1c77ab20283c3b10a80696e8c284bb0c794812c3d6643358540",
+            "2e6267cca3dd7dc8b3f86f68b30fd2e06682da12a4c61b1d845d380b8e071f7d",
+            "315c8655ae7130f296f97dabe1fe5c89fef069686794094ac047f308d67b4b2a",
+            "31b683f0bebeb23f5fca9d33c8fad6a001185433b8b5ab22b6bfaca64b339c49",
+            "35e4594a929306c0a85f542f5132e398da9178dcc35701e5fb8783b3fbe20533",
+            "362725526ef6787abeecb11033ecde8488c05fc69334eeae1cae4dd9469a2a06",
+            "3b3f6ddb9c47695475b93e8bd67e348a8a9a434a4eb563fa00a62927c61b54e4",
+            "3e96fcf76dbcdfaf838f606e3f4e93084da0f340bdc8b86631cb220c67867a4f",
+            "41c1594e33f0598fe0a9fbd7fd20fa433cbc503606b7529cf975d46273a4a02d",
+            "423d2480c34f42f65005106482a1e4ed2dc02ca6c3dbbd66f856ea085a1dcc22",
+            "48f0ed9589b508d0b3f204d6d75bf3dfacdb84aec16e6d48eb668e2690917242",
+            "49eb00dcea39c2e64500944af077173eeb8e7d2a8570969a2c155815dceb1c30",
+            "4c0dae90acdb9aa28ee4e24b01e59fca2d1c2d01747f9262541a4fa536b7d5b6",
+            "562aacb12fe43bc8a4220b5633b0d985618acd49f6a600c8316376f99d32cc1c",
+            "5f02635be9281fe505dc90f8468c790318e4e499a348d89f886091e6e055b255",
+            "5f38fc3ade2945fdbef9c72d6ba90f0d44d4ae501d74cb5d4434c6ceb59dc62d",
+            "5f80fe56624ce1b477dcdda0ce46f4caab999941e060be141da17cf95e7dfdb7",
+            "61970e3b914b78aa5743baef2e1e1cf9cd36f5fd5f667d897db31cc7148f04c2",
+            "657f9ceb549f2cd3000505f171fe906a2884618b285ea5f35d0643187a0439d1",
+            "6af782d67c4c0baf019401fb0c59aed761892554eb8124c5a3001632d17151ed",
+            "6b87fb8f5b38a742c78ead958589805fdd84ebf8474ee0cf10b9aae2cb13b09e",
+            "6d1181d9869249f9c5e480505f0273e030bc50428f11502a6b3fe94b34fa8f13",
+            "6e1bddfd5d15092a584441b5b7df015014d219a8c6e27c4e41479af1ca0dc786",
+            "6e8b61fc4b1cc88012297f05c82e020a5083541a6d1918a64d90e7ddbb240be9",
+            "76419d3845e46d59333dd1770406516cc3a3adbfe7496d9db2f5589e271f1ded",
+            "7c29747fd0c3005a761f820daf97e8fbdc04528fe0d6f4b36a2b3bb1a56803bf",
+            "7e98823d4d066c4da15fcf118de1dc17c0e6da5dc07a9ec6bd0bc2f26fb8bef8",
+            "7f1d63749081d97a2cf519c600b01338ca5dd4987ffc277ad19d6d8c4af3987c",
+            "8566f762a46d5dc045977244086e5866ccdecb39276c00d98048721b4c6bee1a",
+            "85da7286e92d0680c41629af756e7a5d20aae7370bd4a924cc4143dee7e01d81",
+            "86cd2a8523b26115fe376fdb6c24ec4e946cf248eb3e9e82257d1211ea7dbb31",
+            "87477c1534318f0a4d49cd1b3e98933b9c7e9a5eea90cc79447c667992046502",
+            "882f19bdeccdf041dbbd1707d24481415f22525c981ec66f16dffbb6d5c4f488",
+            "88a53a4fee22dabeaeb6ab5d4ebfcc1dd49db22887ab74037eedd1ba0bdc534c",
+            "8c5c989315591df9b9002151a119d3dc1e919878760d102431db7d0dddee0706",
+            "8cd18c40b5949dc1a6c401df4ec4f0f104c9109b1ddcd2fa6ecfb4115ef38643",
+            "8eb9ae5676920bd7a278b5ad299d39fbb2da6b3acf03f2da14b9ced511c684bc",
+            "90c42539f5fed6918362d0f6b80834fd9b0f0dc24a3e8190480e649b91b7ce3a",
+            "939fd0b46bfc8996c9034f6b18954963c67cd58af918f79d12e8d2aacf834422",
+            "93cfe087ed0346537fe8b273b13802a67c7f629bd82318813f33a16d78fb2157",
+            "963f74ea01613562ab28a10f345c354fcc2a4630c2cdf5a342ff08f96d4195cb",
+            "9caeb705cbb2117a25dde18d41a7cb4c8a5e76da4905a8f9d28bf38bcd503388",
+            "9f62316845da3d482e91cdcfadeacafbd3032752f40a0669bccbbc756b05a526",
+            "9f848e0deb356b4f514299198cb8c56ecf117334ad36972fbcd3b286093ab076",
+            "a02b12759a29cf84fefbd6b865205edfbba7137cb92e6599a6a70277b32d0f75",
+            "a130ca0782718f32198fe997e201e09330bf2efcefa378f3ef0b20f4f1db5ef7",
+            "a300b70257cc6a55bf8b29716538e58d7a7ef7fb064a182892579b5366ec6cce",
+            "a3c7bfcc8362c8d79cf1ccdfe4c590fc3cbed5a60ad3835d0bb0ca54b1af1a3c",
+            "a611d1a70d11ec98ea75d71724fcaa9187be3e7c173539e5478086048aded655",
+            "a8a3bb10d32910f52c257a678ae8801aa17b5bd0a7c09818d4e5d85fe15505b1",
+            "a994b5d9539911c80109d6c5db267e6bbb2f056ddd3f2101a4af3db4541b62be",
+            "abd3b43605604c4fd602e42011ca0a193e7899edc72e1db1669426f1dd383f86",
+            "ad77267a2873f403eb25262e2692abfd478bcd2c6fe4b980addb2a208bf50c85",
+            "adbb7ef05b983f7913ca96821356e6a16be4390406662cd7fbcba680b4a61a6a",
+            "ae086287f73d216dcbb85164ac2d1c57bcea67c525f043bade80c54aeb30884e",
+            "b052a0220edf4e0acf1433f727708d4e7b2a145364e7865693ad9a7c30ff7e13",
+            "b3ddd244f076d7ce3a09398ade3e56f2ec54475e9953dd6fe31eb66d0536be9a",
+            "b56d3c1571a0a24548de0661ad2759b6ea2654c5590f35f134bab4974d65a49b",
+            "b6e13baadbca4bc92fa04114b9b43dcaf26015bb7fb5e8429617c9f61de4143e",
+            "b7746c11ad5ef23d195e56be960c8338ed305d426b61690df760c795904cddd6",
+            "bb94b005803ac02f7ffbff8fd522d433fce5939a1e1e046f95bd40efdb5f37fb",
+            "bd668cc29582ab649fa0fa4cc002a7d7c052a4104913292aaac0744204862e8d",
+            "c13f394617a11d3c35577be9740250bdcf4a2765408d4e70f4a0e2d9a14e2050",
+            "c2d78e4b868c043fd7f5632eba59ee38b012858662e1f647140a107e4bd060ea",
+            "c2f2d7bd6c492e9d4cf8873528dae1dc130e6eb72251cef39a28d78fbaa60c1d",
+            "c547d9236ba9e8a96d6f23ca915bc6deb52d6dc8ed1c2907eedccd874270e36a",
+            "c576fec584ddca934d8eb560948fdbf0f48c36c1058c24f7781bc7d64233b7c6",
+            "c643edbf8cc41a1beaa92edf1c7e685afaf88ee099a321d2273fc4be1523c1ef",
+            "c85a5286c5e1fc799703211a74629932a497ce16e57bf412cbb4864ecf288c18",
+            "c8f9c6c38cb57f616a85203b5c0480733a6b8957981ac8c696e41f8f7c43e91b",
+            "cc39b9c83b7e7c966a359b9765146e71f3c9cab4ec8cc18ee302e77b52fdca9c",
+            "ce6da910e5473470066ac58a0573ec3a1549531f0f072fc6620c89cb69267fb6",
+            "d195f97c38ff00d030f45376661afaf1aeb2b38b10454e67ef4938f4deb55224",
+            "d3c852d774e40e494dd212c778f52f4c24548358125fb984ec5867ec3585080f",
+            "d41b6a1a19caf605b5480683dc1fddd6e389f8eb31db70e96d9e3facdb8de6ad",
+            "d6a41d2a11f7ec3fdceae3b969ff07b39bf932a54f2b8faa0412184652f92db2",
+            "e02d083fa2b652427eff85ad82dd03d402957254dc90316a5b409212e43787b0",
+            "e3b22c3a9d1299ac58e20cdc987efe6c84900467a36712415c61f2bb14ef8fce",
+            "e5b782f260c4cd7a5a589d5b2dbfae410297aa19ae4390cd7989409e26533a4e",
+            "e71fb48effb7d7840dd2c642d0d194421c7071dd36ca1b6f000412640e6c8177",
+            "e769098c6713e6bae2267c7c7552e7f4cef07206f0d037990f36fea4de036804",
+            "eabd14f59d272a3b1b146859915ddbfc19a89138a9babeda250c1a4b23f9a9ef",
+            "eb6ad978a1021f89ee80a43a82eb549c4949dfdc79f14745554f7f9974dd9f5b",
+            "eda36daa92b19052d96db9c159af239d42172d0369c017c99250c1786c2c3bf6",
+            "ef658dc3cb973c23bb52bbfcf23df6849d05bdf82391575beca5bb94c862dfc8",
+            "f28bf48a64d2cec8a00585ea7c426f386d102422275deb53373d70a10d287316",
+            "f5fbd795a9b38e44023f20feb3dc137f8209afe751aa30d68b7a6e5c9cd4a8a3",
+            "f607a967c53926313fc77012312371062c74693449feebbc1ea303f893dc024f",
+            "f69ac8a1777a5a194001b6c7ba507855ba2af8ee1a90686bd305c2987abbb7d3",
+            "f7ec9c7209ac443a447bcae37071d3b2dc86c54cf07ed1eb736ecf0f96a03015",
+            "fa0fa2357261fb9879c36abdc61e435334d5c15ee0b3e1987363983d9c6339be",
+            "ff27a275c518e558706ff65caaf0eef1f22efbfc14421e64948043a7631ee19a"
+          ]
+        },
+        {
+          "text": "state",
+          "reason": "game-state-term-not-trait",
+          "occurrenceSha256s": [
+            "0c0887c8ac5101385de5890d0420328e83aa9c4fe068a26fb35213dc39d452d0",
+            "190db123221a3148380ebfbbb4cae52a04d5c69483ef43be1db5e801916ddaf4",
+            "1dc46e5fb695f35ec7b7c0ad960a8bfa3bfe789d4b1346f5e15f2cdf1346f655",
+            "36ff3037847f4e919b0c647d8b94d6341c20ab1519b9a8c2655eeb210aeb00cb",
+            "46d9821bf72360689cef5aea3f20b9031b36141eacf889941df380eab8c3794e",
+            "577b964452f5f78c78e0efb6060f89331e6cc1495984a25db4e391bf18d371cb",
+            "60ab648e82493d1dac0b50b2badaf9a75c198cacc328b9a95bdd48caca54bc2a",
+            "7165b0bf06d01fd3e5ba0380449737c19f322924678c9acfb0893f0497f230a6",
+            "747860418aef44afcd1af001464d154bbfbf7233ebbfe94bdb9e4db5cba1ede2",
+            "7b9d77d1884f5d575b1c14d59b1ae0a736d06eef17aee3b0b4193733698f6211",
+            "8fe81e1d9bbd52904a82e811560d392f2148720b963f7c612a2f84130acc830f",
+            "b70ba20810849f8d3bc62925d3c3d2e30b232a5ae2110ef33b3224e0a06f5d75",
+            "de252696a28d8b0b1db9330c577ffe2cdc94dfb867412441ec6f1dd113a29adc",
+            "e64ce575dca9af73754246529d12fdbe08d2640a3a5910c7bae7d95948a91e57",
+            "f06062a6c13feabeecf29265f8b304e2acc222280c7a439ff6921d2cfcd6b2ac",
+            "f367d5fa15f3c2e27193cd1ae883f515b64692b95d5cf22e5f8dbdaa0fa9913d",
+            "fd95c8ff62576e226e333de37a33d2874414f7507f368336dd9c90b4706226f1"
+          ]
+        },
+        {
+          "text": "States",
+          "reason": "game-state-term-not-trait",
+          "occurrenceSha256s": [
+            "0c87b0dfcad56ba8c058464eaab5e31074826a98d69f97df2a61ec8b981e6a19",
+            "236182e6944199d253215bb3cadf797a4b87b002a054cf154d5375759fb52ef1",
+            "2acea02c97b23a54a948ad22e846994f238310ec15c6c4a33707b6d55d3ddfe9",
+            "39662102328e00b55c3e9874e49ef156d021fe6e3e8158b42dcbcc7ad3dc0a5b",
+            "3adc4059f098c6a2883667ebbca4a0e8e6f77b8fddd3827ee9bf84f8590c1031",
+            "40257dba0408a4e1167f0980a4c4e10cab3691fa6be3fd83b62f354f45a00242",
+            "4af2f2a01a78a12193394eed59efb5a2af471061f4666b2c689215502066d40b",
+            "5328376343abcfe4d7053f7d22e6cd344745292113d159b56defeae29236c6e8",
+            "6eae98415ffbfe2caace9690f6aada86f0357c1482c778919e3fc6e2eaa01376",
+            "85bf5c4e4cbc63090c91f9114f59784ba33dcfbb0fa1d2a5993741b166eb1388",
+            "8fa91486deb2f6473e9a7f8c7021a84a9b020ad35bffaabd5ed97154ed65bda7",
+            "9d621a6f4c580cf0955f44b823c557d2b15a8906372136c830f0714629008e12",
+            "a32f3c69fe5f8442826da23e468f1a4012975643a787ecd8bf9e0a28cf4dca65",
+            "ad0d73a2ee9fa6712458cf1322e2e4ae2a2cf08f43308748cbb8f93a3b8321be",
+            "afcedacd345e80aadb4ee42f7a400fcb58b85309ccfa1002963aa62cfb468816",
+            "bb4e8b87cef264b963308bb1aabbd6449a882d4fc2093a38963a5d9fc8187e0d",
+            "c331ba69c16400fc6cf0ee9b198a5050d6674bf19a15abb03afe7246aaa3b891",
+            "db039624b23d70dd8ad35635d7b47d1a73aa46bbc1a91332f764fe68b522510c",
+            "e8c7cf482df7fdc39e3f1d913a2537ba69f670bfcade48a91c322bd2b14af51b",
+            "e9a1c18ae71b3f901d8983fc788309ae13d51474c88f93e03e16c682203ec9ea",
+            "eb6d59b9761e0da30909a61d0bea9afff5b697721538a6a706f4452434f80283",
+            "fcf8d0cc5165b85f13b1b322701a890474b59b670c0d0072b618f5e0696171a3",
+            "ff17cf892d9be4cb96b30275f5f3b8a95b798f596ba8c2a986179eb1459a4694",
+            "ffc782369d0c0b3776fe9d9c85069330b6999833d13f62a20a1b569d0e06058e",
+            "ffd7b01047bbda70cfefd52bb1e3ab57c835be894fdd1e5bb2c9d96b83fbfd57"
+          ]
+        },
+        {
+          "text": "states",
+          "reason": "game-state-term-not-trait",
+          "occurrenceSha256s": [
+            "0dcc728686295a11f378c527a9eb0822716c45cb0d460828eebc805d574c2081",
+            "377757109e4186e91f3b062e9047a3ef0e516eb9012f2dbce874f5e699f419af",
+            "7d9f8062874c4ae5b855f0624dd9cab05b30569ba53df39f67d5739abcc3760c",
+            "bf5c8b656df7885e8f4bf74e027ac6f5347768d51f69fe92fe66e6d18b6dc9bb",
+            "d2922b50bb0cae00d2ccfe51b74f2bc860e769897478ee6232213bf62acc958e"
+          ]
+        },
+        {
+          "text": "Suppressive Fire",
+          "reason": "skill-state-or-mode-not-trait",
+          "occurrenceSha256s": [
+            "e35807a17571483cc5db7ae926bfaa84735d6e3d9618add5736eae54a93a8c93"
+          ]
+        },
+        {
+          "text": "Zone of Control",
+          "reason": "game-area-not-trait",
+          "occurrenceSha256s": [
+            "136186fc663b14cf63979380afb3249b8dfe486e33b753d9b5256748410656a3",
+            "175531637630afd1474a2ff4a3038fbc7b4312b10707c2183644f7ed198efa7a",
+            "2201a5bab95ee141db6a9664e7381d03d4e73b12befa8fe5d738cdde2cde7922",
+            "280f7596e1595173f6c493ef10c2dba7ae80fd5e9d101d277bfb397af80b6308",
+            "399fd3ae0120dea0553d5c348d60d8e2319bc740cd69ed82a8f985d65e539b50",
+            "3a9decd5270aa146eb9350c7002c3f3c106619866db79680b41584ba8bf8d304",
+            "474a1190a66d1f8d99d9e7519855c835aac1e91377b03a7283bd1ff72ab22eb4",
+            "519397cacc069ffd59a6018496f021151bc325f26e69d3536610c61d870d5b03",
+            "51d2777b951b4c4abc5b15b9083a864b5b50d42da27680070a9fa91a0d99602f",
+            "5a756098ece76a174664a9c0ce5c2313f6fa0966500a633462eb5ee63e8cb22f",
+            "5d4b279d9bc3bda514f5b03b3888a9ed3f6de187a69c708c123c2c71eaf18655",
+            "6e45811c6f235e9a5f81b6ef5675805650a9116c6cfc4e6a031c17cc1fcec8b4",
+            "72c2dfbc1797a3e41a2b7506106c7e24e9062d309f7962ab3eaadab58ee0dade",
+            "76cfb434b4caaba998cb494ca11401ba039d3d53cb63fcc61d4f8ccaafcd1d2a",
+            "7a04a2eb09ef8c791c073e24aaa3ae0bf083a2356938fa9313d4e716a2acc4c5",
+            "89a950f99c6edff1c8337f55c841822cb55fac2f31d0c2c02cd85235db9ba074",
+            "920abf04a424a98a491a7788a5799f037edf95c02f9d071424a0a83fef8d1b4c",
+            "92a68fc6f0ff24e99542a309707664dfb4a028ea3f61039dbb3d24c338244380",
+            "989a3fa57fac8a7fdd3c5294ebb096415f1fa313262ca3f93321567bbecad966",
+            "9aeb1e86de809da767f2005bfe5a0ae1d22ace92f4281ce62f99c6632896edd4",
+            "9c7bfcc8f23d7b71d059fb76b5e4c79a14bcf9e41d98a76564485638ef7621fb",
+            "a2f4fafdfa0c583a057ff188bd875181f6aa6736489068083b2591c8c020a6e2",
+            "a996eb3a98118eddc529d02eca3726bbc8a3dd193498009ee4fa441a3381366f",
+            "aa57d8a6f091371b8891cb88baa1346ce3a3b2bdc286033891ed71262aeb916e",
+            "c5efb7a44dcb2e754a1024ecfede6e8cf1ead6ab0e00b2e995ab08b6af898ca3",
+            "c9bcd124501b0c82c32154f6b42ced8572a3e49688dd21a2873b6efce1593043",
+            "d5d80a8522f82c6fc25349b507f0e7a7295e2e9cbfabb1ec6176721f0e737505",
+            "d94085a7c2ad24e5adb8bbe648da1b1bdca33e0ca7c57841a827008c7525dd74",
+            "fa7cd4a977dd52a6ed1d38053105d9836544e3ff96d7f58449837902f89b0b47"
+          ]
+        },
+        {
+          "text": "Direct Template",
+          "reason": "attack-rule-not-trait",
+          "occurrenceSha256s": [
+            "9361b2f20df976e4c4975e20403da4c8bc2a63fd416c6f9235c0aabca97d1e0e",
+            "980b85f51986d3d525a13153364635d4475f8bae5d5149af00b6cf7fab1b0c2f",
+            "f8a9574b063d34f0e8253edea4764d72bd12331fa4f15707e232173cf11cc9ab"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "batch-5-skill-names",
+      "namespace": "skill",
+      "includeAliases": true,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Reviewed Skill names/aliases case-insensitively with simple plurals. Clear Skill references are typed links; same-text game categories/states/modes and ordinary-language uses are bound to exact reviewed passage fingerprints. The former source/collision review-needed queue was manually resolved on 2026-09-29; Infiltration's descriptive forward deployment wording remains reviewed plain text.",
+      "reviewedPlainSurfaces": [
+        {
+          "text": "Camouflage",
+          "reason": "marker-state-not-skill",
+          "occurrenceSha256s": [
+            "04fc4ccf7a9a00c83b6edbf02200c6e8c7fd3e6a054867a0653fc545da170615",
+            "19b0ec780f83cf33a732654c43075dffc4f130377904f9b9c073b6a12d2fff05",
+            "9fbfa193d1716a04674fa5f20d79563e481b0783ae95e776c8ac96ad18a7b85e",
+            "abae18f39726bed49013b7dc806289e59626bec52adcbdac943460081c4491d5"
+          ]
+        },
+        {
+          "text": "Decoys",
+          "reason": "replica-not-skill",
+          "occurrenceSha256s": [
+            "41a9d3ba1e6168072e43dbbd4e519cc22b35fc776b8ab0f460362cb2365c2e33",
+            "6416de877264ee1425588f9e62d73505aa0b7041447e7798623f82af107e210f"
+          ]
+        },
+        {
+          "text": "decoys",
+          "reason": "replica-not-skill",
+          "occurrenceSha256s": [
+            "a41ecc1631acf920cc9ae1cf08c2ef334791705063e47181f768037b89c046f3"
+          ]
+        },
+        {
+          "text": "Hidden Deployment",
+          "reason": "state-not-skill",
+          "occurrenceSha256s": [
+            "54ac0dafa171d411b0c8158696538371fc9cdb983b46868181c541c606e765d9"
+          ]
+        },
+        {
+          "text": "immunity",
+          "reason": "ordinary-noun-not-skill",
+          "occurrenceSha256s": [
+            "e680606a728ab6ba4905980ba30d79065e523a8f065b18b9ed548060ef613e07"
+          ]
+        },
+        {
+          "text": "Impersonation",
+          "reason": "state-not-skill",
+          "occurrenceSha256s": [
+            "16c6f8eb2c0004fa40b3676f5170767db5f82ef29b700b941231565cd36762db",
+            "42772a144ebc878e1e6ec5f7eb499151cd7a6e912bb6b1628c23cfbd4fe6a4c7",
+            "f4556acfd15a6984420deb1cc620d25c1d908b6dde88b4cd314f1b41f368fc55",
+            "fd3ee9f3bea0a0551863f30eba6405f11f656fade40d525abe5809fe8890b29b"
+          ]
+        },
+        {
+          "text": "Jump",
+          "reason": "program-name-not-skill",
+          "occurrenceSha256s": [
+            "2f27fe517596c5b1254503fe53db2e0d175efc5dc626c8d93e61165a964738bf"
+          ]
+        },
+        {
+          "text": "Lieutenant",
+          "reason": "embedded-in-distinct-rule-term",
+          "occurrenceSha256s": [
+            "07261ffc3f44cb44fb561be67bf8bf0f32c812261e1b9332fe3c6b2d7a534b00",
+            "2f4f9b08ab04cbe0473d7a7b907563d747138dece5380dff73df18c356566fe1",
+            "3104cc2d5443a3f2d3e37655b224f83ada9f0eb1d8b94bddf6219e7897d2700d",
+            "3fce6a7986cc81b60a2968223fd54edfb034102cee0805f781b646b8c315d07e",
+            "4c45b93eac74996ffdb914a1a2a3d8b51210b2f08e59679a25e4b73c73cc904a",
+            "77fad3bd1950a51962e514906c78906ebe1c5df82084c7cf5575f79517a50432",
+            "a1892b2745e0c06ff14d1aaca05aa269ead0f10239d0c31d3b4e343de2a83050",
+            "a29a39cafb1e779fc06eeff18108b46711277ff95647cca256fdfb719261b387",
+            "a64174c821ac352e588b1833de0ea08371c7e24a9b3d8984e724c74e54e9e823",
+            "c706f6313dbb242c97eaeec4225b4ffc7d745065cdc07987a3277771a96955e0",
+            "cd69eccbc7f94ded68fbe99789a4ee1046051e2afdaa84ffb10b548a52a03790",
+            "e04f5ba43e1e219d7d5457739f88377bc762a6d4e518e312f15afe940f00d57e",
+            "f0dd97e7281004c8df5acdaddb1d6adb1932853b347f22d4696e1fda821e5378",
+            "f772e5ed8f6ae37dd5f627586b07eae01f7dbd6735af6be983f62315b6bc8fb9",
+            "feb6f5bab703c628d1729a614b3a6975ddf9d036fc44a22eea8da7f4009f0bba"
+          ]
+        },
+        {
+          "text": "move",
+          "reason": "ordinary-movement-verb",
+          "occurrenceSha256s": [
+            "10b0bc9d82fc42350c84795e65d185fd0d056f889b96a8c469ff138bf38a974c",
+            "163588555aa14ef7b39c3588d4136dfa9912a7d8961743178db5b0905f5be1a0",
+            "3fd7514371b06e7e811d3b39863d9b58160b4715e688c90cfce3aade17f5b59e",
+            "406eed2a87e9ea15323a3895197f75c97ed014c5f1131db0c3a35bc90de1f1f0",
+            "5b02f57bc085c74abe0923a2424b7211122e101ff86026fd3c531446c87c8c96",
+            "9490c7b015735419a85fac1584485161799d2b2f85bb3925f825806444e0f46f",
+            "ac3a4ff19fbf4032f44edf3bf77c3c38fbb807a4fd9beee298ff5e290b1e041e",
+            "c3e4d542cf3f21ecf270d69659bad7fd649835c1b0c87f5b68c526403c144a33",
+            "c5d534f04df929885d3e34c8e94eb36ebbdea29e5103794c3829f47bc5d3921c",
+            "ee45c55b8f5469f99a1355417a125a82765b938aac3ebfcf444e1ee3eaa7083d"
+          ]
+        },
+        {
+          "text": "moves",
+          "reason": "ordinary-movement-verb",
+          "occurrenceSha256s": [
+            "143448d6a583d297ca9ed8d02b2debe80d0ad6273fe6a43cd6368910606e17b7",
+            "15996ec9d86ac1406ce9cc3742551b8be2ff3d14206d51bf6d1eabbe019523e6",
+            "8f3eb9f2e5c5bf90081fb324606a95124da19377829281a24b34b67af9c5ddc8"
+          ]
+        },
+        {
+          "text": "Peripheral",
+          "reason": "game-category-not-skill",
+          "occurrenceSha256s": [
+            "1504c9191e02bcea40d3ab4f0776d9fd5b47a5748d9982dc8921d3f42ab3b698",
+            "20ddcce12991588cf577f68f1c94ef62f5cf4ed7b4c49fd89af69304a734260f",
+            "216bebd1880f9722e5f1fe02ba4c10fcb55b9c353225ee9a2d467615d1f9c1d8",
+            "61157ebeee1e807f729226ff16bfa205b26d38ceffd4bbeb38b363aa77a658ee",
+            "67c1ca977918f379c7fc920dec5436aa9bbbe120510aa42ab45d1735acf25e45",
+            "981dae64532ee08c85de24e589c61be3ed4e5a811db83dbf535ac77d84058b23",
+            "a4575dfe89137c51324282cf50767fe2bc86c1a6395b15d5de9b09630830597f",
+            "c223a02a67dabd6b95355aeed2bba490ece424776d065bd75626825ce4e216e9",
+            "c6c56c5ee5e068ad70f47e43811137ed30fa27bf843189140d0c9e42b155311d",
+            "c90fbd10d49f7c73ee1385f7f06d12e9ccbb9a826691e33b7e3b0363771dcfe9",
+            "cd0b52e5af7a0d77e3ea03728e9751ddbcee134a03378059f9e9d69133bcf62c",
+            "f18251da4fa978daefcd9ce6d3df1ca0384ed26aab3206292a3beca1a085e982"
+          ]
+        },
+        {
+          "text": "peripheral",
+          "reason": "game-category-not-skill",
+          "occurrenceSha256s": [
+            "db39345a7990c1fcb053fd66e4ddd6bae111ffdb840708b1fe121e20892a4374"
+          ]
+        },
+        {
+          "text": "Peripherals",
+          "reason": "game-category-not-skill",
+          "occurrenceSha256s": [
+            "4325f6d0de0bbd2f6bb310c5a48ffeecbef55184157921e184b5e4de6769be8e",
+            "90b5c92bd4ce2a16591dd0affef8e244821bd3f56254db703f144dddcb78681c",
+            "d65772bb25fa05a0c0465d0b444b80661ca8bf4a96ac4476996ad93328aa4131"
+          ]
+        },
+        {
+          "text": "reload",
+          "reason": "ordinary-verb-not-skill",
+          "occurrenceSha256s": [
+            "3ce88dec89bfa9c951e38b3665b08c415fb6b14fbee6e25130d8facb3c26fcec"
+          ]
+        },
+        {
+          "text": "Suppressive Fire",
+          "reason": "weapon-mode-not-skill",
+          "occurrenceSha256s": [
+            "0f12e76c39140ae8eff605088626facb668680b40ab4960634a691b065ee4641"
+          ]
+        },
+        {
+          "text": "Terrain",
+          "reason": "terrain-type-not-skill",
+          "occurrenceSha256s": [
+            "1416dd194f06fd428bea0c2e7efac8591ef386c15893c5abab99571d14cad95d",
+            "aa3184d7699ec2b87a5503b3b627a0b70fd5ab890565c7d44becd7f10cb2c16d"
+          ]
+        },
+        {
+          "text": "terrain",
+          "reason": "ordinary-terrain-noun",
+          "occurrenceSha256s": [
+            "e302814b494fbe35cdfa4b495dac7fb473d94fbcaee51c142984b862086f38aa"
+          ]
+        },
+        {
+          "text": "forward deployment",
+          "reason": "descriptive-deployment-phrase-not-skill",
+          "occurrenceSha256s": [
+            "274231eaf06855864f30a3fa1c24fefe5487d8c2bdaf28eba4c465a9d6d5dc84"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "batch-6-state-aliases",
+      "namespace": "state",
+      "includeAliases": true,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Final State alias/collision pass. Genuine State aliases are linked; ordinary uses of Normal/targeted/Retreat/Decoy surfaces are passage-fingerprinted below.",
+      "reviewedPlainSurfaces": [
+        {
+          "text": "Normal",
+          "reason": "ordinary-rules-language-not-state",
+          "occurrenceSha256s": [
+            "1cce8252614667ce5c656c0357691f7218709150e3dddb46ee45294ea3dc9e9d",
+            "33c4041704d31917fcb1a0211181bcf2a2c1c98169ce711f7adb6dea33d5c6c8",
+            "444dd8e45a002dc07c80d1f8e1cb9a241e2c1969e8d09767c4dc8e98b5c7e87b",
+            "45f60941d18605327e3ca336b62eef8999e153a87c02e013196a8ccadafc01ac",
+            "578785193abefb0dc6889d40be24bd452f3514098b9516ec92c85d8a9884c65a",
+            "621aa59867da11d649c94fc12920ab936b072dc93235307630537c6d0cb102bc",
+            "7ed3d292113b2726dfcc1351d28238fcd3b8d1b01d5cfec353fe1e2b10a2ebf3",
+            "8486729d997741077e9c65128f013b22840bca33dc77e18ff7b322558d099aaa",
+            "bb22ad04fdf5d650c9e0d8cfe24b235a966582706199e7a3ea6b195671e33312",
+            "f184cbbfd345fd46fdd509fbcc930d8fe3af8958afbb4893b214d36180854e25",
+            "fb01955f797f435d8b435c4fd1634b53b5da5d5681db84575669c4b4b95e6636"
+          ]
+        },
+        {
+          "text": "normal",
+          "reason": "ordinary-rules-language-not-state",
+          "occurrenceSha256s": [
+            "16657af95346be9155981fb2d419218c330c8dd0b6452d443bca9a7f1dd4f487",
+            "204c24ef27db71da805838526ecee039602999b99b8430bba3f7c93e8931f8fa",
+            "299966d2c8f2bd6cf753711644cebba87b8cfde17a9cbc75d961fd888b8d7615",
+            "3270a2aa174d6af6faf3ece6128df10597bb889d304687c4a2db2caeb1d55f6d",
+            "3ec35d77d6fa94d7615af0d372af4f8ae918e1a8797607ab4694c567c22b7a70",
+            "43db907a3a26bd7f2e6bb932e248568800de7ec731c44ec6a2d7bdb55ed9b27b",
+            "645b29f9cf9edfdca9e4223e53a97a231e164db5e34bd7581c89b9f9780f345d",
+            "7a46f2aa89d59806d92089b98e34eb4fc1e0c6347448aac04fcb45cc9963640f",
+            "8a81276f5d54d927def6f34beb5cb694bc574d37022e0a6c697022eaff3352c8",
+            "a29873123316268a7d611804fb17ab196c5e59049ed445d916d3f59e249b6665",
+            "c2ad41d086f49baf2fd642c1e52f69abf6e0efbced12d62d8da35188787c7966",
+            "c511fbcb2c3e55ad6dfae388abd5871440d8bf34025951bd5484a5b908fed745",
+            "ce118774512cbc8da95d7974793eddaa11add83196a5378554c1461335b09ad7",
+            "edeb2087a04ba659367440cbe353c8aaae4601a38b532decea11d76634d05068"
+          ]
+        },
+        {
+          "text": "targeted",
+          "reason": "verb-not-state",
+          "occurrenceSha256s": [
+            "31038e11a31e31f7d5fc3546f16bef6eb6f15695f9eadd92ca851e5218f9b7a7",
+            "56eec2b92bd3521541af12dbf66c12e9f19c0e00d08b05092bbf0fa71a78eb4e",
+            "6c372324cacfd36c4b8a4a1b6dea87f0af5c5170f80bf35ea8861d4e8ab3d9ca",
+            "93f026f9e8fd1dd1e8f6ef9011cbf0f7f37a24e455b789c329fb50d4b6d5fcc2",
+            "c7245ab5650dcb19f0715f8abb08140007128c21cf02348a271ba76c717397ef"
+          ]
+        },
+        {
+          "text": "Retreat",
+          "reason": "retreat-situation-not-state",
+          "occurrenceSha256s": [
+            "09ea51b94abcac85b95b46aa5f22600d0afe9c27d18c907e6db583c2e6104abe",
+            "279d95952971564f8c0ecf26989322237a4448ba51a764b08629dc48694ef523",
+            "3d35c1a1b0520459d463c9094fd3a07a53978d85149f218bf0b4c0daeaafe09e",
+            "45ad36c151436a6aebb5e7efe9730b6f7b3c2b365256daeb8b8b25254640b934",
+            "45d3a03705e5242d4541f3743aa1de15aadad1532e3a70700493a2d3ec5a7d2a",
+            "56a56b9314eb4e2449af1c2a7e92a23fc0ce035310c1ddee542fa7b2e137654a",
+            "7786a63d017d70ab707e987f8413497d88d4429209a5991e3f87650e970fe9f2",
+            "7ca2d60458be59ece721ef716103271ea7350c5468e88c0f52c74146f8e2da7a",
+            "817e7bbc69f99ed7216c34e45ba9642b2228c7e4884eab013e78790d78b550e8",
+            "861cad599c5bcc1d2e9859b96a3dc975839ca5ec4e0ea847bb02c53c5cd1be38",
+            "d417cc397c31d3bfb2b171f62512166740b43f9c88d9f7b80185dac000f4f613",
+            "e8a465f2f62bd830d14ea7222f44c967db6b59e39f61a24694677d2d06e4b6c0"
+          ]
+        },
+        {
+          "text": "Decoy",
+          "reason": "skill-name-not-state",
+          "occurrenceSha256s": [
+            "3b3c0fc0a1283bf7a7a2b2b8da9db8372fcd849fbad7f72b797219457fc880df"
+          ]
+        },
+        {
+          "text": "Decoys",
+          "reason": "replica-term-not-state",
+          "occurrenceSha256s": [
+            "8168700a6b93f6dfd480c43caaa21c8621fde7453def817fa2e801927646884d"
+          ]
+        },
+        {
+          "text": "decoys",
+          "reason": "replica-term-not-state",
+          "occurrenceSha256s": [
+            "f969031342050b3d337a4a271ef1675d341bf23ae9151f19ca8f09512f9614b1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "batch-7-weapon-names",
+      "namespace": "weapon",
+      "includeAliases": true,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Completeness audit: current Weapon names/aliases and conservative plurals have no remaining plain references."
+    },
+    {
+      "id": "batch-8-ammunition-names",
+      "namespace": "ammunition",
+      "includeAliases": true,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Completeness audit: current Ammunition names/aliases and conservative plurals have no remaining plain references."
+    },
+    {
+      "id": "batch-9-attribute-names",
+      "namespace": "attribute",
+      "includeAliases": true,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Completeness audit: current Attribute names/aliases and conservative plurals have no remaining plain references."
+    }
+  ]
+}

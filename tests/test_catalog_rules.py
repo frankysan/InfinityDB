@@ -122,7 +122,17 @@ def test_catalog_rules_keep_source_specific_rules_on_matching_variant(
     tmp_path: Path,
 ) -> None:
     root = Path(__file__).parents[1]
-    current_path, current = load_curated_directory(root / "data" / "curated")[0]
+    documents = load_curated_directory(root / "data" / "curated")
+    current = next(
+        document
+        for _, document in documents
+        if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    hacking_programs = next(
+        item
+        for item in documents
+        if item[1]["collection"]["id"] == "n5-hacking-programs-v5.3"
+    )
     document = copy.deepcopy(current)
     common = {
         "kind": "equipment",
@@ -158,7 +168,9 @@ def test_catalog_rules_keep_source_specific_rules_on_matching_variant(
         ]
     )
     rules_path = tmp_path / "rules.db"
-    export_rules_database([(current_path, document)], rules_path)
+    export_rules_database(
+        [(root / "curated.json", document), hacking_programs], rules_path
+    )
     item = {
         "id": 900235,
         "name": "TestBot",

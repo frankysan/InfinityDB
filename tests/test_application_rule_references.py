@@ -6,9 +6,18 @@ from pathlib import Path
 
 from infinity_army_data.metadata import decode_metadata
 from infinity_army_data.normalize import normalize_master, validate_normalized
+from infinity_db.application_domains import (
+    APPLICATION_DOMAINS,
+    application_domain,
+    public_rule_domain,
+    public_rule_record_domain,
+    semantic_record_domain,
+)
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database
+from infinity_db.domain_references import enrich_rule_relation_references
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
+from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.skill_catalog import SkillCatalog
 
@@ -100,6 +109,365 @@ def _reference_database(tmp_path: Path) -> Database:
     path = tmp_path / "infinity.db"
     export_database(normalized, path)
     return Database(path)
+
+
+def test_application_domain_registry_separates_identity_from_presentation() -> None:
+    assert len({domain.slug for domain in APPLICATION_DOMAINS}) == len(APPLICATION_DOMAINS)
+    assert {domain.slug for domain in APPLICATION_DOMAINS if domain.level == "top-level"} == {
+        "armies",
+        "units",
+        "skills",
+        "equipment",
+        "weapons",
+        "ammunition",
+        "traits",
+        "states",
+        "hacking-programs",
+        "fireteams",
+        "labels",
+        "rules",
+    }
+
+    ammunition = application_domain("ammunition")
+    assert ammunition.presentation == "catalog"
+    assert ammunition.record_kinds == ("ammunition",)
+    assert ammunition.navigation is True
+    assert ammunition.search is True
+    assert ammunition.glossary is True
+    assert ammunition.catalog is True
+    assert ammunition.detail is True
+    assert ammunition.published is True
+
+    labels = application_domain("labels")
+    assert labels.presentation == "catalog"
+    assert labels.record_kinds == ()
+    assert labels.navigation is True
+    assert labels.glossary is True
+    assert labels.published is True
+
+    armies = application_domain("armies")
+    assert armies.presentation == "overview"
+    assert armies.navigation is True
+    assert armies.landing is True
+    assert armies.catalog is False
+    assert armies.detail is False
+    assert armies.published is True
+    assert armies.route == "/armies"
+
+    fireteams = application_domain("fireteams")
+    assert fireteams.presentation == "scoped"
+    assert fireteams.landing is True
+    assert fireteams.scoped is True
+    assert fireteams.catalog is False
+    assert fireteams.detail is False
+
+    attributes = application_domain("attributes")
+    assert attributes.level == "embedded"
+    assert attributes.glossary is True
+    assert attributes.search is True
+    assert attributes.published is True
+    assert attributes.route is None
+    assert attributes.catalog is False
+    assert attributes.detail is False
+
+    terms = application_domain("terms")
+    assert terms.level == "embedded"
+    assert terms.record_kinds == ("term",)
+    assert terms.glossary is True
+    assert terms.search is True
+    assert terms.published is True
+    assert terms.route is None
+    assert terms.catalog is False
+    assert terms.detail is False
+
+    general_rules = application_domain("rules")
+    assert general_rules.published is True
+    assert general_rules.navigation is True
+    assert general_rules.route == "/rules"
+    assert general_rules.record_kinds == ("rule",)
+    assert set(general_rules.record_categories) == {
+        "basic-rule",
+        "command-token-use",
+        "order-type",
+        "peripheral-type",
+    }
+
+    assert public_rule_domain("ammunition") == ammunition
+    assert public_rule_domain("attribute") is None
+    assert semantic_record_domain("attribute") == attributes
+    assert public_rule_domain("term") is None
+    assert semantic_record_domain("term") == terms
+    assert public_rule_domain("rule") is None
+    assert public_rule_record_domain(
+        {"kind": "rule", "facts": {"category": "basic-rule"}}
+    ) == general_rules
+    assert public_rule_record_domain(
+        {"kind": "rule", "facts": {"category": "fireteam-general"}}
+    ) is None
+
+
+def test_attributes_are_current_canonical_embedded_records(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_database = RulesDatabase(rules_path)
+
+    attributes = rules_database.composed_records_by_kind("attribute")
+    assert {record["id"] for record in attributes} == {
+        "attribute:mov",
+        "attribute:cc",
+        "attribute:bs",
+        "attribute:ph",
+        "attribute:wip",
+        "attribute:arm",
+        "attribute:bts",
+        "attribute:vita",
+        "attribute:str",
+        "attribute:ava",
+        "attribute:s",
+        "attribute:swc",
+        "attribute:c",
+    }
+    movement = next(record for record in attributes if record["id"] == "attribute:mov")
+    assert movement["name"] == "Movement (MOV)"
+    assert movement["facts"]["abbreviation"] == "MOV"
+
+
+def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_database = RulesDatabase(rules_path)
+
+    terms = rules_database.composed_records_by_kind("term")
+    assert {record["id"] for record in terms} == {
+        "term:ally",
+        "term:deployable-equipment",
+        "term:deployable-weapon",
+        "term:enemy",
+        "term:hostile",
+        "term:marker",
+        "term:model",
+        "term:neutral",
+        "term:null-state",
+        "term:peripheral",
+        "term:scenery-element",
+        "term:state-token",
+        "term:target",
+        "term:token",
+        "term:trooper",
+        "term:unit-profile",
+        "term:victory-points",
+    }
+    assert {record["facts"]["scope"] for record in terms} == {
+        "alignment",
+        "game-element",
+        "profile",
+        "scoring",
+        "state-classification",
+        "trooper-category",
+    }
+
+
+def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_database = RulesDatabase(rules_path)
+
+    ammunition = RulesRecordCatalog(rules_database, "ammunition")
+    ammunition_items = ammunition.list_items()
+    assert len(ammunition_items) == 11
+    assert {item["slug"] for item in ammunition_items} == {
+        "normal",
+        "ap",
+        "da",
+        "eclipse",
+        "em",
+        "exp",
+        "para",
+        "shock",
+        "smoke",
+        "stun",
+        "t2",
+    }
+    shock = ammunition.get_item("shock")
+    assert shock is not None
+    assert shock["name"] == "Shock Ammunition"
+    assert shock["rules"][0]["id"] == "ammunition:shock"
+
+    labels = LabelCatalog(rules_database)
+    label_items = labels.list_items()
+    assert len(label_items) == 24
+    assert {item["slug"] for item in label_items} >= {
+        "hackable",
+        "negative-feedback",
+        "supportware",
+    }
+    hackable = labels.get_item("hackable")
+    assert hackable is not None
+    assert hackable["name"] == "Hackable"
+    assert "Hacking Programs" in hackable["description"]
+
+    general_rules = RulesRecordCatalog(rules_database, "rules")
+    general_rule_items = general_rules.list_items()
+    assert len(general_rule_items) == 9
+    assert {item["slug"] for item in general_rule_items} == {
+        "command-token-strategic-use",
+        "loss-of-lieutenant",
+        "peripheral-type-ancillary",
+        "peripheral-type-control",
+        "peripheral-type-cyberplug",
+        "peripheral-type-servant",
+        "peripheral-type-synchronized",
+        "special-lieutenant-order",
+        "tactical-order",
+    }
+    assert general_rules.get_item("fireteam-general") is None
+    servant = general_rules.get_item("peripheral-type-servant")
+    assert servant is not None
+    assert servant["rules"][0]["id"] == "rule:peripheral-type:servant"
+
+    assert RulesRecordCatalog(None, "ammunition").list_items() == []
+    assert RulesRecordCatalog(None, "rules").list_items() == []
+    assert LabelCatalog(None).list_items() == []
+
+def test_rules_relation_references_project_source_variants_to_public_routes(
+    tmp_path: Path,
+) -> None:
+    database = _reference_database(tmp_path)
+    payload = {
+        "rules": [
+            {
+                "display_relations": [
+                    {
+                        "record": {
+                            "id": "skill:martial-arts-l2",
+                            "kind": "skill",
+                            "name": "Martial Arts L2",
+                            "army_links": [{"entity": "skill", "id": "20"}],
+                        }
+                    },
+                    {
+                        "record": {
+                            "id": "equipment:hacking-device",
+                            "kind": "equipment",
+                            "name": "Hacking Device",
+                            "army_links": [{"entity": "equipment", "id": "100"}],
+                        }
+                    },
+                    {
+                        "record": {
+                            "id": "skill:stale-source-variant",
+                            "kind": "skill",
+                            "name": "Stale source variant",
+                            "army_links": [{"entity": "skill", "id": "999"}],
+                        }
+                    },
+                    {
+                        "record": {
+                            "id": "state:unconscious",
+                            "kind": "state",
+                            "name": "Unconscious State",
+                            "army_links": [],
+                        }
+                    },
+                    {
+                        "record": {
+                            "id": "ammunition:shock",
+                            "kind": "ammunition",
+                            "name": "Shock Ammunition",
+                            "army_links": [],
+                        }
+                    },
+                    {
+                        "record": {
+                            "id": "attribute:mov",
+                            "kind": "attribute",
+                            "name": "Movement (MOV)",
+                            "army_links": [],
+                        }
+                    },
+                    {
+                        "record": {
+                            "id": "term:marker",
+                            "kind": "term",
+                            "name": "Marker",
+                            "army_links": [],
+                        }
+                    },
+                    {
+                        "record": {
+                            "id": "rule:loss-of-lieutenant",
+                            "kind": "rule",
+                            "name": "Loss of Lieutenant",
+                            "facts": {"category": "basic-rule"},
+                            "army_links": [],
+                        }
+                    },
+                ]
+            }
+        ]
+    }
+
+    result = enrich_rule_relation_references(database, payload)
+    records = [
+        relation["record"]
+        for relation in result["rules"][0]["display_relations"]
+    ]
+
+    assert records[0]["public_reference"] == {
+        "catalog": "skills",
+        "id": "martial-arts",
+    }
+    assert records[1]["public_reference"] == {
+        "catalog": "equipment",
+        "id": "hacking-device",
+    }
+    assert "public_reference" not in records[2]
+    assert records[3]["public_reference"] == {
+        "catalog": "states",
+        "id": "unconscious",
+    }
+    assert records[4]["public_reference"] == {
+        "catalog": "ammunition",
+        "id": "shock",
+    }
+    assert records[5]["public_reference"] == {"href": "/glossary#attribute-mov"}
+    assert records[6]["public_reference"] == {"href": "/glossary#term-marker"}
+    assert records[7]["public_reference"] == {
+        "catalog": "rules",
+        "id": "loss-of-lieutenant",
+    }
+
+
+def test_peripheral_subtype_relations_resolve_to_general_rules_routes(
+    tmp_path: Path,
+) -> None:
+    database = _reference_database(tmp_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_database = RulesDatabase(rules_path)
+
+    cyberplug = next(
+        record
+        for record in rules_database.composed_records_by_kind("skill")
+        if record["id"] == "skill:cyberplug"
+    )
+    result = enrich_rule_relation_references(database, {"rules": [cyberplug]})
+    relation = next(
+        item
+        for item in result["rules"][0]["display_relations"]
+        if item["record"]["id"] == "rule:peripheral-type:cyberplug"
+    )
+
+    assert relation["presentation"]["label"] == "Can control"
+    assert relation["record"]["name"] == "Peripheral (Cyberplug)"
+    assert relation["record"]["public_reference"] == {
+        "catalog": "rules",
+        "id": "peripheral-type-cyberplug",
+    }
 
 
 def test_structured_reference_metadata_is_materialized_without_raw_tables(
@@ -218,6 +586,9 @@ def test_hacking_program_catalog_composes_army_profiles_with_rules_semantics(
     assert carbonite is not None
     assert carbonite["source_extra_id"] == 13
     assert carbonite["rules"][0]["id"] == "hacking-program:carbonite"
+    assert [label["name"] for label in carbonite["rules"][0]["labels"]] == [
+        "Comms Attack"
+    ]
     assert {
         relation["record"]["id"]
         for relation in carbonite["rules"][0]["display_relations"]

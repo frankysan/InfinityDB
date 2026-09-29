@@ -50,39 +50,44 @@ function sourceVariantLabel(variant) {
   return null;
 }
 
-function referenceCell(value) {
+function referenceCell(value, role) {
   const cell = document.createElement("td");
+  cell.className = `table-column--${role}`;
   if (value instanceof Node) cell.append(value);
   else cell.textContent = value === null || value === undefined || value === "" ? "—" : String(value);
   return cell;
 }
 
-function structuredTable(titleText, headers, rows) {
+function structuredTable(titleText, columns, rows) {
   const section = document.createElement("section");
   section.className = "detail-group";
   const title = document.createElement("h2");
-  title.className = "detail-section-title";
+  title.className = "detail-heading";
   title.textContent = titleText;
   const container = document.createElement("div");
-  container.className = "table-container";
+  container.className = "table-viewport";
   const table = document.createElement("table");
-  table.className = "data-table--compact";
+  table.className = "data-table--compact data-table--reference";
+  const caption = document.createElement("caption");
+  caption.className = "sr-only";
+  caption.textContent = titleText;
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
-  for (const label of headers) {
+  for (const column of columns) {
     const header = document.createElement("th");
     header.scope = "col";
-    header.textContent = label;
+    header.className = `table-column--${column.role}`;
+    header.textContent = column.label;
     headRow.append(header);
   }
   head.append(headRow);
   const body = document.createElement("tbody");
   for (const values of rows) {
     const row = document.createElement("tr");
-    row.append(...values.map(referenceCell));
+    row.append(...values.map((value, index) => referenceCell(value, columns[index].role)));
     body.append(row);
   }
-  table.append(head, body);
+  table.append(caption, head, body);
   container.append(table);
   section.append(title, container);
   return section;
@@ -126,7 +131,17 @@ function structuredReferenceSection(reference) {
   if (reference.kind === "hacking-programs") {
     return structuredTable(
       reference.title,
-      ["Program", "Attack MOD", "Opponent MOD", "PS", "B", "Target", "Type(s)", "Device", "Special"],
+      [
+        { label: "Program", role: "primary" },
+        { label: "Attack MOD", role: "metric" },
+        { label: "Opponent MOD", role: "metric" },
+        { label: "PS", role: "metric" },
+        { label: "B", role: "metric" },
+        { label: "Target", role: "descriptor" },
+        { label: "Type(s)", role: "descriptor" },
+        { label: "Device", role: "descriptor" },
+        { label: "Special", role: "descriptor" },
+      ],
       reference.rows.map((row) => [
         hackingProgramLink(row),
         row.attack_mod,
@@ -143,7 +158,13 @@ function structuredReferenceSection(reference) {
   if (reference.kind === "martial-arts") {
     return structuredTable(
       reference.title,
-      ["Level", "Attack MOD", "Opponent MOD", "PS MOD", "B MOD"],
+      [
+        { label: "Level", role: "metric" },
+        { label: "Attack MOD", role: "metric" },
+        { label: "Opponent MOD", role: "metric" },
+        { label: "PS MOD", role: "metric" },
+        { label: "B MOD", role: "metric" },
+      ],
       reference.rows.map((row) => [
         row.level, row.attack_mod, row.opponent_mod, row.ps_mod, row.burst_mod,
       ]),
@@ -152,7 +173,10 @@ function structuredReferenceSection(reference) {
   if (reference.kind === "random-chart") {
     return structuredTable(
       reference.title,
-      ["Roll", "Result"],
+      [
+        { label: "Roll", role: "metric" },
+        { label: "Result", role: "descriptor" },
+      ],
       reference.rows.map((row) => [row.roll, row.result]),
     );
   }
@@ -161,9 +185,9 @@ function structuredReferenceSection(reference) {
 
 function variantSection(variant, parameterSemantics) {
   const section = document.createElement("details");
-  section.className = "explorer army-profile";
+  section.className = "surface surface--clipped content-frame army-profile";
   const heading = document.createElement("summary");
-  heading.className = "data-surface-header army-profile-title";
+  heading.className = "surface-titlebar surface-titlebar--subtle army-profile-title";
   const title = document.createElement("h2");
   title.textContent = formatVariantName(variant, parameterSemantics);
   const count = document.createElement("span");
@@ -178,13 +202,13 @@ function variantSection(variant, parameterSemantics) {
   section.addEventListener("toggle", () => {
     if (!section.open || section.dataset.loaded) return;
     const table = document.createElement("table");
-    table.className = "data-table--compact";
-    table.innerHTML = "<caption class=\"sr-only\">Units using this skill variant</caption><thead><tr><th scope=\"col\">Unit</th><th scope=\"col\">Armies</th><th class=\"id-column\" scope=\"col\">ID</th></tr></thead>";
+    table.className = "data-table--compact data-table--listing data-table--interactive";
+    table.innerHTML = "<caption class=\"sr-only\">Units using this skill variant</caption><thead><tr><th class=\"table-column--primary\" scope=\"col\">Unit</th><th class=\"table-column--descriptor\" scope=\"col\">Armies</th><th class=\"id-column table-column--technical\" scope=\"col\">ID</th></tr></thead>";
     const body = document.createElement("tbody");
     renderUnitRows(body, variant.units);
     table.append(body);
     const container = document.createElement("div");
-    container.className = "table-container";
+    container.className = "table-viewport";
     container.append(table);
     if (variant.rules?.length) {
       section.append(rulesReferenceSection(variant.rules, "Variant rules"));

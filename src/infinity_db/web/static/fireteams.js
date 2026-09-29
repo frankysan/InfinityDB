@@ -1,5 +1,7 @@
 import { getFireteamArmies, getFireteamChart } from "./api.js";
+import { appendMaintainedText } from "./maintained-text.js";
 import { fireteamsIncludeWildcards } from "./preferences.js";
+import { readShareState, writeShareState } from "./share-state.js";
 
 const number = new Intl.NumberFormat();
 const byId = (id) => document.getElementById(id);
@@ -11,6 +13,7 @@ const elements = {
   error: byId("fireteam-error"),
   errorMessage: byId("fireteam-error-message"),
   empty: byId("fireteam-empty"),
+  landing: byId("fireteam-landing"),
   content: byId("fireteam-content"),
   reference: byId("fireteam-reference"),
   referenceContent: byId("fireteam-reference-content"),
@@ -24,11 +27,14 @@ const elements = {
 
 let armies = [];
 let currentChart = null;
+let currentReference = null;
 let requestController = null;
 const pageController = new AbortController();
 
 function show(panel) {
-  for (const element of [elements.loading, elements.error, elements.empty, elements.content]) {
+  for (const element of [
+    elements.loading, elements.error, elements.empty, elements.landing, elements.content,
+  ]) {
     element.hidden = element !== panel;
   }
   elements.results.setAttribute("aria-busy", String(panel === elements.loading));
@@ -39,20 +45,16 @@ function armyValue(army) {
 }
 
 function currentArmyValue() {
-  return new URLSearchParams(window.location.search).get("army") || "";
+  return readShareState("fireteams").params.get("army") || "";
 }
 
 function writeArmyLocation(value, { replace = false } = {}) {
-  const url = new URL(window.location.href);
-  if (value) url.searchParams.set("army", value);
-  else url.searchParams.delete("army");
-  const method = replace ? "replaceState" : "pushState";
-  history[method](null, "", `${url.pathname}${url.search}`);
+  writeShareState("fireteams", value ? { army: value } : {}, { replace });
 }
 
 function populateArmies(items) {
   armies = items;
-  elements.army.replaceChildren();
+  elements.army.replaceChildren(new Option("Select an Army…", ""));
   const shownGroups = new Set();
   for (const army of armies) {
     if (army.role === "non_aligned" && army.group_id && !shownGroups.has(army.group_id)) {
@@ -75,11 +77,19 @@ function populateArmies(items) {
 }
 
 function normalizeSelection() {
-  if (!armies.length) return "";
   const requested = currentArmyValue();
+  if (!requested || !armies.length) {
+    elements.army.value = "";
+    return "";
+  }
   const selected = armies.find((army) => (
     armyValue(army) === requested || String(army.id) === requested
-  )) || armies[0];
+  ));
+  if (!selected) {
+    elements.army.value = "";
+    writeArmyLocation("", { replace: true });
+    return "";
+  }
   const value = armyValue(selected);
   elements.army.value = value;
   if (requested !== value) writeArmyLocation(value, { replace: true });
@@ -156,9 +166,9 @@ function appendFtoDetails(cell, member) {
 
 function renderTeam(team) {
   const article = document.createElement("article");
-  article.className = "fireteam-card";
+  article.className = "surface surface--subtle surface--raised fireteam-card";
   const header = document.createElement("header");
-  header.className = "fireteam-card-header";
+  header.className = "surface-titlebar surface-titlebar--ruled fireteam-card-titlebar";
   const title = document.createElement("h3");
   title.textContent = team.name || `Fireteam ${team.id}`;
   const typeBadges = document.createElement("div");
@@ -184,22 +194,24 @@ function renderTeam(team) {
   }
 
   const tableContainer = document.createElement("div");
-  tableContainer.className = "table-container fireteam-member-table";
+  tableContainer.className = "table-viewport fireteam-member-table";
   const table = document.createElement("table");
+  table.className = "data-table--reference";
   const caption = document.createElement("caption");
   caption.className = "sr-only";
   caption.textContent = `${team.name || "Fireteam"} members`;
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
-  for (const [heading, developerOnly] of [
-    ["Member", false],
-    ["Requirements", false],
-    ["FTO Profiles", true],
-    ["Notes", true],
+  for (const [heading, developerOnly, columnClass] of [
+    ["Member", false, "table-column--primary"],
+    ["Requirements", false, "table-column--descriptor fireteam-member-requirements"],
+    ["FTO Profiles", true, "table-column--descriptor"],
+    ["Notes", true, "table-column--descriptor"],
   ]) {
     const cell = document.createElement("th");
     cell.scope = "col";
     cell.textContent = heading;
+    cell.className = columnClass;
     if (developerOnly) cell.classList.add("developer-only");
     headRow.append(cell);
   }
@@ -209,15 +221,17 @@ function renderTeam(team) {
     const row = document.createElement("tr");
     const name = document.createElement("th");
     name.scope = "row";
+    name.className = "table-column--primary";
     name.append(memberName(member));
     if (wildcard) name.append(badge("Wildcard"));
     const requirements = document.createElement("td");
+    requirements.className = "table-column--descriptor fireteam-member-requirements";
     appendMemberDetails(requirements, member);
     const fto = document.createElement("td");
-    fto.classList.add("developer-only");
+    fto.className = "developer-only table-column--descriptor";
     appendFtoDetails(fto, member);
     const note = document.createElement("td");
-    note.classList.add("developer-only");
+    note.className = "developer-only table-column--descriptor";
     note.textContent = member.comment || "—";
     const developer = document.createElement("span");
     developer.className = "developer-only fireteam-member-developer";
@@ -309,10 +323,7 @@ function appendReferenceSources(container, records) {
 
 function renderReference(reference) {
   elements.referenceContent.replaceChildren();
-  if (!reference?.general?.facts || !reference?.levels?.facts) {
-    elements.reference.hidden = true;
-    return;
-  }
+  if (!reference?.general?.facts || !reference?.levels?.facts) return false;
 
   const general = reference.general;
   const levels = reference.levels;
@@ -322,7 +333,7 @@ function renderReference(reference) {
 
   const summary = document.createElement("p");
   summary.className = "detail-copy";
-  summary.textContent = general.summary;
+  appendMaintainedText(summary, general.summary_tokens, general.summary);
   fragment.append(summary);
 
   const typeBadges = document.createElement("div");
@@ -334,9 +345,9 @@ function renderReference(reference) {
 
   const rules = document.createElement("ul");
   rules.className = "fireteam-reference-rules";
-  for (const rule of generalFacts.rules || []) {
+  for (const [index, rule] of (generalFacts.rules || []).entries()) {
     const item = document.createElement("li");
-    item.textContent = rule;
+    appendMaintainedText(item, general.fact_tokens?.rules?.[index], rule);
     rules.append(item);
   }
   fragment.append(rules);
@@ -345,18 +356,24 @@ function renderReference(reference) {
   levelHeading.textContent = levels.name;
   const basis = document.createElement("p");
   basis.className = "detail-copy";
-  basis.textContent = levelFacts.basis;
+  appendMaintainedText(basis, levels.fact_tokens?.basis, levelFacts.basis);
   const tableContainer = document.createElement("div");
-  tableContainer.className = "table-container fireteam-reference-table";
+  tableContainer.className = "table-viewport fireteam-reference-table";
   const table = document.createElement("table");
+  table.className = "data-table--reference";
   const caption = document.createElement("caption");
   caption.className = "sr-only";
   caption.textContent = "Fireteam Level bonuses";
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
-  for (const heading of ["Level", "Requirement", "Bonuses"]) {
+  for (const [heading, columnClass] of [
+    ["Level", "table-column--metric"],
+    ["Requirement", "table-column--descriptor"],
+    ["Bonuses", "table-column--descriptor"],
+  ]) {
     const cell = document.createElement("th");
     cell.scope = "col";
+    cell.className = columnClass;
     cell.textContent = heading;
     headRow.append(cell);
   }
@@ -366,11 +383,25 @@ function renderReference(reference) {
     const row = document.createElement("tr");
     const levelCell = document.createElement("th");
     levelCell.scope = "row";
+    levelCell.className = "table-column--metric";
     levelCell.textContent = String(level.level);
     const requirement = document.createElement("td");
-    requirement.textContent = level.requirement;
+    requirement.className = "table-column--descriptor";
+    appendMaintainedText(
+      requirement,
+      levels.fact_tokens?.levels?.[body.children.length]?.requirement,
+      level.requirement
+    );
     const bonuses = document.createElement("td");
-    bonuses.textContent = (level.bonuses || []).join("; ");
+    bonuses.className = "table-column--descriptor";
+    for (const [bonusIndex, bonus] of (level.bonuses || []).entries()) {
+      if (bonusIndex) bonuses.append("; ");
+      appendMaintainedText(
+        bonuses,
+        levels.fact_tokens?.levels?.[body.children.length]?.bonuses?.[bonusIndex],
+        bonus
+      );
+    }
     row.append(levelCell, requirement, bonuses);
     body.append(row);
   }
@@ -396,7 +427,11 @@ function renderReference(reference) {
       name.textContent = term.term;
       title.append(name, badge(provenanceLabel(term.provenance)));
       const meaning = document.createElement("p");
-      meaning.textContent = term.meaning;
+      appendMaintainedText(
+        meaning,
+        general.fact_tokens?.terminology?.[terminologyList.children.length],
+        term.meaning
+      );
       item.append(title, meaning);
       terminologyList.append(item);
     }
@@ -405,12 +440,18 @@ function renderReference(reference) {
 
   appendReferenceSources(fragment, [general, levels]);
   elements.referenceContent.append(fragment);
-  elements.reference.hidden = false;
+  return true;
+}
+
+function renderOverview() {
+  currentChart = null;
+  elements.count.textContent = `${number.format(armies.length)} armies`;
+  if (!renderReference(currentReference)) return show(elements.empty);
+  show(elements.landing);
 }
 
 function renderChart(chart) {
   currentChart = chart;
-  renderReference(chart.reference);
   elements.chartName.textContent = chart.army.name;
   elements.description.textContent = chart.description || "";
   elements.description.hidden = !chart.description;
@@ -435,7 +476,7 @@ function renderChart(chart) {
 }
 
 async function loadChart(value) {
-  if (!value) return show(elements.empty);
+  if (!value) return renderOverview();
   requestController?.abort();
   requestController = new AbortController();
   show(elements.loading);
@@ -453,11 +494,14 @@ async function initialize() {
   try {
     const payload = await getFireteamArmies(pageController.signal);
     populateArmies(payload.items || []);
+    currentReference = payload.reference || null;
     if (!armies.length) {
       elements.count.textContent = "0 armies";
       return show(elements.empty);
     }
-    await loadChart(normalizeSelection());
+    const selection = normalizeSelection();
+    if (selection) await loadChart(selection);
+    else renderOverview();
   } catch (error) {
     if (error.name === "AbortError") return;
     elements.errorMessage.textContent = error.message || "Could not load Fireteam Armies.";
@@ -472,7 +516,8 @@ document.addEventListener("infinity:beforenavigation", () => {
 elements.army.addEventListener("change", () => {
   const value = elements.army.value;
   writeArmyLocation(value);
-  loadChart(value);
+  if (value) loadChart(value);
+  else renderOverview();
 }, { signal: pageController.signal });
 window.addEventListener(
   "popstate",

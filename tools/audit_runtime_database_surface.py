@@ -69,6 +69,7 @@ _register(
     [
         "profile_payloads",
         "profile_payload_characteristics",
+        "loadout_payload_characteristics",
         "profile_payload_skills",
         "profile_payload_skill_extras",
         "profile_payload_equipment",
@@ -260,6 +261,7 @@ _register(
 _register(
     [
         "unit_options",
+        "unit_option_orders",
         "unit_option_skills",
         "unit_option_skill_extras",
         "unit_option_equipment",
@@ -374,12 +376,14 @@ PROBED_DIRECT_METHODS = {
     "trait_usage_index",
     "list_traits",
     "get_trait",
+    "list_unit_filter_values",
     "list_units",
     "visible_unit_ids",
     "get_unit",
 }
 RUNTIME_MODULES = (
     "src/infinity_db/web/app.py",
+    "src/infinity_db/web/api_handler.py",
     "src/infinity_db/army_slugs.py",
     "src/infinity_db/catalog_slugs.py",
     "src/infinity_db/domain_references.py",
@@ -465,6 +469,7 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
     equipment = preparation.list_catalog_items("equipment")
     weapons = preparation.list_catalog_items("weapons")
     traits = preparation.list_traits()
+    unit_filters = preparation.list_unit_filter_values()
     visible_ids = preparation.visible_unit_ids(
         mercs=True,
         specops=True,
@@ -481,6 +486,13 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
     equipment_item = _first(equipment, "equipment item")
     weapon = _first(weapons, "weapon")
     trait = _first(traits, "weapon trait")
+    troop_type = _first(unit_filters["troop_types"], "Troop Type filter value")
+    classification = _first(
+        unit_filters["classifications"], "Classification filter value"
+    )
+    characteristic = _first(
+        unit_filters["characteristics"], "Characteristic filter value"
+    )
     if not visible_ids:
         raise RuntimeSurfaceAuditError("Runtime audit needs at least one visible unit")
     unit_id = visible_ids[0]
@@ -525,7 +537,9 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
         ("traits-list", lambda db: db.list_traits()),
         ("trait-detail", lambda db: db.get_trait(str(trait["id"]))),
         ("traits-usage", lambda db: db.trait_usage_index()),
+        ("unit-filter-values", lambda db: db.list_unit_filter_values()),
         ("units-list", lambda db: db.list_units(limit=500)),
+        ("units-extended", lambda db: db.list_units(limit=500, extended=True)),
         ("units-search", lambda db: db.list_units(search="unit", limit=500)),
         ("units-army", lambda db: db.list_units(army_id=int(playable["id"]), limit=500)),
         ("units-mercs", lambda db: db.list_units(mercs=True, limit=500)),
@@ -546,6 +560,36 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
         (
             "units-weapon-filter",
             lambda db: db.list_units(weapon_id=int(weapon["id"]), limit=500),
+        ),
+        (
+            "units-troop-type-filter",
+            lambda db: db.list_units(troop_type=str(troop_type["slug"]), limit=500),
+        ),
+        (
+            "units-classification-filter",
+            lambda db: db.list_units(
+                classification=str(classification["slug"]), limit=500
+            ),
+        ),
+        (
+            "units-characteristic-filter",
+            lambda db: db.list_units(
+                characteristic=str(characteristic["slug"]), limit=500
+            ),
+        ),
+        (
+            "units-contextual-numeric-filter",
+            lambda db: db.list_units(
+                army_id=int(playable["id"]),
+                skill_id=int(skill["id"]),
+                troop_type=str(troop_type["slug"]),
+                classification=str(classification["slug"]),
+                characteristic=str(characteristic["slug"]),
+                ava_min=0,
+                points_min=0,
+                swc_min=0,
+                limit=500,
+            ),
         ),
         ("unit-detail", lambda db: db.get_unit(unit_id)),
         (

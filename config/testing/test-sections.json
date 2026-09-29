@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "sections": {
+    "model": {
+      "description": "Data model, canonical rules, semantic audits, and database behavior.",
+      "modules": [
+        "test_application_rule_references",
+        "test_audit_army_faction_semantics",
+        "test_audit_database_separation",
+        "test_audit_enrichment_coverage",
+        "test_audit_fireteam_semantics",
+        "test_audit_loadout_semantics",
+        "test_audit_normalization_links",
+        "test_audit_peripheral_semantics",
+        "test_audit_profile_semantics",
+        "test_audit_relationship_semantics",
+        "test_audit_rules_interactions",
+        "test_audit_runtime_database_surface",
+        "test_audit_semantic_deduplication",
+        "test_audit_source_presentation",
+        "test_audit_unit_semantics",
+        "test_availability",
+        "test_availability_schema",
+        "test_catalog_rules",
+        "test_curated",
+        "test_database",
+        "test_display_identities",
+        "test_domain_slugs",
+        "test_equipment_config",
+        "test_fireteam_relationships",
+        "test_hacking_program_catalog",
+        "test_identities",
+        "test_identity_database",
+        "test_logical_unit_identity",
+        "test_maintained_text",
+        "test_peripheral_identities",
+        "test_peripheral_relationships",
+        "test_relation_constraints",
+        "test_relation_group_dependencies",
+        "test_rule_relations",
+        "test_rules_database",
+        "test_skill_config",
+        "test_state_catalog",
+        "test_weapon_config"
+      ]
+    },
+    "web": {
+      "description": "Web application, HTTP/API behavior, browser-facing runtime, and web metrics.",
+      "modules": [
+        "test_api",
+        "test_app_cli",
+        "test_benchmark_runtime",
+        "test_runtime_import_boundary",
+        "test_web",
+        "test_web_metrics"
+      ]
+    },
+    "build": {
+      "description": "Army acquisition, normalization, deterministic build, provenance, and ingestion.",
+      "modules": [
+        "test_cli",
+        "test_deterministic_io",
+        "test_download_army_json",
+        "test_download_wiki_history",
+        "test_download_wiki_snapshot",
+        "test_merge",
+        "test_metadata",
+        "test_project_resources",
+        "test_snapshot_provenance",
+        "test_source_anomalies",
+        "test_source_version",
+        "test_sqlite_determinism"
+      ]
+    },
+    "ops": {
+      "description": "Development checks, deployment, archive/report tooling, and operational helpers.",
+      "modules": [
+        "test_benchmark_test_workers",
+        "test_compare_determinism_manifests",
+        "test_compare_runtime_benchmarks",
+        "test_create_work_archive",
+        "test_deployment_scripts",
+        "test_migrate_symbol_publication_provenance",
+        "test_path_sanitization",
+        "test_pipeline_console",
+        "test_report_metrics",
+        "test_run_checks",
+        "test_snapshot_archive",
+        "test_test_sections",
+        "test_version"
+      ]
+    },
+    "assets": {
+      "description": "Processed graphical assets, symbols, SVG tooling, fonts, and asset publication.",
+      "modules": [
+        "test_asset_validation",
+        "test_build_symbols",
+        "test_download_army_symbols",
+        "test_prepare_web_fonts",
+        "test_reorganize_symbols",
+        "test_stage_full_asset_bundle",
+        "test_svg_compress",
+        "test_svg_processor_conversion",
+        "test_svg_processor_duplicates",
+        "test_svg_processor_fonts",
+        "test_symbol_catalog",
+        "test_symbol_dependencies",
+        "test_symbol_manifest",
+        "test_symbol_work",
+        "test_verify_deployment_assets"
+      ]
+    }
+  }
+}

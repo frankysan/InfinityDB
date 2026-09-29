@@ -1,4 +1,5 @@
 import { getCatalogItems } from "./api.js";
+import { readCatalogSearchQuery, replaceCatalogSearchQuery } from "./catalog-search-state.js";
 import { initializeDistanceUnitToggle } from "./preferences.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 
@@ -18,6 +19,7 @@ const elements = {
   error: byId("catalog-error"), errorMessage: byId("catalog-error-message"), empty: byId("catalog-empty"),
   table: byId("catalog-table-container"), list: byId("catalog-list"), search: byId("catalog-search"),
 };
+const catalogColumnCount = elements.table.querySelectorAll("thead th").length;
 let items = [];
 let searchTimer;
 
@@ -56,7 +58,7 @@ function render() {
       const categoryRow = document.createElement("tr");
       categoryRow.className = "catalog-category-row";
       const categoryCell = document.createElement("th");
-      categoryCell.colSpan = page === "skills" ? 4 : 3;
+      categoryCell.colSpan = catalogColumnCount;
       categoryCell.scope = "rowgroup";
       categoryCell.textContent = category;
       categoryRow.append(categoryCell);
@@ -65,6 +67,7 @@ function render() {
     const row = document.createElement("tr");
     const name = document.createElement("th");
     name.scope = "row";
+    name.className = "table-column--primary";
     if (["skills", "equipment", "weapons", "traits", "states", "hacking-programs"].includes(page)) {
       const link = document.createElement("a");
       const routeId = item.slug || item.id;
@@ -75,14 +78,15 @@ function render() {
       name.textContent = item.name;
     }
     const id = document.createElement("td");
-    id.className = "id-column unit-id";
+    id.className = "id-column table-column--technical";
     id.textContent = item.id;
     if (hasUsage) {
       const useCount = document.createElement("td");
+      useCount.className = "table-column--metric";
       useCount.textContent = Number(item.use_count || 0).toLocaleString();
       if (page === "skills") {
         const types = document.createElement("td");
-        types.className = "skill-category-cell";
+        types.className = "skill-category-cell table-column--descriptor";
         for (const category of item.categories || []) {
           types.append(skillCategoryBadge(category));
         }
@@ -118,11 +122,16 @@ async function load() {
 
 elements.search.addEventListener("input", () => {
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(render, 150);
+  searchTimer = setTimeout(() => {
+    replaceCatalogSearchQuery(elements.search.value);
+    render();
+  }, 150);
 });
 document.addEventListener("infinity:beforenavigation", () => {
   clearTimeout(searchTimer);
   pageController.abort();
 }, { once: true });
+elements.search.value = readCatalogSearchQuery();
+replaceCatalogSearchQuery(elements.search.value);
 initializeDistanceUnitToggle();
 load();
