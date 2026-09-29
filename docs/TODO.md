@@ -141,8 +141,9 @@ skeleton and interaction model.
   - [x] Add the 0.9 Unit filters and extended-results mode to the URL contract so
     categorical/numeric filtering and the optional extended Unit presentation remain
     reproducible in shared links. Extended presentation uses `extended=1`.
-  - [ ] Make catalog-list search/filter state deep-linkable where it is still only
-    local browser state.
+  - [x] Make catalog-list search/filter state deep-linkable where it is still only
+    local browser state. Searchable catalog landing pages now use the shared `q` query parameter,
+    hydrate it before first render, and remove it when the search is cleared.
   - [ ] Define how optional-unit preferences interact with reproducible shared Unit
     URLs. Two users opening the same link should not silently receive materially
     different result sets without the UI explaining the preference-dependent

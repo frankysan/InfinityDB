@@ -160,6 +160,16 @@ parallel definition.
 Clearing a scope returns to the canonical landing state. It should not leave an ambiguous empty or
 partially scoped page.
 
+### Catalog search URL state
+
+**Current.** Searchable catalog landing pages expose their client-side text search through the
+shared `q` query parameter. Loading `/equipment?q=hacking`, `/labels?q=attack`, or another catalog
+URL hydrates the search control before the first result render, and clearing the search removes
+`q` again. Updating a text search replaces the current history entry rather than adding one entry
+per debounce interval. Other query parameters are preserved. Future catalog filters that materially
+change visible results should likewise receive stable domain-appropriate query keys rather than
+remaining browser-local state.
+
 This state model is shared vocabulary, not a requirement that every domain implement all four
 states.
 

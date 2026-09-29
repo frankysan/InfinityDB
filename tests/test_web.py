@@ -3208,6 +3208,32 @@ def test_skill_extras_page_and_api_are_served(app: Callable) -> None:
     assert json.loads(body) == {"items": []}
 
 
+def test_catalog_search_state_is_shareable(app: Callable) -> None:
+    status, _, helper = request(app, "/static/catalog-search-state.js")
+    assert status == 200
+    assert b'const SEARCH_PARAMETER = "q";' in helper
+    assert b'new URLSearchParams(window.location.search)' in helper
+    assert b'url.searchParams.set(SEARCH_PARAMETER, query)' in helper
+    assert b'url.searchParams.delete(SEARCH_PARAMETER)' in helper
+    assert b'window.history.replaceState(window.history.state, "", url)' in helper
+
+    for asset in ("catalog-list.js", "reference-catalog.js"):
+        status, _, script = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b'from "./catalog-search-state.js"' in script
+        assert b'elements.search.value = readCatalogSearchQuery();' in script
+        assert b'replaceCatalogSearchQuery(elements.search.value);' in script
+
+    status, headers, script = request(
+        app, f"/static/catalog-list.js?v={STATIC_ASSET_VERSION}"
+    )
+    assert status == 200
+    assert headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert (
+        f'from "./catalog-search-state.js?v={STATIC_ASSET_VERSION}"'.encode() in script
+    )
+
+
 def test_traits_page_and_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/traits")
     assert status == 200

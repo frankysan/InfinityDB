@@ -49,6 +49,10 @@ ASSETS = {
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
     "/static/fireteams.js": ("fireteams.js", "text/javascript; charset=utf-8"),
     "/static/catalog-list.js": ("catalog-list.js", "text/javascript; charset=utf-8"),
+    "/static/catalog-search-state.js": (
+        "catalog-search-state.js",
+        "text/javascript; charset=utf-8",
+    ),
     "/static/reference-catalog.js": (
         "reference-catalog.js",
         "text/javascript; charset=utf-8",

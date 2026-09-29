@@ -1,4 +1,5 @@
 import { getCatalogItems } from "./api.js";
+import { readCatalogSearchQuery, replaceCatalogSearchQuery } from "./catalog-search-state.js";
 import { initializeDistanceUnitToggle } from "./preferences.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 
@@ -121,11 +122,16 @@ async function load() {
 
 elements.search.addEventListener("input", () => {
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(render, 150);
+  searchTimer = setTimeout(() => {
+    replaceCatalogSearchQuery(elements.search.value);
+    render();
+  }, 150);
 });
 document.addEventListener("infinity:beforenavigation", () => {
   clearTimeout(searchTimer);
   pageController.abort();
 }, { once: true });
+elements.search.value = readCatalogSearchQuery();
+replaceCatalogSearchQuery(elements.search.value);
 initializeDistanceUnitToggle();
 load();

@@ -655,6 +655,10 @@ compatibility references remain unambiguous JSON integers.
 - Search/display ordering is case-, accent-, and punctuation-insensitive.
 - Browser requests belong in `api.js`; shared unit rows in `unit-list.js`;
   page-specific rendering/state in the corresponding page module.
+- Searchable catalog landing pages use `q` as their canonical shareable text-search URL state.
+  The shared catalog URL helper hydrates `q` before first render, preserves unrelated query
+  parameters, removes `q` when cleared, and uses `replaceState` while typing so search debounce
+  updates do not create one browser-history entry per change.
 - Application database data is immutable for a running application instance.
   Snapshot-aware ETags and `/api/version` distinguish new imported data from an
   application release.

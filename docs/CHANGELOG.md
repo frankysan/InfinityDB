@@ -7,6 +7,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ## Unreleased
 
+### Changed
+
+- **Web frontend:** Make text search on all searchable reference catalog landing pages shareable
+  through `?q=` URL state. Opening a catalog search link restores the same narrowed result set, and
+  clearing the search returns to the canonical unscoped catalog URL.
+
 ### Added
 
 - **Data processing + Web backend + Web frontend:** Publish **General Rules** as the explicit
