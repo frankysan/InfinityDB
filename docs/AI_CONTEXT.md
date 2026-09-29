@@ -62,20 +62,17 @@ coexist with same-name Labels/Traits without identity collapse.
 ## Maintained rules-text link policy
 
 All newly authored maintained rules prose must use typed semantic tokens for existing player-facing
-Skills, Equipment, Weapons, Ammunition, Traits, States, and Hacking Programs. The checked-in
-unlinked-reference baseline is temporary migration debt for text that predates this policy: new
-candidate occurrences
-must not be admitted to it, and reviewed migration batches should only reduce the inventory.
-Automated discovery is an audit aid, not permission to bulk-rewrite ambiguous names or aliases;
-resolve those manually. Completed migration batches are also recorded in
-`data/curated/maintained-text-link-reviews.json` and must have zero case-insensitive/plural plain
-residuals. Confident same-text collisions that are not references to the reviewed namespace are
-recorded as fingerprinted `reviewedPlainSurfaces`; any new or changed passage fingerprint reopens
-that decision, while an identical passage cloned under another owner remains covered.
-Any uncertainty encountered during review must remain visible as an explicit `review-needed` marker
-until resolved. Batches 1-5 (canonical States, Hacking Programs, Equipment, Traits, and Skills) are
-complete; the remaining legacy baseline is State-only, so the final migration pass owns State
-alias/collision resolution and explicit review-marker cleanup.
+Skills, Equipment, Weapons, Ammunition, Traits, States, Hacking Programs, and Attributes. The
+pre-token migration baseline is retired: every supported maintained-reference namespace now has an
+explicit completed review batch in `data/curated/maintained-text-link-reviews.json`, and the rules
+build rejects any new plain semantic candidate directly. Completed batches must have zero
+case-insensitive/plural residuals. Confident same-text collisions that are not references to the
+reviewed namespace are recorded as fingerprinted `reviewedPlainSurfaces`; any new or changed passage
+fingerprint reopens that decision, while an identical passage cloned under another owner remains
+covered. Automated discovery is an audit aid, not permission to bulk-rewrite ambiguous names or
+aliases. Any uncertainty encountered during review must remain visible as an explicit
+`review-needed` marker until resolved. The candidate inventory is zero; the remaining migration debt
+is the explicit manual-review queue.
 
 ## Semantic provenance rule
 

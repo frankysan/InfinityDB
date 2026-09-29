@@ -15,8 +15,6 @@ from infinity_db.maintained_text import (
     parse_maintained_text,
 )
 
-BASELINE_FORMAT_VERSION = 1
-BASELINE_FILENAME = "maintained-text-link-baseline.json"
 REVIEW_POLICY_FILENAME = "maintained-text-link-reviews.json"
 REVIEW_POLICY_FORMAT_VERSION = 2
 _CONTEXT_INDEX = re.compile(
@@ -481,149 +479,50 @@ def collect_review_needed_markers(
     return {owner: counter for owner, counter in result.items() if counter}
 
 
-def _candidate_payload(candidates: Counter[CandidateKey]) -> list[dict[str, Any]]:
-    return [
-        {
-            "field": field,
-            "text": text,
-            "targets": list(targets),
-            "count": count,
-        }
-        for (field, text, targets), count in sorted(candidates.items())
-    ]
+def validate_maintained_text_link_coverage(
+    documents: list[tuple[Path, dict[str, Any]]], review_policy_path: Path
+) -> None:
+    """Require complete reviewed semantic-link coverage for maintained prose."""
 
+    batches = _load_review_policy(review_policy_path)
+    reviewed_namespaces = {batch["namespace"] for batch in batches}
+    missing_namespaces = sorted(MAINTAINED_REFERENCE_KINDS - reviewed_namespaces)
+    if missing_namespaces:
+        raise ValueError(
+            "Maintained-text review policy does not cover namespaces: "
+            + ", ".join(missing_namespaces)
+        )
 
-def _owner_summary(candidates: Counter[CandidateKey]) -> dict[str, Any]:
-    payload = _candidate_payload(candidates)
-    encoded = json.dumps(
-        payload,
-        ensure_ascii=False,
-        separators=(",", ":"),
-        sort_keys=True,
-    ).encode("utf-8")
-    return {
-        "candidateCount": sum(candidates.values()),
-        "sha256": hashlib.sha256(encoded).hexdigest(),
-    }
-
-
-def build_maintained_text_link_baseline(
-    documents: list[tuple[Path, dict[str, Any]]],
-    *,
-    review_policy_path: Path | None = None,
-) -> dict[str, Any]:
-    """Build the temporary legacy-debt baseline for unlinked maintained references."""
-
+    validate_reviewed_batch_coverage(documents, review_policy_path)
     candidates = collect_unlinked_reference_candidates(
         documents, review_policy_path=review_policy_path
     )
-    collection_ids = sorted(
-        document["collection"]["id"]
-        for _, document in documents
-        if document["collection"]["status"] == "current"
-    )
-    return {
-        "formatVersion": BASELINE_FORMAT_VERSION,
-        "policy": "legacy-unlinked-maintained-text-references",
-        "collections": collection_ids,
-        "candidateOwners": len(candidates),
-        "candidateOccurrences": sum(sum(values.values()) for values in candidates.values()),
-        "owners": {
-            owner: _owner_summary(values) for owner, values in sorted(candidates.items())
-        },
-    }
-
-
-def _load_baseline(path: Path) -> dict[str, Any]:
-    try:
-        document = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ValueError(f"Could not read maintained-text link baseline {path}: {exc}") from exc
-    if not isinstance(document, dict):
-        raise ValueError(f"Maintained-text link baseline {path} must contain an object")
-    if document.get("formatVersion") != BASELINE_FORMAT_VERSION:
-        raise ValueError(
-            f"Unsupported maintained-text link baseline version: "
-            f"{document.get('formatVersion')!r}"
-        )
-    owners = document.get("owners")
-    if not isinstance(owners, dict):
-        raise ValueError(f"Maintained-text link baseline {path} must contain an owners object")
-    return document
-
-
-def validate_maintained_text_link_baseline(
-    documents: list[tuple[Path, dict[str, Any]]],
-    baseline_path: Path,
-    *,
-    review_policy_path: Path | None = None,
-) -> None:
-    """Reject unreviewed changes to legacy debt or already completed review batches."""
-
-    if review_policy_path is None:
-        review_policy_path = baseline_path.with_name(REVIEW_POLICY_FILENAME)
-    validate_reviewed_batch_coverage(documents, review_policy_path)
-
-    baseline = _load_baseline(baseline_path)
-    current = build_maintained_text_link_baseline(
-        documents, review_policy_path=review_policy_path
-    )
-    baseline_owners = baseline["owners"]
-    current_owners = current["owners"]
-    changed = sorted(
-        owner
-        for owner in set(baseline_owners) | set(current_owners)
-        if baseline_owners.get(owner) != current_owners.get(owner)
-    )
-    if not changed:
+    if not candidates:
         return
 
-    candidates = collect_unlinked_reference_candidates(
-        documents, review_policy_path=review_policy_path
-    )
     details: list[str] = []
-    for owner in changed[:5]:
-        values = candidates.get(owner)
-        if not values:
-            details.append(f"{owner}: legacy candidates were removed; shrink the baseline")
-            continue
+    for owner, values in sorted(candidates.items())[:5]:
         rendered = ", ".join(
             f"{text!r} -> {'/'.join(targets)} x{count}"
             for (_, text, targets), count in values.most_common(3)
         )
         details.append(f"{owner}: {rendered}")
-    suffix = "" if len(changed) <= 5 else f"; plus {len(changed) - 5} more owner(s)"
+    suffix = "" if len(candidates) <= 5 else f"; plus {len(candidates) - 5} more owner(s)"
     raise ValueError(
-        "Maintained-text semantic-link coverage changed outside the reviewed legacy baseline: "
+        "Maintained-text prose contains unlinked semantic references: "
         + "; ".join(details)
         + suffix
     )
 
 
-def inferred_baseline_path(
+
+def inferred_review_policy_path(
     documents: list[tuple[Path, dict[str, Any]]],
 ) -> Path | None:
-    """Return the sibling project baseline when all rule documents share one directory."""
+    """Return the sibling project review policy when rule documents share one directory."""
 
     parents = {path.parent for path, _ in documents}
     if len(parents) != 1:
         return None
-    candidate = next(iter(parents)).parent / BASELINE_FILENAME
-    if not candidate.is_file():
-        return None
-    baseline = _load_baseline(candidate)
-    baseline_collections = baseline.get("collections")
-    if not isinstance(baseline_collections, list) or not all(
-        isinstance(value, str) for value in baseline_collections
-    ):
-        raise ValueError(
-            f"Maintained-text link baseline {candidate} must contain a collections array"
-        )
-    document_collections = {
-        document["collection"]["id"]
-        for _, document in documents
-        if document["collection"]["status"] == "current"
-    }
-    if not set(baseline_collections).issubset(document_collections):
-        return None
-    return candidate
+    candidate = next(iter(parents)).parent / REVIEW_POLICY_FILENAME
+    return candidate if candidate.is_file() else None

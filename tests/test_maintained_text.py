@@ -9,7 +9,7 @@ from infinity_db.maintained_text_policy import (
     collect_review_needed_markers,
     collect_reviewed_batch_residuals,
     collect_unlinked_reference_candidates,
-    validate_maintained_text_link_baseline,
+    validate_maintained_text_link_coverage,
     validate_reviewed_batch_coverage,
 )
 from infinity_db.rules_database import export_rules_database
@@ -110,12 +110,15 @@ def test_rules_database_rejects_unresolved_maintained_text_reference(tmp_path: P
         export_rules_database(documents, tmp_path / "rules.db", finalize=False)
 
 
-def test_project_maintained_text_link_baseline_is_current() -> None:
+def test_project_maintained_text_link_coverage_is_complete() -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
-    baseline = root / "data" / "curated" / "maintained-text-link-baseline.json"
+    review_policy = root / "data" / "curated" / "maintained-text-link-reviews.json"
 
-    validate_maintained_text_link_baseline(documents, baseline)
+    validate_maintained_text_link_coverage(documents, review_policy)
+    assert collect_unlinked_reference_candidates(
+        documents, review_policy_path=review_policy
+    ) == {}
 
 
 def test_project_completed_maintained_text_batches_have_no_plain_residuals() -> None:
@@ -204,16 +207,6 @@ def test_trait_names_are_linked_reviewed_plain_or_explicit_review() -> None:
     ]
     assert remaining == []
 
-    surprise_attack = candidates["n5-core-v5.3|skill:surprise-attack"]
-    assert surprise_attack[
-        (
-            "summary",
-            "Hidden Deployment",
-            ("state:hidden-deployment",),
-        )
-    ] == 1
-
-
 def test_skill_names_are_linked_reviewed_plain_or_explicit_review() -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
@@ -228,6 +221,24 @@ def test_skill_names_are_linked_reviewed_plain_or_explicit_review() -> None:
         for (field, text, targets), count in values.items()
         for _ in range(count)
         if any(target.startswith("skill:") for target in targets)
+    ]
+    assert remaining == []
+
+
+def test_state_aliases_are_linked_reviewed_plain_or_explicit_review() -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    review_policy = root / "data" / "curated" / "maintained-text-link-reviews.json"
+    candidates = collect_unlinked_reference_candidates(
+        documents, review_policy_path=review_policy
+    )
+
+    remaining = [
+        (owner, field, text, targets)
+        for owner, values in candidates.items()
+        for (field, text, targets), count in values.items()
+        for _ in range(count)
+        if any(target.startswith("state:") for target in targets)
     ]
     assert remaining == []
 

@@ -67,11 +67,11 @@ skeleton and interaction model.
 
 ### Player-facing completeness and navigation
 
-- [ ] Complete the systematic semantic-link migration of all maintained rules prose. New rules
-  text is already gated by the checked-in legacy-candidate baseline; migration must therefore
-  proceed as reviewed batches that shrink the baseline rather than bulk-replacing text. Any passage
-  examined during a batch that remains ambiguous or unclear must use an explicit `review-needed`
-  marker until manual review resolves it; reviewed uncertainty must not disappear into the baseline.
+- [ ] Complete the systematic semantic-link migration of all maintained rules prose. The legacy
+  candidate baseline has been retired: all supported semantic-reference namespaces are now covered
+  by completed review batches, and any new unlinked candidate fails the rules build directly. Any
+  passage examined during review that remains ambiguous or unclear must use an explicit
+  `review-needed` marker until manual review resolves it.
   - [x] Establish canonical-name/alias candidate auditing and make new unlinked candidates fail
     the rules build while grandfathering only the pre-migration corpus.
   - [x] Batch 1: replace unambiguous full State names such as `Unconscious State`,
@@ -102,9 +102,15 @@ skeleton and interaction model.
     9 newly unclear source/collision uses became explicit `review-needed` markers. The post-batch
     legacy inventory is 66 candidates across 43 semantic owners, all in the State namespace, with
     30 explicit review markers total.
-  - [ ] Batch 6: resolve the remaining State aliases/collisions (for example `Suppressive Fire`
-    and `Hidden Deployment`) plus the explicit review markers whose target can now be decided, then
-    remove the legacy baseline when the candidate inventory reaches zero.
+  - [x] Batch 6: review the remaining State aliases/collisions. The broad pass classified 87 State
+    alias/name matches: 40 became typed State links and 47 ordinary/cross-domain uses of `Normal`,
+    `targeted`, `Retreat`, and Decoy terminology were bound to reviewed passage fingerprints. The
+    legacy candidate inventory is now zero. Weapon, Ammunition, and Attribute namespaces also
+    received explicit case-insensitive/plural completeness audits with zero residuals, and the
+    temporary legacy baseline has been removed.
+  - [ ] Resolve the 30 explicit `review-needed` passages by manual source/context review; each must
+    become either the correct typed link or confirmed ordinary text before this migration item is
+    fully complete.
 
 - [ ] **Data processing + Web backend + Web frontend:** Continue the application-domain framework
   established in `docs/application-domains.md` without adding one-off catalog/navigation structures.

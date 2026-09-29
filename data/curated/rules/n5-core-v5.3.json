@@ -7815,9 +7815,9 @@
                     "automatic"
                 ],
                 "effects": [
-                    "The user can respond to Attacks directed at them from outside LoF, using a 360° LoF arc for those attackers; this also allows LoF to outside attackers while Engaged.",
+                    "The user can respond to Attacks directed at them from outside LoF, using a 360° LoF arc for those attackers; this also allows LoF to outside attackers while [[state:engaged|Engaged]].",
                     "When targeted by a [[skill:bs-attack]] through a Zero Visibility Zone, the user ignores the -6 MOD caused by the resulting Poor Visibility Zone.",
-                    "[[skill:dodge]] and [[skill:reset]] ignore negative MODs except the specified Immobilized-A, Immobilized-B, and [[state:isolated]] penalties.",
+                    "[[skill:dodge]] and [[skill:reset]] ignore negative MODs except the specified [[state:immobilized-a|Immobilized-A]], [[state:immobilized-b|Immobilized-B]], and [[state:isolated]] penalties.",
                     "[[skill:stealth]] is not effective against the user."
                 ],
                 "requirements": [],
@@ -7927,7 +7927,7 @@
             "labelIds": [
                 "obligatory"
             ],
-            "summary": "An Automatic Special Skill that imposes its listed negative MOD on targets' Face to Face ARO Rolls when attacking from Marker form or Hidden Deployment.",
+            "summary": "An Automatic Special Skill that imposes its listed negative MOD on targets' Face to Face ARO Rolls when attacking from Marker form or [[state:hidden-deployment|Hidden Deployment]].",
             "composition": {
                 "role": "definition"
             },
@@ -7943,7 +7943,7 @@
                     "automatic"
                 ],
                 "requirements": [
-                    "The user must begin the Order in Marker form or Hidden Deployment.",
+                    "The user must begin the Order in Marker form or [[state:hidden-deployment|Hidden Deployment]].",
                     "The user must declare a [[skill:cc-attack]], [[skill:bs-attack]], or Comms Attack during the Active Turn."
                 ],
                 "effects": [
@@ -8107,7 +8107,7 @@
                     "short-skill"
                 ],
                 "effects": [
-                    "The user may make a Normal WIP+6 Roll to simultaneously [[skill:discover]] enemy Troopers, Weapons, or Equipment in Hidden Deployment or [[state:camouflaged]] inside the user's Zone of Control.",
+                    "The user may make a Normal WIP+6 Roll to simultaneously [[skill:discover]] enemy Troopers, Weapons, or Equipment in [[state:hidden-deployment|Hidden Deployment]] or [[state:camouflaged]] inside the user's Zone of Control.",
                     "The Sensor Roll does not apply Range or [[skill:mimetism]] MODs and does not require LoF or a designated target.",
                     "Enemies with the [[skill:camouflage]] Special Skill cannot regain [[state:camouflaged]] inside the user's Zone of Control.",
                     "The user gains +6 WIP when declaring [[skill:discover]] against Camouflage Markers."
@@ -8624,7 +8624,7 @@
             "id": "skill:dodge",
             "kind": "skill",
             "name": "Dodge",
-            "summary": "A Common Skill used to evade Attacks, reposition slightly, and cancel Engaged or [[state:immobilized-a]] on a successful PH Roll.",
+            "summary": "A Common Skill used to evade Attacks, reposition slightly, and cancel [[state:engaged|Engaged]] or [[state:immobilized-a]] on a successful PH Roll.",
             "composition": {
                 "role": "definition"
             },
@@ -8688,7 +8688,7 @@
             "id": "skill:reset",
             "kind": "skill",
             "name": "Reset",
-            "summary": "A Common Skill used to oppose Comms Attacks and Guided attacks and to cancel Targeted, Immobilized-B, or [[state:isolated]].",
+            "summary": "A Common Skill used to oppose Comms Attacks and Guided attacks and to cancel [[state:targeted|Targeted]], [[state:immobilized-b|Immobilized-B]], or [[state:isolated]].",
             "composition": {
                 "role": "definition"
             },
@@ -8709,7 +8709,7 @@
                 ],
                 "effects": [
                     "Reset uses WIP to oppose enemy Comms Attacks and [[skill:bs-attack:plural]] (Guided); otherwise it is a Normal WIP Roll.",
-                    "A successful Reset Roll cancels the user's Targeted, Immobilized-B, or [[state:isolated]], applying any State-specific MODs."
+                    "A successful Reset Roll cancels the user's [[state:targeted|Targeted]], [[state:immobilized-b|Immobilized-B]], or [[state:isolated]], applying any State-specific MODs."
                 ],
                 "restrictions": [
                     "Reset does not evade other types of Attacks; [[skill:dodge]] is used for those instead."
@@ -10173,7 +10173,7 @@
                     "Enemy [[skill:hacker:plural]] inside its Zone of Control may use the Repeater to apply Hacking Programs against enemy [[skill:hacker:plural]], applying the documented Firewall MODs."
                 ],
                 "restrictions": [
-                    "The owner cannot voluntarily deactivate the Repeater; it becomes inactive when its carrier is Isolated or in a Null State."
+                    "The owner cannot voluntarily deactivate the Repeater; it becomes inactive when its carrier is [[state:isolated|Isolated]] or in a Null State."
                 ]
             },
             "armyLinks": [
@@ -10317,7 +10317,7 @@
                     "The dismounted profile applies [[skill:peripheral]] (Synchronized) to the AI Motorcycle and uses [[skill:transmutation]] (Auto) to change between mounted and dismounted profiles."
                 ],
                 "restrictions": [
-                    "The Trooper cannot return to the mounted profile while the Peripheral is Isolated, Immobilized, or in a Null State.",
+                    "The Trooper cannot return to the mounted profile while the Peripheral is [[state:isolated|Isolated]], Immobilized, or in a Null State.",
                     "Supportware affecting the Peripheral is canceled for the Trooper when the mounted profile is applied."
                 ]
             },
@@ -11038,7 +11038,7 @@
                     "Combat Jump (Explosion) adds a single-use PS 8 Normal [[review-needed:scope-unclear|Direct Template]] Attack after the landing position is resolved."
                 ],
                 "restrictions": [
-                    "The landing cannot place the user Prone, in prohibited Silhouette contact, inside enclosed scenery, or in contact with a scenario objective.",
+                    "The landing cannot place the user [[state:prone|Prone]], in prohibited Silhouette contact, inside enclosed scenery, or in contact with a scenario objective.",
                     "The user cannot benefit from Partial Cover during the Order in which Combat Jump is used."
                 ]
             },
@@ -11145,7 +11145,7 @@
                 "effects": [
                     "The user may deploy outside the enemy Deployment Zone in [[state:impersonation-1]].",
                     "The user may attempt a WIP Roll to deploy inside the enemy Deployment Zone.",
-                    "A profile with Impersonation (IMP-2) deploys and activates only [[state:impersonation-2]]."
+                    "A profile with Impersonation ([[state:impersonation-2|IMP-2]]) deploys and activates only [[state:impersonation-2]]."
                 ],
                 "restrictions": [
                     "A failed WIP Roll places the user in their own Deployment Zone at the table edge as a Model and removes [[review-needed:ambiguous-target|Deployables]] placed with the attempt.",
@@ -11321,7 +11321,7 @@
                 ],
                 "restrictions": [
                     "Without the Deployment Zone variant, the user cannot enter inside the enemy Deployment Zone.",
-                    "The entry cannot place the user Prone or in prohibited contact with enemy or neutral game elements or mission objectives.",
+                    "The entry cannot place the user [[state:prone|Prone]] or in prohibited contact with enemy or neutral game elements or mission objectives.",
                     "The user cannot benefit from Partial Cover during the Order in which Parachutist is used."
                 ]
             },
@@ -11776,7 +11776,7 @@
                     "The user and target may apply Skills and MODs whose normal requirements include Silhouette contact."
                 ],
                 "restrictions": [
-                    "Guard cannot be used against an active [[skill:aerial]] Trooper unless that Trooper is Unconscious."
+                    "Guard cannot be used against an active [[skill:aerial]] Trooper unless that Trooper is [[state:unconscious|Unconscious]]."
                 ]
             },
             "labelIds": [
@@ -12010,7 +12010,7 @@
                 "restrictions": [
                     "While Aerial is active, the user cannot be in [[state:prone]] or [[state:engaged]].",
                     "The user cannot declare [[skill:cautious-movement]].",
-                    "[[skill:guard]] cannot be used against the user unless the user is Unconscious.",
+                    "[[skill:guard]] cannot be used against the user unless the user is [[state:unconscious|Unconscious]].",
                     "Weapons with the [[trait:boost|Boost]] Trait do not activate against the user."
                 ]
             },
@@ -12529,7 +12529,7 @@
                     "The Trooper no longer generates Orders and does not count toward Victory Points."
                 ],
                 "requirements": [
-                    "The Trooper has received more Wounds than its VITA or STR value, including receiving further Wounds while Unconscious."
+                    "The Trooper has received more Wounds than its VITA or STR value, including receiving further Wounds while [[state:unconscious|Unconscious]]."
                 ],
                 "restrictions": [
                     "Dead State is irreversible unless a mission or scenario rule explicitly provides a cancellation procedure."
@@ -12580,7 +12580,7 @@
                     "The Trooper cannot draw Line of Fire outside its Close Combat."
                 ],
                 "requirements": [
-                    "The Trooper is in Silhouette contact with an enemy and neither Trooper is Immobilized or in a Null State, except Sepsitorized or Possessed."
+                    "The Trooper is in Silhouette contact with an enemy and neither Trooper is Immobilized or in a Null State, except [[state:sepsitorized|Sepsitorized]] or [[state:possessed|Possessed]]."
                 ],
                 "restrictions": []
             },
@@ -12766,7 +12766,7 @@
                     "Movement from Skills with the Movement Label and failed Guts Rolls is halved while Prone."
                 ],
                 "requirements": [
-                    "A Trooper may deploy Prone or change between Normal and Prone at the permitted points of Movement-labelled Skills or AROs; eligible Troopers also become Prone when entering [[state:unconscious]]."
+                    "A Trooper may deploy Prone or change between [[state:normal|Normal]] and Prone at the permitted points of Movement-labelled Skills or AROs; eligible Troopers also become Prone when entering [[state:unconscious]]."
                 ],
                 "restrictions": [
                     "[[skill:jump]] cancels Prone State, and some troop types or Equipment cannot enter Prone State."
@@ -13009,7 +13009,7 @@
             "id": "skill:dogged",
             "kind": "skill",
             "name": "Dogged",
-            "summary": "An optional Automatic Special Skill that lets an Unconscious Trooper keep acting temporarily before entering [[state:dead]].",
+            "summary": "An optional Automatic Special Skill that lets an [[state:unconscious|Unconscious]] Trooper keep acting temporarily before entering [[state:dead]].",
             "composition": {
                 "role": "definition"
             },
@@ -13087,7 +13087,7 @@
             "id": "skill:no-wound-incapacitation",
             "kind": "skill",
             "name": "No Wound Incapacitation",
-            "summary": "An optional Automatic Special Skill that lets an Unconscious Trooper ignore that State's normal restrictions while remaining healable.",
+            "summary": "An optional Automatic Special Skill that lets an [[state:unconscious|Unconscious]] Trooper ignore that State's normal restrictions while remaining healable.",
             "composition": {
                 "role": "definition"
             },
@@ -13162,7 +13162,7 @@
             "id": "skill:remote-presence",
             "kind": "skill",
             "name": "Remote Presence",
-            "summary": "An obligatory Automatic Special Skill for STR Troopers that adds a second Unconscious level and changes repair behavior.",
+            "summary": "An obligatory Automatic Special Skill for STR Troopers that adds a second [[state:unconscious|Unconscious]] level and changes repair behavior.",
             "composition": {
                 "role": "definition"
             },
@@ -13180,12 +13180,12 @@
                 "requirements": [],
                 "effects": [
                     "A Remote Presence Trooper with STR has two distinct levels of [[state:unconscious]] before entering [[state:dead]].",
-                    "From either Unconscious level, one successful [[skill:engineer]] WIP Roll or [[equipment:gizmokit]] PH Roll removes all Wounds necessary to cancel [[state:unconscious]].",
+                    "From either [[state:unconscious|Unconscious]] level, one successful [[skill:engineer]] WIP Roll or [[equipment:gizmokit]] PH Roll removes all Wounds necessary to cancel [[state:unconscious]].",
                     "When [[skill:engineer]] or another rule explicitly permits it, Command Tokens may reroll the failed repair Roll.",
                     "Remote Presence remains active while its owner is in a Null State."
                 ],
                 "restrictions": [
-                    "The second Unconscious level applies to Troopers with both Remote Presence and the STR Attribute."
+                    "The second [[state:unconscious|Unconscious]] level applies to Troopers with both Remote Presence and the STR Attribute."
                 ]
             },
             "labelIds": [
@@ -13248,8 +13248,8 @@
                     "The user must enter [[state:unconscious]] and activate Shasvastii immediately, in either the Active or Reactive Turn."
                 ],
                 "effects": [
-                    "While the Shasvastii-Embryo form is active, the Unconscious Trooper still counts when calculating Victory Points for Retreat and other scenario rules or conditions.",
-                    "At the end of the game, these special Unconscious rules end and the Trooper no longer counts when calculating Victory Points."
+                    "While the Shasvastii-Embryo form is active, the [[state:unconscious|Unconscious]] Trooper still counts when calculating Victory Points for Retreat and other scenario rules or conditions.",
+                    "At the end of the game, these special [[state:unconscious|Unconscious]] rules end and the Trooper no longer counts when calculating Victory Points."
                 ],
                 "restrictions": []
             },
@@ -13418,7 +13418,7 @@
             "facts": {
                 "category": "basic-rule",
                 "requirements": [
-                    "During the Tactical Phase, the active player has no deployed [[skill:lieutenant]] because the [[skill:lieutenant]] is absent, Isolated, or in a Null State."
+                    "During the Tactical Phase, the active player has no deployed [[skill:lieutenant]] because the [[skill:lieutenant]] is absent, [[state:isolated|Isolated]], or in a Null State."
                 ],
                 "effects": [
                     "All Troopers in the Army List are Irregular while the Loss of Lieutenant situation applies.",
@@ -13587,8 +13587,8 @@
                 ],
                 "requirements": [
                     "Use only at the start of the player's Loss of Lieutenant check.",
-                    "The current [[skill:lieutenant]] must be Isolated or in a Null State.",
-                    "The user must be on the table as a Model or Marker and cannot be Isolated or in a Null State."
+                    "The current [[skill:lieutenant]] must be [[state:isolated|Isolated]] or in a Null State.",
+                    "The user must be on the table as a Model or Marker and cannot be [[state:isolated|Isolated]] or in a Null State."
                 ],
                 "effects": [
                     "The user becomes the new [[skill:lieutenant]] and gains the [[skill:lieutenant]] Special Skill with no additional abilities.",
@@ -13777,7 +13777,7 @@
                 "requirements": [],
                 "effects": [
                     "The user has a Special Lieutenant Order.",
-                    "If the Lieutenant is absent from the table, Isolated, or in a Null State during the Tactical Phase, Loss of Lieutenant applies.",
+                    "If the Lieutenant is absent from the table, [[state:isolated|Isolated]], or in a Null State during the Tactical Phase, Loss of Lieutenant applies.",
                     "The Lieutenant Skill remains active while its owner is in a Null State until a new Lieutenant is appointed."
                 ],
                 "restrictions": [
@@ -13914,7 +13914,7 @@
                     "An NCO acting as Fireteam Team Leader may use the resulting Tactical Order to activate the Fireteam."
                 ],
                 "restrictions": [
-                    "An Isolated NCO cannot replace Special Lieutenant Orders or use the resulting Tactical Orders."
+                    "An [[state:isolated|Isolated]] NCO cannot replace Special Lieutenant Orders or use the resulting Tactical Orders."
                 ]
             },
             "labelIds": [
@@ -14010,7 +14010,7 @@
             "id": "skill:paramedic",
             "kind": "skill",
             "name": "Paramedic",
-            "summary": "An obligatory Automatic Special Skill that equips the user with a [[equipment:medikit]] for recovering Unconscious allies.",
+            "summary": "An obligatory Automatic Special Skill that equips the user with a [[equipment:medikit]] for recovering [[state:unconscious|Unconscious]] allies.",
             "composition": {
                 "role": "definition"
             },
@@ -14150,7 +14150,7 @@
             "id": "skill:technorganic",
             "kind": "skill",
             "name": "Technorganic",
-            "summary": "An optional Automatic Special Skill that allows an Unconscious Trooper to be recovered by medical or engineering methods regardless of VITA or STR.",
+            "summary": "An optional Automatic Special Skill that allows an [[state:unconscious|Unconscious]] Trooper to be recovered by medical or engineering methods regardless of VITA or STR.",
             "composition": {
                 "role": "definition"
             },
@@ -14275,7 +14275,7 @@
             "id": "skill:number-2",
             "kind": "skill",
             "name": "Number 2",
-            "summary": "An optional Automatic Special Skill that can take over as Fireteam Team Leader when the current leader becomes Isolated or enters a Null State.",
+            "summary": "An optional Automatic Special Skill that can take over as Fireteam Team Leader when the current leader becomes [[state:isolated|Isolated]] or enters a Null State.",
             "composition": {
                 "role": "definition"
             },
@@ -14847,7 +14847,7 @@
                     "During the Active Turn, the player chooses the Proxy that becomes Active when declaring the Order; only that Active Proxy can declare Orders.",
                     "During the Reactive Turn, only one eligible Proxy becomes Active for the Order and reacts normally; other reacting Proxies may only declare [[skill:dodge]] or [[skill:reset]].",
                     "If the Active Proxy enters [[state:isolated]] or any Null State, the Active Proxy may be moved to another Proxy that is not in one of those States at the end of the Order.",
-                    "Marker and Hidden Deployment status are not canceled merely by placing or assigning the Active Proxy Token.",
+                    "Marker and [[state:hidden-deployment|Hidden Deployment]] status are not canceled merely by placing or assigning the Active Proxy Token.",
                     "Moving the G: Jumper Trooper between Combat Groups moves all of its Proxies together."
                 ],
                 "restrictions": [
@@ -15081,7 +15081,7 @@
                     "VITA or STR points and Wounds are shared across the user's Unit Profiles.",
                     "Applicable States are shared across the user's Unit Profiles.",
                     "Transmutation (X) changes to the second Unit Profile after the listed Wound threshold is reached.",
-                    "Transmutation (Escape System-X) follows the threshold transition and also places an Eclipse Special Ammo Circular Template; if the Trooper is Possessed when it changes profile, [[state:possessed]] is canceled.",
+                    "Transmutation (Escape System-X) follows the threshold transition and also places an Eclipse Special Ammo Circular Template; if the Trooper is [[state:possessed|Possessed]] when it changes profile, [[state:possessed]] is canceled.",
                     "Transmutation (Hatching) begins with a Seed-Embryo representation and changes to the Developed Form when its documented Movement or successful [[skill:dodge]] ARO trigger occurs.",
                     "Transmutation (Auto) allows deployment in either Unit Profile and profile switching at the start of Movement generated by a Skill with the Movement Label.",
                     "Transmutation (WIP) allows a WIP Roll before an Order or ARO to use the second Unit Profile for the rest of the Player Turn, returning to the first profile in the States Phase."

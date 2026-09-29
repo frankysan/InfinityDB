@@ -14,8 +14,8 @@ from typing import Any
 
 from infinity_db.maintained_text import maintained_text_fields, maintained_text_targets
 from infinity_db.maintained_text_policy import (
-    inferred_baseline_path,
-    validate_maintained_text_link_baseline,
+    inferred_review_policy_path,
+    validate_maintained_text_link_coverage,
 )
 from infinity_db.rule_relations import relation_presentation
 from infinity_db.sqlite_determinism import (
@@ -281,9 +281,9 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
                 f"{family_id!r} to declare family inheritance"
             )
 
-    baseline_path = inferred_baseline_path(documents)
-    if baseline_path is not None:
-        validate_maintained_text_link_baseline(documents, baseline_path)
+    review_policy_path = inferred_review_policy_path(documents)
+    if review_policy_path is not None:
+        validate_maintained_text_link_coverage(documents, review_policy_path)
 
 
 def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -> None:

@@ -33,61 +33,39 @@ identities.
 
 The sections below document the implemented `curated/rules/` contract.
 
-### Maintained rules-text semantic-link migration
+### Maintained rules-text semantic-link policy
 
 Maintained rules prose must use typed `[[kind:slug]]` references when it names an existing
-player-routable Skill, Equipment item, Weapon, Trait, State, or Hacking Program. The current
-pre-token corpus is being migrated in reviewed domain batches rather than by bulk replacement.
-`maintained-text-link-baseline.json` freezes the remaining legacy plain-reference candidates so
-new rules text cannot add unlinked canonical names or aliases while that migration is in progress.
-The baseline is temporary migration debt and should only shrink.
-`maintained-text-link-reviews.json` records the scopes of completed migration batches. Those scopes
-receive an additional case-insensitive scan with conservative plural matching, which catches terms
-that the intentionally exact legacy baseline can miss. A completed-batch residual is an error: link
-it when the meaning is clear, or replace it with `review-needed` when it is not. If a colliding
-surface is confidently ordinary text rather than a reference to that batch's namespace, record it
+player-routable Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program, or
+Attribute. The pre-token migration is complete: `maintained-text-link-reviews.json` records explicit
+completed review coverage for every supported reference namespace, and the rules build rejects any
+new plain semantic candidate directly.
+
+Completed scopes receive a case-insensitive scan with conservative plural matching. A residual is an
+error: link it when the meaning is clear, or replace it with `review-needed` when it is not. If a
+colliding surface is confidently ordinary text rather than a reference to that namespace, record it
 under that batch's `reviewedPlainSurfaces` with a reusable reason plus audit-derived occurrence
 fingerprints. Each fingerprint binds the decision to an exact maintained-text passage, field, match
 span, and semantic target set; changed or newly worded occurrences reopen review. Owner identity is
 not part of the fingerprint, so an unchanged passage cloned into a synthetic/derived record inherits
-the same reviewed meaning. A reviewed plain surface suppresses only that batch namespace from legacy
-debt, not same-text candidates in other namespaces.
+the same reviewed meaning. A reviewed plain surface suppresses only that batch namespace, not
+same-text candidates in another namespace.
 
 Audit the current inventory with:
 
 ```powershell
-python tools/audit_maintained_text_links.py
+python tools\audit_maintained_text_links.py
 ```
 
-The audit prints three inventories: remaining legacy candidates, residuals in already reviewed
-batches, and explicit `review-needed` markers. Reviewed-batch residuals must be zero.
-
-After a reviewed migration batch, add or update its scope in `maintained-text-link-reviews.json` and
-regenerate the smaller baseline in the same change with:
-
-```powershell
-python tools/audit_maintained_text_links.py --write-baseline
-```
-
-Do not use `--write-baseline` to admit newly authored unlinked references. When a reviewed passage
-is ambiguous or its source meaning is not clear enough to choose a semantic target, replace that
-passage with an explicit `[[review-needed:<reason>|<visible text>]]` marker instead. Reason codes are
-lowercase kebab-case; prefer reusable codes such as `ambiguous-target`, `unclear-source-meaning`,
-`source-conflict`, or `scope-unclear` rather than one-off wording.
-`[[review-needed:<reason>]]` is valid for a standalone marker. The audit lists
-all review-needed markers separately from the legacy baseline, so reviewed uncertainty remains easy
-to locate and cannot disappear merely because it is no longer plain text. Resolve the marker to a
-typed semantic reference (or ordinary text if review proves it is not a reference) once the manual
-review is complete.
-
-## Other curated categories
-
-`data/curated/snapshot-notes/` defines the current versioned contract for
-human-maintained snapshot descriptions, comparison targets, and notable-change
-notes associated with immutable snapshots by SHA-256. Those notes remain
-separate from generated snapshot provenance and are not rules-database inputs.
-Acquisition tooling never writes or consumes this subtree; see
-[`snapshot-notes/README.md`](snapshot-notes/README.md).
+The audit prints unlinked candidates, reviewed-batch residuals, and explicit `review-needed` markers.
+The first two inventories must remain zero. When a passage is ambiguous or its source meaning is not
+clear enough to choose a semantic target, use
+`[[review-needed:<reason>|<visible text>]]` rather than guessing. Reason codes are lowercase
+kebab-case; prefer reusable codes such as `ambiguous-target`, `unclear-source-meaning`,
+`source-conflict`, or `scope-unclear`. `[[review-needed:<reason>]]` is valid for a standalone marker.
+The audit lists all review-needed markers separately so reviewed uncertainty remains easy to locate
+and cannot disappear into ordinary prose. Resolve each marker to a typed semantic reference, or to
+ordinary text when manual review proves it is not a reference.
 
 ### Rules-enrichment coverage classifications
 

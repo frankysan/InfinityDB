@@ -1,22 +1,18 @@
-"""Audit or checkpoint maintained rules prose that still needs semantic links."""
+"""Audit maintained rules prose for semantic-link and manual-review coverage."""
 
 from __future__ import annotations
 
 import argparse
-import json
 from collections import Counter
 from pathlib import Path
 
 from infinity_db.curated import load_curated_directory
 from infinity_db.maintained_text_policy import (
-    BASELINE_FILENAME,
     REVIEW_POLICY_FILENAME,
-    build_maintained_text_link_baseline,
     collect_review_needed_markers,
     collect_reviewed_batch_residuals,
     collect_unlinked_reference_candidates,
-    validate_maintained_text_link_baseline,
-    validate_reviewed_batch_coverage,
+    validate_maintained_text_link_coverage,
 )
 
 DEFAULT_RULES = Path("data/curated/rules")
@@ -25,20 +21,13 @@ DEFAULT_RULES = Path("data/curated/rules")
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("rules", nargs="?", type=Path, default=DEFAULT_RULES)
-    parser.add_argument("--baseline", type=Path)
     parser.add_argument("--review-policy", type=Path)
-    parser.add_argument(
-        "--write-baseline",
-        action="store_true",
-        help="Rewrite the legacy migration baseline after a reviewed link-migration batch.",
-    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     documents = load_curated_directory(args.rules)
-    baseline_path = args.baseline or args.rules.parent / BASELINE_FILENAME
     review_policy_path = (
         args.review_policy or args.rules.parent / REVIEW_POLICY_FILENAME
     )
@@ -101,25 +90,9 @@ def main(argv: list[str] | None = None) -> int:
             suffix = f" x{count}" if count != 1 else ""
             print(f"  {owner} {field}: {display} [{reason}]{suffix}")
 
-    if args.write_baseline:
-        validate_reviewed_batch_coverage(documents, review_policy_path)
-        baseline = build_maintained_text_link_baseline(
-            documents, review_policy_path=review_policy_path
-        )
-        baseline_path.write_text(
-            json.dumps(baseline, indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
-        print(f"Wrote reviewed legacy baseline: {baseline_path}")
-        return 0
-
-    validate_maintained_text_link_baseline(
-        documents, baseline_path, review_policy_path=review_policy_path
-    )
-    print(f"Legacy baseline matches: {baseline_path}")
+    validate_maintained_text_link_coverage(documents, review_policy_path)
+    print(f"Maintained-text coverage complete: {review_policy_path}")
     return 0
-
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

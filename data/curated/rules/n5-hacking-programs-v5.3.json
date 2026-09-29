@@ -390,7 +390,7 @@
                     "The target is an enemy TAG, or a TAG already in [[state:possessed]]."
                 ],
                 "effects": [
-                    "A failed Saving Roll places an enemy TAG in [[state:possessed]]; against a TAG already Possessed, a failed Saving Roll cancels that State and returns it to [[state:normal]]."
+                    "A failed Saving Roll places an enemy TAG in [[state:possessed]]; against a TAG already [[state:possessed|Possessed]], a failed Saving Roll cancels that State and returns it to [[state:normal]]."
                 ]
             },
             "relations": [

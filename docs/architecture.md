@@ -864,34 +864,28 @@ resolved catalog route. Touch interaction uses an explicit two-tap contract: the
 summary preview, a second tap on the same reference follows the link, and tapping elsewhere closes
 the pinned preview. Mouse and keyboard navigation keep their normal single-activation behavior.
 
-Semantic links are mandatory for newly authored maintained rules prose whenever the named concept
-already has a player-routable identity. Because the pre-token corpus predates that rule, the rules
-build also audits plain text against the current canonical names and aliases using case-sensitive,
-longest-match detection. Existing legacy candidates are frozen in
-`data/curated/maintained-text-link-baseline.json`; a new or changed unlinked candidate fails the
-rules build. The baseline is migration debt rather than an exception mechanism and is expected only
-to shrink as manually reviewed domain batches replace plain mentions with typed tokens. Self-links
-are excluded. Completed migration scopes are recorded separately in
-`data/curated/maintained-text-link-reviews.json`. Those reviewed scopes are rescanned
-case-insensitively, including conservative plural forms, so a canonical name or alias that escaped
-the original case-sensitive legacy-candidate scan cannot remain silently after its batch is marked
-complete. When a reviewed surface is confidently ordinary text rather than a reference to that
-batch's namespace, the review policy may record it as a `reviewedPlainSurfaces` decision. Such a
-decision is bound to exact passage occurrences by SHA-256 fingerprints over the field, full
-maintained-text value, plain-text segment, match span, visible surface, and semantic target set.
-Changed or newly worded occurrences therefore reopen review instead of silently exempting future
-prose, while an identical passage cloned under a synthetic/derived owner reuses the same reviewed
-meaning. Reviewed plain surfaces are removed only from that namespace's migration debt, so a
-same-name candidate in another semantic namespace can still be reviewed by its own batch. This
-reviewed-batch residual scan
-is a build gate and must be clean before the legacy baseline can be rewritten.
+Semantic links are mandatory for maintained rules prose whenever the named concept already has a
+player-routable identity. The pre-token migration is complete: every supported maintained-reference
+namespace has an explicit completed batch in `data/curated/maintained-text-link-reviews.json`, and
+the rules build rejects any new unlinked candidate directly. Completed scopes are rescanned
+case-insensitively, including conservative plural forms, so canonical names or aliases cannot escape
+coverage through casing or simple plurality.
+
+When a reviewed surface is confidently ordinary text rather than a reference to that batch's
+namespace, the review policy may record it as a `reviewedPlainSurfaces` decision. Such a decision is
+bound to exact passage occurrences by SHA-256 fingerprints over the field, full maintained-text
+value, plain-text segment, match span, visible surface, and semantic target set. Changed or newly
+worded occurrences therefore reopen review instead of silently exempting future prose, while an
+identical passage cloned under a synthetic/derived owner reuses the same reviewed meaning. Reviewed
+plain surfaces suppress only that namespace, so a same-name candidate in another semantic namespace
+still receives its own review.
 
 Once a reviewer encounters a passage that is ambiguous or otherwise unclear, it must be converted
-to an explicit `review-needed` marker rather than left as silent baseline debt or linked
-speculatively. The maintained-text audit enumerates these markers separately with owner, field,
-visible text, and reason; the browser highlights them with the same top-layer preview system used
-by semantic links. Unreviewed legacy candidates may remain in the baseline until their batch is
-examined, but reviewed ambiguity must stay explicitly marked until resolved.
+to an explicit `review-needed` marker rather than linked speculatively. The maintained-text audit
+enumerates these markers separately with owner, field, visible text, and reason; the browser
+highlights them with the same top-layer preview system used by semantic links. Review-needed markers
+remain explicit manual-review debt until resolved to either the correct typed reference or confirmed
+ordinary text.
 
 Gameplay distances embedded in maintained text are structural tokens such as
 `[[distance:+2:inch]]` or `[[distance:5:cm]]`. The parser normalizes them to centimeters in the

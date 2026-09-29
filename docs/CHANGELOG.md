@@ -61,6 +61,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Data processing:** Complete maintained-text semantic-link candidate migration. State aliases are
+  fully reviewed, ordinary State-name collisions are passage-fingerprinted, Weapon/Ammunition/
+  Attribute namespaces have explicit zero-residual review coverage, and the temporary legacy
+  candidate baseline is retired in favor of direct build-time completeness validation.
 - **Web backend + Web frontend:** Make **Labels** bidirectional reference concepts: Label badges
   now preview their canonical definitions, and Label detail pages list the current catalog items
   that use each Label with direct links back to those Skills, Equipment items, States, and other
