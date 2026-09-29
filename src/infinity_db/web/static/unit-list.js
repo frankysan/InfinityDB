@@ -1,4 +1,5 @@
 import { distanceUnit } from "./preferences.js";
+import { shareStateHref } from "./share-state.js";
 import { staticSymbolPath, unitSymbol } from "./unit-symbols.js";
 import {
   characteristicSymbol,
@@ -18,9 +19,7 @@ function text(value) {
 function unitArmyHref(unit, army) {
   const unitId = unit.public_slug || unit.id;
   const armyId = army.public_slug || army.slug || String(army.id);
-  const url = new URL(`/units/${unitId}`, window.location.origin);
-  url.searchParams.set("army_id", armyId);
-  return `${url.pathname}${url.search}`;
+  return shareStateHref(`/units/${unitId}`, "unit", { army_id: armyId });
 }
 
 function movement(profile) {

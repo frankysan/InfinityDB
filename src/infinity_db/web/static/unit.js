@@ -1,5 +1,6 @@
 import { getUnit, getUnitProfileHelp } from "./api.js";
 import { maintainedTextFragment } from "./maintained-text.js";
+import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
 import { formatMovement, troopTypeLabel } from "./unit-presentation.js";
 import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
@@ -10,7 +11,8 @@ const status = document.getElementById("unit-status");
 const content = document.getElementById("unit-content");
 const pageController = new AbortController();
 const unitIdentifier = /^\/units\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(window.location.pathname)?.[1];
-const requestedArmyIdentifier = new URLSearchParams(window.location.search).get("army_id") || "";
+const requestedArmyIdentifier = readShareState("unit").params.get("army_id") || "";
+writeShareState("unit", requestedArmyIdentifier ? { army_id: requestedArmyIdentifier } : {}, { replace: true });
 let profileHelpEntries = new Map();
 let attributeHelpEntries = new Map();
 
@@ -885,14 +887,14 @@ function appendRelationProvenance(item, relation) {
 function armyExplorerLink(army) {
   const link = document.createElement("a");
   const identifier = army.public_slug || army.slug || army.id;
-  link.href = `/units?army_id=${encodeURIComponent(identifier)}`;
+  link.href = shareStateHref("/units", "units", { army_id: identifier });
   link.textContent = army.name || `Army ${army.id}`;
   return link;
 }
 
 function declaredFactionLink(membership) {
   const link = document.createElement("a");
-  link.href = `/units?declared_faction_id=${encodeURIComponent(membership.source_faction_id)}`;
+  link.href = shareStateHref("/units", "units", { declared_faction_id: membership.source_faction_id });
   link.textContent = membership.name || `Faction ${membership.source_faction_id}`;
   return link;
 }

@@ -1,3 +1,5 @@
+import { shareStateHref } from "./share-state.js";
+
 /** Shared behavior for menus: expanded sidebar sections and compact top-bar popovers. */
 const menus = [...document.querySelectorAll("[data-menu]")];
 const compactMenuMedia = window.matchMedia("(max-width: 920px)");
@@ -29,6 +31,12 @@ compactSearchMedia.addEventListener("change", syncGlobalSearchLayout);
 setGlobalSearchOpen(false);
 
 if (globalSearch && globalSearchToggle && globalSearchInput) {
+  globalSearch.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const query = globalSearchInput.value.trim().slice(0, 200);
+    window.location.href = shareStateHref("/search", "search", query ? { q: query } : {});
+  });
+
   globalSearchToggle.addEventListener("click", () => {
     const isOpen = globalSearch.dataset.open === "true";
     setGlobalSearchOpen(!isOpen, { focus: !isOpen });

@@ -45,10 +45,25 @@ class SearchCatalog:
         self.glossary_catalog = glossary_catalog
 
     @staticmethod
-    def _result(domain: str, item: dict[str, Any], href: str) -> dict[str, str]:
+    def _result(domain: str, item: dict[str, Any], href: str) -> dict[str, Any]:
         return {"domain": domain, "name": str(item["name"]), "href": href}
 
-    def search(self, query: str) -> list[dict[str, str]]:
+    @staticmethod
+    def _scoped_result(
+        domain: str,
+        item: dict[str, Any],
+        href: str,
+        schema: str,
+        values: dict[str, str],
+    ) -> dict[str, Any]:
+        return {
+            "domain": domain,
+            "name": str(item["name"]),
+            "href": href,
+            "share_state": {"schema": schema, "values": values},
+        }
+
+    def search(self, query: str) -> list[dict[str, Any]]:
         """Return name matches across every player-facing database domain.
 
         Search deliberately reuses the application read models instead of flattening
@@ -61,14 +76,16 @@ class SearchCatalog:
         if not needle:
             return []
 
-        results: list[dict[str, str]] = []
+        results: list[dict[str, Any]] = []
         for army in self.database.list_armies():
             if needle not in accent_insensitive_key(army["name"]):
                 continue
             slug = public_slug_for_reference(self.database, "armies", army["id"])
             if slug is not None:
                 results.append(
-                    self._result("Army", army, f"/units?army_id={quote(slug, safe='')}")
+                    self._scoped_result(
+                        "Army", army, "/units", "units", {"army_id": slug}
+                    )
                 )
 
         units = self.database.list_units(
@@ -140,11 +157,9 @@ class SearchCatalog:
             slug = public_slug_for_reference(self.database, "armies", army["id"])
             if slug is not None:
                 results.append(
-                    {
-                        "domain": "Fireteam chart",
-                        "name": army["name"],
-                        "href": f"/fireteams?army={quote(slug, safe='')}",
-                    }
+                    self._scoped_result(
+                        "Fireteam chart", army, "/fireteams", "fireteams", {"army": slug}
+                    )
                 )
 
         return sorted(

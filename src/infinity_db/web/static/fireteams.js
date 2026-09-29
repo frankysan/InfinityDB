@@ -1,6 +1,7 @@
 import { getFireteamArmies, getFireteamChart } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { fireteamsIncludeWildcards } from "./preferences.js";
+import { readShareState, writeShareState } from "./share-state.js";
 
 const number = new Intl.NumberFormat();
 const byId = (id) => document.getElementById(id);
@@ -44,15 +45,11 @@ function armyValue(army) {
 }
 
 function currentArmyValue() {
-  return new URLSearchParams(window.location.search).get("army") || "";
+  return readShareState("fireteams").params.get("army") || "";
 }
 
 function writeArmyLocation(value, { replace = false } = {}) {
-  const url = new URL(window.location.href);
-  if (value) url.searchParams.set("army", value);
-  else url.searchParams.delete("army");
-  const method = replace ? "replaceState" : "pushState";
-  history[method](null, "", `${url.pathname}${url.search}`);
+  writeShareState("fireteams", value ? { army: value } : {}, { replace });
 }
 
 function populateArmies(items) {

@@ -1283,17 +1283,29 @@ compact-dropdown pattern. Developer mode sets `data-developer-mode` on the docum
 root; use `.developer-only` for inline technical details and `.id-column` for table
 columns so they remain hidden in the player-facing view by default.
 
+Shareable browser presentation state uses one self-contained `s` query parameter. Its current token
+format is `v1.<scope>.<payload>`, where the scope prevents state from one page family being
+reinterpreted by another and the payload is deterministic base64url over field-indexed UTF-8
+bytes using schema-owned field order. The browser accepts the previous explicit query parameters as
+a migration input and replaces them with the token form after normalization; JSON API query
+parameters are unchanged. General-purpose compression was deliberately not added: the current states are small, a
+compact schema removes the repeated verbose keys, and keeping encode/decode synchronous avoids a
+compression dependency or asynchronous browser API. A hash/lookup design was rejected because it
+would make shared links depend on durable server-side state instead of remaining self-contained.
+Field order is part of the token-version contract and must not be reordered without a version bump.
+
 Optional-unit Settings are defaults for Unit Explorer rather than hidden share-state. The explorer
-uses page-local optional-availability controls and writes the effective `mercs`, `specops`,
-`teamops`, and `reinforcement` values as a complete `0`/`1` quartet in its URL. If none of those
-parameters is present, the initial values come from the current browser preferences and the browser
-replaces the location with the explicit quartet before presenting the shareable view. If any optional
-parameter is present, URL state takes precedence; omitted siblings use their product default and the
-location is normalized to the full quartet. Loading explicit URL state does not modify the user's
-stored Settings. The explorer shows contextual copy when the view was initialized from preferences,
-when invalid URL values were normalized, or when explicit URL state differs from the saved
-preferences. Deliberately changing an optional-unit Setting while the explorer is open updates the
-current view and its URL as well as the preference.
+uses page-local optional-availability controls and records the effective `mercs`, `specops`,
+`teamops`, and `reinforcement` values as a complete `0`/`1` quartet inside its share-state token. If
+none of those values is supplied by either a token or a legacy explicit parameter, the initial values
+come from the current browser preferences and the browser replaces the location with the explicit
+quartet before presenting the shareable view. If any optional value is present, URL state takes
+precedence; omitted siblings use their product default and the location is normalized to the full
+quartet. Loading explicit URL state does not modify the user's stored Settings. The explorer shows
+contextual copy when the view was initialized from preferences, when invalid URL values were
+normalized, or when explicit URL state differs from the saved preferences. Deliberately changing an
+optional-unit Setting while the explorer is open updates the current view and its URL as well as the
+preference.
 
 ### Design direction: browser UX and responsibility boundaries
 
@@ -1577,9 +1589,9 @@ materially different statlines remain separate rows even when the source uses th
 name. This preserves profile ownership of statistics, classification, characteristics, and AVA
 while still keeping the list scan-friendly.
 
-Extended mode is explicit, shareable presentation state: the browser checkbox writes `extended=1`
-to the URL and the API accepts the same flag. The control is independent of Advanced Filters and
-remains directly available beneath the collapsed/expanded filter disclosure; opening Advanced
+Extended mode is explicit, shareable presentation state: the browser records it in the Unit
+Explorer share-state token, while the API continues to accept `extended=1`. The control is independent
+of Advanced Filters and remains directly available beneath the collapsed/expanded filter disclosure; opening Advanced
 Filters must not silently change the presentation mode. The mode does not alter filter semantics
 or result counts, and switching distance units re-renders extended MOV values using the same
 application distance preference as Unit detail.

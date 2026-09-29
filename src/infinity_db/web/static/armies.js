@@ -1,4 +1,5 @@
 import { getArmies } from "./api.js";
+import { shareStateHref } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
 
 const number = new Intl.NumberFormat();
@@ -95,7 +96,7 @@ function renderArmy(army) {
     count.textContent = `${number.format(army.unit_count || 0)} units`;
     const link = document.createElement("a");
     link.className = "button button-primary";
-    link.href = `/units?${new URLSearchParams({ army_id: armyValue(army) })}`;
+    link.href = shareStateHref("/units", "units", { army_id: armyValue(army) });
     link.textContent = "Browse units";
     footer.append(count, link);
   }

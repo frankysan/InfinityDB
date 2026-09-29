@@ -4,6 +4,7 @@ import {
   optionalUnitFilters, saveUnitAdvancedFiltersOpen, unitAdvancedFiltersOpen,
 } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
+import { readShareState, writeShareState } from "./share-state.js";
 import { troopTypeLabel } from "./unit-presentation.js";
 
 const PAGE_SIZE = 50;
@@ -290,7 +291,7 @@ function updateNumericRangeFromInput(control, changed) {
 }
 
 function readLocation() {
-  const params = new URLSearchParams(window.location.search);
+  const { params } = readShareState("units");
   const optionalUnits = readOptionalUnitLocation(params);
   const offset = Number(params.get("offset") || 0);
   const armyId = params.get("army_id") || "";
@@ -343,35 +344,30 @@ function readLocation() {
 }
 
 function writeLocation(replace = false) {
-  const url = new URL(window.location.href);
-  for (const key of ["army_id", "declared_faction_id", "search", "skill_id", "equipment_id", "weapon_id", "troop_type", "classification", "characteristic", "ava", "ava_min", "ava_max", "points", "points_min", "points_max", "swc", "swc_min", "swc_max", "offset", "mercs", "specops", "teamops", "reinforcement", "order", "extended"]) url.searchParams.delete(key);
-  if (state.armyId) url.searchParams.set("army_id", state.armyId);
-  if (state.declaredFactionId) {
-    url.searchParams.set("declared_faction_id", state.declaredFactionId);
-  }
-  if (state.search) url.searchParams.set("search", state.search);
-  if (state.skillId) url.searchParams.set("skill_id", state.skillId);
-  if (state.equipmentId) url.searchParams.set("equipment_id", state.equipmentId);
-  if (state.weaponId) url.searchParams.set("weapon_id", state.weaponId);
-  if (state.troopType) url.searchParams.set("troop_type", state.troopType);
-  if (state.classification) url.searchParams.set("classification", state.classification);
-  if (state.characteristic) url.searchParams.set("characteristic", state.characteristic);
-  if (state.ava) url.searchParams.set("ava", state.ava);
-  if (state.avaMin) url.searchParams.set("ava_min", state.avaMin);
-  if (state.avaMax) url.searchParams.set("ava_max", state.avaMax);
-  if (state.points) url.searchParams.set("points", state.points);
-  if (state.pointsMin) url.searchParams.set("points_min", state.pointsMin);
-  if (state.pointsMax) url.searchParams.set("points_max", state.pointsMax);
-  if (state.swc) url.searchParams.set("swc", state.swc);
-  if (state.swcMin) url.searchParams.set("swc_min", state.swcMin);
-  if (state.swcMax) url.searchParams.set("swc_max", state.swcMax);
-  if (state.offset) url.searchParams.set("offset", String(state.offset));
-  for (const key of OPTIONAL_UNIT_KEYS) url.searchParams.set(key, state[key] ? "1" : "0");
-  if (state.descending) url.searchParams.set("order", "desc");
-  if (state.extended) url.searchParams.set("extended", "1");
-  if (url.href !== window.location.href) {
-    window.history[replace ? "replaceState" : "pushState"](null, "", url);
-  }
+  const params = new URLSearchParams();
+  if (state.armyId) params.set("army_id", state.armyId);
+  if (state.declaredFactionId) params.set("declared_faction_id", state.declaredFactionId);
+  if (state.search) params.set("search", state.search);
+  if (state.skillId) params.set("skill_id", state.skillId);
+  if (state.equipmentId) params.set("equipment_id", state.equipmentId);
+  if (state.weaponId) params.set("weapon_id", state.weaponId);
+  if (state.troopType) params.set("troop_type", state.troopType);
+  if (state.classification) params.set("classification", state.classification);
+  if (state.characteristic) params.set("characteristic", state.characteristic);
+  if (state.ava) params.set("ava", state.ava);
+  if (state.avaMin) params.set("ava_min", state.avaMin);
+  if (state.avaMax) params.set("ava_max", state.avaMax);
+  if (state.points) params.set("points", state.points);
+  if (state.pointsMin) params.set("points_min", state.pointsMin);
+  if (state.pointsMax) params.set("points_max", state.pointsMax);
+  if (state.swc) params.set("swc", state.swc);
+  if (state.swcMin) params.set("swc_min", state.swcMin);
+  if (state.swcMax) params.set("swc_max", state.swcMax);
+  if (state.offset) params.set("offset", String(state.offset));
+  for (const key of OPTIONAL_UNIT_KEYS) params.set(key, state[key] ? "1" : "0");
+  if (state.descending) params.set("order", "desc");
+  if (state.extended) params.set("extended", "1");
+  writeShareState("units", params, { replace });
 }
 
 function syncFilters() {

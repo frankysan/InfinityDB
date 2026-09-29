@@ -372,7 +372,7 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b"army.overview_description" in script
     assert b'if (army.role === "main") return "Main army";' in script
     assert b"staticSymbolPath(army.symbol_path)" in script
-    assert b"new URLSearchParams({ army_id: armyValue(army) })" in script
+    assert b'shareStateHref("/units", "units", { army_id: armyValue(army) })' in script
     assert b"army.overview_group" in script
     assert b"Out of catalog" in script
     assert b"Not playable in N5" in script
@@ -533,6 +533,9 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert status == 200
     assert b"getFireteamArmies" in script
     assert b"getFireteamChart" in script
+    assert b'from "./share-state.js"' in script
+    assert b'readShareState("fireteams").params.get("army")' in script
+    assert b'writeShareState("fireteams", value ? { army: value } : {}, { replace })' in script
     assert b"Counts as:" in script
     assert b"Authoritative" in script
     assert b'army.role === "reinforcement"' in script
@@ -1578,7 +1581,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'const hasExplicitState = OPTIONAL_UNIT_KEYS.some((key) => params.has(key))' in script
     assert (
         b'for (const key of OPTIONAL_UNIT_KEYS) '
-        b'url.searchParams.set(key, state[key] ? "1" : "0")' in script
+        b'params.set(key, state[key] ? "1" : "0")' in script
     )
     assert b'optionalUnitSource: optionalUnits.source' in script
     assert b'optionalUnitInvalid: optionalUnits.invalid' in script
@@ -1600,11 +1603,11 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'unit-profile-troop-type-long' in unit_list_script
     assert b'unit-profile-troop-type-short' in unit_list_script
     assert b'className = "army-availability-link"' in unit_list_script
-    assert b'url.searchParams.set("army_id", armyId)' in unit_list_script
+    assert b'shareStateHref(`/units/${unitId}`, "unit", { army_id: armyId })' in unit_list_script
 
     status, _, unit_detail_script = request(app, "/static/unit.js")
     assert status == 200
-    assert b'new URLSearchParams(window.location.search).get("army_id")' in unit_detail_script
+    assert b'readShareState("unit").params.get("army_id")' in unit_detail_script
     assert b'unit.armies.find(isRequestedArmy)' in unit_detail_script
     assert b'army === requestedArmy' in unit_detail_script
 
@@ -2373,6 +2376,8 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
         in navigation
     )
     assert b'navigationShell.dataset.searchOpen = String(open)' in navigation
+    assert b'from "./share-state.js"' in navigation
+    assert b'shareStateHref("/search", "search", query ? { q: query } : {})' in navigation
     assert b'document.addEventListener("touchstart", closeOnOutsideInteraction' in navigation
     assert b"menu.dataset.open = String(isOpen)" in navigation
     assert b'document.addEventListener("pointerdown"' in navigation
@@ -2615,6 +2620,7 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
     assert status == 200
     assert app_headers["cache-control"] == "public, max-age=31536000, immutable"
     assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in app_body
+    assert f'from "./share-state.js?v={STATIC_ASSET_VERSION}"'.encode() in app_body
 
     status, headers, body = request(app, f"/static/unit.js?v={STATIC_ASSET_VERSION}")
 
@@ -2622,6 +2628,7 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
     assert f'from "./api.js?v={STATIC_ASSET_VERSION}"'.encode() in body
     assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert f'from "./share-state.js?v={STATIC_ASSET_VERSION}"'.encode() in body
 
     status, _, body = request(app, f"/static/api.js?v={STATIC_ASSET_VERSION}")
     assert status == 200
@@ -3115,10 +3122,10 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     assert b"function renderArmyRelationships(unit, armies)" in unit_js
     assert b'heading("Army relationships")' in unit_js
     assert b'section.className = "detail-group army-relationships developer-only";' in unit_js
-    assert b"link.href = `/units?army_id=${encodeURIComponent(identifier)}`;" in unit_js
+    assert b'link.href = shareStateHref("/units", "units", { army_id: identifier });' in unit_js
     assert (
-        b"link.href = `/units?declared_faction_id="
-        b"${encodeURIComponent(membership.source_faction_id)}`;" in unit_js
+        b'link.href = shareStateHref("/units", "units", '
+        b'{ declared_faction_id: membership.source_faction_id });' in unit_js
     )
     assert b"broader source-declared faction membership separately" in unit_js
     assert b"this faction identity has no current Army list" in unit_js
@@ -3126,7 +3133,7 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     status, _, app_js = request(app, "/static/app.js")
     assert status == 200
     assert b'declaredFactionId = params.get("declared_faction_id") || ""' in app_js
-    assert b'url.searchParams.set("declared_faction_id", state.declaredFactionId)' in app_js
+    assert b'params.set("declared_faction_id", state.declaredFactionId)' in app_js
     assert b"renderDeclaredMembershipContext(data)" in app_js
     assert b"broader than concrete current Army-list availability" in app_js
 
@@ -3319,14 +3326,28 @@ def test_skill_extras_page_and_api_are_served(app: Callable) -> None:
     assert json.loads(body) == {"items": []}
 
 
+def test_browser_share_state_codec_is_versioned_scoped_and_legacy_compatible(app: Callable) -> None:
+    status, _, script = request(app, "/static/share-state.js")
+    assert status == 200
+    assert b'const TOKEN_PARAMETER = "s";' in script
+    assert b'const TOKEN_VERSION = "v1";' in script
+    for scope in (b'u', b'c', b'f', b'd', b's', b'g'):
+        assert b'scope: "' + scope + b'"' in script
+    assert b'base64UrlEncode(bytes)' in script
+    assert b'appendVarUint(bytes, encoded.length)' in script
+    assert b'const legacy = legacyState(definition, source);' in script
+    assert b'const hasLegacy = definition.fields.some((field) => source.has(field));' in script
+    assert b'if (hasLegacy) return { params: legacy' in script
+    assert b'url.searchParams.delete(TOKEN_PARAMETER)' in script
+    assert b'url.searchParams.set(TOKEN_PARAMETER, token)' in script
+
+
 def test_catalog_search_state_is_shareable(app: Callable) -> None:
     status, _, helper = request(app, "/static/catalog-search-state.js")
     assert status == 200
-    assert b'const SEARCH_PARAMETER = "q";' in helper
-    assert b'new URLSearchParams(window.location.search)' in helper
-    assert b'url.searchParams.set(SEARCH_PARAMETER, query)' in helper
-    assert b'url.searchParams.delete(SEARCH_PARAMETER)' in helper
-    assert b'window.history.replaceState(window.history.state, "", url)' in helper
+    assert b'from "./share-state.js"' in helper
+    assert b'readShareState("catalog").params.get("q")' in helper
+    assert b'writeShareState("catalog", query ? { q: query } : {}, { replace: true })' in helper
 
     for asset in ("catalog-list.js", "reference-catalog.js"):
         status, _, script = request(app, f"/static/{asset}")
@@ -3752,13 +3773,21 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     assert b'action="/search" role="search"' in body
     assert b"search.js" in body
 
+    status, _, script = request(app, "/static/search.js")
+    assert status == 200
+    assert b'from "./share-state.js"' in script
+    assert b'readShareState("search").params.get("q")' in script
+    assert b'item.share_state.schema' in script
+
     status, _, body = request(app, "/api/search", query="q=alpha")
     assert status == 200
     items = json.loads(body)["items"]
     assert {item["domain"] for item in items} >= {"Army", "Unit"}
-    assert {item["href"] for item in items} >= {
-        "/units?army_id=alpha-company",
-        "/units/ranger-prototype",
+    assert {item["href"] for item in items} >= {"/units", "/units/ranger-prototype"}
+    army = next(item for item in items if item["domain"] == "Army")
+    assert army["share_state"] == {
+        "schema": "units",
+        "values": {"army_id": "alpha-company"},
     }
 
     status, _, body = request(app, "/api/search", query="q=combi")
@@ -3792,6 +3821,12 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     assert b"Canonical terminology" in body
     assert b"glossary.js" in body
     assert b'href="/glossary" aria-current="page"' in body
+
+    status, _, glossary_script = request(rules_app, "/static/glossary.js")
+    assert status == 200
+    assert b'from "./share-state.js"' in glossary_script
+    assert b'readShareState("glossary").params.get("q")' in glossary_script
+    assert b'shareStateHref("/glossary", "glossary"' in glossary_script
 
     status, _, body = request(rules_app, "/api/glossary")
     assert status == 200

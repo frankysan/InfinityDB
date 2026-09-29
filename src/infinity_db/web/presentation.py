@@ -36,6 +36,7 @@ ASSETS = {
     "/static/version-check.js": ("version-check.js", "text/javascript; charset=utf-8"),
     "/static/styles.css": ("styles.css", "text/css; charset=utf-8"),
     "/static/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/static/share-state.js": ("share-state.js", "text/javascript; charset=utf-8"),
     "/static/armies.js": ("armies.js", "text/javascript; charset=utf-8"),
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
     "/static/unit-symbols.js": ("unit-symbols.js", "text/javascript; charset=utf-8"),

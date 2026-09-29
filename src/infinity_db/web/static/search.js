@@ -1,5 +1,6 @@
 import { getSearchResults } from "./api.js";
 import { initializeDistanceUnitToggle } from "./preferences.js";
+import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -9,7 +10,7 @@ const elements = {
   list: byId("search-list"),
 };
 const controller = new AbortController();
-const query = new URLSearchParams(window.location.search).get("q")?.trim() || "";
+const query = readShareState("search").params.get("q")?.trim().slice(0, 200) || "";
 
 function show(panel) {
   for (const element of [elements.prompt, elements.loading, elements.error, elements.empty, elements.list]) {
@@ -26,7 +27,9 @@ function render(items) {
     const result = document.createElement("li");
     result.className = "search-result";
     const link = document.createElement("a");
-    link.href = item.href;
+    link.href = item.share_state
+      ? shareStateHref(item.href, item.share_state.schema, item.share_state.values)
+      : item.href;
     link.textContent = item.name;
     const domain = document.createElement("span");
     domain.className = "search-domain";
@@ -52,6 +55,12 @@ async function search() {
 }
 
 elements.query.value = query;
+writeShareState("search", query ? { q: query } : {}, { replace: true });
+elements.form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const nextQuery = elements.query.value.trim().slice(0, 200);
+  window.location.href = shareStateHref("/search", "search", nextQuery ? { q: nextQuery } : {});
+});
 document.addEventListener("infinity:beforenavigation", () => controller.abort(), { once: true });
 initializeDistanceUnitToggle();
 search();

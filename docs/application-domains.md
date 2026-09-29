@@ -163,12 +163,12 @@ partially scoped page.
 ### Catalog search URL state
 
 **Current.** Searchable catalog landing pages expose their client-side text search through the
-shared `q` query parameter. Loading `/equipment?q=hacking`, `/labels?q=attack`, or another catalog
-URL hydrates the search control before the first result render, and clearing the search removes
-`q` again. Updating a text search replaces the current history entry rather than adding one entry
-per debounce interval. Other query parameters are preserved. Future catalog filters that materially
-change visible results should likewise receive stable domain-appropriate query keys rather than
-remaining browser-local state.
+shared versioned browser share-state token. Loading a tokenized catalog URL hydrates the search
+control before the first result render, and clearing the search removes the token when no other
+page state remains. Updating a text search replaces the current history entry rather than adding one
+entry per debounce interval. Legacy `q` parameters remain accepted during the 0.9 migration and are
+canonicalized to the token form. Future catalog filters that materially change visible results
+should join the catalog share-state schema rather than remaining browser-local state.
 
 This state model is shared vocabulary, not a requirement that every domain implement all four
 states.
@@ -215,7 +215,7 @@ The intended behavior is:
     army selector
     general Fireteam rules summary
 
-/fireteams?army=<slug>
+/fireteams?s=<versioned-share-state-token>
     domain heading
     army selector
     selected Army's Fireteam chart/reference content
@@ -227,8 +227,10 @@ chart. Clearing the Army selection returns to the unscoped summary. The scoped A
 contains only the Army chart projection; the domain-wide rules summary is returned by the unscoped
 Fireteams API.
 
-The selected Army must be URL-addressable/shareable. Loading a scoped URL should render the scoped
-state directly without first depending on presentation of the general summary.
+The selected Army must be URL-addressable/shareable. The current browser contract stores that scope
+in the versioned share-state token while continuing to accept legacy `army=<slug>` URLs. Loading a
+scoped URL should render the scoped state directly without first depending on presentation of the
+general summary.
 
 General Fireteam reference records remain globally searchable/linkable even when the landing summary
 is hidden in an Army-scoped view. Stable record IDs need not be renamed merely because Fireteams is

@@ -175,12 +175,15 @@ tagging the release and remains part of the 0.9 gate. Broader hardening still be
   identifies main armies with the rules' **Generic Army List** terminology, summarizes the official
   roster/AVA distinction, and presents richer Sectorial Fireteam charts as an observation of the
   current N5 Army data rather than a universal rules guarantee.
-- [ ] **Web frontend + Web backend:** Replace verbose share-state query strings with a single
-  versioned URL token that serializes all supported page options into one compact value. Evaluate
-  deterministic compression/encoding (for example base64url over compact structured state) against
-  hash/lookup designs; shared links must remain self-contained unless a durable server-side token
-  store is deliberately introduced. Preserve backward compatibility with current explicit query
-  parameters during migration.
+- [x] **Web frontend + Web backend:** Replace verbose browser share-state query strings with one
+  scoped, versioned `s=v1.<scope>.<payload>` token. The payload uses deterministic base64url over
+  a compact field-indexed UTF-8 payload so links remain self-contained and synchronous to encode
+  and decode. General compression was not justified for the small state payloads, and server-side
+  hash/lookup state was rejected because it would make durable links depend on stored server data.
+  Unit Explorer, Unit Army targeting, Fireteams, catalog search, global search, and Glossary search
+  now use the shared
+  token contract. Legacy explicit query parameters remain accepted and are canonicalized to the new
+  form; API query parameters are unchanged.
 - [ ] **Documentation:** Rewrite the recent Unreleased changelog entries to follow the release-note
   style guide: user-facing outcomes, consolidated by meaningful feature/change, without implementation
   chronology or low-level migration detail.

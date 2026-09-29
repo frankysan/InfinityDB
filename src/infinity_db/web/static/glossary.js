@@ -1,6 +1,7 @@
 import { getGlossary } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { initializeDistanceUnitToggle } from "./preferences.js";
+import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -14,7 +15,7 @@ const elements = {
   list: byId("glossary-list"),
 };
 const controller = new AbortController();
-const query = new URLSearchParams(window.location.search).get("q")?.trim() || "";
+const query = readShareState("glossary").params.get("q")?.trim().slice(0, 200) || "";
 
 function show(panel) {
   for (const element of [elements.loading, elements.error, elements.empty, elements.list]) {
@@ -106,6 +107,12 @@ async function load() {
 }
 
 elements.search.value = query;
+writeShareState("glossary", query ? { q: query } : {}, { replace: true });
+elements.search.form?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const nextQuery = elements.search.value.trim().slice(0, 200);
+  window.location.href = shareStateHref("/glossary", "glossary", nextQuery ? { q: nextQuery } : {});
+});
 document.addEventListener("infinity:beforenavigation", () => controller.abort(), { once: true });
 window.addEventListener("hashchange", revealHashTarget);
 initializeDistanceUnitToggle();
