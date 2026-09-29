@@ -162,6 +162,12 @@ export function initializeOptionalUnitToggles() {
   }
 }
 
+export function optionalUnitDefaultFilters() {
+  return Object.fromEntries(OPTIONAL_UNIT_SETTINGS.map(({ key, defaultChecked }) => [
+    key.replace("infinity-db-", ""), defaultChecked,
+  ]));
+}
+
 export function optionalUnitFilters() {
   return Object.fromEntries(OPTIONAL_UNIT_SETTINGS.map(({ id, key, defaultChecked }) => [
     key.replace("infinity-db-", ""), document.getElementById(id)?.checked ?? defaultChecked,

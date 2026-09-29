@@ -1,5 +1,8 @@
 import { getArmies, getCatalogItems, getUnitFilters, getUnits } from "./api.js";
-import { initializeDistanceUnitToggle, initializeOptionalUnitToggles } from "./preferences.js";
+import {
+  initializeDistanceUnitToggle, initializeOptionalUnitToggles, optionalUnitDefaultFilters,
+  optionalUnitFilters,
+} from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 import { troopTypeLabel } from "./unit-presentation.js";
 
@@ -17,8 +20,9 @@ const elements = {
   pointsMinValue: byId("points-min-value"), pointsMaxValue: byId("points-max-value"),
   swc: byId("swc-filter"), swcMin: byId("swc-min-filter"), swcMax: byId("swc-max-filter"),
   swcMinValue: byId("swc-min-value"), swcMaxValue: byId("swc-max-value"),
-  mercs: byId("mercs-filter"), specops: byId("specops-filter"), teamops: byId("teamops-filter"),
-  reinforcement: byId("reinforcement-filter"), extended: byId("extended-results"),
+  mercs: byId("unit-mercs-filter"), specops: byId("unit-specops-filter"),
+  teamops: byId("unit-teamops-filter"), reinforcement: byId("unit-reinforcement-filter"),
+  optionalUnitContext: byId("optional-unit-context"), extended: byId("extended-results"),
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
   declaredMembership: byId("declared-membership-context"),
   unitCountShown: byId("unit-count-shown-breakdown"),
@@ -60,8 +64,6 @@ const numericRangeControls = {
 };
 
 document.querySelector(".results-toolbar").remove();
-const availabilityField = document.querySelector(".availability-field");
-availabilityField?.remove();
 initializeDistanceUnitToggle();
 initializeOptionalUnitToggles();
 elements.sortButton = document.createElement("button");
@@ -69,6 +71,8 @@ elements.sortButton.className = "unit-sort-button";
 elements.sortButton.type = "button";
 elements.sort.classList.add("sortable-unit-name");
 elements.sort.replaceChildren(elements.sortButton);
+
+const OPTIONAL_UNIT_KEYS = ["mercs", "specops", "teamops", "reinforcement"];
 
 let state = readLocation();
 const advancedFilters = document.querySelector(".advanced-filters");
@@ -84,13 +88,59 @@ let requestNumber = 0;
 let controller;
 let searchTimer;
 
+function readOptionalUnitLocation(params) {
+  const hasExplicitState = OPTIONAL_UNIT_KEYS.some((key) => params.has(key));
+  if (!hasExplicitState) {
+    return { filters: optionalUnitFilters(), source: "preferences", invalid: false };
+  }
+
+  const defaults = optionalUnitDefaultFilters();
+  let invalid = false;
+  const filters = Object.fromEntries(OPTIONAL_UNIT_KEYS.map((key) => {
+    const value = params.get(key);
+    if (value === null) return [key, defaults[key]];
+    if (value === "0" || value === "1") return [key, value === "1"];
+    invalid = true;
+    return [key, defaults[key]];
+  }));
+  return { filters, source: "url", invalid };
+}
+
+function optionalUnitStateMatchesPreferences() {
+  const preferences = optionalUnitFilters();
+  return OPTIONAL_UNIT_KEYS.every((key) => state[key] === preferences[key]);
+}
+
+function renderOptionalUnitContext() {
+  const context = elements.optionalUnitContext;
+  if (!context) return;
+  if (state.optionalUnitInvalid) {
+    context.textContent = "Unsupported optional-unit URL values were reset to their default included state. The corrected choices are now recorded in this URL.";
+    context.hidden = false;
+    return;
+  }
+  if (state.optionalUnitSource === "preferences") {
+    context.textContent = "Optional-unit filters were initialized from your Settings. Their current values are now recorded in this URL, so sharing it reproduces this result set.";
+    context.hidden = false;
+    return;
+  }
+  if (!optionalUnitStateMatchesPreferences()) {
+    context.textContent = "This shared view uses optional-unit filters recorded in the URL rather than your Settings. Your saved Settings were not changed.";
+    context.hidden = false;
+    return;
+  }
+  context.hidden = true;
+  context.textContent = "";
+}
+
 function hasActiveFilters() {
   return state.armyId || state.declaredFactionId || state.search
     || state.skillId || state.equipmentId || state.weaponId
     || state.troopType || state.classification || state.characteristic
     || state.ava || state.avaMin || state.avaMax
     || state.points || state.pointsMin || state.pointsMax
-    || state.swc || state.swcMin || state.swcMax;
+    || state.swc || state.swcMin || state.swcMax
+    || OPTIONAL_UNIT_KEYS.some((key) => !state[key]);
 }
 
 function domainFilterIdentifier(value) {
@@ -236,6 +286,7 @@ function updateNumericRangeFromInput(control, changed) {
 
 function readLocation() {
   const params = new URLSearchParams(window.location.search);
+  const optionalUnits = readOptionalUnitLocation(params);
   const offset = Number(params.get("offset") || 0);
   const armyId = params.get("army_id") || "";
   const declaredFactionId = params.get("declared_faction_id") || "";
@@ -276,10 +327,9 @@ function readLocation() {
     swcMin: swcExact ? "" : swcMin,
     swcMax: swcExact ? "" : swcMax,
     search: (params.get("search") || "").trim().slice(0, 200),
-    mercs: elements.mercs.checked,
-    specops: elements.specops.checked,
-    teamops: elements.teamops.checked,
-    reinforcement: elements.reinforcement.checked,
+    ...optionalUnits.filters,
+    optionalUnitSource: optionalUnits.source,
+    optionalUnitInvalid: optionalUnits.invalid,
     descending: params.get("order") === "desc",
     extended: params.get("extended") === "1",
     offset: Number.isSafeInteger(offset) && offset >= 0 ? Math.floor(offset / PAGE_SIZE) * PAGE_SIZE : 0,
@@ -311,6 +361,7 @@ function writeLocation(replace = false) {
   if (state.swcMin) url.searchParams.set("swc_min", state.swcMin);
   if (state.swcMax) url.searchParams.set("swc_max", state.swcMax);
   if (state.offset) url.searchParams.set("offset", String(state.offset));
+  for (const key of OPTIONAL_UNIT_KEYS) url.searchParams.set(key, state[key] ? "1" : "0");
   if (state.descending) url.searchParams.set("order", "desc");
   if (state.extended) url.searchParams.set("extended", "1");
   if (url.href !== window.location.href) {
@@ -621,8 +672,14 @@ function applyFilters() {
     extended: elements.extended.checked,
   };
   if (Object.entries(next).every(([key, value]) => state[key] === value)) return;
-  state = { ...state, ...next, offset: 0 };
+  const optionalChanged = OPTIONAL_UNIT_KEYS.some((key) => state[key] !== next[key]);
+  state = {
+    ...state, ...next, offset: 0,
+    optionalUnitSource: optionalChanged ? "url" : state.optionalUnitSource,
+    optionalUnitInvalid: false,
+  };
   elements.clear.disabled = !hasActiveFilters();
+  renderOptionalUnitContext();
   writeLocation();
   load();
 }
@@ -635,8 +692,11 @@ function clearFilters() {
     troopType: "", classification: "", characteristic: "",
     ava: "", avaMin: "", avaMax: "", points: "", pointsMin: "", pointsMax: "",
     swc: "", swcMin: "", swcMax: "",
+    mercs: true, specops: true, teamops: true, reinforcement: true,
+    optionalUnitSource: "url", optionalUnitInvalid: false,
   };
   syncFilters();
+  renderOptionalUnitContext();
   writeLocation();
   load();
 }
@@ -702,10 +762,27 @@ function onPopstate() {
   clearTimeout(searchTimer);
   state = readLocation();
   syncFilters();
+  renderOptionalUnitContext();
+  load();
+}
+
+function onOptionalUnitsChange(event) {
+  const filters = event.detail || optionalUnitFilters();
+  if (OPTIONAL_UNIT_KEYS.every((key) => state[key] === filters[key])) {
+    renderOptionalUnitContext();
+    return;
+  }
+  state = {
+    ...state, ...filters, offset: 0, optionalUnitSource: "preferences", optionalUnitInvalid: false,
+  };
+  syncFilters();
+  renderOptionalUnitContext();
+  writeLocation();
   load();
 }
 
 window.addEventListener("popstate", onPopstate);
+window.addEventListener("optionalunitschange", onOptionalUnitsChange);
 window.addEventListener("distanceunitchange", () => {
   if (state.extended) load();
 });
@@ -713,8 +790,10 @@ document.addEventListener("infinity:beforenavigation", () => {
   clearTimeout(searchTimer);
   controller?.abort();
   window.removeEventListener("popstate", onPopstate);
+  window.removeEventListener("optionalunitschange", onOptionalUnitsChange);
 }, { once: true });
 
 syncFilters();
+renderOptionalUnitContext();
 writeLocation(true);
 load();

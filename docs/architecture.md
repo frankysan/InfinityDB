@@ -1281,6 +1281,18 @@ compact-dropdown pattern. Developer mode sets `data-developer-mode` on the docum
 root; use `.developer-only` for inline technical details and `.id-column` for table
 columns so they remain hidden in the player-facing view by default.
 
+Optional-unit Settings are defaults for Unit Explorer rather than hidden share-state. The explorer
+uses page-local optional-availability controls and writes the effective `mercs`, `specops`,
+`teamops`, and `reinforcement` values as a complete `0`/`1` quartet in its URL. If none of those
+parameters is present, the initial values come from the current browser preferences and the browser
+replaces the location with the explicit quartet before presenting the shareable view. If any optional
+parameter is present, URL state takes precedence; omitted siblings use their product default and the
+location is normalized to the full quartet. Loading explicit URL state does not modify the user's
+stored Settings. The explorer shows contextual copy when the view was initialized from preferences,
+when invalid URL values were normalized, or when explicit URL state differs from the saved
+preferences. Deliberately changing an optional-unit Setting while the explorer is open updates the
+current view and its URL as well as the preference.
+
 ### Design direction: browser UX and responsibility boundaries
 
 Browser presentation should optimize first for fast lookup, comparison, and scanning
@@ -1511,7 +1523,9 @@ introducing a second browser-only interpretation of profile/loadout data. Catego
 resolve stable public identities where available, and every user-visible filter has a defined
 URL representation so a filtered view can be shared and reproduced. Troop Type,
 Classification, and Characteristics use public slugs with numeric IDs retained as compatibility
-fallbacks.
+fallbacks. Optional availability uses `mercs`, `specops`, `teamops`, and `reinforcement`, each as an
+explicit `0` or `1` in canonical browser URLs; browser-to-API requests continue to send enabled
+availability modes through the existing backend flag contract.
 
 AVA, points, and SWC support exact matching or an inclusive bounded range through `ava`,
 `ava_min`, `ava_max`, `points`, `points_min`, `points_max`, `swc`, `swc_min`, and `swc_max`.

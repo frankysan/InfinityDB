@@ -59,11 +59,11 @@ hardening work reserved for 0.10.0. The maintained source-to-presentation invent
 confirmed application-data presentation gap.
 
 The Unit Explorer filtering/extended-results work, global search, structured rules-reference
-cross-link pass, Profile notation foundation, and maintained-text reference/token layer are
-complete. Remaining 0.9 work is concentrated in the remaining catalog/share-state gaps.
-General Rules publication and the reviewed maintained-prose link migration are complete.
-`docs/application-domains.md` defines the accepted domain
-skeleton and interaction model.
+cross-link pass, Profile notation foundation, maintained-text reference/token layer, application-
+domain publication, and share-state work are complete. All planned 0.9 application-completeness
+and discoverability items below are now closed; further planned hardening belongs to 0.10 unless
+release validation finds a 0.9 correctness defect. `docs/application-domains.md` defines the
+accepted domain skeleton and interaction model.
 
 ### Player-facing completeness and navigation
 
@@ -115,7 +115,7 @@ skeleton and interaction model.
     reviewed passage fingerprints. The maintained-text audit now reports zero unlinked candidates,
     zero reviewed-batch residuals, and zero explicit review markers.
 
-- [ ] **Data processing + Web backend + Web frontend:** Continue the application-domain framework
+- [x] **Data processing + Web backend + Web frontend:** Continue the application-domain framework
   established in `docs/application-domains.md` without adding one-off catalog/navigation structures.
   - [x] Add `/armies` as an overview surface with each Army's symbol, concise structural
     description, and a link to Unit Explorer pre-filtered by the canonical Army identity. Do not add
@@ -133,7 +133,7 @@ skeleton and interaction model.
     their clearer application owners, and embedded vocabularies still do not gain manufactured
     detail pages.
 
-- [ ] Complete deep-linkable, shareable search and filter state for catalog and
+- [x] Complete deep-linkable, shareable search and filter state for catalog and
   Unit views.
   - [x] Unit Explorer Army, declared-faction, name, Skill, Equipment, Weapon,
     pagination, and sort state already participate in URL state. Global search uses
@@ -144,10 +144,12 @@ skeleton and interaction model.
   - [x] Make catalog-list search/filter state deep-linkable where it is still only
     local browser state. Searchable catalog landing pages now use the shared `q` query parameter,
     hydrate it before first render, and remove it when the search is cleared.
-  - [ ] Define how optional-unit preferences interact with reproducible shared Unit
-    URLs. Two users opening the same link should not silently receive materially
-    different result sets without the UI explaining the preference-dependent
-    difference.
+  - [x] Define how optional-unit preferences interact with reproducible shared Unit
+    URLs. Unit Explorer now owns page-local optional-availability controls and records the effective
+    `mercs`, `specops`, `teamops`, and `reinforcement` values explicitly as `0`/`1` URL state. A
+    location with no optional flags is initialized from the user's Settings and immediately
+    canonicalized to the full four-value URL; explicit shared state never overwrites saved Settings,
+    and the page explains when the current result set came from preferences or overrides them.
 
 ## 0.10.0 — consistency, presentation, and release hardening
 

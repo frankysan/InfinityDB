@@ -23,7 +23,9 @@ Current release: **0.8.1** (2026-09-27).
 - Imports validated Infinity Army snapshots into a local SQLite database and
   serves a read-only browser and HTTP API.
 - Browses units across armies with name search, pagination, and filters for
-  skills, equipment, weapons, and optional availability.
+  skills, equipment, weapons, and optional availability. Unit Explorer filter state is shareable;
+  optional-unit Settings seed a new view but the effective availability choices are recorded in the
+  URL without overwriting another user's saved preferences.
 - Shows a consolidated **General profile** alongside faction- and army-specific
   profiles, loadouts, availability, skills, equipment, and weapons.
 - Groups equivalent standard, reinforcement, and optional-mercenary source

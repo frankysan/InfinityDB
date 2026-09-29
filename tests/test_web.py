@@ -1493,6 +1493,11 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert body.count(b'<option value="">Any</option>') >= 3
     assert b'id="extended-results" type="checkbox"' in body
     assert b'</details><label class="extended-results-control">' in body
+    assert b"Include optional units in this view" in body
+    assert b'id="optional-unit-context" class="relationship-filter-context" hidden' in body
+    for optional_filter in (b"mercs", b"specops", b"teamops", b"reinforcement"):
+        assert b'id="unit-' + optional_filter + b'-filter" type="checkbox" checked' in body
+        assert body.count(b'id="' + optional_filter + b'-filter"') == 1
     for range_filter in (b'ava', b'points', b'swc'):
         assert b'data-range-filter="' + range_filter + b'"' in body
         assert b'id="' + range_filter + b'-min-filter" class="range-input range-input-min"' in body
@@ -1518,6 +1523,18 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'advancedFilters?.addEventListener("toggle"' not in script
     assert b'extendedPreferenceTouched' not in script
     assert b'params.get("extended") === "1"' in script
+    assert b'const OPTIONAL_UNIT_KEYS = ["mercs", "specops", "teamops", "reinforcement"]' in script
+    assert b'const hasExplicitState = OPTIONAL_UNIT_KEYS.some((key) => params.has(key))' in script
+    assert (
+        b'for (const key of OPTIONAL_UNIT_KEYS) '
+        b'url.searchParams.set(key, state[key] ? "1" : "0")' in script
+    )
+    assert b'optionalUnitSource: optionalUnits.source' in script
+    assert b'optionalUnitInvalid: optionalUnits.invalid' in script
+    assert b'OPTIONAL_UNIT_KEYS.some((key) => !state[key])' in script
+    assert b'mercs: true, specops: true, teamops: true, reinforcement: true' in script
+    assert b'Your saved Settings were not changed.' in script
+    assert b'availabilityField?.remove()' not in script
 
     status, _, unit_list_script = request(app, "/static/unit-list.js")
     assert status == 200
@@ -2178,6 +2195,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'new CustomEvent("developermodechange"' in preferences
     assert b'const unit = savedUnit === "cm" ? "cm" : "in";' in preferences
     assert preferences.count(b"defaultChecked: true") == 4
+    assert b"function optionalUnitDefaultFilters()" in preferences
     assert (
         b'id="distance-unit-toggle" class="setting-switch setting-switch--choice" '
         b'type="checkbox" checked'
@@ -2531,6 +2549,11 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
 
 
 def test_versioned_modules_reference_their_matching_release_dependencies(app: Callable) -> None:
+    status, app_headers, app_body = request(app, f"/static/app.js?v={STATIC_ASSET_VERSION}")
+    assert status == 200
+    assert app_headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in app_body
+
     status, headers, body = request(app, f"/static/unit.js?v={STATIC_ASSET_VERSION}")
 
     assert status == 200

@@ -9,6 +9,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web frontend:** Make Unit Explorer optional-availability filtering reproducible in shared links.
+  Mercenaries, Spec-Ops, Team Operations, and Reinforcements now have page-local controls whose
+  effective values are written explicitly to the Unit Explorer URL. Browser Settings seed a view
+  when no availability state is supplied, while shared URL state takes precedence without changing
+  the recipient's saved preferences; contextual copy explains when those states differ.
 - **Web frontend:** Make text search on all searchable reference catalog landing pages shareable
   through `?q=` URL state. Opening a catalog search link restores the same narrowed result set, and
   clearing the search returns to the canonical unscoped catalog URL.
