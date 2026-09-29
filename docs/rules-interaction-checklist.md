@@ -9,6 +9,10 @@ policy, and current curated rules graph. Do not edit it by hand. Regenerate it w
 python tools/audit_rules_interactions.py --output docs/rules-interaction-checklist.md
 ```
 
+Release labels in this checklist record the original review/defer scope. They are
+evidence provenance, not the active project roadmap; `docs/TODO.md` owns current
+milestone planning.
+
 The **0.7.0 progress gate is catalog-based**: every public Skill, Equipment item,
 Trait, and State is listed, including entries that do not yet have a curated rules
 definition.

@@ -73,8 +73,9 @@ destination atomically. The pair is not yet one atomic transaction: recovery
 from interruption between the two replacements remains an explicit backlog item.
 
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
-current curated-v21 rules contract records the local reviewed artifact plus its upstream
-source URL. PDF citations use printed pages. Archived wiki sources bind to an
+curated rules contract records the local reviewed artifact plus its upstream source URL;
+`curated/README.md` owns the current format version and validation rules. PDF citations use
+printed pages. Archived wiki sources bind to an
 exact timestamped ZIP/hash and citations use archive members; exact pinned wiki
 revisions remain URL-backed sources.
 
@@ -159,11 +160,11 @@ documented in [`docs/data-model.md`](../docs/data-model.md#army-source-revision-
 
 ## Symbol build lifecycle
 
-The complete current symbol lifecycle, stage invariants, and publication contract
-are documented in [`docs/architecture.md`](../docs/architecture.md) and
-[`docs/data-model.md`](../docs/data-model.md). This file remains authoritative for
-where local data classes live; it does not duplicate the complete processing
-algorithm or backlog.
+This file owns the current acquisition/build-state and publication lifecycle for symbol artifacts.
+[`docs/architecture.md`](../docs/architecture.md) defines only the subsystem boundary, while
+[`docs/data-model.md`](../docs/data-model.md) defines runtime identity/persistence semantics.
+Implementation details remain in the symbol tooling, and unfinished lifecycle work belongs in
+[`docs/TODO.md`](../docs/TODO.md).
 
 Raw Army data, generated databases, PDF documents, wiki snapshots, and Corvus
 Belli graphical assets are not covered by InfinityDB's MIT License. Corvus Belli

@@ -34,27 +34,6 @@ Record:
 Keep unresolved interpretations explicitly unresolved. Do not use this file to
 turn an inference into a source-native rule.
 
-## Basic Rules / Unit Profile
-
-### RR-BR-UP-002 — Game-term thesaurus can span domains without creating entities
-
-**Scope:** project research derived from source-native terminology.
-
-The Unit Profile page already exposes cross-domain terms such as Unit, Unit
-Profile, Trooper, Attribute, Characteristic, Training, Troop Type, Trooper
-Classification, ISC, Peripheral, and Controller. These terms form the source
-seed for the embedded Game-term vocabulary even when no standalone application
-catalog is warranted for a term.
-
-The completed Game States and Glossary audit established the broader canonical vocabulary and
-relationship boundaries. Current `term:*` identities reuse those audited semantics and project
-through Glossary/search rather than introducing a second competing glossary structure.
-
-Sources:
-
-- Wiki: <https://infinitythewiki.com/Unit_Profile>
-- PDF: Infinity N5 V5.3, printed pages 8-9
-
 ## Basic Rules / Broader research
 
 ### RR-BR-BASE-001 — Game Modes define finite recommended game presets
@@ -266,26 +245,6 @@ Sources:
 
 ## Game States and Glossary / Vocabulary research
 
-### RR-GSG-TERM-001 — Terminology is a strong seed for the cross-domain game-terms thesaurus
-
-**Scope:** project research grounded in source-native terminology.
-
-The source Glossary supplies an initial cross-domain concept set whose members do
-not belong naturally to one Army-data domain: Attributes, Deployable Equipment,
-Deployable Weapon, Marker, Model, Peripheral, Scenery Element, State Token,
-Target, Token, Trooper, Unit Profile, Victory Points, plus the Alignment terms.
-
-The embedded Game-term vocabulary now uses this seed as source-backed concepts and links to
-existing domains where applicable without creating standalone application pages for every term.
-The scoped-concept requirement in `rules-semantics.md` is implemented through typed `term:*`
-identities plus `facts.scope`.
-
-Sources:
-
-- Wiki: <https://infinitythewiki.com/Terminology>
-- Wiki: <https://infinitythewiki.com/Alignment>
-- PDF: Infinity N5 V5.3, printed page 173
-
 ### RR-GSG-TERM-002 — Targetability and ownership form separate semantic axes
 
 **Scope:** core N5.
@@ -306,27 +265,6 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Terminology>
 - Wiki: <https://infinitythewiki.com/Alignment>
 - PDF: Infinity N5 V5.3, printed page 173
-
-### RR-GSG-TRAIT-001 — Trait-to-State links can seed future cross-domain references
-
-**Scope:** core N5.
-
-Several Traits explicitly connect Weapon/Equipment profiles to other rules
-concepts: `State` names a Game State caused by the item; `Suppressive Fire (SF)`
-links to Suppressive Fire State; `Concealed` invokes Camouflaged State effects;
-`Disposable (X)` leads to Unloaded State when uses are exhausted; and
-`Non-Reloadable` changes Unloaded cancellation.
-
-These are useful candidates for a relationship graph between Traits, States,
-Weapons, Equipment, Skills, and Ammunition. The reviewed Concealed-to-Camouflaged-State
-edge is materialized as `uses-effects-of`, and Disposable-to-Unloaded-State is materialized
-as `causes-state`; the later domain audits should validate the remaining edge set before it
-is materialized.
-
-Sources:
-
-- Wiki: <https://infinitythewiki.com/Traits>
-- PDF: Infinity N5 V5.3, printed pages 174-175
 
 ## Skills and Equipment / Broader research
 
@@ -380,52 +318,16 @@ groups rather than only of the bearer. Examples affect Fireteam Training,
 deployment of associated Troopers, Pilot/TAG relationships, Proxy activation,
 Controller/Peripheral activation, or Combat Group counting.
 
-This supports treating future relationship rules as first-class cited semantics
-instead of materializing their effects into unrelated canonical Unit fields.
-The detailed Fireteam and Command consequences remain deferred to their own
-section audits.
+This supports treating relationship rules as first-class cited semantics instead of
+materializing their effects into unrelated canonical Unit fields. Reviewed Fireteam,
+Peripheral, and Command relationships now have concrete semantic records; this broader
+grouping remains research only for relationship families that still lack a current
+application consumer.
 
 Sources:
 
 - Wiki: relevant Special Skill pages under the Skills and Equipment module
 - PDF: Infinity N5 V5.3, printed pages 93-94, 106-109, and 112-115
-
-### RR-SE-REINF-001 — Live Special Skills navigation includes annex-scoped rules
-
-**Scope:** Reinforcements annex, not core N5 Skills and Equipment.
-
-The live Special Skills navigation lists `Commlink` and `Request Reinforcements`,
-while the core N5 V5.3 Skills and Equipment PDF inventory does not. Those links
-resolve into the Reinforcements rules.
-
-This is a useful audit warning for future automated wiki discovery: page
-navigation/parentage is not enough to assign rules scope. Preserve the explicit
-annex source and defer the detailed rules semantics to the Reinforcements audit.
-
-Sources:
-
-- Wiki: live Special Skills navigation
-- Wiki: Commlink and Request Reinforcements pages
-- PDF: Infinity N5 V5.3, printed pages 75-127 (core inventory)
-
-### RR-SE-COMMON-001 — Common Skills are rules-reference entities without Army occurrences
-
-**Scope:** core N5.
-
-Common Skills are available to every Trooper by the rules, so their usefulness to
-InfinityDB does not depend on appearing as Army metadata records. They can still
-be targets of Traits, declaration-category help, cross-links, and play-aid
-content.
-
-The rules-backed Skills catalog now carries all 18 core Common Skill identities
-whether or not they have Army occurrences, and presents them above Special Skills.
-This keeps rules identity separate from Army-profile occurrence and leaves distinct
-Scenario Skills and ITS Scenario Skills categories available for later scoped work.
-
-Sources:
-
-- Wiki: Common Skills index under the Skills and Equipment module
-- PDF: Infinity N5 V5.3, printed pages 76-85
 
 ## Combat Module / Broader research
 
@@ -498,24 +400,6 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Quantronic_Combat_%28Hacking%29>
 - PDF: Infinity N5 V5.3, printed pages 54-55
-
-### RR-CM-HACK-002 — Core Hacking Programs form a finite cross-domain vocabulary
-
-**Scope:** core N5.
-
-N5 V5.3 defines twelve core Programs: Assisted Fire, Carbonite, Controlled Jump,
-Cybermask, Enhanced Reaction, Fairy Dust, Oblivion, Spotlight, Total Control,
-Trinity, White Noise, and Zero Pain. Their effects connect to Troop Types,
-Attributes, Ammunition, States, Labels, deployment, visibility, and Equipment.
-
-The set is a strong candidate for the cross-domain rules thesaurus and a future
-first-class Hacking Program catalog. Exact Device grants and Upgrade Programs
-should be represented as cited relationships rather than embedded in prose.
-
-Sources:
-
-- Wiki: <https://infinitythewiki.com/Hacking_Programs_Chart>
-- PDF: Infinity N5 V5.3, printed pages 57-62
 
 ### RR-CM-ACT-001 — Combat resolution exposes a reusable action ontology
 
@@ -603,8 +487,10 @@ through rules that are not ordinary Trooper damage resolution. This creates a
 cross-domain relationship between Weapon/Ammunition/Traits and the later
 Terrain/Scenery Structure rules.
 
-Retain the relationship as a thesaurus/research edge until the Terrain and
-Scenery Structures audit establishes the authoritative target/object vocabulary.
+The Terrain/Scenery semantics are now reviewed, but InfinityDB still has no canonical
+scenery/object target identity for this edge. Retain it as research until a concrete
+consumer establishes that application target rather than inventing one solely to
+materialize the relationship.
 
 Sources:
 
@@ -851,10 +737,11 @@ Stairs and ladders can make vertical/diagonal scenery behave as a horizontal
 surface for Skills with the Movement Label, while Climb and Jump impose their
 own surface and trajectory rules.
 
-This vocabulary may later support terrain/scenery reference pages, but the
-Movement audit does not make scenery geometry part of canonical Unit data. The
-next Terrain and Scenery Structures pass should reuse these relationships rather
-than introduce a separate movement-geometry model.
+This vocabulary may later support terrain/scenery reference pages, but the Movement
+audit does not make scenery geometry part of canonical Unit data. Terrain/Scenery
+semantics are now recorded in `rules-semantics.md`; keep this geometry vocabulary as
+research until a concrete tabletop/scenery consumer needs it rather than introducing
+a parallel movement-geometry model.
 
 Sources:
 
@@ -1119,25 +1006,6 @@ Source:
 
 - Wiki: <https://infinitythewiki.com/Quick_Reference_Charts>
 
-### RR-QR-CONFLICT-001 — Summary charts can conflict with owning rules
-
-**Scope:** source-quality and precedence research.
-
-The V5.3 Quick Reference Deployable Profiles summary lists Armed Turret as S1,
-while the detailed Armed Turret profile on printed page 70 and the current wiki
-list S2. This is a concrete example of why Quick Reference must remain a
-validation source rather than automatically override the owning rule.
-
-Until Corvus Belli publishes a clarification/erratum or InfinityDB adopts a
-reviewed source-precedence resolution for this exact conflict, preserve both
-observations and present the detailed-rule S2 value currently used by the
-curated Armed Turret record with provenance.
-
-Sources:
-
-- Wiki: <https://infinitythewiki.com/Armed_Turret>
-- PDF: Infinity N5 V5.3, printed pages 70 and 195
-
 ## Reinforcements
 
 ### RR-RF-LIST-001 — Reinforcement point/SWC splits and list-size limits are list-building procedure
@@ -1195,27 +1063,6 @@ InfinityDB catalog/reference responsibilities.
 Source:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Infinity_Reinforcements&oldid=3614>
-
-## Baggage and Reload
-
-### RR-BR-RELOAD-001 — Baggage and Reload state the prerequisite from opposite perspectives
-
-**Scope:** core N5.3 Baggage / Reload interaction.
-
-The Baggage rule states the requirement from the receiving Allied Trooper's
-perspective, while Reload states it from the Baggage holder's perspective. InfinityDB
-normalizes the combined interaction as requiring **both participants to be in non-Null
-States** when the Reload/Baggage effect is used. The curated records retain citations to
-both source formulations and state the combined requirement explicitly rather than
-discarding either side.
-
-**Resolution:** reviewed domain interpretation supplied 2026-09-23; encode both
-non-Null requirements as complementary prerequisites.
-
-Sources:
-
-- Wiki: <https://infinitythewiki.com/Baggage>, live N5.3 page, reviewed 2026-09-23
-- Wiki: <https://infinitythewiki.com/Reload>, live N5.3 page, reviewed 2026-09-23
 
 ## ITS FAQ
 

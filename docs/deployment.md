@@ -39,7 +39,7 @@ old checkout's `scripts/install-or-update.sh` directly: it can rebuild `infinity
 server source material and replace the release-matched database before the new deployment guard
 runs.
 
-After `v0.8.1` has been published, bootstrap the installer from the target tag instead:
+For a server still starting from a 0.8.0 checkout, bootstrap the installer from the 0.8.1 tag instead:
 
 ```sh
 tmp="$(mktemp)" && git fetch origin --tags --prune && git show v0.8.1:scripts/install-or-update.sh > "$tmp" && sh "$tmp"; status=$?; rm -f "$tmp"; [ "$status" -eq 0 ]
@@ -99,7 +99,7 @@ the normal validation gates, then commit the resulting `data/generated/infinity.
 The terminal `data/manifests/army-symbol-build.json` remains ignored local build provenance. It
 is useful for symbol processing/resume but is not part of the deployment contract. The tracked
 `symbol-publication.json` carries only the compact Army archive name/SHA-256 needed by deployment
-plus the published SVG hashes/mappings. Future symbol publication writes that provenance
+plus the published SVG hashes/mappings. Current symbol publication writes that provenance
 automatically. Only when preparing a legacy publication created before this provenance
 field was tracked, run the one-time migration in the development checkout:
 
@@ -185,20 +185,10 @@ either SQLite file inside a running container.
 
 ### Privacy and observability
 
-InfinityDB's accepted monitoring direction is aggregate-only observability: normalized
-route/request counts, status classes, latency distributions, response sizes, active
-requests, version identity, and host/container resource use. Production monitoring must
-not retain IP addresses, user agents/fingerprints, referrers, cookies/session or preference
-values, query strings/search terms, persistent visitor identifiers, or per-user request
-histories. See `docs/architecture.md` for the canonical policy.
-
-The production image disables Gunicorn's routine access log and retains the stderr error
-log for operational diagnostics. Gunicorn starts with `--preload`, allowing the fixed-size
-request registry created by the WSGI app to be inherited and shared by the existing worker
-processes. The registry records only normalized bounded route labels, status classes, latency
-and response-size histogram buckets, active-request counts, and build/snapshot identity. It
-does not read request IPs, user agents, referrers, cookies, query strings, or other
-visitor-identifying fields.
+`docs/architecture.md` owns the canonical aggregate-only privacy/observability policy. The
+deployment layer enforces that policy by disabling Gunicorn's routine access log, retaining stderr
+error logging for diagnostics, and using the preloaded application's fixed-cardinality shared
+request registry for bounded route/status/latency/response-size/activity/build metrics.
 
 The aggregate registry is exposed as Prometheus text at `/internal/metrics` on the app
 container's port 8000. `/internal/health` provides the container liveness/readiness probe and

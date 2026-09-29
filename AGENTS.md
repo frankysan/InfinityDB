@@ -12,16 +12,11 @@ repository instructions and documentation take precedence if the local file
 conflicts with them. Promote a local preference into tracked project
 documentation only when the user explicitly wants it to become project policy.
 
-Before making substantial changes, read:
-
-- `docs/architecture.md` — architecture, engineering principles, and subsystem
-  boundaries.
-- `docs/project-domains.md` — canonical project-domain ownership and documentation
-  labels.
-- `docs/data-model.md` — normalized data and persistence semantics.
-- `docs/AI_CONTEXT.md` — durable project decisions, invariants, and development
-  context.
-- `docs/testing.md` — standard development-check orchestration and reporting.
+Before making substantial changes, read `docs/README.md` to identify the canonical
+document owner for the work, then read the relevant references. Most code changes need
+`docs/architecture.md`, `docs/data-model.md`, `docs/AI_CONTEXT.md`, and
+`docs/testing.md`; planning/release work also needs `docs/project-domains.md` and
+`docs/releasing.md`.
 
 For browser visual, layout, responsive, or interaction changes, also read
 `docs/web-design-guidelines.md`; it defines the target UI vocabulary and reusable
@@ -221,7 +216,8 @@ Official Infinity Army data and current official publications remain
 authoritative where they supersede archived local material.
 
 Maintained rules prose must use the semantic maintained-text token syntax whenever it names an
-existing player-routable Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking
-Program, or Attribute. The checked-in maintained-text link baseline exists only to grandfather pre-migration prose
-while the current corpus is reviewed domain by domain; do not regenerate or expand it to admit newly
-authored unlinked references. Each migration batch should shrink the remaining candidate inventory.
+existing supported Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program,
+or Attribute. The pre-token migration is complete: reviewed batches reject newly authored plain
+semantic candidates. Do not weaken or expand reviewed-plain exceptions merely to make an audit
+pass. Link a clear reference; use an explicit `review-needed` marker when the meaning is genuinely
+ambiguous.

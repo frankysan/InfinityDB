@@ -1,7 +1,7 @@
 # InfinityDB backlog
 
 This is the working implementation backlog. Every unchecked item belongs to exactly
-one release bucket: **0.9.0**, **0.10.0**, **1.0.0**, or **post-1.0**.
+one release bucket: **0.10.0**, **1.0.0**, or **post-1.0**.
 The buckets are planning commitments, not a promise that a minor release cannot move a
 low-risk item earlier or defer a non-gating item when evidence changes.
 
@@ -20,173 +20,18 @@ when all contained work shares the same owner.
 
 ## Current milestone
 
-The current milestone is **0.9.0 — application completeness and discoverability**.
-It follows the completed 0.8.0 connected-data milestone by closing the remaining
-player-facing application-data gaps and making the resulting data searchable,
-navigable, and understandable.
+The current milestone is **0.10.0 — consistency, presentation, and release hardening**.
+It follows the completed 0.9.0 application-completeness/discoverability milestone by auditing the
+finished application model end to end, completing the frontend/theme architecture, and hardening
+release and operations workflows before the 1.0 data-completeness gate.
 
 General performance/storage experiments, major pipeline refactors,
 persistent-user-data features, ITS tooling, and native applications are explicitly
 post-1.0 unless they become necessary to correct a release-blocking defect.
 
-## Release roadmap through 1.0
-
-- **0.8.x — Connected game structure.** Added Fireteams and exposed the structural
-  relationships already present in the canonical application data.
-- **0.9.x — Complete and make discoverable.** Close remaining player-facing
-  application-data gaps and make the resulting data searchable, navigable, and
-  understandable.
-- **0.10.x — Audit, present, and harden.** Run the end-to-end consistency audit,
-  finish the intended frontend/theme architecture, and harden CI/operations without
-  adding another major game-data domain.
-- **1.0.0 — Player data-complete.** Close the remaining current rules/reference gaps
-  and pass the final source-to-storage-to-browser completeness gate. A full ITS
-  scenario library, list builder, and other broader product tooling are not part of
-  the 1.0 gate.
-- **Post-1.0 — Expand and optimize.** Pursue optional product features, persistent
-  user data, ITS/scenario tooling, native apps, historical-data features, pipeline
-  refactors, and performance/storage experiments.
-
-The concise public framing remains: **0.6 built the foundation → 0.7 added context →
-0.8 connected the data → 0.9 closes application gaps → 0.10 hardens and polishes →
-1.0 completes the reference.**
-
-## 0.9.0 — application completeness and discoverability
-
-0.9.0 completes discoverability and navigation around the player-facing application model
-without absorbing the separate consistency, frontend-architecture, theme, and operations
-hardening work reserved for 0.10.0. The maintained source-to-presentation inventory now has no
-confirmed application-data presentation gap.
-
-The Unit Explorer filtering/extended-results work, global search, structured rules-reference
-cross-link pass, Profile notation foundation, maintained-text reference/token layer, application-
-domain publication, and share-state work are complete. The original 0.9 application-completeness
-and discoverability scope is closed, but the pre-release polish checklist below was added before
-tagging the release and remains part of the 0.9 gate. Broader hardening still belongs to 0.10.
-`docs/application-domains.md` defines the accepted domain skeleton and interaction model.
-
-### Player-facing completeness and navigation
-
-- [x] Complete the systematic semantic-link migration of all maintained rules prose. The legacy
-  candidate baseline has been retired: all supported semantic-reference namespaces are now covered
-  by completed review batches, and any new unlinked candidate fails the rules build directly. Any
-  passage examined during review that remains ambiguous or unclear must use an explicit
-  `review-needed` marker until manual review resolves it.
-  - [x] Establish canonical-name/alias candidate auditing and make new unlinked candidates fail
-    the rules build while grandfathering only the pre-migration corpus.
-  - [x] Batch 1: replace unambiguous full State names such as `Unconscious State`,
-    `Dead State`, and the reviewed `Retreat State` alias with typed `state:*` references.
-  - [x] Batch 2: review and link all unambiguous Hacking Program names. The post-batch
-    legacy inventory is 671 candidate occurrences across 183 semantic owners, with no remaining
-    `hacking-program:*` candidates.
-  - [x] Batch 3: review and link Equipment names. The post-batch legacy inventory was 625
-    candidate occurrences across 178 semantic owners, with no remaining `equipment:*` candidates.
-  - [x] Establish explicit `review-needed` markers for passages that have been examined but cannot
-    yet be resolved safely.
-  - [x] Retrospectively audit completed Batches 1-3 with a broader case-insensitive/plural residual
-    scan and keep that scan as a build gate. It found one missed unambiguous `Holoecho States`
-    reference, now linked, and a second ambiguous `HoloMask` passage, now explicitly flagged. The
-    current inventory is 623 legacy candidates across 178 semantic owners plus two explicit
-    `review-needed` markers.
-  - [x] Batch 4: review Trait names, including the generic/colliding surfaces `State`, `CC`,
-    `ARO`, `Zone of Control`, `Deployable`, and same-name Skill/State concepts. Confident non-Trait
-    uses are fingerprinted as reviewed plain surfaces; unresolved Deployable/Direct Template/
-    Perimeter scope and plural Deployables remain explicit `review-needed` markers. The broad pass
-    classified all 332 Trait-name matches: 20 became semantic links, 293 were fingerprinted as
-    reviewed non-Trait text, and 19 became new review markers. The post-batch legacy inventory is
-    411 candidates across 141 semantic owners, with only Skill and State namespaces remaining and
-    21 explicit review markers total including the two earlier HoloMask reviews.
-  - [x] Batch 5: review Skill names. The broader case-insensitive/plural pass classified 401
-    Skill-name matches: 324 became typed Skill links, 68 were confirmed as same-text game
-    categories/states/modes or ordinary language and bound to reviewed passage fingerprints, and
-    9 newly unclear source/collision uses became explicit `review-needed` markers. The post-batch
-    legacy inventory is 66 candidates across 43 semantic owners, all in the State namespace, with
-    30 explicit review markers total.
-  - [x] Batch 6: review the remaining State aliases/collisions. The broad pass classified 87 State
-    alias/name matches: 40 became typed State links and 47 ordinary/cross-domain uses of `Normal`,
-    `targeted`, `Retreat`, and Decoy terminology were bound to reviewed passage fingerprints. The
-    legacy candidate inventory is now zero. Weapon, Ammunition, and Attribute namespaces also
-    received explicit case-insensitive/plural completeness audits with zero residuals, and the
-    temporary legacy baseline has been removed.
-  - [x] Resolve the 30 explicit `review-needed` passages by manual source/context review. Source-
-    backed Deployable/Perimeter, Discover/Neurocinetics/Idle/Decoy/HoloMask, and Impersonation
-    references are now typed links; the three Direct Template attack-rule passages and Infiltration's
-    descriptive `forward deployment` phrase are confirmed ordinary/cross-domain text and bound to
-    reviewed passage fingerprints. The maintained-text audit now reports zero unlinked candidates,
-    zero reviewed-batch residuals, and zero explicit review markers.
-
-- [x] **Data processing + Web backend + Web frontend:** Continue the application-domain framework
-  established in `docs/application-domains.md` without adding one-off catalog/navigation structures.
-  - [x] Add `/armies` as an overview surface with each Army's symbol, concise structural
-    description, and a link to Unit Explorer pre-filtered by the canonical Army identity. Do not add
-    per-Army detail pages without a separate player-facing use case.
-  - [x] Normalize `/fireteams` to the shared landing/scoped contract: the unscoped page shows the
-    Army selector plus general Fireteam rules summary; selecting an Army hides that summary and
-    shows the Army-scoped chart/reference content; clearing the selection returns to the landing
-    state; scoped state remains URL-addressable/shareable.
-  - [x] Establish Attributes as an embedded canonical vocabulary for semantic links, tooltips,
-    Glossary/search, and related metadata without adding an `/attributes` catalog or individual
-    Attribute detail pages.
-  - [x] Publish General Rules only as the explicit fallback for rules/reference concepts with no
-    clearer top-level owner. The initial catalog publishes reviewed basic-rule, order-type,
-    command-token-use, and Peripheral-type records; Fireteam rules and Unit-profile help stay with
-    their clearer application owners, and embedded vocabularies still do not gain manufactured
-    detail pages.
-
-- [x] Complete deep-linkable, shareable search and filter state for catalog and
-  Unit views.
-  - [x] Unit Explorer Army, declared-faction, name, Skill, Equipment, Weapon,
-    pagination, and sort state already participate in URL state. Global search uses
-    its own shareable `q` parameter.
-  - [x] Add the 0.9 Unit filters and extended-results mode to the URL contract so
-    categorical/numeric filtering and the optional extended Unit presentation remain
-    reproducible in shared links. Extended presentation uses `extended=1`.
-  - [x] Make catalog-list search/filter state deep-linkable where it is still only
-    local browser state. Searchable catalog landing pages now use the shared `q` query parameter,
-    hydrate it before first render, and remove it when the search is cleared.
-  - [x] Define how optional-unit preferences interact with reproducible shared Unit
-    URLs. Unit Explorer now owns page-local optional-availability controls and records the effective
-    `mercs`, `specops`, `teamops`, and `reinforcement` values explicitly as `0`/`1` URL state. A
-    location with no optional flags is initialized from the user's Settings and immediately
-    canonicalized to the full four-value URL; explicit shared state never overwrites saved Settings,
-    and the page explains when the current result set came from preferences or overrides them.
-
-### Pre-release polish
-
-- [x] **Web backend + Web frontend:** Make structured Related rules links to Peripheral subtypes
-  resolve to their General Rules detail pages, for example **Can control: Peripheral (Cyberplug)**.
-- [x] **Web frontend:** Standardize rules-card badge ordering across domains: Labels first, then
-  Skill/declaration category badges.
-- [x] **Web frontend:** Make Unit Explorer Army-availability symbols deep-link to the Unit detail
-  page with that Army profile expanded. Honor that explicit Army target even when the recipient's
-  optional-unit Settings would otherwise hide it.
-- [x] **Web frontend:** Retain the Unit Explorer Advanced filters disclosure state across reloads
-  using the existing session/persistent Settings contract.
-- [x] **Web frontend:** Make desktop sidebar vertical spacing responsive to viewport height so
-  navigation/settings/footer content begins scrolling later on shorter displays.
-- [x] **Web frontend:** Increase Army symbols on `/armies`.
-- [x] **Web frontend:** Normalize `/armies` card heading geometry so symbols, Army-type labels, and
-  Army names stay aligned when names wrap to multiple lines.
-- [x] **Data processing + Web frontend:** Replace structural `/armies` descriptions with concise,
-  mostly gameplay-focused summaries of what distinguishes each Army. The summaries are maintained
-  as validated editorial copy keyed by public Army slug, informed by current Army/rules data and
-  secondary faction background without becoming game semantics.
-- [x] **Documentation + Web frontend:** Explain main armies versus Sectorials on `/armies`. The UI
-  identifies main armies with the rules' **Generic Army List** terminology, summarizes the official
-  roster/AVA distinction, and presents richer Sectorial Fireteam charts as an observation of the
-  current N5 Army data rather than a universal rules guarantee.
-- [x] **Web frontend + Web backend:** Replace verbose browser share-state query strings with one
-  scoped, versioned `s=v1.<scope>.<payload>` token. The payload uses deterministic base64url over
-  a compact field-indexed UTF-8 payload so links remain self-contained and synchronous to encode
-  and decode. General compression was not justified for the small state payloads, and server-side
-  hash/lookup state was rejected because it would make durable links depend on stored server data.
-  Unit Explorer, Unit Army targeting, Fireteams, catalog search, global search, and Glossary search
-  now use the shared
-  token contract. Legacy explicit query parameters remain accepted and are canonicalized to the new
-  form; API query parameters are unchanged.
-- [x] **Documentation:** Rewrite the Unreleased changelog as concise, user/operator-facing release
-  notes and retrospectively audit the recent release history for the same problem. The cleanup now
-  covers 0.6.1 through 0.8.1; 0.6.0 and older entries were already concise and were left intact.
+The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
+definition lives in `docs/releasing.md`. The sections below contain only
+implementation work that remains open.
 
 ## 0.10.0 — consistency, presentation, and release hardening
 
@@ -205,11 +50,10 @@ by the audit remain in scope.
     the Git commit, tracked `infinity.db` and `rules.db`, tracked release-matched symbol
     publication manifest, and the local raw/provenance evidence used to build them.
     Verify that the runtime database and symbol publication derive from the same Army
-    snapshot. Keep raw/local evidence under
-    the gitignored `docs/audits/` workspace, then promote durable conclusions and
-    release-closeout decisions into a
-    tracked audit document under `docs/`; do not mix production observations with
-    synthetic test fixtures.
+    snapshot. Keep raw/local evidence and the working audit matrix under the gitignored
+    `docs/audits/` workspace, then promote durable conclusions into their canonical
+    documentation owners and release-visible outcomes into `CHANGELOG.md`; do not mix production
+    observations with synthetic test fixtures.
   - [ ] Create and maintain an explicit audit matrix for each concept, recording
     its semantic-provenance category, source meaning/evidence, storage
     representation, derivation or canonical/application interpretation, API
@@ -261,8 +105,8 @@ by the audit remain in scope.
     incomplete or mismatched databases/assets. Passing one context does not establish
     the others.
   - [ ] Fix discovered inconsistencies incrementally and add focused regression
-    coverage where practical. Record intentional deferrals in the audit document
-    and TODO rather than silently leaving them unresolved. Keep CI hardening,
+    coverage where practical. Record intentional deferrals in the working audit evidence and
+    `TODO.md` rather than silently leaving them unresolved. Keep CI hardening,
     unrelated storage experiments, the Changes page, visual theming, and broader
     UI restructuring outside this audit unless required for a minimal correctness
     or 1.0-completeness fix.
@@ -284,7 +128,8 @@ by the audit remain in scope.
   - [x] Split API handling, shared page-shell/static delivery, and top-level request
     dispatch into visibly separate Python concerns while preserving existing URLs. The WSGI
     composition/instrumentation layer now delegates browser/static delivery to
-    `web/presentation.py` and JSON/domain handling to `web/api_handler.py`, with shared route
+    `src/infinity_db/web/presentation.py` and JSON/domain handling to
+    `src/infinity_db/web/api_handler.py`, with shared route
     identities and response values kept separate from both.
   - [ ] Organize browser code around explicit API transport, preferences/theme
     state, reusable view/components, and page modules; keep JSON API access routed
@@ -389,19 +234,20 @@ it should not introduce a large new product surface.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not
-    recreate Hacking Program facts already promoted by the 0.8 connected-data work.
+    duplicate Hacking Program facts already owned by the current Hacking Program
+    domain.
   - [ ] Generate an Orders/AROs declaration matrix from the reconciled cross-domain
     relationships and use it as a completeness check for missing, invalid, or
     contradictory declaration categories rather than maintaining a second hard-coded
     chart. Make the projection source/scope-aware so scenario-only Skills/AROs can be
     represented without appearing in the core N5 matrix or being flagged as missing
     core categories.
-  - [ ] Model Ammunition rules as first-class cited identities and relationships.
-    Distinguish the eleven base Ammunition types from source-defined combined
-    forms, preserve component relationships for combined Ammunition, and keep
-    Ammunition composition separate from Combined Saving Roll notation. Link
-    state/Attribute/Saving-Roll effects explicitly instead of deriving them from
-    Ammunition display names.
+  - [ ] Deepen the existing first-class Ammunition model with explicit typed
+    relationships. Preserve the eleven published base Ammunition identities, distinguish
+    source-defined combined forms, preserve component relationships for Combined
+    Ammunition, and keep Ammunition composition separate from Combined Saving Roll
+    notation. Link State, Attribute, and Saving-Roll effects explicitly instead of
+    deriving them from display names.
   - [ ] Include scenario-defined catalog concepts needed for the general rules
     reference, including scenario-only Skills, Equipment when present, contextual
     roles such as Specialist Troop, and the scenario elements those concepts act
@@ -448,8 +294,8 @@ it should not introduce a large new product surface.
 
 - [ ] **Data processing + Web backend + Web frontend:** Extend generated rules-reference
   projections that build on the enriched canonical data rather than duplicating its facts.
-  - [ ] Add richer typed/cross-linked projections for the structured Martial Arts,
-    Booty, and MetaChemistry reference rows now served in 0.7.0. Keep random outcomes
+  - [ ] Add richer typed/cross-linked projections for the existing structured Martial Arts,
+    Booty, and MetaChemistry reference rows. Keep random outcomes
     as deployment/session overlays, preserve conditional branches (for example TAG
     versus other Troop Types), and cross-link resolvable outcomes to canonical Skills,
     Equipment, Weapons, and Attributes without rewriting Unit profiles.
@@ -513,9 +359,10 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 ### Routing and long-term compatibility
 
-- [ ] Before retiring or redirecting numeric routes, define and implement the
+- [ ] Before retiring or redirecting numeric routes, define and implement a
   per-domain slug-freezing, reviewed-override, alias/redirect, and canonical-URL
-  compatibility policy documented as future work in `docs/architecture.md`.
+  compatibility policy. Until then, preserve the current contract: canonical generated
+  links prefer stable domain slugs while numeric routes remain accepted compatibility forms.
 
 ### Performance, storage, and build tooling
 
@@ -535,9 +382,9 @@ only when required to fix correctness, reproducibility, or release reliability.
   deciding whether a storage/query abstraction is justified.
 
 - [ ] Establish a reproducible build/export performance baseline on CI or a
-  fixed development host. A 2026-09-14 generated-snapshot smoke export measured
-  8.45 seconds, 13.4 MB for the application DB, and 37.7 MB for the raw archive;
-  treat those numbers as provisional until repeated in a controlled environment.
+  fixed development host. Record the exact source snapshot, toolchain, generated artifact
+  sizes, and timing methodology with each result instead of carrying provisional benchmark
+  numbers in the backlog.
 
 - [ ] Remove redundant whole-document work in the combined build/export path.
   Export validation serializes the complete normalized object to reject invalid
@@ -546,11 +393,10 @@ only when required to fix correctness, reproducibility, or release reliability.
   or an in-memory hand-off that skips only the duplicate build-path pass; the
   standalone `export` command must retain full untrusted-input validation.
 
-- [ ] Evaluate artifact-level deduplication for development builds. The raw
-  archive contains 24.9 MB of row JSON, nearly the 25.2 MB normalized input,
-  so retaining `normalized.json` and `infinity.raw.db` duplicates the same
-  lossless data. Decide whether post-export development workflows need both,
-  or document one as a regenerable/transient artifact.
+- [ ] Evaluate artifact-level deduplication for development builds. `normalized.json` and
+  `infinity.raw.db` intentionally retain overlapping lossless source structure today; measure
+  the duplication on a controlled build, then decide whether post-export workflows need both
+  or whether one should be documented as a regenerable/transient artifact.
 
 - [ ] Provide a small development CLI for `infinity.raw.db`: inspect a raw row,
   list raw rows by normalized table, and verify that an archive matches its

@@ -5,7 +5,7 @@ Entries describe meaningful release outcomes rather than detailed implementation
 New or materially revised entries use the project-domain labels defined in
 `docs/project-domains.md`; historical release notes are not retroactively relabeled.
 
-## Unreleased
+## [0.9.0] - 2026-09-29
 
 ### Added
 

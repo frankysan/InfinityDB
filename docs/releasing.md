@@ -130,7 +130,11 @@ During the audit:
 
 The audit is complete only when stale documentation discovered during the review has
 been corrected in the release preparation, or is explicitly retained and labelled as
-historical context.
+historical context. Raw evidence belongs under `docs/audits/`. Do not create a permanent
+release-specific audit document by default: promote lasting conclusions into the canonical
+document owner, record release outcomes in `CHANGELOG.md`, and let Git history preserve the
+review narrative. Keep a tracked audit/closeout file only when it contains unique rationale that
+will actively guide later work.
 
 ## 3. Prepare release notes and metadata
 
@@ -146,7 +150,7 @@ historical context.
 Do not change the released version early merely to mark work in progress; development
 checkouts use the existing `+dev` display-version mechanism until release preparation.
 
-## 4. Run release validation
+## 4. Run local release validation
 
 - [ ] Rebuild and validate any release runtime database whose source/curated inputs changed,
   then ensure `data/generated/infinity.db` and `data/generated/rules.db` are the intended
@@ -160,13 +164,6 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
   `docs/testing.md`.
 - [ ] Run any additional release-specific acceptance, benchmark, migration, or
   reproducibility checks required by `docs/TODO.md` or the affected subsystem docs.
-- [ ] Confirm the required hosted workflows are green for the exact release commit,
-  including the `Source checks` cross-platform deterministic-output comparison.
-  `Source checks`, `Deployment smoke test`, and `Installed wheel smoke` provide the
-  normal clean-source/package/deployment evidence. Source checks now validate the tracked
-  processed SVG publication with required asset coverage; use `Full-asset checks` when
-  release evidence should also cover the configured checksum-pinned external bundle.
-  See `docs/ci.md` for the authoritative workflow contract.
 - [ ] Confirm the working tree contains only the intentional release-preparation
   changes before creating the release commit.
 
@@ -174,12 +171,24 @@ If any release-preparation edit is made after validation, rerun the affected che
 rerun the full gate when the edit can affect executable, generated, packaged, or
 deployment behavior.
 
-## 5. Tag and publish
+## 5. Land the release commit, verify hosted CI, and tag
 
-- [ ] Create the final release commit only after the checklist above is green.
-- [ ] Create the version tag `v<version>` at that exact commit.
-- [ ] Push the release commit and tag, then verify that the remote tag resolves to the
-  intended commit.
+- [ ] After the local release checklist is green, create the release-preparation commit and land
+  it on protected `main` through the normal pull-request workflow. The resulting `main` revision is
+  the candidate release commit; if the repository uses a merge or squash commit, use that resulting
+  commit rather than assuming the branch-head SHA is the release SHA.
+- [ ] Confirm the required hosted workflows are green for that exact candidate release commit,
+  including the `Source checks` cross-platform deterministic-output comparison. `Source checks`,
+  `Deployment smoke test`, and `Installed wheel smoke` provide the normal
+  clean-source/package/deployment evidence. Source checks validate the tracked processed SVG
+  publication with required asset coverage; use `Full-asset checks` when release evidence should
+  also cover the configured checksum-pinned external bundle. See `docs/ci.md` for the authoritative
+  workflow contract.
+- [ ] If a hosted failure requires any code, data, generated-artifact, or documentation change, land
+  a new candidate release commit and repeat the affected local and hosted validation. Do not tag the
+  superseded candidate.
+- [ ] Create the version tag `v<version>` at the exact hosted-green release commit.
+- [ ] Push the tag, then verify that the remote tag resolves to the intended commit.
 - [ ] Retain the required hosted-workflow evidence for that release commit/tag.
 
 A published release tag is immutable project history. Correct a material release

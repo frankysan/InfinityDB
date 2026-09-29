@@ -2,7 +2,7 @@
 
 **Project domains:** Data processing, Web backend, Web frontend
 
-This document defines the planned **application-domain** structure used to organize InfinityDB's
+This document defines the **current application-domain structure** used to organize InfinityDB's
 player-facing game/reference information. Application domains are distinct from the engineering
 ownership labels in `docs/project-domains.md`.
 
@@ -90,9 +90,9 @@ domains of their own.
 
 This keeps the glossary useful without creating a second source of truth for rules text.
 
-## Planned top-level domain set
+## Current top-level domain set
 
-The planned top-level domain set through 1.0 is:
+The current published top-level domain set is:
 
 - **Armies** (`armies`) — overview/navigation domain.
 - **Units** (`units`) — Unit Explorer plus Unit detail.
@@ -108,14 +108,15 @@ The planned top-level domain set through 1.0 is:
 - **General Rules** (`rules`) — catch-all rules/reference domain for concepts without a clearer
   top-level owner.
 
-This is a planned skeleton, not a requirement that every domain immediately be fully populated or
-visible in primary navigation. Future evidence may justify another domain, but new top-level domains
-should require a concrete player-facing browsing/use case rather than only a new data type.
+The registry is intentionally capability-based: publication, navigation, search, Glossary, landing,
+catalog/detail, and scoped-view behavior are independent flags rather than consequences of being a
+top-level domain. Future evidence may justify another domain, but a new top-level domain requires a
+concrete player-facing browsing/use case rather than merely a new data type.
 
 ## Domain capability registry
 
 **Current.** `src/infinity_db/application_domains.py` is the canonical capability registry for the
-planned domain skeleton. It separates semantic ownership from publication/presentation and is used
+application-domain set. It separates semantic ownership from publication/presentation and is used
 by public rules-reference routing so route ownership is not duplicated in a second kind-to-route
 mapping. The registry expresses at least:
 
@@ -166,8 +167,8 @@ partially scoped page.
 shared versioned browser share-state token. Loading a tokenized catalog URL hydrates the search
 control before the first result render, and clearing the search removes the token when no other
 page state remains. Updating a text search replaces the current history entry rather than adding one
-entry per debounce interval. Legacy `q` parameters remain accepted during the 0.9 migration and are
-canonicalized to the token form. Future catalog filters that materially change visible results
+entry per debounce interval. Legacy `q` parameters remain accepted for backward compatibility and
+are canonicalized to the token form. Future catalog filters that materially change visible results
 should join the catalog share-state schema rather than remaining browser-local state.
 
 This state model is shared vocabulary, not a requirement that every domain implement all four
@@ -193,10 +194,11 @@ playability; Reinforcement entries inherit the display status only from their ca
 overview group.
 
 The overview reuses canonical Army identities/slugs and existing symbol relationships for current
-entries, with curated identities only for historical lists absent from current Army data. The
-initial short descriptions are structural summaries derived from canonical Army role/group
-relationships; they deliberately do not infer lore or play style from Unit composition. Richer
-reviewed presentation copy can replace those summaries later without changing the domain contract.
+entries, with curated identities only for historical lists absent from current Army data. The short
+descriptions are maintained gameplay-oriented editorial copy in
+`data/curated/identities/army-overview.json`. They may summarize broad force character and common
+play patterns, but they are presentation guidance rather than rules, legality, identity, or
+availability input.
 
 Individual `/armies/<slug>` detail pages are not required unless a future player-facing use case
 justifies them. The pre-filtered Unit Explorer URL is the shareable destination for browsing an
@@ -238,19 +240,16 @@ now their canonical presentation domain.
 
 ## Ammunition and Labels
 
-**Current.** Ammunition and Labels are the first new top-level domains published through the shared
-domain framework. They intentionally exercise different existing data shapes.
+**Current.** Ammunition and Labels are published top-level domains using the shared domain
+framework and intentionally exercise different data shapes.
 
 ### Ammunition
 
 Ammunition is a first-class rules/reference domain with canonical `ammunition:*` identities, a
-catalog, detail surfaces, global-search participation, and typed maintained-text links. The initial
-0.9 population establishes the eleven N5.3 base Ammunition types and concise reviewed reference
-text without requiring every Ammunition interaction to be exhaustively modeled.
-
-The 1.0 completeness pass can then finish deeper semantics such as base/combined Ammunition
-relationships, Saving Roll interactions, State effects, and other rules-reference links where they
-serve the application model.
+catalog, detail surfaces, global-search participation, and typed maintained-text links. The current
+population contains the eleven N5.3 base Ammunition types and concise reviewed reference text.
+Deeper relationships can be added within the same domain contract when they serve the application
+model; incomplete work belongs in `docs/TODO.md`.
 
 ### Labels
 
@@ -267,7 +266,7 @@ must therefore remain part of semantic identity and linking.
 
 `rules` is the generic top-level fallback for rules/reference concepts that do not have a clearer
 canonical top-level domain. It is now published through `/rules` as a normal catalog/detail domain.
-The initial reviewed publication owns the `basic-rule`, `order-type`, `command-token-use`, and
+The current publication owns the `basic-rule`, `order-type`, `command-token-use`, and
 `peripheral-type` categories from canonical `rule:*` records. Qualified internal identities such as
 `rule:peripheral-type:servant` keep that canonical identity while projecting to a collision-checked
 public route slug such as `/rules/peripheral-type-servant`.
@@ -304,25 +303,13 @@ anchors. Source-backed `term:*` records provide the corresponding embedded termi
 concepts that do not warrant dedicated pages; search and Glossary preserve their Game-term identity
 separately from same-name Labels, Traits, or other concepts.
 
-## Population and publication strategy
+## Population and publication policy
 
-The domain registry and route/navigation contracts should be established before exhaustive content
-population. A scaffolded domain may exist internally without appearing in primary navigation until
-its minimum useful player-facing content is ready.
+The current registry is fully published for the domains listed above, but publication does not mean
+semantic coverage is permanently complete. New records and deeper relationships can be added within
+those domains without inventing new navigation or identity systems.
 
-The implementation sequence is:
-
-1. **Current:** establish the application-domain registry/capability model and planned top-level
-   skeleton;
-2. **Current:** expose Labels and Ammunition as the first newly browsable domains;
-3. **Current:** publish the Armies overview and normalize Fireteams to the landing/scoped
-   interaction contract;
-4. **Current:** publish Attributes and scoped Game terms as embedded vocabularies and Glossary as
-   a federated projection over canonical domains plus embedded vocabularies;
-5. **Current:** publish General Rules as the reviewed fallback catalog for canonical `rule:*`
-   concepts without a clearer application owner;
-6. continue filling semantic relationships and terminology coverage through the 1.0 completeness
-   work.
-
-This sequence deliberately creates the reusable structure first so later domains do not need to
-invent independent navigation, catalog, glossary, or scoped-view conventions.
+A future domain may be scaffolded internally before publication when that helps establish reusable
+contracts, but unpublished capabilities must remain explicit in the registry and must not be
+documented as player-visible behavior. Concrete completeness work is tracked in `docs/TODO.md`;
+this document owns only the durable domain/presentation contract.

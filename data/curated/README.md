@@ -162,10 +162,10 @@ profile must belong to the mapped entity. Unit-backed mappings additionally pin 
 logical Unit and reviewed Peripheral type so source-name, logical-identity, or subtype drift
 fails closed. Controller access additionally pins source occurrence name, reviewed Peripheral
 type, and the complete canonical target pool so source/controller/target drift fails closed.
-Unknown fields fail closed; notably `mercs` is not accepted as identity data. The checked-in
-current-snapshot contract contains 56 embedded entities, 279 embedded mappings, 17 Unit-backed
-source mappings resolving to 10 logical Units, and four reviewed Cyberplug Controller access
-pools targeting two canonical logical Units.
+Unknown fields fail closed; notably `mercs` is not accepted as identity data. Do not duplicate
+current entity/mapping counts in this reference: the curated file plus
+`infinity-db validate-peripheral-identities --database ...` are the authoritative current
+inventory and coverage check.
 
 Validate the authored contract with:
 
@@ -293,15 +293,14 @@ Every record declares `composition.role` as `definition` or `supplement`. Across
 current collections, each semantic record ID has exactly one definition; supplements
 retain their own scope, facts, citations, relations, and publication provenance rather
 than being field-merged by load order. Related concepts use typed one-way `relations`;
-reverse navigation is derived by `rules.db`. Format v10 introduced the gameplay-
-interaction edge `reduces-modifiers-from`; format v11 extends that closed vocabulary
-with `ignores-modifiers-from` and `negates-effects-of` so counter-rules can describe
-ignored MODs separately from effects that become ineffective. Format v12 adds
-`modifies-rolls-for` and `restricts-use-of` for rules such as Sensor that alter another
-Skill's Roll or constrain one specific use without implying that the whole target rule
-is negated. Format v13 adds `applies-effects-to` and `imposes-modifiers-on` so rules such
-as Reflective and Albedo can expose who they affect without collapsing those different
-mechanics into a generic related-item edge. Format v14 adds `overrides-effects-of` for explicit precedence such as No Cover taking priority over Limited Cover when both restrictions apply. Format v15 adds `cancels-state` for reviewed recovery/removal rules such as Doctor and Engineer; State definitions remain rules/reference identities rather than runtime game-session state. Format v16 adds `causes-state` for explicit activation paths such as Forward Observer causing Targeted State and Disposable (X) causing the item-specific Unloaded State, while existing roll/restriction relations make the affected State useful from both directions. Format v17 adds `enables-use-of` when a reviewed rule or State satisfies a documented prerequisite for another rule without claiming that all of the target rule's requirements are met. Format v18 adds `uses-effects-of` when a rule reuses another rule's effects without claiming that it enters the target State; Concealed uses Camouflaged State effects while retaining its distinct Marker behavior. Format v19 replaces the singular Skill-definition `facts.typeId` with ordered `facts.typeIds`, allowing every full Skill definition to own one or more declaration categories directly. Format v20 adds `modifies-use-of` for rules that change how another rule is used without simply enabling or restricting it, `prevents-state-entry` for explicit prohibitions on entering a State, and `triggered-by-state-entry` for rules that activate when a State is entered. Format v21 adds `equips-with` for rules such as Paramedic that explicitly provide a piece of Equipment without claiming to reuse that Equipment's effects.
+reverse navigation is derived by `rules.db`.
+
+The current closed relation vocabulary is defined by `src/infinity_db/rule_relations.py`. It
+distinguishes creation/enabling, State transitions, MOD/effect changes, cancellation/restriction,
+and structural variant relationships rather than collapsing every connection into a generic
+"related" edge. Curated loading fails closed on unsupported relation types. Add or change a relation
+type in the canonical Python vocabulary and its validation/presentation tests before using it in
+curated data.
 
 Reviewed `training` definitions use `facts: {"orderType": "regular"}` or
 `{"orderType": "irregular"}` and canonical IDs `training:regular` /
@@ -309,8 +308,7 @@ Reviewed `training` definitions use `facts: {"orderType": "regular"}` or
 loadout Order-generation entries reference these records in the Unit API and
 browser, with citations; Lieutenant/Tactical Orders and source skill-like
 compatibility rows must not be treated as further Training values. Training
-supplements may add scoped facts but cannot redefine `orderType`. This is an
-additive v7 record-kind contract; it does not alter the `rules.db` schema.
+supplements may add scoped facts but cannot redefine `orderType`.
 
 ### Document shape
 

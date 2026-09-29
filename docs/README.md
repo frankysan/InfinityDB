@@ -1,58 +1,70 @@
-# Documentation layout
+# Documentation map
 
 **Project domain:** Project infrastructure
 
-InfinityDB separates maintained repository documentation from local audit evidence.
-The distinction is intentional: an audit may produce large, environment-specific working
-material, while only the conclusions that must survive a checkout belong in Git.
+InfinityDB documentation is organized by **authority**, not by development chronology. Current
+behavior should have one maintained owner; secondary documents link to that owner instead of
+repeating the same contract. Git history and `docs/CHANGELOG.md` preserve release history.
 
-## Tracked documentation
+## Canonical current-state documents
 
-Files tracked directly under `docs/` are maintained project records. They include:
+Use these documents when deciding how the project works now:
 
-- authoritative reference documentation such as `architecture.md`, `data-model.md`,
-  `application-domains.md`, `web-design-guidelines.md`, `deployment.md`, and `testing.md`;
-- planning and release records such as `TODO.md`, `CHANGELOG.md`, and `releasing.md`;
-- durable audit or closeout records whose conclusions are useful after the original
-  working evidence has been discarded; and
-- maintained cross-release trackers such as `rules-interaction-checklist.md`.
+- `architecture.md` — system boundaries, engineering principles, ownership between subsystems,
+  runtime/browser/deployment architecture, and accepted design direction.
+- `data-model.md` — current source/application identities, semantic provenance, persistence,
+  query semantics, and generated-database contracts.
+- `application-domains.md` — canonical player-facing domain ownership and publication capabilities.
+- `web-design-guidelines.md` — browser layout, reusable surfaces, tables, controls, responsive
+  behavior, typography, accessibility, and theming rules.
+- `project-domains.md` — engineering ownership labels used by planning and release notes.
+- `data/README.md` — external inputs, generated artifacts, snapshot provenance, and publication
+  lifecycle.
+- `data/curated/README.md` — authored/curated data schemas and review contracts.
+- `testing.md` — local validation entry points, test slices, asset modes, reports, and benchmark
+  tooling.
+- `ci.md` — hosted CI workflows and repository-level validation policy.
+- `deployment.md` — production install/update/rollback/operations contract.
+- `server-migration.md` — moving released or development environments between hosts.
+- `releasing.md` — mandatory release gate and the 1.0 completeness definition.
 
-Release audit records describe the accepted state at a particular milestone. They do not
-override current authoritative reference documentation when the project later changes.
-Release-specific audit records should identify their release in both the filename and title.
-A long-lived refactor may also keep a current tracked audit baseline when its findings guide
-ongoing work; that document should state its status explicitly and be closed or superseded
-when the work finishes. The current durable audit records are:
+When two documents appear to overlap, prefer the owner above. Correct the owner first, then reduce
+secondary text to a link or short boundary statement.
 
-- `070-enrichment-presentation-audit.md`;
-- `080-connected-domain-audit.md`;
-- `080-web-consistency-closeout.md`;
-- `081-release-documentation-audit.md`; and
-- `010-web-design-audit.md` (current 0.10 design-refactor baseline).
+## Maintained evidence and research
+
+These files intentionally retain reviewed evidence that is useful beyond one release:
+
+- `rules-semantics.md` — audited rules meaning that already has a concrete InfinityDB consumer.
+- `rules-research.md` — verified source findings retained for possible future product/model work.
+- `rules-interaction-checklist.md` — generated cross-release interaction-review ledger. Regenerate
+  it with `tools/audit_rules_interactions.py`; do not edit it manually. Its release labels record the
+  original review/defer decision and are evidence provenance, not the active roadmap; use `TODO.md`
+  for current milestone planning.
+
+Completed audit/closeout documents are **not** permanent reference documentation by default. Once
+an audit closes, move lasting contracts into the canonical owner above, record user/operator-visible
+outcomes in `CHANGELOG.md`, and let Git history preserve the detailed narrative. Keep a tracked audit
+only when it contains unique rationale that still guides active work.
+
+## Planning and history
+
+- `TODO.md` — only work that is still unimplemented or intentionally deferred.
+- `CHANGELOG.md` — concise release outcomes and upgrade consequences.
+- `AI_CONTEXT.md` — compact agent-oriented index of non-obvious current invariants and pointers to
+  canonical documentation. It is not a second architecture or data-model specification.
 
 ## Local audit workspace
 
-`docs/audits/` is intentionally ignored by Git. Use it for transient or local audit
-evidence such as generated matrices, command output, comparison results, working notes,
-and environment- or deployment-specific observations. The directory may be deleted and
-regenerated without changing the repository.
+`docs/audits/` is intentionally ignored by Git. Use it for generated matrices, command output,
+comparison results, screenshots, exploratory notes, and machine/deployment-specific evidence.
+Nothing in normal builds, tests, CI, or runtime behavior may depend on this directory.
 
-Do not make builds, tests, CI, or maintained documentation depend on files under
-`docs/audits/`. Do not store credentials, secrets, or other sensitive material there merely
-because the directory is ignored.
+A normal audit therefore has three steps:
 
-When an audit closes, promote durable outcomes to the appropriate authoritative document.
-If preserving the audit decision/history itself has continuing value, write a concise tracked
-release-specific audit or closeout record under `docs/`. Raw evidence may remain local.
+1. collect transient evidence under `docs/audits/`;
+2. correct code/data/documentation and validate the result; and
+3. promote only durable conclusions into the canonical documents above.
 
-## Audit workflow
-
-A normal audit therefore has three layers:
-
-1. collect raw/local evidence under `docs/audits/`;
-2. make and validate corrections in code, data, or maintained documentation; and
-3. retain only durable conclusions in authoritative docs and, when useful, a tracked
-   release-specific audit/closeout record.
-
-This keeps the repository useful as long-lived documentation without turning it into an
-archive of every intermediate audit artifact.
+This keeps the repository documentation useful as a current technical reference instead of an
+archive of every completed review.

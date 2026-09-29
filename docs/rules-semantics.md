@@ -19,11 +19,12 @@ V5.3 core rules (`data/pdf/rules/n5-rules-v5-3-en.pdf`), N5 FAQ v0.1
 scope, and relevant ITS/FAQ material without silently merging season/scenario
 content into core rules.
 
-That pass produced 127 implementation-relevant `RS-*` findings retained in this
-file and 62 verified `RR-*` findings retained in `rules-research.md`. The detailed
-page-by-page audit ledger was intentionally retired after completion; Git history
-retains it. Future rules-version audits should establish a new explicit source
-baseline and update these maintained semantic/research records rather than revive
+That pass established the maintained `RS-*` semantic record set in this file and the
+separate `RR-*` research set in `rules-research.md`. Both have continued to evolve as
+reviewed findings were promoted, added, or retired, so this reference deliberately does not
+freeze their current counts. The detailed page-by-page audit ledger was intentionally retired
+after completion; Git history retains it. Future rules-version audits should establish a new
+explicit source baseline and update these maintained semantic/research records rather than revive
 an indefinitely growing process log.
 
 Source handling remains: prefer current official material when it supersedes an
@@ -932,9 +933,10 @@ Skill/Equipment modifier notation remain source properties without acquiring a T
 route. Unresolved source properties remain visible provisionally rather than being
 discarded.
 
-This finding is about vocabulary/identity coverage, not full rules coverage. Attachment
-of Traits to every relevant Weapon/Equipment/Skill and all structured effect
-relationships still need validation during the later domain audits.
+This finding is about vocabulary/identity coverage, not full rules coverage. Complete
+attachment of Traits to every relevant Weapon/Equipment/Skill and complete structured
+effect relationships remain separate completeness concerns; the identity count alone
+does not establish either.
 
 Sources:
 
@@ -1111,10 +1113,9 @@ Sources:
 **Classification:** resolved InfinityDB curated-data correctness requirement.
 
 The tracked `skillTypes` vocabulary defines the six current categories: Automatic,
-Deployment, Basic Short, Short, Long, and ARO. Curated format v7 uses generic
-`declaration-category` records whose `facts.typeId` resolves to that vocabulary, so the
-same typed classification can apply to Skills and Equipment without changing their
-catalog identity.
+Deployment, Basic Short, Short, Long, and ARO. Generic `declaration-category` records use
+`facts.typeId` to resolve that vocabulary, so the same typed classification can apply to Skills
+and Equipment without changing their catalog identity.
 
 The 2026-09-23 reconciliation corrected the audited mismatches: BS Attack, CC Attack,
 Dodge, and Forward Observer are Short Skill / ARO; Doctor and Engineer are Short Skill;
@@ -1137,16 +1138,13 @@ loadout Order-generation entries. They are presented per loadout with core
 N5.3 citations. Tactical and Lieutenant Orders remain separate facts, and no
 rule-engine or temporary Isolated/Loss-of-Lieutenant state is inferred.
 
-Curated format v19 makes multi-category Skill classification intrinsic to full Skill
-definitions through ordered `facts.typeIds`. Browser/API composition therefore exposes
-all categories for rules-native Skills as well as Army-linked Skills. Linked
-`declaration-category` records remain only as the partial-classification path for Army
-Skills without a full definition and for Equipment. Curated format v20 additionally
-distinguishes rules that modify another rule's use, prohibit entry into a State, or
-trigger specifically on State entry, so those interactions no longer remain deferred
-solely because the older relation vocabulary was too coarse. Curated format v21 adds
-`equips-with` for a rule that explicitly gives its user a piece of Equipment without
-claiming that the source rule itself reuses the Equipment's effects.
+Multi-category Skill classification is intrinsic to full Skill definitions through ordered
+`facts.typeIds`. Browser/API composition therefore exposes all categories for rules-native Skills
+as well as Army-linked Skills. Linked `declaration-category` records remain only as the
+partial-classification path for Army Skills without a full definition and for Equipment. The
+current typed relation vocabulary also distinguishes modification of another rule's use, State-entry
+prohibition and triggers, and explicit Equipment grants such as Paramedic providing MediKit rather
+than treating those interactions as generic related-item links.
 
 Sources:
 
@@ -1176,8 +1174,8 @@ These rules refine `RS-BR-ROLL-001/002`. InfinityDB should preserve the exact
 source annotation and use typed parameter semantics for interpretation. A value
 such as `-3` is insufficient without the owning rule and semantic target.
 
-Curated format v9 introduced the reviewed exact-source Attribute-replacement subset:
-Army Skill IDs 278 (`BS=12`) and 279 (`BS=11`) are typed variants of BS Attack,
+The current curated model represents the reviewed exact-source Attribute-replacement subset
+explicitly: Army Skill IDs 278 (`BS=12`) and 279 (`BS=11`) are typed variants of BS Attack,
 and ID 274 (`CC=21`) is a typed variant of CC Attack. Their structured
 `source_variant` metadata carries `kind: attribute-replacement`, the target
 Attribute, and the replacement value. No runtime display-name parsing is used; PH
@@ -1206,8 +1204,8 @@ The existing canonical grouping of Martial Arts L1-L5 and Strategos L1-L2 is
 therefore compatible with the rules only while the source Level remains
 preserved and presentable.
 
-This was introduced in curated format v9: Martial Arts source IDs 19-23 are typed
-as Levels 1-5 and Strategos source IDs 69-70 as Levels 1-2. The application keeps the
+The current curated model types Martial Arts source IDs 19-23 as Levels 1-5 and Strategos
+source IDs 69-70 as Levels 1-2. The application keeps the
 family browsing identity while exposing the exact Level as `source_variant` metadata on
 the matching source occurrence; no `L<number>` runtime name parsing is used.
 
@@ -1688,7 +1686,7 @@ rules.
 This supports the current application/catalog policy of retaining
 `application_catalog_sources` and source labels alongside canonical identities.
 
-Curated format v9 introduced this distinction for the current TinBot identity group.
+The current curated model preserves this distinction for the TinBot identity group.
 The Firewall, Neurocinetics, Albedo, Discover, ECM Guided, and Repeater source records
 are typed `named` exact-source variants of the TinBot family. Their Army occurrence
 extras remain separate source data: this classification identifies the named advantage
@@ -2001,10 +1999,10 @@ legacy `entire order` declaration value for Long Skills; InfinityDB preserves th
 raw source value but composes it as the canonical **Long Skill** category, using the
 same declaration-category identity and presentation language as Skills.
 
-Hacking Programs should therefore become a rules-reference domain rather than be
-encoded as pseudo-Weapons or pseudo-Skills solely to reuse an existing schema.
-Shared concepts such as PS, Burst, Ammunition, Labels, and States can be related
-across domains while preserving the Program-specific profile fields.
+Hacking Programs are therefore a first-class rules-reference domain rather than
+being encoded as pseudo-Weapons or pseudo-Skills solely to reuse an existing schema.
+Shared concepts such as PS, Burst, Ammunition, Labels, and States are related across
+domains while the Program-specific profile fields remain distinct.
 
 Sources:
 
@@ -2027,9 +2025,10 @@ numeric damage scalar. Depending on the type, Ammunition can change the
 effective Saving Roll Attribute, number of Saving Rolls, Wounds caused, State
 effects, visibility effects, or whether a target can be affected at all.
 
-InfinityDB should therefore model reviewed Ammunition identities/effects in the
-rules layer and link Weapon profiles to them. Source Ammunition IDs/names remain
-provenance; effects should not be inferred from Weapon display names.
+InfinityDB therefore publishes the reviewed base Ammunition identities in the rules
+layer and links Weapon profiles to their Ammunition identities. Source Ammunition
+IDs/names remain provenance. Deeper typed effect/component relationships remain explicit
+completeness work rather than being inferred from Weapon display names.
 
 Sources:
 
@@ -2982,8 +2981,9 @@ identities from the rules-backed Skill catalog when a valid `rules.db` is availa
 Conversely, rules-native Skills do not need an Army occurrence to be catalog identities. The
 current core catalog therefore includes the canonical Special Skill `Non-Hackable` with zero
 Army uses, just as Common Skills can exist without profile rows. The Reinforcements-only
-`Request Reinforcements` Skill remains outside the core 0.7.0 denominator until the separately
-scoped Reinforcements annex is promoted into that catalog surface. Unknown future Army
+`Request Reinforcements` Skill remains outside the current core Skills catalog until the
+separately scoped Reinforcements annex is curated and published into that surface. Unknown
+future Army
 skill-like values remain visible provisionally rather than being silently dropped.
 
 The cross-domain source classifications are maintained in
@@ -3263,7 +3263,7 @@ Source:
 
 **Classification:** source-native Equipment interaction semantics.
 
-The 0.7.0 interaction audit covers public Equipment identities independently of Skill and Trait
+The interaction review covers public Equipment identities independently of Skill and Trait
 coverage. A reviewed Equipment definition may legitimately have no outgoing gameplay edge when
 its rule is self-contained, while Equipment that changes a named action authors the same typed
 relations used elsewhere in the graph.
@@ -3349,8 +3349,9 @@ Sources:
 **Classification:** source-native Skill interaction semantics.
 
 Berserk reuses Move and CC Attack as the two actions combined by its Long Skill. Guard enables
-CC Attack without the normal Silhouette-contact requirement, while its Aerial restriction remains
-queued until Aerial has a canonical Skill definition. Neurocinetics and Total Reaction both alter
+CC Attack without the normal Silhouette-contact requirement. The inverse Aerial restriction is owned
+by the canonical Aerial definition, which restricts Guard rather than duplicating the same condition
+on Guard. Neurocinetics and Total Reaction both alter
 BS Attack Burst processing across Active/Reactive Turn contexts, so they author
 `modifies-rolls-for` toward BS Attack without turning their turn-specific conditions into universal
 BS Attack behavior.
@@ -3378,9 +3379,8 @@ Aerial directly prevents Cautious Movement, prevents Guard from being used again
 Aerial Trooper unless it is Unconscious, and stops Boost weapons from activating against it.
 Those interactions therefore author `restricts-use-of` toward Cautious Movement and Guard, and
 `negates-effects-of` toward Boost. The Aerial rule is the source endpoint for the Guard edge so
-reverse navigation on Guard correctly reads as being restricted by Aerial. Aerial's Prone and
-Engaged restrictions stay in the future ledger until those States and a precise prevents-state
-relation are modeled.
+reverse navigation on Guard correctly reads as being restricted by Aerial. Its Prone and Engaged
+prohibitions are modeled explicitly with `prevents-state-entry` relations to those States.
 
 Climbing Plus reuses Climb while changing its declaration timing, and explicitly extends its
 vertical-movement effects to Move and Dodge. It therefore authors `uses-effects-of` toward Climb
@@ -3388,11 +3388,12 @@ and `applies-effects-to` toward Move and Dodge. Its failed-Guts movement and Par
 interactions stay deferred where the current graph lacks the required generic identity or
 benefit-suppression relation.
 
-Terrain and Warhorse are valid reviewed zero-edge definitions at the current graph boundary.
-Terrain's MOV bonus targets any Movement-labeled Skill and bypasses matching Special Terrain
-movement restrictions; Warhorse interacts with Loss of Lieutenant, Retreat, Isolated State, and
-the exact BS Attack (-X) modifier form. Those concepts are kept in the maintained future ledger
-rather than approximated with incomplete Skill-specific or State-effect edges.
+Terrain is a reviewed zero-edge definition at the current graph boundary: its MOV bonus targets
+any Movement-labelled Skill and bypasses matching Special Terrain movement restrictions, which the
+current graph cannot express precisely. Warhorse now authors `negates-effects-of` toward Loss of
+Lieutenant and `prevents-state-entry` toward Isolated State. Its Retreat interaction and the exact BS
+Attack (-X) modifier form remain in the maintained future ledger rather than being approximated by
+over-broad edges.
 
 Sources:
 
@@ -3422,11 +3423,11 @@ modeled Camouflaged, Decoy, and Impersonation-1/2 States while retaining the gen
 State/prevention semantics in the future ledger. The Wound/Dead trigger also remains deferred until
 event-trigger relationships are modeled precisely.
 
-Impetuous is intentionally a reviewed zero-edge definition at the current graph boundary. Its
-allowed activation combinations, mandatory Movement-labelled behavior, Prone cancellation/re-entry
-restriction, Marker-State prohibition, and Retreat suppression are phase- or category-scoped
-semantics that the current relation vocabulary cannot represent without suggesting the Skill grants
-or universally disables the referenced declarations.
+Impetuous authors the stable State interactions that the current graph can represent: it cancels
+Prone, Holoecho, and HoloMask and prevents entry into Prone. Its allowed activation combinations,
+mandatory Movement-labelled behavior, generic Marker-State prohibition, and Retreat-phase
+suppression remain phase- or category-scoped semantics in the maintained future ledger rather than
+being approximated by over-broad Skill or State edges.
 
 Sources:
 
@@ -3503,9 +3504,8 @@ Sources:
 **Classification:** source-native Equipment interaction semantics.
 
 Motorcycle directly prevents use of Climb, upward Jump, and Cautious Movement while mounted, so
-it authors `restricts-use-of` edges toward those Skills. Its prohibition on entering Prone remains
-queued because the current relation vocabulary does not yet distinguish a restriction on entering
-a State from ordinary Skill-use restriction.
+it authors `restricts-use-of` edges toward those Skills. Its prohibition on entering Prone is
+modeled separately with `prevents-state-entry` toward Prone State.
 
 AI Motorcycle reuses the Motorcycle rules while mounted and Peripheral (Synchronized) rules while
 dismounted, so it authors `uses-effects-of` edges toward those canonical identities. With
@@ -3525,8 +3525,9 @@ TinBot is a browsing family whose actual gameplay effect is defined by the Equip
 in the exact source variant. Exact variants therefore carry their own reviewed relationships rather
 than inheriting one generic TinBot interaction set. Current canonical targets allow TinBot Albedo
 to `uses-effects-of` Albedo, TinBot Discover to `modifies-rolls-for` Discover, TinBot ECM Guided to
-`uses-effects-of` ECM, and TinBot Repeater to `uses-effects-of` Repeater. Firewall and
-Neurocinetics variants remain queued until their target identities are canonically modeled.
+`uses-effects-of` ECM, TinBot Repeater to `uses-effects-of` Repeater, and TinBot Neurocinetics to
+`uses-effects-of` Neurocinetics. The Firewall variant remains queued because Firewall is not yet a
+standalone canonical Equipment rule.
 
 Source:
 
@@ -3566,6 +3567,27 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Holoprojector>
 - Wiki: <https://infinitythewiki.com/Escape_System>
 - Wiki: <https://infinitythewiki.com/SymbioMate>
+
+### RS-EQ-CORE-008 — Baggage and Reload have complementary participant requirements
+
+**Classification:** reviewed cross-rule interpretation.
+
+Baggage and Reload describe the same recovery interaction from opposite participant perspectives.
+Baggage states the conditions on its holder and the affected Allied Trooper; Reload states the
+conditions from the reloading user's perspective. InfinityDB therefore preserves both source
+formulations and presents the combined requirement explicitly: the Baggage holder and affected
+Trooper must both be in non-Null States, and the affected Trooper must be inside the Baggage
+holder's Zone of Control. This is a reviewed composition of complementary prerequisites, not a new
+independent game rule inferred from shared wording.
+
+The canonical records keep their distinct identities and relations: Baggage enables Reload and both
+can cancel Unloaded State where their requirements and restrictions are satisfied.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Baggage>, reviewed 2026-09-23
+- Wiki: <https://infinitythewiki.com/Reload>, reviewed 2026-09-23
+
 
 ## ITS FAQ
 
