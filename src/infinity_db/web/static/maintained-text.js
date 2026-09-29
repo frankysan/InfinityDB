@@ -1,49 +1,110 @@
 import { formatDistanceExtra } from "./preferences.js";
 
 let tooltipSequence = 0;
+let activeReference = null;
 let activeTouchReference = null;
 let pendingTouchReference = null;
 
+function referenceTooltip(link) {
+  return link.closest(".maintained-reference-wrap")
+    ?.querySelector(".maintained-reference-tooltip") || null;
+}
+
+function popoverSupported(tooltip) {
+  return typeof tooltip.showPopover === "function" && typeof tooltip.hidePopover === "function";
+}
+
+function showReferenceTooltip(tooltip) {
+  if (popoverSupported(tooltip)) {
+    if (!tooltip.matches(":popover-open")) tooltip.showPopover();
+    return;
+  }
+  tooltip.dataset.tooltipOpen = "true";
+}
+
+function hideReferenceTooltip(tooltip) {
+  if (popoverSupported(tooltip)) {
+    if (tooltip.matches(":popover-open")) tooltip.hidePopover();
+    return;
+  }
+  tooltip.removeAttribute("data-tooltip-open");
+}
+
+function forceCloseReferencePreview(link) {
+  const tooltip = referenceTooltip(link);
+  if (tooltip) hideReferenceTooltip(tooltip);
+  if (activeReference === link) activeReference = null;
+}
+
+function referencePreviewShouldStayOpen(link) {
+  return activeTouchReference === link
+    || document.activeElement === link
+    || link.matches(":hover");
+}
+
+function closeReferencePreview(link) {
+  if (referencePreviewShouldStayOpen(link)) return;
+  forceCloseReferencePreview(link);
+}
+
 function closeTouchPreview() {
   if (!activeTouchReference) return;
-  const wrapper = activeTouchReference.closest(".maintained-reference-wrap");
-  wrapper?.removeAttribute("data-touch-open");
-  if (document.activeElement === activeTouchReference) activeTouchReference.blur();
+  const link = activeTouchReference;
   activeTouchReference = null;
+  if (document.activeElement === link) link.blur();
+  forceCloseReferencePreview(link);
 }
 
 function positionReferenceTooltip(link) {
-  const wrapper = link.closest(".maintained-reference-wrap");
-  const tooltip = wrapper?.querySelector(".maintained-reference-tooltip");
-  if (!wrapper || !tooltip) return;
+  const tooltip = referenceTooltip(link);
+  if (!tooltip) {
+    if (activeReference === link) activeReference = null;
+    return;
+  }
+
+  if (activeReference && activeReference !== link) forceCloseReferencePreview(activeReference);
+  activeReference = link;
+  showReferenceTooltip(tooltip);
 
   const viewportGutter = 12;
-  wrapper.removeAttribute("data-tooltip-placement");
-  tooltip.style.removeProperty("--maintained-tooltip-shift-x");
+  const tooltipGap = 8;
+  tooltip.style.left = "0px";
+  tooltip.style.top = "0px";
 
   const linkRect = link.getBoundingClientRect();
   const tooltipRect = tooltip.getBoundingClientRect();
   const spaceAbove = linkRect.top - viewportGutter;
   const spaceBelow = window.innerHeight - linkRect.bottom - viewportGutter;
-  if (spaceAbove < tooltipRect.height + 8 && spaceBelow > spaceAbove) {
-    wrapper.dataset.tooltipPlacement = "below";
-  }
 
-  const positionedRect = tooltip.getBoundingClientRect();
-  let shiftX = 0;
-  if (positionedRect.left < viewportGutter) {
-    shiftX += viewportGutter - positionedRect.left;
-  } else if (positionedRect.right > window.innerWidth - viewportGutter) {
-    shiftX -= positionedRect.right - (window.innerWidth - viewportGutter);
+  let left = linkRect.left + (linkRect.width - tooltipRect.width) / 2;
+  const maxLeft = Math.max(
+    viewportGutter,
+    window.innerWidth - viewportGutter - tooltipRect.width,
+  );
+  left = Math.min(Math.max(left, viewportGutter), maxLeft);
+
+  let top = linkRect.top - tooltipRect.height - tooltipGap;
+  if (spaceAbove < tooltipRect.height + tooltipGap && spaceBelow > spaceAbove) {
+    top = linkRect.bottom + tooltipGap;
   }
-  tooltip.style.setProperty("--maintained-tooltip-shift-x", `${Math.round(shiftX)}px`);
+  const maxTop = Math.max(
+    viewportGutter,
+    window.innerHeight - viewportGutter - tooltipRect.height,
+  );
+  top = Math.min(Math.max(top, viewportGutter), maxTop);
+
+  tooltip.style.left = `${Math.round(left)}px`;
+  tooltip.style.top = `${Math.round(top)}px`;
+}
+
+function openReferencePreview(link) {
+  positionReferenceTooltip(link);
 }
 
 function openTouchPreview(link) {
   if (activeTouchReference && activeTouchReference !== link) closeTouchPreview();
-  positionReferenceTooltip(link);
   activeTouchReference = link;
-  link.closest(".maintained-reference-wrap")?.setAttribute("data-touch-open", "true");
+  openReferencePreview(link);
 }
 
 function prepareTouchReference(link) {
@@ -72,9 +133,7 @@ function prepareTouchReference(link) {
     if (pendingTouchReference?.link !== link) return;
     const { follow } = pendingTouchReference;
     pendingTouchReference = null;
-    const tooltip = link.closest(".maintained-reference-wrap")
-      ?.querySelector(".maintained-reference-tooltip");
-    if (!tooltip) return;
+    if (!referenceTooltip(link)) return;
     if (follow) {
       closeTouchPreview();
       return;
@@ -129,11 +188,18 @@ function referenceNode(token, { interactive = true } = {}) {
     tooltip.id = `maintained-reference-tooltip-${tooltipSequence}`;
     tooltip.className = "maintained-reference-tooltip";
     tooltip.role = "tooltip";
+    tooltip.setAttribute("popover", "manual");
     tooltip.append(maintainedTextFragment(token.preview_tokens, "", { interactive: false }));
     link.setAttribute("aria-describedby", tooltip.id);
     wrapper.append(tooltip);
-    link.addEventListener("pointerenter", () => positionReferenceTooltip(link));
-    link.addEventListener("focus", () => positionReferenceTooltip(link));
+    link.addEventListener("pointerenter", (event) => {
+      if (event.pointerType !== "touch") openReferencePreview(link);
+    });
+    link.addEventListener("pointerleave", (event) => {
+      if (event.pointerType !== "touch") closeReferencePreview(link);
+    });
+    link.addEventListener("focus", () => openReferencePreview(link));
+    link.addEventListener("blur", () => closeReferencePreview(link));
     prepareTouchReference(link);
   }
   return wrapper;
@@ -175,11 +241,14 @@ document.addEventListener("click", (event) => {
   closeTouchPreview();
 });
 
-document.addEventListener("infinity:beforenavigation", closeTouchPreview);
+document.addEventListener("infinity:beforenavigation", () => {
+  closeTouchPreview();
+  if (activeReference) forceCloseReferencePreview(activeReference);
+});
 window.addEventListener("resize", () => {
-  if (activeTouchReference) positionReferenceTooltip(activeTouchReference);
+  if (activeReference) positionReferenceTooltip(activeReference);
 });
 window.addEventListener("scroll", () => {
-  if (activeTouchReference) positionReferenceTooltip(activeTouchReference);
+  if (activeReference) positionReferenceTooltip(activeReference);
 }, { passive: true });
 window.addEventListener("distanceunitchange", refreshDistances);

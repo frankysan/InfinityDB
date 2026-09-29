@@ -4210,15 +4210,15 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     assert b'event.preventDefault()' in renderer
     assert b'openTouchPreview(link)' in renderer
     assert b'const viewportGutter = 12' in renderer
-    assert b'wrapper.dataset.tooltipPlacement = "below"' in renderer
-    assert b'--maintained-tooltip-shift-x' in renderer
-    assert (
-        b'link.addEventListener("pointerenter", () => positionReferenceTooltip(link))'
-        in renderer
-    )
-    assert b'link.addEventListener("focus", () => positionReferenceTooltip(link))' in renderer
+    assert b'tooltip.setAttribute("popover", "manual")' in renderer
+    assert b'tooltip.showPopover()' in renderer
+    assert b'tooltip.hidePopover()' in renderer
+    assert b'link.addEventListener("pointerenter", (event) =>' in renderer
+    assert b'link.addEventListener("pointerleave", (event) =>' in renderer
+    assert b'link.addEventListener("focus", () => openReferencePreview(link))' in renderer
+    assert b'link.addEventListener("blur", () => closeReferencePreview(link))' in renderer
     assert b'document.addEventListener("click", (event) =>' in renderer
-    assert b'document.addEventListener("infinity:beforenavigation", closeTouchPreview)' in renderer
+    assert b'document.addEventListener("infinity:beforenavigation", () =>' in renderer
     assert b'window.addEventListener("resize", () =>' in renderer
     assert b'window.addEventListener("scroll", () =>' in renderer
     assert b'window.addEventListener("distanceunitchange", refreshDistances)' in renderer
@@ -4226,12 +4226,12 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     status, _, styles = request(rules_app, "/static/styles.css")
     assert status == 200
     assert b".maintained-reference-tooltip" in styles
-    assert b".maintained-reference-wrap:focus-within .maintained-reference-tooltip" in styles
-    assert b'.maintained-reference-wrap[data-touch-open="true"]' in styles
-    assert b'.maintained-reference-wrap[data-tooltip-placement="below"]' in styles
+    assert b"position: fixed" in styles
+    assert b"z-index: 2147483647" in styles
+    assert b'.maintained-reference-tooltip[data-tooltip-open="true"]' in styles
+    assert b"@supports selector(:popover-open)" in styles
+    assert b".maintained-reference-tooltip:popover-open" in styles
     assert b'calc(100vw - 24px)' in styles
-    assert b'--maintained-tooltip-shift-x' in styles
-    assert b"@media (hover: hover)" in styles
 
 
 def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) -> None:

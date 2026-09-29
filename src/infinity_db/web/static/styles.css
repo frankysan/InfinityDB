@@ -1591,12 +1591,12 @@ h1>span {
 }
 
 .maintained-reference-tooltip {
-  position: absolute;
-  z-index: 3;
-  inset-inline-start: 50%;
-  bottom: calc(100% + 8px);
+  position: fixed;
+  z-index: 2147483647;
+  inset: auto;
   width: max-content;
   max-width: min(320px, calc(100vw - 24px));
+  margin: 0;
   padding: 8px 10px;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
@@ -1608,25 +1608,18 @@ h1>span {
   font-weight: 400;
   line-height: 1.4;
   text-align: start;
-  transform: translateX(calc(-50% + var(--maintained-tooltip-shift-x, 0px)));
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
 }
 
-.maintained-reference-wrap[data-tooltip-placement="below"] .maintained-reference-tooltip {
-  top: calc(100% + 8px);
-  bottom: auto;
-}
-
-.maintained-reference-wrap:focus-within .maintained-reference-tooltip,
-.maintained-reference-wrap[data-touch-open="true"] .maintained-reference-tooltip {
+.maintained-reference-tooltip[data-tooltip-open="true"] {
   visibility: visible;
   opacity: 1;
 }
 
-@media (hover: hover) {
-  .maintained-reference-wrap:hover .maintained-reference-tooltip {
+@supports selector(:popover-open) {
+  .maintained-reference-tooltip:popover-open {
     visibility: visible;
     opacity: 1;
   }
