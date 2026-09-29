@@ -778,6 +778,13 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                             f"{context}: unit-profile-help 'order' must be a "
                             "nonnegative integer"
                         )
+        if record["kind"] == "term":
+            facts = record.get("facts")
+            if not isinstance(facts, dict) or set(facts) != {"scope"}:
+                raise ValueError(
+                    f"{context}: term 'facts' must contain only 'scope'"
+                )
+            require_domain_slug(facts["scope"], context=f"{context}.facts.scope")
         if record["kind"] == "trait":
             facts = record.get("facts")
             if facts is not None:

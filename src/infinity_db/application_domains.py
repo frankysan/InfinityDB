@@ -216,6 +216,17 @@ APPLICATION_DOMAINS: tuple[ApplicationDomain, ...] = (
         glossary=True,
         published=True,
     ),
+    ApplicationDomain(
+        "terms",
+        "Game term",
+        "Game terms",
+        "embedded",
+        "embedded",
+        record_kinds=("term",),
+        search=True,
+        glossary=True,
+        published=True,
+    ),
 )
 
 _APPLICATION_DOMAINS_BY_SLUG = {domain.slug: domain for domain in APPLICATION_DOMAINS}

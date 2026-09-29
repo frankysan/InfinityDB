@@ -13,8 +13,9 @@ are related concerns, but they are not the same concern.
 The capability registry described below is **Current** in
 `src/infinity_db/application_domains.py`. Ammunition and Labels are published catalog domains,
 Armies is a published overview domain, Fireteams follows the shared landing/scoped interaction
-contract, and Attributes are a published embedded vocabulary projected through contextual help,
-global search, and the federated Glossary. General Rules publication remains **Design direction**.
+contract, and Attributes plus scoped Game terms are published embedded vocabularies projected
+through contextual help, global search, and the federated Glossary. General Rules publication
+remains **Design direction**.
 Concrete unfinished work remains in `docs/TODO.md`.
 
 ## Principles
@@ -63,14 +64,18 @@ army-scoped view rather than a conventional item catalog.
 Embedded vocabularies contain canonical typed concepts that are useful for semantic links, tooltips,
 glossary entries, filtering, or search, but do not warrant their own catalog/detail browser.
 
-**Current.** Attributes are the first explicit example. Canonical identities such as
+**Current.** Attributes and Game terms use this model. Canonical Attribute identities such as
 `attribute:mov`, `attribute:bs`, and `attribute:wip` own reviewed definitions and can participate in
-semantic relationships without creating `/attributes` or individual Attribute pages. Their
-player-facing presentation is contextual help/tooltips plus Glossary/search results.
+semantic relationships without creating `/attributes` or individual Attribute pages. Scoped
+`term:*` identities cover source-native terminology such as Trooper, Marker, Token, Peripheral,
+Victory Points, Null State, and Alignment terms. Each Game term carries a reviewed semantic scope
+(for example `game-element`, `alignment`, or `scoring`) so a surface name such as Marker or Hostile
+can coexist with a Label or Trait of the same name without merging identities. Neither vocabulary
+has a standalone catalog/detail hierarchy; both project through Glossary/search, while Attributes
+also participate in contextual Unit-profile help/tooltips.
 
 Other finite vocabularies may use the same model when a player-facing catalog would add little
-value.
-Do not promote a vocabulary to a top-level domain merely because it has typed identities.
+value. Do not promote a vocabulary to a top-level domain merely because it has typed identities.
 
 ### Cross-domain views
 
@@ -276,7 +281,9 @@ The projection:
 
 Profile notation help is a contextual consumer of this framework, not a competing glossary dataset.
 Attribute labels on Unit details reuse the same canonical `attribute:*` definitions and Glossary
-anchors. Additional terminology coverage remains tracked in `docs/TODO.md`.
+anchors. Source-backed `term:*` records provide the corresponding embedded terminology layer for
+concepts that do not warrant dedicated pages; search and Glossary preserve their Game-term identity
+separately from same-name Labels, Traits, or other concepts.
 
 ## Population and publication strategy
 
@@ -291,8 +298,8 @@ The implementation sequence is:
 2. **Current:** expose Labels and Ammunition as the first newly browsable domains;
 3. **Current:** publish the Armies overview and normalize Fireteams to the landing/scoped
    interaction contract;
-4. **Current:** publish Attributes as the first embedded vocabulary and Glossary as a federated
-   projection over canonical domains plus embedded vocabularies;
+4. **Current:** publish Attributes and scoped Game terms as embedded vocabularies and Glossary as
+   a federated projection over canonical domains plus embedded vocabularies;
 5. continue filling semantic relationships and terminology coverage through the 1.0 completeness
    work.
 

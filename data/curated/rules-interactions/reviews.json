@@ -94,6 +94,125 @@
       "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
     },
     {
+      "recordId": "term:ally",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:deployable-equipment",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:deployable-weapon",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:enemy",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:hostile",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:marker",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:model",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:neutral",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:null-state",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:peripheral",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:scenery-element",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:state-token",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:target",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:token",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:trooper",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:unit-profile",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
+      "recordId": "term:victory-points",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
+    },
+    {
       "recordId": "equipment:albedo",
       "targetRelease": "0.7.0",
       "status": "reviewed",

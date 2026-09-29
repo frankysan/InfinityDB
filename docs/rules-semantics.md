@@ -852,11 +852,11 @@ The rules reuse the same surface terms in distinct but related semantic roles:
   the derived phrase “Null State”;
 - `Non-Reloadable` exists as both a Label and a Trait.
 
-A future InfinityDB game-terms thesaurus therefore cannot use normalized display
-text alone as global identity. Terms need a concept kind/scope (for example
-`characteristic`, `label`, `trait`, `alignment`, `game-element`, `state`) plus
-explicit relationships between same-name or related concepts. This avoids accidental
-merges while still allowing cross-links and aliases.
+InfinityDB's embedded Game-term vocabulary therefore does not use normalized display text alone as
+global identity. Canonical `term:*` records retain a semantic `facts.scope` (for example
+`alignment`, `game-element`, `profile`, or `state-classification`) while Labels, Traits, States, and
+other domains keep their own typed identities. This avoids accidental merges while still allowing
+cross-links and aliases as those relationships are reviewed.
 
 Sources:
 

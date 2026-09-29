@@ -232,6 +232,34 @@ def test_training_requires_reviewed_order_type(tmp_path: Path, facts: dict) -> N
         load_curated_document(path)
 
 
+def test_term_requires_scoped_embedded_vocabulary_facts(tmp_path: Path) -> None:
+    document = valid_document()
+    term = document["records"][0]
+    term.update(
+        id="term:marker",
+        kind="term",
+        name="Marker",
+        facts={"scope": "game-element"},
+    )
+    term.pop("labelIds")
+    path = tmp_path / "term.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    assert load_curated_document(path)["records"][0]["facts"] == {
+        "scope": "game-element"
+    }
+
+    term["facts"] = {}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="term 'facts'.*scope"):
+        load_curated_document(path)
+
+    term["facts"] = {"scope": "Game Element"}
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="facts.scope"):
+        load_curated_document(path)
+
+
 def test_training_cannot_masquerade_as_army_skill(tmp_path: Path) -> None:
     document = valid_document()
     training = document["records"][0]

@@ -42,13 +42,13 @@ turn an inference into a source-native rule.
 
 The Unit Profile page already exposes cross-domain terms such as Unit, Unit
 Profile, Trooper, Attribute, Characteristic, Training, Troop Type, Trooper
-Classification, ISC, Peripheral, and Controller. These terms can form the first
-seed of a game-term thesaurus even when no dedicated database domain is warranted
-for a term.
+Classification, ISC, Peripheral, and Controller. These terms form the source
+seed for the embedded Game-term vocabulary even when no standalone application
+catalog is warranted for a term.
 
-The completed Game States and Glossary audit established the broader canonical
-vocabulary and relationship boundaries. Any future thesaurus should reuse those
-audited semantics rather than introduce a second competing glossary structure.
+The completed Game States and Glossary audit established the broader canonical vocabulary and
+relationship boundaries. Current `term:*` identities reuse those audited semantics and project
+through Glossary/search rather than introducing a second competing glossary structure.
 
 Sources:
 
@@ -275,10 +275,10 @@ not belong naturally to one Army-data domain: Attributes, Deployable Equipment,
 Deployable Weapon, Marker, Model, Peripheral, Scenery Element, State Token,
 Target, Token, Trooper, Unit Profile, Victory Points, plus the Alignment terms.
 
-A future thesaurus can use these as source-backed concepts and link them to
-existing domains where applicable without creating dedicated database entities
-for every term. The new scoped-concept requirement in `rules-semantics.md`
-should be treated as part of that design.
+The embedded Game-term vocabulary now uses this seed as source-backed concepts and links to
+existing domains where applicable without creating standalone application pages for every term.
+The scoped-concept requirement in `rules-semantics.md` is implemented through typed `term:*`
+identities plus `facts.scope`.
 
 Sources:
 

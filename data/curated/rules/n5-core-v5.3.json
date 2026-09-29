@@ -1575,6 +1575,499 @@
             }
         },
         {
+            "id": "term:model",
+            "kind": "term",
+            "name": "Model",
+            "summary": "A Model is a game element with Attributes represented on the game table by a miniature.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "game-element"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — Model"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:marker",
+            "kind": "term",
+            "name": "Marker",
+            "summary": "A Marker is a game element with Attributes represented by a Marker when a Skill, Weapon, or Equipment rule allows that representation.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "game-element"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — Marker"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:token",
+            "kind": "term",
+            "name": "Token",
+            "summary": "A Token represents a [[trait:deployable|Deployable]] Weapon or piece of Equipment on the battlefield.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "game-element"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — Token"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:state-token",
+            "kind": "term",
+            "name": "State Token",
+            "summary": "This token is a reminder placed to indicate the effect of a rule, Skill, or game state; it does not replace the identity of the affected game element.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "game-element"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — State Token"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:deployable-equipment",
+            "kind": "term",
+            "name": "Deployable Equipment",
+            "summary": "Equipment with the [[trait:deployable|Deployable]] Trait can be placed as an independent battlefield game element with its own Attributes and can be targeted.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "game-element"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — Deployable Equipment"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:deployable-weapon",
+            "kind": "term",
+            "name": "Deployable Weapon",
+            "summary": "A Weapon with the [[trait:deployable|Deployable]] Trait can be placed as an independent battlefield game element with its own Attributes and can be targeted.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "game-element"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — Deployable Weapon"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:peripheral",
+            "kind": "term",
+            "name": "Peripheral",
+            "summary": "A [[skill:peripheral|Peripheral]] is a Trooper associated with a Controller. The Special Skill defines the common Controller relationship and the core peripheral types.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "trooper-category"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — Peripheral"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:scenery-element",
+            "kind": "term",
+            "name": "Scenery Element",
+            "summary": "A Scenery Element is a battlefield game element representing scenery or terrain; rules may give it Attributes or make it a target.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "game-element"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — Scenery Element"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:target",
+            "kind": "term",
+            "name": "Target",
+            "summary": "A Target is the game element designated by a Skill or Attack as the subject of its effects.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "game-element"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — Target"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:trooper",
+            "kind": "term",
+            "name": "Trooper",
+            "summary": "A Trooper is a game element represented by a Unit Profile and belonging to a player’s force.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "game-element"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — Trooper"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:unit-profile",
+            "kind": "term",
+            "name": "Unit Profile",
+            "summary": "A Unit Profile is the rules data that defines a Trooper’s Attributes, Skills, Equipment, Weapons, and selectable options.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "profile"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — Unit Profile"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:victory-points",
+            "kind": "term",
+            "name": "Victory Points",
+            "summary": "Victory Points are the combined Cost of a player’s Troopers that are in a non-null state. They depend on current game state as well as Army List Cost rather than being a static Unit or profile value.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "scoring"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Terminology — Victory Points"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:null-state",
+            "kind": "term",
+            "name": "Null State",
+            "summary": "A null-classified state is one carrying the Null Label. Troopers in such a state do not provide Orders or Victory Points.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "state-classification"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 174,
+                    "section": "Labels — Null"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:ally",
+            "kind": "term",
+            "name": "Ally",
+            "summary": "An Ally is a game element belonging to the player’s side. Alignment is contextual to the players’ Army Lists rather than inferred from faction identity alone.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "alignment"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Alignment — Ally"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:enemy",
+            "kind": "term",
+            "name": "Enemy",
+            "summary": "An Enemy is a game element belonging to the opposing player’s side. Alignment is contextual to the players’ Army Lists rather than inferred from faction identity alone.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "alignment"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Alignment — Enemy"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:hostile",
+            "kind": "term",
+            "name": "Hostile",
+            "summary": "A Hostile game element belongs to neither player’s Army List but is treated as an Enemy by both players and can declare or receive Attacks.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "alignment"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Alignment — Hostile"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "term:neutral",
+            "kind": "term",
+            "name": "Neutral",
+            "summary": "A Neutral game element belongs to neither player’s Army List and does not gain the additional Hostile rule that makes it an Enemy to both players.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "alignment"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 173,
+                    "section": "Alignment — Neutral"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
             "id": "state:camouflaged",
             "kind": "state",
             "name": "Camouflaged State",

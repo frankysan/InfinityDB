@@ -53,9 +53,11 @@ Semantic identity and player-facing capabilities are independent: navigation, se
 landing/catalog/scoped/detail presentation, and publication are explicit capabilities rather than
 consequences of having a typed identity. New rules-reference route ownership should reuse this
 registry instead of introducing another kind-to-route map. Glossary remains a projection over
-canonical domains and embedded vocabularies rather than a definition owner. Attributes are the first
-published embedded vocabulary: current `attribute:*` records have no `/attributes` catalog or detail
-routes, and their public semantic references resolve to stable `/glossary#attribute-<slug>` anchors.
+canonical domains and embedded vocabularies rather than a definition owner. Attributes and scoped
+Game terms are published embedded vocabularies: current `attribute:*` and `term:*` records have no
+standalone catalog/detail routes, and their public semantic references resolve to stable Glossary
+anchors. Game-term records carry `facts.scope` so source terminology such as Marker or Hostile can
+coexist with same-name Labels/Traits without identity collapse.
 
 ## Maintained rules-text link policy
 

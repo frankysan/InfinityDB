@@ -151,8 +151,10 @@ published overview domain, and Fireteams uses the shared landing/scoped interact
 **Current.** Glossary is a cross-domain projection rather than a canonical data owner. It projects
 current rules/reference domains together with published embedded vocabularies, preserves typed
 identity/domain, links route-backed concepts to their normal detail surfaces, and gives embedded
-concepts stable Glossary anchors. Attributes are the first published embedded vocabulary and remain
-without their own catalog/detail routes. Global search reuses the same embedded projection. General
+concepts stable Glossary anchors. Attributes and scoped Game terms are published embedded
+vocabularies and remain without their own catalog/detail routes. Game-term records retain an
+explicit semantic scope so same-name Labels, Traits, and terminology concepts remain distinct.
+Global search reuses the same embedded projection. General
 Rules remains the unpublished fallback domain for rules/reference concepts with no clearer semantic
 owner. Scaffolded domains may remain unpublished until their player-facing surfaces are useful.
 
@@ -440,8 +442,9 @@ constraints, profile-group dependencies, Reinforcement parentage, and broader
 faction/cross-Army membership remain relationships among existing application
 identities and are presented through those existing surfaces. Generic rules concepts and Training
 may remain supporting link targets unless a later completeness audit demonstrates an independent
-player-facing catalog need. Attributes are canonical embedded identities exposed through contextual
-help, Glossary, and search without a standalone catalog. Ammunition has
+player-facing catalog need. Attributes and scoped Game terms are canonical embedded identities
+exposed through Glossary/search without standalone catalogs; Attributes additionally feed contextual
+Unit-profile help. Ammunition has
 since become a first-class rules/reference catalog under the application-domain framework. A
 relationship target is not, by itself, justification for a new domain.
 

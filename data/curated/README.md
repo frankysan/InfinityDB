@@ -378,9 +378,14 @@ The main collection structure is:
 ```
 
 Supported record kinds include `rule`, `skill`, `declaration-category`,
-`equipment`, `weapon`, `ammunition`, `trait`, `state`, `attribute`, `glossary`,
+`equipment`, `weapon`, `ammunition`, `trait`, `state`, `attribute`, `term`, `glossary`,
 `interaction`, `fireteam`, `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
+
+Embedded `term` records own source-backed Game terminology that does not warrant a standalone
+catalog/detail route. They require `facts.scope` with a stable slug such as `game-element`,
+`alignment`, `profile`, `scoring`, or `state-classification`; the scope prevents same-name concepts
+from being collapsed merely because their display text matches a Label, Trait, or another domain.
 
 Weapon records may use `facts.specialProfile` for rulebook-defined deployable
 profiles that are not fully represented by Army weapon metadata. The special

@@ -60,9 +60,9 @@ confirmed application-data presentation gap.
 
 The Unit Explorer filtering/extended-results work, global search, structured rules-reference
 cross-link pass, Profile notation foundation, and maintained-text reference/token layer are
-complete. Remaining 0.9 work is concentrated in the application-domain/discoverability framework,
-the reviewed maintained-prose link migration, the federated glossary terminology layer, and the
-remaining catalog/share-state gaps. `docs/application-domains.md` defines the accepted domain
+complete. Remaining 0.9 work is concentrated in General Rules publication, the reviewed
+maintained-prose link migration, and the remaining catalog/share-state gaps.
+`docs/application-domains.md` defines the accepted domain
 skeleton and interaction model.
 
 ### Player-facing completeness and navigation
@@ -99,24 +99,6 @@ skeleton and interaction model.
     Attribute detail pages.
   - [ ] Publish General Rules only as the explicit fallback for rules/reference concepts with no
     clearer top-level owner; do not use it to manufacture pages for embedded vocabularies.
-
-- [ ] **Data processing + Web backend + Web frontend:** Complete the rules Glossary and
-  profile-notation help layer as a cross-domain projection,
-  not as a second source of canonical definitions.
-  - [x] Explain the existing profile fields and symbols in context: training/order,
-    troop type, classification, ISC, Hackable, Peripheral, equipment versus
-    BS weapons, melee weapons, and profile/loadout separators. Unit details now
-    expose a collapsed, rules-backed Profile notation panel; relevant profile labels
-    and Order/Characteristic symbols link into that panel without making every row
-    denser.
-  - [x] Build Glossary entries from canonical top-level domains and embedded vocabularies. Link
-    browsable concepts to their owning detail surfaces; render embedded-only concepts through
-    Glossary/contextual help without inventing dedicated detail routes.
-  - [x] Preserve concept kind/domain in glossary/search identity so same-name concepts such as a
-    Label, Trait, Characteristic, State, or general term cannot be merged by display text alone.
-  - [ ] Make terminology such as Trooper, Peripheral, Marker, Token, Deployable,
-    Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever it
-    changes how profile data should be read.
 
 - [ ] Complete deep-linkable, shareable search and filter state for catalog and
   Unit views.

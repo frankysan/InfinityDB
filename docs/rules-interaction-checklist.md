@@ -27,7 +27,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **65/76** complete, **11** pending.
+- Supporting semantic identities: **82/93** complete, **11** pending.
 - Current authored outgoing relations: **262**.
 - Explicitly tracked future/deferred interactions: **115**.
 
@@ -805,6 +805,43 @@ review. `declaration-category` projection records are excluded.
 - [x] **Trooper Classification** (`rule:profile-help:classification`) — reviewed
   - outgoing: none
 - [x] **Unit and Unit Profile** (`rule:profile-help:unit-profile`) — reviewed
+  - outgoing: none
+
+#### Term (17/17)
+
+- [x] **Ally** (`term:ally`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Deployable Equipment** (`term:deployable-equipment`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Deployable Weapon** (`term:deployable-weapon`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Enemy** (`term:enemy`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Hostile** (`term:hostile`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Marker** (`term:marker`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Model** (`term:model`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Neutral** (`term:neutral`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Null State** (`term:null-state`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Peripheral** (`term:peripheral`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Scenery Element** (`term:scenery-element`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **State Token** (`term:state-token`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Target** (`term:target`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Token** (`term:token`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Trooper** (`term:trooper`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Unit Profile** (`term:unit-profile`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+- [x] **Victory Points** (`term:victory-points`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
   - outgoing: none
 
 ### 1.0.0

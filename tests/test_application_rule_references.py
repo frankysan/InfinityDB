@@ -169,6 +169,16 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
     assert attributes.catalog is False
     assert attributes.detail is False
 
+    terms = application_domain("terms")
+    assert terms.level == "embedded"
+    assert terms.record_kinds == ("term",)
+    assert terms.glossary is True
+    assert terms.search is True
+    assert terms.published is True
+    assert terms.route is None
+    assert terms.catalog is False
+    assert terms.detail is False
+
     general_rules = application_domain("rules")
     assert general_rules.published is False
     assert general_rules.route is None
@@ -176,6 +186,8 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
     assert public_rule_domain("ammunition") == ammunition
     assert public_rule_domain("attribute") is None
     assert semantic_record_domain("attribute") == attributes
+    assert public_rule_domain("term") is None
+    assert semantic_record_domain("term") == terms
     assert public_rule_domain("rule") is None
 
 
@@ -204,6 +216,42 @@ def test_attributes_are_current_canonical_embedded_records(tmp_path: Path) -> No
     movement = next(record for record in attributes if record["id"] == "attribute:mov")
     assert movement["name"] == "Movement (MOV)"
     assert movement["facts"]["abbreviation"] == "MOV"
+
+
+def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_database = RulesDatabase(rules_path)
+
+    terms = rules_database.composed_records_by_kind("term")
+    assert {record["id"] for record in terms} == {
+        "term:ally",
+        "term:deployable-equipment",
+        "term:deployable-weapon",
+        "term:enemy",
+        "term:hostile",
+        "term:marker",
+        "term:model",
+        "term:neutral",
+        "term:null-state",
+        "term:peripheral",
+        "term:scenery-element",
+        "term:state-token",
+        "term:target",
+        "term:token",
+        "term:trooper",
+        "term:unit-profile",
+        "term:victory-points",
+    }
+    assert {record["facts"]["scope"] for record in terms} == {
+        "alignment",
+        "game-element",
+        "profile",
+        "scoring",
+        "state-classification",
+        "trooper-category",
+    }
 
 
 def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) -> None:
@@ -307,6 +355,14 @@ def test_rules_relation_references_project_source_variants_to_public_routes(
                     },
                     {
                         "record": {
+                            "id": "term:marker",
+                            "kind": "term",
+                            "name": "Marker",
+                            "army_links": [],
+                        }
+                    },
+                    {
+                        "record": {
                             "id": "rule:loss-of-lieutenant",
                             "kind": "rule",
                             "name": "Loss of Lieutenant",
@@ -342,7 +398,8 @@ def test_rules_relation_references_project_source_variants_to_public_routes(
         "id": "shock",
     }
     assert records[5]["public_reference"] == {"href": "/glossary#attribute-mov"}
-    assert "public_reference" not in records[6]
+    assert records[6]["public_reference"] == {"href": "/glossary#term-marker"}
+    assert "public_reference" not in records[7]
 
 
 def test_structured_reference_metadata_is_materialized_without_raw_tables(

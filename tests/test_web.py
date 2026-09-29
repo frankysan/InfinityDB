@@ -3610,6 +3610,32 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
             }
         ],
     }
+    marker_term = next(item for item in items if item["id"] == "term:marker")
+    assert marker_term == {
+        "id": "term:marker",
+        "kind": "term",
+        "domain": "Game term",
+        "domain_slug": "terms",
+        "name": "Marker",
+        "description": (
+            "A Marker is a game element with Attributes represented by a Marker when "
+            "a Skill, Weapon, or Equipment rule allows that representation."
+        ),
+        "aliases": [],
+        "href": "/glossary#term-marker",
+        "embedded": True,
+        "description_tokens": [
+            {
+                "type": "text",
+                "text": (
+                    "A Marker is a game element with Attributes represented by a "
+                    "Marker when a Skill, Weapon, or Equipment rule allows that "
+                    "representation."
+                ),
+            }
+        ],
+    }
+
     camouflage = next(item for item in items if item["id"] == "skill:camouflage")
     assert camouflage["href"] == "/skills/camouflage"
     assert camouflage["embedded"] is False
@@ -3630,6 +3656,20 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "name": "Movement (MOV)",
         "href": "/glossary#attribute-mov",
     } in json.loads(body)["items"]
+
+    status, _, body = request(rules_app, "/api/search", query="q=marker")
+    assert status == 200
+    marker_results = json.loads(body)["items"]
+    assert {
+        "domain": "Game term",
+        "name": "Marker",
+        "href": "/glossary#term-marker",
+    } in marker_results
+    assert {
+        "domain": "Label",
+        "name": "Marker",
+        "href": "/labels/marker",
+    } in marker_results
 
 
 def test_catalog_api_exposes_all_accepted_numeric_source_ids(app: Callable) -> None:
