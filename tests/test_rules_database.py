@@ -133,6 +133,32 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         ).fetchone() == ("n5-core-v5.3-pdf", 87)
 
 
+def test_rules_database_returns_records_using_current_label(
+    current_rules_database: RulesDatabase,
+) -> None:
+    cc_attack = current_rules_database.composed_records_using_label("cc-attack")
+    assert [record["id"] for record in cc_attack] == ["skill:berserk"]
+    assert cc_attack[0]["army_links"] == [
+        {"entity": "skill", "id": "berserk"}
+    ]
+
+    comms_equipment = {
+        record["id"]: record
+        for record in current_rules_database.composed_records_using_label("comms-equipment")
+    }
+    assert set(comms_equipment) == {
+        "equipment:deployable-repeater",
+        "equipment:evo-hacking-device",
+        "equipment:hacking-device",
+        "equipment:hacking-device-plus",
+        "equipment:killer-hacking-device",
+        "equipment:repeater",
+    }
+    assert comms_equipment["equipment:hacking-device"]["army_links"] == [
+        {"entity": "equipment", "id": "hacking-device"}
+    ]
+
+
 def test_hacking_programs_reuse_canonical_current_labels(
     current_rules_database: RulesDatabase,
 ) -> None:

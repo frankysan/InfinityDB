@@ -13,7 +13,7 @@ const pageController = new AbortController();
 
 function definitionSection(item) {
   const section = document.createElement("section");
-  section.className = "surface surface--subtle detail-section";
+  section.className = "surface surface--subtle detail-section reference-detail-section";
   const heading = document.createElement("h2");
   heading.className = "surface-titlebar surface-titlebar--ruled";
   heading.textContent = summaryHeading || "Definition";
@@ -28,15 +28,56 @@ function definitionSection(item) {
   return section;
 }
 
+function usedBySection(items) {
+  if (!Array.isArray(items) || !items.length) return null;
+
+  const section = document.createElement("section");
+  section.className = "surface surface--subtle detail-section reference-detail-section";
+  const heading = document.createElement("h2");
+  heading.className = "surface-titlebar surface-titlebar--ruled";
+  heading.textContent = "Used by";
+  section.append(heading);
+
+  const groups = new Map();
+  for (const item of items) {
+    const key = item.catalog || item.catalog_name;
+    const group = groups.get(key) || { name: item.catalog_name, items: [] };
+    group.items.push(item);
+    groups.set(key, group);
+  }
+
+  for (const group of groups.values()) {
+    const container = document.createElement("div");
+    container.className = "reference-usage-group";
+    const groupHeading = document.createElement("h3");
+    groupHeading.className = "detail-fact-heading";
+    groupHeading.textContent = group.name;
+    const list = document.createElement("ul");
+    list.className = "reference-usage-list";
+    for (const reference of group.items) {
+      const item = document.createElement("li");
+      const link = document.createElement("a");
+      link.href = reference.href;
+      link.textContent = reference.name;
+      item.append(link);
+      list.append(item);
+    }
+    container.append(groupHeading, list);
+    section.append(container);
+  }
+  return section;
+}
+
 function render(item) {
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
   if (meta) meta.textContent = `${singular} · ${item.id}`;
-  content.replaceChildren(
-    ...(item.rules?.length
-      ? [rulesReferenceSection(item.rules)]
-      : [definitionSection(item)]),
-  );
+  const sections = item.rules?.length
+    ? [rulesReferenceSection(item.rules)]
+    : [definitionSection(item)];
+  const usedBy = usedBySection(item.used_by);
+  if (usedBy) sections.push(usedBy);
+  content.replaceChildren(...sections);
   content.hidden = false;
   status.hidden = true;
 }

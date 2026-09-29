@@ -72,6 +72,15 @@ def _enrich_rule_record(record: dict[str, Any], resolver: _Resolver) -> None:
     if isinstance(summary, str):
         record["summary_tokens"] = resolver.tokens(summary)
 
+    labels = record.get("labels")
+    if isinstance(labels, list):
+        for label in labels:
+            if not isinstance(label, dict):
+                continue
+            description = label.get("description")
+            if isinstance(description, str):
+                label["description_tokens"] = resolver.tokens(description)
+
     facts = record.get("facts")
     if not isinstance(facts, dict):
         return

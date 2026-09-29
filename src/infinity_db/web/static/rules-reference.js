@@ -1,4 +1,4 @@
-import { appendMaintainedText } from "./maintained-text.js";
+import { appendMaintainedText, maintainedTextFragment } from "./maintained-text.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 
 function citationLabel(citation) {
@@ -136,11 +136,26 @@ function ruleBadgeRow(rule) {
     );
   }
   for (const label of labels) {
-    const element = document.createElement(label.id ? "a" : "span");
-    element.className = label.id ? "badge maintained-reference" : "badge";
-    element.textContent = label.name;
-    if (label.id) element.href = `/labels/${encodeURIComponent(label.id)}`;
-    badgeRow.append(element);
+    if (!label.id) {
+      const element = document.createElement("span");
+      element.className = "badge";
+      element.textContent = label.name;
+      badgeRow.append(element);
+      continue;
+    }
+
+    const previewTokens = Array.isArray(label.description_tokens)
+      ? label.description_tokens
+      : (label.description ? [{ type: "text", text: label.description }] : []);
+    const fragment = maintainedTextFragment([{
+      type: "reference",
+      target: `label:${label.id}`,
+      label: label.name,
+      public_reference: { href: `/labels/${encodeURIComponent(label.id)}` },
+      preview_tokens: previewTokens,
+    }]);
+    fragment.querySelector(".maintained-reference")?.classList.add("badge");
+    badgeRow.append(fragment);
   }
   return badgeRow;
 }

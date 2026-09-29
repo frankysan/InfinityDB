@@ -9,6 +9,7 @@ from http import HTTPStatus
 from urllib.parse import parse_qs
 
 from infinity_db import __version__
+from infinity_db.application_domains import public_rule_domain
 from infinity_db.army_overview import (
     army_overview_description,
     army_overview_group,
@@ -18,7 +19,10 @@ from infinity_db.army_slugs import attach_public_army_slug, enrich_army_referenc
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
 from infinity_db.database import ArmySelectionError, Database
-from infinity_db.domain_references import enrich_rule_relation_references
+from infinity_db.domain_references import (
+    enrich_rule_relation_references,
+    rule_record_public_reference,
+)
 from infinity_db.domain_slugs import require_domain_slug
 from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.fireteam_reference import fireteam_reference
@@ -56,6 +60,18 @@ from infinity_db.web.routes import (
 
 LOGGER = logging.getLogger(__name__)
 API_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=600"
+
+
+def _public_reference_href(reference: dict[str, str] | None) -> str | None:
+    if reference is None:
+        return None
+    if href := reference.get("href"):
+        return href
+    catalog = reference.get("catalog")
+    identifier = reference.get("id")
+    if not catalog or not identifier:
+        return None
+    return f"/{catalog}/{identifier}"
 
 
 def _integer(params: dict, key: str, default: int | None, low: int, high: int) -> int | None:
@@ -603,6 +619,37 @@ class ApiHandler:
                 else:
                     payload["description_tokens"] = maintained_text_tokens(
                         self.database, self.rules_database, payload["description"]
+                    )
+                    used_by: list[dict[str, str]] = []
+                    seen_hrefs: set[str] = set()
+                    if self.rules_database is not None:
+                        for record in self.rules_database.composed_records_using_label(
+                            payload["id"]
+                        ):
+                            domain = public_rule_domain(str(record.get("kind", "")))
+                            if domain is None:
+                                continue
+                            href = _public_reference_href(
+                                rule_record_public_reference(self.database, record)
+                            )
+                            if href is None or href in seen_hrefs:
+                                continue
+                            seen_hrefs.add(href)
+                            used_by.append(
+                                {
+                                    "catalog": domain.slug,
+                                    "catalog_name": domain.plural_name,
+                                    "name": str(record["name"]),
+                                    "href": href,
+                                }
+                            )
+                    payload["used_by"] = sorted(
+                        used_by,
+                        key=lambda item: (
+                            item["catalog_name"].casefold(),
+                            item["name"].casefold(),
+                            item["href"],
+                        ),
                     )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Label")

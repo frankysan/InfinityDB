@@ -3293,6 +3293,30 @@ def test_ammunition_and_label_pages_and_rules_backed_apis_are_served(
     assert reference["target"] == "state:unloaded"
     assert reference["public_reference"] == {"catalog": "states", "id": "unloaded"}
 
+    status, _, body = request(rules_app, "/api/labels/cc-attack")
+    assert status == 200
+    assert json.loads(body)["used_by"] == [
+        {
+            "catalog": "skills",
+            "catalog_name": "Skills",
+            "name": "Berserk",
+            "href": "/skills/berserk",
+        }
+    ]
+
+    status, _, body = request(rules_app, "/api/labels/comms-equipment")
+    assert status == 200
+    comms_equipment_users = json.loads(body)["used_by"]
+    assert {item["href"] for item in comms_equipment_users} == {
+        "/equipment/deployable-repeater",
+        "/equipment/evo-hacking-device",
+        "/equipment/hacking-device",
+        "/equipment/hacking-device-plus",
+        "/equipment/killer-hacking-device",
+        "/equipment/repeater",
+    }
+    assert {item["catalog_name"] for item in comms_equipment_users} == {"Equipment"}
+
     status, _, body = request(rules_app, "/api/search", query="q=Shock")
     assert status == 200
     assert {
@@ -3314,7 +3338,14 @@ def test_ammunition_and_label_pages_and_rules_backed_apis_are_served(
 
     status, _, renderer = request(rules_app, "/static/rules-reference.js")
     assert status == 200
-    assert b'element.href = `/labels/${encodeURIComponent(label.id)}`' in renderer
+    assert b"maintainedTextFragment" in renderer
+    assert b"label.description_tokens" in renderer
+    assert b'public_reference: { href: `/labels/${encodeURIComponent(label.id)}` }' in renderer
+
+    status, _, detail_script = request(rules_app, "/static/reference-detail.js")
+    assert status == 200
+    assert b'heading.textContent = "Used by"' in detail_script
+    assert b"item.used_by" in detail_script
 
 def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/hacking-programs")
@@ -3939,6 +3970,8 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
     assert payload["rules"][0]["collection"]["id"] == "n5-core-v5.3"
     assert payload["rules"][0]["scope"] == {"game": "N5", "seasons": ["current"]}
     assert payload["rules"][0]["labels"][0]["name"] == "Optional"
+    assert payload["rules"][0]["labels"][0]["description_tokens"]
+    assert payload["rules"][0]["labels"][0]["description_tokens"][0]["type"] == "text"
     assert payload["rules"][0]["citations"][0]["page"] == 87
 
     status, _, body = request(rules_app, "/api/skills")

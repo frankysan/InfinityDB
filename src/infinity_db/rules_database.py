@@ -951,6 +951,61 @@ class RulesDatabase:
             self._attach_reverse_relations(connection, records)
             return records
 
+    def composed_records_using_label(self, label_id: str) -> list[dict[str, Any]]:
+        """Return current semantic records whose contributions use one Label.
+
+        Army links are attached only for this reverse-reference projection so public
+        application routes can be resolved without widening ordinary rules payloads.
+        """
+
+        with self._connect() as connection:
+            candidate_rows = connection.execute(
+                "SELECT r.id, r.label_ids_json FROM records AS r "
+                "JOIN collections AS c ON c.id = r.collection_id "
+                "WHERE c.status = 'current' ORDER BY r.id, r.collection_id"
+            ).fetchall()
+            record_ids = sorted(
+                {
+                    row["id"]
+                    for row in candidate_rows
+                    if label_id in _decode_json(row["label_ids_json"], [])
+                }
+            )
+            if not record_ids:
+                return []
+
+            placeholders = ", ".join("?" for _ in record_ids)
+            rows = connection.execute(
+                "SELECT r.* FROM records AS r JOIN collections AS c "
+                "ON c.id = r.collection_id "
+                f"WHERE r.id IN ({placeholders}) AND c.status = 'current' "
+                "ORDER BY r.id, r.collection_id",
+                record_ids,
+            ).fetchall()
+            records = self._compose_records(self._records_from_rows(connection, rows))
+            self._attach_reverse_relations(connection, records)
+
+            for record in records:
+                links = connection.execute(
+                    "SELECT l.entity, l.external_id, l.external_name "
+                    "FROM record_army_links AS l JOIN collections AS c "
+                    "ON c.id = l.collection_id "
+                    "WHERE l.record_id = ? AND c.status = 'current' "
+                    "ORDER BY l.collection_id, l.position",
+                    (record["id"],),
+                ).fetchall()
+                if links:
+                    army_links: list[dict[str, str]] = []
+                    for link in links:
+                        item = {"entity": str(link["entity"])}
+                        if link["external_id"] is not None:
+                            item["id"] = str(link["external_id"])
+                        if link["external_name"] is not None:
+                            item["name"] = str(link["external_name"])
+                        army_links.append(item)
+                    record["army_links"] = army_links
+            return records
+
     def current_labels(self) -> list[dict[str, Any]]:
         """Return labels from current rules collections with provenance."""
         with self._connect() as connection:

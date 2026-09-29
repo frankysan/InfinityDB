@@ -56,6 +56,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web backend + Web frontend:** Make **Labels** bidirectional reference concepts: Label badges
+  now preview their canonical definitions, and Label detail pages list the current catalog items
+  that use each Label with direct links back to those Skills, Equipment items, States, and other
+  supported rules domains. Label detail cards also use the normal reference-surface spacing.
 - **Web backend + Web frontend:** Normalize **Fireteams** around the shared domain landing/scoped
   interaction: `/fireteams` now shows the Army selector with the general Fireteam rules summary,
   while selecting an Army replaces that summary with the shareable Army-scoped chart and clearing

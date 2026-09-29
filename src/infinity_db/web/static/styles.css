@@ -1527,6 +1527,32 @@ h1>span {
   margin-bottom: var(--space-2);
 }
 
+.reference-detail-content {
+  display: grid;
+  gap: 20px;
+  padding-bottom: 40px;
+}
+
+.reference-detail-section {
+  display: grid;
+  width: min(760px, 100%);
+  gap: 10px;
+  padding: 16px;
+}
+
+.reference-usage-group {
+  display: grid;
+  gap: 6px;
+}
+
+.reference-usage-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+  gap: 4px 24px;
+  margin: 0;
+  padding-left: 20px;
+}
+
 .rules-reference>.detail-section {
   display: grid;
   gap: 10px;
@@ -1633,6 +1659,10 @@ h1>span {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.detail-badges .maintained-reference-wrap {
+  display: inline-flex;
 }
 
 .status-badge {
