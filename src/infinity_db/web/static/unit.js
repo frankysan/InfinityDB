@@ -10,6 +10,7 @@ const status = document.getElementById("unit-status");
 const content = document.getElementById("unit-content");
 const pageController = new AbortController();
 const unitIdentifier = /^\/units\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(window.location.pathname)?.[1];
+const requestedArmyIdentifier = new URLSearchParams(window.location.search).get("army_id") || "";
 let profileHelpEntries = new Map();
 let attributeHelpEntries = new Map();
 
@@ -1404,6 +1405,11 @@ function isStandardArmy(army) {
   return !flags.includes("mercs") && !flags.includes("reinforcement");
 }
 
+function isRequestedArmy(army) {
+  if (!requestedArmyIdentifier) return false;
+  return [army.public_slug, army.slug, String(army.id)].includes(requestedArmyIdentifier);
+}
+
 function isEnabledArmy(army) {
   const filters = optionalUnitFilters();
   return (army.availability_flags || []).every((flag) => filters[flag]);
@@ -1557,7 +1563,8 @@ function render(unit, helpItems = [], attributeItems = []) {
   unitIds.textContent = `${unitMetadata.length ? " · " : ""}Unit ${unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ")}`;
   meta.append(unitIds);
   status.hidden = true;
-  const armies = unit.armies.filter(isEnabledArmy);
+  const requestedArmy = unit.armies.find(isRequestedArmy);
+  const armies = unit.armies.filter((army) => isEnabledArmy(army) || army === requestedArmy);
   const allProfiles = armies.flatMap((army) => army.profiles.map((profile) => ({
     ...profile,
     armyId: army.id,
@@ -1603,6 +1610,7 @@ function render(unit, helpItems = [], attributeItems = []) {
   const selectionRelationships = renderSelectionRelationships(unit, armies);
   if (selectionRelationships) content.append(selectionRelationships);
   let standardArmyExpanded = false;
+  const hasRequestedArmy = Boolean(requestedArmy);
   for (const group of groupArmiesByFaction(armies)) {
     const section = document.createElement("section");
     section.className = "detail-group faction-profile-group";
@@ -1612,8 +1620,10 @@ function render(unit, helpItems = [], attributeItems = []) {
     const profiles = document.createElement("div");
     profiles.className = "detail-group faction-profile-grid";
     for (const army of group.armies) {
-      const expanded = !standardArmyExpanded && isStandardArmy(army);
-      if (expanded) standardArmyExpanded = true;
+      const expanded = hasRequestedArmy
+        ? army === requestedArmy
+        : !standardArmyExpanded && isStandardArmy(army);
+      if (!hasRequestedArmy && expanded) standardArmyExpanded = true;
       profiles.append(renderArmyProfile(army, generalByName, expanded));
     }
     section.append(profiles);

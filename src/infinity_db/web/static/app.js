@@ -1,7 +1,7 @@
 import { getArmies, getCatalogItems, getUnitFilters, getUnits } from "./api.js";
 import {
   initializeDistanceUnitToggle, initializeOptionalUnitToggles, optionalUnitDefaultFilters,
-  optionalUnitFilters,
+  optionalUnitFilters, saveUnitAdvancedFiltersOpen, unitAdvancedFiltersOpen,
 } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 import { troopTypeLabel } from "./unit-presentation.js";
@@ -76,12 +76,17 @@ const OPTIONAL_UNIT_KEYS = ["mercs", "specops", "teamops", "reinforcement"];
 
 let state = readLocation();
 const advancedFilters = document.querySelector(".advanced-filters");
-if (advancedFilters && (state.skillId || state.equipmentId || state.weaponId
-  || state.troopType || state.classification || state.characteristic
-  || state.ava || state.avaMin || state.avaMax
-  || state.points || state.pointsMin || state.pointsMax
-  || state.swc || state.swcMin || state.swcMax)) {
-  advancedFilters.open = true;
+if (advancedFilters) {
+  const savedAdvancedFiltersOpen = unitAdvancedFiltersOpen();
+  const hasAdvancedFilterState = state.skillId || state.equipmentId || state.weaponId
+    || state.troopType || state.classification || state.characteristic
+    || state.ava || state.avaMin || state.avaMax
+    || state.points || state.pointsMin || state.pointsMax
+    || state.swc || state.swcMin || state.swcMax;
+  advancedFilters.open = savedAdvancedFiltersOpen ?? Boolean(hasAdvancedFilterState);
+  advancedFilters.addEventListener("toggle", () => {
+    saveUnitAdvancedFiltersOpen(advancedFilters.open);
+  });
 }
 let armiesLoaded = false;
 let requestNumber = 0;

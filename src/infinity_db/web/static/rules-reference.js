@@ -130,11 +130,6 @@ function ruleBadgeRow(rule) {
 
   const badgeRow = document.createElement("p");
   badgeRow.className = "detail-badges";
-  for (const category of categories) {
-    badgeRow.append(
-      skillCategoryBadge(category, category.category_name || category.name)
-    );
-  }
   for (const label of labels) {
     if (!label.id) {
       const element = document.createElement("span");
@@ -156,6 +151,11 @@ function ruleBadgeRow(rule) {
     }]);
     fragment.querySelector(".maintained-reference")?.classList.add("badge");
     badgeRow.append(fragment);
+  }
+  for (const category of categories) {
+    badgeRow.append(
+      skillCategoryBadge(category, category.category_name || category.name)
+    );
   }
   return badgeRow;
 }

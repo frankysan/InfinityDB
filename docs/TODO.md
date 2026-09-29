@@ -60,10 +60,10 @@ confirmed application-data presentation gap.
 
 The Unit Explorer filtering/extended-results work, global search, structured rules-reference
 cross-link pass, Profile notation foundation, maintained-text reference/token layer, application-
-domain publication, and share-state work are complete. All planned 0.9 application-completeness
-and discoverability items below are now closed; further planned hardening belongs to 0.10 unless
-release validation finds a 0.9 correctness defect. `docs/application-domains.md` defines the
-accepted domain skeleton and interaction model.
+domain publication, and share-state work are complete. The original 0.9 application-completeness
+and discoverability scope is closed, but the pre-release polish checklist below was added before
+tagging the release and remains part of the 0.9 gate. Broader hardening still belongs to 0.10.
+`docs/application-domains.md` defines the accepted domain skeleton and interaction model.
 
 ### Player-facing completeness and navigation
 
@@ -150,6 +150,41 @@ accepted domain skeleton and interaction model.
     location with no optional flags is initialized from the user's Settings and immediately
     canonicalized to the full four-value URL; explicit shared state never overwrites saved Settings,
     and the page explains when the current result set came from preferences or overrides them.
+
+### Pre-release polish
+
+- [x] **Web backend + Web frontend:** Make structured Related rules links to Peripheral subtypes
+  resolve to their General Rules detail pages, for example **Can control: Peripheral (Cyberplug)**.
+- [x] **Web frontend:** Standardize rules-card badge ordering across domains: Labels first, then
+  Skill/declaration category badges.
+- [x] **Web frontend:** Make Unit Explorer Army-availability symbols deep-link to the Unit detail
+  page with that Army profile expanded. Honor that explicit Army target even when the recipient's
+  optional-unit Settings would otherwise hide it.
+- [x] **Web frontend:** Retain the Unit Explorer Advanced filters disclosure state across reloads
+  using the existing session/persistent Settings contract.
+- [x] **Web frontend:** Make desktop sidebar vertical spacing responsive to viewport height so
+  navigation/settings/footer content begins scrolling later on shorter displays.
+- [x] **Web frontend:** Increase Army symbols on `/armies`.
+- [x] **Web frontend:** Normalize `/armies` card heading geometry so symbols, Army-type labels, and
+  Army names stay aligned when names wrap to multiple lines.
+- [ ] **Data processing + Web frontend:** Replace structural `/armies` descriptions with concise,
+  mostly gameplay-focused summaries of what distinguishes each Army. Use Human Sphere's main-
+  faction/Army pages as secondary inspiration, verify against current Infinity sources where
+  practical, and keep the copy original and short.
+- [ ] **Documentation + Web frontend:** Add a concise player-facing explanation of main armies
+  versus Sectorials: main armies generally offer a broader roster, while Sectorials are more
+  focused/specialized and generally gain broader Fireteam access. Verify the wording against the
+  current rulebook/wiki before publication and state it as project guidance where the official
+  sources do not define the distinction explicitly.
+- [ ] **Web frontend + Web backend:** Replace verbose share-state query strings with a single
+  versioned URL token that serializes all supported page options into one compact value. Evaluate
+  deterministic compression/encoding (for example base64url over compact structured state) against
+  hash/lookup designs; shared links must remain self-contained unless a durable server-side token
+  store is deliberately introduced. Preserve backward compatibility with current explicit query
+  parameters during migration.
+- [ ] **Documentation:** Rewrite the recent Unreleased changelog entries to follow the release-note
+  style guide: user-facing outcomes, consolidated by meaningful feature/change, without implementation
+  chronology or low-level migration detail.
 
 ## 0.10.0 — consistency, presentation, and release hardening
 

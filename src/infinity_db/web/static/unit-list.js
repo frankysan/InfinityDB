@@ -15,6 +15,14 @@ function text(value) {
   return value == null || value === "" ? "—" : String(value);
 }
 
+function unitArmyHref(unit, army) {
+  const unitId = unit.public_slug || unit.id;
+  const armyId = army.public_slug || army.slug || String(army.id);
+  const url = new URL(`/units/${unitId}`, window.location.origin);
+  url.searchParams.set("army_id", armyId);
+  return `${url.pathname}${url.search}`;
+}
+
 function movement(profile) {
   return formatMovement(profile.move_1, profile.move_2, distanceUnit());
 }
@@ -206,6 +214,10 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
     if (armies.length > 12) armyList.classList.add("army-tags-compact");
     for (const army of armies) {
       const symbol = staticSymbolPath(army.symbol_path);
+      const link = document.createElement("a");
+      link.className = "army-availability-link";
+      link.href = unitArmyHref(unit, army);
+      link.title = `${army.name} — open this Army profile`;
       if (symbol) {
         const icon = document.createElement("img");
         icon.className = "army-symbol";
@@ -215,15 +227,14 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
         icon.height = 30;
         icon.loading = "lazy";
         icon.decoding = "async";
-        icon.title = army.name;
-        armyList.append(icon);
+        link.append(icon);
       } else {
         const tag = document.createElement("span");
         tag.className = "army-tag";
-        tag.title = army.name;
         tag.textContent = army.name;
-        armyList.append(tag);
+        link.append(tag);
       }
+      armyList.append(link);
     }
     if (!unit.armies.length) armyList.textContent = "—";
     armyCell.append(armyList);

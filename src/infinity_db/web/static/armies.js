@@ -67,6 +67,7 @@ function renderArmy(army) {
     heading.append(symbol);
   }
   const identity = document.createElement("div");
+  identity.className = "army-overview-card-identity";
   const kind = document.createElement("p");
   kind.className = "eyebrow";
   kind.textContent = roleLabel(army);

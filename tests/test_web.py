@@ -335,6 +335,7 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b"army.overview_group" in script
     assert b"Out of catalog" in script
     assert b"Not playable in N5" in script
+    assert b'identity.className = "army-overview-card-identity"' in script
     assert b"groupIdentity" not in script
     assert b"infinity:beforenavigation" in script
 
@@ -346,6 +347,13 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
         ".army-overview-grid",
         {"display": "grid", "grid-template-columns": "repeat(auto-fit, minmax(280px, 1fr))"},
     )
+    assert_css_rule(
+        styles,
+        ".army-overview-card-heading",
+        {"display": "grid", "grid-template-columns": "64px minmax(0, 1fr)"},
+    )
+    assert_css_rule(styles, ".army-overview-symbol", {"width": "64px", "height": "64px"})
+    assert_css_rule(styles, ".army-overview-card-heading h3", {"min-height": "2.6em"})
     assert_css_rule(
         styles,
         ".status-badge--warning",
@@ -1520,7 +1528,9 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'pointsMin: pointsExact ? ""' in script
     assert b'swcMin: swcExact ? ""' in script
     assert b'renderUnitRows(elements.list, data.items, { extended: state.extended })' in script
-    assert b'advancedFilters?.addEventListener("toggle"' not in script
+    assert b'unitAdvancedFiltersOpen()' in script
+    assert b'saveUnitAdvancedFiltersOpen(advancedFilters.open)' in script
+    assert b'advancedFilters.addEventListener("toggle"' in script
     assert b'extendedPreferenceTouched' not in script
     assert b'params.get("extended") === "1"' in script
     assert b'const OPTIONAL_UNIT_KEYS = ["mercs", "specops", "teamops", "reinforcement"]' in script
@@ -1548,6 +1558,14 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'developerOnlyCharacteristic(characteristic)' in unit_list_script
     assert b'unit-profile-troop-type-long' in unit_list_script
     assert b'unit-profile-troop-type-short' in unit_list_script
+    assert b'className = "army-availability-link"' in unit_list_script
+    assert b'url.searchParams.set("army_id", armyId)' in unit_list_script
+
+    status, _, unit_detail_script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'new URLSearchParams(window.location.search).get("army_id")' in unit_detail_script
+    assert b'unit.armies.find(isRequestedArmy)' in unit_detail_script
+    assert b'army === requestedArmy' in unit_detail_script
 
     status, _, unit_presentation_script = request(app, "/static/unit-presentation.js")
     assert status == 200
@@ -2125,7 +2143,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
         ),
         {"display": "none"},
     )
-    assert_css_rule(styles, ".settings-menu", {"margin-top": "32px"})
+    assert_css_rule(styles, ".settings-menu", {"margin-top": "clamp(20px, 3vh, 32px)"})
     assert_css_rule(
         styles,
         ".setting-row",
@@ -2177,6 +2195,9 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
         b'const FIRETEAMS_INCLUDE_WILDCARDS_KEY = "infinity-db-fireteams-include-wildcards";'
         in preferences
     )
+    assert b'const UNIT_ADVANCED_FILTERS_KEY = "infinity-db-unit-advanced-filters";' in preferences
+    assert b"function unitAdvancedFiltersOpen()" in preferences
+    assert b"function saveUnitAdvancedFiltersOpen(open)" in preferences
     assert b"function initializeFireteamsIncludeWildcardsToggle()" in preferences
     assert b"function fireteamsIncludeWildcards()" in preferences
     assert b'new CustomEvent("fireteamswildcardschange"' in preferences
@@ -2620,7 +2641,9 @@ def test_unit_list_renders_all_toggle_visible_armies(app: Callable) -> None:
     assert b"function factionSlug(" not in body
     assert b"Math.floor(Number(armyId) / 100)" not in body
     assert b"const faction = unit.display_faction?.slug;" in body
-    assert body.count(b"unit.public_slug || unit.id") == 2
+    assert b"const unitId = unit.public_slug || unit.id;" in body
+    assert b"const url = `/units/${unit.public_slug || unit.id}`;" in body
+    assert b"nameLink.href = `/units/${unit.public_slug || unit.id}`;" in body
 
 
 def test_unit_details_frontend_uses_backend_reinforcement_flags(app: Callable) -> None:
@@ -3179,6 +3202,30 @@ def test_unit_details_frontend_renders_order_symbols_as_content(app: Callable) -
     assert b"symbol.src = `/static/${symbolCategories[symbolType]}/${symbolType}.svg`" in body
     assert b"symbol.title = symbolLabels[symbolType]" in body
     assert b'"profile-summary loadout-start"' in body
+
+
+def test_rules_badges_and_desktop_sidebar_use_consistent_presentation(app: Callable) -> None:
+    status, _, rules_reference = request(app, "/static/rules-reference.js")
+    assert status == 200
+    assert rules_reference.index(b"for (const label of labels)") < rules_reference.index(
+        b"for (const category of categories)"
+    )
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".sidebar",
+        {
+            "--sidebar-section-gap": "clamp(28px, 6.5vh, 70px)",
+            "--sidebar-body-padding": "clamp(24px, 6vh, 66px)",
+        },
+    )
+    assert_css_rule(
+        styles,
+        ".nav-item",
+        {"padding": "clamp(9px, 1.3vh, 13px) 12px"},
+    )
 
 
 def test_distance_preference_script_is_served(app: Callable) -> None:

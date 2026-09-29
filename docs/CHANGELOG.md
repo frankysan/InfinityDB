@@ -9,6 +9,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web frontend:** Polish pre-release navigation and Army presentation. Rules cards now place Labels
+  before Skill/declaration categories, the desktop sidebar compresses vertical spacing on shorter
+  displays, `/armies` uses larger consistently aligned symbols/headings, and Unit Explorer remembers
+  whether Advanced filters are open.
+- **Web frontend:** Make Unit Explorer Army-availability symbols open the selected Unit with that
+  Army profile expanded, including optional Army contexts supplied by a shared Unit Explorer view.
 - **Web frontend:** Make Unit Explorer optional-availability filtering reproducible in shared links.
   Mercenaries, Spec-Ops, Team Operations, and Reinforcements now have page-local controls whose
   effective values are written explicitly to the Unit Explorer URL. Browser Settings seed a view
@@ -114,6 +120,9 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Web backend + Web frontend:** Restore links from structured Peripheral subtype relationships to
+  their General Rules pages, so entries such as **Can control: Peripheral (Cyberplug)** are directly
+  navigable.
 - **Data processing:** Scope reviewed-plain maintained-text fingerprints to exact passage occurrences
   rather than corpus-wide word counts. Synthetic or derived records may now clone an unchanged
   reviewed passage without invalidating the Trait-review gate, while new or changed wording still

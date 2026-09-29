@@ -801,7 +801,7 @@ class RulesDatabase:
             return {}
         placeholders = ", ".join("?" for _ in record_ids)
         rows = connection.execute(
-            "SELECT r.collection_id, r.id, r.kind, r.name "
+            "SELECT r.collection_id, r.id, r.kind, r.name, r.facts_json "
             "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
             "WHERE r.id IN (" + placeholders + ") "
             "AND r.composition_role = 'definition' AND c.status = 'current' "
@@ -828,6 +828,11 @@ class RulesDatabase:
                 "name": row["name"],
                 "army_links": links,
             }
+            if row["kind"] == "rule":
+                facts = _decode_json(row["facts_json"], {})
+                category = facts.get("category") if isinstance(facts, dict) else None
+                if isinstance(category, str):
+                    endpoints[row["id"]]["facts"] = {"category": category}
         return endpoints
 
     @classmethod

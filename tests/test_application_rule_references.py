@@ -441,6 +441,35 @@ def test_rules_relation_references_project_source_variants_to_public_routes(
     }
 
 
+def test_peripheral_subtype_relations_resolve_to_general_rules_routes(
+    tmp_path: Path,
+) -> None:
+    database = _reference_database(tmp_path)
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_database = RulesDatabase(rules_path)
+
+    cyberplug = next(
+        record
+        for record in rules_database.composed_records_by_kind("skill")
+        if record["id"] == "skill:cyberplug"
+    )
+    result = enrich_rule_relation_references(database, {"rules": [cyberplug]})
+    relation = next(
+        item
+        for item in result["rules"][0]["display_relations"]
+        if item["record"]["id"] == "rule:peripheral-type:cyberplug"
+    )
+
+    assert relation["presentation"]["label"] == "Can control"
+    assert relation["record"]["name"] == "Peripheral (Cyberplug)"
+    assert relation["record"]["public_reference"] == {
+        "catalog": "rules",
+        "id": "peripheral-type-cyberplug",
+    }
+
+
 def test_structured_reference_metadata_is_materialized_without_raw_tables(
     tmp_path: Path,
 ) -> None:
