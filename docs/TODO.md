@@ -60,8 +60,8 @@ confirmed application-data presentation gap.
 
 The Unit Explorer filtering/extended-results work, global search, structured rules-reference
 cross-link pass, Profile notation foundation, and maintained-text reference/token layer are
-complete. Remaining 0.9 work is concentrated in General Rules publication, the reviewed
-maintained-prose link migration, and the remaining catalog/share-state gaps.
+complete. Remaining 0.9 work is concentrated in the remaining catalog/share-state gaps.
+General Rules publication and the reviewed maintained-prose link migration are complete.
 `docs/application-domains.md` defines the accepted domain
 skeleton and interaction model.
 
@@ -127,8 +127,11 @@ skeleton and interaction model.
   - [x] Establish Attributes as an embedded canonical vocabulary for semantic links, tooltips,
     Glossary/search, and related metadata without adding an `/attributes` catalog or individual
     Attribute detail pages.
-  - [ ] Publish General Rules only as the explicit fallback for rules/reference concepts with no
-    clearer top-level owner; do not use it to manufacture pages for embedded vocabularies.
+  - [x] Publish General Rules only as the explicit fallback for rules/reference concepts with no
+    clearer top-level owner. The initial catalog publishes reviewed basic-rule, order-type,
+    command-token-use, and Peripheral-type records; Fireteam rules and Unit-profile help stay with
+    their clearer application owners, and embedded vocabularies still do not gain manufactured
+    detail pages.
 
 - [ ] Complete deep-linkable, shareable search and filter state for catalog and
   Unit views.

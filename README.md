@@ -32,8 +32,8 @@ Current release: **0.8.1** (2026-09-27).
 - Includes an Army overview with symbols, concise role/context summaries, catalog-status labels,
   legacy Army references, and direct links into pre-filtered Unit Explorer rosters.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
-  Ammunition, Traits, Labels, States, and Hacking Programs reference catalogs, with reverse Unit
-  usage links where that relationship applies.
+  Ammunition, Traits, Labels, States, Hacking Programs, and General Rules reference
+  catalogs, with reverse Unit usage links where that relationship applies.
 - Uses `/fireteams` as a general Fireteam-rules landing page and switches to Army-scoped charts when
   an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, equivalence
   labels, and N5 rules/bonus context.

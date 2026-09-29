@@ -5,8 +5,11 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
-from infinity_db.application_domains import application_domain
-from infinity_db.domain_slugs import route_slug_from_typed_domain_id
+from infinity_db.application_domains import application_domain, record_matches_domain
+from infinity_db.domain_slugs import (
+    route_slug_from_qualified_typed_domain_id,
+    route_slug_from_typed_domain_id,
+)
 from infinity_db.rules_database import RulesDatabase
 
 
@@ -29,12 +32,21 @@ class RulesRecordCatalog:
             self._records_cache = (
                 []
                 if self.rules_database is None
-                else self.rules_database.composed_records_by_kind(self.record_kind)
+                else [
+                    record
+                    for record in self.rules_database.composed_records_by_kind(self.record_kind)
+                    if record_matches_domain(self.domain, record)
+                ]
             )
         return self._records_cache
 
     def _slug(self, record: dict[str, Any]) -> str:
-        return route_slug_from_typed_domain_id(
+        slugger = (
+            route_slug_from_qualified_typed_domain_id
+            if self.domain.record_categories
+            else route_slug_from_typed_domain_id
+        )
+        return slugger(
             record.get("id"),
             expected_domain=self.record_kind,
             context=f"curated {self.domain.singular_name.lower()} id",
@@ -52,6 +64,11 @@ class RulesRecordCatalog:
             }
             for record in self._records()
         ]
+        slugs = [item["slug"] for item in items]
+        if len(slugs) != len(set(slugs)):
+            raise ValueError(
+                f"{self.domain.plural_name} contains colliding public route slugs"
+            )
         return sorted(items, key=lambda item: (item["name"].casefold(), item["id"]))
 
     def get_item(self, slug: str) -> dict[str, Any] | None:

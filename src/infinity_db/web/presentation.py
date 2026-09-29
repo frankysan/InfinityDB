@@ -23,6 +23,7 @@ from infinity_db.web.routes import (
     HACKING_PROGRAM_PAGE_PATH,
     LABEL_PAGE_PATH,
     ORDER_SYMBOL_PATH,
+    RULE_PAGE_PATH,
     SKILL_PAGE_PATH,
     STATE_PAGE_PATH,
     TRAIT_PAGE_PATH,
@@ -253,6 +254,24 @@ _FIXED_PAGES = {
             detail_meta_description="View the canonical definition of an Infinity rules Label.",
         ),
     ),
+    "/rules": PageSpec(
+        "reference-catalog.html",
+        (("Database", "/"), ("General Rules", None)),
+        "Rules reference",
+        "rules",
+        _reference_page_values(
+            "rules",
+            intro=(
+                "Browse core N5 rules concepts that do not belong to a more specific "
+                "InfinityDB rules domain."
+            ),
+            meta_description=(
+                "Browse Infinity N5 General Rules concepts without a more specific rules catalog."
+            ),
+            detail_meta_description="View an Infinity N5 General Rules reference.",
+            summary_heading="Rules reference",
+        ),
+    ),
     "/about": PageSpec(
         "about.html",
         (("InfinityDB", "/"), ("About", None)),
@@ -354,6 +373,28 @@ _DETAIL_PAGES = (
         ),
     ),
     (
+        RULE_PAGE_PATH,
+        PageSpec(
+            "reference-detail.html",
+            (("Database", "/"), ("General Rules", "/rules"), ("Details", None)),
+            "Rules reference",
+            "rules",
+            _reference_page_values(
+                "rules",
+                intro=(
+                    "Browse core N5 rules concepts that do not belong to a more specific "
+                    "InfinityDB rules domain."
+                ),
+                meta_description=(
+                    "Browse Infinity N5 General Rules concepts without a more specific "
+                    "rules catalog."
+                ),
+                detail_meta_description="View an Infinity N5 General Rules reference.",
+                summary_heading="Rules reference",
+            ),
+        ),
+    ),
+    (
         HACKING_PROGRAM_PAGE_PATH,
         PageSpec(
             "hacking-program-detail.html",
@@ -443,6 +484,7 @@ def _render_page(
         "hacking-programs": "HACKING_PROGRAMS_CURRENT",
         "ammunition": "AMMUNITION_CURRENT",
         "labels": "LABELS_CURRENT",
+        "rules": "RULES_CURRENT",
         "skill-extras": "SKILL_EXTRAS_CURRENT",
         "fireteams": "FIRETEAMS_CURRENT",
         "glossary": "GLOSSARY_CURRENT",

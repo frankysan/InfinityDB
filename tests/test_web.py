@@ -1446,6 +1446,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'href="/ammunition"' in body
     assert b'href="/traits"' in body
     assert b'href="/labels"' in body
+    assert b'href="/rules"' in body
     assert b'href="/states"' in body
     assert b'href="/hacking-programs"' in body
     assert b"Army data last changed" in body
@@ -1662,6 +1663,8 @@ def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> N
         "/traits/example",
         "/labels",
         "/labels/example",
+        "/rules",
+        "/rules/example",
         "/states",
         "/states/example",
         "/hacking-programs",
@@ -1695,6 +1698,8 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
         "/traits/example",
         "/labels",
         "/labels/example",
+        "/rules",
+        "/rules/example",
         "/states",
         "/states/example",
         "/hacking-programs",
@@ -1731,6 +1736,8 @@ def test_rules_reference_pages_share_the_same_shell_classification(
         ("/traits/example", "/traits"),
         ("/labels", "/labels"),
         ("/labels/example", "/labels"),
+        ("/rules", "/rules"),
+        ("/rules/example", "/rules"),
         ("/states", "/states"),
         ("/states/example", "/states"),
         ("/hacking-programs", "/hacking-programs"),
@@ -1765,6 +1772,8 @@ def test_every_browser_page_has_a_meta_description(app: Callable) -> None:
         "/traits/example",
         "/labels",
         "/labels/example",
+        "/rules",
+        "/rules/example",
         "/states",
         "/states/example",
         "/hacking-programs",
@@ -3234,12 +3243,13 @@ def test_traits_page_and_api_are_served(app: Callable) -> None:
     assert b"link.href = `/${page}/${encodeURIComponent(routeId)}`;" in body
 
 
-def test_ammunition_and_label_pages_and_rules_backed_apis_are_served(
+def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     app: Callable, tmp_path: Path
 ) -> None:
     for path, heading, current_href in (
         ("/ammunition", b"Ammunition catalog", b"/ammunition"),
         ("/labels", b"Labels catalog", b"/labels"),
+        ("/rules", b"General Rules catalog", b"/rules"),
     ):
         status, headers, body = request(app, path)
         assert status == 200
@@ -3248,7 +3258,7 @@ def test_ammunition_and_label_pages_and_rules_backed_apis_are_served(
         assert b'href="' + current_href + b'" aria-current="page"' in body
         assert b"reference-catalog.js" in body
 
-    for path in ("/api/ammunition", "/api/labels"):
+    for path in ("/api/ammunition", "/api/labels", "/api/rules"):
         status, _, body = request(app, path)
         assert status == 200
         assert json.loads(body) == {"items": []}
@@ -3276,6 +3286,33 @@ def test_ammunition_and_label_pages_and_rules_backed_apis_are_served(
     assert shock["slug"] == "shock"
     assert shock["rules"][0]["id"] == "ammunition:shock"
     assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20260918-130233"
+
+    status, _, body = request(rules_app, "/api/rules")
+    assert status == 200
+    general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
+    assert len(general_rules) == 9
+    assert general_rules["loss-of-lieutenant"]["name"] == "Loss of Lieutenant"
+    assert general_rules["peripheral-type-servant"]["name"] == "Peripheral (Servant)"
+    assert "fireteam-general" not in general_rules
+    assert "profile-help-unit-profile" not in general_rules
+
+    status, headers, body = request(rules_app, "/rules/loss-of-lieutenant")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"reference-detail.js" in body
+
+    status, _, body = request(rules_app, "/api/rules/loss-of-lieutenant")
+    assert status == 200
+    loss_of_lieutenant = json.loads(body)
+    assert loss_of_lieutenant["slug"] == "loss-of-lieutenant"
+    assert loss_of_lieutenant["rules"][0]["id"] == "rule:loss-of-lieutenant"
+    lieutenant_reference = next(
+        token
+        for token in loss_of_lieutenant["rules"][0]["summary_tokens"]
+        if token["type"] == "reference"
+    )
+    assert lieutenant_reference["target"] == "skill:lieutenant"
+    assert lieutenant_reference["public_reference"]["catalog"] == "skills"
 
     status, _, body = request(rules_app, "/api/labels")
     assert status == 200
@@ -3330,6 +3367,13 @@ def test_ammunition_and_label_pages_and_rules_backed_apis_are_served(
         (item["domain"], item["name"], item["href"])
         for item in json.loads(body)["items"]
     } >= {("Label", "Hackable", "/labels/hackable")}
+
+    status, _, body = request(rules_app, "/api/search", query="q=Loss of Lieutenant")
+    assert status == 200
+    assert {
+        (item["domain"], item["name"], item["href"])
+        for item in json.loads(body)["items"]
+    } >= {("General rule", "Loss of Lieutenant", "/rules/loss-of-lieutenant")}
 
     status, _, script = request(rules_app, "/static/reference-detail.js")
     assert status == 200
@@ -3666,6 +3710,13 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
             }
         ],
     }
+
+    loss_of_lieutenant = next(item for item in items if item["id"] == "rule:loss-of-lieutenant")
+    assert loss_of_lieutenant["domain"] == "General rule"
+    assert loss_of_lieutenant["href"] == "/rules/loss-of-lieutenant"
+    assert loss_of_lieutenant["embedded"] is False
+    assert not any(item["id"] == "rule:fireteam-general" for item in items)
+    assert not any(item["id"] == "rule:profile-help:unit-profile" for item in items)
 
     camouflage = next(item for item in items if item["id"] == "skill:camouflage")
     assert camouflage["href"] == "/skills/camouflage"

@@ -19,6 +19,7 @@ class ApplicationDomain:
     level: DomainLevel
     presentation: DomainPresentation
     record_kinds: tuple[str, ...] = ()
+    record_categories: tuple[str, ...] = ()
     navigation: bool = False
     search: bool = False
     glossary: bool = False
@@ -197,13 +198,20 @@ APPLICATION_DOMAINS: tuple[ApplicationDomain, ...] = (
         "General Rules",
         "top-level",
         "catalog",
-        navigation=False,
+        record_kinds=("rule",),
+        record_categories=(
+            "basic-rule",
+            "command-token-use",
+            "order-type",
+            "peripheral-type",
+        ),
+        navigation=True,
         search=True,
         glossary=True,
         landing=True,
         catalog=True,
         detail=True,
-        published=False,
+        published=True,
     ),
     ApplicationDomain(
         "attributes",
@@ -233,13 +241,13 @@ _APPLICATION_DOMAINS_BY_SLUG = {domain.slug: domain for domain in APPLICATION_DO
 _RULE_RECORD_DOMAINS = {
     kind: domain
     for domain in APPLICATION_DOMAINS
-    if domain.published and domain.detail
+    if domain.published and domain.detail and not domain.record_categories
     for kind in domain.record_kinds
 }
 _SEMANTIC_RECORD_DOMAINS = {
     kind: domain
     for domain in APPLICATION_DOMAINS
-    if domain.published
+    if domain.published and not domain.record_categories
     for kind in domain.record_kinds
 }
 
@@ -267,3 +275,39 @@ def semantic_record_domain(kind: str) -> ApplicationDomain | None:
     """
 
     return _SEMANTIC_RECORD_DOMAINS.get(kind)
+
+
+def record_matches_domain(domain: ApplicationDomain, record: dict[str, object]) -> bool:
+    """Return whether one semantic rules record belongs to an application domain.
+
+    Most domains own a complete record kind. General Rules is intentionally the
+    fallback exception: only reviewed ``rule`` categories without a clearer
+    application owner are published there.
+    """
+
+    kind = record.get("kind")
+    if kind not in domain.record_kinds:
+        return False
+    if not domain.record_categories:
+        return True
+    facts = record.get("facts")
+    if not isinstance(facts, dict):
+        return False
+    category = facts.get("category")
+    return isinstance(category, str) and category in domain.record_categories
+
+
+def public_rule_record_domain(record: dict[str, object]) -> ApplicationDomain | None:
+    """Return the published detail domain owning one concrete rules record.
+
+    This record-aware resolver handles category-scoped domains such as General
+    Rules while :func:`public_rule_domain` remains reserved for kinds that map
+    unambiguously to one public catalog.
+    """
+
+    for domain in APPLICATION_DOMAINS:
+        if not domain.published or not domain.detail:
+            continue
+        if record_matches_domain(domain, record):
+            return domain
+    return None

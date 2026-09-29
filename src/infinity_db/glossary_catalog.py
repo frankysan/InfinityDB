@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from infinity_db.application_domains import APPLICATION_DOMAINS, application_domain
+from infinity_db.application_domains import (
+    APPLICATION_DOMAINS,
+    application_domain,
+    record_matches_domain,
+)
 from infinity_db.database.repository import Database, accent_insensitive_key
 from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.rules_database import RulesDatabase
@@ -39,6 +43,8 @@ class GlossaryCatalog:
                 continue
             for kind in domain.record_kinds:
                 for record in self.rules_database.composed_records_by_kind(kind):
+                    if not record_matches_domain(domain, record):
+                        continue
                     if (record.get("variant_semantics") or {}).get("inheritance") == "source":
                         continue
                     reference = rule_record_public_reference(self.database, record)

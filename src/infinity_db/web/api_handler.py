@@ -9,7 +9,7 @@ from http import HTTPStatus
 from urllib.parse import parse_qs
 
 from infinity_db import __version__
-from infinity_db.application_domains import public_rule_domain
+from infinity_db.application_domains import public_rule_record_domain
 from infinity_db.army_overview import (
     army_overview_description,
     army_overview_group,
@@ -51,6 +51,7 @@ from infinity_db.web.routes import (
     EQUIPMENT_API_PATH,
     HACKING_PROGRAM_API_PATH,
     LABEL_API_PATH,
+    RULE_API_PATH,
     SKILL_API_PATH,
     STATE_API_PATH,
     TRAIT_API_PATH,
@@ -264,6 +265,7 @@ class ApiHandler:
         self.hacking_program_catalog = HackingProgramCatalog(database, rules_database)
         self.ammunition_catalog = RulesRecordCatalog(rules_database, "ammunition")
         self.label_catalog = LabelCatalog(rules_database)
+        self.general_rules_catalog = RulesRecordCatalog(rules_database, "rules")
         self.glossary_catalog = GlossaryCatalog(database, rules_database)
         self.search_catalog = SearchCatalog(
             database,
@@ -274,6 +276,7 @@ class ApiHandler:
             self.hacking_program_catalog,
             self.ammunition_catalog,
             self.label_catalog,
+            self.general_rules_catalog,
             self.glossary_catalog,
         )
         self.catalog_rules = CatalogRules(rules_database)
@@ -441,14 +444,15 @@ class ApiHandler:
                 LOGGER.exception("Could not read Hacking Programs")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The Hacking Programs are unavailable. Please try again."}
-        elif path in {"/api/ammunition", "/api/labels"}:
+        elif path in {"/api/ammunition", "/api/labels", "/api/rules"}:
             cache_control = API_CACHE_CONTROL
             try:
-                catalog = (
-                    self.ammunition_catalog
-                    if path == "/api/ammunition"
-                    else self.label_catalog
-                )
+                if path == "/api/ammunition":
+                    catalog = self.ammunition_catalog
+                elif path == "/api/labels":
+                    catalog = self.label_catalog
+                else:
+                    catalog = self.general_rules_catalog
                 payload = {"items": catalog.list_items()}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read rules-reference catalog")
@@ -609,6 +613,24 @@ class ApiHandler:
                 payload = {
                     "error": "The Ammunition reference is unavailable. Please try again."
                 }
+        elif match := RULE_API_PATH.fullmatch(path):
+            cache_control = API_CACHE_CONTROL
+            try:
+                payload = self.general_rules_catalog.get_item(match.group("identifier"))
+                if payload is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "General rule not found"}
+                else:
+                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_maintained_text_references(
+                        self.database, self.rules_database, payload
+                    )
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read General Rule")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "The General Rules reference is unavailable. Please try again."
+                }
         elif match := LABEL_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
@@ -626,7 +648,7 @@ class ApiHandler:
                         for record in self.rules_database.composed_records_using_label(
                             payload["id"]
                         ):
-                            domain = public_rule_domain(str(record.get("kind", "")))
+                            domain = public_rule_record_domain(record)
                             if domain is None:
                                 continue
                             href = _public_reference_href(

@@ -30,6 +30,7 @@ class SearchCatalog:
         hacking_program_catalog: HackingProgramCatalog,
         ammunition_catalog: RulesRecordCatalog,
         label_catalog: LabelCatalog,
+        general_rules_catalog: RulesRecordCatalog,
         glossary_catalog: GlossaryCatalog,
     ) -> None:
         self.database = database
@@ -40,6 +41,7 @@ class SearchCatalog:
         self.hacking_program_catalog = hacking_program_catalog
         self.ammunition_catalog = ammunition_catalog
         self.label_catalog = label_catalog
+        self.general_rules_catalog = general_rules_catalog
         self.glossary_catalog = glossary_catalog
 
     @staticmethod
@@ -99,6 +101,11 @@ class SearchCatalog:
                 application_domain("labels").singular_name,
                 "labels",
                 self.label_catalog.list_items(),
+            ),
+            (
+                application_domain("rules").singular_name,
+                "rules",
+                self.general_rules_catalog.list_items(),
             ),
         )
         for domain, route, items in catalog_sources:

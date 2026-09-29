@@ -36,6 +36,8 @@ AMMUNITION_API_PATH = re.compile(
 )
 LABEL_PAGE_PATH = re.compile(rf"/labels/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 LABEL_API_PATH = re.compile(rf"/api/labels/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+RULE_PAGE_PATH = re.compile(rf"/rules/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+RULE_API_PATH = re.compile(rf"/api/rules/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 TRAIT_PAGE_PATH = re.compile(rf"/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 TRAIT_API_PATH = re.compile(rf"/api/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 
@@ -62,6 +64,7 @@ _METRIC_FIXED_PATHS = frozenset(
         "/hacking-programs",
         "/ammunition",
         "/labels",
+        "/rules",
         "/skill-extras",
         "/fireteams",
         "/search",
@@ -78,6 +81,7 @@ _METRIC_FIXED_PATHS = frozenset(
         "/api/hacking-programs",
         "/api/ammunition",
         "/api/labels",
+        "/api/rules",
         "/api/skill-extras",
         "/api/unit-profile-help",
         "/api/fireteams",
@@ -95,6 +99,7 @@ _METRIC_PARAMETERIZED_PATHS: tuple[tuple[Pattern[str], str], ...] = (
     (HACKING_PROGRAM_PAGE_PATH, "/hacking-programs/:id"),
     (AMMUNITION_PAGE_PATH, "/ammunition/:id"),
     (LABEL_PAGE_PATH, "/labels/:id"),
+    (RULE_PAGE_PATH, "/rules/:id"),
     (UNIT_API_PATH, "/api/units/:id"),
     (SKILL_API_PATH, "/api/skills/:id"),
     (EQUIPMENT_API_PATH, "/api/equipment/:id"),
@@ -104,6 +109,7 @@ _METRIC_PARAMETERIZED_PATHS: tuple[tuple[Pattern[str], str], ...] = (
     (HACKING_PROGRAM_API_PATH, "/api/hacking-programs/:id"),
     (AMMUNITION_API_PATH, "/api/ammunition/:id"),
     (LABEL_API_PATH, "/api/labels/:id"),
+    (RULE_API_PATH, "/api/rules/:id"),
 )
 _SYMBOL_PATHS = (
     ARMY_SYMBOL_PATH,

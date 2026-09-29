@@ -9,6 +9,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Publish **General Rules** as the explicit
+  fallback rules domain. The initial catalog exposes reviewed basic rules, special Order types,
+  Command Token Strategic Use, and Peripheral-type definitions through `/rules`, global search,
+  Glossary, semantic relation links, and the shared reference-detail presentation. Fireteam rules,
+  Unit-profile help, Attributes, and scoped Game terms keep their existing clearer owners instead
+  of being duplicated into the fallback catalog.
 - **Data processing + Web backend + Web frontend:** Add canonical **Attributes** and scoped
   **Game terms** as embedded rules vocabularies plus a federated **Glossary** across current
   reference domains. Attribute and terminology concepts participate in global search without gaining

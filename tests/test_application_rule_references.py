@@ -10,6 +10,7 @@ from infinity_db.application_domains import (
     APPLICATION_DOMAINS,
     application_domain,
     public_rule_domain,
+    public_rule_record_domain,
     semantic_record_domain,
 )
 from infinity_db.curated import load_curated_directory
@@ -180,8 +181,16 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
     assert terms.detail is False
 
     general_rules = application_domain("rules")
-    assert general_rules.published is False
-    assert general_rules.route is None
+    assert general_rules.published is True
+    assert general_rules.navigation is True
+    assert general_rules.route == "/rules"
+    assert general_rules.record_kinds == ("rule",)
+    assert set(general_rules.record_categories) == {
+        "basic-rule",
+        "command-token-use",
+        "order-type",
+        "peripheral-type",
+    }
 
     assert public_rule_domain("ammunition") == ammunition
     assert public_rule_domain("attribute") is None
@@ -189,6 +198,12 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
     assert public_rule_domain("term") is None
     assert semantic_record_domain("term") == terms
     assert public_rule_domain("rule") is None
+    assert public_rule_record_domain(
+        {"kind": "rule", "facts": {"category": "basic-rule"}}
+    ) == general_rules
+    assert public_rule_record_domain(
+        {"kind": "rule", "facts": {"category": "fireteam-general"}}
+    ) is None
 
 
 def test_attributes_are_current_canonical_embedded_records(tmp_path: Path) -> None:
@@ -294,7 +309,27 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
     assert hackable["name"] == "Hackable"
     assert "Hacking Programs" in hackable["description"]
 
+    general_rules = RulesRecordCatalog(rules_database, "rules")
+    general_rule_items = general_rules.list_items()
+    assert len(general_rule_items) == 9
+    assert {item["slug"] for item in general_rule_items} == {
+        "command-token-strategic-use",
+        "loss-of-lieutenant",
+        "peripheral-type-ancillary",
+        "peripheral-type-control",
+        "peripheral-type-cyberplug",
+        "peripheral-type-servant",
+        "peripheral-type-synchronized",
+        "special-lieutenant-order",
+        "tactical-order",
+    }
+    assert general_rules.get_item("fireteam-general") is None
+    servant = general_rules.get_item("peripheral-type-servant")
+    assert servant is not None
+    assert servant["rules"][0]["id"] == "rule:peripheral-type:servant"
+
     assert RulesRecordCatalog(None, "ammunition").list_items() == []
+    assert RulesRecordCatalog(None, "rules").list_items() == []
     assert LabelCatalog(None).list_items() == []
 
 def test_rules_relation_references_project_source_variants_to_public_routes(
@@ -366,6 +401,7 @@ def test_rules_relation_references_project_source_variants_to_public_routes(
                             "id": "rule:loss-of-lieutenant",
                             "kind": "rule",
                             "name": "Loss of Lieutenant",
+                            "facts": {"category": "basic-rule"},
                             "army_links": [],
                         }
                     },
@@ -399,7 +435,10 @@ def test_rules_relation_references_project_source_variants_to_public_routes(
     }
     assert records[5]["public_reference"] == {"href": "/glossary#attribute-mov"}
     assert records[6]["public_reference"] == {"href": "/glossary#term-marker"}
-    assert "public_reference" not in records[7]
+    assert records[7]["public_reference"] == {
+        "catalog": "rules",
+        "id": "loss-of-lieutenant",
+    }
 
 
 def test_structured_reference_metadata_is_materialized_without_raw_tables(

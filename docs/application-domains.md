@@ -11,11 +11,10 @@ same UI. Data identity, semantic ownership, search/glossary participation, and b
 are related concerns, but they are not the same concern.
 
 The capability registry described below is **Current** in
-`src/infinity_db/application_domains.py`. Ammunition and Labels are published catalog domains,
-Armies is a published overview domain, Fireteams follows the shared landing/scoped interaction
-contract, and Attributes plus scoped Game terms are published embedded vocabularies projected
-through contextual help, global search, and the federated Glossary. General Rules publication
-remains **Design direction**.
+`src/infinity_db/application_domains.py`. Ammunition, Labels, and General Rules are published
+catalog domains, Armies is a published overview domain, Fireteams follows the shared landing/scoped
+interaction contract, and Attributes plus scoped Game terms are published embedded vocabularies
+projected through contextual help, global search, and the federated Glossary.
 Concrete unfinished work remains in `docs/TODO.md`.
 
 ## Principles
@@ -121,7 +120,8 @@ by public rules-reference routing so route ownership is not duplicated in a seco
 mapping. The registry expresses at least:
 
 - stable public domain slug and singular/plural display names;
-- the concept/record kinds owned or presented by the domain;
+- the concept/record kinds owned or presented by the domain, plus reviewed record-category
+  filters where one kind is intentionally split across application owners;
 - whether the domain participates in navigation, global search, and Glossary;
 - whether it provides a landing/overview surface, catalog/list surface, scoped views, or detail
   pages;
@@ -254,14 +254,21 @@ must therefore remain part of semantic identity and linking.
 ## General Rules
 
 `rules` is the generic top-level fallback for rules/reference concepts that do not have a clearer
-canonical top-level domain.
+canonical top-level domain. It is now published through `/rules` as a normal catalog/detail domain.
+The initial reviewed publication owns the `basic-rule`, `order-type`, `command-token-use`, and
+`peripheral-type` categories from canonical `rule:*` records. Qualified internal identities such as
+`rule:peripheral-type:servant` keep that canonical identity while projecting to a collision-checked
+public route slug such as `/rules/peripheral-type-servant`.
 
 A concept belongs here because **General Rules is its best semantic owner**, not merely because the
-concept is inconvenient to classify. If a later domain provides a natural home, presentation/domain
-ownership should move there while preserving stable identities and relationships where practical.
+concept is inconvenient to classify. Fireteam general/bonus records remain owned by the Fireteams
+surface, and Unit-profile help remains contextual profile help rather than being duplicated into the
+fallback catalog. If a later domain provides a natural home, presentation/domain ownership should
+move there while preserving stable identities and relationships where practical.
 
-General Rules should not absorb embedded vocabularies solely to give them pages. Concepts such as
-Attributes can remain canonical and glossary/searchable without becoming generic rule-detail pages.
+General Rules does not absorb embedded vocabularies solely to give them pages. Concepts such as
+Attributes and scoped Game terms remain canonical and glossary/searchable without becoming generic
+rule-detail pages.
 
 ## Glossary usage
 
@@ -300,7 +307,9 @@ The implementation sequence is:
    interaction contract;
 4. **Current:** publish Attributes and scoped Game terms as embedded vocabularies and Glossary as
    a federated projection over canonical domains plus embedded vocabularies;
-5. continue filling semantic relationships and terminology coverage through the 1.0 completeness
+5. **Current:** publish General Rules as the reviewed fallback catalog for canonical `rule:*`
+   concepts without a clearer application owner;
+6. continue filling semantic relationships and terminology coverage through the 1.0 completeness
    work.
 
 This sequence deliberately creates the reusable structure first so later domains do not need to

@@ -5,8 +5,14 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any
 
-from infinity_db.application_domains import public_rule_domain, semantic_record_domain
-from infinity_db.domain_slugs import route_slug_from_typed_domain_id
+from infinity_db.application_domains import (
+    public_rule_record_domain,
+    semantic_record_domain,
+)
+from infinity_db.domain_slugs import (
+    route_slug_from_qualified_typed_domain_id,
+    route_slug_from_typed_domain_id,
+)
 
 if TYPE_CHECKING:
     from infinity_db.database.repository import Database
@@ -39,7 +45,7 @@ def rule_record_public_reference(
     kind = record.get("kind")
     if not isinstance(kind, str):
         return None
-    domain = public_rule_domain(kind)
+    domain = public_rule_record_domain(record)
     if domain is None:
         semantic_domain = semantic_record_domain(kind)
         if (
@@ -82,12 +88,20 @@ def rule_record_public_reference(
             return None
 
     record_id = record.get("id")
-    prefix = f"{typed_prefix}:"
-    if isinstance(record_id, str) and record_id.startswith(prefix):
-        route_id = record_id[len(prefix):]
-        if route_id:
-            return {"catalog": catalog, "id": route_id}
-    return None
+    try:
+        slugger = (
+            route_slug_from_qualified_typed_domain_id
+            if domain.record_categories
+            else route_slug_from_typed_domain_id
+        )
+        route_id = slugger(
+            record_id,
+            expected_domain=typed_prefix,
+            context=f"curated {domain.singular_name.lower()} id",
+        )
+    except ValueError:
+        return None
+    return {"catalog": catalog, "id": route_id}
 
 
 def enrich_rule_relation_references(
