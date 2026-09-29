@@ -1,0 +1,39 @@
+{
+  "formatVersion": 1,
+  "policy": "reviewed-maintained-text-link-batches",
+  "batches": [
+    {
+      "id": "batch-1-state-canonical-names",
+      "namespace": "state",
+      "includeAliases": false,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Retrospective coverage gate for the completed canonical State-name pass. State aliases remain intentionally deferred to the alias/collision batch.",
+      "extraSurfaces": [
+        {
+          "target": "state:retreat",
+          "text": "Retreat State"
+        }
+      ]
+    },
+    {
+      "id": "batch-2-hacking-program-names",
+      "namespace": "hacking-program",
+      "includeAliases": true,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Retrospective coverage gate for the completed Hacking Program name/alias pass."
+    },
+    {
+      "id": "batch-3-equipment-names",
+      "namespace": "equipment",
+      "includeAliases": true,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29",
+      "note": "Retrospective coverage gate for the completed Equipment name/alias pass, including conservative plural and case-only variants."
+    }
+  ]
+}

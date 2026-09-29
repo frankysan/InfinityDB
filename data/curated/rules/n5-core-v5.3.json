@@ -9955,7 +9955,7 @@
                 "effects": [
                     "The user ignores the WIP -3 MOD imposed by [[state:impersonation-1]].",
                     "A successful Discover Roll against a Trooper in [[state:impersonation-1]] cancels that Impersonation State.",
-                    "The user ignores Surprise Attack MODs from attackers benefiting from Impersonation or Holoecho States when the rule conditions are met."
+                    "The user ignores Surprise Attack MODs from attackers benefiting from Impersonation or [[state:holoecho:plural]] when the rule conditions are met."
                 ],
                 "restrictions": [
                     "The Surprise Attack protection is conditional on the attacker benefiting from Impersonation or [[state:holoecho]]; LoF is normally required, except against qualifying CC Attacks."
@@ -12682,7 +12682,7 @@
                     "The imitated Trooper must belong to the bearer’s faction or Sectorial Army and have the same Silhouette value."
                 ],
                 "restrictions": [
-                    "HoloMask cannot copy Hacker or Hackable status or Deployable items represented by Tokens or Models.",
+                    "[[review-needed:ambiguous-target|HoloMask]] cannot copy Hacker or Hackable status or Deployable items represented by Tokens or Models.",
                     "The State is canceled by its listed revelation conditions."
                 ]
             },

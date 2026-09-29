@@ -67,7 +67,10 @@ unlinked-reference baseline is temporary migration debt for text that predates t
 candidate occurrences
 must not be admitted to it, and reviewed migration batches should only reduce the inventory.
 Automated discovery is an audit aid, not permission to bulk-rewrite ambiguous names or aliases;
-resolve those manually.
+resolve those manually. Completed migration batches are also recorded in
+`data/curated/maintained-text-link-reviews.json` and must have zero case-insensitive/plural plain
+residuals. Any uncertainty encountered during review must remain visible as an explicit
+`review-needed` marker until resolved.
 
 ## Semantic provenance rule
 

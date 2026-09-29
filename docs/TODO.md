@@ -82,8 +82,12 @@ skeleton and interaction model.
   - [x] Batch 3: review and link Equipment names. The post-batch legacy inventory was 625
     candidate occurrences across 178 semantic owners, with no remaining `equipment:*` candidates.
   - [x] Establish explicit `review-needed` markers for passages that have been examined but cannot
-    yet be resolved safely. The current inventory is 624 legacy candidates across 178 semantic
-    owners plus one explicit marker for the unresolved `HoloMask` state-alias passage.
+    yet be resolved safely.
+  - [x] Retrospectively audit completed Batches 1-3 with a broader case-insensitive/plural residual
+    scan and keep that scan as a build gate. It found one missed unambiguous `Holoecho States`
+    reference, now linked, and a second ambiguous `HoloMask` passage, now explicitly flagged. The
+    current inventory is 623 legacy candidates across 178 semantic owners plus two explicit
+    `review-needed` markers.
   - [ ] Batch 4: review Trait names, with special care for generic terms such as `State`, `CC`,
     `ARO`, and `Deployable`.
   - [ ] Batch 5: review Skill names.

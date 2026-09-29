@@ -6,7 +6,7 @@
     "n5-hacking-programs-v5.3"
   ],
   "candidateOwners": 178,
-  "candidateOccurrences": 624,
+  "candidateOccurrences": 623,
   "owners": {
     "n5-core-v5.3|declaration-category:aro:p103": {
       "candidateCount": 1,
@@ -49,8 +49,8 @@
       "sha256": "3d69d3aa02ee37b6bab188bc15a0b4c2ec9aed7508b91e8a389ca4746b4d5bb4"
     },
     "n5-core-v5.3|equipment:biometric-visor": {
-      "candidateCount": 11,
-      "sha256": "e6a7991396d2a1a0f9e1d1943cb3df4779b926a14e2405722722c252073095b6"
+      "candidateCount": 10,
+      "sha256": "d35f4d8508e2267728a31ac8ff07cc093f5ac776a7af84a38bfd2f08c8b1a1b8"
     },
     "n5-core-v5.3|equipment:cube": {
       "candidateCount": 2,

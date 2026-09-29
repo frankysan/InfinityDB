@@ -1674,7 +1674,7 @@ h1>span {
 }
 
 .maintained-review-needed-badge {
-  font-size: .7em;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   letter-spacing: .04em;
   text-transform: uppercase;

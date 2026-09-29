@@ -871,11 +871,18 @@ longest-match detection. Existing legacy candidates are frozen in
 `data/curated/maintained-text-link-baseline.json`; a new or changed unlinked candidate fails the
 rules build. The baseline is migration debt rather than an exception mechanism and is expected only
 to shrink as manually reviewed domain batches replace plain mentions with typed tokens. Self-links
-are excluded. Once a reviewer encounters a passage that is ambiguous or otherwise unclear, it must
-be converted to an explicit `review-needed` marker rather than left as silent baseline debt or
-linked speculatively. The maintained-text audit enumerates these markers separately with owner,
-field, visible text, and reason; the browser highlights them with the same top-layer preview system
-used by semantic links. Unreviewed legacy candidates may remain in the baseline until their batch is
+are excluded. Completed migration scopes are recorded separately in
+`data/curated/maintained-text-link-reviews.json`. Those reviewed scopes are rescanned
+case-insensitively, including conservative plural forms, so a canonical name or alias that escaped
+the original case-sensitive legacy-candidate scan cannot remain silently after its batch is marked
+complete. This reviewed-batch residual scan is a build gate and must be clean before the legacy
+baseline can be rewritten.
+
+Once a reviewer encounters a passage that is ambiguous or otherwise unclear, it must be converted
+to an explicit `review-needed` marker rather than left as silent baseline debt or linked
+speculatively. The maintained-text audit enumerates these markers separately with owner, field,
+visible text, and reason; the browser highlights them with the same top-layer preview system used
+by semantic links. Unreviewed legacy candidates may remain in the baseline until their batch is
 examined, but reviewed ambiguity must stay explicitly marked until resolved.
 
 Gameplay distances embedded in maintained text are structural tokens such as

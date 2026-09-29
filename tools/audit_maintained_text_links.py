@@ -10,10 +10,13 @@ from pathlib import Path
 from infinity_db.curated import load_curated_directory
 from infinity_db.maintained_text_policy import (
     BASELINE_FILENAME,
+    REVIEW_POLICY_FILENAME,
     build_maintained_text_link_baseline,
     collect_review_needed_markers,
+    collect_reviewed_batch_residuals,
     collect_unlinked_reference_candidates,
     validate_maintained_text_link_baseline,
+    validate_reviewed_batch_coverage,
 )
 
 DEFAULT_RULES = Path("data/curated/rules")
@@ -23,6 +26,7 @@ def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("rules", nargs="?", type=Path, default=DEFAULT_RULES)
     parser.add_argument("--baseline", type=Path)
+    parser.add_argument("--review-policy", type=Path)
     parser.add_argument(
         "--write-baseline",
         action="store_true",
@@ -35,6 +39,9 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     documents = load_curated_directory(args.rules)
     baseline_path = args.baseline or args.rules.parent / BASELINE_FILENAME
+    review_policy_path = (
+        args.review_policy or args.rules.parent / REVIEW_POLICY_FILENAME
+    )
     candidates = collect_unlinked_reference_candidates(documents)
     by_namespace: Counter[str] = Counter()
     for values in candidates.values():
@@ -54,6 +61,28 @@ def main(argv: list[str] | None = None) -> int:
             + ", ".join(f"{key}={value}" for key, value in sorted(by_namespace.items()))
         )
 
+    reviewed_residuals = collect_reviewed_batch_residuals(
+        documents, review_policy_path
+    )
+    reviewed_residual_count = sum(
+        sum(values.values()) for values in reviewed_residuals.values()
+    )
+    print(
+        f"Reviewed-batch residuals: {reviewed_residual_count} occurrence(s) "
+        f"across {len(reviewed_residuals)} owner(s)"
+    )
+    for owner, values in sorted(reviewed_residuals.items()):
+        ordered = sorted(
+            values.items(),
+            key=lambda item: (item[0][0], item[0][1], item[0][2]),
+        )
+        for (batch_id, field, text, targets), count in ordered:
+            suffix = f" x{count}" if count != 1 else ""
+            print(
+                f"  {owner} {field}: {text!r} -> {'/'.join(targets)} "
+                f"[{batch_id}]{suffix}"
+            )
+
     review_needed = collect_review_needed_markers(documents)
     review_count = sum(sum(values.values()) for values in review_needed.values())
     print(
@@ -71,6 +100,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {owner} {field}: {display} [{reason}]{suffix}")
 
     if args.write_baseline:
+        validate_reviewed_batch_coverage(documents, review_policy_path)
         baseline = build_maintained_text_link_baseline(documents)
         baseline_path.write_text(
             json.dumps(baseline, indent=2, ensure_ascii=False) + "\n",
@@ -80,7 +110,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Wrote reviewed legacy baseline: {baseline_path}")
         return 0
 
-    validate_maintained_text_link_baseline(documents, baseline_path)
+    validate_maintained_text_link_baseline(
+        documents, baseline_path, review_policy_path=review_policy_path
+    )
     print(f"Legacy baseline matches: {baseline_path}")
     return 0
 

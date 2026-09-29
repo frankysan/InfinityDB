@@ -41,6 +41,10 @@ pre-token corpus is being migrated in reviewed domain batches rather than by bul
 `maintained-text-link-baseline.json` freezes the remaining legacy plain-reference candidates so
 new rules text cannot add unlinked canonical names or aliases while that migration is in progress.
 The baseline is temporary migration debt and should only shrink.
+`maintained-text-link-reviews.json` records the scopes of completed migration batches. Those scopes
+receive an additional case-insensitive scan with conservative plural matching, which catches terms
+that the intentionally exact legacy baseline can miss. A completed-batch residual is an error: link
+it when the meaning is clear, or replace it with `review-needed` when it is not.
 
 Audit the current inventory with:
 
@@ -48,7 +52,11 @@ Audit the current inventory with:
 python tools/audit_maintained_text_links.py
 ```
 
-After a reviewed migration batch, regenerate the smaller baseline in the same change with:
+The audit prints three inventories: remaining legacy candidates, residuals in already reviewed
+batches, and explicit `review-needed` markers. Reviewed-batch residuals must be zero.
+
+After a reviewed migration batch, add or update its scope in `maintained-text-link-reviews.json` and
+regenerate the smaller baseline in the same change with:
 
 ```powershell
 python tools/audit_maintained_text_links.py --write-baseline

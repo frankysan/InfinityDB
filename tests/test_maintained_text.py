@@ -6,8 +6,10 @@ from infinity_db.curated import load_curated_directory, load_curated_document
 from infinity_db.maintained_text import parse_maintained_text
 from infinity_db.maintained_text_policy import (
     collect_review_needed_markers,
+    collect_reviewed_batch_residuals,
     collect_unlinked_reference_candidates,
     validate_maintained_text_link_baseline,
+    validate_reviewed_batch_coverage,
 )
 from infinity_db.rules_database import export_rules_database
 
@@ -113,6 +115,15 @@ def test_project_maintained_text_link_baseline_is_current() -> None:
     baseline = root / "data" / "curated" / "maintained-text-link-baseline.json"
 
     validate_maintained_text_link_baseline(documents, baseline)
+
+
+def test_project_completed_maintained_text_batches_have_no_plain_residuals() -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    review_policy = root / "data" / "curated" / "maintained-text-link-reviews.json"
+
+    assert collect_reviewed_batch_residuals(documents, review_policy) == {}
+    validate_reviewed_batch_coverage(documents, review_policy)
 
 
 def test_rules_database_rejects_new_unlinked_semantic_reference(tmp_path: Path) -> None:
@@ -230,6 +241,65 @@ def test_unlinked_reference_candidates_use_aliases_longest_match_and_ignore_toke
     assert sum(values.values()) == 3
 
 
+def test_reviewed_batch_audit_catches_case_and_plural_omissions(
+    tmp_path: Path,
+) -> None:
+    policy = tmp_path / "maintained-text-link-reviews.json"
+    policy.write_text(
+        """{
+  "formatVersion": 1,
+  "policy": "reviewed-maintained-text-link-batches",
+  "batches": [
+    {
+      "id": "equipment",
+      "namespace": "equipment",
+      "includeAliases": true,
+      "includeSimplePlurals": true,
+      "caseInsensitive": true,
+      "reviewedOn": "2026-09-29"
+    }
+  ]
+}
+""",
+        encoding="utf-8",
+    )
+    document = {
+        "collection": {"id": "test", "status": "current"},
+        "skillTypes": [],
+        "labels": [],
+        "records": [
+            {
+                "id": "equipment:multispectral-visor",
+                "kind": "equipment",
+                "name": "Multispectral Visor",
+                "summary": "Definition.",
+            },
+            {
+                "id": "rule:test",
+                "kind": "rule",
+                "name": "Test",
+                "summary": "MULTISPECTRAL VISORS are visible here.",
+            },
+        ],
+    }
+    documents = [(Path("test.json"), document)]
+
+    residuals = collect_reviewed_batch_residuals(documents, policy)
+    assert residuals["test|rule:test"][
+        (
+            "equipment",
+            "summary",
+            "MULTISPECTRAL VISORS",
+            ("equipment:multispectral-visor",),
+        )
+    ] == 1
+
+    document["records"][1]["summary"] = (
+        "[[review-needed:ambiguous-target|MULTISPECTRAL VISORS]] are visible here."
+    )
+    assert collect_reviewed_batch_residuals(documents, policy) == {}
+
+
 def test_review_needed_markers_are_explicit_and_excluded_from_unlinked_candidates() -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
@@ -247,4 +317,7 @@ def test_review_needed_markers_are_explicit_and_excluded_from_unlinked_candidate
 
     assert review_needed["n5-core-v5.3|state:retreat"][
         ("facts.effects[]", "ambiguous-target", "HoloMask")
+    ] == 1
+    assert review_needed["n5-core-v5.3|state:holomask"][
+        ("facts.restrictions[]", "ambiguous-target", "HoloMask")
     ] == 1
