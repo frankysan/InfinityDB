@@ -981,7 +981,7 @@ def test_unit_profile_help_is_rules_backed_and_optional(
 ) -> None:
     status, _, body = request(app, "/api/unit-profile-help")
     assert status == 200
-    assert json.loads(body) == {"items": []}
+    assert json.loads(body) == {"items": [], "attributes": []}
 
     root = Path(__file__).parents[1]
     rules_path = tmp_path / "rules.db"
@@ -990,7 +990,23 @@ def test_unit_profile_help_is_rules_backed_and_optional(
 
     status, _, body = request(rules_app, "/api/unit-profile-help")
     assert status == 200
-    items = json.loads(body)["items"]
+    payload = json.loads(body)
+    items = payload["items"]
+    assert {item["id"] for item in payload["attributes"]} == {
+        "attribute:mov",
+        "attribute:cc",
+        "attribute:bs",
+        "attribute:ph",
+        "attribute:wip",
+        "attribute:arm",
+        "attribute:bts",
+        "attribute:vita",
+        "attribute:str",
+        "attribute:ava",
+        "attribute:s",
+        "attribute:swc",
+        "attribute:c",
+    }
     assert [item["key"] for item in items] == [
         "unit-profile",
         "attributes",
@@ -1617,6 +1633,7 @@ def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> N
         ),
         ("skill.js", b'getCatalogItem("skills", skillId, pageController.signal)'),
         ("skill-extras.js", b"getSkillExtras(pageController.signal)"),
+        ("glossary.js", b"getGlossary(controller.signal)"),
         ("version-check.js", b"getVersion()"),
     ):
         status, _, body = request(app, f"/static/{asset}")
@@ -1650,6 +1667,7 @@ def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> N
         "/hacking-programs",
         "/hacking-programs/example",
         "/fireteams",
+        "/glossary",
         "/skill-extras",
         "/about",
     ],
@@ -1681,6 +1699,7 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
         "/states/example",
         "/hacking-programs",
         "/hacking-programs/example",
+        "/glossary",
     ],
 )
 def test_rules_reference_pages_share_the_same_shell_classification(
@@ -1717,6 +1736,7 @@ def test_rules_reference_pages_share_the_same_shell_classification(
         ("/hacking-programs", "/hacking-programs"),
         ("/hacking-programs/example", "/hacking-programs"),
         ("/fireteams", "/fireteams"),
+        ("/glossary", "/glossary"),
         ("/about", "/about"),
     ],
 )
@@ -1750,6 +1770,7 @@ def test_every_browser_page_has_a_meta_description(app: Callable) -> None:
         "/hacking-programs",
         "/hacking-programs/example",
         "/fireteams",
+        "/glossary",
         "/skill-extras",
         "/about",
     ):
@@ -2192,6 +2213,7 @@ def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> No
         "/hacking-programs",
         "/hacking-programs/carbonite",
         "/fireteams",
+        "/glossary",
         "/about",
     )
     expected_csp = (
@@ -3542,6 +3564,72 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     status, _, body = request(app, "/api/search", query="q=alpha&q=beta")
     assert status == 400
     assert json.loads(body)["error"] == "Provide q exactly once"
+
+
+def test_glossary_projects_canonical_rules_and_embedded_attributes(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+
+    status, headers, body = request(rules_app, "/glossary")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"Canonical terminology" in body
+    assert b"glossary.js" in body
+    assert b'href="/glossary" aria-current="page"' in body
+
+    status, _, body = request(rules_app, "/api/glossary")
+    assert status == 200
+    items = json.loads(body)["items"]
+    movement = next(item for item in items if item["id"] == "attribute:mov")
+    assert movement == {
+        "id": "attribute:mov",
+        "kind": "attribute",
+        "domain": "Attribute",
+        "domain_slug": "attributes",
+        "name": "Movement (MOV)",
+        "description": (
+            "Movement (MOV) is the distance a Trooper can move in an Order. It normally "
+            "has separate first-move and second-move values; a dash means the Trooper "
+            "is stationary."
+        ),
+        "aliases": [],
+        "href": "/glossary#attribute-mov",
+        "embedded": True,
+        "description_tokens": [
+            {
+                "type": "text",
+                "text": (
+                    "Movement (MOV) is the distance a Trooper can move in an Order. It "
+                    "normally has separate first-move and second-move values; a dash "
+                    "means the Trooper is stationary."
+                ),
+            }
+        ],
+    }
+    camouflage = next(item for item in items if item["id"] == "skill:camouflage")
+    assert camouflage["href"] == "/skills/camouflage"
+    assert camouflage["embedded"] is False
+    assert any(
+        token.get("target") == "state:camouflaged"
+        and token.get("public_reference") == {
+            "catalog": "states",
+            "id": "camouflaged",
+        }
+        for token in camouflage["description_tokens"]
+        if token.get("type") == "reference"
+    )
+
+    status, _, body = request(rules_app, "/api/search", query="q=movement")
+    assert status == 200
+    assert {
+        "domain": "Attribute",
+        "name": "Movement (MOV)",
+        "href": "/glossary#attribute-mov",
+    } in json.loads(body)["items"]
 
 
 def test_catalog_api_exposes_all_accepted_numeric_source_ids(app: Callable) -> None:

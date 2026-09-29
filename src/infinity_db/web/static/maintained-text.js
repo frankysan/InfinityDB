@@ -86,6 +86,7 @@ function prepareTouchReference(link) {
 
 function referenceHref(token) {
   const reference = token.public_reference;
+  if (reference?.href) return reference.href;
   if (!reference?.catalog || !reference?.id) return null;
   return `/${reference.catalog}/${encodeURIComponent(reference.id)}`;
 }

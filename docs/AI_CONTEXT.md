@@ -53,7 +53,9 @@ Semantic identity and player-facing capabilities are independent: navigation, se
 landing/catalog/scoped/detail presentation, and publication are explicit capabilities rather than
 consequences of having a typed identity. New rules-reference route ownership should reuse this
 registry instead of introducing another kind-to-route map. Glossary remains a projection over
-canonical domains and embedded vocabularies rather than a definition owner.
+canonical domains and embedded vocabularies rather than a definition owner. Attributes are the first
+published embedded vocabulary: current `attribute:*` records have no `/attributes` catalog or detail
+routes, and their public semantic references resolve to stable `/glossary#attribute-<slug>` anchors.
 
 ## Maintained rules-text link policy
 
@@ -138,7 +140,7 @@ and serves a read-only browser and same-origin HTTP API.
   `data/manifests/symbol-publication.json` contract (path + SHA-256 for every
   published SVG) before enabling `full_assets`; it separately reports the
   browser-referenced subset defined by the manifest mappings; the current
-  processed publication is fully browser-addressable at 806/806 SVGs. Direct
+  processed publication is fully browser-addressable. Direct
   pytest is hermetic by default. `auto` may fall back only when the asset tree
   is entirely absent, never when it is partial/corrupt.
   Test stages use pytest-xdist `worksteal` scheduling with `--test-workers auto`

@@ -9,6 +9,7 @@ from infinity_db.application_domains import application_domain
 from infinity_db.database.repository import Database, accent_insensitive_key
 from infinity_db.domain_references import public_slug_for_reference
 from infinity_db.equipment_catalog import EquipmentCatalog
+from infinity_db.glossary_catalog import GlossaryCatalog
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.skill_catalog import SkillCatalog
@@ -29,6 +30,7 @@ class SearchCatalog:
         hacking_program_catalog: HackingProgramCatalog,
         ammunition_catalog: RulesRecordCatalog,
         label_catalog: LabelCatalog,
+        glossary_catalog: GlossaryCatalog,
     ) -> None:
         self.database = database
         self.skill_catalog = skill_catalog
@@ -38,6 +40,7 @@ class SearchCatalog:
         self.hacking_program_catalog = hacking_program_catalog
         self.ammunition_catalog = ammunition_catalog
         self.label_catalog = label_catalog
+        self.glossary_catalog = glossary_catalog
 
     @staticmethod
     def _result(domain: str, item: dict[str, Any], href: str) -> dict[str, str]:
@@ -111,6 +114,18 @@ class SearchCatalog:
                 results.append(
                     self._result(domain, item, f"/{route}/{quote(str(identifier), safe='')}")
                 )
+
+        for item in self.glossary_catalog.embedded_entries():
+            labels = [item["name"], *item.get("aliases", [])]
+            if not any(needle in accent_insensitive_key(label) for label in labels):
+                continue
+            results.append(
+                {
+                    "domain": item["domain"],
+                    "name": item["name"],
+                    "href": item["href"],
+                }
+            )
 
         for army in self.database.list_fireteam_armies():
             if needle not in accent_insensitive_key(army["name"]):

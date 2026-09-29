@@ -3,6 +3,97 @@
   "formatVersion": 1,
   "records": [
     {
+      "recordId": "attribute:arm",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:ava",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:bs",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:bts",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:c",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:cc",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:mov",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:ph",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:s",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:str",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:swc",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:vita",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
+      "recordId": "attribute:wip",
+      "targetRelease": "0.9.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-29",
+      "note": "Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records."
+    },
+    {
       "recordId": "equipment:albedo",
       "targetRelease": "0.7.0",
       "status": "reviewed",
@@ -2305,7 +2396,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Morpho-Scan target eligibility requires the VITA Attribute; Attributes are not yet canonical rules identities and the relation is a target requirement rather than an effect on VITA."
+      "reason": "Morpho-Scan target eligibility requires the canonical VITA Attribute; the relation is a target requirement rather than an effect on VITA, and the current relation vocabulary cannot preserve that participant role precisely."
     },
     {
       "sourceRecordId": "skill:morpho-scan",
@@ -2313,7 +2404,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Morpho-Scan explicitly excludes targets with STR; Attributes are not yet canonical rules identities and the relation is a target restriction rather than an effect on STR."
+      "reason": "Morpho-Scan explicitly excludes targets with the canonical STR Attribute; the relation is a target restriction rather than an effect on STR, and the current relation vocabulary cannot preserve that participant role precisely."
     },
     {
       "sourceRecordId": "skill:morpho-scan",
@@ -2321,7 +2412,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Morpho-Scan replaces the user's MOV value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+      "reason": "Morpho-Scan replaces the user's canonical MOV value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles."
     },
     {
       "sourceRecordId": "skill:morpho-scan",
@@ -2329,7 +2420,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Morpho-Scan replaces the user's CC value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+      "reason": "Morpho-Scan replaces the user's canonical CC value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles."
     },
     {
       "sourceRecordId": "skill:morpho-scan",
@@ -2337,7 +2428,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Morpho-Scan replaces the user's BS value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+      "reason": "Morpho-Scan replaces the user's canonical BS value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles."
     },
     {
       "sourceRecordId": "skill:morpho-scan",
@@ -2345,7 +2436,7 @@
       "relationType": null,
       "targetRelease": "post-0.7.0",
       "status": "planned",
-      "reason": "Morpho-Scan replaces the user's PH value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles."
+      "reason": "Morpho-Scan replaces the user's canonical PH value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles."
     },
     {
       "sourceRecordId": "skill:remdriver",

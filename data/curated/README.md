@@ -378,8 +378,8 @@ The main collection structure is:
 ```
 
 Supported record kinds include `rule`, `skill`, `declaration-category`,
-`equipment`, `weapon`, `ammunition`, `trait`, `state`, `glossary`, `interaction`, `fireteam`,
-`faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
+`equipment`, `weapon`, `ammunition`, `trait`, `state`, `attribute`, `glossary`,
+`interaction`, `fireteam`, `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
 
 Weapon records may use `facts.specialProfile` for rulebook-defined deployable

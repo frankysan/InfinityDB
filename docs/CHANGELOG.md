@@ -9,6 +9,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Add canonical **Attributes** as an embedded
+  rules vocabulary and a federated **Glossary** across current reference domains. Attribute terms
+  participate in semantic links, Unit-profile tooltips, and global search without gaining a separate
+  catalog/detail hierarchy; browsable Glossary concepts continue to open their owning detail pages.
 - **Data processing + Web backend + Web frontend:** Add an **Armies** overview with current Army
   symbols, concise structural descriptions, catalog-status labels, and direct links into Unit
   Explorer with the selected Army already applied. Source `discontinued` metadata now identifies

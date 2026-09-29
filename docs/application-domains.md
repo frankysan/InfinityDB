@@ -12,10 +12,10 @@ are related concerns, but they are not the same concern.
 
 The capability registry described below is **Current** in
 `src/infinity_db/application_domains.py`. Ammunition and Labels are published catalog domains,
-Armies is a published overview domain, and Fireteams now follows the shared landing/scoped
-interaction contract. Attributes, General Rules publication, and the federated Glossary remain
-**Design direction** unless their sections state otherwise. Concrete unfinished work remains in
-`docs/TODO.md`.
+Armies is a published overview domain, Fireteams follows the shared landing/scoped interaction
+contract, and Attributes are a published embedded vocabulary projected through contextual help,
+global search, and the federated Glossary. General Rules publication remains **Design direction**.
+Concrete unfinished work remains in `docs/TODO.md`.
 
 ## Principles
 
@@ -63,10 +63,10 @@ army-scoped view rather than a conventional item catalog.
 Embedded vocabularies contain canonical typed concepts that are useful for semantic links, tooltips,
 glossary entries, filtering, or search, but do not warrant their own catalog/detail browser.
 
-Attributes are the first explicit example. Identities such as `attribute:mov`, `attribute:bs`, and
-`attribute:wip` can own definitions and relationships without creating `/attributes` or individual
-Attribute pages. Their primary presentation can remain contextual help/tooltips plus glossary/search
-results.
+**Current.** Attributes are the first explicit example. Canonical identities such as
+`attribute:mov`, `attribute:bs`, and `attribute:wip` own reviewed definitions and can participate in
+semantic relationships without creating `/attributes` or individual Attribute pages. Their
+player-facing presentation is contextual help/tooltips plus Glossary/search results.
 
 Other finite vocabularies may use the same model when a player-facing catalog would add little
 value.
@@ -260,21 +260,23 @@ Attributes can remain canonical and glossary/searchable without becoming generic
 
 ## Glossary usage
 
-Glossary should answer “what does this term mean here?” across InfinityDB rather than behave as a
-separate rules catalog.
+**Current.** `/glossary` answers “what does this term mean here?” across InfinityDB rather than
+behaving as a separate rules catalog. It is a federated projection over canonical rules/reference
+domains and embedded vocabularies.
 
-The implementation should:
+The projection:
 
-- derive entries from canonical top-level domains and embedded vocabularies;
-- preserve concept kind/domain so identical surface text is not merged incorrectly;
-- link browsable concepts to their owning detail surfaces;
-- present embedded-only definitions inline or through contextual help/tooltips;
-- support aliases/synonyms without creating duplicate canonical concepts; and
-- remain compatible with the typed maintained-text reference layer so authored prose links to the
-  same concepts Glossary exposes.
+- derives entries from current canonical top-level domains and embedded vocabularies;
+- preserves typed concept identity and owning domain so identical surface text is not merged;
+- links browsable concepts to their owning detail surfaces;
+- presents embedded-only definitions at stable Glossary anchors without inventing detail routes;
+- keeps aliases on the canonical concept rather than creating duplicate entries; and
+- renders maintained-text tokens through the same semantic-reference layer used by owning detail
+  surfaces.
 
 Profile notation help is a contextual consumer of this framework, not a competing glossary dataset.
-Where a profile term has a canonical concept identity, tooltips/help should reuse it.
+Attribute labels on Unit details reuse the same canonical `attribute:*` definitions and Glossary
+anchors. Additional terminology coverage remains tracked in `docs/TODO.md`.
 
 ## Population and publication strategy
 
@@ -289,8 +291,10 @@ The implementation sequence is:
 2. **Current:** expose Labels and Ammunition as the first newly browsable domains;
 3. **Current:** publish the Armies overview and normalize Fireteams to the landing/scoped
    interaction contract;
-4. build Glossary as a federated projection over those canonical domains plus embedded vocabularies;
-5. continue filling semantic relationships and domain coverage through the 1.0 completeness work.
+4. **Current:** publish Attributes as the first embedded vocabulary and Glossary as a federated
+   projection over canonical domains plus embedded vocabularies;
+5. continue filling semantic relationships and terminology coverage through the 1.0 completeness
+   work.
 
 This sequence deliberately creates the reusable structure first so later domains do not need to
 invent independent navigation, catalog, glossary, or scoped-view conventions.

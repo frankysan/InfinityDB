@@ -5,7 +5,8 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any
 
-from infinity_db.application_domains import public_rule_domain
+from infinity_db.application_domains import public_rule_domain, semantic_record_domain
+from infinity_db.domain_slugs import route_slug_from_typed_domain_id
 
 if TYPE_CHECKING:
     from infinity_db.database.repository import Database
@@ -28,14 +29,35 @@ def rule_record_public_reference(
     database: Database,
     record: dict[str, Any],
 ) -> dict[str, str] | None:
-    """Return a routable catalog reference for one rules-relation endpoint."""
+    """Return the player-facing reference for one rules-relation endpoint.
+
+    Route-backed domains use their normal catalog/detail URL contract. Embedded
+    vocabularies intentionally have no detail route, so their canonical public
+    destination is the corresponding Glossary entry.
+    """
 
     kind = record.get("kind")
     if not isinstance(kind, str):
         return None
     domain = public_rule_domain(kind)
     if domain is None:
-        return None
+        semantic_domain = semantic_record_domain(kind)
+        if (
+            semantic_domain is None
+            or semantic_domain.level != "embedded"
+            or not semantic_domain.glossary
+        ):
+            return None
+        record_id = record.get("id")
+        try:
+            route_id = route_slug_from_typed_domain_id(
+                record_id,
+                expected_domain=kind,
+                context=f"curated {semantic_domain.singular_name.lower()} id",
+            )
+        except ValueError:
+            return None
+        return {"href": f"/glossary#{kind}-{route_id}"}
     catalog = domain.slug
     typed_prefix = kind
 

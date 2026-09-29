@@ -10,6 +10,7 @@ from infinity_db.application_domains import (
     APPLICATION_DOMAINS,
     application_domain,
     public_rule_domain,
+    semantic_record_domain,
 )
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database
@@ -163,6 +164,7 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
     assert attributes.level == "embedded"
     assert attributes.glossary is True
     assert attributes.search is True
+    assert attributes.published is True
     assert attributes.route is None
     assert attributes.catalog is False
     assert attributes.detail is False
@@ -173,7 +175,35 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
 
     assert public_rule_domain("ammunition") == ammunition
     assert public_rule_domain("attribute") is None
+    assert semantic_record_domain("attribute") == attributes
     assert public_rule_domain("rule") is None
+
+
+def test_attributes_are_current_canonical_embedded_records(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_database = RulesDatabase(rules_path)
+
+    attributes = rules_database.composed_records_by_kind("attribute")
+    assert {record["id"] for record in attributes} == {
+        "attribute:mov",
+        "attribute:cc",
+        "attribute:bs",
+        "attribute:ph",
+        "attribute:wip",
+        "attribute:arm",
+        "attribute:bts",
+        "attribute:vita",
+        "attribute:str",
+        "attribute:ava",
+        "attribute:s",
+        "attribute:swc",
+        "attribute:c",
+    }
+    movement = next(record for record in attributes if record["id"] == "attribute:mov")
+    assert movement["name"] == "Movement (MOV)"
+    assert movement["facts"]["abbreviation"] == "MOV"
 
 
 def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) -> None:
@@ -269,6 +299,14 @@ def test_rules_relation_references_project_source_variants_to_public_routes(
                     },
                     {
                         "record": {
+                            "id": "attribute:mov",
+                            "kind": "attribute",
+                            "name": "Movement (MOV)",
+                            "army_links": [],
+                        }
+                    },
+                    {
+                        "record": {
                             "id": "rule:loss-of-lieutenant",
                             "kind": "rule",
                             "name": "Loss of Lieutenant",
@@ -303,7 +341,8 @@ def test_rules_relation_references_project_source_variants_to_public_routes(
         "catalog": "ammunition",
         "id": "shock",
     }
-    assert "public_reference" not in records[5]
+    assert records[5]["public_reference"] == {"href": "/glossary#attribute-mov"}
+    assert "public_reference" not in records[6]
 
 
 def test_structured_reference_metadata_is_materialized_without_raw_tables(

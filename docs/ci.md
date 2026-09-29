@@ -174,7 +174,7 @@ established by the canonical publication manifest, not merely by the presence of
 files. The validator checks every published path and
 SHA-256, rejects unexpected SVGs, and independently verifies that the browser-referenced
 subset is contained in the publication. The current processed publication is fully
-browser-addressable (806/806 SVGs); the separate subset contract still permits future
+browser-addressable; the separate subset contract still permits future
 preserved variants without excluding them from complete-publication validation.
 
 Asset-dependent pytest coverage remains marked `full_assets`; direct pytest excludes it

@@ -65,6 +65,7 @@ _METRIC_FIXED_PATHS = frozenset(
         "/skill-extras",
         "/fireteams",
         "/search",
+        "/glossary",
         "/api/version",
         "/api/armies",
         "/api/units",
@@ -81,6 +82,7 @@ _METRIC_FIXED_PATHS = frozenset(
         "/api/unit-profile-help",
         "/api/fireteams",
         "/api/search",
+        "/api/glossary",
     }
 )
 _METRIC_PARAMETERIZED_PATHS: tuple[tuple[Pattern[str], str], ...] = (

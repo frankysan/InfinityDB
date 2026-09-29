@@ -2,14 +2,21 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TypedDict
+
+
+class ArmyOverviewGroup(TypedDict):
+    """Canonical overview grouping with a stable integer identity."""
+
+    id: int
+    name: str
 
 
 def army_overview_group(
     army: dict[str, Any],
     *,
     armies_by_id: dict[int, dict[str, Any]],
-) -> dict[str, int | str]:
+) -> ArmyOverviewGroup:
     """Return the canonical overview group for one Army."""
 
     role = army.get("role")

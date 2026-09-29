@@ -2660,6 +2660,62 @@ input::placeholder {
   text-transform: uppercase;
 }
 
+.glossary-list {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  background: var(--color-border-default);
+}
+
+.glossary-entry {
+  padding: 20px 22px;
+  background: var(--color-surface-default);
+  scroll-margin-top: var(--space-4);
+}
+
+.glossary-entry:target {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
+.glossary-entry-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.glossary-entry-header h3 {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
+.glossary-entry-header h3>a {
+  color: var(--color-text-primary);
+}
+
+.glossary-domain {
+  flex: 0 0 auto;
+}
+
+.glossary-description {
+  max-width: 78ch;
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.glossary-aliases {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-detail);
+  font-size: var(--font-size-xs);
+}
+
+.glossary-entry .detail-source {
+  margin-bottom: 0;
+}
+
 .state-panel {
   min-height: 310px;
   display: flex;

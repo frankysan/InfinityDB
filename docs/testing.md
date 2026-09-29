@@ -62,7 +62,7 @@ its SHA-256, and unlisted SVGs inside the generated asset categories are
 rejected. The same manifest also defines the currently browser-referenced
 subset through its Army, Unit/profile, and static mappings. This distinction is
 intentional even though the current processed publication is
-fully browser-addressable (806/806 SVGs): future preserved variants must remain
+fully browser-addressable: future preserved variants must remain
 part of the complete asset set rather than weakening validation. Check output
 therefore reports both the full published count and the browser-referenced count.
 

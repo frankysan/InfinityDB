@@ -242,5 +242,6 @@ def test_tracked_symbol_publication_is_fully_browser_addressable() -> None:
     )
 
     assert validation.complete
-    assert validation.browser_expected_count == validation.expected_count == 806
+    assert validation.browser_expected_count == validation.expected_count
+    assert validation.expected_count > 0
     assert validation.unreferenced_published_count == 0

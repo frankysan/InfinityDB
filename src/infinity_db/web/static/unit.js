@@ -1,4 +1,5 @@
 import { getUnit, getUnitProfileHelp } from "./api.js";
+import { maintainedTextFragment } from "./maintained-text.js";
 import { staticSymbolPath } from "./unit-symbols.js";
 import { formatMovement, troopTypeLabel } from "./unit-presentation.js";
 import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
@@ -10,8 +11,21 @@ const content = document.getElementById("unit-content");
 const pageController = new AbortController();
 const unitIdentifier = /^\/units\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(window.location.pathname)?.[1];
 let profileHelpEntries = new Map();
+let attributeHelpEntries = new Map();
 
 function text(value) { return value == null || value === "" ? "—" : String(value); }
+
+function attributeReferenceLabel(label) {
+  const item = attributeHelpEntries.get(label);
+  if (!item) return document.createTextNode(label);
+  return maintainedTextFragment([{
+    type: "reference",
+    target: item.id,
+    label,
+    public_reference: { href: item.href },
+    preview_tokens: [{ type: "text", text: item.description }],
+  }]);
+}
 
 function groupArmiesByFaction(armies) {
   const groups = new Map();
@@ -74,7 +88,7 @@ function attributeStatline(
     const attributeValue = document.createElement("span");
     attributeValue.className = "attribute-value";
     const value = displayStatlineValue(read(stats));
-    attributeLabel.textContent = statLabel(label, stats);
+    attributeLabel.append(attributeReferenceLabel(statLabel(label, stats)));
     attributeValue.textContent = text(value);
     attribute.append(attributeLabel, attributeValue);
     if (generalDifferenceLabels?.has(label)) {
@@ -99,7 +113,7 @@ function attributeStatline(
     const attributeValue = document.createElement("span");
     attributeLabel.className = "attribute-label";
     attributeValue.className = "attribute-value";
-    attributeLabel.textContent = "AVA";
+    attributeLabel.append(attributeReferenceLabel("AVA"));
     attributeValue.textContent = text(displayAvailability(stats.ava));
     attribute.append(attributeLabel, attributeValue);
     attributes.append(attribute);
@@ -1510,9 +1524,13 @@ function renderArmyProfile(army, generalByName, expanded) {
   return section;
 }
 
-function render(unit, helpItems = []) {
+function render(unit, helpItems = [], attributeItems = []) {
   content.replaceChildren();
   profileHelpEntries = new Map(helpItems.map((item) => [item.key, item]));
+  attributeHelpEntries = new Map(attributeItems.map((item) => [
+    item.id.split(":").at(-1).toUpperCase(),
+    item,
+  ]));
   document.title = `${unit.name} · InfinityDB`;
   name.textContent = unit.name;
   const displayArmySymbol = staticSymbolPath(unit.display_army_symbol_path);
@@ -1622,11 +1640,12 @@ if (!unitIdentifier) {
     }),
   ]).then(([unit, help]) => {
     const helpItems = help.items || [];
-    render(unit, helpItems);
-    window.addEventListener("distanceunitchange", () => render(unit, helpItems), {
+    const attributeItems = help.attributes || [];
+    render(unit, helpItems, attributeItems);
+    window.addEventListener("distanceunitchange", () => render(unit, helpItems, attributeItems), {
       signal: pageController.signal,
     });
-    window.addEventListener("optionalunitschange", () => render(unit, helpItems), {
+    window.addEventListener("optionalunitschange", () => render(unit, helpItems, attributeItems), {
       signal: pageController.signal,
     });
   }).catch((error) => {

@@ -214,7 +214,7 @@ APPLICATION_DOMAINS: tuple[ApplicationDomain, ...] = (
         record_kinds=("attribute",),
         search=True,
         glossary=True,
-        published=False,
+        published=True,
     ),
 )
 
@@ -223,6 +223,12 @@ _RULE_RECORD_DOMAINS = {
     kind: domain
     for domain in APPLICATION_DOMAINS
     if domain.published and domain.detail
+    for kind in domain.record_kinds
+}
+_SEMANTIC_RECORD_DOMAINS = {
+    kind: domain
+    for domain in APPLICATION_DOMAINS
+    if domain.published
     for kind in domain.record_kinds
 }
 
@@ -240,3 +246,13 @@ def public_rule_domain(kind: str) -> ApplicationDomain | None:
     """Return the published detail domain owning one unambiguous rules kind."""
 
     return _RULE_RECORD_DOMAINS.get(kind)
+
+
+def semantic_record_domain(kind: str) -> ApplicationDomain | None:
+    """Return the published semantic owner of one rules-record kind.
+
+    Unlike :func:`public_rule_domain`, embedded vocabularies are included even
+    when they intentionally have no detail route of their own.
+    """
+
+    return _SEMANTIC_RECORD_DOMAINS.get(kind)

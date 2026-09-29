@@ -27,7 +27,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **52/63** complete, **11** pending.
+- Supporting semantic identities: **65/76** complete, **11** pending.
 - Current authored outgoing relations: **262**.
 - Explicitly tracked future/deferred interactions: **115**.
 
@@ -232,12 +232,12 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:troop-type:rem` — Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific.
 - [x] **Morpho-scan** (`skill:morpho-scan`) — reviewed
   - `imposes-modifiers-on` → Reset (`skill:reset`)
-  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:vita` — Morpho-Scan target eligibility requires the VITA Attribute; Attributes are not yet canonical rules identities and the relation is a target requirement rather than an effect on VITA.
-  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:str` — Morpho-Scan explicitly excludes targets with STR; Attributes are not yet canonical rules identities and the relation is a target restriction rather than an effect on STR.
-  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:mov` — Morpho-Scan replaces the user's MOV value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
-  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:cc` — Morpho-Scan replaces the user's CC value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
-  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:bs` — Morpho-Scan replaces the user's BS value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
-  - future [post-0.7.0; planned]: `relation type TBD` → `attribute:ph` — Morpho-Scan replaces the user's PH value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
+  - future [post-0.7.0; planned]: `relation type TBD` → Vitality (VITA) (`attribute:vita`) — Morpho-Scan target eligibility requires the canonical VITA Attribute; the relation is a target requirement rather than an effect on VITA, and the current relation vocabulary cannot preserve that participant role precisely.
+  - future [post-0.7.0; planned]: `relation type TBD` → Structure (STR) (`attribute:str`) — Morpho-Scan explicitly excludes targets with the canonical STR Attribute; the relation is a target restriction rather than an effect on STR, and the current relation vocabulary cannot preserve that participant role precisely.
+  - future [post-0.7.0; planned]: `relation type TBD` → Movement (MOV) (`attribute:mov`) — Morpho-Scan replaces the user's canonical MOV value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles.
+  - future [post-0.7.0; planned]: `relation type TBD` → Close Combat (CC) (`attribute:cc`) — Morpho-Scan replaces the user's canonical CC value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles.
+  - future [post-0.7.0; planned]: `relation type TBD` → Ballistic Skills (BS) (`attribute:bs`) — Morpho-Scan replaces the user's canonical BS value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles.
+  - future [post-0.7.0; planned]: `relation type TBD` → Physique (PH) (`attribute:ph`) — Morpho-Scan replaces the user's canonical PH value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles.
 - [x] **Move** (`skill:move`) — reviewed
   - outgoing: none
 - [x] **Natural Born Warrior** (`skill:natural-born-warrior`) — reviewed
@@ -755,6 +755,35 @@ review. `declaration-category` projection records are excluded.
 
 ### 0.9.0
 
+#### Attribute (13/13)
+
+- [x] **Armor (ARM)** (`attribute:arm`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Availability (AVA)** (`attribute:ava`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Ballistic Skills (BS)** (`attribute:bs`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Bio-Technological Shield (BTS)** (`attribute:bts`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Close Combat (CC)** (`attribute:cc`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Cost (C)** (`attribute:c`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Movement (MOV)** (`attribute:mov`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Physique (PH)** (`attribute:ph`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Silhouette (S)** (`attribute:s`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Structure (STR)** (`attribute:str`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Support Weapons Cost (SWC)** (`attribute:swc`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Vitality (VITA)** (`attribute:vita`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+- [x] **Willpower (WIP)** (`attribute:wip`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
+  - outgoing: none
+
 #### Rule (10/10)
 
 - [x] **Attributes** (`rule:profile-help:attributes`) — reviewed
@@ -869,12 +898,12 @@ review. `declaration-category` projection records are excluded.
 - [ ] Minelayer (`skill:minelayer`) → Disposable (X) (`trait:disposable-x`); `relation type TBD`; **post-0.7.0 / deferred** — Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge.
 - [ ] Mnemonica (`skill:mnemonica`) → Cube (`equipment:cube`); `relation type TBD`; **post-0.7.0 / deferred** — Mnemonica host eligibility allows an allied Model or Marker with a Cube, but the Cube belongs to the receiving participant rather than the Mnemonica user; the current graph lacks a participant-role relation for this host requirement.
 - [ ] Mnemonica (`skill:mnemonica`) → `rule:troop-type:rem`; `relation type TBD`; **post-0.7.0 / planned** — Mnemonica host eligibility also permits the REM Troop Type, but Troop Types are not yet canonical rules identities and the relation is participant-role specific.
-- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:bs`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's BS value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
-- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:cc`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's CC value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
-- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:mov`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's MOV value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
-- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:ph`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's PH value with the target's value. Preserve this until Attribute-value copying has canonical identities and a relation that distinguishes source and recipient roles.
-- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:str`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan explicitly excludes targets with STR; Attributes are not yet canonical rules identities and the relation is a target restriction rather than an effect on STR.
-- [ ] Morpho-scan (`skill:morpho-scan`) → `attribute:vita`; `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan target eligibility requires the VITA Attribute; Attributes are not yet canonical rules identities and the relation is a target requirement rather than an effect on VITA.
+- [ ] Morpho-scan (`skill:morpho-scan`) → Ballistic Skills (BS) (`attribute:bs`); `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's canonical BS value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → Close Combat (CC) (`attribute:cc`); `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's canonical CC value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → Movement (MOV) (`attribute:mov`); `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's canonical MOV value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → Physique (PH) (`attribute:ph`); `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan replaces the user's canonical PH value with the target's value. Preserve this until the relation vocabulary can represent Attribute-value copying while distinguishing source and recipient roles.
+- [ ] Morpho-scan (`skill:morpho-scan`) → Structure (STR) (`attribute:str`); `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan explicitly excludes targets with the canonical STR Attribute; the relation is a target restriction rather than an effect on STR, and the current relation vocabulary cannot preserve that participant role precisely.
+- [ ] Morpho-scan (`skill:morpho-scan`) → Vitality (VITA) (`attribute:vita`); `relation type TBD`; **post-0.7.0 / planned** — Morpho-Scan target eligibility requires the canonical VITA Attribute; the relation is a target requirement rather than an effect on VITA, and the current relation vocabulary cannot preserve that participant role precisely.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Doctor (`skill:doctor`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Doctor may use Doctor on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Doctor.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Engineer (`skill:engineer`); `relation type TBD`; **post-0.7.0 / deferred** — A Trooper with both No Wound Incapacitation and Engineer may use Engineer on itself; the current graph lacks a participant-role relation for this self-use exception and must not imply that NWI grants Engineer.
 - [ ] No Wound Incapacitation (`skill:no-wound-incapacitation`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — An additional Wound or a failed healing Roll while NWI is active sends the Trooper directly to Dead State; keep the outcome conditional rather than authoring an unconditional enters-state edge.

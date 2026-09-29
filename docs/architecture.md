@@ -148,12 +148,13 @@ Published rules-record route ownership is derived from this registry rather than
 second kind-to-route mapping. Ammunition and Labels are published catalog domains, Armies is a
 published overview domain, and Fireteams uses the shared landing/scoped interaction contract.
 
-**Design direction.** Glossary is a cross-domain projection rather than a canonical data owner;
-global search already follows that projection model for published domains. General Rules is the
-fallback domain only for rules/reference concepts with no clearer semantic owner. Scaffolded domains
-may remain unpublished until their player-facing surfaces are useful, so later additions reuse the
-shared routing, navigation, glossary, and presentation contracts rather than inventing parallel
-structures.
+**Current.** Glossary is a cross-domain projection rather than a canonical data owner. It projects
+current rules/reference domains together with published embedded vocabularies, preserves typed
+identity/domain, links route-backed concepts to their normal detail surfaces, and gives embedded
+concepts stable Glossary anchors. Attributes are the first published embedded vocabulary and remain
+without their own catalog/detail routes. Global search reuses the same embedded projection. General
+Rules remains the unpublished fallback domain for rules/reference concepts with no clearer semantic
+owner. Scaffolded domains may remain unpublished until their player-facing surfaces are useful.
 
 ## Documentation status
 
@@ -437,9 +438,10 @@ while `rules.db` owns reviewed semantic identity/effects and typed rules relatio
 Peripheral/Controller relationships, profile/loadout/unit-option includes, selection
 constraints, profile-group dependencies, Reinforcement parentage, and broader
 faction/cross-Army membership remain relationships among existing application
-identities and are presented through those existing surfaces. Generic rules concepts, Attributes,
-and Training may remain supporting link targets unless a later completeness audit demonstrates an
-independent player-facing catalog need. Ammunition has
+identities and are presented through those existing surfaces. Generic rules concepts and Training
+may remain supporting link targets unless a later completeness audit demonstrates an independent
+player-facing catalog need. Attributes are canonical embedded identities exposed through contextual
+help, Glossary, and search without a standalone catalog. Ammunition has
 since become a first-class rules/reference catalog under the application-domain framework. A
 relationship target is not, by itself, justification for a new domain.
 
@@ -1134,7 +1136,7 @@ Unit-detail responses preserve the contextual source profile-logo URLs as `logo_
 the browser resolves those values through the generated overrides and falls back to the
 Unit's primary mapping, allowing secondary artwork to stay attached to its General
 profile without making logo context part of canonical gameplay identity. The current
-processed publication is fully browser-addressable (806/806 SVGs). Corvus Belli has explicitly
+processed publication is fully browser-addressable. Corvus Belli has explicitly
 permitted InfinityDB to redistribute the processed graphical publication in the
 public repository and release/build packages for this non-commercial project. The
 assets remain Corvus Belli property and outside the MIT License. Raw acquisition
@@ -1153,8 +1155,7 @@ symbol set before enabling `full_assets` tests; direct pytest excludes those tes
 by default. Final publication writes the tracked
 `data/manifests/symbol-publication.json`, which binds every published SVG path to its
 SHA-256 and owns the Army, Unit/profile, and static symbol mappings used by the
-backend. The current processed publication is fully browser-addressable
-(806/806 SVGs); the
+backend. The current processed publication is fully browser-addressable; the
 separate subset check remains part of the publication contract so future preserved
 variants cannot weaken full-set validation. A detected
 partial/corrupt local asset tree is an error in `auto`/`required`, while a

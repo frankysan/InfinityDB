@@ -60,6 +60,7 @@ ASSETS = {
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
     "/static/search.js": ("search.js", "text/javascript; charset=utf-8"),
+    "/static/glossary.js": ("glossary.js", "text/javascript; charset=utf-8"),
     "/static/hacking-program-detail.js": (
         "hacking-program-detail.js",
         "text/javascript; charset=utf-8",
@@ -169,6 +170,12 @@ _FIXED_PAGES = {
         "search.html",
         (("Database", "/"), ("Search", None)),
         "Global search",
+    ),
+    "/glossary": PageSpec(
+        "glossary.html",
+        (("Database", "/"), ("Glossary", None)),
+        "Rules reference",
+        "glossary",
     ),
     "/fireteams": PageSpec(
         "fireteams.html",
@@ -438,6 +445,7 @@ def _render_page(
         "labels": "LABELS_CURRENT",
         "skill-extras": "SKILL_EXTRAS_CURRENT",
         "fireteams": "FIRETEAMS_CURRENT",
+        "glossary": "GLOSSARY_CURRENT",
         "about": "ABOUT_CURRENT",
     }
     for page, marker_name in navigation_markers.items():

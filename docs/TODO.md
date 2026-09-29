@@ -94,7 +94,7 @@ skeleton and interaction model.
     Army selector plus general Fireteam rules summary; selecting an Army hides that summary and
     shows the Army-scoped chart/reference content; clearing the selection returns to the landing
     state; scoped state remains URL-addressable/shareable.
-  - [ ] Establish Attributes as an embedded canonical vocabulary for semantic links, tooltips,
+  - [x] Establish Attributes as an embedded canonical vocabulary for semantic links, tooltips,
     Glossary/search, and related metadata without adding an `/attributes` catalog or individual
     Attribute detail pages.
   - [ ] Publish General Rules only as the explicit fallback for rules/reference concepts with no
@@ -109,10 +109,10 @@ skeleton and interaction model.
     expose a collapsed, rules-backed Profile notation panel; relevant profile labels
     and Order/Characteristic symbols link into that panel without making every row
     denser.
-  - [ ] Build Glossary entries from canonical top-level domains and embedded vocabularies. Link
+  - [x] Build Glossary entries from canonical top-level domains and embedded vocabularies. Link
     browsable concepts to their owning detail surfaces; render embedded-only concepts through
     Glossary/contextual help without inventing dedicated detail routes.
-  - [ ] Preserve concept kind/domain in glossary/search identity so same-name concepts such as a
+  - [x] Preserve concept kind/domain in glossary/search identity so same-name concepts such as a
     Label, Trait, Characteristic, State, or general term cannot be merged by display text alone.
   - [ ] Make terminology such as Trooper, Peripheral, Marker, Token, Deployable,
     Null State, Ally/Enemy/Hostile, and Victory Points discoverable wherever it

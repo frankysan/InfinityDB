@@ -22,6 +22,7 @@ from infinity_db.domain_references import enrich_rule_relation_references
 from infinity_db.domain_slugs import require_domain_slug
 from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.fireteam_reference import fireteam_reference
+from infinity_db.glossary_catalog import GlossaryCatalog
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.maintained_text_references import (
@@ -247,6 +248,7 @@ class ApiHandler:
         self.hacking_program_catalog = HackingProgramCatalog(database, rules_database)
         self.ammunition_catalog = RulesRecordCatalog(rules_database, "ammunition")
         self.label_catalog = LabelCatalog(rules_database)
+        self.glossary_catalog = GlossaryCatalog(database, rules_database)
         self.search_catalog = SearchCatalog(
             database,
             self.skill_catalog,
@@ -256,6 +258,7 @@ class ApiHandler:
             self.hacking_program_catalog,
             self.ammunition_catalog,
             self.label_catalog,
+            self.glossary_catalog,
         )
         self.catalog_rules = CatalogRules(rules_database)
         self.symbol_catalog = SymbolCatalog()
@@ -313,6 +316,19 @@ class ApiHandler:
                 LOGGER.exception("Could not search the database")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "Search is unavailable. Please try again."}
+        elif path == "/api/glossary":
+            cache_control = API_CACHE_CONTROL
+            try:
+                items = self.glossary_catalog.entries()
+                for item in items:
+                    item["description_tokens"] = maintained_text_tokens(
+                        self.database, self.rules_database, item["description"]
+                    )
+                payload = {"items": items}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read Glossary")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "The Glossary is unavailable. Please try again."}
         elif path == "/api/fireteams":
             cache_control = API_CACHE_CONTROL
             try:
@@ -345,7 +361,12 @@ class ApiHandler:
                     if self.rules_database is not None
                     else []
                 )
-                payload = {"items": items}
+                attributes = [
+                    item
+                    for item in self.glossary_catalog.embedded_entries()
+                    if item["domain_slug"] == "attributes"
+                ]
+                payload = {"items": items, "attributes": attributes}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Unit Profile help")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

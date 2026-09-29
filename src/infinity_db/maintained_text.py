@@ -10,7 +10,16 @@ from typing import Any
 from infinity_db.domain_slugs import validate_typed_domain_id
 
 MAINTAINED_REFERENCE_KINDS = frozenset(
-    {"skill", "equipment", "weapon", "ammunition", "trait", "state", "hacking-program"}
+    {
+        "skill",
+        "equipment",
+        "weapon",
+        "ammunition",
+        "trait",
+        "state",
+        "hacking-program",
+        "attribute",
+    }
 )
 DISPLAY_FORMS = frozenset({"plural"})
 DISTANCE_UNITS = frozenset({"cm", "inch"})

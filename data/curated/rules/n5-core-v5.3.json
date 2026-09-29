@@ -1185,6 +1185,396 @@
     ],
     "records": [
         {
+            "id": "attribute:mov",
+            "kind": "attribute",
+            "name": "Movement (MOV)",
+            "summary": "Movement (MOV) is the distance a Trooper can move in an Order. It normally has separate first-move and second-move values; a dash means the Trooper is stationary.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "MOV"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Movement (MOV)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:cc",
+            "kind": "attribute",
+            "name": "Close Combat (CC)",
+            "summary": "Close Combat (CC) measures a Trooper's capability in hand-to-hand combat.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "CC"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Close Combat (CC)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:bs",
+            "kind": "attribute",
+            "name": "Ballistic Skills (BS)",
+            "summary": "Ballistic Skills (BS) measures a Trooper's capability in ranged combat.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "BS"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Ballistic Skills (BS)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:ph",
+            "kind": "attribute",
+            "name": "Physique (PH)",
+            "summary": "Physique (PH) represents a Trooper's physical capability, including strength, dexterity, throwing, and dodging.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "PH"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Physique (PH)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:wip",
+            "kind": "attribute",
+            "name": "Willpower (WIP)",
+            "summary": "Willpower (WIP) represents a Trooper's mental capability for tasks such as detection, medical actions, and hacking.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "WIP"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Willpower (WIP)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:arm",
+            "kind": "attribute",
+            "name": "Armor (ARM)",
+            "summary": "Armor (ARM) measures a Trooper's overall armor protection; higher values provide more effective protection against damaging attacks.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "ARM"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Armor (ARM)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:bts",
+            "kind": "attribute",
+            "name": "Bio-Technological Shield (BTS)",
+            "summary": "Bio-Technological Shield (BTS) measures a Trooper's NBC, nanotechnological, electromagnetic, and anti-hacking protection.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "BTS"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Bio-Technological Shield (BTS)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:vita",
+            "kind": "attribute",
+            "name": "Vitality (VITA)",
+            "summary": "Vitality (VITA) represents a Trooper's physical endurance and how much punishment it can withstand before losing consciousness or dying.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "VITA"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Vitality (VITA)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:str",
+            "kind": "attribute",
+            "name": "Structure (STR)",
+            "summary": "Structure (STR) is the alternative durability Attribute used by mechanical Troopers and some scenery structures.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "STR"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Structure (STR)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:ava",
+            "kind": "attribute",
+            "name": "Availability (AVA)",
+            "summary": "Availability (AVA) is the number of Troopers from a Unit allowed in a single Army List.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "AVA"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Availability (AVA)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:s",
+            "kind": "attribute",
+            "name": "Silhouette (S)",
+            "summary": "Silhouette (S) identifies the Silhouette Template used to represent a Trooper's three-dimensional volume for game purposes.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "S"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Silhouette (S)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:swc",
+            "kind": "attribute",
+            "name": "Support Weapons Cost (SWC)",
+            "summary": "Support Weapons Cost (SWC) is the Support Weapon Point cost paid when adding the Trooper to an Army List.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "SWC"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Support Weapons Cost (SWC)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
+            "id": "attribute:c",
+            "kind": "attribute",
+            "name": "Cost (C)",
+            "summary": "Cost (C) is the Trooper's Army Points value including its Special Skills, Weapons, and Equipment.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-attribute",
+                "abbreviation": "C"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 9,
+                    "section": "Attributes — Cost (C)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-29"
+            }
+        },
+        {
             "id": "state:camouflaged",
             "kind": "state",
             "name": "Camouflaged State",

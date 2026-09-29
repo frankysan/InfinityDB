@@ -36,6 +36,7 @@ function applicabilityText(rule) {
 
 function relationHref(record) {
   const reference = record.public_reference;
+  if (reference?.href) return reference.href;
   if (!reference?.catalog || !reference?.id) return null;
   return `/${reference.catalog}/${encodeURIComponent(reference.id)}`;
 }
