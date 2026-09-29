@@ -88,8 +88,14 @@ skeleton and interaction model.
     reference, now linked, and a second ambiguous `HoloMask` passage, now explicitly flagged. The
     current inventory is 623 legacy candidates across 178 semantic owners plus two explicit
     `review-needed` markers.
-  - [ ] Batch 4: review Trait names, with special care for generic terms such as `State`, `CC`,
-    `ARO`, and `Deployable`.
+  - [x] Batch 4: review Trait names, including the generic/colliding surfaces `State`, `CC`,
+    `ARO`, `Zone of Control`, `Deployable`, and same-name Skill/State concepts. Confident non-Trait
+    uses are fingerprinted as reviewed plain surfaces; unresolved Deployable/Direct Template/
+    Perimeter scope and plural Deployables remain explicit `review-needed` markers. The broad pass
+    classified all 332 Trait-name matches: 20 became semantic links, 293 were fingerprinted as
+    reviewed non-Trait text, and 19 became new review markers. The post-batch legacy inventory is
+    411 candidates across 141 semantic owners, with only Skill and State namespaces remaining and
+    21 explicit review markers total including the two earlier HoloMask reviews.
   - [ ] Batch 5: review Skill names.
   - [ ] Batch 6: resolve aliases/collisions (for example `Suppressive Fire` and
     `Hidden Deployment`), then remove the legacy baseline when the candidate inventory reaches

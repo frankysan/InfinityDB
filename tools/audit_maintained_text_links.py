@@ -42,7 +42,12 @@ def main(argv: list[str] | None = None) -> int:
     review_policy_path = (
         args.review_policy or args.rules.parent / REVIEW_POLICY_FILENAME
     )
-    candidates = collect_unlinked_reference_candidates(documents)
+    reviewed_residuals = collect_reviewed_batch_residuals(
+        documents, review_policy_path
+    )
+    candidates = collect_unlinked_reference_candidates(
+        documents, review_policy_path=review_policy_path
+    )
     by_namespace: Counter[str] = Counter()
     for values in candidates.values():
         for (_, _, targets), count in values.items():
@@ -61,9 +66,6 @@ def main(argv: list[str] | None = None) -> int:
             + ", ".join(f"{key}={value}" for key, value in sorted(by_namespace.items()))
         )
 
-    reviewed_residuals = collect_reviewed_batch_residuals(
-        documents, review_policy_path
-    )
     reviewed_residual_count = sum(
         sum(values.values()) for values in reviewed_residuals.values()
     )
@@ -101,7 +103,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.write_baseline:
         validate_reviewed_batch_coverage(documents, review_policy_path)
-        baseline = build_maintained_text_link_baseline(documents)
+        baseline = build_maintained_text_link_baseline(
+            documents, review_policy_path=review_policy_path
+        )
         baseline_path.write_text(
             json.dumps(baseline, indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",

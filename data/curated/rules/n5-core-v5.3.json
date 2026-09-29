@@ -3093,7 +3093,7 @@
             "id": "trait:perimeter",
             "kind": "trait",
             "name": "Perimeter",
-            "summary": "When placed, applies Deployable and Perimeter, placing it completely inside the user's Zone of Control.",
+            "summary": "When placed, applies [[trait:deployable|Deployable]] and Perimeter, placing it completely inside the user's Zone of Control.",
             "composition": {
                 "role": "definition"
             },
@@ -3405,7 +3405,7 @@
             "id": "weapon:armed-turret",
             "kind": "weapon",
             "name": "Armed Turret",
-            "summary": "A stationary Deployable Weapon that reacts to enemy Orders.",
+            "summary": "A stationary [[review-needed:scope-unclear|Deployable]] Weapon that reacts to enemy Orders.",
             "composition": {
                 "role": "definition"
             },
@@ -8252,7 +8252,7 @@
                 ],
                 "restrictions": [
                     "Only one Allied Trooper can receive the Reload effect per Order.",
-                    "Non-Reloadable items cannot regain uses or cancel their [[state:unloaded]] through this effect.",
+                    "[[trait:non-reloadable|Non-Reloadable]] items cannot regain uses or cancel their [[state:unloaded]] through this effect.",
                     "Recovering uses does not affect items already deployed on the table."
                 ]
             },
@@ -8586,7 +8586,7 @@
                     "The user must be able to draw LoF to the target."
                 ],
                 "effects": [
-                    "Forward Observer is a BS Attack using a BS Weapon (WIP); instead of forcing a Saving Roll, a successful attack causes the target to enter [[state:targeted]]."
+                    "Forward Observer is a BS Attack using a [[trait:bs-weapon-wip|BS Weapon (WIP)]]; instead of forcing a Saving Roll, a successful attack causes the target to enter [[state:targeted]]."
                 ],
                 "restrictions": []
             },
@@ -8942,7 +8942,7 @@
             "id": "skill:intuitive-attack",
             "kind": "skill",
             "name": "Intuitive Attack",
-            "summary": "A Long Common Skill that uses a BS Weapon with the Intuitive Attack Trait against a target that normally cannot be attacked directly.",
+            "summary": "A Long Common Skill that uses a BS Weapon with the [[trait:intuitive-attack|Intuitive Attack]] Trait against a target that normally cannot be attacked directly.",
             "composition": {
                 "role": "definition"
             },
@@ -8958,7 +8958,7 @@
                     "long-skill"
                 ],
                 "requirements": [
-                    "The user must employ a BS Weapon with the Intuitive Attack Trait.",
+                    "The user must employ a BS Weapon with the [[trait:intuitive-attack|Intuitive Attack]] Trait.",
                     "The target must be outside the user's LoF because of a Zero Visibility Zone, or be in a State that normally requires Discover before it can be attacked."
                 ],
                 "effects": [
@@ -9136,7 +9136,7 @@
             "id": "skill:place-deployable",
             "kind": "skill",
             "name": "Place Deployable",
-            "summary": "A Common Skill used to place eligible Deployable Weapons, Equipment, or Peripheral (Ancillary) items on the table.",
+            "summary": "A Common Skill used to place eligible [[review-needed:scope-unclear|Deployable]] Weapons, Equipment, or Peripheral (Ancillary) items on the table.",
             "composition": {
                 "role": "definition"
             },
@@ -9209,7 +9209,7 @@
                 "restrictions": [
                     "Only one Allied Trooper can receive this effect per Order.",
                     "Recovering Disposable uses does not affect Weapons or Equipment already deployed on the table.",
-                    "Non-Reloadable Weapons or Equipment cannot cancel [[state:unloaded]] or regain expended uses through Reload."
+                    "[[trait:non-reloadable|Non-Reloadable]] Weapons or Equipment cannot cancel [[state:unloaded]] or regain expended uses through Reload."
                 ]
             },
             "labelIds": [
@@ -9287,7 +9287,7 @@
             "id": "skill:speculative-attack",
             "kind": "skill",
             "name": "Speculative Attack",
-            "summary": "A Long Common Skill that uses a BS Weapon with the Speculative Attack Trait to attack without LoF.",
+            "summary": "A Long Common Skill that uses a BS Weapon with the [[trait:speculative-attack|Speculative Attack]] Trait to attack without LoF.",
             "composition": {
                 "role": "definition"
             },
@@ -9303,7 +9303,7 @@
                     "long-skill"
                 ],
                 "requirements": [
-                    "The user must employ a BS Weapon with the Speculative Attack Trait.",
+                    "The user must employ a BS Weapon with the [[trait:speculative-attack|Speculative Attack]] Trait.",
                     "A valid trajectory must exist between the user and the chosen impact point."
                 ],
                 "effects": [
@@ -9355,7 +9355,7 @@
                     "long-skill"
                 ],
                 "requirements": [
-                    "The user must select a Weapon with the Suppressive Fire Trait."
+                    "The user must select a Weapon with the [[trait:suppressive-fire|Suppressive Fire]] Trait."
                 ],
                 "effects": [
                     "The user enters [[state:suppressive-fire]] using the selected Weapon."
@@ -9757,7 +9757,7 @@
                 "category": "state",
                 "effects": [
                     "The relevant Weapon or Equipment item cannot be used while Unloaded State is active.",
-                    "Reloading cancels the state and restores the item's uses unless a rule such as Non-Reloadable says otherwise."
+                    "Reloading cancels the state and restores the item's uses unless a rule such as [[trait:non-reloadable|Non-Reloadable]] says otherwise."
                 ],
                 "requirements": [],
                 "restrictions": []
@@ -10001,7 +10001,7 @@
             "kind": "equipment",
             "name": "Dazer",
             "labelIds": [],
-            "summary": "Deployable Equipment that creates a Difficult Terrain area inside its Zone of Control.",
+            "summary": "[[review-needed:scope-unclear|Deployable]] Equipment that creates a Difficult Terrain area inside its Zone of Control.",
             "composition": {
                 "role": "definition"
             },
@@ -10059,7 +10059,7 @@
             "facts": {
                 "requirements": [
                     "The target must be inside the user's Line of Fire or Zone of Control.",
-                    "The target must be an enemy Deployable Weapon or deployed piece of Equipment, and cannot be a Camouflage Marker."
+                    "The target must be an enemy [[review-needed:scope-unclear|Deployable]] Weapon or deployed piece of Equipment, and cannot be a Camouflage Marker."
                 ],
                 "effects": [
                     "On a successful Normal WIP Roll, the target deployed Weapon or Equipment is removed from the game table."
@@ -10101,7 +10101,7 @@
             "kind": "equipment",
             "name": "Deployable Cover",
             "labelIds": [],
-            "summary": "Deployable Equipment that places a Scenery Element providing variant-specific Cover effects.",
+            "summary": "[[review-needed:scope-unclear|Deployable]] Equipment that places a Scenery Element providing variant-specific Cover effects.",
             "composition": {
                 "role": "definition"
             },
@@ -10204,7 +10204,7 @@
             "labelIds": [
                 "comms-equipment"
             ],
-            "summary": "Deployable Comms Equipment that places a [[equipment:repeater]] on the battlefield using Place Deployable.",
+            "summary": "[[review-needed:scope-unclear|Deployable]] Comms Equipment that places a [[equipment:repeater]] on the battlefield using Place Deployable.",
             "composition": {
                 "role": "definition"
             },
@@ -10252,7 +10252,7 @@
             "kind": "equipment",
             "name": "FastPanda",
             "labelIds": [],
-            "summary": "Self-propelled Deployable Equipment that places a [[equipment:repeater]] anywhere completely inside the user's Zone of Control.",
+            "summary": "Self-propelled [[review-needed:scope-unclear|Deployable]] Equipment that places a [[equipment:repeater]] anywhere completely inside the user's Zone of Control.",
             "composition": {
                 "role": "definition"
             },
@@ -10571,7 +10571,7 @@
                     "Remote use requires LoF; contact use requires Silhouette contact."
                 ],
                 "effects": [
-                    "Remote use is a Non-Lethal BS Weapon; contact use spends a Short Skill without an attack Roll.",
+                    "Remote use is a [[trait:non-lethal|Non-Lethal]] BS Weapon; contact use spends a Short Skill without an attack Roll.",
                     "On a successful target PH Roll, remove one Wound and cancel [[state:unconscious]] if applicable.",
                     "On a failed target PH Roll, the target receives a Wound instead."
                 ]
@@ -10854,7 +10854,7 @@
                     "Remote use requires LoF; contact use requires Silhouette contact."
                 ],
                 "effects": [
-                    "Remote use is a Non-Lethal BS Weapon; contact use spends a Short Skill without an attack Roll.",
+                    "Remote use is a [[trait:non-lethal|Non-Lethal]] BS Weapon; contact use spends a Short Skill without an attack Roll.",
                     "On a successful target PH Roll, remove one Wound and cancel [[state:unconscious]].",
                     "On a failed target PH Roll, the target enters [[state:dead]]."
                 ]
@@ -11034,8 +11034,8 @@
                 "effects": [
                     "The user may remain off-table after Deployment and later spend their own Order to enter the table.",
                     "The user is placed on a valid horizontal landing surface and makes the Combat Jump PH Roll; a successful Roll keeps that position.",
-                    "A failed landing moves the user to the player's Deployment Zone edge and removes any Deployables placed with the attempted landing.",
-                    "Combat Jump (Explosion) adds a single-use PS 8 Normal Direct Template Attack after the landing position is resolved."
+                    "A failed landing moves the user to the player's Deployment Zone edge and removes any [[review-needed:ambiguous-target|Deployables]] placed with the attempted landing.",
+                    "Combat Jump (Explosion) adds a single-use PS 8 Normal [[review-needed:scope-unclear|Direct Template]] Attack after the landing position is resolved."
                 ],
                 "restrictions": [
                     "The landing cannot place the user Prone, in prohibited Silhouette contact, inside enclosed scenery, or in contact with a scenario objective.",
@@ -11148,7 +11148,7 @@
                     "A profile with Impersonation (IMP-2) deploys and activates only [[state:impersonation-2]]."
                 ],
                 "restrictions": [
-                    "A failed WIP Roll places the user in their own Deployment Zone at the table edge as a Model and removes Deployables placed with the attempt.",
+                    "A failed WIP Roll places the user in their own Deployment Zone at the table edge as a Model and removes [[review-needed:ambiguous-target|Deployables]] placed with the attempt.",
                     "The user cannot deploy in prohibited contact with enemy or neutral game elements or mission objectives."
                 ]
             },
@@ -11209,7 +11209,7 @@
                 "effects": [
                     "During Deployment, the user may deploy anywhere in the player's half of the table.",
                     "Deploying in the opponent's half requires the Infiltration Roll, normally PH-3, with any profile-specific PH replacement applied as stated.",
-                    "If the Roll fails, the user is moved to their own Deployment Zone edge and Deployables placed with the attempt are removed."
+                    "If the Roll fails, the user is moved to their own Deployment Zone edge and [[review-needed:ambiguous-target|Deployables]] placed with the attempt are removed."
                 ],
                 "restrictions": [
                     "Infiltration cannot be used to deploy inside the enemy Deployment Zone.",
@@ -11243,7 +11243,7 @@
             "labelIds": [
                 "optional"
             ],
-            "summary": "A Deployment Skill that lets the user place carried Deployable Weapons or Equipment near their deployment position.",
+            "summary": "A Deployment Skill that lets the user place carried [[review-needed:scope-unclear|Deployable]] Weapons or Equipment near their deployment position.",
             "composition": {
                 "role": "definition"
             },
@@ -11259,11 +11259,11 @@
                     "deployment-skill"
                 ],
                 "requirements": [
-                    "The Deployable must satisfy the normal Deployment conditions and remain within the area where the Minelayer user may deploy.",
-                    "Its Trigger Area or Perimeter area must satisfy the rule's enemy-presence restrictions when placed."
+                    "The [[review-needed:scope-unclear|Deployable]] must satisfy the normal Deployment conditions and remain within the area where the Minelayer user may deploy.",
+                    "Its Trigger Area or [[review-needed:scope-unclear|Perimeter]] area must satisfy the rule's enemy-presence restrictions when placed."
                 ],
                 "effects": [
-                    "When the user deploys, they may place the allowed number of carried Deployable Weapons or Equipment inside their Zone of Control.",
+                    "When the user deploys, they may place the allowed number of carried [[review-needed:scope-unclear|Deployable]] Weapons or Equipment inside their Zone of Control.",
                     "Placing an item with the Disposable Trait consumes the corresponding available use.",
                     "If the user's Superior Deployment Roll fails, a Minelayer item placed with that deployment is removed and any Disposable use is consumed."
                 ],
@@ -12011,7 +12011,7 @@
                     "While Aerial is active, the user cannot be in [[state:prone]] or [[state:engaged]].",
                     "The user cannot declare Cautious Movement.",
                     "Guard cannot be used against the user unless the user is Unconscious.",
-                    "Weapons with the Boost Trait do not activate against the user."
+                    "Weapons with the [[trait:boost|Boost]] Trait do not activate against the user."
                 ]
             },
             "labelIds": [
@@ -12323,7 +12323,7 @@
                     "When the user gains Impetuous through Frenzy, they cancel any Marker State they are in and cannot re-enter those States."
                 ],
                 "restrictions": [
-                    "Wounds caused by the user’s Deployable Weapons do not satisfy the Requirement."
+                    "Wounds caused by the user’s [[review-needed:scope-unclear|Deployable]] Weapons do not satisfy the Requirement."
                 ]
             },
             "labelIds": [
@@ -12682,7 +12682,7 @@
                     "The imitated Trooper must belong to the bearer’s faction or Sectorial Army and have the same Silhouette value."
                 ],
                 "restrictions": [
-                    "[[review-needed:ambiguous-target|HoloMask]] cannot copy Hacker or Hackable status or Deployable items represented by Tokens or Models.",
+                    "[[review-needed:ambiguous-target|HoloMask]] cannot copy Hacker or Hackable status or [[review-needed:scope-unclear|Deployable]] items represented by Tokens or Models.",
                     "The State is canceled by its listed revelation conditions."
                 ]
             },
@@ -14581,7 +14581,7 @@
             "id": "skill:explode",
             "kind": "skill",
             "name": "Explode",
-            "summary": "An obligatory Automatic Attack Skill that detonates when the user enters [[state:unconscious]], resolves a Shock Direct Template Attack, and then sends the user to [[state:dead]].",
+            "summary": "An obligatory Automatic Attack Skill that detonates when the user enters [[state:unconscious]], resolves a Shock [[review-needed:scope-unclear|Direct Template]] Attack, and then sends the user to [[state:dead]].",
             "composition": {
                 "role": "definition"
             },
@@ -14601,7 +14601,7 @@
                 ],
                 "effects": [
                     "Explode activates automatically when the user enters [[state:unconscious]].",
-                    "At the end of that Order, before Guts Rolls, the user makes a Direct Template Attack centered on its base with PS 7 [[ammunition:shock|Shock Ammunition]] against ARM.",
+                    "At the end of that Order, before Guts Rolls, the user makes a [[review-needed:scope-unclear|Direct Template]] Attack centered on its base with PS 7 [[ammunition:shock|Shock Ammunition]] against ARM.",
                     "Enemy Troopers affected by the Attack that declared Dodge avoid it if they passed their PH Roll.",
                     "After the Rolls are resolved, the user enters [[state:dead]] and is removed from the game table."
                 ],
@@ -14737,7 +14737,7 @@
                 ],
                 "restrictions": [
                     "Except for Immunity (State), Immunity does not apply against Comms Attacks.",
-                    "Immunity does not prevent the Non-Lethal or State: Stunned Traits, which are always applied.",
+                    "Immunity does not prevent the [[trait:non-lethal|Non-Lethal]] or [[trait:state|State: Stunned]] Traits, which are always applied.",
                     "Unless the user has Immunity (Critical), a Critical hit still causes its additional Saving Roll even when the underlying Ammunition or effect is otherwise covered by Immunity."
                 ]
             },

@@ -44,7 +44,14 @@ The baseline is temporary migration debt and should only shrink.
 `maintained-text-link-reviews.json` records the scopes of completed migration batches. Those scopes
 receive an additional case-insensitive scan with conservative plural matching, which catches terms
 that the intentionally exact legacy baseline can miss. A completed-batch residual is an error: link
-it when the meaning is clear, or replace it with `review-needed` when it is not.
+it when the meaning is clear, or replace it with `review-needed` when it is not. If a colliding
+surface is confidently ordinary text rather than a reference to that batch's namespace, record it
+under that batch's `reviewedPlainSurfaces` with a reusable reason plus audit-derived occurrence
+fingerprints. Each fingerprint binds the decision to an exact maintained-text passage, field, match
+span, and semantic target set; changed or newly worded occurrences reopen review. Owner identity is
+not part of the fingerprint, so an unchanged passage cloned into a synthetic/derived record inherits
+the same reviewed meaning. A reviewed plain surface suppresses only that batch namespace from legacy
+debt, not same-text candidates in other namespaces.
 
 Audit the current inventory with:
 

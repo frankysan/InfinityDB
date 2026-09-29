@@ -1,3 +1,4 @@
+import copy
 from pathlib import Path
 
 import pytest
@@ -183,6 +184,80 @@ def test_equipment_names_are_semantic_links() -> None:
     assert remaining == []
 
 
+def test_trait_names_are_linked_reviewed_plain_or_explicit_review() -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    review_policy = root / "data" / "curated" / "maintained-text-link-reviews.json"
+    candidates = collect_unlinked_reference_candidates(
+        documents, review_policy_path=review_policy
+    )
+
+    remaining = [
+        (owner, field, text, targets)
+        for owner, values in candidates.items()
+        for (field, text, targets), count in values.items()
+        for _ in range(count)
+        if any(target.startswith("trait:") for target in targets)
+    ]
+    assert remaining == []
+
+    xvisor = candidates["n5-core-v5.3|equipment:x-visor"]
+    assert xvisor[
+        (
+            "facts.effects[]",
+            "Suppressive Fire",
+            ("skill:suppressive-fire", "state:suppressive-fire"),
+        )
+    ] == 1
+
+
+def test_reviewed_plain_surface_fingerprint_reopens_on_passage_drift() -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    review_policy = root / "data" / "curated" / "maintained-text-link-reviews.json"
+
+    for _, document in documents:
+        for record in document.get("records", []):
+            if record.get("id") == "skill:jump":
+                record["summary"] += " ARO."
+                break
+        else:
+            continue
+        break
+    else:  # pragma: no cover - protected by the tracked curated corpus
+        raise AssertionError("skill:jump not found")
+
+    residuals = collect_reviewed_batch_residuals(documents, review_policy)
+    assert residuals["n5-core-v5.3|skill:jump"][
+        ("batch-4-trait-names", "summary", "ARO", ("trait:aro",))
+    ] == 1
+    with pytest.raises(ValueError, match="still contains unmarked semantic references"):
+        validate_reviewed_batch_coverage(documents, review_policy)
+
+
+def test_reviewed_plain_surface_fingerprint_allows_identical_cloned_passage() -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    review_policy = root / "data" / "curated" / "maintained-text-link-reviews.json"
+
+    for _, document in documents:
+        for record in document.get("records", []):
+            if record.get("id") != "skill:alert":
+                continue
+            clone = copy.deepcopy(record)
+            clone["id"] = "skill:synthetic-alert-copy"
+            clone["name"] = "Synthetic Alert Copy"
+            document["records"].append(clone)
+            break
+        else:
+            continue
+        break
+    else:  # pragma: no cover - protected by the tracked curated corpus
+        raise AssertionError("skill:alert not found")
+
+    assert collect_reviewed_batch_residuals(documents, review_policy) == {}
+
+
 def test_unlinked_reference_candidates_use_aliases_longest_match_and_ignore_tokens() -> None:
     document = {
         "collection": {"id": "test", "status": "current"},
@@ -247,7 +322,7 @@ def test_reviewed_batch_audit_catches_case_and_plural_omissions(
     policy = tmp_path / "maintained-text-link-reviews.json"
     policy.write_text(
         """{
-  "formatVersion": 1,
+  "formatVersion": 2,
   "policy": "reviewed-maintained-text-link-batches",
   "batches": [
     {

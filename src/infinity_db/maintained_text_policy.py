@@ -18,11 +18,13 @@ from infinity_db.maintained_text import (
 BASELINE_FORMAT_VERSION = 1
 BASELINE_FILENAME = "maintained-text-link-baseline.json"
 REVIEW_POLICY_FILENAME = "maintained-text-link-reviews.json"
-REVIEW_POLICY_FORMAT_VERSION = 1
+REVIEW_POLICY_FORMAT_VERSION = 2
 _CONTEXT_INDEX = re.compile(
     r"^(?P<section>records|labels|skillTypes)\[(?P<index>\d+)\](?P<field>.*)$"
 )
 _LIST_INDEX = re.compile(r"\[\d+\]")
+_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+_REVIEW_REASON_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 CandidateKey = tuple[str, str, tuple[str, ...]]
 OwnerCandidates = dict[str, Counter[CandidateKey]]
@@ -115,7 +117,9 @@ def _load_review_policy(path: Path) -> list[dict[str, Any]]:
         if not isinstance(batch, dict):
             raise ValueError(f"{context} must be an object")
         missing = required - batch.keys()
-        unknown = batch.keys() - (required | {"note", "extraSurfaces"})
+        unknown = batch.keys() - (
+            required | {"note", "extraSurfaces", "reviewedPlainSurfaces"}
+        )
         if missing:
             raise ValueError(f"{context} missing fields {sorted(missing)}")
         if unknown:
@@ -163,6 +167,54 @@ def _load_review_policy(path: Path) -> list[dict[str, Any]]:
                 )
             if not isinstance(text, str) or not text.strip():
                 raise ValueError(f"{surface_context}.text must be a non-empty string")
+
+        reviewed_plain_surfaces = batch.get("reviewedPlainSurfaces", [])
+        if not isinstance(reviewed_plain_surfaces, list):
+            raise ValueError(
+                f"{context}.reviewedPlainSurfaces must be an array when present"
+            )
+        seen_plain_texts: set[str] = set()
+        for surface_index, surface in enumerate(reviewed_plain_surfaces):
+            surface_context = f"{context}.reviewedPlainSurfaces[{surface_index}]"
+            if not isinstance(surface, dict) or set(surface) != {
+                "text",
+                "reason",
+                "occurrenceSha256s",
+            }:
+                raise ValueError(
+                    f"{surface_context} must contain exactly text, reason, and "
+                    "occurrenceSha256s"
+                )
+            text = surface["text"]
+            reason = surface["reason"]
+            fingerprints = surface["occurrenceSha256s"]
+            if not isinstance(text, str) or not text.strip():
+                raise ValueError(f"{surface_context}.text must be a non-empty string")
+            if text in seen_plain_texts:
+                raise ValueError(
+                    f"{surface_context}.text duplicates reviewed plain surface {text!r}"
+                )
+            seen_plain_texts.add(text)
+            if not isinstance(reason, str) or not _REVIEW_REASON_PATTERN.fullmatch(reason):
+                raise ValueError(
+                    f"{surface_context}.reason must be a lowercase kebab-case code"
+                )
+            if not isinstance(fingerprints, list) or not fingerprints:
+                raise ValueError(
+                    f"{surface_context}.occurrenceSha256s must be a non-empty array"
+                )
+            if len(fingerprints) != len(set(fingerprints)):
+                raise ValueError(
+                    f"{surface_context}.occurrenceSha256s must not contain duplicates"
+                )
+            if not all(
+                isinstance(value, str) and _SHA256_PATTERN.fullmatch(value)
+                for value in fingerprints
+            ):
+                raise ValueError(
+                    f"{surface_context}.occurrenceSha256s must contain lowercase "
+                    "SHA-256 digests"
+                )
         validated.append(batch)
     return validated
 
@@ -205,6 +257,63 @@ def _reviewed_batch_vocabulary(
     return {label: frozenset(targets) for label, targets in labels.items()}
 
 
+def _reviewed_plain_occurrence_sha256(
+    *,
+    field: str,
+    maintained_text: str,
+    plain_text: str,
+    start: int,
+    end: int,
+    matched_text: str,
+    targets: tuple[str, ...],
+) -> str:
+    """Fingerprint one reviewed plain occurrence by its semantic passage context.
+
+    Owner identity is deliberately excluded: tests and derived documents may clone an
+    unchanged reviewed passage under a synthetic record id. Any wording, field, span,
+    case, or target-set change still produces a new fingerprint and reopens review.
+    """
+
+    payload = {
+        "field": field,
+        "maintainedText": maintained_text,
+        "plainText": plain_text,
+        "start": start,
+        "end": end,
+        "matchedText": matched_text,
+        "targets": list(targets),
+    }
+    encoded = json.dumps(
+        payload,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _reviewed_plain_occurrence_fingerprints(
+    batch: dict[str, Any],
+) -> dict[str, frozenset[str]]:
+    return {
+        surface["text"]: frozenset(surface["occurrenceSha256s"])
+        for surface in batch.get("reviewedPlainSurfaces", [])
+    }
+
+
+def _reviewed_plain_target_namespaces(
+    review_policy_path: Path | None,
+) -> dict[str, frozenset[str]]:
+    if review_policy_path is None:
+        return {}
+    namespaces: dict[str, set[str]] = {}
+    for batch in _load_review_policy(review_policy_path):
+        namespace = batch["namespace"]
+        for surface in batch.get("reviewedPlainSurfaces", []):
+            namespaces.setdefault(surface["text"], set()).add(namespace)
+    return {text: frozenset(values) for text, values in namespaces.items()}
+
+
 def collect_reviewed_batch_residuals(
     documents: list[tuple[Path, dict[str, Any]]], review_policy_path: Path
 ) -> OwnerReviewedBatchResiduals:
@@ -213,6 +322,7 @@ def collect_reviewed_batch_residuals(
     This audit is deliberately broader than the migration baseline: reviewed batches are
     rescanned case-insensitively and may include conservative plural forms. Review-needed
     markers and semantic tokens are excluded, so unresolved reviewed text must be explicit.
+    Reviewed-plain decisions apply only to exact passage-occurrence fingerprints.
     """
 
     result: OwnerReviewedBatchResiduals = {}
@@ -220,6 +330,9 @@ def collect_reviewed_batch_residuals(
         vocabulary = _reviewed_batch_vocabulary(documents, batch)
         if not vocabulary:
             continue
+        reviewed_plain = _reviewed_plain_occurrence_fingerprints(batch)
+        seen_reviewed: dict[str, set[str]] = {text: set() for text in reviewed_plain}
+        batch_result: OwnerReviewedBatchResiduals = {}
         labels = sorted(vocabulary, key=lambda value: (-len(value), value))
         pattern = re.compile(
             r"(?<![\w-])(?:"
@@ -234,23 +347,46 @@ def collect_reviewed_batch_residuals(
             for context, text in maintained_text_fields(document):
                 owner_id, field, current_record_id = _stable_owner(document, context)
                 owner_key = f"{collection_id}|{owner_id}"
-                counter = result.setdefault(owner_key, Counter())
+                counter = batch_result.setdefault(owner_key, Counter())
                 for token in parse_maintained_text(text, context=context):
                     if token["type"] != "text":
                         continue
-                    for match in pattern.finditer(token["text"]):
-                        targets = set(vocabulary[match.group(0).casefold()])
+                    plain_text = token["text"]
+                    for match in pattern.finditer(plain_text):
+                        matched_text = match.group(0)
+                        targets = set(vocabulary[matched_text.casefold()])
                         if current_record_id is not None:
                             targets.discard(current_record_id)
-                        if targets:
-                            counter[
-                                (
-                                    batch["id"],
-                                    field,
-                                    match.group(0),
-                                    tuple(sorted(targets)),
-                                )
-                            ] += 1
+                        if not targets:
+                            continue
+                        target_tuple = tuple(sorted(targets))
+                        fingerprint = _reviewed_plain_occurrence_sha256(
+                            field=field,
+                            maintained_text=text,
+                            plain_text=plain_text,
+                            start=match.start(),
+                            end=match.end(),
+                            matched_text=matched_text,
+                            targets=target_tuple,
+                        )
+                        allowed = reviewed_plain.get(matched_text)
+                        if allowed is not None and fingerprint in allowed:
+                            seen_reviewed[matched_text].add(fingerprint)
+                            continue
+                        counter[(batch["id"], field, matched_text, target_tuple)] += 1
+
+        for matched_text, expected in reviewed_plain.items():
+            missing = expected - seen_reviewed[matched_text]
+            if missing:
+                raise ValueError(
+                    f"Maintained-text review batch {batch['id']!r} reviewed plain surface "
+                    f"{matched_text!r} lost or changed {len(missing)} reviewed occurrence "
+                    f"fingerprint(s)"
+                )
+
+        for owner, values in batch_result.items():
+            if values:
+                result.setdefault(owner, Counter()).update(values)
     return {owner: counter for owner, counter in result.items() if counter}
 
 
@@ -279,6 +415,8 @@ def validate_reviewed_batch_coverage(
 
 def collect_unlinked_reference_candidates(
     documents: list[tuple[Path, dict[str, Any]]],
+    *,
+    review_policy_path: Path | None = None,
 ) -> OwnerCandidates:
     """Return plain canonical/alias references that remain outside semantic tokens.
 
@@ -289,6 +427,7 @@ def collect_unlinked_reference_candidates(
     vocabulary = _reference_vocabulary(documents)
     if not vocabulary:
         return {}
+    reviewed_plain = _reviewed_plain_target_namespaces(review_policy_path)
     labels = sorted(vocabulary, key=lambda value: (-len(value), value))
     pattern = re.compile(
         r"(?<![\w-])(?:" + "|".join(re.escape(label) for label in labels) + r")(?![\w-])"
@@ -306,11 +445,18 @@ def collect_unlinked_reference_candidates(
                 if token["type"] != "text":
                     continue
                 for match in pattern.finditer(token["text"]):
-                    targets = set(vocabulary[match.group(0)])
+                    matched_text = match.group(0)
+                    targets = set(vocabulary[matched_text])
                     if current_record_id is not None:
                         targets.discard(current_record_id)
+                    for namespace in reviewed_plain.get(matched_text, ()):
+                        targets = {
+                            target
+                            for target in targets
+                            if not target.startswith(f"{namespace}:")
+                        }
                     if targets:
-                        counter[(field, match.group(0), tuple(sorted(targets)))] += 1
+                        counter[(field, matched_text, tuple(sorted(targets)))] += 1
     return {owner: counter for owner, counter in result.items() if counter}
 
 
@@ -363,10 +509,14 @@ def _owner_summary(candidates: Counter[CandidateKey]) -> dict[str, Any]:
 
 def build_maintained_text_link_baseline(
     documents: list[tuple[Path, dict[str, Any]]],
+    *,
+    review_policy_path: Path | None = None,
 ) -> dict[str, Any]:
     """Build the temporary legacy-debt baseline for unlinked maintained references."""
 
-    candidates = collect_unlinked_reference_candidates(documents)
+    candidates = collect_unlinked_reference_candidates(
+        documents, review_policy_path=review_policy_path
+    )
     collection_ids = sorted(
         document["collection"]["id"]
         for _, document in documents
@@ -415,7 +565,9 @@ def validate_maintained_text_link_baseline(
     validate_reviewed_batch_coverage(documents, review_policy_path)
 
     baseline = _load_baseline(baseline_path)
-    current = build_maintained_text_link_baseline(documents)
+    current = build_maintained_text_link_baseline(
+        documents, review_policy_path=review_policy_path
+    )
     baseline_owners = baseline["owners"]
     current_owners = current["owners"]
     changed = sorted(
@@ -426,7 +578,9 @@ def validate_maintained_text_link_baseline(
     if not changed:
         return
 
-    candidates = collect_unlinked_reference_candidates(documents)
+    candidates = collect_unlinked_reference_candidates(
+        documents, review_policy_path=review_policy_path
+    )
     details: list[str] = []
     for owner in changed[:5]:
         values = candidates.get(owner)

@@ -40,9 +40,12 @@ New or materially revised entries use the project-domain labels defined in
   distance tokens to maintained rules text. Canonical Skill, Equipment, Weapon, Trait, State,
   and Hacking Program references can show viewport-bounded summary previews and navigate to
   their detail pages; touch interaction previews before following, and typed distances follow the
-  user's cm/in preference. Reviewed State, Hacking Program, and Equipment references now use
+  user's cm/in preference. Reviewed State, Hacking Program, Equipment, and Trait references now use
   semantic links, while validation prevents new unresolved references or literal gameplay-distance
-  debt from being introduced. Ambiguous reviewed passages can now carry explicit `review-needed`
+  debt from being introduced. Generic Trait-name collisions that are confirmed to be ordinary rules
+  text are fingerprinted to their exact reviewed passage contexts, so later prose changes reopen
+  review instead of being silently exempted while identical derived/test clones remain valid.
+  Ambiguous reviewed passages can now carry explicit `review-needed`
   markers with machine-readable reasons; the audit lists them separately and the browser highlights
   them instead of allowing uncertainty to disappear from the migration inventory.
 - **Web backend + Web frontend:** Expand the Unit Explorer with Troop Type, Classification,
@@ -87,6 +90,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Data processing:** Scope reviewed-plain maintained-text fingerprints to exact passage occurrences
+  rather than corpus-wide word counts. Synthetic or derived records may now clone an unchanged
+  reviewed passage without invalidating the Trait-review gate, while new or changed wording still
+  reopens review.
 - **Data processing + Web backend + Web frontend:** Restore canonical Labels on Hacking Program
   details. Supportware, No Roll, Comms Attack, and Negative Feedback (NFB) reuse the current core
   Label vocabulary; Non-Lethal remains correctly modeled as a Trait.

@@ -875,8 +875,16 @@ are excluded. Completed migration scopes are recorded separately in
 `data/curated/maintained-text-link-reviews.json`. Those reviewed scopes are rescanned
 case-insensitively, including conservative plural forms, so a canonical name or alias that escaped
 the original case-sensitive legacy-candidate scan cannot remain silently after its batch is marked
-complete. This reviewed-batch residual scan is a build gate and must be clean before the legacy
-baseline can be rewritten.
+complete. When a reviewed surface is confidently ordinary text rather than a reference to that
+batch's namespace, the review policy may record it as a `reviewedPlainSurfaces` decision. Such a
+decision is bound to exact passage occurrences by SHA-256 fingerprints over the field, full
+maintained-text value, plain-text segment, match span, visible surface, and semantic target set.
+Changed or newly worded occurrences therefore reopen review instead of silently exempting future
+prose, while an identical passage cloned under a synthetic/derived owner reuses the same reviewed
+meaning. Reviewed plain surfaces are removed only from that namespace's migration debt, so a
+same-name candidate in another semantic namespace can still be reviewed by its own batch. This
+reviewed-batch residual scan
+is a build gate and must be clean before the legacy baseline can be rewritten.
 
 Once a reviewer encounters a passage that is ambiguous or otherwise unclear, it must be converted
 to an explicit `review-needed` marker rather than left as silent baseline debt or linked

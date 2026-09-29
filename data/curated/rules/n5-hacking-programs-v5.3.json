@@ -76,7 +76,7 @@
             "id": "hacking-program:carbonite",
             "kind": "hacking-program",
             "name": "Carbonite",
-            "summary": "Non-Lethal Comms Attack that can place Hackable Troopers or enemy Hackers in [[state:immobilized-b]].",
+            "summary": "[[trait:non-lethal|Non-Lethal]] Comms Attack that can place Hackable Troopers or enemy Hackers in [[state:immobilized-b]].",
             "composition": {
                 "role": "definition"
             },
@@ -289,7 +289,7 @@
             "id": "hacking-program:oblivion",
             "kind": "hacking-program",
             "name": "Oblivion",
-            "summary": "Non-Lethal AP Comms Attack that can place Hackable Troopers or enemy Hackers in [[state:isolated]].",
+            "summary": "[[trait:non-lethal|Non-Lethal]] AP Comms Attack that can place Hackable Troopers or enemy Hackers in [[state:isolated]].",
             "composition": {
                 "role": "definition"
             },
@@ -332,7 +332,7 @@
             "id": "hacking-program:spotlight",
             "kind": "hacking-program",
             "name": "Spotlight",
-            "summary": "Non-Lethal AP Comms Attack that can place its target in [[state:targeted]] without requiring the Hackable Characteristic.",
+            "summary": "[[trait:non-lethal|Non-Lethal]] AP Comms Attack that can place its target in [[state:targeted]] without requiring the Hackable Characteristic.",
             "composition": {
                 "role": "definition"
             },
@@ -375,7 +375,7 @@
             "id": "hacking-program:total-control",
             "kind": "hacking-program",
             "name": "Total Control",
-            "summary": "Non-Lethal Comms Attack against TAGs that can impose or cancel [[state:possessed]].",
+            "summary": "[[trait:non-lethal|Non-Lethal]] Comms Attack against TAGs that can impose or cancel [[state:possessed]].",
             "composition": {
                 "role": "definition"
             },
@@ -499,7 +499,7 @@
             "id": "hacking-program:zero-pain",
             "kind": "hacking-program",
             "name": "Zero Pain",
-            "summary": "Defensive Non-Lethal Comms Attack used to oppose and nullify enemy Comms Attacks.",
+            "summary": "Defensive [[trait:non-lethal|Non-Lethal]] Comms Attack used to oppose and nullify enemy Comms Attacks.",
             "composition": {
                 "role": "definition"
             },

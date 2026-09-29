@@ -69,8 +69,11 @@ must not be admitted to it, and reviewed migration batches should only reduce th
 Automated discovery is an audit aid, not permission to bulk-rewrite ambiguous names or aliases;
 resolve those manually. Completed migration batches are also recorded in
 `data/curated/maintained-text-link-reviews.json` and must have zero case-insensitive/plural plain
-residuals. Any uncertainty encountered during review must remain visible as an explicit
-`review-needed` marker until resolved.
+residuals. Confident same-text collisions that are not references to the reviewed namespace are
+recorded as fingerprinted `reviewedPlainSurfaces`; any new or changed passage fingerprint reopens
+that decision, while an identical passage cloned under another owner remains covered.
+Any uncertainty encountered during review must remain visible as an explicit `review-needed` marker
+until resolved.
 
 ## Semantic provenance rule
 
