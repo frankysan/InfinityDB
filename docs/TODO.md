@@ -184,9 +184,9 @@ tagging the release and remains part of the 0.9 gate. Broader hardening still be
   now use the shared
   token contract. Legacy explicit query parameters remain accepted and are canonicalized to the new
   form; API query parameters are unchanged.
-- [ ] **Documentation:** Rewrite the recent Unreleased changelog entries to follow the release-note
-  style guide: user-facing outcomes, consolidated by meaningful feature/change, without implementation
-  chronology or low-level migration detail.
+- [x] **Documentation:** Rewrite the Unreleased changelog as concise, user/operator-facing release
+  notes and retrospectively audit the recent release history for the same problem. The cleanup now
+  covers 0.6.1 through 0.8.1; 0.6.0 and older entries were already concise and were left intact.
 
 ## 0.10.0 — consistency, presentation, and release hardening
 
