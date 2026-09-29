@@ -1642,6 +1642,31 @@ h1>span {
   gap: 6px;
 }
 
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 3px 8px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.status-badge--warning {
+  border-color: var(--color-status-warning-indicator);
+  background: var(--color-status-warning-surface);
+  color: var(--color-status-warning-text);
+}
+
+.status-badge--muted {
+  border-color: var(--color-border-muted);
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+}
+
 .skill-category-badge {
   display: inline-flex;
   align-items: center;
@@ -4417,6 +4442,10 @@ html[data-distance-unit="in"] .unit-extended-statline {
 
 .army-overview-card-heading .eyebrow {
   margin-bottom: 4px;
+}
+
+.army-overview-statuses {
+  margin-top: 8px;
 }
 
 .army-overview-card-heading h3 {

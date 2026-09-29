@@ -114,6 +114,37 @@ def test_materialize_symbol_archive_verifies_and_rebuilds_work_tree(tmp_path: Pa
     assert second.asset_count == 1
 
 
+def test_materialize_symbol_archive_retries_transient_directory_lock(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    body = b'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>'
+    archive, snapshot_manifest, manifest = _fixture(
+        tmp_path, {"units/example.svg": body}
+    )
+    work_base = tmp_path / "data" / "work" / "symbols"
+    original_replace = Path.replace
+    attempts: list[tuple[Path, Path]] = []
+
+    def flaky_replace(source: Path, destination: Path) -> Path:
+        attempts.append((source, destination))
+        if len(attempts) == 1:
+            raise PermissionError("transient directory lock")
+        return original_replace(source, destination)
+
+    monkeypatch.setattr(Path, "replace", flaky_replace)
+    monkeypatch.setattr(symbol_work.time, "sleep", lambda _seconds: None)
+
+    materialized = materialize_symbol_archive(
+        archive, snapshot_manifest, manifest, work_base
+    )
+
+    assert len(attempts) == 2
+    assert all(
+        source.is_absolute() and destination.is_absolute()
+        for source, destination in attempts
+    )
+    assert (materialized.raw_root / "units" / "example.svg").read_bytes() == body
+
 
 def test_load_materialized_symbol_work_verifies_without_replacing(tmp_path: Path) -> None:
     body = b'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>'

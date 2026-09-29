@@ -656,6 +656,33 @@ class Database:
             return identity_config_from_connection(connection)
 
     @instance_lru_cache(maxsize=1)
+    def _army_metadata_factions(self) -> dict[int, dict[str, Any]]:
+        """Return source faction metadata retained in the published snapshot metadata."""
+
+        with self._connect() as connection:
+            row = connection.execute(
+                f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
+                ("armyMetadata",),
+            ).fetchone()
+        try:
+            document = json.loads(row["value"]) if row else None
+            data = document.get("data") if isinstance(document, dict) else None
+            factions = data.get("factions") if isinstance(data, dict) else None
+        except (TypeError, json.JSONDecodeError) as exc:
+            raise ValueError(
+                "Database has invalid Army metadata; rebuild the database"
+            ) from exc
+        if not isinstance(factions, list):
+            raise ValueError("Database has invalid Army metadata; rebuild the database")
+
+        result: dict[int, dict[str, Any]] = {}
+        for source in factions:
+            if not isinstance(source, dict) or type(source.get("id")) is not int:
+                continue
+            result[source["id"]] = dict(source)
+        return result
+
+    @instance_lru_cache(maxsize=1)
     def _application_army_graph(self) -> dict[str, Any]:
         """Return the materialized application Army model and source mappings."""
         with self._connect() as connection:
@@ -1530,6 +1557,7 @@ class Database:
     def list_armies(self) -> list[dict[str, Any]]:
         """Return canonical application Armies with current logical-unit counts."""
         graph = self._application_army_graph()
+        metadata_factions = self._army_metadata_factions()
         logical_unit_ids: dict[int, set[int]] = {
             army_id: set() for army_id in graph["armies"]
         }
@@ -1555,6 +1583,12 @@ class Database:
                 if source_list_id is not None
                 else "grouping"
             )
+            preferred_source_id = army.get("preferred_source_id")
+            metadata_row = (
+                metadata_factions.get(preferred_source_id)
+                if type(preferred_source_id) is int
+                else None
+            )
             items.append(
                 {
                     "id": army_id,
@@ -1563,6 +1597,7 @@ class Database:
                     "kind": kind,
                     "role": army["role"],
                     "playable": bool(army["playable"]),
+                    "discontinued": bool((metadata_row or {}).get("discontinued", False)),
                     "group_id": army["group_id"],
                     "group_name": group.get("name") if group is not None else None,
                     "group_slug": group.get("slug") if group is not None else None,

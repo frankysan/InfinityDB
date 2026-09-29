@@ -31,6 +31,23 @@ def army_overview_group(
     return {"id": int(army["id"]), "name": str(army["name"])}
 
 
+def army_overview_out_of_catalog(
+    army: dict[str, Any],
+    *,
+    armies_by_id: dict[int, dict[str, Any]],
+) -> bool:
+    """Return the player-facing catalog status for one current Army identity."""
+
+    if army.get("legacy"):
+        return False
+    if army.get("role") != "reinforcement":
+        return bool(army.get("discontinued"))
+
+    group = army_overview_group(army, armies_by_id=armies_by_id)
+    parent = armies_by_id.get(group["id"])
+    return bool((parent or {}).get("discontinued"))
+
+
 def army_overview_description(
     army: dict[str, Any],
     *,
@@ -43,6 +60,8 @@ def army_overview_description(
     kind = army.get("kind")
     group_name = army.get("group_name")
 
+    if army.get("legacy"):
+        return f"{name} is a legacy Army list from an earlier edition and is not playable in N5."
     if role == "main":
         return f"The main {name} army list, drawing on the faction's broad current roster."
     if role == "sectorial":

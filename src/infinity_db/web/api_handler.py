@@ -9,7 +9,11 @@ from http import HTTPStatus
 from urllib.parse import parse_qs
 
 from infinity_db import __version__
-from infinity_db.army_overview import army_overview_description, army_overview_group
+from infinity_db.army_overview import (
+    army_overview_description,
+    army_overview_group,
+    army_overview_out_of_catalog,
+)
 from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
@@ -19,6 +23,7 @@ from infinity_db.domain_slugs import require_domain_slug
 from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.fireteam_reference import fireteam_reference
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
+from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.maintained_text_references import (
     enrich_maintained_text_references,
     maintained_text_tokens,
@@ -254,6 +259,7 @@ class ApiHandler:
         )
         self.catalog_rules = CatalogRules(rules_database)
         self.symbol_catalog = SymbolCatalog()
+        self.legacy_armies = load_legacy_armies()
         self.fireteam_rules_reference = fireteam_reference(rules_database)
         if self.fireteam_rules_reference is not None:
             self.fireteam_rules_reference = enrich_maintained_text_references(
@@ -587,9 +593,23 @@ class ApiHandler:
             cache_control = API_CACHE_CONTROL
             try:
                 items = [dict(item) for item in self.database.list_armies()]
-                armies_by_id = {item["id"]: item for item in items}
                 for item in items:
                     attach_public_army_slug(self.database, item)
+
+                current_by_id = {item["id"]: item for item in items}
+                for legacy_army in self.legacy_armies:
+                    if legacy_army.id in current_by_id:
+                        raise ValueError(
+                            f"Legacy Army {legacy_army.id} overlaps a current Army identity"
+                        )
+                    items.append(legacy_army.as_api_item())
+
+                items.sort(key=lambda item: int(item["id"]))
+                armies_by_id = {item["id"]: item for item in items}
+                for item in items:
+                    item["out_of_catalog"] = army_overview_out_of_catalog(
+                        item, armies_by_id=armies_by_id
+                    )
                     item["overview_group"] = army_overview_group(
                         item, armies_by_id=armies_by_id
                     )

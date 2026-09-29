@@ -256,6 +256,16 @@ and serves a read-only browser and same-origin HTTP API.
   reinforcement lists, and grouping identities; the browser selector
   consumes that contract rather than Army-ID ranges. Grouping identity `901` is
   non-playable.
+- Treat source `metadata.factions[].discontinued` as catalog/product-range status,
+  not playability. The Army overview labels a current playable Army **Out of catalog**
+  when that source flag is true. Reinforcement rows inherit this display status only
+  from their canonical main overview group (for example Tohaa Reinforcements from
+  Tohaa), never merely from a discontinued sectorial that shares the same section.
+- Spiral Corps (`906`) and Foreign Company (`907`) are maintained curated legacy
+  overview identities. They are reference-only and explicitly not playable in N5; do
+  not promote them into `application_armies` or Unit Explorer selectability. Their
+  ignored `image_overrides/factions` SVGs enter the normal symbol pipeline through
+  curated authoritative faction-logo references.
 - Rules semantics refine the `reinforcement` application role: the linked
   identity represents a faction-shared Reinforcement Section/pool attached to an
   ordinary Army List, not a standalone legal Army. For reinforcement rows,
@@ -462,8 +472,9 @@ image overrides remain ignored build inputs.
 Army-symbol acquisition is now source-semantic and URL/reference based.
 `tools/download_army_symbols.py` discovers every
 `units[].profileGroups[].profiles[].logo` plus every
-`metadata.json -> factions[].logo`, includes validated maintained static-symbol
-declarations, and treats `resume[].logo` as audit-only. A recursive scan of all
+`metadata.json -> factions[].logo`, adds curated legacy-Army faction-logo references,
+includes validated maintained static-symbol declarations, and treats `resume[].logo`
+as audit-only. A recursive scan of all
 source strings fails closed on SVG-bearing fields that are not reviewed semantic
 or audit-only locations. A unit may reference several SVGs and several source
 references may share one URL; every reference is preserved while each

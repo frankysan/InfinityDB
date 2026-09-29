@@ -20,6 +20,7 @@ from urllib.parse import urlparse
 from urllib.request import urlopen
 from xml.etree import ElementTree
 
+from infinity_db.legacy_armies import DEFAULT_LEGACY_ARMIES, LegacyArmy, load_legacy_armies
 from infinity_db.snapshot_provenance import (
     load_snapshot_manifest,
     portable_project_path,
@@ -196,6 +197,8 @@ def discover_symbols(
     *,
     static_symbols: list[dict[str, str]],
     static_source: str,
+    legacy_armies: tuple[LegacyArmy, ...] = (),
+    legacy_source: str = "data/curated/identities/legacy-armies.json",
 ) -> Discovery:
     """Discover authoritative Army/static symbols and audit all raw SVG references."""
     semantic: list[dict[str, Any]] = []
@@ -302,6 +305,18 @@ def discover_symbols(
                     reference["unitSlug"] = row["slug"]
                 resume.append(reference)
                 known_locations.add((document.name, path))
+
+    for index, army in enumerate(legacy_armies):
+        reference = {
+            "kind": "faction",
+            "authoritative": True,
+            "sourceDocument": legacy_source,
+            "jsonPath": f"$.armies[{index}].logo",
+            "assetUrl": army.logo,
+            "factionId": army.id,
+            "factionSlug": army.slug,
+        }
+        semantic.append(reference)
 
     recursive: list[tuple[str, str, str]] = []
     for document in documents:
@@ -600,6 +615,7 @@ def discover_symbol_source(
     source: Path,
     *,
     static_symbols_path: Path = DEFAULT_STATIC_CONFIG,
+    legacy_armies_path: Path | None = DEFAULT_LEGACY_ARMIES,
     project_root: Path | None = None,
 ) -> Discovery:
     """Discover every authoritative symbol for one explicit Army source artifact."""
@@ -612,10 +628,21 @@ def discover_symbol_source(
         portable_project_path(static_symbols_path, project_root=project_root)
         or static_symbols_path.name
     )
+    if legacy_armies_path is None:
+        legacy_armies = ()
+        legacy_source = "data/curated/identities/legacy-armies.json"
+    else:
+        legacy_armies = load_legacy_armies(legacy_armies_path)
+        legacy_source = (
+            portable_project_path(legacy_armies_path, project_root=project_root)
+            or legacy_armies_path.name
+        )
     return discover_symbols(
         documents,
         static_symbols=static_symbols,
         static_source=static_source,
+        legacy_armies=legacy_armies,
+        legacy_source=legacy_source,
     )
 
 
@@ -626,6 +653,7 @@ def acquire_symbol_snapshot(
     build_manifest_path: Path,
     *,
     static_symbols_path: Path = DEFAULT_STATIC_CONFIG,
+    legacy_armies_path: Path | None = DEFAULT_LEGACY_ARMIES,
     delay: float = 0.2,
     project_root: Path | None = None,
     discovery: Discovery | None = None,
@@ -645,6 +673,7 @@ def acquire_symbol_snapshot(
     discovery = discovery or discover_symbol_source(
         source,
         static_symbols_path=static_symbols_path,
+        legacy_armies_path=legacy_armies_path,
         project_root=project_root,
     )
     opener = opener or urlopen

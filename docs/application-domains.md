@@ -163,17 +163,25 @@ states.
 **Current.** Armies are a top-level **overview** domain rather than a conventional catalog/detail
 domain.
 
-`/armies` presents one concise entry per playable army with:
+`/armies` presents concise entries for current playable armies plus explicitly curated historical
+Army references. Current entries include:
 
 - army symbol;
 - canonical display name;
-- a short maintained description; and
+- a short maintained description;
+- **Out of catalog** status when source `discontinued` metadata applies; and
 - a link to Unit Explorer with the corresponding Army filter already applied.
 
-The overview reuses canonical Army identities/slugs and existing symbol relationships. The initial
-short descriptions are structural summaries derived from canonical Army role/group relationships;
-they deliberately do not infer lore or play style from Unit composition. Richer reviewed
-presentation copy can replace those summaries later without changing the domain contract.
+Legacy entries such as Spiral Corps and Foreign Company are visibly marked **Legacy** / **Not
+playable in N5** and do not offer a Unit Explorer link. Catalog status remains independent from
+playability; Reinforcement entries inherit the display status only from their canonical main
+overview group.
+
+The overview reuses canonical Army identities/slugs and existing symbol relationships for current
+entries, with curated identities only for historical lists absent from current Army data. The
+initial short descriptions are structural summaries derived from canonical Army role/group
+relationships; they deliberately do not infer lore or play style from Unit composition. Richer
+reviewed presentation copy can replace those summaries later without changing the domain contract.
 
 Individual `/armies/<slug>` detail pages are not required unless a future player-facing use case
 justifies them. The pre-filtered Unit Explorer URL is the shareable destination for browsing an

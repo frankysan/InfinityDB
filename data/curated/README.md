@@ -10,8 +10,8 @@ provenance under `data/manifests/`.
 ## Current curated data
 
 - `rules/` contains validated rules-reference collections consumed by `infinity-db build-rules`.
-- `identities/` contains reviewed source-derived presentation relationships consumed
-  during Army normalization.
+- `identities/` contains reviewed source-derived presentation and historical identity
+  relationships consumed by the Army build/runtime surfaces that own them.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship
   endpoints that cannot be resolved from the current Army snapshot alone.
@@ -215,6 +215,14 @@ relationship maps canonical source identity `1` to display army `901`.
 `display_army_id`, and pin the exact document plus canonical SHA-256 into
 `normalized.json`. Database export revalidates that pinned relationship. Runtime
 code consumes the persisted field and does not reload this curated file.
+
+`identities/legacy-armies.json` separately records historical Army identities that
+remain useful for player-facing reference but have no current N5 Army list. These
+entries are not normalization aliases and are never promoted into selectable
+`application_armies`. The Army overview loads them as explicit non-playable legacy
+references, while symbol discovery uses their historical logo URLs so maintained
+`image_overrides/factions` assets pass through the normal symbol processing and
+publication pipeline.
 
 ## Curated rules reference data
 

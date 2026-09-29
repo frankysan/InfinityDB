@@ -256,8 +256,11 @@ to a distinct publication/domain scope; unclassified missing definitions remain 
 stale exceptions fail validation once a current definition exists. The maintained primary
 catalog denominator established for 0.7.0 includes States; exact source variants and other
 independently modeled supporting identities remain separate review identities.
-`data/curated/identities/` contains reviewed source-derived presentation
-relationships consumed during Army normalization. `data/curated/peripherals/` owns
+`data/curated/identities/` contains reviewed source-derived presentation and
+historical identity relationships. `army-display.json` is consumed during Army
+normalization; `legacy-armies.json` is a separate player-facing historical-reference
+contract consumed by the Army overview and symbol discovery without making those
+identities selectable. `data/curated/peripherals/` owns
 the independent reviewed mapping from Army-local Peripheral definitions and Unit-backed
 Peripheral occurrences to canonical application identities. It is consumed during Army
 database export when its pinned snapshot provenance matches the normalized source; the
@@ -323,6 +326,13 @@ faction metadata to display army `901` without changing source membership,
 availability, or playability semantics. Canonical source identity `1` remains
 numeric in this file because it is provenance identity with no authoritative
 source-faction slug to own an equivalent readable reference.
+
+Historical Army identities that no longer have current N5 list documents are kept
+out of that normalization policy. `data/curated/identities/legacy-armies.json`
+currently retains Spiral Corps (`906`) and Foreign Company (`907`) as explicit
+non-playable overview references and supplies their historical faction-logo URLs to
+the symbol pipeline. This does not add application Army ownership, Unit availability,
+or selector entries.
 
 The authored identity configuration is a build input, not a deployed runtime
 file. InfinityDB normalization validates it, supplies normalization-time

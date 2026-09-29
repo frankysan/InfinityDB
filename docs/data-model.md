@@ -238,6 +238,16 @@ source-derived contract through `/api/armies`, and consumes the materialized
 logical-unit relation for unit reads. Clients must not infer logical identity from
 numeric ID patterns.
 
+The Army overview keeps catalog availability separate from playability. The
+source-retained `metadata.factions[].discontinued` flag is exposed as source
+metadata and drives the player-facing **Out of catalog** status without making a
+current Army unplayable. Reinforcement overview cards inherit that catalog
+status only from their canonical main overview group; a discontinued sectorial
+sharing the same Reinforcement Section does not make the section globally out of
+catalog. Historical source identities 906 (Spiral Corps) and 907 (Foreign
+Company) are maintained as curated reference-only overview entries. They are not
+promoted into `application_armies`, selectable filters, or N5 playability.
+
 ### Current logical-unit materialization
 
 Source ID `1` and grouping identity `901` are kept distinct in current

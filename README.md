@@ -29,8 +29,8 @@ Current release: **0.8.1** (2026-09-27).
 - Groups equivalent standard, reinforcement, and optional-mercenary source
   records into coherent unit views while preserving their distinct availability
   and army contexts.
-- Includes an Army overview with symbols, concise role/context summaries, and direct links into
-  pre-filtered Unit Explorer rosters.
+- Includes an Army overview with symbols, concise role/context summaries, catalog-status labels,
+  legacy Army references, and direct links into pre-filtered Unit Explorer rosters.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
   Ammunition, Traits, Labels, States, and Hacking Programs reference catalogs, with reverse Unit
   usage links where that relationship applies.

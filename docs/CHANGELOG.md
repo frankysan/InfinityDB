@@ -9,9 +9,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
-- **Web backend + Web frontend:** Add an **Armies** overview with current Army symbols, concise
-  structural descriptions, and direct links into Unit Explorer with the selected Army already
-  applied.
+- **Data processing + Web backend + Web frontend:** Add an **Armies** overview with current Army
+  symbols, concise structural descriptions, catalog-status labels, and direct links into Unit
+  Explorer with the selected Army already applied. Source `discontinued` metadata now identifies
+  playable armies that are **Out of catalog**, Reinforcements inherit that display status from
+  their main overview group, and curated Spiral Corps / Foreign Company cards preserve legacy
+  identities that are no longer playable in N5.
 - **Data processing + Web backend + Web frontend:** Add first-class **Ammunition** and **Labels**
   reference domains. The browser now exposes the eleven N5.3 base Ammunition types and the canonical
   current Label vocabulary through searchable catalog/detail surfaces, while a shared application-

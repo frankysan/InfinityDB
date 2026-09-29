@@ -33,6 +33,26 @@ function roleLabel(army) {
   return "Army";
 }
 
+function statusBadge(label, modifier) {
+  const badge = document.createElement("span");
+  badge.className = `status-badge status-badge--${modifier}`;
+  badge.textContent = label;
+  return badge;
+}
+
+function armyStatuses(army) {
+  const statuses = document.createElement("div");
+  statuses.className = "detail-badges army-overview-statuses";
+  if (army.out_of_catalog) statuses.append(statusBadge("Out of catalog", "warning"));
+  if (army.legacy) {
+    statuses.append(
+      statusBadge("Legacy", "muted"),
+      statusBadge("Not playable in N5", "muted"),
+    );
+  }
+  return statuses;
+}
+
 function renderArmy(army) {
   const article = document.createElement("article");
   article.className = "surface surface--subtle surface--raised army-overview-card";
@@ -53,6 +73,8 @@ function renderArmy(army) {
   const title = document.createElement("h3");
   title.textContent = army.name;
   identity.append(kind, title);
+  const statuses = armyStatuses(army);
+  if (statuses.childElementCount) identity.append(statuses);
   heading.append(identity);
 
   const description = document.createElement("p");
@@ -61,14 +83,21 @@ function renderArmy(army) {
 
   const footer = document.createElement("div");
   footer.className = "army-overview-card-footer";
-  const count = document.createElement("span");
-  count.className = "detail-badge";
-  count.textContent = `${number.format(army.unit_count || 0)} units`;
-  const link = document.createElement("a");
-  link.className = "button button-primary";
-  link.href = `/units?${new URLSearchParams({ army_id: armyValue(army) })}`;
-  link.textContent = "Browse units";
-  footer.append(count, link);
+  if (army.playable === false) {
+    const note = document.createElement("span");
+    note.className = "detail-source";
+    note.textContent = "Historical reference only";
+    footer.append(note);
+  } else {
+    const count = document.createElement("span");
+    count.className = "detail-badge";
+    count.textContent = `${number.format(army.unit_count || 0)} units`;
+    const link = document.createElement("a");
+    link.className = "button button-primary";
+    link.href = `/units?${new URLSearchParams({ army_id: armyValue(army) })}`;
+    link.textContent = "Browse units";
+    footer.append(count, link);
+  }
 
   article.append(heading, description, footer);
   return article;
@@ -76,11 +105,15 @@ function renderArmy(army) {
 
 function render(items) {
   const playable = items.filter((army) => army.playable !== false);
-  elements.count.textContent = `${number.format(playable.length)} armies`;
-  if (!playable.length) return show(elements.empty);
+  const legacy = items.filter((army) => army.legacy);
+  const visible = items.filter((army) => army.playable !== false || army.legacy);
+  elements.count.textContent = legacy.length
+    ? `${number.format(playable.length)} playable · ${number.format(legacy.length)} legacy`
+    : `${number.format(playable.length)} playable`;
+  if (!visible.length) return show(elements.empty);
 
   const groups = new Map();
-  for (const army of playable) {
+  for (const army of visible) {
     const group = army.overview_group || { id: army.id, name: army.name };
     if (!groups.has(group.id)) groups.set(group.id, { ...group, armies: [] });
     groups.get(group.id).armies.push(army);

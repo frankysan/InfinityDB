@@ -19,6 +19,7 @@ import pytest
 from infinity_army_data.merge import make_source, merge_sources
 from infinity_army_data.normalize import normalize_master
 from infinity_db import __display_version__, __version__
+from infinity_db.army_overview import army_overview_out_of_catalog
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import export_database
 from infinity_db.database.publication import (
@@ -293,8 +294,8 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("application/json")
     armies = {item["id"]: item for item in json.loads(body)["items"]}
-    assert set(armies) == {101, 198, 201}
-    assert [army["id"] for army in json.loads(body)["items"]] == [101, 198, 201]
+    assert set(armies) == {101, 198, 201, 906, 907}
+    assert [army["id"] for army in json.loads(body)["items"]] == [101, 198, 201, 906, 907]
     assert armies[101]["slug"] == "zulu_company"
     assert armies[101]["public_slug"] == "zulu-company"
     assert armies[101]["name"]
@@ -304,7 +305,14 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert armies[198]["kind"] == "reinforcement"
     assert armies[198]["overview_description"]
     assert armies[198]["overview_group"]
-    assert {army["unit_count"] for army in armies.values()} == {1, 2, 4}
+    assert {armies[army_id]["unit_count"] for army_id in (101, 198, 201)} == {1, 2, 4}
+    assert armies[906]["name"] == "Spiral Corps"
+    assert armies[906]["legacy"] is True
+    assert armies[906]["playable"] is False
+    assert armies[906]["overview_group"] == {"id": 901, "name": "Non-Aligned Armies"}
+    assert armies[907]["name"] == "Foreign Company"
+    assert armies[907]["legacy"] is True
+    assert armies[907]["playable"] is False
 
 
 
@@ -312,7 +320,7 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     status, headers, body = request(app, "/armies")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"Current armies" in body
+    assert b"Army lists" in body
     assert b'/static/armies.js?v=' in body
     assert b'href="/armies" aria-current="page"' in body
 
@@ -325,6 +333,8 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b"staticSymbolPath(army.symbol_path)" in script
     assert b"new URLSearchParams({ army_id: armyValue(army) })" in script
     assert b"army.overview_group" in script
+    assert b"Out of catalog" in script
+    assert b"Not playable in N5" in script
     assert b"groupIdentity" not in script
     assert b"infinity:beforenavigation" in script
 
@@ -336,6 +346,38 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
         ".army-overview-grid",
         {"display": "grid", "grid-template-columns": "repeat(auto-fit, minmax(280px, 1fr))"},
     )
+    assert_css_rule(
+        styles,
+        ".status-badge--warning",
+        {
+            "background": "var(--color-status-warning-surface)",
+            "color": "var(--color-status-warning-text)",
+        },
+    )
+
+
+def test_reinforcement_catalog_status_uses_main_overview_group_only() -> None:
+    armies = {
+        101: {"id": 101, "name": "Main", "role": "main", "discontinued": False},
+        102: {
+            "id": 102,
+            "name": "Sectorial",
+            "role": "sectorial",
+            "group_id": 101,
+            "discontinued": True,
+        },
+        198: {
+            "id": 198,
+            "name": "Reinforcements",
+            "role": "reinforcement",
+            "discontinued": False,
+            "parent_armies": [{"id": 102}, {"id": 101}],
+        },
+    }
+
+    assert army_overview_out_of_catalog(armies[198], armies_by_id=armies) is False
+    armies[101]["discontinued"] = True
+    assert army_overview_out_of_catalog(armies[198], armies_by_id=armies) is True
 
 
 def test_fireteam_chart_page_and_api_use_application_projection(
@@ -612,7 +654,15 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
     normalized["armyMetadata"] = {
         "sourceFile": "metadata.json",
         "sourceSha256": "test-metadata",
-        "data": {"factions": []},
+        "data": {
+            "factions": [
+                {"id": 101, "name": "Main Army", "discontinued": True},
+                {"id": 102, "name": "Sectorial", "discontinued": False},
+                {"id": 198, "name": "Reinforcements", "discontinued": False},
+                {"id": 901, "name": "Non-Aligned Armies", "discontinued": False},
+                {"id": 902, "name": "Independent Army", "discontinued": False},
+            ]
+        },
     }
     normalized["tables"]["metadata_factions"] = [
         {"id": 101, "parent": 101, "name": "Main Army", "slug": "main-army"},
@@ -641,6 +691,12 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
     assert armies[198]["parent_armies"] == [
         {"id": 101, "name": "Main Army", "slug": "main", "public_slug": "main"}
     ]
+    assert armies[101]["discontinued"] is True
+    assert armies[101]["out_of_catalog"] is True
+    assert armies[102]["discontinued"] is False
+    assert armies[102]["out_of_catalog"] is False
+    assert armies[198]["discontinued"] is False
+    assert armies[198]["out_of_catalog"] is True
     assert armies[101]["reinforcement_sections"] == [
         {
             "id": 198,
