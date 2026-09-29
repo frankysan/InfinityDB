@@ -5,240 +5,60 @@
     "n5-core-v5.3",
     "n5-hacking-programs-v5.3"
   ],
-  "candidateOwners": 141,
-  "candidateOccurrences": 411,
+  "candidateOwners": 43,
+  "candidateOccurrences": 66,
   "owners": {
     "n5-core-v5.3|equipment:ai-motorcycle": {
-      "candidateCount": 6,
-      "sha256": "7cb5db391bf4c00ce9dd79288ddbd8fb136f504d866a115a431f7da640180bea"
-    },
-    "n5-core-v5.3|equipment:albedo": {
-      "candidateCount": 4,
-      "sha256": "9c20e13037c1cffed90ff8140eebc8a49ca476cea354eeb64d06491322506dac"
-    },
-    "n5-core-v5.3|equipment:baggage": {
-      "candidateCount": 2,
-      "sha256": "88bc12c8861e99e6c05050e8d384cafdf4930a50bc91b2a3b81810585cdf957b"
-    },
-    "n5-core-v5.3|equipment:bangbomb": {
-      "candidateCount": 3,
-      "sha256": "857111b53e16b4f0b0d99352a2a319091af7f384a19f8499a32d026358ad1647"
-    },
-    "n5-core-v5.3|equipment:biometric-visor": {
-      "candidateCount": 8,
-      "sha256": "2e2a95c4b2c82657da42f0b01f1df9a773129536c401933b05f758351d9004f3"
-    },
-    "n5-core-v5.3|equipment:cube": {
-      "candidateCount": 2,
-      "sha256": "9857de58faf5d1fde7022904f6a11ecf5c9a614799f0a36cc11c8b9cf66e518e"
-    },
-    "n5-core-v5.3|equipment:cube-2": {
       "candidateCount": 1,
-      "sha256": "ea940dc97469eec7e478b799e72cca28ed76d94b1680d422a5d122e7446b7231"
-    },
-    "n5-core-v5.3|equipment:dazer": {
-      "candidateCount": 4,
-      "sha256": "5b61536c98d0aa830dbc351d554d132dd08f4cb8bf44f801ee636755ed2584bf"
+      "sha256": "363e938f0d013d7ce10440f66085d5f8d8619497f7ec58dd38a4c23ff707fa12"
     },
     "n5-core-v5.3|equipment:deactivator": {
-      "candidateCount": 3,
-      "sha256": "7a1df14c139688a368de19d8a65f52d912ee8252b431a3f83bf746e2057b7e21"
-    },
-    "n5-core-v5.3|equipment:deployable-cover": {
-      "candidateCount": 3,
-      "sha256": "a9d9804361b4a56e2c3c40722c4626dd56d370c2da2d76ff3911c5aedede3454"
-    },
-    "n5-core-v5.3|equipment:deployable-repeater": {
-      "candidateCount": 2,
-      "sha256": "5c80b7e341c01df9575568ddb3f6207c48fc900ce6c2b79ac38b8b0e28da195f"
-    },
-    "n5-core-v5.3|equipment:escape-system": {
-      "candidateCount": 2,
-      "sha256": "1778f9b26927f1de61f7d76becc7a99bd0db9d096961131161eed70122bb66ce"
-    },
-    "n5-core-v5.3|equipment:fastpanda": {
       "candidateCount": 1,
-      "sha256": "e92049eafd9bd5d8cac97a5c176d953f3349f3716dfd13269803a29829183849"
-    },
-    "n5-core-v5.3|equipment:motorcycle": {
-      "candidateCount": 7,
-      "sha256": "663ffa713a489878aefb1d7a9069bdf6cd9bc3d0e28f9d17ed7d8c76cfa0da5e"
-    },
-    "n5-core-v5.3|equipment:multispectral-visor": {
-      "candidateCount": 10,
-      "sha256": "7a0ff2acefb4c2e25b4d207167fcb828a1b11044a9d52fadeb6f877e91fa1304"
-    },
-    "n5-core-v5.3|equipment:nanoscreen": {
-      "candidateCount": 2,
-      "sha256": "869a69bad56bb59f3f2f3fc0d9b7f9d0bec0a16fad584800f1950c949ddef9f2"
+      "sha256": "c4591b977491d42a10dde1513f07b9da9c87953fff72aaa32d686c13196b358a"
     },
     "n5-core-v5.3|equipment:repeater": {
       "candidateCount": 1,
       "sha256": "363e938f0d013d7ce10440f66085d5f8d8619497f7ec58dd38a4c23ff707fa12"
     },
-    "n5-core-v5.3|equipment:symbiomate": {
-      "candidateCount": 3,
-      "sha256": "c7ee60c16a06f5c78d62d941d4c678343c1f30c6488bd3573569c235e85fab0f"
-    },
-    "n5-core-v5.3|equipment:tinbot-discover": {
-      "candidateCount": 1,
-      "sha256": "2aba2fad11b4dfd885e05779d7b64ab234c43b0724ab4b31c5099d37316a9ff9"
-    },
-    "n5-core-v5.3|equipment:tinbot-neurocinetics": {
-      "candidateCount": 1,
-      "sha256": "5343b77d591fdd4e4359f9db9d218bae3032c652cbbc8a66cb0060df0b99718c"
-    },
-    "n5-core-v5.3|equipment:x-visor": {
-      "candidateCount": 2,
-      "sha256": "085e49e8879536cf49c2a85ad041170f0a9ab6a33423dec93c5e1f1588347199"
-    },
-    "n5-core-v5.3|label:assignable-transmutation": {
-      "candidateCount": 1,
-      "sha256": "ec60766ae535938bce85a6f35ea593971f341b75a215145fa76a5af328a5b7dc"
-    },
-    "n5-core-v5.3|label:bs-attack": {
-      "candidateCount": 1,
-      "sha256": "7f09fd8e619adc673a67d5cff0a5620447857c9a429e6900cbd5e8ecb74b6343"
-    },
-    "n5-core-v5.3|label:cc-attack": {
-      "candidateCount": 1,
-      "sha256": "8c6caf3fea49162ec382672cde3a9c7f489c1a3571d56f7762320fac8e47577b"
-    },
-    "n5-core-v5.3|label:comms-attack": {
-      "candidateCount": 2,
-      "sha256": "fc1318e43841c2d8b9029195c2904727acece5761166dc9da858b094cc7159d5"
-    },
-    "n5-core-v5.3|label:hackable": {
-      "candidateCount": 1,
-      "sha256": "5eb704e90c8cfa76a08ef37b6a1ded0dcfae4556f2b3b416b37dc809d5aef740"
-    },
-    "n5-core-v5.3|rule:fireteam-level-bonuses": {
-      "candidateCount": 4,
-      "sha256": "fa70919a73dc9088d584aa866840fc0507b922ed401b355ce9cfa0bf827893d4"
-    },
     "n5-core-v5.3|rule:loss-of-lieutenant": {
-      "candidateCount": 7,
-      "sha256": "b07248fe22625b7d6e3789e4bde16c83732cecc2d25e455cae3ec8c44e60389b"
-    },
-    "n5-core-v5.3|rule:peripheral-type:ancillary": {
       "candidateCount": 1,
-      "sha256": "df2f0b1d4514e076320bbda8182d668227c03a9eda6352517d53bf54e6ac94b8"
-    },
-    "n5-core-v5.3|rule:peripheral-type:control": {
-      "candidateCount": 1,
-      "sha256": "df2f0b1d4514e076320bbda8182d668227c03a9eda6352517d53bf54e6ac94b8"
-    },
-    "n5-core-v5.3|rule:peripheral-type:cyberplug": {
-      "candidateCount": 2,
-      "sha256": "39c7a11b3f67d4fa97809b881b04c075750fa725715b82e159d731c59a81905d"
-    },
-    "n5-core-v5.3|rule:peripheral-type:servant": {
-      "candidateCount": 3,
-      "sha256": "4fa16c6bbd338d605e693a40a2338cd766f7ae4a7180673bcf40446f8e99d140"
-    },
-    "n5-core-v5.3|rule:peripheral-type:synchronized": {
-      "candidateCount": 1,
-      "sha256": "df2f0b1d4514e076320bbda8182d668227c03a9eda6352517d53bf54e6ac94b8"
-    },
-    "n5-core-v5.3|rule:profile-help:peripheral": {
-      "candidateCount": 1,
-      "sha256": "df2f0b1d4514e076320bbda8182d668227c03a9eda6352517d53bf54e6ac94b8"
-    },
-    "n5-core-v5.3|rule:profile-help:training-orders": {
-      "candidateCount": 1,
-      "sha256": "0bcc5c2d653b76f567562808f3e56fa306056e2efc83c24f1a58f59e4e8ce010"
-    },
-    "n5-core-v5.3|rule:profile-help:troop-type": {
-      "candidateCount": 1,
-      "sha256": "df2f0b1d4514e076320bbda8182d668227c03a9eda6352517d53bf54e6ac94b8"
-    },
-    "n5-core-v5.3|rule:special-lieutenant-order": {
-      "candidateCount": 4,
-      "sha256": "b708ecf1fbdf75ee0eeb880efecc470da1757be775071b6c27447f68c54a54ae"
+      "sha256": "31a6081c989beed37c460a2d254068f90a3771e07458beee08f711beef8e3e6d"
     },
     "n5-core-v5.3|skill:aerial": {
-      "candidateCount": 3,
-      "sha256": "c7546f494ba7c8040314bd5c388bbb2a639d18637a668ed2aa2ec436e1d929d4"
-    },
-    "n5-core-v5.3|skill:berserk": {
-      "candidateCount": 9,
-      "sha256": "0792f1f822eb826437e9df057a62f07cc58b3003bdec152573ad606ad0303d07"
-    },
-    "n5-core-v5.3|skill:bs-11": {
       "candidateCount": 1,
-      "sha256": "05273e05fb4d3b279bf987e09e42df9de93fed9184eb73571c3be263bb329521"
-    },
-    "n5-core-v5.3|skill:bs-12": {
-      "candidateCount": 1,
-      "sha256": "05273e05fb4d3b279bf987e09e42df9de93fed9184eb73571c3be263bb329521"
-    },
-    "n5-core-v5.3|skill:cautious-movement": {
-      "candidateCount": 1,
-      "sha256": "db1244e979f541684f9863e45b25c001e96fc45184355a1de4640dca2b31b6ec"
-    },
-    "n5-core-v5.3|skill:cc-21": {
-      "candidateCount": 1,
-      "sha256": "55088dc196e2fd431da111cdf05c7574408a6ef0a7af85855c8d9a46a19ab541"
+      "sha256": "5d8f4a64a6b727e0e677fd8f06a560d224b3e699a4c839c2b3d2becb399f3531"
     },
     "n5-core-v5.3|skill:chain-of-command": {
-      "candidateCount": 10,
-      "sha256": "f734fd6b7975de6b4fb77a2a7d5d225348e4e05e8ab975cf8ca775db28d8eb93"
-    },
-    "n5-core-v5.3|skill:climbing-plus": {
-      "candidateCount": 6,
-      "sha256": "0b0fc34b8f3a3fd9bf1b0c56cc54a9c5835504a8930dface3c54d50ecb722905"
-    },
-    "n5-core-v5.3|skill:combat-instinct": {
-      "candidateCount": 6,
-      "sha256": "52e97df5240ffb2226a337a71d941207489e78b655929120bb56965f9e3e8acf"
+      "candidateCount": 2,
+      "sha256": "eee03226596128f8c654a815fbad7543015581bdc87ba54a8a82176a158fa355"
     },
     "n5-core-v5.3|skill:combat-jump": {
       "candidateCount": 2,
       "sha256": "3682983f2ca9503c7f168d08f7645b17d2a04c1817780e79fe46270cf41a85d3"
     },
     "n5-core-v5.3|skill:courage": {
-      "candidateCount": 4,
-      "sha256": "1d348e9f0d84a451bda3fecddd19f48d64ee2a18b63ac8ffd64bb2065a3590f1"
-    },
-    "n5-core-v5.3|skill:cyberplug": {
       "candidateCount": 3,
-      "sha256": "788c935a4c65014d7aa377fd633b3d39c3f44f6e808c70387c86122d1309ece0"
+      "sha256": "0840d897786dbf135a0ba784125c33a50651faf1a2c83dca91207f1b77a24cf6"
     },
     "n5-core-v5.3|skill:decoy": {
       "candidateCount": 1,
       "sha256": "1054d89937f647a6c0c4945a855dcc9290567cab1f0915abd23e5afe0dae37cd"
     },
     "n5-core-v5.3|skill:dodge": {
-      "candidateCount": 3,
-      "sha256": "01e363cb8d06b53a42dfe4742875f160a47d3d02197a3d4e824d43382e69d03e"
+      "candidateCount": 2,
+      "sha256": "58e578d07c519c70ff711305fbdb3aca009e4095b84dd2250e9d271a7789957a"
     },
     "n5-core-v5.3|skill:dogged": {
-      "candidateCount": 3,
-      "sha256": "f5fadb35c60c4ce6cc8a2c2e0c355d45ca08cc03b5f3df821971ae5f24a803f5"
-    },
-    "n5-core-v5.3|skill:explode": {
-      "candidateCount": 3,
-      "sha256": "15338574fac3068adfb39051436f5fbbbc78ec4a2aa06dc98488627aa18d5139"
-    },
-    "n5-core-v5.3|skill:exrah": {
-      "candidateCount": 2,
-      "sha256": "4ab13ac62da3243c2f254872429e7e7b1137a916b3db63b05f3fb23acc9642d8"
-    },
-    "n5-core-v5.3|skill:forward-observer": {
-      "candidateCount": 2,
-      "sha256": "a7cb4ddab04040d8f16a1b90f4a3e0a098c3666b4dabbe40861cead63b51445b"
-    },
-    "n5-core-v5.3|skill:frenzy": {
-      "candidateCount": 5,
-      "sha256": "66cecc6b5dc9003e42f8ae94464178701729544dd588becbaf504067ee9c33ed"
+      "candidateCount": 1,
+      "sha256": "87abf702bd58a7947441ccdc3db2919b429d9d369a6a2fddab27b1c13c079bcc"
     },
     "n5-core-v5.3|skill:g-jumper": {
-      "candidateCount": 3,
-      "sha256": "8f75dc1a4410b15c02f8f955355934fc1bb17a5228d51f2efb05905f653e36f8"
+      "candidateCount": 1,
+      "sha256": "16c57710f3d2a91590370bb3bc13dadf602aed5102161e012ea1c7c1640147e7"
     },
     "n5-core-v5.3|skill:guard": {
-      "candidateCount": 5,
-      "sha256": "626bb275bfbb4389ab262925187df4e9aeb2a52f8d50bbfecd94f687222336d3"
+      "candidateCount": 1,
+      "sha256": "5d8f4a64a6b727e0e677fd8f06a560d224b3e699a4c839c2b3d2becb399f3531"
     },
     "n5-core-v5.3|skill:immunity": {
       "candidateCount": 2,
@@ -249,80 +69,24 @@
       "sha256": "2c3c2355e592791c1f79d8276962483befe9191b23df1d51018a9ea5b6982e00"
     },
     "n5-core-v5.3|skill:impetuous": {
-      "candidateCount": 4,
-      "sha256": "e34627e4d627d3d3a5a363d541c4546029231e47543dcab934061507c156b38f"
+      "candidateCount": 1,
+      "sha256": "0189491f9d4653fa1349dcaf5b02debd10d5603d476cfc99d651b5a4f48f8690"
     },
     "n5-core-v5.3|skill:inspiring-leadership": {
-      "candidateCount": 9,
-      "sha256": "d6c4481d595ed7f1593c5d2c8cf99fac4456865a2cdf0501011d84cbd9596fb8"
-    },
-    "n5-core-v5.3|skill:intuitive-attack": {
-      "candidateCount": 2,
-      "sha256": "e47e625a69b4be25a3d6861917cafd6227cf53da7a59dd6e09ff2d6a04f4b6b7"
+      "candidateCount": 1,
+      "sha256": "a57241dadcf9d45ed033cbbb0427576280422a8c5f82fea2ec8446adb0512ffd"
     },
     "n5-core-v5.3|skill:lieutenant": {
       "candidateCount": 1,
       "sha256": "5b180eb285a318113d275435511f3d73571f34d2ad3e1c5095b8533dbbc5b6ca"
     },
-    "n5-core-v5.3|skill:look-out": {
-      "candidateCount": 2,
-      "sha256": "63751701f5272966cd03687aa59019d6a747de9d5ff4fb9a8c7119f3d7512511"
-    },
-    "n5-core-v5.3|skill:marksmanship": {
-      "candidateCount": 1,
-      "sha256": "5d07b09282fc206307a5d90a26d837f1cad07bda9eb1d027f3693c34d88626d8"
-    },
-    "n5-core-v5.3|skill:martial-arts": {
-      "candidateCount": 1,
-      "sha256": "e3a81b7617b6d0f4144d17bbcaf4176add672299d5c1a2f8aee89b1801484626"
-    },
-    "n5-core-v5.3|skill:martial-arts-l1": {
-      "candidateCount": 1,
-      "sha256": "0ec38dcc0058a476a19cc883e47db0e85909598b1ad39059bbf094a71f7ea3ff"
-    },
-    "n5-core-v5.3|skill:martial-arts-l2": {
-      "candidateCount": 1,
-      "sha256": "0ec38dcc0058a476a19cc883e47db0e85909598b1ad39059bbf094a71f7ea3ff"
-    },
-    "n5-core-v5.3|skill:martial-arts-l3": {
-      "candidateCount": 1,
-      "sha256": "0ec38dcc0058a476a19cc883e47db0e85909598b1ad39059bbf094a71f7ea3ff"
-    },
-    "n5-core-v5.3|skill:martial-arts-l4": {
-      "candidateCount": 1,
-      "sha256": "0ec38dcc0058a476a19cc883e47db0e85909598b1ad39059bbf094a71f7ea3ff"
-    },
-    "n5-core-v5.3|skill:martial-arts-l5": {
-      "candidateCount": 1,
-      "sha256": "0ec38dcc0058a476a19cc883e47db0e85909598b1ad39059bbf094a71f7ea3ff"
-    },
-    "n5-core-v5.3|skill:mimetism": {
-      "candidateCount": 2,
-      "sha256": "a9eeb3a5bce141b3a9cc9126882735bcfd03863a8c47c77484517be772484ed0"
-    },
-    "n5-core-v5.3|skill:mnemonica": {
-      "candidateCount": 3,
-      "sha256": "abe92ad982ed0e67c76615744ba810e2d53a464e88093ea4084a4e175559c049"
-    },
-    "n5-core-v5.3|skill:morpho-scan": {
-      "candidateCount": 2,
-      "sha256": "cd31940c2173e4c7e08e7cbf821ef2a49d6b0b3f15a2e97a4fb1c6587ce68551"
-    },
-    "n5-core-v5.3|skill:natural-born-warrior": {
-      "candidateCount": 2,
-      "sha256": "681803f14c4608790d4586c4869a2f89fac3afcb487d15f533db1e7a2166467c"
-    },
     "n5-core-v5.3|skill:nco": {
-      "candidateCount": 5,
-      "sha256": "e5e72dbedbb5235a13527ee0c4bad7542a019a200b6407b0ee0d3da292fa1d20"
-    },
-    "n5-core-v5.3|skill:no-cover": {
       "candidateCount": 1,
-      "sha256": "2871f74d1ce4edb1df1588c0240c40f67097fc1f0691736e6a24f20d3bb4f98f"
+      "sha256": "363e938f0d013d7ce10440f66085d5f8d8619497f7ec58dd38a4c23ff707fa12"
     },
     "n5-core-v5.3|skill:no-wound-incapacitation": {
-      "candidateCount": 5,
-      "sha256": "845c966da697d1d9cd5c8d6abf6e40ea57323be718da60535431467bd829a056"
+      "candidateCount": 1,
+      "sha256": "87abf702bd58a7947441ccdc3db2919b429d9d369a6a2fddab27b1c13c079bcc"
     },
     "n5-core-v5.3|skill:number-2": {
       "candidateCount": 1,
@@ -336,217 +100,69 @@
       "candidateCount": 1,
       "sha256": "87abf702bd58a7947441ccdc3db2919b429d9d369a6a2fddab27b1c13c079bcc"
     },
-    "n5-core-v5.3|skill:place-deployable": {
-      "candidateCount": 2,
-      "sha256": "0c2b2b2f4aa6d7712725d2f70a8b7dc4537b3145fdb8bdda61f588537ed7860f"
-    },
-    "n5-core-v5.3|skill:protheion": {
-      "candidateCount": 2,
-      "sha256": "f086f584f60a305dd0afad9b356606ffad976ebfcdda71ff7e9bd0c97dfabb13"
-    },
     "n5-core-v5.3|skill:regeneration": {
       "candidateCount": 1,
       "sha256": "c4591b977491d42a10dde1513f07b9da9c87953fff72aaa32d686c13196b358a"
     },
     "n5-core-v5.3|skill:religious-troop": {
-      "candidateCount": 5,
-      "sha256": "7446378a1992012a2adff9ae0b8efad53b857cacafe52e763af5f1dd7e79d658"
+      "candidateCount": 4,
+      "sha256": "8ccdf52d7e9da2de1788ffd3999384d4939dcd77b2d68ae9f2f8b43784c9a797"
     },
     "n5-core-v5.3|skill:remote-presence": {
-      "candidateCount": 5,
-      "sha256": "2fe961b2d883cef4d9c4f153980f40ef73d60d14aacb5aa06667f205062cfc24"
-    },
-    "n5-core-v5.3|skill:request-speedball": {
-      "candidateCount": 1,
-      "sha256": "4c79fdc62d60c8cc4fc173d618792a622397c6fd98b7e343a830cb17c1fcf630"
+      "candidateCount": 3,
+      "sha256": "d49fb0e21426d52442ea464055666a0b64a8aa3fe563a442e92e036bfea24231"
     },
     "n5-core-v5.3|skill:reset": {
-      "candidateCount": 6,
-      "sha256": "e7a5f2faa52e8dbaaa3badb3a1a73f99b22734e2953fa6b066c00112d3da15b0"
-    },
-    "n5-core-v5.3|skill:sapper": {
-      "candidateCount": 1,
-      "sha256": "e90ac5e94f3d877d03712e37b3abaca440a76257f4eb818521769e431aabb6b7"
+      "candidateCount": 5,
+      "sha256": "834a8bafbcc2b2908fc20d3aa7e38a33a2331685e34d513c54fd422086bee98b"
     },
     "n5-core-v5.3|skill:sensor": {
-      "candidateCount": 9,
-      "sha256": "dd4b49463f5f90960e95d03a676600865cd03944645e7826503f6fce5b6e3119"
+      "candidateCount": 2,
+      "sha256": "8efb3832bec7896bd1a10fb186919ca88e66c79d662c3624077e79f59b7e4cfe"
     },
     "n5-core-v5.3|skill:shasvastii": {
       "candidateCount": 3,
       "sha256": "ffae90879cd22d97c165e2b21c32f9ddaee7a5a269304273f944008a0b40fd50"
     },
     "n5-core-v5.3|skill:sixth-sense": {
-      "candidateCount": 8,
-      "sha256": "302c03ecc5e473cdebbbe57937758c9ba60d10653ce39da306e0ae3e0bddf82b"
-    },
-    "n5-core-v5.3|skill:specialist-operative": {
       "candidateCount": 3,
-      "sha256": "5e0162249eb92610c67e29cadc8521648e7b5a657aa8f1770331c72c11036f06"
-    },
-    "n5-core-v5.3|skill:speculative-attack": {
-      "candidateCount": 2,
-      "sha256": "4ba83f22023b176234da4e919e9c495d775cdbb0532ea0e9f48bd3f0d1fd38c5"
-    },
-    "n5-core-v5.3|skill:stealth": {
-      "candidateCount": 3,
-      "sha256": "2a7be57d1112058ab5c273c45e1c3e50f4cad34892e1655d916d2159c2cd4042"
-    },
-    "n5-core-v5.3|skill:strategic-deployment": {
-      "candidateCount": 2,
-      "sha256": "ed1c64cde34bfc2aaa2984526032af23b16b0b894b0b348748b9ed4e9cbae775"
-    },
-    "n5-core-v5.3|skill:strategos": {
-      "candidateCount": 1,
-      "sha256": "e216e106a457c7c0a17f09ef00a0fde5897df21f8cdc2be295f28a2da14a5625"
-    },
-    "n5-core-v5.3|skill:strategos-l1": {
-      "candidateCount": 1,
-      "sha256": "00ffed3f62893d3f984a19ed907ba4d4f6075f45d883675a96d301a1c4ac2fcf"
-    },
-    "n5-core-v5.3|skill:strategos-l2": {
-      "candidateCount": 1,
-      "sha256": "00ffed3f62893d3f984a19ed907ba4d4f6075f45d883675a96d301a1c4ac2fcf"
-    },
-    "n5-core-v5.3|skill:super-jump": {
-      "candidateCount": 6,
-      "sha256": "508f2e7a517cd68da05eebbb4b7d2bc040342e06281af791e112fa436e5c7716"
+      "sha256": "d4d34e0520009edd8f793fc86d3952d7e4c6ec967ec749efce7d49b87d91611e"
     },
     "n5-core-v5.3|skill:surprise-attack": {
-      "candidateCount": 4,
-      "sha256": "a8c54c323b0f9245cea625b9663df2012197a381d0e57c5d87dfdda24ecb1a81"
+      "candidateCount": 2,
+      "sha256": "e53c4d1f041e9a7789ecb1553612f038c9c7d382530708768328e2037e01585f"
     },
     "n5-core-v5.3|skill:tech-recovery": {
-      "candidateCount": 3,
-      "sha256": "6967d8570eef7cb842a6d4d9550cc8bcb6ba132b07da62e697340923295b9cf9"
+      "candidateCount": 1,
+      "sha256": "c4591b977491d42a10dde1513f07b9da9c87953fff72aaa32d686c13196b358a"
     },
     "n5-core-v5.3|skill:technorganic": {
-      "candidateCount": 3,
-      "sha256": "20005192de0ddce60a3ff6690fc9808c4b9f80b0303b756b9de519e256400c47"
-    },
-    "n5-core-v5.3|skill:total-reaction": {
-      "candidateCount": 2,
-      "sha256": "a7cb4ddab04040d8f16a1b90f4a3e0a098c3666b4dabbe40861cead63b51445b"
+      "candidateCount": 1,
+      "sha256": "87abf702bd58a7947441ccdc3db2919b429d9d369a6a2fddab27b1c13c079bcc"
     },
     "n5-core-v5.3|skill:transmutation": {
-      "candidateCount": 2,
-      "sha256": "3a32f1c2211bddea92ea9536e5f0d7cf4275652274778c4dce1c57c62713c892"
-    },
-    "n5-core-v5.3|skill:triangulated-fire": {
-      "candidateCount": 2,
-      "sha256": "a7cb4ddab04040d8f16a1b90f4a3e0a098c3666b4dabbe40861cead63b51445b"
-    },
-    "n5-core-v5.3|skill:vulnerability": {
-      "candidateCount": 2,
-      "sha256": "da065ce5061f2de88187f2300f2fa99af3d093a50baa4d2c0fb4f61db30aae0d"
+      "candidateCount": 1,
+      "sha256": "a0b134bfe6e1bf5cb30dd46d50adc6636e436b04b70771d3509f53ca10ecea0a"
     },
     "n5-core-v5.3|skill:warhorse": {
-      "candidateCount": 6,
-      "sha256": "bdf4faf63ce12639482a31e5b8683f3b55febc264dd9cef66045e5a6004e4bd8"
-    },
-    "n5-core-v5.3|state:camouflaged": {
-      "candidateCount": 5,
-      "sha256": "d2d77bf9574368870547e6d97a6f2b1f0c38865c58bd1281cc31e8981c9ca28d"
+      "candidateCount": 2,
+      "sha256": "3c18f75493151706dbf31a47665397980488cc620166c51f6907a522837b01a7"
     },
     "n5-core-v5.3|state:dead": {
       "candidateCount": 1,
       "sha256": "6452925437de90dee104cd2e7bde073e569ba90857d43889e0ee2a599dc87fc2"
     },
-    "n5-core-v5.3|state:decoy": {
-      "candidateCount": 4,
-      "sha256": "38c8c3992c3104ce07194f15f59d3165ad0bf4208714cde13e4e5300aee566d7"
-    },
-    "n5-core-v5.3|state:disconnected": {
-      "candidateCount": 4,
-      "sha256": "a8a94193030818baf7b15023abfa3eaf0bb7fd4fffc290a1cd8aca9c1ff4a1dc"
-    },
     "n5-core-v5.3|state:engaged": {
-      "candidateCount": 7,
-      "sha256": "39476a0e3468987296c3d38d4e5419a6f63ec6e5edd8e700772e154f2f404b05"
-    },
-    "n5-core-v5.3|state:foxhole": {
-      "candidateCount": 5,
-      "sha256": "c58625858797c149707dd2bb59f1bcddfb775532c4a178902c8c177d11f708bf"
-    },
-    "n5-core-v5.3|state:hidden-deployment": {
       "candidateCount": 2,
-      "sha256": "3f77697400815036934ddc4eb45d07859e66a8ebed646e0de656aa30a3ef0ec9"
-    },
-    "n5-core-v5.3|state:holoecho": {
-      "candidateCount": 1,
-      "sha256": "94dde107cc71bdc553b56df498b37747dae27e893071dcef9304c333aae229ad"
-    },
-    "n5-core-v5.3|state:holomask": {
-      "candidateCount": 2,
-      "sha256": "69ecffc39804d7c7eab0b2eef23d0579d5d0e5f0dacccce3f66401d7c05a5e70"
-    },
-    "n5-core-v5.3|state:immobilized-a": {
-      "candidateCount": 4,
-      "sha256": "26403126902327d5a2fb580a22c0c6aa7bd04861eeffb07c6efcb0d4cea19842"
-    },
-    "n5-core-v5.3|state:immobilized-b": {
-      "candidateCount": 4,
-      "sha256": "6d82689aa71cf2cca79ebd69b5b3583edcc541ab0c35a692ec794e3fbc81bd33"
-    },
-    "n5-core-v5.3|state:impersonation-1": {
-      "candidateCount": 6,
-      "sha256": "ff28d295a4d7f487e6f4cfea7a107612a403018fa149644fe753ffd98bc28660"
-    },
-    "n5-core-v5.3|state:impersonation-2": {
-      "candidateCount": 5,
-      "sha256": "06f15d9dacc26a165aaa617cd1c035817737c4f276d0f3c62fd4a03ec0a196b9"
-    },
-    "n5-core-v5.3|state:isolated": {
-      "candidateCount": 3,
-      "sha256": "fc1e94ec5843351ec2308fe647bd2723c71a0142d24130fc210a37d25643175f"
+      "sha256": "628636b159110f6fa3043942e28fb1b98c23505970ca6fe2a397d489e507dcf1"
     },
     "n5-core-v5.3|state:prone": {
-      "candidateCount": 2,
-      "sha256": "8dfdf404dc808b2ae8c105941fad0f3d73523616c8c78473bccfe8a4b0cd7e5e"
-    },
-    "n5-core-v5.3|state:retreat": {
-      "candidateCount": 6,
-      "sha256": "1fe12bbc5984c775bdb742ca454f72a4ec3dc67fc2ecfece87cf1e3d0ab741db"
-    },
-    "n5-core-v5.3|state:stunned": {
-      "candidateCount": 2,
-      "sha256": "8a67223d679f3b4eba3773765224b5635f0d5cd34bc4d8aa383a8c140fca68de"
-    },
-    "n5-core-v5.3|state:suppressive-fire": {
-      "candidateCount": 4,
-      "sha256": "acd808fe6d241549027d97352837c2fafadc7492452c7019bf5768a344804312"
-    },
-    "n5-core-v5.3|state:targeted": {
-      "candidateCount": 11,
-      "sha256": "444f4b01121cce89a74a3bd25cad07f9c73fb25ccac752d5618e69e68f571539"
-    },
-    "n5-core-v5.3|trait:indiscriminate": {
       "candidateCount": 1,
-      "sha256": "f0a7668ecd6ec5f843fcb833d90bbf1b31720b1ffbc439f8d0a916ce0e68d124"
-    },
-    "n5-core-v5.3|trait:reflective": {
-      "candidateCount": 1,
-      "sha256": "9859d258aaa507bc0406ab9307a4b684bda67e19ca162798b57dc429f65f5b45"
-    },
-    "n5-core-v5.3|trait:silent-x": {
-      "candidateCount": 1,
-      "sha256": "9f0493c19ba57a5cbfc048b3c4f52fd43b1de14ebed78d2ba59e8304644b1ec5"
+      "sha256": "783f06558823cdee2959b6155844ad591727358f1fde605b0cdb2161bff8bf47"
     },
     "n5-hacking-programs-v5.3|hacking-program:assisted-fire": {
-      "candidateCount": 3,
-      "sha256": "752493cf65935f71746e80b139ab02d1c148b0ac8d9e10511a993bbc748d811a"
-    },
-    "n5-hacking-programs-v5.3|hacking-program:carbonite": {
       "candidateCount": 1,
-      "sha256": "f96672538efb2de1f04ecf64cf1b6b2c498b209830e0699d0ffdf1e1a3769752"
-    },
-    "n5-hacking-programs-v5.3|hacking-program:controlled-jump": {
-      "candidateCount": 3,
-      "sha256": "94d7e41332e4f97bb42fda789aed44627dbef8a90ab9a2199e69aee60777d40a"
-    },
-    "n5-hacking-programs-v5.3|hacking-program:cybermask": {
-      "candidateCount": 3,
-      "sha256": "7f4600cbc2cf7f8fe1bf6a672fede7dbd935d93a66dbb0238004effb9c19cad8"
+      "sha256": "54c733e15a4257fe5f114967a532fbeb4719a54137c9af8e232d1a36aba96655"
     },
     "n5-hacking-programs-v5.3|hacking-program:enhanced-reaction": {
       "candidateCount": 1,
@@ -556,21 +172,13 @@
       "candidateCount": 1,
       "sha256": "54c733e15a4257fe5f114967a532fbeb4719a54137c9af8e232d1a36aba96655"
     },
-    "n5-hacking-programs-v5.3|hacking-program:oblivion": {
-      "candidateCount": 1,
-      "sha256": "f96672538efb2de1f04ecf64cf1b6b2c498b209830e0699d0ffdf1e1a3769752"
-    },
     "n5-hacking-programs-v5.3|hacking-program:total-control": {
       "candidateCount": 1,
       "sha256": "a0b134bfe6e1bf5cb30dd46d50adc6636e436b04b70771d3509f53ca10ecea0a"
     },
-    "n5-hacking-programs-v5.3|hacking-program:trinity": {
-      "candidateCount": 1,
-      "sha256": "f96672538efb2de1f04ecf64cf1b6b2c498b209830e0699d0ffdf1e1a3769752"
-    },
     "n5-hacking-programs-v5.3|hacking-program:white-noise": {
-      "candidateCount": 4,
-      "sha256": "995b83d5676018845bdaeffe390dcd893a05de2972d5af6169e72d4b4cd12d24"
+      "candidateCount": 1,
+      "sha256": "c4591b977491d42a10dde1513f07b9da9c87953fff72aaa32d686c13196b358a"
     }
   }
 }

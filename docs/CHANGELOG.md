@@ -40,7 +40,7 @@ New or materially revised entries use the project-domain labels defined in
   distance tokens to maintained rules text. Canonical Skill, Equipment, Weapon, Trait, State,
   and Hacking Program references can show viewport-bounded summary previews and navigate to
   their detail pages; touch interaction previews before following, and typed distances follow the
-  user's cm/in preference. Reviewed State, Hacking Program, Equipment, and Trait references now use
+  user's cm/in preference. Reviewed State, Hacking Program, Equipment, Trait, and Skill references now use
   semantic links, while validation prevents new unresolved references or literal gameplay-distance
   debt from being introduced. Generic Trait-name collisions that are confirmed to be ordinary rules
   text are fingerprinted to their exact reviewed passage contexts, so later prose changes reopen

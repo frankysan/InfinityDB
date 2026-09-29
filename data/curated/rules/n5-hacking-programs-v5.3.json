@@ -35,7 +35,7 @@
             "id": "hacking-program:assisted-fire",
             "kind": "hacking-program",
             "name": "Assisted Fire",
-            "summary": "Supportware that grants an allied REM Marksmanship while the Program remains active.",
+            "summary": "Supportware that grants an allied REM [[skill:marksmanship]] while the Program remains active.",
             "composition": {
                 "role": "definition"
             },
@@ -50,7 +50,7 @@
                     "The target is an allied REM from the same Army List and is inside the user's Hacking Area."
                 ],
                 "effects": [
-                    "The target gains Marksmanship; after activation the sustained effect covers the entire game table."
+                    "The target gains [[skill:marksmanship]]; after activation the sustained effect covers the entire game table."
                 ],
                 "restrictions": [
                     "Normal Supportware exclusivity and cancellation rules apply."
@@ -76,7 +76,7 @@
             "id": "hacking-program:carbonite",
             "kind": "hacking-program",
             "name": "Carbonite",
-            "summary": "[[trait:non-lethal|Non-Lethal]] Comms Attack that can place Hackable Troopers or enemy Hackers in [[state:immobilized-b]].",
+            "summary": "[[trait:non-lethal|Non-Lethal]] Comms Attack that can place Hackable Troopers or enemy [[skill:hacker:plural]] in [[state:immobilized-b]].",
             "composition": {
                 "role": "definition"
             },
@@ -88,7 +88,7 @@
             },
             "facts": {
                 "requirements": [
-                    "The target is an enemy Hackable Trooper or an enemy Hacker."
+                    "The target is an enemy Hackable Trooper or an enemy [[skill:hacker]]."
                 ],
                 "effects": [
                     "Failed BTS Saving Rolls caused by Carbonite place the target in [[state:immobilized-b]]."
@@ -119,7 +119,7 @@
             "id": "hacking-program:controlled-jump",
             "kind": "hacking-program",
             "name": "Controlled Jump",
-            "summary": "Supportware that modifies Combat Jump PH Rolls for allied and enemy Troopers across the table.",
+            "summary": "Supportware that modifies [[skill:combat-jump]] PH Rolls for allied and enemy Troopers across the table.",
             "composition": {
                 "role": "definition"
             },
@@ -131,7 +131,7 @@
             },
             "facts": {
                 "effects": [
-                    "Allied Combat Jump Rolls receive +3 while enemy Combat Jump Rolls receive -3 while the Program is active."
+                    "Allied [[skill:combat-jump]] Rolls receive +3 while enemy [[skill:combat-jump]] Rolls receive -3 while the Program is active."
                 ],
                 "restrictions": [
                     "A player cannot have more than one Controlled Jump Program active."
@@ -163,7 +163,7 @@
             "id": "hacking-program:cybermask",
             "kind": "hacking-program",
             "name": "Cybermask",
-            "summary": "No-Roll NFB Hacking Program that lets the Hacker enter [[state:impersonation-2]].",
+            "summary": "No-Roll NFB Hacking Program that lets the [[skill:hacker]] enter [[state:impersonation-2]].",
             "composition": {
                 "role": "definition"
             },
@@ -175,10 +175,10 @@
             },
             "facts": {
                 "requirements": [
-                    "The Hacker is outside the Line of Fire of enemy Troopers and Markers."
+                    "The [[skill:hacker]] is outside the Line of Fire of enemy Troopers and Markers."
                 ],
                 "effects": [
-                    "The Hacker enters [[state:impersonation-2]] and remains in it until revealed by that State's rules."
+                    "The [[skill:hacker]] enters [[state:impersonation-2]] and remains in it until revealed by that State's rules."
                 ]
             },
             "relations": [
@@ -289,7 +289,7 @@
             "id": "hacking-program:oblivion",
             "kind": "hacking-program",
             "name": "Oblivion",
-            "summary": "[[trait:non-lethal|Non-Lethal]] AP Comms Attack that can place Hackable Troopers or enemy Hackers in [[state:isolated]].",
+            "summary": "[[trait:non-lethal|Non-Lethal]] AP Comms Attack that can place Hackable Troopers or enemy [[skill:hacker:plural]] in [[state:isolated]].",
             "composition": {
                 "role": "definition"
             },
@@ -301,7 +301,7 @@
             },
             "facts": {
                 "requirements": [
-                    "The target is an enemy Hackable Trooper or an enemy Hacker."
+                    "The target is an enemy Hackable Trooper or an enemy [[skill:hacker]]."
                 ],
                 "effects": [
                     "Failed Saving Rolls caused by Oblivion place the target in [[state:isolated]]."
@@ -422,7 +422,7 @@
             "id": "hacking-program:trinity",
             "kind": "hacking-program",
             "name": "Trinity",
-            "summary": "Offensive Comms Attack against enemy Hackers with a positive WIP MOD and multiple Active-Turn Rolls.",
+            "summary": "Offensive Comms Attack against enemy [[skill:hacker:plural]] with a positive WIP MOD and multiple Active-Turn Rolls.",
             "composition": {
                 "role": "definition"
             },
@@ -434,7 +434,7 @@
             },
             "facts": {
                 "requirements": [
-                    "The target is an enemy Hacker."
+                    "The target is an enemy [[skill:hacker]]."
                 ],
                 "effects": [
                     "Each failed BTS Saving Roll causes one Wound."
@@ -459,7 +459,7 @@
             "id": "hacking-program:white-noise",
             "kind": "hacking-program",
             "name": "White Noise",
-            "summary": "NFB Hacking Program that creates a temporary White Noise Zone inside the Hacker's Hacking Area.",
+            "summary": "NFB Hacking Program that creates a temporary White Noise Zone inside the [[skill:hacker]]'s Hacking Area.",
             "composition": {
                 "role": "definition"
             },
@@ -471,13 +471,13 @@
             },
             "facts": {
                 "requirements": [
-                    "The Hacker is the Active Trooper."
+                    "The [[skill:hacker]] is the Active Trooper."
                 ],
                 "effects": [
                     "On a successful Normal WIP Roll, place a Circular Template White Noise Zone fully inside the user's Hacking Area until the start of the States Phase."
                 ],
                 "restrictions": [
-                    "Troopers with [[equipment:multispectral-visor]] or Marksmanship cannot draw Line of Fire through the White Noise Zone."
+                    "Troopers with [[equipment:multispectral-visor]] or [[skill:marksmanship]] cannot draw Line of Fire through the White Noise Zone."
                 ]
             },
             "citations": [

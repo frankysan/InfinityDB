@@ -469,8 +469,8 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     levels = reference["levels"]["facts"]
     assert levels["cumulative"] is True
     assert [level["level"] for level in levels["levels"]] == [1, 2, 3, 4, 5]
-    assert levels["levels"][1]["bonuses"] == ["BS Attack (+1 SD)"]
-    assert levels["levels"][4]["bonuses"] == ["Sixth Sense"]
+    assert levels["levels"][1]["bonuses"] == ["[[skill:bs-attack]] (+1 SD)"]
+    assert levels["levels"][4]["bonuses"] == ["[[skill:sixth-sense]]"]
     assert any(
         citation.get("source_url") and "Fireteam_Bonuses" in citation["source_url"]
         for citation in reference["levels"]["citations"]

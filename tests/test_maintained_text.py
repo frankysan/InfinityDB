@@ -132,10 +132,13 @@ def test_rules_database_rejects_new_unlinked_semantic_reference(tmp_path: Path) 
     documents = load_curated_directory(root / "data" / "curated")
     document_path, document = documents[0]
     document = {**document, "records": [dict(record) for record in document["records"]]}
-    document["records"][0]["summary"] += " Jump."
+    record = next(record for record in document["records"] if record["id"] == "skill:alert")
+    record["summary"] += " Jump."
     documents[0] = (document_path, document)
 
-    with pytest.raises(ValueError, match="semantic-link coverage changed"):
+    with pytest.raises(
+        ValueError, match="(?:unmarked semantic references|semantic-link coverage changed)"
+    ):
         export_rules_database(documents, tmp_path / "rules.db", finalize=False)
 
 
@@ -201,14 +204,32 @@ def test_trait_names_are_linked_reviewed_plain_or_explicit_review() -> None:
     ]
     assert remaining == []
 
-    xvisor = candidates["n5-core-v5.3|equipment:x-visor"]
-    assert xvisor[
+    surprise_attack = candidates["n5-core-v5.3|skill:surprise-attack"]
+    assert surprise_attack[
         (
-            "facts.effects[]",
-            "Suppressive Fire",
-            ("skill:suppressive-fire", "state:suppressive-fire"),
+            "summary",
+            "Hidden Deployment",
+            ("state:hidden-deployment",),
         )
     ] == 1
+
+
+def test_skill_names_are_linked_reviewed_plain_or_explicit_review() -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    review_policy = root / "data" / "curated" / "maintained-text-link-reviews.json"
+    candidates = collect_unlinked_reference_candidates(
+        documents, review_policy_path=review_policy
+    )
+
+    remaining = [
+        (owner, field, text, targets)
+        for owner, values in candidates.items()
+        for (field, text, targets), count in values.items()
+        for _ in range(count)
+        if any(target.startswith("skill:") for target in targets)
+    ]
+    assert remaining == []
 
 
 def test_reviewed_plain_surface_fingerprint_reopens_on_passage_drift() -> None:
@@ -218,20 +239,18 @@ def test_reviewed_plain_surface_fingerprint_reopens_on_passage_drift() -> None:
 
     for _, document in documents:
         for record in document.get("records", []):
-            if record.get("id") == "skill:jump":
-                record["summary"] += " ARO."
+            if record.get("id") == "skill:combat-instinct":
+                record["facts"]["restrictions"][0] += " Changed."
                 break
         else:
             continue
         break
     else:  # pragma: no cover - protected by the tracked curated corpus
-        raise AssertionError("skill:jump not found")
+        raise AssertionError("skill:combat-instinct not found")
 
-    residuals = collect_reviewed_batch_residuals(documents, review_policy)
-    assert residuals["n5-core-v5.3|skill:jump"][
-        ("batch-4-trait-names", "summary", "ARO", ("trait:aro",))
-    ] == 1
-    with pytest.raises(ValueError, match="still contains unmarked semantic references"):
+    with pytest.raises(ValueError, match="lost or changed"):
+        collect_reviewed_batch_residuals(documents, review_policy)
+    with pytest.raises(ValueError, match="lost or changed"):
         validate_reviewed_batch_coverage(documents, review_policy)
 
 

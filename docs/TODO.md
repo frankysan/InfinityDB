@@ -96,10 +96,15 @@ skeleton and interaction model.
     reviewed non-Trait text, and 19 became new review markers. The post-batch legacy inventory is
     411 candidates across 141 semantic owners, with only Skill and State namespaces remaining and
     21 explicit review markers total including the two earlier HoloMask reviews.
-  - [ ] Batch 5: review Skill names.
-  - [ ] Batch 6: resolve aliases/collisions (for example `Suppressive Fire` and
-    `Hidden Deployment`), then remove the legacy baseline when the candidate inventory reaches
-    zero.
+  - [x] Batch 5: review Skill names. The broader case-insensitive/plural pass classified 401
+    Skill-name matches: 324 became typed Skill links, 68 were confirmed as same-text game
+    categories/states/modes or ordinary language and bound to reviewed passage fingerprints, and
+    9 newly unclear source/collision uses became explicit `review-needed` markers. The post-batch
+    legacy inventory is 66 candidates across 43 semantic owners, all in the State namespace, with
+    30 explicit review markers total.
+  - [ ] Batch 6: resolve the remaining State aliases/collisions (for example `Suppressive Fire`
+    and `Hidden Deployment`) plus the explicit review markers whose target can now be decided, then
+    remove the legacy baseline when the candidate inventory reaches zero.
 
 - [ ] **Data processing + Web backend + Web frontend:** Continue the application-domain framework
   established in `docs/application-domains.md` without adding one-off catalog/navigation structures.

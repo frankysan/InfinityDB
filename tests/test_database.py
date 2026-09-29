@@ -3243,7 +3243,7 @@ def test_skill_catalog_full_definition_overrides_fallback_across_equivalent_army
         next(record for record in document["records"] if record["id"] == "skill:alert")
     )
     definition["id"] = "skill:cross-reference-test"
-    definition["name"] = "skills"
+    definition["name"] = "Cross Reference Test"
     definition["armyLinks"] = [{"entity": "skill", "id": "skills"}]
     definition["variantSemantics"] = {"inheritance": "family"}
     definition["facts"]["requirements"][0] = definition["facts"]["requirements"][0].replace(

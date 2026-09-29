@@ -1226,10 +1226,10 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
 
     martial_arts = records["skill:martial-arts"]["facts"]
     assert "Silhouette contact" in martial_arts["requirements"][0]
-    assert "declare CC Attack" in martial_arts["requirements"][0]
+    assert "declare [[skill:cc-attack]]" in martial_arts["requirements"][0]
 
     strategos = records["skill:strategos"]["facts"]
-    assert strategos["requirements"] == ["The user must be the army's Lieutenant."]
+    assert strategos["requirements"] == ["The user must be the army's [[skill:lieutenant]]."]
     assert "Order Count" in strategos["effects"][0]
 
     super_jump = records["skill:super-jump"]["facts"]
@@ -1496,7 +1496,7 @@ def test_checked_in_n5_collection_keeps_new_common_skill_facts_source_faithful()
 
     look_out = records["skill:look-out"]["facts"]
     assert "LoF" in look_out["requirements"][0]
-    assert "Dodge (PH-3)" in look_out["effects"][0]
+    assert "[[skill:dodge]] (PH-3)" in look_out["effects"][0]
 
     speedball = records["skill:request-speedball"]["facts"]
     assert speedball["requirements"] == ["The player must have two Speedball Tokens."]
@@ -1756,5 +1756,5 @@ def test_checked_in_n5_collection_models_fireteam_general_reference() -> None:
     levels = records["rule:fireteam-level-bonuses"]["facts"]
     assert levels["cumulative"] is True
     assert [item["level"] for item in levels["levels"]] == [1, 2, 3, 4, 5]
-    assert levels["levels"][1]["bonuses"] == ["BS Attack (+1 SD)"]
-    assert levels["levels"][4]["bonuses"] == ["Sixth Sense"]
+    assert levels["levels"][1]["bonuses"] == ["[[skill:bs-attack]] (+1 SD)"]
+    assert levels["levels"][4]["bonuses"] == ["[[skill:sixth-sense]]"]

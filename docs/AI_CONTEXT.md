@@ -73,7 +73,9 @@ residuals. Confident same-text collisions that are not references to the reviewe
 recorded as fingerprinted `reviewedPlainSurfaces`; any new or changed passage fingerprint reopens
 that decision, while an identical passage cloned under another owner remains covered.
 Any uncertainty encountered during review must remain visible as an explicit `review-needed` marker
-until resolved.
+until resolved. Batches 1-5 (canonical States, Hacking Programs, Equipment, Traits, and Skills) are
+complete; the remaining legacy baseline is State-only, so the final migration pass owns State
+alias/collision resolution and explicit review-marker cleanup.
 
 ## Semantic provenance rule
 
