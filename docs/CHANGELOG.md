@@ -61,10 +61,13 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
-- **Data processing:** Complete maintained-text semantic-link candidate migration. State aliases are
-  fully reviewed, ordinary State-name collisions are passage-fingerprinted, Weapon/Ammunition/
-  Attribute namespaces have explicit zero-residual review coverage, and the temporary legacy
-  candidate baseline is retired in favor of direct build-time completeness validation.
+- **Data processing:** Complete maintained-text semantic-link candidate migration and the final
+  manual source/context review. State aliases are fully reviewed, ordinary State-name collisions are
+  passage-fingerprinted, Weapon/Ammunition/Attribute namespaces have explicit zero-residual review
+  coverage, and the temporary legacy candidate baseline is retired in favor of direct build-time
+  completeness validation. All 30 formerly explicit review markers are resolved: source-backed
+  references are typed links, while Direct Template attack-rule uses and Infiltration's descriptive
+  `forward deployment` wording remain explicitly reviewed plain text.
 - **Web backend + Web frontend:** Make **Labels** bidirectional reference concepts: Label badges
   now preview their canonical definitions, and Label detail pages list the current catalog items
   that use each Label with direct links back to those Skills, Equipment items, States, and other

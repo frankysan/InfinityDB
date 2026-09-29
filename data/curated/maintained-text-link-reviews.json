@@ -42,7 +42,7 @@
       "includeSimplePlurals": true,
       "caseInsensitive": true,
       "reviewedOn": "2026-09-29",
-      "note": "Trait-name pass. Plain generic rules vocabulary and cross-domain name collisions that are confidently not Trait references are fingerprinted below; unresolved scope/target collisions remain explicit review-needed markers.",
+      "note": "Trait-name pass. Plain generic rules vocabulary and cross-domain name collisions that are confidently not Trait references are fingerprinted below. The former Deployable, Direct Template, and Perimeter review-needed queue was manually source-reviewed on 2026-09-29; semantic Trait uses are linked and Direct Template attack-rule uses are retained as reviewed plain text.",
       "reviewedPlainSurfaces": [
         {
           "text": "ARO",
@@ -69,13 +69,13 @@
             "9c1bbd72f25bb3333a2b36db50457618b109d10f686cdb8cda2b8cb82e90e3fe",
             "a98e85a3c31843530632334308c23bec95fcf5d41c2a92c0c8c3e050e67cb579",
             "bd0c4193f1217329ce8d3e2d8bacd003c2be432a39300e3dcf2a9f147d2cba13",
+            "cf933ac0e10b76e8bdf0e80f2e892007796e8db9e9cfed00f9cb6c058a283dbe",
             "d0bf701bc8d055745660818d9100d00b127b242046b866a354e8b6342ccfebf9",
             "d0d97e3ff535967042f442b8348337fc800ab1ffc9451223a51fa94e7023827b",
             "d39fdfc921997a2b91028c8608bc2d37d76e3d8903fc3c004bb3e064c8cd0619",
             "d6c143b45987351ef4480cde48ed9aff593cdedb4da339eaca4283d5ac224ea7",
             "e0adcfc3b901ee56a7d9eb4f9a9d476bf8003a2100092b5157fb725674fd23ff",
-            "e5898940ac2bc58c1f67a67bc74a17c18f1deda1a3e2005184d4332707e7f1b6",
-            "f138e91b44f87e38497eafab857fa472146c8ca5e0910ae8dbc32e0bfe1580f3"
+            "e5898940ac2bc58c1f67a67bc74a17c18f1deda1a3e2005184d4332707e7f1b6"
           ]
         },
         {
@@ -298,6 +298,7 @@
           "occurrenceSha256s": [
             "0c87b0dfcad56ba8c058464eaab5e31074826a98d69f97df2a61ec8b981e6a19",
             "236182e6944199d253215bb3cadf797a4b87b002a054cf154d5375759fb52ef1",
+            "2acea02c97b23a54a948ad22e846994f238310ec15c6c4a33707b6d55d3ddfe9",
             "39662102328e00b55c3e9874e49ef156d021fe6e3e8158b42dcbcc7ad3dc0a5b",
             "3adc4059f098c6a2883667ebbca4a0e8e6f77b8fddd3827ee9bf84f8590c1031",
             "40257dba0408a4e1167f0980a4c4e10cab3691fa6be3fd83b62f354f45a00242",
@@ -313,7 +314,6 @@
             "bb4e8b87cef264b963308bb1aabbd6449a882d4fc2093a38963a5d9fc8187e0d",
             "c331ba69c16400fc6cf0ee9b198a5050d6674bf19a15abb03afe7246aaa3b891",
             "db039624b23d70dd8ad35635d7b47d1a73aa46bbc1a91332f764fe68b522510c",
-            "db56309a131e582a3d9e881001529bab47378ad183515b17619af055789c0e30",
             "e8c7cf482df7fdc39e3f1d913a2537ba69f670bfcade48a91c322bd2b14af51b",
             "e9a1c18ae71b3f901d8983fc788309ae13d51474c88f93e03e16c682203ec9ea",
             "eb6d59b9761e0da30909a61d0bea9afff5b697721538a6a706f4452434f80283",
@@ -349,7 +349,6 @@
             "175531637630afd1474a2ff4a3038fbc7b4312b10707c2183644f7ed198efa7a",
             "2201a5bab95ee141db6a9664e7381d03d4e73b12befa8fe5d738cdde2cde7922",
             "280f7596e1595173f6c493ef10c2dba7ae80fd5e9d101d277bfb397af80b6308",
-            "2d398a391d7db3cdf0a7ecfb1e0f10a5d45b41d2ab74205265129bae72a08d8c",
             "399fd3ae0120dea0553d5c348d60d8e2319bc740cd69ed82a8f985d65e539b50",
             "3a9decd5270aa146eb9350c7002c3f3c106619866db79680b41584ba8bf8d304",
             "474a1190a66d1f8d99d9e7519855c835aac1e91377b03a7283bd1ff72ab22eb4",
@@ -358,6 +357,8 @@
             "5a756098ece76a174664a9c0ce5c2313f6fa0966500a633462eb5ee63e8cb22f",
             "5d4b279d9bc3bda514f5b03b3888a9ed3f6de187a69c708c123c2c71eaf18655",
             "6e45811c6f235e9a5f81b6ef5675805650a9116c6cfc4e6a031c17cc1fcec8b4",
+            "72c2dfbc1797a3e41a2b7506106c7e24e9062d309f7962ab3eaadab58ee0dade",
+            "76cfb434b4caaba998cb494ca11401ba039d3d53cb63fcc61d4f8ccaafcd1d2a",
             "7a04a2eb09ef8c791c073e24aaa3ae0bf083a2356938fa9313d4e716a2acc4c5",
             "89a950f99c6edff1c8337f55c841822cb55fac2f31d0c2c02cd85235db9ba074",
             "920abf04a424a98a491a7788a5799f037edf95c02f9d071424a0a83fef8d1b4c",
@@ -368,12 +369,20 @@
             "a2f4fafdfa0c583a057ff188bd875181f6aa6736489068083b2591c8c020a6e2",
             "a996eb3a98118eddc529d02eca3726bbc8a3dd193498009ee4fa441a3381366f",
             "aa57d8a6f091371b8891cb88baa1346ce3a3b2bdc286033891ed71262aeb916e",
-            "ba1f2b27a7056d3e8661211f8eba6fd30db6ed67b5a136ca0eb463eb5695caca",
             "c5efb7a44dcb2e754a1024ecfede6e8cf1ead6ab0e00b2e995ab08b6af898ca3",
             "c9bcd124501b0c82c32154f6b42ced8572a3e49688dd21a2873b6efce1593043",
             "d5d80a8522f82c6fc25349b507f0e7a7295e2e9cbfabb1ec6176721f0e737505",
-            "fa7cd4a977dd52a6ed1d38053105d9836544e3ff96d7f58449837902f89b0b47",
-            "fb0ea2199fc7cd788edf806602acce753d65b83179d69d3db9ff17242a3935c8"
+            "d94085a7c2ad24e5adb8bbe648da1b1bdca33e0ca7c57841a827008c7525dd74",
+            "fa7cd4a977dd52a6ed1d38053105d9836544e3ff96d7f58449837902f89b0b47"
+          ]
+        },
+        {
+          "text": "Direct Template",
+          "reason": "attack-rule-not-trait",
+          "occurrenceSha256s": [
+            "9361b2f20df976e4c4975e20403da4c8bc2a63fd416c6f9235c0aabca97d1e0e",
+            "980b85f51986d3d525a13153364635d4475f8bae5d5149af00b6cf7fab1b0c2f",
+            "f8a9574b063d34f0e8253edea4764d72bd12331fa4f15707e232173cf11cc9ab"
           ]
         }
       ]
@@ -385,7 +394,7 @@
       "includeSimplePlurals": true,
       "caseInsensitive": true,
       "reviewedOn": "2026-09-29",
-      "note": "Reviewed Skill names/aliases case-insensitively with simple plurals. Clear Skill references are typed links; same-text game categories/states/modes and ordinary-language uses are bound to exact reviewed passage fingerprints; unresolved cross-domain/source meaning stays explicit as review-needed markers.",
+      "note": "Reviewed Skill names/aliases case-insensitively with simple plurals. Clear Skill references are typed links; same-text game categories/states/modes and ordinary-language uses are bound to exact reviewed passage fingerprints. The former source/collision review-needed queue was manually resolved on 2026-09-29; Infiltration's descriptive forward deployment wording remains reviewed plain text.",
       "reviewedPlainSurfaces": [
         {
           "text": "Camouflage",
@@ -393,8 +402,8 @@
           "occurrenceSha256s": [
             "04fc4ccf7a9a00c83b6edbf02200c6e8c7fd3e6a054867a0653fc545da170615",
             "19b0ec780f83cf33a732654c43075dffc4f130377904f9b9c073b6a12d2fff05",
-            "abae18f39726bed49013b7dc806289e59626bec52adcbdac943460081c4491d5",
-            "c7772f48264ba8a5b4bd4765cf7b8c9657ca163ab639902aa4c7f57185a163bb"
+            "9fbfa193d1716a04674fa5f20d79563e481b0783ae95e776c8ac96ad18a7b85e",
+            "abae18f39726bed49013b7dc806289e59626bec52adcbdac943460081c4491d5"
           ]
         },
         {
@@ -485,8 +494,8 @@
           "reason": "ordinary-movement-verb",
           "occurrenceSha256s": [
             "143448d6a583d297ca9ed8d02b2debe80d0ad6273fe6a43cd6368910606e17b7",
-            "8f3eb9f2e5c5bf90081fb324606a95124da19377829281a24b34b67af9c5ddc8",
-            "bfeb7d0a4083767d8013119a738629758b5835ec08341c3c666049da2df95980"
+            "15996ec9d86ac1406ce9cc3742551b8be2ff3d14206d51bf6d1eabbe019523e6",
+            "8f3eb9f2e5c5bf90081fb324606a95124da19377829281a24b34b67af9c5ddc8"
           ]
         },
         {
@@ -542,7 +551,7 @@
           "reason": "terrain-type-not-skill",
           "occurrenceSha256s": [
             "1416dd194f06fd428bea0c2e7efac8591ef386c15893c5abab99571d14cad95d",
-            "e8796b2a53f78e565848a0aea761768cc17079986d079442dc6eafd205cbadf6"
+            "aa3184d7699ec2b87a5503b3b627a0b70fd5ab890565c7d44becd7f10cb2c16d"
           ]
         },
         {
@@ -550,6 +559,13 @@
           "reason": "ordinary-terrain-noun",
           "occurrenceSha256s": [
             "e302814b494fbe35cdfa4b495dac7fb473d94fbcaee51c142984b862086f38aa"
+          ]
+        },
+        {
+          "text": "forward deployment",
+          "reason": "descriptive-deployment-phrase-not-skill",
+          "occurrenceSha256s": [
+            "274231eaf06855864f30a3fa1c24fefe5487d8c2bdaf28eba4c465a9d6d5dc84"
           ]
         }
       ]
@@ -568,10 +584,10 @@
           "reason": "ordinary-rules-language-not-state",
           "occurrenceSha256s": [
             "1cce8252614667ce5c656c0357691f7218709150e3dddb46ee45294ea3dc9e9d",
-            "33bc00674eed88bd520b5dd4413ab0bdd7619b3b7bbd405ee16d5f2b865619a6",
             "33c4041704d31917fcb1a0211181bcf2a2c1c98169ce711f7adb6dea33d5c6c8",
             "444dd8e45a002dc07c80d1f8e1cb9a241e2c1969e8d09767c4dc8e98b5c7e87b",
             "45f60941d18605327e3ca336b62eef8999e153a87c02e013196a8ccadafc01ac",
+            "578785193abefb0dc6889d40be24bd452f3514098b9516ec92c85d8a9884c65a",
             "621aa59867da11d649c94fc12920ab936b072dc93235307630537c6d0cb102bc",
             "7ed3d292113b2726dfcc1351d28238fcd3b8d1b01d5cfec353fe1e2b10a2ebf3",
             "8486729d997741077e9c65128f013b22840bca33dc77e18ff7b322558d099aaa",
@@ -584,7 +600,6 @@
           "text": "normal",
           "reason": "ordinary-rules-language-not-state",
           "occurrenceSha256s": [
-            "02890af0d15ba79b8db23597d0272ff705a5f509851c0e59a7f02349f30c3ba2",
             "16657af95346be9155981fb2d419218c330c8dd0b6452d443bca9a7f1dd4f487",
             "204c24ef27db71da805838526ecee039602999b99b8430bba3f7c93e8931f8fa",
             "299966d2c8f2bd6cf753711644cebba87b8cfde17a9cbc75d961fd888b8d7615",
@@ -593,9 +608,10 @@
             "43db907a3a26bd7f2e6bb932e248568800de7ec731c44ec6a2d7bdb55ed9b27b",
             "645b29f9cf9edfdca9e4223e53a97a231e164db5e34bd7581c89b9f9780f345d",
             "7a46f2aa89d59806d92089b98e34eb4fc1e0c6347448aac04fcb45cc9963640f",
-            "8795b0e85e6d61c4dd1811053c318ded8a4a4eb74c9dffb3c22a904d9d5b13fb",
             "8a81276f5d54d927def6f34beb5cb694bc574d37022e0a6c697022eaff3352c8",
+            "a29873123316268a7d611804fb17ab196c5e59049ed445d916d3f59e249b6665",
             "c2ad41d086f49baf2fd642c1e52f69abf6e0efbced12d62d8da35188787c7966",
+            "c511fbcb2c3e55ad6dfae388abd5871440d8bf34025951bd5484a5b908fed745",
             "ce118774512cbc8da95d7974793eddaa11add83196a5378554c1461335b09ad7",
             "edeb2087a04ba659367440cbe353c8aaae4601a38b532decea11d76634d05068"
           ]

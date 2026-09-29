@@ -71,8 +71,9 @@ reviewed namespace are recorded as fingerprinted `reviewedPlainSurfaces`; any ne
 fingerprint reopens that decision, while an identical passage cloned under another owner remains
 covered. Automated discovery is an audit aid, not permission to bulk-rewrite ambiguous names or
 aliases. Any uncertainty encountered during review must remain visible as an explicit
-`review-needed` marker until resolved. The candidate inventory is zero; the remaining migration debt
-is the explicit manual-review queue.
+`review-needed` marker until resolved. The original migration is complete: the current audit reports
+zero unlinked candidates, zero reviewed-batch residuals, and zero explicit review markers. The
+`review-needed` syntax remains the required mechanism for future ambiguous maintained prose.
 
 ## Semantic provenance rule
 

@@ -3405,7 +3405,7 @@
             "id": "weapon:armed-turret",
             "kind": "weapon",
             "name": "Armed Turret",
-            "summary": "A stationary [[review-needed:scope-unclear|Deployable]] Weapon that reacts to enemy Orders.",
+            "summary": "A stationary [[trait:deployable]] Weapon that reacts to enemy Orders.",
             "composition": {
                 "role": "definition"
             },
@@ -7352,7 +7352,7 @@
             "id": "equipment:tinbot-neurocinetics",
             "kind": "equipment",
             "name": "TinBot: Neurocinetics",
-            "summary": "The [[review-needed:source-meaning-unclear|Neurocinetics]] named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "The source variant of [[equipment:tinbot]] named for [[skill:neurocinetics]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
             "composition": {
                 "role": "definition"
             },
@@ -7460,7 +7460,7 @@
             "id": "equipment:tinbot-discover",
             "kind": "equipment",
             "name": "TinBot: Discover",
-            "summary": "The [[review-needed:source-meaning-unclear|Discover]] named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "The source variant of [[equipment:tinbot]] named for [[skill:discover]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
             "composition": {
                 "role": "definition"
             },
@@ -7866,7 +7866,7 @@
             "labelIds": [
                 "optional"
             ],
-            "summary": "An Automatic Special Skill that limits ARO generation for movement and [[review-needed:scope-unclear|idle]] actions when enemies lack LoF.",
+            "summary": "An Automatic Special Skill that limits ARO generation when the user declares movement or [[skill:idle]], provided enemies lack LoF.",
             "composition": {
                 "role": "definition"
             },
@@ -9136,7 +9136,7 @@
             "id": "skill:place-deployable",
             "kind": "skill",
             "name": "Place Deployable",
-            "summary": "A Common Skill used to place eligible [[review-needed:scope-unclear|Deployable]] Weapons, Equipment, or [[skill:peripheral]] (Ancillary) items on the table.",
+            "summary": "A Common Skill used to place eligible [[trait:deployable]] Weapons or Equipment, or [[skill:peripheral]] (Ancillary) items, on the table.",
             "composition": {
                 "role": "definition"
             },
@@ -9941,7 +9941,7 @@
             "labelIds": [
                 "obligatory"
             ],
-            "summary": "Automatic Equipment that counters [[review-needed:ambiguous-target|Impersonation]] penalties and qualifying [[skill:surprise-attack]] MODs.",
+            "summary": "Automatic Equipment that counters [[state:impersonation-1|Impersonation-1 State]] penalties and qualifying [[skill:surprise-attack]] MODs from [[state:impersonation-1|Impersonation-1 State]], [[state:impersonation-2|Impersonation-2 State]], and [[state:holoecho|Holoecho State]].",
             "composition": {
                 "role": "definition"
             },
@@ -9955,10 +9955,10 @@
                 "effects": [
                     "The user ignores the WIP -3 MOD imposed by [[state:impersonation-1]].",
                     "A successful [[skill:discover]] Roll against a Trooper in [[state:impersonation-1]] cancels that Impersonation State.",
-                    "The user ignores [[skill:surprise-attack]] MODs from attackers benefiting from [[review-needed:ambiguous-target|Impersonation]] or [[state:holoecho:plural]] when the rule conditions are met."
+                    "The user ignores [[skill:surprise-attack]] MODs from attackers benefiting from [[state:impersonation-1|Impersonation-1 State]], [[state:impersonation-2|Impersonation-2 State]], or [[state:holoecho|Holoecho State]] when the rule conditions are met."
                 ],
                 "restrictions": [
-                    "The [[skill:surprise-attack]] protection is conditional on the attacker benefiting from [[review-needed:ambiguous-target|Impersonation]] or [[state:holoecho]]; LoF is normally required, except against qualifying [[skill:cc-attack:plural]]."
+                    "The [[skill:surprise-attack]] protection is conditional on the attacker benefiting from [[state:impersonation-1|Impersonation-1 State]], [[state:impersonation-2|Impersonation-2 State]], or [[state:holoecho|Holoecho State]]; LoF is normally required, except against qualifying [[skill:cc-attack:plural]]."
                 ]
             },
             "armyLinks": [
@@ -10001,7 +10001,7 @@
             "kind": "equipment",
             "name": "Dazer",
             "labelIds": [],
-            "summary": "[[review-needed:scope-unclear|Deployable]] Equipment that creates a Difficult Terrain area inside its Zone of Control.",
+            "summary": "Equipment with the [[trait:deployable]] Trait that creates a Difficult Terrain area inside its Zone of Control.",
             "composition": {
                 "role": "definition"
             },
@@ -10059,7 +10059,7 @@
             "facts": {
                 "requirements": [
                     "The target must be inside the user's Line of Fire or Zone of Control.",
-                    "The target must be an enemy [[review-needed:scope-unclear|Deployable]] Weapon or deployed piece of Equipment, and cannot be a Camouflage Marker."
+                    "The target must be an enemy Weapon or piece of Equipment with the [[trait:deployable]] Trait, and cannot be a Camouflage Marker."
                 ],
                 "effects": [
                     "On a successful Normal WIP Roll, the target deployed Weapon or Equipment is removed from the game table."
@@ -10101,7 +10101,7 @@
             "kind": "equipment",
             "name": "Deployable Cover",
             "labelIds": [],
-            "summary": "[[review-needed:scope-unclear|Deployable]] Equipment that places a Scenery Element providing variant-specific Cover effects.",
+            "summary": "Equipment with the [[trait:deployable]] Trait that places a Scenery Element providing variant-specific Cover effects.",
             "composition": {
                 "role": "definition"
             },
@@ -10204,7 +10204,7 @@
             "labelIds": [
                 "comms-equipment"
             ],
-            "summary": "[[review-needed:scope-unclear|Deployable]] Comms Equipment that places a [[equipment:repeater]] on the battlefield using [[skill:place-deployable]].",
+            "summary": "Comms Equipment with the [[trait:deployable]] Trait that places a [[equipment:repeater]] on the battlefield using [[skill:place-deployable]].",
             "composition": {
                 "role": "definition"
             },
@@ -10252,7 +10252,7 @@
             "kind": "equipment",
             "name": "FastPanda",
             "labelIds": [],
-            "summary": "Self-propelled [[review-needed:scope-unclear|Deployable]] Equipment that places a [[equipment:repeater]] anywhere completely inside the user's Zone of Control.",
+            "summary": "Self-propelled Equipment with the [[trait:deployable]] Trait that places a [[equipment:repeater]] anywhere completely inside the user's Zone of Control.",
             "composition": {
                 "role": "definition"
             },
@@ -11034,8 +11034,8 @@
                 "effects": [
                     "The user may remain off-table after Deployment and later spend their own Order to enter the table.",
                     "The user is placed on a valid horizontal landing surface and makes the Combat Jump PH Roll; a successful Roll keeps that position.",
-                    "A failed landing moves the user to the player's Deployment Zone edge and removes any [[review-needed:ambiguous-target|Deployables]] placed with the attempted landing.",
-                    "Combat Jump (Explosion) adds a single-use PS 8 Normal [[review-needed:scope-unclear|Direct Template]] Attack after the landing position is resolved."
+                    "A failed landing moves the user to the player's Deployment Zone edge and removes any Weapons or Equipment with the [[trait:deployable]] Trait placed with the attempted landing.",
+                    "Combat Jump (Explosion) adds a single-use PS 8 Normal Direct Template Attack after the landing position is resolved."
                 ],
                 "restrictions": [
                     "The landing cannot place the user [[state:prone|Prone]], in prohibited Silhouette contact, inside enclosed scenery, or in contact with a scenario objective.",
@@ -11148,7 +11148,7 @@
                     "A profile with Impersonation ([[state:impersonation-2|IMP-2]]) deploys and activates only [[state:impersonation-2]]."
                 ],
                 "restrictions": [
-                    "A failed WIP Roll places the user in their own Deployment Zone at the table edge as a Model and removes [[review-needed:ambiguous-target|Deployables]] placed with the attempt.",
+                    "A failed WIP Roll places the user in their own Deployment Zone at the table edge as a Model and removes Weapons or Equipment with the [[trait:deployable]] Trait placed with the attempt.",
                     "The user cannot deploy in prohibited contact with enemy or neutral game elements or mission objectives."
                 ]
             },
@@ -11190,7 +11190,7 @@
                 "superior-deployment",
                 "optional"
             ],
-            "summary": "A Deployment Skill that allows [[review-needed:scope-unclear|forward deployment]] in the user's half and a PH-based attempt to deploy into the opponent's half.",
+            "summary": "A Deployment Skill that allows forward deployment in the user's half and a PH-based attempt to deploy into the opponent's half.",
             "composition": {
                 "role": "definition"
             },
@@ -11209,7 +11209,7 @@
                 "effects": [
                     "During Deployment, the user may deploy anywhere in the player's half of the table.",
                     "Deploying in the opponent's half requires the Infiltration Roll, normally PH-3, with any profile-specific PH replacement applied as stated.",
-                    "If the Roll fails, the user is moved to their own Deployment Zone edge and [[review-needed:ambiguous-target|Deployables]] placed with the attempt are removed."
+                    "If the Roll fails, the user is moved to their own Deployment Zone edge and Weapons or Equipment with the [[trait:deployable]] Trait placed with the attempt are removed."
                 ],
                 "restrictions": [
                     "Infiltration cannot be used to deploy inside the enemy Deployment Zone.",
@@ -11243,7 +11243,7 @@
             "labelIds": [
                 "optional"
             ],
-            "summary": "A Deployment Skill that lets the user place carried [[review-needed:scope-unclear|Deployable]] Weapons or Equipment near their deployment position.",
+            "summary": "A Deployment Skill that lets the user place carried Weapons or Equipment with the [[trait:deployable]] Trait near their deployment position.",
             "composition": {
                 "role": "definition"
             },
@@ -11259,11 +11259,11 @@
                     "deployment-skill"
                 ],
                 "requirements": [
-                    "The [[review-needed:scope-unclear|Deployable]] must satisfy the normal Deployment conditions and remain within the area where the Minelayer user may deploy.",
-                    "Its Trigger Area or [[review-needed:scope-unclear|Perimeter]] area must satisfy the rule's enemy-presence restrictions when placed."
+                    "The Weapon or Equipment with the [[trait:deployable]] Trait must satisfy the normal Deployment conditions and remain within the area where the Minelayer user may deploy.",
+                    "Its Trigger Area or the area defined by the [[trait:perimeter]] Trait must satisfy the rule's enemy-presence restrictions when placed."
                 ],
                 "effects": [
-                    "When the user deploys, they may place the allowed number of carried [[review-needed:scope-unclear|Deployable]] Weapons or Equipment inside their Zone of Control.",
+                    "When the user deploys, they may place the allowed number of carried Weapons or Equipment with the [[trait:deployable]] Trait inside their Zone of Control.",
                     "Placing an item with the Disposable Trait consumes the corresponding available use.",
                     "If the user's Superior Deployment Roll fails, a Minelayer item placed with that deployment is removed and any Disposable use is consumed."
                 ],
@@ -11496,7 +11496,7 @@
                     "The Trooper has the [[skill:decoy]] Special Skill."
                 ],
                 "restrictions": [
-                    "A Trooper using [[review-needed:ambiguous-target|Decoy]] cannot remain part of a Fireteam or participate in a Coordinated Order.",
+                    "A Trooper using [[skill:decoy]] cannot remain part of a Fireteam or participate in a Coordinated Order.",
                     "The real user is revealed by the State's listed revealing declarations, failed deployment Rolls, enemy Silhouette contact, or forced Saving Rolls."
                 ]
             },
@@ -11546,7 +11546,7 @@
                     "The Trooper can activate Impersonation-1 State through [[skill:impersonation]] or another qualifying rule."
                 ],
                 "restrictions": [
-                    "Attacks and [[skill:intuitive-attack:plural]] cannot be declared against an IMP-1 Marker under the normal [[review-needed:ambiguous-target|Impersonation]] rules.",
+                    "Attacks and [[skill:intuitive-attack:plural]] cannot be declared against an IMP-1 Marker under the normal [[state:impersonation-1|Impersonation-1 State]] rules.",
                     "A Trooper in Impersonation State cannot be part of a Fireteam."
                 ]
             },
@@ -12323,7 +12323,7 @@
                     "When the user gains [[skill:impetuous]] through Frenzy, they cancel any Marker State they are in and cannot re-enter those States."
                 ],
                 "restrictions": [
-                    "Wounds caused by the user’s [[review-needed:scope-unclear|Deployable]] Weapons do not satisfy the Requirement."
+                    "Wounds caused by the user’s Weapons with the [[trait:deployable]] Trait do not satisfy the Requirement."
                 ]
             },
             "labelIds": [
@@ -12682,7 +12682,7 @@
                     "The imitated Trooper must belong to the bearer’s faction or Sectorial Army and have the same Silhouette value."
                 ],
                 "restrictions": [
-                    "[[review-needed:ambiguous-target|HoloMask]] cannot copy [[skill:hacker]] or Hackable status or [[review-needed:scope-unclear|Deployable]] items represented by Tokens or Models.",
+                    "A Trooper in [[state:holomask|HoloMask State]] cannot copy [[skill:hacker]] or Hackable status or items with the [[trait:deployable]] Trait represented by Tokens or Models.",
                     "The State is canceled by its listed revelation conditions."
                 ]
             },
@@ -12863,7 +12863,7 @@
                 "category": "state",
                 "effects": [
                     "The Trooper may only use Basic Short Skills, [[skill:cautious-movement]], [[skill:dodge]], [[skill:reset]], or Special Skills that explicitly permit use in Retreat!.",
-                    "Entering Retreat! cancels [[equipment:holoprojector]]/[[review-needed:ambiguous-target|HoloMask]] presentation and Marker States."
+                    "Entering Retreat! cancels [[equipment:holoprojector]] and [[state:holomask|HoloMask State]] presentation and Marker States."
                 ],
                 "requirements": [
                     "The Trooper’s army enters the Retreat! situation at the beginning of the Player Turn."
@@ -14581,7 +14581,7 @@
             "id": "skill:explode",
             "kind": "skill",
             "name": "Explode",
-            "summary": "An obligatory Automatic Attack Skill that detonates when the user enters [[state:unconscious]], resolves a Shock [[review-needed:scope-unclear|Direct Template]] Attack, and then sends the user to [[state:dead]].",
+            "summary": "An obligatory Automatic Attack Skill that detonates when the user enters [[state:unconscious]], resolves a Shock Direct Template Attack, and then sends the user to [[state:dead]].",
             "composition": {
                 "role": "definition"
             },
@@ -14601,7 +14601,7 @@
                 ],
                 "effects": [
                     "Explode activates automatically when the user enters [[state:unconscious]].",
-                    "At the end of that Order, before Guts Rolls, the user makes a [[review-needed:scope-unclear|Direct Template]] Attack centered on its base with PS 7 [[ammunition:shock|Shock Ammunition]] against ARM.",
+                    "At the end of that Order, before Guts Rolls, the user makes a Direct Template Attack centered on its base with PS 7 [[ammunition:shock|Shock Ammunition]] against ARM.",
                     "Enemy Troopers affected by the Attack that declared [[skill:dodge]] avoid it if they passed their PH Roll.",
                     "After the Rolls are resolved, the user enters [[state:dead]] and is removed from the game table."
                 ],

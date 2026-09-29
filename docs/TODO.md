@@ -67,7 +67,7 @@ skeleton and interaction model.
 
 ### Player-facing completeness and navigation
 
-- [ ] Complete the systematic semantic-link migration of all maintained rules prose. The legacy
+- [x] Complete the systematic semantic-link migration of all maintained rules prose. The legacy
   candidate baseline has been retired: all supported semantic-reference namespaces are now covered
   by completed review batches, and any new unlinked candidate fails the rules build directly. Any
   passage examined during review that remains ambiguous or unclear must use an explicit
@@ -108,9 +108,12 @@ skeleton and interaction model.
     legacy candidate inventory is now zero. Weapon, Ammunition, and Attribute namespaces also
     received explicit case-insensitive/plural completeness audits with zero residuals, and the
     temporary legacy baseline has been removed.
-  - [ ] Resolve the 30 explicit `review-needed` passages by manual source/context review; each must
-    become either the correct typed link or confirmed ordinary text before this migration item is
-    fully complete.
+  - [x] Resolve the 30 explicit `review-needed` passages by manual source/context review. Source-
+    backed Deployable/Perimeter, Discover/Neurocinetics/Idle/Decoy/HoloMask, and Impersonation
+    references are now typed links; the three Direct Template attack-rule passages and Infiltration's
+    descriptive `forward deployment` phrase are confirmed ordinary/cross-domain text and bound to
+    reviewed passage fingerprints. The maintained-text audit now reports zero unlinked candidates,
+    zero reviewed-batch residuals, and zero explicit review markers.
 
 - [ ] **Data processing + Web backend + Web frontend:** Continue the application-domain framework
   established in `docs/application-domains.md` without adding one-off catalog/navigation structures.

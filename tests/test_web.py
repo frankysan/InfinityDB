@@ -4239,13 +4239,16 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
         for token in effect
         if token["type"] == "review-needed"
     ]
-    assert review_needed == [
-        {
-            "type": "review-needed",
-            "reason": "ambiguous-target",
-            "text": "HoloMask",
-        }
-    ]
+    assert review_needed == []
+    holomask = next(
+        token
+        for retreat_rule in retreat["rules"]
+        for effect in retreat_rule.get("fact_tokens", {}).get("effects", [])
+        for token in effect
+        if token.get("type") == "reference" and token.get("target") == "state:holomask"
+    )
+    assert holomask["label"] == "HoloMask State"
+    assert holomask["public_reference"] == {"catalog": "states", "id": "holomask"}
 
     status, _, renderer = request(rules_app, "/static/maintained-text.js")
     assert status == 200

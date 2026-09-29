@@ -407,10 +407,27 @@ def test_reviewed_batch_audit_catches_case_and_plural_omissions(
 
 def test_review_needed_markers_are_explicit_and_excluded_from_unlinked_candidates() -> None:
     root = Path(__file__).parents[1]
-    documents = load_curated_directory(root / "data" / "curated")
+    current = load_curated_directory(root / "data" / "curated")
+    assert collect_review_needed_markers(current) == {}
+
+    documents = copy.deepcopy(current)
+    for _, document in documents:
+        record = next(
+            (record for record in document["records"] if record["id"] == "state:retreat"),
+            None,
+        )
+        if record is None:
+            continue
+        record["facts"]["effects"][1] = record["facts"]["effects"][1].replace(
+            "[[state:holomask|HoloMask State]]",
+            "[[review-needed:ambiguous-target|HoloMask]]",
+        )
+        break
+    else:  # pragma: no cover - curated contract fixture
+        raise AssertionError("state:retreat not found")
+
     candidates = collect_unlinked_reference_candidates(documents)
     review_needed = collect_review_needed_markers(documents)
-
     remaining_holomask = [
         (owner, field, text, targets)
         for owner, values in candidates.items()
@@ -419,10 +436,6 @@ def test_review_needed_markers_are_explicit_and_excluded_from_unlinked_candidate
         if text == "HoloMask"
     ]
     assert remaining_holomask == []
-
     assert review_needed["n5-core-v5.3|state:retreat"][
         ("facts.effects[]", "ambiguous-target", "HoloMask")
-    ] == 1
-    assert review_needed["n5-core-v5.3|state:holomask"][
-        ("facts.restrictions[]", "ambiguous-target", "HoloMask")
     ] == 1
