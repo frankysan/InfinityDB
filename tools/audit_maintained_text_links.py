@@ -11,6 +11,7 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.maintained_text_policy import (
     BASELINE_FILENAME,
     build_maintained_text_link_baseline,
+    collect_review_needed_markers,
     collect_unlinked_reference_candidates,
     validate_maintained_text_link_baseline,
 )
@@ -52,6 +53,22 @@ def main(argv: list[str] | None = None) -> int:
             "Candidate target namespaces: "
             + ", ".join(f"{key}={value}" for key, value in sorted(by_namespace.items()))
         )
+
+    review_needed = collect_review_needed_markers(documents)
+    review_count = sum(sum(values.values()) for values in review_needed.values())
+    print(
+        f"Explicit review-needed markers: {review_count} occurrence(s) "
+        f"across {len(review_needed)} owner(s)"
+    )
+    for owner, values in sorted(review_needed.items()):
+        ordered = sorted(
+            values.items(),
+            key=lambda item: (item[0][0], item[0][1], item[0][2] or ""),
+        )
+        for (field, reason, text), count in ordered:
+            display = repr(text) if text is not None else "<standalone marker>"
+            suffix = f" x{count}" if count != 1 else ""
+            print(f"  {owner} {field}: {display} [{reason}]{suffix}")
 
     if args.write_baseline:
         baseline = build_maintained_text_link_baseline(documents)

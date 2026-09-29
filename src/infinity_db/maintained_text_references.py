@@ -32,7 +32,9 @@ class _Resolver:
 
     def record(self, record_id: str) -> dict[str, Any]:
         if record_id not in self.records:
-            self.records[record_id] = self.rules_database.composed_record(record_id)
+            self.records[record_id] = self.rules_database.composed_record(
+                record_id, include_army_links=True
+            )
         record = self.records[record_id]
         if record is None:
             raise ValueError(f"Maintained-text reference {record_id!r} is not current")

@@ -40,9 +40,11 @@ New or materially revised entries use the project-domain labels defined in
   distance tokens to maintained rules text. Canonical Skill, Equipment, Weapon, Trait, State,
   and Hacking Program references can show viewport-bounded summary previews and navigate to
   their detail pages; touch interaction previews before following, and typed distances follow the
-  user's cm/in preference. Current State and Hacking Program references have begun the reviewed
-  prose migration, while validation prevents new unresolved references or literal gameplay-distance
-  debt from being introduced.
+  user's cm/in preference. Reviewed State, Hacking Program, and Equipment references now use
+  semantic links, while validation prevents new unresolved references or literal gameplay-distance
+  debt from being introduced. Ambiguous reviewed passages can now carry explicit `review-needed`
+  markers with machine-readable reasons; the audit lists them separately and the browser highlights
+  them instead of allowing uncertainty to disappear from the migration inventory.
 - **Web backend + Web frontend:** Expand the Unit Explorer with Troop Type, Classification,
   Characteristics, AVA, Points, and SWC filters plus an optional extended result mode. Exact
   numeric values and inclusive ranges coexist with the existing Skill, Equipment, and Weapon

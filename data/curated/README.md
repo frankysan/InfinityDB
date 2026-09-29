@@ -54,8 +54,16 @@ After a reviewed migration batch, regenerate the smaller baseline in the same ch
 python tools/audit_maintained_text_links.py --write-baseline
 ```
 
-Do not use `--write-baseline` to admit newly authored unlinked references; ambiguous candidates
-should be reviewed and linked to the correct semantic identity in a later migration batch.
+Do not use `--write-baseline` to admit newly authored unlinked references. When a reviewed passage
+is ambiguous or its source meaning is not clear enough to choose a semantic target, replace that
+passage with an explicit `[[review-needed:<reason>|<visible text>]]` marker instead. Reason codes are
+lowercase kebab-case; prefer reusable codes such as `ambiguous-target`, `unclear-source-meaning`,
+`source-conflict`, or `scope-unclear` rather than one-off wording.
+`[[review-needed:<reason>]]` is valid for a standalone marker. The audit lists
+all review-needed markers separately from the legacy baseline, so reviewed uncertainty remains easy
+to locate and cannot disappear merely because it is no longer plain text. Resolve the marker to a
+typed semantic reference (or ordinary text if review proves it is not a reference) once the manual
+review is complete.
 
 ## Other curated categories
 

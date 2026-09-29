@@ -205,6 +205,48 @@ function referenceNode(token, { interactive = true } = {}) {
   return wrapper;
 }
 
+function reviewNeededNode(token, { interactive = true } = {}) {
+  const wrapper = document.createElement("span");
+  wrapper.className = "maintained-reference-wrap maintained-review-needed-wrap";
+
+  const marker = document.createElement("span");
+  marker.className = "maintained-review-needed";
+  if (interactive) marker.tabIndex = 0;
+
+  const text = document.createElement("span");
+  text.className = "maintained-review-needed-text";
+  text.textContent = token.text || "Review needed";
+  marker.append(text);
+
+  const badge = document.createElement("span");
+  badge.className = "maintained-review-needed-badge";
+  badge.textContent = "review";
+  marker.append(badge);
+  wrapper.append(marker);
+  if (!interactive) return wrapper;
+
+  const tooltip = document.createElement("span");
+  tooltipSequence += 1;
+  tooltip.id = `maintained-reference-tooltip-${tooltipSequence}`;
+  tooltip.className = "maintained-reference-tooltip";
+  tooltip.role = "tooltip";
+  tooltip.setAttribute("popover", "manual");
+  tooltip.textContent = `Manual review needed: ${token.reason || "unspecified"}`;
+  marker.setAttribute("aria-describedby", tooltip.id);
+  wrapper.append(tooltip);
+
+  marker.addEventListener("pointerenter", (event) => {
+    if (event.pointerType !== "touch") openReferencePreview(marker);
+  });
+  marker.addEventListener("pointerleave", (event) => {
+    if (event.pointerType !== "touch") closeReferencePreview(marker);
+  });
+  marker.addEventListener("focus", () => openReferencePreview(marker));
+  marker.addEventListener("blur", () => closeReferencePreview(marker));
+  prepareTouchReference(marker);
+  return wrapper;
+}
+
 export function maintainedTextFragment(tokens, fallback = "", { interactive = true } = {}) {
   const fragment = document.createDocumentFragment();
   if (!Array.isArray(tokens)) {
@@ -218,6 +260,8 @@ export function maintainedTextFragment(tokens, fallback = "", { interactive = tr
       fragment.append(distanceNode(token));
     } else if (token?.type === "reference") {
       fragment.append(referenceNode(token, { interactive }));
+    } else if (token?.type === "review-needed") {
+      fragment.append(reviewNeededNode(token, { interactive }));
     }
   }
   return fragment;

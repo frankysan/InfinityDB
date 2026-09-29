@@ -3149,7 +3149,7 @@
             "id": "trait:reflective",
             "kind": "trait",
             "name": "Reflective",
-            "summary": "Also affects Troopers with Marksmanship, Multispectral Visors, or specified equivalent Equipment.",
+            "summary": "Also affects Troopers with Marksmanship, [[equipment:multispectral-visor:plural]], or specified equivalent Equipment.",
             "composition": {
                 "role": "definition"
             },
@@ -7206,7 +7206,7 @@
             "id": "equipment:cube-2",
             "kind": "equipment",
             "name": "Cube 2.0",
-            "summary": "Automatic Equipment represented by a Unit Profile symbol that includes Cube recovery rerolls and improves Saving Rolls against Sepsitor attacks.",
+            "summary": "Automatic Equipment represented by a Unit Profile symbol that includes [[equipment:cube]] recovery rerolls and improves Saving Rolls against Sepsitor attacks.",
             "composition": {
                 "role": "definition"
             },
@@ -7302,7 +7302,7 @@
             "id": "equipment:tinbot-firewall",
             "kind": "equipment",
             "name": "TinBot: Firewall",
-            "summary": "The Firewall named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "The Firewall named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
             "composition": {
                 "role": "definition"
             },
@@ -7352,7 +7352,7 @@
             "id": "equipment:tinbot-neurocinetics",
             "kind": "equipment",
             "name": "TinBot: Neurocinetics",
-            "summary": "The Neurocinetics named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "The Neurocinetics named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
             "composition": {
                 "role": "definition"
             },
@@ -7406,7 +7406,7 @@
             "id": "equipment:tinbot-albedo",
             "kind": "equipment",
             "name": "TinBot: Albedo",
-            "summary": "The Albedo named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "The [[equipment:albedo]] named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
             "composition": {
                 "role": "definition"
             },
@@ -7460,7 +7460,7 @@
             "id": "equipment:tinbot-discover",
             "kind": "equipment",
             "name": "TinBot: Discover",
-            "summary": "The Discover named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "The Discover named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
             "composition": {
                 "role": "definition"
             },
@@ -7514,7 +7514,7 @@
             "id": "equipment:tinbot-ecm-guided",
             "kind": "equipment",
             "name": "TinBot: ECM Guided",
-            "summary": "The ECM Guided named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "The [[equipment:ecm]] Guided named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
             "composition": {
                 "role": "definition"
             },
@@ -7568,7 +7568,7 @@
             "id": "equipment:tinbot-repeater",
             "kind": "equipment",
             "name": "TinBot: Repeater",
-            "summary": "The Repeater named source variant of TinBot. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "The [[equipment:repeater]] named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
             "composition": {
                 "role": "definition"
             },
@@ -8173,7 +8173,7 @@
             "labelIds": [
                 "obligatory"
             ],
-            "summary": "An Automatic Special Skill used with BS Attacks that ignores negative BS MODs from Partial Cover and Nanoscreen.",
+            "summary": "An Automatic Special Skill used with BS Attacks that ignores negative BS MODs from Partial Cover and [[equipment:nanoscreen]].",
             "composition": {
                 "role": "definition"
             },
@@ -8192,10 +8192,10 @@
                     "The user can benefit from Marksmanship only when declaring a BS Attack."
                 ],
                 "effects": [
-                    "The user may ignore negative BS MODs imposed by Partial Cover and Nanoscreen."
+                    "The user may ignore negative BS MODs imposed by Partial Cover and [[equipment:nanoscreen]]."
                 ],
                 "restrictions": [
-                    "Only the negative BS MODs from Partial Cover and Nanoscreen are ignored."
+                    "Only the negative BS MODs from Partial Cover and [[equipment:nanoscreen]] are ignored."
                 ]
             },
             "armyLinks": [
@@ -8295,7 +8295,7 @@
                 "obligatory",
                 "negative-feedback"
             ],
-            "summary": "Automatic Equipment whose listed negative MOD affects enemy Multispectral Visor or Marksmanship users attacking or Discovering the bearer.",
+            "summary": "Automatic Equipment whose listed negative MOD affects enemy [[equipment:multispectral-visor]] or Marksmanship users attacking or Discovering the bearer.",
             "composition": {
                 "role": "definition"
             },
@@ -8307,7 +8307,7 @@
             },
             "facts": {
                 "effects": [
-                    "An enemy with a Multispectral Visor or Marksmanship that declares a LoF-requiring BS Attack or Discover against the bearer applies the listed Albedo negative MOD to the relevant Attribute.",
+                    "An enemy with a [[equipment:multispectral-visor]] or Marksmanship that declares a LoF-requiring BS Attack or Discover against the bearer applies the listed Albedo negative MOD to the relevant Attribute.",
                     "The Albedo MOD does not apply to CC Attacks."
                 ]
             },
@@ -8776,7 +8776,7 @@
                     "The Trooper may move up to the first MOV value without generating enemy AROs when the movement begins and ends outside the required enemy LoF, Zone of Control, and applicable Hacking Areas."
                 ],
                 "restrictions": [
-                    "TAGs, Remotes, Vehicles, Troopers with Motorcycles, Troopers with Aerial, and Troopers in [[state:targeted]] cannot declare Cautious Movement."
+                    "TAGs, Remotes, Vehicles, Troopers with [[equipment:motorcycle:plural]], Troopers with Aerial, and Troopers in [[state:targeted]] cannot declare Cautious Movement."
                 ]
             },
             "labelIds": [
@@ -9200,7 +9200,7 @@
                     "aro"
                 ],
                 "requirements": [
-                    "The user and the Allied Trooper or game element with Baggage must both be in non-Null States, and the user must be inside that Baggage holder's Zone of Control.",
+                    "The user and the Allied Trooper or game element with [[equipment:baggage]] must both be in non-Null States, and the user must be inside that [[equipment:baggage]] holder's Zone of Control.",
                     "The user is in [[state:unloaded]] or has expended uses of a Disposable Weapon or piece of Equipment."
                 ],
                 "effects": [
@@ -10204,7 +10204,7 @@
             "labelIds": [
                 "comms-equipment"
             ],
-            "summary": "Deployable Comms Equipment that places a Repeater on the battlefield using Place Deployable.",
+            "summary": "Deployable Comms Equipment that places a [[equipment:repeater]] on the battlefield using Place Deployable.",
             "composition": {
                 "role": "definition"
             },
@@ -10217,7 +10217,7 @@
             "facts": {
                 "effects": [
                     "Place Deployable places a Deployable Repeater Token on the game table.",
-                    "The deployed Equipment contains a Repeater and applies the Repeater rule while active."
+                    "The deployed Equipment contains a [[equipment:repeater]] and applies the [[equipment:repeater]] rule while active."
                 ]
             },
             "armyLinks": [
@@ -10252,7 +10252,7 @@
             "kind": "equipment",
             "name": "FastPanda",
             "labelIds": [],
-            "summary": "Self-propelled Deployable Equipment that places a Repeater anywhere completely inside the user's Zone of Control.",
+            "summary": "Self-propelled Deployable Equipment that places a [[equipment:repeater]] anywhere completely inside the user's Zone of Control.",
             "composition": {
                 "role": "definition"
             },
@@ -10265,7 +10265,7 @@
             "facts": {
                 "effects": [
                     "When Place Deployable is declared, the FastPanda may be placed completely inside the user's Zone of Control instead of in Silhouette contact.",
-                    "The deployed FastPanda contains a Repeater and applies the Repeater rule while active.",
+                    "The deployed FastPanda contains a [[equipment:repeater]] and applies the [[equipment:repeater]] rule while active.",
                     "The deployed FastPanda remains on the table until the end of the game or until destroyed."
                 ]
             },
@@ -10301,7 +10301,7 @@
             "kind": "equipment",
             "name": "AI Motorcycle",
             "labelIds": [],
-            "summary": "Automatic Equipment that uses Motorcycle rules while mounted and becomes a Peripheral (Synchronized) when the rider dismounts.",
+            "summary": "Automatic Equipment that uses [[equipment:motorcycle]] rules while mounted and becomes a Peripheral (Synchronized) when the rider dismounts.",
             "composition": {
                 "role": "definition"
             },
@@ -10313,7 +10313,7 @@
             },
             "facts": {
                 "effects": [
-                    "The mounted profile applies the Motorcycle Equipment rules.",
+                    "The mounted profile applies the [[equipment:motorcycle]] Equipment rules.",
                     "The dismounted profile applies Peripheral (Synchronized) to the AI Motorcycle and uses Transmutation (Auto) to change between mounted and dismounted profiles."
                 ],
                 "restrictions": [
@@ -10653,7 +10653,7 @@
             "labelIds": [
                 "comms-equipment"
             ],
-            "summary": "Automatic Comms Equipment that expands the standard Hacking Device program set with [[hacking-program:cybermask]] and [[hacking-program:white-noise]].",
+            "summary": "Automatic Comms Equipment that expands the standard [[equipment:hacking-device]] program set with [[hacking-program:cybermask]] and [[hacking-program:white-noise]].",
             "composition": {
                 "role": "definition"
             },
@@ -12609,7 +12609,7 @@
             "aliases": [
                 "Holoecho"
             ],
-            "summary": "A Marker State created by Holoprojector that conceals which of up to three representations is the real bearer.",
+            "summary": "A Marker State created by [[equipment:holoprojector]] that conceals which of up to three representations is the real bearer.",
             "composition": {
                 "role": "definition"
             },
@@ -12627,7 +12627,7 @@
                     "Enemies must Discover the relevant representation to reveal the bearer without another cancellation condition."
                 ],
                 "requirements": [
-                    "Holoprojector places or restores the Holoechoes under the deployment, States Phase, or Active Turn conditions specified by the rule."
+                    "[[equipment:holoprojector]] places or restores the Holoechoes under the deployment, States Phase, or Active Turn conditions specified by the rule."
                 ],
                 "restrictions": [
                     "Holoecho State is canceled by its listed revelation and coherency conditions, including declarations or events that reveal the bearer."
@@ -12863,7 +12863,7 @@
                 "category": "state",
                 "effects": [
                     "The Trooper may only use Basic Short Skills, Cautious Movement, Dodge, Reset, or Special Skills that explicitly permit use in Retreat!.",
-                    "Entering Retreat! cancels Holoprojector/HoloMask presentation and Marker States."
+                    "Entering Retreat! cancels [[equipment:holoprojector]]/[[review-needed:ambiguous-target|HoloMask]] presentation and Marker States."
                 ],
                 "requirements": [
                     "The Trooper’s army enters the Retreat! situation at the beginning of the Player Turn."
@@ -13180,7 +13180,7 @@
                 "requirements": [],
                 "effects": [
                     "A Remote Presence Trooper with STR has two distinct levels of [[state:unconscious]] before entering [[state:dead]].",
-                    "From either Unconscious level, one successful Engineer WIP Roll or GizmoKit PH Roll removes all Wounds necessary to cancel [[state:unconscious]].",
+                    "From either Unconscious level, one successful Engineer WIP Roll or [[equipment:gizmokit]] PH Roll removes all Wounds necessary to cancel [[state:unconscious]].",
                     "When Engineer or another rule explicitly permits it, Command Tokens may reroll the failed repair Roll.",
                     "Remote Presence remains active while its owner is in a Null State."
                 ],
@@ -13844,7 +13844,7 @@
                 ],
                 "requirements": [
                     "The user must enter a Null State.",
-                    "The chosen allied host must be on the battlefield as a Model or Marker and have either a Cube or the REM Troop Type."
+                    "The chosen allied host must be on the battlefield as a Model or Marker and have either a [[equipment:cube]] or the REM Troop Type."
                 ],
                 "effects": [
                     "Transfer the user's WIP value and Mnemonica to the chosen host; if the user was Lieutenant, transfer Lieutenant and its additional abilities as well.",
@@ -13852,7 +13852,7 @@
                     "After the transfer, the original user enters [[state:dead]] and is removed from the game table."
                 ],
                 "restrictions": [
-                    "Troopers with Mnemonica are never considered to have a Cube."
+                    "Troopers with Mnemonica are never considered to have a [[equipment:cube]]."
                 ]
             },
             "labelIds": [
@@ -14010,7 +14010,7 @@
             "id": "skill:paramedic",
             "kind": "skill",
             "name": "Paramedic",
-            "summary": "An obligatory Automatic Special Skill that equips the user with a MediKit for recovering Unconscious allies.",
+            "summary": "An obligatory Automatic Special Skill that equips the user with a [[equipment:medikit]] for recovering Unconscious allies.",
             "composition": {
                 "role": "definition"
             },
@@ -14027,7 +14027,7 @@
                 ],
                 "requirements": [],
                 "effects": [
-                    "The user is equipped with a MediKit to recover allied Troopers from [[state:unconscious]]."
+                    "The user is equipped with a [[equipment:medikit]] to recover allied Troopers from [[state:unconscious]]."
                 ],
                 "restrictions": []
             },
@@ -14064,7 +14064,7 @@
             "id": "skill:tech-recovery",
             "kind": "skill",
             "name": "Tech-Recovery",
-            "summary": "An optional Automatic Special Skill that lets an allied GizmoKit cancel Engineer-recoverable States through the user’s PH Roll.",
+            "summary": "An optional Automatic Special Skill that lets an allied [[equipment:gizmokit]] cancel Engineer-recoverable States through the user’s PH Roll.",
             "composition": {
                 "role": "definition"
             },
@@ -14081,16 +14081,16 @@
                 ],
                 "requirements": [
                     "The user must be in a State that can be canceled by Engineer.",
-                    "An allied GizmoKit must successfully hit the user or be applied through Silhouette contact."
+                    "An allied [[equipment:gizmokit]] must successfully hit the user or be applied through Silhouette contact."
                 ],
                 "effects": [
                     "A successful Normal PH Roll cancels all of the user’s States that Engineer can cancel, except [[state:unconscious]].",
                     "A failed PH Roll has no negative consequence and the recovery can be tried again in a later Order.",
-                    "If the user has a GizmoKit PH value listed in its Unit Profile, use that PH value when a GizmoKit is used on the user.",
+                    "If the user has a [[equipment:gizmokit]] PH value listed in its Unit Profile, use that PH value when a [[equipment:gizmokit]] is used on the user.",
                     "Tech-Recovery remains active while the user is in a Null State."
                 ],
                 "restrictions": [
-                    "Tech-Recovery does not cancel [[state:unconscious]]; resolve the GizmoKit using its normal Unconscious-recovery rules instead."
+                    "Tech-Recovery does not cancel [[state:unconscious]]; resolve the [[equipment:gizmokit]] using its normal Unconscious-recovery rules instead."
                 ]
             },
             "labelIds": [
@@ -14169,7 +14169,7 @@
                     "The user must be in [[state:unconscious]]."
                 ],
                 "effects": [
-                    "Doctor, Engineer, MediKit, and GizmoKit may cancel the user’s [[state:unconscious]] regardless of whether the user has the VITA or STR Attribute.",
+                    "Doctor, Engineer, [[equipment:medikit]], and [[equipment:gizmokit]] may cancel the user’s [[state:unconscious]] regardless of whether the user has the VITA or STR Attribute.",
                     "Technorganic remains active while the user is in a Null State."
                 ],
                 "restrictions": [
@@ -14667,7 +14667,7 @@
                 "requirements": [],
                 "effects": [
                     "If the user enters [[state:unconscious]], it automatically passes directly to [[state:dead]] without receiving an additional Wound and is removed from the game table.",
-                    "Because the user passes directly to [[state:dead]], it cannot subsequently be healed by Doctor, MediKit, Regeneration, or another recovery method.",
+                    "Because the user passes directly to [[state:dead]], it cannot subsequently be healed by Doctor, [[equipment:medikit]], Regeneration, or another recovery method.",
                     "Exrah remains active while its owner is in a Null State."
                 ],
                 "restrictions": []
@@ -15113,7 +15113,7 @@
             "id": "skill:hacker",
             "kind": "skill",
             "name": "Hacker",
-            "summary": "An obligatory Automatic Special Skill that identifies a Trooper as a Hacker, allowing Hacking Devices and assigned Hacking Programs or Upgrades to provide their documented quantronic capabilities.",
+            "summary": "An obligatory Automatic Special Skill that identifies a Trooper as a Hacker, allowing [[equipment:hacking-device:plural]] and assigned Hacking Programs or Upgrades to provide their documented quantronic capabilities.",
             "composition": {
                 "role": "definition"
             },
@@ -15130,9 +15130,9 @@
                 ],
                 "requirements": [],
                 "effects": [
-                    "A Hacker may use a Hacking Device they are equipped with; the Device determines which Hacking Programs it grants.",
-                    "A Hacker may instead have Hacking Programs assigned directly without requiring a Hacking Device.",
-                    "Upgrade Programs may be assigned to the Hacker independently of the baseline Programs granted by a Hacking Device.",
+                    "A Hacker may use a [[equipment:hacking-device]] they are equipped with; the Device determines which Hacking Programs it grants.",
+                    "A Hacker may instead have Hacking Programs assigned directly without requiring a [[equipment:hacking-device]].",
+                    "Upgrade Programs may be assigned to the Hacker independently of the baseline Programs granted by a [[equipment:hacking-device]].",
                     "The Hacker Special Skill remains active while its owner is in a Null State."
                 ],
                 "restrictions": []
@@ -15731,7 +15731,7 @@
             "id": "ammunition:eclipse",
             "kind": "ammunition",
             "name": "Eclipse Ammunition",
-            "summary": "A Smoke variant that creates a visibility-blocking zone which also affects Multispectral Visors.",
+            "summary": "A Smoke variant that creates a visibility-blocking zone which also affects [[equipment:multispectral-visor:plural]].",
             "composition": {
                 "role": "definition"
             },

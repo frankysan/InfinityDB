@@ -4229,11 +4229,33 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
         {"type": "distance", "centimeters": 5, "positive_sign": False},
     ]
 
+    status, _, body = request(rules_app, "/api/states/retreat")
+    assert status == 200
+    retreat = json.loads(body)
+    review_needed = [
+        token
+        for retreat_rule in retreat["rules"]
+        for effect in retreat_rule.get("fact_tokens", {}).get("effects", [])
+        for token in effect
+        if token["type"] == "review-needed"
+    ]
+    assert review_needed == [
+        {
+            "type": "review-needed",
+            "reason": "ambiguous-target",
+            "text": "HoloMask",
+        }
+    ]
+
     status, _, renderer = request(rules_app, "/static/maintained-text.js")
     assert status == 200
     assert b'from "./preferences.js"' in renderer
     assert b'node.className = "maintained-distance"' in renderer
     assert b'wrapper.className = "maintained-reference-wrap"' in renderer
+    assert b'function reviewNeededNode(token, { interactive = true } = {})' in renderer
+    assert b'marker.className = "maintained-review-needed"' in renderer
+    assert b'badge.textContent = "review"' in renderer
+    assert b'Manual review needed: ${token.reason || "unspecified"}' in renderer
     assert b'tooltip.role = "tooltip"' in renderer
     assert b'{ interactive: false }' in renderer
     assert b'link.setAttribute("aria-describedby", tooltip.id)' in renderer
@@ -4265,6 +4287,8 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     assert b"@supports selector(:popover-open)" in styles
     assert b".maintained-reference-tooltip:popover-open" in styles
     assert b'calc(100vw - 24px)' in styles
+    assert b".maintained-review-needed" in styles
+    assert b"var(--color-status-warning-surface)" in styles
 
 
 def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) -> None:

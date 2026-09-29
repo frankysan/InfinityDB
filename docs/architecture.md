@@ -849,8 +849,10 @@ does not reinterpret Army IDs or rules namespaces to invent links.
 Maintained rules text uses the same semantic boundary. Curated editorial fields accept a small
 wiki-like token syntax: `[[skill:jump]]` references a canonical typed rules identity,
 `[[skill:jump:plural]]` requests the plural display form, `[[skill:jump|Jump Skill]]` supplies
-explicit display text, and `\[[...]]` escapes a literal token. Link namespaces are the existing
-player-routable semantic domains (`skill`, `equipment`, `weapon`, `trait`, `state`, and
+explicit display text, and `[[review-needed:reason|Ambiguous text]]` marks a passage whose
+semantic target is not yet safe to choose. Review reasons are lowercase kebab-case codes; omitting
+the display text creates a standalone review marker. `\[[...]]` escapes a literal token. Link
+namespaces are the existing player-routable semantic domains (`skill`, `equipment`, `weapon`, `trait`, `state`, and
 `hacking-program`); InfinityDB does not invent a parallel generic `rule:` alias namespace for
 concepts that do not yet have a player-facing route. Curated loading validates token syntax, the
 rules build rejects references that do not resolve to a current semantic record, and the web
@@ -869,8 +871,12 @@ longest-match detection. Existing legacy candidates are frozen in
 `data/curated/maintained-text-link-baseline.json`; a new or changed unlinked candidate fails the
 rules build. The baseline is migration debt rather than an exception mechanism and is expected only
 to shrink as manually reviewed domain batches replace plain mentions with typed tokens. Self-links
-are excluded, and ambiguous aliases remain in the migration queue until a reviewer selects the
-correct semantic target rather than relying on automated replacement.
+are excluded. Once a reviewer encounters a passage that is ambiguous or otherwise unclear, it must
+be converted to an explicit `review-needed` marker rather than left as silent baseline debt or
+linked speculatively. The maintained-text audit enumerates these markers separately with owner,
+field, visible text, and reason; the browser highlights them with the same top-layer preview system
+used by semantic links. Unreviewed legacy candidates may remain in the baseline until their batch is
+examined, but reviewed ambiguity must stay explicitly marked until resolved.
 
 Gameplay distances embedded in maintained text are structural tokens such as
 `[[distance:+2:inch]]` or `[[distance:5:cm]]`. The parser normalizes them to centimeters in the

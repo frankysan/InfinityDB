@@ -5,6 +5,7 @@ import pytest
 from infinity_db.curated import load_curated_directory, load_curated_document
 from infinity_db.maintained_text import parse_maintained_text
 from infinity_db.maintained_text_policy import (
+    collect_review_needed_markers,
     collect_unlinked_reference_candidates,
     validate_maintained_text_link_baseline,
 )
@@ -40,6 +41,25 @@ def test_maintained_text_parser_preserves_text_references_distances_and_escapes(
     ]
 
 
+def test_maintained_text_parser_preserves_explicit_review_markers() -> None:
+    tokens = parse_maintained_text(
+        "Check [[review-needed:ambiguous-target|HoloMask]] and "
+        "[[review-needed:source-meaning-unclear]]."
+    )
+
+    assert tokens == [
+        {"type": "text", "text": "Check "},
+        {
+            "type": "review-needed",
+            "reason": "ambiguous-target",
+            "text": "HoloMask",
+        },
+        {"type": "text", "text": " and "},
+        {"type": "review-needed", "reason": "source-meaning-unclear"},
+        {"type": "text", "text": "."},
+    ]
+
+
 @pytest.mark.parametrize(
     ("text", "message"),
     [
@@ -49,6 +69,9 @@ def test_maintained_text_parser_preserves_text_references_distances_and_escapes(
         ("[[distance:two:inch]]", "distance token must use"),
         ("[[distance:-2:inch]]", "distance values must be nonnegative"),
         ("[[skill:jump| ]]", "display text must not be empty"),
+        ("[[review-needed:]]", "must include a reason"),
+        ("[[review-needed:Ambiguous]]", "lowercase kebab-case"),
+        ("[[review-needed:ambiguous-target| ]]", "display text must not be empty"),
     ],
 )
 def test_maintained_text_parser_rejects_invalid_tokens(text: str, message: str) -> None:
@@ -134,6 +157,21 @@ def test_hacking_program_names_are_semantic_links() -> None:
     assert remaining == []
 
 
+def test_equipment_names_are_semantic_links() -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    candidates = collect_unlinked_reference_candidates(documents)
+
+    remaining = [
+        (text, targets)
+        for values in candidates.values()
+        for (_, text, targets), count in values.items()
+        for _ in range(count)
+        if any(target.startswith("equipment:") for target in targets)
+    ]
+    assert remaining == []
+
+
 def test_unlinked_reference_candidates_use_aliases_longest_match_and_ignore_tokens() -> None:
     document = {
         "collection": {"id": "test", "status": "current"},
@@ -190,3 +228,23 @@ def test_unlinked_reference_candidates_use_aliases_longest_match_and_ignore_toke
     ] == 1
     assert values[("summary", "Unconscious State", ("state:unconscious",))] == 1
     assert sum(values.values()) == 3
+
+
+def test_review_needed_markers_are_explicit_and_excluded_from_unlinked_candidates() -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    candidates = collect_unlinked_reference_candidates(documents)
+    review_needed = collect_review_needed_markers(documents)
+
+    remaining_holomask = [
+        (owner, field, text, targets)
+        for owner, values in candidates.items()
+        for (field, text, targets), count in values.items()
+        for _ in range(count)
+        if text == "HoloMask"
+    ]
+    assert remaining_holomask == []
+
+    assert review_needed["n5-core-v5.3|state:retreat"][
+        ("facts.effects[]", "ambiguous-target", "HoloMask")
+    ] == 1

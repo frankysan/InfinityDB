@@ -133,6 +133,22 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         ).fetchone() == ("n5-core-v5.3-pdf", 87)
 
 
+def test_composed_record_can_attach_current_army_links(
+    current_rules_database: RulesDatabase,
+) -> None:
+    ordinary = current_rules_database.composed_record("equipment:multispectral-visor")
+    assert ordinary is not None
+    assert "army_links" not in ordinary
+
+    routed = current_rules_database.composed_record(
+        "equipment:multispectral-visor", include_army_links=True
+    )
+    assert routed is not None
+    assert routed["army_links"] == [
+        {"entity": "equipment", "id": "multispectral-visor"}
+    ]
+
+
 def test_rules_database_returns_records_using_current_label(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -1532,7 +1548,7 @@ def test_hacker_skill_is_composed(current_rules_database: RulesDatabase) -> None
     assert hacker["label_ids"] == ["obligatory"]
     assert hacker["facts"]["typeIds"] == ["automatic"]
     effects = " ".join(hacker["facts"]["effects"])
-    assert "Hacking Device" in effects
+    assert "[[equipment:hacking-device]]" in effects
     assert "Upgrade Programs" in effects
     assert "Null State" in effects
     assert {

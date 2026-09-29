@@ -69,7 +69,9 @@ skeleton and interaction model.
 
 - [ ] Complete the systematic semantic-link migration of all maintained rules prose. New rules
   text is already gated by the checked-in legacy-candidate baseline; migration must therefore
-  proceed as reviewed batches that shrink the baseline rather than bulk-replacing text.
+  proceed as reviewed batches that shrink the baseline rather than bulk-replacing text. Any passage
+  examined during a batch that remains ambiguous or unclear must use an explicit `review-needed`
+  marker until manual review resolves it; reviewed uncertainty must not disappear into the baseline.
   - [x] Establish canonical-name/alias candidate auditing and make new unlinked candidates fail
     the rules build while grandfathering only the pre-migration corpus.
   - [x] Batch 1: replace unambiguous full State names such as `Unconscious State`,
@@ -77,7 +79,11 @@ skeleton and interaction model.
   - [x] Batch 2: review and link all unambiguous Hacking Program names. The post-batch
     legacy inventory is 671 candidate occurrences across 183 semantic owners, with no remaining
     `hacking-program:*` candidates.
-  - [ ] Batch 3: review and link Equipment names.
+  - [x] Batch 3: review and link Equipment names. The post-batch legacy inventory was 625
+    candidate occurrences across 178 semantic owners, with no remaining `equipment:*` candidates.
+  - [x] Establish explicit `review-needed` markers for passages that have been examined but cannot
+    yet be resolved safely. The current inventory is 624 legacy candidates across 178 semantic
+    owners plus one explicit marker for the unresolved `HoloMask` state-alias passage.
   - [ ] Batch 4: review Trait names, with special care for generic terms such as `State`, `CC`,
     `ARO`, and `Deployable`.
   - [ ] Batch 5: review Skill names.

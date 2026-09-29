@@ -5,8 +5,8 @@
     "n5-core-v5.3",
     "n5-hacking-programs-v5.3"
   ],
-  "candidateOwners": 183,
-  "candidateOccurrences": 671,
+  "candidateOwners": 178,
+  "candidateOccurrences": 624,
   "owners": {
     "n5-core-v5.3|declaration-category:aro:p103": {
       "candidateCount": 1,
@@ -33,12 +33,12 @@
       "sha256": "d6f821c11b852102f7b9f675396df5555e42d8d476f25fb583f8698cff5de56e"
     },
     "n5-core-v5.3|equipment:ai-motorcycle": {
-      "candidateCount": 9,
-      "sha256": "09418e320c89269223ca135bda744f77b8cff7fe6b2951c79c002e9a96f9833e"
+      "candidateCount": 7,
+      "sha256": "42a94b5d3c2b1a728cbe48f84d24ebb00e95286e5d700c37e9a96cc2adcd9859"
     },
     "n5-core-v5.3|equipment:albedo": {
-      "candidateCount": 7,
-      "sha256": "e9bbd4d1f0d790b458ccb248f7140cc1053e1ff38abb699213adaad3eb626eb7"
+      "candidateCount": 5,
+      "sha256": "5569c017e0b16f7efac322a1e56e5267216debc6e6eeb2919153f543aae61975"
     },
     "n5-core-v5.3|equipment:baggage": {
       "candidateCount": 4,
@@ -57,8 +57,8 @@
       "sha256": "9857de58faf5d1fde7022904f6a11ecf5c9a614799f0a36cc11c8b9cf66e518e"
     },
     "n5-core-v5.3|equipment:cube-2": {
-      "candidateCount": 2,
-      "sha256": "612c25ba1f9d2ff3e29234832229864f6cf830b2faf76217d98d298ecabe69f6"
+      "candidateCount": 1,
+      "sha256": "ea940dc97469eec7e478b799e72cca28ed76d94b1680d422a5d122e7446b7231"
     },
     "n5-core-v5.3|equipment:dazer": {
       "candidateCount": 7,
@@ -73,24 +73,20 @@
       "sha256": "ed96a884353b586a828d46168794af1afabad2abac6a02d8c816d8336f1f3b3b"
     },
     "n5-core-v5.3|equipment:deployable-repeater": {
-      "candidateCount": 6,
-      "sha256": "f71615223eb5c3bcb1a2037e991f379699d38c9262d48815a9d1f4d002e05600"
+      "candidateCount": 3,
+      "sha256": "bf0b8c9a88a657e7a8089942c37c2544b1ca4c666595b1aca3771bfa1f3d1f0b"
     },
     "n5-core-v5.3|equipment:escape-system": {
       "candidateCount": 2,
       "sha256": "1778f9b26927f1de61f7d76becc7a99bd0db9d096961131161eed70122bb66ce"
     },
     "n5-core-v5.3|equipment:fastpanda": {
-      "candidateCount": 7,
-      "sha256": "8b71ac8fe31eb50da764db6187c68cf41b888a72418c5aac041d981cfd97110d"
+      "candidateCount": 4,
+      "sha256": "049a1df4adb18f510e4aa72a3ef2d33321b5dedc55609e80ec0939d27b6f5d90"
     },
     "n5-core-v5.3|equipment:gizmokit": {
       "candidateCount": 1,
       "sha256": "2c748c10bdf6051151e9a2d3c9aea0e85007329d9d41a794892d542f64cfcb03"
-    },
-    "n5-core-v5.3|equipment:hacking-device-plus": {
-      "candidateCount": 1,
-      "sha256": "ae0626de7edc6805b420d11a013e0b9f003757d95dc2840ff0380fd076b0efac"
     },
     "n5-core-v5.3|equipment:medikit": {
       "candidateCount": 1,
@@ -116,29 +112,13 @@
       "candidateCount": 3,
       "sha256": "c7ee60c16a06f5c78d62d941d4c678343c1f30c6488bd3573569c235e85fab0f"
     },
-    "n5-core-v5.3|equipment:tinbot-albedo": {
-      "candidateCount": 2,
-      "sha256": "59145c1a7f72fd6cb54ac46905cd6c3cc5b6217fb2ba462f3292bc07c8fd3461"
-    },
     "n5-core-v5.3|equipment:tinbot-discover": {
-      "candidateCount": 2,
-      "sha256": "3ab8b06bb7594d6fdc8c64fd80592e64ebd4b0f65cc7d99acf9bc9bcc93196db"
-    },
-    "n5-core-v5.3|equipment:tinbot-ecm-guided": {
-      "candidateCount": 2,
-      "sha256": "00d25e3f817440e863f691e7651035ee397f59c8b40e5db43c53cb6ccf9c6a22"
-    },
-    "n5-core-v5.3|equipment:tinbot-firewall": {
       "candidateCount": 1,
-      "sha256": "da6008a7491aaec95a48dd64a3a4a0812bad18cf8b85ff52b631f5c117a6a42b"
+      "sha256": "2aba2fad11b4dfd885e05779d7b64ab234c43b0724ab4b31c5099d37316a9ff9"
     },
     "n5-core-v5.3|equipment:tinbot-neurocinetics": {
-      "candidateCount": 2,
-      "sha256": "ad3c79823411b46e0bcd01d75fc95dec906f1c81eb29b1c6cdd9f6be3dddd946"
-    },
-    "n5-core-v5.3|equipment:tinbot-repeater": {
-      "candidateCount": 2,
-      "sha256": "edc91ac0041e7442f4443a484419f493cb281f92d5f5b6d199c18b4ba648ba14"
+      "candidateCount": 1,
+      "sha256": "5343b77d591fdd4e4359f9db9d218bae3032c652cbbc8a66cb0060df0b99718c"
     },
     "n5-core-v5.3|equipment:x-visor": {
       "candidateCount": 2,
@@ -313,8 +293,8 @@
       "sha256": "6a9c59c155c4dc72190a5ef62f7eeaea0cd2a8bd2054708aec750347bd79a452"
     },
     "n5-core-v5.3|skill:exrah": {
-      "candidateCount": 4,
-      "sha256": "40535a2b663f65834bf1efa641c6f30a341cfd0b3c3005ff13e0a7ccbe0aa471"
+      "candidateCount": 3,
+      "sha256": "9de9456bf3926b4d73c6b1c48b5599c26b0e106a2ef31329a1cef086531b7cfc"
     },
     "n5-core-v5.3|skill:forward-observer": {
       "candidateCount": 3,
@@ -337,8 +317,8 @@
       "sha256": "4000b638a3af9699a40f152e806fe11f3a813dac47cd383d5f90c10702e08db2"
     },
     "n5-core-v5.3|skill:hacker": {
-      "candidateCount": 4,
-      "sha256": "f615d79c413d47ad7b96e4c6b2bdfa258cee7d787ceff78eb014389d259f389e"
+      "candidateCount": 1,
+      "sha256": "67e3881989dd48c5399c0a5c554d9bed4b24c91dacb8372fb13392c41a8ea30e"
     },
     "n5-core-v5.3|skill:immunity": {
       "candidateCount": 11,
@@ -373,8 +353,8 @@
       "sha256": "708f0c4d9803235c3f54aca8016271a3ecda4c182e5ce501730cd760c8c9c4aa"
     },
     "n5-core-v5.3|skill:marksmanship": {
-      "candidateCount": 4,
-      "sha256": "067959d10d2ab6ab0a9e3f18a2ee6504698ee108d00cf5c7679dcf6534439e7b"
+      "candidateCount": 1,
+      "sha256": "5d07b09282fc206307a5d90a26d837f1cad07bda9eb1d027f3693c34d88626d8"
     },
     "n5-core-v5.3|skill:martial-arts": {
       "candidateCount": 1,
@@ -409,8 +389,8 @@
       "sha256": "eaaf40928ffe1707cbbde862cae76e8348ed598c7f9fc7e43a1b3c117c0e3c8a"
     },
     "n5-core-v5.3|skill:mnemonica": {
-      "candidateCount": 8,
-      "sha256": "9600602e9a5196aef95b67392fe2d9491e05a36cf72e18239896b0710a3374f9"
+      "candidateCount": 6,
+      "sha256": "34acfde7d216fa986b1df3faad3fe001814b29c7719691d672787340247e0c1b"
     },
     "n5-core-v5.3|skill:morpho-scan": {
       "candidateCount": 7,
@@ -445,8 +425,8 @@
       "sha256": "7337005b7825ffacbd60b732ee52de5d5cdd72080404ab6e4ef62b3a615e8c23"
     },
     "n5-core-v5.3|skill:paramedic": {
-      "candidateCount": 3,
-      "sha256": "116905244a3ebc7410805c67bf6ff9bde1d0e09f388f9365086c194b04ee548d"
+      "candidateCount": 1,
+      "sha256": "87abf702bd58a7947441ccdc3db2919b429d9d369a6a2fddab27b1c13c079bcc"
     },
     "n5-core-v5.3|skill:place-deployable": {
       "candidateCount": 5,
@@ -465,16 +445,16 @@
       "sha256": "7446378a1992012a2adff9ae0b8efad53b857cacafe52e763af5f1dd7e79d658"
     },
     "n5-core-v5.3|skill:reload": {
-      "candidateCount": 4,
-      "sha256": "ea88b9dd3acc93a88eeb307f4bec17b904c77cbb20c34fc56753c2432468629c"
+      "candidateCount": 2,
+      "sha256": "24938be343aee231f9a807afbc881ca2c8978b6b68d9fbfebaeb70203c7c7058"
     },
     "n5-core-v5.3|skill:remdriver": {
       "candidateCount": 1,
       "sha256": "871e14fdf69438463cab076226de0a369b10e9ed82c1bfea1c7d2bde3443e089"
     },
     "n5-core-v5.3|skill:remote-presence": {
-      "candidateCount": 7,
-      "sha256": "4dbaaeb930ac88c0f08b6b0aae2d2d40058685a26d0704125407f2d3060d4f11"
+      "candidateCount": 6,
+      "sha256": "5f90cfa4401cf222ba9d334650c7321bcd6e3cb2c185ad40cf0e000ca92effca"
     },
     "n5-core-v5.3|skill:request-speedball": {
       "candidateCount": 1,
@@ -545,12 +525,12 @@
       "sha256": "67e3881989dd48c5399c0a5c554d9bed4b24c91dacb8372fb13392c41a8ea30e"
     },
     "n5-core-v5.3|skill:tech-recovery": {
-      "candidateCount": 10,
-      "sha256": "33ec733f2cd875e09f70b540bfba0e105a498a416f55246a60c8f5c3ac33aacd"
+      "candidateCount": 5,
+      "sha256": "fdee45a062cf5f5c0638af9dd60f70f615d99dea64935984a97d5d3a967440cf"
     },
     "n5-core-v5.3|skill:technorganic": {
-      "candidateCount": 6,
-      "sha256": "7d4ec42b4647021a161869080fb9faa33f0fdf08efe4dd65af699b0764306f9c"
+      "candidateCount": 4,
+      "sha256": "d6b803e81df5c220ce07f93aaf78f5396aee012079f0374af1f2d2773dcf55bf"
     },
     "n5-core-v5.3|skill:total-reaction": {
       "candidateCount": 4,
@@ -601,8 +581,8 @@
       "sha256": "3f77697400815036934ddc4eb45d07859e66a8ebed646e0de656aa30a3ef0ec9"
     },
     "n5-core-v5.3|state:holoecho": {
-      "candidateCount": 4,
-      "sha256": "65b9cd8f1e6f127f997d36bf3ee60d6b4171cd495d3d4c83790f4565a2329ff3"
+      "candidateCount": 2,
+      "sha256": "9523c98c3e5e7067becec7603ecea27af083c383e1a062936aceda470f20035f"
     },
     "n5-core-v5.3|state:holomask": {
       "candidateCount": 5,
@@ -641,8 +621,8 @@
       "sha256": "67b44da2431ddd853ee91c801b91bc62ec1be415fa56a4767c01bfdcdefa1421"
     },
     "n5-core-v5.3|state:retreat": {
-      "candidateCount": 9,
-      "sha256": "aaa9cc917238cbcbf5be85ac348aa25d5c7aa507018a82c87d3ac58cfdaf3740"
+      "candidateCount": 7,
+      "sha256": "58fc9af47f576c0029febc2c647a128b7d6bfbb8259d72a005726f51e4551af0"
     },
     "n5-core-v5.3|state:sepsitorized": {
       "candidateCount": 2,
@@ -733,8 +713,8 @@
       "sha256": "f96672538efb2de1f04ecf64cf1b6b2c498b209830e0699d0ffdf1e1a3769752"
     },
     "n5-hacking-programs-v5.3|hacking-program:white-noise": {
-      "candidateCount": 5,
-      "sha256": "a1121cc7bf6c4d05474ffa2d106a5763aa9a80bbd83717ffc510642b1bcbc233"
+      "candidateCount": 4,
+      "sha256": "995b83d5676018845bdaeffe390dcd893a05de2972d5af6169e72d4b4cd12d24"
     },
     "n5-hacking-programs-v5.3|hacking-program:zero-pain": {
       "candidateCount": 2,

@@ -24,6 +24,8 @@ _LIST_INDEX = re.compile(r"\[\d+\]")
 
 CandidateKey = tuple[str, str, tuple[str, ...]]
 OwnerCandidates = dict[str, Counter[CandidateKey]]
+ReviewNeededKey = tuple[str, str, str | None]
+OwnerReviewNeeded = dict[str, Counter[ReviewNeededKey]]
 
 
 def _stable_owner(
@@ -94,6 +96,27 @@ def collect_unlinked_reference_candidates(
                         targets.discard(current_record_id)
                     if targets:
                         counter[(field, match.group(0), tuple(sorted(targets)))] += 1
+    return {owner: counter for owner, counter in result.items() if counter}
+
+
+def collect_review_needed_markers(
+    documents: list[tuple[Path, dict[str, Any]]],
+) -> OwnerReviewNeeded:
+    """Return explicitly flagged maintained-text passages awaiting manual review."""
+
+    result: OwnerReviewNeeded = {}
+    for _, document in documents:
+        if document["collection"]["status"] != "current":
+            continue
+        collection_id = document["collection"]["id"]
+        for context, text in maintained_text_fields(document):
+            owner_id, field, _ = _stable_owner(document, context)
+            owner_key = f"{collection_id}|{owner_id}"
+            counter = result.setdefault(owner_key, Counter())
+            for token in parse_maintained_text(text, context=context):
+                if token["type"] != "review-needed":
+                    continue
+                counter[(field, token["reason"], token.get("text"))] += 1
     return {owner: counter for owner, counter in result.items() if counter}
 
 

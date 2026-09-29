@@ -916,8 +916,41 @@ class RulesDatabase:
             self._attach_reverse_relations(connection, records)
             return records
 
-    def composed_record(self, record_id: str) -> dict[str, Any] | None:
-        """Return one current semantic record with supplements attached."""
+    @staticmethod
+    def _attach_current_army_links(
+        connection: sqlite3.Connection, records: list[dict[str, Any]]
+    ) -> None:
+        """Attach current Army/application links to composed semantic records."""
+
+        for record in records:
+            links = connection.execute(
+                "SELECT l.entity, l.external_id, l.external_name "
+                "FROM record_army_links AS l JOIN collections AS c "
+                "ON c.id = l.collection_id "
+                "WHERE l.record_id = ? AND c.status = 'current' "
+                "ORDER BY l.collection_id, l.position",
+                (record["id"],),
+            ).fetchall()
+            if not links:
+                continue
+            army_links: list[dict[str, str]] = []
+            for link in links:
+                item = {"entity": str(link["entity"])}
+                if link["external_id"] is not None:
+                    item["id"] = str(link["external_id"])
+                if link["external_name"] is not None:
+                    item["name"] = str(link["external_name"])
+                army_links.append(item)
+            record["army_links"] = army_links
+
+    def composed_record(
+        self, record_id: str, *, include_army_links: bool = False
+    ) -> dict[str, Any] | None:
+        """Return one current semantic record with supplements attached.
+
+        Army/application links remain opt-in so ordinary rules payloads stay bounded.
+        Consumers that must resolve a public application route can request them.
+        """
 
         with self._connect() as connection:
             rows = connection.execute(
@@ -931,6 +964,8 @@ class RulesDatabase:
                 return None
             records = self._compose_records(self._records_from_rows(connection, rows))
             self._attach_reverse_relations(connection, records)
+            if include_army_links:
+                self._attach_current_army_links(connection, records)
             if len(records) != 1:
                 raise ValueError(
                     f"Current rules identity {record_id!r} resolved to {len(records)} records"
@@ -984,26 +1019,7 @@ class RulesDatabase:
             ).fetchall()
             records = self._compose_records(self._records_from_rows(connection, rows))
             self._attach_reverse_relations(connection, records)
-
-            for record in records:
-                links = connection.execute(
-                    "SELECT l.entity, l.external_id, l.external_name "
-                    "FROM record_army_links AS l JOIN collections AS c "
-                    "ON c.id = l.collection_id "
-                    "WHERE l.record_id = ? AND c.status = 'current' "
-                    "ORDER BY l.collection_id, l.position",
-                    (record["id"],),
-                ).fetchall()
-                if links:
-                    army_links: list[dict[str, str]] = []
-                    for link in links:
-                        item = {"entity": str(link["entity"])}
-                        if link["external_id"] is not None:
-                            item["id"] = str(link["external_id"])
-                        if link["external_name"] is not None:
-                            item["name"] = str(link["external_name"])
-                        army_links.append(item)
-                    record["army_links"] = army_links
+            self._attach_current_army_links(connection, records)
             return records
 
     def current_labels(self) -> list[dict[str, Any]]:

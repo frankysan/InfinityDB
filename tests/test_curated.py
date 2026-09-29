@@ -1428,7 +1428,7 @@ def test_checked_in_n5_collection_models_hacker_core_skill() -> None:
     assert hacker["labelIds"] == ["obligatory"]
     assert hacker["armyLinks"] == [{"entity": "skill", "id": "hacker"}]
     effects = " ".join(hacker["facts"]["effects"])
-    assert "Hacking Device" in effects
+    assert "[[equipment:hacking-device]]" in effects
     assert "Upgrade Programs" in effects
     assert "Null State" in effects
     assert hacker["relations"] == [

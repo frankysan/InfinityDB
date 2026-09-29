@@ -477,7 +477,7 @@
                     "On a successful Normal WIP Roll, place a Circular Template White Noise Zone fully inside the user's Hacking Area until the start of the States Phase."
                 ],
                 "restrictions": [
-                    "Troopers with Multispectral Visor or Marksmanship cannot draw Line of Fire through the White Noise Zone."
+                    "Troopers with [[equipment:multispectral-visor]] or Marksmanship cannot draw Line of Fire through the White Noise Zone."
                 ]
             },
             "citations": [

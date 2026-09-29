@@ -23,6 +23,7 @@ MAINTAINED_REFERENCE_KINDS = frozenset(
 )
 DISPLAY_FORMS = frozenset({"plural"})
 DISTANCE_UNITS = frozenset({"cm", "inch"})
+_REVIEW_REASON_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _DISTANCE_PATTERN = re.compile(
     r"^distance:(?P<value>[+-]?(?:\d+(?:\.\d+)?|\.\d+)):(?P<unit>cm|inch)$"
 )
@@ -60,6 +61,36 @@ def _parse_distance(body: str, context: str) -> dict[str, Any] | None:
         "centimeters": _number(centimeters),
         "positive_sign": raw_value.startswith("+"),
     }
+
+
+def _parse_review_needed(body: str, context: str) -> dict[str, Any] | None:
+    prefix = "review-needed:"
+    if not body.startswith(prefix):
+        return None
+
+    payload = body[len(prefix) :]
+    reason, separator, display_text = payload.partition("|")
+    reason = reason.strip()
+    if not reason:
+        raise ValueError(f"{context}: review-needed token must include a reason")
+    if not _REVIEW_REASON_PATTERN.fullmatch(reason):
+        raise ValueError(
+            f"{context}: review-needed reason must be a lowercase kebab-case code"
+        )
+
+    token: dict[str, Any] = {"type": "review-needed", "reason": reason}
+    if separator:
+        display_text = display_text.strip()
+        if not display_text:
+            raise ValueError(
+                f"{context}: review-needed display text must not be empty"
+            )
+        if "[[" in display_text or "]]" in display_text:
+            raise ValueError(
+                f"{context}: review-needed display text must not contain token delimiters"
+            )
+        token["text"] = display_text
+    return token
 
 
 def _parse_reference(body: str, context: str) -> dict[str, Any]:
@@ -109,8 +140,9 @@ def parse_maintained_text(value: str, *, context: str = "maintained text") -> li
     ``[[skill:jump]]`` references a semantic rules identity. ``:plural`` is a
     supported display-form suffix and ``|Custom text`` overrides the visible label.
     ``[[distance:2:inch]]`` stores a typed distance that the browser can render in
-    the active cm/in preference. A literal opening token delimiter is escaped as
-    ``\\[[``.
+    the active cm/in preference. ``[[review-needed:reason|Text]]`` marks reviewed
+    ambiguity explicitly without choosing a semantic target. A literal opening token
+    delimiter is escaped as ``\\[[``.
     """
 
     if not isinstance(value, str):
@@ -143,7 +175,9 @@ def parse_maintained_text(value: str, *, context: str = "maintained text") -> li
             body = value[index + 2 : end].strip()
             if not body:
                 raise ValueError(f"{context}: maintained-text token must not be empty")
-            token = _parse_distance(body, context)
+            token = _parse_review_needed(body, context)
+            if token is None:
+                token = _parse_distance(body, context)
             tokens.append(token if token is not None else _parse_reference(body, context))
             index = end + 2
             continue
@@ -226,7 +260,9 @@ def validate_maintained_text_syntax(document: dict[str, Any]) -> None:
     for context, text in maintained_text_fields(document):
         tokens = parse_maintained_text(text, context=context)
         literal_text = "".join(
-            token["text"] for token in tokens if token["type"] == "text"
+            token.get("text", "")
+            for token in tokens
+            if token["type"] in {"text", "review-needed"}
         )
         match = _UNMARKED_DISTANCE_PATTERN.search(literal_text)
         if match is not None:
