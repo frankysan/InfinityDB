@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download one timestamped local mirror snapshot of the Infinity wiki.
+"""Download one timestamped local mirror snapshot of a configured Infinity MediaWiki site.
 
 The downloader stages the mirror in a local work directory, rewrites local links,
 then stores the complete result as a timestamped ZIP archive. Optional history mode
@@ -47,31 +47,12 @@ except ImportError:  # pragma: no cover - direct script execution fallback
 
 sanitize_path_component = _sanitize_path_component
 
-ROOT_URL = "https://infinitythewiki.com/"
-SUPPORTED_LANGUAGES = ("en", "es")
-LANGUAGE_ROOT_URLS = {
-    "en": ROOT_URL,
-    "es": urllib.parse.urljoin(ROOT_URL, "es/"),
-}
-LANGUAGE_API_URLS = {
-    "en": urllib.parse.urljoin(ROOT_URL, "api.php"),
-    "es": urllib.parse.urljoin(ROOT_URL, "wiki-es/api.php"),
-}
-LANGUAGE_INDEX_URLS = {
-    "en": urllib.parse.urljoin(ROOT_URL, "index.php"),
-    "es": urllib.parse.urljoin(ROOT_URL, "wiki-es/index.php"),
-}
 HISTORY_DIRECTORY = "_history"
 HISTORY_INDEX_FORMAT = "InfinityDB wiki revision history"
 HISTORY_INDEX_VERSION = 1
 FETCH_ATTEMPTS = 5
 FETCH_RETRY_DELAYS = (1.0, 2.0, 4.0, 8.0)
 RETRYABLE_HTTP_STATUS = frozenset({408, 425, 429, 500, 502, 503, 504})
-LANGUAGE_ACCEPT_HEADERS = {
-    "en": "en-US,en;q=0.9",
-    "es": "es-ES,es;q=0.9,en;q=0.5",
-}
-ALLOWED_HOSTS = {"infinitythewiki.com", "assets.corvusbelli.net"}
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:155.0) Gecko/20100101 Firefox/155.0"
 ASSET_EXTENSIONS = frozenset(
     {
@@ -90,6 +71,95 @@ ASSET_EXTENSIONS = frozenset(
         ".woff2",
     }
 )
+
+
+class WikiSite(NamedTuple):
+    """Static acquisition contract for one MediaWiki installation."""
+
+    key: str
+    label: str
+    languages: tuple[str, ...]
+    root_urls: dict[str, str]
+    api_urls: dict[str, str]
+    index_urls: dict[str, str]
+    page_hosts: frozenset[str]
+    canonical_host: str
+    asset_hosts: frozenset[str]
+    archive_prefix: str
+    archive_language: bool
+    project_namespaces: frozenset[str]
+    ignored_namespaces: frozenset[str] = frozenset()
+    ignored_path_prefixes: tuple[str, ...] = ()
+    ignored_discovered_http_statuses: frozenset[int] = frozenset()
+    enumerate_pages: bool = False
+    request_delay_seconds: float = 0.0
+    page_path_suffix: str = ""
+    windows_portable_paths: bool = False
+
+
+INFINITY_WIKI_SITE = WikiSite(
+    key="infinity-wiki",
+    label="Infinity Wiki",
+    languages=("en", "es"),
+    root_urls={
+        "en": "https://infinitythewiki.com/",
+        "es": "https://infinitythewiki.com/es/",
+    },
+    api_urls={
+        "en": "https://infinitythewiki.com/api.php",
+        "es": "https://infinitythewiki.com/wiki-es/api.php",
+    },
+    index_urls={
+        "en": "https://infinitythewiki.com/index.php",
+        "es": "https://infinitythewiki.com/wiki-es/index.php",
+    },
+    page_hosts=frozenset({"infinitythewiki.com"}),
+    canonical_host="infinitythewiki.com",
+    asset_hosts=frozenset({"assets.corvusbelli.net"}),
+    archive_prefix="WIKI",
+    archive_language=True,
+    project_namespaces=frozenset({"infinity"}),
+)
+
+HUMAN_SPHERE_SITE = WikiSite(
+    key="human-sphere",
+    label="Human Sphere",
+    languages=("en",),
+    root_urls={"en": "https://www.human-sphere.com/Main_Page"},
+    api_urls={"en": "https://www.human-sphere.com/api.php"},
+    index_urls={"en": "https://www.human-sphere.com/index.php"},
+    page_hosts=frozenset({"human-sphere.com", "www.human-sphere.com"}),
+    canonical_host="www.human-sphere.com",
+    asset_hosts=frozenset(),
+    archive_prefix="HUMAN-SPHERE",
+    archive_language=False,
+    project_namespaces=frozenset({"human sphere"}),
+    ignored_namespaces=frozenset({"talk"}),
+    ignored_path_prefixes=("/rest.php/", "/cdn-cgi/"),
+    ignored_discovered_http_statuses=frozenset({404}),
+    enumerate_pages=True,
+    request_delay_seconds=0.5,
+    page_path_suffix=".html",
+    windows_portable_paths=True,
+)
+
+WIKI_SITES = {
+    INFINITY_WIKI_SITE.key: INFINITY_WIKI_SITE,
+    HUMAN_SPHERE_SITE.key: HUMAN_SPHERE_SITE,
+}
+DEFAULT_SITE = INFINITY_WIKI_SITE
+
+# Backwards-compatible public constants used by existing callers/tests.
+ROOT_URL = DEFAULT_SITE.root_urls["en"]
+SUPPORTED_LANGUAGES = DEFAULT_SITE.languages
+LANGUAGE_ROOT_URLS = DEFAULT_SITE.root_urls
+LANGUAGE_API_URLS = DEFAULT_SITE.api_urls
+LANGUAGE_INDEX_URLS = DEFAULT_SITE.index_urls
+LANGUAGE_ACCEPT_HEADERS = {
+    "en": "en-US,en;q=0.9",
+    "es": "es-ES,es;q=0.9,en;q=0.5",
+}
+ALLOWED_HOSTS = set(DEFAULT_SITE.page_hosts | DEFAULT_SITE.asset_hosts)
 
 
 class WikiLink(NamedTuple):
@@ -243,19 +313,50 @@ class LinkExtractor(HTMLParser):
             self.links.append(WikiLink(value=value, asset=asset))
 
 
-def page_title_from_html(html_text: str) -> str | None:
+def _require_site_language(site: WikiSite, language: str) -> None:
+    if language not in site.languages:
+        choices = ", ".join(site.languages)
+        raise ValueError(
+            f"Unsupported {site.label} language {language!r}; expected one of: {choices}"
+        )
+
+
+def _site_accept_language(language: str) -> str:
+    return LANGUAGE_ACCEPT_HEADERS.get(language, f"{language},en;q=0.5")
+
+
+def _site_archive_prefix(
+    site: WikiSite,
+    *,
+    language: str,
+    include_history: bool,
+) -> str:
+    _require_site_language(site, language)
+    prefix = site.archive_prefix
+    if site.archive_language:
+        prefix = f"{prefix}-{language}"
+    if include_history:
+        prefix = f"{prefix}-history"
+    return prefix
+
+
+def page_title_from_html(
+    html_text: str,
+    *,
+    site: WikiSite = DEFAULT_SITE,
+    language: str = "en",
+) -> str | None:
     """Extract the MediaWiki source title from a rendered page footer link."""
+    _require_site_language(site, language)
     parser = LinkExtractor()
     parser.feed(html_text)
-    valid_paths = {
-        urllib.parse.urlsplit(url).path for url in LANGUAGE_INDEX_URLS.values()
-    }
+    valid_path = urllib.parse.urlsplit(site.index_urls[language]).path
     for link in reversed(parser.links):
-        candidate = urllib.parse.urljoin(ROOT_URL, link.value)
+        candidate = urllib.parse.urljoin(site.root_urls[language], link.value)
         parsed = urllib.parse.urlsplit(candidate)
-        if (parsed.hostname or "").lower() != "infinitythewiki.com":
+        if (parsed.hostname or "").lower() not in site.page_hosts:
             continue
-        if parsed.path not in valid_paths:
+        if parsed.path != valid_path:
             continue
         query = urllib.parse.parse_qs(parsed.query)
         if query.get("oldid") and query.get("title"):
@@ -263,14 +364,22 @@ def page_title_from_html(html_text: str) -> str | None:
     return None
 
 
-def page_title_from_url(url: str, *, language: str) -> str:
+def page_title_from_url(
+    url: str,
+    *,
+    language: str,
+    site: WikiSite = DEFAULT_SITE,
+) -> str:
     """Derive a MediaWiki title from a language-scoped pretty URL."""
-    if language not in SUPPORTED_LANGUAGES:
-        raise ValueError(f"Unsupported wiki language: {language}")
+    _require_site_language(site, language)
     path = urllib.parse.unquote(urllib.parse.urlsplit(url).path).strip("/")
-    if language == "es" and path.casefold() == "es":
+    if site is INFINITY_WIKI_SITE and language == "es" and path.casefold() == "es":
         return "Página principal"
-    if language == "es" and path.casefold().startswith("es/"):
+    if (
+        site is INFINITY_WIKI_SITE
+        and language == "es"
+        and path.casefold().startswith("es/")
+    ):
         path = path[3:]
     if not path:
         return "Main Page" if language == "en" else "Página principal"
@@ -282,10 +391,10 @@ def revision_query_url(
     *,
     language: str,
     continuation: str | None = None,
+    site: WikiSite = DEFAULT_SITE,
 ) -> str:
     """Build one MediaWiki API request that enumerates page revisions."""
-    if language not in SUPPORTED_LANGUAGES:
-        raise ValueError(f"Unsupported wiki language: {language}")
+    _require_site_language(site, language)
     params = {
         "action": "query",
         "format": "json",
@@ -298,32 +407,83 @@ def revision_query_url(
     }
     if continuation is not None:
         params["rvcontinue"] = continuation
-    return f"{LANGUAGE_API_URLS[language]}?{urllib.parse.urlencode(params)}"
+    return f"{site.api_urls[language]}?{urllib.parse.urlencode(params)}"
 
 
-def oldid_url(title: str, oldid: int, *, language: str) -> str:
+def oldid_url(
+    title: str,
+    oldid: int,
+    *,
+    language: str,
+    site: WikiSite = DEFAULT_SITE,
+) -> str:
     """Build the rendered source URL for one exact MediaWiki revision."""
-    if language not in SUPPORTED_LANGUAGES:
-        raise ValueError(f"Unsupported wiki language: {language}")
+    _require_site_language(site, language)
     query = urllib.parse.urlencode(
         {"title": title, "oldid": str(oldid), "redirect": "no"}
     )
-    return f"{LANGUAGE_INDEX_URLS[language]}?{query}"
+    return f"{site.index_urls[language]}?{query}"
+
+
+def allpages_query_url(
+    *,
+    language: str,
+    continuation: str | None = None,
+    site: WikiSite = DEFAULT_SITE,
+) -> str:
+    """Build one MediaWiki request enumerating main-namespace content pages."""
+    _require_site_language(site, language)
+    params = {
+        "action": "query",
+        "format": "json",
+        "formatversion": "2",
+        "list": "allpages",
+        "apnamespace": "0",
+        "aplimit": "max",
+    }
+    if continuation is not None:
+        params["apcontinue"] = continuation
+    return f"{site.api_urls[language]}?{urllib.parse.urlencode(params)}"
+
+
+def page_url_from_title(
+    title: str,
+    *,
+    language: str,
+    site: WikiSite = DEFAULT_SITE,
+) -> str:
+    """Return a same-site pretty URL for one main-namespace MediaWiki title."""
+    _require_site_language(site, language)
+    root = urllib.parse.urlsplit(site.root_urls[language])
+    base_path = "/"
+    if site is INFINITY_WIKI_SITE and language == "es":
+        base_path = "/es/"
+    title_path = urllib.parse.quote(title.replace(" ", "_"), safe="/:()")
+    return urllib.parse.urlunsplit(
+        (root.scheme, site.canonical_host, f"{base_path}{title_path}", "", "")
+    )
 
 
 def fetch_page_revisions(
     page: WikiPage,
     *,
     language: str,
+    site: WikiSite = DEFAULT_SITE,
 ) -> tuple[str, tuple[WikiRevision, ...]]:
     """Return every public revision advertised for one mirrored page."""
+    _require_site_language(site, language)
     continuation: str | None = None
     revisions: list[WikiRevision] = []
     canonical_title: str | None = None
 
     while True:
-        url = revision_query_url(page.title, language=language, continuation=continuation)
-        payload = fetch_bytes(url, language=language)
+        url = revision_query_url(
+            page.title,
+            language=language,
+            continuation=continuation,
+            site=site,
+        )
+        payload = fetch_site_bytes(url, language=language, site=site)
         try:
             document = json.loads(payload)
         except json.JSONDecodeError as exc:
@@ -378,12 +538,62 @@ def fetch_page_revisions(
     return canonical_title, tuple(revisions)
 
 
+def fetch_all_page_titles(
+    *,
+    language: str,
+    site: WikiSite = DEFAULT_SITE,
+) -> tuple[str, ...]:
+    """Return all main-namespace MediaWiki page titles for a configured site."""
+    _require_site_language(site, language)
+    continuation: str | None = None
+    titles: list[str] = []
+
+    while True:
+        url = allpages_query_url(
+            language=language,
+            continuation=continuation,
+            site=site,
+        )
+        payload = fetch_site_bytes(url, language=language, site=site)
+        try:
+            document = json.loads(payload)
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                f"Invalid MediaWiki allpages response for {site.label}: {exc}"
+            ) from exc
+        if not isinstance(document, dict):
+            raise ValueError(f"Invalid MediaWiki allpages response for {site.label}")
+        query = document.get("query")
+        page_records = query.get("allpages") if isinstance(query, dict) else None
+        if not isinstance(page_records, list):
+            raise ValueError(f"MediaWiki allpages response is invalid for {site.label}")
+        for record in page_records:
+            if not isinstance(record, dict):
+                raise ValueError(f"MediaWiki allpages entry is invalid for {site.label}")
+            title = record.get("title")
+            if not isinstance(title, str) or not title:
+                raise ValueError(f"MediaWiki allpages entry has no title for {site.label}")
+            titles.append(title)
+
+        continuation_record = document.get("continue")
+        if not isinstance(continuation_record, dict):
+            break
+        next_continuation = continuation_record.get("apcontinue")
+        if not isinstance(next_continuation, str) or not next_continuation:
+            raise ValueError(f"MediaWiki allpages continuation is invalid for {site.label}")
+        continuation = next_continuation
+
+    return tuple(titles)
+
+
 def _history_index_payload(
     *,
     language: str,
     pages: list[dict[str, object]],
     revision_count: int,
+    site: WikiSite = DEFAULT_SITE,
 ) -> bytes:
+    _require_site_language(site, language)
     document = {
         "format": HISTORY_INDEX_FORMAT,
         "formatVersion": HISTORY_INDEX_VERSION,
@@ -391,8 +601,8 @@ def _history_index_payload(
         "pages": pages,
         "revisionCount": revision_count,
         "source": {
-            "apiUrl": LANGUAGE_API_URLS[language],
-            "indexUrl": LANGUAGE_INDEX_URLS[language],
+            "apiUrl": site.api_urls[language],
+            "indexUrl": site.index_urls[language],
         },
     }
     return (
@@ -405,11 +615,11 @@ def download_wiki_history(
     destination: Path,
     *,
     language: str = "en",
+    site: WikiSite = DEFAULT_SITE,
     progress: Callable[[WikiHistoryProgress], None] | None = None,
 ) -> WikiHistoryResult:
     """Download all rendered oldid revisions for the mirrored current pages."""
-    if language not in SUPPORTED_LANGUAGES:
-        raise ValueError(f"Unsupported wiki language: {language}")
+    _require_site_language(site, language)
     if not pages:
         raise ValueError("Historical wiki acquisition requires at least one mirrored page")
 
@@ -420,11 +630,15 @@ def download_wiki_history(
 
     for page_number, page in enumerate(pages, start=1):
         try:
-            canonical_title, revisions = fetch_page_revisions(page, language=language)
+            canonical_title, revisions = fetch_page_revisions(
+                page,
+                language=language,
+                site=site,
+            )
         except Exception as exc:  # pragma: no cover - live network failure path.
             failures.append(
                 WikiDownloadFailure(
-                    url=revision_query_url(page.title, language=language),
+                    url=revision_query_url(page.title, language=language, site=site),
                     error=f"{type(exc).__name__}: {exc}",
                 )
             )
@@ -432,7 +646,12 @@ def download_wiki_history(
 
         revision_records: list[dict[str, object]] = []
         for revision in revisions:
-            source_url = oldid_url(canonical_title, revision.oldid, language=language)
+            source_url = oldid_url(
+                canonical_title,
+                revision.oldid,
+                language=language,
+                site=site,
+            )
             if progress is not None:
                 progress(
                     WikiHistoryProgress(
@@ -452,7 +671,11 @@ def download_wiki_history(
                     saved_oldids.add(revision.oldid)
                 else:
                     try:
-                        payload = fetch_bytes(source_url, language=language)
+                        payload = fetch_site_bytes(
+                            source_url,
+                            language=language,
+                            site=site,
+                        )
                     except Exception as exc:  # pragma: no cover - live network failure path.
                         failures.append(
                             WikiDownloadFailure(
@@ -490,6 +713,7 @@ def download_wiki_history(
             language=language,
             pages=history_pages,
             revision_count=len(saved_oldids),
+            site=site,
         ),
     )
     files.add(index_path)
@@ -502,28 +726,54 @@ def download_wiki_history(
     )
 
 
-def ignored_url_reason(url: str) -> str | None:
+def ignored_url_reason(url: str, *, site: WikiSite = DEFAULT_SITE) -> str | None:
     """Return why an optional site URL does not affect snapshot completeness."""
     parsed = urllib.parse.urlsplit(url)
-    if (parsed.hostname or "").lower() != "infinitythewiki.com":
+    if (parsed.hostname or "").lower() not in site.page_hosts:
         return None
 
     path = urllib.parse.unquote(parsed.path or "/")
-    if path.casefold() == "/favicon.ico":
+    folded_path = path.casefold()
+    if folded_path == "/favicon.ico":
         return "optional site favicon"
+    if any(folded_path.startswith(prefix.casefold()) for prefix in site.ignored_path_prefixes):
+        return "optional site service endpoint"
 
-    segments = [segment for segment in path.split("/") if segment]
-    if any(segment.casefold().startswith("infinity:") for segment in segments):
+    segments = [segment.replace("_", " ").casefold() for segment in path.split("/") if segment]
+    if any(
+        any(segment.startswith(f"{namespace}:") for namespace in site.project_namespaces)
+        for segment in segments
+    ):
         return "MediaWiki project namespace"
+    if any(
+        any(segment.startswith(f"{namespace}:") for namespace in site.ignored_namespaces)
+        for segment in segments
+    ):
+        return "optional MediaWiki namespace"
 
     return None
 
 
-def should_skip_url(url: str) -> bool:
+def ignored_fetch_failure_reason(
+    exc: BaseException,
+    *,
+    required: bool,
+    site: WikiSite = DEFAULT_SITE,
+) -> str | None:
+    """Return why a failed discovered URL may be omitted from a complete snapshot."""
+    if required or not isinstance(exc, urllib.error.HTTPError):
+        return None
+    if exc.code in site.ignored_discovered_http_statuses:
+        return f"discovered URL returned HTTP {exc.code}"
+    return None
+
+
+def should_skip_url(url: str, *, site: WikiSite = DEFAULT_SITE) -> bool:
     """Return True when a URL should never be mirrored."""
     parsed = urllib.parse.urlparse(url)
     host = (parsed.hostname or "").lower()
-    if host and host not in ALLOWED_HOSTS:
+    allowed_hosts = site.page_hosts | site.asset_hosts
+    if host and host not in allowed_hosts:
         return True
 
     path = urllib.parse.unquote(parsed.path).casefold()
@@ -549,21 +799,33 @@ def is_asset_url(url: str) -> bool:
     return suffix in ASSET_EXTENSIONS or Path(path).name.casefold() == "load.php"
 
 
-def wiki_page_matches_language(url: str, language: str) -> bool:
+def wiki_page_matches_language(
+    url: str,
+    language: str,
+    *,
+    site: WikiSite = DEFAULT_SITE,
+) -> bool:
     """Return whether a wiki page URL belongs to the selected language tree."""
-    if language not in SUPPORTED_LANGUAGES:
-        raise ValueError(f"Unsupported wiki language: {language}")
+    _require_site_language(site, language)
 
     parsed = urllib.parse.urlsplit(url)
-    if (parsed.hostname or "").lower() != "infinitythewiki.com":
+    if (parsed.hostname or "").lower() not in site.page_hosts:
         return False
+
+    if site is not INFINITY_WIKI_SITE:
+        return True
 
     path = urllib.parse.unquote(parsed.path or "/").casefold()
     is_spanish = path == "/es" or path.startswith("/es/")
     return is_spanish if language == "es" else not is_spanish
 
 
-def canonical_crawl_url(url: str, *, asset: bool = False) -> str:
+def canonical_crawl_url(
+    url: str,
+    *,
+    asset: bool = False,
+    site: WikiSite = DEFAULT_SITE,
+) -> str:
     """Return the fetch identity used for one mirrored page or asset.
 
     Wiki page query/fragment variants map to the same persisted page and are
@@ -571,10 +833,16 @@ def canonical_crawl_url(url: str, *, asset: bool = False) -> str:
     strings remain part of the fetch identity. Fragments never affect fetching.
     """
     parsed = urllib.parse.urlsplit(url)
+    hostname = (parsed.hostname or "").lower()
+    netloc = parsed.netloc.lower()
+    scheme = parsed.scheme.lower()
+    if hostname in site.page_hosts:
+        netloc = site.canonical_host
+        scheme = urllib.parse.urlsplit(site.root_urls[site.languages[0]]).scheme
     return urllib.parse.urlunsplit(
         (
-            parsed.scheme.lower(),
-            parsed.netloc.lower(),
+            scheme,
+            netloc,
             parsed.path or "/",
             parsed.query if asset else "",
             "",
@@ -586,6 +854,7 @@ def local_relative_path(
     url: str,
     *,
     asset: bool = False,
+    site: WikiSite = DEFAULT_SITE,
     os_name: str | None = None,
 ) -> str:
     """Map a mirrored page or asset URL to a relative local filesystem path."""
@@ -599,6 +868,8 @@ def local_relative_path(
             normalized = normalized[1:]
         if not normalized or normalized.endswith("/"):
             normalized = f"{normalized}index.html" if normalized else "index.html"
+        elif not asset and site.page_path_suffix:
+            normalized = f"{normalized}{site.page_path_suffix}"
 
     if asset and parsed.query:
         query_hash = hashlib.sha256(parsed.query.encode("utf-8")).hexdigest()[:12]
@@ -612,7 +883,10 @@ def local_relative_path(
         else:
             normalized = f"{normalized}__q_{query_hash}"
 
-    return sanitize_relative_path(normalized, os_name=os_name)
+    path_os_name = os_name
+    if path_os_name is None and site.windows_portable_paths:
+        path_os_name = "Windows"
+    return sanitize_relative_path(normalized, os_name=path_os_name)
 
 
 def rewrite_html_links(
@@ -620,9 +894,11 @@ def rewrite_html_links(
     base_url: str,
     *,
     language: str = "en",
+    site: WikiSite = DEFAULT_SITE,
     os_name: str | None = None,
 ) -> str:
     """Rewrite included pages/assets to local mirror paths for one language."""
+    _require_site_language(site, language)
     pattern = re.compile(
         r'(?P<attr>\b(?:href|src)\s*=\s*["\'])(?P<value>[^"\']+)(?P<quote>["\'])', re.I
     )
@@ -639,22 +915,26 @@ def rewrite_html_links(
         if value.lower().startswith(("javascript:", "mailto:", "data:")):
             return match.group(0)
 
-        if ignored_url_reason(candidate) is not None:
+        if ignored_url_reason(candidate, site=site) is not None:
             return f"{match.group('attr')}{candidate}{match.group('quote')}"
 
         attr = match.group("attr").lstrip().casefold()
         asset = attr.startswith("src") or is_asset_url(candidate)
 
-        if hostname == "assets.corvusbelli.net":
-            relative = local_relative_path(candidate, asset=True, os_name=os_name)
+        if hostname in site.asset_hosts:
+            relative = local_relative_path(candidate, asset=True, site=site, os_name=os_name)
             if parsed.fragment:
                 relative = f"{relative}#{parsed.fragment}"
             return f"{match.group('attr')}{relative}{match.group('quote')}"
 
-        if hostname == "infinitythewiki.com" or not hostname:
-            if not asset and not wiki_page_matches_language(candidate, language):
+        if hostname in site.page_hosts or not hostname:
+            if not asset and not wiki_page_matches_language(
+                candidate,
+                language,
+                site=site,
+            ):
                 return f"{match.group('attr')}{candidate}{match.group('quote')}"
-            relative = local_relative_path(candidate, asset=asset, os_name=os_name)
+            relative = local_relative_path(candidate, asset=asset, site=site, os_name=os_name)
             if parsed.fragment:
                 relative = f"{relative}#{parsed.fragment}"
             return f"{match.group('attr')}{relative}{match.group('quote')}"
@@ -676,7 +956,7 @@ def fetch_bytes(url: str, *, language: str = "en") -> bytes:
         headers={
             "User-Agent": USER_AGENT,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": LANGUAGE_ACCEPT_HEADERS[language],
+            "Accept-Language": _site_accept_language(language),
             "Connection": "keep-alive",
         },
     )
@@ -689,6 +969,19 @@ def fetch_bytes(url: str, *, language: str = "en") -> bytes:
                 raise
             time.sleep(FETCH_RETRY_DELAYS[attempt])
     raise AssertionError("fetch retry loop exhausted unexpectedly")
+
+
+def fetch_site_bytes(
+    url: str,
+    *,
+    language: str,
+    site: WikiSite = DEFAULT_SITE,
+) -> bytes:
+    """Fetch one site URL, applying any source-specific courtesy delay."""
+    _require_site_language(site, language)
+    if site.request_delay_seconds:
+        time.sleep(site.request_delay_seconds)
+    return fetch_bytes(url, language=language)
 
 
 def write_bytes(path: Path, payload: bytes) -> None:
@@ -704,22 +997,73 @@ def mirror_path_sort_key(path: PurePath, destination: PurePath) -> str:
     return path.relative_to(destination).as_posix()
 
 
+def _migrate_blocking_legacy_page_paths(
+    target: Path,
+    destination: Path,
+    *,
+    site: WikiSite,
+) -> None:
+    """Move legacy extensionless page files that block a new descendant path."""
+    if not site.page_path_suffix:
+        return
+
+    parents: list[Path] = []
+    candidate = target.parent
+    while candidate != destination:
+        parents.append(candidate)
+        if candidate.parent == candidate:
+            raise ValueError(f"Mirror target is outside destination: {target}")
+        candidate = candidate.parent
+
+    for blocker in reversed(parents):
+        if not blocker.is_file():
+            continue
+        migrated = blocker.with_name(f"{blocker.name}{site.page_path_suffix}")
+        if migrated.exists():
+            blocker.unlink()
+        else:
+            blocker.replace(migrated)
+
+
 def download_wiki(
     base_url: str,
     destination: Path,
     *,
     language: str = "en",
+    site: WikiSite = DEFAULT_SITE,
     progress: Callable[[WikiCrawlProgress], None] | None = None,
 ) -> WikiDownloadResult:
     """Crawl one language-scoped mirror candidate without publishing partial data."""
-    if language not in SUPPORTED_LANGUAGES:
-        raise ValueError(f"Unsupported wiki language: {language}")
-    if not wiki_page_matches_language(base_url, language):
+    _require_site_language(site, language)
+    if not wiki_page_matches_language(base_url, language, site=site):
         raise ValueError(f"Wiki root {base_url!r} does not match language {language!r}")
 
-    canonical_base_url = canonical_crawl_url(base_url)
-    queue: deque[tuple[str, bool]] = deque([(canonical_base_url, False)])
-    discovered: set[str] = {canonical_base_url}
+    canonical_base_url = canonical_crawl_url(base_url, site=site)
+    initial_urls = [canonical_base_url]
+    if site.enumerate_pages:
+        try:
+            titles = fetch_all_page_titles(language=language, site=site)
+        except Exception as exc:  # pragma: no cover - live network failure path.
+            return WikiDownloadResult(
+                files=(),
+                failures=(
+                    WikiDownloadFailure(
+                        url=allpages_query_url(language=language, site=site),
+                        error=f"{type(exc).__name__}: {exc}",
+                    ),
+                ),
+            )
+        initial_urls.extend(
+            canonical_crawl_url(
+                page_url_from_title(title, language=language, site=site),
+                site=site,
+            )
+            for title in titles
+        )
+
+    required_urls = set(initial_urls)
+    discovered = set(initial_urls)
+    queue: deque[tuple[str, bool]] = deque((url, False) for url in dict.fromkeys(initial_urls))
     saved: set[Path] = set()
     pages: dict[str, WikiPage] = {}
     failures: list[WikiDownloadFailure] = []
@@ -729,11 +1073,17 @@ def download_wiki(
     while queue:
         url, asset = queue.popleft()
 
-        ignore_reason = ignored_url_reason(url)
+        ignore_reason = ignored_url_reason(url, site=site)
         if ignore_reason is not None:
             ignored[url] = WikiIgnoredURL(url=url, reason=ignore_reason)
             continue
-        if should_skip_url(url):
+        if should_skip_url(url, site=site):
+            continue
+
+        relative = local_relative_path(url, asset=asset, site=site)
+        target = destination / relative
+        if asset and target.is_file():
+            saved.add(target)
             continue
 
         attempted += 1
@@ -750,20 +1100,34 @@ def download_wiki(
             )
 
         try:
-            payload = fetch_bytes(url, language=language)
+            payload = fetch_site_bytes(url, language=language, site=site)
         except Exception as exc:  # pragma: no cover - network failures are expected in real use.
+            failure_ignore_reason = ignored_fetch_failure_reason(
+                exc,
+                required=url in required_urls,
+                site=site,
+            )
+            if failure_ignore_reason is not None:
+                ignored[url] = WikiIgnoredURL(url=url, reason=failure_ignore_reason)
+                continue
             failures.append(
                 WikiDownloadFailure(url=url, error=f"{type(exc).__name__}: {exc}")
             )
             continue
 
-        relative = local_relative_path(url, asset=asset)
-        target = destination / relative
+        _migrate_blocking_legacy_page_paths(target, destination, site=site)
         write_bytes(target, payload)
         saved.add(target)
 
         if asset:
             continue
+
+        if site.page_path_suffix:
+            legacy_site = site._replace(page_path_suffix="")
+            legacy_relative = local_relative_path(url, site=legacy_site)
+            legacy_target = destination / legacy_relative
+            if legacy_target != target and legacy_target.is_file():
+                legacy_target.unlink()
 
         text = payload.decode("utf-8", errors="replace")
         if not any(token in text.lower() for token in ("<html", "<body", "href=", "src=")):
@@ -772,30 +1136,35 @@ def download_wiki(
         pages[url] = WikiPage(
             url=url,
             path=relative,
-            title=page_title_from_html(text) or page_title_from_url(url, language=language),
+            title=page_title_from_html(text, site=site, language=language)
+            or page_title_from_url(url, language=language, site=site),
         )
-        rewritten_text = rewrite_html_links(text, url, language=language)
+        rewritten_text = rewrite_html_links(text, url, language=language, site=site)
         write_bytes(target, rewritten_text.encode("utf-8"))
 
         parser = LinkExtractor()
         parser.feed(text)
         for link in parser.links:
             absolute = urllib.parse.urljoin(url, link.value)
-            candidate = canonical_crawl_url(absolute, asset=link.asset)
+            candidate = canonical_crawl_url(absolute, asset=link.asset, site=site)
             if candidate in discovered:
                 continue
             discovered.add(candidate)
 
-            ignore_reason = ignored_url_reason(candidate)
+            ignore_reason = ignored_url_reason(candidate, site=site)
             if ignore_reason is not None:
                 ignored[candidate] = WikiIgnoredURL(
                     url=candidate,
                     reason=ignore_reason,
                 )
                 continue
-            if should_skip_url(candidate):
+            if should_skip_url(candidate, site=site):
                 continue
-            if not link.asset and not wiki_page_matches_language(candidate, language):
+            if not link.asset and not wiki_page_matches_language(
+                candidate,
+                language,
+                site=site,
+            ):
                 continue
             queue.append((candidate, link.asset))
 
@@ -813,16 +1182,20 @@ def create_wiki_work_directory(
     root: Path,
     *,
     language: str,
+    site: WikiSite = DEFAULT_SITE,
     now: datetime | None = None,
     include_history: bool = False,
 ) -> Path:
     """Create a collision-safe work directory retained when acquisition fails."""
-    if language not in SUPPORTED_LANGUAGES:
-        raise ValueError(f"Unsupported wiki language: {language}")
+    _require_site_language(site, language)
 
     root.mkdir(parents=True, exist_ok=True)
     timestamp = (now or datetime.now().astimezone()).strftime("%Y%m%d-%H%M%S")
-    prefix = f"WIKI-{language}-history" if include_history else f"WIKI-{language}"
+    prefix = _site_archive_prefix(
+        site,
+        language=language,
+        include_history=include_history,
+    )
     candidate = root / f"{prefix} {timestamp}.work"
     counter = 2
     while candidate.exists():
@@ -838,16 +1211,20 @@ def archive_wiki(
     *,
     root: Path,
     language: str = "en",
+    site: WikiSite = DEFAULT_SITE,
     now: datetime | None = None,
     include_history: bool = False,
 ) -> Path:
     """Store one language-labeled wiki snapshot in a timestamped ZIP file."""
-    if language not in SUPPORTED_LANGUAGES:
-        raise ValueError(f"Unsupported wiki language: {language}")
+    _require_site_language(site, language)
     return create_timestamped_archive(
         files,
         destination,
-        prefix=(f"WIKI-{language}-history" if include_history else f"WIKI-{language}"),
+        prefix=_site_archive_prefix(
+            site,
+            language=language,
+            include_history=include_history,
+        ),
         root=root,
         now=now,
     )
@@ -855,6 +1232,15 @@ def archive_wiki(
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--site",
+        choices=tuple(WIKI_SITES),
+        default=DEFAULT_SITE.key,
+        help=(
+            "MediaWiki site to mirror (default: infinity-wiki; "
+            "human-sphere is currently English-only)"
+        ),
+    )
     parser.add_argument(
         "--root",
         type=Path,
@@ -874,7 +1260,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--language",
         choices=SUPPORTED_LANGUAGES,
         default="en",
-        help="Wiki language to mirror (default: en)",
+        help="Wiki language to mirror where supported (default: en)",
     )
     parser.add_argument(
         "--include-history",
@@ -903,6 +1289,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    site = WIKI_SITES[args.site]
+    try:
+        _require_site_language(site, args.language)
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
     snapshot_root = (Path.cwd() / args.root).resolve()
     work_root = (Path.cwd() / args.work_root).resolve()
     snapshot_root.mkdir(parents=True, exist_ok=True)
@@ -911,7 +1303,7 @@ def main(argv: list[str] | None = None) -> int:
     staging_path: Path | None = None
     history_result: WikiHistoryResult | None = None
     progress = ConsoleProgressReporter()
-    root_url = LANGUAGE_ROOT_URLS[args.language]
+    root_url = site.root_urls[args.language]
 
     try:
         started_at = datetime.now().astimezone()
@@ -924,6 +1316,7 @@ def main(argv: list[str] | None = None) -> int:
             staging_path = create_wiki_work_directory(
                 work_root,
                 language=args.language,
+                site=site,
                 now=started_at,
                 include_history=args.include_history,
             )
@@ -933,6 +1326,7 @@ def main(argv: list[str] | None = None) -> int:
                 root_url,
                 staging_path,
                 language=args.language,
+                site=site,
                 progress=progress,
             )
         finally:
@@ -967,6 +1361,7 @@ def main(argv: list[str] | None = None) -> int:
                     result.pages,
                     staging_path,
                     language=args.language,
+                    site=site,
                     progress=history_progress,
                 )
             finally:
@@ -989,6 +1384,7 @@ def main(argv: list[str] | None = None) -> int:
             snapshot_root,
             root=staging_path,
             language=args.language,
+            site=site,
             now=acquired_at,
             include_history=args.include_history,
         )

@@ -197,7 +197,16 @@ The wiki snapshot downloader is also available independently:
 ```powershell
 python tools/download_wiki_snapshot.py
 python tools/download_wiki_snapshot.py --language es
+python tools/download_wiki_snapshot.py --site human-sphere
+python tools/download_wiki_snapshot.py --site human-sphere --include-history
 ```
+
+The default site remains the official Infinity Wiki. Human Sphere acquisition is English-only,
+uses a distinct `HUMAN-SPHERE ...zip` archive identity, and enumerates MediaWiki content pages
+before following rendered links so unlinked main-namespace pages are not silently omitted. That
+enumerated main-namespace inventory defines required Human Sphere content; stale discovered 404s,
+Talk pages, and site-service endpoints are recorded as ignored rather than making a healthy mirror
+unpublishable. Both sources keep incomplete work for inspection and publish only complete snapshots.
 
 ## Common commands
 
