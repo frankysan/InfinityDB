@@ -202,10 +202,8 @@ function variantSection(variant, parameterSemantics) {
   const count = document.createElement("span");
   count.className = "section-index";
   const semanticLabel = sourceVariantLabel(variant);
-  const deferredRules = (variant.rules || []).filter((rule) => !hasGameplayRuleFacts(rule));
   const unitCount = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
-  const summaryParts = [semanticLabel, deferredRules.length ? "Variant rules" : null, unitCount]
-    .filter(Boolean);
+  const summaryParts = [semanticLabel, unitCount].filter(Boolean);
   count.textContent = summaryParts.join(" · ");
   heading.append(title, count);
   section.append(heading);
@@ -220,9 +218,6 @@ function variantSection(variant, parameterSemantics) {
     const container = document.createElement("div");
     container.className = "table-viewport";
     container.append(table);
-    if (deferredRules.length) {
-      section.append(rulesReferenceSection(deferredRules, "Variant rules"));
-    }
     section.append(container);
     section.dataset.loaded = "true";
   });
