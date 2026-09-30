@@ -21,9 +21,10 @@ New or materially revised entries use the project-domain labels defined in
   and cross-link directly, while Impetuous remains canonically a Skill and is surfaced alongside
   them as a related activation rather than being misclassified as an Order.
 - **Data processing + Web frontend:** Restore the concrete Strategos L1/L2 effects from the core
-  rules and present source-specific gameplay rules before the collapsed Unit-usage sections, while
-  keeping identity-only source variants such as Martial Arts levels out of the player-facing usage
-  view.
+  rules and present variant/level gameplay differences before collapsed Unit-usage sections across
+  the reference catalogs. Level-based Equipment such as Multispectral Visor now uses a compact
+  comparison table, identity-only variants stay out of the player-facing rule view, and Army symbols
+  use the same bounded, wrapping availability-column layout in the Unit Explorer and usage tables.
 
 ## [0.9.0] - 2026-09-29
 

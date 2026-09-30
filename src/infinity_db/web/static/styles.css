@@ -1788,6 +1788,10 @@ h1>span {
   color: var(--color-text-secondary);
 }
 
+.level-effects-list {
+  margin: 0;
+}
+
 .rules-relations {
   gap: 8px;
 }
@@ -2851,6 +2855,20 @@ input::placeholder {
   width: 1%;
 }
 
+.data-table--unit-list .table-column--primary {
+  width: 52%;
+}
+
+.data-table--unit-list .table-column--descriptor {
+  width: 48%;
+  min-width: 14rem;
+}
+
+.data-table--unit-usage tbody th,
+.data-table--unit-usage tbody td {
+  vertical-align: top;
+}
+
 .table-column--metric,
 .table-column--technical {
   white-space: nowrap;
@@ -3408,15 +3426,13 @@ html[data-distance-unit="in"] .unit-extended-statline {
 }
 
 .army-tags {
-  --symbols-per-row: 10;
-  display: grid;
-  grid-template-columns: repeat(var(--symbols-per-row), max-content);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
+  min-width: 0;
+  max-width: 100%;
   font-size: var(--font-size-sm);
-}
-
-.army-tags-compact {
-  --symbols-per-row: 12;
 }
 
 .army-tags-compact .army-symbol {
@@ -3681,13 +3697,6 @@ html[data-distance-unit="in"] .unit-extended-statline {
     --table-cell-padding: 11px 14px;
   }
 
-  .army-tags {
-    --symbols-per-row: 8;
-  }
-
-  .army-tags-compact {
-    --symbols-per-row: 9;
-  }
 }
 
 @media (max-width: 920px) {
@@ -3835,13 +3844,6 @@ html[data-distance-unit="in"] .unit-extended-statline {
     gap: 20px;
   }
 
-  .army-tags {
-    --symbols-per-row: 6;
-  }
-
-  .army-tags-compact {
-    --symbols-per-row: 7;
-  }
 
   h1 {
     font-size: var(--font-size-title-md);
@@ -4230,12 +4232,7 @@ html[data-distance-unit="in"] .unit-extended-statline {
     height: 26px;
   }
 
-  .army-tags {
-    --symbols-per-row: 4;
-  }
-
   .army-tags-compact {
-    --symbols-per-row: 6;
     gap: 3px;
   }
 

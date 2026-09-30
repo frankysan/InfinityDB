@@ -243,14 +243,16 @@ def maintained_text_fields(document: dict[str, Any]) -> Iterator[tuple[str, str]
                         f"records[{index}].facts.levels[{level_index}].requirement",
                         requirement,
                     )
-                bonuses = level.get("bonuses")
-                if isinstance(bonuses, list):
-                    for bonus_index, bonus in enumerate(bonuses):
-                        if isinstance(bonus, str):
+                for key in ("bonuses", "effects"):
+                    values = level.get(key)
+                    if not isinstance(values, list):
+                        continue
+                    for value_index, text in enumerate(values):
+                        if isinstance(text, str):
                             yield (
                                 f"records[{index}].facts.levels[{level_index}]"
-                                f".bonuses[{bonus_index}]",
-                                bonus,
+                                f".{key}[{value_index}]",
+                                text,
                             )
 
 

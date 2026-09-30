@@ -1985,17 +1985,22 @@ def test_listing_tables_use_semantic_column_layout(app: Callable) -> None:
 
     status, _, units = request(app, "/units")
     assert status == 200
-    assert b'class="data-table--listing data-table--interactive"' in units
+    assert b'class="data-table--listing data-table--unit-list data-table--interactive"' in units
     assert b'class="table-column--primary" scope="col">Unit</th>' in units
     assert b'class="table-column--descriptor" scope="col">Available in</th>' in units
     assert b'class="id-column table-column--technical" scope="col">Unit ID</th>' in units
 
-    assert_css_rule(styles, ".army-tags", {"--symbols-per-row": "4"})
     assert_css_rule(
         styles,
-        ".army-tags-compact",
-        {"--symbols-per-row": "6", "gap": "3px"},
+        ".army-tags",
+        {
+            "display": "flex",
+            "flex-wrap": "wrap",
+            "min-width": "0",
+            "max-width": "100%",
+        },
     )
+    assert_css_rule(styles, ".army-tags-compact", {"gap": "3px"})
     assert_css_rule(
         styles,
         ".army-tags-compact .army-symbol",
@@ -2052,11 +2057,29 @@ def test_secondary_tables_use_shared_semantic_layout(app: Callable) -> None:
         ".data-table--profile .table-column--metric",
         {"width": "1%", "text-align": "center"},
     )
+    assert_css_rule(
+        styles,
+        ".data-table--unit-list .table-column--primary",
+        {"width": "52%"},
+    )
+    assert_css_rule(
+        styles,
+        ".data-table--unit-list .table-column--descriptor",
+        {"width": "48%", "min-width": "14rem"},
+    )
+    assert_css_rule(
+        styles,
+        ".data-table--unit-usage tbody th, .data-table--unit-usage tbody td",
+        {"vertical-align": "top"},
+    )
 
     status, _, skill = request(app, "/static/skill.js")
     assert status == 200
     assert b'data-table--compact data-table--reference' in skill
-    assert b'data-table--compact data-table--listing data-table--interactive' in skill
+    assert (
+        b'data-table--compact data-table--listing data-table--unit-list '
+        b'data-table--unit-usage data-table--interactive' in skill
+    )
     assert b'{ label: "Program", role: "primary" }' in skill
     assert b'{ label: "Attack MOD", role: "metric" }' in skill
     assert b'{ label: "Target", role: "descriptor" }' in skill
@@ -2065,7 +2088,10 @@ def test_secondary_tables_use_shared_semantic_layout(app: Callable) -> None:
     assert status == 200
     assert b"function tableViewport(table, className = \"\")" in catalog_detail
     assert b'data-table--compact data-table--profile weapon-statline' in catalog_detail
-    assert b'data-table--compact data-table--listing data-table--interactive' in catalog_detail
+    assert (
+        b'data-table--compact data-table--listing data-table--unit-list '
+        b'data-table--unit-usage data-table--interactive' in catalog_detail
+    )
     assert b'cell.className = "table-column--metric";' in catalog_detail
 
     status, _, hacking = request(app, "/static/hacking-program-detail.js")
@@ -4372,7 +4398,11 @@ def test_catalog_detail_frontend_renders_typed_source_variant_labels(
     assert status == 200
     assert b"function sourceVariantLabel(variant)" in body
     assert b'if (semantics.kind === "named") return semantics.label;' in body
-    assert b'variant.rules?.length ? "Variant rules" : null' in body
+    assert b'const summaryParts = [semanticLabel, unitCount].filter(Boolean);' in body
+    assert b"gameplayVariantRules(item.variants)" in body
+    assert b"levelEffectsSection(item.rules)" in body
+    assert b'rulesReferenceSection(variantRules, "Variant rules")' in body
+    assert b"section.append(rulesReferenceSection(variant.rules" not in body
     assert b'count.textContent = summaryParts.join(" \xc2\xb7 ");' in body
 
 
@@ -4382,7 +4412,8 @@ def test_skill_detail_frontend_flags_exact_variant_rules_before_expansion(
     status, _, body = request(app, "/static/skill.js")
 
     assert status == 200
-    assert b"function hasGameplayRuleFacts(rule)" in body
+    assert b'from "./rules-reference.js"' in body
+    assert b"gameplayVariantRules(variants)" in body
     assert b'const summaryParts = [semanticLabel, unitCount].filter(Boolean);' in body
     assert b"deferredRules" not in body
     assert b'rulesReferenceSection(variantRules, "Variant rules")' in body
@@ -4559,6 +4590,9 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"rule.collection?.title" in body
     assert b"rule.supplements || []" in body
     assert b"Additional rules context" in body
+    assert b"export function levelEffectsSection(rules)" in body
+    assert b"fact_tokens?.levels?.[levelIndex]?.effects" in body
+    assert b"level-effects-table" in body
     assert b'["requirements", "Requirements"]' in body
     assert b'["effects", "Effects"]' in body
     assert b'["restrictions", "Restrictions"]' in body

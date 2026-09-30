@@ -7714,10 +7714,37 @@
             },
             "facts": {
                 "effects": [
-                    "Level 1 reduces [[skill:mimetism]] (-3) to 0 and [[skill:mimetism]] (-6) to -3.",
-                    "Levels 2 and 3 reduce [[skill:mimetism]] MODs to 0.",
-                    "All Levels interact with Visibility Zones and Smoke; Levels 2 and 3 remove Visibility Zone MODs while drawing LoF through those Zones.",
-                    "Level 3 additionally improves [[skill:discover]] against Camouflaged targets, ignores specified [[skill:surprise-attack]] MODs, and can [[skill:bs-attack]] a Camouflage Marker in LoF without first succeeding at [[skill:discover]] during the Active Turn; the Marker’s [[skill:mimetism]] MOD still applies to that attack."
+                    "The Level listed for the user supplies its defined [[skill:mimetism]], Visibility Zone, [[ammunition:smoke|Smoke Ammunition]], and camouflage-countering effects."
+                ],
+                "levels": [
+                    {
+                        "level": 1,
+                        "effects": [
+                            "Reduces [[skill:mimetism]] (-3) and Low Visibility Zone MODs to 0.",
+                            "Reduces [[skill:mimetism]] (-6) and Poor Visibility Zone MODs to -3.",
+                            "Allows the user to draw LoF through Zero Visibility Zones, applying a -6 MOD to Skills that require LoF.",
+                            "The user does not make Face to Face Rolls against weapons using [[ammunition:smoke|Smoke Ammunition]]."
+                        ]
+                    },
+                    {
+                        "level": 2,
+                        "effects": [
+                            "Reduces MODs from [[skill:mimetism]] and Visibility Zones to 0.",
+                            "Allows the user to draw LoF through Visibility Zones without applying those Zones' MODs to Skills that require LoF.",
+                            "The user does not make Face to Face Rolls against weapons using [[ammunition:smoke|Smoke Ammunition]]."
+                        ]
+                    },
+                    {
+                        "level": 3,
+                        "effects": [
+                            "Reduces MODs from [[skill:mimetism]] and Visibility Zones to 0.",
+                            "Allows the user to draw LoF through Visibility Zones without applying those Zones' MODs to Skills that require LoF.",
+                            "The user does not make Face to Face Rolls against weapons using [[ammunition:smoke|Smoke Ammunition]].",
+                            "A [[skill:discover]] WIP Roll against a target in [[state:camouflaged|Camouflaged State]] automatically succeeds.",
+                            "Ignores [[skill:surprise-attack]] MODs when the user has LoF to the attacker, and also ignores [[skill:surprise-attack|Surprise Attack]] MODs from [[skill:cc-attack|CC Attacks]] without LoF to the attacker.",
+                            "During the Active Turn, the user may declare a [[skill:bs-attack]] against a [[state:camouflaged|Camouflage Marker]] in LoF without first succeeding at [[skill:discover]]; the Marker's [[skill:mimetism]] MOD still applies and the usual [[state:camouflaged|Camouflaged State]] Cancellation clauses apply."
+                        ]
+                    }
                 ]
             },
             "armyLinks": [
@@ -7734,7 +7761,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-09-30"
             },
             "variantSemantics": {
                 "inheritance": "family"

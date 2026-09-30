@@ -327,7 +327,9 @@ preserving source spelling in source storage.
 
 Exact source variants may belong to a family through typed `variant-of` semantics while retaining
 their own source-specific facts. Family grouping must not imply that every Level/named variant has
-identical rules.
+identical rules. When the authoritative rule is naturally level-based, a family definition may also
+carry reviewed `facts.levels` entries so the browser can present the level differences as one
+comparison surface instead of duplicating near-identical rule cards.
 
 ### Typed relations
 

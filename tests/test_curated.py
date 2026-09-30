@@ -1631,6 +1631,20 @@ def test_checked_in_n5_collection_models_mimetism_affected_rolls() -> None:
     ]
 
 
+def test_checked_in_n5_collection_models_multispectral_visor_levels() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    facts = records["equipment:multispectral-visor"]["facts"]
+    assert len(facts["effects"]) == 1
+    levels = facts["levels"]
+    assert [level["level"] for level in levels] == [1, 2, 3]
+    assert [len(level["effects"]) for level in levels] == [4, 3, 6]
+    assert "[[ammunition:smoke|Smoke Ammunition]]" in levels[0]["effects"][3]
+    assert "[[state:camouflaged|Camouflage Marker]]" in levels[2]["effects"][5]
+
+
 def test_checked_in_n5_collection_models_silent_dodge_modifier() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
