@@ -183,6 +183,15 @@ function structuredReferenceSection(reference) {
   return null;
 }
 
+function hasGameplayRuleFacts(rule) {
+  return [rule, ...(rule?.supplements || [])].some((contribution) => {
+    const facts = contribution?.facts || {};
+    return ["requirements", "effects", "restrictions"].some(
+      (key) => Array.isArray(facts[key]) && facts[key].length,
+    );
+  });
+}
+
 function variantSection(variant, parameterSemantics) {
   const section = document.createElement("details");
   section.className = "surface surface--clipped content-frame army-profile";
@@ -193,8 +202,9 @@ function variantSection(variant, parameterSemantics) {
   const count = document.createElement("span");
   count.className = "section-index";
   const semanticLabel = sourceVariantLabel(variant);
+  const deferredRules = (variant.rules || []).filter((rule) => !hasGameplayRuleFacts(rule));
   const unitCount = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
-  const summaryParts = [semanticLabel, variant.rules?.length ? "Variant rules" : null, unitCount]
+  const summaryParts = [semanticLabel, deferredRules.length ? "Variant rules" : null, unitCount]
     .filter(Boolean);
   count.textContent = summaryParts.join(" · ");
   heading.append(title, count);
@@ -210,8 +220,8 @@ function variantSection(variant, parameterSemantics) {
     const container = document.createElement("div");
     container.className = "table-viewport";
     container.append(table);
-    if (variant.rules?.length) {
-      section.append(rulesReferenceSection(variant.rules, "Variant rules"));
+    if (deferredRules.length) {
+      section.append(rulesReferenceSection(deferredRules, "Variant rules"));
     }
     section.append(container);
     section.dataset.loaded = "true";
@@ -245,6 +255,10 @@ function render(skill) {
   sections.className = "detail-group usage-section-group";
   const children = [];
   if (skill.rules?.length) children.push(rulesReferenceSection(skill.rules));
+  const variantRules = variants.flatMap((variant) =>
+    (variant.rules || []).filter(hasGameplayRuleFacts),
+  );
+  if (variantRules.length) children.push(rulesReferenceSection(variantRules, "Variant rules"));
   const structuredReference = structuredReferenceSection(skill.structured_reference);
   if (structuredReference) children.push(structuredReference);
   children.push(sections);

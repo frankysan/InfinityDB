@@ -6760,6 +6760,13 @@
                 "category": "special-skill",
                 "typeIds": [
                     "automatic"
+                ],
+                "requirements": [
+                    "The user must be the army's [[skill:lieutenant]]."
+                ],
+                "effects": [
+                    "During the Deployment Phase, the player may set aside two Troopers and their [[skill:peripheral|Peripherals]] to deploy after the opponent instead of the usual one.",
+                    "At the beginning of the Active Turn, during Order Count, replace any Special Lieutenant Orders with Regular Orders and add them to the Order Pool of the [[skill:lieutenant]]'s Combat Group."
                 ]
             },
             "labelIds": [],
@@ -6783,7 +6790,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-09-30"
             },
             "variantSemantics": {
                 "inheritance": "source",
@@ -6817,6 +6824,14 @@
                 "category": "special-skill",
                 "typeIds": [
                     "automatic"
+                ],
+                "requirements": [
+                    "The user must be the army's [[skill:lieutenant]]."
+                ],
+                "effects": [
+                    "During the Tactical Phase's Executive Use of Command Tokens step, the user may transfer one Trooper and their [[skill:peripheral|Peripherals]] to a different Combat Group without spending a Command Token.",
+                    "During the Deployment Phase, the player may set aside two Troopers and their [[skill:peripheral|Peripherals]] to deploy after the opponent instead of the usual one.",
+                    "At the beginning of the Active Turn, during Order Count, replace any Special Lieutenant Orders with Regular Orders and add them to the Order Pool of the [[skill:lieutenant]]'s Combat Group."
                 ]
             },
             "labelIds": [],
@@ -6840,7 +6855,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-09-30"
             },
             "variantSemantics": {
                 "inheritance": "source",

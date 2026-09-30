@@ -5,6 +5,16 @@ Entries describe meaningful release outcomes rather than detailed implementation
 New or materially revised entries use the project-domain labels defined in
 `docs/project-domains.md`; historical release notes are not retroactively relabeled.
 
+## [Unreleased]
+
+### Fixed
+
+- **Web backend + Web frontend:** Add same-category navigation to category-backed General Rules
+  details, so related concepts such as Tactical Order and Special Lieutenant Order are directly
+  reachable from one another.
+- **Data processing + Web frontend:** Restore the concrete Strategos L1/L2 effects from the core
+  rules and present source-specific Skill rules before the collapsed Unit-usage sections.
+
 ## [0.9.0] - 2026-09-29
 
 ### Added

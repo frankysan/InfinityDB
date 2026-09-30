@@ -1232,6 +1232,19 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
     assert strategos["requirements"] == ["The user must be the army's [[skill:lieutenant]]."]
     assert "Order Count" in strategos["effects"][0]
 
+    strategos_l1 = records["skill:strategos-l1"]["facts"]
+    assert strategos_l1["requirements"] == strategos["requirements"]
+    assert len(strategos_l1["effects"]) == 2
+    assert "two Troopers" in strategos_l1["effects"][0]
+    assert "Special Lieutenant Orders" in strategos_l1["effects"][1]
+    assert "Regular Orders" in strategos_l1["effects"][1]
+
+    strategos_l2 = records["skill:strategos-l2"]["facts"]
+    assert strategos_l2["requirements"] == strategos["requirements"]
+    assert len(strategos_l2["effects"]) == 3
+    assert "without spending a Command Token" in strategos_l2["effects"][0]
+    assert strategos_l2["effects"][1:] == strategos_l1["effects"]
+
     super_jump = records["skill:super-jump"]["facts"]
     assert "Basic Short Skill" in super_jump["effects"][0]
     assert "plus [[distance:4:inch]]" in super_jump["effects"][1]

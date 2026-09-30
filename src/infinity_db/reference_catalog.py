@@ -78,13 +78,40 @@ class RulesRecordCatalog:
             record_slug = self._slug(record)
             if record_slug != slug:
                 continue
-            return {
+            item = {
                 "id": record_slug,
                 "slug": record_slug,
                 "name": record["name"],
                 "description": record["summary"],
                 "rules": [deepcopy(record)],
             }
+            facts = record.get("facts")
+            category = facts.get("category") if isinstance(facts, dict) else None
+            if self.domain.record_categories and isinstance(category, str):
+                item["category"] = category
+                peers = []
+                for candidate in self._records():
+                    candidate_facts = candidate.get("facts")
+                    candidate_category = (
+                        candidate_facts.get("category")
+                        if isinstance(candidate_facts, dict)
+                        else None
+                    )
+                    if candidate["id"] == record["id"] or candidate_category != category:
+                        continue
+                    candidate_slug = self._slug(candidate)
+                    peers.append(
+                        {
+                            "id": candidate_slug,
+                            "slug": candidate_slug,
+                            "name": candidate["name"],
+                        }
+                    )
+                if peers:
+                    item["category_peers"] = sorted(
+                        peers, key=lambda peer: (peer["name"].casefold(), peer["id"])
+                    )
+            return item
         return None
 
 

@@ -324,6 +324,16 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
         "tactical-order",
     }
     assert general_rules.get_item("fireteam-general") is None
+    tactical_order = general_rules.get_item("tactical-order")
+    assert tactical_order is not None
+    assert tactical_order["category"] == "order-type"
+    assert tactical_order["category_peers"] == [
+        {
+            "id": "special-lieutenant-order",
+            "slug": "special-lieutenant-order",
+            "name": "Special Lieutenant Order",
+        }
+    ]
     servant = general_rules.get_item("peripheral-type-servant")
     assert servant is not None
     assert servant["rules"][0]["id"] == "rule:peripheral-type:servant"

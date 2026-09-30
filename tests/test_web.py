@@ -4356,7 +4356,9 @@ def test_skill_detail_frontend_flags_exact_variant_rules_before_expansion(
     status, _, body = request(app, "/static/skill.js")
 
     assert status == 200
-    assert b'variant.rules?.length ? "Variant rules" : null' in body
+    assert b"function hasGameplayRuleFacts(rule)" in body
+    assert b'deferredRules.length ? "Variant rules" : null' in body
+    assert b'rulesReferenceSection(variantRules, "Variant rules")' in body
     assert b'count.textContent = summaryParts.join(" \xc2\xb7 ");' in body
 
 

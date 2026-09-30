@@ -68,6 +68,28 @@ function usedBySection(items) {
   return section;
 }
 
+function categoryPeersSection(items) {
+  if (!Array.isArray(items) || !items.length) return null;
+
+  const section = document.createElement("section");
+  section.className = "surface surface--subtle detail-section reference-detail-section";
+  const heading = document.createElement("h2");
+  heading.className = "surface-titlebar surface-titlebar--ruled";
+  heading.textContent = "Same category";
+  const list = document.createElement("ul");
+  list.className = "reference-usage-list";
+  for (const reference of items) {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = `/${catalog}/${encodeURIComponent(reference.slug || reference.id)}`;
+    link.textContent = reference.name;
+    item.append(link);
+    list.append(item);
+  }
+  section.append(heading, list);
+  return section;
+}
+
 function render(item) {
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
@@ -75,6 +97,8 @@ function render(item) {
   const sections = item.rules?.length
     ? [rulesReferenceSection(item.rules)]
     : [definitionSection(item)];
+  const categoryPeers = categoryPeersSection(item.category_peers);
+  if (categoryPeers) sections.push(categoryPeers);
   const usedBy = usedBySection(item.used_by);
   if (usedBy) sections.push(usedBy);
   content.replaceChildren(...sections);
