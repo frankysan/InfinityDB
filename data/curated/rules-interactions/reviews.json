@@ -1300,6 +1300,20 @@
       "reviewedOn": "2026-09-24"
     },
     {
+      "recordId": "rule:regular-order",
+      "targetRelease": "0.9.1",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-30",
+      "note": "Public General Rules projection of the reviewed Regular training/order semantics; the record adds no authored outbound interaction relations."
+    },
+    {
+      "recordId": "rule:irregular-order",
+      "targetRelease": "0.9.1",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-30",
+      "note": "Public General Rules projection of the reviewed Irregular training/order semantics; the record adds no authored outbound interaction relations."
+    },
+    {
       "recordId": "rule:special-lieutenant-order",
       "targetRelease": "0.7.0",
       "status": "reviewed",

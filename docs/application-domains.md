@@ -267,9 +267,12 @@ must therefore remain part of semantic identity and linking.
 `rules` is the generic top-level fallback for rules/reference concepts that do not have a clearer
 canonical top-level domain. It is now published through `/rules` as a normal catalog/detail domain.
 The current publication owns the `basic-rule`, `order-type`, `command-token-use`, and
-`peripheral-type` categories from canonical `rule:*` records. Qualified internal identities such as
-`rule:peripheral-type:servant` keep that canonical identity while projecting to a collision-checked
-public route slug such as `/rules/peripheral-type-servant`.
+`peripheral-type` categories from canonical `rule:*` records. The `order-type` category covers the
+four N5 Order types: Regular, Irregular, Special Lieutenant, and Tactical. Impetuous remains owned
+by the Skills domain because it grants a phase activation without spending an Order; General Rules
+may surface it as a related cross-domain reference without changing that ownership. Qualified
+internal identities such as `rule:peripheral-type:servant` keep that canonical identity while
+projecting to a collision-checked public route slug such as `/rules/peripheral-type-servant`.
 
 A concept belongs here because **General Rules is its best semantic owner**, not merely because the
 concept is inconvenient to classify. Fireteam general/bonus records remain owned by the Fireteams

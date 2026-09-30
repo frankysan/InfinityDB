@@ -1,7 +1,7 @@
 import { formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
-import { rulesReferenceSection } from "./rules-reference.js";
+import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
@@ -194,15 +194,14 @@ function variantSection(variant, parameterSemantics) {
   count.className = "section-index";
   const semanticLabel = sourceVariantLabel(variant);
   const unitCount = `${variant.units.length} ${variant.units.length === 1 ? "unit" : "units"}`;
-  const summaryParts = [semanticLabel, variant.rules?.length ? "Variant rules" : null, unitCount]
-    .filter(Boolean);
+  const summaryParts = [semanticLabel, unitCount].filter(Boolean);
   count.textContent = summaryParts.join(" · ");
   heading.append(title, count);
   section.append(heading);
   section.addEventListener("toggle", () => {
     if (!section.open || section.dataset.loaded) return;
     const table = document.createElement("table");
-    table.className = "data-table--compact data-table--listing data-table--interactive";
+    table.className = "data-table--compact data-table--listing data-table--unit-list data-table--unit-usage data-table--interactive";
     table.innerHTML = "<caption class=\"sr-only\">Units using this skill variant</caption><thead><tr><th class=\"table-column--primary\" scope=\"col\">Unit</th><th class=\"table-column--descriptor\" scope=\"col\">Armies</th><th class=\"id-column table-column--technical\" scope=\"col\">ID</th></tr></thead>";
     const body = document.createElement("tbody");
     renderUnitRows(body, variant.units);
@@ -210,9 +209,6 @@ function variantSection(variant, parameterSemantics) {
     const container = document.createElement("div");
     container.className = "table-viewport";
     container.append(table);
-    if (variant.rules?.length) {
-      section.append(rulesReferenceSection(variant.rules, "Variant rules"));
-    }
     section.append(container);
     section.dataset.loaded = "true";
   });
@@ -245,6 +241,8 @@ function render(skill) {
   sections.className = "detail-group usage-section-group";
   const children = [];
   if (skill.rules?.length) children.push(rulesReferenceSection(skill.rules));
+  const variantRules = gameplayVariantRules(variants);
+  if (variantRules.length) children.push(rulesReferenceSection(variantRules, "Variant rules"));
   const structuredReference = structuredReferenceSection(skill.structured_reference);
   if (structuredReference) children.push(structuredReference);
   children.push(sections);

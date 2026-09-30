@@ -175,6 +175,8 @@ Metric and identifier values normally use `nowrap`. Numeric comparison columns s
 
 Descriptor text may wrap when it contains natural prose or several independent tokens. Individual badges/tokens should not break internally. When a descriptor represents a record-wide classification rather than row-specific data, prefer moving it to the surface header/titlebar instead of reserving a sparse table column.
 
+Collections of compact symbols or badges are not ordinary content-sized descriptors. When a column presents a potentially large availability or membership set, give that collection a reusable bounded column role with enough horizontal space to wrap into rows; do not let intrinsic sizing collapse it to one token per line. Equivalent collections should use the same geometry everywhere they appear.
+
 ### Developer mode is additive
 
 Enabling developer mode should expose technical information without needlessly changing the geometry of the core table.

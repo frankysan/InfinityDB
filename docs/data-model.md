@@ -315,6 +315,10 @@ vocabularies. Fireteam general rules remain owned by the Fireteams surface.
 A semantic identity may exist without a dedicated detail route. Search/Glossary/presentation code
 must preserve kind/domain and not merge same-name concepts from different namespaces.
 
+Cross-domain discovery may additionally use reviewed `facts.relatedCategories` category slugs.
+This adds navigation only: it does not change the record's canonical kind/domain, primary category,
+or typed rules relationships.
+
 ### Declaration categories and exact source variants
 
 Declaration/action categories are composition metadata rather than standalone public rule records.
@@ -323,7 +327,9 @@ preserving source spelling in source storage.
 
 Exact source variants may belong to a family through typed `variant-of` semantics while retaining
 their own source-specific facts. Family grouping must not imply that every Level/named variant has
-identical rules.
+identical rules. When the authoritative rule is naturally level-based, a family definition may also
+carry reviewed `facts.levels` entries so the browser can present the level differences as one
+comparison surface instead of duplicating near-identical rule cards.
 
 ### Typed relations
 

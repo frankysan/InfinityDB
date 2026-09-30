@@ -115,9 +115,10 @@ def _enrich_rule_record(record: dict[str, Any], resolver: _Resolver) -> None:
             requirement = level.get("requirement")
             if isinstance(requirement, str):
                 level_item["requirement"] = resolver.tokens(requirement)
-            bonuses = level.get("bonuses")
-            if isinstance(bonuses, list) and all(isinstance(value, str) for value in bonuses):
-                level_item["bonuses"] = [resolver.tokens(value) for value in bonuses]
+            for key in ("bonuses", "effects"):
+                values = level.get(key)
+                if isinstance(values, list) and all(isinstance(value, str) for value in values):
+                    level_item[key] = [resolver.tokens(value) for value in values]
             level_tokens.append(level_item or None)
         if any(tokens is not None for tokens in level_tokens):
             fact_tokens["levels"] = level_tokens

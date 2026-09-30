@@ -1788,6 +1788,10 @@ h1>span {
   color: var(--color-text-secondary);
 }
 
+.level-effects-list {
+  margin: 0;
+}
+
 .rules-relations {
   gap: 8px;
 }
@@ -2516,38 +2520,23 @@ h2 {
   color: var(--color-text-label);
 }
 
-.availability-field {
-  border: 0;
-  padding: 0;
-  margin: 0;
+.optional-unit-view-field {
+  flex: 1;
   min-width: 0;
 }
 
-.availability-field legend {
-  padding: 0;
+.optional-unit-view-label {
+  display: block;
+  color: var(--color-text-label);
   font-size: var(--font-size-sm);
   font-weight: 550;
-  color: var(--color-text-label);
 }
 
-.availability-options {
-  display: flex;
-  gap: 12px;
-  min-height: 42px;
-  align-items: center;
-}
-
-.availability-options label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-}
-
-.availability-options input {
-  width: auto;
-  min-height: 0;
-  accent-color: var(--color-action-primary);
+.optional-unit-view-value {
+  margin: 5px 0 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
 }
 
 .army-field {
@@ -2864,6 +2853,20 @@ input::placeholder {
 .data-table--listing .table-column--metric,
 .data-table--listing .table-column--technical {
   width: 1%;
+}
+
+.data-table--unit-list .table-column--primary {
+  width: 52%;
+}
+
+.data-table--unit-list .table-column--descriptor {
+  width: 48%;
+  min-width: 14rem;
+}
+
+.data-table--unit-usage tbody th,
+.data-table--unit-usage tbody td {
+  vertical-align: top;
 }
 
 .table-column--metric,
@@ -3423,15 +3426,13 @@ html[data-distance-unit="in"] .unit-extended-statline {
 }
 
 .army-tags {
-  --symbols-per-row: 10;
-  display: grid;
-  grid-template-columns: repeat(var(--symbols-per-row), max-content);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
+  min-width: 0;
+  max-width: 100%;
   font-size: var(--font-size-sm);
-}
-
-.army-tags-compact {
-  --symbols-per-row: 12;
 }
 
 .army-tags-compact .army-symbol {
@@ -3696,13 +3697,6 @@ html[data-distance-unit="in"] .unit-extended-statline {
     --table-cell-padding: 11px 14px;
   }
 
-  .army-tags {
-    --symbols-per-row: 8;
-  }
-
-  .army-tags-compact {
-    --symbols-per-row: 9;
-  }
 }
 
 @media (max-width: 920px) {
@@ -3850,13 +3844,6 @@ html[data-distance-unit="in"] .unit-extended-statline {
     gap: 20px;
   }
 
-  .army-tags {
-    --symbols-per-row: 6;
-  }
-
-  .army-tags-compact {
-    --symbols-per-row: 7;
-  }
 
   h1 {
     font-size: var(--font-size-title-md);
@@ -4245,12 +4232,7 @@ html[data-distance-unit="in"] .unit-extended-statline {
     height: 26px;
   }
 
-  .army-tags {
-    --symbols-per-row: 4;
-  }
-
   .army-tags-compact {
-    --symbols-per-row: 6;
     gap: 3px;
   }
 
