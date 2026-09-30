@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **82/93** complete, **11** pending.
+- Supporting semantic identities: **84/95** complete, **11** pending.
 - Current authored outgoing relations: **262**.
 - Explicitly tracked future/deferred interactions: **115**.
 
@@ -846,6 +846,15 @@ review. `declaration-category` projection records are excluded.
 - [x] **Unit Profile** (`term:unit-profile`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
   - outgoing: none
 - [x] **Victory Points** (`term:victory-points`) — reviewed: Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself.
+  - outgoing: none
+
+### 0.9.1
+
+#### Rule (2/2)
+
+- [x] **Irregular Order** (`rule:irregular-order`) — reviewed: Public General Rules projection of the reviewed Irregular training/order semantics; the record adds no authored outbound interaction relations.
+  - outgoing: none
+- [x] **Regular Order** (`rule:regular-order`) — reviewed: Public General Rules projection of the reviewed Regular training/order semantics; the record adds no authored outbound interaction relations.
   - outgoing: none
 
 ### 1.0.0

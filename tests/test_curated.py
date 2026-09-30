@@ -218,6 +218,22 @@ def test_load_curated_document_requires_structured_scope_and_review(tmp_path: Pa
 
 
 @pytest.mark.parametrize(
+    "related_categories",
+    [[], ["Order Type"], ["order-type", "order-type"]],
+)
+def test_related_categories_require_unique_category_slugs(
+    tmp_path: Path, related_categories: list[str]
+) -> None:
+    document = valid_document()
+    document["records"][0]["facts"]["relatedCategories"] = related_categories
+    path = tmp_path / "bad-related-categories.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="relatedCategories"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     "facts",
     [{}, {"orderType": "tactical"}, {"orderType": "regular", "level": 1}],
 )
@@ -1232,6 +1248,35 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
     assert strategos["requirements"] == ["The user must be the army's [[skill:lieutenant]]."]
     assert "Order Count" in strategos["effects"][0]
 
+    strategos_l1 = records["skill:strategos-l1"]["facts"]
+    assert strategos_l1["requirements"] == strategos["requirements"]
+    assert len(strategos_l1["effects"]) == 2
+    assert "two Troopers" in strategos_l1["effects"][0]
+    assert "Special Lieutenant Orders" in strategos_l1["effects"][1]
+    assert "Regular Orders" in strategos_l1["effects"][1]
+
+    strategos_l2 = records["skill:strategos-l2"]["facts"]
+    assert strategos_l2["requirements"] == strategos["requirements"]
+    assert len(strategos_l2["effects"]) == 3
+    assert "without spending a Command Token" in strategos_l2["effects"][0]
+    assert strategos_l2["effects"][1:] == strategos_l1["effects"]
+
+    impetuous = records["skill:impetuous"]["facts"]
+    assert impetuous["relatedCategories"] == ["order-type"]
+
+    regular_order = records["rule:regular-order"]
+    assert regular_order["facts"]["category"] == "order-type"
+    assert regular_order["citations"] == [
+        {
+            "sourceId": "n5-core-v5.3-pdf",
+            "page": 11,
+            "section": "Types of Orders",
+        }
+    ]
+    irregular_order = records["rule:irregular-order"]
+    assert irregular_order["facts"]["category"] == "order-type"
+    assert "not added" in irregular_order["facts"]["restrictions"][0]
+
     super_jump = records["skill:super-jump"]["facts"]
     assert "Basic Short Skill" in super_jump["effects"][0]
     assert "plus [[distance:4:inch]]" in super_jump["effects"][1]
@@ -1584,6 +1629,20 @@ def test_checked_in_n5_collection_models_mimetism_affected_rolls() -> None:
         {"type": "imposes-modifiers-on", "recordId": "skill:bs-attack"},
         {"type": "imposes-modifiers-on", "recordId": "skill:discover"},
     ]
+
+
+def test_checked_in_n5_collection_models_multispectral_visor_levels() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+
+    facts = records["equipment:multispectral-visor"]["facts"]
+    assert len(facts["effects"]) == 1
+    levels = facts["levels"]
+    assert [level["level"] for level in levels] == [1, 2, 3]
+    assert [len(level["effects"]) for level in levels] == [4, 3, 6]
+    assert "[[ammunition:smoke|Smoke Ammunition]]" in levels[0]["effects"][3]
+    assert "[[state:camouflaged|Camouflage Marker]]" in levels[2]["effects"][5]
 
 
 def test_checked_in_n5_collection_models_silent_dodge_modifier() -> None:

@@ -5,6 +5,36 @@ Entries describe meaningful release outcomes rather than detailed implementation
 New or materially revised entries use the project-domain labels defined in
 `docs/project-domains.md`; historical release notes are not retroactively relabeled.
 
+## [0.9.1] - 2026-09-30
+
+### Changed
+
+- **Web frontend:** Replace the Unit Explorer's duplicate optional-unit controls with a compact
+  status showing whether the URL-owned view matches Settings and, when it does not, which optional
+  unit categories differ. Clearing filters returns the view to the current Settings baseline, while
+  shared views remain reproducible without overwriting the recipient's saved Settings.
+
+### Fixed
+
+- **Data processing + Web backend + Web frontend:** Publish Regular Order and Irregular Order as
+  General Rules alongside Special Lieutenant Order and Tactical Order, so all four Order types
+  cross-link through the `order-type` category. Impetuous remains a Skill and is surfaced as a
+  related reference rather than being misclassified as an Order.
+- **Data processing + Web frontend:** Publish the concrete Strategos L1/L2 effects from the core
+  rules and surface gameplay-bearing source variants before collapsed Unit-usage sections while
+  keeping identity-only variants out of the player-facing rule view.
+- **Data processing + Web frontend:** Present level-based reference data such as Multispectral
+  Visor in a compact level-effects table between the family rules and Unit-usage sections.
+- **Web frontend:** Keep Army-availability symbols bounded and horizontally wrapping in both the
+  Unit Explorer and reverse Unit-usage tables, preventing dense Army sets from clipping or
+  collapsing into one-symbol-wide columns.
+
+### Upgrade notes
+
+- Deploy the release-matched tracked `data/generated/rules.db` shipped with 0.9.1; it contains the
+  new Order references and reviewed Strategos/Multispectral Visor level content.
+- No Army database rebuild is required solely for 0.9.1.
+
 ## [0.9.0] - 2026-09-29
 
 ### Added

@@ -311,19 +311,49 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
 
     general_rules = RulesRecordCatalog(rules_database, "rules")
     general_rule_items = general_rules.list_items()
-    assert len(general_rule_items) == 9
+    assert len(general_rule_items) == 11
     assert {item["slug"] for item in general_rule_items} == {
         "command-token-strategic-use",
+        "irregular-order",
         "loss-of-lieutenant",
         "peripheral-type-ancillary",
         "peripheral-type-control",
         "peripheral-type-cyberplug",
         "peripheral-type-servant",
         "peripheral-type-synchronized",
+        "regular-order",
         "special-lieutenant-order",
         "tactical-order",
     }
     assert general_rules.get_item("fireteam-general") is None
+    tactical_order = general_rules.get_item("tactical-order")
+    assert tactical_order is not None
+    assert tactical_order["category"] == "order-type"
+    assert tactical_order["category_peers"] == [
+        {
+            "id": "irregular-order",
+            "slug": "irregular-order",
+            "name": "Irregular Order",
+        },
+        {
+            "id": "regular-order",
+            "slug": "regular-order",
+            "name": "Regular Order",
+        },
+        {
+            "id": "special-lieutenant-order",
+            "slug": "special-lieutenant-order",
+            "name": "Special Lieutenant Order",
+        },
+    ]
+    assert tactical_order["related_category_peers"] == [
+        {
+            "id": "skill:impetuous",
+            "name": "Impetuous",
+            "domain": "Skill",
+            "public_reference": {"catalog": "skills", "id": "impetuous"},
+        }
+    ]
     servant = general_rules.get_item("peripheral-type-servant")
     assert servant is not None
     assert servant["rules"][0]["id"] == "rule:peripheral-type:servant"

@@ -400,7 +400,6 @@
           "text": "Camouflage",
           "reason": "marker-state-not-skill",
           "occurrenceSha256s": [
-            "04fc4ccf7a9a00c83b6edbf02200c6e8c7fd3e6a054867a0653fc545da170615",
             "19b0ec780f83cf33a732654c43075dffc4f130377904f9b9c073b6a12d2fff05",
             "9fbfa193d1716a04674fa5f20d79563e481b0783ae95e776c8ac96ad18a7b85e",
             "abae18f39726bed49013b7dc806289e59626bec52adcbdac943460081c4491d5"
@@ -469,6 +468,7 @@
             "cd69eccbc7f94ded68fbe99789a4ee1046051e2afdaa84ffb10b548a52a03790",
             "e04f5ba43e1e219d7d5457739f88377bc762a6d4e518e312f15afe940f00d57e",
             "f0dd97e7281004c8df5acdaddb1d6adb1932853b347f22d4696e1fda821e5378",
+            "f5b6a59fc7118620fce6e3470eb6c0c4b298741d741c49cd9676c7f8ea6fe0a9",
             "f772e5ed8f6ae37dd5f627586b07eae01f7dbd6735af6be983f62315b6bc8fb9",
             "feb6f5bab703c628d1729a614b3a6975ddf9d036fc44a22eea8da7f4009f0bba"
           ]

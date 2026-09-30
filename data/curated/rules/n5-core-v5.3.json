@@ -6760,6 +6760,13 @@
                 "category": "special-skill",
                 "typeIds": [
                     "automatic"
+                ],
+                "requirements": [
+                    "The user must be the army's [[skill:lieutenant]]."
+                ],
+                "effects": [
+                    "During the Deployment Phase, the player may set aside two Troopers and their [[skill:peripheral|Peripherals]] to deploy after the opponent instead of the usual one.",
+                    "At the beginning of the Active Turn, during Order Count, replace any Special Lieutenant Orders with Regular Orders and add them to the Order Pool of the [[skill:lieutenant]]'s Combat Group."
                 ]
             },
             "labelIds": [],
@@ -6783,7 +6790,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-09-30"
             },
             "variantSemantics": {
                 "inheritance": "source",
@@ -6817,6 +6824,14 @@
                 "category": "special-skill",
                 "typeIds": [
                     "automatic"
+                ],
+                "requirements": [
+                    "The user must be the army's [[skill:lieutenant]]."
+                ],
+                "effects": [
+                    "During the Tactical Phase's Executive Use of Command Tokens step, the user may transfer one Trooper and their [[skill:peripheral|Peripherals]] to a different Combat Group without spending a Command Token.",
+                    "During the Deployment Phase, the player may set aside two Troopers and their [[skill:peripheral|Peripherals]] to deploy after the opponent instead of the usual one.",
+                    "At the beginning of the Active Turn, during Order Count, replace any Special Lieutenant Orders with Regular Orders and add them to the Order Pool of the [[skill:lieutenant]]'s Combat Group."
                 ]
             },
             "labelIds": [],
@@ -6840,7 +6855,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-09-30"
             },
             "variantSemantics": {
                 "inheritance": "source",
@@ -7699,10 +7714,37 @@
             },
             "facts": {
                 "effects": [
-                    "Level 1 reduces [[skill:mimetism]] (-3) to 0 and [[skill:mimetism]] (-6) to -3.",
-                    "Levels 2 and 3 reduce [[skill:mimetism]] MODs to 0.",
-                    "All Levels interact with Visibility Zones and Smoke; Levels 2 and 3 remove Visibility Zone MODs while drawing LoF through those Zones.",
-                    "Level 3 additionally improves [[skill:discover]] against Camouflaged targets, ignores specified [[skill:surprise-attack]] MODs, and can [[skill:bs-attack]] a Camouflage Marker in LoF without first succeeding at [[skill:discover]] during the Active Turn; the Marker’s [[skill:mimetism]] MOD still applies to that attack."
+                    "The Level listed for the user supplies its defined [[skill:mimetism]], Visibility Zone, [[ammunition:smoke|Smoke Ammunition]], and camouflage-countering effects."
+                ],
+                "levels": [
+                    {
+                        "level": 1,
+                        "effects": [
+                            "Reduces [[skill:mimetism]] (-3) and Low Visibility Zone MODs to 0.",
+                            "Reduces [[skill:mimetism]] (-6) and Poor Visibility Zone MODs to -3.",
+                            "Allows the user to draw LoF through Zero Visibility Zones, applying a -6 MOD to Skills that require LoF.",
+                            "The user does not make Face to Face Rolls against weapons using [[ammunition:smoke|Smoke Ammunition]]."
+                        ]
+                    },
+                    {
+                        "level": 2,
+                        "effects": [
+                            "Reduces MODs from [[skill:mimetism]] and Visibility Zones to 0.",
+                            "Allows the user to draw LoF through Visibility Zones without applying those Zones' MODs to Skills that require LoF.",
+                            "The user does not make Face to Face Rolls against weapons using [[ammunition:smoke|Smoke Ammunition]]."
+                        ]
+                    },
+                    {
+                        "level": 3,
+                        "effects": [
+                            "Reduces MODs from [[skill:mimetism]] and Visibility Zones to 0.",
+                            "Allows the user to draw LoF through Visibility Zones without applying those Zones' MODs to Skills that require LoF.",
+                            "The user does not make Face to Face Rolls against weapons using [[ammunition:smoke|Smoke Ammunition]].",
+                            "A [[skill:discover]] WIP Roll against a target in [[state:camouflaged|Camouflaged State]] automatically succeeds.",
+                            "Ignores [[skill:surprise-attack]] MODs when the user has LoF to the attacker, and also ignores [[skill:surprise-attack|Surprise Attack]] MODs from [[skill:cc-attack|CC Attacks]] without LoF to the attacker.",
+                            "During the Active Turn, the user may declare a [[skill:bs-attack]] against a [[state:camouflaged|Camouflage Marker]] in LoF without first succeeding at [[skill:discover]]; the Marker's [[skill:mimetism]] MOD still applies and the usual [[state:camouflaged|Camouflaged State]] Cancellation clauses apply."
+                        ]
+                    }
                 ]
             },
             "armyLinks": [
@@ -7719,7 +7761,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-09-30"
             },
             "variantSemantics": {
                 "inheritance": "family"
@@ -12396,6 +12438,9 @@
             },
             "facts": {
                 "category": "special-skill",
+                "relatedCategories": [
+                    "order-type"
+                ],
                 "typeIds": [
                     "automatic"
                 ],
@@ -13447,6 +13492,78 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "rule:regular-order",
+            "kind": "rule",
+            "name": "Regular Order",
+            "summary": "An Order contributed by a Regular Trooper to its Combat Group's Order Pool, where it may be spent to activate Troopers in that Combat Group.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "order-type",
+                "effects": [
+                    "The Order contributed by a Regular Trooper is added to its Combat Group's Order Pool.",
+                    "A Regular Order in that Order Pool may be spent to activate any Trooper in the same Combat Group."
+                ],
+                "requirements": [],
+                "restrictions": []
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 11,
+                    "section": "Types of Orders"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-30"
+            }
+        },
+        {
+            "id": "rule:irregular-order",
+            "kind": "rule",
+            "name": "Irregular Order",
+            "summary": "An Order contributed by an Irregular Trooper and kept separate from the Combat Group Order Pool for that Trooper's own use.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "order-type",
+                "effects": [
+                    "The Order contributed by an Irregular Trooper is kept by that Trooper for their own use.",
+                    "An Irregular Trooper may still spend Regular Orders from its Combat Group's Order Pool."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "An Irregular Order is not added to the Combat Group's Order Pool."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 11,
+                    "section": "Types of Orders"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-30"
             }
         },
         {

@@ -1545,10 +1545,11 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert body.count(b'<option value="">Any</option>') >= 3
     assert b'id="extended-results" type="checkbox"' in body
     assert b'</details><label class="extended-results-control">' in body
-    assert b"Include optional units in this view" in body
-    assert b'id="optional-unit-context" class="relationship-filter-context" hidden' in body
+    assert b"Include optional units in this view" not in body
+    assert b'id="optional-unit-context" class="optional-unit-view-value"' in body
+    assert b"View matches optional-unit Settings." in body
     for optional_filter in (b"mercs", b"specops", b"teamops", b"reinforcement"):
-        assert b'id="unit-' + optional_filter + b'-filter" type="checkbox" checked' in body
+        assert b'id="unit-' + optional_filter + b'-filter"' not in body
         assert body.count(b'id="' + optional_filter + b'-filter"') == 1
     for range_filter in (b'ava', b'points', b'swc'):
         assert b'data-range-filter="' + range_filter + b'"' in body
@@ -1585,9 +1586,12 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     )
     assert b'optionalUnitSource: optionalUnits.source' in script
     assert b'optionalUnitInvalid: optionalUnits.invalid' in script
-    assert b'OPTIONAL_UNIT_KEYS.some((key) => !state[key])' in script
-    assert b'mercs: true, specops: true, teamops: true, reinforcement: true' in script
-    assert b'Your saved Settings were not changed.' in script
+    assert b'optionalUnitPreferenceDifferences().length > 0' in script
+    assert b'...optionalUnitFilters(),' in script
+    assert b'View differs from Settings:' in script
+    assert b'View matches optional-unit Settings.' in script
+    assert b'optionalUnitPreferenceDifferences()' in script
+    assert b'byId("unit-mercs-filter")' not in script
     assert b'availabilityField?.remove()' not in script
 
     status, _, unit_list_script = request(app, "/static/unit-list.js")
@@ -1981,17 +1985,22 @@ def test_listing_tables_use_semantic_column_layout(app: Callable) -> None:
 
     status, _, units = request(app, "/units")
     assert status == 200
-    assert b'class="data-table--listing data-table--interactive"' in units
+    assert b'class="data-table--listing data-table--unit-list data-table--interactive"' in units
     assert b'class="table-column--primary" scope="col">Unit</th>' in units
     assert b'class="table-column--descriptor" scope="col">Available in</th>' in units
     assert b'class="id-column table-column--technical" scope="col">Unit ID</th>' in units
 
-    assert_css_rule(styles, ".army-tags", {"--symbols-per-row": "4"})
     assert_css_rule(
         styles,
-        ".army-tags-compact",
-        {"--symbols-per-row": "6", "gap": "3px"},
+        ".army-tags",
+        {
+            "display": "flex",
+            "flex-wrap": "wrap",
+            "min-width": "0",
+            "max-width": "100%",
+        },
     )
+    assert_css_rule(styles, ".army-tags-compact", {"gap": "3px"})
     assert_css_rule(
         styles,
         ".army-tags-compact .army-symbol",
@@ -2048,11 +2057,29 @@ def test_secondary_tables_use_shared_semantic_layout(app: Callable) -> None:
         ".data-table--profile .table-column--metric",
         {"width": "1%", "text-align": "center"},
     )
+    assert_css_rule(
+        styles,
+        ".data-table--unit-list .table-column--primary",
+        {"width": "52%"},
+    )
+    assert_css_rule(
+        styles,
+        ".data-table--unit-list .table-column--descriptor",
+        {"width": "48%", "min-width": "14rem"},
+    )
+    assert_css_rule(
+        styles,
+        ".data-table--unit-usage tbody th, .data-table--unit-usage tbody td",
+        {"vertical-align": "top"},
+    )
 
     status, _, skill = request(app, "/static/skill.js")
     assert status == 200
     assert b'data-table--compact data-table--reference' in skill
-    assert b'data-table--compact data-table--listing data-table--interactive' in skill
+    assert (
+        b'data-table--compact data-table--listing data-table--unit-list '
+        b'data-table--unit-usage data-table--interactive' in skill
+    )
     assert b'{ label: "Program", role: "primary" }' in skill
     assert b'{ label: "Attack MOD", role: "metric" }' in skill
     assert b'{ label: "Target", role: "descriptor" }' in skill
@@ -2061,7 +2088,10 @@ def test_secondary_tables_use_shared_semantic_layout(app: Callable) -> None:
     assert status == 200
     assert b"function tableViewport(table, className = \"\")" in catalog_detail
     assert b'data-table--compact data-table--profile weapon-statline' in catalog_detail
-    assert b'data-table--compact data-table--listing data-table--interactive' in catalog_detail
+    assert (
+        b'data-table--compact data-table--listing data-table--unit-list '
+        b'data-table--unit-usage data-table--interactive' in catalog_detail
+    )
     assert b'cell.className = "table-column--metric";' in catalog_detail
 
     status, _, hacking = request(app, "/static/hacking-program-detail.js")
@@ -3448,7 +3478,9 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 9
+    assert len(general_rules) == 11
+    assert general_rules["regular-order"]["name"] == "Regular Order"
+    assert general_rules["irregular-order"]["name"] == "Irregular Order"
     assert general_rules["loss-of-lieutenant"]["name"] == "Loss of Lieutenant"
     assert general_rules["peripheral-type-servant"]["name"] == "Peripheral (Servant)"
     assert "fireteam-general" not in general_rules
@@ -3471,6 +3503,23 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     )
     assert lieutenant_reference["target"] == "skill:lieutenant"
     assert lieutenant_reference["public_reference"]["catalog"] == "skills"
+
+    status, _, body = request(rules_app, "/api/rules/tactical-order")
+    assert status == 200
+    tactical_order = json.loads(body)
+    assert [item["name"] for item in tactical_order["category_peers"]] == [
+        "Irregular Order",
+        "Regular Order",
+        "Special Lieutenant Order",
+    ]
+    assert tactical_order["related_category_peers"] == [
+        {
+            "id": "skill:impetuous",
+            "name": "Impetuous",
+            "domain": "Skill",
+            "public_reference": {"catalog": "skills", "id": "impetuous"},
+        }
+    ]
 
     status, _, body = request(rules_app, "/api/labels")
     assert status == 200
@@ -3548,6 +3597,9 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     assert status == 200
     assert b'heading.textContent = "Used by"' in detail_script
     assert b"item.used_by" in detail_script
+    assert b'heading.textContent = "Same category"' in detail_script
+    assert b'heading.textContent = "Related"' in detail_script
+    assert b"item.related_category_peers" in detail_script
 
 def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/hacking-programs")
@@ -4346,7 +4398,11 @@ def test_catalog_detail_frontend_renders_typed_source_variant_labels(
     assert status == 200
     assert b"function sourceVariantLabel(variant)" in body
     assert b'if (semantics.kind === "named") return semantics.label;' in body
-    assert b'variant.rules?.length ? "Variant rules" : null' in body
+    assert b'const summaryParts = [semanticLabel, unitCount].filter(Boolean);' in body
+    assert b"gameplayVariantRules(item.variants)" in body
+    assert b"levelEffectsSection(item.rules)" in body
+    assert b'rulesReferenceSection(variantRules, "Variant rules")' in body
+    assert b"section.append(rulesReferenceSection(variant.rules" not in body
     assert b'count.textContent = summaryParts.join(" \xc2\xb7 ");' in body
 
 
@@ -4356,7 +4412,11 @@ def test_skill_detail_frontend_flags_exact_variant_rules_before_expansion(
     status, _, body = request(app, "/static/skill.js")
 
     assert status == 200
-    assert b'variant.rules?.length ? "Variant rules" : null' in body
+    assert b'from "./rules-reference.js"' in body
+    assert b"gameplayVariantRules(variants)" in body
+    assert b'const summaryParts = [semanticLabel, unitCount].filter(Boolean);' in body
+    assert b"deferredRules" not in body
+    assert b'rulesReferenceSection(variantRules, "Variant rules")' in body
     assert b'count.textContent = summaryParts.join(" \xc2\xb7 ");' in body
 
 
@@ -4530,6 +4590,9 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"rule.collection?.title" in body
     assert b"rule.supplements || []" in body
     assert b"Additional rules context" in body
+    assert b"export function levelEffectsSection(rules)" in body
+    assert b"fact_tokens?.levels?.[levelIndex]?.effects" in body
+    assert b"level-effects-table" in body
     assert b'["requirements", "Requirements"]' in body
     assert b'["effects", "Effects"]' in body
     assert b'["restrictions", "Restrictions"]' in body

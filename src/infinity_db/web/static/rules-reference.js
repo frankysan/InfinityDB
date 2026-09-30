@@ -218,6 +218,84 @@ function appendRuleDetails(
   }
 }
 
+
+export function hasGameplayRuleFacts(rule) {
+  return [rule, ...(rule?.supplements || [])].some((contribution) => {
+    const facts = contribution?.facts || {};
+    return ["requirements", "effects", "restrictions"].some(
+      (key) => Array.isArray(facts[key]) && facts[key].length,
+    );
+  });
+}
+
+export function gameplayVariantRules(variants) {
+  const result = [];
+  const seen = new Set();
+  for (const variant of variants || []) {
+    for (const rule of variant.rules || []) {
+      if (!hasGameplayRuleFacts(rule)) continue;
+      const key = rule.id || rule;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push(rule);
+    }
+  }
+  return result;
+}
+
+export function levelEffectsSection(rules) {
+  const rule = (rules || []).find((candidate) => (candidate.facts?.levels || []).some(
+    (level) => Array.isArray(level?.effects) && level.effects.length,
+  ));
+  if (!rule) return null;
+
+  const levels = rule.facts.levels
+    .map((level, index) => ({ level, index }))
+    .filter(({ level }) => Array.isArray(level?.effects) && level.effects.length);
+  const section = document.createElement("section");
+  section.className = "detail-group";
+  const heading = document.createElement("h2");
+  heading.className = "detail-heading";
+  heading.textContent = `${rule.name} levels`;
+
+  const viewport = document.createElement("div");
+  viewport.className = "table-viewport";
+  const table = document.createElement("table");
+  table.className = "data-table--compact data-table--reference level-effects-table";
+  const caption = document.createElement("caption");
+  caption.className = "sr-only";
+  caption.textContent = `${rule.name} level effects`;
+  const head = document.createElement("thead");
+  head.innerHTML = '<tr><th class="table-column--metric" scope="col">Level</th><th class="table-column--descriptor" scope="col">Effects</th></tr>';
+  const body = document.createElement("tbody");
+
+  for (const { level, index: levelIndex } of levels) {
+    const row = document.createElement("tr");
+    const levelCell = document.createElement("th");
+    levelCell.scope = "row";
+    levelCell.className = "table-column--metric";
+    levelCell.textContent = String(level.level);
+    const effectsCell = document.createElement("td");
+    effectsCell.className = "table-column--descriptor";
+    const list = document.createElement("ul");
+    list.className = "detail-list level-effects-list";
+    const tokenRows = rule.fact_tokens?.levels?.[levelIndex]?.effects || [];
+    for (const [effectIndex, effect] of level.effects.entries()) {
+      const item = document.createElement("li");
+      appendMaintainedText(item, tokenRows[effectIndex], effect);
+      list.append(item);
+    }
+    effectsCell.append(list);
+    row.append(levelCell, effectsCell);
+    body.append(row);
+  }
+
+  table.append(caption, head, body);
+  viewport.append(table);
+  section.append(heading, viewport);
+  return section;
+}
+
 export function rulesReferenceArticle(
   rule,
   { leadingContent = [], headerContent = [], beforeRelations = [] } = {},

@@ -18,7 +18,8 @@ from infinity_db.rules_database import export_rules_database
 def test_maintained_text_parser_preserves_text_references_distances_and_escapes() -> None:
     tokens = parse_maintained_text(
         r"Use [[skill:jump]] or [[skill:dodge:plural|Dodge Skills]] with "
-        r"[[attribute:mov|MOV]] within [[distance:+2:inch]]; write \[[literal]] "
+        r"[[attribute:mov|MOV]] within "
+        r"[[distance:+2:inch]]; write \[[literal]] "
         r"for documentation."
     )
 

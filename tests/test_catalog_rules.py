@@ -54,6 +54,11 @@ def test_catalog_rules_surface_msv_mimetism_interaction(tmp_path: Path) -> None:
     result = catalog.enrich_catalog_item("equipment", item)
 
     rule = next(rule for rule in result["rules"] if rule["id"] == "equipment:multispectral-visor")
+    levels = rule["facts"]["levels"]
+    assert [level["level"] for level in levels] == [1, 2, 3]
+    assert "Zero Visibility Zones" in levels[0]["effects"][2]
+    assert "Visibility Zones to 0" in levels[1]["effects"][0]
+    assert "automatically succeeds" in levels[2]["effects"][3]
     assert (
         "reduces-modifiers-from",
         "outbound",
