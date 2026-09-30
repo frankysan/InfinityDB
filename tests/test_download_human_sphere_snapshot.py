@@ -230,6 +230,77 @@ def test_human_sphere_crawl_seeds_orphan_pages_and_follows_assets(
     }
 
 
+@pytest.mark.parametrize("extension", ["pdf", "zip", "rar", "txt"])
+def test_human_sphere_downloadable_files_keep_their_extensions(
+    tmp_path: Path,
+    monkeypatch,
+    extension: str,
+) -> None:
+    site = module.HUMAN_SPHERE_SITE
+    root = site.root_urls["en"]
+    resource = f"https://www.human-sphere.com/downloads/reference.{extension}"
+    pages = {
+        root: (
+            f'<html><body><a href="/downloads/reference.{extension}">Download</a>'
+            "</body></html>"
+        ).encode(),
+        resource: b"download",
+    }
+    monkeypatch.setattr(
+        module,
+        "fetch_all_page_titles",
+        lambda *, language, site: ("Main Page",),
+    )
+    monkeypatch.setattr(module.time, "sleep", lambda _seconds: None)
+    monkeypatch.setattr(
+        module,
+        "fetch_bytes",
+        lambda url, *, language="en": pages[url],
+    )
+
+    result = module.download_wiki(root, tmp_path, language="en", site=site)
+
+    assert result.failures == ()
+    relative = f"downloads/reference.{extension}"
+    assert (tmp_path / relative).read_bytes() == b"download"
+    assert not (tmp_path / f"{relative}.html").exists()
+    mirrored = (tmp_path / "Main_Page.html").read_text(encoding="utf-8")
+    assert f'href="{relative}"' in mirrored
+    assert f"{relative}.html" not in mirrored
+
+
+def test_human_sphere_mediawiki_upload_tree_is_always_an_asset(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    site = module.HUMAN_SPHERE_SITE
+    root = site.root_urls["en"]
+    resource = "https://www.human-sphere.com/images/archive/source.bin"
+    pages = {
+        root: b'<html><body><a href="/images/archive/source.bin">Download</a></body></html>',
+        resource: b"binary",
+    }
+    monkeypatch.setattr(
+        module,
+        "fetch_all_page_titles",
+        lambda *, language, site: ("Main Page",),
+    )
+    monkeypatch.setattr(module.time, "sleep", lambda _seconds: None)
+    monkeypatch.setattr(
+        module,
+        "fetch_bytes",
+        lambda url, *, language="en": pages[url],
+    )
+
+    result = module.download_wiki(root, tmp_path, language="en", site=site)
+
+    assert result.failures == ()
+    assert (tmp_path / "images/archive/source.bin").read_bytes() == b"binary"
+    assert not (tmp_path / "images/archive/source.bin.html").exists()
+    mirrored = (tmp_path / "Main_Page.html").read_text(encoding="utf-8")
+    assert 'href="images/archive/source.bin"' in mirrored
+
+
 def test_human_sphere_page_paths_do_not_collide_with_descendant_assets() -> None:
     site = module.HUMAN_SPHERE_SITE
 

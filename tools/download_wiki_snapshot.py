@@ -65,10 +65,14 @@ ASSET_EXTENSIONS = frozenset(
         ".js",
         ".json",
         ".png",
+        ".pdf",
+        ".rar",
         ".svg",
+        ".txt",
         ".webp",
         ".woff",
         ".woff2",
+        ".zip",
     }
 )
 
@@ -795,8 +799,13 @@ def should_skip_url(url: str, *, site: WikiSite = DEFAULT_SITE) -> bool:
 def is_asset_url(url: str) -> bool:
     """Return whether a URL path is recognizably an asset resource."""
     path = urllib.parse.urlsplit(url).path
+    decoded_path = urllib.parse.unquote(path).casefold()
     suffix = Path(path).suffix.casefold()
-    return suffix in ASSET_EXTENSIONS or Path(path).name.casefold() == "load.php"
+    return (
+        decoded_path.startswith("/images/")
+        or suffix in ASSET_EXTENSIONS
+        or Path(path).name.casefold() == "load.php"
+    )
 
 
 def wiki_page_matches_language(
