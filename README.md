@@ -95,7 +95,8 @@ The current direction is deliberately incremental:
   finish the frontend/theme architecture, and harden release and operations workflows.
 - **1.0.0 — Player data-complete:** every useful in-scope game datum collected by
   InfinityDB has a maintained representation and a meaningful, usable place in the
-  web reference.
+  web reference, including the current core-rules scenarios. ITS season/tournament
+  content remains a later extension of the same scenario model.
 
 In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
 0.9 closed application gaps → 0.10 hardens and polishes → 1.0 completes the reference.**

@@ -26,8 +26,10 @@ finished application model end to end, completing the frontend/theme architectur
 release and operations workflows before the 1.0 data-completeness gate.
 
 General performance/storage experiments, major pipeline refactors,
-persistent-user-data features, ITS tooling, and native applications are explicitly
-post-1.0 unless they become necessary to correct a release-blocking defect.
+persistent-user-data features, ITS season/tournament tooling, and native applications are explicitly
+post-1.0 unless they become necessary to correct a release-blocking defect. Core-rules scenarios are
+part of the 1.0 completeness target; 0.10.0 should establish their architecture without implementing
+the full scenario surface.
 
 The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
 definition lives in `docs/releasing.md`. The sections below contain only
@@ -115,6 +117,28 @@ by the audit remain in scope.
     publication when it is available. Update canonical documentation, `TODO.md`,
     and `CHANGELOG.md` for material findings before closing the audit; feed any
     resulting corrections into the remaining frontend-architecture or theming work.
+
+### Scenario architecture planning
+
+- [ ] **Data processing + Web backend + Web frontend:** Review all current core-rules
+  scenarios together with the two latest ITS scenario sets before freezing the scenario
+  model. Use the comparison as design evidence rather than deriving the schema only from
+  the simpler core material.
+  - [ ] Inventory recurring and variant concepts including scenario identity/version and
+    source scope; table/force configuration; deployment geometry; objectives and scoring;
+    rounds/end conditions; Classified Objectives; scenario-specific rules, roles, Skills/AROs,
+    Equipment, States, and Traits; objective/scenery elements; tokens; exclusions; and other
+    setup constraints.
+  - [ ] Separate universal scenario structure from optional reusable features and
+    ITS/season-specific extensions. Preserve source publication, scenario, season, and
+    applicability independently so later ITS support does not require redesigning a
+    core-only schema.
+  - [ ] Decide the maintained representation only after the review (relational, structured
+    JSON, or a deliberate hybrid). Record the resulting durable model in the canonical
+    architecture/data-model documentation before implementation.
+  - [ ] Ensure the proposed model can later supply deployment-map generation and other
+    scenario tooling from the same structured data rather than requiring a second map or
+    scenario representation.
 
 ### Frontend architecture and theming
 
@@ -222,8 +246,8 @@ by the audit remain in scope.
 ## 1.0.0 — current-reference completeness gate
 
 1.0.0 is the final completeness release for the supported current reference data. It
-should resolve remaining material source/rules gaps and validate the whole application;
-it should not introduce a large new product surface.
+should resolve remaining material source/rules gaps, add the bounded core-scenario reference
+surface, and validate the whole application without expanding into broader ITS/tournament tooling.
 
 ### Rules and reference completeness
 
@@ -258,8 +282,8 @@ it should not introduce a large new product surface.
     Akial Interference`. Keep semantic identity, source publication provenance, and
     applicability separate so the same canonical concept can be cited or overlaid
     by core, scenario, FAQ, or season material without duplication or collection-
-    load-order semantics. This catalog coverage is in scope for 1.0; a complete
-    scenario library and scenario list/detail pages are not.
+    load-order semantics. This catalog coverage is in scope for 1.0 and should share
+    identities/scope with the core-scenario model rather than becoming a parallel representation.
   - [ ] Add the official Reinforcements Extra as a separately versioned/scoped
     annex source rather than folding it into `n5-core-rules`. Curate `Commlink`
     and `Request Reinforcements`, link the capability they create to the annex
@@ -270,6 +294,18 @@ it should not introduce a large new product surface.
       `Request Reinforcements` can be explicitly classified outside Basic Short/
       Short/Long/ARO instead of being treated as incomplete or assigned a false
       category.
+
+- [ ] **Data processing + Web backend + Web frontend:** Add the current core-rules
+  scenarios as a first-class, browsable scenario domain for 1.0, using the model derived
+  from the 0.10.0 core/ITS comparison.
+  - [ ] Maintain structured, cited scenario data sufficient to understand setup, objectives,
+    scoring, deployment, special rules/elements, and end conditions without relying on an
+    unstructured PDF excerpt as the application model.
+  - [ ] Keep the model source/scope-aware and extensible to versioned ITS seasons, but do
+    not make ITS scenario content, tournament/event tooling, or a deployment-map editor a
+    1.0 requirement.
+  - [ ] Provide usable scenario list/detail presentation and links to existing canonical
+    rule/catalog entities where identities overlap.
 
 - [ ] Add a dated FAQ/errata layer to the existing rules-reference system from
   current material under `data/pdf/faq/`.
@@ -497,8 +533,8 @@ portability coverage rather than a prerequisite for the 1.0 application-data gat
     InfinityDB may provide read-only explanation and planning support, but must
     label its snapshot/date and avoid claiming tournament validation.
 
-- [ ] Add ITS scenario list and detail pages backed by a curated seasonal data
-  model, rather than PDF excerpts.
+- [ ] Extend the 1.0 scenario domain with ITS scenario list/detail coverage backed by
+  curated seasonal data, rather than creating a separate ITS-only model or using PDF excerpts.
   - [ ] Capture structured, cited scenario facts: objectives and scoring, game
     rounds/end conditions, force/point/SWC/table/deployment configuration,
     deployment map or geometry, exclusion zones, token types/diameters,

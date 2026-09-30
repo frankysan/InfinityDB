@@ -123,6 +123,21 @@ not competing semantic owners.
 
 `docs/application-domains.md` owns the detailed domain/presentation contract.
 
+### Planned scenario domain
+
+Core-rules scenarios are a required first-class application domain for 1.0. Their maintained model
+must be structured enough to represent setup/deployment, objectives and scoring, end conditions,
+special rules, and relationships to existing canonical rules/catalog entities; scenario pages must
+not use PDF prose as their application data model.
+
+Do not freeze that model from core scenarios alone. The design baseline is a comparative review of
+the core-rules scenarios and the two latest ITS scenario sets, separating common scenario semantics
+from optional features and ITS/season-specific extensions. Source publication, version, scenario,
+season, and applicability remain distinct provenance/scope concerns. This allows later ITS support
+and deployment-map tooling to extend the same scenario representation rather than introducing a
+parallel ITS-only or map-only model. The concrete relational/structured/hybrid storage shape remains
+a planning decision until that review is complete.
+
 ## Identifiers and routing
 
 Application-facing identities use stable domain-local slugs where the domain supports them. Numeric
