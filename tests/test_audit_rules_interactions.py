@@ -20,7 +20,7 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 274
+    assert report["summary"]["recordCount"] == 276
     assert report["summary"]["authoredOutgoingRelationCount"] == 262
     assert report["summary"]["futureInteractionCount"] == 115
     assert report["summary"]["releases"]["0.7.0"] == {
@@ -44,6 +44,14 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "complete": 40,
         "pending": 0,
         "reviewed": 40,
+        "inherited": 0,
+        "percentComplete": 100.0,
+    }
+    assert report["summary"]["releases"]["0.9.1"] == {
+        "total": 2,
+        "complete": 2,
+        "pending": 0,
+        "reviewed": 2,
         "inherited": 0,
         "percentComplete": 100.0,
     }
@@ -100,8 +108,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 93
-    assert report["summary"]["supporting"]["complete"] == 82
+    assert report["summary"]["supporting"]["total"] == 95
+    assert report["summary"]["supporting"]["complete"] == 84
     assert report["summary"]["supporting"]["pending"] == 11
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -531,7 +539,7 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 82/93 complete, 11 pending" in output
+    assert "Supporting identities: 84/95 complete, 11 pending" in output
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:

@@ -12411,6 +12411,9 @@
             },
             "facts": {
                 "category": "special-skill",
+                "relatedCategories": [
+                    "order-type"
+                ],
                 "typeIds": [
                     "automatic"
                 ],
@@ -13462,6 +13465,78 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-09-24"
+            }
+        },
+        {
+            "id": "rule:regular-order",
+            "kind": "rule",
+            "name": "Regular Order",
+            "summary": "An Order contributed by a Regular Trooper to its Combat Group's Order Pool, where it may be spent to activate Troopers in that Combat Group.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "order-type",
+                "effects": [
+                    "The Order contributed by a Regular Trooper is added to its Combat Group's Order Pool.",
+                    "A Regular Order in that Order Pool may be spent to activate any Trooper in the same Combat Group."
+                ],
+                "requirements": [],
+                "restrictions": []
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 11,
+                    "section": "Types of Orders"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-30"
+            }
+        },
+        {
+            "id": "rule:irregular-order",
+            "kind": "rule",
+            "name": "Irregular Order",
+            "summary": "An Order contributed by an Irregular Trooper and kept separate from the Combat Group Order Pool for that Trooper's own use.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "order-type",
+                "effects": [
+                    "The Order contributed by an Irregular Trooper is kept by that Trooper for their own use.",
+                    "An Irregular Trooper may still spend Regular Orders from its Combat Group's Order Pool."
+                ],
+                "requirements": [],
+                "restrictions": [
+                    "An Irregular Order is not added to the Combat Group's Order Pool."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 11,
+                    "section": "Types of Orders"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-09-30"
             }
         },
         {

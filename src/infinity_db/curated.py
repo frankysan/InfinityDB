@@ -166,6 +166,26 @@ def _require_positive_int(value: Any, field: str, context: str) -> None:
         raise ValueError(f"{context}: '{field}' must be a positive integer")
 
 
+def _validate_related_categories(facts: dict[str, Any], context: str) -> None:
+    related_categories = facts.get("relatedCategories")
+    if related_categories is None:
+        return
+    if (
+        not isinstance(related_categories, list)
+        or not related_categories
+        or any(not isinstance(value, str) or not value for value in related_categories)
+    ):
+        raise ValueError(
+            f"{context}.relatedCategories: must be a non-empty array of category slugs"
+        )
+    if len(related_categories) != len(set(related_categories)):
+        raise ValueError(f"{context}.relatedCategories: must not contain duplicates")
+    for index, category in enumerate(related_categories):
+        require_domain_slug(
+            category, context=f"{context}.relatedCategories[{index}]"
+        )
+
+
 def _validate_scope(value: object, context: str) -> None:
     if not isinstance(value, dict):
         raise ValueError(f"{context}: must be an object")
@@ -727,6 +747,9 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         _validate_review(record["review"], f"{context}.review")
         if "facts" in record and not isinstance(record["facts"], dict):
             raise ValueError(f"{context}: 'facts' must be an object")
+        facts = record.get("facts")
+        if isinstance(facts, dict):
+            _validate_related_categories(facts, f"{context}.facts")
         if record["kind"] == "skill":
             facts = record.get("facts")
             if composition_role == "definition":

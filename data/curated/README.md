@@ -310,6 +310,14 @@ browser, with citations; Lieutenant/Tactical Orders and source skill-like
 compatibility rows must not be treated as further Training values. Training
 supplements may add scoped facts but cannot redefine `orderType`.
 
+A reviewed record whose fact schema permits it may use `facts.relatedCategories` to opt into cross-domain
+reference navigation without changing its canonical kind or primary category.
+Values are stable category slugs. This is intentionally weaker than a typed
+record relation: it groups concepts for discovery only and must not be used to
+claim that a concept belongs to that category. For example, Impetuous can be
+surfaced next to Order types while remaining a Special Skill rather than an
+Order.
+
 ### Document shape
 
 The main collection structure is:

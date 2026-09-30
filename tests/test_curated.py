@@ -218,6 +218,22 @@ def test_load_curated_document_requires_structured_scope_and_review(tmp_path: Pa
 
 
 @pytest.mark.parametrize(
+    "related_categories",
+    [[], ["Order Type"], ["order-type", "order-type"]],
+)
+def test_related_categories_require_unique_category_slugs(
+    tmp_path: Path, related_categories: list[str]
+) -> None:
+    document = valid_document()
+    document["records"][0]["facts"]["relatedCategories"] = related_categories
+    path = tmp_path / "bad-related-categories.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="relatedCategories"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
     "facts",
     [{}, {"orderType": "tactical"}, {"orderType": "regular", "level": 1}],
 )
@@ -1244,6 +1260,22 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
     assert len(strategos_l2["effects"]) == 3
     assert "without spending a Command Token" in strategos_l2["effects"][0]
     assert strategos_l2["effects"][1:] == strategos_l1["effects"]
+
+    impetuous = records["skill:impetuous"]["facts"]
+    assert impetuous["relatedCategories"] == ["order-type"]
+
+    regular_order = records["rule:regular-order"]
+    assert regular_order["facts"]["category"] == "order-type"
+    assert regular_order["citations"] == [
+        {
+            "sourceId": "n5-core-v5.3-pdf",
+            "page": 11,
+            "section": "Types of Orders",
+        }
+    ]
+    irregular_order = records["rule:irregular-order"]
+    assert irregular_order["facts"]["category"] == "order-type"
+    assert "not added" in irregular_order["facts"]["restrictions"][0]
 
     super_jump = records["skill:super-jump"]["facts"]
     assert "Basic Short Skill" in super_jump["effects"][0]

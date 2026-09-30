@@ -315,6 +315,10 @@ vocabularies. Fireteam general rules remain owned by the Fireteams surface.
 A semantic identity may exist without a dedicated detail route. Search/Glossary/presentation code
 must preserve kind/domain and not merge same-name concepts from different namespaces.
 
+Cross-domain discovery may additionally use reviewed `facts.relatedCategories` category slugs.
+This adds navigation only: it does not change the record's canonical kind/domain, primary category,
+or typed rules relationships.
+
 ### Declaration categories and exact source variants
 
 Declaration/action categories are composition metadata rather than standalone public rule records.

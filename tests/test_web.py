@@ -3448,7 +3448,9 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 9
+    assert len(general_rules) == 11
+    assert general_rules["regular-order"]["name"] == "Regular Order"
+    assert general_rules["irregular-order"]["name"] == "Irregular Order"
     assert general_rules["loss-of-lieutenant"]["name"] == "Loss of Lieutenant"
     assert general_rules["peripheral-type-servant"]["name"] == "Peripheral (Servant)"
     assert "fireteam-general" not in general_rules
@@ -3471,6 +3473,23 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     )
     assert lieutenant_reference["target"] == "skill:lieutenant"
     assert lieutenant_reference["public_reference"]["catalog"] == "skills"
+
+    status, _, body = request(rules_app, "/api/rules/tactical-order")
+    assert status == 200
+    tactical_order = json.loads(body)
+    assert [item["name"] for item in tactical_order["category_peers"]] == [
+        "Irregular Order",
+        "Regular Order",
+        "Special Lieutenant Order",
+    ]
+    assert tactical_order["related_category_peers"] == [
+        {
+            "id": "skill:impetuous",
+            "name": "Impetuous",
+            "domain": "Skill",
+            "public_reference": {"catalog": "skills", "id": "impetuous"},
+        }
+    ]
 
     status, _, body = request(rules_app, "/api/labels")
     assert status == 200
@@ -3548,6 +3567,9 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     assert status == 200
     assert b'heading.textContent = "Used by"' in detail_script
     assert b"item.used_by" in detail_script
+    assert b'heading.textContent = "Same category"' in detail_script
+    assert b'heading.textContent = "Related"' in detail_script
+    assert b"item.related_category_peers" in detail_script
 
 def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/hacking-programs")

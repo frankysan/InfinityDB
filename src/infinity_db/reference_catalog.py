@@ -5,7 +5,12 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
-from infinity_db.application_domains import application_domain, record_matches_domain
+from infinity_db.application_domains import (
+    APPLICATION_DOMAINS,
+    application_domain,
+    record_matches_domain,
+)
+from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.domain_slugs import (
     route_slug_from_qualified_typed_domain_id,
     route_slug_from_typed_domain_id,
@@ -51,6 +56,49 @@ class RulesRecordCatalog:
             expected_domain=self.record_kind,
             context=f"curated {self.domain.singular_name.lower()} id",
         )
+
+    def _related_category_peers(
+        self, category: str, *, exclude_id: str
+    ) -> list[dict[str, Any]]:
+        if self.rules_database is None:
+            return []
+        peers = []
+        seen: set[tuple[str, str]] = set()
+        for domain in APPLICATION_DOMAINS:
+            if not domain.published or not domain.detail:
+                continue
+            for kind in domain.record_kinds:
+                for candidate in self.rules_database.composed_records_by_kind(kind):
+                    if not record_matches_domain(domain, candidate):
+                        continue
+                    if candidate.get("id") == exclude_id:
+                        continue
+                    facts = candidate.get("facts")
+                    related_categories = (
+                        facts.get("relatedCategories", [])
+                        if isinstance(facts, dict)
+                        else []
+                    )
+                    if category not in related_categories:
+                        continue
+                    if (candidate.get("variant_semantics") or {}).get("inheritance") == "source":
+                        continue
+                    reference = rule_record_public_reference(None, candidate)
+                    if reference is None:
+                        continue
+                    key = (str(candidate["id"]), domain.slug)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    peers.append(
+                        {
+                            "id": candidate["id"],
+                            "name": candidate["name"],
+                            "domain": domain.singular_name,
+                            "public_reference": reference,
+                        }
+                    )
+        return sorted(peers, key=lambda peer: (peer["name"].casefold(), peer["id"]))
 
     def list_items(self) -> list[dict[str, Any]]:
         """Return the current player-facing identities in stable display order."""
@@ -111,6 +159,11 @@ class RulesRecordCatalog:
                     item["category_peers"] = sorted(
                         peers, key=lambda peer: (peer["name"].casefold(), peer["id"])
                     )
+                related_peers = self._related_category_peers(
+                    category, exclude_id=str(record["id"])
+                )
+                if related_peers:
+                    item["related_category_peers"] = related_peers
             return item
         return None
 

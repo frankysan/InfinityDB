@@ -68,6 +68,17 @@ function usedBySection(items) {
   return section;
 }
 
+function publicReferenceHref(reference, fallbackCatalog = null) {
+  if (reference?.href) return reference.href;
+  if (reference?.catalog && reference?.id) {
+    return `/${reference.catalog}/${encodeURIComponent(reference.id)}`;
+  }
+  if (fallbackCatalog && reference?.slug) {
+    return `/${fallbackCatalog}/${encodeURIComponent(reference.slug)}`;
+  }
+  return null;
+}
+
 function categoryPeersSection(items) {
   if (!Array.isArray(items) || !items.length) return null;
 
@@ -81,11 +92,37 @@ function categoryPeersSection(items) {
   for (const reference of items) {
     const item = document.createElement("li");
     const link = document.createElement("a");
-    link.href = `/${catalog}/${encodeURIComponent(reference.slug || reference.id)}`;
+    link.href = publicReferenceHref({ slug: reference.slug || reference.id }, catalog);
     link.textContent = reference.name;
     item.append(link);
     list.append(item);
   }
+  section.append(heading, list);
+  return section;
+}
+
+function relatedCategorySection(items) {
+  if (!Array.isArray(items) || !items.length) return null;
+
+  const section = document.createElement("section");
+  section.className = "surface surface--subtle detail-section reference-detail-section";
+  const heading = document.createElement("h2");
+  heading.className = "surface-titlebar surface-titlebar--ruled";
+  heading.textContent = "Related";
+  const list = document.createElement("ul");
+  list.className = "reference-usage-list";
+  for (const reference of items) {
+    const href = publicReferenceHref(reference.public_reference);
+    if (!href) continue;
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = href;
+    link.textContent = reference.name;
+    item.append(link);
+    if (reference.domain) item.append(` · ${reference.domain}`);
+    list.append(item);
+  }
+  if (!list.childElementCount) return null;
   section.append(heading, list);
   return section;
 }
@@ -99,6 +136,8 @@ function render(item) {
     : [definitionSection(item)];
   const categoryPeers = categoryPeersSection(item.category_peers);
   if (categoryPeers) sections.push(categoryPeers);
+  const relatedCategory = relatedCategorySection(item.related_category_peers);
+  if (relatedCategory) sections.push(relatedCategory);
   const usedBy = usedBySection(item.used_by);
   if (usedBy) sections.push(usedBy);
   content.replaceChildren(...sections);

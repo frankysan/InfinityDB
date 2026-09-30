@@ -9,9 +9,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
-- **Web backend + Web frontend:** Add same-category navigation to category-backed General Rules
-  details, so related concepts such as Tactical Order and Special Lieutenant Order are directly
-  reachable from one another.
+- **Data processing + Web backend + Web frontend:** Complete General Rules navigation for Orders:
+  Regular, Irregular, Special Lieutenant, and Tactical Orders now share the `order-type` category
+  and cross-link directly, while Impetuous remains canonically a Skill and is surfaced alongside
+  them as a related activation rather than being misclassified as an Order.
 - **Data processing + Web frontend:** Restore the concrete Strategos L1/L2 effects from the core
   rules and present source-specific Skill rules before the collapsed Unit-usage sections.
 

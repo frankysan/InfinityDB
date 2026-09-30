@@ -32,7 +32,7 @@ def public_slug_for_reference(
 
 
 def rule_record_public_reference(
-    database: Database,
+    database: Database | None,
     record: dict[str, Any],
 ) -> dict[str, str] | None:
     """Return the player-facing reference for one rules-relation endpoint.
@@ -78,6 +78,8 @@ def rule_record_public_reference(
             if not isinstance(raw_ref, str) or not raw_ref:
                 continue
             if raw_ref.isdigit():
+                if database is None:
+                    continue
                 slug = public_slug_for_reference(database, catalog, int(raw_ref))
                 if slug is None:
                     continue
