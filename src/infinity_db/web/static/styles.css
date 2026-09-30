@@ -2516,38 +2516,23 @@ h2 {
   color: var(--color-text-label);
 }
 
-.availability-field {
-  border: 0;
-  padding: 0;
-  margin: 0;
+.optional-unit-view-field {
+  flex: 1;
   min-width: 0;
 }
 
-.availability-field legend {
-  padding: 0;
+.optional-unit-view-label {
+  display: block;
+  color: var(--color-text-label);
   font-size: var(--font-size-sm);
   font-weight: 550;
-  color: var(--color-text-label);
 }
 
-.availability-options {
-  display: flex;
-  gap: 12px;
-  min-height: 42px;
-  align-items: center;
-}
-
-.availability-options label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-}
-
-.availability-options input {
-  width: auto;
-  min-height: 0;
-  accent-color: var(--color-action-primary);
+.optional-unit-view-value {
+  margin: 5px 0 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
 }
 
 .army-field {

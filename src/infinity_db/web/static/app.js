@@ -21,8 +21,6 @@ const elements = {
   pointsMinValue: byId("points-min-value"), pointsMaxValue: byId("points-max-value"),
   swc: byId("swc-filter"), swcMin: byId("swc-min-filter"), swcMax: byId("swc-max-filter"),
   swcMinValue: byId("swc-min-value"), swcMaxValue: byId("swc-max-value"),
-  mercs: byId("unit-mercs-filter"), specops: byId("unit-specops-filter"),
-  teamops: byId("unit-teamops-filter"), reinforcement: byId("unit-reinforcement-filter"),
   optionalUnitContext: byId("optional-unit-context"), extended: byId("extended-results"),
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
   declaredMembership: byId("declared-membership-context"),
@@ -74,6 +72,12 @@ elements.sort.classList.add("sortable-unit-name");
 elements.sort.replaceChildren(elements.sortButton);
 
 const OPTIONAL_UNIT_KEYS = ["mercs", "specops", "teamops", "reinforcement"];
+const OPTIONAL_UNIT_LABELS = {
+  mercs: "Mercenaries",
+  specops: "Spec-Ops",
+  teamops: "Team Operations",
+  reinforcement: "Reinforcements",
+};
 
 let state = readLocation();
 const advancedFilters = document.querySelector(".advanced-filters");
@@ -112,31 +116,23 @@ function readOptionalUnitLocation(params) {
   return { filters, source: "url", invalid };
 }
 
-function optionalUnitStateMatchesPreferences() {
+function optionalUnitPreferenceDifferences() {
   const preferences = optionalUnitFilters();
-  return OPTIONAL_UNIT_KEYS.every((key) => state[key] === preferences[key]);
+  return OPTIONAL_UNIT_KEYS
+    .filter((key) => state[key] !== preferences[key])
+    .map((key) => `${OPTIONAL_UNIT_LABELS[key]} ${state[key] ? "included" : "excluded"}`);
 }
 
 function renderOptionalUnitContext() {
   const context = elements.optionalUnitContext;
   if (!context) return;
-  if (state.optionalUnitInvalid) {
-    context.textContent = "Unsupported optional-unit URL values were reset to their default included state. The corrected choices are now recorded in this URL.";
-    context.hidden = false;
-    return;
-  }
-  if (state.optionalUnitSource === "preferences") {
-    context.textContent = "Optional-unit filters were initialized from your Settings. Their current values are now recorded in this URL, so sharing it reproduces this result set.";
-    context.hidden = false;
-    return;
-  }
-  if (!optionalUnitStateMatchesPreferences()) {
-    context.textContent = "This shared view uses optional-unit filters recorded in the URL rather than your Settings. Your saved Settings were not changed.";
-    context.hidden = false;
-    return;
-  }
-  context.hidden = true;
-  context.textContent = "";
+  const differences = optionalUnitPreferenceDifferences();
+  const correction = state.optionalUnitInvalid
+    ? "Unsupported optional-unit URL values were reset to defaults. "
+    : "";
+  context.textContent = differences.length
+    ? `${correction}View differs from Settings: ${differences.join("; ")}.`
+    : `${correction}View matches optional-unit Settings.`;
 }
 
 function hasActiveFilters() {
@@ -146,7 +142,7 @@ function hasActiveFilters() {
     || state.ava || state.avaMin || state.avaMax
     || state.points || state.pointsMin || state.pointsMax
     || state.swc || state.swcMin || state.swcMax
-    || OPTIONAL_UNIT_KEYS.some((key) => !state[key]);
+    || optionalUnitPreferenceDifferences().length > 0;
 }
 
 function domainFilterIdentifier(value) {
@@ -384,10 +380,6 @@ function syncFilters() {
   elements.points.value = state.points;
   elements.swc.value = state.swc;
   for (const control of Object.values(numericRangeControls)) syncNumericRangeControl(control);
-  elements.mercs.checked = state.mercs;
-  elements.specops.checked = state.specops;
-  elements.teamops.checked = state.teamops;
-  elements.reinforcement.checked = state.reinforcement;
   elements.clear.disabled = !hasActiveFilters();
   updateSortButton();
 }
@@ -668,16 +660,11 @@ function applyFilters() {
       "swc", numericRangeControls.swc, elements.swcMax,
       numericRangeControls.swc.metadata?.max,
     ),
-    mercs: elements.mercs.checked, specops: elements.specops.checked, teamops: elements.teamops.checked,
-    reinforcement: elements.reinforcement.checked,
     extended: elements.extended.checked,
   };
   if (Object.entries(next).every(([key, value]) => state[key] === value)) return;
-  const optionalChanged = OPTIONAL_UNIT_KEYS.some((key) => state[key] !== next[key]);
   state = {
-    ...state, ...next, offset: 0,
-    optionalUnitSource: optionalChanged ? "url" : state.optionalUnitSource,
-    optionalUnitInvalid: false,
+    ...state, ...next, offset: 0, optionalUnitInvalid: false,
   };
   elements.clear.disabled = !hasActiveFilters();
   renderOptionalUnitContext();
@@ -693,8 +680,8 @@ function clearFilters() {
     troopType: "", classification: "", characteristic: "",
     ava: "", avaMin: "", avaMax: "", points: "", pointsMin: "", pointsMax: "",
     swc: "", swcMin: "", swcMax: "",
-    mercs: true, specops: true, teamops: true, reinforcement: true,
-    optionalUnitSource: "url", optionalUnitInvalid: false,
+    ...optionalUnitFilters(),
+    optionalUnitSource: "preferences", optionalUnitInvalid: false,
   };
   syncFilters();
   renderOptionalUnitContext();
@@ -743,9 +730,6 @@ for (const control of Object.values(numericRangeControls)) {
     input.addEventListener("pointerdown", () => activateNumericRangeThumb(control, input));
     input.addEventListener("focus", () => activateNumericRangeThumb(control, input));
   }
-}
-for (const filter of [elements.mercs, elements.specops, elements.teamops, elements.reinforcement]) {
-  filter.addEventListener("change", applyFilters);
 }
 elements.extended.addEventListener("change", applyFilters);
 elements.search.addEventListener("input", () => {

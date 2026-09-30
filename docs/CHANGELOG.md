@@ -7,6 +7,13 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [Unreleased]
 
+### Changed
+
+- **Web frontend:** Replace the Unit Explorer's duplicate optional-unit controls with a compact
+  status showing whether the URL-owned view matches Settings and, when it does not, which optional
+  unit categories are included or excluded differently. Shared views remain reproducible without
+  changing the recipient's saved Settings.
+
 ### Fixed
 
 - **Data processing + Web backend + Web frontend:** Complete General Rules navigation for Orders:

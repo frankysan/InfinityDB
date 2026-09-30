@@ -1545,10 +1545,11 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert body.count(b'<option value="">Any</option>') >= 3
     assert b'id="extended-results" type="checkbox"' in body
     assert b'</details><label class="extended-results-control">' in body
-    assert b"Include optional units in this view" in body
-    assert b'id="optional-unit-context" class="relationship-filter-context" hidden' in body
+    assert b"Include optional units in this view" not in body
+    assert b'id="optional-unit-context" class="optional-unit-view-value"' in body
+    assert b"View matches optional-unit Settings." in body
     for optional_filter in (b"mercs", b"specops", b"teamops", b"reinforcement"):
-        assert b'id="unit-' + optional_filter + b'-filter" type="checkbox" checked' in body
+        assert b'id="unit-' + optional_filter + b'-filter"' not in body
         assert body.count(b'id="' + optional_filter + b'-filter"') == 1
     for range_filter in (b'ava', b'points', b'swc'):
         assert b'data-range-filter="' + range_filter + b'"' in body
@@ -1585,9 +1586,12 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     )
     assert b'optionalUnitSource: optionalUnits.source' in script
     assert b'optionalUnitInvalid: optionalUnits.invalid' in script
-    assert b'OPTIONAL_UNIT_KEYS.some((key) => !state[key])' in script
-    assert b'mercs: true, specops: true, teamops: true, reinforcement: true' in script
-    assert b'Your saved Settings were not changed.' in script
+    assert b'optionalUnitPreferenceDifferences().length > 0' in script
+    assert b'...optionalUnitFilters(),' in script
+    assert b'View differs from Settings:' in script
+    assert b'View matches optional-unit Settings.' in script
+    assert b'optionalUnitPreferenceDifferences()' in script
+    assert b'byId("unit-mercs-filter")' not in script
     assert b'availabilityField?.remove()' not in script
 
     status, _, unit_list_script = request(app, "/static/unit-list.js")
