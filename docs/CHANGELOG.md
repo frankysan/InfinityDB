@@ -18,6 +18,14 @@ New or materially revised entries use the project-domain labels defined in
   main-namespace inventory: failed enumerated pages remain fatal, while Talk/service URLs and stale
   link-discovered HTTP 404s are retained as ignored diagnostics instead of blocking publication.
 
+### Fixed
+
+- **Data processing + Web backend + Web frontend:** Resolve Unit and General-profile symbols as
+  semantic assignments instead of blindly following each Army profile-logo occurrence. General
+  profiles now have one effective symbol with Unit fallback, while high-confidence cross-Unit
+  consensus repairs repeated upstream assignments such as Crabbots on Cutters and Dragões without
+  discarding the original Army logo URLs used as provenance.
+
 ## [0.9.1] - 2026-09-30
 
 ### Changed

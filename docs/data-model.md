@@ -143,6 +143,20 @@ profile identities, classifications, characteristics, or other contextual facts 
 Source profile IDs/names remain available as provenance even when multiple occurrences share one
 application payload identity.
 
+### Unit and General-profile symbols
+
+Every published logical Unit has exactly one effective graphical symbol. A General profile inherits
+that Unit symbol unless InfinityDB can resolve one distinct profile symbol for its normalized profile
+identity. Raw Army `logo` values remain occurrence-level provenance and are not themselves the
+semantic assignment.
+
+The tracked symbol publication may promote a cross-Unit profile-symbol consensus when one
+published symbol is a strict majority of the source occurrences for that profile identity and is
+observed as a non-Unit override against at least two different parent Unit symbols. This permits
+InfinityDB to repair repeated Army assignment errors without treating a single Army-specific
+variant as a global graphical identity. Ambiguous contextual evidence falls back to the Unit
+symbol rather than exposing multiple effective symbols for one General profile.
+
 ### Profile and loadout payloads
 
 Profiles and loadouts are treated as structured semantic payloads rather than deduplicated by display

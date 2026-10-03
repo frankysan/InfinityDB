@@ -877,6 +877,15 @@
   },
   "format": "InfinityDB symbol publication mapping",
   "formatVersion": 2,
+  "profileIdentityToPublishedPath": {
+    "ancillary crabbot remote": "units/panoceania/33-tikbalangs--2-1.svg",
+    "ancillary remote shangdiao": "units/yu-jing/133-guijia-squadrons--2-1.svg",
+    "ancillary remote turtlemek": "units/unassigned/380-scarface-and-cordelia--army-401-2-1.svg",
+    "ancillary remote zetbot": "units/o-12/1458-zeta-unit--2-1.svg",
+    "blueberry specbot": "units/panoceania/1912-indigo-spec-ops--2-1.svg",
+    "bot hojo kobaruto": "units/jsa/156-o-yoroi-kidobutai--2-1.svg",
+    "jandab remote": "units/haqqislam/309-maghariba-guard--2-1.svg"
+  },
   "publishedSha256ByPath": {
     "armies/aleph/701-aleph.svg": "cae77f51239c8a6804ef3402106e877fba106c8d7134a9ebc774dd4ebc3ff60d",
     "armies/aleph/702-steel-phalanx.svg": "6b812071c44ca4b2da30121c468738c08e2eeae9c2b38eda7e47b10f9166105a",

@@ -18,11 +18,12 @@ import shutil
 import tempfile
 import xml.etree.ElementTree as ET
 import zipfile
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 from typing import Any, NamedTuple
 
+from infinity_db.identities import load_identity_config, normalized_profile_identity
 from infinity_db.snapshot_provenance import sha256_file
 from infinity_db.symbol_manifest import (
     SYMBOL_BUILD_COMPRESSION_VERSION,
@@ -293,6 +294,59 @@ def _reference_rank(
     return (2, 0, 0, 0, 0, 0, 0, str(key or ""))
 
 
+def _semantic_profile_mapping(
+    references: list[dict[str, Any]], unit_mapping: dict[str, str]
+) -> dict[str, str]:
+    """Resolve high-confidence cross-unit profile symbols from Army evidence.
+
+    A semantic profile symbol is only promoted when one published path is a
+    strict majority of all occurrences for the normalized profile identity and
+    is observed as a non-unit override against at least two different parent
+    Unit symbols.
+    This repairs repeated source-assignment mistakes (for example Crabbots that
+    incorrectly reuse their parent TAG symbol) without turning one contextual
+    variant into a global override.
+    """
+
+    identity_config = load_identity_config()
+    evidence: dict[str, list[tuple[int, str, str]]] = defaultdict(list)
+    for reference in references:
+        profile_name = reference.get("profile_name")
+        unit_id = reference.get("unit_id")
+        unit_slug = reference.get("unit_slug")
+        browser_path = reference.get("browser_path")
+        if (
+            not isinstance(profile_name, str)
+            or not profile_name.strip()
+            or type(unit_id) is not int
+            or not isinstance(unit_slug, str)
+            or not isinstance(browser_path, str)
+        ):
+            continue
+        identity = normalized_profile_identity(profile_name, identity_config)
+        unit_path = unit_mapping.get(unit_slug)
+        if identity and unit_path is not None:
+            evidence[identity].append((unit_id, browser_path, unit_path))
+
+    mapping: dict[str, str] = {}
+    for identity, rows in sorted(evidence.items()):
+        counts = Counter(browser_path for _, browser_path, _ in rows)
+        if not counts:
+            continue
+        browser_path, count = counts.most_common(1)[0]
+        if count * 2 <= len(rows):
+            continue
+        override_parent_paths = {
+            unit_path
+            for _unit_id, candidate, unit_path in rows
+            if candidate == browser_path and candidate != unit_path
+        }
+        if len(override_parent_paths) < 2:
+            continue
+        mapping[identity] = f"units/{browser_path}.svg"
+    return mapping
+
+
 def _has_active_text(root: ET.Element) -> bool:
     for element in root.iter():
         if element.tag.rsplit("}", 1)[-1] not in _TEXT_ROOT_TAGS:
@@ -387,7 +441,7 @@ def _build_publication(
         tuple[int, str],
         list[tuple[tuple[int, int, int, int, int, int, int, str], str]],
     ] = defaultdict(list)
-    unit_profile_references: list[tuple[str, str, str]] = []
+    unit_profile_references: list[dict[str, Any]] = []
     static_mapping: dict[str, str] = {}
     for reference in manifest["references"]:
         if not reference.get("authoritative"):
@@ -431,7 +485,15 @@ def _build_publication(
             unit_mapping_candidates[(unit_id, key)].append(
                 (_reference_rank(reference, snapshot_index), browser_path)
             )
-            unit_profile_references.append((key, asset_url, browser_path))
+            unit_profile_references.append(
+                {
+                    "unit_id": unit_id,
+                    "unit_slug": key,
+                    "profile_name": reference.get("profileName"),
+                    "asset_url": asset_url,
+                    "browser_path": browser_path,
+                }
+            )
         elif kind == "static":
             key = reference.get("staticKey")
             if not isinstance(key, str) or not key.strip():
@@ -455,7 +517,10 @@ def _build_publication(
             )
 
     unit_profile_mapping: dict[str, str] = {}
-    for key, asset_url, browser_path in unit_profile_references:
+    for reference in unit_profile_references:
+        key = reference["unit_slug"]
+        asset_url = reference["asset_url"]
+        browser_path = reference["browser_path"]
         primary_path = unit_mapping.get(key)
         if primary_path is None:
             raise ValueError(f"Unit profile {key!r} has no primary browser symbol")
@@ -467,6 +532,10 @@ def _build_publication(
                 f"Profile logo {asset_url!r} resolves to conflicting symbols: "
                 f"{previous} vs {browser_path}"
             )
+
+    semantic_profile_mapping = _semantic_profile_mapping(
+        unit_profile_references, unit_mapping
+    )
 
     staging_static.mkdir(parents=True, exist_ok=True)
     for category in GENERATED_CATEGORIES:
@@ -493,6 +562,7 @@ def _build_publication(
         *(f"armies/{value}" for value in army_mapping.values()),
         *(f"units/{value}.svg" for value in unit_mapping.values()),
         *(f"units/{value}.svg" for value in unit_profile_mapping.values()),
+        *semantic_profile_mapping.values(),
         *static_mapping.values(),
     }
     unreferenced_published_paths = set(published_sha256) - browser_referenced_paths
@@ -538,6 +608,7 @@ def _build_publication(
             key: f"units/{value}.svg"
             for key, value in sorted(unit_profile_mapping.items())
         },
+        "profileIdentityToPublishedPath": dict(sorted(semantic_profile_mapping.items())),
         "staticKeyToPublishedPath": dict(sorted(static_mapping.items())),
         "publishedSha256ByPath": dict(sorted(published_sha256.items())),
         "browserUsageSummary": {

@@ -63,6 +63,9 @@ class SymbolCatalog:
         self.armies = self._mapping(document, "factionIdToPublishedPath")
         self.units = self._mapping(document, "unitSlugToPublishedPath")
         self.profile_logos = self._mapping(document, "unitProfileLogoToPublishedPath")
+        self.profile_identities = self._optional_mapping(
+            document, "profileIdentityToPublishedPath"
+        )
 
     @staticmethod
     def _mapping(document: dict[str, Any], field: str) -> dict[str, str]:
@@ -83,6 +86,12 @@ class SymbolCatalog:
             result[key] = path
         return result
 
+    @classmethod
+    def _optional_mapping(cls, document: dict[str, Any], field: str) -> dict[str, str]:
+        if field not in document:
+            return {}
+        return cls._mapping(document, field)
+
     def army_path(self, army_id: object) -> str | None:
         if type(army_id) is not int:
             return None
@@ -92,36 +101,86 @@ class SymbolCatalog:
         slug = _slugify(unit_name)
         return self.units.get(slug) if slug else None
 
-    def profile_path(self, profile_logo: object, unit_name: object) -> str | None:
+    def profile_path(
+        self,
+        profile_identity: object,
+        profile_logo: object,
+        unit_name: object,
+    ) -> str | None:
+        if isinstance(profile_identity, str):
+            semantic = self.profile_identities.get(profile_identity)
+            if semantic is not None:
+                return semantic
         if isinstance(profile_logo, str):
             override = self.profile_logos.get(profile_logo)
             if override is not None:
                 return override
         return self.unit_path(unit_name)
 
-    def enrich_army(self, army: dict[str, Any], *, unit_name: object = None) -> None:
+    def enrich_army(self, army: dict[str, Any]) -> None:
         symbol_path = self.army_path(army.get("id"))
         if symbol_path is not None:
             army["symbol_path"] = symbol_path
 
-        unit_path = self.unit_path(unit_name)
-        profiles = army.get("profiles")
-        if not isinstance(profiles, list):
-            return
-        for profile in profiles:
-            if not isinstance(profile, dict):
+    def _profile_candidates(
+        self, profile: dict[str, Any], unit_name: object
+    ) -> list[str]:
+        identity = profile.get("profile_identity")
+        semantic = self.profile_identities.get(identity) if isinstance(identity, str) else None
+        if semantic is not None:
+            return [semantic]
+
+        logo_urls = profile.get("logo_urls")
+        logos = logo_urls if isinstance(logo_urls, list) and logo_urls else [None]
+        paths: list[str] = []
+        for logo in logos:
+            path = self.profile_path(None, logo, unit_name)
+            if path is not None and path not in paths:
+                paths.append(path)
+        return paths
+
+    def _enrich_profiles(
+        self,
+        armies: list[dict[str, Any]],
+        *,
+        unit_name: object,
+        unit_path: str,
+    ) -> None:
+        profiles_by_identity: dict[str, list[dict[str, Any]]] = {}
+        anonymous_profiles: list[dict[str, Any]] = []
+        for army in armies:
+            profiles = army.get("profiles")
+            if not isinstance(profiles, list):
                 continue
-            logo_urls = profile.get("logo_urls")
-            logos = logo_urls if isinstance(logo_urls, list) and logo_urls else [None]
-            symbol_paths: list[str] = []
-            for logo in logos:
-                path = self.profile_path(logo, unit_name)
-                if path is not None and path not in symbol_paths:
-                    symbol_paths.append(path)
-            if not symbol_paths and unit_path is not None:
-                symbol_paths.append(unit_path)
-            if symbol_paths:
-                profile["symbol_paths"] = symbol_paths
+            for profile in profiles:
+                if not isinstance(profile, dict):
+                    continue
+                identity = profile.get("profile_identity")
+                if isinstance(identity, str) and identity:
+                    profiles_by_identity.setdefault(identity, []).append(profile)
+                else:
+                    anonymous_profiles.append(profile)
+
+        def assign(profiles: list[dict[str, Any]], identity: str | None) -> None:
+            semantic = self.profile_identities.get(identity) if identity is not None else None
+            if semantic is not None:
+                selected = semantic
+            else:
+                candidates = {
+                    path
+                    for profile in profiles
+                    for path in self._profile_candidates(profile, unit_name)
+                }
+                selected = next(iter(candidates)) if len(candidates) == 1 else unit_path
+            for profile in profiles:
+                profile["symbol_path"] = selected
+                # Compatibility for existing API consumers. The semantic result is now singular.
+                profile["symbol_paths"] = [selected]
+
+        for identity, profiles in profiles_by_identity.items():
+            assign(profiles, identity)
+        for profile in anonymous_profiles:
+            assign([profile], None)
 
     def enrich_unit(self, unit: dict[str, Any]) -> None:
         unit_name = unit.get("slug") or unit.get("isc") or unit.get("name")
@@ -137,7 +196,13 @@ class SymbolCatalog:
         if isinstance(armies, list):
             for army in armies:
                 if isinstance(army, dict):
-                    self.enrich_army(army, unit_name=unit_name)
+                    self.enrich_army(army)
+            if symbol_path is not None:
+                self._enrich_profiles(
+                    [army for army in armies if isinstance(army, dict)],
+                    unit_name=unit_name,
+                    unit_path=symbol_path,
+                )
 
     def enrich_armies(self, armies: list[dict[str, Any]]) -> None:
         for army in armies:
