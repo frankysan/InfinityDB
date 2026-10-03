@@ -300,9 +300,9 @@ def _semantic_profile_mapping(
     """Resolve high-confidence cross-unit profile symbols from Army evidence.
 
     A semantic profile symbol is only promoted when one published path is a
-    strict majority of all occurrences for the normalized profile identity and
-    is observed as a non-unit override against at least two different parent
-    Unit symbols.
+    strict majority across distinct parent Unit symbols for the normalized profile
+    identity and is observed as a non-unit override against at least two different
+    parent Unit symbols. Repeated Army occurrences of the same Unit count once.
     This repairs repeated source-assignment mistakes (for example Crabbots that
     incorrectly reuse their parent TAG symbol) without turning one contextual
     variant into a global override.
@@ -330,15 +330,24 @@ def _semantic_profile_mapping(
 
     mapping: dict[str, str] = {}
     for identity, rows in sorted(evidence.items()):
-        counts = Counter(browser_path for _, browser_path, _ in rows)
+        candidates_by_parent: dict[str, set[str]] = defaultdict(set)
+        for _unit_id, browser_path, unit_path in rows:
+            candidates_by_parent[unit_path].add(browser_path)
+
+        parent_votes = [
+            (unit_path, next(iter(candidates)))
+            for unit_path, candidates in candidates_by_parent.items()
+            if len(candidates) == 1
+        ]
+        counts = Counter(browser_path for _, browser_path in parent_votes)
         if not counts:
             continue
         browser_path, count = counts.most_common(1)[0]
-        if count * 2 <= len(rows):
+        if count * 2 <= len(parent_votes):
             continue
         override_parent_paths = {
             unit_path
-            for _unit_id, candidate, unit_path in rows
+            for unit_path, candidate in parent_votes
             if candidate == browser_path and candidate != unit_path
         }
         if len(override_parent_paths) < 2:

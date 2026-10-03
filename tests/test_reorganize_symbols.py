@@ -200,6 +200,12 @@ def test_semantic_profile_mapping_promotes_cross_unit_majority_override() -> Non
             "browser_path": "panoceania/cutter",
         },
         {
+            "unit_id": 3,
+            "unit_slug": "cutter",
+            "profile_name": "Crabbot Ancillary Remote Unit",
+            "browser_path": "panoceania/cutter",
+        },
+        {
             "unit_id": 4,
             "unit_slug": "spec-ops",
             "profile_name": "Initial Profile",

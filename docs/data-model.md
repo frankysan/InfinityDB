@@ -151,8 +151,9 @@ identity. Raw Army `logo` values remain occurrence-level provenance and are not 
 semantic assignment.
 
 The tracked symbol publication may promote a cross-Unit profile-symbol consensus when one
-published symbol is a strict majority of the source occurrences for that profile identity and is
-observed as a non-Unit override against at least two different parent Unit symbols. This permits
+published symbol is a strict majority across distinct parent Unit symbols for that profile identity
+and is observed as a non-Unit override against at least two different parent Unit symbols. Repeated
+Army occurrences of the same Unit count once. This permits
 InfinityDB to repair repeated Army assignment errors without treating a single Army-specific
 variant as a global graphical identity. Ambiguous contextual evidence falls back to the Unit
 symbol rather than exposing multiple effective symbols for one General profile.
