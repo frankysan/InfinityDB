@@ -10,10 +10,11 @@ provenance/state, and build outputs.
 - `raw/` — immutable downloaded Corvus Belli Army snapshot archives. Army
   acquisition writes `JSON YYYYMMDD-HHMMSS.zip`; symbol acquisition uses the
   `raw/symbols/` subtree for `SYMBOLS YYYYMMDD-HHMMSS.zip`. Ignored by Git.
-- `wiki/` — local wiki research material. The current downloader persists
-  immutable `WIKI-<language> YYYYMMDD-HHMMSS.zip` snapshots here. English (`en`)
-  is the downloader default; Spanish (`es`) is an explicit alternative. Ignored
-  by Git.
+- `wiki/` — local wiki research material. The downloader persists immutable
+  `WIKI-<language> YYYYMMDD-HHMMSS.zip` Infinity Wiki snapshots here; English (`en`)
+  is the default and Spanish (`es`) is an explicit alternative. Human Sphere uses the
+  distinct English-only `HUMAN-SPHERE YYYYMMDD-HHMMSS.zip` identity. History-enabled
+  acquisitions add `-history` before the timestamp. Ignored by Git.
 - `pdf/` — local rules/FAQ/ITS research documents. Ignored by Git.
 - `work/wiki/` — local wiki crawl work. Successful acquisitions remove their
   work directory after publishing the immutable archive and provenance;
@@ -86,17 +87,19 @@ provenance` documents under `manifests/snapshots/`. Version 3 retains the logica
 content and exact archive identities introduced in version 2 and adds
 `source.dataChangedOn` for Army snapshots. Version-1 and version-2 manifests remain
 valid historical provenance.
-Wiki acquisition is fail-closed for required content: if any required eligible
-URL discovered during the crawl cannot be fetched, the run reports the failed
-URLs, publishes neither a `WIKI-<language> ...zip` archive nor snapshot
-provenance, and preserves the partial crawl under `work/wiki/`. Optional site
-chrome/project links that are not part of the mirrored content contract—currently
-`/favicon.ico` and pages in the `Infinity:` MediaWiki project namespace—are
-reported as ignored rather than failures. Wiki crawls are language-scoped:
-English is the default, Spanish is selected explicitly, same-language pages are
-mirrored, and cross-language assets are included only when an included page
-references them. Only a complete successful crawl becomes an immutable wiki
-snapshot.
+Wiki acquisition is fail-closed for required content: if any required eligible URL or required
+MediaWiki enumeration request cannot be fetched, the run reports the failed URLs, publishes no
+archive or snapshot provenance, and preserves the partial crawl under `work/wiki/`. Optional site
+chrome/project links that are not part of the mirrored content contract—such as `/favicon.ico`
+and configured MediaWiki project namespaces—are reported as ignored rather than failures. Infinity
+Wiki crawls are language-scoped: English is the default, Spanish is selected explicitly,
+same-language pages are mirrored, and cross-language assets are included only when an included
+page references them. Human Sphere is currently English-only; its MediaWiki-enumerated
+main-namespace page inventory is the required content contract, so orphaned content pages remain
+covered while stale link-discovered HTTP 404s do not block publication. Human Sphere Talk pages and
+site-service endpoints are also ignored as non-content, while transient/server failures and any
+failed API-enumerated page remain fatal. Requests use a source-specific courtesy delay. Only a
+complete successful crawl becomes an immutable wiki snapshot.
 
 The manifest filename mirrors the archive label with a `.json` suffix. Version 2
 and later store two separate SHA-256 values:

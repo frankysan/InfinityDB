@@ -179,6 +179,58 @@ def test_slugify_matches_asset_sanitization() -> None:
     assert slugify("Special:Recent Changes?new=1*") == "special-recent-changes-new-1"
 
 
+def test_semantic_profile_mapping_promotes_cross_unit_majority_override() -> None:
+    references = [
+        {
+            "unit_id": 1,
+            "unit_slug": "uhlan",
+            "profile_name": "Crabbot Ancillary Remote Unit",
+            "browser_path": "panoceania/crabbot",
+        },
+        {
+            "unit_id": 2,
+            "unit_slug": "jotum",
+            "profile_name": "CRABBOT Ancillary Remote Unit",
+            "browser_path": "panoceania/crabbot",
+        },
+        {
+            "unit_id": 3,
+            "unit_slug": "cutter",
+            "profile_name": "Crabbot Ancillary Remote Unit",
+            "browser_path": "panoceania/cutter",
+        },
+        {
+            "unit_id": 3,
+            "unit_slug": "cutter",
+            "profile_name": "Crabbot Ancillary Remote Unit",
+            "browser_path": "panoceania/cutter",
+        },
+        {
+            "unit_id": 4,
+            "unit_slug": "spec-ops",
+            "profile_name": "Initial Profile",
+            "browser_path": "ariadna/spec-ops-variant",
+        },
+        {
+            "unit_id": 5,
+            "unit_slug": "other-spec-ops",
+            "profile_name": "Initial Profile",
+            "browser_path": "ariadna/other-spec-ops",
+        },
+    ]
+    unit_mapping = {
+        "uhlan": "panoceania/uhlan",
+        "jotum": "panoceania/jotum",
+        "cutter": "panoceania/cutter",
+        "spec-ops": "ariadna/spec-ops",
+        "other-spec-ops": "ariadna/other-spec-ops",
+    }
+
+    assert reorganize_symbols._semantic_profile_mapping(references, unit_mapping) == {
+        "ancillary crabbot remote": "units/panoceania/crabbot.svg"
+    }
+
+
 def test_build_publication_maps_many_references_to_canonical_assets(tmp_path: Path) -> None:
     snapshot = tmp_path / "army.zip"
     _write_snapshot(snapshot)

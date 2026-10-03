@@ -474,23 +474,21 @@ function profileTitle(profile, profileSymbols = null) {
 }
 
 function generalProfileSymbols(profile) {
-  if (!profile.symbolPaths.length) return null;
+  if (!profile.symbolPath) return null;
 
   const symbols = document.createElement("div");
   symbols.className = "general-profile-symbols";
   symbols.setAttribute("aria-hidden", "true");
-  for (const symbolPath of profile.symbolPaths) {
-    const icon = document.createElement("img");
-    icon.className = "unit-symbol general-profile-unit-symbol";
-    icon.src = staticSymbolPath(symbolPath);
-    icon.alt = "";
-    icon.width = 56;
-    icon.height = 56;
-    icon.loading = "lazy";
-    icon.decoding = "async";
-    icon.addEventListener("error", () => icon.remove(), { once: true });
-    symbols.append(icon);
-  }
+  const icon = document.createElement("img");
+  icon.className = "unit-symbol general-profile-unit-symbol";
+  icon.src = staticSymbolPath(profile.symbolPath);
+  icon.alt = "";
+  icon.width = 56;
+  icon.height = 56;
+  icon.loading = "lazy";
+  icon.decoding = "async";
+  icon.addEventListener("error", () => icon.remove(), { once: true });
+  symbols.append(icon);
   return symbols;
 }
 
@@ -523,7 +521,7 @@ function generalProfiles(profiles, loadouts) {
       classification: mostCommon(matchingProfiles, "classification"),
       occurrenceCount: matchingProfiles.length,
       reinforcement: matchingProfiles.every((profile) => profile.reinforcement),
-      symbolPaths: [...new Set(matchingProfiles.flatMap((profile) => profile.symbol_paths || []))],
+      symbolPath: matchingProfiles.find((profile) => profile.symbol_path)?.symbol_path || null,
       sharedItems: {
         skills: generalProfileSkills(matchingProfiles, matchingLoadouts),
         equipment: commonProfileItems(matchingProfiles, "equipment"),

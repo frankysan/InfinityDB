@@ -95,7 +95,8 @@ The current direction is deliberately incremental:
   finish the frontend/theme architecture, and harden release and operations workflows.
 - **1.0.0 — Player data-complete:** every useful in-scope game datum collected by
   InfinityDB has a maintained representation and a meaningful, usable place in the
-  web reference.
+  web reference, including the current core-rules scenarios. ITS season/tournament
+  content remains a later extension of the same scenario model.
 
 In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
 0.9 closed application gaps → 0.10 hardens and polishes → 1.0 completes the reference.**
@@ -196,7 +197,16 @@ The wiki snapshot downloader is also available independently:
 ```powershell
 python tools/download_wiki_snapshot.py
 python tools/download_wiki_snapshot.py --language es
+python tools/download_wiki_snapshot.py --site human-sphere
+python tools/download_wiki_snapshot.py --site human-sphere --include-history
 ```
+
+The default site remains the official Infinity Wiki. Human Sphere acquisition is English-only,
+uses a distinct `HUMAN-SPHERE ...zip` archive identity, and enumerates MediaWiki content pages
+before following rendered links so unlinked main-namespace pages are not silently omitted. That
+enumerated main-namespace inventory defines required Human Sphere content; stale discovered 404s,
+Talk pages, and site-service endpoints are recorded as ignored rather than making a healthy mirror
+unpublishable. Both sources keep incomplete work for inspection and publish only complete snapshots.
 
 ## Common commands
 

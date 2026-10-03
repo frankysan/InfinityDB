@@ -292,6 +292,7 @@ def test_main_rejects_incomplete_snapshot_before_archive_creation(
         staging: Path,
         *,
         language: str = "en",
+        site=module.DEFAULT_SITE,
         progress=None,
     ) -> Any:
         assert language == "en"
@@ -344,6 +345,7 @@ def test_main_writes_snapshot_provenance(tmp_path: Path, monkeypatch) -> None:
         staging: Path,
         *,
         language: str = "en",
+        site=module.DEFAULT_SITE,
         progress=None,
     ) -> Any:
         assert language == "en"
@@ -556,6 +558,7 @@ def test_main_spanish_snapshot_records_language_and_root(
         staging: Path,
         *,
         language: str = "en",
+        site=module.DEFAULT_SITE,
         progress=None,
     ) -> Any:
         assert root_url == module.LANGUAGE_ROOT_URLS["es"]

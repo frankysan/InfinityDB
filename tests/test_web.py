@@ -2766,7 +2766,8 @@ def test_unit_details_frontend_places_unit_symbols_on_general_profiles(
     status, _, unit_js = request(app, "/static/unit.js")
     assert status == 200
     assert b"staticSymbolPath" in unit_js
-    assert b"profile.symbol_paths || []" in unit_js
+    assert b"profile.symbol_path" in unit_js
+    assert b"profile.symbol_paths || []" not in unit_js
     assert b"general-profile-symbols" in unit_js
     assert b"profileTitle(profile, profileSymbols)" in unit_js
     assert b"unitProfileSymbolPath" not in unit_js

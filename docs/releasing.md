@@ -21,14 +21,16 @@ maintained structured layer and accessible through the web application in a usab
 form. A specialized or final-form UI is not required when a basic presentation makes
 the information understandable and navigable.
 
-ITS-specific rules, missions, season material, classifications, and tournament
-content are deliberately outside the 1.0 requirement unless they become necessary to
-interpret otherwise in-scope data. A complete core/ITS scenario library and scenario
-list/detail pages are likewise outside the 1.0 requirement. Scenario-specific Skills,
+The current core-rules scenarios are part of the 1.0 requirement: they must have a
+maintained structured representation and a usable browsable presentation. Before that
+model is frozen, its structure must be informed by a comparative review of the core
+scenarios and the two latest ITS scenario sets so core-only assumptions do not prevent
+later ITS support. ITS-specific missions, season material, tournament/event tooling,
+and a complete historical ITS library remain outside the 1.0 requirement unless they
+are necessary to interpret otherwise in-scope data. Scenario-specific Skills,
 Equipment, States, Traits, contextual roles, objective elements, or other named rules
-concepts remain in scope when they are needed to complete the general catalog/reference
-experience; preserve their scenario/season scope rather than requiring full mission
-modeling. Final visual polish, every planned search/filter/comparison feature,
+concepts remain in scope when needed by the core scenarios or the general catalog/reference
+experience; preserve their scenario/season scope. Final visual polish, every planned search/filter/comparison feature,
 exhaustive performance work, optional themes, deployment conveniences, and unrelated
 architectural refactors likewise do not block 1.0.
 

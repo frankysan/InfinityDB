@@ -140,6 +140,18 @@ def _publication_manifest(
                 )
             browser_paths.add(relative)
 
+    semantic_profiles = document.get("profileIdentityToPublishedPath", {})
+    if not isinstance(semantic_profiles, dict):
+        raise AssetValidationError(
+            "Published symbol manifest profileIdentityToPublishedPath must be an object"
+        )
+    for relative in semantic_profiles.values():
+        if not isinstance(relative, str):
+            raise AssetValidationError(
+                "Published symbol manifest profileIdentityToPublishedPath values must be strings"
+            )
+        browser_paths.add(relative)
+
     browser_count = usage.get("browserReferencedAssetCount")
     unreferenced_count = usage.get("unreferencedPublishedAssetCount")
     if browser_count != len(browser_paths):
