@@ -142,9 +142,15 @@ surfaces, and separation of theme tokens from component geometry.
 - `tools/build_symbols.py` is the maintained symbol orchestration entry point. Local build state is
   resumable/forward-only; final production publication is represented by the tracked publication
   manifest, not by terminal local build state.
-- Peripheral profile artwork publishes under `peripherals/<main-army>/<peripheral-name>.svg`;
-  source-reused parent Unit artwork stays Unit-owned, and distinct same-name Peripheral artwork is
-  retained as contextual variants.
+- Peripheral-only profile artwork publishes under
+  `peripherals/<main-army>/<peripheral-name>.svg`; when one physical symbol proves that a profile
+  name is used in both Peripheral and normal Unit contexts, that mixed-role name stays Unit-owned
+  in every context. Source-reused parent Unit artwork also stays Unit-owned, while distinct
+  same-name Peripheral-only artwork is retained as contextual variants.
+- Image overrides replace an upstream symbol identity within the same symbol category, not only
+  one URL occurrence. Exact upstream-equivalent assets inherit the same override; conflicting
+  non-identical overrides for one upstream identity fail acquisition. The build manifest retains
+  `upstreamSha256` separately from the effective asset SHA-256 so this equivalence survives caches.
 - The processed SVG publication is redistributable under Corvus Belli's explicit non-commercial
   permission but remains outside InfinityDB's MIT license.
 

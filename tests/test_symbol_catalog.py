@@ -177,7 +177,7 @@ def test_tracked_symbols_repair_cutter_crabbot_assignment() -> None:
         "units/panoceania/12-cutters-varuna-naval-chasseurs.svg"
     )
     assert unit["armies"][0]["profiles"][0]["symbol_path"] == (
-        "units/panoceania/33-tikbalangs--2-1.svg"
+        "peripherals/panoceania/crabbot.svg"
     )
 
 

@@ -51,8 +51,12 @@ GENERATED_CATEGORIES = (
 )
 _TEXT_ROOT_TAGS = {"text", "flowRoot"}
 _STATIC_PUBLIC_STEMS = {"cube2": "cube-2"}
+_REINFORCEMENT_UNIT_SLUG_PREFIX = "reinf-"
 _UNIT_PROFILE_JSON_PATH = re.compile(
     r"\.profileGroups\[(\d+)\]\.profiles\[(\d+)\]\.logo$"
+)
+_REINFORCEMENT_PERIPHERAL_PREFIX = re.compile(
+    r"^\s*reinf(?:orcement)?\s*[.:]\s*", re.IGNORECASE
 )
 
 
@@ -234,6 +238,34 @@ def _peripheral_reference(reference: dict[str, Any]) -> bool:
     return isinstance(name, str) and bool(name.strip())
 
 
+def _profile_name_key(reference: dict[str, Any]) -> str | None:
+    raw_name = reference.get("profileName")
+    if not isinstance(raw_name, str) or not raw_name.strip():
+        return None
+    key = slugify(raw_name)
+    return key or None
+
+
+def _mixed_role_profile_names(
+    references_by_canonical: dict[str, list[dict[str, Any]]],
+) -> set[str]:
+    """Return profile names physically evidenced in both Peripheral and normal roles."""
+    mixed: set[str] = set()
+    for references in references_by_canonical.values():
+        roles_by_name: dict[str, set[bool]] = defaultdict(set)
+        for reference in references:
+            if reference.get("kind") != "unit-profile":
+                continue
+            name_key = _profile_name_key(reference)
+            if name_key is None:
+                continue
+            roles_by_name[name_key].add(_peripheral_reference(reference))
+        mixed.update(
+            name for name, roles in roles_by_name.items() if roles == {False, True}
+        )
+    return mixed
+
+
 def _peripheral_public_path(reference: dict[str, Any], index: SnapshotIndex) -> str:
     raw_name = reference.get("peripheralName")
     if not isinstance(raw_name, str) or not raw_name.strip():
@@ -249,7 +281,82 @@ def _peripheral_public_path(reference: dict[str, Any], index: SnapshotIndex) -> 
     folder = parent.slug if parent is not None else (
         faction_info.slug if faction_info is not None else "unassigned"
     )
-    return f"peripherals/{folder}/{slugify(raw_name)}.svg"
+    public_name, _is_reinforcement = _base_peripheral_name(raw_name)
+    return f"peripherals/{folder}/{slugify(public_name)}.svg"
+
+
+def _base_peripheral_name(raw_name: str) -> tuple[str, bool]:
+    """Return a Peripheral name with an Army reinforcement prefix removed."""
+    match = _REINFORCEMENT_PERIPHERAL_PREFIX.match(raw_name)
+    if match is None:
+        return raw_name.strip(), False
+    base_name = raw_name[match.end() :].strip()
+    return (base_name or raw_name.strip()), bool(base_name)
+
+
+def _peripheral_occurrence_family(
+    reference: dict[str, Any], index: SnapshotIndex
+) -> FactionInfo | None:
+    """Return the main-Army family for the Army occurrence of one Peripheral."""
+    army_id = reference.get("armyId")
+    if type(army_id) is not int:
+        return None
+    faction_info = index.factions.get(army_id)
+    if faction_info is None:
+        return None
+    return index.factions.get(faction_info.parent) or faction_info
+
+
+def _prefer_non_reinforcement_peripheral_path(
+    selected_reference: dict[str, Any],
+    references: list[dict[str, Any]],
+    index: SnapshotIndex,
+) -> str | None:
+    """Resolve a reinforcement alias to its normal Peripheral identity when evidenced.
+
+    Army can expose byte-identical standalone Peripheral assets under both normal
+    and ``REINF:``/``REINF.`` Unit identities. A reinforcement-only canonical
+    faction can otherwise win normal publication ranking and leak both its prefix
+    and reinforcement army folder into the public path. Only repair that case when
+    the same physical canonical asset also has a non-reinforcement reference whose
+    normalized Peripheral name matches.
+    """
+    raw_name = selected_reference.get("peripheralName")
+    if not isinstance(raw_name, str):
+        return None
+    base_name, is_reinforcement = _base_peripheral_name(raw_name)
+    if not is_reinforcement:
+        return None
+    base_slug = slugify(base_name)
+
+    matching: list[dict[str, Any]] = []
+    for reference in references:
+        candidate_name = reference.get("peripheralName")
+        if not isinstance(candidate_name, str):
+            continue
+        candidate_base, candidate_is_reinforcement = _base_peripheral_name(candidate_name)
+        if candidate_is_reinforcement or slugify(candidate_base) != base_slug:
+            continue
+        matching.append(reference)
+    if not matching:
+        return None
+
+    family_counts: Counter[int] = Counter()
+    family_by_id: dict[int, FactionInfo] = {}
+    for reference in matching:
+        family = _peripheral_occurrence_family(reference, index)
+        if family is None:
+            continue
+        family_counts[family.identifier] += 1
+        family_by_id[family.identifier] = family
+    if family_counts:
+        family_id = min(family_counts, key=lambda key: (-family_counts[key], key))
+        return f"peripherals/{family_by_id[family_id].slug}/{base_slug}.svg"
+
+    best_reference = min(matching, key=lambda row: _reference_rank(row, index))
+    fallback = _peripheral_public_path(best_reference, index)
+    folder = _portable_member(fallback).parts[1]
+    return f"peripherals/{folder}/{base_slug}.svg"
 
 
 def _static_public_path(reference: dict[str, Any]) -> str:
@@ -263,17 +370,39 @@ def _static_public_path(reference: dict[str, Any]) -> str:
     return f"{category}/{stem}.svg"
 
 
-def _publication_candidate(reference: dict[str, Any], index: SnapshotIndex) -> str:
+def _publication_candidate(
+    reference: dict[str, Any],
+    index: SnapshotIndex,
+    mixed_role_profile_names: set[str] | frozenset[str] = frozenset(),
+) -> str:
     kind = reference.get("kind")
     if kind == "faction":
         return _faction_public_path(reference, index)
     if kind == "unit-profile":
-        if _peripheral_reference(reference):
+        name_key = _profile_name_key(reference)
+        if (
+            _peripheral_reference(reference)
+            and name_key not in mixed_role_profile_names
+        ):
             return _peripheral_public_path(reference, index)
         return _unit_public_path(reference, index)
     if kind == "static":
         return _static_public_path(reference)
     raise ValueError(f"Unsupported authoritative symbol reference kind: {kind!r}")
+
+
+def _publication_rank(
+    reference: dict[str, Any],
+    index: SnapshotIndex,
+    mixed_role_profile_names: set[str],
+) -> tuple[Any, ...]:
+    name_key = _profile_name_key(reference)
+    mixed_peripheral_rank = int(
+        reference.get("kind") == "unit-profile"
+        and _peripheral_reference(reference)
+        and name_key in mixed_role_profile_names
+    )
+    return (mixed_peripheral_rank, *_reference_rank(reference, index))
 
 
 def _namespace(path: str) -> str:
@@ -282,12 +411,13 @@ def _namespace(path: str) -> str:
 
 def _reference_rank(
     reference: dict[str, Any], index: SnapshotIndex
-) -> tuple[int, int, int, int, int, int, int, str]:
+) -> tuple[int, int, int, int, int, int, int, int, str]:
     kind = reference.get("kind")
     if kind == "faction":
         identifier = reference.get("factionId")
         slug = reference.get("factionSlug")
         return (
+            0,
             0,
             0,
             0,
@@ -309,11 +439,22 @@ def _reference_rank(
             or army_id == canonical_faction_id
             else 1
         )
+        # Shared Unit artwork should be named for the ordinary Unit rather than a
+        # Reinforcements-only source variant. Peripheral aliases have their own
+        # canonicalization rules and must keep their existing evidence ranking.
+        reinforcement_rank = (
+            1
+            if not _peripheral_reference(reference)
+            and isinstance(slug, str)
+            and slugify(slug).startswith(_REINFORCEMENT_UNIT_SLUG_PREFIX)
+            else 0
+        )
         slot = _unit_profile_slot(reference)
         group_index, profile_index = slot if slot is not None else (0, 0)
         primary_rank = 0 if slot is None or slot == (0, 0) else 1
         return (
             1,
+            reinforcement_rank,
             canonical_faction_rank,
             primary_rank,
             identifier if type(identifier) is int else 2**31,
@@ -323,7 +464,7 @@ def _reference_rank(
             str(slug or ""),
         )
     key = reference.get("staticKey")
-    return (2, 0, 0, 0, 0, 0, 0, str(key or ""))
+    return (2, 0, 0, 0, 0, 0, 0, 0, str(key or ""))
 
 
 def _semantic_profile_mapping(
@@ -525,6 +666,8 @@ def _build_publication(
             raise ValueError(f"Source asset has no canonical mapping: {archive_path}")
         references_by_canonical[canonical].append(reference)
 
+    mixed_role_profile_names = _mixed_role_profile_names(references_by_canonical)
+
     canonical_to_published: dict[str, str] = {}
     for canonical in canonical_paths:
         references = references_by_canonical.get(canonical, [])
@@ -533,8 +676,10 @@ def _build_publication(
         ranked_candidates = sorted(
             (
                 (
-                    _reference_rank(row, snapshot_index),
-                    _publication_candidate(row, snapshot_index),
+                    _publication_rank(row, snapshot_index, mixed_role_profile_names),
+                    _publication_candidate(
+                        row, snapshot_index, mixed_role_profile_names
+                    ),
                     row,
                 )
                 for row in references
@@ -562,7 +707,15 @@ def _build_publication(
                 "Static symbols with different public keys cannot share one physical canonical "
                 f"asset: {canonical}: {', '.join(candidates)}"
             )
-        canonical_to_published[canonical] = ranked_candidates[0][1]
+        selected_candidate = ranked_candidates[0][1]
+        selected_reference = ranked_candidates[0][2]
+        if _namespace(selected_candidate) == "peripherals":
+            preferred = _prefer_non_reinforcement_peripheral_path(
+                selected_reference, references, snapshot_index
+            )
+            if preferred is not None:
+                selected_candidate = preferred
+        canonical_to_published[canonical] = selected_candidate
 
     _resolve_peripheral_path_collisions(
         canonical_to_published, references_by_canonical, snapshot_index
@@ -587,7 +740,7 @@ def _build_publication(
     unit_mapping: dict[str, str] = {}
     unit_mapping_candidates: dict[
         tuple[int, str],
-        list[tuple[tuple[int, int, int, int, int, int, int, str], str]],
+        list[tuple[tuple[int, int, int, int, int, int, int, int, str], str]],
     ] = defaultdict(list)
     unit_profile_references: list[dict[str, Any]] = []
     static_mapping: dict[str, str] = {}

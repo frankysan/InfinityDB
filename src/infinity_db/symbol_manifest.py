@@ -470,7 +470,7 @@ def validate_symbol_manifest(document: Any) -> None:
         row = _object(asset, context)
         _only_keys(
             row,
-            {"url", "sourceFilename", "archivePath", "sha256", "sourceMethod"},
+            {"url", "sourceFilename", "archivePath", "sha256", "upstreamSha256", "sourceMethod"},
             context,
         )
         url = _string(row.get("url"), f"{context}.url")
@@ -485,6 +485,8 @@ def validate_symbol_manifest(document: Any) -> None:
             )
         archive_paths.add(archive_path)
         _sha256(row.get("sha256"), f"{context}.sha256")
+        if "upstreamSha256" in row:
+            _sha256(row.get("upstreamSha256"), f"{context}.upstreamSha256")
         method = _string(row.get("sourceMethod"), f"{context}.sourceMethod")
         if method not in SOURCE_METHODS:
             raise SymbolManifestError(

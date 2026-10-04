@@ -2515,6 +2515,7 @@ def test_dynamic_symbol_routes_serve_project_owned_svg_fixtures(
         "static/armies/test/101-test.svg",
         "static/characteristics/cube.svg",
         "static/orders/regular.svg",
+        "static/peripherals/test/test-bot.svg",
         "static/units/test/1-test.svg",
     )
     svg = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>'
@@ -2529,6 +2530,7 @@ def test_dynamic_symbol_routes_serve_project_owned_svg_fixtures(
         "/static/armies/test/101-test.svg",
         "/static/characteristics/cube.svg",
         "/static/orders/regular.svg",
+        "/static/peripherals/test/test-bot.svg",
         "/static/units/test/1-test.svg",
     ):
         status, headers, body = request(app, url)
@@ -4787,6 +4789,8 @@ def test_unit_symbol_is_served(app: Callable) -> None:
     for slug in [
         "fusiliers",
         "clipper-dronbot",
+        "palbots",
+        "sartroids-puzzlers-cyberplugged-forward-remotes",
         "yojimbo-motorized-sword-for-hire",
         "blur-spec-ops",
         "next-wave-team-ops",
@@ -4797,6 +4801,14 @@ def test_unit_symbol_is_served(app: Callable) -> None:
         assert status == 200
         assert headers["content-type"] == "image/svg+xml"
         assert b"<svg" in body
+
+    staldron = catalog.profile_path("ancillary remote staldron", None, "avatar")
+    assert staldron == "peripherals/combined-army/staldron.svg"
+    status, headers, body = request(app, f"/static/{staldron}")
+    assert status == 200
+    assert headers["content-type"] == "image/svg+xml"
+    assert b"<svg" in body
+
     status, _, _ = request(app, "/static/units/unassigned/not-a-unit.svg")
     assert status == 404
     status, _, _ = request(app, "/static/unit-symbol-map.js")

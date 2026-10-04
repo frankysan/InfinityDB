@@ -20,6 +20,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Acquisition:** Apply a local symbol override to every same-category Army asset that is
+  byte-identical upstream, so correcting one duplicated Army symbol no longer leaves equivalent
+  Unit/profile occurrences on the original artwork. Conflicting overrides for the same upstream
+  symbol now fail explicitly instead of producing ambiguous output.
 - **Data processing + Web backend + Web frontend:** Resolve Unit and General-profile symbols as
   semantic assignments instead of blindly following each Army profile-logo occurrence. General
   profiles now have one effective symbol with Unit fallback, while high-confidence cross-Unit

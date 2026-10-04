@@ -151,13 +151,18 @@ identity. Raw Army `logo` values remain occurrence-level provenance and are not 
 semantic assignment.
 
 Army profiles explicitly identified as Peripherals publish into a dedicated
-`peripherals/<main-army>/<peripheral-name>.svg` namespace, including Units whose primary profile is
-itself a Peripheral. The Peripheral name comes from Army's Peripheral metadata when it can be
-matched without guessing. Main-army folders follow the same faction-parent hierarchy used by the
-Unit symbol publication. If Army reuses parent Unit artwork for a Peripheral occurrence, the
-physical asset remains Unit-owned instead of being duplicated under `peripherals/`. Distinct
-physical assets that claim the same Peripheral name remain preserved as context-suffixed variants
-rather than being silently discarded.
+`peripherals/<main-army>/<peripheral-name>.svg` namespace when that profile name is Peripheral-only,
+including Units whose primary profile is itself a Peripheral. The Peripheral name comes from Army's
+Peripheral metadata when it can be matched without guessing. Main-army folders follow the same
+faction-parent hierarchy used by Unit symbol publication. Peripheral is contextual Army metadata,
+not a global property of a profile name. When the same physical symbol is evidenced under the same
+profile name in both Peripheral and normal Unit contexts, InfinityDB treats that name as mixed-role:
+its artwork stays Unit-owned under `units/`, including any additional contextual variants of that
+name. Byte-identical occurrences therefore resolve to one Unit-owned symbol, while genuinely
+distinct artwork remains preserved as separate Unit-profile assets. Likewise, if Army reuses parent
+Unit artwork for a Peripheral occurrence, the physical asset remains Unit-owned. Distinct physical
+assets for Peripheral-only names remain preserved as context-suffixed Peripheral variants rather
+than being silently discarded.
 
 The tracked symbol publication may promote a cross-Unit profile-symbol consensus when one
 published symbol is a strict majority across distinct parent Unit symbols for that profile identity

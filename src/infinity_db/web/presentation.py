@@ -23,6 +23,7 @@ from infinity_db.web.routes import (
     HACKING_PROGRAM_PAGE_PATH,
     LABEL_PAGE_PATH,
     ORDER_SYMBOL_PATH,
+    PERIPHERAL_SYMBOL_PATH,
     RULE_PAGE_PATH,
     SKILL_PAGE_PATH,
     STATE_PAGE_PATH,
@@ -628,6 +629,11 @@ class PresentationHandler:
         if ARMY_SYMBOL_PATH.fullmatch(path):
             filename = path.removeprefix("/static/armies/")
             asset = files("infinity_db.web").joinpath("static", "armies", filename)
+        elif PERIPHERAL_SYMBOL_PATH.fullmatch(path):
+            filename = path.removeprefix("/static/peripherals/")
+            asset = files("infinity_db.web").joinpath(
+                "static", "peripherals", filename
+            )
         elif UNIT_SYMBOL_PATH.fullmatch(path):
             filename = path.removeprefix("/static/units/")
             asset = files("infinity_db.web").joinpath("static", "units", filename)

@@ -503,8 +503,8 @@ portability coverage rather than a prerequisite for the 1.0 application-data gat
   - [ ] Snapshot/discovery tests: metadata/faction validation, complete archive,
     snapshot identity/hash, all profile/faction logos, multiple logos for one
     unit, one logo shared by units, duplicate URLs, static declarations,
-    override suppression of network, override over cache, invalid/unused
-    overrides, filename collisions, unexpected SVG fields, and proof that
+    override propagation across upstream-equivalent assets, override over cache,
+    invalid/unused overrides, filename collisions, unexpected SVG fields, and proof that
     `resume` is not required for complete discovery.
   - [ ] SVG fixtures: exact duplicate, XML-different visual duplicate, no-text,
     normal text, alias-font, missing-font, empty-text cleanup, and troublesome
