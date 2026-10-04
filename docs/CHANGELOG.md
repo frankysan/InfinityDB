@@ -18,6 +18,18 @@ New or materially revised entries use the project-domain labels defined in
   main-namespace inventory: failed enumerated pages remain fatal, while Talk/service URLs and stale
   link-discovered HTTP 404s are retained as ignored diagnostics instead of blocking publication.
 
+### Changed
+
+- **Data processing + Web backend + Web frontend:** Rework symbol publication around semantic
+  ownership instead of Army source naming. Peripheral-only artwork now publishes under a dedicated
+  main-Army namespace, mixed-role profile names remain Unit-owned, distinct contextual variants are
+  preserved, and byte-identical artwork prefers ordinary Unit/Peripheral identities over
+  Reinforcement-only aliases for canonical public naming.
+- **Data processing + Web frontend:** Refresh the tracked processed SVG corpus with maintained
+  reconstructions and cleanup across affected faction, Order, Characteristic, Peripheral, and Unit
+  artwork, including corrected gradients/geometry and removal of hidden or redundant source
+  structure where appropriate.
+
 ### Fixed
 
 - **Acquisition:** Apply a local symbol override to every same-category Army asset that is

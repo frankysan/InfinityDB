@@ -443,82 +443,65 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 ### Army snapshot and symbol-pipeline maintenance
 
-Milestone 1 acceptance for the integrated pipeline is complete. The remaining work is
-maintenance, refactoring, richer diagnostics, incremental performance, and broader
-portability coverage rather than a prerequisite for the 1.0 application-data gate.
+Milestone 1 acceptance for the integrated pipeline is complete. Immutable-input acquisition,
+verified resumable checkpoints, deterministic canonical processing, transaction-safe publication,
+and release-bound symbol provenance are established. Remaining work is maintenance, selective
+refactoring, richer diagnostics/performance work, and broader portability coverage rather than a
+prerequisite for the 1.0 application-data gate.
 
 - [ ] Let future snapshot-comparison tooling write structured generated diff
   data/reports under manifest/report paths while curated snapshot notes remain
   the human interpretation of those results.
 
-- [ ] Refactor stage scripts into thin CLIs over reusable Python functions and a
-  small shared symbol-pipeline utility layer.
-  - [ ] Make the symbol-downloader input contract match its CLI and tests. Prefer
-    the immutable raw Army ZIP as the authoritative input; either fully support
-    directory/current merged-master inputs end to end or stop advertising them.
-    In particular, do not claim legacy/current `master.json` compatibility unless
-    discovery can consume that schema without treating ordinary embedded SVG
-    references as unknown fields.
-  - [ ] `svg_processor.py`: keep font audit, alias normalization, complete-set
-    duplicate detection, deterministic representative ranking, persistent
-    Inkscape conversion, and reports. Duplicate/canonical and text-conversion
-    state are integrated into the build manifest; multi-category processing
-    beyond the current canonical flow remains.
-  - [ ] `path_sanitization.py`: remain shared infrastructure for external/mirror
-    naming; pipeline-generated asset names should use one host-independent
-    policy.
-  - [ ] Longer-term reusable modules may be split into `snapshot`, `discovery`,
-    `manifest`, `downloader`, `audit`, `deduplicate`, `convert`, `compress`, and
-    `publish` helpers when that reduces duplication rather than adding ceremony.
+- [ ] Refactor legacy/standalone stage CLIs around the integrated pipeline only where doing so
+  removes duplicated contracts or platform handling.
+  - [ ] Resolve the standalone symbol-downloader input mismatch. The maintained integrated build
+    requires an immutable raw Army ZIP, while the downloader help still advertises discovery-only
+    directory/master inputs that are not supported consistently end to end. Either implement that
+    discovery-only contract deliberately or remove it from the CLI/documentation.
+  - [ ] Consolidate shared executable discovery, native/project-relative path conversion, atomic
+    writes, and subprocess invocation where conversion/compression/orchestration still duplicate
+    those rules.
+  - [ ] Split additional `snapshot`, `discovery`, `manifest`, `downloader`, `audit`, `deduplicate`,
+    `convert`, `compress`, or `publish` helpers only when the split reduces duplication rather than
+    adding ceremony.
 
-- [ ] Make every integrated symbol stage idempotent and traceable before adding
-  sophisticated incremental caching.
-  - [ ] Changes to an override SHA-256 invalidate downstream processing for that
-    asset. Removing an override falls back to validated symbol archives/cache or
-    network by the normal resolution rules.
-  - [ ] After the integrated build is stable, consider cache keys based on snapshot
-    SHA-256, source SVG SHA-256, processor/tool versions, font-alias config,
-    duplicate renderer/settings, conversion backend/settings, and compression
-    profile/settings.
+- [ ] Evaluate content-addressed incremental reuse only after measuring the current full rebuild.
+  If worthwhile, derive cache keys from the pinned snapshot/source SVG hashes plus processor/tool
+  versions, font-alias configuration, duplicate-render settings, conversion settings, and
+  compression profile/settings. Do not weaken the current manifest/hash validation or immutable
+  raw-symbol snapshot boundary to gain incremental speed.
 
-- [ ] Standardize symbol-pipeline reports around detailed machine/human outputs
-  plus one concise build summary.
-  - [ ] Preserve/report discovery counts, unknown SVG references, font audit,
-    missing fonts, unused font declarations, SVG parse errors, duplicate groups,
-    duplicate-render errors/separation/summary, text-to-path results/summary,
-    compression report/candidates/run metadata, overrides used/unused, raw-cache
-    hits, network downloads, manual static assets, canonical counts, published
-    asset counts, application-mapping counts, and per-stage/total runtime.
-  - [ ] Existing report filenames from the plan may be retained where useful:
-    `symbol-discovery.csv`, `unknown-svg-references.csv`, `svg-font-report.csv`,
-    `missing-fonts.csv`, `unused-font-declarations.csv`, `svg-parse-errors.csv`,
-    `duplicate-groups.csv`, `duplicate-render-errors.csv`,
-    `duplicate-separation.csv`, `duplicate-summary.csv`,
-    `svg-text-to-path-report.csv`, `text-conversion-summary.csv`,
-    `compression-report.csv`, `compression-candidates.csv`, and
-    `compression-run.json`.
+- [ ] Finish symbol-pipeline reporting for machine-to-machine comparison.
+  - [x] Persist the detailed acquisition/source counts, SVG preflight, font audit, duplicate
+    detection, text-conversion, compression, publication mapping/change data, override usage, and
+    cache/network provenance while keeping the interactive console concise and the verbose build
+    log complete.
+  - [ ] Add one compact machine-readable build-summary artifact with per-stage and total runtime so
+    repeated builds can be compared without scraping the verbose log or individual reports.
+  - [ ] Add separate discovery/unknown-reference CSV outputs only if future audit tooling needs
+    row-oriented data beyond the build manifest and current JSON/CSV stage reports.
 
-- [ ] Add focused end-to-end and cross-platform regression coverage for the
-  integrated Army/symbol pipeline.
-  - [ ] Snapshot/discovery tests: metadata/faction validation, complete archive,
-    snapshot identity/hash, all profile/faction logos, multiple logos for one
-    unit, one logo shared by units, duplicate URLs, static declarations,
-    override propagation across upstream-equivalent assets, override over cache,
-    invalid/unused overrides, filename collisions, unexpected SVG fields, and proof that
-    `resume` is not required for complete discovery.
-  - [ ] SVG fixtures: exact duplicate, XML-different visual duplicate, no-text,
-    normal text, alias-font, missing-font, empty-text cleanup, and troublesome
-    real-world conversion cases.
-  - [ ] Run core portability coverage on Windows, Ubuntu/Linux, and macOS when CI
-    permits: project-relative path generation, path sanitization, executable
-    discovery including `.exe`/`.cmd`, subprocess argument construction without
-    shell quoting, temp files, case-only collisions, snapshot ZIP handling,
-    override lookup, static-symbol manifest loading, atomic replacement, and
-    Windows `spawn` compatibility. External-tool integration tests may be
-    conditional when Inkscape, `resvg`, or SVGO are unavailable.
-  - [ ] Add a shared utility layer for executable discovery, native/project-relative
-    path conversion, atomic writes, subprocess invocation, and platform-neutral
-    generated filenames before orchestration otherwise duplicates those rules.
+- [ ] Extend the remaining regression and portability coverage for the integrated Army/symbol
+  pipeline.
+  - [x] Cover pinned snapshot/provenance validation, complete Unit/profile/faction discovery,
+    multiple/shared/duplicate URLs, static declarations, category-safe filename collisions,
+    override precedence and upstream-equivalent propagation, conflicting/invalid/unused overrides,
+    validated cache reuse, refresh behavior, and unavailable-source handling.
+  - [x] Cover verified materialization/resume behavior, persisted failed audits, exact-first visual
+    deduplication and deterministic representative ranking, text-conversion failure preservation,
+    compression/report binding, publication collision detection, removed-symbol backups, and
+    transactional publication rollback.
+  - [x] Cover semantic publication cases for Unit/Profile fallback, distinct General-profile
+    artwork, Reinforcement aliases, Peripheral-only and mixed-role identities, contextual
+    Peripheral variants, parent-Unit artwork reuse, and cross-Unit profile-symbol consensus.
+  - [ ] Add explicit fixtures for empty-text cleanup and a small set of troublesome real-world SVG
+    conversion cases that should remain stable across tool upgrades.
+  - [ ] Run core portability coverage on Windows, Ubuntu/Linux, and macOS when CI permits,
+    especially executable discovery (`.exe`/`.cmd`), subprocess argument construction, temp files,
+    case-only collisions, snapshot ZIP handling, atomic replacement, and Windows `spawn` behavior.
+    External-tool integration tests may remain conditional when Inkscape, `resvg`, or SVGO are
+    unavailable.
 
 ### ITS, scenarios, and game tools
 
