@@ -150,6 +150,15 @@ that Unit symbol unless InfinityDB can resolve one distinct profile symbol for i
 identity. Raw Army `logo` values remain occurrence-level provenance and are not themselves the
 semantic assignment.
 
+Army profiles explicitly identified as Peripherals publish into a dedicated
+`peripherals/<main-army>/<peripheral-name>.svg` namespace, including Units whose primary profile is
+itself a Peripheral. The Peripheral name comes from Army's Peripheral metadata when it can be
+matched without guessing. Main-army folders follow the same faction-parent hierarchy used by the
+Unit symbol publication. If Army reuses parent Unit artwork for a Peripheral occurrence, the
+physical asset remains Unit-owned instead of being duplicated under `peripherals/`. Distinct
+physical assets that claim the same Peripheral name remain preserved as context-suffixed variants
+rather than being silently discarded.
+
 The tracked symbol publication may promote a cross-Unit profile-symbol consensus when one
 published symbol is a strict majority across distinct parent Unit symbols for that profile identity
 and is observed as a non-Unit override against at least two different parent Unit symbols. Repeated

@@ -160,6 +160,7 @@ def test_symbol_manifest_separates_assets_from_many_references(tmp_path: Path) -
             "jsonPath": "$.units[0].profileGroups[0].profiles[0].logo",
             "assetUrl": url,
             "unitId": 1,
+            "peripheralName": "CRABBOT",
         },
         {
             "kind": "unit-profile",
@@ -199,6 +200,7 @@ def test_symbol_manifest_separates_assets_from_many_references(tmp_path: Path) -
 
     assert len(document["assets"]) == 1
     assert len(document["references"]) == 2
+    assert document["references"][0]["peripheralName"] == "CRABBOT"
     assert document["snapshot"]["armyArtifact"]["path"] == "army.zip"
     assert document["snapshot"]["symbolArtifact"]["path"] == "symbols.zip"
     assert document["snapshot"]["armySource"] == {

@@ -142,6 +142,9 @@ surfaces, and separation of theme tokens from component geometry.
 - `tools/build_symbols.py` is the maintained symbol orchestration entry point. Local build state is
   resumable/forward-only; final production publication is represented by the tracked publication
   manifest, not by terminal local build state.
+- Peripheral profile artwork publishes under `peripherals/<main-army>/<peripheral-name>.svg`;
+  source-reused parent Unit artwork stays Unit-owned, and distinct same-name Peripheral artwork is
+  retained as contextual variants.
 - The processed SVG publication is redistributable under Corvus Belli's explicit non-commercial
   permission but remains outside InfinityDB's MIT license.
 

@@ -135,9 +135,9 @@ volumes intact for the next test run.
 ## Published graphical symbols
 
 The deployment scripts do not acquire or regenerate Corvus Belli graphical assets. The
-processed `armies/`, `characteristics/`, `orders/`, and `units/` SVG trees plus
-`data/manifests/symbol-publication.json` are tracked release content supplied by the exact Git
-revision being deployed. Browser static code consumes paths derived from that canonical manifest;
+processed `armies/`, `characteristics/`, `orders/`, and `units/` SVG trees, plus the
+`peripherals/<main-army>/` tree when present, are tracked release content together with
+`data/manifests/symbol-publication.json`, supplied by the exact Git revision being deployed. Browser static code consumes paths derived from that canonical manifest;
 no generated lookup metadata or terminal build manifest is required at runtime.
 
 `tools/run_checks.py --assets required` remains the full project-level asset gate in a

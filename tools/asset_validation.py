@@ -10,7 +10,9 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
 ASSET_MODES = ("off", "auto", "required")
-PUBLISHED_ASSET_CATEGORIES = ("armies", "characteristics", "orders", "units")
+PUBLISHED_ASSET_CATEGORIES = (
+    "armies", "characteristics", "orders", "peripherals", "units"
+)
 PUBLICATION_MANIFEST_FORMAT = "InfinityDB symbol publication mapping"
 PUBLICATION_MANIFEST_VERSION = 2
 _SHA256 = re.compile(r"[0-9a-f]{64}")

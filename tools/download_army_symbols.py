@@ -89,6 +89,115 @@ class ResolutionPlan(NamedTuple):
     collisions: dict[str, list[str]]
 
 
+def _normalized_label(value: object) -> str:
+    """Return one source-label comparison form without inventing semantic aliases."""
+    return _slugify_label(str(value or "")).replace("-", " ")
+
+
+def _slugify_label(value: str) -> str:
+    """Return the same readable ASCII slug shape used by published symbol names."""
+    return sanitize_filename(value).removesuffix(".svg")
+
+
+def _peripheral_skill_ids(documents: list[SourceDocument]) -> set[int]:
+    """Return source Skill IDs explicitly named Peripheral by metadata."""
+    result: set[int] = set()
+    for document in documents:
+        if document.name != "metadata.json":
+            continue
+        skills = document.data.get("skills")
+        if not isinstance(skills, list):
+            continue
+        for skill in skills:
+            if (
+                isinstance(skill, dict)
+                and type(skill.get("id")) is int
+                and isinstance(skill.get("name"), str)
+                and skill["name"].strip().casefold() == "peripheral"
+            ):
+                result.add(skill["id"])
+    return result
+
+
+def _profile_is_peripheral(profile: dict[str, Any], peripheral_skill_ids: set[int]) -> bool:
+    skills = profile.get("skills")
+    if not isinstance(skills, list):
+        return False
+    for skill in skills:
+        if not isinstance(skill, dict):
+            continue
+        if type(skill.get("id")) is int and skill["id"] in peripheral_skill_ids:
+            return True
+        name = skill.get("name")
+        if isinstance(name, str) and name.strip().casefold() == "peripheral":
+            return True
+    return False
+
+
+def _army_peripheral_names(document: dict[str, Any]) -> list[str]:
+    filters = document.get("filters")
+    if not isinstance(filters, dict):
+        return []
+    rows = filters.get("peripheral")
+    if not isinstance(rows, list):
+        return []
+    names: list[str] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        name = row.get("name")
+        if isinstance(name, str) and name.strip():
+            names.append(name.strip())
+    return names
+
+
+def _peripheral_name(profile_name: str, source_names: list[str]) -> str:
+    """Prefer the Army-local Peripheral name embedded in one profile label.
+
+    Exact and prefix matches are intentionally preferred over generic substring
+    matches.  This keeps labels such as ``BÂTARD, Merc Antipode`` attached to
+    BÂTARD rather than the more generic ANTIPODE definition.  When Army does not
+    expose a matching filter label, the profile name remains the source-backed
+    fallback instead of guessing a maintained identity.
+    """
+    normalized_profile = _normalized_label(profile_name)
+    if not normalized_profile:
+        return profile_name.strip()
+
+    candidates = [
+        (name, _normalized_label(name))
+        for name in source_names
+        if _normalized_label(name)
+    ]
+    exact = [name for name, normalized in candidates if normalized == normalized_profile]
+    if len(exact) == 1:
+        return exact[0]
+
+    prefix = [
+        (name, normalized)
+        for name, normalized in candidates
+        if normalized_profile.startswith(normalized + " ")
+    ]
+    if prefix:
+        longest = max(len(normalized) for _name, normalized in prefix)
+        winners = [name for name, normalized in prefix if len(normalized) == longest]
+        if len(winners) == 1:
+            return winners[0]
+
+    padded_profile = f" {normalized_profile} "
+    contained = [
+        (name, normalized)
+        for name, normalized in candidates
+        if f" {normalized} " in padded_profile
+    ]
+    if contained:
+        longest = max(len(normalized) for _name, normalized in contained)
+        winners = [name for name, normalized in contained if len(normalized) == longest]
+        if len(winners) == 1:
+            return winners[0]
+    return profile_name.strip()
+
+
 def destination_name(url: str) -> str:
     """Return one deterministic, Windows-safe SVG filename for an asset URL."""
     parsed = urlparse(url)
@@ -204,6 +313,7 @@ def discover_symbols(
     semantic: list[dict[str, Any]] = []
     resume: list[dict[str, Any]] = []
     known_locations: set[tuple[str, str]] = set()
+    peripheral_skill_ids = _peripheral_skill_ids(documents)
 
     for document in documents:
         if document.name == "metadata.json":
@@ -238,6 +348,7 @@ def discover_symbols(
         army_match = ARMY_FILE.match(document.name)
         army_id = int(army_match.group("id")) if army_match else None
         army_slug = army_match.group("slug") if army_match else None
+        peripheral_names = _army_peripheral_names(document.data)
         for unit_index, unit in enumerate(units):
             if not isinstance(unit, dict):
                 continue
@@ -279,6 +390,11 @@ def discover_symbols(
                         profile_name = profile.get("name") or profile.get("isc")
                         if isinstance(profile_name, str) and profile_name.strip():
                             reference["profileName"] = profile_name
+                            if _profile_is_peripheral(profile, peripheral_skill_ids):
+                                reference["peripheralName"] = _peripheral_name(
+                                    profile_name,
+                                    peripheral_names,
+                                )
                         semantic.append(reference)
                         known_locations.add((document.name, path))
 

@@ -195,7 +195,8 @@ Current semantic/storage details are in `docs/data-model.md`.
 The processed SVG publication under `src/infinity_db/web/static/` is tracked release content and is
 bound by `data/manifests/symbol-publication.json`. The manifest owns published paths/hashes, browser
 mappings, and the compact Army source identity needed to prove that runtime Army data and symbols
-come from the intended source snapshot.
+come from the intended source snapshot. Peripheral profile artwork has its own
+`peripherals/<main-army>/` publication namespace rather than inheriting parent-Unit filenames.
 
 Raw/source symbol archives, conversion work trees, detailed stage reports, and terminal build state
 remain local processing evidence. Production deployment requires the tracked publication, not the

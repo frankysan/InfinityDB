@@ -13,7 +13,9 @@ from infinity_army_data.project_resources import maintained_manifest_path
 
 PUBLICATION_FORMAT = "InfinityDB symbol publication mapping"
 PUBLICATION_VERSION = 2
-_PUBLISHED_CATEGORIES = frozenset({"armies", "characteristics", "orders", "units"})
+_PUBLISHED_CATEGORIES = frozenset(
+    {"armies", "characteristics", "orders", "peripherals", "units"}
+)
 
 
 class SymbolCatalogError(ValueError):

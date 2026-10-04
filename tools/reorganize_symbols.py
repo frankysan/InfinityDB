@@ -42,7 +42,13 @@ PUBLICATION_MAPPING_VERSION = 2
 PUBLICATION_MANIFEST = "symbol-publication.json"
 REMOVED_SYMBOL_BACKUP_FORMAT = "InfinityDB removed symbol backup"
 REMOVED_SYMBOL_BACKUP_VERSION = 1
-GENERATED_CATEGORIES = ("armies", "characteristics", "orders", "units")
+GENERATED_CATEGORIES = (
+    "armies",
+    "characteristics",
+    "orders",
+    "peripherals",
+    "units",
+)
 _TEXT_ROOT_TAGS = {"text", "flowRoot"}
 _STATIC_PUBLIC_STEMS = {"cube2": "cube-2"}
 _UNIT_PROFILE_JSON_PATH = re.compile(
@@ -222,6 +228,30 @@ def _unit_public_path(reference: dict[str, Any], index: SnapshotIndex) -> str:
     return f"{stem}{suffix}.svg"
 
 
+def _peripheral_reference(reference: dict[str, Any]) -> bool:
+    """Return whether Army explicitly identifies one profile as a Peripheral."""
+    name = reference.get("peripheralName")
+    return isinstance(name, str) and bool(name.strip())
+
+
+def _peripheral_public_path(reference: dict[str, Any], index: SnapshotIndex) -> str:
+    raw_name = reference.get("peripheralName")
+    if not isinstance(raw_name, str) or not raw_name.strip():
+        raise ValueError("Peripheral profile reference requires peripheralName")
+
+    canonical_faction_id = _unit_reference_canonical_faction(reference, index)
+    faction_info = (
+        index.factions.get(canonical_faction_id)
+        if canonical_faction_id is not None
+        else None
+    )
+    parent = index.factions.get(faction_info.parent) if faction_info is not None else None
+    folder = parent.slug if parent is not None else (
+        faction_info.slug if faction_info is not None else "unassigned"
+    )
+    return f"peripherals/{folder}/{slugify(raw_name)}.svg"
+
+
 def _static_public_path(reference: dict[str, Any]) -> str:
     key = reference.get("staticKey")
     category = reference.get("staticCategory")
@@ -238,6 +268,8 @@ def _publication_candidate(reference: dict[str, Any], index: SnapshotIndex) -> s
     if kind == "faction":
         return _faction_public_path(reference, index)
     if kind == "unit-profile":
+        if _peripheral_reference(reference):
+            return _peripheral_public_path(reference, index)
         return _unit_public_path(reference, index)
     if kind == "static":
         return _static_public_path(reference)
@@ -314,46 +346,133 @@ def _semantic_profile_mapping(
         profile_name = reference.get("profile_name")
         unit_id = reference.get("unit_id")
         unit_slug = reference.get("unit_slug")
-        browser_path = reference.get("browser_path")
+        published_path = reference.get("published_path")
         if (
             not isinstance(profile_name, str)
             or not profile_name.strip()
             or type(unit_id) is not int
             or not isinstance(unit_slug, str)
-            or not isinstance(browser_path, str)
+            or not isinstance(published_path, str)
         ):
             continue
         identity = normalized_profile_identity(profile_name, identity_config)
         unit_path = unit_mapping.get(unit_slug)
         if identity and unit_path is not None:
-            evidence[identity].append((unit_id, browser_path, unit_path))
+            evidence[identity].append((unit_id, published_path, unit_path))
 
     mapping: dict[str, str] = {}
     for identity, rows in sorted(evidence.items()):
         candidates_by_parent: dict[str, set[str]] = defaultdict(set)
-        for _unit_id, browser_path, unit_path in rows:
-            candidates_by_parent[unit_path].add(browser_path)
+        for _unit_id, published_path, unit_path in rows:
+            candidates_by_parent[unit_path].add(published_path)
 
         parent_votes = [
             (unit_path, next(iter(candidates)))
             for unit_path, candidates in candidates_by_parent.items()
             if len(candidates) == 1
         ]
-        counts = Counter(browser_path for _, browser_path in parent_votes)
+        counts = Counter(published_path for _, published_path in parent_votes)
         if not counts:
             continue
-        browser_path, count = counts.most_common(1)[0]
+        published_path, count = counts.most_common(1)[0]
         if count * 2 <= len(parent_votes):
             continue
         override_parent_paths = {
             unit_path
             for unit_path, candidate in parent_votes
-            if candidate == browser_path and candidate != unit_path
+            if candidate == published_path and candidate != unit_path
         }
         if len(override_parent_paths) < 2:
             continue
-        mapping[identity] = f"units/{browser_path}.svg"
+        mapping[identity] = published_path
     return mapping
+
+
+def _peripheral_variant_path(
+    base_path: str, reference: dict[str, Any], index: SnapshotIndex
+) -> str:
+    """Return a deterministic context suffix for a colliding Peripheral asset."""
+    unit_id = reference.get("unitId")
+    raw_slug = reference.get("unitSlug")
+    if type(unit_id) is not int or not isinstance(raw_slug, str) or not raw_slug.strip():
+        raise ValueError("Peripheral variant reference requires unitId and unitSlug")
+
+    suffix_parts = [str(unit_id), slugify(raw_slug)]
+    canonical_faction_id = _unit_reference_canonical_faction(reference, index)
+    army_id = reference.get("armyId")
+    if (
+        type(canonical_faction_id) is int
+        and type(army_id) is int
+        and army_id != canonical_faction_id
+    ):
+        suffix_parts.extend(("army", str(army_id)))
+    slot = _unit_profile_slot(reference)
+    if slot is not None:
+        group_index, profile_index = slot
+        suffix_parts.extend((str(group_index + 1), str(profile_index + 1)))
+    return f"{base_path.removesuffix('.svg')}--{'-'.join(suffix_parts)}.svg"
+
+
+def _resolve_peripheral_path_collisions(
+    canonical_to_published: dict[str, str],
+    references_by_canonical: dict[str, list[dict[str, Any]]],
+    index: SnapshotIndex,
+) -> None:
+    """Preserve distinct Peripheral artwork that shares one semantic filename.
+
+    The most broadly evidenced canonical asset keeps the clean Peripheral name.
+    Other physical variants remain published with deterministic source-Unit
+    context, so source evidence is never silently discarded.
+    """
+    by_path: dict[str, list[str]] = defaultdict(list)
+    for canonical, published in canonical_to_published.items():
+        if _namespace(published) == "peripherals":
+            by_path[published.casefold()].append(canonical)
+
+    for canonicals in by_path.values():
+        if len(canonicals) < 2:
+            continue
+        base_path = canonical_to_published[canonicals[0]]
+        folded_base_path = base_path.casefold()
+        evidence_keys: dict[str, tuple[int, tuple[Any, ...], str]] = {}
+        for canonical in canonicals:
+            matching = [
+                row
+                for row in references_by_canonical[canonical]
+                if _publication_candidate(row, index).casefold() == folded_base_path
+            ]
+            unit_ids = {
+                row["unitId"]
+                for row in matching
+                if type(row.get("unitId")) is int
+            }
+            best_rank = min(_reference_rank(row, index) for row in matching)
+            evidence_keys[canonical] = (-len(unit_ids), best_rank, canonical)
+
+        winner = min(canonicals, key=evidence_keys.__getitem__)
+        used = {base_path.casefold()}
+        for canonical in sorted(canonicals, key=evidence_keys.__getitem__):
+            if canonical == winner:
+                canonical_to_published[canonical] = base_path
+                continue
+            matching = sorted(
+                (
+                    row
+                    for row in references_by_canonical[canonical]
+                    if _publication_candidate(row, index).casefold() == base_path.casefold()
+                ),
+                key=lambda row: _reference_rank(row, index),
+            )
+            if not matching:
+                raise ValueError(
+                    f"Peripheral collision has no matching source reference: {canonical}"
+                )
+            variant = _peripheral_variant_path(base_path, matching[0], index)
+            folded = variant.casefold()
+            if folded in used:
+                raise ValueError(f"Peripheral variant path collision: {variant}")
+            used.add(folded)
+            canonical_to_published[canonical] = variant
 
 
 def _has_active_text(root: ET.Element) -> bool:
@@ -412,12 +531,28 @@ def _build_publication(
         if not references:
             raise ValueError(f"Canonical asset has no authoritative references: {canonical}")
         ranked_candidates = sorted(
-            (_reference_rank(row, snapshot_index), _publication_candidate(row, snapshot_index))
-            for row in references
+            (
+                (
+                    _reference_rank(row, snapshot_index),
+                    _publication_candidate(row, snapshot_index),
+                    row,
+                )
+                for row in references
+            ),
+            key=lambda item: (item[0], item[1]),
         )
-        candidates = sorted({candidate for _, candidate in ranked_candidates})
+        candidates = sorted({candidate for _, candidate, _row in ranked_candidates})
         namespaces = {_namespace(candidate) for candidate in candidates}
-        if len(namespaces) != 1:
+        if namespaces == {"units", "peripherals"}:
+            # Source Army sometimes assigns the parent Unit artwork to an embedded
+            # Peripheral profile. Physical artwork already owned by a Unit stays in
+            # the Unit namespace; the Peripheral reference remains provenance only.
+            ranked_candidates = [
+                row for row in ranked_candidates if _namespace(row[1]) == "units"
+            ]
+            candidates = sorted({candidate for _, candidate, _row in ranked_candidates})
+            namespaces = {"units"}
+        elif len(namespaces) != 1:
             raise ValueError(
                 f"Canonical asset crosses incompatible publication namespaces {canonical}: "
                 + ", ".join(candidates)
@@ -428,6 +563,10 @@ def _build_publication(
                 f"asset: {canonical}: {', '.join(candidates)}"
             )
         canonical_to_published[canonical] = ranked_candidates[0][1]
+
+    _resolve_peripheral_path_collisions(
+        canonical_to_published, references_by_canonical, snapshot_index
+    )
 
     casefolded: dict[str, str] = {}
     for canonical, published in canonical_to_published.items():
@@ -488,11 +627,15 @@ def _build_publication(
             ):
                 raise ValueError("Authoritative unit reference requires unitId and unitSlug")
             key = slugify(raw_slug)
-            if not published.startswith("units/") or not published.endswith(".svg"):
-                raise ValueError(f"Unit {key!r} resolved outside units/: {published}")
-            browser_path = published.removeprefix("units/").removesuffix(".svg")
+            if not published.endswith(".svg") or _namespace(published) not in {
+                "units",
+                "peripherals",
+            }:
+                raise ValueError(
+                    f"Unit profile {key!r} resolved outside unit/peripheral symbols: {published}"
+                )
             unit_mapping_candidates[(unit_id, key)].append(
-                (_reference_rank(reference, snapshot_index), browser_path)
+                (_reference_rank(reference, snapshot_index), published)
             )
             unit_profile_references.append(
                 {
@@ -500,7 +643,7 @@ def _build_publication(
                     "unit_slug": key,
                     "profile_name": reference.get("profileName"),
                     "asset_url": asset_url,
-                    "browser_path": browser_path,
+                    "published_path": published,
                 }
             )
         elif kind == "static":
@@ -529,17 +672,17 @@ def _build_publication(
     for reference in unit_profile_references:
         key = reference["unit_slug"]
         asset_url = reference["asset_url"]
-        browser_path = reference["browser_path"]
+        published_path = reference["published_path"]
         primary_path = unit_mapping.get(key)
         if primary_path is None:
             raise ValueError(f"Unit profile {key!r} has no primary browser symbol")
-        if browser_path == primary_path:
+        if published_path == primary_path:
             continue
-        previous = unit_profile_mapping.setdefault(asset_url, browser_path)
-        if previous != browser_path:
+        previous = unit_profile_mapping.setdefault(asset_url, published_path)
+        if previous != published_path:
             raise ValueError(
                 f"Profile logo {asset_url!r} resolves to conflicting symbols: "
-                f"{previous} vs {browser_path}"
+                f"{previous} vs {published_path}"
             )
 
     semantic_profile_mapping = _semantic_profile_mapping(
@@ -569,8 +712,8 @@ def _build_publication(
 
     browser_referenced_paths = {
         *(f"armies/{value}" for value in army_mapping.values()),
-        *(f"units/{value}.svg" for value in unit_mapping.values()),
-        *(f"units/{value}.svg" for value in unit_profile_mapping.values()),
+        *unit_mapping.values(),
+        *unit_profile_mapping.values(),
         *semantic_profile_mapping.values(),
         *static_mapping.values(),
     }
@@ -610,13 +753,8 @@ def _build_publication(
         "factionIdToPublishedPath": {
             str(key): f"armies/{value}" for key, value in sorted(army_mapping.items())
         },
-        "unitSlugToPublishedPath": {
-            key: f"units/{value}.svg" for key, value in sorted(unit_mapping.items())
-        },
-        "unitProfileLogoToPublishedPath": {
-            key: f"units/{value}.svg"
-            for key, value in sorted(unit_profile_mapping.items())
-        },
+        "unitSlugToPublishedPath": dict(sorted(unit_mapping.items())),
+        "unitProfileLogoToPublishedPath": dict(sorted(unit_profile_mapping.items())),
         "profileIdentityToPublishedPath": dict(sorted(semantic_profile_mapping.items())),
         "staticKeyToPublishedPath": dict(sorted(static_mapping.items())),
         "publishedSha256ByPath": dict(sorted(published_sha256.items())),

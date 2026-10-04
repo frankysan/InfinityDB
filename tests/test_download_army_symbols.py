@@ -156,6 +156,62 @@ def test_complete_discovery_preserves_every_reference_and_unique_url() -> None:
     assert all(row["authoritative"] is False for row in resume_refs)
 
 
+def test_discovery_marks_embedded_peripheral_profiles_from_source_metadata() -> None:
+    module = load_module()
+    primary = unit_url("cutter")
+    crabbot = unit_url("crabbot")
+    documents = [
+        module.SourceDocument(
+            "metadata.json",
+            {
+                "factions": [],
+                "skills": [{"id": 243, "name": "Peripheral"}],
+            },
+        ),
+        module.SourceDocument(
+            "101-panoceania.json",
+            {
+                "filters": {
+                    "peripheral": [
+                        {"id": 1, "name": "CRABBOT"},
+                        {"id": 2, "name": "PALBOT"},
+                    ]
+                },
+                "units": [
+                    {
+                        "id": 12,
+                        "slug": "cutters",
+                        "profileGroups": [
+                            {
+                                "profiles": [
+                                    {"name": "CUTTER", "logo": primary},
+                                    {
+                                        "name": "Crabbot Ancillary Remote Unit",
+                                        "logo": crabbot,
+                                        "skills": [{"id": 243}],
+                                    },
+                                ]
+                            }
+                        ],
+                    }
+                ],
+                "resume": [],
+            },
+        ),
+    ]
+
+    discovery = module.discover_symbols(
+        documents,
+        static_symbols=[],
+        static_source="config/symbols/static-symbols.json",
+    )
+
+    unit_refs = [row for row in discovery.references if row["kind"] == "unit-profile"]
+    assert "peripheralName" not in unit_refs[0]
+    assert unit_refs[1]["peripheralName"] == "CRABBOT"
+
+
+
 def test_legacy_army_logos_are_authoritative_faction_references() -> None:
     module = load_module()
     legacy = module.LegacyArmy(

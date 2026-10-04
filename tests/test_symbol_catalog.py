@@ -60,6 +60,35 @@ def test_symbol_catalog_enriches_unit_armies_and_profiles(tmp_path: Path) -> Non
     )
 
 
+def test_symbol_catalog_accepts_peripheral_path_as_unit_symbol(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path / "symbol-publication.json")
+    document = json.loads(manifest.read_text(encoding="utf-8"))
+    peripheral_path = "peripherals/panoceania/palbot.svg"
+    document["unitSlugToPublishedPath"]["alpha-ranger"] = peripheral_path
+    manifest.write_text(json.dumps(document), encoding="utf-8")
+
+    catalog = SymbolCatalog(manifest)
+
+    assert catalog.unit_path("alpha-ranger") == peripheral_path
+
+
+
+def test_symbol_catalog_accepts_dedicated_peripheral_profile_path(tmp_path: Path) -> None:
+    manifest = _manifest(tmp_path / "symbol-publication.json")
+    document = json.loads(manifest.read_text(encoding="utf-8"))
+    peripheral_path = "peripherals/panoceania/crabbot.svg"
+    document["unitProfileLogoToPublishedPath"] = {
+        "https://example.test/profile.svg": peripheral_path,
+    }
+    manifest.write_text(json.dumps(document), encoding="utf-8")
+    catalog = SymbolCatalog(manifest)
+
+    assert catalog.profile_path(
+        None, "https://example.test/profile.svg", "alpha-ranger"
+    ) == peripheral_path
+
+
+
 def test_symbol_catalog_repairs_profile_logo_from_semantic_identity(tmp_path: Path) -> None:
     manifest = _manifest(tmp_path / "symbol-publication.json")
     document = json.loads(manifest.read_text(encoding="utf-8"))
