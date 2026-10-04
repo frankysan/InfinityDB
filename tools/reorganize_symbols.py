@@ -826,11 +826,13 @@ def _build_publication(
         key = reference["unit_slug"]
         asset_url = reference["asset_url"]
         published_path = reference["published_path"]
-        primary_path = unit_mapping.get(key)
-        if primary_path is None:
+        if key not in unit_mapping:
             raise ValueError(f"Unit profile {key!r} has no primary browser symbol")
-        if published_path == primary_path:
-            continue
+        # Keep every authoritative profile-logo resolution as occurrence evidence.
+        # A source Unit's primary logo can still be a distinct General-profile
+        # symbol after several source Units collapse into one logical Unit. Runtime
+        # profile enrichment decides whether that evidence forms one unambiguous
+        # override or should fall back to the logical Unit symbol.
         previous = unit_profile_mapping.setdefault(asset_url, published_path)
         if previous != published_path:
             raise ValueError(

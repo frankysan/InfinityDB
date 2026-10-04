@@ -26,9 +26,10 @@ New or materially revised entries use the project-domain labels defined in
   symbol now fail explicitly instead of producing ambiguous output.
 - **Data processing + Web backend + Web frontend:** Resolve Unit and General-profile symbols as
   semantic assignments instead of blindly following each Army profile-logo occurrence. General
-  profiles now have one effective symbol with Unit fallback, while high-confidence cross-Unit
-  consensus repairs repeated upstream assignments such as Crabbots on Cutters and Dragões without
-  discarding the original Army logo URLs used as provenance.
+  profiles now have one effective symbol with Unit fallback, source-primary artwork remains
+  available when it belongs to a distinct General profile after Unit identity consolidation, and
+  high-confidence cross-Unit consensus repairs repeated upstream assignments such as Crabbots on
+  Cutters and Dragões without discarding the original Army logo URLs used as provenance.
 
 ## [0.9.1] - 2026-09-30
 

@@ -148,7 +148,9 @@ application payload identity.
 Every published logical Unit has exactly one effective graphical symbol. A General profile inherits
 that Unit symbol unless InfinityDB can resolve one distinct profile symbol for its normalized profile
 identity. Raw Army `logo` values remain occurrence-level provenance and are not themselves the
-semantic assignment.
+semantic assignment. The tracked publication retains every authoritative profile-logo resolution as
+evidence, including logos that are primary for one source Unit representation, because source Units
+can later collapse into one logical Unit while their distinct General profiles remain meaningful.
 
 Army profiles explicitly identified as Peripherals publish into a dedicated
 `peripherals/<main-army>/<peripheral-name>.svg` namespace when that profile name is Peripheral-only,

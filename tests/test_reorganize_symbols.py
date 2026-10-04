@@ -445,9 +445,11 @@ def test_publication_preserves_distinct_unit_profile_symbols(tmp_path: Path) -> 
     assert (staging / primary_path).is_file()
     assert (staging / alternate_path).is_file()
 
-    assert report["unitProfileLogoToPublishedPath"] == {
-        alternate_url: alternate_path,
-    }
+    profile_map = report["unitProfileLogoToPublishedPath"]
+    assert profile_map[manifest["references"][0]["assetUrl"]] == primary_path
+    assert profile_map[manifest["references"][1]["assetUrl"]] == primary_path
+    assert profile_map[duplicate_url] == primary_path
+    assert profile_map[alternate_url] == alternate_path
 
 
 
@@ -752,7 +754,7 @@ def test_parent_unit_art_is_not_republished_as_peripheral(tmp_path: Path) -> Non
 
     parent_path = "units/panoceania/1-mech-engineer.svg"
     assert report["sourceArchivePathToPublishedPath"]["units/u1.svg"] == parent_path
-    assert parent["assetUrl"] not in report["unitProfileLogoToPublishedPath"]
+    assert report["unitProfileLogoToPublishedPath"][parent["assetUrl"]] == parent_path
     assert not (staging / "peripherals" / "panoceania" / "crabbot.svg").exists()
 
 

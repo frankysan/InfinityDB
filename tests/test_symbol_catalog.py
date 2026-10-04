@@ -120,6 +120,40 @@ def test_symbol_catalog_repairs_profile_logo_from_semantic_identity(tmp_path: Pa
     assert profile["symbol_paths"] == [crabbot]
 
 
+def test_symbol_catalog_source_primary_logo_can_be_general_profile_override(
+    tmp_path: Path,
+) -> None:
+    manifest = _manifest(tmp_path / "symbol-publication.json")
+    document = json.loads(manifest.read_text(encoding="utf-8"))
+    alternate = "units/panoceania/2-alpha-ranger-variant.svg"
+    document["unitProfileLogoToPublishedPath"] = {
+        "https://example.test/source-primary.svg": alternate,
+    }
+    manifest.write_text(json.dumps(document), encoding="utf-8")
+    catalog = SymbolCatalog(manifest)
+    unit = {
+        "slug": "alpha-ranger",
+        "armies": [
+            {
+                "id": 101,
+                "profiles": [
+                    {
+                        "profile_identity": "variant profile",
+                        "logo_urls": ["https://example.test/source-primary.svg"],
+                    }
+                ],
+            }
+        ],
+    }
+
+    catalog.enrich_unit(unit)
+
+    assert unit["symbol_path"] == "units/panoceania/1-alpha-ranger.svg"
+    profile = unit["armies"][0]["profiles"][0]
+    assert profile["symbol_path"] == alternate
+    assert profile["symbol_paths"] == [alternate]
+
+
 def test_symbol_catalog_ambiguous_contextual_profile_symbols_inherit_unit(
     tmp_path: Path,
 ) -> None:

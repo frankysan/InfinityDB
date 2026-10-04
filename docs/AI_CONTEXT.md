@@ -147,6 +147,9 @@ surfaces, and separation of theme tokens from component geometry.
   name is used in both Peripheral and normal Unit contexts, that mixed-role name stays Unit-owned
   in every context. Source-reused parent Unit artwork also stays Unit-owned, while distinct
   same-name Peripheral-only artwork is retained as contextual variants.
+- `unitProfileLogoToPublishedPath` is occurrence evidence, not an override-only table: retain every
+  authoritative Army profile-logo resolution so logical-Unit consolidation can still distinguish a
+  genuine General-profile symbol from the Unit fallback.
 - Image overrides replace an upstream symbol identity within the same symbol category, not only
   one URL occurrence. Exact upstream-equivalent assets inherit the same override; conflicting
   non-identical overrides for one upstream identity fail acquisition. The build manifest retains
