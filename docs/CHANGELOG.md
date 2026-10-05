@@ -20,6 +20,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Web backend + Web frontend:** Normalize Army Fireteam limit sentinels into explicit application
+  semantics before they reach the browser, reconnect the Skill Modifiers review surface as a
+  discoverable child of Skills, and include curated legacy Armies in global search with links to
+  the Armies overview.
 - **Data processing + Web backend + Web frontend:** Rework symbol publication around semantic
   ownership instead of Army source naming. Peripheral-only artwork now publishes under a dedicated
   main-Army namespace, mixed-role profile names remain Unit-owned, distinct contextual variants are
@@ -32,6 +36,15 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Web backend:** Reject unknown or duplicate semantic query parameters on Fireteam and Unit-detail
+  APIs instead of silently ignoring malformed requests, while retaining the Developer-mode cache-bust
+  parameter.
+- **Web frontend:** Display stationary MOV profiles using the rules `-` value instead of treating
+  Army's `-1/-1` sentinel as a negative distance, while keeping Army/rules distance conversion
+  consistent across Unit profiles, Skill parameters, maintained rules text, and Weapon ranges.
+- **Data processing:** Revalidate Armed Turret against the current N5 v5.3 core rules and
+  replace its stale N5.2 citation with the current primary source while preserving the documented
+  source conflict in its deployable-profile Silhouette.
 - **Acquisition:** Apply a local symbol override to every same-category Army asset that is
   byte-identical upstream, so correcting one duplicated Army symbol no longer leaves equivalent
   Unit/profile occurrences on the original artwork. Conflicting overrides for the same upstream

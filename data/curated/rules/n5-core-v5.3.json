@@ -256,15 +256,6 @@
             "retrievedDate": "2026-09-17"
         },
         {
-            "id": "wiki-armed-turret-oldid-3919",
-            "kind": "wiki",
-            "title": "Infinity Wiki — Armed Turret revision 3919",
-            "version": "N5.2 / oldid 3919",
-            "url": "https://infinitythewiki.com/index.php?title=Armed_Turret&oldid=3919",
-            "authority": "secondary",
-            "retrievedDate": "2026-09-17"
-        },
-        {
             "id": "wiki-super-jump-oldid-4075",
             "kind": "wiki",
             "title": "Infinity Wiki — Super-Jump revision 4075",
@@ -3506,13 +3497,14 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-armed-turret-oldid-3919",
-                    "heading": "Armed Turret Profile"
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 70,
+                    "section": "Armed Turret Profile"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-04"
             },
             "variantSemantics": {
                 "inheritance": "family"

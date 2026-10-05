@@ -9,10 +9,14 @@ import pytest
 
 from tools.audit_profile_semantics import (
     EXPECTED_COLUMNS,
+    PAYLOAD_FIELDS,
+    PAYLOAD_FORMAT,
+    PAYLOAD_FORMAT_VERSION,
     ProfileSemanticsAuditError,
     audit_database,
     main,
 )
+from tools.payload_audit_common import canonical_json
 
 
 def _insert(connection: sqlite3.Connection, table: str, **values: object) -> None:
@@ -24,15 +28,9 @@ def _insert(connection: sqlite3.Connection, table: str, **values: object) -> Non
     )
 
 
-def _profile(army_id: int, unit_id: int, **overrides: object) -> dict[str, object]:
-    row: dict[str, object] = {
-        "army_id": army_id,
-        "unit_id": unit_id,
-        "group_id": 1,
-        "profile_id": 1,
-        "position": 1,
-        "name": f"Profile {unit_id}",
-        "logo": "logo.svg",
+def _payload_values(name: str) -> dict[str, object]:
+    return {
+        "name": name,
         "type_id": 2,
         "move_1": 4,
         "move_2": 4,
@@ -44,12 +42,30 @@ def _profile(army_id: int, unit_id: int, **overrides: object) -> dict[str, objec
         "bts": 0,
         "vitality": 1,
         "silhouette": 2,
-        "ava": 2,
         "is_structure": 0,
         "notes": None,
     }
-    row.update(overrides)
-    return row
+
+
+def _payload_sha(values: dict[str, object]) -> str:
+    payload = {field: values[field] for field in PAYLOAD_FIELDS}
+    payload.update(
+        {
+            "characteristics": [],
+            "skills": [],
+            "equipment": [],
+            "weapons": [],
+        }
+    )
+    serialized = canonical_json(
+        {
+            "format": PAYLOAD_FORMAT,
+            "formatVersion": PAYLOAD_FORMAT_VERSION,
+            "payload": payload,
+        },
+        allow_nan=False,
+    )
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
 def _fixture_database(tmp_path: Path) -> Path:
@@ -60,7 +76,8 @@ def _fixture_database(tmp_path: Path) -> Path:
             definition = ", ".join(f'"{column}"' for column in columns)
             connection.execute(f'CREATE TABLE "{table}" ({definition})')
 
-        connection.execute("PRAGMA user_version = 11")
+        connection.execute("PRAGMA application_id = 1229210161")
+        connection.execute("PRAGMA user_version = 25")
         _insert(
             connection,
             "__infinity_metadata",
@@ -68,98 +85,73 @@ def _fixture_database(tmp_path: Path) -> Path:
             value=json.dumps(
                 {
                     "snapshotArchiveSha256": "a" * 64,
-                    "snapshotDownloadedOn": "2026-09-18",
+                    "snapshotDownloadedOn": "2026-09-29",
                 },
                 sort_keys=True,
             ),
         )
-        for unit_id in range(1, 6):
+        _insert(
+            connection,
+            "__infinity_metadata",
+            key="database_compatibility_version",
+            value="34",
+        )
+
+        for source_id, logical_id in ((1, 1), (2, 2)):
             _insert(
                 connection,
                 "logical_unit_sources",
-                source_unit_id=unit_id,
-                logical_unit_id=unit_id,
+                source_unit_id=source_id,
+                logical_unit_id=logical_id,
             )
 
-        # Each source-profile key occurs in two armies.  The five keys isolate
-        # AVA, logo, representation-only skill data, real skill data, and WIP.
-        profiles = [
-            _profile(101, 1, ava=2),
-            _profile(102, 1, ava=1),
-            _profile(101, 2, logo="a.svg"),
-            _profile(102, 2, logo="b.svg"),
-            _profile(101, 3),
-            _profile(102, 3),
-            _profile(101, 4),
-            _profile(102, 4),
-            _profile(101, 5, wip=13),
-            _profile(102, 5, wip=14),
-        ]
-        for row in profiles:
-            _insert(connection, "profiles", **row)
-            _insert(
-                connection,
-                "profile_groups",
-                army_id=row["army_id"],
-                unit_id=row["unit_id"],
-                group_id=1,
-                position=1,
-                category_id=1,
-                isc=f"Group {row['unit_id']}",
-                notes=None,
-            )
+        first = _payload_values("Shared")
+        second = _payload_values("Other")
+        _insert(
+            connection,
+            "profile_payloads",
+            id=1,
+            logical_unit_id=1,
+            payload_sha256=_payload_sha(first),
+            **first,
+        )
+        _insert(
+            connection,
+            "profile_payloads",
+            id=2,
+            logical_unit_id=2,
+            payload_sha256=_payload_sha(second),
+            **second,
+        )
 
-        # Unit 3 differs only by explicit-vs-omitted quantity and display_order.
-        for occurrence_id, army_id, display_order, quantity in (
-            (1, 101, 1, None),
-            (2, 102, 7, 1),
+        for army_id, unit_id, profile_id, payload_id, ava, logo in (
+            (101, 1, 1, 1, 2, "a.svg"),
+            (102, 1, 1, 1, 1, "b.svg"),
+            (201, 2, 1, 2, 1, "c.svg"),
         ):
             _insert(
                 connection,
-                "profile_skills",
-                occurrence_id=occurrence_id,
+                "profile_groups",
                 army_id=army_id,
-                unit_id=3,
+                unit_id=unit_id,
                 group_id=1,
-                profile_id=1,
                 position=1,
-                item_id=10,
-                display_order=display_order,
-                quantity=quantity,
-                raw=None,
+                category_id=1,
+                isc="Group",
+                notes=None,
             )
-
-        # Unit 4 has a genuine extra skill in the second army.
-        _insert(
-            connection,
-            "profile_skills",
-            occurrence_id=3,
-            army_id=101,
-            unit_id=4,
-            group_id=1,
-            profile_id=1,
-            position=1,
-            item_id=10,
-            display_order=1,
-            quantity=None,
-            raw=None,
-        )
-        for occurrence_id, position, item_id in ((4, 1, 10), (5, 2, 11)):
             _insert(
                 connection,
-                "profile_skills",
-                occurrence_id=occurrence_id,
-                army_id=102,
-                unit_id=4,
+                "profile_payload_occurrences",
+                army_id=army_id,
+                unit_id=unit_id,
                 group_id=1,
-                profile_id=1,
-                position=position,
-                item_id=item_id,
-                display_order=position,
-                quantity=None,
-                raw=None,
+                profile_id=profile_id,
+                profile_payload_id=payload_id,
+                position=1,
+                ava=ava,
+                logo=logo,
             )
-
         connection.commit()
     finally:
         connection.close()
@@ -170,136 +162,81 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def test_profile_semantics_stages_context_and_representation_variation(tmp_path: Path) -> None:
-    database = _fixture_database(tmp_path)
-    report = audit_database(database)
-
-    assert report["summary"] == {
-        "profileOccurrenceCount": 10,
-        "sourceProfileIdentityCount": 5,
-        "repeatedSourceProfileIdentityCount": 5,
-        "repeatedSourceProfileOccurrenceCount": 10,
-        "baselineVariantIdentityCount": 5,
-        "withoutAvaVariantIdentityCount": 4,
-        "withoutAvaOrLogoVariantIdentityCount": 3,
-        "withoutAvaOrLogoAndNormalizedRepresentationVariantIdentityCount": 2,
-    }
-    assert report["fields"]["ava"]["sameSourceVariantIdentityCount"] == 1
-    assert report["fields"]["logo"]["sameSourceVariantIdentityCount"] == 1
-    assert report["fields"]["wip"]["sameSourceVariantIdentityCount"] == 1
-
-    candidate = report["candidateModel"]
-    assert candidate["scope"] == "logical_unit"
-    assert candidate["profileOccurrenceCount"] == 10
-    assert candidate["sourceUnitDistinctPayloadCount"] == 8
-    assert candidate["logicalUnitDistinctPayloadCount"] == 8
-    assert candidate["repeatedOccurrenceCount"] == 2
-    assert candidate["payloadRelationships"] == [
-        "characteristics",
-        "skills",
-        "equipment",
-        "weapons",
-    ]
-    assert candidate["deferredContextRelationships"] == [
-        "includes",
-        "peripherals",
-        "profile_groups",
-    ]
-
-    skills = report["relationships"]["skills"]
-    assert skills["sameSourceRawVariantIdentityCount"] == 2
-    assert skills["sameSourceNormalizedVariantIdentityCount"] == 1
-    assert skills["representationOnlyVariantIdentityCount"] == 1
-
-
-def test_profile_semantics_records_field_and_relationship_classification(tmp_path: Path) -> None:
-    report = audit_database(_fixture_database(tmp_path))
-
-    assert report["fields"]["army_id"]["classification"] == "source_provenance"
-    assert report["fields"]["position"]["classification"] == "normalization_only"
-    assert report["fields"]["name"]["classification"] == "canonical_fact"
-    assert report["fields"]["type_id"]["classification"] == "relationship"
-    assert report["fields"]["ava"]["classification"] == "contextual_delta"
-    assert report["fields"]["notes"]["nonNullCount"] == 0
-    assert report["relationships"]["peripherals"]["rowCount"] == 0
-    assert report["profileGroups"]["fields"]["category_id"]["classification"] == "relationship"
-
-
-def test_profile_semantics_rejects_unclassified_schema_drift(tmp_path: Path) -> None:
-    database = _fixture_database(tmp_path)
-    connection = sqlite3.connect(database)
-    try:
-        connection.execute("ALTER TABLE profiles ADD COLUMN future_field")
-        connection.commit()
-    finally:
-        connection.close()
-
-    with pytest.raises(
-        ProfileSemanticsAuditError,
-        match=r"profiles.*unclassified future_field",
-    ):
-        audit_database(database)
-
-
-def test_candidate_payloads_reuse_exact_payload_across_one_logical_unit(
-    tmp_path: Path,
-) -> None:
-    database = _fixture_database(tmp_path)
-    connection = sqlite3.connect(database)
-    try:
-        connection.execute(
-            "UPDATE logical_unit_sources SET logical_unit_id = 1 WHERE source_unit_id = 2"
-        )
-        connection.execute(
-            "UPDATE profiles SET name = 'Profile 1' WHERE unit_id = 2"
-        )
-        connection.commit()
-    finally:
-        connection.close()
-
-    candidate = audit_database(database)["candidateModel"]
-
-    assert candidate["sourceUnitDistinctPayloadCount"] == 8
-    assert candidate["logicalUnitDistinctPayloadCount"] == 7
-    assert candidate["additionalDistinctPayloadReductionFromLogicalIdentity"] == 1
-
-
-def test_profile_semantics_requires_complete_logical_unit_mapping(tmp_path: Path) -> None:
-    database = _fixture_database(tmp_path)
-    connection = sqlite3.connect(database)
-    try:
-        connection.execute(
-            "DELETE FROM logical_unit_sources WHERE source_unit_id = 5"
-        )
-        connection.commit()
-    finally:
-        connection.close()
-
-    with pytest.raises(
-        ProfileSemanticsAuditError,
-        match="Source unit 5 has no logical-unit mapping",
-    ):
-        audit_database(database)
-
-
-def test_profile_semantics_is_read_only_and_json_is_deterministic(
-    tmp_path: Path,
-    capsys: pytest.CaptureFixture[str],
-) -> None:
+def test_profile_semantics_audits_published_payload_boundary(tmp_path: Path) -> None:
     database = _fixture_database(tmp_path)
     before = _sha256(database)
+
+    report = audit_database(database)
+
+    assert _sha256(database) == before
+    summary = report["summary"]
+    assert summary["status"] == "pass"
+    assert summary["profilePayloadCount"] == 2
+    assert summary["profileOccurrenceCount"] == 3
+    assert summary["reusedPayloadCount"] == 1
+    assert summary["repeatedSourceProfileKeyCount"] == 1
+    assert summary["sourceProfileKeysWithAvaVariation"] == 1
+    assert summary["sourceProfileKeysWithLogoVariation"] == 1
+    assert summary["sourceProfileKeysWithMultiplePayloads"] == 0
+
+
+def test_profile_semantics_rejects_schema_drift(tmp_path: Path) -> None:
+    database = _fixture_database(tmp_path)
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute("ALTER TABLE profile_payloads ADD COLUMN new_semantic_field")
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(
+        ProfileSemanticsAuditError,
+        match=r"profile_payloads.*unclassified new_semantic_field",
+    ):
+        audit_database(database)
+
+
+def test_profile_semantics_reports_invalid_payload_hash(tmp_path: Path) -> None:
+    database = _fixture_database(tmp_path)
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute(
+            "UPDATE profile_payloads SET payload_sha256 = ? WHERE id = 1",
+            ("0" * 64,),
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    report = audit_database(database)
+    assert report["summary"]["status"] == "fail"
+    assert report["summary"]["invalidPayloadHashCount"] == 1
+    assert report["invalidPayloadIds"] == [1]
+    assert main([str(database)]) == 1
+
+
+def test_profile_semantics_reports_logical_unit_mismatch(tmp_path: Path) -> None:
+    database = _fixture_database(tmp_path)
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute(
+            "UPDATE profile_payload_occurrences SET profile_payload_id = 2 "
+            "WHERE army_id = 101"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    report = audit_database(database)
+    assert report["summary"]["status"] == "fail"
+    assert report["summary"]["logicalUnitMismatchCount"] == 1
+
+
+def test_profile_semantics_json_is_deterministic(tmp_path: Path) -> None:
+    database = _fixture_database(tmp_path)
     first = tmp_path / "first.json"
     second = tmp_path / "second.json"
 
     assert main([str(database), "--output", str(first)]) == 0
     assert main([str(database), "--output", str(second)]) == 0
-    assert _sha256(database) == before
     assert first.read_bytes() == second.read_bytes()
-
-    report = json.loads(first.read_text(encoding="utf-8"))
-    assert report["formatVersion"] == 2
-    assert report["sourceProfileKey"] == ["unit_id", "group_id", "profile_id"]
-    assert "not a proposed canonical" in report["sourceProfileKeyCaveat"]
-    output = capsys.readouterr().out
-    assert "Profiles: 10 occurrences" in output
-    assert "8 logical-unit payloads from 10 occurrences" in output

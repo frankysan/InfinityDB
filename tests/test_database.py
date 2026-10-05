@@ -467,7 +467,7 @@ def test_fireteam_repository_exposes_army_scoped_application_chart(
     assert chart["source"]["army_id"] == 101
     assert chart["source"]["kind"] == "faction"
     assert chart["limits"] == [
-        {"type": "MAX", "position": 1, "max_count": 2}
+        {"type": "MAX", "position": 1, "max_count": 2, "limit_kind": "maximum"}
     ]
     assert len(chart["teams"]) == 1
     team = chart["teams"][0]

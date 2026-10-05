@@ -11,6 +11,7 @@ from infinity_db.domain_references import public_slug_for_reference
 from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.glossary_catalog import GlossaryCatalog
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
+from infinity_db.legacy_armies import LegacyArmy
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
@@ -32,6 +33,7 @@ class SearchCatalog:
         label_catalog: LabelCatalog,
         general_rules_catalog: RulesRecordCatalog,
         glossary_catalog: GlossaryCatalog,
+        legacy_armies: tuple[LegacyArmy, ...] = (),
     ) -> None:
         self.database = database
         self.skill_catalog = skill_catalog
@@ -43,6 +45,7 @@ class SearchCatalog:
         self.label_catalog = label_catalog
         self.general_rules_catalog = general_rules_catalog
         self.glossary_catalog = glossary_catalog
+        self.legacy_armies = legacy_armies
 
     @staticmethod
     def _result(domain: str, item: dict[str, Any], href: str) -> dict[str, Any]:
@@ -87,6 +90,17 @@ class SearchCatalog:
                         "Army", army, "/units", "units", {"army_id": slug}
                     )
                 )
+
+        for army in self.legacy_armies:
+            if needle not in accent_insensitive_key(army.name):
+                continue
+            results.append(
+                self._result(
+                    "Army",
+                    {"name": army.name},
+                    "/armies",
+                )
+            )
 
         units = self.database.list_units(
             search=query,

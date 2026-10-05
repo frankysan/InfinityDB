@@ -347,7 +347,11 @@ def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> 
         "skills": ["Total Reaction"],
         "ccWeapon": "PARA CC Weapon (-3)",
     }
-    assert records[0]["citations"][0]["heading"] == "Armed Turret Profile"
+    citation = records[0]["citations"][0]
+    assert citation["source_id"] == "n5-core-v5.3-pdf"
+    assert citation["source_version"] == "5.3"
+    assert citation["page"] == 70
+    assert citation["section"] == "Armed Turret Profile"
 
 
 def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> None:

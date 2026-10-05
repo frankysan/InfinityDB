@@ -251,13 +251,13 @@ def test_internal_metrics_use_bounded_normalized_route_labels(app: Callable) -> 
     status, _, _ = request(
         app,
         "/api/units/ranger-prototype",
-        query="search=private-search-term&visitor=private-id",
+        query="cache_bust=private-search-term-private-id",
     )
     assert status == 200
     status, _, _ = request(
         app,
         "/api/units/not-a-unit",
-        query="search=another-private-term",
+        query="cache_bust=another-private-term",
     )
     assert status == 404
 
@@ -293,6 +293,22 @@ def test_internal_health_and_metrics_do_not_instrument_themselves(app: Callable)
     status, _, after = request(app, "/internal/metrics")
     assert status == 200
     assert after == before
+
+
+def test_internal_health_fails_closed_without_exposing_database_errors(
+    app: Callable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fail_health() -> None:
+        raise sqlite3.DatabaseError("private database failure detail")
+
+    monkeypatch.setattr(app.api, "validate_health", fail_health)
+
+    status, headers, body = request(app, "/internal/health")
+
+    assert status == 503
+    assert headers["cache-control"] == "no-store"
+    assert body == b"unavailable\n"
+    assert b"private database failure detail" not in body
 
 
 def test_curated_army_overview_copy_covers_tracked_player_facing_armies() -> None:
@@ -482,13 +498,29 @@ def test_fireteam_chart_page_and_api_use_application_projection(
         (101, "zulu-company", 1)
     ]
 
+    for query in (
+        "unknown=1",
+        "army_id=zulu-company&army_id=zulu-company",
+        "cache_bust=1&cache_bust=2",
+    ):
+        status, _, body = request(fireteam_app, "/api/fireteams", query=query)
+        assert status == 400
+        assert json.loads(body)["error"]
+
+    status, _, body = request(
+        fireteam_app, "/api/fireteams", query="army_id=zulu-company&cache_bust=1"
+    )
+    assert status == 200
+
     status, _, body = request(fireteam_app, "/api/fireteams", query="army_id=zulu-company")
     assert status == 200
     chart = json.loads(body)
     assert "reference" not in chart
     assert chart["army"]["public_slug"] == "zulu-company"
     assert chart["description"] == "Current chart note"
-    assert chart["limits"] == [{"type": "CORE", "position": 1, "max_count": 1}]
+    assert chart["limits"] == [
+        {"type": "CORE", "position": 1, "max_count": 1, "limit_kind": "maximum"}
+    ]
     assert chart["teams"][0]["name"] == "Ranger Team"
     assert chart["teams"][0]["types"] == ["CORE"]
     member = chart["teams"][0]["members"][0]
@@ -540,8 +572,12 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b"Authoritative" in script
     assert b'army.role === "reinforcement"' in script
     assert b'army.role === "sectorial" || army.role === "non_aligned"' in script
-    assert b"value === 256" in script
+    assert b"value === 256" not in script
+    assert b"value === 0" not in script
+    assert b'limit.limit_kind || "maximum"' in script
+    assert b'kind === "unlimited"' in script
     assert b"`${limit.type}: unlimited`" in script
+    assert b'kind === "unavailable"' in script
     assert b'element.classList.add("developer-only")' in script
     assert b'["FTO Profiles", true, "table-column--descriptor"]' in script
     assert b'["Notes", true, "table-column--descriptor"]' in script
@@ -795,6 +831,23 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
         }
     ]
 
+    status, _, body = request(role_app, "/api/units/1", query="reinforcement=0")
+    assert status == 200
+    detail = json.loads(body)
+    detail_armies = {army["id"]: army for army in detail["armies"]}
+    assert detail_armies[101]["presentation_visible"] is True
+    assert detail_armies[198]["presentation_visible"] is False
+    assert detail_armies[198]["presentation_requested"] is False
+
+    status, _, body = request(
+        role_app, "/api/units/1", query="reinforcement=0&army_id=198"
+    )
+    assert status == 200
+    detail = json.loads(body)
+    detail_armies = {army["id"]: army for army in detail["armies"]}
+    assert detail_armies[198]["presentation_visible"] is True
+    assert detail_armies[198]["presentation_requested"] is True
+
     for army_ref in ("901", "non-aligned"):
         status, _, body = request(role_app, "/api/units", query=f"army_id={army_ref}")
         assert status == 400
@@ -994,6 +1047,17 @@ def test_unit_details_api_exposes_include_relationships(
             "compatible": None,
             "habilities": None,
             "orders": [{"type": "REGULAR", "list": 2, "total": 2}],
+            "order_presentations": [
+                {
+                    "label": "Regular Order",
+                    "symbol_descriptor": {
+                        "type": "regular",
+                        "symbol_path": "orders/regular.svg",
+                        "label": "Regular Order",
+                        "help_key": "training-orders",
+                    },
+                }
+            ],
             "includes": [
                 {
                     "loadout_payload_id": payload_id,
@@ -1079,7 +1143,12 @@ def test_unit_categorical_filters_are_exposed_and_filter_units(app: Callable) ->
     assert status == 200
     assert json.loads(body) == {
         "troop_types": [
-            {"id": 1, "slug": "line-trooper", "name": "Line Trooper"}
+            {
+                "id": 1,
+                "slug": "line-trooper",
+                "name": "Line Trooper",
+                "display_name": "Line Trooper",
+            }
         ],
         "classifications": [
             {"id": 1, "slug": "light-infantry", "name": "Light Infantry"}
@@ -1150,7 +1219,9 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     profile = item["profiles"][0]
     assert profile["name"] == "Ranger Profile"
     assert profile["type"] == "Line Trooper"
+    assert profile["type_label"] == "Line Trooper"
     assert profile["classification"] == "Light Infantry"
+    assert profile["characteristic_presentations"] == []
     assert {entry["army_id"] for entry in profile["availability"]} == {101, 201}
     assert {entry["ava"] for entry in profile["availability"]} == {2}
 
@@ -1277,6 +1348,54 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
                 "extras": [{"id": 43, "name": "AP"}],
             }
         ]
+        assert army["profiles"][0]["type_label"] == "Line Trooper"
+        assert army["profiles"][0]["characteristic_presentations"] == []
+        assert army["availability_badges"] == []
+        assert army["profiles"][0]["specific_items"]["skills"] == []
+        assert army["profiles"][0]["specific_items"]["equipment"] == []
+        assert army["loadouts"][0]["symbol_descriptors"] == []
+
+    assert unit["general_profiles"] == [
+        {
+            "profile_identity": "profile ranger",
+            "display_name": "Ranger Profile",
+            "stats": {
+                "move_1": None,
+                "move_2": None,
+                "is_structure": None,
+                "cc": None,
+                "bs": None,
+                "ph": None,
+                "wip": None,
+                "arm": None,
+                "bts": None,
+                "vitality": None,
+                "silhouette": None,
+            },
+            "order_type": "regular",
+            "type": "Line Trooper",
+            "type_label": "Line Trooper",
+            "classification": "Light Infantry",
+            "occurrence_count": 2,
+            "reinforcement_only": False,
+            "symbol_path": None,
+            "shared_items": {
+                "skills": [army["profiles"][0]["skills"][0]],
+                "equipment": [army["profiles"][0]["equipment"][0]],
+                "weapons": [army["loadouts"][0]["weapons"][0]],
+            },
+            "different_stat_labels": [],
+            "symbol_descriptors": [
+                {
+                    "type": "regular",
+                    "symbol_path": "orders/regular.svg",
+                    "label": "Regular Order",
+                    "help_key": "training-orders",
+                }
+            ],
+            "presentation_visible": True,
+        }
+    ]
     status, headers, body = request(app, "/units/1")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
@@ -1378,6 +1497,7 @@ def test_unit_details_expose_bidirectional_peripheral_controller_links(
         {
             "id": "peripheral-controller-access:test",
             "type_id": "rule:peripheral-type:cyberplug",
+            "type_label": "Cyberplug",
             "relationship": "access-pool",
             "targets": [{"id": 2, "slug": "beta-scout", "name": "Beta Scout"}],
         }
@@ -1387,10 +1507,14 @@ def test_unit_details_expose_bidirectional_peripheral_controller_links(
     assert status == 200
     target = json.loads(body)
     assert target["peripheral_type_ids"] == ["rule:peripheral-type:cyberplug"]
+    assert target["peripheral_types"] == [
+        {"id": "rule:peripheral-type:cyberplug", "label": "Cyberplug"}
+    ]
     assert target["peripheral_controllers"] == [
         {
             "id": "peripheral-controller-access:test",
             "type_id": "rule:peripheral-type:cyberplug",
+            "type_label": "Cyberplug",
             "relationship": "access-pool",
             "controller_kind": "loadout",
             "controller_option_name": "Rifle loadout",
@@ -1422,6 +1546,25 @@ def test_unit_details_include_occurrence_availability_categories(
     assert status == 200
     unit = json.loads(body)
     assert unit["armies"][0]["availability_flags"] == expected_flags
+
+
+def test_unit_detail_query_rejects_unknown_and_duplicate_parameters(
+    app: Callable,
+) -> None:
+    for query in (
+        "unknown=1",
+        "army_id=101&army_id=101",
+        "cache_bust=1&cache_bust=2",
+    ):
+        status, _, body = request(app, "/api/units/ranger-prototype", query=query)
+        assert status == 400
+        assert json.loads(body)["error"]
+
+    status, _, body = request(
+        app, "/api/units/ranger-prototype", query="army_id=101&cache_bust=1"
+    )
+    assert status == 200
+    assert json.loads(body)["id"] == 1
 
 
 @pytest.mark.parametrize(
@@ -1603,7 +1746,8 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'row.append(nameCell, idCell)' in unit_list_script
     assert b'unit-profile-characteristic-symbol' in unit_list_script
     assert b'unit-profile-characteristic-fallback' in unit_list_script
-    assert b'developerOnlyCharacteristic(characteristic)' in unit_list_script
+    assert b'descriptor.developer_only' in unit_list_script
+    assert b'developerOnlyCharacteristic' not in unit_list_script
     assert b'unit-profile-troop-type-long' in unit_list_script
     assert b'unit-profile-troop-type-short' in unit_list_script
     assert b'className = "army-availability-link"' in unit_list_script
@@ -1612,17 +1756,18 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     status, _, unit_detail_script = request(app, "/static/unit.js")
     assert status == 200
     assert b'readShareState("unit").params.get("army_id")' in unit_detail_script
-    assert b'unit.armies.find(isRequestedArmy)' in unit_detail_script
-    assert b'army === requestedArmy' in unit_detail_script
+    assert b'unit.armies.find((army) => army.presentation_requested)' in unit_detail_script
+    assert b'unit.armies.filter((army) => army.presentation_visible)' in unit_detail_script
 
     status, _, unit_presentation_script = request(app, "/static/unit-presentation.js")
     assert status == 200
     for characteristic in (b"no cube", b"non hackable", b"not impetuous"):
-        assert characteristic in unit_presentation_script
+        assert characteristic not in unit_presentation_script
 
     status, _, app_script = request(app, "/static/app.js")
     assert status == 200
-    assert b'(item) => troopTypeLabel(item.name)' in app_script
+    assert b'(item) => item.display_name || item.name' in app_script
+    assert b'troopTypeLabel' not in app_script
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -1809,6 +1954,7 @@ def test_rules_reference_pages_share_the_same_shell_classification(
         ("/units/example", "/units"),
         ("/skills", "/skills"),
         ("/skills/example", "/skills"),
+        ("/skill-extras", "/skills"),
         ("/equipment", "/equipment"),
         ("/equipment/example", "/equipment"),
         ("/weapons", "/weapons"),
@@ -1837,6 +1983,17 @@ def test_browser_routes_keep_their_parent_navigation_active(
 
     assert status == 200
     assert f'href="{active_href}" aria-current="page"'.encode() in body
+
+
+def test_skill_modifiers_is_a_discoverable_child_of_skills(app: Callable) -> None:
+    status, _, skills = request(app, "/skills")
+    assert status == 200
+    assert b'href="/skill-extras"' in skills
+
+    status, _, modifiers = request(app, "/skill-extras")
+    assert status == 200
+    assert b'href="/skills"' in modifiers
+    assert b'href="/skills" aria-current="page"' in modifiers
 
 
 def test_every_browser_page_has_a_meta_description(app: Callable) -> None:
@@ -2020,7 +2177,7 @@ def test_generated_tables_own_accessible_semantics_and_normal_wrapping(app: Call
     assert b'"Loadouts",' in unit_js
     assert b'"Composite options",' in unit_js
     assert b'"Profiles",' in unit_js
-    assert b'`${profile.name || "Unit"} general profile`' in unit_js
+    assert b'`${profile.display_name || "Unit"} general profile`' in unit_js
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -2732,7 +2889,10 @@ def test_unit_details_frontend_uses_backend_reinforcement_flags(app: Callable) -
     assert status == 200
     assert b"[98, 99]" not in body
     assert b"function isReinforcementArmy(" not in body
-    assert b'reinforcement: (army.availability_flags || []).includes("reinforcement"),' in body
+    assert b"const generalProfiles = unit.general_profiles || [];" in body
+    assert b"profile.presentation_visible !== false" in body
+    assert b"generalProfiles(allProfiles, allLoadouts)" not in body
+    assert b"isEnabledArmy" not in body
 
 
 def test_unit_details_frontend_uses_backend_faction_metadata(app: Callable) -> None:
@@ -2753,8 +2913,8 @@ def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> N
     assert b'document.createElement("details")' in body
     assert b"function isStandardArmy(army)" in body
     assert b"section.open = expanded" in body
-    assert b"const profileKey = profile.profile_identity;" in body
-    assert b"profile.display_name || profile.name" in body
+    assert b"const generalByIdentity = new Map(generalProfiles.map" in body
+    assert b"generalByIdentity.get(profile.profile_identity)" in body
     assert b"(?:REINF|REFUERZOS)" not in body
     assert b"function baseProfileName(" not in body
     assert b"function profileIdentity(" not in body
@@ -2827,7 +2987,10 @@ def test_unit_details_frontend_labels_vitality_as_vita_or_str(app: Callable) -> 
     assert b'["W", (profile) => profile.vitality]' not in body
     assert b"profile.is_structure === true || Number(profile.is_structure) === 1" in body
     assert b'label === "VITA" && isStructureProfile(profile) ? "STR" : label' in body
-    assert b'is_structure: mostCommon(profiles, "is_structure")' in body
+    assert b"mostCommon(profiles" not in body
+    status, _, api_body = request(app, "/api/units/1")
+    assert status == 200
+    assert "is_structure" in json.loads(api_body)["general_profiles"][0]["stats"]
 
 
 def test_unit_details_frontend_pluralizes_general_profile_heading(app: Callable) -> None:
@@ -2840,7 +3003,8 @@ def test_unit_details_frontend_pluralizes_general_profile_heading(app: Callable)
 def test_unit_details_frontend_marks_general_stats_that_vary_by_army(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
-    assert b"function generalStatDifferenceLabels(profile)" in body
+    assert b"new Set(profile.different_stat_labels || [])" in body
+    assert b"function generalStatDifferenceLabels(profile)" not in body
     assert b"general-stat-difference-indicator" in body
     assert b"One or more Army profiles differ from this General profile stat" in body
 
@@ -2935,7 +3099,7 @@ def test_weapon_range_tables_always_include_canonical_bands(app: Callable) -> No
     assert b".find((range) => Number(range.max) >= maximum);" in body
     assert b'if (!matchingRange) return "--";' in body
     assert b"String(modifier)" in body
-    assert b"maximum / 2.5" in body
+    assert b"maximum / DISTANCE_CENTIMETERS_PER_INCH" in body
     assert b"weaponRangeBands" not in body
 
 
@@ -3114,13 +3278,23 @@ def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable)
     assert body.count(b"if (!items.length) continue;") == 2
 
 
-def test_unit_details_frontend_promotes_sole_loadout_skills_to_general_profile(
+def test_unit_details_api_owns_general_profile_shared_item_semantics(
     app: Callable,
 ) -> None:
-    status, _, body = request(app, "/static/unit.js")
+    status, _, body = request(app, "/api/units/1")
     assert status == 200
-    assert b"function generalProfileSkills(profiles, loadouts)" in body
-    assert b"if (loadouts.length !== 1) return skills;" in body
+    unit = json.loads(body)
+    general = unit["general_profiles"][0]
+    assert general["profile_identity"] == "profile ranger"
+    assert general["order_type"] == "regular"
+    assert [item["name"] for item in general["shared_items"]["skills"]] == ["Stealth"]
+    assert [item["name"] for item in general["shared_items"]["equipment"]] == ["Medikit"]
+    assert [item["name"] for item in general["shared_items"]["weapons"]] == ["Combi Rifle"]
+
+    status, _, script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function generalProfileSkills(profiles, loadouts)" not in script
+    assert b"profile.shared_items" in script
 
 
 def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callable) -> None:
@@ -3143,7 +3317,8 @@ def test_unit_details_frontend_presents_include_relationships(app: Callable) -> 
     assert b"details.open = true" in unit_js
     assert b"function compositeOptionTable(options, anchorScope)" in unit_js
     assert b'"Composite option", "PTS", "SWC"' in unit_js
-    assert b"function compositeOptionOrderSummary(orders)" in unit_js
+    assert b"function compositeOptionOrderSummary(option)" in unit_js
+    assert b"option.order_presentations?.[index]?.label" in unit_js
     assert b'section.append(subheading("Composite options"));' in unit_js
 
 
@@ -3268,20 +3443,12 @@ def test_unit_details_frontend_renders_order_symbols_as_content(app: Callable) -
     assert status == 200
     assert b"function profileTitle(profile, profileSymbols = null)" in body
     assert b"generalProfile.append(profileTitle(profile, profileSymbols), table(" in body
-    assert b"nameWithOrderSymbols(loadout.name, symbolTypes)" in body
-    assert b"function generalProfileOrderType(profiles, loadouts)" in body
-    assert b'hasSkill(loadouts, "regular")' in body
-    assert b'.startsWith("peripheral")' in body
-    assert b'hasSkill([loadout], "impetuous")' in body
-    assert b'hasSkill([loadout], "tactical awareness")' in body
-    assert b"function lieutenantOrderCount(items)" in body
-    assert b"function generalLieutenantOrderCount(profiles, loadouts)" in body
-    assert b'Array(lieutenantOrderCount([loadout])).fill("lieutenant")' in body
-    assert b"function characteristicSymbolTypes(profiles)" in body
-    assert b"characteristic.equipment_reference?.slug" in body
-    assert b"href: `/equipment/${encodeURIComponent(slug)}`" in body
-    assert b"symbol.src = `/static/${symbolCategories[symbolType]}/${symbolType}.svg`" in body
-    assert b"symbol.title = symbolLabels[symbolType]" in body
+    assert b"loadout.symbol_descriptors || []" in body
+    assert b"function generalProfileOrderType(profiles, loadouts)" not in body
+    assert b"function lieutenantOrderCount(items)" not in body
+    assert b"function characteristicSymbolTypes(profiles)" not in body
+    assert b"descriptor.symbol_path" in body
+    assert b"descriptor.label" in body
     assert b'"profile-summary loadout-start"' in body
 
 
@@ -3845,6 +4012,14 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
         "values": {"army_id": "alpha-company"},
     }
 
+    status, _, body = request(app, "/api/search", query="q=spiral")
+    assert status == 200
+    assert {
+        "domain": "Army",
+        "name": "Spiral Corps",
+        "href": "/armies",
+    } in json.loads(body)["items"]
+
     status, _, body = request(app, "/api/search", query="q=combi")
     assert status == 200
     assert {
@@ -4126,7 +4301,17 @@ def test_unit_profile_help_links_are_rendered_from_rules_data(app: Callable) -> 
     assert b'profileHelpLabel("Type", "troop-type")' in unit_js
     assert b'profileHelpLabel("Classification", "classification")' in unit_js
     assert b'profileHelpLabel("Peripherals", "peripheral")' in unit_js
-    assert b'"training-orders"' in unit_js
+    assert b'descriptor.help_key' in unit_js
+    assert b'"training-orders"' not in unit_js
+
+    status, _, body = request(app, "/api/units/1")
+    assert status == 200
+    unit = json.loads(body)
+    assert any(
+        descriptor.get("help_key") == "training-orders"
+        for profile in unit["general_profiles"]
+        for descriptor in profile["symbol_descriptors"]
+    )
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -4649,23 +4834,18 @@ def test_072_detail_and_catalog_presentation_contract(app: Callable, tmp_path: P
 
     status, _, unit_script = request(app, "/static/unit.js")
     assert status == 200
-    assert b"troopTypeLabel(profile.type)" in unit_script
+    assert b"profile.type_label || profile.type" in unit_script
+    assert b"troopTypeLabel" not in unit_script
     assert b"formatMovement(profile.move_1, profile.move_2, distanceUnit())" in unit_script
 
     status, _, presentation_script = request(app, "/static/unit-presentation.js")
     assert status == 200
-    for code, label in (
-        (b"LI", b"Light Infantry"),
-        (b"MI", b"Medium Infantry"),
-        (b"HI", b"Heavy Infantry"),
-        (b"REM", b"Remote"),
-        (b"TAG", b"Tactical Armored Gear"),
-        (b"WB", b"Warband"),
-        (b"SK", b"Skirmisher"),
-        (b"VH", b"Vehicle"),
-    ):
-        assert code in presentation_script
-        assert label in presentation_script
+    assert b"TROOP_TYPE_LABELS" not in presentation_script
+    assert b"CHARACTERISTIC_SYMBOLS" not in presentation_script
+    assert b'Number(value) === -1' in presentation_script
+    assert b'return "-"' in presentation_script
+    assert b'Number(value) < 0' in presentation_script
+    assert b'DISTANCE_CENTIMETERS_PER_INCH' in presentation_script
     assert b'join("-")}\\"`' in presentation_script
     assert b'`${values.join("-")} cm`' in presentation_script
 
@@ -4950,6 +5130,30 @@ def test_adjacent_rules_database_remains_optional_for_local_use(
     local_app = create_app(database_path)
 
     assert local_app.rules_database is None
+
+
+def test_local_app_without_rules_database_keeps_army_data_available(
+    app: Callable, tmp_path: Path
+) -> None:
+    local_root = tmp_path / "rules-optional"
+    local_root.mkdir()
+    database_path = local_root / "infinity.db"
+    shutil.copy2(app.database.path, database_path)
+
+    local_app = create_app(database_path)
+
+    assert local_app.rules_database is None
+    for path in ("/", "/skills", "/states", "/api/armies", "/api/units"):
+        status, _, _ = request(local_app, path)
+        assert status == 200
+
+    status, _, body = request(local_app, "/api/states")
+    assert status == 200
+    assert json.loads(body) == {"items": []}
+
+    status, _, body = request(local_app, "/api/unit-profile-help")
+    assert status == 200
+    assert json.loads(body)["items"] == []
 
 
 def test_wsgi_uses_explicit_rules_database_from_environment(

@@ -1,4 +1,8 @@
-import { distanceUnit, initializeDistanceUnitToggle } from "./preferences.js";
+import {
+  DISTANCE_CENTIMETERS_PER_INCH,
+  distanceUnit,
+  initializeDistanceUnitToggle,
+} from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 import {
@@ -111,7 +115,9 @@ function rangeModifier(ranges, maximum) {
 const canonicalWeaponRangeBands = [20, 40, 60, 80, 100, 120, 240];
 
 function rangeBandLabel(maximum) {
-  return distanceUnit() === "in" ? `${maximum / 2.5}"` : `${maximum} cm`;
+  return distanceUnit() === "in"
+    ? `${maximum / DISTANCE_CENTIMETERS_PER_INCH}"`
+    : `${maximum} cm`;
 }
 
 function specialWeaponProfile(profile) {

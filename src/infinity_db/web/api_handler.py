@@ -41,6 +41,12 @@ from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.trait_catalog import TraitCatalog
+from infinity_db.unit_presentation import (
+    OPTIONAL_AVAILABILITY_FLAGS,
+    enrich_unit_filter_presentation,
+    enrich_unit_list_presentation,
+    enrich_unit_presentation,
+)
 from infinity_db.unit_slugs import (
     attach_public_unit_slug,
     enrich_nested_unit_slugs,
@@ -150,6 +156,29 @@ def _domain_filter_identifier(params: dict, key: str) -> int | str | None:
             raise ValueError(f"{key} must be a valid domain identifier")
         return value
     return require_domain_slug(raw, context=key)
+
+
+def _validated_query_params(query: str, allowed: set[str]) -> dict[str, list[str]]:
+    params = parse_qs(query, keep_blank_values=True, max_num_fields=40)
+    unknown = sorted(set(params) - allowed)
+    if unknown:
+        raise ValueError(f"Unknown query parameter: {unknown[0]}")
+    for key, values in params.items():
+        if len(values) != 1:
+            raise ValueError(f"Provide {key} only once")
+    return params
+
+
+def _unit_detail_presentation_query(query: str) -> tuple[dict[str, bool], str | None]:
+    params = _validated_query_params(
+        query, {"army_id", "cache_bust", *OPTIONAL_AVAILABILITY_FLAGS}
+    )
+    optional_filters = {
+        flag: (_flag(params, flag) if flag in params else True)
+        for flag in OPTIONAL_AVAILABILITY_FLAGS
+    }
+    requested_army = _domain_filter_identifier(params, "army_id")
+    return optional_filters, None if requested_army is None else str(requested_army)
 
 
 def _unit_query(query: str) -> dict:
@@ -268,6 +297,7 @@ class ApiHandler:
         self.label_catalog = LabelCatalog(rules_database)
         self.general_rules_catalog = RulesRecordCatalog(rules_database, "rules")
         self.glossary_catalog = GlossaryCatalog(database, rules_database)
+        self.legacy_armies = load_legacy_armies()
         self.search_catalog = SearchCatalog(
             database,
             self.skill_catalog,
@@ -279,10 +309,10 @@ class ApiHandler:
             self.label_catalog,
             self.general_rules_catalog,
             self.glossary_catalog,
+            self.legacy_armies,
         )
         self.catalog_rules = CatalogRules(rules_database)
         self.symbol_catalog = SymbolCatalog()
-        self.legacy_armies = load_legacy_armies()
         self.army_overview_summaries = load_army_overview_copy()
         self.fireteam_rules_reference = fireteam_reference(rules_database)
         if self.fireteam_rules_reference is not None:
@@ -353,7 +383,9 @@ class ApiHandler:
         elif path == "/api/fireteams":
             cache_control = API_CACHE_CONTROL
             try:
-                params = parse_qs(query_string, keep_blank_values=True)
+                params = _validated_query_params(
+                    query_string, {"army_id", "cache_bust"}
+                )
                 army_ref = _domain_filter_identifier(params, "army_id")
                 if army_ref is None:
                     items = [dict(item) for item in self.database.list_fireteam_armies()]
@@ -738,7 +770,9 @@ class ApiHandler:
         elif path == "/api/unit-filters":
             cache_control = API_CACHE_CONTROL
             try:
-                payload = self.database.list_unit_filter_values()
+                payload = enrich_unit_filter_presentation(
+                    self.database.list_unit_filter_values()
+                )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Unit filter values")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -765,6 +799,7 @@ class ApiHandler:
                     }
                     payload = enrich_army_references(self.database, payload)
                     self.symbol_catalog.enrich_units(payload["items"])
+                    enrich_unit_list_presentation(payload["items"])
                 except ArmySelectionError as exc:
                     status = HTTPStatus.BAD_REQUEST
                     payload = {"error": str(exc)}
@@ -775,6 +810,9 @@ class ApiHandler:
         elif match := UNIT_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
+                optional_filters, requested_army = _unit_detail_presentation_query(
+                    query_string
+                )
                 identifier = match.group("identifier")
                 unit_ref = int(identifier) if identifier.isdigit() else identifier
                 payload = self.database.get_unit(unit_ref)
@@ -789,6 +827,11 @@ class ApiHandler:
                     attach_public_unit_slug(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
                     self.symbol_catalog.enrich_unit(payload)
+                    payload = enrich_unit_presentation(
+                        payload,
+                        optional_filters=optional_filters,
+                        requested_army=requested_army,
+                    )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}

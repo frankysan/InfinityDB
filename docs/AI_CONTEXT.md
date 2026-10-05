@@ -79,6 +79,8 @@ validated set. Production must not substitute a server-side rebuild.
 - Peripheral identity, Unit-backed Peripheral mappings, Controller access pools, include
   relationships, selection/dependency constraints, and Fireteam membership are explicit application
   relationships. Do not infer ownership from names.
+- Fireteam chart limit sentinels are source encoding, not browser semantics. Preserve the raw limit
+  for provenance/compatibility and expose the interpreted limit kind from the backend.
 
 ## Query-coherence invariant
 
@@ -101,6 +103,10 @@ because the source does not attach them to a profile group.
   identity instead of merging by label.
 - Maintained prose must use typed semantic links for supported reference namespaces. The migration
   is complete: reviewed batches reject newly introduced plain semantic candidates.
+- Gameplay distance presentation uses the Army/rules round-trip convention **2.5 cm = 1 inch**, not
+  the SI physical conversion. Preserve Army metric storage, typed maintained-rule distances, and
+  the `-1/-1` MOV sentinel (`-` / stationary) as distinct semantics; never convert the sentinel as a
+  numeric distance.
 - Use `[[review-needed:<reason>|...]]` for genuinely ambiguous maintained prose rather than choosing
   a target without evidence. Reviewed ordinary-text collisions are fingerprinted to exact passages,
   so wording changes reopen review.

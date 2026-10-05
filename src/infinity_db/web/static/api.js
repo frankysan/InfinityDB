@@ -104,6 +104,16 @@ export function getUnits({ armyId, declaredFactionId, search, skillId, equipment
   return get(`/api/units?${params}`, signal);
 }
 
-export function getUnit(unitIdentifier, signal) {
-  return get(`/api/units/${encodeURIComponent(unitIdentifier)}`, signal);
+export function getUnit(
+  unitIdentifier,
+  { optionalFilters = {}, armyId = "" } = {},
+  signal,
+) {
+  const params = new URLSearchParams();
+  for (const key of ["mercs", "specops", "teamops", "reinforcement"]) {
+    params.set(key, optionalFilters[key] === false ? "0" : "1");
+  }
+  if (armyId) params.set("army_id", armyId);
+  const query = params.toString();
+  return get(`/api/units/${encodeURIComponent(unitIdentifier)}${query ? `?${query}` : ""}`, signal);
 }

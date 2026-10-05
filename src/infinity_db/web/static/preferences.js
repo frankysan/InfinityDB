@@ -12,6 +12,7 @@ const OPTIONAL_UNIT_SETTINGS = [
 ];
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 const DISTANCE_NUMBER_PATTERN = /[+-]?\d+(?:\.\d+)?/g;
+export const DISTANCE_CENTIMETERS_PER_INCH = 2.5;
 
 function cookieValue(name) {
   const prefix = `${encodeURIComponent(name)}=`;
@@ -67,7 +68,9 @@ export function distanceUnit() {
 
 export function formatDistanceExtra(value, { showPositiveSign = true, forcePositiveSign = false } = {}) {
   return String(value).replace(DISTANCE_NUMBER_PATTERN, (number) => {
-    const converted = distanceUnit() === "in" ? Number(number) / 2.5 : Number(number);
+    const converted = distanceUnit() === "in"
+      ? Number(number) / DISTANCE_CENTIMETERS_PER_INCH
+      : Number(number);
     const sign = converted >= 0 && (forcePositiveSign || (showPositiveSign && number.startsWith("+")))
       ? "+" : "";
     return `${sign}${converted}${distanceUnit() === "in" ? '"' : " cm"}`;

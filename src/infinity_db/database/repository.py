@@ -29,6 +29,7 @@ from infinity_db.domain_slugs import (
     require_domain_slug,
     resolve_domain_slug_candidates,
 )
+from infinity_db.fireteam_semantics import fireteam_limit_kind
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
@@ -1825,6 +1826,7 @@ class Database:
                     "type": row["fireteam_type"],
                     "position": int(row["position"]),
                     "max_count": int(row["raw_limit"]),
+                    "limit_kind": fireteam_limit_kind(int(row["raw_limit"])),
                 }
                 for row in limits
             ],

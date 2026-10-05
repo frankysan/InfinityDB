@@ -25,6 +25,7 @@
         "test_curated",
         "test_database",
         "test_display_identities",
+        "test_distance_semantics",
         "test_domain_slugs",
         "test_equipment_config",
         "test_fireteam_relationships",

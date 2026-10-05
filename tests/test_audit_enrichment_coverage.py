@@ -103,24 +103,33 @@ def _fixture_rules(tmp_path: Path) -> Path:
     return path
 
 
+def _fixture_classification_policy(tmp_path: Path) -> Path:
+    document = json.loads(DEFAULT_CLASSIFICATION_PATH.read_text(encoding="utf-8"))
+    document["catalogGapCodes"] = {}
+    document["overrides"] = []
+    path = tmp_path / "fixture-classifications.json"
+    path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
 def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_path: Path) -> None:
     report = audit_coverage(
         _fixture_database(tmp_path),
         _fixture_rules(tmp_path),
         include_complete=True,
+        classification_path=_fixture_classification_policy(tmp_path),
     )
 
     assert report["summary"]["exposedCount"] == 154
-    assert report["summary"]["completeCount"] == 152
-    assert report["summary"]["gapCount"] == 2
+    assert report["summary"]["completeCount"] == 153
+    assert report["summary"]["gapCount"] == 1
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
-        "stale_citation_source": 1,
         "unresolved_related_item_link": 8,
     }
-    assert report["summary"]["classifiedGapCount"] == 10
-    assert report["summary"]["classificationCounts"] == {"release-blocker": 10}
-    assert report["summary"]["releaseBlockerCount"] == 10
+    assert report["summary"]["classifiedGapCount"] == 9
+    assert report["summary"]["classificationCounts"] == {"release-blocker": 9}
+    assert report["summary"]["releaseBlockerCount"] == 9
 
     skills = {item["name"]: item for item in report["domains"]["skills"]["items"]}
     assert skills["Super-Jump"]["gapCodes"] == []
@@ -139,9 +148,13 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     ]
     assert tinbot["gapCodes"] == []
 
-    turret = report["domains"]["weapons"]["items"][0]
+    turret = next(
+        item
+        for item in report["domains"]["weapons"]["items"]
+        if item["name"] == "Armed Turret"
+    )
     assert turret["familyRuleIds"] == ["weapon:armed-turret"]
-    assert turret["gapCodes"] == ["stale_citation_source"]
+    assert turret["gapCodes"] == []
     states = {item["name"]: item for item in report["domains"]["states"]["items"]}
     assert len(states) == 24
     assert states["Camouflaged State"]["gapCodes"] == []
@@ -176,16 +189,18 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
 
 
 def test_enrichment_coverage_default_details_only_list_gaps(tmp_path: Path) -> None:
-    report = audit_coverage(_fixture_database(tmp_path), _fixture_rules(tmp_path))
+    report = audit_coverage(
+        _fixture_database(tmp_path),
+        _fixture_rules(tmp_path),
+        classification_path=_fixture_classification_policy(tmp_path),
+    )
 
     assert [item["name"] for item in report["domains"]["skills"]["items"]] == [
         "Missing Skill"
     ]
     assert report["domains"]["equipment"]["items"] == []
     assert report["domains"]["states"]["items"] == []
-    assert [item["name"] for item in report["domains"]["weapons"]["items"]] == [
-        "Armed Turret"
-    ]
+    assert report["domains"]["weapons"]["items"] == []
 
 
 def test_enrichment_coverage_cli_writes_report(tmp_path: Path, capsys) -> None:
@@ -193,7 +208,18 @@ def test_enrichment_coverage_cli_writes_report(tmp_path: Path, capsys) -> None:
     rules = _fixture_rules(tmp_path)
     output = tmp_path / "coverage.json"
 
-    assert main([str(database), "--rules", str(rules), "--output", str(output)]) == 0
+    classifications = _fixture_classification_policy(tmp_path)
+    assert main(
+        [
+            str(database),
+            "--rules",
+            str(rules),
+            "--classifications",
+            str(classifications),
+            "--output",
+            str(output),
+        ]
+    ) == 0
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["formatVersion"] == 3
     assert payload["classificationPolicy"]["sha256"]
@@ -204,10 +230,69 @@ def _classification_policy_with_override(
     tmp_path: Path, override: dict[str, object]
 ) -> Path:
     document = json.loads(DEFAULT_CLASSIFICATION_PATH.read_text(encoding="utf-8"))
+    document["catalogGapCodes"] = {}
     document["overrides"] = [override]
     path = tmp_path / "classifications.json"
     path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
     return path
+
+
+def _classification_policy_with_catalog_gap(
+    tmp_path: Path,
+    *,
+    catalog: str,
+    gap_code: str,
+    classification: str,
+    reason: str,
+) -> Path:
+    document = json.loads(DEFAULT_CLASSIFICATION_PATH.read_text(encoding="utf-8"))
+    document["catalogGapCodes"] = {
+        catalog: {
+            gap_code: {
+                "classification": classification,
+                "reason": reason,
+            }
+        }
+    }
+    document["overrides"] = []
+    path = tmp_path / "catalog-classifications.json"
+    path.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
+def test_enrichment_coverage_allows_catalog_gap_classification(tmp_path: Path) -> None:
+    classifications = _classification_policy_with_catalog_gap(
+        tmp_path,
+        catalog="skills",
+        gap_code="missing_rule_definition",
+        classification="later-product-work",
+        reason="Synthetic catalog-scope decision.",
+    )
+
+    report = audit_coverage(
+        _fixture_database(tmp_path),
+        _fixture_rules(tmp_path),
+        classification_path=classifications,
+    )
+
+    missing = next(
+        item
+        for item in report["domains"]["skills"]["items"]
+        if item["name"] == "Missing Skill"
+    )
+    assert missing["gapClassifications"] == [
+        {
+            "code": "missing_rule_definition",
+            "classification": "later-product-work",
+            "reason": "Synthetic catalog-scope decision.",
+            "source": "catalog-gap-code",
+        }
+    ]
+    assert report["summary"]["classificationCounts"] == {
+        "later-product-work": 1,
+        "release-blocker": 8,
+    }
+    assert report["summary"]["releaseBlockerCount"] == 8
 
 
 def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> None:
@@ -244,9 +329,9 @@ def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> Non
     ]
     assert report["summary"]["classificationCounts"] == {
         "later-product-work": 1,
-        "release-blocker": 9,
+        "release-blocker": 8,
     }
-    assert report["summary"]["releaseBlockerCount"] == 9
+    assert report["summary"]["releaseBlockerCount"] == 8
 
 
 def test_enrichment_coverage_rejects_stale_classification_override(tmp_path: Path) -> None:

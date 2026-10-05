@@ -451,6 +451,14 @@ Army-derived metric values for display. A bare numeric value is insufficient to
 establish rules meaning; centimetre source data and inch rules presentation are
 representations of a distance, not interchangeable raw fields.
 
+The current Army source serializes those gameplay distances on a nominal metric grid where
+`2.5 cm` corresponds to `1 inch`. InfinityDB uses that **2.5 cm ↔ 1 rules inch** mapping for
+Army-derived values and typed maintained-rule distances so switching display units round-trips the
+game value exactly. This is a game/source representation convention, not an SI physical conversion;
+do not substitute `2.54 cm` when formatting these values. The Army MOV sentinel `-1/-1` represents
+the rules `-` value (stationary) and must be rendered as semantic absence rather than converted as a
+negative distance.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Distances_and_Measurements>

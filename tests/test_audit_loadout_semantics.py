@@ -9,10 +9,14 @@ import pytest
 
 from tools.audit_loadout_semantics import (
     EXPECTED_COLUMNS,
+    PAYLOAD_FIELDS,
+    PAYLOAD_FORMAT,
+    PAYLOAD_FORMAT_VERSION,
     LoadoutSemanticsAuditError,
     audit_database,
     main,
 )
+from tools.payload_audit_common import canonical_json
 
 
 def _insert(connection: sqlite3.Connection, table: str, **values: object) -> None:
@@ -24,45 +28,30 @@ def _insert(connection: sqlite3.Connection, table: str, **values: object) -> Non
     )
 
 
-def _loadout(army_id: int, unit_id: int, **overrides: object) -> dict[str, object]:
-    row: dict[str, object] = {
-        "army_id": army_id,
-        "unit_id": unit_id,
-        "group_id": 1,
-        "option_id": 1,
-        "position": 1,
-        "name": f"Loadout {unit_id}",
-        "points": 20,
-        "swc": 0,
-        "minis": 1,
-        "disabled": 0,
-    }
-    row.update(overrides)
-    return row
+def _payload_values(name: str) -> dict[str, object]:
+    return {"name": name, "minis": 1, "disabled": 0}
 
 
-def _item_row(
-    occurrence_id: int,
-    loadout: dict[str, object],
-    *,
-    position: int = 1,
-    item_id: int = 10,
-    display_order: int | None = 1,
-    quantity: int | None = None,
-    raw: str | None = None,
-) -> dict[str, object]:
-    return {
-        "occurrence_id": occurrence_id,
-        "army_id": loadout["army_id"],
-        "unit_id": loadout["unit_id"],
-        "group_id": loadout["group_id"],
-        "option_id": loadout["option_id"],
-        "position": position,
-        "item_id": item_id,
-        "display_order": display_order,
-        "quantity": quantity,
-        "raw": raw,
-    }
+def _payload_sha(values: dict[str, object]) -> str:
+    payload = {field: values[field] for field in PAYLOAD_FIELDS}
+    payload.update(
+        {
+            "characteristics": [],
+            "orders": [],
+            "skills": [],
+            "equipment": [],
+            "weapons": [],
+        }
+    )
+    serialized = canonical_json(
+        {
+            "format": PAYLOAD_FORMAT,
+            "formatVersion": PAYLOAD_FORMAT_VERSION,
+            "payload": payload,
+        },
+        allow_nan=False,
+    )
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
 def _fixture_database(tmp_path: Path) -> Path:
@@ -73,7 +62,8 @@ def _fixture_database(tmp_path: Path) -> Path:
             definition = ", ".join(f'"{column}"' for column in columns)
             connection.execute(f'CREATE TABLE "{table}" ({definition})')
 
-        connection.execute("PRAGMA user_version = 12")
+        connection.execute("PRAGMA application_id = 1229210161")
+        connection.execute("PRAGMA user_version = 25")
         _insert(
             connection,
             "__infinity_metadata",
@@ -81,144 +71,73 @@ def _fixture_database(tmp_path: Path) -> Path:
             value=json.dumps(
                 {
                     "snapshotArchiveSha256": "a" * 64,
-                    "snapshotDownloadedOn": "2026-09-18",
+                    "snapshotDownloadedOn": "2026-09-29",
                 },
                 sort_keys=True,
             ),
         )
+        _insert(
+            connection,
+            "__infinity_metadata",
+            key="database_compatibility_version",
+            value="34",
+        )
 
-        for unit_id in range(1, 9):
+        for source_id, logical_id in ((1, 1), (2, 2)):
             _insert(
                 connection,
                 "logical_unit_sources",
-                source_unit_id=unit_id,
-                logical_unit_id=unit_id,
+                source_unit_id=source_id,
+                logical_unit_id=logical_id,
             )
 
-        loadouts: dict[tuple[int, int], dict[str, object]] = {}
-        for unit_id in range(1, 9):
-            for army_id in (101, 102):
-                overrides: dict[str, object] = {}
-                if unit_id == 1 and army_id == 102:
-                    overrides["points"] = 21
-                if unit_id == 2 and army_id == 102:
-                    overrides["swc"] = 1
-                row = _loadout(army_id, unit_id, **overrides)
-                loadouts[(army_id, unit_id)] = row
-                _insert(connection, "loadout_options", **row)
-
-        # Unit 3 differs only by equipment representation.
+        first = _payload_values("Shared")
+        second = _payload_values("Other")
         _insert(
             connection,
-            "option_equipment",
-            **_item_row(1, loadouts[(101, 3)], display_order=1, quantity=None),
+            "loadout_payloads",
+            id=1,
+            logical_unit_id=1,
+            payload_sha256=_payload_sha(first),
+            **first,
         )
         _insert(
             connection,
-            "option_equipment",
-            **_item_row(2, loadouts[(102, 3)], display_order=7, quantity=1),
+            "loadout_payloads",
+            id=2,
+            logical_unit_id=2,
+            payload_sha256=_payload_sha(second),
+            **second,
         )
 
-        # Unit 4 has a genuine skill-extra difference.
-        for occurrence_id, army_id in ((3, 101), (4, 102)):
+        for army_id, unit_id, option_id, payload_id, points, swc in (
+            (101, 1, 1, 1, 20, "0"),
+            (102, 1, 1, 1, 21, "1"),
+            (201, 2, 1, 2, 25, "0"),
+        ):
             _insert(
                 connection,
-                "option_skills",
-                **_item_row(occurrence_id, loadouts[(army_id, 4)]),
-            )
-        _insert(
-            connection,
-            "option_skill_extras",
-            occurrence_id=4,
-            position=1,
-            extra_id=50,
-        )
-
-        # Unit 5 has different army-local peripheral IDs for the same definition.
-        # Unit 6 has the same name but a real contextual mercs difference.
-        for army_id, peripheral_id in ((101, 1001), (102, 2001)):
-            _insert(
-                connection,
-                "peripherals",
+                "profile_groups",
                 army_id=army_id,
-                id=peripheral_id,
-                position=1,
-                name="BOT",
-                mercs=0,
-            )
-            _insert(
-                connection,
-                "option_peripherals",
-                **_item_row(
-                    10 + army_id,
-                    loadouts[(army_id, 5)],
-                    item_id=peripheral_id,
-                    display_order=None,
-                ),
-            )
-
-        for army_id, peripheral_id, mercs in ((101, 1002, 0), (102, 2002, 1)):
-            _insert(
-                connection,
-                "peripherals",
-                army_id=army_id,
-                id=peripheral_id,
-                position=2,
-                name="TURTLEMEK",
-                mercs=mercs,
-            )
-            _insert(
-                connection,
-                "option_peripherals",
-                **_item_row(
-                    20 + army_id,
-                    loadouts[(army_id, 6)],
-                    item_id=peripheral_id,
-                    display_order=None,
-                ),
-            )
-
-        # Unit 7 has the same weapon content with different display_order only.
-        for template_id, display_order in ((1, 1), (2, 9)):
-            _insert(
-                connection,
-                "option_weapon_templates",
-                id=template_id,
-                item_id=70,
-                display_order=display_order,
-                quantity=None,
-                raw=None,
-            )
-        for occurrence_id, army_id, template_id in ((31, 101, 1), (32, 102, 2)):
-            row = loadouts[(army_id, 7)]
-            _insert(
-                connection,
-                "option_weapons",
-                occurrence_id=occurrence_id,
-                army_id=army_id,
-                unit_id=7,
+                unit_id=unit_id,
                 group_id=1,
-                option_id=1,
                 position=1,
-                template_id=template_id,
+                category_id=1,
+                isc="Group",
+                notes=None,
             )
-
-        # Unit 8 genuinely changes the generated order type.
-        for army_id, order_type in ((101, "REGULAR"), (102, "IRREGULAR")):
             _insert(
                 connection,
-                "option_orders",
+                "loadout_payload_occurrences",
                 army_id=army_id,
-                unit_id=8,
+                unit_id=unit_id,
                 group_id=1,
-                option_id=1,
+                option_id=option_id,
+                loadout_payload_id=payload_id,
                 position=1,
-                order_type=order_type,
-                list_count=1,
-                total_count=1,
-                raw=None,
+                points=points,
+                swc=swc,
             )
-
         connection.commit()
     finally:
         connection.close()
@@ -229,150 +148,81 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def test_loadout_semantics_stages_representation_and_peripheral_identity(
-    tmp_path: Path,
-) -> None:
-    report = audit_database(_fixture_database(tmp_path))
-
-    assert report["summary"] == {
-        "loadoutOccurrenceCount": 16,
-        "sourceLoadoutIdentityCount": 8,
-        "repeatedSourceLoadoutIdentityCount": 8,
-        "repeatedSourceLoadoutOccurrenceCount": 16,
-        "baselineVariantIdentityCount": 8,
-        "normalizedRepresentationVariantIdentityCount": 6,
-        "resolvedPeripheralIdentityVariantIdentityCount": 7,
-        "resolvedPeripheralIdentityAndNormalizedRepresentationVariantIdentityCount": 5,
-    }
-
-    candidate = report["candidateModel"]
-    assert candidate["scope"] == "logical_unit"
-    assert candidate["loadoutOccurrenceCount"] == 16
-    assert candidate["sourceUnitDistinctPayloadCount"] == 12
-    assert candidate["logicalUnitDistinctPayloadCount"] == 12
-    assert candidate["repeatedOccurrenceCount"] == 4
-    assert candidate["sameSourceVariantIdentityCount"] == 4
-    assert candidate["payloadFields"] == ["name", "minis", "disabled"]
-    assert candidate["payloadRelationships"] == [
-        "characteristics",
-        "orders",
-        "skills",
-        "equipment",
-        "weapons",
-    ]
-    assert candidate["deferredContextRelationships"] == [
-        "includes",
-        "peripherals",
-        "profile_groups",
-    ]
-
-    equipment = report["relationships"]["equipment"]
-    assert equipment["sameSourceRawVariantIdentityCount"] == 1
-    assert equipment["sameSourceNormalizedVariantIdentityCount"] == 0
-
-    weapons = report["relationships"]["weapons"]
-    assert weapons["sameSourceRawVariantIdentityCount"] == 1
-    assert weapons["sameSourceNormalizedVariantIdentityCount"] == 0
-
-    peripherals = report["relationships"]["peripherals"]
-    assert peripherals["sameSourceRawVariantIdentityCount"] == 2
-    assert peripherals["sameSourceResolvedIdentityVariantIdentityCount"] == 1
-    assert peripherals["armyLocalIdOnlyVariantIdentityCount"] == 1
-
-
-def test_loadout_semantics_records_field_and_relationship_classification(
-    tmp_path: Path,
-) -> None:
-    report = audit_database(_fixture_database(tmp_path))
-
-    assert report["fields"]["army_id"]["classification"] == "source_provenance"
-    assert report["fields"]["position"]["classification"] == "normalization_only"
-    assert report["fields"]["name"]["classification"] == "canonical_fact"
-    assert report["fields"]["points"]["classification"] == "contextual_delta"
-    assert report["fields"]["swc"]["sameSourceVariantIdentityCount"] == 1
-    assert report["fields"]["minis"]["sameSourceVariantIdentityCount"] == 0
-    assert report["relationships"]["orders"]["sameSourceRawVariantIdentityCount"] == 1
-    assert report["nestedFieldClassification"]["raw"]["classification"] == (
-        "source_provenance"
-    )
-
-
-def test_candidate_payloads_reuse_exact_payload_across_one_logical_unit(
-    tmp_path: Path,
-) -> None:
-    database = _fixture_database(tmp_path)
-    connection = sqlite3.connect(database)
-    try:
-        connection.execute(
-            "UPDATE logical_unit_sources SET logical_unit_id = 1 WHERE source_unit_id = 2"
-        )
-        connection.execute(
-            "UPDATE loadout_options SET name = 'Loadout 1' WHERE unit_id = 2"
-        )
-        connection.commit()
-    finally:
-        connection.close()
-
-    candidate = audit_database(database)["candidateModel"]
-
-    assert candidate["sourceUnitDistinctPayloadCount"] == 12
-    assert candidate["logicalUnitDistinctPayloadCount"] == 11
-    assert candidate["additionalDistinctPayloadReductionFromLogicalIdentity"] == 1
-
-
-def test_loadout_semantics_requires_complete_logical_unit_mapping(tmp_path: Path) -> None:
-    database = _fixture_database(tmp_path)
-    connection = sqlite3.connect(database)
-    try:
-        connection.execute(
-            "DELETE FROM logical_unit_sources WHERE source_unit_id = 8"
-        )
-        connection.commit()
-    finally:
-        connection.close()
-
-    with pytest.raises(
-        LoadoutSemanticsAuditError,
-        match="Source unit 8 has no logical-unit mapping",
-    ):
-        audit_database(database)
-
-
-def test_loadout_semantics_rejects_unclassified_schema_drift(tmp_path: Path) -> None:
-    database = _fixture_database(tmp_path)
-    connection = sqlite3.connect(database)
-    try:
-        connection.execute("ALTER TABLE loadout_options ADD COLUMN future_field")
-        connection.commit()
-    finally:
-        connection.close()
-
-    with pytest.raises(
-        LoadoutSemanticsAuditError,
-        match=r"loadout_options.*unclassified future_field",
-    ):
-        audit_database(database)
-
-
-def test_loadout_semantics_is_read_only_and_json_is_deterministic(
-    tmp_path: Path,
-    capsys: pytest.CaptureFixture[str],
-) -> None:
+def test_loadout_semantics_audits_published_payload_boundary(tmp_path: Path) -> None:
     database = _fixture_database(tmp_path)
     before = _sha256(database)
+
+    report = audit_database(database)
+
+    assert _sha256(database) == before
+    summary = report["summary"]
+    assert summary["status"] == "pass"
+    assert summary["loadoutPayloadCount"] == 2
+    assert summary["loadoutOccurrenceCount"] == 3
+    assert summary["reusedPayloadCount"] == 1
+    assert summary["repeatedSourceLoadoutKeyCount"] == 1
+    assert summary["sourceLoadoutKeysWithPointsVariation"] == 1
+    assert summary["sourceLoadoutKeysWithSwcVariation"] == 1
+    assert summary["sourceLoadoutKeysWithMultiplePayloads"] == 0
+
+
+def test_loadout_semantics_rejects_schema_drift(tmp_path: Path) -> None:
+    database = _fixture_database(tmp_path)
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute("ALTER TABLE loadout_payloads ADD COLUMN new_semantic_field")
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(
+        LoadoutSemanticsAuditError,
+        match=r"loadout_payloads.*unclassified new_semantic_field",
+    ):
+        audit_database(database)
+
+
+def test_loadout_semantics_reports_invalid_payload_hash(tmp_path: Path) -> None:
+    database = _fixture_database(tmp_path)
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute(
+            "UPDATE loadout_payloads SET payload_sha256 = ? WHERE id = 1",
+            ("0" * 64,),
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    report = audit_database(database)
+    assert report["summary"]["status"] == "fail"
+    assert report["summary"]["invalidPayloadHashCount"] == 1
+    assert report["invalidPayloadIds"] == [1]
+    assert main([str(database)]) == 1
+
+
+def test_loadout_semantics_reports_logical_unit_mismatch(tmp_path: Path) -> None:
+    database = _fixture_database(tmp_path)
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute(
+            "UPDATE loadout_payload_occurrences SET loadout_payload_id = 2 "
+            "WHERE army_id = 101"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    report = audit_database(database)
+    assert report["summary"]["status"] == "fail"
+    assert report["summary"]["logicalUnitMismatchCount"] == 1
+
+
+def test_loadout_semantics_json_is_deterministic(tmp_path: Path) -> None:
+    database = _fixture_database(tmp_path)
     first = tmp_path / "first.json"
     second = tmp_path / "second.json"
 
     assert main([str(database), "--output", str(first)]) == 0
     assert main([str(database), "--output", str(second)]) == 0
-    assert _sha256(database) == before
     assert first.read_bytes() == second.read_bytes()
-
-    report = json.loads(first.read_text(encoding="utf-8"))
-    assert report["formatVersion"] == 2
-    assert report["sourceLoadoutKey"] == ["unit_id", "group_id", "option_id"]
-    assert "not a proposed canonical" in report["sourceLoadoutKeyCaveat"]
-    output = capsys.readouterr().out
-    assert "Loadouts: 16 occurrences" in output
-    assert "8 baseline" in output
-    assert "12 logical-unit payloads from 16 occurrences" in output

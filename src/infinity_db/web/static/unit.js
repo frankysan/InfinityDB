@@ -2,7 +2,7 @@ import { getUnit, getUnitProfileHelp } from "./api.js";
 import { maintainedTextFragment } from "./maintained-text.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
-import { formatMovement, troopTypeLabel } from "./unit-presentation.js";
+import { formatMovement } from "./unit-presentation.js";
 import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
@@ -254,38 +254,6 @@ function statLabel(label, profile) {
   return label === "VITA" && isStructureProfile(profile) ? "STR" : label;
 }
 
-function mostCommon(profiles, property) {
-  const counts = new Map();
-  for (const profile of profiles) {
-    const value = profile[property];
-    if (value == null || value === "") continue;
-    counts.set(value, (counts.get(value) || 0) + 1);
-  }
-  let selected = null;
-  let highestCount = 0;
-  for (const [value, count] of counts) {
-    if (count > highestCount) {
-      selected = value;
-      highestCount = count;
-    }
-  }
-  return selected;
-}
-
-function generalStats(profiles) {
-  return {
-    move_1: mostCommon(profiles, "move_1"), move_2: mostCommon(profiles, "move_2"),
-    is_structure: mostCommon(profiles, "is_structure"),
-    ...Object.fromEntries(Object.values(statProperties).map((property) => [
-      property, mostCommon(profiles, property),
-    ])),
-  };
-}
-
-function generalStatline(stats) {
-  return statColumns.map(([, read]) => read(stats));
-}
-
 function displayStatlineValue(value) {
   return (typeof value === "number" && value < 0)
     || (typeof value === "string" && /^-\d+(?:\.\d+)?$/.test(value.trim()))
@@ -297,153 +265,36 @@ function displayAvailability(value) {
   return Number(value) >= 100 ? "Total" : displayStatlineValue(value);
 }
 
-function identicalStatline(left, right) {
-  if (isStructureProfile(left) !== isStructureProfile(right)) return false;
-  const rightStatline = generalStatline(right);
-  return generalStatline(left).every((value, index) => value === rightStatline[index]);
-}
-
-const orderTypes = ["regular", "irregular"];
-const symbolLabels = {
-  regular: "Regular Order",
-  irregular: "Irregular Order",
-  peripheral: "Peripheral",
-  impetuous: "Impetuous",
-  tactical: "Tactical Awareness",
-  lieutenant: "Lieutenant Order",
-  hackable: "Hackable",
-  cube: "Cube",
-  "cube-2": "Cube 2.0",
-};
-
-const symbolCategories = {
-  regular: "orders",
-  irregular: "orders",
-  peripheral: "characteristics",
-  impetuous: "orders",
-  tactical: "orders",
-  lieutenant: "orders",
-  hackable: "characteristics",
-  cube: "characteristics",
-  "cube-2": "characteristics",
-};
-
-const symbolHelpKeys = {
-  regular: "training-orders",
-  irregular: "training-orders",
-  tactical: "training-orders",
-  lieutenant: "training-orders",
-  peripheral: "peripheral",
-  hackable: "hackable",
-};
-
-function prominentOrderType(loadouts) {
-  const counts = new Map(orderTypes.map((type) => [type, 0]));
-  for (const loadout of loadouts) {
-    for (const order of loadout.orders || []) {
-      const type = String(order.type || "").toLowerCase();
-      if (!counts.has(type)) continue;
-      const count = Number(order.list) || Number(order.total) || 1;
-      counts.set(type, counts.get(type) + count);
-    }
+function differsFromGeneral(profile, general, label) {
+  if (label.startsWith("MOV")) {
+    return profile.move_1 !== general.move_1 || profile.move_2 !== general.move_2;
   }
-  const prominent = orderTypes.reduce((prominent, type) => (
-    counts.get(type) > counts.get(prominent) ? type : prominent
-  ), orderTypes[0]);
-  return counts.get(prominent) ? prominent : null;
-}
-
-function hasSkill(items, skillName) {
-  return items.some((item) => (
-    (item.skills || []).some((skill) => String(skill.name || "").toLowerCase() === skillName)
-  ));
-}
-
-function normalizedSkillName(value) {
-  return String(value || "").toLowerCase().replace(/\s+/g, " ").trim();
-}
-
-function lieutenantSkills(items) {
-  return items.flatMap((item) => (item.skills || []).filter((skill) => (
-    normalizedSkillName(skill.name).startsWith("lieutenant")
-  )));
-}
-
-function hasLieutenantPlusOne(items) {
-  return lieutenantSkills(items).some((skill) => (
-    normalizedSkillName(skill.name) === "lieutenant (+1 order)"
-    || (normalizedSkillName(skill.name) === "lieutenant"
-      && (skill.extras || []).some((extra) => normalizedSkillName(extra.name) === "+1 order"))
-  ));
-}
-
-function lieutenantOrderCount(items) {
-  const skills = lieutenantSkills(items);
-  if (!skills.length) return 0;
-  return hasLieutenantPlusOne(items) ? 2 : 1;
-}
-
-function characteristicSymbolTypes(profiles) {
-  const characteristics = new Map();
-  for (const profile of profiles) {
-    for (const characteristic of profile.characteristics || []) {
-      const name = String(characteristic.name || "").toLowerCase();
-      if (name && !characteristics.has(name)) characteristics.set(name, characteristic);
-    }
+  if (label === "VITA" && isStructureProfile(profile) !== isStructureProfile(general)) {
+    return true;
   }
-  const symbol = (name, type) => {
-    const characteristic = characteristics.get(name);
-    if (!characteristic) return null;
-    const slug = characteristic.equipment_reference?.slug;
-    return slug ? { type, href: `/equipment/${encodeURIComponent(slug)}` } : type;
-  };
-  return [
-    symbol("hackable", "hackable"),
-    symbol("cube", "cube"),
-    symbol("cube 2.0", "cube-2"),
-  ].filter(Boolean);
+  return profile[statProperties[label]] !== general[statProperties[label]];
 }
 
-function generalLieutenantOrderCount(profiles, loadouts) {
-  if (hasLieutenantPlusOne(profiles)) return 2;
-  if (lieutenantSkills(profiles).length) return 1;
-  return loadouts.length && loadouts.every((loadout) => lieutenantSkills([loadout]).length)
-    ? 1
-    : 0;
-}
-
-function generalProfileOrderType(profiles, loadouts) {
-  if (hasSkill(loadouts, "regular")) return "irregular";
-  const orderType = prominentOrderType(loadouts);
-  if (orderType) return orderType;
-  return [...profiles, ...loadouts].some((item) => (
-    (item.skills || []).some((skill) => (
-      String(skill.name || "").toLowerCase().startsWith("peripheral")
-    ))
-  )) ? "peripheral" : null;
-}
-
-function nameWithOrderSymbols(nameText, symbolTypes) {
-  if (!symbolTypes.length) return nameText;
+function nameWithOrderSymbols(nameText, descriptors) {
+  if (!descriptors.length) return nameText;
   const name = document.createElement("span");
   name.className = "order-symbol-name";
-  for (const descriptor of symbolTypes) {
-    const symbolType = typeof descriptor === "string" ? descriptor : descriptor.type;
-    const href = typeof descriptor === "string" ? null : descriptor.href;
-    const helpKey = symbolHelpKeys[symbolType];
-    const helpLink = !href
-      ? profileHelpAnchor(helpKey, `${symbolLabels[symbolType]} profile help`)
+  for (const descriptor of descriptors) {
+    const href = descriptor.href || null;
+    const helpKey = descriptor.help_key || null;
+    const helpLink = !href && helpKey
+      ? profileHelpAnchor(helpKey, `${descriptor.label} profile help`)
       : null;
     const symbol = document.createElement("img");
     symbol.className = "order-symbol";
-    symbol.src = `/static/${symbolCategories[symbolType]}/${symbolType}.svg`;
-    symbol.alt = href || helpLink ? "" : symbolLabels[symbolType];
-    symbol.title = symbolLabels[symbolType];
+    symbol.src = staticSymbolPath(descriptor.symbol_path);
+    symbol.alt = href || helpLink ? "" : descriptor.label;
+    symbol.title = descriptor.label;
     if (href) {
       const link = document.createElement("a");
       link.className = "profile-symbol-link";
       link.href = href;
-      link.setAttribute("aria-label", `${symbolLabels[symbolType]} equipment`);
+      link.setAttribute("aria-label", `${descriptor.label} equipment`);
       link.append(symbol);
       name.append(link);
     } else if (helpLink) {
@@ -459,7 +310,7 @@ function nameWithOrderSymbols(nameText, symbolTypes) {
 }
 
 function generalProfileName(profile) {
-  return nameWithOrderSymbols(profile.profileName, profile.symbolTypes);
+  return nameWithOrderSymbols(profile.display_name, profile.symbol_descriptors || []);
 }
 
 function profileTitle(profile, profileSymbols = null) {
@@ -474,14 +325,14 @@ function profileTitle(profile, profileSymbols = null) {
 }
 
 function generalProfileSymbols(profile) {
-  if (!profile.symbolPath) return null;
+  if (!profile.symbol_path) return null;
 
   const symbols = document.createElement("div");
   symbols.className = "general-profile-symbols";
   symbols.setAttribute("aria-hidden", "true");
   const icon = document.createElement("img");
   icon.className = "unit-symbol general-profile-unit-symbol";
-  icon.src = staticSymbolPath(profile.symbolPath);
+  icon.src = staticSymbolPath(profile.symbol_path);
   icon.alt = "";
   icon.width = 56;
   icon.height = 56;
@@ -490,129 +341,6 @@ function generalProfileSymbols(profile) {
   icon.addEventListener("error", () => icon.remove(), { once: true });
   symbols.append(icon);
   return symbols;
-}
-
-function generalProfiles(profiles, loadouts) {
-  const byName = new Map();
-  for (const profile of profiles) {
-    const profileName = String(profile.display_name || profile.name || "").trim();
-    const profileKey = profile.profile_identity;
-    if (!byName.has(profileKey)) byName.set(profileKey, {
-      profileName, profiles: [],
-    });
-    byName.get(profileKey).profiles.push(profile);
-  }
-  const rows = [];
-  const generalByName = new Map();
-  for (const { profileName, profiles: matchingProfiles } of byName.values()) {
-    const stats = generalStats(matchingProfiles);
-    const matchingGroupKeys = new Set(matchingProfiles.map(
-      (profile) => `${profile.armyId}:${profile.group_id}`,
-    ));
-    const matchingLoadouts = loadouts.filter(
-      (loadout) => matchingGroupKeys.has(`${loadout.armyId}:${loadout.group_id}`),
-    );
-    const row = {
-      profileName,
-      stats,
-      sourceProfiles: matchingProfiles,
-      orderType: generalProfileOrderType(matchingProfiles, matchingLoadouts),
-      type: mostCommon(matchingProfiles, "type"),
-      classification: mostCommon(matchingProfiles, "classification"),
-      occurrenceCount: matchingProfiles.length,
-      reinforcement: matchingProfiles.every((profile) => profile.reinforcement),
-      symbolPath: matchingProfiles.find((profile) => profile.symbol_path)?.symbol_path || null,
-      sharedItems: {
-        skills: generalProfileSkills(matchingProfiles, matchingLoadouts),
-        equipment: commonProfileItems(matchingProfiles, "equipment"),
-        weapons: commonProfileItems(matchingLoadouts, "weapons"),
-      },
-    };
-    row.symbolTypes = [
-      row.orderType,
-      ...(hasSkill([...matchingProfiles, ...matchingLoadouts], "impetuous") ? ["impetuous"] : []),
-      ...(hasSkill([...matchingProfiles, ...matchingLoadouts], "tactical awareness") ? ["tactical"] : []),
-      ...Array(generalLieutenantOrderCount(matchingProfiles, matchingLoadouts)).fill("lieutenant"),
-      ...characteristicSymbolTypes(matchingProfiles),
-    ].filter(Boolean);
-    rows.push(row);
-    for (const profile of matchingProfiles) {
-      generalByName.set(profile.name || "", row);
-    }
-  }
-  return { rows, generalByName };
-}
-
-function itemIdentity(item) {
-  const quantity = item.quantity == null || Number(item.quantity) === 1
-    ? null
-    : item.quantity;
-  return JSON.stringify([
-    item.id,
-    quantity,
-    (item.extras || []).map((extra) => extra.id).sort(),
-  ]);
-}
-
-function commonProfileItems(profiles, property) {
-  if (!profiles.length) return [];
-  const shared = new Set();
-  return (profiles[0][property] || []).filter((item) => {
-    const identity = itemIdentity(item);
-    if (shared.has(identity)) return false;
-    const appearsEverywhere = profiles.every((profile) => (
-      (profile[property] || []).some((candidate) => itemIdentity(candidate) === identity)
-    ));
-    if (appearsEverywhere) shared.add(identity);
-    return appearsEverywhere;
-  });
-}
-
-function generalProfileSkills(profiles, loadouts) {
-  const skills = commonProfileItems(profiles, "skills");
-  if (loadouts.length !== 1) return skills;
-  for (const skill of loadouts[0].skills || []) {
-    if (!skills.some((candidate) => itemIdentity(candidate) === itemIdentity(skill))) {
-      skills.push(skill);
-    }
-  }
-  return skills;
-}
-
-function withoutSharedItems(items, sharedItems) {
-  const sharedIdentities = new Set(sharedItems.map(itemIdentity));
-  return items.filter((item) => !sharedIdentities.has(itemIdentity(item)));
-}
-
-function visibleGeneralProfiles(rows) {
-  return rows.filter((profile) => !rows.some((candidate) => (
-    candidate !== profile
-    && candidate.profileName === profile.profileName
-    && identicalStatline(profile.stats, candidate.stats)
-    && (
-      (profile.reinforcement && !candidate.reinforcement)
-      || (profile.reinforcement === candidate.reinforcement
-        && candidate.occurrenceCount > profile.occurrenceCount)
-    )
-  )));
-}
-
-function differsFromGeneral(profile, general, label) {
-  if (label.startsWith("MOV")) {
-    return profile.move_1 !== general.move_1 || profile.move_2 !== general.move_2;
-  }
-  if (label === "VITA" && isStructureProfile(profile) !== isStructureProfile(general)) {
-    return true;
-  }
-  return profile[statProperties[label]] !== general[statProperties[label]];
-}
-
-function generalStatDifferenceLabels(profile) {
-  return new Set(statColumns
-    .filter(([label]) => profile.sourceProfiles.some((armyProfile) => (
-      differsFromGeneral(armyProfile, profile.stats, label)
-    )))
-    .map(([label]) => label));
 }
 
 function profileItems(items, catalog, fallbackLabel) {
@@ -648,17 +376,10 @@ function profileItems(items, catalog, fallbackLabel) {
   return result;
 }
 
-const peripheralTypeLabels = {
-  "rule:peripheral-type:servant": "Servant",
-  "rule:peripheral-type:synchronized": "Synchronized",
-  "rule:peripheral-type:control": "Control",
-  "rule:peripheral-type:ancillary": "Ancillary",
-  "rule:peripheral-type:cyberplug": "Cyberplug",
-};
-
-function peripheralTypeLabel(typeId) {
-  return peripheralTypeLabels[typeId] || String(typeId || "Peripheral").split(":").at(-1);
+function peripheralTypeLabel(item) {
+  return item?.type_label || text(item?.type_id);
 }
+
 
 function unitLink(unit) {
   const link = document.createElement("a");
@@ -716,7 +437,7 @@ function peripheralItems(items) {
     const quantity = item.quantity != null && Number(item.quantity) !== 1
       ? ` ×${item.quantity}`
       : "";
-    const label = `${item.name || "Peripheral"}${quantity} (${peripheralTypeLabel(item.type_id)})`;
+    const label = `${item.name || "Peripheral"}${quantity} (${peripheralTypeLabel(item)})`;
     if (index) result.append(", ");
     result.append(document.createTextNode(label));
   });
@@ -731,7 +452,7 @@ function peripheralAccessItems(accessItems) {
     if (access.relationship === "access-pool") {
       group.title = "Access pool; this does not assign fixed Controller ownership.";
     }
-    group.append(`${peripheralTypeLabel(access.type_id)}: `);
+    group.append(`${peripheralTypeLabel(access)}: `);
     (access.targets || []).forEach((target, targetIndex) => {
       if (targetIndex) group.append(", ");
       group.append(unitLink(target));
@@ -1134,9 +855,9 @@ function renderSelectionRelationships(unit, armies) {
 }
 
 function renderPeripheralRelationships(unit) {
-  const typeIds = unit.peripheral_type_ids || [];
+  const types = unit.peripheral_types || [];
   const controllers = unit.peripheral_controllers || [];
-  if (!typeIds.length && !controllers.length) return null;
+  if (!types.length && !controllers.length) return null;
 
   const section = document.createElement("section");
   section.className = "detail-group peripheral-relationships";
@@ -1146,11 +867,10 @@ function renderPeripheralRelationships(unit) {
 
   const surface = document.createElement("div");
   surface.className = "surface surface--clipped content-frame connected-unit-surface";
-  if (typeIds.length) {
+  if (types.length) {
     const type = document.createElement("p");
     type.className = "connected-unit-type";
-    const label = typeIds.map(peripheralTypeLabel).join(", ");
-    type.textContent = `Peripheral type: ${label}`;
+    type.textContent = `Peripheral type: ${types.map((item) => item.label).join(", ")}`;
     surface.append(type);
   }
   if (controllers.length) {
@@ -1189,7 +909,7 @@ function generalProfileTableRows(profiles) {
     rows.push(
       [
         { content: profileHelpLabel("Type", "troop-type"), header: true, className: "data-label general-item-label" },
-        { value: troopTypeLabel(profile.type), className: "general-item-list" },
+        { value: profile.type_label || profile.type, className: "general-item-list" },
       ],
       [
         { content: profileHelpLabel("Classification", "classification"), header: true, className: "data-label general-item-label" },
@@ -1203,7 +923,7 @@ function generalProfileTableRows(profiles) {
           profile.stats,
           null,
           false,
-          generalStatDifferenceLabels(profile),
+          new Set(profile.different_stat_labels || []),
         ),
         className: "profile-attributes",
       },
@@ -1213,7 +933,7 @@ function generalProfileTableRows(profiles) {
       ["Equipment", "equipment", "Equipment"],
       ["Weapons", "weapons", "Weapon"],
     ]) {
-      if (!profile.sharedItems[property].length) continue;
+      if (!(profile.shared_items?.[property] || []).length) continue;
       rows.push([
         {
           content: profileHelpLabel(
@@ -1223,7 +943,7 @@ function generalProfileTableRows(profiles) {
           className: "data-label general-item-label",
         },
         {
-          content: profileItems(profile.sharedItems[property], property, fallbackLabel),
+          content: profileItems(profile.shared_items[property], property, fallbackLabel),
           className: "general-item-list",
         },
       ]);
@@ -1232,11 +952,10 @@ function generalProfileTableRows(profiles) {
   return rows;
 }
 
-function profileTableRows(profiles, generalByName, anchorScope) {
+function profileTableRows(profiles, generalByIdentity, anchorScope) {
   return profiles.flatMap((profile) => {
-    const generalProfile = generalByName.get(profile.name || "");
-    const generalStatsForProfile = generalProfile.stats;
-    const sharedItems = generalProfile.sharedItems;
+    const generalProfile = generalByIdentity.get(profile.profile_identity);
+    const generalStatsForProfile = generalProfile?.stats || null;
     const profileRow = [{ content: profileNameWithDivisionBadge(profile), header: true, colSpan: 2 }];
     profileRow.className = "profile-summary";
     const rows = [profileRow, [
@@ -1251,7 +970,7 @@ function profileTableRows(profiles, generalByName, anchorScope) {
       ["Equipment", "equipment", "Equipment"],
       ["Weapons", "weapons", "Weapon"],
     ]) {
-      const items = withoutSharedItems(profile[property], sharedItems[property]);
+      const items = profile.specific_items?.[property] || profile[property] || [];
       if (!items.length) continue;
       rows.push([
         {
@@ -1291,17 +1010,10 @@ function profileNameWithDivisionBadge(profile) {
   return title;
 }
 
-function loadoutTable(loadouts, sharedItems, generalOrderType, anchorScope, anchoredPayloads) {
+function loadoutTable(loadouts, anchorScope, anchoredPayloads) {
   return table(
     ["Name", "Points", "SWC"],
     loadouts.flatMap((loadout, index) => {
-      const loadoutOrderType = prominentOrderType([loadout]);
-      const symbolTypes = [
-        loadoutOrderType && loadoutOrderType !== generalOrderType ? loadoutOrderType : null,
-        ...(hasSkill([loadout], "impetuous") ? ["impetuous"] : []),
-        ...(hasSkill([loadout], "tactical awareness") ? ["tactical"] : []),
-        ...Array(lieutenantOrderCount([loadout])).fill("lieutenant"),
-      ].filter(Boolean);
       const loadoutName = document.createDocumentFragment();
       for (const payloadId of loadout.loadout_payload_ids || []) {
         if (anchoredPayloads.has(payloadId)) continue;
@@ -1312,7 +1024,9 @@ function loadoutTable(loadouts, sharedItems, generalOrderType, anchorScope, anch
         anchor.setAttribute("aria-hidden", "true");
         loadoutName.append(anchor);
       }
-      loadoutName.append(nameWithOrderSymbols(loadout.name, symbolTypes));
+      loadoutName.append(nameWithOrderSymbols(
+        loadout.name, loadout.symbol_descriptors || [],
+      ));
       const loadoutRow = [{ content: loadoutName }, loadout.points, loadout.swc];
       loadoutRow.className = index ? "profile-summary loadout-start" : "profile-summary";
       const rows = [loadoutRow];
@@ -1321,17 +1035,17 @@ function loadoutTable(loadouts, sharedItems, generalOrderType, anchorScope, anch
         ["Equipment", "equipment", "Equipment"],
         ["Weapons", "weapons", "Weapon"],
       ]) {
-        const items = withoutSharedItems(loadout[property], sharedItems[property]);
+        const items = loadout.specific_items?.[property] || loadout[property] || [];
         if (!items.length) continue;
         rows.push([
           {
-          content: profileHelpLabel(
-            label,
-            ["Equipment", "Weapons"].includes(label) ? "equipment-weapons" : null,
-          ),
-          header: true,
-          className: "data-label profile-item-label",
-        },
+            content: profileHelpLabel(
+              label,
+              ["Equipment", "Weapons"].includes(label) ? "equipment-weapons" : null,
+            ),
+            header: true,
+            className: "data-label profile-item-label",
+          },
           {
             content: profileItems(items, property, fallbackLabel),
             className: "profile-item-list",
@@ -1346,21 +1060,6 @@ function loadoutTable(loadouts, sharedItems, generalOrderType, anchorScope, anch
     "data-table--compact loadout-table",
     "Loadouts",
   );
-}
-
-function sharedItemsForProfileGroup(profiles, generalByName) {
-  const items = { skills: [], equipment: [], weapons: [] };
-  for (const profile of profiles) {
-    const sharedItems = generalByName.get(profile.name || "").sharedItems;
-    for (const property of Object.keys(items)) {
-      for (const item of sharedItems[property]) {
-        if (!items[property].some((candidate) => itemIdentity(candidate) === itemIdentity(item))) {
-          items[property].push(item);
-        }
-      }
-    }
-  }
-  return items;
 }
 
 function profileLoadoutGroups(army) {
@@ -1380,21 +1079,13 @@ function profileLoadoutGroups(army) {
   return [...groups.values()];
 }
 
-const availabilityLabels = {
-  mercs: "Mercenary",
-  specops: "Spec-Ops",
-  teamops: "Team Operations",
-  reinforcement: "Reinforcements",
-};
-
-function availabilityBadges(flags = []) {
+function availabilityBadges(items = []) {
   const badges = document.createElement("span");
   badges.className = "availability-badges";
-  for (const flag of flags) {
-    if (!availabilityLabels[flag]) continue;
+  for (const item of items) {
     const badge = document.createElement("span");
-    badge.className = `badge availability-badge availability-badge-${flag}`;
-    badge.textContent = availabilityLabels[flag];
+    badge.className = `badge availability-badge availability-badge-${item.flag}`;
+    badge.textContent = item.label;
     badges.append(badge);
   }
   return badges;
@@ -1405,21 +1096,10 @@ function isStandardArmy(army) {
   return !flags.includes("mercs") && !flags.includes("reinforcement");
 }
 
-function isRequestedArmy(army) {
-  if (!requestedArmyIdentifier) return false;
-  return [army.public_slug, army.slug, String(army.id)].includes(requestedArmyIdentifier);
-}
-
-function isEnabledArmy(army) {
-  const filters = optionalUnitFilters();
-  return (army.availability_flags || []).every((flag) => filters[flag]);
-}
-
-function compositeOptionOrderSummary(orders) {
-  return orders.map((order) => {
+function compositeOptionOrderSummary(option) {
+  return (option.orders || []).map((order, index) => {
     const count = Number(order.list) || Number(order.total) || 1;
-    const type = String(order.type || "").toLowerCase();
-    const singular = symbolLabels[type] || `${text(order.type)} Order`;
+    const singular = option.order_presentations?.[index]?.label || `${text(order.type)} Order`;
     const label = count === 1 ? singular : singular.replace(/Order$/, "Orders");
     return `${count} ${label}`;
   }).join(", ");
@@ -1430,10 +1110,11 @@ function compositeOptionTable(options, anchorScope) {
     ["Composite option", "PTS", "SWC"],
     options.flatMap((option, index) => {
       const optionName = document.createDocumentFragment();
-      const symbolTypes = [...new Set((option.orders || [])
-        .map((order) => String(order.type || "").toLowerCase())
-        .filter((type) => symbolLabels[type]))];
-      optionName.append(nameWithOrderSymbols(option.name, symbolTypes));
+      const symbolDescriptors = [...new Map((option.order_presentations || [])
+        .map((presentation) => presentation?.symbol_descriptor)
+        .filter(Boolean)
+        .map((descriptor) => [descriptor.type, descriptor])).values()];
+      optionName.append(nameWithOrderSymbols(option.name, symbolDescriptors));
       const sourceId = document.createElement("span");
       sourceId.className = "developer-only";
       sourceId.textContent = ` (Unit #${option.source_unit_id}, option #${option.option_id})`;
@@ -1453,7 +1134,7 @@ function compositeOptionTable(options, anchorScope) {
       if ((option.orders || []).length) {
         rows.push([
           { value: "Orders", header: true, className: "data-label profile-item-label" },
-          { value: compositeOptionOrderSummary(option.orders), colSpan: 2 },
+          { value: compositeOptionOrderSummary(option), colSpan: 2 },
         ]);
       }
       appendIncludeRows(rows, option, anchorScope, 2);
@@ -1470,7 +1151,7 @@ function compositeOptionTable(options, anchorScope) {
   );
 }
 
-function renderArmyProfile(army, generalByName, expanded) {
+function renderArmyProfile(army, generalByIdentity, expanded) {
   const section = document.createElement("details");
   const anchorScope = [army.id, ...(army.availability_flags || [])].join("-");
   section.className = "surface surface--clipped content-frame army-profile";
@@ -1491,7 +1172,7 @@ function renderArmyProfile(army, generalByName, expanded) {
     icon.title = army.name;
     armyHeading.prepend(icon);
   }
-  armyHeading.append(availabilityBadges(army.availability_flags));
+  armyHeading.append(availabilityBadges(army.availability_badges));
   section.append(armyHeading);
   if ((army.composite_options || []).length) {
     section.append(subheading("Composite options"));
@@ -1509,7 +1190,7 @@ function renderArmyProfile(army, generalByName, expanded) {
       section.append(profilesHeading);
       section.append(table(
         [],
-        profileTableRows(group.profiles, generalByName, anchorScope),
+        profileTableRows(group.profiles, generalByIdentity, anchorScope),
         "data-table--compact profile-details-table",
         "Profiles",
       ));
@@ -1520,8 +1201,6 @@ function renderArmyProfile(army, generalByName, expanded) {
       section.append(loadoutsHeading);
       section.append(loadoutTable(
         group.loadouts,
-        sharedItemsForProfileGroup(group.profiles, generalByName),
-        generalByName.get(group.profiles[0]?.name || "")?.orderType,
         anchorScope,
         anchoredPayloads,
       ));
@@ -1563,18 +1242,15 @@ function render(unit, helpItems = [], attributeItems = []) {
   unitIds.textContent = `${unitMetadata.length ? " · " : ""}Unit ${unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ")}`;
   meta.append(unitIds);
   status.hidden = true;
-  const requestedArmy = unit.armies.find(isRequestedArmy);
-  const armies = unit.armies.filter((army) => isEnabledArmy(army) || army === requestedArmy);
-  const allProfiles = armies.flatMap((army) => army.profiles.map((profile) => ({
-    ...profile,
-    armyId: army.id,
-    reinforcement: (army.availability_flags || []).includes("reinforcement"),
-  })));
-  const allLoadouts = armies.flatMap((army) => army.loadouts.map((loadout) => ({
-    ...loadout, armyId: army.id,
-  })));
-  const { rows: generalProfileRows, generalByName } = generalProfiles(allProfiles, allLoadouts);
-  const displayedGeneralProfiles = visibleGeneralProfiles(generalProfileRows);
+  const requestedArmy = unit.armies.find((army) => army.presentation_requested);
+  const armies = unit.armies.filter((army) => army.presentation_visible);
+  const generalProfiles = unit.general_profiles || [];
+  const displayedGeneralProfiles = generalProfiles.filter(
+    (profile) => profile.presentation_visible !== false,
+  );
+  const generalByIdentity = new Map(generalProfiles.map((profile) => [
+    profile.profile_identity, profile,
+  ]));
   const generalProfilesSection = document.createElement("section");
   generalProfilesSection.className = "detail-group general-profile-group";
   const displayFaction = unit.display_faction?.slug;
@@ -1594,7 +1270,7 @@ function render(unit, helpItems = [], attributeItems = []) {
       [],
       generalProfileTableRows([profile]),
       "statline",
-      `${profile.name || "Unit"} general profile`,
+      `${profile.display_name || "Unit"} general profile`,
     ));
     generalProfilesSection.append(generalProfile);
   }
@@ -1624,7 +1300,7 @@ function render(unit, helpItems = [], attributeItems = []) {
         ? army === requestedArmy
         : !standardArmyExpanded && isStandardArmy(army);
       if (!hasRequestedArmy && expanded) standardArmyExpanded = true;
-      profiles.append(renderArmyProfile(army, generalByName, expanded));
+      profiles.append(renderArmyProfile(army, generalByIdentity, expanded));
     }
     section.append(profiles);
     content.append(section);
@@ -1642,22 +1318,40 @@ initializeDistanceUnitToggle();
 if (!unitIdentifier) {
   status.textContent = "The requested unit address is invalid.";
 } else {
+  const unitRequestOptions = () => ({
+    optionalFilters: optionalUnitFilters(),
+    armyId: requestedArmyIdentifier,
+  });
+  let currentUnit = null;
+  let unitRequestNumber = 0;
+  const fetchUnit = () => {
+    const requestNumber = ++unitRequestNumber;
+    return getUnit(unitIdentifier, unitRequestOptions(), pageController.signal)
+      .then((unit) => ({ unit, requestNumber }));
+  };
   Promise.all([
-    getUnit(unitIdentifier, pageController.signal),
+    fetchUnit(),
     getUnitProfileHelp(pageController.signal).catch((error) => {
       if (error.name === "AbortError") throw error;
       return { items: [] };
     }),
-  ]).then(([unit, help]) => {
+  ]).then(([initialUnit, help]) => {
     const helpItems = help.items || [];
     const attributeItems = help.attributes || [];
-    render(unit, helpItems, attributeItems);
-    window.addEventListener("distanceunitchange", () => render(unit, helpItems, attributeItems), {
-      signal: pageController.signal,
-    });
-    window.addEventListener("optionalunitschange", () => render(unit, helpItems, attributeItems), {
-      signal: pageController.signal,
-    });
+    currentUnit = initialUnit.unit;
+    render(currentUnit, helpItems, attributeItems);
+    window.addEventListener("distanceunitchange", () => {
+      if (currentUnit) render(currentUnit, helpItems, attributeItems);
+    }, { signal: pageController.signal });
+    window.addEventListener("optionalunitschange", () => {
+      fetchUnit().then(({ unit: updatedUnit, requestNumber }) => {
+        if (requestNumber !== unitRequestNumber) return;
+        currentUnit = updatedUnit;
+        render(currentUnit, helpItems, attributeItems);
+      }).catch((error) => {
+        if (error.name !== "AbortError") console.error(error);
+      });
+    }, { signal: pageController.signal });
   }).catch((error) => {
     if (error.name === "AbortError") return;
     name.textContent = "Unit unavailable";

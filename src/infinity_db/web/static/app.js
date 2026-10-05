@@ -5,7 +5,6 @@ import {
 } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 import { readShareState, writeShareState } from "./share-state.js";
-import { troopTypeLabel } from "./unit-presentation.js";
 
 const PAGE_SIZE = 50;
 const number = new Intl.NumberFormat();
@@ -596,7 +595,7 @@ async function load() {
       populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
       populateCatalogFilter(
         elements.troopType, unitFilters.troop_types, "Troop types",
-        (item) => troopTypeLabel(item.name),
+        (item) => item.display_name || item.name,
       );
       populateCatalogFilter(elements.classification, unitFilters.classifications, "Classifications");
       populateCatalogFilter(elements.characteristic, unitFilters.characteristics, "Characteristics");

@@ -48,7 +48,7 @@ by the audit remain in scope.
   groundwork above is sufficiently established. This remains an audit and bounded
   correctness-fix effort rather than a visual redesign or broad frontend
   restructuring project.
-  - [ ] Establish one pinned production audit baseline before inspecting behavior:
+  - [x] Establish one pinned production audit baseline before inspecting behavior:
     the Git commit, tracked `infinity.db` and `rules.db`, tracked release-matched symbol
     publication manifest, and the local raw/provenance evidence used to build them.
     Verify that the runtime database and symbol publication derive from the same Army
@@ -56,7 +56,7 @@ by the audit remain in scope.
     `docs/audits/` workspace, then promote durable conclusions into their canonical
     documentation owners and release-visible outcomes into `CHANGELOG.md`; do not mix production
     observations with synthetic test fixtures.
-  - [ ] Create and maintain an explicit audit matrix for each concept, recording
+  - [x] Create and maintain an explicit audit matrix for each concept, recording
     its semantic-provenance category, source meaning/evidence, storage
     representation, derivation or canonical/application interpretation, API
     representation, browser consumers, canonical documentation location, existing
@@ -74,13 +74,34 @@ by the audit remain in scope.
     queries, and application-level composition (including `SkillCatalog`,
     `TraitCatalog`, and `CatalogRules`) to the JSON API. Add focused contract
     coverage wherever intentional behavior is not sufficiently pinned.
-  - [ ] Audit browser semantic ownership. Inventory domain interpretation in
+    - [x] Retarget the profile, loadout, and semantic-deduplication audits to the
+      published canonical payload/occurrence model and verify the pinned production
+      database has no payload-hash, orphan, logical-Unit, or profile-group integrity
+      failures.
+    - [x] Reconcile current catalog/rules enrichment coverage against the release
+      boundary rather than the historical 0.7 gate.
+      - [x] Keep missing Weapon rule definitions and Commlink visible as explicit
+        1.0 `later-product-work` while retaining other enrichment defects as normal
+        release blockers.
+      - [x] Re-review Armed Turret against the N5 v5.3 primary rules and replace the
+        stale N5.2 wiki citation with the reviewed printed-page-70 source while preserving
+        the separately documented page-195 Silhouette conflict.
+    - [x] Audit distance/range semantics across tracked Army storage, maintained rules,
+      backend/API payloads, and browser presentation. Keep the Army/game conversion contract at
+      `2.5 cm = 1 inch`, preserve typed Skill-distance extras and Weapon range bands, and render the
+      source `-1/-1` MOV sentinel as the rules `-` stationary value instead of a negative distance.
+  - [x] Audit browser semantic ownership. Inventory domain interpretation in
     browser modules, beginning with `unit.js`, the army selector, catalog detail
     modules, symbol lookup, rules links, and optional-unit filtering. Keep display
     formatting in JavaScript, but expose game/data semantics through the backend
     API when duplicate interpretation could disagree. Route JSON API access
     through `api.js` to match the documented boundary; static/HTML fetches are not
-    part of that API-transport requirement.
+    part of that API-transport requirement. The Unit API now owns General-profile
+    composition, shared/specific profile items, Order/Characteristic symbol roles,
+    troop/Peripheral labels, and optional-detail visibility; the remaining audited
+    browser mappings are presentation/state mechanics over backend-owned semantics. Fireteam limit
+    sentinels are now likewise decoded by the backend instead of interpreting Army's `0`/`256`
+    source encoding in JavaScript.
   - [ ] Perform route-by-route parity checks for the Unit explorer and details;
     landing/About; Fireteams; Skill Modifiers; Skills, Equipment, Weapons, Traits,
     States, and Hacking Programs list/detail pages; shared navigation/settings; and
@@ -89,23 +110,43 @@ by the audit remain in scope.
     deep-link state, cross-links, optional-unit behavior, source/rules links,
     catalog-item Unit usage where applicable, and symbol identity. Use a deliberate manual browser
     pass unless lightweight browser automation is added for a concrete audit need.
+    - [x] Complete the machine route/API/link parity pass against the pinned production artifacts:
+      fixed browser/API routes, all 737 Unit detail slugs, all current catalog list/detail pairs,
+      all 56 Fireteam charts, Glossary hrefs, and representative global-search hrefs resolve without
+      identity/count/route failures. Normalize Fireteam limit sentinels at the backend boundary,
+      reconnect the subordinate Skill Modifiers review page to the Skills hierarchy, and include
+      curated legacy Armies in global search with links back to the Armies overview.
+    - [ ] Complete the deliberate manual browser pass for interaction/visual parity that cannot be
+      established by request-level tests alone.
   - [x] Verify Fireteam source retention through the canonical application projection
     and first-class repository/API/browser chart surface. Keep the broader consistency
     audit responsible for route/API/render parity rather than reopening Fireteam domain
     modeling that is already tracked in the 0.8 connected-data workstream.
-  - [ ] Exercise degraded states deliberately: rules database available versus
+  - [x] Exercise degraded states deliberately: rules database available versus
     unavailable; asset validation disabled versus required; complete tracked published
     assets versus an intentionally asset-free specialized package/test layout; unknown
     unit/catalog/trait IDs; empty search
     or filter results; invalid query parameters; missing catalog enrichment;
     stale version/snapshot detection; and database/symbol snapshot mismatch.
-  - [ ] Verify the supported validation/runtime contexts independently: a normal
-    source checkout with the tracked processed publication, a specialized package/test
-    layout where the third-party SVG tree is deliberately absent and asset checks are
-    disabled or allowed to fall back, local development with explicitly supplied
-    generated runtime artifacts, and production deployment that fails closed for
-    incomplete or mismatched databases/assets. Passing one context does not establish
-    the others.
+    - [x] Keep adjacent `rules.db` optional for local/source use while explicit rules-database
+      configuration fails closed; rules-only catalogs degrade to empty data without breaking
+      Army-backed pages and APIs.
+    - [x] Return clean 404/empty-result contracts for unknown identities and no-match queries,
+      and reject unknown or duplicate semantic query parameters on Unit detail and Fireteam APIs
+      while preserving the Developer-mode `cache_bust` parameter.
+    - [x] Verify off/auto/required asset-mode behavior, the complete tracked 808-asset publication,
+      version/snapshot refresh contracts, and fail-closed database/symbol snapshot provenance.
+  - [ ] Verify the supported validation/runtime contexts independently. Passing one context does
+    not establish the others.
+    - [x] Normal source checkout with the tracked processed publication: complete publication and
+      release-matched database/rules/provenance verification pass together.
+    - [x] Local development with explicitly supplied generated runtime artifacts, including the
+      supported no-adjacent-rules fallback.
+    - [x] Production release-artifact validation fails closed for missing/invalid rules, incomplete
+      published assets, and database/symbol snapshot mismatch.
+    - [ ] Exercise an actual specialized package/test runtime layout with the third-party SVG tree
+      deliberately absent; asset-mode selection already covers disabled/auto-fallback versus
+      required behavior, but the packaged runtime layout remains to be exercised directly.
   - [ ] Fix discovered inconsistencies incrementally and add focused regression
     coverage where practical. Record intentional deferrals in the working audit evidence and
     `TODO.md` rather than silently leaving them unresolved. Keep CI hardening,
@@ -163,7 +204,7 @@ by the audit remain in scope.
     - [x] Pin Python route ownership so presentation handling does not absorb `/api/*` and API
       handling does not absorb browser pages, and keep packaged-symbol tests coupled to the
       presentation concern rather than top-level WSGI dispatch.
-    - [ ] Add browser/backend semantic-boundary coverage while moving remaining inferred domain
+    - [x] Add browser/backend semantic-boundary coverage while moving remaining inferred domain
       labels/symbol roles out of page modules.
 
 - [ ] Implement first-class theme selection using the semantic theme contract documented in

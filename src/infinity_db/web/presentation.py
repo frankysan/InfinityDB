@@ -192,9 +192,9 @@ _FIXED_PAGES = {
     ),
     "/skill-extras": PageSpec(
         "skill-extras.html",
-        (("Database", "/"), ("Skill modifiers", None)),
+        (("Database", "/"), ("Skills", "/skills"), ("Skill modifiers", None)),
         "Reference data",
-        "skill-extras",
+        "skills",
     ),
     "/skills": PageSpec(
         "skills.html",

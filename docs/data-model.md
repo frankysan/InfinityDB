@@ -289,7 +289,8 @@ Peripheral JSON directly.
 Fireteam charts are Army-local structured source data. InfinityDB materializes one canonical
 application chart per supported Army/source context while preserving:
 
-- chart/type limits;
+- chart/type limits, including the raw Army value for provenance while projecting explicit
+  `maximum`, `unavailable`, or `unlimited` application semantics before browser use;
 - member requirements;
 - Wildcards and equivalence context;
 - source notes;

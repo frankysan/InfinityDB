@@ -249,13 +249,13 @@ function renderTeam(team) {
 }
 
 function fireteamLimitBadge(limit) {
-  const value = Number(limit.max_count);
+  const kind = String(limit.limit_kind || "maximum");
   let label;
-  if (value === 0) label = `${limit.type}: unavailable`;
-  else if (value === 256) label = `${limit.type}: unlimited`;
-  else label = `${limit.type}: max ${value}`;
+  if (kind === "unavailable") label = `${limit.type}: unavailable`;
+  else if (kind === "unlimited") label = `${limit.type}: unlimited`;
+  else label = `${limit.type}: max ${limit.max_count}`;
   const element = badge(label);
-  if (value === 0) element.classList.add("developer-only");
+  if (kind === "unavailable") element.classList.add("developer-only");
   return element;
 }
 

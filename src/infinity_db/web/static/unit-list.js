@@ -1,12 +1,7 @@
 import { distanceUnit } from "./preferences.js";
 import { shareStateHref } from "./share-state.js";
 import { staticSymbolPath, unitSymbol } from "./unit-symbols.js";
-import {
-  characteristicSymbol,
-  developerOnlyCharacteristic,
-  formatMovement,
-  troopTypeLabel,
-} from "./unit-presentation.js";
+import { formatMovement } from "./unit-presentation.js";
 
 function displayArmies(armies) {
   return [...armies].sort((left, right) => left.id - right.id);
@@ -116,7 +111,7 @@ function extendedProfilesRow(unit, columnCount) {
       troopType.className = "unit-profile-troop-type";
       const longType = document.createElement("span");
       longType.className = "unit-profile-troop-type-long";
-      longType.textContent = troopTypeLabel(profile.type);
+      longType.textContent = profile.type_label || profile.type;
       const shortType = document.createElement("span");
       shortType.className = "unit-profile-troop-type-short";
       shortType.textContent = profile.type;
@@ -135,15 +130,14 @@ function extendedProfilesRow(unit, columnCount) {
     const characteristics = document.createElement("div");
     characteristics.className = "unit-profile-characteristics";
     characteristics.setAttribute("aria-label", "Characteristics");
-    for (const characteristic of profile.characteristics || []) {
-      const descriptor = characteristicSymbol(characteristic);
-      if (descriptor) {
+    for (const descriptor of profile.characteristic_presentations || []) {
+      if (descriptor.symbol) {
         const symbol = document.createElement("img");
         symbol.className = "unit-profile-characteristic-symbol";
-        if (developerOnlyCharacteristic(characteristic)) symbol.classList.add("developer-only");
-        symbol.src = `/static/${descriptor.category}/${descriptor.type}.svg`;
-        symbol.alt = descriptor.label;
-        symbol.title = descriptor.label;
+        if (descriptor.developer_only) symbol.classList.add("developer-only");
+        symbol.src = staticSymbolPath(descriptor.symbol.symbol_path);
+        symbol.alt = descriptor.symbol.label;
+        symbol.title = descriptor.symbol.label;
         symbol.width = 18;
         symbol.height = 18;
         characteristics.append(symbol);
@@ -151,8 +145,8 @@ function extendedProfilesRow(unit, columnCount) {
       }
       const fallback = document.createElement("span");
       fallback.className = "unit-profile-characteristic-fallback";
-      if (developerOnlyCharacteristic(characteristic)) fallback.classList.add("developer-only");
-      fallback.textContent = characteristic;
+      if (descriptor.developer_only) fallback.classList.add("developer-only");
+      fallback.textContent = descriptor.name;
       characteristics.append(fallback);
     }
     if (!characteristics.childElementCount) characteristics.textContent = "No characteristics";

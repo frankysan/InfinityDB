@@ -23,6 +23,7 @@ MAINTAINED_REFERENCE_KINDS = frozenset(
 )
 DISPLAY_FORMS = frozenset({"plural"})
 DISTANCE_UNITS = frozenset({"cm", "inch"})
+DISTANCE_CENTIMETERS_PER_INCH = Decimal("2.5")
 _REVIEW_REASON_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _DISTANCE_PATTERN = re.compile(
     r"^distance:(?P<value>[+-]?(?:\d+(?:\.\d+)?|\.\d+)):(?P<unit>cm|inch)$"
@@ -55,7 +56,11 @@ def _parse_distance(body: str, context: str) -> dict[str, Any] | None:
         raise ValueError(f"{context}: invalid distance value {raw_value!r}") from exc
     if value < 0:
         raise ValueError(f"{context}: distance values must be nonnegative")
-    centimeters = value if match.group("unit") == "cm" else value * Decimal("2.5")
+    centimeters = (
+        value
+        if match.group("unit") == "cm"
+        else value * DISTANCE_CENTIMETERS_PER_INCH
+    )
     return {
         "type": "distance",
         "centimeters": _number(centimeters),
