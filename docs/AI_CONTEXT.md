@@ -135,6 +135,10 @@ Browser state rules:
 - URL-owned state wins for the current view and must not overwrite persistent local Settings.
 - `static/preferences.js` owns preference values/persistence; `static/settings.js` alone binds the
   shared Settings controls. Page modules consume state instead of initializing shell controls.
+- Theme preference defaults to System and resolves before first paint through the synchronous
+  `theme-startup.js` bootstrap. Theme persistence remains owned by `preferences.js`; Settings owns
+  user selection. Do not move theme resolution back into page modules or defer initial resolution
+  until after stylesheet paint.
 - Soft-navigation page code must dispose transient listeners/requests when content is replaced.
 - Browser display should use backend-provided canonical references/relationship labels instead of
   inventing semantic mappings in JavaScript.

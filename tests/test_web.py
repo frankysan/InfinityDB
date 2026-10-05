@@ -2457,6 +2457,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert status == 200
     assert b'id="developer-mode-toggle"' in body
     assert b'id="remember-settings-toggle"' in body
+    assert b'id="theme-selector" class="setting-select"' in body
     assert (
         b'id="fireteams-include-wildcards-toggle" class="setting-switch" '
         b'type="checkbox" checked'
@@ -2466,10 +2467,12 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b"Allow cookies" in body
     assert b"Remember settings with browser cookies" in body
     assert b"Fireteam Wildcard" in body
+    assert b"your theme, distance, optional-unit" in body
     assert b"InfinityDB / Player reference" in body
     assert b'<div class="menu settings-menu" data-menu>' in body
     assert b'aria-controls="settings-menu"' in body
     assert body.count(b'class="setting-switch') == 9
+    assert b'class="setting-row setting-row--select"' in body
     assert b'class="setting-row setting-row--choice"' in body
     assert b'class="setting-row developer-only"' in body
     assert b'class="settings-group"' in body
@@ -2503,6 +2506,15 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
         ".setting-switch--choice",
         {"--setting-switch-width": "29px", "--setting-switch-height": "16px"},
     )
+    assert_css_rule(
+        styles,
+        ".setting-select",
+        {
+            "border": "1px solid var(--color-nav-control-border)",
+            "color": "var(--color-nav-text-active)",
+            "background": "var(--color-nav-control-surface)",
+        },
+    )
     assert b".developer-toggle" not in styles
     assert b".optional-unit-toggle" not in styles
     assert b".remember-settings-toggle" not in styles
@@ -2534,6 +2546,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     status, _, preferences = request(app, "/static/preferences.js")
     assert status == 200
     assert b'const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";' in preferences
+    assert b'from "./theme.js"' in preferences
     assert b'const REMEMBER_SETTINGS_KEY = "infinity-db-remember-settings";' in preferences
     assert (
         b'const FIRETEAMS_INCLUDE_WILDCARDS_KEY = "infinity-db-fireteams-include-wildcards";'
@@ -2550,6 +2563,9 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b"function disableCacheEnabled()" in preferences
     assert b"function saveDeveloperModeEnabled(enabled)" in preferences
     assert b"function saveDisableCacheEnabled(enabled)" in preferences
+    assert b"function themeSelection()" in preferences
+    assert b"function saveThemeSelection(selection)" in preferences
+    assert b"[THEME_PREFERENCE_KEY, themeSelection()]" in preferences
     assert b"window.localStorage" not in preferences
     assert b"window.sessionStorage.getItem(name)" in preferences
     assert b"window.sessionStorage.setItem(name, value)" in preferences
@@ -2570,7 +2586,13 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     status, _, settings = request(app, "/static/settings.js")
     assert status == 200
     assert b'from "./preferences.js"' in settings
+    assert b'from "./theme.js"' in settings
     assert b"function initializeSettings()" in settings
+    assert b"function initializeThemeSelector()" in settings
+    assert b'document.getElementById("theme-selector")' in settings
+    assert b"themeOptions().map" in settings
+    assert b'saveThemeSelection(selector.value)' in settings
+    assert b'new CustomEvent("themechange"' in settings
     assert b"function initializeDistanceUnitToggle()" in settings
     assert b"function initializeDeveloperModeToggle()" in settings
     assert b"function initializeDisableCacheToggle()" in settings
@@ -2585,7 +2607,12 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'new CustomEvent("fireteamswildcardschange"' in settings
     assert b'new CustomEvent("developermodechange"' in settings
     assert b"dialog.showModal()" in settings
+    assert f'src="/static/theme-startup.js?v={STATIC_ASSET_VERSION}"'.encode() in body
     assert f'src="/static/settings.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert b'<meta name="color-scheme" content="light dark">' in body
+    startup_src = f'src="/static/theme-startup.js?v={STATIC_ASSET_VERSION}"'.encode()
+    stylesheet_href = f'href="/static/styles.css?v={STATIC_ASSET_VERSION}"'.encode()
+    assert body.index(startup_src) < body.index(stylesheet_href)
     assert body.index(f'src="/static/settings.js?v={STATIC_ASSET_VERSION}"'.encode()) < body.index(
         f'src="/static/units.js?v={STATIC_ASSET_VERSION}"'.encode()
     )
@@ -2608,6 +2635,33 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     status, _, navigation = request(app, "/static/navigation.js")
     assert status == 200
     assert b'menu.classList.contains("settings-menu")' in navigation
+
+
+def test_theme_selection_uses_prepaint_shared_preference_contract(app: Callable) -> None:
+    status, headers, startup = request(app, "/static/theme-startup.js")
+    assert status == 200
+    assert headers["content-type"].startswith("text/javascript")
+    assert b'const THEME_PREFERENCE_KEY = "infinity-db-theme";' in startup
+    assert b'{ value: "system", label: "System" }' in startup
+    assert b'{ value: "light", label: "Light" }' in startup
+    assert b'{ value: "dark", label: "Dark" }' in startup
+    assert b'window.matchMedia?.("(prefers-color-scheme: dark)")' in startup
+    assert b'document.documentElement.dataset.theme = resolved' in startup
+    assert b"applySelection(savedThemeSelection())" in startup
+
+    status, _, theme = request(app, "/static/theme.js")
+    assert status == 200
+    assert b"window.infinityThemeBootstrap" in theme
+    assert b"function themeOptions()" in theme
+    assert b"function applyThemeSelection(value)" in theme
+
+    status, _, body = request(app, "/")
+    assert status == 200
+    startup_src = f'src="/static/theme-startup.js?v={STATIC_ASSET_VERSION}"'.encode()
+    stylesheet_href = f'href="/static/styles.css?v={STATIC_ASSET_VERSION}"'.encode()
+    assert startup_src in body
+    assert body.index(startup_src) < body.index(stylesheet_href)
+
 
 
 def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> None:
@@ -2967,6 +3021,11 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
     status, _, settings = request(app, f"/static/settings.js?v={STATIC_ASSET_VERSION}")
     assert status == 200
     assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in settings
+    assert f'from "./theme.js?v={STATIC_ASSET_VERSION}"'.encode() in settings
+
+    status, _, preferences = request(app, f"/static/preferences.js?v={STATIC_ASSET_VERSION}")
+    assert status == 200
+    assert f'from "./theme.js?v={STATIC_ASSET_VERSION}"'.encode() in preferences
 
     status, _, distance = request(app, f"/static/distance.js?v={STATIC_ASSET_VERSION}")
     assert status == 200
@@ -3261,10 +3320,23 @@ def test_presentation_colors_are_owned_by_semantic_theme_contract(app: Callable)
     assert light_theme is not None
     assert "color-scheme: light;" in light_theme.group(0)
 
+    dark_theme = re.search(
+        r':root\[data-theme="dark"\]\s*\{.*?\n\}',
+        css,
+        flags=re.DOTALL,
+    )
+    assert dark_theme is not None
+    assert "color-scheme: dark;" in dark_theme.group(0)
+
+    light_tokens = set(re.findall(r"--([\w-]+):", light_theme.group(0)))
+    dark_tokens = set(re.findall(r"--([\w-]+):", dark_theme.group(0)))
+    assert dark_tokens == light_tokens
+
     component_css = (
         css[: root.start()]
         + css[root.end() : light_theme.start()]
-        + css[light_theme.end() :]
+        + css[light_theme.end() : dark_theme.start()]
+        + css[dark_theme.end() :]
     )
     color_literals = re.findall(
         r"#[0-9a-fA-F]{3,8}\b|(?:rgb|rgba)\([^)]*\)",

@@ -39,6 +39,8 @@ Current release: **0.9.1** (2026-09-30).
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Includes global search and a federated Glossary across player-facing reference domains, with
   embedded Attributes and scoped Game terms routed back to their canonical owning surfaces.
+- Supports System, Light, and Dark themes from Settings; System follows the operating-system
+  preference, while an explicit choice can be remembered with the other browser settings.
 - Uses `/fireteams` as a general Fireteam-rules landing page and switches to Army-scoped charts when
   an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, equivalence
   labels, and N5 rules/bonus context.

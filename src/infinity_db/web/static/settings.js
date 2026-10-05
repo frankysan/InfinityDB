@@ -13,7 +13,10 @@ import {
   saveFireteamsIncludeWildcards,
   saveOptionalUnitFilter,
   saveUnitAdvancedFiltersOpen,
+  saveThemeSelection,
+  themeSelection,
 } from "./preferences.js";
+import { applyThemeSelection, themeOptions } from "./theme.js";
 
 const OPTIONAL_UNIT_CONTROLS = [
   { id: "mercs-filter", name: "mercs" },
@@ -26,6 +29,34 @@ function syncDocumentPreferenceState() {
   document.documentElement.dataset.distanceUnit = distanceUnit();
   document.documentElement.dataset.developerMode = String(developerModeEnabled());
   document.documentElement.dataset.disableCache = String(disableCacheEnabled());
+}
+
+function initializeThemeSelector() {
+  const selector = document.getElementById("theme-selector");
+  if (!selector || selector.dataset.initialized === "true") return;
+
+  selector.dataset.initialized = "true";
+  selector.replaceChildren(...themeOptions().map(({ value, label }) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    return option;
+  }));
+  selector.value = themeSelection();
+
+  selector.addEventListener("change", () => {
+    saveThemeSelection(selector.value);
+    const state = applyThemeSelection(themeSelection());
+    selector.value = state.selection;
+    window.dispatchEvent(new CustomEvent("themechange", { detail: state }));
+  });
+
+  const colorScheme = window.matchMedia?.("(prefers-color-scheme: dark)");
+  colorScheme?.addEventListener("change", () => {
+    if (themeSelection() !== "system") return;
+    const state = applyThemeSelection("system");
+    window.dispatchEvent(new CustomEvent("themechange", { detail: state }));
+  });
 }
 
 function initializeDistanceUnitToggle() {
@@ -144,6 +175,7 @@ function initializeRememberSettingsToggle() {
 
 export function initializeSettings() {
   syncDocumentPreferenceState();
+  initializeThemeSelector();
   initializeRememberSettingsToggle();
   initializeDeveloperModeToggle();
   initializeDisableCacheToggle();

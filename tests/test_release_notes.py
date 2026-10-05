@@ -18,8 +18,9 @@ def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     assert releases[0].version is None
     assert releases[0].released_on is None
     assert [section.heading for section in releases[0].sections] == ["Added", "Changed", "Fixed"]
-    assert releases[0].sections[0].items[0].startswith(
-        "**Web frontend + Project infrastructure:** Add a Changes page"
+    assert any(
+        item.startswith("**Web frontend + Project infrastructure:** Add a Changes page")
+        for item in releases[0].sections[0].items
     )
 
     release_091 = next(release for release in releases if release.version == "0.9.1")

@@ -86,6 +86,10 @@
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="settings-menu">Settings <span aria-hidden="true">⌄</span></button>
       <p class="nav-label menu-label">Settings</p>
       <div id="settings-menu" class="compact-menu-panel" aria-label="Settings">
+        <label class="setting-row setting-row--select" for="theme-selector">
+          <span class="setting-label">Theme</span>
+          <select id="theme-selector" class="setting-select" aria-label="Theme"></select>
+        </label>
         <label class="setting-row setting-row--choice" for="distance-unit-toggle">
           <span class="setting-label">Distance</span>
           <span class="setting-choice"><span>cm</span><input id="distance-unit-toggle" class="setting-switch setting-switch--choice" type="checkbox" checked aria-label="Use inches for movement distances"><span>in</span></span>
@@ -138,7 +142,7 @@
 <dialog id="cookie-consent-dialog" class="cookie-consent-dialog" aria-labelledby="cookie-consent-title">
   <form method="dialog">
     <h2 id="cookie-consent-title">Remember settings?</h2>
-    <p>InfinityDB uses browser cookies to remember your distance, optional-unit, Fireteam Wildcard, and developer mode settings on this device.</p>
+    <p>InfinityDB uses browser cookies to remember your theme, distance, optional-unit, Fireteam Wildcard, and developer mode settings on this device.</p>
     <div class="cookie-consent-actions">
       <button value="cancel" class="button cookie-consent-cancel">Cancel</button>
       <button value="accept" class="button button-primary">Allow cookies</button>

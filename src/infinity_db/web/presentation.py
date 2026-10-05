@@ -48,6 +48,8 @@ ASSETS = {
     "/static/view-components.js": ("view-components.js", "text/javascript; charset=utf-8"),
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
     "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
+    "/static/theme-startup.js": ("theme-startup.js", "text/javascript; charset=utf-8"),
+    "/static/theme.js": ("theme.js", "text/javascript; charset=utf-8"),
     "/static/settings.js": ("settings.js", "text/javascript; charset=utf-8"),
     "/static/distance.js": ("distance.js", "text/javascript; charset=utf-8"),
     "/static/navigation.js": ("navigation.js", "text/javascript; charset=utf-8"),
@@ -574,7 +576,11 @@ def _render_page(
         )
         .replace(
             '<meta charset="utf-8">',
-            '<meta charset="utf-8"><script type="module" src="/static/settings.js"></script>',
+            (
+                '<meta charset="utf-8">'
+                '<script src="/static/theme-startup.js"></script>'
+                '<script type="module" src="/static/settings.js"></script>'
+            ),
         )
         .replace(
             "</head>",

@@ -88,12 +88,13 @@ domain unless required to correct a release-blocking defect.
   - [x] Separate semantic theme tokens from theme-neutral layout/component rules
     and remove remaining hard-coded light-theme assumptions. The current Light palette now lives
     entirely in the explicit semantic theme contract, while component/layout rules consume tokens.
-  - [ ] Decide and document the default startup behavior (for example, operating-
-    system preference versus a fixed project default); an explicit user choice wins.
-  - [ ] Add a theme selector to Settings that is data-driven rather than hard-coded as a binary
-    Light/Dark switch, resolve the selected theme before first meaningful paint, and keep
-    persistence on the existing preference contract so additional themes can be added without new
-    state logic.
+  - [x] Use the operating-system color-scheme preference as the default (`System`) startup
+    behavior; an explicit Light/Dark user choice wins. A synchronous same-origin bootstrap resolves
+    the concrete theme before the stylesheet is applied.
+  - [x] Add a data-driven theme selector to Settings with System, Light, and Dark as the initial
+    choices. Theme selection uses the existing session/cookie preference contract, resolves before
+    first meaningful paint, and exposes a registry that can accept additional explicit themes
+    without changing persistence logic.
   - [ ] Audit contrast and distinguishability for status/range colors, links, focus,
     muted text, tables, dialogs, menus, and faction accents in every shipped theme
     (initially Light and Dark).

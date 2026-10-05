@@ -301,16 +301,25 @@ mixing incompatible module/data generations.
 Visual/component rules, responsive table behavior, typography, Developer-mode presentation, and
 accessibility are owned by `docs/web-design-guidelines.md`.
 
-### Design direction: theming
+### Browser theming
 
 The browser CSS separates theme-neutral geometry/typography from an explicit semantic theme
 contract. Component and layout rules consume semantic color/shadow roles rather than concrete
-palette literals; the existing Light palette is the first implementation of that contract. Domain
-identity colors such as faction and rules-category accents remain semantic data roles inside the
-theme layer so a theme can provide contrast-safe values without changing domain meaning.
+palette literals. Light and Dark are the initial implementations of that contract. Domain identity
+colors such as faction and rules-category accents remain semantic data roles inside the theme layer
+so each theme can provide contrast-safe values without changing domain meaning.
 
-Light/Dark selection and any later themes remain unfinished user-facing behavior. Concrete unfinished
-theming work is tracked only in `docs/TODO.md`.
+Theme preference defaults to **System**, which follows the operating-system color-scheme preference;
+an explicit user selection wins. The selected preference uses the same session-first, optional-cookie
+persistence contract as other Settings. `static/theme-startup.js` is the intentionally small
+synchronous bootstrap exception to normal browser-module loading: it reads that preference and sets
+the resolved `data-theme` before the stylesheet can produce the first meaningful paint. It also owns
+the data-driven theme registry consumed by `static/theme.js` and the Settings selector.
+`static/preferences.js` owns persistence of the selected theme, while `static/settings.js` owns the
+selector and live System-preference updates. Adding another explicit theme should require a registry
+entry and semantic-token implementation, not new persistence logic.
+
+Remaining contrast/audit and regression work is tracked only in `docs/TODO.md`.
 
 ## Privacy-preserving observability
 
