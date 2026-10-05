@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date
 from hashlib import sha256
@@ -14,6 +15,7 @@ from urllib.parse import parse_qs
 from infinity_army_data.project_resources import maintained_manifest_path
 from infinity_db import __display_version__, __version__
 from infinity_db.application_domains import application_domain
+from infinity_db.web.release_notes import render_current_release_notes_html
 from infinity_db.web.response import WebResponse
 from infinity_db.web.routes import (
     AMMUNITION_PAGE_PATH,
@@ -131,6 +133,7 @@ class PageSpec:
     catalog_tag: str
     active_page: str | None = None
     template_values: tuple[tuple[str, str], ...] = ()
+    body_renderer: Callable[[], str] | None = None
 
 
 def _reference_page_values(
@@ -277,6 +280,13 @@ _FIXED_PAGES = {
             detail_meta_description="View an Infinity N5 General Rules reference.",
             summary_heading="Rules reference",
         ),
+    ),
+    "/changes": PageSpec(
+        "changes.html",
+        (("InfinityDB", "/"), ("Changes", None)),
+        "Project history",
+        "changes",
+        body_renderer=render_current_release_notes_html,
     ),
     "/about": PageSpec(
         "about.html",
@@ -494,6 +504,7 @@ def _render_page(
         "skill-extras": "SKILL_EXTRAS_CURRENT",
         "fireteams": "FIRETEAMS_CURRENT",
         "glossary": "GLOSSARY_CURRENT",
+        "changes": "CHANGES_CURRENT",
         "about": "ABOUT_CURRENT",
     }
     for page, marker_name in navigation_markers.items():
@@ -547,6 +558,8 @@ def _render_page(
     document = static.joinpath(spec.filename).read_text(encoding="utf-8")
     for key, value in spec.template_values:
         document = document.replace(f"{{{{{key}}}}}", escape(value, quote=True))
+    if spec.body_renderer is not None:
+        document = document.replace("{{PAGE_CONTENT}}", spec.body_renderer())
     return _version_static_urls(
         document.replace(
             '<html lang="en">',

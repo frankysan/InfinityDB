@@ -45,6 +45,23 @@ def maintained_curated_path(
     prefix = install_prefix if install_prefix is not None else Path(sys.prefix)
     return prefix / "share" / "infinity-db" / "data" / "curated" / relative
 
+
+def maintained_documentation_path(
+    *parts: str,
+    source_root: Path | None = None,
+    install_prefix: Path | None = None,
+) -> Path:
+    """Return one maintained documentation path for a source checkout or wheel install."""
+    relative = Path(*parts)
+    source_base = source_root if source_root is not None else _SOURCE_ROOT
+    source_path = source_base / "docs" / relative
+    if source_path.is_file():
+        return source_path
+
+    prefix = install_prefix if install_prefix is not None else Path(sys.prefix)
+    return prefix / "share" / "infinity-db" / "docs" / relative
+
+
 def maintained_manifest_path(
     *parts: str,
     source_root: Path | None = None,

@@ -5,6 +5,7 @@ from pathlib import Path
 from infinity_army_data.project_resources import (
     maintained_config_path,
     maintained_curated_path,
+    maintained_documentation_path,
     maintained_manifest_path,
 )
 
@@ -146,6 +147,43 @@ def test_maintained_manifest_falls_back_to_installed_share(tmp_path: Path) -> No
     assert (
         maintained_manifest_path(
             "symbol-publication.json",
+            source_root=source_root,
+            install_prefix=prefix,
+        )
+        == installed
+    )
+
+
+def test_maintained_documentation_prefers_source_checkout(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    prefix = tmp_path / "prefix"
+    source = source_root / "docs" / "CHANGELOG.md"
+    installed = prefix / "share" / "infinity-db" / "docs" / "CHANGELOG.md"
+    source.parent.mkdir(parents=True)
+    installed.parent.mkdir(parents=True)
+    source.write_text("source", encoding="utf-8")
+    installed.write_text("installed", encoding="utf-8")
+
+    assert (
+        maintained_documentation_path(
+            "CHANGELOG.md",
+            source_root=source_root,
+            install_prefix=prefix,
+        )
+        == source
+    )
+
+
+def test_maintained_documentation_falls_back_to_installed_share(tmp_path: Path) -> None:
+    source_root = tmp_path / "source"
+    prefix = tmp_path / "prefix"
+    installed = prefix / "share" / "infinity-db" / "docs" / "CHANGELOG.md"
+    installed.parent.mkdir(parents=True)
+    installed.write_text("installed", encoding="utf-8")
+
+    assert (
+        maintained_documentation_path(
+            "CHANGELOG.md",
             source_root=source_root,
             install_prefix=prefix,
         )

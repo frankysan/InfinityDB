@@ -41,6 +41,9 @@ where = ["src"]
 license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 
 [tool.setuptools.data-files]
+"share/infinity-db/docs" = [
+  "docs/CHANGELOG.md",
+]
 "share/infinity-db/config/catalogs" = [
   "config/catalogs/weapon-categories.json",
   "config/catalogs/weapon-overrides.json",

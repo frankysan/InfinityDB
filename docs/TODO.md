@@ -45,7 +45,7 @@ domain unless required to correct a release-blocking defect.
 
 ### Frontend architecture and theming
 
-- [ ] **Web frontend + Project infrastructure:** Add a user-facing **Changes** page backed by
+- [x] **Web frontend + Project infrastructure:** Add a user-facing **Changes** page backed by
   `docs/CHANGELOG.md`, which remains the canonical release-history source. Present current and
   historical release notes in the browser without maintaining a second hand-edited copy of the
   same content.

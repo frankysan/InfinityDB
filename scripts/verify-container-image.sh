@@ -235,6 +235,11 @@ if expected_display_version:
         raise SystemExit(
             f"Browser footer does not show built display version {expected_display_version!r}"
         )
+
+with urlopen("http://127.0.0.1:8000/changes", timeout=3) as response:
+    changes = response.read().decode("utf-8")
+if "InfinityDB release notes" not in changes or "Unreleased" not in changes:
+    raise SystemExit("/changes did not render the installed canonical changelog")
 '
 
 if [ "$packaged_assets" -eq 1 ]; then

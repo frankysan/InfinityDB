@@ -103,6 +103,19 @@ def test_docker_build_copies_curated_wheel_data_inputs() -> None:
     assert "rm -rf /app/config /app/data/curated" in dockerfile
 
 
+def test_container_build_packages_canonical_changelog() -> None:
+    dockerfile = _read("Dockerfile")
+
+    assert "COPY docs/CHANGELOG.md /app/docs/CHANGELOG.md" in dockerfile
+    assert "rm -rf /app/config /app/data/curated /app/docs /app/data/manifests" in dockerfile
+
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)
+
+    documentation = project["tool"]["setuptools"]["data-files"]["share/infinity-db/docs"]
+    assert documentation == ["docs/CHANGELOG.md"]
+
+
 def test_wheel_packages_runtime_unit_filter_semantics() -> None:
     with (ROOT / "pyproject.toml").open("rb") as handle:
         project = tomllib.load(handle)

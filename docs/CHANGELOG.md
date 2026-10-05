@@ -9,6 +9,8 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Web frontend + Project infrastructure:** Add a Changes page that presents current and historical release notes directly
+  from the project's canonical changelog.
 - **Acquisition:** Add Human Sphere as an English-only wiki research source using the existing
   deterministic snapshot/history pipeline. Human Sphere acquisitions use their own archive
   identity, normalize bare/`www` host aliases, enumerate MediaWiki content pages before rendered

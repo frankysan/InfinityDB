@@ -51,6 +51,7 @@
         "test_api",
         "test_app_cli",
         "test_benchmark_runtime",
+        "test_release_notes",
         "test_runtime_import_boundary",
         "test_web",
         "test_web_metrics"
