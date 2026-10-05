@@ -47,10 +47,11 @@ ASSETS = {
     "/static/unit-presentation.js": ("unit-presentation.js", "text/javascript; charset=utf-8"),
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
     "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
+    "/static/settings.js": ("settings.js", "text/javascript; charset=utf-8"),
+    "/static/distance.js": ("distance.js", "text/javascript; charset=utf-8"),
     "/static/navigation.js": ("navigation.js", "text/javascript; charset=utf-8"),
     "/static/page-navigation.js": ("page-navigation.js", "text/javascript; charset=utf-8"),
     "/static/themed-logo.js": ("themed-logo.js", "text/javascript; charset=utf-8"),
-    "/static/about.js": ("about.js", "text/javascript; charset=utf-8"),
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
     "/static/fireteams.js": ("fireteams.js", "text/javascript; charset=utf-8"),
     "/static/catalog-list.js": ("catalog-list.js", "text/javascript; charset=utf-8"),
@@ -568,6 +569,10 @@ def _render_page(
             f'data-static-version="{STATIC_ASSET_VERSION}" '
             f'data-static-revision="{STATIC_ASSET_REVISION}" '
             f'data-snapshot-revision="{snapshot_revision}">',
+        )
+        .replace(
+            '<meta charset="utf-8">',
+            '<meta charset="utf-8"><script type="module" src="/static/settings.js"></script>',
         )
         .replace(
             "</head>",

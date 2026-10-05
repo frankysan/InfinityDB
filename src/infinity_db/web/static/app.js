@@ -1,7 +1,7 @@
 import { getArmies, getCatalogItems, getUnitFilters, getUnits } from "./api.js";
 import {
-  initializeDistanceUnitToggle, initializeOptionalUnitToggles, optionalUnitDefaultFilters,
-  optionalUnitFilters, saveUnitAdvancedFiltersOpen, unitAdvancedFiltersOpen,
+  optionalUnitDefaultFilters, optionalUnitFilters, saveUnitAdvancedFiltersOpen,
+  unitAdvancedFiltersOpen,
 } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 import { readShareState, writeShareState } from "./share-state.js";
@@ -62,8 +62,6 @@ const numericRangeControls = {
 };
 
 document.querySelector(".results-toolbar").remove();
-initializeDistanceUnitToggle();
-initializeOptionalUnitToggles();
 elements.sortButton = document.createElement("button");
 elements.sortButton.className = "unit-sort-button";
 elements.sortButton.type = "button";

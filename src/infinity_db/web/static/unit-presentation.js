@@ -1,4 +1,4 @@
-import { DISTANCE_CENTIMETERS_PER_INCH } from "./preferences.js";
+import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
 
 export function formatMovement(move1, move2, unit) {
   const values = [move1, move2];

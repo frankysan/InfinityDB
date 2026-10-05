@@ -3,7 +3,8 @@ import { maintainedTextFragment } from "./maintained-text.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
 import { formatMovement } from "./unit-presentation.js";
-import { distanceUnit, formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
+import { formatSkillDistanceExtra } from "./distance.js";
+import { distanceUnit, optionalUnitFilters } from "./preferences.js";
 
 const name = document.getElementById("unit-name");
 const meta = document.getElementById("unit-meta");
@@ -1327,7 +1328,6 @@ document.addEventListener(
   () => pageController.abort(),
   { once: true },
 );
-initializeDistanceUnitToggle();
 
 if (!unitIdentifier) {
   status.textContent = "The requested unit address is invalid.";

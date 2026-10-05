@@ -1,4 +1,5 @@
-import { formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
+import { formatSkillDistanceExtra } from "./distance.js";
+import { optionalUnitFilters } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
@@ -257,7 +258,6 @@ document.addEventListener(
   () => pageController.abort(),
   { once: true },
 );
-initializeDistanceUnitToggle();
 window.addEventListener("distanceunitchange", () => {
   if (currentSkill) render(currentSkill);
 }, { signal: pageController.signal });

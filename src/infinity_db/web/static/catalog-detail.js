@@ -1,9 +1,5 @@
-import {
-  DISTANCE_CENTIMETERS_PER_INCH,
-  distanceUnit,
-  initializeDistanceUnitToggle,
-  optionalUnitFilters,
-} from "./preferences.js";
+import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
+import { distanceUnit, optionalUnitFilters } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 import {
@@ -415,7 +411,6 @@ document.addEventListener(
   () => pageController.abort(),
   { once: true },
 );
-initializeDistanceUnitToggle();
 window.addEventListener("distanceunitchange", () => {
   if (currentItem && catalog === "weapons") render(currentItem);
 }, { signal: pageController.signal });

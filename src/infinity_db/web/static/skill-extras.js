@@ -1,5 +1,5 @@
 import { getSkillExtras } from "./api.js";
-import { formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
+import { formatSkillDistanceExtra } from "./distance.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -66,7 +66,6 @@ document.addEventListener(
   () => pageController.abort(),
   { once: true },
 );
-initializeDistanceUnitToggle();
 load();
 window.addEventListener("distanceunitchange", () => {
   if (!elements.table.hidden) renderItems(items);

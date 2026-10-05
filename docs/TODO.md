@@ -64,6 +64,9 @@ domain unless required to correct a release-blocking defect.
     - [x] Decouple application API wrappers from preference/UI modules: `api.js` now delegates
       request mechanics to an explicit transport module, while page modules pass optional-Unit
       visibility state into API calls instead of the API layer reading browser controls itself.
+    - [x] Separate preference state/persistence from shared Settings UI wiring: page modules now
+      consume stored preference values without initializing shell controls, `settings.js` owns the
+      persistent Settings bindings/events, and reusable distance formatting is independent of both.
   - [ ] Add focused contract/regression coverage as responsibilities move so domain
     interpretation cannot silently migrate back into browser code.
     - [x] Pin Python route ownership so presentation handling does not absorb `/api/*` and API

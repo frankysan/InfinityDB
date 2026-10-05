@@ -1,5 +1,4 @@
 import { getSearchResults } from "./api.js";
-import { initializeDistanceUnitToggle } from "./preferences.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 
 const byId = (id) => document.getElementById(id);
@@ -62,5 +61,4 @@ elements.form.addEventListener("submit", (event) => {
   window.location.href = shareStateHref("/search", "search", nextQuery ? { q: nextQuery } : {});
 });
 document.addEventListener("infinity:beforenavigation", () => controller.abort(), { once: true });
-initializeDistanceUnitToggle();
 search();

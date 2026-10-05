@@ -1,6 +1,5 @@
 import { getCatalogItems } from "./api.js";
 import { readCatalogSearchQuery, replaceCatalogSearchQuery } from "./catalog-search-state.js";
-import { initializeDistanceUnitToggle } from "./preferences.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 
 const page = document.body.dataset.catalog;
@@ -133,5 +132,4 @@ document.addEventListener("infinity:beforenavigation", () => {
 }, { once: true });
 elements.search.value = readCatalogSearchQuery();
 replaceCatalogSearchQuery(elements.search.value);
-initializeDistanceUnitToggle();
 load();

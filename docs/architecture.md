@@ -278,7 +278,10 @@ comes from backend/application contracts.
 Current persistent preferences are local browser settings such as distance units, Developer mode,
 and optional availability defaults. Shareable page state is URL-owned and must not overwrite the
 recipient's saved preferences. A page may seed missing share state from preferences, but explicit
-URL state wins for that view.
+URL state wins for that view. Preference values and persistence are owned by `static/preferences.js`;
+the shared Settings controls and their browser events are bound by `static/settings.js`. Page modules
+consume preference state but do not initialize or read those shared controls directly. Reusable
+distance formatting is separate from both concerns in `static/distance.js`.
 
 Browser JSON access is routed through `static/api.js`, which owns application endpoint shapes and
 delegates same-origin request mechanics to `static/api-transport.js`. Transport does not import

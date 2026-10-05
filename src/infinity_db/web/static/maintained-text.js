@@ -1,4 +1,4 @@
-import { formatDistanceExtra } from "./preferences.js";
+import { formatDistanceExtra } from "./distance.js";
 
 let tooltipSequence = 0;
 let activeReference = null;

@@ -133,6 +133,8 @@ Browser state rules:
 - Legacy explicit browser parameters remain accepted for compatibility and normalize to canonical
   state; do not remove them casually.
 - URL-owned state wins for the current view and must not overwrite persistent local Settings.
+- `static/preferences.js` owns preference values/persistence; `static/settings.js` alone binds the
+  shared Settings controls. Page modules consume state instead of initializing shell controls.
 - Soft-navigation page code must dispose transient listeners/requests when content is replaced.
 - Browser display should use backend-provided canonical references/relationship labels instead of
   inventing semantic mappings in JavaScript.

@@ -1,6 +1,5 @@
 import { getGlossary } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
-import { initializeDistanceUnitToggle } from "./preferences.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 
 const byId = (id) => document.getElementById(id);
@@ -115,5 +114,4 @@ elements.search.form?.addEventListener("submit", (event) => {
 });
 document.addEventListener("infinity:beforenavigation", () => controller.abort(), { once: true });
 window.addEventListener("hashchange", revealHashTarget);
-initializeDistanceUnitToggle();
 load();

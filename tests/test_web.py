@@ -2468,25 +2468,53 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'const UNIT_ADVANCED_FILTERS_KEY = "infinity-db-unit-advanced-filters";' in preferences
     assert b"function unitAdvancedFiltersOpen()" in preferences
     assert b"function saveUnitAdvancedFiltersOpen(open)" in preferences
-    assert b"function initializeFireteamsIncludeWildcardsToggle()" in preferences
     assert b"function fireteamsIncludeWildcards()" in preferences
-    assert b'new CustomEvent("fireteamswildcardschange"' in preferences
-    assert b"function initializeDeveloperModeToggle()" in preferences
-    assert b"function initializeRememberSettingsToggle()" in preferences
-    assert b"dialog.showModal()" in preferences
-    assert b'getElementById("distance-unit-toggle")?.checked ? "in" : "cm"' in preferences
-    assert b'getElementById("developer-mode-toggle")?.checked' in preferences
+    assert b"function rememberSettingsEnabled()" in preferences
+    assert b"function rememberCurrentSettings()" in preferences
+    assert b"function forgetRememberedSettings()" in preferences
+    assert b"function developerModeEnabled()" in preferences
+    assert b"function disableCacheEnabled()" in preferences
+    assert b"function saveDeveloperModeEnabled(enabled)" in preferences
+    assert b"function saveDisableCacheEnabled(enabled)" in preferences
     assert b"window.localStorage" not in preferences
     assert b"window.sessionStorage.getItem(name)" in preferences
     assert b"window.sessionStorage.setItem(name, value)" in preferences
-    assert b"if (!isRememberingSettings()) return session;" in preferences
+    assert b"const settingCache = new Map();" in preferences
+    assert b"if (settingCache.has(name)) return settingCache.get(name);" in preferences
     assert b"const persistent = cookieValue(name);" in preferences
-    assert b"if (persistent === undefined) return session;" in preferences
-    assert b"setSessionValue(name, persistent);" in preferences
-    assert b'new CustomEvent("developermodechange"' in preferences
-    assert b'const unit = savedUnit === "cm" ? "cm" : "in";' in preferences
-    assert preferences.count(b"defaultChecked: true") == 4
+    assert b"const value = persistent === undefined ? session : persistent;" in preferences
+    assert b"if (persistent !== undefined) setSessionValue(name, persistent);" in preferences
+    assert b"settingCache.set(name, value);" in preferences
+    assert b'=== "cm" ? "cm" : "in"' in preferences
+    assert preferences.count(b"defaultValue: true") == 4
     assert b"function optionalUnitDefaultFilters()" in preferences
+    assert b"document.getElementById" not in preferences
+    assert b"addEventListener(" not in preferences
+    assert b"CustomEvent(" not in preferences
+    assert b"document.documentElement.dataset" not in preferences
+
+    status, _, settings = request(app, "/static/settings.js")
+    assert status == 200
+    assert b'from "./preferences.js"' in settings
+    assert b"function initializeSettings()" in settings
+    assert b"function initializeDistanceUnitToggle()" in settings
+    assert b"function initializeDeveloperModeToggle()" in settings
+    assert b"function initializeDisableCacheToggle()" in settings
+    assert b"function initializeOptionalUnitToggles()" in settings
+    assert b"function initializeFireteamsIncludeWildcardsToggle()" in settings
+    assert b"function initializeRememberSettingsToggle()" in settings
+    assert b'document.getElementById("distance-unit-toggle")' in settings
+    assert b'document.getElementById("developer-mode-toggle")' in settings
+    assert b'document.documentElement.dataset.distanceUnit' in settings
+    assert b'document.documentElement.dataset.developerMode' in settings
+    assert b'document.documentElement.dataset.disableCache' in settings
+    assert b'new CustomEvent("fireteamswildcardschange"' in settings
+    assert b'new CustomEvent("developermodechange"' in settings
+    assert b"dialog.showModal()" in settings
+    assert f'src="/static/settings.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert body.index(f'src="/static/settings.js?v={STATIC_ASSET_VERSION}"'.encode()) < body.index(
+        f'src="/static/app.js?v={STATIC_ASSET_VERSION}"'.encode()
+    )
     assert (
         b'id="distance-unit-toggle" class="setting-switch setting-switch--choice" '
         b'type="checkbox" checked'
@@ -2588,7 +2616,10 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     assert status == 200
     assert b"currentMain.replaceWith(nextMain)" in page_navigation
     assert b"window.infinityNavigate" in page_navigation
-    assert b'"/static/navigation.js", "/static/page-navigation.js"' in page_navigation
+    assert (
+        b'"/static/settings.js", "/static/navigation.js", "/static/page-navigation.js"'
+        in page_navigation
+    )
     assert b'source.searchParams.set("_navigation", String(navigationNumber))' in page_navigation
     assert b"window.document.body.append(script)" in page_navigation
     assert b"const menus = [...document.querySelectorAll" in navigation
@@ -2685,7 +2716,7 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert b"not affiliated with Corvus Belli S.L." in body
     assert b"explicitly permitted InfinityDB to use and redistribute" in body
     assert b'href="/about" aria-current="page"' in body
-    assert b"about.js" in body
+    assert b"about.js" not in body
 
 
 def test_web_route_handlers_keep_presentation_and_api_ownership_separate(app: Callable) -> None:
@@ -2856,7 +2887,16 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
     assert f'from "./api.js?v={STATIC_ASSET_VERSION}"'.encode() in body
     assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert f'from "./distance.js?v={STATIC_ASSET_VERSION}"'.encode() in body
     assert f'from "./share-state.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+
+    status, _, settings = request(app, f"/static/settings.js?v={STATIC_ASSET_VERSION}")
+    assert status == 200
+    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in settings
+
+    status, _, distance = request(app, f"/static/distance.js?v={STATIC_ASSET_VERSION}")
+    assert status == 200
+    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in distance
 
     status, _, body = request(app, f"/static/api.js?v={STATIC_ASSET_VERSION}")
     assert status == 200
@@ -3539,15 +3579,26 @@ def test_rules_badges_and_desktop_sidebar_use_consistent_presentation(app: Calla
     )
 
 
-def test_distance_preference_script_is_served(app: Callable) -> None:
-    status, headers, body = request(app, "/static/preferences.js")
+def test_preference_state_and_distance_formatter_are_served(app: Callable) -> None:
+    status, headers, preferences = request(app, "/static/preferences.js")
     assert status == 200
     assert headers["content-type"].startswith("text/javascript")
-    assert b"distanceunitchange" in body
+    assert b"function distanceUnit()" in preferences
+    assert b"distanceunitchange" not in preferences
+
+    status, _, distance = request(app, "/static/distance.js")
+    assert status == 200
+    assert b'from "./preferences.js"' in distance
+    assert b"function formatDistanceExtra(" in distance
+    assert b"function formatSkillDistanceExtra(" in distance
+
+    status, _, settings = request(app, "/static/settings.js")
+    assert status == 200
+    assert b"distanceunitchange" in settings
 
 
 def test_developer_cache_toggle_is_served(app: Callable) -> None:
-    status, _, body = request(app, "/static/preferences.js")
+    status, _, body = request(app, "/static/settings.js")
     assert status == 200
     assert b"function initializeDisableCacheToggle()" in body
     assert b'document.documentElement.dataset.disableCache = "false";' in body
@@ -3564,10 +3615,10 @@ def test_developer_cache_toggle_is_served(app: Callable) -> None:
 
 
 def test_skill_distance_display_uses_api_parameter_semantics(app: Callable) -> None:
-    status, _, preferences = request(app, "/static/preferences.js")
+    status, _, distance = request(app, "/static/distance.js")
     assert status == 200
-    assert b"function formatSkillDistanceExtra(value, parameterSemantics = null)" in preferences
-    assert b"parameterSemantics?.positive_sign" in preferences
+    assert b"function formatSkillDistanceExtra(value, parameterSemantics = null)" in distance
+    assert b"parameterSemantics?.positive_sign" in distance
 
     for asset in ("skill.js", "skill-extras.js", "unit.js"):
         status, _, body = request(app, f"/static/{asset}")
@@ -4790,7 +4841,7 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
 
     status, _, renderer = request(rules_app, "/static/maintained-text.js")
     assert status == 200
-    assert b'from "./preferences.js"' in renderer
+    assert b'from "./distance.js"' in renderer
     assert b'node.className = "maintained-distance"' in renderer
     assert b'wrapper.className = "maintained-reference-wrap"' in renderer
     assert b'function reviewNeededNode(token, { interactive = true } = {})' in renderer

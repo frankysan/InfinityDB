@@ -1,6 +1,5 @@
 import { getCatalogItems } from "./api.js";
 import { readCatalogSearchQuery, replaceCatalogSearchQuery } from "./catalog-search-state.js";
-import { initializeDistanceUnitToggle } from "./preferences.js";
 
 const { catalog, singular, plural } = document.body.dataset;
 const pageController = new AbortController();
@@ -86,5 +85,4 @@ document.addEventListener("infinity:beforenavigation", () => {
 }, { once: true });
 elements.search.value = readCatalogSearchQuery();
 replaceCatalogSearchQuery(elements.search.value);
-initializeDistanceUnitToggle();
 load();

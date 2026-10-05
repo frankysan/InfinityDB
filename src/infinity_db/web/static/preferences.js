@@ -5,22 +5,17 @@ const DISABLE_CACHE_KEY = "infinity-db-disable-cache";
 const FIRETEAMS_INCLUDE_WILDCARDS_KEY = "infinity-db-fireteams-include-wildcards";
 const UNIT_ADVANCED_FILTERS_KEY = "infinity-db-unit-advanced-filters";
 const OPTIONAL_UNIT_SETTINGS = [
-  { id: "mercs-filter", key: "infinity-db-mercs", defaultChecked: true },
-  { id: "specops-filter", key: "infinity-db-specops", defaultChecked: true },
-  { id: "teamops-filter", key: "infinity-db-teamops", defaultChecked: true },
-  { id: "reinforcement-filter", key: "infinity-db-reinforcement", defaultChecked: true },
+  { name: "mercs", key: "infinity-db-mercs", defaultValue: true },
+  { name: "specops", key: "infinity-db-specops", defaultValue: true },
+  { name: "teamops", key: "infinity-db-teamops", defaultValue: true },
+  { name: "reinforcement", key: "infinity-db-reinforcement", defaultValue: true },
 ];
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
-const DISTANCE_NUMBER_PATTERN = /[+-]?\d+(?:\.\d+)?/g;
-export const DISTANCE_CENTIMETERS_PER_INCH = 2.5;
+const settingCache = new Map();
 
 function cookieValue(name) {
   const prefix = `${encodeURIComponent(name)}=`;
   return document.cookie.split("; ").find((cookie) => cookie.startsWith(prefix))?.slice(prefix.length);
-}
-
-function isRememberingSettings() {
-  return cookieValue(REMEMBER_SETTINGS_KEY) === "true";
 }
 
 function setCookie(name, value) {
@@ -47,130 +42,84 @@ function setSessionValue(name, value) {
   }
 }
 
+export function rememberSettingsEnabled() {
+  return cookieValue(REMEMBER_SETTINGS_KEY) === "true";
+}
+
 function savedSetting(name) {
+  if (settingCache.has(name)) return settingCache.get(name);
+
   const session = sessionValue(name);
-  if (!isRememberingSettings()) return session;
+  if (!rememberSettingsEnabled()) {
+    settingCache.set(name, session);
+    return session;
+  }
 
   const persistent = cookieValue(name);
-  if (persistent === undefined) return session;
-  setSessionValue(name, persistent);
-  return persistent;
+  const value = persistent === undefined ? session : persistent;
+  if (persistent !== undefined) setSessionValue(name, persistent);
+  settingCache.set(name, value);
+  return value;
 }
 
 function saveSetting(name, value) {
+  settingCache.set(name, value);
   setSessionValue(name, value);
-  if (isRememberingSettings()) setCookie(name, value);
+  if (rememberSettingsEnabled()) setCookie(name, value);
+}
+
+function booleanSetting(name, defaultValue) {
+  const saved = savedSetting(name);
+  return saved === undefined ? defaultValue : saved === "true";
+}
+
+function saveBooleanSetting(name, value) {
+  saveSetting(name, String(Boolean(value)));
 }
 
 export function distanceUnit() {
-  return document.documentElement.dataset.distanceUnit === "in" ? "in" : "cm";
+  return savedSetting(DISTANCE_UNIT_KEY) === "cm" ? "cm" : "in";
 }
 
-export function formatDistanceExtra(value, { showPositiveSign = true, forcePositiveSign = false } = {}) {
-  return String(value).replace(DISTANCE_NUMBER_PATTERN, (number) => {
-    const converted = distanceUnit() === "in"
-      ? Number(number) / DISTANCE_CENTIMETERS_PER_INCH
-      : Number(number);
-    const sign = converted >= 0 && (forcePositiveSign || (showPositiveSign && number.startsWith("+")))
-      ? "+" : "";
-    return `${sign}${converted}${distanceUnit() === "in" ? '"' : " cm"}`;
-  });
+export function saveDistanceUnit(unit) {
+  saveSetting(DISTANCE_UNIT_KEY, unit === "cm" ? "cm" : "in");
 }
 
-export function formatSkillDistanceExtra(value, parameterSemantics = null) {
-  const positiveSign = parameterSemantics?.positive_sign || "preserve";
-  return formatDistanceExtra(value, {
-    showPositiveSign: positiveSign !== "omit",
-    forcePositiveSign: positiveSign === "force",
-  });
+export function developerModeEnabled() {
+  return booleanSetting(DEVELOPER_MODE_KEY, false);
 }
 
-export function initializeDistanceUnitToggle() {
-  const toggle = document.getElementById("distance-unit-toggle");
-  if (!toggle || toggle.dataset.initialized === "true") return;
-
-  toggle.dataset.initialized = "true";
-  const savedUnit = savedSetting(DISTANCE_UNIT_KEY);
-  const unit = savedUnit === "cm" ? "cm" : "in";
-  document.documentElement.dataset.distanceUnit = unit;
-  toggle.checked = unit === "in";
-
-  toggle.addEventListener("change", () => {
-    const nextUnit = toggle.checked ? "in" : "cm";
-    document.documentElement.dataset.distanceUnit = nextUnit;
-    saveSetting(DISTANCE_UNIT_KEY, nextUnit);
-    window.dispatchEvent(new CustomEvent("distanceunitchange", { detail: nextUnit }));
-  });
+export function saveDeveloperModeEnabled(enabled) {
+  const next = Boolean(enabled);
+  saveBooleanSetting(DEVELOPER_MODE_KEY, next);
+  if (!next) saveBooleanSetting(DISABLE_CACHE_KEY, false);
 }
 
-export function initializeDeveloperModeToggle() {
-  const toggle = document.getElementById("developer-mode-toggle");
-  if (!toggle || toggle.dataset.initialized === "true") return;
-
-  toggle.dataset.initialized = "true";
-  const enabled = savedSetting(DEVELOPER_MODE_KEY) === "true";
-  document.documentElement.dataset.developerMode = String(enabled);
-  toggle.checked = enabled;
-
-  toggle.addEventListener("change", () => {
-    const next = toggle.checked;
-    document.documentElement.dataset.developerMode = String(next);
-    saveSetting(DEVELOPER_MODE_KEY, String(next));
-    if (!next) {
-      const cacheToggle = document.getElementById("disable-cache-toggle");
-      document.documentElement.dataset.disableCache = "false";
-      if (cacheToggle) cacheToggle.checked = false;
-      saveSetting(DISABLE_CACHE_KEY, "false");
-      window.dispatchEvent(new CustomEvent("cachemodechange", { detail: false }));
-    }
-    window.dispatchEvent(new CustomEvent("developermodechange", { detail: next }));
-  });
+export function disableCacheEnabled() {
+  return developerModeEnabled() && booleanSetting(DISABLE_CACHE_KEY, false);
 }
 
-export function initializeDisableCacheToggle() {
-  const toggle = document.getElementById("disable-cache-toggle");
-  if (!toggle || toggle.dataset.initialized === "true") return;
-
-  toggle.dataset.initialized = "true";
-  const enabled = document.documentElement.dataset.developerMode === "true"
-    && savedSetting(DISABLE_CACHE_KEY) === "true";
-  document.documentElement.dataset.disableCache = String(enabled);
-  toggle.checked = enabled;
-  toggle.addEventListener("change", () => {
-    const next = toggle.checked;
-    document.documentElement.dataset.disableCache = String(next);
-    saveSetting(DISABLE_CACHE_KEY, String(next));
-    window.dispatchEvent(new CustomEvent("cachemodechange", { detail: next }));
-  });
-}
-
-export function initializeOptionalUnitToggles() {
-  for (const { id, key, defaultChecked } of OPTIONAL_UNIT_SETTINGS) {
-    const toggle = document.getElementById(id);
-    if (!toggle || toggle.dataset.initialized === "true") continue;
-
-    toggle.dataset.initialized = "true";
-    const saved = savedSetting(key);
-    toggle.checked = saved === undefined ? defaultChecked : saved === "true";
-    toggle.addEventListener("change", () => {
-      saveSetting(key, String(toggle.checked));
-      window.dispatchEvent(new CustomEvent("optionalunitschange", { detail: optionalUnitFilters() }));
-    });
-  }
+export function saveDisableCacheEnabled(enabled) {
+  saveBooleanSetting(DISABLE_CACHE_KEY, Boolean(enabled) && developerModeEnabled());
 }
 
 export function optionalUnitDefaultFilters() {
-  return Object.fromEntries(OPTIONAL_UNIT_SETTINGS.map(({ key, defaultChecked }) => [
-    key.replace("infinity-db-", ""), defaultChecked,
+  return Object.fromEntries(OPTIONAL_UNIT_SETTINGS.map(({ name, defaultValue }) => [
+    name, defaultValue,
   ]));
 }
 
 export function optionalUnitFilters() {
-  return Object.fromEntries(OPTIONAL_UNIT_SETTINGS.map(({ id, key, defaultChecked }) => [
-    key.replace("infinity-db-", ""), document.getElementById(id)?.checked ?? defaultChecked,
+  return Object.fromEntries(OPTIONAL_UNIT_SETTINGS.map(({ name, key, defaultValue }) => [
+    name, booleanSetting(key, defaultValue),
   ]));
 }
 
+export function saveOptionalUnitFilter(name, included) {
+  const setting = OPTIONAL_UNIT_SETTINGS.find((candidate) => candidate.name === name);
+  if (!setting) return;
+  saveBooleanSetting(setting.key, included);
+}
 
 export function unitAdvancedFiltersOpen() {
   const saved = savedSetting(UNIT_ADVANCED_FILTERS_KEY);
@@ -178,75 +127,51 @@ export function unitAdvancedFiltersOpen() {
 }
 
 export function saveUnitAdvancedFiltersOpen(open) {
-  saveSetting(UNIT_ADVANCED_FILTERS_KEY, String(Boolean(open)));
+  saveBooleanSetting(UNIT_ADVANCED_FILTERS_KEY, open);
 }
 
 export function fireteamsIncludeWildcards() {
-  return document.getElementById("fireteams-include-wildcards-toggle")?.checked ?? true;
+  return booleanSetting(FIRETEAMS_INCLUDE_WILDCARDS_KEY, true);
 }
 
-export function initializeFireteamsIncludeWildcardsToggle() {
-  const toggle = document.getElementById("fireteams-include-wildcards-toggle");
-  if (!toggle || toggle.dataset.initialized === "true") return;
-
-  toggle.dataset.initialized = "true";
-  const saved = savedSetting(FIRETEAMS_INCLUDE_WILDCARDS_KEY);
-  toggle.checked = saved === undefined ? true : saved === "true";
-  toggle.addEventListener("change", () => {
-    saveSetting(FIRETEAMS_INCLUDE_WILDCARDS_KEY, String(toggle.checked));
-    window.dispatchEvent(new CustomEvent("fireteamswildcardschange", { detail: toggle.checked }));
-  });
+export function saveFireteamsIncludeWildcards(included) {
+  saveBooleanSetting(FIRETEAMS_INCLUDE_WILDCARDS_KEY, included);
 }
 
-export function initializeRememberSettingsToggle() {
-  const toggle = document.getElementById("remember-settings-toggle");
-  const dialog = document.getElementById("cookie-consent-dialog");
-  if (!toggle || !dialog || toggle.dataset.initialized === "true") return;
-
-  toggle.dataset.initialized = "true";
-  toggle.checked = isRememberingSettings();
-
-  toggle.addEventListener("change", () => {
-    if (!toggle.checked) {
-      removeCookie(REMEMBER_SETTINGS_KEY);
-      removeCookie(DISTANCE_UNIT_KEY);
-      removeCookie(DEVELOPER_MODE_KEY);
-      removeCookie(DISABLE_CACHE_KEY);
-      removeCookie(FIRETEAMS_INCLUDE_WILDCARDS_KEY);
-      removeCookie(UNIT_ADVANCED_FILTERS_KEY);
-      OPTIONAL_UNIT_SETTINGS.forEach(({ key }) => removeCookie(key));
-      return;
-    }
-
-    dialog.returnValue = "";
-    dialog.showModal();
-  });
-
-  dialog.addEventListener("close", () => {
-    if (dialog.returnValue !== "accept") {
-      toggle.checked = false;
-      return;
-    }
-
-    setCookie(REMEMBER_SETTINGS_KEY, "true");
-    setCookie(DISTANCE_UNIT_KEY, document.getElementById("distance-unit-toggle")?.checked ? "in" : "cm");
-    setCookie(DEVELOPER_MODE_KEY, String(document.getElementById("developer-mode-toggle")?.checked));
-    setCookie(DISABLE_CACHE_KEY, String(document.getElementById("disable-cache-toggle")?.checked));
-    setCookie(
-      FIRETEAMS_INCLUDE_WILDCARDS_KEY,
-      String(document.getElementById("fireteams-include-wildcards-toggle")?.checked ?? true),
-    );
-    const advancedFilters = document.querySelector(".advanced-filters");
-    if (advancedFilters) setCookie(UNIT_ADVANCED_FILTERS_KEY, String(advancedFilters.open));
-    OPTIONAL_UNIT_SETTINGS.forEach(({ id, key, defaultChecked }) => {
-      setCookie(key, String(document.getElementById(id)?.checked ?? defaultChecked));
-    });
-  });
+function rememberedSettingValues() {
+  const values = [
+    [DISTANCE_UNIT_KEY, distanceUnit()],
+    [DEVELOPER_MODE_KEY, String(developerModeEnabled())],
+    [DISABLE_CACHE_KEY, String(disableCacheEnabled())],
+    [FIRETEAMS_INCLUDE_WILDCARDS_KEY, String(fireteamsIncludeWildcards())],
+  ];
+  const optionalFilters = optionalUnitFilters();
+  for (const { name, key } of OPTIONAL_UNIT_SETTINGS) {
+    values.push([key, String(optionalFilters[name])]);
+  }
+  const advancedFilters = unitAdvancedFiltersOpen();
+  if (advancedFilters !== null) {
+    values.push([UNIT_ADVANCED_FILTERS_KEY, String(advancedFilters)]);
+  }
+  return values;
 }
 
-initializeRememberSettingsToggle();
-initializeDeveloperModeToggle();
-initializeDisableCacheToggle();
-initializeFireteamsIncludeWildcardsToggle();
-initializeOptionalUnitToggles();
-initializeDistanceUnitToggle();
+export function rememberCurrentSettings() {
+  const values = rememberedSettingValues();
+  setCookie(REMEMBER_SETTINGS_KEY, "true");
+  for (const [name, value] of values) setCookie(name, value);
+}
+
+export function forgetRememberedSettings() {
+  removeCookie(REMEMBER_SETTINGS_KEY);
+  for (const name of [
+    DISTANCE_UNIT_KEY,
+    DEVELOPER_MODE_KEY,
+    DISABLE_CACHE_KEY,
+    FIRETEAMS_INCLUDE_WILDCARDS_KEY,
+    UNIT_ADVANCED_FILTERS_KEY,
+    ...OPTIONAL_UNIT_SETTINGS.map(({ key }) => key),
+  ]) {
+    removeCookie(name);
+  }
+}
