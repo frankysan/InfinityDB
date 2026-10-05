@@ -285,7 +285,9 @@ distance formatting is separate from both concerns in `static/distance.js`.
 
 Browser JSON access is routed through `static/api.js`, which owns application endpoint shapes and
 delegates same-origin request mechanics to `static/api-transport.js`. Transport does not import
-preference/UI modules; page modules pass presentation-derived request state explicitly.
+preference/UI modules; page modules pass presentation-derived request state explicitly. Page-specific
+modules are named for and loaded only by the pages that own them; shell-only or server-rendered pages
+must not load an unrelated page module just to obtain shared behavior.
 
 Soft navigation must preserve the shared shell while disposing transient page listeners/requests
 before replacing content. Release/static/snapshot revision changes trigger a clean reload rather than

@@ -385,6 +385,33 @@ def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
     )
 
 
+def test_browser_pages_load_only_their_owned_page_modules(app: Callable) -> None:
+    status, _, units = request(app, "/units")
+    assert status == 200
+    assert f'src="/static/units.js?v={STATIC_ASSET_VERSION}"'.encode() in units
+    assert b'/static/app.js' not in units
+
+    status, _, changes = request(app, "/changes")
+    assert status == 200
+    assert b'/static/units.js' not in changes
+    assert b'/static/app.js' not in changes
+
+    status, _, glossary = request(app, "/glossary")
+    assert status == 200
+    assert f'src="/static/glossary.js?v={STATIC_ASSET_VERSION}"'.encode() in glossary
+    assert b'/static/units.js' not in glossary
+    assert b'/static/app.js' not in glossary
+
+
+def test_legacy_app_static_url_serves_unit_explorer(app: Callable) -> None:
+    status, headers, body = request(app, f"/static/app.js?v={STATIC_ASSET_VERSION}")
+
+    assert status == 200
+    assert headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert b'document.querySelector(".results-toolbar").remove()' in body
+
+
 def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) -> None:
     status, headers, body = request(app, "/armies")
     assert status == 200
@@ -1721,7 +1748,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
         assert b'id="' + range_filter + b'-range-reset" class="numeric-range-reset"' in body
         assert b'aria-label="Reset ' in body
 
-    status, _, script = request(app, "/static/app.js")
+    status, _, script = request(app, "/static/units.js")
     assert status == 200
     assert b'className = "page-results-summary"' in script
     assert b"renderAvailabilitySummary(data)" in script
@@ -1784,10 +1811,10 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     for characteristic in (b"no cube", b"non hackable", b"not impetuous"):
         assert characteristic not in unit_presentation_script
 
-    status, _, app_script = request(app, "/static/app.js")
+    status, _, units_script = request(app, "/static/units.js")
     assert status == 200
-    assert b'(item) => item.display_name || item.name' in app_script
-    assert b'troopTypeLabel' not in app_script
+    assert b'(item) => item.display_name || item.name' in units_script
+    assert b'troopTypeLabel' not in units_script
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -2513,7 +2540,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b"dialog.showModal()" in settings
     assert f'src="/static/settings.js?v={STATIC_ASSET_VERSION}"'.encode() in body
     assert body.index(f'src="/static/settings.js?v={STATIC_ASSET_VERSION}"'.encode()) < body.index(
-        f'src="/static/app.js?v={STATIC_ASSET_VERSION}"'.encode()
+        f'src="/static/units.js?v={STATIC_ASSET_VERSION}"'.encode()
     )
     assert (
         b'id="distance-unit-toggle" class="setting-switch setting-switch--choice" '
@@ -2875,11 +2902,11 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
 
 
 def test_versioned_modules_reference_their_matching_release_dependencies(app: Callable) -> None:
-    status, app_headers, app_body = request(app, f"/static/app.js?v={STATIC_ASSET_VERSION}")
+    status, unit_headers, unit_body = request(app, f"/static/units.js?v={STATIC_ASSET_VERSION}")
     assert status == 200
-    assert app_headers["cache-control"] == "public, max-age=31536000, immutable"
-    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in app_body
-    assert f'from "./share-state.js?v={STATIC_ASSET_VERSION}"'.encode() in app_body
+    assert unit_headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in unit_body
+    assert f'from "./share-state.js?v={STATIC_ASSET_VERSION}"'.encode() in unit_body
 
     status, headers, body = request(app, f"/static/unit.js?v={STATIC_ASSET_VERSION}")
 
@@ -2912,7 +2939,7 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
 
 
 def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None:
-    status, _, body = request(app, "/static/app.js")
+    status, _, body = request(app, "/static/units.js")
 
     assert status == 200
     assert b"return army.public_slug || String(army.id);" in body
@@ -2941,7 +2968,7 @@ def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None
 
 
 def test_army_selector_uses_backend_role_and_playability(app: Callable) -> None:
-    status, _, body = request(app, "/static/app.js")
+    status, _, body = request(app, "/static/units.js")
 
     assert status == 200
     assert b"Math.floor(Number(army.id) / 100)" not in body
@@ -3441,12 +3468,12 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     assert b"broader source-declared faction membership separately" in unit_js
     assert b"this faction identity has no current Army list" in unit_js
 
-    status, _, app_js = request(app, "/static/app.js")
+    status, _, units_js = request(app, "/static/units.js")
     assert status == 200
-    assert b'declaredFactionId = params.get("declared_faction_id") || ""' in app_js
-    assert b'params.set("declared_faction_id", state.declaredFactionId)' in app_js
-    assert b"renderDeclaredMembershipContext(data)" in app_js
-    assert b"broader than concrete current Army-list availability" in app_js
+    assert b'declaredFactionId = params.get("declared_faction_id") || ""' in units_js
+    assert b'params.set("declared_faction_id", state.declaredFactionId)' in units_js
+    assert b"renderDeclaredMembershipContext(data)" in units_js
+    assert b"broader than concrete current Army-list availability" in units_js
 
     status, _, api_js = request(app, "/static/api.js")
     assert status == 200

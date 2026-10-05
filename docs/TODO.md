@@ -67,6 +67,10 @@ domain unless required to correct a release-blocking defect.
     - [x] Separate preference state/persistence from shared Settings UI wiring: page modules now
       consume stored preference values without initializing shell controls, `settings.js` owns the
       persistent Settings bindings/events, and reusable distance formatting is independent of both.
+    - [x] Make page-module ownership explicit: the Unit Explorer now uses `units.js`, current pages
+      no longer load the legacy `app.js` entry point, and server-rendered Changes/Glossary pages do
+      not execute Unit Explorer code. `/static/app.js` remains only as a compatibility URL alias for
+      cached pre-refactor Unit Explorer documents.
   - [ ] Add focused contract/regression coverage as responsibilities move so domain
     interpretation cannot silently migrate back into browser code.
     - [x] Pin Python route ownership so presentation handling does not absorb `/api/*` and API

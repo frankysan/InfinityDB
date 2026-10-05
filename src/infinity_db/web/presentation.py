@@ -38,7 +38,7 @@ from infinity_db.web.routes import (
 ASSETS = {
     "/static/version-check.js": ("version-check.js", "text/javascript; charset=utf-8"),
     "/static/styles.css": ("styles.css", "text/css; charset=utf-8"),
-    "/static/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/static/units.js": ("units.js", "text/javascript; charset=utf-8"),
     "/static/share-state.js": ("share-state.js", "text/javascript; charset=utf-8"),
     "/static/armies.js": ("armies.js", "text/javascript; charset=utf-8"),
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
@@ -126,6 +126,7 @@ _MODULE_IMPORT_URL = re.compile(
     r'(?P<path>\./[^"\']+\.js)(?P=quote)'
 )
 _STATIC_REVISION_FILES = tuple(sorted(filename for filename, _ in ASSETS.values()))
+_LEGACY_STATIC_ASSET_ALIASES = {"/static/app.js": "/static/units.js"}
 
 
 @dataclass(frozen=True, slots=True)
@@ -619,8 +620,9 @@ class PresentationHandler:
         if spec := _FIXED_PAGES.get(path):
             return self._page_response(spec)
 
-        if path in ASSETS:
-            filename, content_type = ASSETS[path]
+        asset_path = _LEGACY_STATIC_ASSET_ALIASES.get(path, path)
+        if asset_path in ASSETS:
+            filename, content_type = ASSETS[asset_path]
             body = files("infinity_db.web").joinpath(
                 "static", *filename.split("/")
             ).read_bytes()
