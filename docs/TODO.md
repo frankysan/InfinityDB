@@ -61,6 +61,9 @@ domain unless required to correct a release-blocking defect.
   - [ ] Organize browser code around explicit API transport, preferences/theme
     state, reusable view/components, and page modules; keep JSON API access routed
     through `api.js`.
+    - [x] Decouple application API wrappers from preference/UI modules: `api.js` now delegates
+      request mechanics to an explicit transport module, while page modules pass optional-Unit
+      visibility state into API calls instead of the API layer reading browser controls itself.
   - [ ] Add focused contract/regression coverage as responsibilities move so domain
     interpretation cannot silently migrate back into browser code.
     - [x] Pin Python route ownership so presentation handling does not absorb `/api/*` and API

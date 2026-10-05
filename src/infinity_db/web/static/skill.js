@@ -1,4 +1,4 @@
-import { formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
+import { formatSkillDistanceExtra, initializeDistanceUnitToggle, optionalUnitFilters } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
@@ -268,7 +268,7 @@ if (!skillId) {
   getCatalogItem("skills", skillId, pageController.signal).then((skill) => {
     currentSkill = skill;
     render(skill);
-    return visibleUnitIds(pageController.signal)
+    return visibleUnitIds(optionalUnitFilters(), pageController.signal)
       .then((ids) => render(withVisibleUnits(skill, ids)));
   }).catch((error) => {
     if (error.name === "AbortError") return;
@@ -278,7 +278,7 @@ if (!skillId) {
 }
 window.addEventListener("optionalunitschange", () => {
   if (!currentSkill) return;
-  visibleUnitIds(pageController.signal)
+  visibleUnitIds(optionalUnitFilters(), pageController.signal)
     .then((ids) => render(withVisibleUnits(currentSkill, ids)))
     .catch((error) => {
       if (error.name !== "AbortError") throw error;

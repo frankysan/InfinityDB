@@ -2,6 +2,7 @@ import {
   DISTANCE_CENTIMETERS_PER_INCH,
   distanceUnit,
   initializeDistanceUnitToggle,
+  optionalUnitFilters,
 } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
@@ -422,7 +423,7 @@ getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
   currentItem = item;
   render(item);
   if (catalog === "states") return null;
-  return visibleUnitIds(pageController.signal).then((ids) => render(withVisibleUnits(item, ids)));
+  return visibleUnitIds(optionalUnitFilters(), pageController.signal).then((ids) => render(withVisibleUnits(item, ids)));
 }).catch((error) => {
   if (error.name === "AbortError") return;
   name.firstChild.textContent = "Item unavailable";
@@ -430,7 +431,7 @@ getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
 });
 window.addEventListener("optionalunitschange", () => {
   if (!currentItem) return;
-  visibleUnitIds(pageController.signal)
+  visibleUnitIds(optionalUnitFilters(), pageController.signal)
     .then((ids) => render(withVisibleUnits(currentItem, ids)))
     .catch((error) => {
       if (error.name !== "AbortError") throw error;

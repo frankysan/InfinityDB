@@ -280,6 +280,10 @@ and optional availability defaults. Shareable page state is URL-owned and must n
 recipient's saved preferences. A page may seed missing share state from preferences, but explicit
 URL state wins for that view.
 
+Browser JSON access is routed through `static/api.js`, which owns application endpoint shapes and
+delegates same-origin request mechanics to `static/api-transport.js`. Transport does not import
+preference/UI modules; page modules pass presentation-derived request state explicitly.
+
 Soft navigation must preserve the shared shell while disposing transient page listeners/requests
 before replacing content. Release/static/snapshot revision changes trigger a clean reload rather than
 mixing incompatible module/data generations.

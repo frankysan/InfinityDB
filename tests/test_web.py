@@ -1872,7 +1872,7 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
     assert b"window.location.replace(freshUrl)" in script
 
 
-def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> None:
+def test_browser_json_access_is_routed_through_api_and_transport_modules(app: Callable) -> None:
     for asset, helper in (
         ("catalog-list.js", b"getCatalogItems(page, pageController.signal)"),
         ("catalog-detail.js", b"getCatalogItem(catalog, itemId, pageController.signal)"),
@@ -1890,6 +1890,25 @@ def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> N
         assert b'from "./api.js"' in body
         assert helper in body
         assert b"fetch(" not in body
+
+    status, _, api = request(app, "/static/api.js")
+    assert status == 200
+    assert b'from "./api-transport.js"' in api
+    assert b"preferences.js" not in api
+    assert b"fetch(" not in api
+    assert b"visibleUnitIds(optionalFilters, signal)" in api
+
+    for asset in ("catalog-detail.js", "skill.js"):
+        status, _, body = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b"optionalUnitFilters" in body
+        assert b"visibleUnitIds(optionalUnitFilters(), pageController.signal)" in body
+
+    status, _, transport = request(app, "/static/api-transport.js")
+    assert status == 200
+    assert b"async function getJson(path, signal)" in transport
+    assert b"fetch(cacheBustedUrl(path)" in transport
+    assert b"preferences.js" not in transport
 
 
 @pytest.mark.parametrize(
@@ -2841,7 +2860,10 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
 
     status, _, body = request(app, f"/static/api.js?v={STATIC_ASSET_VERSION}")
     assert status == 200
-    assert f'import("./preferences.js?v={STATIC_ASSET_VERSION}")'.encode() in body
+    assert f'from "./api-transport.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+
+    status, _, body = request(app, f"/static/api-transport.js?v={STATIC_ASSET_VERSION}")
+    assert status == 200
     assert b'cache: "no-store"' in body
 
     status, headers, _ = request(app, "/api/armies")
@@ -3528,8 +3550,12 @@ def test_developer_cache_toggle_is_served(app: Callable) -> None:
     status, _, body = request(app, "/static/preferences.js")
     assert status == 200
     assert b"function initializeDisableCacheToggle()" in body
-    assert b"function cacheBustedUrl(path)" in body
     assert b'document.documentElement.dataset.disableCache = "false";' in body
+
+    status, _, transport = request(app, "/static/api-transport.js")
+    assert status == 200
+    assert b"function cacheBustedUrl(path)" in transport
+    assert b'document.documentElement.dataset.disableCache !== "true"' in transport
 
     status, _, body = request(app, "/units")
     assert status == 200

@@ -127,13 +127,6 @@ export function initializeDeveloperModeToggle() {
   });
 }
 
-export function cacheBustedUrl(path) {
-  if (document.documentElement.dataset.disableCache !== "true") return path;
-  const url = new URL(path, window.location.origin);
-  url.searchParams.set("cache_bust", String(Date.now()));
-  return `${url.pathname}${url.search}`;
-}
-
 export function initializeDisableCacheToggle() {
   const toggle = document.getElementById("disable-cache-toggle");
   if (!toggle || toggle.dataset.initialized === "true") return;
