@@ -77,3 +77,60 @@ jobs:
           assert app.database.path == database.path
           assert app.rules_database is not None
           PY
+
+      - name: Validate installed asset-free runtime
+        working-directory: ${{ runner.temp }}/wheel-smoke
+        run: |
+          "$RUNNER_TEMP/wheel-venv/bin/python" - <<'PY'
+          import shutil
+          from importlib.resources import files
+          from pathlib import Path
+          from wsgiref.util import setup_testing_defaults
+
+          from infinity_db.database import Database
+          from infinity_db.rules_database import RulesDatabase
+          from infinity_db.web import create_app
+
+          static_root = Path(files("infinity_db.web").joinpath("static"))
+          symbol_categories = ("armies", "characteristics", "orders", "peripherals", "units")
+          for category in symbol_categories:
+              category_root = static_root / category
+              assert category_root.is_dir(), category_root
+              shutil.rmtree(category_root)
+          for category in symbol_categories:
+              assert not (static_root / category).exists(), category
+
+          database = Database(Path("generated/infinity.db"))
+          database.validate()
+          rules = RulesDatabase(Path("generated/rules.db"))
+          rules.validate()
+          app = create_app(database.path, rules.path)
+
+          def request(path):
+              environ = {}
+              setup_testing_defaults(environ)
+              environ.update(PATH_INFO=path, QUERY_STRING="", REQUEST_METHOD="GET")
+              response = {}
+
+              def start_response(status, headers, exc_info=None):
+                  response["status"] = int(status.split()[0])
+
+              body = b"".join(app(environ, start_response))
+              return response["status"], body
+
+          for path in (
+              "/",
+              "/api/armies",
+              "/units",
+              "/skills",
+              "/internal/health",
+              "/static/unit-symbols.js",
+          ):
+              status, _body = request(path)
+              assert status == 200, (path, status)
+
+          symbol_path = app.symbol_catalog.army_path(101)
+          assert symbol_path is not None
+          status, _body = request(f"/static/{symbol_path}")
+          assert status == 404, (symbol_path, status)
+          PY

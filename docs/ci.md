@@ -65,12 +65,17 @@ The job verifies:
 - `infinity-db` and `infinity-army` entry points;
 - installed Army build and rules build/validation;
 - packaged maintained configuration resolution;
-- runtime `Database` / `RulesDatabase` validation; and
-- application startup against generated test databases.
+- runtime `Database` / `RulesDatabase` validation;
+- application startup against generated test databases; and
+- a specialized installed runtime after the third-party SVG category trees are deliberately removed,
+  proving that the application and non-symbol static resources remain usable without that optional
+  graphical tree.
 
 This is deliberately different from source-tree tests: installed build commands may use packaged
 shared configuration, while runtime opening of already-built databases must remain independent of
-repository-relative normalization policy.
+repository-relative normalization policy. The asset-free subcheck mutates only the disposable wheel
+virtual environment after the normal installed-package contract has already passed; production
+images still require the complete tracked publication through deployment-smoke validation.
 
 ## Deployment smoke
 

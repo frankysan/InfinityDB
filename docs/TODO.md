@@ -136,7 +136,7 @@ by the audit remain in scope.
       while preserving the Developer-mode `cache_bust` parameter.
     - [x] Verify off/auto/required asset-mode behavior, the complete tracked 808-asset publication,
       version/snapshot refresh contracts, and fail-closed database/symbol snapshot provenance.
-  - [ ] Verify the supported validation/runtime contexts independently. Passing one context does
+  - [x] Verify the supported validation/runtime contexts independently. Passing one context does
     not establish the others.
     - [x] Normal source checkout with the tracked processed publication: complete publication and
       release-matched database/rules/provenance verification pass together.
@@ -144,9 +144,11 @@ by the audit remain in scope.
       supported no-adjacent-rules fallback.
     - [x] Production release-artifact validation fails closed for missing/invalid rules, incomplete
       published assets, and database/symbol snapshot mismatch.
-    - [ ] Exercise an actual specialized package/test runtime layout with the third-party SVG tree
-      deliberately absent; asset-mode selection already covers disabled/auto-fallback versus
-      required behavior, but the packaged runtime layout remains to be exercised directly.
+    - [x] Exercise an actual specialized package/test runtime layout with the third-party SVG tree
+      deliberately absent. Installed-wheel CI now removes all five published symbol category trees
+      after the normal wheel contract passes and rechecks CLI-built databases, application startup,
+      core browser/API routes, health, non-symbol static resources, and clean 404 handling for a
+      manifest-referenced symbol path.
   - [ ] Fix discovered inconsistencies incrementally and add focused regression
     coverage where practical. Record intentional deferrals in the working audit evidence and
     `TODO.md` rather than silently leaving them unresolved. Keep CI hardening,
