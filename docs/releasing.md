@@ -22,17 +22,17 @@ form. A specialized or final-form UI is not required when a basic presentation m
 the information understandable and navigable.
 
 The current core-rules scenarios are part of the 1.0 requirement: they must have a
-maintained structured representation and a usable browsable presentation. Before that
-model is frozen, its structure must be informed by a comparative review of the core
-scenarios and the two latest ITS scenario sets so core-only assumptions do not prevent
-later ITS support. ITS-specific missions, season material, tournament/event tooling,
-and a complete historical ITS library remain outside the 1.0 requirement unless they
-are necessary to interpret otherwise in-scope data. Scenario-specific Skills,
-Equipment, States, Traits, contextual roles, objective elements, or other named rules
+maintained structured representation and a usable browsable presentation. The planned model is
+defined by the completed comparative review of the core scenarios and ITS Seasons 17 and 18 in
+`docs/architecture.md` and `docs/data-model.md`, so the 1.0 implementation must preserve that
+extensibility rather than introducing a simpler core-only representation. ITS-specific missions,
+season material, tournament/event tooling, and a complete historical ITS library remain outside the
+1.0 requirement unless they are necessary to interpret otherwise in-scope data. Scenario-specific
+Skills, Equipment, States, Traits, contextual roles, objective elements, or other named rules
 concepts remain in scope when needed by the core scenarios or the general catalog/reference
-experience; preserve their scenario/season scope. Final visual polish, every planned search/filter/comparison feature,
-exhaustive performance work, optional themes, deployment conveniences, and unrelated
-architectural refactors likewise do not block 1.0.
+experience; preserve their scenario/season scope. Final visual polish, every planned
+search/filter/comparison feature, exhaustive performance work, optional themes, deployment
+conveniences, and unrelated architectural refactors likewise do not block 1.0.
 
 The 1.0 release gate requires:
 

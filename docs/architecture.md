@@ -125,18 +125,42 @@ not competing semantic owners.
 
 ### Planned scenario domain
 
-Core-rules scenarios are a required first-class application domain for 1.0. Their maintained model
-must be structured enough to represent setup/deployment, objectives and scoring, end conditions,
-special rules, and relationships to existing canonical rules/catalog entities; scenario pages must
-not use PDF prose as their application data model.
+Core-rules scenarios are a required first-class application domain for 1.0. The architecture review
+covered the four N5.3 core scenarios, the final ITS Season 17 set, and the current ITS Season 18 set.
+The comparison is retained in `docs/rules-semantics.md`; it establishes that core-only assumptions
+would be too narrow for deployment geometry, scoring cadence, asymmetric sides, Classified
+Objectives, scenario elements, and revision/season provenance.
 
-Do not freeze that model from core scenarios alone. The design baseline is a comparative review of
-the core-rules scenarios and the two latest ITS scenario sets, separating common scenario semantics
-from optional features and ITS/season-specific extensions. Source publication, version, scenario,
-season, and applicability remain distinct provenance/scope concerns. This allows later ITS support
-and deployment-map tooling to extend the same scenario representation rather than introducing a
-parallel ITS-only or map-only model. The concrete relational/structured/hybrid storage shape remains
-a planning decision until that review is complete.
+Scenario definitions are curated rules/reference knowledge, not Army-export facts or mutable match
+state. Maintained scenario source therefore belongs in validated structured documents under the
+rules curation pipeline and is published into `rules.db`, not `infinity.db`. Runtime publication uses
+a deliberate hybrid model: stable/queryable identities, provenance, collection membership, and
+cross-domain references are relational, while ordered/nested scenario structure is retained as a
+validated typed payload rather than flattened into prose or an untyped JSON blob. The exact table
+layout is an implementation concern, but the semantic boundary below is fixed before 1.0 work
+begins.
+
+A stable scenario identity is independent from both a source publication/revision and membership in
+a collection such as core N5.3, ITS Season 17, or ITS Season 18. A publication can revise a scenario
+without creating a new conceptual identity, and a season can add, remove, or alter scenario
+applicability without mutating that identity. Scenario pages resolve a selected published revision
+and expose its provenance explicitly.
+
+The common scenario model includes force/table configuration, sides, deployment and scoring geometry,
+objectives and score timing, end conditions, scenario rules/actions, objective/scenery elements, and
+typed links to existing canonical rules/catalog entities. Classified Objectives, HVTs, carried
+objects, control regions, asymmetric attacker/defender roles, selectable objective sets, seasonal
+extras, Reinforcements suitability, and similar mechanics are optional reusable features or
+collection-scoped overlays rather than mandatory fields on every scenario. Tournament pairing,
+ranking, and mutable in-game state remain outside the scenario definition domain.
+
+Scenario geometry is semantic data. It uses typed regions/points/anchors and parameterized dimensions
+for supported table/force configurations, including side-relative transforms and placement/exclusion
+constraints. Diagrams are generated presentation, never the canonical geometry. This contract lets
+the same scenario data later drive deployment-map generation and other tooling without introducing a
+second map representation. Scoring is likewise structured by timing, points/caps, side/applicability,
+and typed condition/comparison kinds where known; maintained explanatory text may supplement unusual
+procedures without requiring InfinityDB to become a complete game-state rules engine.
 
 ## Identifiers and routing
 

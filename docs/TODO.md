@@ -22,14 +22,15 @@ when all contained work shares the same owner.
 
 The current milestone is **0.10.0 — consistency, presentation, and release hardening**.
 It follows the completed 0.9.0 application-completeness/discoverability milestone by auditing the
-finished application model end to end, completing the frontend/theme architecture, and hardening
-release and operations workflows before the 1.0 data-completeness gate.
+finished application model end to end, establishing the scenario architecture, completing the
+frontend/theme architecture, and hardening release and operations workflows before the 1.0
+data-completeness gate.
 
 General performance/storage experiments, major pipeline refactors,
 persistent-user-data features, ITS season/tournament tooling, and native applications are explicitly
 post-1.0 unless they become necessary to correct a release-blocking defect. Core-rules scenarios are
-part of the 1.0 completeness target; 0.10.0 should establish their architecture without implementing
-the full scenario surface.
+part of the 1.0 completeness target; their architecture is now established for later 1.0
+implementation without adding the full scenario surface to 0.10.0.
 
 The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
 definition lives in `docs/releasing.md`. The sections below contain only
@@ -38,31 +39,9 @@ implementation work that remains open.
 ## 0.10.0 — consistency, presentation, and release hardening
 
 0.10.0 is the stabilization pass before 1.0. The end-to-end application consistency
-audit is complete; the remaining work is scenario architecture planning, frontend/theme
-architecture, and release/operations hardening. It should avoid introducing another major
-game-data domain unless required to correct a release-blocking defect.
-
-### Scenario architecture planning
-
-- [ ] **Data processing + Web backend + Web frontend:** Review all current core-rules
-  scenarios together with the two latest ITS scenario sets before freezing the scenario
-  model. Use the comparison as design evidence rather than deriving the schema only from
-  the simpler core material.
-  - [ ] Inventory recurring and variant concepts including scenario identity/version and
-    source scope; table/force configuration; deployment geometry; objectives and scoring;
-    rounds/end conditions; Classified Objectives; scenario-specific rules, roles, Skills/AROs,
-    Equipment, States, and Traits; objective/scenery elements; tokens; exclusions; and other
-    setup constraints.
-  - [ ] Separate universal scenario structure from optional reusable features and
-    ITS/season-specific extensions. Preserve source publication, scenario, season, and
-    applicability independently so later ITS support does not require redesigning a
-    core-only schema.
-  - [ ] Decide the maintained representation only after the review (relational, structured
-    JSON, or a deliberate hybrid). Record the resulting durable model in the canonical
-    architecture/data-model documentation before implementation.
-  - [ ] Ensure the proposed model can later supply deployment-map generation and other
-    scenario tooling from the same structured data rather than requiring a second map or
-    scenario representation.
+audit and scenario architecture review are complete; the remaining work is frontend/theme
+architecture and release/operations hardening. It should avoid introducing another major game-data
+domain unless required to correct a release-blocking defect.
 
 ### Frontend architecture and theming
 

@@ -389,6 +389,67 @@ passage fingerprints so changed wording reopens review.
 
 The maintained policy is documented in `data/curated/README.md`.
 
+## Planned scenario model (1.0)
+
+Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
+maintained representation is validated structured JSON; their runtime representation is a deliberate
+hybrid in `rules.db`. High-stability/queryable facts are relational, while nested ordered structures
+whose shape legitimately varies by scenario remain validated typed payloads. Runtime code must never
+parse PDF prose, image geometry, or display HTML to recover scenario semantics.
+
+The planned semantic model separates these identities and scopes:
+
+- **Scenario identity:** stable InfinityDB slug/name for the conceptual mission. Reuse across seasons
+  does not duplicate the identity.
+- **Publication/revision:** authoritative source collection, source version/revision, language,
+  reviewed citation, publication date when known, and deterministic content identity. A hotfix or
+  revised mission document creates a new publication revision, not a new scenario identity.
+- **Collection membership:** membership in a source set such as core N5.3 or an ITS season, including
+  collection-local category/ordering and applicability. Membership may change between revisions of a
+  season.
+- **Scenario applicability/configuration:** supported Army Points/SWC, table dimensions, round count,
+  minimum-VP/end thresholds, side configuration, and feature flags such as Reinforcements or
+  collection-specific options. These values can vary by game-size row without changing identity.
+
+Each published scenario revision then composes typed scenario components:
+
+- **Sides and roles:** symmetric Side A/B by default, with named asymmetric roles and role-assignment
+  procedure when required. Objectives/rules may be scoped to a side or role.
+- **Geometry:** a table-local coordinate system plus typed points, lines, rectangles/strips, circles
+  or radius regions, quadrants/sectors, and derived/side-relative regions. Dimensions, anchors,
+  transforms, exclusion areas, and placement constraints remain numeric semantic data rather than
+  pixels from a source diagram.
+- **Elements and tokens:** objective/scenery element types and instances with placement, ownership or
+  alignment, interaction/lifecycle capabilities, and representation metadata. Carrying, destruction,
+  activation, control, and state-like markers are modeled only where the scenario definition needs
+  them; live ownership/carrier/state during a match is not persisted by the scenario catalog.
+- **Objectives and scoring:** ordered objective groups with side/applicability, timing such as
+  immediate/end-of-round/end-of-game, Objective Points, caps, and typed condition/comparison forms.
+  Game-size-dependent thresholds are data. Unusual resolution procedure may retain reviewed prose in
+  addition to typed facts rather than forcing a universal executable scoring language.
+- **Classified Objectives and reusable features:** optional configuration for counts, Common/Private
+  use, points, exclusions, substitutions/alternate use, and scenario-specific interactions. HVTs,
+  Specialists, carried objectives, control areas, selectable objective sets, and season extras follow
+  the same optional-feature principle.
+- **Scenario actions and rules:** local Skills/AROs/interactions, requirements, effects, roll/MOD
+  metadata, timing hooks, and rule overrides where structurally useful. Existing Skills, Equipment,
+  States, Traits, Labels, General Rules, and other canonical entities are referenced by typed ID
+  rather than copied into scenario-local identities.
+- **End conditions:** round/time limits, Retreat-related behavior, all-Null/minimum-VP conditions, and
+  explicit scenario overrides. Definition data records the condition; match-state evaluation remains
+  outside the 1.0 catalog/reference responsibility.
+
+Publication should materialize relational indexes/foreign keys for identity, provenance, collection
+membership, slugs, canonical entity references, and other cross-scenario query needs. The validated
+component payload remains the canonical ordered scenario structure consumed by the backend. Browser
+code receives composed presentation data and must not reinterpret score conditions, geometry, or
+source-specific feature semantics.
+
+The geometry component is also the sole semantic input for later deployment-map generation. A map
+renderer may project it to SVG/other presentation formats, but map-specific coordinates must not
+become an independent maintained source. Likewise, future ITS support extends publication/collection
+and optional-feature data rather than creating an ITS-only scenario schema.
+
 ## SQLite storage contract
 
 Army export first loads normalized source data into validated relational staging, then writes two

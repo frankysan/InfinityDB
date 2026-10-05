@@ -2822,27 +2822,98 @@ Sources:
 
 ## Scenarios
 
-### RS-SCN-SCOPE-001 — Scenario-defined catalog concepts do not require a full scenario library
+### RS-SCN-SCOPE-001 — Core scenarios are first-class 1.0 data; ITS remains an extension scope
 
-**Classification:** InfinityDB scope boundary derived from source-native scenario
-structure.
+**Classification:** InfinityDB scope boundary derived from source-native scenario structure.
 
-The core Scenarios section contains a small introductory set, while additional
-missions exist outside that section. Some scenario pages define named Skills,
-roles, or game elements that are useful to InfinityDB's general catalog/reference
-experience even when the mission itself is not represented as a complete
-scenario record.
+The N5.3 Scenarios section contains four introductory missions: `Annihilation`, `Domination`,
+`Supplies`, and `Firefight`. Additional official missions exist in ITS. InfinityDB 1.0 must provide
+maintained structured definitions and a usable browsable presentation for all four current core
+scenarios, including the scenario-defined Skills, roles, elements, scoring, setup, and scoped rule
+overlays needed to understand them.
 
-For version 1.0, InfinityDB should cover those scenario-defined catalog concepts
-when they are needed to understand Skills, Equipment, States, Traits, or related
-reference material. It does not need complete scenario list/detail pages,
-objectives/scoring, maps, or a comprehensive core/ITS mission library to satisfy
-that requirement.
+ITS-specific missions, season material, tournament/event procedure, and a historical ITS library are
+not 1.0 completeness requirements. They were nevertheless used as architecture evidence so the core
+implementation cannot bake in assumptions that would require a second scenario model later.
 
 Sources:
 
-- Wiki: <https://infinitythewiki.com/Scenarios>
+- Wiki: <https://infinitythewiki.com/Scenarios>, N5.3
 - PDF: Infinity N5 V5.3, printed pages 149-156
+- 1.0 acceptance boundary: `docs/releasing.md`
+
+### RS-SCN-ID-001 — Scenario identity, publication revision, and collection membership are distinct
+
+**Classification:** source-native provenance plus an InfinityDB identity consequence.
+
+The architecture comparison completed on 2026-10-05 covered the complete current N5.3 core set, the
+final ITS Season 17 v1.0.2 mission set, and the then-current ITS Season 18 set. Season 17's final
+publication contains eleven regular scenarios after `Outbreak` was added during the season, plus five
+Direct Action scenarios. Season 18 expands that set to twenty by adding `Data-Harvest`, `Double Bind`,
+`Neutralization`, and `The Dig`.
+
+The September 2026 Season 18 hotfix subsequently changed rules inside `The Dig`, `Double Bind`, and
+`Crossing Lines` without creating new scenario identities. A scenario title/slug therefore cannot
+also identify a particular source revision, and season membership cannot be an intrinsic property of
+the scenario identity. InfinityDB must preserve stable scenario identity, authoritative
+publication/revision, collection/season membership, and applicability as independent concerns.
+
+Sources:
+
+- Core scenario index: <https://infinitythewiki.com/Scenarios>, N5.3
+- ITS Season 17 v1.0.2:
+  <https://downloads.corvusbelli.com/infinity/organized-play/its-rules-season-17-en-v1.0.2.pdf>
+- ITS Season 18 launch: <https://infinityuniverse.com/en/news/infinity-rules-update-5-3>
+- ITS Season 18 September hotfix: <https://infinityuniverse.com/en/news/its18-hotfix-september>
+
+### RS-SCN-STRUCT-001 — Geometry and scoring need structured, parameterized scenario data
+
+**Classification:** source-native scenario structure with an InfinityDB model consequence.
+
+The core scenarios already vary scoring thresholds and Deployment Zone dimensions by Army Points.
+`Domination` adds quadrant control scored every Game Round and fixed Console locations, while
+`Supplies` places carryable Supply Boxes. ITS broadens the same semantic problem: `Crossing Lines`
+gives each player two Deployment Zones and scores Dead Zones per round, while `Provisioning` uses
+opposite-corner radius-based Deployment Zones and Safe Areas.
+
+InfinityDB must represent table geometry as typed table-local regions/anchors with dimensions
+parameterized by force/table configuration; source diagrams are presentation evidence, not canonical
+machine geometry. Objectives likewise need explicit timing, Objective Points/caps, side/applicability,
+and typed comparison/threshold semantics where practical. Reviewed prose can supplement unusual
+procedures without requiring a complete game-state execution engine. This structured geometry is the
+canonical input for later deployment-map generation.
+
+Sources:
+
+- Wiki: <https://infinitythewiki.com/Annihilation>, N5.3
+- Wiki: <https://infinitythewiki.com/Domination>, N5.3
+- Wiki: <https://infinitythewiki.com/Supplies>, N5.3
+- ITS Season 17 v1.0.2 (`Crossing Lines`, `Provisioning`):
+  <https://downloads.corvusbelli.com/infinity/organized-play/its-rules-season-17-en-v1.0.2.pdf>
+
+### RS-SCN-FEATURE-001 — Asymmetry and seasonal mechanics are optional scenario features
+
+**Classification:** source-native scenario variation with an InfinityDB composition consequence.
+
+`Critical Intervention` assigns different Attacker and Defender objective sets. `Akial Interference`
+uses Common and Private Classified Objectives and scenario-local actions whose effects depend on card
+symbols and prior accomplishment. `Crossing Lines` uses no Classified Objectives. Season 18's
+`Double Bind` adds selectable Main Objective sets whose choice is tied to the Deployment decision.
+
+A scenario therefore cannot be modeled as one symmetric objective list plus a fixed Classified
+count. The stable common structure is scenario + publication + sides + configurations + geometry +
+objectives + rules/elements + end conditions. Classified systems, HVTs, custom roles/actions, carried
+objects, control areas, selectable objective sets, Reinforcements suitability, season options, and
+similar mechanics compose as optional reusable features or collection-scoped overlays. Existing
+canonical Skills, Equipment, States, Traits, Labels, and General Rules are referenced rather than
+duplicated when a scenario modifies or depends on them.
+
+Sources:
+
+- ITS Season 17 v1.0.2 (`Akial Interference`, `Critical Intervention`, `Crossing Lines`):
+  <https://downloads.corvusbelli.com/infinity/organized-play/its-rules-season-17-en-v1.0.2.pdf>
+- ITS Season 18 September hotfix (`Double Bind`, `Crossing Lines`):
+  <https://infinityuniverse.com/en/news/its18-hotfix-september>
 
 ### RS-SCN-SKILL-001 — Scenario-only Skills are scoped Skills, not profile facts
 
