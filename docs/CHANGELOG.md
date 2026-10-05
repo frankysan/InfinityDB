@@ -36,6 +36,9 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Web frontend:** Keep Fireteam Member/Requirements columns aligned with a compact, stable split
+  across viewport widths, and reserve more room for cm-mode MOV values so profile statlines do not
+  crowd adjacent attributes.
 - **Web frontend:** Army results that open the Armies overview now target, scroll to, and highlight the matching Army card instead of dropping users at the top of the page.
 - **Web backend + Web frontend:** Clarify Unit pages when optional-unit Settings hide every profile,
   remove redundant one-Unit source Characteristics from the Unit Explorer picker, and treat Army's

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit Fireteam chart semantics preserved in the normalized InfinityDB database."""
+"""Audit Fireteam semantics preserved in the published InfinityDB database."""
 
 from __future__ import annotations
 
@@ -14,48 +14,86 @@ from typing import Any
 from infinity_db.fireteam_semantics import (
     decode_fireteam_spec,
     equivalence_labels,
-    fto_option_matches,
     member_fto_marker,
 )
 
 REPORT_FORMAT = "InfinityDB Fireteam semantics audit"
-REPORT_FORMAT_VERSION = 1
+REPORT_FORMAT_VERSION = 2
 
 REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
-    "army_lists": (
-        "id",
-        "name",
-        "kind",
-        "fireteam_description",
-        "fireteam_spec",
+    "application_fireteam_charts": (
+        "application_army_id",
+        "source_army_id",
+        "source_kind",
+        "description",
+        "source_spec",
     ),
-    "fireteams": ("army_id", "fireteam_id", "position", "name", "observation"),
-    "fireteam_types": ("army_id", "fireteam_id", "position", "fireteam_type"),
-    "fireteam_members": (
-        "army_id",
+    "application_fireteam_chart_limits": (
+        "application_army_id",
+        "fireteam_type",
+        "position",
+        "raw_limit",
+    ),
+    "application_fireteams": (
+        "application_army_id",
+        "fireteam_id",
+        "position",
+        "name",
+        "observation",
+        "source_army_id",
+        "is_wildcard",
+    ),
+    "application_fireteam_types": (
+        "application_army_id",
+        "fireteam_id",
+        "position",
+        "fireteam_type",
+    ),
+    "application_fireteam_members": (
+        "application_army_id",
         "fireteam_id",
         "member_id",
         "position",
+        "source_army_id",
         "slug",
         "name",
         "comment",
         "min_count",
         "max_count",
         "required",
-        "resolved_unit_id",
+        "source_unit_id",
+        "logical_unit_id",
         "resolution",
+        "fto_marker",
     ),
-    "army_units": ("army_id", "unit_id"),
-    "units": ("id", "name", "slug"),
-    "loadout_options": ("army_id", "unit_id", "group_id", "option_id", "name"),
+    "application_fireteam_member_loadouts": (
+        "application_army_id",
+        "fireteam_id",
+        "member_id",
+        "position",
+        "source_army_id",
+        "source_unit_id",
+        "group_id",
+        "option_id",
+        "loadout_payload_id",
+        "option_name",
+        "fto_marker",
+    ),
+    "application_fireteam_member_equivalence_labels": (
+        "application_army_id",
+        "fireteam_id",
+        "member_id",
+        "position",
+        "label",
+    ),
     "application_armies": ("id", "name", "role", "playable"),
-    "application_army_sources": ("application_army_id", "source_army_id"),
     "application_army_reinforcement_parents": (
         "reinforcement_army_id",
         "parent_army_id",
     ),
     "__infinity_metadata": ("key", "value"),
 }
+
 
 class FireteamSemanticsAuditError(ValueError):
     """Raised when the selected database cannot be audited safely."""
@@ -113,27 +151,32 @@ def _decode_spec(value: Any, army_id: int) -> dict[str, int]:
 
 
 def _chart_shape(connection: sqlite3.Connection) -> dict[str, Any]:
-    counts = {}
-    for table in ("army_lists", "fireteams", "fireteam_types", "fireteam_members"):
-        counts[table] = connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
-
+    counts = {
+        table: connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+        for table in (
+            "application_fireteam_charts",
+            "application_fireteams",
+            "application_fireteam_types",
+            "application_fireteam_members",
+        )
+    }
     type_counts = {
         row[0]: row[1]
         for row in connection.execute(
-            "SELECT fireteam_type, COUNT(*) FROM fireteam_types "
+            "SELECT fireteam_type, COUNT(*) FROM application_fireteam_types "
             "GROUP BY fireteam_type ORDER BY fireteam_type"
         )
     }
     return {
-        "sourceArmyCount": counts["army_lists"],
-        "teamCount": counts["fireteams"],
-        "typeMembershipCount": counts["fireteam_types"],
-        "memberCount": counts["fireteam_members"],
+        "sourceArmyCount": counts["application_fireteam_charts"],
+        "teamCount": counts["application_fireteams"],
+        "typeMembershipCount": counts["application_fireteam_types"],
+        "memberCount": counts["application_fireteam_members"],
         "typeMembershipCounts": type_counts,
         "policy": (
             "Fireteam Charts are Army-local configuration/relationship data. Team names, "
             "type membership, member wording, cardinality, and notes remain attached to the "
-            "source Army context rather than becoming logical-Unit facts."
+            "selected source Army context rather than becoming logical-Unit facts."
         ),
     }
 
@@ -141,40 +184,76 @@ def _chart_shape(connection: sqlite3.Connection) -> dict[str, Any]:
 def _type_limits(connection: sqlite3.Connection) -> dict[str, Any]:
     value_counts: dict[str, Counter[int]] = defaultdict(Counter)
     unknown_values: list[dict[str, Any]] = []
-    reinforcement_zero_type_memberships: list[dict[str, Any]] = []
+    projection_mismatches: list[dict[str, Any]] = []
 
-    army_rows = connection.execute(
-        "SELECT id, kind, fireteam_spec FROM army_lists ORDER BY id"
+    charts = connection.execute(
+        "SELECT application_army_id, source_army_id, source_kind, source_spec "
+        "FROM application_fireteam_charts ORDER BY application_army_id"
     ).fetchall()
-    specs: dict[int, dict[str, int]] = {}
-    kinds: dict[int, str | None] = {}
-    for row in army_rows:
-        army_id = row["id"]
-        spec = _decode_spec(row["fireteam_spec"], army_id)
-        specs[army_id] = spec
-        kinds[army_id] = row["kind"]
+    chart_kinds: dict[int, str | None] = {}
+    expected_limits: dict[int, dict[str, int]] = {}
+    for row in charts:
+        application_army_id = int(row["application_army_id"])
+        source_army_id = int(row["source_army_id"])
+        spec = _decode_spec(row["source_spec"], source_army_id)
+        expected_limits[application_army_id] = spec
+        chart_kinds[application_army_id] = row["source_kind"]
         for fireteam_type, limit in sorted(spec.items()):
             value_counts[fireteam_type][limit] += 1
             if limit not in (0, 256) and limit < 1:
                 unknown_values.append(
-                    {"armyId": army_id, "fireteamType": fireteam_type, "value": limit}
+                    {
+                        "applicationArmyId": application_army_id,
+                        "sourceArmyId": source_army_id,
+                        "fireteamType": fireteam_type,
+                        "value": limit,
+                    }
                 )
+
+    stored_limits: dict[int, dict[str, int]] = defaultdict(dict)
+    for row in connection.execute(
+        "SELECT application_army_id, fireteam_type, raw_limit "
+        "FROM application_fireteam_chart_limits "
+        "ORDER BY application_army_id, position, fireteam_type"
+    ):
+        stored_limits[int(row["application_army_id"])][row["fireteam_type"]] = int(
+            row["raw_limit"]
+        )
+
+    for application_army_id, expected in sorted(expected_limits.items()):
+        actual = stored_limits.get(application_army_id, {})
+        if expected != actual:
+            projection_mismatches.append(
+                {
+                    "applicationArmyId": application_army_id,
+                    "expected": expected,
+                    "stored": actual,
+                }
+            )
 
     source_types: dict[int, set[str]] = defaultdict(set)
     for row in connection.execute(
-        "SELECT DISTINCT army_id, fireteam_type FROM fireteam_types "
-        "ORDER BY army_id, fireteam_type"
+        "SELECT DISTINCT application_army_id, fireteam_type "
+        "FROM application_fireteam_types ORDER BY application_army_id, fireteam_type"
     ):
-        source_types[row["army_id"]].add(row["fireteam_type"].upper())
+        source_types[int(row["application_army_id"])].add(row["fireteam_type"].upper())
 
-    for army_id, fireteam_types in sorted(source_types.items()):
-        if kinds.get(army_id) != "reinforcement":
+    reinforcement_zero_type_memberships: list[dict[str, Any]] = []
+    chart_sources = {
+        int(row["application_army_id"]): int(row["source_army_id"]) for row in charts
+    }
+    for application_army_id, fireteam_types in sorted(source_types.items()):
+        if chart_kinds.get(application_army_id) != "reinforcement":
             continue
-        spec = specs.get(army_id, {})
+        spec = expected_limits.get(application_army_id, {})
         for fireteam_type in sorted(fireteam_types):
             if spec.get(fireteam_type) == 0:
                 reinforcement_zero_type_memberships.append(
-                    {"sourceArmyId": army_id, "fireteamType": fireteam_type}
+                    {
+                        "applicationArmyId": application_army_id,
+                        "sourceArmyId": chart_sources[application_army_id],
+                        "fireteamType": fireteam_type,
+                    }
                 )
 
     return {
@@ -189,14 +268,17 @@ def _type_limits(connection: sqlite3.Connection) -> dict[str, Any]:
         },
         "unknownValueCount": len(unknown_values),
         "unknownValues": unknown_values,
+        "projectionMismatchCount": len(projection_mismatches),
+        "projectionMismatches": projection_mismatches,
         "reinforcementSectionTypeRowsWhoseOwnSpecIsZeroCount": len(
             reinforcement_zero_type_memberships
         ),
         "reinforcementSectionTypeRowsWhoseOwnSpecIsZero": reinforcement_zero_type_memberships,
         "policy": (
-            "Preserve the raw chart spec. Reinforcement-section charts can contain Fireteam "
-            "types while their own spec says zero, so their own spec is not a standalone "
-            "legality rule; selected parent-Army limits remain separate context."
+            "Preserve the selected source chart spec and its raw limits. Reinforcement-section "
+            "charts can contain Fireteam types while their own spec says zero, so their own "
+            "spec is not a standalone legality rule; selected parent-Army limits remain separate "
+            "context."
         ),
     }
 
@@ -205,20 +287,23 @@ def _member_resolution(connection: sqlite3.Connection) -> dict[str, Any]:
     counts = {
         row["resolution"]: row["count"]
         for row in connection.execute(
-            "SELECT resolution, COUNT(*) AS count FROM fireteam_members "
+            "SELECT resolution, COUNT(*) AS count FROM application_fireteam_members "
             "GROUP BY resolution ORDER BY resolution"
         )
     }
     details = [
         dict(row)
         for row in connection.execute(
-            "SELECT fm.army_id AS armyId, fm.fireteam_id AS fireteamId, "
-            "f.name AS fireteamName, fm.member_id AS memberId, fm.slug, fm.name, "
-            "fm.comment, fm.resolved_unit_id AS resolvedUnitId, fm.resolution "
-            "FROM fireteam_members AS fm "
-            "JOIN fireteams AS f USING (army_id, fireteam_id) "
+            "SELECT fm.application_army_id AS applicationArmyId, "
+            "fm.source_army_id AS sourceArmyId, fm.fireteam_id AS fireteamId, "
+            "f.name AS fireteamName, fm.member_id AS memberId, fm.slug, fm.name, fm.comment, "
+            "fm.source_unit_id AS resolvedUnitId, fm.logical_unit_id AS logicalUnitId, "
+            "fm.resolution FROM application_fireteam_members AS fm "
+            "JOIN application_fireteams AS f "
+            "ON f.application_army_id = fm.application_army_id "
+            "AND f.fireteam_id = fm.fireteam_id "
             "WHERE fm.resolution <> 'army' "
-            "ORDER BY fm.army_id, fm.fireteam_id, fm.member_id"
+            "ORDER BY fm.application_army_id, fm.fireteam_id, fm.member_id"
         )
     ]
     return {
@@ -235,17 +320,17 @@ def _member_resolution(connection: sqlite3.Connection) -> dict[str, Any]:
 
 def _required_choice_evidence(connection: sqlite3.Connection) -> dict[str, Any]:
     required_rows = connection.execute(
-        "SELECT COUNT(*) FROM fireteam_members WHERE required = 1"
+        "SELECT COUNT(*) FROM application_fireteam_members WHERE required = 1"
     ).fetchone()[0]
     team_rows = connection.execute(
-        "SELECT army_id, fireteam_id, "
+        "SELECT application_army_id, fireteam_id, "
         "SUM(CASE WHEN required = 1 THEN 1 ELSE 0 END) AS required_count "
-        "FROM fireteam_members GROUP BY army_id, fireteam_id "
-        "HAVING required_count > 0 ORDER BY army_id, fireteam_id"
+        "FROM application_fireteam_members GROUP BY application_army_id, fireteam_id "
+        "HAVING required_count > 0 ORDER BY application_army_id, fireteam_id"
     ).fetchall()
     distribution = Counter(row["required_count"] for row in team_rows)
     positive_min = connection.execute(
-        "SELECT COUNT(*) FROM fireteam_members "
+        "SELECT COUNT(*) FROM application_fireteam_members "
         "WHERE required = 1 AND COALESCE(min_count, 0) > 0"
     ).fetchone()[0]
     return {
@@ -265,13 +350,14 @@ def _required_choice_evidence(connection: sqlite3.Connection) -> dict[str, Any]:
 
 def _wildcard_evidence(connection: sqlite3.Connection) -> dict[str, Any]:
     team_count, army_count = connection.execute(
-        "SELECT COUNT(*), COUNT(DISTINCT army_id) FROM fireteams "
-        "WHERE UPPER(name) LIKE '%WILDCARD%'"
+        "SELECT COUNT(*), COUNT(DISTINCT source_army_id) "
+        "FROM application_fireteams WHERE is_wildcard = 1"
     ).fetchone()
     typed = connection.execute(
-        "SELECT COUNT(*) FROM fireteam_types AS ft "
-        "JOIN fireteams AS f USING (army_id, fireteam_id) "
-        "WHERE UPPER(f.name) LIKE '%WILDCARD%'"
+        "SELECT COUNT(*) FROM application_fireteam_types AS ft "
+        "JOIN application_fireteams AS f "
+        "ON f.application_army_id = ft.application_army_id "
+        "AND f.fireteam_id = ft.fireteam_id WHERE f.is_wildcard = 1"
     ).fetchone()[0]
     return {
         "teamCount": team_count,
@@ -285,20 +371,52 @@ def _wildcard_evidence(connection: sqlite3.Connection) -> dict[str, Any]:
 
 
 def _level_equivalence_evidence(connection: sqlite3.Connection) -> dict[str, Any]:
-    row_count = 0
-    labels: list[str] = []
+    stored: dict[tuple[int, int, int], list[str]] = defaultdict(list)
     for row in connection.execute(
-        "SELECT comment FROM fireteam_members WHERE COALESCE(comment, '') <> ''"
+        "SELECT application_army_id, fireteam_id, member_id, label "
+        "FROM application_fireteam_member_equivalence_labels "
+        "ORDER BY application_army_id, fireteam_id, member_id, position"
     ):
-        row_labels = equivalence_labels(row["comment"])
-        if not row_labels:
-            continue
-        row_count += 1
-        labels.extend(row_labels)
+        key = (
+            int(row["application_army_id"]),
+            int(row["fireteam_id"]),
+            int(row["member_id"]),
+        )
+        stored[key].append(row["label"])
+
+    expected: dict[tuple[int, int, int], list[str]] = {}
+    for row in connection.execute(
+        "SELECT application_army_id, fireteam_id, member_id, comment "
+        "FROM application_fireteam_members ORDER BY application_army_id, fireteam_id, member_id"
+    ):
+        labels = equivalence_labels(row["comment"])
+        if labels:
+            key = (
+                int(row["application_army_id"]),
+                int(row["fireteam_id"]),
+                int(row["member_id"]),
+            )
+            expected[key] = list(labels)
+
+    keys = sorted(set(expected) | set(stored))
+    mismatches = [
+        {
+            "applicationArmyId": key[0],
+            "fireteamId": key[1],
+            "memberId": key[2],
+            "expected": expected.get(key, []),
+            "stored": stored.get(key, []),
+        }
+        for key in keys
+        if expected.get(key, []) != stored.get(key, [])
+    ]
+    labels = [label for values in stored.values() for label in values]
     return {
-        "memberRowCount": row_count,
+        "memberRowCount": len(stored),
         "labelReferenceCount": len(labels),
         "distinctLabelCount": len(set(labels)),
+        "projectionMismatchCount": len(mismatches),
+        "projectionMismatches": mismatches,
         "policy": (
             "Bracketed terms are preserved as Fireteam-Level equivalence wording. They must "
             "not feed logical-Unit identity or generic Unit aliasing."
@@ -310,17 +428,18 @@ def _rule_bearing_notes(connection: sqlite3.Connection) -> dict[str, Any]:
     army_notes = [
         dict(row)
         for row in connection.execute(
-            "SELECT id AS sourceArmyId, name AS armyName, "
-            "fireteam_description AS description FROM army_lists "
-            "WHERE COALESCE(fireteam_description, '') <> '' ORDER BY id"
+            "SELECT application_army_id AS applicationArmyId, source_army_id AS sourceArmyId, "
+            "description FROM application_fireteam_charts "
+            "WHERE COALESCE(description, '') <> '' ORDER BY application_army_id"
         )
     ]
     team_notes = [
         dict(row)
         for row in connection.execute(
-            "SELECT army_id AS sourceArmyId, fireteam_id AS fireteamId, name AS fireteamName, "
-            "observation FROM fireteams WHERE COALESCE(observation, '') <> '' "
-            "ORDER BY army_id, fireteam_id"
+            "SELECT application_army_id AS applicationArmyId, source_army_id AS sourceArmyId, "
+            "fireteam_id AS fireteamId, name AS fireteamName, observation "
+            "FROM application_fireteams WHERE COALESCE(observation, '') <> '' "
+            "ORDER BY application_army_id, fireteam_id"
         )
     ]
     return {
@@ -336,46 +455,68 @@ def _rule_bearing_notes(connection: sqlite3.Connection) -> dict[str, Any]:
 
 
 def _fto_evidence(connection: sqlite3.Connection) -> dict[str, Any]:
-    rows = connection.execute(
-        "SELECT fm.*, f.name AS fireteam_name FROM fireteam_members AS fm "
-        "JOIN fireteams AS f USING (army_id, fireteam_id) "
-        "ORDER BY fm.army_id, fm.fireteam_id, fm.member_id"
-    ).fetchall()
-    loadouts: dict[tuple[int, int], list[sqlite3.Row]] = defaultdict(list)
+    loadouts: dict[tuple[int, int, int], list[sqlite3.Row]] = defaultdict(list)
     for row in connection.execute(
-        "SELECT army_id, unit_id, group_id, option_id, name FROM loadout_options "
-        "ORDER BY army_id, unit_id, group_id, option_id"
+        "SELECT * FROM application_fireteam_member_loadouts "
+        "ORDER BY application_army_id, fireteam_id, member_id, position"
     ):
-        loadouts[(row["army_id"], row["unit_id"])].append(row)
+        key = (
+            int(row["application_army_id"]),
+            int(row["fireteam_id"]),
+            int(row["member_id"]),
+        )
+        loadouts[key].append(row)
 
     status_counts: Counter[str] = Counter()
     details: list[dict[str, Any]] = []
     eligible_option_count = 0
+    marker_mismatches: list[dict[str, Any]] = []
+    rows = connection.execute(
+        "SELECT fm.*, f.name AS fireteam_name FROM application_fireteam_members AS fm "
+        "JOIN application_fireteams AS f "
+        "ON f.application_army_id = fm.application_army_id "
+        "AND f.fireteam_id = fm.fireteam_id "
+        "ORDER BY fm.application_army_id, fm.fireteam_id, fm.member_id"
+    ).fetchall()
     for row in rows:
-        marker = member_fto_marker(row["name"], row["comment"])
+        expected_marker = member_fto_marker(row["name"], row["comment"])
+        if expected_marker != row["fto_marker"]:
+            marker_mismatches.append(
+                {
+                    "applicationArmyId": row["application_army_id"],
+                    "fireteamId": row["fireteam_id"],
+                    "memberId": row["member_id"],
+                    "expected": expected_marker,
+                    "stored": row["fto_marker"],
+                }
+            )
+        marker = row["fto_marker"]
         if marker is None:
             continue
+        key = (
+            int(row["application_army_id"]),
+            int(row["fireteam_id"]),
+            int(row["member_id"]),
+        )
         base = {
-            "sourceArmyId": row["army_id"],
+            "applicationArmyId": row["application_army_id"],
+            "sourceArmyId": row["source_army_id"],
             "fireteamId": row["fireteam_id"],
             "fireteamName": row["fireteam_name"],
             "memberId": row["member_id"],
             "memberName": row["name"],
             "comment": row["comment"],
             "marker": "FTO" if marker == "generic" else f"FTO-{marker}",
-            "resolvedUnitId": row["resolved_unit_id"],
+            "resolvedUnitId": row["source_unit_id"],
+            "logicalUnitId": row["logical_unit_id"],
         }
-        if row["resolution"] != "army" or row["resolved_unit_id"] is None:
+        if row["resolution"] != "army" or row["source_unit_id"] is None:
             status = "source-unit-context-mismatch"
             status_counts[status] += 1
             details.append({**base, "status": status, "resolution": row["resolution"]})
             continue
 
-        matches = [
-            option
-            for option in loadouts[(row["army_id"], row["resolved_unit_id"])]
-            if fto_option_matches(row["name"], marker, option["name"])
-        ]
+        matches = loadouts.get(key, [])
         if not matches:
             status = "no-matching-fto-option"
             status_counts[status] += 1
@@ -393,7 +534,8 @@ def _fto_evidence(connection: sqlite3.Connection) -> dict[str, Any]:
                     {
                         "groupId": option["group_id"],
                         "optionId": option["option_id"],
-                        "name": option["name"],
+                        "loadoutPayloadId": option["loadout_payload_id"],
+                        "name": option["option_name"],
                     }
                     for option in matches
                 ],
@@ -407,10 +549,12 @@ def _fto_evidence(connection: sqlite3.Connection) -> dict[str, Any]:
         "eligibleOptionOccurrenceCount": eligible_option_count,
         "unresolvedCount": len(unresolved),
         "unresolved": unresolved,
+        "markerProjectionMismatchCount": len(marker_mismatches),
+        "markerProjectionMismatches": marker_mismatches,
         "policy": (
-            "Resolve FTO against Army-local loadout-option identity. Generic FTO accepts "
-            "matching FTO variants; numbered FTO-N requires that variant. Preserve any "
-            "source-context or option mismatch instead of inferring eligibility from Unit "
+            "Resolve FTO against Army-local loadout-option identity before publication. Generic "
+            "FTO accepts matching FTO variants; numbered FTO-N requires that variant. Preserve "
+            "any source-context or option mismatch instead of inferring eligibility from Unit "
             "identity alone."
         ),
     }
@@ -420,12 +564,13 @@ def _unit_granularity_evidence(connection: sqlite3.Connection) -> dict[str, Any]
     details = [
         dict(row)
         for row in connection.execute(
-            "SELECT army_id AS sourceArmyId, fireteam_id AS fireteamId, "
-            "resolved_unit_id AS resolvedUnitId, COUNT(*) AS memberCount, "
-            "GROUP_CONCAT(name, ' | ') AS memberNames FROM fireteam_members "
-            "WHERE resolution = 'army' AND resolved_unit_id IS NOT NULL "
-            "GROUP BY army_id, fireteam_id, resolved_unit_id HAVING COUNT(*) > 1 "
-            "ORDER BY army_id, fireteam_id, resolved_unit_id"
+            "SELECT application_army_id AS applicationArmyId, source_army_id AS sourceArmyId, "
+            "fireteam_id AS fireteamId, source_unit_id AS resolvedUnitId, "
+            "logical_unit_id AS logicalUnitId, COUNT(*) AS memberCount, "
+            "GROUP_CONCAT(name, ' | ') AS memberNames FROM application_fireteam_members "
+            "WHERE resolution = 'army' AND source_unit_id IS NOT NULL "
+            "GROUP BY application_army_id, fireteam_id, source_unit_id, logical_unit_id "
+            "HAVING COUNT(*) > 1 ORDER BY application_army_id, fireteam_id, source_unit_id"
         )
     ]
     return {
@@ -433,8 +578,8 @@ def _unit_granularity_evidence(connection: sqlite3.Connection) -> dict[str, Any]
         "cases": details,
         "policy": (
             "A Fireteam member can identify a subgroup/profile/loadout within one source Unit. "
-            "Do not collapse member identity to resolved_unit_id when multiple chart rows point "
-            "at the same Unit."
+            "Do not collapse member identity to source_unit_id or logical_unit_id when multiple "
+            "chart rows point at the same Unit."
         ),
     }
 
@@ -446,40 +591,35 @@ def _reinforcement_context(connection: sqlite3.Connection) -> dict[str, Any]:
             "SELECT id, name, role, playable FROM application_armies ORDER BY id"
         )
     }
-    source_to_application = {
-        row["source_army_id"]: row["application_army_id"]
+    chart_sources = {
+        int(row["application_army_id"]): {
+            "sourceArmyId": int(row["source_army_id"]),
+            "sourceKind": row["source_kind"],
+        }
         for row in connection.execute(
-            "SELECT application_army_id, source_army_id FROM application_army_sources"
+            "SELECT application_army_id, source_army_id, source_kind "
+            "FROM application_fireteam_charts"
         )
     }
-    application_sources: dict[int, list[int]] = defaultdict(list)
-    for source_id, application_id in source_to_application.items():
-        application_sources[application_id].append(source_id)
-
-    source_specs: dict[int, dict[str, int]] = {}
-    source_kinds: dict[int, str | None] = {}
+    limits: dict[int, dict[str, int]] = defaultdict(dict)
     for row in connection.execute(
-        "SELECT id, kind, fireteam_spec FROM army_lists ORDER BY id"
+        "SELECT application_army_id, fireteam_type, raw_limit "
+        "FROM application_fireteam_chart_limits"
     ):
-        source_specs[row["id"]] = _decode_spec(row["fireteam_spec"], row["id"])
-        source_kinds[row["id"]] = row["kind"]
-
-    source_types: dict[int, set[str]] = defaultdict(set)
+        limits[int(row["application_army_id"])][row["fireteam_type"]] = int(
+            row["raw_limit"]
+        )
+    types: dict[int, set[str]] = defaultdict(set)
     for row in connection.execute(
-        "SELECT DISTINCT army_id, fireteam_type FROM fireteam_types"
+        "SELECT DISTINCT application_army_id, fireteam_type FROM application_fireteam_types"
     ):
-        source_types[row["army_id"]].add(row["fireteam_type"].upper())
+        types[int(row["application_army_id"])].add(row["fireteam_type"].upper())
 
-    reinforcement_types: dict[int, set[str]] = defaultdict(set)
-    reinforcement_source_ids: set[int] = set()
-    for source_id, kind in source_kinds.items():
-        if kind != "reinforcement":
-            continue
-        reinforcement_source_ids.add(source_id)
-        application_id = source_to_application.get(source_id)
-        if application_id is not None:
-            reinforcement_types[application_id].update(source_types.get(source_id, set()))
-
+    reinforcement_ids = {
+        army_id
+        for army_id, source in chart_sources.items()
+        if source["sourceKind"] == "reinforcement"
+    }
     parent_edges = [
         dict(row)
         for row in connection.execute(
@@ -496,33 +636,32 @@ def _reinforcement_context(connection: sqlite3.Connection) -> dict[str, Any]:
         parent = application_armies.get(parent_id)
         if parent is None or not parent["playable"]:
             continue
-        parent_source_ids = application_sources.get(parent_id, [])
-        for fireteam_type in sorted(reinforcement_types.get(reinforcement_id, set())):
+        parent_chart = chart_sources.get(parent_id)
+        for fireteam_type in sorted(types.get(reinforcement_id, set())):
             checked_contexts += 1
-            source_limits = [
+            raw_limit = limits.get(parent_id, {}).get(fireteam_type)
+            if raw_limit is not None and raw_limit != 0:
+                continue
+            blocked.append(
                 {
-                    "sourceArmyId": source_id,
-                    "limit": source_specs.get(source_id, {}).get(fireteam_type),
+                    "reinforcementArmyId": reinforcement_id,
+                    "parentArmyId": parent_id,
+                    "parentArmyName": parent["name"],
+                    "fireteamType": fireteam_type,
+                    "parentSourceLimits": [
+                        {
+                            "sourceArmyId": (
+                                parent_chart["sourceArmyId"] if parent_chart is not None else None
+                            ),
+                            "limit": raw_limit,
+                        }
+                    ],
                 }
-                for source_id in parent_source_ids
-            ]
-            allowed = any(
-                item["limit"] is not None and item["limit"] != 0 for item in source_limits
             )
-            if not allowed:
-                blocked.append(
-                    {
-                        "reinforcementArmyId": reinforcement_id,
-                        "parentArmyId": parent_id,
-                        "parentArmyName": parent["name"],
-                        "fireteamType": fireteam_type,
-                        "parentSourceLimits": source_limits,
-                    }
-                )
 
     return {
-        "sourceReinforcementSectionCount": len(reinforcement_source_ids),
-        "applicationReinforcementSectionCount": len(reinforcement_types),
+        "sourceReinforcementSectionCount": len(reinforcement_ids),
+        "applicationReinforcementSectionCount": len(reinforcement_ids),
         "parentEdgeCount": len(parent_edges),
         "playableParentTypeContextCount": checked_contexts,
         "blockedByParentTypeLimitCount": len(blocked),
@@ -536,7 +675,7 @@ def _reinforcement_context(connection: sqlite3.Connection) -> dict[str, Any]:
 
 
 def audit_database(path: Path) -> dict[str, Any]:
-    """Return deterministic Fireteam semantic evidence for a normalized database."""
+    """Return deterministic Fireteam semantic evidence for a published database."""
     path = path.resolve()
     if not path.is_file():
         raise FireteamSemanticsAuditError(f"Database does not exist: {path}")
@@ -573,7 +712,7 @@ def audit_database(path: Path) -> dict[str, Any]:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("database", type=Path, help="Frontend infinity.db to audit")
+    parser.add_argument("database", type=Path, help="Published infinity.db to audit")
     parser.add_argument("--output", type=Path, help="Optional deterministic JSON report path")
     return parser
 
@@ -592,7 +731,7 @@ def main(argv: list[str] | None = None) -> int:
     reinforcement = report["reinforcementContext"]
     print("InfinityDB Fireteam semantics audit")
     print(
-        f"Charts: {chart['sourceArmyCount']} source armies | {chart['teamCount']} teams | "
+        f"Charts: {chart['sourceArmyCount']} source charts | {chart['teamCount']} teams | "
         f"{chart['memberCount']} member rows"
     )
     print(

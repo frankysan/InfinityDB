@@ -3077,7 +3077,7 @@ tbody td {
 }
 
 .attribute-statline {
-  --movement-column-width: 68px;
+  --movement-column-width: 76px;
   display: grid;
   grid-template-columns: var(--movement-column-width) repeat(8, minmax(0, 1fr));
 }
@@ -3243,7 +3243,7 @@ tbody tr:last-child>* {
 
 .unit-extended-statline {
   display: grid;
-  grid-template-columns: minmax(68px, 1.4fr) repeat(8, minmax(34px, 1fr));
+  grid-template-columns: minmax(76px, 1.4fr) repeat(8, minmax(34px, 1fr));
   margin: 0;
 }
 
@@ -3946,7 +3946,7 @@ html[data-distance-unit="in"] .unit-extended-statline {
   }
 
   .unit-extended-statline {
-    grid-template-columns: minmax(68px, 1.4fr) repeat(4, minmax(42px, 1fr));
+    grid-template-columns: minmax(76px, 1.4fr) repeat(4, minmax(42px, 1fr));
     row-gap: 8px;
   }
 
@@ -4374,7 +4374,7 @@ html[data-distance-unit="in"] .unit-extended-statline {
 
   .attribute-statline,
   .attribute-statline-with-availability {
-    grid-template-columns: 68px repeat(4, minmax(0, 1fr));
+    grid-template-columns: 76px repeat(4, minmax(0, 1fr));
   }
 
   html[data-distance-unit="in"] .attribute-statline,

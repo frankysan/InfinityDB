@@ -2283,7 +2283,7 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
         styles,
         ".attribute-statline",
         {
-            "--movement-column-width": "68px",
+            "--movement-column-width": "76px",
             "grid-template-columns": ("var(--movement-column-width) repeat(8, minmax(0, 1fr))"),
         },
     )
@@ -2296,7 +2296,7 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
     assert_css_rule(
         styles,
         ".attribute-statline, .attribute-statline-with-availability",
-        {"grid-template-columns": "68px repeat(4, minmax(0, 1fr))"},
+        {"grid-template-columns": "76px repeat(4, minmax(0, 1fr))"},
     )
     assert_css_rule(
         styles,
