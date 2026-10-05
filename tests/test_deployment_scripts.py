@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import fnmatch
+import json
+import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -98,6 +101,26 @@ def test_docker_build_copies_curated_wheel_data_inputs() -> None:
     assert "COPY data/curated/identities /app/data/curated/identities" in dockerfile
     assert "COPY data/curated/peripherals /app/data/curated/peripherals" in dockerfile
     assert "rm -rf /app/config /app/data/curated" in dockerfile
+
+
+def test_wheel_package_data_covers_every_published_symbol() -> None:
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)
+    publication = json.loads(
+        (ROOT / "data/manifests/symbol-publication.json").read_text(encoding="utf-8")
+    )
+
+    patterns = project["tool"]["setuptools"]["package-data"]["infinity_db.web"]
+    published = publication["publishedSha256ByPath"]
+    uncovered = [
+        relative
+        for relative in sorted(published)
+        if not any(
+            fnmatch.fnmatchcase(f"static/{relative}", pattern) for pattern in patterns
+        )
+    ]
+
+    assert uncovered == []
 
 
 def test_container_verifier_uses_installed_tracked_publication_provenance() -> None:

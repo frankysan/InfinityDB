@@ -36,6 +36,9 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Deployment:** Include the published Peripheral SVG namespace in wheel/container package data,
+  and pin package-data coverage against the tracked symbol-publication manifest so a complete source
+  tree cannot produce an incomplete release image.
 - **Web backend:** Reject unknown or duplicate semantic query parameters on Fireteam and Unit-detail
   APIs instead of silently ignoring malformed requests, while retaining the Developer-mode cache-bust
   parameter.

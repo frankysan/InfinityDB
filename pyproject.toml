@@ -74,6 +74,7 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
   "static/armies/**/*.svg",
   "static/characteristics/*.svg",
   "static/orders/*.svg",
+  "static/peripherals/**/*.svg",
   "static/units/**/*.svg",
   "static/fonts/**/*.woff2",
   "static/fonts/**/OFL.txt",
