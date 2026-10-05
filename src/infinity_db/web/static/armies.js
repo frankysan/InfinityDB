@@ -57,6 +57,8 @@ function armyStatuses(army) {
 function renderArmy(army) {
   const article = document.createElement("article");
   article.className = "surface surface--subtle surface--raised army-overview-card";
+  article.id = `army-${armyValue(army)}`;
+  article.tabIndex = -1;
 
   const heading = document.createElement("div");
   heading.className = "army-overview-card-heading";
@@ -136,6 +138,21 @@ function render(items) {
   }
   elements.groups.replaceChildren(fragment);
   show(elements.groups);
+  requestAnimationFrame(revealHashTarget);
+}
+
+function revealHashTarget() {
+  if (!window.location.hash) return;
+  let targetId;
+  try {
+    targetId = decodeURIComponent(window.location.hash.slice(1));
+  } catch {
+    return;
+  }
+  const target = document.getElementById(targetId);
+  if (!target?.classList.contains("army-overview-card")) return;
+  target.scrollIntoView({ block: "center" });
+  target.focus({ preventScroll: true });
 }
 
 async function initialize() {
@@ -151,4 +168,5 @@ async function initialize() {
 }
 
 document.addEventListener("infinity:beforenavigation", () => controller.abort(), { once: true });
+window.addEventListener("hashchange", revealHashTarget);
 initialize();

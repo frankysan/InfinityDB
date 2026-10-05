@@ -89,7 +89,7 @@ by the audit remain in scope.
     - [x] Audit distance/range semantics across tracked Army storage, maintained rules,
       backend/API payloads, and browser presentation. Keep the Army/game conversion contract at
       `2.5 cm = 1 inch`, preserve typed Skill-distance extras and Weapon range bands, and render the
-      source `-1/-1` MOV sentinel as the rules `-` stationary value instead of a negative distance.
+      source `-1/-1` MOV sentinel as an em dash (`—`) for stationary movement instead of a negative distance.
   - [x] Audit browser semantic ownership. Inventory domain interpretation in
     browser modules, beginning with `unit.js`, the army selector, catalog detail
     modules, symbol lookup, rules links, and optional-unit filtering. Keep display

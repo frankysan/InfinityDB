@@ -98,7 +98,7 @@ class SearchCatalog:
                 self._result(
                     "Army",
                     {"name": army.name},
-                    "/armies",
+                    f"/armies#army-{quote(army.slug, safe='')}",
                 )
             )
 

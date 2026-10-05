@@ -9,6 +9,9 @@ from infinity_db.maintained_text import DISTANCE_CENTIMETERS_PER_INCH
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_DATABASE = ROOT / "data" / "generated" / "infinity.db"
+UNIT_PRESENTATION_SCRIPT = (
+    ROOT / "src" / "infinity_db" / "web" / "static" / "unit-presentation.js"
+)
 
 
 def _is_game_distance(value: object) -> bool:
@@ -53,3 +56,9 @@ def test_tracked_runtime_distance_storage_matches_game_conversion_contract() -> 
                 maxima.append(band["max"])
     assert maxima
     assert all(_is_game_distance(value) for value in maxima)
+
+
+def test_stationary_movement_uses_semantic_absence_glyph() -> None:
+    script = UNIT_PRESENTATION_SCRIPT.read_text(encoding="utf-8")
+    assert 'if (values.every((value) => Number(value) === -1)) return "—";' in script
+    assert 'if (values.every((value) => Number(value) === -1)) return "-";' not in script

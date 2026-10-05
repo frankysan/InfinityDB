@@ -4565,6 +4565,12 @@ html[data-distance-unit="in"] .unit-extended-statline {
   flex-direction: column;
   min-width: 0;
   padding: 16px 18px;
+  scroll-margin-block: var(--space-4);
+}
+
+.army-overview-card:target {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 3px;
 }
 
 .army-overview-card-heading {
@@ -4771,12 +4777,28 @@ html[data-distance-unit="in"] .unit-extended-statline {
   min-width: 520px;
 }
 
+html:not([data-developer-mode="true"]) .fireteam-member-table table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
 html[data-developer-mode="true"] .fireteam-member-table table {
   min-width: 760px;
 }
 
 .fireteam-member-table .table-column--primary {
   min-width: 180px;
+}
+
+html:not([data-developer-mode="true"]) .fireteam-member-table .table-column--primary {
+  width: 70%;
+  min-width: 0;
+}
+
+html:not([data-developer-mode="true"])
+  .fireteam-member-table .fireteam-member-requirements {
+  width: 30%;
 }
 
 .fireteam-member-table .table-column--primary .skill-category-badge {
@@ -4855,26 +4877,10 @@ html[data-developer-mode="true"] .fireteam-member-table table {
     --table-cell-size: var(--font-size-base);
   }
 
-  html:not([data-developer-mode="true"]) .fireteam-member-table table {
-    width: 100%;
-    min-width: 0;
-    table-layout: fixed;
-  }
-
   .fireteam-member-table th,
   .fireteam-member-table td {
     min-width: 0;
     white-space: normal;
-  }
-
-  html:not([data-developer-mode="true"]) .fireteam-member-table .table-column--primary {
-    width: 54%;
-    min-width: 0;
-  }
-
-  html:not([data-developer-mode="true"])
-    .fireteam-member-table .fireteam-member-requirements {
-    width: 46%;
   }
 
   .fireteam-card-titlebar {

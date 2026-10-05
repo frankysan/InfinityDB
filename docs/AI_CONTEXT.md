@@ -108,8 +108,8 @@ because the source does not attach them to a profile group.
   is complete: reviewed batches reject newly introduced plain semantic candidates.
 - Gameplay distance presentation uses the Army/rules round-trip convention **2.5 cm = 1 inch**, not
   the SI physical conversion. Preserve Army metric storage, typed maintained-rule distances, and
-  the `-1/-1` MOV sentinel (`-` / stationary) as distinct semantics; never convert the sentinel as a
-  numeric distance.
+  the `-1/-1` MOV sentinel (stationary) as distinct semantics; render it as an em dash (`—`) and
+  never convert the sentinel as a numeric distance.
 - Use `[[review-needed:<reason>|...]]` for genuinely ambiguous maintained prose rather than choosing
   a target without evidence. Reviewed ordinary-text collisions are fingerprinted to exact passages,
   so wording changes reopen review.

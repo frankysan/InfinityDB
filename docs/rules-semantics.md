@@ -456,7 +456,7 @@ The current Army source serializes those gameplay distances on a nominal metric 
 Army-derived values and typed maintained-rule distances so switching display units round-trips the
 game value exactly. This is a game/source representation convention, not an SI physical conversion;
 do not substitute `2.54 cm` when formatting these values. The Army MOV sentinel `-1/-1` represents
-the rules `-` value (stationary) and must be rendered as semantic absence rather than converted as a
+stationary movement and must be rendered as semantic absence (`—`) rather than converted as a
 negative distance.
 
 Sources:

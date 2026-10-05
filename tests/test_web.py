@@ -388,6 +388,9 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b"army.overview_description" in script
     assert b'if (army.role === "main") return "Main army";' in script
     assert b"staticSymbolPath(army.symbol_path)" in script
+    assert b"article.id = `army-${armyValue(army)}`;" in script
+    assert b"requestAnimationFrame(revealHashTarget);" in script
+    assert b'target.scrollIntoView({ block: "center" });' in script
     assert b'shareStateHref("/units", "units", { army_id: armyValue(army) })' in script
     assert b"army.overview_group" in script
     assert b"Out of catalog" in script
@@ -672,13 +675,10 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'html[data-developer-mode="true"] .fireteam-card {' not in styles
     assert_css_rule(styles, ".fireteam-member-table", {"border": "0"})
     assert_css_rule(styles, ".fireteam-member-table table", {"min-width": "520px"})
-    assert (
-        b"""  html:not([data-developer-mode="true"]) .fireteam-member-table table {
-    width: 100%;
-    min-width: 0;
-    table-layout: fixed;
-  }"""
-        in styles
+    assert_css_rule(
+        styles,
+        'html:not([data-developer-mode="true"]) .fireteam-member-table table',
+        {"width": "100%", "min-width": "0", "table-layout": "fixed"},
     )
     assert (
         b"""  .fireteam-member-table table {
@@ -697,12 +697,16 @@ def test_fireteam_chart_page_and_api_use_application_projection(
   }"""
         in styles
     )
-    assert (
-        b"""  html:not([data-developer-mode="true"]) .fireteam-member-table .table-column--primary {
-    width: 54%;
-    min-width: 0;
-  }"""
-        in styles
+    assert_css_rule(
+        styles,
+        'html:not([data-developer-mode="true"]) .fireteam-member-table .table-column--primary',
+        {"width": "70%", "min-width": "0"},
+    )
+    assert_css_rule(
+        styles,
+        'html:not([data-developer-mode="true"]) '
+        '.fireteam-member-table .fireteam-member-requirements',
+        {"width": "30%"},
     )
     assert_css_rule(
         styles,
@@ -4038,7 +4042,7 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     assert {
         "domain": "Army",
         "name": "Spiral Corps",
-        "href": "/armies",
+        "href": "/armies#army-spiral-corps",
     } in json.loads(body)["items"]
 
     status, _, body = request(app, "/api/search", query="q=combi")
@@ -4863,8 +4867,10 @@ def test_072_detail_and_catalog_presentation_contract(app: Callable, tmp_path: P
     assert status == 200
     assert b"TROOP_TYPE_LABELS" not in presentation_script
     assert b"CHARACTERISTIC_SYMBOLS" not in presentation_script
-    assert b'Number(value) === -1' in presentation_script
-    assert b'return "-"' in presentation_script
+    assert (
+        'if (values.every((value) => Number(value) === -1)) return "—";'.encode()
+        in presentation_script
+    )
     assert b'Number(value) < 0' in presentation_script
     assert b'DISTANCE_CENTIMETERS_PER_INCH' in presentation_script
     assert b'join("-")}\\"`' in presentation_script

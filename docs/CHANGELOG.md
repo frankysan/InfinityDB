@@ -36,6 +36,7 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Web frontend:** Army results that open the Armies overview now target, scroll to, and highlight the matching Army card instead of dropping users at the top of the page.
 - **Web backend + Web frontend:** Clarify Unit pages when optional-unit Settings hide every profile,
   remove redundant one-Unit source Characteristics from the Unit Explorer picker, and treat Army's
   combined Headquarters/Mechanized classification as matching both component filters.
@@ -45,7 +46,7 @@ New or materially revised entries use the project-domain labels defined in
 - **Web backend:** Reject unknown or duplicate semantic query parameters on Fireteam and Unit-detail
   APIs instead of silently ignoring malformed requests, while retaining the Developer-mode cache-bust
   parameter.
-- **Web frontend:** Display stationary MOV profiles using the rules `-` value instead of treating
+- **Web frontend:** Display stationary MOV profiles with an em dash (`—`) instead of treating
   Army's `-1/-1` sentinel as a negative distance, while keeping Army/rules distance conversion
   consistent across Unit profiles, Skill parameters, maintained rules text, and Weapon ranges.
 - **Data processing:** Revalidate Armed Turret against the current N5 v5.3 core rules and
