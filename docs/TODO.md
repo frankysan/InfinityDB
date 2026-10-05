@@ -85,8 +85,9 @@ domain unless required to correct a release-blocking defect.
 - [ ] Implement first-class theme selection using the semantic theme contract documented in
   `docs/architecture.md`, with Light and Dark as the initial themes rather than an architectural
   limit.
-  - [ ] Separate semantic theme tokens from theme-neutral layout/component rules
-    and remove remaining hard-coded light-theme assumptions.
+  - [x] Separate semantic theme tokens from theme-neutral layout/component rules
+    and remove remaining hard-coded light-theme assumptions. The current Light palette now lives
+    entirely in the explicit semantic theme contract, while component/layout rules consume tokens.
   - [ ] Decide and document the default startup behavior (for example, operating-
     system preference versus a fixed project default); an explicit user choice wins.
   - [ ] Add a theme selector to Settings that is data-driven rather than hard-coded as a binary

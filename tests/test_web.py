@@ -7,7 +7,6 @@ import re
 import shutil
 import sqlite3
 import sys
-from collections import Counter
 from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 from typing import Any
@@ -3210,8 +3209,16 @@ def test_unit_details_frontend_marks_surface_and_deepspace_profiles(app: Callabl
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert_css_rule(styles, ".division-badge-surface", {"background": "#256d1b"})
-    assert_css_rule(styles, ".division-badge-deepspace", {"background": "#d68623"})
+    assert_css_rule(
+        styles,
+        ".division-badge-surface",
+        {"background": "var(--color-division-surface)"},
+    )
+    assert_css_rule(
+        styles,
+        ".division-badge-deepspace",
+        {"background": "var(--color-division-deepspace)"},
+    )
 
 
 def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> None:
@@ -3237,22 +3244,33 @@ def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> Non
     assert b".detail-section-title" not in styles
 
 
-def test_recurring_presentation_colors_use_semantic_tokens(app: Callable) -> None:
+def test_presentation_colors_are_owned_by_semantic_theme_contract(app: Callable) -> None:
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
 
     css = styles.decode("utf-8")
     root = re.search(r":root\s*\{.*?\n\}", css, flags=re.DOTALL)
     assert root is not None
+    assert not re.search(r"(?m)^\s*--(?:color|shadow)-", root.group(0))
 
-    component_css = css[: root.start()] + css[root.end() :]
+    light_theme = re.search(
+        r':root,\s*:root\[data-theme="light"\]\s*\{.*?\n\}',
+        css,
+        flags=re.DOTALL,
+    )
+    assert light_theme is not None
+    assert "color-scheme: light;" in light_theme.group(0)
+
+    component_css = (
+        css[: root.start()]
+        + css[root.end() : light_theme.start()]
+        + css[light_theme.end() :]
+    )
     color_literals = re.findall(
         r"#[0-9a-fA-F]{3,8}\b|(?:rgb|rgba)\([^)]*\)",
         component_css,
     )
-    counts = Counter(literal.lower() for literal in color_literals)
-    repeated = {literal: count for literal, count in counts.items() if count > 1}
-    assert repeated == {}
+    assert color_literals == []
 
     for token in [
         "--color-surface-data-header",
@@ -3263,6 +3281,9 @@ def test_recurring_presentation_colors_use_semantic_tokens(app: Callable) -> Non
         "--color-border-subtle",
         "--color-control-border",
         "--color-link-hover",
+        "--color-availability-mercs-surface",
+        "--color-profile-fallback-surface",
+        "--shadow-dialog",
     ]:
         assert f"{token}:".encode() in styles
 

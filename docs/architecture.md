@@ -303,10 +303,14 @@ accessibility are owned by `docs/web-design-guidelines.md`.
 
 ### Design direction: theming
 
-The current CSS token layer should continue moving toward a first-class semantic theme system rather
-than page-local colors or layout exceptions. Light/Dark selection and any later themes are design
-direction, not current user-facing behavior. Components must not encode a specific palette as game
-semantics. Concrete unfinished theming work is tracked only in `docs/TODO.md`.
+The browser CSS separates theme-neutral geometry/typography from an explicit semantic theme
+contract. Component and layout rules consume semantic color/shadow roles rather than concrete
+palette literals; the existing Light palette is the first implementation of that contract. Domain
+identity colors such as faction and rules-category accents remain semantic data roles inside the
+theme layer so a theme can provide contrast-safe values without changing domain meaning.
+
+Light/Dark selection and any later themes remain unfinished user-facing behavior. Concrete unfinished
+theming work is tracked only in `docs/TODO.md`.
 
 ## Privacy-preserving observability
 
