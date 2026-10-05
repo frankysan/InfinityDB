@@ -2,6 +2,7 @@ import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
+import { tableViewport } from "./view-components.js";
 import {
   gameplayVariantRules,
   levelEffectsSection,
@@ -59,13 +60,6 @@ function sourceVariantLabel(variant) {
 
 function text(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
-}
-
-function tableViewport(table, className = "") {
-  const container = document.createElement("div");
-  container.className = `table-viewport${className ? ` ${className}` : ""}`;
-  container.append(table);
-  return container;
 }
 
 function weaponTraitLinks(traits) {
@@ -306,10 +300,7 @@ function usageSections(item) {
         const body = document.createElement("tbody");
         renderUnitRows(body, variant.units);
         table.append(body);
-        const container = document.createElement("div");
-        container.className = "table-viewport";
-        container.append(table);
-        section.append(container);
+        section.append(tableViewport(table));
         section.dataset.loaded = "true";
       });
       return section;

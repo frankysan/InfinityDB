@@ -403,6 +403,54 @@ def test_browser_pages_load_only_their_owned_page_modules(app: Callable) -> None
     assert b'/static/app.js' not in glossary
 
 
+def test_browser_view_components_own_shared_presentation_primitives(app: Callable) -> None:
+    status, headers, components = request(app, "/static/view-components.js")
+
+    assert status == 200
+    assert headers["content-type"].startswith("text/javascript")
+    assert b"function createPanelSwitcher(" in components
+    assert b'container.setAttribute("aria-busy", String(panel === loading))' in components
+    assert b"function tableViewport(" in components
+    assert (
+        b'container.className = `table-viewport${className ? ` ${className}` : ""}`'
+        in components
+    )
+
+    panel_consumers = (
+        "armies.js",
+        "catalog-list.js",
+        "fireteams.js",
+        "glossary.js",
+        "reference-catalog.js",
+        "search.js",
+        "skill-extras.js",
+        "units.js",
+    )
+    for asset in panel_consumers:
+        status, _, script = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b'from "./view-components.js"' in script
+
+    table_consumers = (
+        "catalog-detail.js",
+        "fireteams.js",
+        "hacking-program-detail.js",
+        "rules-reference.js",
+        "skill.js",
+    )
+    for asset in table_consumers:
+        status, _, script = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b"tableViewport(" in script
+        assert b'className = "table-viewport' not in script
+
+    status, _, catalog_list = request(
+        app, f"/static/catalog-list.js?v={STATIC_ASSET_VERSION}"
+    )
+    assert status == 200
+    assert f'from "./view-components.js?v={STATIC_ASSET_VERSION}"'.encode() in catalog_list
+
+
 def test_legacy_app_static_url_serves_unit_explorer(app: Callable) -> None:
     status, headers, body = request(app, f"/static/app.js?v={STATIC_ASSET_VERSION}")
 
@@ -2309,7 +2357,7 @@ def test_secondary_tables_use_shared_semantic_layout(app: Callable) -> None:
 
     status, _, catalog_detail = request(app, "/static/catalog-detail.js")
     assert status == 200
-    assert b"function tableViewport(table, className = \"\")" in catalog_detail
+    assert b'import { tableViewport } from "./view-components.js";' in catalog_detail
     assert b'data-table--compact data-table--profile weapon-statline' in catalog_detail
     assert (
         b'data-table--compact data-table--listing data-table--unit-list '

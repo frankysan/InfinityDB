@@ -1,6 +1,7 @@
 import { getArmies } from "./api.js";
 import { shareStateHref } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
+import { createPanelSwitcher } from "./view-components.js";
 
 const number = new Intl.NumberFormat();
 const byId = (id) => document.getElementById(id);
@@ -15,12 +16,11 @@ const elements = {
 };
 const controller = new AbortController();
 
-function show(panel) {
-  for (const element of [elements.loading, elements.error, elements.empty, elements.groups]) {
-    element.hidden = element !== panel;
-  }
-  elements.results.setAttribute("aria-busy", String(panel === elements.loading));
-}
+const show = createPanelSwitcher({
+  container: elements.results,
+  loading: elements.loading,
+  panels: [elements.loading, elements.error, elements.empty, elements.groups],
+});
 
 function armyValue(army) {
   return army.public_slug || army.slug || String(army.id);

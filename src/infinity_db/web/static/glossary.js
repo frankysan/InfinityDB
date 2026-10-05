@@ -1,6 +1,7 @@
 import { getGlossary } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
+import { createPanelSwitcher } from "./view-components.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -16,12 +17,11 @@ const elements = {
 const controller = new AbortController();
 const query = readShareState("glossary").params.get("q")?.trim().slice(0, 200) || "";
 
-function show(panel) {
-  for (const element of [elements.loading, elements.error, elements.empty, elements.list]) {
-    element.hidden = element !== panel;
-  }
-  elements.results.setAttribute("aria-busy", String(panel === elements.loading));
-}
+const show = createPanelSwitcher({
+  container: elements.results,
+  loading: elements.loading,
+  panels: [elements.loading, elements.error, elements.empty, elements.list],
+});
 
 function anchorId(item) {
   return item.id.replaceAll(":", "-");

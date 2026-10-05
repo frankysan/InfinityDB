@@ -5,6 +5,7 @@ import {
 } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 import { readShareState, writeShareState } from "./share-state.js";
+import { createPanelSwitcher } from "./view-components.js";
 
 const PAGE_SIZE = 50;
 const number = new Intl.NumberFormat();
@@ -391,13 +392,17 @@ function updateSortButton() {
   elements.sort.setAttribute("aria-sort", state.descending ? "descending" : "ascending");
 }
 
+const switchPanel = createPanelSwitcher({
+  container: elements.results,
+  loading: elements.loading,
+  panels: [elements.loading, elements.error, elements.empty, elements.table],
+});
+
 function showPanel(panel) {
-  for (const element of [elements.loading, elements.error, elements.empty, elements.table]) {
-    element.hidden = element !== panel;
+  switchPanel(panel);
+  if (panel !== elements.table) {
+    elements.pagination.forEach((pagination) => { pagination.hidden = true; });
   }
-  const loading = panel === elements.loading;
-  elements.results.setAttribute("aria-busy", String(loading));
-  if (panel !== elements.table) elements.pagination.forEach((pagination) => { pagination.hidden = true; });
 }
 
 function armyFilterValue(army) {

@@ -1,5 +1,6 @@
 import { getSkillExtras } from "./api.js";
 import { formatSkillDistanceExtra } from "./distance.js";
+import { createPanelSwitcher } from "./view-components.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -10,12 +11,11 @@ const elements = {
 let items = [];
 const pageController = new AbortController();
 
-function show(panel) {
-  for (const element of [elements.loading, elements.error, elements.empty, elements.table]) {
-    element.hidden = element !== panel;
-  }
-  elements.results.setAttribute("aria-busy", String(panel === elements.loading));
-}
+const show = createPanelSwitcher({
+  container: elements.results,
+  loading: elements.loading,
+  panels: [elements.loading, elements.error, elements.empty, elements.table],
+});
 
 function renderItems(items) {
   const fragment = document.createDocumentFragment();

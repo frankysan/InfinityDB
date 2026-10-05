@@ -1,5 +1,6 @@
 import { getCatalogItems } from "./api.js";
 import { readCatalogSearchQuery, replaceCatalogSearchQuery } from "./catalog-search-state.js";
+import { createPanelSwitcher } from "./view-components.js";
 
 const { catalog, singular, plural } = document.body.dataset;
 const pageController = new AbortController();
@@ -18,12 +19,11 @@ const elements = {
 let items = [];
 let searchTimer;
 
-function show(panel) {
-  for (const element of [elements.loading, elements.error, elements.empty, elements.table]) {
-    element.hidden = element !== panel;
-  }
-  elements.results.setAttribute("aria-busy", String(panel === elements.loading));
-}
+const show = createPanelSwitcher({
+  container: elements.results,
+  loading: elements.loading,
+  panels: [elements.loading, elements.error, elements.empty, elements.table],
+});
 
 function render() {
   const query = elements.search.value.trim().toLocaleLowerCase();

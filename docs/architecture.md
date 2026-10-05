@@ -289,6 +289,11 @@ preference/UI modules; page modules pass presentation-derived request state expl
 modules are named for and loaded only by the pages that own them; shell-only or server-rendered pages
 must not load an unrelated page module just to obtain shared behavior.
 
+Reusable browser view primitives that encode shared presentation contracts live in
+`static/view-components.js`. They own generic behaviors such as mutually exclusive page-state panels
+with `aria-busy` synchronization and the canonical table-viewport wrapper; they must not absorb
+domain interpretation or page-specific state.
+
 Soft navigation must preserve the shared shell while disposing transient page listeners/requests
 before replacing content. Release/static/snapshot revision changes trigger a clean reload rather than
 mixing incompatible module/data generations.

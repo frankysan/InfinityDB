@@ -4,6 +4,7 @@ import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
+import { tableViewport } from "./view-components.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
   || window.location.pathname.split("/").pop();
@@ -65,8 +66,6 @@ function structuredTable(titleText, columns, rows) {
   const title = document.createElement("h2");
   title.className = "detail-heading";
   title.textContent = titleText;
-  const container = document.createElement("div");
-  container.className = "table-viewport";
   const table = document.createElement("table");
   table.className = "data-table--compact data-table--reference";
   const caption = document.createElement("caption");
@@ -89,8 +88,7 @@ function structuredTable(titleText, columns, rows) {
     body.append(row);
   }
   table.append(caption, head, body);
-  container.append(table);
-  section.append(title, container);
+  section.append(title, tableViewport(table));
   return section;
 }
 
@@ -207,10 +205,7 @@ function variantSection(variant, parameterSemantics) {
     const body = document.createElement("tbody");
     renderUnitRows(body, variant.units);
     table.append(body);
-    const container = document.createElement("div");
-    container.className = "table-viewport";
-    container.append(table);
-    section.append(container);
+    section.append(tableViewport(table));
     section.dataset.loaded = "true";
   });
   return section;

@@ -58,7 +58,7 @@ domain unless required to correct a release-blocking defect.
     `src/infinity_db/web/presentation.py` and JSON/domain handling to
     `src/infinity_db/web/api_handler.py`, with shared route
     identities and response values kept separate from both.
-  - [ ] Organize browser code around explicit API transport, preferences/theme
+  - [x] Organize browser code around explicit API transport, preferences/theme
     state, reusable view/components, and page modules; keep JSON API access routed
     through `api.js`.
     - [x] Decouple application API wrappers from preference/UI modules: `api.js` now delegates
@@ -71,6 +71,9 @@ domain unless required to correct a release-blocking defect.
       no longer load the legacy `app.js` entry point, and server-rendered Changes/Glossary pages do
       not execute Unit Explorer code. `/static/app.js` remains only as a compatibility URL alias for
       cached pre-refactor Unit Explorer documents.
+    - [x] Establish a reusable browser view/component boundary: `view-components.js` now owns
+      shared page-state panel switching/`aria-busy` behavior and the canonical table-viewport
+      wrapper, while page modules retain page state and domain-specific rendering.
   - [ ] Add focused contract/regression coverage as responsibilities move so domain
     interpretation cannot silently migrate back into browser code.
     - [x] Pin Python route ownership so presentation handling does not absorb `/api/*` and API
