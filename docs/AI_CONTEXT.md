@@ -89,6 +89,9 @@ logical Unit. In particular, AVA is contextual to an Army/profile occurrence, wh
 are loadout facts. When those constraints participate in a query, other selected profile/loadout
 criteria must be satisfiable in the same compatible context. Unit-wide option facts remain Unit-wide
 because the source does not attach them to a profile group.
+- Unit Explorer source-filter overlays are maintained semantics, not source rewrites. Combined source
+  Classifications may match multiple public Classification filters, and redundant source
+  Characteristics may be hidden from the picker while remaining preserved/queryable.
 
 ## Rules/reference invariants
 

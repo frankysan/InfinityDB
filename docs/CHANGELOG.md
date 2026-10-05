@@ -36,6 +36,9 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Web backend + Web frontend:** Clarify Unit pages when optional-unit Settings hide every profile,
+  remove redundant one-Unit source Characteristics from the Unit Explorer picker, and treat Army's
+  combined Headquarters/Mechanized classification as matching both component filters.
 - **Deployment:** Include the published Peripheral SVG namespace in wheel/container package data,
   and pin package-data coverage against the tracked symbol-publication manifest so a complete source
   tree cannot produce an incomplete release image.

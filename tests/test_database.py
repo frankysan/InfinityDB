@@ -74,6 +74,8 @@ from infinity_db.rules_database import (
 )
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.trait_catalog import TraitCatalog
+from infinity_db.unit_filter_config import load_unit_filter_config
+from infinity_db.unit_presentation import enrich_unit_filter_presentation
 
 FINALIZE_TEST_DATABASES = os.environ.get("INFINITYDB_TEST_FINALIZE_SQLITE") == "1"
 
@@ -2844,6 +2846,54 @@ def test_unit_catalog_filter_expands_logical_equipment_identity(
     for equipment_ref in (244, 235, "tinbot"):
         result = database.list_units(equipment_id=equipment_ref)
         assert {item["id"] for item in result["items"]} == expected_ids
+
+
+def test_tracked_unit_filter_semantics_preserve_source_facts_and_public_filter_meaning() -> None:
+    database = Database(Path("data/generated/infinity.db"))
+    raw = database.list_unit_filter_values()
+    public = enrich_unit_filter_presentation(raw)
+    config = load_unit_filter_config()
+
+    raw_characteristics = {item["slug"] for item in raw["characteristics"]}
+    public_characteristics = {item["slug"] for item in public["characteristics"]}
+    assert config.hidden_characteristics <= raw_characteristics
+    assert config.hidden_characteristics.isdisjoint(public_characteristics)
+
+    membership = config.classification_memberships[0]
+    raw_classifications = {item["slug"] for item in raw["classifications"]}
+    public_classifications = {item["slug"] for item in public["classifications"]}
+    assert membership.source_classification in raw_classifications
+    assert membership.source_classification not in public_classifications
+    assert set(membership.matches) <= public_classifications
+
+    combined = database.list_units(
+        classification=membership.source_classification, limit=500
+    )["items"]
+    assert [item["name"] for item in combined] == ["MARUTS"]
+    for classification in membership.matches:
+        names = {
+            item["name"]
+            for item in database.list_units(classification=classification, limit=500)["items"]
+        }
+        assert "MARUTS" in names
+        contextual_names = {
+            item["name"]
+            for item in database.list_units(
+                classification=classification, points=86, limit=500
+            )["items"]
+        }
+        assert "MARUTS" in contextual_names
+
+    hidden_expected = {
+        "mechanical-transmutation": "SÙ-JIÀN Immediate Action Unit",
+        "shasvastii": "Shasvastii Airborne Infiltration Group CADMUS",
+    }
+    for characteristic, expected_unit in hidden_expected.items():
+        names = {
+            item["name"]
+            for item in database.list_units(characteristic=characteristic, limit=500)["items"]
+        }
+        assert names == {expected_unit}
 
 
 def test_unit_categorical_filters_use_stable_public_slugs(

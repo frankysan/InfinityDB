@@ -7,6 +7,8 @@ from copy import deepcopy
 from typing import Any
 from urllib.parse import quote
 
+from infinity_db.unit_filter_config import load_unit_filter_config
+
 OPTIONAL_AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
 
 _TROOP_TYPE_LABELS = {
@@ -464,11 +466,26 @@ def _annotate_composite_option_presentations(armies: Iterable[dict[str, Any]]) -
 
 
 def enrich_unit_filter_presentation(payload: dict[str, Any]) -> dict[str, Any]:
-    """Attach player-facing Unit-filter labels without changing filter identities."""
+    """Attach player-facing Unit-filter labels and reviewed vocabulary overlays."""
 
     result = deepcopy(payload)
+    config = load_unit_filter_config()
     for item in result.get("troop_types", ()):
         item["display_name"] = troop_type_label(item.get("name"))
+    result["characteristics"] = [
+        item
+        for item in result.get("characteristics", ())
+        if item.get("slug") not in config.hidden_characteristics
+    ]
+    combined_classifications = {
+        membership.source_classification
+        for membership in config.classification_memberships
+    }
+    result["classifications"] = [
+        item
+        for item in result.get("classifications", ())
+        if item.get("slug") not in combined_classifications
+    ]
     return result
 
 

@@ -2993,6 +2993,27 @@ def test_unit_details_frontend_labels_vitality_as_vita_or_str(app: Callable) -> 
     assert "is_structure" in json.loads(api_body)["general_profiles"][0]["stats"]
 
 
+def test_unit_details_frontend_explains_when_optional_settings_hide_every_profile(
+    app: Callable,
+) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'army.presentation_visible === false' in body
+    assert b'"Profiles filtered out"' in body
+    assert (
+        b'"This Unit has profile details, but all of them are hidden by your current '
+        b'optional-unit settings.' in body
+    )
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".unit-filtered-notice",
+        {"width": "min(760px, 100%)", "padding": "18px 20px"},
+    )
+
+
 def test_unit_details_frontend_pluralizes_general_profile_heading(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200

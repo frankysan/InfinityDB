@@ -1209,6 +1209,18 @@ function renderArmyProfile(army, generalByIdentity, expanded) {
   return section;
 }
 
+function filteredProfilesNotice() {
+  const notice = document.createElement("section");
+  notice.className = "surface surface--subtle content-frame unit-filtered-notice";
+  notice.setAttribute("role", "status");
+  const title = document.createElement("h2");
+  title.textContent = "Profiles filtered out";
+  const message = document.createElement("p");
+  message.textContent = "This Unit has profile details, but all of them are hidden by your current optional-unit settings. Enable the relevant optional-unit category in Settings to show them.";
+  notice.append(title, message);
+  return notice;
+}
+
 function render(unit, helpItems = [], attributeItems = []) {
   content.replaceChildren();
   profileHelpEntries = new Map(helpItems.map((item) => [item.key, item]));
@@ -1276,7 +1288,9 @@ function render(unit, helpItems = [], attributeItems = []) {
   }
   const profileHelp = renderProfileNotationHelp(helpItems);
   if (profileHelp) content.append(profileHelp);
-  content.append(generalProfilesSection);
+  const profilesFilteredOut = armies.length === 0
+    && unit.armies.some((army) => army.presentation_visible === false);
+  content.append(profilesFilteredOut ? filteredProfilesNotice() : generalProfilesSection);
   const sourceNotes = renderSourceNotes(unit, armies);
   if (sourceNotes) content.append(sourceNotes);
   const armyRelationships = renderArmyRelationships(unit, unit.armies);

@@ -103,6 +103,16 @@ def test_docker_build_copies_curated_wheel_data_inputs() -> None:
     assert "rm -rf /app/config /app/data/curated" in dockerfile
 
 
+def test_wheel_packages_runtime_unit_filter_semantics() -> None:
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)
+
+    catalog_data = project["tool"]["setuptools"]["data-files"][
+        "share/infinity-db/config/catalogs"
+    ]
+    assert "config/catalogs/unit-filter-semantics.json" in catalog_data
+
+
 def test_wheel_package_data_covers_every_published_symbol() -> None:
     with (ROOT / "pyproject.toml").open("rb") as handle:
         project = tomllib.load(handle)

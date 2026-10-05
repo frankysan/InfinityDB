@@ -1823,6 +1823,24 @@ h1>span {
   gap: 10px;
 }
 
+.unit-filtered-notice {
+  width: min(760px, 100%);
+  padding: 18px 20px;
+}
+
+.unit-filtered-notice h2 {
+  margin: 0 0 6px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.unit-filtered-notice p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
 .unit-detail .general-profile-group--faction-panoceania {
   --color-general-profile-primary: var(--color-faction-panoceania-primary);
   --color-general-profile-secondary: var(--color-faction-panoceania-secondary);

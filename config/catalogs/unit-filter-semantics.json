@@ -1,0 +1,24 @@
+{
+  "format": "InfinityDB Unit filter semantics",
+  "formatVersion": 1,
+  "hiddenCharacteristics": [
+    {
+      "characteristic": "mechanical-transmutation",
+      "reason": "Infinity Army exposes Mechanical Transmutation as a characteristic only on the Su-Jian profiles, while the current rules/application semantic is already represented by the Transmutation Skill. Keep the source fact but do not offer the duplicate one-Unit characteristic filter."
+    },
+    {
+      "characteristic": "shasvastii",
+      "reason": "Infinity Army exposes Shasvastii as a characteristic only on the Cadmus Developed Shape, while the current rules/application semantic is already represented by the Shasvastii Skill. Keep the source fact but do not offer the duplicate one-Unit characteristic filter."
+    }
+  ],
+  "classificationMemberships": [
+    {
+      "sourceClassification": "headquarters-troops-mechanized-troops",
+      "matches": [
+        "headquarters-troops",
+        "mechanized-troops"
+      ],
+      "reason": "Infinity Army classifies the Marut with one combined source value. Unit Explorer filtering should treat that source value as membership in both component classifications rather than presenting a third standalone filter choice."
+    }
+  ]
+}

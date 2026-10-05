@@ -238,6 +238,12 @@ When AVA/Points/SWC participates in a query, another selected profile/loadout cr
 satisfied by an unrelated option elsewhere on the same logical Unit. This prevents semantically
 impossible cross-option matches.
 
+Unit Explorer filter vocabulary may also apply a maintained application overlay without rewriting
+the source facts. A combined source Classification can participate in more than one public
+Classification filter, while source Characteristics that duplicate a canonical current Skill can be
+omitted from the picker as redundant. The original category/characteristic rows remain preserved
+and direct identifiers remain queryable for compatibility and provenance.
+
 AVA preserves `Total` as a first-class display/exact-filter value. Negative ancillary/source AVA
 sentinels are not ordinary player-facing AVA values. SWC preserves ordinary costs separately from
 bonus/non-cost source forms such as `+1`, `+1.5`, or `-`; numeric ranges apply only where numeric
