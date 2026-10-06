@@ -82,7 +82,7 @@ domain unless required to correct a release-blocking defect.
     - [x] Add browser/backend semantic-boundary coverage while moving remaining inferred domain
       labels/symbol roles out of page modules.
 
-- [ ] Implement first-class theme selection using the semantic theme contract documented in
+- [x] Implement first-class theme selection using the semantic theme contract documented in
   `docs/architecture.md`, with Light and Dark as the initial themes rather than an architectural
   limit.
   - [x] Separate semantic theme tokens from theme-neutral layout/component rules
@@ -100,7 +100,7 @@ domain unless required to correct a release-blocking defect.
     (initially Light and Dark). Compact text/status roles now have executable contrast
     thresholds, focus and other meaningful graphical cues have non-text thresholds, and
     faction gradients remain supplementary to textual identity rather than carrying meaning alone.
-  - [ ] Add regression coverage for initialization, switching, persistence, and
+  - [x] Add regression coverage for initialization, switching, persistence, and
     representative core pages across every shipped theme.
 
 - [ ] Add a project favicon derived from `infinitydb-logo.svg` and keep it legible

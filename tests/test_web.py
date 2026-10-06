@@ -6,6 +6,7 @@ import json
 import re
 import shutil
 import sqlite3
+import subprocess
 import sys
 from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
@@ -2662,6 +2663,91 @@ def test_theme_selection_uses_prepaint_shared_preference_contract(app: Callable)
     assert startup_src in body
     assert body.index(startup_src) < body.index(stylesheet_href)
 
+
+
+def test_theme_runtime_initialization_switching_and_persistence() -> None:
+    root = Path(__file__).resolve().parents[1]
+    harness = root / "tests" / "theme_runtime_harness.cjs"
+    startup = root / "src" / "infinity_db" / "web" / "static" / "theme-startup.js"
+    preferences = root / "src" / "infinity_db" / "web" / "static" / "preferences.js"
+
+    node = shutil.which("node")
+    if node is not None:
+        command = [node]
+    else:
+        try:
+            importlib.import_module("nodejs_wheel")
+        except ModuleNotFoundError:
+            pytest.fail("Theme runtime regression test requires the dev Node.js dependency.")
+        command = [sys.executable, "-m", "nodejs_wheel"]
+
+    completed = subprocess.run(
+        [*command, str(harness), str(startup), str(preferences)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    runtime = json.loads(completed.stdout)
+
+    assert runtime["options"] == ["system", "light", "dark"]
+    assert runtime["startup"] == {
+        "defaultLight": {"themePreference": "system", "theme": "light"},
+        "defaultDark": {"themePreference": "system", "theme": "dark"},
+        "sessionWinsWithoutRemember": {"themePreference": "dark", "theme": "dark"},
+        "cookieWinsWhenRemembered": {"themePreference": "light", "theme": "light"},
+        "invalidFallsBackToSystem": {"themePreference": "system", "theme": "dark"},
+        "switchDark": {"themePreference": "dark", "theme": "dark"},
+        "switchLight": {"themePreference": "light", "theme": "light"},
+        "systemTracksChange": {"themePreference": "system", "theme": "dark"},
+    }
+    assert runtime["persistence"] == {
+        "transientSave": {"selection": "dark", "session": "dark", "cookie": None},
+        "rememberedSave": {"selection": "light", "session": "light", "cookie": "light"},
+        "restored": {"selection": "dark", "session": "dark", "cookie": "dark"},
+        "invalidNormalized": {"selection": "system", "session": "system", "cookie": "system"},
+        "forgotten": {"selection": "light", "session": "light", "cookie": None},
+    }
+
+
+def test_representative_pages_share_theme_runtime_contract(app: Callable) -> None:
+    status, _, startup = request(app, "/static/theme-startup.js")
+    assert status == 200
+    registered = re.findall(rb'Object\.freeze\(\{ value: "([^"]+)", label:', startup)
+    explicit_themes = [theme for theme in registered if theme != b"system"]
+    assert explicit_themes
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    for theme in explicit_themes:
+        assert b':root[data-theme="' + theme + b'"]' in styles
+
+    startup_src = f'src="/static/theme-startup.js?v={STATIC_ASSET_VERSION}"'.encode()
+    settings_src = f'src="/static/settings.js?v={STATIC_ASSET_VERSION}"'.encode()
+    stylesheet_href = f'href="/static/styles.css?v={STATIC_ASSET_VERSION}"'.encode()
+    representative_paths = (
+        "/",
+        "/units",
+        "/units/ranger-prototype",
+        "/skills",
+        "/skills/11",
+        "/fireteams",
+        "/glossary",
+        "/changes",
+        "/about",
+    )
+
+    for path in representative_paths:
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b'<meta name="color-scheme" content="light dark">' in body
+        assert b'id="theme-selector" class="setting-select"' in body
+        assert startup_src in body
+        assert settings_src in body
+        assert stylesheet_href in body
+        assert body.index(startup_src) < body.index(stylesheet_href)
+        opening_html = re.search(rb"<html\b[^>]*>", body)
+        assert opening_html is not None
+        assert b"data-theme=" not in opening_html.group(0)
 
 
 def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> None:

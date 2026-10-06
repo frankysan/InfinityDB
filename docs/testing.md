@@ -67,6 +67,16 @@ python -m pyright
 
 Do not report Ruff/Pyright as run when those tools are unavailable in the active environment.
 
+## Theme runtime regression coverage
+
+The web test suite executes the checked-in theme startup and preference modules in a minimal Node.js
+runtime harness. This pins pre-paint System/Light/Dark resolution, session-versus-cookie precedence,
+explicit switching, normalization, and remembered-setting behavior without introducing a browser or
+JavaScript build dependency. The development dependency set already provides Node.js through
+`pyright[nodejs]`; the test also accepts a normal `node` executable when one is already available.
+Representative server-rendered pages separately verify that the shared pre-paint bootstrap and
+semantic theme stylesheet are present in the correct order.
+
 ## Maintained pytest sections
 
 `config/testing/test-sections.json` defines coarse, maintained slices of the test suite. The current
