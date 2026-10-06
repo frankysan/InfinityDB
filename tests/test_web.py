@@ -2065,9 +2065,20 @@ def test_player_page_framing_uses_reference_language(app: Callable) -> None:
     status, _, units = request(app, "/units")
     assert status == 200
     assert b"Browse units<br" in units
+    assert b'<span class="catalog-tag"><span aria-hidden="true"></span> Units</span>' in units
+    assert b'aria-label="Unit counts"' in units
+    assert b">01 / UNITS</span>" in units
+    assert b"Enable JavaScript to browse and filter units." in units
     assert b'<span class="stat-label">Armies</span>' in units
+    assert b"Unit catalog" not in units
+    assert b"01 / CATALOG" not in units
     assert b"Browse the database" not in units
     assert b"Armies indexed" not in units
+
+    status, _, unit_detail = request(app, "/units/example")
+    assert status == 200
+    assert b'<span class="catalog-tag"><span aria-hidden="true"></span> Units</span>' in unit_detail
+    assert b"Unit catalog" not in unit_detail
 
     status, _, search = request(app, "/search")
     assert status == 200

@@ -194,7 +194,7 @@ _FIXED_PAGES = {
     "/units": PageSpec(
         "units.html",
         (("InfinityDB", "/"), ("Units", None)),
-        "Unit catalog",
+        "Units",
         "units",
     ),
     "/search": PageSpec(
@@ -320,7 +320,7 @@ _DETAIL_PAGES = (
         PageSpec(
             "unit.html",
             (("InfinityDB", "/"), ("Units", "/units"), ("Details", None)),
-            "Unit catalog",
+            "Units",
             "units",
         ),
     ),
