@@ -632,7 +632,7 @@ function renderSourceNotes(unit, armies) {
 
   const section = document.createElement("section");
   section.className = "detail-group source-notes";
-  const title = heading("Source notes");
+  const title = heading("Unit notes");
   title.className = "detail-heading detail-heading--rule";
   section.append(title);
 

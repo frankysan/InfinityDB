@@ -76,6 +76,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend:** Rename Unit-detail **Source notes** to **Unit notes**, keeping the
+  Army-specific applicability visible while removing source-processing terminology from the player
+  view.
 - **Web frontend:** Present unresolved maintained rules text as **Needs verification** with an
   **uncertain** marker and player-readable reasons, while keeping the underlying review marker
   available to the curation workflow.

@@ -3940,7 +3940,8 @@ def test_unit_details_frontend_presents_source_attributed_notes(app: Callable) -
 
     assert status == 200
     assert b"function renderSourceNotes(unit, armies)" in unit_js
-    assert b'heading("Source notes")' in unit_js
+    assert b'heading("Unit notes")' in unit_js
+    assert b'heading("Source notes")' not in unit_js
     assert b"it is not a rule for every profile shown for this Unit" in unit_js
     assert b'intro.className = "army-relationship-intro developer-only";' in unit_js
     assert b"const appliesToAllShownArmies = shownArmyIds.size > 0" in unit_js
