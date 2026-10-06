@@ -189,3 +189,17 @@ def test_maintained_documentation_falls_back_to_installed_share(tmp_path: Path) 
         )
         == installed
     )
+
+
+def test_readme_publishes_user_facing_privacy_policy() -> None:
+    root = Path(__file__).resolve().parents[1]
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    normalized = " ".join(readme.split())
+
+    assert "## Privacy policy" in readme
+    assert "without visitor-level tracking" in normalized
+    assert "`sessionStorage` by default" in readme
+    assert "does not use `localStorage`" in readme
+    assert "Persistent cookies are opt-in" in readme
+    assert "for up to one year" in readme
+    assert "query or search terms" in readme

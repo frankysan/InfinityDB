@@ -2508,6 +2508,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'id="cookie-consent-dialog"' in body
     assert b"Allow cookies" in body
     assert b"Remember settings with browser cookies" in body
+    assert b'href="/about#privacy-policy"' in body
     assert b"Fireteam Wildcard" in body
     assert b"your theme, distance, optional-unit" in body
     assert b"InfinityDB / Player reference" in body
@@ -2964,6 +2965,13 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert b"developed in the open" in body
     assert b"https://github.com/frankysan/InfinityDB" in body
     assert b"LLM code disclosure" in body
+    assert b'id="privacy-policy"' in body
+    assert b"Privacy policy" in body
+    assert b"No visitor profiles" in body
+    assert b"sessionStorage" in body
+    assert b"localStorage" in body
+    assert b"last for up to one year" in body
+    assert b"query/search values from its aggregate metrics" in body
     assert b"Version 0.8 connects more of the game" in body
     assert b"Version 0.9 closes the remaining application-presentation gaps" in body
     assert b"0.10 is the consistency, presentation, and release-hardening pass" in body

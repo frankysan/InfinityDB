@@ -9,6 +9,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Web frontend + Project infrastructure:** Publish a user-facing privacy policy in the README and
+  About page explaining InfinityDB's no-profile/no-visitor-tracking stance, aggregate-only
+  operational metrics, session-only browser settings by default, opt-in preference cookies, and
+  shareable URL state. The cookie-consent dialog links directly to the policy.
 - **Deployment + Project infrastructure:** Add bounded sanitized deployment diagnostics for the
   existing Caddy/Gunicorn Docker log streams, retaining warning/error-class summaries and grouped
   samples while redacting request targets and identity-like values instead of archiving raw logs.

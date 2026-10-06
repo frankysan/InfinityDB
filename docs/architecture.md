@@ -337,6 +337,9 @@ identity. Remaining cross-theme page regression work is tracked only in `docs/TO
 
 ## Privacy-preserving observability
 
+The user-facing privacy policy is published in the project `README.md` and on `/about#privacy-policy`.
+This architecture section owns the implementation constraints behind that policy.
+
 Production observability is aggregate-first. InfinityDB may collect bounded metrics such as
 normalized-route request counts, status classes, latency/response-size histograms, active requests,
 and build identity. Query strings, search terms, IP addresses, user agents, referrers, cookies,

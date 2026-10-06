@@ -18,6 +18,36 @@ Current release: **0.9.1** (2026-09-30).
 - **Privacy:** collect only the aggregate operational information needed to run
   and improve the service; do not build visitor profiles or persistent tracking.
 
+## Privacy policy
+
+InfinityDB is designed to be useful without an account and without visitor-level
+tracking. The application does not build user profiles, assign persistent visitor
+identifiers, or use advertising trackers, fingerprinting, or per-user analytics.
+
+- **Operational monitoring is aggregate-only.** InfinityDB records bounded route,
+  status-class, latency, response-size, active-request, and build/snapshot metrics.
+  IP addresses/geolocation, user agents or fingerprints, referrers, cookie/session/
+  preference values, query or search terms, unique/returning-user identifiers, and
+  per-user navigation histories are excluded from those metrics.
+- **Temporary settings stay in the browser session.** Theme, distance, optional-unit,
+  Fireteam Wildcard, developer-mode, and related display preferences use browser
+  `sessionStorage` by default. InfinityDB does not use `localStorage`.
+- **Persistent cookies are opt-in.** Enabling **Remember settings** and accepting the
+  confirmation stores first-party preference cookies for up to one year. They contain
+  settings values only, not a visitor identifier. Turning **Remember settings** off
+  deletes those InfinityDB cookies; current-session values can remain until that
+  browser tab/session ends.
+- **Shareable state can appear in the URL.** Search/filter state that needs to be
+  bookmarkable or shareable may be encoded in the URL, so it can also appear in your
+  browser history or in a link you choose to share. InfinityDB does not retain those
+  query/search values in its aggregate metrics.
+
+This policy describes InfinityDB's application-level collection and retention. Hosting
+and network infrastructure necessarily processes connection metadata to deliver HTTP
+traffic, and external links are governed by the destination site's own privacy policy;
+InfinityDB does not use that connection metadata for visitor analytics or store it in
+its application metrics.
+
 ## Current features
 
 - Imports validated Infinity Army snapshots into a local SQLite database and
