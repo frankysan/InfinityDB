@@ -124,7 +124,7 @@ normal local working tree:
 
 ### Changelog discipline
 
-`docs/CHANGELOG.md` is the canonical release history and should be written so it can also serve as the source for a user-facing **Changes** page.
+`docs/CHANGELOG.md` is the canonical release history and should be written so it can also serve as the source for the user-facing **What's changed** page.
 
 Record **meaningful release outcomes**, not a detailed implementation history. Prefer describing what was added, what behaves differently, what was fixed, or what an operator must do when upgrading.
 
@@ -133,7 +133,8 @@ When adding or consolidating changelog entries:
 - Write from the perspective of a user or operator of InfinityDB.
 - Describe the resulting capability, behavior, correctness improvement, or upgrade consequence rather than the implementation steps that produced it.
 - Consolidate related engineering changes into a single outcome-oriented entry where they form one coherent improvement.
-- Keep `Added`, `Changed`, and `Fixed` as the normal categories. Use an `Upgrade notes` section when a release requires an explicit action such as rebuilding generated databases.
+- Begin every release, including `Unreleased`, with a `Player summary` section. Keep it concise and include only changes that are visible or directly useful to players; use `No player-facing changes.` when a release has none. The browser publishes this section openly and keeps the fuller release detail collapsed by default.
+- Keep `Added`, `Changed`, and `Fixed` as the normal detailed categories. Use an `Upgrade notes` section when a release requires an explicit action such as rebuilding generated databases.
 - Keep wording understandable without requiring knowledge of InfinityDB's internal architecture, build pipeline, CI setup, or implementation tools.
 - Retain technical terminology only when it identifies a meaningful user-visible concept or is necessary for an operator to act on the change.
 - Prefer concise entries. A release should communicate its important changes without becoming an inventory of commits.

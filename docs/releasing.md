@@ -141,8 +141,8 @@ will actively guide later work.
 ## 3. Prepare release notes and metadata
 
 - [ ] Review the complete `Unreleased` section of `docs/CHANGELOG.md` as one release:
-  merge overlapping entries, remove implementation-only detail, and make upgrade
-  consequences explicit.
+  make its `Player summary` concise and player-visible only, merge overlapping detailed entries,
+  remove implementation-only detail, and make upgrade consequences explicit.
 - [ ] Move the finalized entries to a section for the target version and release date.
 - [ ] Update the package/application version consistently in `pyproject.toml` and
   `src/infinity_army_data/__init__.py`.

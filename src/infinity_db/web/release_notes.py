@@ -21,7 +21,7 @@ class ReleaseNotesError(ValueError):
 
 @dataclass(frozen=True, slots=True)
 class ReleaseNoteSection:
-    """One Added/Changed/Fixed/Upgrade notes section in a release."""
+    """One player-summary or detailed section in a release."""
 
     heading: str
     items: tuple[str, ...]
@@ -38,6 +38,14 @@ class ReleaseNote:
     @property
     def label(self) -> str:
         return "Unreleased" if self.version is None else self.version
+
+    @property
+    def player_summary(self) -> tuple[str, ...]:
+        return self.sections[0].items
+
+    @property
+    def detail_sections(self) -> tuple[ReleaseNoteSection, ...]:
+        return self.sections[1:]
 
 
 def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
@@ -73,6 +81,10 @@ def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
         flush_section()
         if not current_sections:
             raise ReleaseNotesError("Release has no release-note sections")
+        if current_sections[0].heading != "Player summary":
+            raise ReleaseNotesError("Release must begin with a Player summary section")
+        if any(section.heading == "Player summary" for section in current_sections[1:]):
+            raise ReleaseNotesError("Release contains more than one Player summary section")
         releases.append(ReleaseNote(current_version, current_date, tuple(current_sections)))
         current_sections = []
 
@@ -178,14 +190,28 @@ def render_release_notes_html(releases: tuple[ReleaseNote, ...]) -> str:
             )
             heading = f"Version {release.version}"
 
-        sections = []
-        for section in release.sections:
+        summary_items = "".join(
+            f"<li>{_render_inline(item)}</li>" for item in release.player_summary
+        )
+        detail_sections = []
+        for section in release.detail_sections:
             items = "".join(f"<li>{_render_inline(item)}</li>" for item in section.items)
-            sections.append(
+            detail_sections.append(
                 '<section class="changes-category">'
                 f"<h3>{escape(section.heading)}</h3>"
                 f"<ul>{items}</ul>"
                 "</section>"
+            )
+
+        details_markup = ""
+        if detail_sections:
+            details_markup = (
+                '<details class="changes-details">'
+                '<summary><span class="changes-details-title">Detailed changes</span>'
+                '<span class="changes-details-hint">Full release notes</span>'
+                "</summary>"
+                f'<div class="changes-details-body">{"".join(detail_sections)}</div>'
+                "</details>"
             )
 
         rendered.append(
@@ -194,13 +220,18 @@ def render_release_notes_html(releases: tuple[ReleaseNote, ...]) -> str:
             'surface-titlebar--ruled changes-release-header">'
             f"<h2>{escape(heading)}</h2>{date_markup}"
             "</header>"
-            f'<div class="changes-release-body">{"".join(sections)}</div>'
+            '<div class="changes-release-body">'
+            '<section class="changes-player-summary">'
+            f"<ul>{summary_items}</ul>"
+            "</section>"
+            f"{details_markup}"
+            "</div>"
             "</article>"
         )
     return "".join(rendered)
 
 
 def render_current_release_notes_html() -> str:
-    """Load and render the canonical changelog for the Changes page."""
+    """Load and render the canonical changelog for the What's changed page."""
 
     return render_release_notes_html(load_release_notes())
