@@ -76,6 +76,7 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend:** Remove remaining source-review qualifiers from Hacking Program and Fireteam chart copy, keeping the player view focused on rules content and chart type.
 - **Web frontend:** Rename Unit-detail **Source notes** to **Unit notes**, keeping the
   Army-specific applicability visible while removing source-processing terminology from the player
   view.

@@ -464,8 +464,9 @@ function renderChart(chart) {
   }
   const sourceKind = chart.source.kind
     ? chart.source.kind.replaceAll("_", " ")
-    : "Army";
-  elements.source.textContent = `Authoritative ${sourceKind} chart from the current Army snapshot.`;
+    : "army";
+  const sourceLabel = sourceKind[0].toUpperCase() + sourceKind.slice(1);
+  elements.source.textContent = `${sourceLabel} Fireteam chart.`;
   const sourceDetails = [`Source Army #${chart.source.army_id}`];
   if (chart.source.file) sourceDetails.push(chart.source.file);
   if (chart.source.sha256) sourceDetails.push(chart.source.sha256);

@@ -677,7 +677,9 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'readShareState("fireteams").params.get("army")' in script
     assert b'writeShareState("fireteams", value ? { army: value } : {}, { replace })' in script
     assert b"Counts as:" in script
-    assert b"Authoritative" in script
+    assert b"`${sourceLabel} Fireteam chart.`" in script
+    assert b"Authoritative" not in script
+    assert b"current Army snapshot" not in script
     assert b'army.role === "reinforcement"' in script
     assert b'army.role === "sectorial" || army.role === "non_aligned"' in script
     assert b"value === 256" not in script
@@ -4373,6 +4375,9 @@ def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"Hacking Program catalog" in body
+    assert b"Browse Hacking Program profiles, targets, Devices, Skills, States, and related rules." in body
+    assert b"reviewed N5.3 rules semantics" not in body
+    assert b"reviewed rules" not in body
     assert b'href="/hacking-programs" aria-current="page"' in body
     assert b'>Uses</th>' not in body
 
