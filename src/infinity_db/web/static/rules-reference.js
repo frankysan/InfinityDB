@@ -315,7 +315,7 @@ export function rulesReferenceArticle(
     const supplemental = document.createElement("div");
     supplemental.className = "rules-supplement";
     const supplementTitle = document.createElement("h4");
-    supplementTitle.textContent = "Additional rules context";
+    supplementTitle.textContent = "Additional rules";
     supplemental.append(supplementTitle);
     appendRuleDetails(supplemental, supplement);
     article.append(supplemental);

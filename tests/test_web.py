@@ -5666,7 +5666,8 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"Rules reference" in body
     assert b"rule.collection?.title" in body
     assert b"rule.supplements || []" in body
-    assert b"Additional rules context" in body
+    assert b'supplementTitle.textContent = "Additional rules";' in body
+    assert b"Additional rules context" not in body
     assert b"export function levelEffectsSection(rules)" in body
     assert b"fact_tokens?.levels?.[levelIndex]?.effects" in body
     assert b"level-effects-table" in body
