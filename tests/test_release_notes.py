@@ -19,7 +19,7 @@ def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     assert releases[0].released_on is None
     assert [section.heading for section in releases[0].sections] == ["Added", "Changed", "Fixed"]
     assert any(
-        item.startswith("**Web frontend + Project infrastructure:** Add a Changes page")
+        item.startswith("**Web frontend + Project infrastructure:** Add a What's changed page")
         for item in releases[0].sections[0].items
     )
 

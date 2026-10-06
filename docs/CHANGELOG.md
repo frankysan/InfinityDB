@@ -52,7 +52,7 @@ New or materially revised entries use the project-domain labels defined in
 - **Web frontend:** Add System, Light, and Dark theme selection in Settings. System follows the
   operating-system color preference by default, explicit choices can be remembered with existing
   Settings persistence, and the selected theme is applied before first paint.
-- **Web frontend + Project infrastructure:** Add a Changes page that presents current and historical release notes directly
+- **Web frontend + Project infrastructure:** Add a What's changed page that presents current and historical release notes directly
   from the project's canonical changelog.
 - **Acquisition:** Add Human Sphere as an English-only wiki research source using the existing
   deterministic snapshot/history pipeline. Human Sphere acquisitions use their own archive
