@@ -2066,6 +2066,33 @@ def test_player_page_framing_uses_reference_language(app: Callable) -> None:
     assert b"database domain" not in search
 
 
+def test_rules_taxonomy_pages_use_player_language(app: Callable) -> None:
+    status, _, home = request(app, "/")
+    assert status == 200
+    assert b"Browse Labels used to classify Skills, Equipment, and rules effects." in home
+    assert b"Browse core N5 rules that apply across the game." in home
+    assert b"Look up Infinity terms and abbreviations used throughout the reference." in home
+
+    status, _, labels = request(app, "/labels")
+    assert status == 200
+    assert b"Browse Labels used to classify Skills, Equipment, and rules effects." in labels
+    assert b"canonical" not in labels.lower()
+
+    status, _, rules = request(app, "/rules")
+    assert status == 200
+    assert b"Browse core N5 rules that apply across the game." in rules
+    assert b"rules domain" not in rules.lower()
+    assert b"more specific rules catalog" not in rules.lower()
+
+    status, _, glossary = request(app, "/glossary")
+    assert status == 200
+    assert b"Look up Infinity terms and abbreviations used throughout the reference." in glossary
+    assert b"Gathering terms and definitions." in glossary
+    assert b"canonical terminology" not in glossary.lower()
+    assert b"rules domains" not in glossary.lower()
+    assert b"embedded vocabularies" not in glossary.lower()
+
+
 @pytest.mark.parametrize(
     "path",
     [
@@ -4547,7 +4574,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     status, headers, body = request(rules_app, "/glossary")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"Canonical terminology" in body
+    assert b"Look up Infinity terms and abbreviations" in body
     assert b"glossary.js" in body
     assert b'href="/glossary" aria-current="page"' in body
 

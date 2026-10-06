@@ -76,6 +76,8 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend:** Rewrite Labels, General Rules, and Glossary framing around the rules information
+  players can look up, removing internal taxonomy and data-model terminology from those surfaces.
 - **Web frontend:** Replace database/domain-oriented page framing with InfinityDB and player-reference
   language across navigation breadcrumbs, the landing page, Unit Explorer, and global Search.
 - **Data processing:** Bind each generated Army application/raw database pair to one deterministic

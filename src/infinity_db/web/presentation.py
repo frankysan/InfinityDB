@@ -277,11 +277,10 @@ _FIXED_PAGES = {
         _reference_page_values(
             "labels",
             intro=(
-                "Browse the canonical Labels used to classify Skills, Equipment, and "
-                "rules effects."
+                "Browse Labels used to classify Skills, Equipment, and rules effects."
             ),
-            meta_description="Browse Infinity rules Labels and their canonical definitions.",
-            detail_meta_description="View the canonical definition of an Infinity rules Label.",
+            meta_description="Browse Infinity rules Labels and their definitions.",
+            detail_meta_description="View the definition of an Infinity rules Label.",
         ),
     ),
     "/rules": PageSpec(
@@ -292,11 +291,10 @@ _FIXED_PAGES = {
         _reference_page_values(
             "rules",
             intro=(
-                "Browse core N5 rules concepts that do not belong to a more specific "
-                "InfinityDB rules domain."
+                "Browse core N5 rules that apply across the game."
             ),
             meta_description=(
-                "Browse Infinity N5 General Rules concepts without a more specific rules catalog."
+                "Browse core Infinity N5 General Rules."
             ),
             detail_meta_description="View an Infinity N5 General Rules reference.",
             summary_heading="Rules reference",
@@ -398,14 +396,9 @@ _DETAIL_PAGES = (
             "labels",
             _reference_page_values(
                 "labels",
-                intro=(
-                    "Browse the canonical Labels used to classify Skills, Equipment, and "
-                    "rules effects."
-                ),
-                meta_description="Browse Infinity rules Labels and their canonical definitions.",
-                detail_meta_description=(
-                    "View the canonical definition of an Infinity rules Label."
-                ),
+                intro="Browse Labels used to classify Skills, Equipment, and rules effects.",
+                meta_description="Browse Infinity rules Labels and their definitions.",
+                detail_meta_description="View the definition of an Infinity rules Label.",
             ),
         ),
     ),
@@ -419,12 +412,10 @@ _DETAIL_PAGES = (
             _reference_page_values(
                 "rules",
                 intro=(
-                    "Browse core N5 rules concepts that do not belong to a more specific "
-                    "InfinityDB rules domain."
+                    "Browse core N5 rules that apply across the game."
                 ),
                 meta_description=(
-                    "Browse Infinity N5 General Rules concepts without a more specific "
-                    "rules catalog."
+                    "Browse core Infinity N5 General Rules."
                 ),
                 detail_meta_description="View an Infinity N5 General Rules reference.",
                 summary_heading="Rules reference",
