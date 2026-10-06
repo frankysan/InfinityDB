@@ -100,7 +100,7 @@ function hackingProgramLink(row) {
 }
 
 function hackingDeviceLinks(devices) {
-  if (!devices?.length) return "Upgrade / source-specific";
+  if (!devices?.length) return "Granted separately / Upgrade";
   const fragment = document.createDocumentFragment();
   for (const [index, device] of devices.entries()) {
     if (index) fragment.append(", ");

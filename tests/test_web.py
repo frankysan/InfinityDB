@@ -4409,6 +4409,9 @@ def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     assert b'from "./skill-categories.js"' in script
     assert b"skillCategoryBadge(category)" in script
     assert b"baselineDevicesGroup(program)" in script
+    assert b"No baseline Hacking Device includes this Program." in script
+    assert b"including as an Upgrade Program." in script
+    assert b"source-specific associations" not in script
     assert (
         b"[\"Targets\", program.targets?.length ? program.targets.join(\", \") : null, "
         b"\"descriptor\"]" in script
@@ -5294,6 +5297,8 @@ def test_skill_detail_frontend_renders_structured_reference_tables(
     assert b'"random-chart"' in body
     assert b'"Hacking Programs"' not in body
     assert b"hackingDeviceLinks(row.devices)" in body
+    assert b"Granted separately / Upgrade" in body
+    assert b"Upgrade / source-specific" not in body
 
 
 def test_catalog_usage_summaries_wrap_variant_context_on_narrow_layouts(

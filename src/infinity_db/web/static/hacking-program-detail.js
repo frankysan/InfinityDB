@@ -80,8 +80,8 @@ function baselineDevicesGroup(program) {
     const note = document.createElement("p");
     note.className = "detail-copy";
     note.textContent =
-      "No baseline Device association is declared by Army. This Program is available through "
-      + "Upgrade/source-specific associations instead.";
+      "No baseline Hacking Device includes this Program. It may instead be granted separately, "
+      + "including as an Upgrade Program.";
     group.append(note);
     return group;
   }
