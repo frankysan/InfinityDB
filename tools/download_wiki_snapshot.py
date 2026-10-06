@@ -998,7 +998,16 @@ def write_bytes(path: Path, payload: bytes) -> None:
     temp_path = path.with_suffix(path.suffix + ".part")
     with temp_path.open("wb") as handle:
         handle.write(payload)
-    temp_path.replace(path)
+
+    max_attempts = 12
+    for attempt in range(max_attempts):
+        try:
+            temp_path.replace(path)
+            return
+        except PermissionError:
+            if attempt == max_attempts - 1:
+                raise
+            time.sleep(min(0.05 * (2**attempt), 0.5))
 
 
 def mirror_path_sort_key(path: PurePath, destination: PurePath) -> str:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from .health import database_health_report
 from .paths import raw_database_path
 from .publication import validate_database_pair
 from .repository import ArmySelectionError, Database
@@ -17,6 +18,7 @@ __all__ = [
     "SCHEMA_VERSION",
     "ArmySelectionError",
     "Database",
+    "database_health_report",
     "export_database",
     "raw_database_path",
     "validate_database_pair",

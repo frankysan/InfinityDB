@@ -14,6 +14,29 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 
+def test_write_bytes_retries_transient_windows_replace_lock(
+    tmp_path: Path, monkeypatch
+) -> None:
+    target = tmp_path / "page.html"
+    original_replace = Path.replace
+    attempts = 0
+
+    def flaky_replace(source: Path, destination: Path) -> Path:
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            raise PermissionError("transient Windows destination lock")
+        return original_replace(source, destination)
+
+    monkeypatch.setattr(Path, "replace", flaky_replace)
+    monkeypatch.setattr(module.time, "sleep", lambda _seconds: None)
+
+    module.write_bytes(target, b"stable")
+
+    assert attempts == 2
+    assert target.read_bytes() == b"stable"
+    assert not target.with_suffix(".html.part").exists()
+
 
 def test_mirror_path_sort_key_is_platform_neutral() -> None:
     root = PureWindowsPath(r"C:\\wiki")

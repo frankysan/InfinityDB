@@ -9,6 +9,9 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Deployment + Project infrastructure:** Add `infinity-db database-health` for operational
+  validation of published Army databases, reporting schema/compatibility revisions and validation
+  timing with optional application/raw export-pair verification and machine-readable JSON output.
 - **Web frontend:** Add a project favicon derived from the InfinityDB logo, simplified for clear
   recognition at small browser-tab sizes and high contrast in both light and dark browser chrome,
   with SVG as the scalable primary icon plus a 32 px PNG fallback and Apple touch icon.

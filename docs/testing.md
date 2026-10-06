@@ -218,7 +218,21 @@ Benchmarks are diagnostic evidence, not stable documentation constants. Record t
 source/database snapshot, platform, Python/SQLite versions, worker configuration, and command with
 each result instead of copying timing numbers into this file.
 
-Available tools include:
+The installed application also exposes a lightweight database health/validation timing command:
+
+```powershell
+infinity-db database-health data/generated/infinity.db
+infinity-db database-health data/generated/infinity.db --require-raw
+infinity-db database-health data/generated/infinity.db --require-raw --json
+```
+
+It always runs the application-database integrity validation and reports actual/expected SQLite
+schema and application compatibility revisions. `--require-raw` additionally requires the expected
+`infinity.raw.db` sibling and verifies that both files belong to one export generation. Validation
+time and file sizes are included as lightweight operational evidence; use the dedicated benchmark
+tools below for representative query-performance comparisons.
+
+Available benchmark tools include:
 
 ```powershell
 python tools\benchmark_runtime.py --help

@@ -14,7 +14,7 @@ from infinity_army_data.cli import cmd_normalize as normalize_dataset
 
 from . import __version__
 from .curated import load_curated_directory, load_curated_document
-from .database import export_database, raw_database_path
+from .database import database_health_report, export_database, raw_database_path
 from .display_identities import display_identity_metadata, load_display_identity_curated
 from .identities import identity_metadata, load_identity_config
 from .peripheral_identities import (
@@ -107,6 +107,52 @@ def cmd_export(args: argparse.Namespace) -> int:
     _export(args.input, args.output)
     return 0
 
+
+
+def cmd_database_health(args: argparse.Namespace) -> int:
+    report = database_health_report(args.database, require_raw=args.require_raw)
+    if args.json:
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0 if report["status"] == "healthy" else 1
+
+    application = report["application"]
+    raw_archive = report["rawArchive"]
+    print(f"Database health: {report['status']}")
+    print(f"Application database: {application['path']}")
+    if application["bytes"] is not None:
+        print(f"Application size: {application['bytes']:,} bytes")
+    print(
+        "Schema revision: "
+        f"{application['schemaRevision']} (expected {application['expectedSchemaRevision']})"
+    )
+    print(
+        "Compatibility revision: "
+        f"{application['compatibilityRevision']} "
+        f"(expected {application['expectedCompatibilityRevision']})"
+    )
+    print(
+        f"Application validation: {application['status']} "
+        f"({application['validationMs']:.3f} ms)"
+    )
+    if error := application.get("error"):
+        print(f"Application error: {error}")
+    if args.require_raw:
+        print(f"Raw archive: {raw_archive['path']}")
+        if raw_archive["bytes"] is not None:
+            print(f"Raw archive size: {raw_archive['bytes']:,} bytes")
+        print(
+            f"Raw pair validation: {raw_archive['status']} "
+            f"({raw_archive['validationMs']:.3f} ms)"
+        )
+        if pair_sha256 := raw_archive.get("pairSha256"):
+            print(f"Export pair SHA-256: {pair_sha256}")
+        elif raw_archive["status"] == "valid":
+            print("Export pair: legacy metadata match (no pair fingerprint)")
+        if error := raw_archive.get("error"):
+            print(f"Raw archive error: {error}")
+    else:
+        print("Raw archive: not checked (use --require-raw to validate the sibling pair)")
+    return 0 if report["status"] == "healthy" else 1
 
 def cmd_serve(args: argparse.Namespace) -> int:
     from .web.server import serve
@@ -230,6 +276,23 @@ def build_parser() -> argparse.ArgumentParser:
     p_export.add_argument("input", type=Path, help="normalized.json input")
     p_export.add_argument("output", nargs="?", type=Path, default=DEFAULT_DATABASE)
     p_export.set_defaults(func=cmd_export)
+
+    p_health = sub.add_parser(
+        "database-health",
+        help="Validate a published application database and report revision metadata",
+    )
+    p_health.add_argument("database", nargs="?", type=Path, default=DEFAULT_DATABASE)
+    p_health.add_argument(
+        "--require-raw",
+        action="store_true",
+        help="Require and validate the release-matched raw database sibling",
+    )
+    p_health.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit the health report as machine-readable JSON",
+    )
+    p_health.set_defaults(func=cmd_database_health)
 
     p_serve = sub.add_parser("serve", help="Start the local unit browser and read-only API")
     p_serve.add_argument("--database", type=Path, default=DEFAULT_DATABASE)

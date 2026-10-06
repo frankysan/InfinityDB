@@ -116,6 +116,15 @@ def test_container_build_packages_canonical_changelog() -> None:
     assert documentation == ["docs/CHANGELOG.md"]
 
 
+def test_installed_wheel_smoke_runs_database_health_check() -> None:
+    workflow = _read(".github/workflows/installed-wheel.yml")
+
+    assert (
+        '"$RUNNER_TEMP/wheel-venv/bin/infinity-db" database-health '
+        "generated/infinity.db --require-raw"
+    ) in workflow
+
+
 def test_wheel_packages_runtime_unit_filter_semantics() -> None:
     with (ROOT / "pyproject.toml").open("rb") as handle:
         project = tomllib.load(handle)

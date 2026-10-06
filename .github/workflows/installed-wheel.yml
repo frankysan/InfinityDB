@@ -45,6 +45,7 @@ jobs:
           "$RUNNER_TEMP/wheel-venv/bin/infinity-db" --version
           "$RUNNER_TEMP/wheel-venv/bin/infinity-army" --version
           "$RUNNER_TEMP/wheel-venv/bin/infinity-db" build army --output-dir generated --compact
+          "$RUNNER_TEMP/wheel-venv/bin/infinity-db" database-health generated/infinity.db --require-raw
           "$RUNNER_TEMP/wheel-venv/bin/infinity-army" build army --output-dir army-only --compact
           "$RUNNER_TEMP/wheel-venv/bin/infinity-db" build-rules rules --output generated/rules.db
           "$RUNNER_TEMP/wheel-venv/bin/infinity-db" validate-curated rules

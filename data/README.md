@@ -92,7 +92,9 @@ both destination siblings already belong to the new generation.
 
 Older pairs created before `export_pair_sha256` remain acceptable when their full
 shared metadata dictionaries match. New exports always carry the stronger pair
-fingerprint.
+fingerprint. `infinity-db database-health data/generated/infinity.db --require-raw` is the
+operator-facing validation command for this pair contract; omitting `--require-raw` validates only
+the published application database.
 
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;

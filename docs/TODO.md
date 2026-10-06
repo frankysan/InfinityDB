@@ -166,9 +166,11 @@ domain unless required to correct a release-blocking defect.
     multiple immutable app replicas behind Caddy over unbounded worker growth;
     re-run the test before changing worker counts or deployment resources.
 
-- [ ] Add a benchmark/health-check command that validates the application database,
+- [x] Add a benchmark/health-check command that validates the application database,
   confirms its expected raw archive when requested, and reports schema and
-  compatibility revisions.
+  compatibility revisions. `infinity-db database-health` now reports actual/expected revision
+  metadata and validation timing, optionally verifies the export-paired raw sibling, and supports
+  machine-readable JSON for retained operational evidence.
 
 ## 1.0.0 — current-reference completeness gate
 

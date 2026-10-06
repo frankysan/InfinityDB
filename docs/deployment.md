@@ -181,7 +181,16 @@ sh ./scripts/stop-local-test.sh
 To update Army data, perform acquisition/build/publication in the development environment,
 validate and commit the updated runtime databases/publication, then release a new tag. Production
 servers update by checking out that tag; they do not need the underlying raw archive. Do not edit
-either SQLite file inside a running container.
+either SQLite file inside a running container. Before publication, the development pair can be
+checked explicitly with:
+
+```powershell
+infinity-db database-health data/generated/infinity.db --require-raw
+```
+
+For a tracked/deployed application database where the development-only raw sibling is intentionally
+absent, omit `--require-raw`. The command reports actual/expected schema and compatibility revisions
+and fails if the application database is not valid for the running InfinityDB code.
 
 ### Privacy and observability
 
