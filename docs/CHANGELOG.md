@@ -19,6 +19,14 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web frontend:** Add **FTO (Fireteam Option)** to the Glossary, explaining that
+  FTO is an option-name identifier rather than a standalone rule and that Fireteam charts can
+  require FTO or a specific FTO variant such as FTO-2.
+
+- **Data processing + Web frontend:** Add **FTO (Fireteam Option)** to the Glossary, explaining that
+  FTO is an option-name identifier rather than a standalone rule and that Fireteam charts can
+  require FTO or a specific FTO variant such as FTO-2.
+
 - **Deployment + Project infrastructure:** Add operator-side retained metrics history reporting and
   comparison by week/version/snapshot, including request/status/error summaries, normalized-route
   activity, cumulative latency/response-size histograms, bounded percentile estimates, and JSON output

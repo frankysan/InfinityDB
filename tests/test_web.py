@@ -4728,6 +4728,35 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         ],
     }
 
+    fto_term = next(item for item in items if item["id"] == "term:fto")
+    assert fto_term == {
+        "id": "term:fto",
+        "kind": "term",
+        "domain": "Game term",
+        "domain_slug": "terms",
+        "name": "FTO (Fireteam Option)",
+        "description": (
+            "FTO (Fireteam Option) is an identifier suffix on Unit Profile options, not a rule "
+            "with effects of its own. If a Fireteams Chart requires FTO for a Unit, only options "
+            "with FTO in their option name can join that Fireteam; if it requires a specific form "
+            "such as FTO-2, only that named option qualifies."
+        ),
+        "aliases": ["FTO", "Fireteam Option"],
+        "href": "/glossary#term-fto",
+        "embedded": True,
+        "description_tokens": [
+            {
+                "type": "text",
+                "text": (
+                    "FTO (Fireteam Option) is an identifier suffix on Unit Profile options, not a "
+                    "rule with effects of its own. If a Fireteams Chart requires FTO for a Unit, "
+                    "only options with FTO in their option name can join that Fireteam; if it "
+                    "requires a specific form such as FTO-2, only that named option qualifies."
+                ),
+            }
+        ],
+    }
+
     marker_term = next(item for item in items if item["id"] == "term:marker")
     assert marker_term == {
         "id": "term:marker",
@@ -4811,6 +4840,14 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "domain": "Attribute",
         "name": "Movement (MOV)",
         "href": "/glossary#attribute-mov",
+    } in json.loads(body)["items"]
+
+    status, _, body = request(rules_app, "/api/search", query="q=fto")
+    assert status == 200
+    assert {
+        "domain": "Game term",
+        "name": "FTO (Fireteam Option)",
+        "href": "/glossary#term-fto",
     } in json.loads(body)["items"]
 
     status, _, body = request(rules_app, "/api/search", query="q=marker")

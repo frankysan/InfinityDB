@@ -1885,6 +1885,38 @@
             }
         },
         {
+            "id": "term:fto",
+            "kind": "term",
+            "name": "FTO (Fireteam Option)",
+            "aliases": [
+                "FTO",
+                "Fireteam Option"
+            ],
+            "summary": "FTO (Fireteam Option) is an identifier suffix on Unit Profile options, not a rule with effects of its own. If a Fireteams Chart requires FTO for a Unit, only options with FTO in their option name can join that Fireteam; if it requires a specific form such as FTO-2, only that named option qualifies.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "fireteam-eligibility"
+            },
+            "citations": [
+                {
+                    "sourceId": "wiki-fireteams-chart-oldid-4116",
+                    "heading": "Fireteams Chart"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-06"
+            }
+        },
+        {
             "id": "term:victory-points",
             "kind": "term",
             "name": "Victory Points",

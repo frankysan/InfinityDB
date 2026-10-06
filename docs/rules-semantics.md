@@ -2336,6 +2336,12 @@ Sources:
 
 **Classification:** source-native with an InfinityDB relationship consequence.
 
+`FTO` stands for **Fireteam Option**. It is an identifier suffix on Unit Profile
+options rather than a Skill, Equipment item, or rule with effects of its own.
+
+`FTO` stands for **Fireteam Option**. It is an identifier suffix on Unit Profile
+options rather than a Skill, Equipment item, or rule with effects of its own.
+
 When a Fireteams Chart lists a Unit as `FTO`, only Unit Profile options carrying
 FTO in the option name can join that Fireteam. A more specific chart term such
 as `FTO-2` restricts eligibility to that specific option.

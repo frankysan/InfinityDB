@@ -626,6 +626,16 @@ def test_checked_in_n5_collection_is_valid() -> None:
             "section": "Trooper Characteristics",
         }
     ]
+    fto = records["term:fto"]
+    assert fto["name"] == "FTO (Fireteam Option)"
+    assert fto["aliases"] == ["FTO", "Fireteam Option"]
+    assert fto["facts"] == {"scope": "fireteam-eligibility"}
+    assert fto["citations"] == [
+        {
+            "sourceId": "wiki-fireteams-chart-oldid-4116",
+            "heading": "Fireteams Chart",
+        }
+    ]
     assert records["state:camouflaged"]["kind"] == "state"
     assert records["state:camouflaged"]["labelIds"] == ["marker"]
     assert records["state:camouflaged"]["review"]["status"] == "reviewed"

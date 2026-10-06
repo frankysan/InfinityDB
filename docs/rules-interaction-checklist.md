@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **86/97** complete, **11** pending.
+- Supporting semantic identities: **87/98** complete, **11** pending.
 - Current authored outgoing relations: **262**.
 - Explicitly tracked future/deferred interactions: **115**.
 
@@ -639,6 +639,11 @@ review. `declaration-category` projection records are excluded.
 - [x] **Skills** (`rule:profile-help:skills`) — reviewed
   - outgoing: none
 - [x] **Weapons** (`rule:profile-help:weapons`) — reviewed
+  - outgoing: none
+
+#### Term (1/1)
+
+- [x] **FTO (Fireteam Option)** (`term:fto`) — reviewed: Canonical embedded game-term identity for Fireteam option naming. FTO has no independent rule effect; its gameplay consequence is the Fireteam-chart restriction to matching Unit Profile option names.
   - outgoing: none
 
 ### 0.7.0
