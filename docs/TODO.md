@@ -127,10 +127,11 @@ domain unless required to correct a release-blocking defect.
   when no downloader or comparison workflow happens to load it. Routine pytest now recursively
   validates every maintained JSON note and rejects unsupported stray files in that directory.
 
-- [ ] Retain release evidence for the configured hosted workflows. Before
-  claiming a release has passed hosted CI, record successful `Source checks`,
-  `Installed wheel smoke`, and `Deployment smoke test` runs for the release
-  commit or tag.
+- [x] Retain release evidence for the configured hosted workflows. Release preparation now
+  verifies the exact candidate commit against successful `Source checks`, `Installed wheel smoke`,
+  and `Deployment smoke test` runs, writes an ignored machine-readable evidence record, and embeds
+  the run identities/URLs in the immutable annotated release-tag message so evidence does not require
+  modifying the already-validated release commit.
 
 - [ ] Complete optional/manual full-asset CI administration by adding authorized
   `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` secrets to the existing

@@ -86,6 +86,34 @@ release `infinity.db`, `rules.db`, and processed SVG publication, then runs
 Deployment smoke tests the exact artifact model used by tagged production deployment. It does not
 rebuild runtime databases and is not a substitute for the source or installed-wheel checks.
 
+## Release evidence retention
+
+`tools/prepare_release_ci_evidence.py` verifies the three required hosted workflows for one exact
+40-character candidate release commit: `Source checks`, `Installed wheel smoke`, and
+`Deployment smoke test`. It queries each workflow by its maintained workflow filename and commit SHA,
+uses the latest completed run for that workflow/commit, and fails if that run is not successful. An
+older successful run therefore cannot hide a later failed rerun for the same candidate.
+
+The tool writes two ignored local files under `reports/` during release preparation:
+
+- machine-readable JSON containing the repository, candidate commit, workflow/run identity, attempt,
+  trigger, timestamps, conclusion, and GitHub run URL; and
+- an annotated-tag message containing the candidate commit and the successful run identities/URLs.
+
+The JSON is local release-working evidence and must not be committed back into the candidate release
+commit. The annotated Git tag is the durable project record: it can be created only after the hosted
+checks are green, so retaining evidence does not mutate the commit whose CI status it proves. GitHub
+Actions logs remain subject to GitHub's own retention policy, but the immutable tag annotation keeps
+the exact run IDs, attempts, outcomes, and URLs in Git history.
+
+The GitHub REST workflow-runs endpoint is readable without authentication for public repositories;
+set `GITHUB_TOKEN` when authentication is required or to avoid anonymous API rate limits. A token used
+for this read-only collection needs Actions read access, not repository write access. When the
+checksum-pinned external bundle should also be part of release evidence, pass `--include-full-assets`;
+that makes a successful `Full-asset checks` run for the same commit mandatory without changing the
+normal three-workflow release gate. The canonical release commands and tag ordering live in
+`docs/releasing.md`.
+
 ## Published-asset validation
 
 The tracked `data/manifests/symbol-publication.json` is the authoritative publication inventory.

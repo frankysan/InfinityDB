@@ -89,6 +89,7 @@ logical Unit. In particular, AVA is contextual to an Army/profile occurrence, wh
 are loadout facts. When those constraints participate in a query, other selected profile/loadout
 criteria must be satisfiable in the same compatible context. Unit-wide option facts remain Unit-wide
 because the source does not attach them to a profile group.
+
 - Unit Explorer source-filter overlays are maintained semantics, not source rewrites. Combined source
   Classifications may match multiple public Classification filters, and redundant source
   Characteristics may be hidden from the picker while remaining preserved/queryable.
@@ -186,6 +187,10 @@ stable entry point; do not add a CSS build step or link the source parts directl
 - A release requires a project-wide documentation audit, release-matched runtime artifacts, hosted
   checks green for the exact release commit, an immutable version tag, and post-deployment smoke
   verification where deployed.
+- Hosted release evidence is retained without mutating the validated release commit: prepare the
+  exact-commit workflow evidence after CI is green, then create an annotated `v<version>` tag whose
+  message records the required GitHub Actions run identities/URLs. Lightweight release tags do not
+  satisfy the release-evidence contract.
 - `scripts/install-or-update.sh` hands off to the installer from the target release before checkout.
   Historical upgrade exceptions and operator commands are owned by `docs/deployment.md`.
 

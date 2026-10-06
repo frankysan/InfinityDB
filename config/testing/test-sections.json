@@ -87,6 +87,7 @@
         "test_migrate_symbol_publication_provenance",
         "test_path_sanitization",
         "test_pipeline_console",
+        "test_release_ci_evidence",
         "test_report_metrics",
         "test_run_checks",
         "test_snapshot_archive",

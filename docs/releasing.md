@@ -189,9 +189,28 @@ deployment behavior.
 - [ ] If a hosted failure requires any code, data, generated-artifact, or documentation change, land
   a new candidate release commit and repeat the affected local and hosted validation. Do not tag the
   superseded candidate.
-- [ ] Create the version tag `v<version>` at the exact hosted-green release commit.
-- [ ] Push the tag, then verify that the remote tag resolves to the intended commit.
-- [ ] Retain the required hosted-workflow evidence for that release commit/tag.
+- [ ] For the exact hosted-green candidate SHA, prepare the retained workflow evidence and annotated
+  tag message. The outputs belong under ignored `reports/`; do not commit them back into the release
+  candidate:
+
+  ```text
+  python tools/prepare_release_ci_evidence.py --repository OWNER/REPO --commit <release-sha> --tag v<version> --json-output reports/release-ci-v<version>.json --tag-message-output reports/release-tag-v<version>.txt
+  ```
+
+  The command must verify successful `Source checks`, `Installed wheel smoke`, and
+  `Deployment smoke test` runs for that exact SHA. Add `--include-full-assets` when this release's
+  retained evidence should also require the optional checksum-pinned `Full-asset checks` workflow.
+  Set `GITHUB_TOKEN` when authenticated GitHub API access is required or desirable for rate limits.
+- [ ] Create an **annotated** version tag at that exact commit using the generated evidence message:
+
+  ```text
+  git tag -a v<version> <release-sha> -F reports/release-tag-v<version>.txt
+  ```
+
+  The annotation is the durable hosted-CI evidence record; a lightweight tag does not satisfy this
+  release contract.
+- [ ] Push the tag, then verify that the remote annotated tag resolves to the intended commit and its
+  annotation contains the expected three hosted workflow records.
 
 A published release tag is immutable project history. Correct a material release
 error with a subsequent release rather than silently moving a published tag.
