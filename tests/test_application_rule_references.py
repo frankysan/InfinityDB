@@ -245,6 +245,7 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
         "term:deployable-equipment",
         "term:deployable-weapon",
         "term:enemy",
+        "term:fto",
         "term:hostile",
         "term:marker",
         "term:model",
@@ -261,6 +262,7 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
     }
     assert {record["facts"]["scope"] for record in terms} == {
         "alignment",
+        "fireteam-eligibility",
         "game-element",
         "profile",
         "scoring",

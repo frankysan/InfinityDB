@@ -16,6 +16,7 @@ are not retroactively relabeled.
   understand what InfinityDB stores.
 - Unit, Army, Fireteam, Skill-reference, and symbol presentation received navigation, filtering,
   glossary-help, artwork, and small-screen fixes.
+- Reference descriptions and Unit help now explain game information more clearly.
 
 ### Added
 
@@ -86,8 +87,8 @@ are not retroactively relabeled.
   Hacking Program and Fireteam copy, including Hacking Program access labels and empty Fireteam
   member states, keeping the player view focused on rules content and gameplay meaning.
 - **Web frontend:** Rename Unit-detail **Source notes** to **Unit notes**, keeping the
-  Army-specific applicability visible while removing source-processing terminology from the player
-  view.
+  Army-specific applicability visible, and clarify Peripheral choices and faction membership
+  without exposing source-processing terminology in the player view.
 - **Web frontend:** Present unresolved maintained rules text as **Needs verification** with an
   **uncertain** marker and player-readable reasons, while keeping the underlying review marker
   available to the curation workflow.
@@ -95,12 +96,17 @@ are not retroactively relabeled.
   information players can browse, removing Army snapshot and source-authority framing from normal
   page copy and giving Fireteams a direct **Fireteam reference** label.
 - **Web backend + Web frontend:** Rewrite empty, loading, invalid-link, and error states, including
-  Army, Unit, Skill, and rules-reference failures, to describe the player-visible situation directly
-  instead of exposing database, snapshot, source-data, catalog, or URL-address terminology.
+  Army, Unit, Skill, rules-reference failures, and invalid filter selections, to describe the
+  player-visible situation directly instead of exposing database, snapshot, source-data, catalog,
+  or URL-address terminology. Unexpected reference failures keep technical details in diagnostics
+  and show players a clear unavailable-information message.
 - **Web frontend:** Rewrite the About page and Home/About introductory framing around what InfinityDB
   helps players explore, how related rules information is connected, and how uncertainty is
   presented, replacing data-pipeline, generic data framing, and internal release-planning language
   with player-relevant reference language and project goals.
+- **Data processing + Web frontend:** Explain Skill levels, Attribute-replacement variants,
+  TinBot options, and profile notation in game terms, keeping their rules effects, applicable
+  modifiers, and official references clear.
 - **Web frontend:** Rewrite Labels, General Rules, and Glossary framing around the rules information
   players can look up, removing internal taxonomy and data-model terminology from those surfaces.
 - **Web frontend:** Replace database/domain/indexing/catalog-oriented page framing with InfinityDB

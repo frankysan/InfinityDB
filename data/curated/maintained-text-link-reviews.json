@@ -103,18 +103,14 @@
           "reason": "combat-term-not-trait",
           "occurrenceSha256s": [
             "0688c585ec0e7e986eb227ddf64fcb8cfb8aa652fd27262dcf945f2785249b5b",
-            "240ede8b2cf71ee524ca19e5bf1de872c09dd5e5e94faa502672a7f4e4ad2ff6",
             "25035fe58b40e7ee7521c844dfbae15446b27bf0b763ff6322b11585519c9dc5",
             "30e4e84a1a6906d11bd2616cb223fd05eec240bb5f9b22d7e72caadcdadfdab3",
             "342022f9a0c83944a9d9d9ad30a951969a9aa99549a5cbe0e418649f3a17edeb",
-            "34562f7b3a425fb935fdedf428e805e2ff0f2894fc9d1322fdfba607672baccc",
             "3b4077c976769b1dd5a935a9079b63138a85f081cb5510a5d393890316b17961",
             "46cd6e67bef33a02f953a0837b1f706123d5c60015df671b2147071e5db9f4cb",
             "5fe813ac5f8db8b1d36b5bf314a3888973181908f7fe8911d068ea4041e8950d",
-            "6021c3b8c7afc08659de24c9b864f4f09175b9f7f2477a76c809e3b14c102bbd",
             "7b8d4e761c167924694be5fcbc9a0a0daa7f13a996a098de099221e6b286b013",
             "7b99a8c7000f742073a1d5f0bc5827ed6c58fa7112dc7680e84a85d280528915",
-            "7c11ed65078c948e17ba1c516aa148c3dee1c850e445a932546e4bf9bf81e846",
             "979dc2a0b1e1c338b9963a4e2251831c0b79c1ad2727b7628c532ec273edc35f",
             "cfefeeff1974c5724c98589dc5ae6fcfe776ef1fdc7e235e7771993e0a214963",
             "ed7432ae5730ef637c250b4d6f0e0a32749ec12085836b6ff227c531081dbed6"
@@ -526,7 +522,6 @@
           "text": "Peripherals",
           "reason": "game-category-not-skill",
           "occurrenceSha256s": [
-            "4325f6d0de0bbd2f6bb310c5a48ffeecbef55184157921e184b5e4de6769be8e",
             "90b5c92bd4ce2a16591dd0affef8e244821bd3f56254db703f144dddcb78681c"
           ]
         },

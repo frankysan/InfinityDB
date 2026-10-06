@@ -193,7 +193,7 @@ function profileHelpLabel(label, key, fallbackHref = null) {
       target: item.id,
       label,
       public_reference: { href: `/glossary#${item.id.replaceAll(":", "-")}` },
-      preview_tokens: [{ type: "text", text: item.summary }],
+      preview_tokens: item.summary_tokens || [{ type: "text", text: item.summary }],
     }]);
   }
   if (!fallbackHref) return document.createTextNode(label);
@@ -231,7 +231,7 @@ function renderProfileNotationHelp(items) {
     const heading = document.createElement("h3");
     heading.textContent = item.name;
     const copy = document.createElement("p");
-    copy.textContent = item.summary;
+    copy.append(maintainedTextFragment(item.summary_tokens, item.summary));
     entry.append(heading, copy);
     grid.append(entry);
   }
@@ -457,7 +457,7 @@ function peripheralAccessItems(accessItems) {
     if (accessIndex) result.append("; ");
     const group = document.createElement("span");
     if (access.relationship === "access-pool") {
-      group.title = "Access pool; this does not assign fixed Controller ownership.";
+      group.title = "Peripherals this Controller can select; this list does not assign them to a particular Controller.";
     }
     group.append(`${peripheralTypeLabel(access)}: `);
     (access.targets || []).forEach((target, targetIndex) => {
@@ -900,7 +900,7 @@ function renderPeripheralRelationships(unit) {
         item.append(detail);
       }
       if (access.relationship === "access-pool") {
-        item.title = "This Controller can select this Peripheral from its access pool; no fixed ownership is implied.";
+        item.title = "This Controller can select this Peripheral; this listing does not assign it to a particular Controller.";
       }
       list.append(item);
     }

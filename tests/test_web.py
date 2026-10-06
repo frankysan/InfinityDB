@@ -972,7 +972,8 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
     for army_ref in ("901", "non-aligned"):
         status, _, body = request(role_app, "/api/units", query=f"army_id={army_ref}")
         assert status == 400
-        assert "grouping-only identity" in json.loads(body)["error"]
+        assert json.loads(body)["error"] == "Choose a playable Army list to browse its units."
+        assert b"grouping-only identity" not in body
 
 
 def test_army_filter_uses_actual_occurrences(app: Callable) -> None:
@@ -1259,6 +1260,26 @@ def test_unit_profile_help_is_rules_backed_and_optional(
         "profile-options",
     ]
     assert items[6]["name"] == "Hackable"
+    by_key = {item["key"]: item for item in items}
+    assert "language-independent name" in by_key["isc"]["summary"]
+    assert "O-12 intelligence reporting" in by_key["isc"]["summary"]
+    assert by_key["profile-options"]["name"] == "Profiles and Loadouts"
+    assert "selectable options" in by_key["profile-options"]["summary"]
+    references = [
+        token for token in by_key["profile-options"]["summary_tokens"]
+        if token["type"] == "reference"
+    ]
+    assert {token["target"] for token in references} == {
+        "skill:peripheral", "attribute:swc", "attribute:c"
+    }
+    assert all(
+        token["public_reference"].get("href")
+        or (token["public_reference"].get("catalog") and token["public_reference"].get("id"))
+        for token in references
+    )
+    for key in ("isc", "profile-options"):
+        for internal_copy in ("source ", "application identity", "profile rows", "loadout rows"):
+            assert internal_copy not in by_key[key]["summary"]
 
 
 def test_unit_categorical_filters_are_exposed_and_filter_units(app: Callable) -> None:
@@ -2094,6 +2115,65 @@ def test_player_page_framing_uses_reference_language(app: Callable) -> None:
     assert b"database domain" not in search
 
 
+def test_player_unit_tooltips_and_filter_context_use_game_language(app: Callable) -> None:
+    status, _, unit_script = request(app, "/static/unit.js")
+    assert status == 200
+    titles = re.findall(rb'(?:group|item)\.title = "([^"]+)"', unit_script)
+    assert any(b"Peripherals this Controller can select" in title for title in titles)
+    assert any(b"This Controller can select this Peripheral" in title for title in titles)
+    assert all(b"access pool" not in title.lower() for title in titles)
+    assert all(b"ownership" not in title.lower() for title in titles)
+    assert any(b"does not assign" in title for title in titles)
+    assert b"copy.append(maintainedTextFragment(item.summary_tokens, item.summary))" in unit_script
+    assert b"preview_tokens: item.summary_tokens" in unit_script
+    assert b"copy.textContent = item.summary" not in unit_script
+
+    # Technical relationship explanations remain inside Developer-only sections.
+    for function, section, explanation in (
+        ("renderArmyRelationships", "army-relationships", "This source relationship"),
+        ("renderSelectionRelationships", "selection-relationships", "source-defined relationships"),
+    ):
+        block = unit_script.split(f"function {function}(".encode(), 1)[1].split(
+            b"\nfunction ", 1
+        )[0]
+        assert f'detail-group {section} developer-only'.encode() in block
+        assert explanation.encode() in block
+
+    status, _, units_script = request(app, "/static/units.js")
+    assert status == 200
+    assert b"Faction membership:" in units_script
+    assert b"may not be available in the faction's current Army lists" in units_script
+    assert b"concrete current Army-list availability" not in units_script
+
+    status, _, home = request(app, "/")
+    assert status == 200
+    assert b"and N5.3 rules references" in home
+    assert b"maintained N5.3 rules references" not in home
+    status, _, unit = request(app, "/units/example")
+    assert status == 200
+    assert b"Army availability, and related rules" in unit
+    assert b"Army context" not in unit
+
+
+@pytest.mark.parametrize(
+    ("path", "query"),
+    [
+        ("/api/units/1", "army_id=INVALID"),
+        ("/api/fireteams", "army_id=9223372036854775808"),
+        ("/api/units", "skill_id=99999999999999999999"),
+        ("/api/units", "declared_faction_id=99999999999999999999"),
+    ],
+)
+def test_invalid_reference_selections_use_player_language(
+    app: Callable, path: str, query: str,
+) -> None:
+    status, _, body = request(app, path, query=query)
+    assert status == 400
+    assert json.loads(body)["error"] == "This filter selection is invalid."
+    assert b"domain identifier" not in body
+    assert b"slug" not in body
+
+
 def test_player_loading_empty_and_error_states_hide_storage_language(app: Callable) -> None:
     status, _, armies = request(app, "/armies")
     assert status == 200
@@ -2209,6 +2289,44 @@ def test_rules_reference_api_failures_use_player_language(
         assert "catalog" not in payload["error"].lower()
         assert "database" not in payload["error"].lower()
         assert b"private database failure detail" not in body
+
+
+@pytest.mark.parametrize(
+    ("path", "query", "service_name", "method_name", "message"),
+    [
+        ("/api/search", "q=stealth", "search_catalog", "search",
+         "Search is unavailable. Please try again."),
+        ("/api/fireteams", "", "database", "list_fireteam_armies",
+         "The Fireteam chart is unavailable. Please try again."),
+        ("/api/fireteams", "army_id=101", "database", "get_fireteam_chart",
+         "The Fireteam chart is unavailable. Please try again."),
+        ("/api/skills/stealth", "", "skill_catalog", "get_skill",
+         "The skill is unavailable. Please try again."),
+        ("/api/equipment/1", "", "equipment_catalog", "get_equipment",
+         "The reference item is unavailable. Please try again."),
+        ("/api/weapons/combi-rifle", "", "database", "get_catalog_item",
+         "The reference item is unavailable. Please try again."),
+        ("/api/visible-unit-ids", "", "database", "visible_unit_ids",
+         "Unit information is unavailable. Please try again."),
+        ("/api/units/ranger-prototype", "", "database", "get_unit",
+         "Unit information is unavailable. Please try again."),
+    ],
+)
+def test_internal_value_errors_stay_in_diagnostics(
+    app: Callable, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture,
+    path: str, query: str, service_name: str, method_name: str, message: str,
+) -> None:
+    diagnostic = "Source-specific rule has conflicting curated records and source IDs"
+
+    def fail(*args, **kwargs):
+        raise ValueError(diagnostic)
+
+    monkeypatch.setattr(getattr(app.api, service_name), method_name, fail)
+    status, _, body = request(app, path, query=query)
+    assert status == 503
+    assert json.loads(body) == {"error": message}
+    assert diagnostic.encode() not in body
+    assert diagnostic in caplog.text
 
 
 def test_equipment_weapons_and_fireteams_intros_use_player_language(app: Callable) -> None:
@@ -2338,7 +2456,10 @@ def test_skill_modifiers_remains_internal_to_the_player_skills_page(app: Callabl
     status, _, skills = request(app, "/skills")
     assert status == 200
     assert b'href="/skill-extras"' not in skills
-    assert b"Browse Common and Special Skills, with rules text and Army usage where available." in skills
+    assert (
+        b"Browse Common and Special Skills, with rules text and Army usage where available."
+        in skills
+    )
 
     status, _, modifiers = request(app, "/skill-extras")
     assert status == 200
@@ -2382,7 +2503,7 @@ def test_home_and_about_intros_use_reference_language(app: Callable) -> None:
     status, _, home = request(app, "/")
     assert status == 200
     assert b"official Infinity Army information" in home
-    assert b"maintained N5.3 rules references" in home
+    assert b"and N5.3 rules references" in home
     assert b"official Infinity Army data" not in home
     assert b"maintained N5.3 rules context" not in home
 
@@ -4065,7 +4186,7 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     assert b'declaredFactionId = params.get("declared_faction_id") || ""' in units_js
     assert b'params.set("declared_faction_id", state.declaredFactionId)' in units_js
     assert b"renderDeclaredMembershipContext(data)" in units_js
-    assert b"broader than concrete current Army-list availability" in units_js
+    assert b"may not be available in the faction's current Army lists" in units_js
 
     status, _, api_js = request(app, "/static/api.js")
     assert status == 200
@@ -4132,7 +4253,7 @@ def test_unit_details_frontend_presents_peripheral_relationships(app: Callable) 
     assert b"function renderPeripheralRelationships(unit)" in unit_js
     assert b"const controllers = unit.peripheral_controllers || [];" in unit_js
     assert b"item.append(unitLink(access.controller));" in unit_js
-    assert b"no fixed ownership is implied" in unit_js
+    assert b"this listing does not assign it to a particular Controller" in unit_js
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -4550,7 +4671,10 @@ def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b">Browse Hacking Programs</h2>" in body
     assert b"Hacking Program catalog" not in body
-    assert b"Browse Hacking Program profiles, targets, Devices, Skills, States, and related rules." in body
+    assert (
+        b"Browse Hacking Program profiles, targets, Devices, Skills, States, and related rules."
+        in body
+    )
     assert b"reviewed N5.3 rules semantics" not in body
     assert b"reviewed rules" not in body
     assert b'href="/hacking-programs" aria-current="page"' in body

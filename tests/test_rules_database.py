@@ -53,6 +53,48 @@ def _current_core_with_hacking_programs(
     return current_path, current, hacking_programs
 
 
+@pytest.mark.parametrize(
+    ("record_id", "expected"),
+    [
+        *[(f"skill:martial-arts-l{level}", f"Level {level}") for level in range(1, 6)],
+        *[(f"skill:strategos-l{level}", f"Level {level}") for level in range(1, 3)],
+        ("skill:bs-attack", "some variants"),
+        ("skill:cc-attack", "some variants"),
+        ("skill:bs-12", "with 12"),
+        ("skill:bs-11", "with 11"),
+        ("skill:cc-21", "with 21"),
+        ("equipment:tinbot", "listed"),
+        *[
+            (f"equipment:tinbot-{variant}", "Unit Profile")
+            for variant in (
+                "firewall", "neurocinetics", "albedo", "discover", "ecm-guided", "repeater"
+            )
+        ],
+    ],
+)
+def test_published_variant_descriptions_use_game_language(
+    current_rules_database: RulesDatabase, record_id: str, expected: str,
+) -> None:
+    record = current_rules_database.composed_record(record_id)
+    assert record is not None
+    assert expected in record["summary"]
+    assert record["citations"]
+    for internal_copy in ("source variant", "source identity", "occurrence", "modifier values"):
+        assert internal_copy not in record["summary"]
+    if "-l" in record_id:
+        assert "discrete rather than cumulative" in record["summary"]
+
+
+def test_escape_system_threshold_help_refers_to_the_unit_profile(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record("equipment:escape-system")
+    assert record is not None
+    restrictions = " ".join(record["facts"]["restrictions"])
+    assert "listed after [[equipment:escape-system]] in the Unit Profile" in restrictions
+    assert "source profile" not in restrictions
+
+
 def test_rules_export_finalization_is_default_and_can_be_skipped(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

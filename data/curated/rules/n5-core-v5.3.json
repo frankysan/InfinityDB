@@ -6427,7 +6427,7 @@
             "id": "skill:martial-arts-l1",
             "kind": "skill",
             "name": "Martial Arts L1",
-            "summary": "The Level 1 source variant of [[skill:martial-arts]]. Levels are discrete rather than cumulative, so this occurrence identifies Level 1 specifically.",
+            "summary": "Level 1 of [[skill:martial-arts]]. Levels are discrete rather than cumulative; use the effects listed for Level 1.",
             "composition": {
                 "role": "definition"
             },
@@ -6484,7 +6484,7 @@
             "id": "skill:martial-arts-l2",
             "kind": "skill",
             "name": "Martial Arts L2",
-            "summary": "The Level 2 source variant of [[skill:martial-arts]]. Levels are discrete rather than cumulative, so this occurrence identifies Level 2 specifically.",
+            "summary": "Level 2 of [[skill:martial-arts]]. Levels are discrete rather than cumulative; use the effects listed for Level 2.",
             "composition": {
                 "role": "definition"
             },
@@ -6541,7 +6541,7 @@
             "id": "skill:martial-arts-l3",
             "kind": "skill",
             "name": "Martial Arts L3",
-            "summary": "The Level 3 source variant of [[skill:martial-arts]]. Levels are discrete rather than cumulative, so this occurrence identifies Level 3 specifically.",
+            "summary": "Level 3 of [[skill:martial-arts]]. Levels are discrete rather than cumulative; use the effects listed for Level 3.",
             "composition": {
                 "role": "definition"
             },
@@ -6598,7 +6598,7 @@
             "id": "skill:martial-arts-l4",
             "kind": "skill",
             "name": "Martial Arts L4",
-            "summary": "The Level 4 source variant of [[skill:martial-arts]]. Levels are discrete rather than cumulative, so this occurrence identifies Level 4 specifically.",
+            "summary": "Level 4 of [[skill:martial-arts]]. Levels are discrete rather than cumulative; use the effects listed for Level 4.",
             "composition": {
                 "role": "definition"
             },
@@ -6655,7 +6655,7 @@
             "id": "skill:martial-arts-l5",
             "kind": "skill",
             "name": "Martial Arts L5",
-            "summary": "The Level 5 source variant of [[skill:martial-arts]]. Levels are discrete rather than cumulative, so this occurrence identifies Level 5 specifically.",
+            "summary": "Level 5 of [[skill:martial-arts]]. Levels are discrete rather than cumulative; use the effects listed for Level 5.",
             "composition": {
                 "role": "definition"
             },
@@ -6770,7 +6770,7 @@
             "id": "skill:strategos-l1",
             "kind": "skill",
             "name": "Strategos L1",
-            "summary": "The Level 1 source variant of [[skill:strategos]]. Levels are discrete rather than cumulative, so this occurrence identifies Level 1 specifically.",
+            "summary": "Level 1 of [[skill:strategos]]. Levels are discrete rather than cumulative; use the effects listed for Level 1.",
             "composition": {
                 "role": "definition"
             },
@@ -6834,7 +6834,7 @@
             "id": "skill:strategos-l2",
             "kind": "skill",
             "name": "Strategos L2",
-            "summary": "The Level 2 source variant of [[skill:strategos]]. Levels are discrete rather than cumulative, so this occurrence identifies Level 2 specifically.",
+            "summary": "Level 2 of [[skill:strategos]]. Levels are discrete rather than cumulative; use the effects listed for Level 2.",
             "composition": {
                 "role": "definition"
             },
@@ -6899,7 +6899,7 @@
             "id": "skill:bs-attack",
             "kind": "skill",
             "name": "BS Attack",
-            "summary": "A Common Skill used to make BS Attacks; exact source variants may replace the user's BS Attribute with a listed value for this Skill.",
+            "summary": "A Common Skill used to make [[skill:bs-attack:plural]]; some variants replace the user's [[attribute:bs|BS]] with the value listed for this Skill.",
             "composition": {
                 "role": "definition"
             },
@@ -6958,7 +6958,7 @@
             "id": "skill:bs-12",
             "kind": "skill",
             "name": "BS=12",
-            "summary": "The BS=12 exact source variant of [[skill:bs-attack]]. When using this Skill, the user replaces their BS Attribute with 12.",
+            "summary": "A [[skill:bs-attack]] variant that replaces the user's [[attribute:bs|BS]] with 12 when using this Skill.",
             "composition": {
                 "role": "definition"
             },
@@ -7017,7 +7017,7 @@
             "id": "skill:bs-11",
             "kind": "skill",
             "name": "BS=11",
-            "summary": "The BS=11 exact source variant of [[skill:bs-attack]]. When using this Skill, the user replaces their BS Attribute with 11.",
+            "summary": "A [[skill:bs-attack]] variant that replaces the user's [[attribute:bs|BS]] with 11 when using this Skill.",
             "composition": {
                 "role": "definition"
             },
@@ -7076,7 +7076,7 @@
             "id": "skill:cc-attack",
             "kind": "skill",
             "name": "CC Attack",
-            "summary": "A Common Skill used to make CC Attacks; an exact source variant may replace the user's CC Attribute with a listed value for this Skill.",
+            "summary": "A Common Skill used to make [[skill:cc-attack:plural]]; some variants replace the user's [[attribute:cc|CC]] with the value listed for this Skill.",
             "composition": {
                 "role": "definition"
             },
@@ -7135,7 +7135,7 @@
             "id": "skill:cc-21",
             "kind": "skill",
             "name": "CC=21",
-            "summary": "The CC=21 exact source variant of [[skill:cc-attack]]. When using this Skill, the user replaces their CC Attribute with 21.",
+            "summary": "A [[skill:cc-attack]] variant that replaces the user's [[attribute:cc|CC]] with 21 when using this Skill.",
             "composition": {
                 "role": "definition"
             },
@@ -7301,7 +7301,7 @@
             "id": "equipment:tinbot",
             "kind": "equipment",
             "name": "TinBot",
-            "summary": "Automatic Equipment that grants its owner the MOD, Special Skill, or Equipment advantage specified by the exact TinBot source variant.",
+            "summary": "Automatic Equipment that grants its owner the MOD, Special Skill, or Equipment advantage listed for that [[equipment:tinbot]] option.",
             "composition": {
                 "role": "definition"
             },
@@ -7341,7 +7341,7 @@
             "id": "equipment:tinbot-firewall",
             "kind": "equipment",
             "name": "TinBot: Firewall",
-            "summary": "The Firewall named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "A [[equipment:tinbot]] that provides a Firewall. Check the Unit Profile for the listed MOD.",
             "composition": {
                 "role": "definition"
             },
@@ -7391,7 +7391,7 @@
             "id": "equipment:tinbot-neurocinetics",
             "kind": "equipment",
             "name": "TinBot: Neurocinetics",
-            "summary": "The source variant of [[equipment:tinbot]] named for [[skill:neurocinetics]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "A [[equipment:tinbot]] option with [[skill:neurocinetics]]. Check the Unit Profile for any listed MOD.",
             "composition": {
                 "role": "definition"
             },
@@ -7445,7 +7445,7 @@
             "id": "equipment:tinbot-albedo",
             "kind": "equipment",
             "name": "TinBot: Albedo",
-            "summary": "The [[equipment:albedo]] named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "A [[equipment:tinbot]] option with [[equipment:albedo]]. Check the Unit Profile for any listed MOD.",
             "composition": {
                 "role": "definition"
             },
@@ -7499,7 +7499,7 @@
             "id": "equipment:tinbot-discover",
             "kind": "equipment",
             "name": "TinBot: Discover",
-            "summary": "The source variant of [[equipment:tinbot]] named for [[skill:discover]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "A [[equipment:tinbot]] option affecting [[skill:discover]]. Check the Unit Profile for the listed MOD.",
             "composition": {
                 "role": "definition"
             },
@@ -7553,7 +7553,7 @@
             "id": "equipment:tinbot-ecm-guided",
             "kind": "equipment",
             "name": "TinBot: ECM Guided",
-            "summary": "The [[equipment:ecm]] Guided named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "A [[equipment:tinbot]] option with [[equipment:ecm]] against Guided attacks. Check the Unit Profile for the listed MOD.",
             "composition": {
                 "role": "definition"
             },
@@ -7607,7 +7607,7 @@
             "id": "equipment:tinbot-repeater",
             "kind": "equipment",
             "name": "TinBot: Repeater",
-            "summary": "The [[equipment:repeater]] named source variant of [[equipment:tinbot]]. Its exact source identity remains distinct from occurrence-specific modifier values.",
+            "summary": "A [[equipment:tinbot]] option with a [[equipment:repeater]]. Check the Unit Profile for any listed MOD.",
             "composition": {
                 "role": "definition"
             },
@@ -10543,7 +10543,7 @@
                     "The profile change places an Eclipse Special Ammo Circular Template centered on the replacement Model."
                 ],
                 "restrictions": [
-                    "The threshold is the value listed after Escape System in the source profile."
+                    "The threshold is the value listed after [[equipment:escape-system]] in the Unit Profile."
                 ]
             },
             "armyLinks": [
@@ -15639,7 +15639,7 @@
             "id": "rule:profile-help:isc",
             "kind": "rule",
             "name": "ISC",
-            "summary": "ISC is the International Standard Code, a language-independent source nomenclature used for O-12 intelligence reporting. InfinityDB presents it as source metadata rather than using it as the Unit’s application identity.",
+            "summary": "ISC is the International Standard Code, a language-independent name used for O-12 intelligence reporting.",
             "composition": {
                 "role": "definition"
             },
@@ -15824,8 +15824,8 @@
         {
             "id": "rule:profile-help:profile-options",
             "kind": "rule",
-            "name": "Profile and Loadout Rows",
-            "summary": "The source profile distinguishes data common to a Unit Profile from option-specific Skills, Equipment, Weapons, Peripherals, SWC, and Cost. InfinityDB preserves that distinction by separating profile rows from selectable loadout rows.",
+            "name": "Profiles and Loadouts",
+            "summary": "A Unit Profile shows shared abilities and gear. Individual loadouts show the selectable options, including any differences in Skills, Equipment, Weapons, [[skill:peripheral:plural]], [[attribute:swc|SWC]], and [[attribute:c|Cost]].",
             "composition": {
                 "role": "definition"
             },

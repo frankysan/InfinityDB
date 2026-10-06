@@ -530,8 +530,8 @@ function renderDeclaredMembershipContext(data) {
   }
   const relationship = data.declared_faction;
   const label = relationship?.name || `Faction ${state.declaredFactionId}`;
-  elements.declaredMembership.textContent = `Declared faction membership: ${label}. `
-    + "This relationship is broader than concrete current Army-list availability.";
+  elements.declaredMembership.textContent = `Faction membership: ${label}. `
+    + "This includes units that may not be available in the faction's current Army lists.";
   elements.declaredMembership.hidden = false;
 }
 

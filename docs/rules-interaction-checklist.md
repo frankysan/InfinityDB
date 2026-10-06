@@ -814,7 +814,7 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Peripheral** (`rule:profile-help:peripheral`) — reviewed
   - outgoing: none
-- [x] **Profile and Loadout Rows** (`rule:profile-help:profile-options`) — reviewed
+- [x] **Profiles and Loadouts** (`rule:profile-help:profile-options`) — reviewed
   - outgoing: none
 - [x] **Training and Orders** (`rule:profile-help:training-orders`) — reviewed
   - outgoing: none
