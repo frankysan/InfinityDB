@@ -355,15 +355,16 @@ restart is observable even when version and snapshot revision are unchanged. Rea
 endpoint does not advance either timestamp.
 
 The accepted boundary for retained metrics history is a separate operational service, not writable
-state inside the application container. A future `metrics-history` collector should scrape the
-private `app:8000/internal/metrics` endpoint over the Compose network, run with an immutable root
-filesystem and no published port, and own one bounded writable volume containing its SQLite history.
-The web-facing `app` remains immutable and unaware of historical persistence. Historical aggregation
-remains aggregate-only and version/snapshot aware; the live generation timestamps are the canonical
-restart boundary so application restarts cannot be mistaken for negative/request deltas. Retention
-must be bounded and
-automatically enforced rather than relying on operator cleanup. Exact rollout stages and retention
-parameters are tracked in `docs/TODO.md`.
+state inside the application container. `tools/metrics_history.py` now owns the standalone SQLite
+collection/aggregation engine: one rolling scrape state is converted into generation-aware counter
+deltas and bounded weekly summaries keyed by week/version/snapshot. The deployment service that runs
+that engine should scrape the private `app:8000/internal/metrics` endpoint over the Compose network,
+run with an immutable root filesystem and no published port, and own one bounded writable volume
+containing its SQLite history. The web-facing `app` remains immutable and unaware of historical
+persistence. The live generation timestamps are the canonical restart boundary so application
+restarts cannot be mistaken for negative/request deltas. Retention is automatically enforced by the
+engine rather than relying on operator cleanup. Exact remaining rollout stages are tracked in
+`docs/TODO.md`.
 
 Temporary raw request logging is an incident-diagnostic exception, not the normal analytics path,
 and should be minimized and short-lived.

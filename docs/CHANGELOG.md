@@ -9,6 +9,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Deployment + Project infrastructure:** Add a bounded, version-aware metrics-history collector
+  engine that converts volatile request counters into generation-safe weekly SQLite summaries,
+  retains only one rolling scrape state, and automatically enforces age and database-size limits
+  without storing user/request identity data.
+
 - **Deployment + Project infrastructure:** Expose live metrics-generation start and latest completed-request timestamps, and show the generation observation span in the operator metrics report so restarts and counter lifetimes are explicit before retained history is introduced.
 
 - **Deployment + Project infrastructure:** Add a privacy-preserving operational alert evaluator for sustained CPU, memory/OOM/restart pressure, filesystem space/inodes, 5xx response deltas, and health failures, with configurable thresholds and monitoring-friendly exit codes.

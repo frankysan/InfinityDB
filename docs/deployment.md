@@ -212,25 +212,39 @@ container restarts.
 ### Planned retained metrics history
 
 Retained history must not make the web-facing application container writable. The accepted target
-topology is a separate `metrics-history` operational service on the private Compose network. It will
-scrape `http://app:8000/internal/metrics` directly, expose no public/LAN port, run with an immutable
-root filesystem, and own one dedicated writable SQLite volume. It must not receive the Docker socket,
-host filesystem mounts, or writable mounts into `app`. The existing LAN-only `/metrics` endpoint
-remains the interactive/current-state scrape surface.
+topology remains a separate `metrics-history` operational service on the private Compose network.
+The standalone collection/aggregation engine is implemented in `tools/metrics_history.py`; Compose
+wiring is still pending. The service will scrape `http://app:8000/internal/metrics` directly, expose
+no public/LAN port, run with an immutable root filesystem, and own one dedicated writable SQLite
+volume. It must not receive the Docker socket, host filesystem mounts, or writable mounts into `app`.
+The existing LAN-only `/metrics` endpoint remains the interactive/current-state scrape surface.
 
-The planned collector treats each application metrics generation explicitly. Live metrics already
-expose the generation-start and latest completed-request timestamps needed to distinguish restarts
-even when version and snapshot revision are unchanged. The collector will retain only the previous
-scrape state needed to compute deltas, then fold deltas into weekly summaries keyed by ISO week,
-InfinityDB version, and snapshot revision. Multiple process generations may contribute to the same
-weekly/version/snapshot summary without losing the generation boundaries used for reset detection.
+The collector treats each application metrics generation explicitly. Live metrics expose the
+generation-start and latest completed-request timestamps needed to distinguish restarts even when
+version and snapshot revision are unchanged. The SQLite store keeps only one previous scrape state
+needed to compute deltas, then folds deltas into weekly summaries keyed by ISO week, InfinityDB
+version, and snapshot revision. The first scrape of a new generation is safely treated as a delta
+from zero; later scrapes subtract only the matching generation state. An unexplained counter decrease
+inside one generation is not retained as a delta: rolling state is reset so history cannot inflate.
+Multiple process generations may therefore contribute to the same weekly/version/snapshot summary
+without confusing counter resets with request activity.
 
-The initial retention contract is intentionally bounded: collect every 5 minutes, keep the current
-week plus 52 completed weeks, prune after every successful collection, and enforce a 64-MiB SQLite
-safety ceiling by deleting the oldest completed weeks first. Operator reports must show earliest and
-latest retained observations, retained-week count, and database size so retention cleanup is visible.
-No raw request URL, search/query value, IP address, user agent, cookie/preference value, visitor ID,
-or per-user history may enter the history database.
+The retention contract is intentionally bounded: continuous collection defaults to every 5 minutes,
+keeps the current week plus 52 completed weeks, prunes after successful collection, and enforces a
+64-MiB SQLite safety ceiling by deleting the oldest completed weeks first. Collector status exposes
+earliest/latest retained observations, retained-week count, database size, and whether the size
+ceiling is still exceeded because only the current week remains. No raw request URL, search/query
+value, IP address, user agent, cookie/preference value, visitor ID, or per-user history may enter the
+history database. The collector also fails closed on an unreviewed route label rather than silently
+persisting a new high-cardinality dimension.
+
+Before Compose integration, the engine can be exercised manually from a checkout against the trusted
+LAN metrics listener:
+
+```powershell
+python tools/metrics_history.py --database reports/metrics-history.db collect --url http://127.0.0.1:9090/metrics
+python tools/metrics_history.py --database reports/metrics-history.db status
+```
 
 Deployment integration will take one final history scrape before replacing the old application and
 one opening scrape after the new release passes health checks. Periodic collection handles normal

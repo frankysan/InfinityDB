@@ -268,13 +268,15 @@ generation-start timestamp is created with the preloaded request registry, only 
 requests advance the latest-request timestamp, and reading `/metrics`/`/health` does not change either
 value. `report_metrics.py` must also remain tolerant of older deployments without these gauges.
 
-When the planned retained metrics-history service is implemented, its tests must keep the persistence
-boundary explicit: the application container remains read-only; collector state lives only in the
-dedicated history volume; counter resets/generation changes are tested; weekly aggregation is keyed
-by week/version/snapshot; and retention tests prove both age-based pruning and the hard database-size
-safety ceiling. Tests should use deterministic synthetic scrape snapshots rather than real visitor
-data or unbounded request labels. Deployment tests should also prove the pre-update closing scrape
-and post-health opening scrape without making historical storage a prerequisite for app startup.
+Metrics-history engine tests keep the persistence/privacy contract explicit: deterministic synthetic
+scrapes verify first-generation-from-zero accumulation, same-generation deltas, restart/version
+boundaries, fail-closed handling of unexplained counter decreases, weekly aggregation keyed by
+week/version/snapshot, route-label allowlisting, age-based pruning, and oldest-completed-week pruning
+under the database-size ceiling. The collector state remains one rolling snapshot and must not retain
+real visitor data or unbounded request labels. When the isolated Compose service is added, deployment
+tests must additionally prove the application container remains read-only, collector state lives only
+in its dedicated history volume, and pre-update/post-health transition scrapes do not make historical
+storage a prerequisite for app startup.
 
 ## CI and release validation
 
