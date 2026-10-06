@@ -70,6 +70,10 @@ def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
             return
         if not current_items:
             raise ReleaseNotesError(f"Release-note section {current_heading!r} has no items")
+        if len(set(current_items)) != len(current_items):
+            raise ReleaseNotesError(
+                f"Release-note section {current_heading!r} contains duplicate items"
+            )
         current_sections.append(ReleaseNoteSection(current_heading, tuple(current_items)))
         current_heading = None
         current_items = []

@@ -88,6 +88,25 @@ def test_release_notes_parser_requires_player_summary_first() -> None:
         )
 
 
+def test_release_notes_parser_rejects_duplicate_items_within_a_section() -> None:
+    with pytest.raises(ReleaseNotesError, match="contains duplicate items"):
+        parse_release_notes(
+            """# Changelog
+
+## Unreleased
+
+### Player summary
+
+- Visible summary.
+
+### Added
+
+- Added the same thing.
+- Added the same thing.
+"""
+        )
+
+
 def test_release_notes_parser_rejects_unsupported_structure_inside_a_release() -> None:
     with pytest.raises(ReleaseNotesError, match="Unsupported changelog structure"):
         parse_release_notes(
