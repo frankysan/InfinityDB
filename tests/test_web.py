@@ -686,6 +686,8 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'writeShareState("fireteams", value ? { army: value } : {}, { replace })' in script
     assert b"Counts as:" in script
     assert b"`${sourceLabel} Fireteam chart.`" in script
+    assert b"No members are listed for this Fireteam." in script
+    assert b"No member rows are defined for this chart entry." not in script
     assert b"Authoritative" not in script
     assert b"current Army snapshot" not in script
     assert b'army.role === "reinforcement"' in script

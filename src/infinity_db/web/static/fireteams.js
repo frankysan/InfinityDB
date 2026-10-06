@@ -192,7 +192,7 @@ function renderTeam(team) {
   if (!(team.members || []).length && !(team.wildcard_members || []).length) {
     const empty = document.createElement("p");
     empty.className = "detail-copy";
-    empty.textContent = "No member rows are defined for this chart entry.";
+    empty.textContent = "No members are listed for this Fireteam.";
     article.append(empty);
     return article;
   }
