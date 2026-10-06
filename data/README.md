@@ -69,9 +69,30 @@ production will serve. Generated snapshot manifests remain local provenance reco
 than maintained project knowledge.
 
 Generated Army database data is replaceable. Builds create temporary application
-and raw-archive siblings, validate both before publication, and replace each
-destination atomically. The pair is not yet one atomic transaction: recovery
-from interruption between the two replacements remains an explicit backlog item.
+and raw-archive siblings, validate both before publication, and bind them with the
+same deterministic `export_pair_sha256` metadata. That fingerprint covers the full
+normalized source model plus the shared build metadata, including source-only rows
+that do not appear in the application database.
+
+The two destination files cannot be replaced as one filesystem transaction, so
+publication has an explicit commit order and recovery policy:
+
+1. replace `infinity.raw.db` first;
+2. replace `infinity.db` last; the application replacement is the commit point.
+
+If a process stops before the raw replacement, the previous pair remains. If it
+stops between replacements, normal serving remains on the previous validated
+`infinity.db`, while the newer raw archive is intentionally treated as unpaired.
+Raw-dependent audit tooling must validate the pair metadata and fail closed rather
+than combine generations. Rerunning the export rolls both siblings forward and is
+the supported recovery operation; temporary files are not a rollback contract. On
+a first-ever publication, the same interruption may leave only the raw sibling, and
+a rerun completes the pair. If the process stops after the application replacement,
+both destination siblings already belong to the new generation.
+
+Older pairs created before `export_pair_sha256` remain acceptable when their full
+shared metadata dictionaries match. New exports always carry the stronger pair
+fingerprint.
 
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;

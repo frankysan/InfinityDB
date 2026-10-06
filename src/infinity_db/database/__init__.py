@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from .paths import raw_database_path
+from .publication import validate_database_pair
 from .repository import ArmySelectionError, Database
 from .schema import DATABASE_COMPATIBILITY_VERSION, SCHEMA_VERSION
 
@@ -18,6 +19,7 @@ __all__ = [
     "Database",
     "export_database",
     "raw_database_path",
+    "validate_database_pair",
 ]
 
 

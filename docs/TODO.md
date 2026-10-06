@@ -116,9 +116,11 @@ domain unless required to correct a release-blocking defect.
 
 ### Release hardening, CI, and operations
 
-- [ ] Define a paired-export replacement policy. The application and raw archive
-  are currently built as temporary siblings; document and test recovery when a
-  process stops between replacing either output.
+- [x] Define a paired-export replacement policy. Temporary application/raw candidates are
+  validated and fingerprinted as one generation; publication replaces the raw archive first and
+  the application database last as the commit point. Interruption leaves serving on the previous
+  valid application database, raw-dependent tooling rejects mismatched generations, and rerunning
+  export is the tested roll-forward recovery path.
 
 - [x] Integrate curated snapshot-note validation into routine project checks so
   every checked-in file under `data/curated/snapshot-notes/` is validated even

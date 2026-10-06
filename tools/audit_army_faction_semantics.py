@@ -11,6 +11,7 @@ from typing import Any
 
 from infinity_db.database.application_armies import derive_application_armies
 from infinity_db.database.paths import raw_database_path
+from infinity_db.database.publication import validate_database_pair
 from infinity_db.database.repository import Database, identity_config_from_connection
 
 FORMAT = "InfinityDB army/faction semantic audit"
@@ -211,6 +212,10 @@ def audit_database(path: Path) -> dict[str, Any]:
     Database(path).validate()
     if not source_path.is_file():
         raise ArmyFactionAuditError(f"Raw source sibling does not exist: {source_path}")
+    try:
+        validate_database_pair(path, raw_path=source_path)
+    except ValueError as exc:
+        raise ArmyFactionAuditError(str(exc)) from exc
 
     with _connect(source_path) as source_connection:
         _check_schema(source_connection, SOURCE_REQUIRED_FIELDS)

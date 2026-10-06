@@ -29,11 +29,17 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.database import (
     Database,
     raw_database_path,
+    validate_database_pair,
 )
 from infinity_db.database import (
     export_database as export_release_database,
 )
 from infinity_db.database.importer import BATCH_SIZE, batched, reinforcement_unit_matches
+from infinity_db.database.publication import (
+    EXPORT_PAIR_SHA256_KEY,
+    PUBLISHED_CONTENT_SHA256_KEY,
+    export_pair_sha256,
+)
 from infinity_db.database.repository import (
     army_required_flags,
     availability_summary,
@@ -328,6 +334,14 @@ def test_database_splits_lossless_source_from_published_application_data(
             (DATABASE_COMPATIBILITY_KEY,),
         ).fetchone()[0]
         assert json.loads(compatibility) == DATABASE_COMPATIBILITY_VERSION
+        pair_sha256 = json.loads(
+            connection.execute(
+                f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
+                (EXPORT_PAIR_SHA256_KEY,),
+            ).fetchone()[0]
+        )
+        assert len(pair_sha256) == 64
+        assert validate_database_pair(path) == pair_sha256
         reinforcement_matches = connection.execute(
             f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
             (REINFORCEMENT_UNIT_MATCHES_KEY,),
@@ -2110,6 +2124,102 @@ def test_database_uses_exported_reinforcement_mapping(
     assert details is not None
     assert details["id"] == 1
     assert details["source_ids"] == [1, 1649]
+
+
+def test_export_pair_fingerprint_covers_source_only_normalized_rows(normalized: dict) -> None:
+    metadata = {PUBLISHED_CONTENT_SHA256_KEY: "a" * 64}
+    original = export_pair_sha256(normalized, metadata)
+    changed = copy.deepcopy(normalized)
+    source_only_table = next(
+        name for name in sorted(SOURCE_ONLY_TABLES) if changed["tables"].get(name)
+    )
+    changed["tables"][source_only_table][0]["pair_test_marker"] = "changed"
+
+    assert export_pair_sha256(changed, metadata) != original
+
+
+def test_legacy_database_pair_without_generation_fingerprint_remains_valid(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    for sibling in (path, raw_database_path(path)):
+        connection = sqlite3.connect(sibling)
+        try:
+            with connection:
+                connection.execute(
+                    f"DELETE FROM {quote(METADATA_TABLE)} WHERE key = ?",
+                    (EXPORT_PAIR_SHA256_KEY,),
+                )
+        finally:
+            connection.close()
+
+    assert validate_database_pair(path) is None
+
+
+def test_interrupted_pair_replacement_keeps_application_commit_point_and_rerun_recovers(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    old_application = path.read_bytes()
+    old_archive = raw_database_path(path).read_bytes()
+    old_pair_sha256 = validate_database_pair(path)
+    updated = copy.deepcopy(normalized)
+    updated["armyMetadata"]["sourceSha256"] = "updated-source"
+
+    original_replace = database_importer.os.replace
+
+    def interrupt_before_application_commit(source: Path, destination: Path) -> None:
+        if Path(destination) == path:
+            raise RuntimeError("simulated process interruption")
+        original_replace(source, destination)
+
+    monkeypatch.setattr(
+        database_importer.os, "replace", interrupt_before_application_commit
+    )
+    with pytest.raises(RuntimeError, match="simulated process interruption"):
+        export_database(updated, path)
+
+    assert path.read_bytes() == old_application
+    assert raw_database_path(path).read_bytes() != old_archive
+    Database(path).validate()
+    with pytest.raises(ValueError, match="different exports"):
+        validate_database_pair(path)
+
+    monkeypatch.setattr(database_importer.os, "replace", original_replace)
+    export_database(updated, path)
+
+    recovered_pair_sha256 = validate_database_pair(path)
+    assert recovered_pair_sha256 is not None
+    assert recovered_pair_sha256 != old_pair_sha256
+
+
+def test_interrupted_first_pair_publication_recovers_on_rerun(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    original_replace = database_importer.os.replace
+
+    def interrupt_before_application_commit(source: Path, destination: Path) -> None:
+        if Path(destination) == path:
+            raise RuntimeError("simulated process interruption")
+        original_replace(source, destination)
+
+    monkeypatch.setattr(
+        database_importer.os, "replace", interrupt_before_application_commit
+    )
+    with pytest.raises(RuntimeError, match="simulated process interruption"):
+        export_database(normalized, path)
+
+    assert not path.exists()
+    assert raw_database_path(path).is_file()
+    with pytest.raises(ValueError, match="does not exist"):
+        validate_database_pair(path)
+
+    monkeypatch.setattr(database_importer.os, "replace", original_replace)
+    export_database(normalized, path)
+    assert validate_database_pair(path) is not None
 
 
 @pytest.mark.parametrize(

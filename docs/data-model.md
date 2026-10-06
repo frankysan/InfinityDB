@@ -473,7 +473,10 @@ It is not deployed.
 
 Both Army siblings retain the generated metadata needed to bind them to the source/configuration
 that produced them. Important metadata includes source snapshot identity, validated identity-policy
-hashes, publication/raw table boundaries, and deterministic content identity.
+hashes, publication/raw table boundaries, deterministic application-content identity, and the
+shared `export_pair_sha256` fingerprint for the complete application/raw export generation. The
+pair fingerprint includes source-only normalized rows, so a partially published raw archive cannot
+silently masquerade as the companion of an older application database.
 
 When the Army database is built from a ZIP snapshot, `snapshotArchiveSha256` records that exact
 archive identity. Deployment compares it with the Army source identity in the tracked symbol
@@ -485,8 +488,9 @@ validated before normal reads. Export validates integrity, writes planner statis
 canonical physical finalization for deterministic release bytes. Semantic tests may explicitly skip
 only the physical finalization step; they do not bypass schema/input/integrity validation.
 
-Builds publish generated database destinations only after temporary artifacts validate. The exact
-publication/recovery lifecycle is owned by `data/README.md`.
+Builds publish generated database destinations only after temporary artifacts validate. The raw
+archive is replaced first and the application database last, making the application replacement the
+publication commit point. The exact interruption/recovery lifecycle is owned by `data/README.md`.
 
 ## Snapshot provenance
 

@@ -178,7 +178,10 @@ only asserts logical database contents.
 
 That optimization skips only physical finalization. It must not bypass source validation, schema
 creation, integrity checks, semantic materialization, or atomic destination replacement.
-Determinism/release tests continue to exercise the canonical finalized path.
+Army export tests also simulate interruption between raw-sibling replacement and the application
+commit point: the previous application remains valid, the mismatched pair is rejected, and rerunning
+export restores one matching generation. Determinism/release tests continue to exercise the
+canonical finalized path.
 
 ## Reports
 

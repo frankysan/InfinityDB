@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.database.paths import raw_database_path
+from infinity_db.database.publication import validate_database_pair
 from infinity_db.database.schema import METADATA_TABLE, TABLES, quote
 
 FORMAT = "InfinityDB source-to-presentation completeness audit"
@@ -423,6 +424,10 @@ def _raw_evidence(path: Path) -> dict[str, Any]:
     raw_path = raw_database_path(path)
     if not raw_path.is_file():
         return {"status": "not_available", "path": str(raw_path)}
+    try:
+        validate_database_pair(path, raw_path=raw_path)
+    except ValueError as exc:
+        raise SourcePresentationAuditError(str(exc)) from exc
     connection = sqlite3.connect(raw_path.resolve().as_uri() + "?mode=ro", uri=True)
     try:
         tables = _table_names(connection)

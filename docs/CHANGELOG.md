@@ -28,6 +28,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Changed
 
+- **Data processing:** Bind each generated Army application/raw database pair to one deterministic
+  full-export fingerprint and make application-database replacement the publication commit point.
+  Interrupted paired publication now fails closed for raw-dependent audits and recovers by rerunning
+  the export without putting normal serving onto an unvalidated application database.
 - **Web backend + Web frontend:** Normalize Army Fireteam limit sentinels into explicit application
   semantics before they reach the browser, reconnect the Skill Modifiers review surface as a
   discoverable child of Skills, and include curated legacy Armies in global search with links to
