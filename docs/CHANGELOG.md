@@ -20,6 +20,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Web frontend:** Add scale-preserving S1–S8 Silhouette diagrams to the Glossary and optional Unit
+  statline previews. Non-S2 profiles include a faded S2 comparison at the same physical scale, while
+  the normal Unit statline stays compact.
+
 - **Data processing + Web frontend:** Add **FTO (Fireteam Option)** to the Glossary, explaining that
   FTO is an option-name identifier rather than a standalone rule and that Fireteam charts can
   require FTO or a specific FTO variant such as FTO-2.

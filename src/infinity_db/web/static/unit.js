@@ -1,5 +1,6 @@
 import { getUnit, getUnitProfileHelp } from "./api.js";
 import { maintainedTextFragment } from "./maintained-text.js";
+import { silhouetteValuePreview } from "./silhouette-diagrams.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
 import { formatMovement } from "./unit-presentation.js";
@@ -93,7 +94,9 @@ function attributeStatline(
     attributeValue.className = "attribute-value";
     const value = displayStatlineValue(read(stats));
     attributeLabel.append(attributeReferenceLabel(statLabel(label, stats)));
-    attributeValue.textContent = text(value);
+    const silhouettePreview = label === "S" ? silhouetteValuePreview(value) : null;
+    if (silhouettePreview) attributeValue.append(silhouettePreview);
+    else attributeValue.textContent = text(value);
     attribute.append(attributeLabel, attributeValue);
     if (generalDifferenceLabels?.has(label)) {
       const indicator = document.createElement("sup");

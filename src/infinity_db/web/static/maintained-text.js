@@ -143,6 +143,19 @@ function prepareTouchReference(link) {
   });
 }
 
+export function attachReferencePreview(link, tooltip) {
+  link.setAttribute("aria-describedby", tooltip.id);
+  link.addEventListener("pointerenter", (event) => {
+    if (event.pointerType !== "touch") openReferencePreview(link);
+  });
+  link.addEventListener("pointerleave", (event) => {
+    if (event.pointerType !== "touch") closeReferencePreview(link);
+  });
+  link.addEventListener("focus", () => openReferencePreview(link));
+  link.addEventListener("blur", () => closeReferencePreview(link));
+  prepareTouchReference(link);
+}
+
 function referenceHref(token) {
   const reference = token.public_reference;
   if (reference?.href) return reference.href;
@@ -190,17 +203,8 @@ function referenceNode(token, { interactive = true } = {}) {
     tooltip.role = "tooltip";
     tooltip.setAttribute("popover", "manual");
     tooltip.append(maintainedTextFragment(token.preview_tokens, "", { interactive: false }));
-    link.setAttribute("aria-describedby", tooltip.id);
     wrapper.append(tooltip);
-    link.addEventListener("pointerenter", (event) => {
-      if (event.pointerType !== "touch") openReferencePreview(link);
-    });
-    link.addEventListener("pointerleave", (event) => {
-      if (event.pointerType !== "touch") closeReferencePreview(link);
-    });
-    link.addEventListener("focus", () => openReferencePreview(link));
-    link.addEventListener("blur", () => closeReferencePreview(link));
-    prepareTouchReference(link);
+    attachReferencePreview(link, tooltip);
   }
   return wrapper;
 }
@@ -242,18 +246,8 @@ function reviewNeededNode(token, { interactive = true } = {}) {
   tooltip.role = "tooltip";
   tooltip.setAttribute("popover", "manual");
   tooltip.textContent = `Needs verification: ${reviewNeededReason(token.reason)}.`;
-  marker.setAttribute("aria-describedby", tooltip.id);
   wrapper.append(tooltip);
-
-  marker.addEventListener("pointerenter", (event) => {
-    if (event.pointerType !== "touch") openReferencePreview(marker);
-  });
-  marker.addEventListener("pointerleave", (event) => {
-    if (event.pointerType !== "touch") closeReferencePreview(marker);
-  });
-  marker.addEventListener("focus", () => openReferencePreview(marker));
-  marker.addEventListener("blur", () => closeReferencePreview(marker));
-  prepareTouchReference(marker);
+  attachReferencePreview(marker, tooltip);
   return wrapper;
 }
 

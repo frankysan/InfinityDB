@@ -1,5 +1,6 @@
 import { getGlossary } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
+import { silhouetteReferenceSet } from "./silhouette-diagrams.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { createPanelSwitcher } from "./view-components.js";
 
@@ -60,6 +61,8 @@ function entryNode(item) {
   description.className = "glossary-description";
   appendMaintainedText(description, item.description_tokens, item.description);
   article.append(header, description);
+
+  if (item.id === "attribute:s") article.append(silhouetteReferenceSet());
 
   if (item.aliases?.length) {
     const aliases = document.createElement("p");

@@ -90,6 +90,8 @@
   --color-range-caution: #fcc002;
   --color-range-negative: #cd171a;
 
+  --filter-monochrome-artwork: none;
+
   /* Shared component roles extracted from the former light-only rules. */
   --color-action-highlight: #e0f4b5;
   --color-text-on-highlight: #142923;

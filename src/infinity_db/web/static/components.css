@@ -1410,6 +1410,122 @@ h1>span {
   }
 }
 
+.silhouette-reference-section {
+  margin-top: var(--space-4);
+}
+
+.silhouette-reference-heading {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.silhouette-reference-copy {
+  max-width: 68ch;
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+.silhouette-reference-viewport {
+  max-width: 100%;
+  margin-top: var(--space-3);
+  padding: var(--space-2) 0 var(--space-3);
+}
+
+.silhouette-diagram-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+}
+
+.silhouette-reference-viewport .silhouette-diagram-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  align-items: end;
+  justify-items: center;
+  gap: var(--space-4) var(--space-3);
+  width: 100%;
+}
+
+.silhouette-figure {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 0;
+}
+
+.silhouette-diagram-image {
+  display: block;
+  max-width: none;
+  filter: var(--filter-monochrome-artwork);
+}
+
+.silhouette-figure-caption {
+  margin-bottom: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.silhouette-figure--reference .silhouette-diagram-image {
+  opacity: .45;
+}
+
+.silhouette-figure--reference .silhouette-figure-caption {
+  color: var(--color-text-tertiary);
+}
+
+.silhouette-preview-trigger {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: inherit;
+  line-height: inherit;
+  text-decoration: underline dotted var(--color-border-strong);
+  text-underline-offset: .16em;
+  cursor: help;
+}
+
+.silhouette-preview-trigger:hover,
+.silhouette-preview-trigger:focus-visible {
+  text-decoration-style: solid;
+}
+
+.silhouette-preview-tooltip {
+  max-width: min(400px, calc(100vw - 24px));
+  padding: 12px;
+}
+
+.silhouette-preview-title,
+.silhouette-preview-note {
+  display: block;
+}
+
+.silhouette-preview-title {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-heading);
+  font-size: var(--font-size-sm);
+}
+
+.silhouette-preview-tooltip .silhouette-diagram-row {
+  min-width: 0;
+  gap: var(--space-3);
+}
+
+.silhouette-preview-note {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
 .maintained-review-needed-wrap {
   display: inline-flex;
   vertical-align: baseline;

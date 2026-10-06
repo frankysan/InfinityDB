@@ -108,6 +108,20 @@ domain unless required to correct a release-blocking defect.
   geometry on its dark brand surface, simplified for small browser-tab sizes, with SVG as the
   scalable primary icon plus a 32 px PNG fallback and 180 px Apple touch icon.
 
+- [ ] **Web frontend:** Add scale-preserving Silhouette diagrams to player reference surfaces.
+  Whenever multiple templates are shown together they must use one shared physical scale and aligned
+  baselines so the S1–S8 size differences remain meaningful rather than fitting each image
+  independently.
+  - [x] Publish the maintained S1–S8 SVG set through one reusable browser renderer with explicit
+    physical dimensions and theme-aware monochrome presentation.
+  - [x] Show the complete S1–S8 set in the **Silhouette (S)** Glossary entry, preserving one common
+    scale and horizontal scrolling rather than shrinking templates independently on narrow screens.
+  - [x] Add an optional Unit-profile `S` value preview without enlarging the normal statline. For
+    S1/S3–S8, compare the selected template with a faded S2 reference at exactly the same scale; S2
+    is shown alone, and unsupported values such as S0 remain plain stat text.
+  - [ ] Complete manual browser review of the Glossary strip and Unit popup in Light/Dark themes,
+    keyboard/focus and touch interaction, and narrow-screen layouts before closing the item.
+
 - [x] Reorganize frontend design-system ownership after first-class themes are implemented:
   foundational typography/geometry tokens, one CSS palette file per explicit theme, shared
   component/layout rules, and late page-specific exceptions now have separate source ownership.

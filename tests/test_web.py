@@ -468,6 +468,95 @@ def test_browser_view_components_own_shared_presentation_primitives(app: Callabl
     assert f'from "./view-components.js?v={STATIC_ASSET_VERSION}"'.encode() in catalog_list
 
 
+def test_silhouette_diagrams_use_shared_scale_and_player_surfaces(app: Callable) -> None:
+    status, headers, renderer = request(
+        app, f"/static/silhouette-diagrams.js?v={STATIC_ASSET_VERSION}"
+    )
+    assert status == 200
+    assert headers["content-type"].startswith("text/javascript")
+    assert headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert f'from "./maintained-text.js?v={STATIC_ASSET_VERSION}"'.encode() in renderer
+    assert b"const SVG_UNITS_PER_MM = 4.23336" in renderer
+    assert b"const GLOSSARY_PIXELS_PER_MM = 2.7" in renderer
+    assert b"const PREVIEW_PIXELS_PER_MM = 2.2" in renderer
+    assert b"(item.viewBoxWidth / SVG_UNITS_PER_MM) * pixelsPerMm" in renderer
+    assert b"(item.viewBoxHeight / SVG_UNITS_PER_MM) * pixelsPerMm" in renderer
+    assert b"row.dataset.pixelsPerMm = String(pixelsPerMm)" in renderer
+    assert 'copy.textContent = "S1–S8 are shown at the same scale'.encode() in renderer
+    assert (
+        b"const comparison = id === 2 ? [selected] : [selected, SILHOUETTE_BY_ID.get(2)]"
+        in renderer
+    )
+    assert b'reference: item.id === 2 && id !== 2' in renderer
+    assert b'if (!selected) return null' in renderer
+
+    expected_viewboxes = {
+        1: (149.027, 155.329),
+        2: (149.376, 218.829),
+        3: (212.875, 184.954),
+        4: (276.375, 184.953),
+        5: (212.875, 239.987),
+        6: (212.875, 282.32),
+        7: (276.375, 333.128),
+        8: (339.875, 345.826),
+    }
+    for silhouette, viewbox in expected_viewboxes.items():
+        status, asset_headers, svg = request(
+            app,
+            f"/static/silhouettes/silhouette-{silhouette}.svg?v={STATIC_ASSET_VERSION}",
+        )
+        assert status == 200
+        assert asset_headers["content-type"] == "image/svg+xml"
+        assert asset_headers["cache-control"] == "public, max-age=31536000, immutable"
+        match = re.search(rb'<svg\b[^>]*viewBox="0 0 ([0-9.]+) ([0-9.]+)"', svg)
+        assert match is not None
+        assert tuple(map(float, match.groups())) == viewbox
+
+    status, _, glossary = request(app, "/static/glossary.js")
+    assert status == 200
+    assert b'from "./silhouette-diagrams.js"' in glossary
+    assert b'item.id === "attribute:s"' in glossary
+    assert b"silhouetteReferenceSet()" in glossary
+
+    status, _, unit = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'from "./silhouette-diagrams.js"' in unit
+    assert b'label === "S" ? silhouetteValuePreview(value) : null' in unit
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".silhouette-diagram-row",
+        {"display": "flex", "align-items": "flex-end"},
+    )
+    assert_css_rule(
+        styles,
+        ".silhouette-reference-viewport .silhouette-diagram-row",
+        {
+            "display": "grid",
+            "grid-template-columns": "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+            "justify-items": "center",
+            "width": "100%",
+        },
+    )
+    assert_css_rule(
+        styles,
+        ".silhouette-figure--reference .silhouette-diagram-image",
+        {"opacity": ".45"},
+    )
+    assert_css_rule(
+        styles,
+        ".silhouette-diagram-image",
+        {"max-width": "none", "filter": "var(--filter-monochrome-artwork)"},
+    )
+    assert_css_rule(
+        styles,
+        ':root[data-theme="dark"]',
+        {"--filter-monochrome-artwork": "invert(1)"},
+    )
+
+
 def test_legacy_app_static_url_serves_unit_explorer(app: Callable) -> None:
     status, headers, body = request(app, f"/static/app.js?v={STATIC_ASSET_VERSION}")
 

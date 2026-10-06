@@ -45,6 +45,7 @@
   --color-control-disabled-muted: #657068;
   --color-range-selection-muted: #4b5a51;
   --color-focus-ring: #79c49e;
+  --filter-monochrome-artwork: invert(1);
   --shadow-card: 0 3px 12px rgb(0 0 0 / 22%);
   --shadow-surface: 0 3px 8px rgb(0 0 0 / 18%);
   --shadow-logo-hero: 0 14px 22px rgb(0 0 0 / 35%);
