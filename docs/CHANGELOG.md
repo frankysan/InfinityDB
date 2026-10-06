@@ -76,6 +76,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend:** Present unresolved maintained rules text as **Needs verification** with an
+  **uncertain** marker and player-readable reasons, while keeping the underlying review marker
+  available to the curation workflow.
 - **Web frontend:** Rewrite Equipment, Weapons, and Fireteams introductions around the rules
   information players can browse, removing Army snapshot and source-authority framing from normal
   page copy.

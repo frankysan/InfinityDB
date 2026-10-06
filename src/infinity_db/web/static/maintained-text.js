@@ -205,6 +205,16 @@ function referenceNode(token, { interactive = true } = {}) {
   return wrapper;
 }
 
+function reviewNeededReason(reason) {
+  const labels = {
+    "ambiguous-target": "the intended rules reference is ambiguous",
+    "unclear-source-meaning": "the rules meaning is unclear",
+    "source-conflict": "the available rules information conflicts",
+    "scope-unclear": "the scope of this rule is unclear",
+  };
+  return labels[reason] || String(reason || "the reason is not specified").replaceAll("-", " ");
+}
+
 function reviewNeededNode(token, { interactive = true } = {}) {
   const wrapper = document.createElement("span");
   wrapper.className = "maintained-reference-wrap maintained-review-needed-wrap";
@@ -215,12 +225,12 @@ function reviewNeededNode(token, { interactive = true } = {}) {
 
   const text = document.createElement("span");
   text.className = "maintained-review-needed-text";
-  text.textContent = token.text || "Review needed";
+  text.textContent = token.text || "Needs verification";
   marker.append(text);
 
   const badge = document.createElement("span");
   badge.className = "maintained-review-needed-badge";
-  badge.textContent = "review";
+  badge.textContent = "uncertain";
   marker.append(badge);
   wrapper.append(marker);
   if (!interactive) return wrapper;
@@ -231,7 +241,7 @@ function reviewNeededNode(token, { interactive = true } = {}) {
   tooltip.className = "maintained-reference-tooltip";
   tooltip.role = "tooltip";
   tooltip.setAttribute("popover", "manual");
-  tooltip.textContent = `Manual review needed: ${token.reason || "unspecified"}`;
+  tooltip.textContent = `Needs verification: ${reviewNeededReason(token.reason)}.`;
   marker.setAttribute("aria-describedby", tooltip.id);
   wrapper.append(tooltip);
 

@@ -5387,10 +5387,14 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     assert b'from "./distance.js"' in renderer
     assert b'node.className = "maintained-distance"' in renderer
     assert b'wrapper.className = "maintained-reference-wrap"' in renderer
+    assert b'function reviewNeededReason(reason)' in renderer
     assert b'function reviewNeededNode(token, { interactive = true } = {})' in renderer
     assert b'marker.className = "maintained-review-needed"' in renderer
-    assert b'badge.textContent = "review"' in renderer
-    assert b'Manual review needed: ${token.reason || "unspecified"}' in renderer
+    assert b'text.textContent = token.text || "Needs verification"' in renderer
+    assert b'badge.textContent = "uncertain"' in renderer
+    assert b'Needs verification: ${reviewNeededReason(token.reason)}.' in renderer
+    assert b'"source-conflict": "the available rules information conflicts"' in renderer
+    assert b'"Manual review needed"' not in renderer
     assert b'tooltip.role = "tooltip"' in renderer
     assert b'{ interactive: false }' in renderer
     assert b'link.setAttribute("aria-describedby", tooltip.id)' in renderer
