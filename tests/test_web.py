@@ -2112,6 +2112,44 @@ def test_player_loading_empty_and_error_states_hide_storage_language(app: Callab
     assert b"Reading Fireteam reference data." not in fireteams
 
 
+def test_player_api_failures_hide_storage_language(
+    app: Callable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    cases = [
+        ("/api/armies", "list_armies", "Army information is unavailable. Please try again."),
+        (
+            "/api/visible-unit-ids",
+            "visible_unit_ids",
+            "Unit information is unavailable. Please try again.",
+        ),
+        (
+            "/api/unit-filters",
+            "list_unit_filter_values",
+            "Unit information is unavailable. Please try again.",
+        ),
+        ("/api/units", "list_units", "Unit information is unavailable. Please try again."),
+        (
+            "/api/units/ranger-prototype",
+            "get_unit",
+            "Unit information is unavailable. Please try again.",
+        ),
+    ]
+
+    for path, method_name, expected_error in cases:
+        with monkeypatch.context() as patch:
+            def fail(*args, **kwargs):
+                raise sqlite3.DatabaseError("private database failure detail")
+
+            patch.setattr(app.api.database, method_name, fail)
+            status, _, body = request(app, path)
+
+        assert status == 503
+        payload = json.loads(body)
+        assert payload == {"error": expected_error}
+        assert "database" not in payload["error"].lower()
+        assert b"private database failure detail" not in body
+
+
 def test_equipment_weapons_and_fireteams_intros_use_player_language(app: Callable) -> None:
     status, _, equipment = request(app, "/equipment")
     assert status == 200

@@ -747,7 +747,7 @@ class ApiHandler:
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read armies")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
+                payload = {"error": "Army information is unavailable. Please try again."}
         elif path == "/api/visible-unit-ids":
             cache_control = API_CACHE_CONTROL
             try:
@@ -766,7 +766,7 @@ class ApiHandler:
             except (OSError, sqlite3.Error):
                 LOGGER.exception("Could not read visible unit IDs")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
+                payload = {"error": "Unit information is unavailable. Please try again."}
         elif path == "/api/unit-filters":
             cache_control = API_CACHE_CONTROL
             try:
@@ -776,7 +776,7 @@ class ApiHandler:
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Unit filter values")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
+                payload = {"error": "Unit information is unavailable. Please try again."}
         elif path == "/api/units":
             cache_control = API_CACHE_CONTROL
             try:
@@ -806,7 +806,7 @@ class ApiHandler:
                 except (OSError, ValueError, sqlite3.Error):
                     LOGGER.exception("Could not read units")
                     status = HTTPStatus.SERVICE_UNAVAILABLE
-                    payload = {"error": "The database is unavailable. Please try again."}
+                    payload = {"error": "Unit information is unavailable. Please try again."}
         elif match := UNIT_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
@@ -841,7 +841,7 @@ class ApiHandler:
             except (OSError, sqlite3.Error):
                 LOGGER.exception("Could not read unit")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
+                payload = {"error": "Unit information is unavailable. Please try again."}
         else:
             status = HTTPStatus.NOT_FOUND
             payload = {"error": "Resource not found"}
