@@ -349,7 +349,17 @@ The preloaded Gunicorn application uses a fixed-cardinality shared request regis
 `/internal/metrics` and `/internal/health` are not public application routes; the public Caddy site
 blocks `/internal/*`. An optional separate Caddy listener may expose only `/metrics` and `/health`
 on loopback or an explicitly configured trusted LAN address. Deployment refuses wildcard metrics
-binds.
+binds. The live metrics surface is volatile process-lifetime state, not the historical store.
+
+The accepted boundary for retained metrics history is a separate operational service, not writable
+state inside the application container. A future `metrics-history` collector should scrape the
+private `app:8000/internal/metrics` endpoint over the Compose network, run with an immutable root
+filesystem and no published port, and own one bounded writable volume containing its SQLite history.
+The web-facing `app` remains immutable and unaware of historical persistence. Historical aggregation
+remains aggregate-only and version/snapshot aware; counter-generation boundaries must be explicit so
+application restarts cannot be mistaken for negative/request deltas. Retention must be bounded and
+automatically enforced rather than relying on operator cleanup. Exact rollout stages and retention
+parameters are tracked in `docs/TODO.md`.
 
 Temporary raw request logging is an incident-diagnostic exception, not the normal analytics path,
 and should be minimized and short-lived.

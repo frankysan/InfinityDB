@@ -158,6 +158,29 @@ domain unless required to correct a release-blocking defect.
   - [x] Publish aggregate request counters/histograms using normalized bounded route
     labels: request rate, status class, latency, response size, and active requests. Static
     assets and `/api/` requests remain separately identifiable for future dashboards.
+  - [ ] Add explicit live-metrics generation timestamps. `/metrics` remains a volatile
+    Prometheus scrape surface, but it should expose the generation start time and latest
+    completed instrumented-request time so operators can identify the exact observation span
+    and distinguish application restarts even when version/snapshot identity is unchanged.
+  - [ ] Add an isolated `metrics-history` service outside the immutable web-facing `app`
+    container. The collector should run with an immutable root filesystem, no published port,
+    no Docker socket/host-filesystem access, and exactly one bounded writable volume for its
+    SQLite history store. It should scrape `app:8000/internal/metrics` over the private Compose
+    network; do not mount writable metrics state into the application container.
+  - [ ] Implement bounded version-aware metrics-history aggregation. Keep only the current/
+    previous scrape state needed for counter deltas, then aggregate into weekly summaries keyed
+    by ISO week + InfinityDB version + snapshot revision while tracking metrics-generation
+    boundaries. Default collection interval: 5 minutes. Retain the current week plus 52 completed
+    weeks; prune after every successful collection; enforce a 64-MiB safety ceiling by removing
+    the oldest completed weeks first. Reports must expose earliest/latest retained timestamps,
+    retained-week count, and current database size so cleanup is visible rather than silent.
+  - [ ] Integrate metrics-history collection with deployment transitions: take a final scrape of
+    the old generation before replacing the running app and an opening scrape after the new
+    release passes health checks. Unexpected restarts may lose at most one periodic collection
+    interval; generation changes must be detected without treating reset counters as deltas.
+  - [ ] Extend operator reporting for retained history: compare weekly/version/snapshot request
+    counts, status/error rates, route activity, latency histograms, and response-size histograms
+    without retaining raw URLs, query/search terms, request identities, or per-user history.
   - [x] Do not collect IP/geolocation, user-agent/fingerprint, referrer, cookie/session/
     preference values, query/search terms, persistent visitor IDs, unique/returning-user
     analytics, or per-user navigation histories. Raw URLs and unbounded request values are

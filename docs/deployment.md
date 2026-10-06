@@ -209,6 +209,35 @@ container itself remains unpublished. Deployment tooling rejects wildcard metric
 metrics are process-lifetime operational state and intentionally reset when the application
 container restarts.
 
+### Planned retained metrics history
+
+Retained history must not make the web-facing application container writable. The accepted target
+topology is a separate `metrics-history` operational service on the private Compose network. It will
+scrape `http://app:8000/internal/metrics` directly, expose no public/LAN port, run with an immutable
+root filesystem, and own one dedicated writable SQLite volume. It must not receive the Docker socket,
+host filesystem mounts, or writable mounts into `app`. The existing LAN-only `/metrics` endpoint
+remains the interactive/current-state scrape surface.
+
+The planned collector treats each application metrics generation explicitly. Live metrics will expose
+a generation-start timestamp and latest completed-request timestamp so restarts remain identifiable
+even when version and snapshot revision are unchanged. The collector will retain only the previous
+scrape state needed to compute deltas, then fold deltas into weekly summaries keyed by ISO week,
+InfinityDB version, and snapshot revision. Multiple process generations may contribute to the same
+weekly/version/snapshot summary without losing the generation boundaries used for reset detection.
+
+The initial retention contract is intentionally bounded: collect every 5 minutes, keep the current
+week plus 52 completed weeks, prune after every successful collection, and enforce a 64-MiB SQLite
+safety ceiling by deleting the oldest completed weeks first. Operator reports must show earliest and
+latest retained observations, retained-week count, and database size so retention cleanup is visible.
+No raw request URL, search/query value, IP address, user agent, cookie/preference value, visitor ID,
+or per-user history may enter the history database.
+
+Deployment integration will take one final history scrape before replacing the old application and
+one opening scrape after the new release passes health checks. Periodic collection handles normal
+operation; after an unexpected restart, generation detection prevents reset counters from being
+interpreted as deltas. The implementation stages remain tracked in `docs/TODO.md`; until they are
+complete, `/metrics` remains volatile process-lifetime state only.
+
 ### LAN metrics access and workstation report
 
 For direct access from a trusted workstation on the local network, bind the metrics listener to

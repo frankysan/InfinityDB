@@ -40,6 +40,10 @@ release/audit narrative belongs in the changelog and Git history.
 - Browser code renders backend-owned semantics rather than recreating data-model policy.
 - Game/reference data is read-only at runtime. Persistent user-authored application data is not part
   of the current model.
+- Retained operational metrics must not make the web-facing `app` container writable. The accepted
+  design is a separate private-network metrics-history service with one bounded writable SQLite
+  volume; `/metrics` remains a volatile aggregate scrape surface. `docs/architecture.md` owns the
+  boundary and `docs/TODO.md` owns the unfinished rollout stages.
 - Future work belongs in `docs/TODO.md`; do not preserve an obsolete task list in architecture or
   this context file.
 

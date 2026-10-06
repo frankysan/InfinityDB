@@ -263,6 +263,14 @@ codes without retaining endpoint URLs or user/request identity data. Generated b
 resource/alert reports belong in ignored report/audit storage unless a specific result is needed as
 release evidence.
 
+When the planned retained metrics-history service is implemented, its tests must keep the persistence
+boundary explicit: the application container remains read-only; collector state lives only in the
+dedicated history volume; counter resets/generation changes are tested; weekly aggregation is keyed
+by week/version/snapshot; and retention tests prove both age-based pruning and the hard database-size
+safety ceiling. Tests should use deterministic synthetic scrape snapshots rather than real visitor
+data or unbounded request labels. Deployment tests should also prove the pre-update closing scrape
+and post-health opening scrape without making historical storage a prerequisite for app startup.
+
 ## CI and release validation
 
 `docs/ci.md` owns the hosted workflow contract. `docs/releasing.md` owns the release gate. Do not
