@@ -260,11 +260,25 @@ contains the target version/snapshot identity, aggregate and per-route p50/p95/p
 request/error rate, status classes, and response sizes. The generated search term is synthetic and
 redacted from retained report paths. A non-zero load-phase error count makes the command fail.
 
-The HTTP report is only one half of a capacity result. Record host/container CPU, memory, swap, disk
-space/inodes, disk I/O, network utilization, restart/OOM events, and the exact Gunicorn/container
-allocation alongside it. Do not compare 2-worker and 4-worker results unless the resource allocation
-is recorded and controlled. The remaining baseline/resource/scale-trigger acceptance work is tracked
-in `docs/TODO.md`.
+The HTTP report is only one half of a capacity result. On the Linux deployment host, wrap the
+capacity command with the resource sampler so both ignored JSON reports cover the same interval:
+
+```bash
+.venv/bin/python tools/deployment_resources.py --output reports/capacity-resources.json -- .venv/bin/python tools/capacity_test.py http://127.0.0.1:8080 --output reports/capacity.json
+```
+
+The resource report records host CPU, memory/swap, filesystem space/inodes, aggregate network rates,
+backing-device I/O when the Linux mount exposes a corresponding `/proc/diskstats` device, and Docker
+CPU/memory/network/block-I/O data for the `app` and `caddy` services. It also records container
+restart-count changes plus Docker `restart`/`oom` events during the capture. Some LXC/storage layouts
+do not expose a directly attributable host block device; in that case host disk-I/O rates are `null`
+while Docker block-I/O deltas remain available.
+
+The retained report deliberately omits hostnames, IP addresses, request URLs, arbitrary Docker event
+attributes, and the wrapped command line. Capture the exact Gunicorn/container allocation separately
+with the baseline notes. Do not compare 2-worker and 4-worker results unless the resource allocation
+is recorded and controlled. Sanitized Caddy/Gunicorn error diagnostics and alert thresholds remain
+separate operational work tracked in `docs/TODO.md`.
 
 `deploy.sh` retains the current build and the two newest rollback builds by
 default. After Compose has successfully started and health-checked the new

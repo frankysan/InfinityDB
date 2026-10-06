@@ -139,10 +139,15 @@ domain unless required to correct a release-blocking defect.
 
 - [ ] Establish privacy-preserving production monitoring and a repeatable capacity test
   for the Docker deployment.
-  - [ ] Record host and container CPU, memory, swap, disk-space/inode, disk-I/O,
-    and network utilization; retain Docker restart/OOM events and sanitized Caddy/Gunicorn
-    error diagnostics. Alert on sustained CPU saturation, memory pressure or OOM kills,
-    low disk space, elevated 5xx responses, and failed health checks.
+  - [x] Add privacy-preserving host/container resource capture for capacity evidence.
+    `tools/deployment_resources.py` samples Linux CPU, memory/swap, filesystem space/inodes,
+    backing-device I/O when exposed, aggregate host network rates, per-container Docker
+    CPU/memory/block/network usage, and restart/OOM state/events. It can wrap the capacity-test
+    command so both retained JSON reports cover the same interval without recording hostnames,
+    IP addresses, request URLs, or arbitrary Docker event attributes.
+  - [ ] Retain sanitized Caddy/Gunicorn error diagnostics and add operational alerts for
+    sustained CPU saturation, memory pressure or OOM kills, low disk space/inodes, elevated
+    5xx responses, and failed health checks.
   - [x] Publish aggregate request counters/histograms using normalized bounded route
     labels: request rate, status class, latency, response size, and active requests. Static
     assets and `/api/` requests remain separately identifiable for future dashboards.

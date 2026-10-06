@@ -239,6 +239,7 @@ python tools\benchmark_runtime.py --help
 python tools\compare_runtime_benchmarks.py --help
 python tools\benchmark_test_workers.py --help
 python tools\capacity_test.py --help
+python tools\deployment_resources.py --help
 ```
 
 Use runtime benchmarks for repository/query performance and the worker benchmark for deciding whether
@@ -252,8 +253,11 @@ not use `/health` as the workload.
 
 Capacity reports are diagnostic evidence, not stable performance promises. Retain the exact target
 release/snapshot, deployment worker/resource configuration, client location, command, and accompanying
-host/container resource observations with any baseline. Generated benchmark/capacity reports belong in
-ignored report/audit storage unless a specific result is needed as release evidence.
+host/container resource observations with any baseline. `deployment_resources.py` is Linux-host-only
+and can wrap the capacity command while sampling bounded host/Docker resource counters over the same
+interval; its retained JSON intentionally excludes hostnames, IPs, request URLs, and arbitrary Docker
+event payloads. Generated benchmark/capacity/resource reports belong in ignored report/audit storage
+unless a specific result is needed as release evidence.
 
 ## CI and release validation
 

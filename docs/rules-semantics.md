@@ -3667,7 +3667,6 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Baggage>, reviewed 2026-09-23
 - Wiki: <https://infinitythewiki.com/Reload>, reviewed 2026-09-23
 
-
 ## ITS FAQ
 
 ### RS-FAQ-SCOPE-001 — Ruling publication identity and ITS applicability are separate axes

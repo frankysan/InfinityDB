@@ -351,6 +351,12 @@ binds.
 Temporary raw request logging is an incident-diagnostic exception, not the normal analytics path,
 and should be minimized and short-lived.
 
+Capacity/resource evidence follows the same boundary. Retained host/container reports may contain
+bounded CPU, memory/swap, filesystem/inode, disk-I/O, network, container utilization, and
+restart/OOM state, but not hostnames, IP addresses, request URLs/query values, arbitrary Docker
+event attributes, or wrapped command lines. Missing platform counters are reported as unavailable
+rather than inferred from unrelated signals.
+
 ## Determinism, portability, and validation
 
 Supported development/runtime Python begins at 3.11. Maintained tooling supports Windows, Linux,
