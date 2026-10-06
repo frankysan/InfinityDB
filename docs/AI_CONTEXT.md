@@ -157,10 +157,16 @@ Browser state rules:
 - Soft-navigation page code must dispose transient listeners/requests when content is replaced.
 - Browser display should use backend-provided canonical references/relationship labels instead of
   inventing semantic mappings in JavaScript.
+- Normal player-facing copy describes Infinity concepts and user-visible outcomes, not InfinityDB's
+  storage, pipeline, provenance, or maintainer workflow. Data-review-only surfaces must not be
+  discoverable through ordinary player navigation; genuine source uncertainty remains visible but is
+  phrased as uncertainty rather than an internal review instruction. `docs/web-design-guidelines.md`
+  owns the complete browser-language contract.
 
-Visual/layout implementation must follow `docs/web-design-guidelines.md`, especially semantic table
-columns, bounded overflow, progressive disclosure, Developer-mode additive columns, reusable
-surfaces, and separation of theme tokens from component geometry.
+Browser visual/layout and copy implementation must follow `docs/web-design-guidelines.md`,
+especially semantic table columns, bounded overflow, progressive disclosure, Developer-mode
+additive columns, reusable surfaces, player-facing language, and separation of theme tokens from
+component geometry.
 CSS source ownership is `foundation.css` (font and theme-neutral tokens), one semantic palette file
 per explicit theme under `themes/`, `components.css` (shared layout/components), and
 `page-overrides.css` (late page-specific exceptions). `/static/styles.css` is a server-composed

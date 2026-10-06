@@ -18,8 +18,8 @@ document owner for the work, then read the relevant references. Most code change
 `docs/testing.md`; planning/release work also needs `docs/project-domains.md` and
 `docs/releasing.md`.
 
-For browser visual, layout, responsive, or interaction changes, also read
-`docs/web-design-guidelines.md`; it defines the target UI vocabulary and reusable
+For browser visual, layout, responsive, interaction, or player-facing copy changes, also read
+`docs/web-design-guidelines.md`; it defines the target UI vocabulary, language, and reusable
 design contract.
 
 The engineering principles in `docs/architecture.md` are authoritative for

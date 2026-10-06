@@ -122,6 +122,10 @@ During the audit:
   remaining work accurately describe what is still unimplemented.
 - [ ] Review `docs/AI_CONTEXT.md` for durable, non-obvious invariants that changed
   during the release, without duplicating ordinary reference documentation.
+- [ ] Audit normal player-visible browser copy against `docs/web-design-guidelines.md`: titles,
+  introductions, navigation, controls, badges, and empty/error/loading states should use player/game
+  language rather than implementation or maintainer-workflow vocabulary, and data-review-only
+  surfaces should not be discoverable through the normal player journey.
 - [ ] Check documentation links and references to renamed, removed, or superseded
   files and sections.
 - [ ] Search deliberately for stale references to the previous release and previous

@@ -16,7 +16,7 @@ Use these documents when deciding how the project works now:
   query semantics, and generated-database contracts.
 - `application-domains.md` — canonical player-facing domain ownership and publication capabilities.
 - `web-design-guidelines.md` — browser layout, reusable surfaces, tables, controls, responsive
-  behavior, typography, accessibility, and theming rules.
+  behavior, player-facing language, typography, accessibility, and theming rules.
 - `project-domains.md` — engineering ownership labels used by planning and release notes.
 - `data/README.md` — external inputs, generated artifacts, snapshot provenance, and publication
   lifecycle.

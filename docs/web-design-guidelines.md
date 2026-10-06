@@ -4,9 +4,9 @@
 
 This document defines InfinityDB's target browser design contract. It is intentionally aspirational: it describes what the interface should converge toward, not every detail of the current implementation.
 
-The visual layer should follow the same engineering philosophy as the rest of the project: define reusable structures, keep responsibilities explicit, simplify repeated behavior, and remove duplication rather than accumulating page-specific exceptions. When current UI behavior conflicts with this document, treat the mismatch as implementation debt to resolve deliberately rather than copying the inconsistency into new work.
+The browser presentation layer should follow the same engineering philosophy as the rest of the project: define reusable structures, keep responsibilities explicit, simplify repeated behavior, and remove duplication rather than accumulating page-specific exceptions. When current UI behavior conflicts with this document, treat the mismatch as implementation debt to resolve deliberately rather than copying the inconsistency into new work.
 
-`docs/architecture.md` remains authoritative for subsystem boundaries and frontend/backend responsibility. This document owns the reusable visual and interaction vocabulary and the intended behavior of shared browser structures. `src/infinity_db/web/static/styles.css` implements that contract; it is not the specification itself.
+`docs/architecture.md` remains authoritative for subsystem boundaries and frontend/backend responsibility. This document owns the reusable visual, interaction, and player-facing language vocabulary and the intended behavior of shared browser structures. `src/infinity_db/web/static/styles.css` implements the visual part of that contract; it is not the specification itself.
 
 ## Design principles
 
@@ -45,6 +45,36 @@ Stable geometry is especially important for side-by-side comparison and repeated
 Player-facing information should dominate the normal view. Provenance, internal identifiers, source diagnostics, and developer metadata should remain available without distorting the ordinary layout.
 
 Developer mode should add technical depth rather than redefine the primary presentation.
+
+### Write player-facing copy for players
+
+Normal browser surfaces should describe Infinity concepts, player choices, and visible outcomes
+rather than InfinityDB's implementation. A player should not need to understand the data pipeline,
+persistence model, source-processing vocabulary, or maintainer workflow to understand a page,
+control, status message, or empty state.
+
+Prefer game/reference language and direct user outcomes. Avoid implementation-facing terms such
+as `database`, `snapshot`, `domain`, `canonical`, `normalized`, `source-native`, `provenance`, or
+`application database` in ordinary player copy when a clearer player-facing description exists.
+These terms remain appropriate in Developer mode, operator/deployment surfaces, privacy/security
+explanations where precision matters, and documentation aimed at maintainers. This rule does not
+replace legitimate Infinity terminology: game concepts such as AVA, SWC, Sectorial, Fireteam,
+Reinforcements, Common Skill, and similar terms should remain precise when they are the concepts
+being presented. Do not perform mechanical terminology replacement without considering context.
+
+Data-review and maintainer-diagnostic surfaces may remain directly addressable when useful for
+development, but they must not be presented as normal player features or linked from ordinary
+player navigation unless the information itself has a genuine player use. Route availability is
+not a security boundary; sensitive information must still be protected independently.
+
+When source uncertainty or incomplete review affects rules meaning, keep that uncertainty
+visible, but describe the uncertainty rather than the maintainer workflow. For example, prefer
+language such as **Needs verification** or **Uncertain** over copy such as **Manual review needed**.
+Do not hide ambiguity merely to make the interface sound simpler.
+
+Apply the same rule to titles, introductions, breadcrumbs, control labels, helper text, badges,
+empty/error/loading states, and release summaries. Copy should explain what the player can find,
+compare, or do before explaining how InfinityDB stores or derives it.
 
 ### Make responsiveness a content-priority decision
 
@@ -336,6 +366,12 @@ Use this checklist when adding or materially changing a browser surface:
 - For tables, is the width policy explicit and are column roles defined?
 - Do primary names avoid unnecessary line breaks while short columns remain compact?
 - Does developer mode add information without destabilizing the core layout?
+- Does normal player-facing copy use game/reference language instead of implementation,
+  data-pipeline, or maintainer-workflow vocabulary?
+- Are data-review and maintainer-diagnostic surfaces absent from normal player discovery unless
+  they provide genuine player value?
+- Do empty, error, loading, and uncertainty states describe the player's situation rather than
+  internal database or review mechanics?
 - Does the narrow-screen behavior preserve the important data and relationships?
 - Are focus, keyboard, touch, screen-reader, scaling, and non-color meaning preserved?
 - Would another page solving the same problem be expected to use the same structure?
