@@ -1327,7 +1327,7 @@ document.addEventListener(
 );
 
 if (!unitIdentifier) {
-  status.textContent = "The requested unit address is invalid.";
+  status.textContent = "This Unit link is invalid.";
 } else {
   const unitRequestOptions = () => ({
     optionalFilters: optionalUnitFilters(),

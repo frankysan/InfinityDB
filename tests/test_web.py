@@ -2131,6 +2131,18 @@ def test_player_loading_empty_and_error_states_hide_storage_language(app: Callab
     assert b"Reading Fireteam reference data." not in fireteams
 
 
+
+def test_invalid_unit_and_skill_links_use_player_language(app: Callable) -> None:
+    status, _, unit_script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"This Unit link is invalid." in unit_script
+    assert b"requested unit address" not in unit_script.lower()
+
+    status, _, skill_script = request(app, "/static/skill.js")
+    assert status == 200
+    assert b"This Skill link is invalid." in skill_script
+    assert b"requested skill address" not in skill_script.lower()
+
 def test_player_api_failures_hide_storage_language(
     app: Callable, monkeypatch: pytest.MonkeyPatch
 ) -> None:

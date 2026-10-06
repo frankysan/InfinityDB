@@ -258,7 +258,7 @@ window.addEventListener("distanceunitchange", () => {
 }, { signal: pageController.signal });
 if (!skillId) {
   name.firstChild.textContent = "Skill unavailable";
-  status.textContent = "The requested skill address is invalid.";
+  status.textContent = "This Skill link is invalid.";
 } else {
   getCatalogItem("skills", skillId, pageController.signal).then((skill) => {
     currentSkill = skill;
