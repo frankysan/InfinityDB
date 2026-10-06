@@ -95,8 +95,9 @@ are not retroactively relabeled.
   internal release-planning language with player-relevant project goals.
 - **Web frontend:** Rewrite Labels, General Rules, and Glossary framing around the rules information
   players can look up, removing internal taxonomy and data-model terminology from those surfaces.
-- **Web frontend:** Replace database/domain-oriented page framing with InfinityDB and player-reference
-  language across navigation breadcrumbs, the landing page, Unit Explorer, and global Search.
+- **Web frontend:** Replace database/domain/indexing-oriented page framing with InfinityDB and
+  player-reference language across navigation breadcrumbs, the landing page, Unit Explorer, and
+  global Search.
 - **Data processing:** Bind each generated Army application/raw database pair to one deterministic
   full-export fingerprint and make application-database replacement the publication commit point.
   Interrupted paired publication now fails closed for raw-dependent audits and recovers by rerunning

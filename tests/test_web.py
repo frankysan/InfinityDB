@@ -2065,7 +2065,9 @@ def test_player_page_framing_uses_reference_language(app: Callable) -> None:
     status, _, units = request(app, "/units")
     assert status == 200
     assert b"Browse units<br" in units
+    assert b'<span class="stat-label">Armies</span>' in units
     assert b"Browse the database" not in units
+    assert b"Armies indexed" not in units
 
     status, _, search = request(app, "/search")
     assert status == 200
