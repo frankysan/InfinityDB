@@ -499,16 +499,27 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.5.1] - 2026-09-14
 
+### Fixed
+
+- Mark the deployment, install/update, and application-image pruning scripts executable so the
+  documented server maintenance commands work directly from a release checkout.
+
+## [0.5.0] - 2026-09-14
+
 ### Added
 
 - Add advanced unit-catalog filters for skills, equipment, and weapons.
-- Add Traits catalog and detail pages with concise summaries and usage links.
-- Add deployment maintenance tools and a Developer-mode cache bypass for local review.
+- Add a Traits catalog and detail pages covering traits used by weapons, Skills, and Equipment,
+  with concise summaries and usage grouped by catalog type.
+- Add server deployment, install/update, and application-image pruning scripts with documented
+  image-retention behavior.
+- Add a Developer-mode control for bypassing cached API responses while reviewing a local
+  deployment.
 
 ### Changed
 
-- Improve deployment guidance and ensure browsers load matching release assets after
-  an update.
+- Document the release deployment workflow and refresh immutable static-asset URLs so linked
+  browser modules load their matching release versions after deployment.
 
 ### Fixed
 
