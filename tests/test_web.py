@@ -2217,6 +2217,8 @@ def test_equipment_weapons_and_fireteams_intros_use_player_language(app: Callabl
         b"Wildcards."
         in fireteams
     )
+    assert b'<p class="eyebrow">Fireteam reference</p>' in fireteams
+    assert b"Connected game structure" not in fireteams
     assert b"authoritative Infinity Fireteam charts" not in fireteams
     assert b"each Army's current Fireteam chart" not in fireteams
 

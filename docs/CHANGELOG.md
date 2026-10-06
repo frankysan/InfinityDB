@@ -93,7 +93,7 @@ are not retroactively relabeled.
   available to the curation workflow.
 - **Web frontend:** Rewrite Equipment, Weapons, and Fireteams introductions around the rules
   information players can browse, removing Army snapshot and source-authority framing from normal
-  page copy.
+  page copy and giving Fireteams a direct **Fireteam reference** label.
 - **Web backend + Web frontend:** Rewrite empty, loading, and error states, including Army, Unit,
   and rules-reference API failures, to describe the player-visible situation directly instead of
   exposing database, snapshot, source-data, or catalog terminology.
