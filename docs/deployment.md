@@ -243,6 +243,29 @@ concrete incident, minimize and sanitize the fields, restrict access, and define
 retention before enabling it. Error logs and host/container health data remain appropriate
 when they do not embed request-identifying values.
 
+### Repeatable HTTP capacity scenario
+
+Use the dependency-free capacity runner against the HTTP entry point being evaluated, preferably an
+isolated deployment first. The scenario discovers current public identities from the target and
+exercises Unit browsing, global search, Unit/catalog details, and matching JSON APIs after a warm-up;
+it does not benchmark only the health endpoint. For example, after starting the loopback test stack:
+
+```powershell
+python tools\capacity_test.py http://127.0.0.1:8080 --output reports\capacity-local.json
+```
+
+The defaults run a 60-second steady phase at concurrency 8 followed by a 10-second burst at
+concurrency 32. Override those values explicitly when reproducing a recorded baseline. The report
+contains the target version/snapshot identity, aggregate and per-route p50/p95/p99 latency,
+request/error rate, status classes, and response sizes. The generated search term is synthetic and
+redacted from retained report paths. A non-zero load-phase error count makes the command fail.
+
+The HTTP report is only one half of a capacity result. Record host/container CPU, memory, swap, disk
+space/inodes, disk I/O, network utilization, restart/OOM events, and the exact Gunicorn/container
+allocation alongside it. Do not compare 2-worker and 4-worker results unless the resource allocation
+is recorded and controlled. The remaining baseline/resource/scale-trigger acceptance work is tracked
+in `docs/TODO.md`.
+
 `deploy.sh` retains the current build and the two newest rollback builds by
 default. After Compose has successfully started and health-checked the new
 application container, it removes only older `infinity-db:app-*` tags. It does

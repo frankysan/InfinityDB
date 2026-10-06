@@ -153,10 +153,11 @@ domain unless required to correct a release-blocking defect.
   - [x] Disable the routine Gunicorn access-log stream while retaining stderr error logs.
     If raw request logging is temporarily required for a concrete incident, minimize/sanitize
     its fields, restrict access, and define short retention before enabling it.
-  - [ ] Define a representative load-test scenario: browse the unit list, search,
-    open unit/catalog details, and fetch API endpoints using a current
-    production-like SQLite snapshot. Include a warm-cache steady-state run and
-    a short burst run; do not benchmark only the health endpoint.
+  - [x] Define a representative load-test scenario: `tools/capacity_test.py` discovers
+    current public Unit/Skill/Equipment/Weapon identities from the deployed snapshot, warms and
+    exercises Unit browsing, global search, Unit/catalog details, and matching JSON APIs, then
+    records separate steady-state and short-burst phases with p50/p95/p99 latency, request/error
+    rate, status classes, and response sizes. The health endpoint is not part of the workload.
   - [ ] Establish a baseline at 2 Gunicorn workers x 4 threads, then test 4 x 4
     only with a matching 4-vCPU/4-GiB container allocation. Record p50/p95/p99
     latency, request/error rate, CPU, memory, and SQLite/disk behavior at each

@@ -232,17 +232,28 @@ schema and application compatibility revisions. `--require-raw` additionally req
 time and file sizes are included as lightweight operational evidence; use the dedicated benchmark
 tools below for representative query-performance comparisons.
 
-Available benchmark tools include:
+Available benchmark and capacity tools include:
 
 ```powershell
 python tools\benchmark_runtime.py --help
 python tools\compare_runtime_benchmarks.py --help
 python tools\benchmark_test_workers.py --help
+python tools\capacity_test.py --help
 ```
 
 Use runtime benchmarks for repository/query performance and the worker benchmark for deciding whether
-a different local pytest worker setting is warranted. Generated benchmark reports belong in ignored
-report/audit storage unless a specific result is needed as release evidence.
+a different local pytest worker setting is warranted. `capacity_test.py` is deliberately HTTP-level:
+it discovers representative public Unit/Skill/Equipment/Weapon identities from the target deployment,
+warms the same routes, then runs separate fixed-concurrency steady and burst phases across Unit list,
+search, Unit/catalog detail, and matching JSON API requests. It reports aggregate and per-case p50/p95/
+p99 successful-request latency, request/error rate, status classes, response sizes, and target
+version/snapshot identity. The synthetic search value is redacted from retained report paths. It does
+not use `/health` as the workload.
+
+Capacity reports are diagnostic evidence, not stable performance promises. Retain the exact target
+release/snapshot, deployment worker/resource configuration, client location, command, and accompanying
+host/container resource observations with any baseline. Generated benchmark/capacity reports belong in
+ignored report/audit storage unless a specific result is needed as release evidence.
 
 ## CI and release validation
 

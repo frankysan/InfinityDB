@@ -9,6 +9,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Deployment + Project infrastructure:** Add a repeatable HTTP capacity-test scenario for deployed
+  InfinityDB stacks, covering representative Unit browsing, search, detail, and API traffic with
+  warm-cache steady and burst phases plus retained p50/p95/p99, throughput, error, and response-size
+  evidence tied to the target version and snapshot.
 - **Deployment + Project infrastructure:** Add `infinity-db database-health` for operational
   validation of published Army databases, reporting schema/compatibility revisions and validation
   timing with optional application/raw export-pair verification and machine-readable JSON output.
