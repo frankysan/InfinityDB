@@ -3039,10 +3039,21 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert b"localStorage" in body
     assert b"last for up to one year" in body
     assert b"query/search values from its aggregate metrics" in body
-    assert b"Version 0.8 connects more of the game" in body
-    assert b"Version 0.9 closes the remaining application-presentation gaps" in body
-    assert b"0.10 is the consistency, presentation, and release-hardening pass" in body
-    assert b"1.0 completes the current rules/reference coverage" in body
+    assert b"A more connected Infinity reference." in body
+    assert b"Current work focuses on clearer presentation" in body
+    assert b"Know where information comes from" in body
+    assert b"official Army information, rules references" in body
+    for internal_phrase in (
+        b"imports, normalizes, validates, and reconciles",
+        b"read-only application database",
+        b"Source-native facts",
+        b"curated rules context",
+        b"provenance",
+        b"bidirectional related-rule links",
+        b"application-presentation gaps",
+        b"release-hardening",
+    ):
+        assert internal_phrase not in body
     assert b"not affiliated with Corvus Belli S.L." in body
     assert b"explicitly permitted InfinityDB to use and redistribute" in body
     assert b'href="/about" aria-current="page"' in body

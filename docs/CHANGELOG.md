@@ -76,6 +76,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend:** Rewrite the About page around what InfinityDB helps players explore, how related
+  rules information is connected, and how uncertainty is presented, replacing data-pipeline and
+  internal release-planning language with player-relevant project goals.
 - **Web frontend:** Rewrite Labels, General Rules, and Glossary framing around the rules information
   players can look up, removing internal taxonomy and data-model terminology from those surfaces.
 - **Web frontend:** Replace database/domain-oriented page framing with InfinityDB and player-reference
