@@ -97,9 +97,10 @@ are not retroactively relabeled.
 - **Web backend + Web frontend:** Rewrite empty, loading, and error states, including Army, Unit,
   and rules-reference API failures, to describe the player-visible situation directly instead of
   exposing database, snapshot, source-data, or catalog terminology.
-- **Web frontend:** Rewrite the About page around what InfinityDB helps players explore, how related
-  rules information is connected, and how uncertainty is presented, replacing data-pipeline and
-  internal release-planning language with player-relevant project goals.
+- **Web frontend:** Rewrite the About page and Home/About introductory framing around what InfinityDB
+  helps players explore, how related rules information is connected, and how uncertainty is
+  presented, replacing data-pipeline, generic data framing, and internal release-planning language
+  with player-relevant reference language and project goals.
 - **Web frontend:** Rewrite Labels, General Rules, and Glossary framing around the rules information
   players can look up, removing internal taxonomy and data-model terminology from those surfaces.
 - **Web frontend:** Replace database/domain/indexing/catalog-oriented page framing with InfinityDB

@@ -2357,6 +2357,22 @@ def test_every_browser_page_has_a_meta_description(app: Callable) -> None:
         assert b'<meta name="description"' in body
 
 
+def test_home_and_about_intros_use_reference_language(app: Callable) -> None:
+    status, _, home = request(app, "/")
+    assert status == 200
+    assert b"official Infinity Army information" in home
+    assert b"maintained N5.3 rules references" in home
+    assert b"official Infinity Army data" not in home
+    assert b"maintained N5.3 rules context" not in home
+
+    status, _, about = request(app, "/about")
+    assert status == 200
+    assert b"official Infinity Army information" in about
+    assert b"Explore units, profiles, and rules" in about
+    assert b"official Infinity Army data" not in about
+    assert b"Explore the game data you already use" not in about
+
+
 def test_landing_page_states_independence_and_asset_permission(app: Callable) -> None:
     status, _, body = request(app, "/")
 
