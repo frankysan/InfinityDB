@@ -187,78 +187,78 @@ _FIXED_PAGES = {
     ),
     "/armies": PageSpec(
         "armies.html",
-        (("Database", "/"), ("Armies", None)),
+        (("InfinityDB", "/"), ("Armies", None)),
         "Army overview",
         "armies",
     ),
     "/units": PageSpec(
         "units.html",
-        (("Database", "/"), ("Units", None)),
+        (("InfinityDB", "/"), ("Units", None)),
         "Unit catalog",
         "units",
     ),
     "/search": PageSpec(
         "search.html",
-        (("Database", "/"), ("Search", None)),
+        (("InfinityDB", "/"), ("Search", None)),
         "Global search",
     ),
     "/glossary": PageSpec(
         "glossary.html",
-        (("Database", "/"), ("Glossary", None)),
+        (("InfinityDB", "/"), ("Glossary", None)),
         "Rules reference",
         "glossary",
     ),
     "/fireteams": PageSpec(
         "fireteams.html",
-        (("Database", "/"), ("Fireteams", None)),
+        (("InfinityDB", "/"), ("Fireteams", None)),
         "Fireteam charts",
         "fireteams",
     ),
     "/skill-extras": PageSpec(
         "skill-extras.html",
-        (("Database", "/"), ("Skills", "/skills"), ("Skill modifiers", None)),
+        (("InfinityDB", "/"), ("Skills", "/skills"), ("Skill modifiers", None)),
         "Reference data",
         "skills",
     ),
     "/skills": PageSpec(
         "skills.html",
-        (("Database", "/"), ("Skills", None)),
+        (("InfinityDB", "/"), ("Skills", None)),
         "Rules reference",
         "skills",
     ),
     "/equipment": PageSpec(
         "equipment.html",
-        (("Database", "/"), ("Equipment", None)),
+        (("InfinityDB", "/"), ("Equipment", None)),
         "Rules reference",
         "equipment",
     ),
     "/weapons": PageSpec(
         "weapons.html",
-        (("Database", "/"), ("Weapons", None)),
+        (("InfinityDB", "/"), ("Weapons", None)),
         "Rules reference",
         "weapons",
     ),
     "/traits": PageSpec(
         "traits.html",
-        (("Database", "/"), ("Traits", None)),
+        (("InfinityDB", "/"), ("Traits", None)),
         "Rules reference",
         "traits",
     ),
     "/states": PageSpec(
         "states.html",
-        (("Database", "/"), ("States", None)),
+        (("InfinityDB", "/"), ("States", None)),
         "Rules reference",
         "states",
     ),
     "/hacking-programs": PageSpec(
         "hacking-programs.html",
-        (("Database", "/"), ("Hacking Programs", None)),
+        (("InfinityDB", "/"), ("Hacking Programs", None)),
         "Rules reference",
         "hacking-programs",
     ),
     "/ammunition": PageSpec(
         "reference-catalog.html",
-        (("Database", "/"), ("Ammunition", None)),
+        (("InfinityDB", "/"), ("Ammunition", None)),
         "Rules reference",
         "ammunition",
         _reference_page_values(
@@ -271,7 +271,7 @@ _FIXED_PAGES = {
     ),
     "/labels": PageSpec(
         "reference-catalog.html",
-        (("Database", "/"), ("Labels", None)),
+        (("InfinityDB", "/"), ("Labels", None)),
         "Rules reference",
         "labels",
         _reference_page_values(
@@ -286,7 +286,7 @@ _FIXED_PAGES = {
     ),
     "/rules": PageSpec(
         "reference-catalog.html",
-        (("Database", "/"), ("General Rules", None)),
+        (("InfinityDB", "/"), ("General Rules", None)),
         "Rules reference",
         "rules",
         _reference_page_values(
@@ -321,7 +321,7 @@ _DETAIL_PAGES = (
         UNIT_PAGE_PATH,
         PageSpec(
             "unit.html",
-            (("Database", "/"), ("Units", "/units"), ("Details", None)),
+            (("InfinityDB", "/"), ("Units", "/units"), ("Details", None)),
             "Unit catalog",
             "units",
         ),
@@ -330,7 +330,7 @@ _DETAIL_PAGES = (
         SKILL_PAGE_PATH,
         PageSpec(
             "skill.html",
-            (("Database", "/"), ("Skills", "/skills"), ("Details", None)),
+            (("InfinityDB", "/"), ("Skills", "/skills"), ("Details", None)),
             "Rules reference",
             "skills",
         ),
@@ -339,7 +339,7 @@ _DETAIL_PAGES = (
         EQUIPMENT_PAGE_PATH,
         PageSpec(
             "equipment-detail.html",
-            (("Database", "/"), ("Equipment", "/equipment"), ("Details", None)),
+            (("InfinityDB", "/"), ("Equipment", "/equipment"), ("Details", None)),
             "Rules reference",
             "equipment",
         ),
@@ -348,7 +348,7 @@ _DETAIL_PAGES = (
         WEAPON_PAGE_PATH,
         PageSpec(
             "weapons-detail.html",
-            (("Database", "/"), ("Weapons", "/weapons"), ("Details", None)),
+            (("InfinityDB", "/"), ("Weapons", "/weapons"), ("Details", None)),
             "Rules reference",
             "weapons",
         ),
@@ -357,7 +357,7 @@ _DETAIL_PAGES = (
         TRAIT_PAGE_PATH,
         PageSpec(
             "traits-detail.html",
-            (("Database", "/"), ("Traits", "/traits"), ("Details", None)),
+            (("InfinityDB", "/"), ("Traits", "/traits"), ("Details", None)),
             "Rules reference",
             "traits",
         ),
@@ -366,7 +366,7 @@ _DETAIL_PAGES = (
         STATE_PAGE_PATH,
         PageSpec(
             "states-detail.html",
-            (("Database", "/"), ("States", "/states"), ("Details", None)),
+            (("InfinityDB", "/"), ("States", "/states"), ("Details", None)),
             "Rules reference",
             "states",
         ),
@@ -375,7 +375,7 @@ _DETAIL_PAGES = (
         AMMUNITION_PAGE_PATH,
         PageSpec(
             "reference-detail.html",
-            (("Database", "/"), ("Ammunition", "/ammunition"), ("Details", None)),
+            (("InfinityDB", "/"), ("Ammunition", "/ammunition"), ("Details", None)),
             "Rules reference",
             "ammunition",
             _reference_page_values(
@@ -393,7 +393,7 @@ _DETAIL_PAGES = (
         LABEL_PAGE_PATH,
         PageSpec(
             "reference-detail.html",
-            (("Database", "/"), ("Labels", "/labels"), ("Details", None)),
+            (("InfinityDB", "/"), ("Labels", "/labels"), ("Details", None)),
             "Rules reference",
             "labels",
             _reference_page_values(
@@ -413,7 +413,7 @@ _DETAIL_PAGES = (
         RULE_PAGE_PATH,
         PageSpec(
             "reference-detail.html",
-            (("Database", "/"), ("General Rules", "/rules"), ("Details", None)),
+            (("InfinityDB", "/"), ("General Rules", "/rules"), ("Details", None)),
             "Rules reference",
             "rules",
             _reference_page_values(
@@ -436,7 +436,7 @@ _DETAIL_PAGES = (
         PageSpec(
             "hacking-program-detail.html",
             (
-                ("Database", "/"),
+                ("InfinityDB", "/"),
                 ("Hacking Programs", "/hacking-programs"),
                 ("Details", None),
             ),

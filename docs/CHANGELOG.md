@@ -76,6 +76,8 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend:** Replace database/domain-oriented page framing with InfinityDB and player-reference
+  language across navigation breadcrumbs, the landing page, Unit Explorer, and global Search.
 - **Data processing:** Bind each generated Army application/raw database pair to one deterministic
   full-export fingerprint and make application-database replacement the publication commit point.
   Interrupted paired publication now fails closed for raw-dependent audits and recovers by rerunning

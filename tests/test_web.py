@@ -2043,6 +2043,29 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert f"Version {__display_version__}".encode() in body
 
 
+def test_player_page_framing_uses_reference_language(app: Callable) -> None:
+    for path in ("/armies", "/units", "/search", "/skills", "/equipment", "/weapons"):
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b'<a href="/">InfinityDB</a><span aria-hidden="true">/</span>' in body
+        assert b">Database<" not in body
+
+    status, _, home = request(app, "/")
+    assert status == 200
+    assert b"Explore InfinityDB" in home
+    assert b"Explore the database" not in home
+
+    status, _, units = request(app, "/units")
+    assert status == 200
+    assert b"Browse units<br" in units
+    assert b"Browse the database" not in units
+
+    status, _, search = request(app, "/search")
+    assert status == 200
+    assert b"All references" in search
+    assert b"database domain" not in search
+
+
 @pytest.mark.parametrize(
     "path",
     [
@@ -2172,7 +2195,7 @@ def test_landing_page_states_independence_and_asset_permission(app: Callable) ->
     assert b"assets used by the project" in body
 
 
-def test_landing_database_links_match_primary_navigation_order(app: Callable) -> None:
+def test_landing_reference_links_match_primary_navigation_order(app: Callable) -> None:
     status, _, body = request(app, "/")
 
     assert status == 200
@@ -4467,7 +4490,7 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     status, headers, body = request(app, "/search?q=alpha")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"Every database domain" in body
+    assert b"All references" in body
     assert b'action="/search" role="search"' in body
     assert b"search.js" in body
 
