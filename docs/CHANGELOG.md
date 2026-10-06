@@ -56,8 +56,9 @@ are not retroactively relabeled.
   samples while redacting request targets and identity-like values instead of archiving raw logs.
 - **Deployment + Project infrastructure:** Add privacy-preserving Linux host/container resource
   capture for deployment capacity evidence, including CPU, memory/swap, filesystem space/inodes,
-  available disk-I/O, network rates, per-container Docker utilization, and restart/OOM events over
-  the same interval as an optionally wrapped capacity-test command.
+  available disk-I/O, network rates, per-container Docker utilization, restart/OOM events, and the
+  bounded CPU/memory/Gunicorn configuration needed to interpret capacity comparisons, over the same
+  interval as an optionally wrapped capacity-test command.
 - **Deployment + Project infrastructure:** Add a repeatable HTTP capacity-test scenario for deployed
   InfinityDB stacks, covering representative Unit browsing, search, detail, and API traffic with
   warm-cache steady and burst phases plus retained p50/p95/p99, throughput, error, and response-size

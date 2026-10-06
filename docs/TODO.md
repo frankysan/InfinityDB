@@ -226,6 +226,9 @@ domain unless required to correct a release-blocking defect.
     exercises Unit browsing, global search, Unit/catalog details, and matching JSON APIs, then
     records separate steady-state and short-burst phases with p50/p95/p99 latency, request/error
     rate, status classes, and response sizes. The health endpoint is not part of the workload.
+  - [x] Make retained resource evidence self-describing for capacity comparisons: record only the
+    app/container CPU and memory limits plus detected Gunicorn worker/thread counts from Docker
+    metadata, without retaining arbitrary commands, environment values, bind mounts, or addresses.
   - [ ] Establish a baseline at 2 Gunicorn workers x 4 threads, then test 4 x 4
     only with a matching 4-vCPU/4-GiB container allocation. Record p50/p95/p99
     latency, request/error rate, CPU, memory, and SQLite/disk behavior at each

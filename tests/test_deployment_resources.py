@@ -11,6 +11,7 @@ from tools.deployment_resources import (
     ContainerSnapshot,
     HostSnapshot,
     ResourceCaptureError,
+    _container_configuration_from_inspect,
     _mount_device_for_path,
     _parse_cpu_stat,
     _parse_diskstats,
@@ -81,6 +82,67 @@ def test_docker_stat_parser_supports_binary_and_decimal_units() -> None:
     assert result.block_read_bytes == 4000
     assert result.block_write_bytes == 8192
     assert _parse_size("0B") == 0
+
+
+
+def test_container_configuration_retains_only_capacity_relevant_runtime_settings() -> None:
+    configuration = _container_configuration_from_inspect(
+        {
+            "Path": "/usr/local/bin/gunicorn",
+            "Args": ["ignored-fallback"],
+            "Config": {
+                "Cmd": [
+                    "gunicorn",
+                    "--preload",
+                    "--bind",
+                    "0.0.0.0:8000",
+                    "--workers",
+                    "4",
+                    "--threads=4",
+                    "--error-logfile",
+                    "-",
+                    "infinity_db.web.wsgi:app",
+                ],
+                "Env": [
+                    "SECRET_TOKEN=do-not-retain",
+                    "INFINITY_DB_DATABASE=/app/data/infinity.db",
+                ],
+            },
+            "HostConfig": {
+                "NanoCpus": 4_000_000_000,
+                "Memory": 4 * 1024**3,
+                "Binds": ["/private/path:/app/private"],
+            },
+        }
+    )
+
+    assert configuration == {
+        "cpuLimitCores": 4.0,
+        "memoryLimitBytes": 4 * 1024**3,
+        "applicationServer": {
+            "server": "gunicorn",
+            "workers": 4,
+            "threads": 4,
+        },
+    }
+    serialized = json.dumps(configuration)
+    assert "SECRET_TOKEN" not in serialized
+    assert "/private/path" not in serialized
+    assert "0.0.0.0" not in serialized
+
+
+def test_container_configuration_supports_cpu_quota_and_omitted_limits() -> None:
+    quota = _container_configuration_from_inspect(
+        {
+            "Config": {"Cmd": ["caddy", "run"]},
+            "HostConfig": {"NanoCpus": 0, "CpuQuota": 200_000, "CpuPeriod": 100_000, "Memory": 0},
+        }
+    )
+    assert quota == {
+        "cpuLimitCores": 2.0,
+        "memoryLimitBytes": None,
+        "applicationServer": None,
+    }
 
 
 def _host_sample(
@@ -185,7 +247,21 @@ def test_container_summary_retains_resource_and_restart_oom_evidence_only() -> N
             }
         },
         events=[{"container": "infinitydb-app-1", "action": "restart"}],
+        configuration={
+            "infinitydb-app-1": {
+                "cpuLimitCores": 4.0,
+                "memoryLimitBytes": 4 * 1024**3,
+                "applicationServer": {"server": "gunicorn", "workers": 2, "threads": 4},
+            }
+        },
     )["infinitydb-app-1"]
+    assert report["configuration"]["applicationServer"] == {
+        "server": "gunicorn",
+        "workers": 2,
+        "threads": 4,
+    }
+    assert report["configuration"]["cpuLimitCores"] == 4.0
+    assert report["configuration"]["memoryLimitBytes"] == 4 * 1024**3
     assert report["cpuPercent"] == {"average": 20.0, "max": 30}
     assert report["memory"]["maxUsedBytes"] == 400
     assert report["networkDeltaBytes"] == {"receive": 400, "transmit": 600}

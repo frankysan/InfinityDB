@@ -253,11 +253,13 @@ version/snapshot identity. The synthetic search value is redacted from retained 
 not use `/health` as the workload.
 
 Capacity reports are diagnostic evidence, not stable performance promises. Retain the exact target
-release/snapshot, deployment worker/resource configuration, client location, command, and accompanying
-host/container resource observations with any baseline. `deployment_resources.py` is Linux-host-only
-and can wrap the capacity command while sampling bounded host/Docker resource counters over the same
-interval; its retained JSON intentionally excludes hostnames, IPs, request URLs, and arbitrary Docker
-event payloads. `deployment_alerts.py` evaluates a fresh resource report together with bounded
+release/snapshot, client location, command, and accompanying host/container resource observations with
+any baseline. `deployment_resources.py` is Linux-host-only and can wrap the capacity command while
+sampling bounded host/Docker resource counters over the same interval. Its container summaries retain
+only the capacity-relevant runtime configuration (explicit Docker CPU/memory limits and detected
+Gunicorn worker/thread counts), while its JSON intentionally excludes hostnames, IPs, request URLs,
+arbitrary container environment/command values, and arbitrary Docker event payloads. Record resource
+boundaries outside Docker separately. `deployment_alerts.py` evaluates a fresh resource report together with bounded
 aggregate metrics and health samples, producing monitoring-friendly OK/warning/critical/unknown exit
 codes without retaining endpoint URLs or user/request identity data. Generated benchmark/capacity/
 resource/alert reports belong in ignored report/audit storage unless a specific result is needed as

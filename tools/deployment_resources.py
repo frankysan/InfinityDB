@@ -11,7 +11,7 @@ import re
 import subprocess
 import sys
 import time
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -332,17 +332,75 @@ def capture_container_stats(
     return snapshots
 
 
-def inspect_container_state(
+def _parse_cli_integer_option(tokens: Sequence[str], *names: str) -> int | None:
+    for index, token in enumerate(tokens):
+        for name in names:
+            prefix = f"{name}="
+            if token.startswith(prefix):
+                try:
+                    value = int(token[len(prefix) :])
+                except ValueError:
+                    return None
+                return value if value > 0 else None
+            if token == name and index + 1 < len(tokens):
+                try:
+                    value = int(tokens[index + 1])
+                except ValueError:
+                    return None
+                return value if value > 0 else None
+    return None
+
+
+def _container_configuration_from_inspect(item: Mapping[str, Any]) -> dict[str, Any]:
+    host_config = item.get("HostConfig") or {}
+    nano_cpus = int(host_config.get("NanoCpus") or 0)
+    cpu_limit_cores: float | None = nano_cpus / 1_000_000_000 if nano_cpus > 0 else None
+    if cpu_limit_cores is None:
+        cpu_quota = int(host_config.get("CpuQuota") or 0)
+        cpu_period = int(host_config.get("CpuPeriod") or 0)
+        if cpu_quota > 0 and cpu_period > 0:
+            cpu_limit_cores = cpu_quota / cpu_period
+
+    configured_memory_bytes = int(host_config.get("Memory") or 0)
+    memory_limit_bytes: int | None = (
+        configured_memory_bytes if configured_memory_bytes > 0 else None
+    )
+
+    config = item.get("Config") or {}
+    command = [str(token) for token in (config.get("Cmd") or [])]
+    if not command:
+        path = str(item.get("Path") or "")
+        args = [str(token) for token in (item.get("Args") or [])]
+        command = ([path] if path else []) + args
+
+    executable = Path(command[0]).name if command else ""
+    gunicorn: dict[str, int | str | None] | None = None
+    if executable == "gunicorn":
+        gunicorn = {
+            "server": "gunicorn",
+            "workers": _parse_cli_integer_option(command, "--workers", "-w"),
+            "threads": _parse_cli_integer_option(command, "--threads"),
+        }
+
+    return {
+        "cpuLimitCores": round(cpu_limit_cores, 3) if cpu_limit_cores is not None else None,
+        "memoryLimitBytes": memory_limit_bytes,
+        "applicationServer": gunicorn,
+    }
+
+
+def inspect_container_metadata(
     repo_root: Path,
     container_ids: Sequence[str],
     *,
     runner: Callable[..., subprocess.CompletedProcess[str]] = _run_command,
-) -> dict[str, dict[str, Any]]:
+) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
     result = runner(["docker", "inspect", *container_ids], cwd=repo_root)
     if result.returncode != 0:
         raise ResourceCaptureError(f"docker inspect failed: {result.stderr.strip()}")
     document: list[dict[str, Any]] = json.loads(result.stdout)
     state: dict[str, dict[str, Any]] = {}
+    configuration: dict[str, dict[str, Any]] = {}
     for item in document:
         name = str(item.get("Name") or "").lstrip("/")
         container_state = item.get("State") or {}
@@ -353,6 +411,17 @@ def inspect_container_state(
             "restarting": bool(container_state.get("Restarting")),
             "exitCode": int(container_state.get("ExitCode") or 0),
         }
+        configuration[name] = _container_configuration_from_inspect(item)
+    return state, configuration
+
+
+def inspect_container_state(
+    repo_root: Path,
+    container_ids: Sequence[str],
+    *,
+    runner: Callable[..., subprocess.CompletedProcess[str]] = _run_command,
+) -> dict[str, dict[str, Any]]:
+    state, _configuration = inspect_container_metadata(repo_root, container_ids, runner=runner)
     return state
 
 
@@ -530,6 +599,7 @@ def summarize_containers(
     start_state: dict[str, dict[str, Any]],
     end_state: dict[str, dict[str, Any]],
     events: Sequence[dict[str, str]],
+    configuration: Mapping[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     names = sorted({name for sample in samples for name in sample})
     summary: dict[str, Any] = {}
@@ -540,6 +610,14 @@ def summarize_containers(
         start = start_state.get(name, {})
         end = end_state.get(name, {})
         summary[name] = {
+            "configuration": (configuration or {}).get(
+                name,
+                {
+                    "cpuLimitCores": None,
+                    "memoryLimitBytes": None,
+                    "applicationServer": None,
+                },
+            ),
             "cpuPercent": {
                 "average": _round_optional(_mean([value.cpu_percent for value in values])),
                 "max": _round_optional(max(value.cpu_percent for value in values)),
@@ -591,7 +669,7 @@ def capture_resources(
         raise ResourceCaptureError("deployment resource capture must run on the Linux host")
     container_ids = discover_containers(repo_root, services)
     started_at = now()
-    start_state = inspect_container_state(repo_root, container_ids)
+    start_state, container_configuration = inspect_container_metadata(repo_root, container_ids)
     host_samples = [capture_host_snapshot(filesystem_path=repo_root)]
     container_samples = [capture_container_stats(repo_root, container_ids)]
 
@@ -642,6 +720,7 @@ def capture_resources(
             start_state=start_state,
             end_state=end_state,
             events=events,
+            configuration=container_configuration,
         ),
     }
     return report, command_exit_code

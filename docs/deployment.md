@@ -419,14 +419,19 @@ capacity command with the resource sampler so both ignored JSON reports cover th
 The resource report records host CPU, memory/swap, filesystem space/inodes, aggregate network rates,
 backing-device I/O when the Linux mount exposes a corresponding `/proc/diskstats` device, and Docker
 CPU/memory/network/block-I/O data for the `app` and `caddy` services. It also records container
-restart-count changes plus Docker `restart`/`oom` events during the capture. Some LXC/storage layouts
-do not expose a directly attributable host block device; in that case host disk-I/O rates are `null`
-while Docker block-I/O deltas remain available.
+restart-count changes plus Docker `restart`/`oom` events during the capture. For capacity evidence,
+each container summary also records only the bounded runtime configuration needed to interpret the
+result: an explicit Docker CPU limit in cores, an explicit Docker memory limit in bytes, and, when the
+container command is Gunicorn, its configured worker/thread counts. A missing CPU or memory limit is
+reported as `null` rather than inferred from host capacity. Some LXC/storage layouts do not expose a
+directly attributable host block device; in that case host disk-I/O rates are `null` while Docker
+block-I/O deltas remain available.
 
 The retained report deliberately omits hostnames, IP addresses, request URLs, arbitrary Docker event
-attributes, and the wrapped command line. Capture the exact Gunicorn/container allocation separately
-with the baseline notes. Do not compare 2-worker and 4-worker results unless the resource allocation
-is recorded and controlled.
+attributes, arbitrary container environment/command values, and the wrapped command line. Record any
+resource boundary outside Docker (for example an LXC/VM allocation) with the baseline notes. Do not
+compare 2-worker and 4-worker results unless the relevant allocation is recorded and controlled; the
+planned 4x4 result specifically requires the app container report to show a 4-core/4-GiB limit.
 
 ### Operational alert evaluation
 
