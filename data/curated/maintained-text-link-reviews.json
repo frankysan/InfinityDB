@@ -103,7 +103,6 @@
           "reason": "combat-term-not-trait",
           "occurrenceSha256s": [
             "0688c585ec0e7e986eb227ddf64fcb8cfb8aa652fd27262dcf945f2785249b5b",
-            "19055daf82d098405bb39910c95273eff8855f8b01971ed64258ca83d2e63ebe",
             "240ede8b2cf71ee524ca19e5bf1de872c09dd5e5e94faa502672a7f4e4ad2ff6",
             "25035fe58b40e7ee7521c844dfbae15446b27bf0b763ff6322b11585519c9dc5",
             "30e4e84a1a6906d11bd2616cb223fd05eec240bb5f9b22d7e72caadcdadfdab3",
@@ -528,8 +527,7 @@
           "reason": "game-category-not-skill",
           "occurrenceSha256s": [
             "4325f6d0de0bbd2f6bb310c5a48ffeecbef55184157921e184b5e4de6769be8e",
-            "90b5c92bd4ce2a16591dd0affef8e244821bd3f56254db703f144dddcb78681c",
-            "d65772bb25fa05a0c0465d0b444b80661ca8bf4a96ac4476996ad93328aa4131"
+            "90b5c92bd4ce2a16591dd0affef8e244821bd3f56254db703f144dddcb78681c"
           ]
         },
         {

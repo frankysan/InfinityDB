@@ -1160,7 +1160,6 @@ h1>span {
 }
 
 .profile-help-summary-hint,
-.profile-help-intro,
 .profile-help-entry p {
   color: var(--color-text-secondary);
 }
@@ -1170,13 +1169,8 @@ h1>span {
 }
 
 .profile-help-body {
-  padding: 0 16px 16px;
+  padding: 16px;
   border-top: 1px solid var(--color-border-default);
-}
-
-.profile-help-intro {
-  margin: 14px 0 16px;
-  line-height: 1.6;
 }
 
 .profile-help-grid {

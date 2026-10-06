@@ -15697,10 +15697,10 @@
             }
         },
         {
-            "id": "rule:profile-help:equipment-weapons",
+            "id": "rule:profile-help:skills",
             "kind": "rule",
-            "name": "Equipment and Weapons",
-            "summary": "Unit Profile notation separates Skills and Equipment from BS Weapons, Peripherals, and CC or other special melee weapons. These groups are different profile domains even when they appear close together in the source layout.",
+            "name": "Skills",
+            "summary": "Skills are rules listed on a Unit Profile that describe actions, capabilities, or effects available to a Trooper. A Skill can apply across a profile or only to a specific option.",
             "composition": {
                 "role": "definition"
             },
@@ -15712,7 +15712,7 @@
             },
             "facts": {
                 "category": "unit-profile-help",
-                "key": "equipment-weapons",
+                "key": "skills",
                 "order": 90
             },
             "citations": [
@@ -15724,7 +15724,69 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
+                "reviewedOn": "2026-10-06"
+            }
+        },
+        {
+            "id": "rule:profile-help:equipment",
+            "kind": "rule",
+            "name": "Equipment",
+            "summary": "Equipment is gear listed on a Unit Profile that provides rules or capabilities to a Trooper. Equipment can apply across a profile or only to a specific option.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "equipment",
+                "order": 91
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Unit Profile"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-06"
+            }
+        },
+        {
+            "id": "rule:profile-help:weapons",
+            "kind": "rule",
+            "name": "Weapons",
+            "summary": "Weapons are the attack options listed on a Unit Profile, including BS Weapons and close-combat weapons. A Weapon can apply across a profile or only to a specific option.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "unit-profile-help",
+                "key": "weapons",
+                "order": 92
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Unit Profile"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-06"
             }
         },
         {

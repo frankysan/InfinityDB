@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **84/95** complete, **11** pending.
+- Supporting semantic identities: **86/97** complete, **11** pending.
 - Current authored outgoing relations: **262**.
 - Explicitly tracked future/deferred interactions: **115**.
 
@@ -630,6 +630,17 @@ review. `declaration-category` projection records are excluded.
 
 ## Supporting rules-identity review
 
+### 0.10.0
+
+#### Rule (3/3)
+
+- [x] **Equipment** (`rule:profile-help:equipment`) — reviewed
+  - outgoing: none
+- [x] **Skills** (`rule:profile-help:skills`) — reviewed
+  - outgoing: none
+- [x] **Weapons** (`rule:profile-help:weapons`) — reviewed
+  - outgoing: none
+
 ### 0.7.0
 
 #### Equipment (6/6)
@@ -788,11 +799,9 @@ review. `declaration-category` projection records are excluded.
 - [x] **Willpower (WIP)** (`attribute:wip`) — reviewed: Canonical embedded Attribute identity; no additional outbound interaction is authored by the Attribute definition itself. Rule-specific Attribute interactions remain reviewed at their originating records.
   - outgoing: none
 
-#### Rule (10/10)
+#### Rule (9/9)
 
 - [x] **Attributes** (`rule:profile-help:attributes`) — reviewed
-  - outgoing: none
-- [x] **Equipment and Weapons** (`rule:profile-help:equipment-weapons`) — reviewed
   - outgoing: none
 - [x] **Hackable** (`rule:profile-help:hackable`) — reviewed
   - outgoing: none

@@ -85,6 +85,7 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Web frontend:** Make Unit Profile row headers follow the same reference behavior as Attribute labels: profile concepts now show maintained tooltips and open their Glossary entries, with separate Skills, Equipment, and Weapons concepts, and the redundant Profile notation introduction is removed.
 - **Web frontend:** Tune Light and Dark semantic theme colors against an executable contrast audit
   for compact/muted text, links, focus cues, status and range values, tables, dialogs, menus, and
   related badges while keeping faction accents supplementary to textual identity.

@@ -185,9 +185,21 @@ function profileHelpAnchor(key, ariaLabel = null) {
   return link;
 }
 
-function profileHelpLabel(label, key) {
-  const link = profileHelpAnchor(key);
-  if (!link) return document.createTextNode(label);
+function profileHelpLabel(label, key, fallbackHref = null) {
+  const item = key ? profileHelpEntries.get(key) : null;
+  if (item) {
+    return maintainedTextFragment([{
+      type: "reference",
+      target: item.id,
+      label,
+      public_reference: { href: `/glossary#${item.id.replaceAll(":", "-")}` },
+      preview_tokens: [{ type: "text", text: item.summary }],
+    }]);
+  }
+  if (!fallbackHref) return document.createTextNode(label);
+  const link = document.createElement("a");
+  link.className = "maintained-reference";
+  link.href = fallbackHref;
   link.textContent = label;
   return link;
 }
@@ -210,12 +222,6 @@ function renderProfileNotationHelp(items) {
 
   const body = document.createElement("div");
   body.className = "profile-help-body";
-  const intro = document.createElement("p");
-  intro.className = "profile-help-intro";
-  intro.textContent = "InfinityDB keeps profile domains separate rather than flattening "
-    + "the source notation. These notes explain the fields and symbols used below.";
-  body.append(intro);
-
   const grid = document.createElement("div");
   grid.className = "profile-help-grid";
   for (const item of items) {
@@ -937,10 +943,7 @@ function generalProfileTableRows(profiles) {
       if (!(profile.shared_items?.[property] || []).length) continue;
       rows.push([
         {
-          content: profileHelpLabel(
-            label,
-            ["Equipment", "Weapons"].includes(label) ? "equipment-weapons" : null,
-          ),
+          content: profileHelpLabel(label, property),
           className: "data-label general-item-label",
         },
         {
@@ -975,10 +978,7 @@ function profileTableRows(profiles, generalByIdentity, anchorScope) {
       if (!items.length) continue;
       rows.push([
         {
-          content: profileHelpLabel(
-            label,
-            ["Equipment", "Weapons"].includes(label) ? "equipment-weapons" : null,
-          ),
+          content: profileHelpLabel(label, property),
           header: true,
           className: "data-label profile-item-label",
         },
@@ -1040,10 +1040,7 @@ function loadoutTable(loadouts, anchorScope, anchoredPayloads) {
         if (!items.length) continue;
         rows.push([
           {
-            content: profileHelpLabel(
-              label,
-              ["Equipment", "Weapons"].includes(label) ? "equipment-weapons" : null,
-            ),
+            content: profileHelpLabel(label, property),
             header: true,
             className: "data-label profile-item-label",
           },

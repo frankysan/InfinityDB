@@ -258,11 +258,18 @@ def test_unit_profile_help_returns_reviewed_profile_notation_entries(
         "isc",
         "hackable",
         "peripheral",
-        "equipment-weapons",
+        "skills",
+        "equipment",
+        "weapons",
         "profile-options",
     ]
     assert items[2]["name"] == "Training and Orders"
     assert "Regular and Irregular" in items[2]["summary"]
+    assert [item["name"] for item in items[8:11]] == [
+        "Skills",
+        "Equipment",
+        "Weapons",
+    ]
     assert items[-1]["order"] == 100
 
 

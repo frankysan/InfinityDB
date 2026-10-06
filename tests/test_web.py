@@ -1230,7 +1230,9 @@ def test_unit_profile_help_is_rules_backed_and_optional(
         "isc",
         "hackable",
         "peripheral",
-        "equipment-weapons",
+        "skills",
+        "equipment",
+        "weapons",
         "profile-options",
     ]
     assert items[6]["name"] == "Hackable"
@@ -4549,6 +4551,35 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
             }
         ],
     }
+    troop_type_help = next(
+        item for item in items if item["id"] == "rule:profile-help:troop-type"
+    )
+    assert troop_type_help == {
+        "id": "rule:profile-help:troop-type",
+        "kind": "rule",
+        "domain": "Unit Profile",
+        "domain_slug": "rules",
+        "name": "Troop Type",
+        "description": (
+            "Troop Type is a rules category such as LI, MI, HI, REM, TAG, WB, SK, "
+            "VH, or Peripheral. It is a separate axis from Trooper Classification "
+            "and can be referenced by rules restrictions."
+        ),
+        "aliases": ["Type"],
+        "href": "/glossary#rule-profile-help-troop-type",
+        "embedded": True,
+        "description_tokens": [
+            {
+                "type": "text",
+                "text": (
+                    "Troop Type is a rules category such as LI, MI, HI, REM, TAG, WB, "
+                    "SK, VH, or Peripheral. It is a separate axis from Trooper "
+                    "Classification and can be referenced by rules restrictions."
+                ),
+            }
+        ],
+    }
+
     marker_term = next(item for item in items if item["id"] == "term:marker")
     assert marker_term == {
         "id": "term:marker",
@@ -4580,7 +4611,30 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     assert loss_of_lieutenant["href"] == "/rules/loss-of-lieutenant"
     assert loss_of_lieutenant["embedded"] is False
     assert not any(item["id"] == "rule:fireteam-general" for item in items)
-    assert not any(item["id"] == "rule:profile-help:unit-profile" for item in items)
+    assert any(item["id"] == "rule:profile-help:unit-profile" for item in items)
+    profile_domain_entries = {
+        item["id"]: item
+        for item in items
+        if item["id"] in {
+            "rule:profile-help:skills",
+            "rule:profile-help:equipment",
+            "rule:profile-help:weapons",
+        }
+    }
+    assert {
+        identifier: entry["name"]
+        for identifier, entry in profile_domain_entries.items()
+    } == {
+        "rule:profile-help:skills": "Skills",
+        "rule:profile-help:equipment": "Equipment",
+        "rule:profile-help:weapons": "Weapons",
+    }
+    assert profile_domain_entries["rule:profile-help:skills"]["aliases"] == ["Skill"]
+    assert profile_domain_entries["rule:profile-help:equipment"]["aliases"] == []
+    assert profile_domain_entries["rule:profile-help:weapons"]["aliases"] == ["Weapon"]
+    assert not any(
+        item["id"] == "rule:profile-help:equipment-weapons" for item in items
+    )
 
     camouflage = next(item for item in items if item["id"] == "skill:camouflage")
     assert camouflage["href"] == "/skills/camouflage"
@@ -4594,6 +4648,14 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         for token in camouflage["description_tokens"]
         if token.get("type") == "reference"
     )
+
+    status, _, body = request(rules_app, "/api/search", query="q=type")
+    assert status == 200
+    assert {
+        "domain": "Unit Profile",
+        "name": "Troop Type",
+        "href": "/glossary#rule-profile-help-troop-type",
+    } in json.loads(body)["items"]
 
     status, _, body = request(rules_app, "/api/search", query="q=movement")
     assert status == 200
@@ -4763,6 +4825,11 @@ def test_unit_profile_help_links_are_rendered_from_rules_data(app: Callable) -> 
     assert b'profileHelpLabel("Type", "troop-type")' in unit_js
     assert b'profileHelpLabel("Classification", "classification")' in unit_js
     assert b'profileHelpLabel("Peripherals", "peripheral")' in unit_js
+    assert b'public_reference: { href: `/glossary#${item.id.replaceAll(":", "-")}` }' in unit_js
+    assert unit_js.count(b'profileHelpLabel(label, property)') == 3
+    assert b'"equipment-weapons"' not in unit_js
+    assert b'label === "Skills" ? "/skills" : null' not in unit_js
+    assert b"InfinityDB keeps profile domains separate" not in unit_js
     assert b'descriptor.help_key' in unit_js
     assert b'"training-orders"' not in unit_js
 
