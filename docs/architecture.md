@@ -319,7 +319,10 @@ the data-driven theme registry consumed by `static/theme.js` and the Settings se
 selector and live System-preference updates. Adding another explicit theme should require a registry
 entry and semantic-token implementation, not new persistence logic.
 
-Remaining contrast/audit and regression work is tracked only in `docs/TODO.md`.
+Theme contrast is enforced as a browser design contract: compact/normal text roles must retain at
+least 4.5:1 contrast against their owned surfaces, while meaningful focus/status/graphical cues use
+a 3:1 minimum. Faction gradients are supplementary identity accents and do not replace textual
+identity. Remaining cross-theme page regression work is tracked only in `docs/TODO.md`.
 
 ## Privacy-preserving observability
 

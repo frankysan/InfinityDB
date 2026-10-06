@@ -154,7 +154,7 @@
   --color-action-primary: #245e4c;
   --color-action-primary-hover: #183e31;
   --color-link-hover: #087b62;
-  --color-accent: #8caa60;
+  --color-accent: #617740;
   --color-border-default: #dce2da;
   --color-border-strong: #9bb48a;
   --color-border-muted: #b9cbb0;
@@ -201,9 +201,9 @@
   --color-switch-choice-checked-knob: #d5efad;
   --color-status-warning-surface: #fff3d5;
   --color-status-warning-text: #704d00;
-  --color-status-warning-indicator: #d79b2d;
-  --color-range-neutral: #009fe3;
-  --color-range-positive: #3fa535;
+  --color-status-warning-indicator: #b58123;
+  --color-range-neutral: #007cb1;
+  --color-range-positive: #33852b;
   --color-range-caution: #fcc002;
   --color-range-negative: #cd171a;
 
@@ -219,8 +219,8 @@
   --color-surface-translucent: rgb(255 255 255 / 62%);
   --color-border-raised: #d8e2d4;
   --color-border-raised-hover: #a8bf91;
-  --color-text-accent-muted: #779354;
-  --color-text-accent-subtle: #66864e;
+  --color-text-accent-muted: #637a46;
+  --color-text-accent-subtle: #5e7b48;
   --color-text-on-inverse-strong: #e4ebdf;
   --color-text-on-inverse-detail: #bdccbd;
   --color-text-on-inverse-action: #18342d;
@@ -244,13 +244,13 @@
   --color-spinner-track: #e3e9dc;
   --color-spinner-active: #62874c;
   --color-division-surface: #256d1b;
-  --color-division-deepspace: #d68623;
+  --color-division-deepspace: #a5671b;
   --color-profile-accent: #78926f;
-  --color-profile-accent-subordinate: #a5b4a0;
-  --color-profile-attachment: #748471;
-  --color-profile-stat-label: #758074;
+  --color-profile-accent-subordinate: #83977c;
+  --color-profile-attachment: #6a7867;
+  --color-profile-stat-label: #6d776c;
   --color-profile-stat-value: #263d31;
-  --color-profile-characteristics: #71806f;
+  --color-profile-characteristics: #6a7868;
   --color-profile-fallback-border: #d5ded1;
   --color-profile-fallback-surface: #f7f9f4;
   --color-profile-fallback-text: #4b624f;
@@ -323,7 +323,7 @@
   --color-skill-category-automatic: #000000;
   --color-skill-category-deployment: #4b0082;
   --color-skill-category-basic-short: #3278bd;
-  --color-skill-category-short: #228b22;
+  --color-skill-category-short: #218721;
   --color-skill-category-long: #b20000;
   --color-skill-category-aro: #ffbf00;
   --color-skill-category-on-dark: #ffffff;
@@ -429,7 +429,7 @@
   --color-text-accent-subtle: #a4c183;
   --color-text-on-inverse-strong: #edf4ef;
   --color-text-on-inverse-detail: #bdccbd;
-  --color-text-on-inverse-action: #dcebd5;
+  --color-text-on-inverse-action: #18342d;
   --color-text-separator: #708079;
   --color-accent-indicator: #79a583;
   --color-text-accent: #a8c58d;

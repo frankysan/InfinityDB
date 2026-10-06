@@ -60,6 +60,12 @@ Reusable structures must remain usable with keyboard navigation, visible focus, 
 
 Themes define semantic color and appearance roles. Layout primitives define structure, spacing, sizing, and interaction behavior. Components should consume both without baking a particular theme into geometry or duplicating layout for individual theme variants.
 
+### Maintain measurable contrast and non-color meaning
+
+Normal and compact text roles must maintain at least 4.5:1 contrast against the surfaces they own in every shipped theme. Meaningful focus indicators and other graphical cues that communicate state or structure must maintain at least 3:1 against the adjacent audited surface. Disabled controls and purely decorative separators are not treated as normal readable content.
+
+Status, range, rules-category, and similar semantic colors must retain readable text or another explicit label/value so meaning never depends on hue alone. Faction colors are supplementary identity accents: Unit/Army names and symbols remain the identity source, so faction gradients may stay visually subtle instead of being forced into text-contrast roles. The executable palette audit lives in `tests/test_theme_contrast.py`; new theme tokens that carry readable or state-bearing content should be added to that contract.
+
 ## Design vocabulary
 
 Use these terms when discussing, documenting, or implementing the browser UI.

@@ -95,9 +95,11 @@ domain unless required to correct a release-blocking defect.
     choices. Theme selection uses the existing session/cookie preference contract, resolves before
     first meaningful paint, and exposes a registry that can accept additional explicit themes
     without changing persistence logic.
-  - [ ] Audit contrast and distinguishability for status/range colors, links, focus,
+  - [x] Audit contrast and distinguishability for status/range colors, links, focus,
     muted text, tables, dialogs, menus, and faction accents in every shipped theme
-    (initially Light and Dark).
+    (initially Light and Dark). Compact text/status roles now have executable contrast
+    thresholds, focus and other meaningful graphical cues have non-text thresholds, and
+    faction gradients remain supplementary to textual identity rather than carrying meaning alone.
   - [ ] Add regression coverage for initialization, switching, persistence, and
     representative core pages across every shipped theme.
 

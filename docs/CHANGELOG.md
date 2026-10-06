@@ -41,6 +41,9 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Fixed
 
+- **Web frontend:** Tune Light and Dark semantic theme colors against an executable contrast audit
+  for compact/muted text, links, focus cues, status and range values, tables, dialogs, menus, and
+  related badges while keeping faction accents supplementary to textual identity.
 - **Web frontend:** Keep Fireteam Member/Requirements columns aligned with a compact, stable split
   across viewport widths, and reserve more room for cm-mode MOV values so profile statlines do not
   crowd adjacent attributes.
