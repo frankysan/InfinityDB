@@ -1523,7 +1523,8 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"unit.js" in body
-    assert b'aria-label="Project navigation"' in body
+    assert b'aria-label="InfinityDB navigation"' in body
+    assert b'aria-label="Project navigation"' not in body
     assert b"Skip to unit details" in body
 
     status, headers, slug_page = request(app, "/units/ranger-prototype")
@@ -1759,7 +1760,8 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert body.count(b"Your Infinity reference,") >= 2
     assert b"Your Infinity data," not in body
     assert b"in one place." in body
-    assert b'aria-label="Project navigation"' in body
+    assert b'aria-label="InfinityDB navigation"' in body
+    assert b'aria-label="Project navigation"' not in body
     assert b'href="/armies"' in body
     assert b'href="/units"' in body
     assert b'href="/ammunition"' in body
