@@ -542,10 +542,10 @@ function renderUnits(data) {
   const hasFilters = Boolean(hasActiveFilters());
   if (!data.total) {
     elements.summary.textContent = "0 units found";
-    elements.emptyTitle.textContent = hasFilters ? "No matching units" : "Your catalog is ready for data";
+    elements.emptyTitle.textContent = hasFilters ? "No matching units" : "No units available";
     elements.emptyMessage.textContent = hasFilters
       ? "Try another name or choose a different army."
-      : "No units have been added to this database yet.";
+      : "There are no units to browse right now.";
     elements.emptyClear.hidden = !hasFilters;
     showPanel(elements.empty);
     return;
@@ -621,7 +621,7 @@ async function load() {
   } catch (error) {
     if (signal.aborted || currentRequest !== requestNumber) return;
     elements.errorMessage.textContent = error instanceof TypeError
-      ? "Could not connect to the database. Check your connection and try again."
+      ? "Could not reach InfinityDB. Check your connection and try again."
       : error.message || "Something went wrong. Please try again.";
     elements.summary.textContent = "Unable to load units";
     showPanel(elements.error);

@@ -1139,7 +1139,7 @@ function compositeOptionTable(options, anchorScope) {
       if (option.disabled) {
         rows.push([
           { value: "Availability", header: true, className: "data-label profile-item-label" },
-          { value: "Unavailable in this source data", colSpan: 2 },
+          { value: "Not currently available", colSpan: 2 },
         ]);
       }
       return rows;

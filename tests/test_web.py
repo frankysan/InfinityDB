@@ -2066,6 +2066,43 @@ def test_player_page_framing_uses_reference_language(app: Callable) -> None:
     assert b"database domain" not in search
 
 
+def test_player_loading_empty_and_error_states_hide_storage_language(app: Callable) -> None:
+    status, _, armies = request(app, "/armies")
+    assert status == 200
+    assert b"There are no Army lists to browse right now." in armies
+    assert b"current snapshot" not in armies.lower()
+
+    status, _, units = request(app, "/units")
+    assert status == 200
+    assert b"Loading unit information." in units
+    assert b"Units could not be loaded" in units
+    assert b"Loading the unit catalog" not in units
+    assert b"Getting your catalog ready" not in units
+
+    status, _, units_script = request(app, "/static/units.js")
+    assert status == 200
+    assert b"No units available" in units_script
+    assert b"There are no units to browse right now." in units_script
+    assert b"Could not reach InfinityDB. Check your connection and try again." in units_script
+    assert b"No units have been added to this database yet." not in units_script
+    assert b"Could not connect to the database" not in units_script
+
+    status, _, unit_script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"Not currently available" in unit_script
+    assert b"Unavailable in this source data" not in unit_script
+
+    status, _, transport = request(app, "/static/api-transport.js")
+    assert status == 200
+    assert b"This information could not be loaded. Please try again." in transport
+    assert b"The database returned an error" not in transport
+
+    status, _, fireteams = request(app, "/fireteams")
+    assert status == 200
+    assert b"Loading Fireteam rules and Army charts." in fireteams
+    assert b"Reading Fireteam reference data." not in fireteams
+
+
 def test_rules_taxonomy_pages_use_player_language(app: Callable) -> None:
     status, _, home = request(app, "/")
     assert status == 200

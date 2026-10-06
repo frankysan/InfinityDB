@@ -13,7 +13,7 @@ export async function getJson(path, signal) {
     headers: { Accept: "application/json" },
   });
   if (!response.ok) {
-    let message = `The database returned an error (${response.status}). Please try again.`;
+    let message = "This information could not be loaded. Please try again.";
     try {
       const payload = await response.json();
       message = payload.error || message;
