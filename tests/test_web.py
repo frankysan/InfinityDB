@@ -482,6 +482,11 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b"Main armies and Sectorials" in body
     assert b"Generic Army Lists" in body
     assert b'richer <a href="/fireteams">Fireteam</a> charts' in body
+    assert b"see which forces are out of catalog" in body
+    assert b"Loading Army information." in body
+    assert b"catalog status" not in body
+    assert b"current N5 Army data" not in body
+    assert b"Reading the current Army overview" not in body
     assert b'/static/armies.js?v=' in body
     assert b'href="/armies" aria-current="page"' in body
 
