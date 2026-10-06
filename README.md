@@ -282,8 +282,11 @@ prevents replacement.
 ## Linux deployment
 
 The supported Docker Compose deployment packages the application, the tracked runtime
-databases, and the tracked processed symbol publication from one release tag into an
-immutable image. Raw Army/wiki/PDF/source-symbol archives are not required on the server.
+databases, and the tracked processed symbol publication from one release tag into an immutable
+application image. Retained aggregate metrics run separately in an immutable-root
+`metrics-history` service with one bounded writable SQLite volume; no writable metrics state is
+mounted into the web-facing application container. Raw Army/wiki/PDF/source-symbol archives are
+not required on the server.
 
 ```sh
 sh ./scripts/install-or-update.sh
@@ -299,7 +302,9 @@ transition.
 
 For a deployment test on the server that must not be reachable from the LAN, use
 `sh ./scripts/deploy-local-test.sh`. It runs as a separate Compose project on
-`127.0.0.1:8080` by default and does not prune production rollback images.
+`127.0.0.1:8080` by default, including an isolated metrics-history volume, and does not prune
+production rollback images. `sh ./scripts/stop-local-test.sh` preserves that test history; add
+`--purge` for a deliberate clean-slate local stack.
 
 Place the supplied production Caddy service behind a public TLS reverse proxy.
 Deployment validation fails if required databases or graphical assets are missing or

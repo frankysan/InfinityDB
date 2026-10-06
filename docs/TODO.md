@@ -163,16 +163,14 @@ domain unless required to correct a release-blocking defect.
     and `infinitydb_metrics_last_request_timestamp_seconds` so operators and the planned history
     collector can identify the exact observation span and distinguish application restarts even
     when version/snapshot identity is unchanged.
-  - [ ] Add an isolated `metrics-history` service outside the immutable web-facing `app`
-    container. Build/version it separately from `app`; run it with an immutable root filesystem,
-    no published port, no Docker socket/host-filesystem access, and exactly one bounded writable
-    volume for its SQLite history store. It should scrape `app:8000/internal/metrics` over the
-    private Compose network; do not mount writable metrics state into the application container.
-    Collector startup/health must be reported separately and must not become an availability
-    prerequisite for the website. The isolated `infinitydb-test` deployment should run the same
-    collector lifecycle by default with its own Compose-namespaced history volume; ordinary local
-    test shutdown should preserve that volume, while an explicit future `stop-local-test.sh --purge`
-    path should remove only the `infinitydb-test` project's volumes for clean-slate testing.
+  - [x] Add an isolated `metrics-history` service outside the immutable web-facing `app`
+    container. `Dockerfile.metrics-history` builds a separate unprivileged image containing only
+    the standard-library collector engine; Compose runs it read-only with no published port, no
+    Docker socket/host-filesystem access, and exactly one writable `metrics_history` volume. The
+    collector scrapes `app:8000/internal/metrics` over the private Compose network and remains
+    outside the app/Caddy availability gate. The `infinitydb-test` project runs the same service
+    with an automatically isolated history volume; normal stop preserves that volume and
+    `stop-local-test.sh --purge` removes only the local-test project's volumes.
   - [x] Implement bounded version-aware metrics-history aggregation.
     `tools/metrics_history.py` keeps only one rolling scrape state for counter deltas, treats each
     metrics-generation identity as a fresh zero-based counter set, and folds deltas into weekly
@@ -182,17 +180,19 @@ domain unless required to correct a release-blocking defect.
     completed weeks first, and reports earliest/latest retained observations, week count, and
     current database size. Unexplained counter decreases fail closed and reset only rolling state
     rather than inflating retained history.
-  - [ ] Integrate metrics-history collection with deployment transitions. Build/verify the new
-    app and collector images before changing the running stack; use the new collector image for a
-    one-shot closing scrape of the old app, replace/wait for the availability-critical app/Caddy
-    services, take a one-shot opening scrape after app health passes, then start/update the
-    continuous collector. Closing/opening scrape or collector-start failures should be prominent
-    operational warnings but must not roll back or block an otherwise healthy application/security
-    update. Preserve the history volume across app rollback, including rollback to a pre-history
-    release; do not couple application rollback to downgrading the history schema. Define explicit
-    forward schema migrations for the persistent collector store and prune old collector images
-    with a bounded rollback window. Unexpected restarts may lose at most one periodic collection
-    interval; generation changes must never treat reset counters as deltas.
+  - [x] Integrate metrics-history collection with deployment transitions. Deployment builds and
+    verifies both images before touching the running stack, stops only the continuous collector,
+    takes a one-shot closing scrape of the old app, replaces/waits for the availability-critical
+    app/Caddy services, takes an opening scrape after app health passes, and then starts the
+    continuous collector. Closing/opening scrape or collector-start failures are warnings and do
+    not roll back/block a healthy application update. A transition-only legacy fallback lets the
+    first collector-enabled release retain outgoing counters from older deployments that lack live
+    generation timestamps. App and collector image repositories share the bounded rollback-image
+    retention count. Unexpected restarts may lose at most one periodic collection interval;
+    generation changes never treat reset counters as deltas.
+  - [ ] Define explicit forward schema migrations before incrementing the persistent
+    metrics-history database format. Application rollback must continue to preserve rather than
+    downgrade/delete the history volume, including rollback to a pre-history release.
   - [ ] Extend operator reporting for retained history: compare weekly/version/snapshot request
     counts, status/error rates, route activity, latency histograms, and response-size histograms
     without retaining raw URLs, query/search terms, request identities, or per-user history.

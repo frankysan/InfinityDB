@@ -198,7 +198,11 @@ def _validate_series_labels(name: str, labels: Mapping[str, str]) -> None:
             raise ValueError(f"Invalid histogram bound {bound!r}")
 
 
-def parse_history_snapshot(text: str) -> ScrapeSnapshot:
+def parse_history_snapshot(
+    text: str,
+    *,
+    fallback_generation_started_at: float | None = None,
+) -> ScrapeSnapshot:
     """Parse and validate the fixed-cardinality history subset of `/metrics`."""
 
     version: str | None = None
@@ -243,6 +247,8 @@ def parse_history_snapshot(text: str) -> ScrapeSnapshot:
 
     if not version or not snapshot_revision:
         raise ValueError("Metrics history requires build version and snapshot identity")
+    if generation_started_at is None:
+        generation_started_at = fallback_generation_started_at
     if generation_started_at is None:
         raise ValueError("Metrics history requires a generation-start timestamp")
     if not counters:
@@ -720,12 +726,19 @@ def render_status(status: HistoryStatus) -> str:
 
 
 def _collect_from_endpoint(args: argparse.Namespace) -> CollectionResult:
+    collected_at = time.time()
     text = fetch_metrics(args.url, timeout=args.timeout)
-    snapshot = parse_history_snapshot(text)
+    fallback_generation_started_at = (
+        collected_at if getattr(args, "legacy_generation_at_collection", False) else None
+    )
+    snapshot = parse_history_snapshot(
+        text,
+        fallback_generation_started_at=fallback_generation_started_at,
+    )
     return collect_snapshot(
         args.database,
         snapshot,
-        collected_at=time.time(),
+        collected_at=collected_at,
         retention_weeks=args.retention_weeks,
         max_bytes=args.max_bytes,
     )
@@ -781,6 +794,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     collect_parser = subparsers.add_parser("collect", help="collect one metrics snapshot")
     _add_collection_arguments(collect_parser)
+    collect_parser.add_argument(
+        "--legacy-generation-at-collection",
+        action="store_true",
+        help=(
+            "accept a legacy metrics surface without generation timestamps by treating this "
+            "one-shot collection time as its generation boundary"
+        ),
+    )
 
     run_parser = subparsers.add_parser("run", help="collect continuously at a fixed interval")
     _add_collection_arguments(run_parser)

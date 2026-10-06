@@ -1,0 +1,20 @@
+# syntax=docker/dockerfile:1
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    INFINITYDB_METRICS_HISTORY_DATABASE=/var/lib/infinitydb-metrics/history.db \
+    INFINITYDB_METRICS_HISTORY_URL=http://app:8000/internal/metrics
+
+WORKDIR /app
+
+COPY tools/metrics_history.py /app/metrics_history.py
+
+RUN useradd --create-home --uid 10002 metrics \
+    && mkdir -p /var/lib/infinitydb-metrics \
+    && chown -R metrics:metrics /var/lib/infinitydb-metrics
+
+USER metrics
+
+ENTRYPOINT ["python", "/app/metrics_history.py"]
+CMD ["run"]

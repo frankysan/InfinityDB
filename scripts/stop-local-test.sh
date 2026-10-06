@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Stop the isolated loopback-only InfinityDB test deployment.
+# Stop or explicitly purge the isolated loopback-only InfinityDB test deployment.
 set -eu
 
 fail() {
@@ -11,7 +11,22 @@ repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" ||
   fail "run this script from an InfinityDB Git checkout."
 cd "$repo_root"
 
-echo "Stopping isolated infinitydb-test deployment..."
-COMPOSE_PROJECT_NAME=infinitydb-test docker compose down
+purge=0
+case "${1:-}" in
+  '') ;;
+  --purge) purge=1 ;;
+  *) fail "usage: sh scripts/stop-local-test.sh [--purge]" ;;
+esac
+if [ "$#" -gt 1 ]; then
+  fail "usage: sh scripts/stop-local-test.sh [--purge]"
+fi
 
-echo "Local test deployment stopped. Production deployment was not targeted."
+if [ "$purge" = "1" ]; then
+  echo "Stopping isolated infinitydb-test deployment and removing its volumes..."
+  COMPOSE_PROJECT_NAME=infinitydb-test docker compose down -v
+  echo "Local test deployment stopped and purged. Production deployment was not targeted."
+else
+  echo "Stopping isolated infinitydb-test deployment; preserving its volumes..."
+  COMPOSE_PROJECT_NAME=infinitydb-test docker compose down
+  echo "Local test deployment stopped. Its volumes were preserved; production deployment was not targeted."
+fi

@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Deploy a versioned InfinityDB image, then retain a small rollback window.
+# Deploy versioned InfinityDB application/metrics images, then retain a small rollback window.
 set -eu
 
 : "${IMAGE_TAG:?Set IMAGE_TAG to an app-* version, for example app-0.4.2}"
@@ -11,8 +11,19 @@ case "$IMAGE_TAG" in
     ;;
 esac
 
-# The deployed image plus two rollback builds. Set RETAIN_APP_IMAGES=2 to keep
-# the deployed image and one rollback build, for example.
+: "${METRICS_HISTORY_IMAGE_TAG:=$IMAGE_TAG}"
+export IMAGE_TAG METRICS_HISTORY_IMAGE_TAG
+case "$METRICS_HISTORY_IMAGE_TAG" in
+  app-*) ;;
+  *)
+    echo "METRICS_HISTORY_IMAGE_TAG must begin with app-." >&2
+    exit 2
+    ;;
+esac
+
+# The deployed images plus two rollback builds. Set RETAIN_APP_IMAGES=2 to keep
+# each deployed image and one rollback build, for example. The historical name
+# remains for deployment-config compatibility and applies to both repositories.
 : "${RETAIN_APP_IMAGES:=3}"
 case "$RETAIN_APP_IMAGES" in
   *[!0-9]* | '')
@@ -63,6 +74,60 @@ if [ ! -x "$python" ]; then
   exit 2
 fi
 
+warn() {
+  echo "WARNING: $*" >&2
+}
+
+metrics_history_running() {
+  [ -n "$(docker compose ps -q metrics-history | sed -n '1p')" ]
+}
+
+application_running() {
+  [ -n "$(docker compose ps -q app | sed -n '1p')" ]
+}
+
+stop_metrics_history() {
+  if metrics_history_running; then
+    echo "Stopping continuous metrics-history collector for deployment transition..."
+    if ! docker compose stop metrics-history; then
+      warn "could not stop metrics-history cleanly; continuing with application deployment."
+    fi
+  fi
+}
+
+collect_metrics_history() {
+  phase="$1"
+  echo "Collecting metrics-history $phase sample..."
+  if [ "$phase" = "closing" ]; then
+    if docker compose run --rm --no-deps metrics-history collect \
+      --legacy-generation-at-collection; then
+      status=0
+    else
+      status=$?
+    fi
+  elif docker compose run --rm --no-deps metrics-history collect; then
+    status=0
+  else
+    status=$?
+  fi
+
+  if [ "$status" -eq 0 ]; then
+    echo "Metrics-history $phase sample complete."
+  else
+    warn "metrics-history $phase sample failed (exit $status); continuing with application deployment."
+  fi
+}
+
+start_metrics_history() {
+  echo "Starting continuous metrics-history collector..."
+  if docker compose up -d --no-build metrics-history; then
+    echo "Metrics-history collector started."
+  else
+    status=$?
+    warn "metrics-history collector failed to start (exit $status); application deployment remains active."
+  fi
+}
+
 echo "Validating tracked runtime databases and published symbol set..."
 "$python" tools/verify_deployment_assets.py
 
@@ -70,13 +135,35 @@ display_version="$("$python" -c 'import infinity_db; print(infinity_db.__display
 echo "Building application image infinity-db:$IMAGE_TAG (display $display_version)..."
 docker compose build --build-arg "INFINITY_DB_DISPLAY_VERSION=$display_version" app
 
-# Verify the exact image that Compose will deploy. The published-assets mode
-# checks that the locally validated symbol publication survived Docker/package
-# installation and that production routes can serve representative assets.
-sh ./scripts/verify-container-image.sh "infinity-db:$IMAGE_TAG" --published-assets
+echo "Building metrics-history image infinity-db-metrics-history:$METRICS_HISTORY_IMAGE_TAG..."
+docker compose build metrics-history
 
-docker compose up -d --no-build --wait
+# Verify both exact images before changing the running deployment. A collector
+# build/verification failure is caught here; later scrape/runtime failures are
+# operational warnings and do not make the application availability-critical.
+sh ./scripts/verify-container-image.sh "infinity-db:$IMAGE_TAG" --published-assets
+sh ./scripts/verify-metrics-history-image.sh \
+  "infinity-db-metrics-history:$METRICS_HISTORY_IMAGE_TAG"
+
+had_running_app=0
+if application_running; then
+  had_running_app=1
+fi
+stop_metrics_history
+if [ "$had_running_app" = "1" ]; then
+  collect_metrics_history "closing"
+else
+  echo "No running application found; skipping metrics-history closing sample."
+fi
+
+# Keep application availability independent of the collector. Only app/Caddy
+# participate in the deployment health gate.
+docker compose up -d --no-build --wait app caddy
+
+collect_metrics_history "opening"
+start_metrics_history
+
 if [ "$PRUNE_APP_IMAGES" = "1" ]; then
   exec sh "$(dirname "$0")/prune-app-images.sh" "$RETAIN_APP_IMAGES"
 fi
-echo "Application image pruning skipped for this deployment."
+echo "Deployment image pruning skipped for this deployment."

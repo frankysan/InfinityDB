@@ -21,6 +21,69 @@ def test_compose_supports_explicit_bind_address_and_host_port() -> None:
     )
 
 
+
+
+def test_metrics_history_service_is_immutable_private_and_volume_backed() -> None:
+    compose = _read("compose.yaml")
+    dockerfile = _read("Dockerfile.metrics-history")
+
+    assert "metrics-history:" in compose
+    assert "dockerfile: Dockerfile.metrics-history" in compose
+    assert "infinity-db-metrics-history:${METRICS_HISTORY_IMAGE_TAG:-latest}" in compose
+    assert "read_only: true" in compose
+    assert "- metrics_history:/var/lib/infinitydb-metrics" in compose
+    assert "metrics_history:" in compose
+    assert "ports:" not in compose.split("  metrics-history:", 1)[1].split("  caddy:", 1)[0]
+    metrics_service = compose.split("  metrics-history:", 1)[1].split("  caddy:", 1)[0]
+    assert "condition: service_healthy" in metrics_service
+
+    assert "FROM python:3.11-slim" in dockerfile
+    assert "COPY tools/metrics_history.py /app/metrics_history.py" in dockerfile
+    assert "USER metrics" in dockerfile
+    assert "ENTRYPOINT" in dockerfile
+    assert 'CMD ["run"]' in dockerfile
+
+
+def test_deploy_brackets_app_replacement_with_noncritical_metrics_history_scrapes() -> None:
+    script = _read("scripts/deploy.sh")
+
+    app_build = script.index(
+        'docker compose build --build-arg "INFINITY_DB_DISPLAY_VERSION=$display_version" app'
+    )
+    history_build = script.index("docker compose build metrics-history")
+    history_verify = script.index("verify-metrics-history-image.sh")
+    stop_history = script.index("\nstop_metrics_history\n", history_verify)
+    closing = script.index('collect_metrics_history "closing"')
+    app_up = script.index("docker compose up -d --no-build --wait app caddy")
+    opening = script.index('collect_metrics_history "opening"')
+    history_start = script.index("start_metrics_history", opening)
+
+    assert app_build < history_build < history_verify
+    assert history_verify < stop_history < closing < app_up < opening < history_start
+    assert 'warn "metrics-history $phase sample failed' in script
+    assert "application deployment remains active" in script
+    assert "--no-deps metrics-history collect" in script
+    assert "--legacy-generation-at-collection" in script
+    assert "docker compose up -d --no-build metrics-history" in script
+
+
+def test_metrics_history_image_verifier_uses_read_only_ephemeral_state() -> None:
+    script = _read("scripts/verify-metrics-history-image.sh")
+
+    assert "docker run --rm" in script
+    assert "--read-only" in script
+    assert "--tmpfs /tmp" in script
+    assert "INFINITYDB_METRICS_HISTORY_DATABASE=/tmp/history.db" in script
+    assert '"$image" status' in script
+
+
+def test_deployment_image_pruning_covers_app_and_metrics_history() -> None:
+    script = _read("scripts/prune-app-images.sh")
+
+    assert "prune_repository infinity-db app application" in script
+    assert "prune_repository infinity-db-metrics-history metrics-history metrics-history" in script
+    assert 'reference=$repository:app-*' in script
+
 def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     gitignore = _read(".gitignore")
     attributes = _read(".gitattributes")
@@ -62,12 +125,16 @@ def test_local_test_deployment_is_loopback_only_and_isolated() -> None:
     assert "DOMAIN=localhost" in script
     assert "PRUNE_APP_IMAGES=0" in script
     assert "sh ./scripts/deploy.sh" in script
+    assert "isolated infinitydb-test volume" in script
 
 
-def test_stop_local_test_targets_only_isolated_compose_project() -> None:
+def test_stop_local_test_preserves_by_default_and_purges_only_isolated_project() -> None:
     script = _read("scripts/stop-local-test.sh")
+
     assert "COMPOSE_PROJECT_NAME=infinitydb-test docker compose down" in script
-    assert "docker compose down -v" not in script
+    assert "COMPOSE_PROJECT_NAME=infinitydb-test docker compose down -v" in script
+    assert "--purge" in script
+    assert "preserving its volumes" in script
     assert "prune-app-images" not in script
     assert "Production deployment was not targeted." in script
 
@@ -76,7 +143,7 @@ def test_low_level_deploy_can_disable_image_pruning() -> None:
     script = _read("scripts/deploy.sh")
     assert ': "${PRUNE_APP_IMAGES:=1}"' in script
     assert '[ "$PRUNE_APP_IMAGES" = "1" ]' in script
-    assert "Application image pruning skipped for this deployment." in script
+    assert "Deployment image pruning skipped for this deployment." in script
 
 
 def test_deploy_bakes_display_version_into_container_image() -> None:

@@ -117,6 +117,27 @@ def test_parse_history_snapshot_rejects_unreviewed_route_labels() -> None:
         parse_history_snapshot(text)
 
 
+
+
+def test_legacy_transition_snapshot_requires_explicit_fallback_generation() -> None:
+    collected_at = _timestamp(2026, 10, 6)
+    text = "\n".join(
+        line
+        for line in _metrics_text(started_at=collected_at - 60, requests=7).splitlines()
+        if not line.startswith("infinitydb_metrics_")
+    )
+
+    with pytest.raises(ValueError, match="generation-start timestamp"):
+        parse_history_snapshot(text)
+
+    snapshot = parse_history_snapshot(
+        text,
+        fallback_generation_started_at=collected_at,
+    )
+    assert snapshot.version == "0.10.0"
+    assert snapshot.generation_started_at == collected_at
+    assert snapshot.last_request_at is None
+
 def test_collect_accumulates_first_generation_from_zero_then_only_deltas(tmp_path: Path) -> None:
     path = tmp_path / "history.db"
     collected_at = _timestamp(2026, 10, 6)

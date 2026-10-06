@@ -9,6 +9,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Deployment + Project infrastructure:** Run retained aggregate metrics in a dedicated
+  immutable-root `metrics-history` container with one bounded writable SQLite volume, bracket
+  application updates with non-blocking closing/opening scrapes, preserve isolated history across
+  normal local-test restarts, and provide an explicit local `--purge` clean-slate path.
+
 - **Deployment + Project infrastructure:** Add a bounded, version-aware metrics-history collector
   engine that converts volatile request counters into generation-safe weekly SQLite summaries,
   retains only one rolling scrape state, and automatically enforces age and database-size limits

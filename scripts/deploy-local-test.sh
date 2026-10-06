@@ -52,4 +52,5 @@ PRUNE_APP_IMAGES=0 \
 
 printf 'Local test deployment ready: http://localhost:%s\n' "$port"
 printf 'Local test metrics: http://localhost:%s/metrics\n' "$metrics_port"
+printf 'Metrics history: isolated infinitydb-test volume (preserved on normal stop)\n'
 printf 'Remote access: ssh -L %s:127.0.0.1:%s <server>\n' "$port" "$port"

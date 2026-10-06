@@ -130,13 +130,17 @@ sh ./scripts/stop-local-test.sh
 ```
 
 The stop helper always targets the `infinitydb-test` Compose project and leaves its named
-volumes intact for the next test run. When the planned `metrics-history` service is integrated, the
-local test deployment will run the same collector/update lifecycle by default and its history volume
-will therefore be isolated automatically as an `infinitydb-test` project volume. Normal stop/start
-and update tests will preserve that synthetic history. A future explicit
-`sh ./scripts/stop-local-test.sh --purge` mode will use the same project namespace and remove only
-the local test project's volumes when a clean-slate metrics-history test is desired; that option is
-not implemented yet.
+volumes intact for the next test run. The local deployment runs the same `metrics-history`
+collector/update lifecycle as production, so its history database is automatically isolated in the
+`infinitydb-test` Compose project's `metrics_history` volume. Normal stop/start and update tests
+preserve that synthetic history. For a deliberate clean-slate run, use:
+
+```sh
+sh ./scripts/stop-local-test.sh --purge
+```
+
+The purge path still targets only `COMPOSE_PROJECT_NAME=infinitydb-test`; it removes that project's
+named volumes (including metrics history and local Caddy state) without targeting production.
 
 ## Published graphical symbols
 
@@ -244,29 +248,32 @@ value, IP address, user agent, cookie/preference value, visitor ID, or per-user 
 history database. The collector also fails closed on an unreviewed route label rather than silently
 persisting a new high-cardinality dimension.
 
-Before Compose integration, the engine can be exercised manually from a checkout against the trusted
-LAN metrics listener:
+The engine can also be exercised manually from a checkout against the trusted LAN metrics listener:
 
 ```powershell
 python tools/metrics_history.py --database reports/metrics-history.db collect --url http://127.0.0.1:9090/metrics
 python tools/metrics_history.py --database reports/metrics-history.db status
 ```
 
-Deployment integration will keep application availability and history persistence deliberately
-separate. Before changing the running stack, deployment will build and verify both the new application
-and collector images. If an application is already running, the new collector image will run once
-against the old `app:8000/internal/metrics` endpoint and write a closing sample into the persistent
-history volume. The app/Caddy replacement and health wait then remain the availability-critical
-deployment step. After the new application passes health checks, the collector image runs once again
-for the opening sample, and only then is the continuous collector service started/updated. This order
-also lets the first release containing metrics-history close the outgoing pre-collector version.
+Deployment keeps application availability and history persistence deliberately separate. Before
+changing the running stack, `deploy.sh` builds and verifies both the new application image and the
+separate `metrics-history` image. It then stops only an existing continuous collector so it cannot
+race the transition samples. If an application is already running, the new collector image runs once
+against the old `app:8000/internal/metrics` endpoint and writes a closing sample into the persistent
+history volume. The app/Caddy replacement and `--wait` health gate then remain the availability-
+critical deployment step. After the new application passes health checks, the collector image runs
+once again for the opening sample, and only then is the continuous collector service started/updated.
+The closing one-shot may use a transition-only legacy generation fallback, allowing the first
+collector-enabled release to retain aggregate counters from an older deployment that predates the
+live generation-timestamp gauges. Continuous collection never uses that fallback.
 
 Closing/opening scrape failures or failure to start the continuous collector are operational warnings,
 not reasons to roll back or block an otherwise healthy application/security update. A collector image
-that cannot be built or verified should fail before application replacement begins. Collector image
-retention should be bounded alongside application-image retention so repeated releases do not silently
-accumulate old operational images. Periodic collection handles normal operation; after an unexpected
-restart, generation detection prevents reset counters from being interpreted as deltas.
+that cannot be built or verified fails before application replacement begins. The historical
+`RETAIN_APP_IMAGES` deployment setting is retained for configuration compatibility but now applies
+to both `infinity-db:app-*` and `infinity-db-metrics-history:app-*`, so repeated releases do not
+silently accumulate collector images. Periodic collection handles normal operation; after an
+unexpected restart, generation detection prevents reset counters from being interpreted as deltas.
 
 The persistent history database is independent forward-moving operational state. Schema changes require
 explicit forward migrations. An application rollback does not imply a history-database downgrade; a
@@ -274,12 +281,11 @@ rollback to a release without metrics-history support stops the collector while 
 for a later compatible release. Collector health/status should be reported separately from app/Caddy
 health and must not participate in the deployment success gate.
 
-The isolated local test deployment will use the same transition sequence under
+The isolated local test deployment uses the same transition sequence under
 `COMPOSE_PROJECT_NAME=infinitydb-test`, giving it a separate history volume automatically. Normal local
-shutdown preserves that volume so restart/update continuity can be tested; an explicit future `--purge`
-stop mode will remove only the isolated test project's volumes. The implementation stages remain
-tracked in `docs/TODO.md`; until they are complete, `/metrics` remains volatile process-lifetime state
-only.
+shutdown preserves that volume so restart/update continuity can be tested; `stop-local-test.sh --purge`
+removes only the isolated test project's volumes for a deliberate clean slate. `/metrics` itself
+remains volatile process-lifetime state; retained history lives only in the collector volume.
 
 ### LAN metrics access and workstation report
 
@@ -410,12 +416,13 @@ These defaults are an initial operational safety net. Tune them only after retai
 error, and resource behavior rather than simply copying these alert thresholds.
 
 `deploy.sh` retains the current build and the two newest rollback builds by
-default. After Compose has successfully started and health-checked the new
-application container, it removes only older `infinity-db:app-*` tags. It does
-not prune dangling images or touch Caddy, Portainer, named volumes, or images
-from other repositories. Set `RETAIN_APP_IMAGES=2` to keep the current build
-plus one rollback build; use `RETAIN_APP_IMAGES=1` to keep only the current
-build.
+default. After the application health gate and metrics-history transition/start
+steps, it removes only older `infinity-db:app-*` and
+`infinity-db-metrics-history:app-*` tags. It does not prune dangling images or
+touch Caddy, Portainer, named volumes, or images from other repositories. The
+historical `RETAIN_APP_IMAGES` setting controls both InfinityDB image
+repositories: set it to `2` to keep the current build plus one rollback build,
+or `1` to keep only the current build.
 
 To apply the retention policy to images already on the server without
 deploying, run `sh ./scripts/prune-app-images.sh` (or pass the desired count as

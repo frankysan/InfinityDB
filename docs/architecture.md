@@ -376,8 +376,8 @@ migrations; application rollback does not imply history-schema rollback. Rolling
 without metrics-history support stops the collector but preserves its volume for a later compatible
 release. Isolated local deployments follow the same lifecycle under their own Compose project namespace
 so their writable history volume cannot collide with production; routine teardown preserves local
-history for update testing, with explicit purge reserved for deliberate clean-slate runs. Exact
-remaining rollout stages are tracked in `docs/TODO.md`.
+history for update testing, while `stop-local-test.sh --purge` removes only local-test volumes for
+deliberate clean-slate runs. Exact remaining rollout stages are tracked in `docs/TODO.md`.
 
 Temporary raw request logging is an incident-diagnostic exception, not the normal analytics path,
 and should be minimized and short-lived.

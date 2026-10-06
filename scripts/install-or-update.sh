@@ -70,7 +70,7 @@ domain="$(prompt 'Public domain (or localhost)' "${domain_default:-localhost}")"
 [ -n "$domain" ] || fail "a domain is required."
 
 retain_default="$(config_value RETAIN_APP_IMAGES)"
-retain="$(prompt 'Number of app images to retain' "${retain_default:-3}")"
+retain="$(prompt 'Number of deployment image builds to retain' "${retain_default:-3}")"
 
 metrics_bind_default="$(config_value METRICS_BIND_ADDRESS)"
 metrics_bind="$(prompt 'Metrics bind address (loopback or server LAN IP)' "${metrics_bind_default:-127.0.0.1}")"
