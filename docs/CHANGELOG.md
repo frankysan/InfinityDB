@@ -94,9 +94,9 @@ are not retroactively relabeled.
 - **Web frontend:** Rewrite Equipment, Weapons, and Fireteams introductions around the rules
   information players can browse, removing Army snapshot and source-authority framing from normal
   page copy.
-- **Web backend + Web frontend:** Rewrite empty, loading, and error states, including API-backed
-  failures, to describe the player-visible situation directly instead of exposing database,
-  snapshot, or source-data terminology.
+- **Web backend + Web frontend:** Rewrite empty, loading, and error states, including Army, Unit,
+  and rules-reference API failures, to describe the player-visible situation directly instead of
+  exposing database, snapshot, source-data, or catalog terminology.
 - **Web frontend:** Rewrite the About page around what InfinityDB helps players explore, how related
   rules information is connected, and how uncertainty is presented, replacing data-pipeline and
   internal release-planning language with player-relevant project goals.

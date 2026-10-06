@@ -2161,6 +2161,36 @@ def test_player_api_failures_hide_storage_language(
         assert b"private database failure detail" not in body
 
 
+def test_rules_reference_api_failures_use_player_language(
+    app: Callable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    cases = [
+        ("/api/skills", app.api.skill_catalog, "list_skills"),
+        ("/api/equipment", app.api.equipment_catalog, "list_equipment"),
+        ("/api/weapons", app.api.database, "list_catalog_items"),
+        ("/api/ammunition", app.api.ammunition_catalog, "list_items"),
+        ("/api/labels", app.api.label_catalog, "list_items"),
+        ("/api/rules", app.api.general_rules_catalog, "list_items"),
+    ]
+
+    for path, owner, method_name in cases:
+        with monkeypatch.context() as patch:
+            def fail(*args, **kwargs):
+                raise sqlite3.DatabaseError("private database failure detail")
+
+            patch.setattr(owner, method_name, fail)
+            status, _, body = request(app, path)
+
+        assert status == 503
+        payload = json.loads(body)
+        assert payload == {
+            "error": "Reference information is unavailable. Please try again."
+        }
+        assert "catalog" not in payload["error"].lower()
+        assert "database" not in payload["error"].lower()
+        assert b"private database failure detail" not in body
+
+
 def test_equipment_weapons_and_fireteams_intros_use_player_language(app: Callable) -> None:
     status, _, equipment = request(app, "/equipment")
     assert status == 200

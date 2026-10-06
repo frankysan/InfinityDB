@@ -453,7 +453,7 @@ class ApiHandler:
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read catalog")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The catalog is unavailable. Please try again."}
+                payload = {"error": "Reference information is unavailable. Please try again."}
         elif path == "/api/traits":
             cache_control = API_CACHE_CONTROL
             try:
@@ -492,7 +492,7 @@ class ApiHandler:
                 LOGGER.exception("Could not read rules-reference catalog")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {
-                    "error": "The reference catalog is unavailable. Please try again."
+                    "error": "Reference information is unavailable. Please try again."
                 }
         elif match := SKILL_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
