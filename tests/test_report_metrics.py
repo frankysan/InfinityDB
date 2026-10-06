@@ -7,6 +7,8 @@ from tools.report_metrics import parse_prometheus, render_report
 SAMPLE = """\
 # HELP infinitydb_build_info build info
 infinitydb_build_info{version="0.8.0",snapshot_revision="snapshot-1"} 1
+infinitydb_metrics_started_timestamp_seconds 1760000000
+infinitydb_metrics_last_request_timestamp_seconds 1760003661
 infinitydb_http_requests_active 2
 infinitydb_http_requests_total{route="/units/:id",status_class="2xx"} 8
 infinitydb_http_requests_total{route="/units/:id",status_class="4xx"} 2
@@ -35,6 +37,8 @@ def test_parse_prometheus_aggregates_bounded_metrics() -> None:
 
     assert report.version == "0.8.0"
     assert report.snapshot_revision == "snapshot-1"
+    assert report.metrics_started_timestamp_seconds == 1760000000
+    assert report.metrics_last_request_timestamp_seconds == 1760003661
     assert report.active_requests == 2
     assert report.total_requests == 15
     assert report.status_counts == {"2xx": 13, "4xx": 2}
@@ -54,6 +58,9 @@ def test_render_report_is_compact_and_uses_normalized_routes() -> None:
     )
 
     assert "Version: 0.8.0" in body
+    assert "Metrics started: 2025-10-09 08:53:20 UTC" in body
+    assert "Latest request: 2025-10-09 09:54:21 UTC" in body
+    assert "Observed span: 1h 1m 1s" in body
     assert "Completed requests: 15" in body
     assert "2xx: 13" in body
     assert "4xx: 2" in body
@@ -62,4 +69,18 @@ def test_render_report_is_compact_and_uses_normalized_routes() -> None:
     assert "Average response size: 2.0 KiB" in body
     assert "        10  /units/:id" in body
     assert "/api/units" not in body
-    assert "reset on restart" in body
+    assert "reset on application restart" in body
+
+
+def test_parse_prometheus_accepts_legacy_metrics_without_generation_timestamps() -> None:
+    report = parse_prometheus(
+        'infinitydb_build_info{version="0.9.1",snapshot_revision="snapshot-old"} 1\n'
+    )
+
+    assert report.metrics_started_timestamp_seconds is None
+    assert report.metrics_last_request_timestamp_seconds is None
+
+    body = render_report(report, source_url="http://example.invalid/metrics", top_routes=1)
+    assert "Metrics started: —" in body
+    assert "Latest request: —" in body
+    assert "Observed span: —" in body

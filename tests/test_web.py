@@ -265,6 +265,9 @@ def test_internal_metrics_use_bounded_normalized_route_labels(app: Callable) -> 
     assert status == 200
     assert headers["content-type"].startswith("text/plain; version=0.0.4")
     assert headers["cache-control"] == "no-store"
+    assert b"infinitydb_metrics_started_timestamp_seconds " in body
+    assert b"infinitydb_metrics_last_request_timestamp_seconds " in body
+    assert b"infinitydb_metrics_last_request_timestamp_seconds 0.000000" not in body
     assert b'infinitydb_http_requests_total{route="/api/units/:id",status_class="2xx"} 1' in body
     assert b'infinitydb_http_requests_total{route="/api/units/:id",status_class="4xx"} 1' in body
     assert b'infinitydb_http_request_duration_seconds_bucket{route="/api/units/:id"' in body

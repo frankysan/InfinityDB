@@ -263,6 +263,11 @@ codes without retaining endpoint URLs or user/request identity data. Generated b
 resource/alert reports belong in ignored report/audit storage unless a specific result is needed as
 release evidence.
 
+Live-metrics tests pin the generation timing contract before retained history exists: one shared
+generation-start timestamp is created with the preloaded request registry, only completed instrumented
+requests advance the latest-request timestamp, and reading `/metrics`/`/health` does not change either
+value. `report_metrics.py` must also remain tolerant of older deployments without these gauges.
+
 When the planned retained metrics-history service is implemented, its tests must keep the persistence
 boundary explicit: the application container remains read-only; collector state lives only in the
 dedicated history volume; counter resets/generation changes are tested; weekly aggregation is keyed

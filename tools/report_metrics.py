@@ -12,6 +12,7 @@ import urllib.error
 import urllib.request
 from collections import Counter, defaultdict
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 DEFAULT_METRICS_URL = "http://127.0.0.1:9090/metrics"
 _SAMPLE_RE = re.compile(
@@ -25,6 +26,8 @@ _LABEL_RE = re.compile(r'(?P<key>[a-zA-Z_][a-zA-Z0-9_]*)="(?P<value>(?:\\.|[^"\\
 class MetricsReport:
     version: str
     snapshot_revision: str
+    metrics_started_timestamp_seconds: float | None
+    metrics_last_request_timestamp_seconds: float | None
     active_requests: int
     status_counts: dict[str, int]
     route_counts: dict[str, int]
@@ -57,6 +60,8 @@ def parse_prometheus(text: str) -> MetricsReport:
 
     version = "unknown"
     snapshot_revision = "unknown"
+    metrics_started_timestamp_seconds: float | None = None
+    metrics_last_request_timestamp_seconds: float | None = None
     active_requests = 0
     status_counts: Counter[str] = Counter()
     route_counts: Counter[str] = Counter()
@@ -80,6 +85,10 @@ def parse_prometheus(text: str) -> MetricsReport:
         if name == "infinitydb_build_info":
             version = labels.get("version", version)
             snapshot_revision = labels.get("snapshot_revision", snapshot_revision)
+        elif name == "infinitydb_metrics_started_timestamp_seconds":
+            metrics_started_timestamp_seconds = value if value > 0 else None
+        elif name == "infinitydb_metrics_last_request_timestamp_seconds":
+            metrics_last_request_timestamp_seconds = value if value > 0 else None
         elif name == "infinitydb_http_requests_active":
             active_requests = int(value)
         elif name == "infinitydb_http_requests_total":
@@ -102,6 +111,8 @@ def parse_prometheus(text: str) -> MetricsReport:
     return MetricsReport(
         version=version,
         snapshot_revision=snapshot_revision,
+        metrics_started_timestamp_seconds=metrics_started_timestamp_seconds,
+        metrics_last_request_timestamp_seconds=metrics_last_request_timestamp_seconds,
         active_requests=active_requests,
         status_counts=dict(status_counts),
         route_counts=dict(route_counts),
@@ -137,8 +148,35 @@ def _format_bytes(value: float) -> str:
     return f"{value / 1024**2:.1f} MiB"
 
 
+def _format_timestamp(timestamp_seconds: float | None) -> str:
+    if timestamp_seconds is None:
+        return "—"
+    value = datetime.fromtimestamp(timestamp_seconds, UTC)
+    return value.strftime("%Y-%m-%d %H:%M:%S UTC")
+
+
+def _format_observed_span(report: MetricsReport) -> str:
+    started = report.metrics_started_timestamp_seconds
+    latest = report.metrics_last_request_timestamp_seconds
+    if started is None or latest is None:
+        return "—"
+    seconds = max(int(latest - started), 0)
+    days, remainder = divmod(seconds, 86_400)
+    hours, remainder = divmod(remainder, 3_600)
+    minutes, seconds = divmod(remainder, 60)
+    parts: list[str] = []
+    if days:
+        parts.append(f"{days}d")
+    if hours or days:
+        parts.append(f"{hours}h")
+    if minutes or hours or days:
+        parts.append(f"{minutes}m")
+    parts.append(f"{seconds}s")
+    return " ".join(parts)
+
+
 def render_report(report: MetricsReport, *, source_url: str, top_routes: int) -> str:
-    """Render a human-readable process-lifetime metrics summary."""
+    """Render a human-readable current-generation metrics summary."""
 
     average_duration = (
         report.duration_sum_seconds / report.duration_count if report.duration_count else 0.0
@@ -159,6 +197,9 @@ def render_report(report: MetricsReport, *, source_url: str, top_routes: int) ->
         f"Source: {source_url}",
         f"Version: {report.version}",
         f"Snapshot: {report.snapshot_revision}",
+        f"Metrics started: {_format_timestamp(report.metrics_started_timestamp_seconds)}",
+        f"Latest request: {_format_timestamp(report.metrics_last_request_timestamp_seconds)}",
+        f"Observed span: {_format_observed_span(report)}",
         f"Active requests: {report.active_requests}",
         f"Completed requests: {report.total_requests}",
         f"Status classes: {status_summary}",
@@ -187,7 +228,7 @@ def render_report(report: MetricsReport, *, source_url: str, top_routes: int) ->
     else:
         for route, count in populated_routes[:top_routes]:
             lines.append(f"  {count:>8}  {route}")
-    lines.append("Counters cover the current application process lifetime and reset on restart.")
+    lines.append("Counters cover the current metrics generation and reset on application restart.")
     return "\n".join(lines)
 
 

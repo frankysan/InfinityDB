@@ -42,8 +42,9 @@ release/audit narrative belongs in the changelog and Git history.
   of the current model.
 - Retained operational metrics must not make the web-facing `app` container writable. The accepted
   design is a separate private-network metrics-history service with one bounded writable SQLite
-  volume; `/metrics` remains a volatile aggregate scrape surface. `docs/architecture.md` owns the
-  boundary and `docs/TODO.md` owns the unfinished rollout stages.
+  volume; `/metrics` remains a volatile aggregate scrape surface. Live metrics expose shared
+  generation-start and latest-request timestamps for restart/reset detection. `docs/architecture.md`
+  owns the boundary and `docs/TODO.md` owns the unfinished rollout stages.
 - Future work belongs in `docs/TODO.md`; do not preserve an obsolete task list in architecture or
   this context file.
 

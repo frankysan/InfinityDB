@@ -218,8 +218,8 @@ root filesystem, and own one dedicated writable SQLite volume. It must not recei
 host filesystem mounts, or writable mounts into `app`. The existing LAN-only `/metrics` endpoint
 remains the interactive/current-state scrape surface.
 
-The planned collector treats each application metrics generation explicitly. Live metrics will expose
-a generation-start timestamp and latest completed-request timestamp so restarts remain identifiable
+The planned collector treats each application metrics generation explicitly. Live metrics already
+expose the generation-start and latest completed-request timestamps needed to distinguish restarts
 even when version and snapshot revision are unchanged. The collector will retain only the previous
 scrape state needed to compute deltas, then fold deltas into weekly summaries keyed by ISO week,
 InfinityDB version, and snapshot revision. Multiple process generations may contribute to the same
@@ -261,11 +261,12 @@ $env:INFINITYDB_METRICS_URL = "http://192.168.1.20:9090/metrics"
 python tools/report_metrics.py
 ```
 
-The report shows application/snapshot identity, active and completed requests, status-class
-counts, average and approximate p95 latency, average response size, and the busiest normalized
-routes. It consumes only the bounded aggregate Prometheus surface and therefore cannot reconstruct
-visitor histories. Use `python tools/report_metrics.py --raw` when the raw Prometheus exposition is
-needed for another local monitoring tool.
+The report shows application/snapshot identity, metrics-generation start/latest-request timestamps
+and observed span, active and completed requests, status-class counts, average and approximate p95
+latency, average response size, and the busiest normalized routes. It consumes only the bounded
+aggregate Prometheus surface and therefore cannot reconstruct visitor histories. Use
+`python tools/report_metrics.py --raw` when the raw Prometheus exposition is needed for another local
+monitoring tool.
 
 Raw request logging is not enabled in normal operation. If it is temporarily required for a
 concrete incident, minimize and sanitize the fields, restrict access, and define short

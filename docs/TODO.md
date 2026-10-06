@@ -158,10 +158,11 @@ domain unless required to correct a release-blocking defect.
   - [x] Publish aggregate request counters/histograms using normalized bounded route
     labels: request rate, status class, latency, response size, and active requests. Static
     assets and `/api/` requests remain separately identifiable for future dashboards.
-  - [ ] Add explicit live-metrics generation timestamps. `/metrics` remains a volatile
-    Prometheus scrape surface, but it should expose the generation start time and latest
-    completed instrumented-request time so operators can identify the exact observation span
-    and distinguish application restarts even when version/snapshot identity is unchanged.
+  - [x] Add explicit live-metrics generation timestamps. `/metrics` remains a volatile
+    Prometheus scrape surface, but now exposes `infinitydb_metrics_started_timestamp_seconds`
+    and `infinitydb_metrics_last_request_timestamp_seconds` so operators and the planned history
+    collector can identify the exact observation span and distinguish application restarts even
+    when version/snapshot identity is unchanged.
   - [ ] Add an isolated `metrics-history` service outside the immutable web-facing `app`
     container. The collector should run with an immutable root filesystem, no published port,
     no Docker socket/host-filesystem access, and exactly one bounded writable volume for its

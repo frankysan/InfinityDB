@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import multiprocessing
 import os
+import time
 from collections.abc import Iterable
 from dataclasses import dataclass
 
@@ -61,6 +62,8 @@ _STATUS_INDEX = {status: index for index, status in enumerate(STATUS_CLASSES)}
 class RequestMetricSnapshot:
     """Immutable copy of the shared counters used while rendering exposition text."""
 
+    metrics_started_timestamp_seconds: float
+    metrics_last_request_timestamp_seconds: float
     active_requests: int
     request_counts: tuple[int, ...]
     latency_bins: tuple[int, ...]
@@ -104,6 +107,7 @@ class RequestMetrics:
         # uses --preload so these synchronization primitives are created once in the master and
         # inherited by every worker. Direct/local WSGI use remains valid without forking.
         self._lock = multiprocessing.RLock()
+        self._timestamps = multiprocessing.Array("d", (time.time(), 0.0), lock=False)
         self._worker_pids = multiprocessing.Array("q", MAX_WORKER_SLOTS, lock=False)
         self._worker_active = multiprocessing.Array("q", MAX_WORKER_SLOTS, lock=False)
         self._worker_slot: int | None = None
@@ -190,6 +194,7 @@ class RequestMetrics:
             self._latency_sums[route_index] += max(duration_seconds, 0.0)
             self._response_size_bins[route_index * size_width + size_index] += 1
             self._response_size_sums[route_index] += size_value
+            self._timestamps[1] = max(self._timestamps[0], self._timestamps[1], time.time())
 
     def snapshot(self) -> RequestMetricSnapshot:
         """Copy all shared counters atomically for stable exposition output."""
@@ -205,6 +210,8 @@ class RequestMetrics:
                     self._worker_pids[index] = 0
                     self._worker_active[index] = 0
             return RequestMetricSnapshot(
+                metrics_started_timestamp_seconds=self._timestamps[0],
+                metrics_last_request_timestamp_seconds=self._timestamps[1],
                 active_requests=active_requests,
                 request_counts=tuple(self._request_counts),
                 latency_bins=tuple(self._latency_bins),
@@ -226,6 +233,24 @@ class RequestMetrics:
                 + '",snapshot_revision="'
                 + _label(snapshot_revision)
                 + '"} 1'
+            ),
+            (
+                "# HELP infinitydb_metrics_started_timestamp_seconds Unix timestamp when "
+                "this metrics generation started."
+            ),
+            "# TYPE infinitydb_metrics_started_timestamp_seconds gauge",
+            (
+                "infinitydb_metrics_started_timestamp_seconds "
+                f"{snapshot.metrics_started_timestamp_seconds:.6f}"
+            ),
+            (
+                "# HELP infinitydb_metrics_last_request_timestamp_seconds Unix timestamp "
+                "of the latest completed instrumented request, or 0 if none has completed."
+            ),
+            "# TYPE infinitydb_metrics_last_request_timestamp_seconds gauge",
+            (
+                "infinitydb_metrics_last_request_timestamp_seconds "
+                f"{snapshot.metrics_last_request_timestamp_seconds:.6f}"
             ),
             "# HELP infinitydb_http_requests_active Requests currently being handled.",
             "# TYPE infinitydb_http_requests_active gauge",
