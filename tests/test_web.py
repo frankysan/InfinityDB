@@ -2115,10 +2115,11 @@ def test_browser_routes_keep_their_parent_navigation_active(
     assert f'href="{active_href}" aria-current="page"'.encode() in body
 
 
-def test_skill_modifiers_is_a_discoverable_child_of_skills(app: Callable) -> None:
+def test_skill_modifiers_remains_internal_to_the_player_skills_page(app: Callable) -> None:
     status, _, skills = request(app, "/skills")
     assert status == 200
-    assert b'href="/skill-extras"' in skills
+    assert b'href="/skill-extras"' not in skills
+    assert b"Browse Common and Special Skills, with rules text and Army usage where available." in skills
 
     status, _, modifiers = request(app, "/skill-extras")
     assert status == 200

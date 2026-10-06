@@ -81,9 +81,8 @@ are not retroactively relabeled.
   Interrupted paired publication now fails closed for raw-dependent audits and recovers by rerunning
   the export without putting normal serving onto an unvalidated application database.
 - **Web backend + Web frontend:** Normalize Army Fireteam limit sentinels into explicit application
-  semantics before they reach the browser, reconnect the Skill Modifiers review surface as a
-  discoverable child of Skills, and include curated legacy Armies in global search with links to
-  the Armies overview.
+  semantics before they reach the browser, and include curated legacy Armies in global search with
+  links to the Armies overview.
 - **Data processing + Web backend + Web frontend:** Rework symbol publication around semantic
   ownership instead of Army source naming. Peripheral-only artwork now publishes under a dedicated
   main-Army namespace, mixed-role profile names remain Unit-owned, distinct contextual variants are
