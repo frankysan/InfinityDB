@@ -83,6 +83,7 @@ ASSETS = {
     "/static/rules-reference.js": ("rules-reference.js", "text/javascript; charset=utf-8"),
     "/static/skill-categories.js": ("skill-categories.js", "text/javascript; charset=utf-8"),
     "/static/infinitydb-logo.svg": ("infinitydb-logo.svg", "image/svg+xml"),
+    "/static/favicon.svg": ("favicon.svg", "image/svg+xml"),
     "/static/fonts/Audiowide/Audiowide-Regular.woff2": (
         "fonts/Audiowide/Audiowide-Regular.woff2",
         "font/woff2",
@@ -578,6 +579,8 @@ def _render_page(
             '<meta charset="utf-8">',
             (
                 '<meta charset="utf-8">'
+                '<link rel="icon" href="/static/favicon.svg" '
+                'type="image/svg+xml" sizes="any">'
                 '<script src="/static/theme-startup.js"></script>'
                 '<script type="module" src="/static/settings.js"></script>'
             ),

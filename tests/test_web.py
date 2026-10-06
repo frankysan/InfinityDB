@@ -2173,6 +2173,27 @@ def test_landing_page_links_to_fireteams(app: Callable) -> None:
     assert b"<strong>Fireteams</strong>" in body
 
 
+def test_project_favicon_is_shared_versioned_brand_asset(app: Callable) -> None:
+    favicon_href = f'href="/static/favicon.svg?v={STATIC_ASSET_VERSION}"'.encode()
+
+    for path in ("/", "/units/ranger-prototype", "/changes"):
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b'<link rel="icon" ' + favicon_href in body
+        assert b'type="image/svg+xml" sizes="any">' in body
+
+    status, headers, favicon = request(
+        app, f"/static/favicon.svg?v={STATIC_ASSET_VERSION}"
+    )
+    assert status == 200
+    assert headers["content-type"] == "image/svg+xml"
+    assert headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' in favicon
+    assert b"Simplified from infinitydb-logo.svg" in favicon
+    assert b'fill="#0d2922"' in favicon
+    assert b"var(" not in favicon
+
+
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
     status, _, body = request(app, "/")
 

@@ -103,8 +103,9 @@ domain unless required to correct a release-blocking defect.
   - [x] Add regression coverage for initialization, switching, persistence, and
     representative core pages across every shipped theme.
 
-- [ ] Add a project favicon derived from `infinitydb-logo.svg` and keep it legible
-  in light and dark browser chrome where practical.
+- [x] Add a project favicon derived from `infinitydb-logo.svg` and keep it legible
+  in light and dark browser chrome where practical. The favicon uses the logo's infinity-ribbon
+  geometry on its dark brand surface, simplified for small browser-tab sizes.
 
 - [ ] Reorganize frontend design-system ownership after first-class themes are implemented:
   keep foundational tokens, per-theme values, shared components/layout, and page-specific

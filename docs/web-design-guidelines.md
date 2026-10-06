@@ -56,6 +56,12 @@ Breakpoints should correspond to layout failure or content need rather than arbi
 
 Reusable structures must remain usable with keyboard navigation, visible focus, screen readers, user font scaling, reduced motion where relevant, and non-color-only meaning. A component is not complete if its intended interaction depends on a mouse, a specific viewport width, or a specific color perception.
 
+### Keep browser-chrome branding self-contained
+
+The project favicon is a small-size derivative of the InfinityDB logo rather than a second brand
+design. It uses a self-contained high-contrast surface so it remains recognizable in light and
+dark browser chrome without depending on page-theme CSS.
+
 ### Keep theme and layout concerns separate
 
 Themes define semantic color and appearance roles. Layout primitives define structure, spacing, sizing, and interaction behavior. Components should consume both without baking a particular theme into geometry or duplicating layout for individual theme variants.

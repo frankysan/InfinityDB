@@ -9,6 +9,8 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Web frontend:** Add a project favicon derived from the InfinityDB logo, simplified for clear
+  recognition at small browser-tab sizes and high contrast in both light and dark browser chrome.
 - **Web frontend:** Add System, Light, and Dark theme selection in Settings. System follows the
   operating-system color preference by default, explicit choices can be remembered with existing
   Settings persistence, and the selected theme is applied before first paint.
