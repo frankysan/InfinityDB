@@ -378,6 +378,9 @@ def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
     assert headers["content-type"].startswith("text/html")
     assert b"<title>What's changed \xc2\xb7 InfinityDB</title>" in body
     assert b'<h1 id="page-title">What\'s changed<span>.</span></h1>' in body
+    assert b'<p class="eyebrow">Release history</p>' in body
+    assert b'<span aria-hidden="true"></span> Release history</span>' in body
+    assert b"Project history" not in body
     assert b"<strong>What&#x27;s changed</strong>" in body
     assert b"Player-visible highlights are shown first" in body
     assert b'href="/changes" aria-current="page"' in body

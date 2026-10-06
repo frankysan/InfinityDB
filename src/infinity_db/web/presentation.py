@@ -303,7 +303,7 @@ _FIXED_PAGES = {
     "/changes": PageSpec(
         "changes.html",
         (("InfinityDB", "/"), ("What's changed", None)),
-        "Project history",
+        "Release history",
         "changes",
         body_renderer=render_current_release_notes_html,
     ),
