@@ -1751,7 +1751,8 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     status, headers, body = request(app, "/")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"Your Infinity reference," in body
+    assert body.count(b"Your Infinity reference,") >= 2
+    assert b"Your Infinity data," not in body
     assert b"in one place." in body
     assert b'aria-label="Project navigation"' in body
     assert b'href="/armies"' in body
