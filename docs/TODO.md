@@ -193,9 +193,12 @@ domain unless required to correct a release-blocking defect.
   - [ ] Define explicit forward schema migrations before incrementing the persistent
     metrics-history database format. Application rollback must continue to preserve rather than
     downgrade/delete the history volume, including rollback to a pre-history release.
-  - [ ] Extend operator reporting for retained history: compare weekly/version/snapshot request
-    counts, status/error rates, route activity, latency histograms, and response-size histograms
-    without retaining raw URLs, query/search terms, request identities, or per-user history.
+  - [x] Extend operator reporting for retained history. `metrics_history.py periods/report/compare`
+    can inspect exact or aggregated week/version/snapshot selections, expose request/status/error
+    counts, normalized-route activity, cumulative latency/response-size histograms and bounded
+    p50/p95/p99 estimates, and compare retained selections without retaining raw URLs,
+    query/search terms, request identities, or per-user history. JSON output exposes the same
+    aggregate structures for later automation.
   - [x] Do not collect IP/geolocation, user-agent/fingerprint, referrer, cookie/session/
     preference values, query/search terms, persistent visitor IDs, unique/returning-user
     analytics, or per-user navigation histories. Raw URLs and unbounded request values are

@@ -306,6 +306,12 @@ For a deployment test on the server that must not be reachable from the LAN, use
 production rollback images. `sh ./scripts/stop-local-test.sh` preserves that test history; add
 `--purge` for a deliberate clean-slate local stack.
 
+Retained aggregate history can be inspected from the collector SQLite store with
+`tools/metrics_history.py periods`, `report`, and `compare`. Reports can select or aggregate by ISO
+week, InfinityDB version, and snapshot revision and expose only the bounded status/route/histogram
+dimensions already collected; no historical HTTP endpoint or request-level log is added. See the
+[Linux deployment guide](docs/deployment.md) for command examples and percentile semantics.
+
 Place the supplied production Caddy service behind a public TLS reverse proxy.
 Deployment validation fails if required databases or graphical assets are missing or
 inconsistent.

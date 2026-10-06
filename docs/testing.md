@@ -271,9 +271,12 @@ value. `report_metrics.py` must also remain tolerant of older deployments withou
 Metrics-history engine tests keep the persistence/privacy contract explicit: deterministic synthetic
 scrapes verify first-generation-from-zero accumulation, same-generation deltas, restart/version
 boundaries, fail-closed handling of unexplained counter decreases, weekly aggregation keyed by
-week/version/snapshot, route-label allowlisting, age-based pruning, and oldest-completed-week pruning
+week/version/snapshot, route-label and histogram-bound allowlisting, age-based pruning, and oldest-completed-week pruning
 under the database-size ceiling. The collector state remains one rolling snapshot and must not retain
-real visitor data or unbounded request labels. Deployment tests additionally prove the application container remains read-only, collector state lives
+real visitor data or unbounded request labels. Historical-report tests additionally pin exact/latest
+selection, broad week/version/snapshot aggregation, request/status/error summaries, normalized-route
+activity, cumulative histogram percentile bounds, machine-readable output, and latest-period
+comparison behavior. Deployment tests additionally prove the application container remains read-only, collector state lives
 only in its dedicated history volume, and pre-update/post-health transition scrapes do not make
 historical storage a prerequisite for app startup. They pin the lifecycle order: build/verify both
 images, stop only the continuous collector, one-shot closing scrape, availability-critical app/Caddy

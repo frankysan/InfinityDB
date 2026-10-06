@@ -219,13 +219,14 @@ container itself remains unpublished. Deployment tooling rejects wildcard metric
 metrics are process-lifetime operational state and intentionally reset when the application
 container restarts.
 
-### Planned retained metrics history
+### Retained metrics history
 
 Retained history must not make the web-facing application container writable. The accepted target
 topology remains a separate `metrics-history` operational service on the private Compose network.
-The standalone collection/aggregation engine is implemented in `tools/metrics_history.py`; Compose
-wiring is still pending. The service will scrape `http://app:8000/internal/metrics` directly, expose
-no public/LAN port, run with an immutable root filesystem, and own one dedicated writable SQLite
+The standalone collection/aggregation/reporting engine is implemented in `tools/metrics_history.py`
+and runs through the dedicated Compose service. The service scrapes
+`http://app:8000/internal/metrics` directly, exposes no public/LAN port, runs with an immutable root
+filesystem, and owns one dedicated writable SQLite
 volume. It must not receive the Docker socket, host filesystem mounts, or writable mounts into `app`.
 The existing LAN-only `/metrics` endpoint remains the interactive/current-state scrape surface.
 
@@ -246,7 +247,9 @@ earliest/latest retained observations, retained-week count, database size, and w
 ceiling is still exceeded because only the current week remains. No raw request URL, search/query
 value, IP address, user agent, cookie/preference value, visitor ID, or per-user history may enter the
 history database. The collector also fails closed on an unreviewed route label rather than silently
-persisting a new high-cardinality dimension.
+persisting a new high-cardinality dimension. Latency and response-size histogram boundaries are also
+allowlisted so a future metrics-layout change cannot silently mix incompatible bucket schemas in one
+historical store.
 
 The engine can also be exercised manually from a checkout against the trusted LAN metrics listener:
 
@@ -254,6 +257,39 @@ The engine can also be exercised manually from a checkout against the trusted LA
 python tools/metrics_history.py --database reports/metrics-history.db collect --url http://127.0.0.1:9090/metrics
 python tools/metrics_history.py --database reports/metrics-history.db status
 ```
+
+Retained history is queryable without exposing another HTTP endpoint. `periods` lists the exact
+week/version/snapshot identities present in the SQLite store. `report` defaults to the latest exact
+period; `--week`, `--version`, and `--snapshot` may be combined, and broader selectors intentionally
+aggregate all matching retained periods. `compare` defaults to the latest two exact periods or accepts
+independent `--from-*` and `--to-*` selectors. For example:
+
+```powershell
+python tools/metrics_history.py --database reports/metrics-history.db periods
+python tools/metrics_history.py --database reports/metrics-history.db report
+python tools/metrics_history.py --database reports/metrics-history.db report --week 2026-10-05
+python tools/metrics_history.py --database reports/metrics-history.db compare --from-version 0.9.1 --to-version 0.10.0
+```
+
+Human-readable reports include request/status counts, 4xx+5xx and 5xx rates, normalized-route
+activity, average latency/response size, cumulative histograms, and bounded p50/p95/p99 estimates.
+Percentiles are histogram upper-bound estimates, not reconstructed raw request timings; if a
+percentile falls in `+Inf`, the report states that it is greater than the largest finite bucket.
+Append `--json` to `periods`, `report`, or `compare` for machine-readable aggregate output. Reporting
+reads only the retained bounded dimensions already present in the history store and does not add
+request-level persistence.
+
+For the deployed persistent history volume, run the reporting commands inside the collector service
+so they use its configured `/var/lib/infinitydb-metrics/history.db` directly:
+
+```sh
+docker compose exec metrics-history python /app/metrics_history.py periods
+docker compose exec metrics-history python /app/metrics_history.py report
+docker compose exec metrics-history python /app/metrics_history.py compare
+```
+
+Use `COMPOSE_PROJECT_NAME=infinitydb-test` with the same commands when inspecting the isolated local
+test history.
 
 Deployment keeps application availability and history persistence deliberately separate. Before
 changing the running stack, `deploy.sh` builds and verifies both the new application image and the

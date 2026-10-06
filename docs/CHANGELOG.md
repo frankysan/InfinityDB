@@ -9,6 +9,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Deployment + Project infrastructure:** Add operator-side retained metrics history reporting and
+  comparison by week/version/snapshot, including request/status/error summaries, normalized-route
+  activity, cumulative latency/response-size histograms, bounded percentile estimates, and JSON output
+  without introducing another network endpoint or request-level persistence.
+
 - **Deployment + Project infrastructure:** Run retained aggregate metrics in a dedicated
   immutable-root `metrics-history` container with one bounded writable SQLite volume, bracket
   application updates with non-blocking closing/opening scrapes, preserve isolated history across

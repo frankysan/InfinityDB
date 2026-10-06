@@ -377,7 +377,11 @@ without metrics-history support stops the collector but preserves its volume for
 release. Isolated local deployments follow the same lifecycle under their own Compose project namespace
 so their writable history volume cannot collide with production; routine teardown preserves local
 history for update testing, while `stop-local-test.sh --purge` removes only local-test volumes for
-deliberate clean-slate runs. Exact remaining rollout stages are tracked in `docs/TODO.md`.
+deliberate clean-slate runs. Historical reporting remains an operator-side SQLite/CLI concern rather
+than another network service: exact or aggregated week/version/snapshot selections can expose only the
+already-bounded status, normalized-route, latency-histogram, and response-size-histogram dimensions.
+Percentile values are derived only as histogram upper-bound estimates; raw request timing/size samples
+are never reconstructed or retained. Exact remaining rollout stages are tracked in `docs/TODO.md`.
 
 Temporary raw request logging is an incident-diagnostic exception, not the normal analytics path,
 and should be minimized and short-lived.

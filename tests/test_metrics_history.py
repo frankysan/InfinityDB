@@ -7,12 +7,16 @@ from pathlib import Path
 
 import pytest
 
-from infinity_db.web.metrics import ROUTES
+from infinity_db.web.metrics import LATENCY_BUCKETS, RESPONSE_SIZE_BUCKETS, ROUTES
 from tools import metrics_history
 from tools.metrics_history import (
+    SAFE_LATENCY_BOUNDS,
+    SAFE_RESPONSE_SIZE_BOUNDS,
     SAFE_ROUTES,
     collect_snapshot,
     history_status,
+    list_retained_periods,
+    load_historical_report,
     open_history_database,
     parse_history_snapshot,
 )
@@ -31,9 +35,20 @@ def _metrics_text(
     duration_sum: float | None = None,
     response_sum: int | None = None,
     route: str = "/units",
+    error_requests: int = 0,
+    latency_bucket_requests: int | None = None,
+    response_bucket_requests: int | None = None,
 ) -> str:
+    if error_requests < 0 or error_requests > requests:
+        raise ValueError("error_requests must be between zero and requests")
     duration_sum = float(requests) / 10 if duration_sum is None else duration_sum
     response_sum = requests * 2048 if response_sum is None else response_sum
+    latency_bucket_requests = (
+        requests if latency_bucket_requests is None else latency_bucket_requests
+    )
+    response_bucket_requests = (
+        requests if response_bucket_requests is None else response_bucket_requests
+    )
     latest = started_at + 30 if requests else 0
     return "\n".join(
         (
@@ -47,11 +62,21 @@ def _metrics_text(
             (
                 "infinitydb_http_requests_total{"
                 f'route="{route}",status_class="2xx"'
-                f"}} {requests}"
+                f"}} {requests - error_requests}"
+            ),
+            (
+                "infinitydb_http_requests_total{"
+                f'route="{route}",status_class="5xx"'
+                f"}} {error_requests}"
             ),
             (
                 "infinitydb_http_request_duration_seconds_bucket{"
                 f'route="{route}",le="0.1"'
+                f"}} {latency_bucket_requests}"
+            ),
+            (
+                "infinitydb_http_request_duration_seconds_bucket{"
+                f'route="{route}",le="+Inf"'
                 f"}} {requests}"
             ),
             f'infinitydb_http_request_duration_seconds_sum{{route="{route}"}} {duration_sum}',
@@ -59,6 +84,11 @@ def _metrics_text(
             (
                 "infinitydb_http_response_size_bytes_bucket{"
                 f'route="{route}",le="10240"'
+                f"}} {response_bucket_requests}"
+            ),
+            (
+                "infinitydb_http_response_size_bytes_bucket{"
+                f'route="{route}",le="+Inf"'
                 f"}} {requests}"
             ),
             f'infinitydb_http_response_size_bytes_sum{{route="{route}"}} {response_sum}',
@@ -92,6 +122,15 @@ def test_history_route_allowlist_matches_runtime_metrics_vocabulary() -> None:
     assert SAFE_ROUTES == frozenset(ROUTES)
 
 
+def test_history_histogram_allowlists_match_runtime_metrics_vocabulary() -> None:
+    assert SAFE_LATENCY_BOUNDS == frozenset(
+        {*(format(bound, ".12g") for bound in LATENCY_BUCKETS), "+Inf"}
+    )
+    assert SAFE_RESPONSE_SIZE_BOUNDS == frozenset(
+        {*(format(bound, ".12g") for bound in RESPONSE_SIZE_BUCKETS), "+Inf"}
+    )
+
+
 def test_history_database_rejects_unknown_schema_version(tmp_path: Path) -> None:
     path = tmp_path / "history.db"
     with sqlite3.connect(path) as connection:
@@ -114,6 +153,17 @@ def test_parse_history_snapshot_rejects_unreviewed_route_labels() -> None:
     )
 
     with pytest.raises(ValueError, match="unreviewed metrics route"):
+        parse_history_snapshot(text)
+
+
+def test_parse_history_snapshot_rejects_unreviewed_histogram_bounds() -> None:
+    text = _metrics_text(started_at=_timestamp(2026, 10, 6), requests=1).replace(
+        'le="0.1"',
+        'le="0.123"',
+        1,
+    )
+
+    with pytest.raises(ValueError, match="unreviewed latency histogram bound"):
         parse_history_snapshot(text)
 
 
@@ -337,3 +387,156 @@ def test_cli_status_json_does_not_retain_metrics_url(
 
     assert payload["retainedWeekCount"] == 0
     assert "url" not in json.dumps(payload).lower()
+
+
+def _seed_reporting_history(path: Path) -> None:
+    first = _timestamp(2026, 9, 29)
+    current = _timestamp(2026, 10, 6)
+    collect_snapshot(
+        path,
+        parse_history_snapshot(
+            _metrics_text(
+                version="0.9.1",
+                snapshot_revision="snapshot-old",
+                started_at=first - 60,
+                requests=100,
+                error_requests=5,
+                latency_bucket_requests=95,
+                response_bucket_requests=100,
+            )
+        ),
+        collected_at=first,
+    )
+    collect_snapshot(
+        path,
+        parse_history_snapshot(
+            _metrics_text(
+                version="0.10.0",
+                snapshot_revision="snapshot-a",
+                started_at=current - 60,
+                requests=200,
+                error_requests=10,
+                latency_bucket_requests=190,
+                response_bucket_requests=200,
+            )
+        ),
+        collected_at=current,
+    )
+    collect_snapshot(
+        path,
+        parse_history_snapshot(
+            _metrics_text(
+                version="0.10.0",
+                snapshot_revision="snapshot-b",
+                started_at=current + 240,
+                requests=50,
+                error_requests=5,
+                latency_bucket_requests=40,
+                response_bucket_requests=50,
+                route="/skills",
+            )
+        ),
+        collected_at=current + 300,
+    )
+
+
+def test_history_report_selects_and_aggregates_week_version_snapshot_periods(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "history.db"
+    _seed_reporting_history(path)
+
+    connection = open_history_database(path)
+    try:
+        periods = list_retained_periods(connection)
+        latest = load_historical_report(connection)
+        current_week = load_historical_report(connection, week_start="2026-10-05")
+        snapshot = load_historical_report(connection, snapshot_revision="snapshot-a")
+    finally:
+        connection.close()
+
+    assert [period.snapshot_revision for period in periods] == [
+        "snapshot-b",
+        "snapshot-a",
+        "snapshot-old",
+    ]
+    assert latest.requests == 50
+    assert latest.periods[0].snapshot_revision == "snapshot-b"
+    assert current_week.requests == 250
+    assert current_week.status_counts["2xx"] == 235
+    assert current_week.status_counts["5xx"] == 15
+    assert current_week.error_rate == pytest.approx(0.06)
+    assert current_week.server_error_rate == pytest.approx(0.06)
+    assert current_week.average_latency_seconds == pytest.approx(0.1)
+    assert current_week.latency_percentiles["p50"] == pytest.approx(0.1)
+    assert current_week.latency_percentiles["p95"] is None
+    assert current_week.response_size_percentiles["p95"] == pytest.approx(10240.0)
+    assert [(route.route, route.requests) for route in current_week.routes] == [
+        ("/units", 200),
+        ("/skills", 50),
+    ]
+    assert snapshot.requests == 200
+    assert [period.snapshot_revision for period in snapshot.periods] == ["snapshot-a"]
+
+
+def test_history_reporting_cli_lists_reports_and_compares_retained_periods(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    path = tmp_path / "history.db"
+    _seed_reporting_history(path)
+
+    assert metrics_history.main(["--database", str(path), "periods", "--json"]) == 0
+    periods_payload = json.loads(capsys.readouterr().out)
+    assert periods_payload["periods"][0]["snapshotRevision"] == "snapshot-b"
+    assert periods_payload["periods"][2]["snapshotRevision"] == "snapshot-old"
+
+    assert (
+        metrics_history.main(
+            [
+                "--database",
+                str(path),
+                "report",
+                "--week",
+                "2026-10-05",
+                "--json",
+            ]
+        )
+        == 0
+    )
+    report_payload = json.loads(capsys.readouterr().out)
+    assert report_payload["requests"] == 250
+    assert report_payload["statusCounts"]["5xx"] == 15
+    assert report_payload["latencyPercentilesSeconds"]["p95"] is None
+    assert {route["route"] for route in report_payload["routes"]} == {"/units", "/skills"}
+
+    assert metrics_history.main(["--database", str(path), "compare", "--json"]) == 0
+    compare_payload = json.loads(capsys.readouterr().out)
+    assert compare_payload["from"]["periods"][0]["snapshotRevision"] == "snapshot-a"
+    assert compare_payload["to"]["periods"][0]["snapshotRevision"] == "snapshot-b"
+    deltas = {
+        item["route"]: item["deltaRequests"]
+        for item in compare_payload["routeRequestDeltas"]
+    }
+    assert deltas == {"/skills": 50, "/units": -200}
+
+
+def test_history_report_cli_rejects_missing_selection_and_non_monday_week(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    path = tmp_path / "history.db"
+    _seed_reporting_history(path)
+
+    with pytest.raises(SystemExit, match="Monday"):
+        metrics_history.main(
+            ["--database", str(path), "report", "--week", "2026-10-06"]
+        )
+
+    assert (
+        metrics_history.main(
+            ["--database", str(path), "report", "--version", "does-not-exist"]
+        )
+        == 2
+    )
+    assert "No retained metrics-history periods" in capsys.readouterr().err

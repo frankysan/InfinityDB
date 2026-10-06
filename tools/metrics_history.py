@@ -13,7 +13,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
@@ -76,6 +76,10 @@ SAFE_ROUTES = frozenset(
     }
 )
 SAFE_STATUS_CLASSES = frozenset({"1xx", "2xx", "3xx", "4xx", "5xx"})
+SAFE_LATENCY_BOUNDS = frozenset(
+    {"0.005", "0.01", "0.025", "0.05", "0.1", "0.25", "0.5", "1", "2.5", "5", "+Inf"}
+)
+SAFE_RESPONSE_SIZE_BOUNDS = frozenset({"1024", "10240", "102400", "1048576", "+Inf"})
 
 _TRACKED_LABELS: dict[str, frozenset[str]] = {
     "infinitydb_http_requests_total": frozenset({"route", "status_class"}),
@@ -163,6 +167,94 @@ class CollectionResult:
         }
 
 
+@dataclass(frozen=True)
+class RetainedPeriod:
+    """One retained ISO-week/version/snapshot aggregate identity."""
+
+    week_start: str
+    version: str
+    snapshot_revision: str
+    first_observed_at: float
+    last_observed_at: float
+    generation_count: int
+    collection_count: int
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "weekStart": self.week_start,
+            "version": self.version,
+            "snapshotRevision": self.snapshot_revision,
+            "firstObservedAt": self.first_observed_at,
+            "lastObservedAt": self.last_observed_at,
+            "generationCount": self.generation_count,
+            "collectionCount": self.collection_count,
+        }
+
+
+@dataclass(frozen=True)
+class RouteSummary:
+    """Aggregate request metrics for one normalized route."""
+
+    route: str
+    requests: int
+    errors: int
+    average_latency_seconds: float | None
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "route": self.route,
+            "requests": self.requests,
+            "errors": self.errors,
+            "averageLatencySeconds": self.average_latency_seconds,
+        }
+
+
+@dataclass(frozen=True)
+class HistoricalReport:
+    """Operator-facing aggregate report for one retained-history selection."""
+
+    periods: tuple[RetainedPeriod, ...]
+    requests: int
+    status_counts: Mapping[str, int]
+    error_rate: float
+    server_error_rate: float
+    average_latency_seconds: float | None
+    latency_percentiles: Mapping[str, float | None]
+    latency_histogram: Mapping[str, int]
+    average_response_size_bytes: float | None
+    response_size_percentiles: Mapping[str, float | None]
+    response_size_histogram: Mapping[str, int]
+    routes: tuple[RouteSummary, ...]
+
+    @property
+    def first_observed_at(self) -> float:
+        return min(period.first_observed_at for period in self.periods)
+
+    @property
+    def last_observed_at(self) -> float:
+        return max(period.last_observed_at for period in self.periods)
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "format": FORMAT,
+            "formatVersion": FORMAT_VERSION,
+            "periods": [period.as_dict() for period in self.periods],
+            "firstObservedAt": self.first_observed_at,
+            "lastObservedAt": self.last_observed_at,
+            "requests": self.requests,
+            "statusCounts": dict(self.status_counts),
+            "errorRate": self.error_rate,
+            "serverErrorRate": self.server_error_rate,
+            "averageLatencySeconds": self.average_latency_seconds,
+            "latencyPercentilesSeconds": dict(self.latency_percentiles),
+            "latencyHistogram": dict(self.latency_histogram),
+            "averageResponseSizeBytes": self.average_response_size_bytes,
+            "responseSizePercentilesBytes": dict(self.response_size_percentiles),
+            "responseSizeHistogram": dict(self.response_size_histogram),
+            "routes": [route.as_dict() for route in self.routes],
+        }
+
+
 def _unescape_label(value: str) -> str:
     return value.replace("\\n", "\n").replace('\\"', '"').replace("\\\\", "\\")
 
@@ -196,6 +288,12 @@ def _validate_series_labels(name: str, labels: Mapping[str, str]) -> None:
             raise ValueError(f"Invalid histogram bound {bound!r}") from exc
         if not math.isfinite(parsed_bound) or parsed_bound < 0:
             raise ValueError(f"Invalid histogram bound {bound!r}")
+    if name == "infinitydb_http_request_duration_seconds_bucket":
+        if bound not in SAFE_LATENCY_BOUNDS:
+            raise ValueError(f"Refusing unreviewed latency histogram bound: {bound!r}")
+    elif name == "infinitydb_http_response_size_bytes_bucket":
+        if bound not in SAFE_RESPONSE_SIZE_BOUNDS:
+            raise ValueError(f"Refusing unreviewed response-size histogram bound: {bound!r}")
 
 
 def parse_history_snapshot(
@@ -622,6 +720,234 @@ def history_status(
     )
 
 
+def list_retained_periods(connection: sqlite3.Connection) -> tuple[RetainedPeriod, ...]:
+    """Return retained aggregate identities newest first."""
+
+    rows = connection.execute(
+        """
+        SELECT
+            week_start,
+            version,
+            snapshot_revision,
+            first_observed_at,
+            last_observed_at,
+            generation_count,
+            collection_count
+        FROM weekly_periods
+        ORDER BY week_start DESC, last_observed_at DESC, version, snapshot_revision
+        """
+    ).fetchall()
+    return tuple(
+        RetainedPeriod(
+            week_start=str(row[0]),
+            version=str(row[1]),
+            snapshot_revision=str(row[2]),
+            first_observed_at=float(row[3]),
+            last_observed_at=float(row[4]),
+            generation_count=int(row[5]),
+            collection_count=int(row[6]),
+        )
+        for row in rows
+    )
+
+
+def _select_periods(
+    connection: sqlite3.Connection,
+    *,
+    week_start: str | None = None,
+    version: str | None = None,
+    snapshot_revision: str | None = None,
+) -> tuple[RetainedPeriod, ...]:
+    periods = list_retained_periods(connection)
+    if week_start is None and version is None and snapshot_revision is None:
+        return periods[:1]
+    return tuple(
+        period
+        for period in periods
+        if (week_start is None or period.week_start == week_start)
+        and (version is None or period.version == version)
+        and (snapshot_revision is None or period.snapshot_revision == snapshot_revision)
+    )
+
+
+def _period_where_clause(periods: Sequence[RetainedPeriod]) -> tuple[str, list[str]]:
+    clauses: list[str] = []
+    parameters: list[str] = []
+    for period in periods:
+        clauses.append("(week_start = ? AND version = ? AND snapshot_revision = ?)")
+        parameters.extend((period.week_start, period.version, period.snapshot_revision))
+    return " OR ".join(clauses), parameters
+
+
+def _parse_stored_labels(raw: str) -> dict[str, str]:
+    document = json.loads(raw)
+    if not isinstance(document, dict) or not all(
+        isinstance(key, str) and isinstance(value, str) for key, value in document.items()
+    ):
+        raise ValueError("Stored metrics-history labels are malformed")
+    return document
+
+
+def _histogram_percentile(
+    histogram: Mapping[str, int],
+    percentile: float,
+) -> float | None:
+    if not 0 < percentile <= 1:
+        raise ValueError("percentile must be in (0, 1]")
+    total = histogram.get("+Inf", 0)
+    if total <= 0:
+        total = max(histogram.values(), default=0)
+    if total <= 0:
+        return None
+    target = math.ceil(total * percentile)
+    finite = sorted(
+        (float(bound), count)
+        for bound, count in histogram.items()
+        if bound != "+Inf"
+    )
+    for bound, count in finite:
+        if count >= target:
+            return bound
+    return None
+
+
+def _build_historical_report(
+    connection: sqlite3.Connection,
+    periods: Sequence[RetainedPeriod],
+) -> HistoricalReport:
+    if not periods:
+        raise ValueError("No retained metrics-history periods match the requested selection")
+
+    where_clause, parameters = _period_where_clause(periods)
+    rows = connection.execute(
+        f"""
+        SELECT metric_name, labels_json, SUM(value)
+        FROM weekly_metrics
+        WHERE {where_clause}
+        GROUP BY metric_name, labels_json
+        """,  # noqa: S608 - predicate is generated only from fixed SQL fragments.
+        parameters,
+    ).fetchall()
+
+    status_counts = {status_class: 0 for status_class in sorted(SAFE_STATUS_CLASSES)}
+    route_requests: dict[str, int] = {}
+    route_errors: dict[str, int] = {}
+    route_latency_sums: dict[str, float] = {}
+    route_latency_counts: dict[str, int] = {}
+    latency_histogram: dict[str, int] = {}
+    response_histogram: dict[str, int] = {}
+    latency_sum = 0.0
+    latency_count = 0
+    response_sum = 0.0
+    response_count = 0
+
+    for metric_name, labels_raw, value_raw in rows:
+        labels = _parse_stored_labels(str(labels_raw))
+        value = float(value_raw)
+        route = labels.get("route")
+        if route is not None and route not in SAFE_ROUTES:
+            raise ValueError(f"Stored metrics history contains an unreviewed route: {route!r}")
+
+        if metric_name == "infinitydb_http_requests_total":
+            status_class = labels.get("status_class")
+            if status_class not in SAFE_STATUS_CLASSES or route is None:
+                raise ValueError("Stored request-count labels are malformed")
+            count = int(round(value))
+            status_counts[status_class] += count
+            route_requests[route] = route_requests.get(route, 0) + count
+            if status_class in {"4xx", "5xx"}:
+                route_errors[route] = route_errors.get(route, 0) + count
+        elif metric_name == "infinitydb_http_request_duration_seconds_bucket":
+            bound = labels.get("le")
+            if route is None or bound is None:
+                raise ValueError("Stored latency-histogram labels are malformed")
+            latency_histogram[bound] = latency_histogram.get(bound, 0) + int(round(value))
+        elif metric_name == "infinitydb_http_request_duration_seconds_sum":
+            if route is None:
+                raise ValueError("Stored latency-sum labels are malformed")
+            latency_sum += value
+            route_latency_sums[route] = route_latency_sums.get(route, 0.0) + value
+        elif metric_name == "infinitydb_http_request_duration_seconds_count":
+            if route is None:
+                raise ValueError("Stored latency-count labels are malformed")
+            count = int(round(value))
+            latency_count += count
+            route_latency_counts[route] = route_latency_counts.get(route, 0) + count
+        elif metric_name == "infinitydb_http_response_size_bytes_bucket":
+            bound = labels.get("le")
+            if route is None or bound is None:
+                raise ValueError("Stored response-size histogram labels are malformed")
+            response_histogram[bound] = response_histogram.get(bound, 0) + int(round(value))
+        elif metric_name == "infinitydb_http_response_size_bytes_sum":
+            if route is None:
+                raise ValueError("Stored response-size sum labels are malformed")
+            response_sum += value
+        elif metric_name == "infinitydb_http_response_size_bytes_count":
+            if route is None:
+                raise ValueError("Stored response-size count labels are malformed")
+            response_count += int(round(value))
+
+    requests = sum(status_counts.values())
+    errors = status_counts["4xx"] + status_counts["5xx"]
+    routes = tuple(
+        RouteSummary(
+            route=route,
+            requests=count,
+            errors=route_errors.get(route, 0),
+            average_latency_seconds=(
+                route_latency_sums.get(route, 0.0) / route_latency_counts[route]
+                if route_latency_counts.get(route, 0) > 0
+                else None
+            ),
+        )
+        for route, count in sorted(
+            route_requests.items(),
+            key=lambda item: (-item[1], item[0]),
+        )
+        if count > 0
+    )
+    return HistoricalReport(
+        periods=tuple(periods),
+        requests=requests,
+        status_counts=status_counts,
+        error_rate=(errors / requests if requests else 0.0),
+        server_error_rate=(status_counts["5xx"] / requests if requests else 0.0),
+        average_latency_seconds=(latency_sum / latency_count if latency_count else None),
+        latency_percentiles={
+            "p50": _histogram_percentile(latency_histogram, 0.50),
+            "p95": _histogram_percentile(latency_histogram, 0.95),
+            "p99": _histogram_percentile(latency_histogram, 0.99),
+        },
+        latency_histogram=latency_histogram,
+        average_response_size_bytes=(response_sum / response_count if response_count else None),
+        response_size_percentiles={
+            "p50": _histogram_percentile(response_histogram, 0.50),
+            "p95": _histogram_percentile(response_histogram, 0.95),
+            "p99": _histogram_percentile(response_histogram, 0.99),
+        },
+        response_size_histogram=response_histogram,
+        routes=routes,
+    )
+
+
+def load_historical_report(
+    connection: sqlite3.Connection,
+    *,
+    week_start: str | None = None,
+    version: str | None = None,
+    snapshot_revision: str | None = None,
+) -> HistoricalReport:
+    """Load one exact or aggregated retained-history selection."""
+
+    periods = _select_periods(
+        connection,
+        week_start=week_start,
+        version=version,
+        snapshot_revision=snapshot_revision,
+    )
+    return _build_historical_report(connection, periods)
+
+
 def collect_snapshot(
     path: Path,
     snapshot: ScrapeSnapshot,
@@ -725,6 +1051,265 @@ def render_status(status: HistoryStatus) -> str:
     )
 
 
+def _format_duration(seconds: float | None) -> str:
+    if seconds is None:
+        return "—"
+    if seconds < 0.001:
+        return f"{seconds * 1_000_000:.1f} µs"
+    if seconds < 1:
+        return f"{seconds * 1000:.1f} ms"
+    return f"{seconds:.3f} s"
+
+
+def _format_bytes(value: float | None) -> str:
+    if value is None:
+        return "—"
+    if value < 1024:
+        return f"{value:.0f} B"
+    if value < 1024 * 1024:
+        return f"{value / 1024:.1f} KiB"
+    return f"{value / (1024 * 1024):.2f} MiB"
+
+
+def _finite_histogram_bounds(histogram: Mapping[str, int]) -> tuple[float, ...]:
+    return tuple(sorted(float(bound) for bound in histogram if bound != "+Inf"))
+
+
+def _format_percentile(
+    value: float | None,
+    histogram: Mapping[str, int],
+    *,
+    formatter: Callable[[float | None], str],
+) -> str:
+    if value is not None:
+        return f"≤ {formatter(value)}"
+    if not histogram or max(histogram.values(), default=0) <= 0:
+        return "—"
+    finite = _finite_histogram_bounds(histogram)
+    if not finite:
+        return "—"
+    return f"> {formatter(finite[-1])}"
+
+
+def _format_rate(value: float) -> str:
+    return f"{value * 100:.2f}%"
+
+
+def _period_label(period: RetainedPeriod) -> str:
+    snapshot = period.snapshot_revision
+    short_snapshot = snapshot if len(snapshot) <= 16 else f"{snapshot[:12]}…"
+    return f"{period.week_start} | {period.version} | {short_snapshot}"
+
+
+def render_periods(periods: Sequence[RetainedPeriod]) -> str:
+    lines = ["InfinityDB retained metrics periods"]
+    if not periods:
+        lines.append("No retained periods.")
+        return "\n".join(lines)
+    for period in periods:
+        lines.append(
+            f"{period.week_start} | {period.version} | {period.snapshot_revision} | "
+            f"{_format_timestamp(period.first_observed_at)} → "
+            f"{_format_timestamp(period.last_observed_at)} | "
+            f"generations={period.generation_count} collections={period.collection_count}"
+        )
+    return "\n".join(lines)
+
+
+def _format_histogram(
+    histogram: Mapping[str, int],
+    *,
+    formatter: Callable[[float | None], str],
+) -> str:
+    ordered = sorted(
+        ((float(bound), count) for bound, count in histogram.items() if bound != "+Inf"),
+        key=lambda item: item[0],
+    )
+    parts = [f"≤{formatter(bound)}={count}" for bound, count in ordered]
+    if "+Inf" in histogram:
+        parts.append(f"+Inf={histogram['+Inf']}")
+    return ", ".join(parts) if parts else "—"
+
+
+def render_historical_report(report: HistoricalReport, *, top_routes: int) -> str:
+    period_labels = ", ".join(_period_label(period) for period in report.periods)
+    status_text = ", ".join(
+        f"{status_class}={report.status_counts.get(status_class, 0)}"
+        for status_class in sorted(SAFE_STATUS_CLASSES)
+    )
+    latency_percentiles = report.latency_percentiles
+    response_percentiles = report.response_size_percentiles
+    lines = [
+        "InfinityDB metrics history report",
+        f"Selection: {period_labels}",
+        (
+            f"Observed: {_format_timestamp(report.first_observed_at)} → "
+            f"{_format_timestamp(report.last_observed_at)}"
+        ),
+        (
+            f"Periods: {len(report.periods)} | "
+            f"generations={sum(period.generation_count for period in report.periods)} | "
+            f"collections={sum(period.collection_count for period in report.periods)}"
+        ),
+        f"Requests: {report.requests}",
+        f"Status: {status_text}",
+        (
+            f"Error rate: {_format_rate(report.error_rate)} | "
+            f"5xx rate: {_format_rate(report.server_error_rate)}"
+        ),
+        (
+            "Latency: "
+            f"avg {_format_duration(report.average_latency_seconds)} | "
+            "p50 "
+            + _format_percentile(
+                latency_percentiles.get("p50"),
+                report.latency_histogram,
+                formatter=_format_duration,
+            )
+            + " | p95 "
+            + _format_percentile(
+                latency_percentiles.get("p95"),
+                report.latency_histogram,
+                formatter=_format_duration,
+            )
+            + " | p99 "
+            + _format_percentile(
+                latency_percentiles.get("p99"),
+                report.latency_histogram,
+                formatter=_format_duration,
+            )
+        ),
+        (
+            "Response size: "
+            f"avg {_format_bytes(report.average_response_size_bytes)} | "
+            "p50 "
+            + _format_percentile(
+                response_percentiles.get("p50"),
+                report.response_size_histogram,
+                formatter=_format_bytes,
+            )
+            + " | p95 "
+            + _format_percentile(
+                response_percentiles.get("p95"),
+                report.response_size_histogram,
+                formatter=_format_bytes,
+            )
+            + " | p99 "
+            + _format_percentile(
+                response_percentiles.get("p99"),
+                report.response_size_histogram,
+                formatter=_format_bytes,
+            )
+        ),
+        "Latency histogram (cumulative): "
+        + _format_histogram(report.latency_histogram, formatter=_format_duration),
+        "Response-size histogram (cumulative): "
+        + _format_histogram(report.response_size_histogram, formatter=_format_bytes),
+    ]
+    if top_routes > 0:
+        lines.append(f"Top routes (max {top_routes}):")
+        for route in report.routes[:top_routes]:
+            share = route.requests / report.requests if report.requests else 0.0
+            error_rate = route.errors / route.requests if route.requests else 0.0
+            lines.append(
+                f"  {route.route}: requests={route.requests} "
+                f"share={_format_rate(share)} errors={_format_rate(error_rate)} "
+                f"avg_latency={_format_duration(route.average_latency_seconds)}"
+            )
+    return "\n".join(lines)
+
+
+def _format_change(before: float, after: float, *, percent: bool = False) -> str:
+    delta = after - before
+    if percent:
+        return f"{before * 100:.2f}% → {after * 100:.2f}% ({delta * 100:+.2f} pp)"
+    if before == 0:
+        relative = "n/a" if after == 0 else "new"
+    else:
+        relative = f"{delta / before * 100:+.1f}%"
+    return f"{before:.3g} → {after:.3g} ({delta:+.3g}, {relative})"
+
+
+def render_comparison(
+    before: HistoricalReport,
+    after: HistoricalReport,
+    *,
+    top_routes: int,
+) -> str:
+    lines = [
+        "InfinityDB metrics history comparison",
+        "From: " + ", ".join(_period_label(period) for period in before.periods),
+        "To:   " + ", ".join(_period_label(period) for period in after.periods),
+        f"Requests: {_format_change(float(before.requests), float(after.requests))}",
+        f"Error rate: {_format_change(before.error_rate, after.error_rate, percent=True)}",
+        (
+            "5xx rate: "
+            + _format_change(before.server_error_rate, after.server_error_rate, percent=True)
+        ),
+    ]
+
+    if before.average_latency_seconds is not None and after.average_latency_seconds is not None:
+        lines.append(
+            "Average latency: "
+            f"{_format_duration(before.average_latency_seconds)} → "
+            f"{_format_duration(after.average_latency_seconds)}"
+        )
+    lines.append(
+        "p95 latency: "
+        + _format_percentile(
+            before.latency_percentiles.get("p95"),
+            before.latency_histogram,
+            formatter=_format_duration,
+        )
+        + " → "
+        + _format_percentile(
+            after.latency_percentiles.get("p95"),
+            after.latency_histogram,
+            formatter=_format_duration,
+        )
+    )
+    if (
+        before.average_response_size_bytes is not None
+        and after.average_response_size_bytes is not None
+    ):
+        lines.append(
+            "Average response size: "
+            f"{_format_bytes(before.average_response_size_bytes)} → "
+            f"{_format_bytes(after.average_response_size_bytes)}"
+        )
+    lines.append(
+        "p95 response size: "
+        + _format_percentile(
+            before.response_size_percentiles.get("p95"),
+            before.response_size_histogram,
+            formatter=_format_bytes,
+        )
+        + " → "
+        + _format_percentile(
+            after.response_size_percentiles.get("p95"),
+            after.response_size_histogram,
+            formatter=_format_bytes,
+        )
+    )
+
+    if top_routes > 0:
+        before_routes = {route.route: route.requests for route in before.routes}
+        after_routes = {route.route: route.requests for route in after.routes}
+        changed_routes = sorted(
+            set(before_routes) | set(after_routes),
+            key=lambda route: (
+                -abs(after_routes.get(route, 0) - before_routes.get(route, 0)),
+                route,
+            ),
+        )
+        lines.append(f"Largest route-count changes (max {top_routes}):")
+        for route in changed_routes[:top_routes]:
+            previous = before_routes.get(route, 0)
+            current = after_routes.get(route, 0)
+            lines.append(f"  {route}: {previous} → {current} ({current - previous:+d})")
+    return "\n".join(lines)
+
+
 def _collect_from_endpoint(args: argparse.Namespace) -> CollectionResult:
     collected_at = time.time()
     text = fetch_metrics(args.url, timeout=args.timeout)
@@ -778,6 +1363,30 @@ def _add_collection_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
 
 
+def _add_report_selector_arguments(
+    parser: argparse.ArgumentParser,
+    *,
+    prefix: str = "",
+) -> None:
+    option_prefix = f"{prefix}-" if prefix else ""
+    destination_prefix = f"{prefix}_" if prefix else ""
+    parser.add_argument(
+        f"--{option_prefix}week",
+        dest=f"{destination_prefix}week",
+        help="ISO week start (Monday, YYYY-MM-DD)",
+    )
+    parser.add_argument(
+        f"--{option_prefix}version",
+        dest=f"{destination_prefix}version",
+        help="InfinityDB version selector",
+    )
+    parser.add_argument(
+        f"--{option_prefix}snapshot",
+        dest=f"{destination_prefix}snapshot",
+        help="exact snapshot revision selector",
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Collect bounded InfinityDB aggregate metrics into weekly SQLite history."
@@ -815,6 +1424,36 @@ def build_parser() -> argparse.ArgumentParser:
     status_parser = subparsers.add_parser("status", help="show bounded retention/storage status")
     status_parser.add_argument("--max-bytes", type=int, default=DEFAULT_MAX_BYTES)
     status_parser.add_argument("--json", action="store_true")
+
+    periods_parser = subparsers.add_parser(
+        "periods",
+        help="list retained week/version/snapshot periods",
+    )
+    periods_parser.add_argument("--json", action="store_true")
+
+    report_parser = subparsers.add_parser("report", help="summarize retained aggregate history")
+    _add_report_selector_arguments(report_parser)
+    report_parser.add_argument(
+        "--top-routes",
+        type=int,
+        default=10,
+        help="maximum normalized routes shown in human-readable output",
+    )
+    report_parser.add_argument("--json", action="store_true")
+
+    compare_parser = subparsers.add_parser(
+        "compare",
+        help="compare two retained aggregate selections (defaults to the latest two periods)",
+    )
+    _add_report_selector_arguments(compare_parser, prefix="from")
+    _add_report_selector_arguments(compare_parser, prefix="to")
+    compare_parser.add_argument(
+        "--top-routes",
+        type=int,
+        default=10,
+        help="maximum normalized route-count changes shown in human-readable output",
+    )
+    compare_parser.add_argument("--json", action="store_true")
     return parser
 
 
@@ -850,12 +1489,66 @@ def _run_forever(args: argparse.Namespace) -> int:
         time.sleep(max(args.interval - elapsed, 0.0))
 
 
+def _validate_week_selector(value: str | None, option: str) -> None:
+    if value is None:
+        return
+    try:
+        parsed = date.fromisoformat(value)
+    except ValueError as exc:
+        raise SystemExit(f"{option} must be YYYY-MM-DD") from exc
+    if parsed.weekday() != 0:
+        raise SystemExit(f"{option} must be the Monday starting an ISO week")
+
+
+def _selector_from_args(args: argparse.Namespace, *, prefix: str = "") -> dict[str, str | None]:
+    attribute_prefix = f"{prefix}_" if prefix else ""
+    return {
+        "week_start": getattr(args, f"{attribute_prefix}week"),
+        "version": getattr(args, f"{attribute_prefix}version"),
+        "snapshot_revision": getattr(args, f"{attribute_prefix}snapshot"),
+    }
+
+
+def _comparison_payload(
+    before: HistoricalReport,
+    after: HistoricalReport,
+) -> dict[str, object]:
+    before_routes = {route.route: route.requests for route in before.routes}
+    after_routes = {route.route: route.requests for route in after.routes}
+    route_deltas = [
+        {
+            "route": route,
+            "fromRequests": before_routes.get(route, 0),
+            "toRequests": after_routes.get(route, 0),
+            "deltaRequests": after_routes.get(route, 0) - before_routes.get(route, 0),
+        }
+        for route in sorted(set(before_routes) | set(after_routes))
+    ]
+    return {
+        "format": FORMAT,
+        "formatVersion": FORMAT_VERSION,
+        "from": before.as_dict(),
+        "to": after.as_dict(),
+        "routeRequestDeltas": route_deltas,
+    }
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command in {"collect", "run"}:
         _validate_collection_args(args)
-    elif args.max_bytes < 1:
+    elif args.command == "status" and args.max_bytes < 1:
         raise SystemExit("--max-bytes must be greater than zero")
+
+    if args.command == "report":
+        _validate_week_selector(args.week, "--week")
+        if args.top_routes < 0:
+            raise SystemExit("--top-routes must be zero or greater")
+    elif args.command == "compare":
+        _validate_week_selector(args.from_week, "--from-week")
+        _validate_week_selector(args.to_week, "--to-week")
+        if args.top_routes < 0:
+            raise SystemExit("--top-routes must be zero or greater")
 
     if args.command == "status":
         connection = open_history_database(args.database)
@@ -868,6 +1561,78 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             print(render_status(status))
         return 1 if status.over_size_limit else 0
+
+    if args.command == "periods":
+        connection = open_history_database(args.database)
+        try:
+            periods = list_retained_periods(connection)
+        finally:
+            connection.close()
+        if args.json:
+            print(
+                json.dumps(
+                    {
+                        "format": FORMAT,
+                        "formatVersion": FORMAT_VERSION,
+                        "periods": [period.as_dict() for period in periods],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+        else:
+            print(render_periods(periods))
+        return 0
+
+    if args.command == "report":
+        connection = open_history_database(args.database)
+        try:
+            report = load_historical_report(connection, **_selector_from_args(args))
+        except ValueError as exc:
+            print(f"metrics-history report failed: {exc}", file=sys.stderr)
+            return 2
+        finally:
+            connection.close()
+        if args.json:
+            print(json.dumps(report.as_dict(), indent=2, sort_keys=True))
+        else:
+            print(render_historical_report(report, top_routes=args.top_routes))
+        return 0
+
+    if args.command == "compare":
+        from_selector = _selector_from_args(args, prefix="from")
+        to_selector = _selector_from_args(args, prefix="to")
+        selector_values = (*from_selector.values(), *to_selector.values())
+        explicit_selector = any(value is not None for value in selector_values)
+        if explicit_selector and (
+            not any(value is not None for value in from_selector.values())
+            or not any(value is not None for value in to_selector.values())
+        ):
+            raise SystemExit(
+                "explicit compare requires at least one --from-* and one --to-* selector"
+            )
+
+        connection = open_history_database(args.database)
+        try:
+            if explicit_selector:
+                before = load_historical_report(connection, **from_selector)
+                after = load_historical_report(connection, **to_selector)
+            else:
+                periods = list_retained_periods(connection)
+                if len(periods) < 2:
+                    raise ValueError("At least two retained periods are required for comparison")
+                after = _build_historical_report(connection, periods[:1])
+                before = _build_historical_report(connection, periods[1:2])
+        except ValueError as exc:
+            print(f"metrics-history comparison failed: {exc}", file=sys.stderr)
+            return 2
+        finally:
+            connection.close()
+        if args.json:
+            print(json.dumps(_comparison_payload(before, after), indent=2, sort_keys=True))
+        else:
+            print(render_comparison(before, after, top_routes=args.top_routes))
+        return 0
 
     if args.command == "run":
         return _run_forever(args)
