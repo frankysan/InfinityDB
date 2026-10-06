@@ -63,6 +63,10 @@ are not retroactively relabeled.
   InfinityDB stacks, covering representative Unit browsing, search, detail, and API traffic with
   warm-cache steady and burst phases plus retained p50/p95/p99, throughput, error, and response-size
   evidence tied to the target version and snapshot.
+- **Deployment + Project infrastructure:** Record the first controlled 2x4 capacity baseline on the
+  isolated deployment, including the enclosing 8-CPU/8-GiB LXC boundary, zero-error throughput and
+  latency results, resource observations, and the resulting evidence that the synthetic workload
+  reaches an application-concurrency plateau before exhausting host CPU, memory, or disk.
 - **Deployment + Project infrastructure:** Add `infinity-db database-health` for operational
   validation of published Army databases, reporting schema/compatibility revisions and validation
   timing with optional application/raw export-pair verification and machine-readable JSON output.

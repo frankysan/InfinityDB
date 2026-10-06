@@ -400,7 +400,7 @@ exercises Unit browsing, global search, Unit/catalog details, and matching JSON 
 it does not benchmark only the health endpoint. For example, after starting the loopback test stack:
 
 ```powershell
-python tools\capacity_test.py http://127.0.0.1:8080 --output reports\capacity-local.json
+python tools\capacity_test.py http://localhost:8080 --output reports\capacity-local.json
 ```
 
 The defaults run a 60-second steady phase at concurrency 8 followed by a 10-second burst at
@@ -413,7 +413,7 @@ The HTTP report is only one half of a capacity result. On the Linux deployment h
 capacity command with the resource sampler so both ignored JSON reports cover the same interval:
 
 ```bash
-.venv/bin/python tools/deployment_resources.py --output reports/capacity-resources.json -- .venv/bin/python tools/capacity_test.py http://127.0.0.1:8080 --output reports/capacity.json
+COMPOSE_PROJECT_NAME=infinitydb-test .venv/bin/python tools/deployment_resources.py --output reports/capacity-resources.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output reports/capacity.json
 ```
 
 The resource report records host CPU, memory/swap, filesystem space/inodes, aggregate network rates,
@@ -432,6 +432,33 @@ attributes, arbitrary container environment/command values, and the wrapped comm
 resource boundary outside Docker (for example an LXC/VM allocation) with the baseline notes. Do not
 compare 2-worker and 4-worker results unless the relevant allocation is recorded and controlled; the
 planned 4x4 result specifically requires the app container report to show a 4-core/4-GiB limit.
+
+#### Recorded 2x4 baseline (2026-10-06)
+
+The first retained baseline used the isolated `infinitydb-test` deployment with Gunicorn configured
+for 2 workers x 4 threads. The enclosing Proxmox LXC was limited to 8 CPUs and 8 GiB RAM. The app
+container itself had no explicit Docker CPU or memory limit, so the LXC allocation is the effective
+outer resource boundary for this result. The target was InfinityDB 0.9.1 with snapshot revision
+`49a316155f34d386a5acda02c7bce1615976a46c7955fccff23961a0f9077769`.
+
+Using the default capacity scenario after warm-up:
+
+- steady phase, concurrency 8 for 60 seconds: 271.1 requests/s, 0 errors, p50 8.5 ms,
+  p95 113.6 ms, p99 160.5 ms;
+- burst phase, concurrency 32 for 10 seconds: 264.8 requests/s, 0 errors, p50 107.9 ms,
+  p95 219.8 ms, p99 262.3 ms.
+
+During the wrapped run, app CPU averaged 265.9% and peaked at 338.3%; host CPU averaged 41.6% and
+peaked at 45.6% on 8 logical CPUs. App memory peaked at about 149 MB, host memory peaked at about
+8.2% used, and no restart/OOM event occurred. Disk activity was negligible: the app container
+reported no block-I/O delta, while host disk I/O averaged about 2.4 kB/s read and 11.6 kB/s write.
+
+The result is intentionally treated as a baseline, not a production SLO. Increasing concurrency from
+8 to 32 did not increase throughput and instead raised median and tail latency substantially, while
+host CPU, memory, and disk remained well below their resource ceilings. For this synthetic scenario,
+that is evidence that the 2x4 Gunicorn configuration is application-concurrency-bound before the
+8-CPU/8-GiB LXC is host-resource-bound. Run the planned 4x4 comparison with an explicit 4-vCPU/4-GiB
+app-container limit before changing production worker counts or defining the final scale trigger.
 
 ### Operational alert evaluation
 

@@ -229,10 +229,17 @@ domain unless required to correct a release-blocking defect.
   - [x] Make retained resource evidence self-describing for capacity comparisons: record only the
     app/container CPU and memory limits plus detected Gunicorn worker/thread counts from Docker
     metadata, without retaining arbitrary commands, environment values, bind mounts, or addresses.
-  - [ ] Establish a baseline at 2 Gunicorn workers x 4 threads, then test 4 x 4
-    only with a matching 4-vCPU/4-GiB container allocation. Record p50/p95/p99
-    latency, request/error rate, CPU, memory, and SQLite/disk behavior at each
-    concurrency level.
+  - [x] Establish and record the initial 2 Gunicorn workers x 4 threads baseline on the
+    isolated deployment. The enclosing LXC is limited to 8 CPUs/8 GiB RAM; the app container
+    had no explicit Docker CPU/memory limits. The default scenario sustained 271.1 req/s at
+    concurrency 8 with 0 errors and p50/p95/p99 8.5/113.6/160.5 ms, while the concurrency-32
+    burst delivered 264.8 req/s with 0 errors and p50/p95/p99 107.9/219.8/262.3 ms. App CPU
+    averaged 265.9% and peaked at 338.3%; host CPU averaged 41.6% and peaked at 45.6%; memory
+    and disk I/O remained low. Treat the throughput plateau plus rising latency as evidence that
+    2x4 is application-concurrency-bound under this synthetic workload, not host-resource-bound.
+  - [ ] Run the controlled 4 x 4 comparison only with a matching 4-vCPU/4-GiB app-container
+    allocation. Record the same latency, throughput/error, CPU, memory, and SQLite/disk evidence,
+    then compare against the retained 2x4 baseline before changing production worker counts.
   - [ ] Set an explicit scale trigger (for example, a sustained p95 latency or
     error-rate SLO breach while CPU is not otherwise constrained). Prefer
     multiple immutable app replicas behind Caddy over unbounded worker growth;

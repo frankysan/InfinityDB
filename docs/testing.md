@@ -254,16 +254,24 @@ not use `/health` as the workload.
 
 Capacity reports are diagnostic evidence, not stable performance promises. Retain the exact target
 release/snapshot, client location, command, and accompanying host/container resource observations with
-any baseline. `deployment_resources.py` is Linux-host-only and can wrap the capacity command while
-sampling bounded host/Docker resource counters over the same interval. Its container summaries retain
-only the capacity-relevant runtime configuration (explicit Docker CPU/memory limits and detected
-Gunicorn worker/thread counts), while its JSON intentionally excludes hostnames, IPs, request URLs,
-arbitrary container environment/command values, and arbitrary Docker event payloads. Record resource
-boundaries outside Docker separately. `deployment_alerts.py` evaluates a fresh resource report together with bounded
-aggregate metrics and health samples, producing monitoring-friendly OK/warning/critical/unknown exit
-codes without retaining endpoint URLs or user/request identity data. Generated benchmark/capacity/
-resource/alert reports belong in ignored report/audit storage unless a specific result is needed as
-release evidence.
+any baseline. For the isolated Caddy test stack, use `http://localhost:8080`; `127.0.0.1:8080` reaches
+the listener but does not match the configured Caddy host. `deployment_resources.py` is Linux-host-only
+and can wrap the capacity command while sampling bounded host/Docker resource counters over the same
+interval. Its container summaries retain only the capacity-relevant runtime configuration (explicit
+Docker CPU/memory limits and detected Gunicorn worker/thread counts), while its JSON intentionally
+excludes hostnames, IPs, request URLs, arbitrary container environment/command values, and arbitrary
+Docker event payloads. Record resource boundaries outside Docker separately.
+
+The retained 2026-10-06 2x4 reference run used an 8-CPU/8-GiB LXC, no explicit app-container CPU or
+memory limit, concurrency 8 steady state and concurrency 32 burst. It produced 271.1 req/s at
+8.5/113.6/160.5 ms p50/p95/p99 and 264.8 req/s at 107.9/219.8/262.3 ms respectively, with zero errors.
+Host CPU peaked at 45.6%, app memory peaked near 149 MB, and disk activity remained negligible. The
+throughput plateau plus rising latency is the comparison point for the planned controlled 4x4 run.
+
+`deployment_alerts.py` evaluates a fresh resource report together with bounded aggregate metrics and
+health samples, producing monitoring-friendly OK/warning/critical/unknown exit codes without retaining
+endpoint URLs or user/request identity data. Generated benchmark/capacity/resource/alert reports belong
+in ignored report/audit storage unless a specific result is needed as release evidence.
 
 Live-metrics tests pin the generation timing contract before retained history exists: one shared
 generation-start timestamp is created with the preloaded request registry, only completed instrumented
