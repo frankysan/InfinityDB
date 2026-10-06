@@ -1,0 +1,5 @@
+# Capacity-test-only resource boundary. Production/default Compose remains uncapped.
+services:
+  app:
+    cpus: 4.0
+    mem_limit: 4g

@@ -116,6 +116,37 @@ def test_release_installer_hands_off_to_target_release_installer_before_prompts(
     assert script.index(handoff) < script.index(prompt)
 
 
+def test_capacity_overrides_separate_resource_boundary_from_worker_count() -> None:
+    resources = _read("compose.capacity-4cpu-4g.yaml")
+    workers = _read("compose.capacity-4x4.yaml")
+
+    assert "services:" in resources
+    assert "  app:" in resources
+    assert "cpus: 4.0" in resources
+    assert "mem_limit: 4g" in resources
+    assert "command:" not in resources
+    assert "caddy:" not in resources
+    assert "metrics-history:" not in resources
+
+    assert "services:" in workers
+    assert "  app:" in workers
+    assert "command:" in workers
+    assert "- --workers" in workers
+    assert '- "4"' in workers
+    assert "- --threads" in workers
+    assert "cpus:" not in workers
+    assert "mem_limit:" not in workers
+    assert "caddy:" not in workers
+    assert "metrics-history:" not in workers
+
+    compose = _read("compose.yaml")
+    dockerfile = _read("Dockerfile")
+    app_service = compose.split("  app:", 1)[1].split("  metrics-history:", 1)[0]
+    assert "cpus:" not in app_service
+    assert "mem_limit:" not in app_service
+    assert '"--workers", "2", "--threads", "4"' in dockerfile
+
+
 def test_local_test_deployment_is_loopback_only_and_isolated() -> None:
     script = _read("scripts/deploy-local-test.sh")
     assert "COMPOSE_PROJECT_NAME=infinitydb-test" in script

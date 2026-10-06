@@ -1,0 +1,15 @@
+# Capacity-test-only Gunicorn override. Production/image defaults remain 2 workers x 4 threads.
+services:
+  app:
+    command:
+      - gunicorn
+      - --preload
+      - --bind
+      - 0.0.0.0:8000
+      - --workers
+      - "4"
+      - --threads
+      - "4"
+      - --error-logfile
+      - "-"
+      - infinity_db.web.wsgi:app

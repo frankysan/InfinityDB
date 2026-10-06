@@ -152,7 +152,7 @@ domain unless required to correct a release-blocking defect.
   `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` secrets to the existing
   `full-assets` environment, then record one successful manual run.
 
-- [ ] Establish privacy-preserving production monitoring and a repeatable capacity test
+- [x] Establish privacy-preserving production monitoring and a repeatable capacity test
   for the Docker deployment.
   - [x] Add privacy-preserving host/container resource capture for capacity evidence.
     `tools/deployment_resources.py` samples Linux CPU, memory/swap, filesystem space/inodes,
@@ -237,13 +237,25 @@ domain unless required to correct a release-blocking defect.
     averaged 265.9% and peaked at 338.3%; host CPU averaged 41.6% and peaked at 45.6%; memory
     and disk I/O remained low. Treat the throughput plateau plus rising latency as evidence that
     2x4 is application-concurrency-bound under this synthetic workload, not host-resource-bound.
-  - [ ] Run the controlled 4 x 4 comparison only with a matching 4-vCPU/4-GiB app-container
-    allocation. Record the same latency, throughput/error, CPU, memory, and SQLite/disk evidence,
-    then compare against the retained 2x4 baseline before changing production worker counts.
-  - [ ] Set an explicit scale trigger (for example, a sustained p95 latency or
-    error-rate SLO breach while CPU is not otherwise constrained). Prefer
-    multiple immutable app replicas behind Caddy over unbounded worker growth;
-    re-run the test before changing worker counts or deployment resources.
+  - [x] Add isolated capacity-test Compose overrides that separate the controlled 4-vCPU/4-GiB
+    app-container boundary from the 4-worker x 4-thread Gunicorn change. Production Compose/image
+    defaults remain 2x4 and uncapped at the Docker layer.
+  - [x] Run a matched 2x4-control versus 4x4 comparison with both app containers limited to the
+    same 4 vCPUs/4 GiB. The 4x4 steady phase improved throughput from 251.6 to 432.1 req/s
+    (+71.8%) while reducing mean/p50/p95/p99 latency by about 41.8%/32.3%/23.0%/14.2%, with
+    zero errors in both runs. Under the concurrency-32 burst, 4x4 still improved throughput by
+    40.8% and median latency by 37.6%, but p95/p99 rose by about 6.4%/13.4%, showing that 4x4
+    raises useful capacity substantially without removing tail-latency pressure at heavier overload.
+    Resource evidence confirmed identical 4-vCPU/4-GiB limits, 2x4 versus 4x4 Gunicorn settings,
+    no restart/OOM events, and low memory/disk pressure.
+  - [x] Set an explicit production scale-review trigger. Treat the current 2x4 deployment as due
+    for a 4x4 review when representative traffic sustains aggregate p95 latency >=120 ms for
+    about 15 minutes while request rate is >=200 req/s, or when overload-attributable 5xx exceeds
+    1% for at least 5 minutes, provided fresh resource evidence shows host/LXC CPU below 70%
+    average, memory below 80%, and no storage/OOM/restart pressure. Re-run the representative
+    capacity test before changing production. The matched experiment validates 4x4 as the first
+    bounded vertical step; if the same trigger is later reached on 4x4, prefer multiple immutable
+    app replicas behind Caddy over further unbounded worker growth.
 
 - [x] Add a benchmark/health-check command that validates the application database,
   confirms its expected raw archive when requested, and reports schema and

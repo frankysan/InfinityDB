@@ -431,7 +431,49 @@ The retained report deliberately omits hostnames, IP addresses, request URLs, ar
 attributes, arbitrary container environment/command values, and the wrapped command line. Record any
 resource boundary outside Docker (for example an LXC/VM allocation) with the baseline notes. Do not
 compare 2-worker and 4-worker results unless the relevant allocation is recorded and controlled; the
-planned 4x4 result specifically requires the app container report to show a 4-core/4-GiB limit.
+planned matched comparison specifically requires both app-container reports to show the same
+4-core/4-GiB limit.
+
+For the controlled worker-count comparison, keep resource allocation and workload identical. The
+retained 2x4 baseline was uncapped at the Docker layer, so it remains useful reference evidence
+but is not by itself a matched control for a capped 4x4 run. Two capacity-only Compose overrides keep
+the experimental variables separate:
+
+- `compose.capacity-4cpu-4g.yaml` applies only the 4-CPU / 4-GiB app-container limit;
+- `compose.capacity-4x4.yaml` changes only Gunicorn from the image default 2x4 to 4x4.
+
+First deploy and measure the matched **2x4 control** under the resource cap:
+
+```bash
+COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml sh scripts/deploy-local-test.sh 8080
+```
+
+```bash
+COMPOSE_PROJECT_NAME=infinitydb-test COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml .venv/bin/python tools/deployment_resources.py --output reports/capacity-resources-2x4-4cpu-4g.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output reports/capacity-2x4-4cpu-4g.json
+```
+
+Then deploy and measure the **4x4 experiment** with the same resource cap:
+
+```bash
+COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml:compose.capacity-4x4.yaml sh scripts/deploy-local-test.sh 8080
+```
+
+```bash
+COMPOSE_PROJECT_NAME=infinitydb-test COMPOSE_FILE=compose.yaml:compose.capacity-4cpu-4g.yaml:compose.capacity-4x4.yaml .venv/bin/python tools/deployment_resources.py --output reports/capacity-resources-4x4-4cpu-4g.json -- .venv/bin/python tools/capacity_test.py http://localhost:8080 --output reports/capacity-4x4-4cpu-4g.json
+```
+
+Both valid reports must record `cpuLimitCores: 4.0` and `memoryLimitBytes: 4294967296`. The control
+must additionally report `workers: 2`, `threads: 4`; the experiment must report `workers: 4`,
+`threads: 4`. If any value differs, discard that run as non-comparable. Compare the matched pair first;
+use the original uncapped 2x4 result as supporting context rather than attributing resource-boundary
+differences to worker count.
+
+After the experiment, restore the ordinary isolated 2x4 stack simply by redeploying without
+`COMPOSE_FILE`:
+
+```bash
+sh scripts/deploy-local-test.sh 8080
+```
 
 #### Recorded 2x4 baseline (2026-10-06)
 
@@ -457,8 +499,48 @@ The result is intentionally treated as a baseline, not a production SLO. Increas
 8 to 32 did not increase throughput and instead raised median and tail latency substantially, while
 host CPU, memory, and disk remained well below their resource ceilings. For this synthetic scenario,
 that is evidence that the 2x4 Gunicorn configuration is application-concurrency-bound before the
-8-CPU/8-GiB LXC is host-resource-bound. Run the planned 4x4 comparison with an explicit 4-vCPU/4-GiB
-app-container limit before changing production worker counts or defining the final scale trigger.
+8-CPU/8-GiB LXC is host-resource-bound.
+
+#### Matched 2x4 versus 4x4 result (2026-10-06)
+
+A follow-up matched experiment applied the same explicit 4-vCPU/4-GiB app-container boundary to both
+worker configurations. The control report confirmed Gunicorn 2x4 with `cpuLimitCores: 4.0` and
+`memoryLimitBytes: 4294967296`; the experiment confirmed Gunicorn 4x4 under the identical limits.
+Both runs completed with zero HTTP errors and no container restart/OOM events. The capped 2x4
+control was also consistent with the earlier uncapped reference: steady p95 stayed effectively the
+same (114.2 ms versus 113.6 ms) and steady throughput was within 7.2%, so the 4-CPU boundary was
+not itself the dominant 2x4 bottleneck.
+
+Under the 60-second concurrency-8 steady phase:
+
+- 2x4: 251.6 requests/s; p50/p95/p99 8.5/114.2/164.9 ms;
+- 4x4: 432.1 requests/s; p50/p95/p99 5.8/87.9/141.5 ms.
+
+That is a 71.8% throughput increase. Mean latency fell 41.8%, p50 32.3%, p95 23.0%, and p99 14.2%.
+The 4x4 app averaged 368.5% CPU versus 277.3% for 2x4; host CPU averaged 57.2% versus 40.2%. App
+memory remained small in both cases, peaking around 238 MB for 4x4 and 212 MB for 2x4, while disk
+activity remained negligible relative to the workload.
+
+Under the concurrency-32 burst, 4x4 delivered 366.7 requests/s versus 260.5 requests/s for 2x4
+(+40.8%). Mean and median latency improved by about 29.1% and 37.6%, but p95/p99 were 241.4/304.3 ms
+versus 226.9/268.5 ms for 2x4. The result therefore validates 4x4 as a substantially higher-capacity
+configuration under the controlled resource boundary, but also shows that heavier overload still
+produces tail-latency pressure rather than unlimited scaling.
+
+Production remains 2x4 by default. Use the matched result as a bounded scale step rather than an
+unconditional worker-count increase. Start a 4x4 scale review when representative production traffic
+sustains aggregate p95 latency of at least 120 ms for about 15 minutes while request rate is at least
+200 requests/s, or when overload-attributable 5xx exceeds 1% for at least 5 minutes. Before changing
+workers, collect fresh resource evidence and require host/LXC CPU below 70% average, memory below 80%,
+and no storage/OOM/restart pressure; otherwise address the actual resource bottleneck instead. Re-run
+the representative capacity scenario against the candidate configuration before production rollout.
+If the same trigger is later reached on 4x4, prefer multiple immutable app replicas behind Caddy over
+continuing to grow Gunicorn worker count in one container.
+
+When the Proxmox/LXC CPU allocation changes, restart Docker inside the LXC before relying on Docker CPU
+limits or cpusets. Docker can retain the CPU topology observed when the daemon started even though
+existing unconstrained containers see newly added CPUs. Verify with `docker info --format 'Docker CPUs: {{.NCPU}}'`
+and a small cpuset probe before running controlled capacity experiments.
 
 ### Operational alert evaluation
 

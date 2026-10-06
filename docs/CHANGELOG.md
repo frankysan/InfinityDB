@@ -67,6 +67,16 @@ are not retroactively relabeled.
   isolated deployment, including the enclosing 8-CPU/8-GiB LXC boundary, zero-error throughput and
   latency results, resource observations, and the resulting evidence that the synthetic workload
   reaches an application-concurrency plateau before exhausting host CPU, memory, or disk.
+- **Deployment + Project infrastructure:** Add capacity-test-only Compose overrides for a matched
+  worker-count experiment: a shared 4-vCPU/4-GiB app resource boundary plus a separate 4x4 Gunicorn
+  override, allowing 2x4 and 4x4 to be measured under identical limits without changing production
+  or image defaults.
+- **Deployment + Project infrastructure:** Record the matched 2x4-versus-4x4 capacity result under
+  identical 4-vCPU/4-GiB limits: 4x4 improves concurrency-8 throughput by 71.8% while reducing
+  p50/p95/p99 latency, and improves concurrency-32 throughput by 40.8% while exposing continued
+  tail-latency pressure at overload. Keep production at 2x4 by default, document the bounded 4x4
+  scale step and explicit latency/error/resource trigger, and note that Docker must be restarted after
+  an LXC CPU-allocation change before controlled CPU limits/cpusets can be trusted.
 - **Deployment + Project infrastructure:** Add `infinity-db database-health` for operational
   validation of published Army databases, reporting schema/compatibility revisions and validation
   timing with optional application/raw export-pair verification and machine-readable JSON output.
