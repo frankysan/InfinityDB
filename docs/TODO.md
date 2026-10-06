@@ -105,7 +105,8 @@ domain unless required to correct a release-blocking defect.
 
 - [x] Add a project favicon derived from `infinitydb-logo.svg` and keep it legible
   in light and dark browser chrome where practical. The favicon uses the logo's infinity-ribbon
-  geometry on its dark brand surface, simplified for small browser-tab sizes.
+  geometry on its dark brand surface, simplified for small browser-tab sizes, with SVG as the
+  scalable primary icon plus a 32 px PNG fallback and 180 px Apple touch icon.
 
 - [ ] Reorganize frontend design-system ownership after first-class themes are implemented:
   keep foundational tokens, per-theme values, shared components/layout, and page-specific

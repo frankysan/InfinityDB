@@ -60,7 +60,10 @@ Reusable structures must remain usable with keyboard navigation, visible focus, 
 
 The project favicon is a small-size derivative of the InfinityDB logo rather than a second brand
 design. It uses a self-contained high-contrast surface so it remains recognizable in light and
-dark browser chrome without depending on page-theme CSS.
+dark browser chrome without depending on page-theme CSS. Keep the SVG as the scalable primary
+icon with `sizes="any"`, provide a small raster fallback for older browser favicon handling, and
+derive the Apple touch icon from the same simplified mark rather than introducing alternate
+branding.
 
 ### Keep theme and layout concerns separate
 

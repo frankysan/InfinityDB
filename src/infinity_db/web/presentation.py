@@ -84,6 +84,8 @@ ASSETS = {
     "/static/skill-categories.js": ("skill-categories.js", "text/javascript; charset=utf-8"),
     "/static/infinitydb-logo.svg": ("infinitydb-logo.svg", "image/svg+xml"),
     "/static/favicon.svg": ("favicon.svg", "image/svg+xml"),
+    "/static/favicon-32.png": ("favicon-32.png", "image/png"),
+    "/static/apple-touch-icon.png": ("apple-touch-icon.png", "image/png"),
     "/static/fonts/Audiowide/Audiowide-Regular.woff2": (
         "fonts/Audiowide/Audiowide-Regular.woff2",
         "font/woff2",
@@ -579,8 +581,12 @@ def _render_page(
             '<meta charset="utf-8">',
             (
                 '<meta charset="utf-8">'
+                '<link rel="icon" href="/static/favicon-32.png" '
+                'type="image/png" sizes="32x32">'
                 '<link rel="icon" href="/static/favicon.svg" '
                 'type="image/svg+xml" sizes="any">'
+                '<link rel="apple-touch-icon" '
+                'href="/static/apple-touch-icon.png" sizes="180x180">'
                 '<script src="/static/theme-startup.js"></script>'
                 '<script type="module" src="/static/settings.js"></script>'
             ),

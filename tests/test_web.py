@@ -2174,13 +2174,22 @@ def test_landing_page_links_to_fireteams(app: Callable) -> None:
 
 
 def test_project_favicon_is_shared_versioned_brand_asset(app: Callable) -> None:
-    favicon_href = f'href="/static/favicon.svg?v={STATIC_ASSET_VERSION}"'.encode()
+    svg_href = f'href="/static/favicon.svg?v={STATIC_ASSET_VERSION}"'.encode()
+    png_href = f'href="/static/favicon-32.png?v={STATIC_ASSET_VERSION}"'.encode()
+    touch_href = (
+        f'href="/static/apple-touch-icon.png?v={STATIC_ASSET_VERSION}"'.encode()
+    )
 
     for path in ("/", "/units/ranger-prototype", "/changes"):
         status, _, body = request(app, path)
         assert status == 200
-        assert b'<link rel="icon" ' + favicon_href in body
+        assert b'<link rel="icon" ' + png_href in body
+        assert b'type="image/png" sizes="32x32">' in body
+        assert b'<link rel="icon" ' + svg_href in body
         assert b'type="image/svg+xml" sizes="any">' in body
+        assert b'<link rel="apple-touch-icon" ' + touch_href in body
+        assert b'sizes="180x180">' in body
+        assert body.index(png_href) < body.index(svg_href) < body.index(touch_href)
 
     status, headers, favicon = request(
         app, f"/static/favicon.svg?v={STATIC_ASSET_VERSION}"
@@ -2192,6 +2201,17 @@ def test_project_favicon_is_shared_versioned_brand_asset(app: Callable) -> None:
     assert b"Simplified from infinitydb-logo.svg" in favicon
     assert b'fill="#0d2922"' in favicon
     assert b"var(" not in favicon
+
+    for asset, size in (("favicon-32.png", 32), ("apple-touch-icon.png", 180)):
+        status, headers, png = request(
+            app, f"/static/{asset}?v={STATIC_ASSET_VERSION}"
+        )
+        assert status == 200
+        assert headers["content-type"] == "image/png"
+        assert headers["cache-control"] == "public, max-age=31536000, immutable"
+        assert png[:8] == b"\x89PNG\r\n\x1a\n"
+        assert int.from_bytes(png[16:20], "big") == size
+        assert int.from_bytes(png[20:24], "big") == size
 
 
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
