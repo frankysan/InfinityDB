@@ -4172,13 +4172,40 @@ def test_catalog_search_state_is_shareable(app: Callable) -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("path", "heading"),
+    [
+        ("/skills", b">Browse skills</h2>"),
+        ("/equipment", b">Browse equipment</h2>"),
+        ("/weapons", b">Browse weapons</h2>"),
+        ("/traits", b">Browse traits</h2>"),
+        ("/states", b">Browse states</h2>"),
+        ("/hacking-programs", b">Browse Hacking Programs</h2>"),
+        ("/ammunition", b">Browse ammunition</h2>"),
+        ("/labels", b">Browse labels</h2>"),
+        ("/rules", b">Browse general rules</h2>"),
+    ],
+)
+def test_rules_reference_lists_use_browse_language(
+    app: Callable, path: str, heading: bytes
+) -> None:
+    status, _, body = request(app, path)
+
+    assert status == 200
+    assert heading in body
+    assert b" catalog</h2>" not in body
+    assert b" catalog</caption>" not in body
+    assert b"Gathering catalog entries." not in body
+
+
 def test_traits_page_and_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/traits")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"catalog-list.js" in body
     assert b'href="/traits" aria-current="page"' in body
-    assert b"Traits catalog" in body
+    assert b">Browse traits</h2>" in body
+    assert b"Traits catalog" not in body
 
     status, headers, body = request(app, "/api/traits")
     assert status == 200
@@ -4211,9 +4238,9 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     app: Callable, tmp_path: Path
 ) -> None:
     for path, heading, current_href in (
-        ("/ammunition", b"Ammunition catalog", b"/ammunition"),
-        ("/labels", b"Labels catalog", b"/labels"),
-        ("/rules", b"General Rules catalog", b"/rules"),
+        ("/ammunition", b"Browse ammunition", b"/ammunition"),
+        ("/labels", b"Browse labels", b"/labels"),
+        ("/rules", b"Browse general rules", b"/rules"),
     ):
         status, headers, body = request(app, path)
         assert status == 200
@@ -4381,7 +4408,8 @@ def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/hacking-programs")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"Hacking Program catalog" in body
+    assert b">Browse Hacking Programs</h2>" in body
+    assert b"Hacking Program catalog" not in body
     assert b"Browse Hacking Program profiles, targets, Devices, Skills, States, and related rules." in body
     assert b"reviewed N5.3 rules semantics" not in body
     assert b"reviewed rules" not in body
@@ -4430,7 +4458,8 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
     status, headers, body = request(app, "/states")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"States catalog" in body
+    assert b">Browse states</h2>" in body
+    assert b"States catalog" not in body
     assert b'href="/states" aria-current="page"' in body
     assert b'>Uses</th>' not in body
 
