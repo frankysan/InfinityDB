@@ -18,6 +18,7 @@ from infinity_db.snapshot_provenance import (
     sha256_file,
     snapshot_content_sha256,
     validate_snapshot_note,
+    validate_snapshot_note_directory,
     write_snapshot_manifest,
 )
 
@@ -247,6 +248,44 @@ def test_snapshot_note_rejects_unknown_fields_and_self_comparison() -> None:
     document["unexpected"] = True
     with pytest.raises(SnapshotProvenanceError, match="unknown field"):
         validate_snapshot_note(document)
+
+
+def test_snapshot_note_directory_validates_all_json_and_rejects_stray_files(
+    tmp_path: Path,
+) -> None:
+    directory = tmp_path / "snapshot-notes"
+    directory.mkdir()
+    (directory / "README.md").write_text("# Snapshot notes\n", encoding="utf-8")
+    note = {
+        "format": SNAPSHOT_NOTE_FORMAT,
+        "formatVersion": SNAPSHOT_NOTE_VERSION,
+        "snapshotSha256": "a" * 64,
+        "description": "Reviewed snapshot.",
+        "notableChanges": [],
+    }
+    first = directory / "first.json"
+    nested = directory / "history" / "second.json"
+    nested.parent.mkdir()
+    first.write_text(json.dumps(note), encoding="utf-8")
+    note["snapshotSha256"] = "b" * 64
+    nested.write_text(json.dumps(note), encoding="utf-8")
+
+    assert validate_snapshot_note_directory(directory) == (first, nested)
+
+    nested.write_text("{}", encoding="utf-8")
+    with pytest.raises(SnapshotProvenanceError, match="'format' must be"):
+        validate_snapshot_note_directory(directory)
+
+    nested.write_text(json.dumps(note), encoding="utf-8")
+    (directory / "notes.txt").write_text("not a snapshot note", encoding="utf-8")
+    with pytest.raises(SnapshotProvenanceError, match=r"unsupported file\(s\): notes\.txt"):
+        validate_snapshot_note_directory(directory)
+
+
+def test_checked_in_snapshot_notes_are_valid() -> None:
+    root = Path(__file__).parents[1]
+
+    validate_snapshot_note_directory(root / "data" / "curated" / "snapshot-notes")
 
 
 def test_identical_archive_bytes_can_have_distinct_acquisition_records(tmp_path: Path) -> None:

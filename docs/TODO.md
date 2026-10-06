@@ -120,9 +120,10 @@ domain unless required to correct a release-blocking defect.
   are currently built as temporary siblings; document and test recovery when a
   process stops between replacing either output.
 
-- [ ] Integrate curated snapshot-note validation into routine project checks so
+- [x] Integrate curated snapshot-note validation into routine project checks so
   every checked-in file under `data/curated/snapshot-notes/` is validated even
-  when no downloader or comparison workflow happens to load it.
+  when no downloader or comparison workflow happens to load it. Routine pytest now recursively
+  validates every maintained JSON note and rejects unsupported stray files in that directory.
 
 - [ ] Retain release evidence for the configured hosted workflows. Before
   claiming a release has passed hosted CI, record successful `Source checks`,

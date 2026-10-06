@@ -77,6 +77,13 @@ JavaScript build dependency. The development dependency set already provides Nod
 Representative server-rendered pages separately verify that the shared pre-paint bootstrap and
 semantic theme stylesheet are present in the correct order.
 
+## Maintained snapshot-note validation
+
+The routine pytest suite recursively validates every maintained JSON snapshot note under
+`data/curated/snapshot-notes/`, independently of downloader/comparison workflows. The directory
+contract permits only `README.md` plus `.json` note files, so an accidentally checked-in stray file
+cannot bypass validation by using an unrecognized extension.
+
 ## Maintained pytest sections
 
 `config/testing/test-sections.json` defines coarse, maintained slices of the test suite. The current

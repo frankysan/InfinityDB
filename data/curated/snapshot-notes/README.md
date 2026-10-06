@@ -7,8 +7,10 @@ annotations about immutable acquisition snapshots. These files are deliberately
 separate from downloader-generated provenance under `data/manifests/snapshots/`.
 Acquisition tooling must never create, rewrite, or delete snapshot-note files.
 
-Snapshot notes use the versioned `InfinityDB snapshot note` format. Version 1 is
-bound to the exact immutable archive bytes by the lowercase SHA-256 stored as
+Snapshot notes use the versioned `InfinityDB snapshot note` format. Maintained note files use the
+`.json` extension; `README.md` is the only non-JSON file allowed in this directory. Routine project
+tests recursively discover and validate every JSON note and reject unsupported stray files. Version 1
+is bound to the exact immutable archive bytes by the lowercase SHA-256 stored as
 `snapshot.archive.sha256` in generated provenance. It deliberately predates and does
 not use the version-2 logical `snapshot.contentSha256` identity:
 

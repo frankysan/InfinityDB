@@ -351,6 +351,33 @@ def load_snapshot_note(
     return document
 
 
+def validate_snapshot_note_directory(directory: Path) -> tuple[Path, ...]:
+    """Validate every maintained snapshot-note JSON file below ``directory``."""
+    if not directory.is_dir():
+        raise SnapshotProvenanceError(f"Snapshot-note directory does not exist: {directory}")
+
+    notes: list[Path] = []
+    unsupported: list[Path] = []
+    for path in sorted(candidate for candidate in directory.rglob("*") if candidate.is_file()):
+        relative = path.relative_to(directory)
+        if relative == Path("README.md"):
+            continue
+        if path.suffix.casefold() == ".json":
+            notes.append(path)
+        else:
+            unsupported.append(relative)
+
+    if unsupported:
+        rendered = ", ".join(path.as_posix() for path in unsupported)
+        raise SnapshotProvenanceError(
+            f"Snapshot-note directory contains unsupported file(s): {rendered}"
+        )
+
+    for path in notes:
+        load_snapshot_note(path)
+    return tuple(notes)
+
+
 def _snapshot_member_name(name: str) -> str:
     path = PurePosixPath(name)
     if (
