@@ -134,6 +134,14 @@ def test_wheel_package_data_includes_browser_icon_rasters() -> None:
     assert "static/*.png" in patterns
 
 
+def test_wheel_package_data_includes_theme_palettes() -> None:
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)
+
+    patterns = project["tool"]["setuptools"]["package-data"]["infinity_db.web"]
+    assert "static/themes/*.css" in patterns
+
+
 def test_wheel_package_data_covers_every_published_symbol() -> None:
     with (ROOT / "pyproject.toml").open("rb") as handle:
         project = tomllib.load(handle)

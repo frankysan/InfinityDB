@@ -73,6 +73,7 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 "infinity_db.web" = [
   "static/*.html",
   "static/*.css",
+  "static/themes/*.css",
   "static/*.js",
   "static/*.svg",
   "static/*.png",

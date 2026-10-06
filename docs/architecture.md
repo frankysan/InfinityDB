@@ -309,6 +309,17 @@ palette literals. Light and Dark are the initial implementations of that contrac
 colors such as faction and rules-category accents remain semantic data roles inside the theme layer
 so each theme can provide contrast-safe values without changing domain meaning.
 
+CSS source ownership is explicit without introducing a build pipeline: `static/foundation.css` owns
+font declarations and theme-neutral foundational tokens, each explicit theme owns one semantic
+palette file under `static/themes/` (currently `light.css` and `dark.css`),
+`static/components.css` owns the established shared layout/component rules, and
+`static/page-overrides.css` owns late page-specific exceptions that intentionally sit after the
+shared rules. `/static/styles.css` remains the stable public stylesheet URL; the presentation layer
+composes those sources in that order at request time. This preserves the existing cascade and cache
+contract while keeping maintainership boundaries visible in source. A new explicit theme therefore
+adds a registry entry plus its own `static/themes/<theme>.css` implementation instead of extending a
+shared theme stylesheet.
+
 Theme preference defaults to **System**, which follows the operating-system color-scheme preference;
 an explicit user selection wins. The selected preference uses the same session-first, optional-cookie
 persistence contract as other Settings. `static/theme-startup.js` is the intentionally small

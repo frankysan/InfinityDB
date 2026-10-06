@@ -38,6 +38,11 @@ from infinity_db.web.routes import (
 ASSETS = {
     "/static/version-check.js": ("version-check.js", "text/javascript; charset=utf-8"),
     "/static/styles.css": ("styles.css", "text/css; charset=utf-8"),
+    "/static/foundation.css": ("foundation.css", "text/css; charset=utf-8"),
+    "/static/themes/light.css": ("themes/light.css", "text/css; charset=utf-8"),
+    "/static/themes/dark.css": ("themes/dark.css", "text/css; charset=utf-8"),
+    "/static/components.css": ("components.css", "text/css; charset=utf-8"),
+    "/static/page-overrides.css": ("page-overrides.css", "text/css; charset=utf-8"),
     "/static/units.js": ("units.js", "text/javascript; charset=utf-8"),
     "/static/share-state.js": ("share-state.js", "text/javascript; charset=utf-8"),
     "/static/armies.js": ("armies.js", "text/javascript; charset=utf-8"),
@@ -130,6 +135,13 @@ _STATIC_URL = re.compile(
 _MODULE_IMPORT_URL = re.compile(
     r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])'
     r'(?P<path>\./[^"\']+\.js)(?P=quote)'
+)
+STYLESHEET_PARTS = (
+    "foundation.css",
+    "themes/light.css",
+    "themes/dark.css",
+    "components.css",
+    "page-overrides.css",
 )
 _STATIC_REVISION_FILES = tuple(sorted(filename for filename, _ in ASSETS.values()))
 _LEGACY_STATIC_ASSET_ALIASES = {"/static/app.js": "/static/units.js"}
@@ -466,6 +478,13 @@ def _version_static_urls(document: str) -> str:
     )
 
 
+def _composed_stylesheet() -> bytes:
+    """Compose the stable stylesheet entry point from owned source layers."""
+
+    static = files("infinity_db.web").joinpath("static")
+    return b"".join(static.joinpath(filename).read_bytes() for filename in STYLESHEET_PARTS)
+
+
 def _asset_cache_control(query: str) -> str:
     """Cache fingerprinted assets forever and imported modules briefly."""
 
@@ -639,9 +658,12 @@ class PresentationHandler:
         asset_path = _LEGACY_STATIC_ASSET_ALIASES.get(path, path)
         if asset_path in ASSETS:
             filename, content_type = ASSETS[asset_path]
-            body = files("infinity_db.web").joinpath(
-                "static", *filename.split("/")
-            ).read_bytes()
+            if asset_path == "/static/styles.css":
+                body = _composed_stylesheet()
+            else:
+                body = files("infinity_db.web").joinpath(
+                    "static", *filename.split("/")
+                ).read_bytes()
             version = parse_qs(query).get("v")
             if filename.endswith(".js") and version == [STATIC_ASSET_VERSION]:
                 body = _version_module_imports(body.decode("utf-8")).encode("utf-8")

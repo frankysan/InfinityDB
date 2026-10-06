@@ -300,6 +300,15 @@ When the same literal presentation color recurs, treat that as a signal to ident
 
 Each theme should therefore replace semantic token values, not duplicate component/layout rules. Light and Dark are the initial first-class themes, not an architectural limit: additional themes should plug into the same semantic token contract. Theme work may need theme-specific contrast-safe values for domain accents, but should preserve the component contract and non-color meaning.
 
+CSS source ownership mirrors that contract. Foundational font/geometry/typography tokens live in
+`foundation.css`; each explicit theme owns one complete semantic palette in `themes/<theme>.css`;
+established reusable layout and component rules live in `components.css`; and late route-specific
+deltas that should not become shared primitives live in `page-overrides.css`. The browser continues
+to request the single `/static/styles.css` entry point, which composes those sources in order. A new
+theme should be added as a new palette file rather than appended to another theme's file. Do not
+bypass the stable entry point from templates, introduce a CSS build step merely to concatenate the
+files, or move a recurring component rule into page overrides to avoid identifying its shared role.
+
 Text hierarchy should communicate function: identity/title, section heading, normal content, compact/tabular content, metadata, and technical identifiers are different semantic roles. Pages should not invent new type sizes or weights merely to make one local element appear important.
 
 ## Exceptions and evolution

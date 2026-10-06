@@ -146,6 +146,10 @@ Browser state rules:
 Visual/layout implementation must follow `docs/web-design-guidelines.md`, especially semantic table
 columns, bounded overflow, progressive disclosure, Developer-mode additive columns, reusable
 surfaces, and separation of theme tokens from component geometry.
+CSS source ownership is `foundation.css` (font and theme-neutral tokens), one semantic palette file
+per explicit theme under `themes/`, `components.css` (shared layout/components), and
+`page-overrides.css` (late page-specific exceptions). `/static/styles.css` is a server-composed
+stable entry point; do not add a CSS build step or link the source parts directly from page templates.
 
 ## Snapshot and symbol invariants
 

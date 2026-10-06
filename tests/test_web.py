@@ -3079,6 +3079,44 @@ def test_assets_and_catalog_api_have_release_safe_cache_headers(app: Callable) -
     assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
 
 
+def test_stylesheet_entrypoint_composes_owned_sources_in_order(app: Callable) -> None:
+    parts = (
+        "/static/foundation.css",
+        "/static/themes/light.css",
+        "/static/themes/dark.css",
+        "/static/components.css",
+        "/static/page-overrides.css",
+    )
+    sources: dict[str, bytes] = {}
+    expected = bytearray()
+
+    for path in parts:
+        status, headers, body = request(app, path)
+        assert status == 200
+        assert headers["content-type"].startswith("text/css")
+        sources[path] = body
+        expected.extend(body)
+
+    assert b"@font-face" in sources["/static/foundation.css"]
+    assert b"--font-size-root:" in sources["/static/foundation.css"]
+    assert b"--color-surface-page:" not in sources["/static/foundation.css"]
+    assert b':root[data-theme="light"]' in sources["/static/themes/light.css"]
+    assert b':root[data-theme="dark"]' not in sources["/static/themes/light.css"]
+    assert b"--color-surface-page:" in sources["/static/themes/light.css"]
+    assert b':root[data-theme="dark"]' in sources["/static/themes/dark.css"]
+    assert b':root[data-theme="light"]' not in sources["/static/themes/dark.css"]
+    assert b"--color-surface-page:" in sources["/static/themes/dark.css"]
+    assert b".surface {" in sources["/static/components.css"]
+    assert b".army-overview {" in sources["/static/page-overrides.css"]
+    assert b".fireteam-explorer {" in sources["/static/page-overrides.css"]
+    assert b".changes-list {" in sources["/static/page-overrides.css"]
+
+    status, headers, body = request(app, "/static/styles.css")
+    assert status == 200
+    assert headers["content-type"].startswith("text/css")
+    assert body == bytes(expected)
+
+
 def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> None:
     status, headers, body = request(app, "/api/armies")
 

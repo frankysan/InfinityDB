@@ -4,8 +4,11 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-STYLES = (ROOT / "src" / "infinity_db" / "web" / "static" / "styles.css").read_text(
-    encoding="utf-8"
+STATIC = ROOT / "src" / "infinity_db" / "web" / "static"
+THEME_DIRECTORY = STATIC / "themes"
+PRESENTATION_RULES = "".join(
+    (STATIC / filename).read_text(encoding="utf-8")
+    for filename in ("foundation.css", "components.css", "page-overrides.css")
 )
 THEME_STARTUP = (
     ROOT / "src" / "infinity_db" / "web" / "static" / "theme-startup.js"
@@ -146,19 +149,24 @@ def _registered_explicit_themes() -> tuple[str, ...]:
     return tuple(value for value in values if value != "system")
 
 
+def _theme_source(theme: str) -> str:
+    return (THEME_DIRECTORY / f"{theme}.css").read_text(encoding="utf-8")
+
+
 def _theme_tokens(theme: str) -> dict[str, str]:
+    source = _theme_source(theme)
     marker = f':root[data-theme="{theme}"]'
-    marker_start = STYLES.index(marker)
-    opening = STYLES.index("{", marker_start)
+    marker_start = source.index(marker)
+    opening = source.index("{", marker_start)
     depth = 1
     cursor = opening + 1
     while depth:
-        if STYLES[cursor] == "{":
+        if source[cursor] == "{":
             depth += 1
-        elif STYLES[cursor] == "}":
+        elif source[cursor] == "}":
             depth -= 1
         cursor += 1
-    body = STYLES[opening + 1 : cursor - 1]
+    body = source[opening + 1 : cursor - 1]
     return {
         name: value.strip()
         for name, value in re.findall(r"--([\w-]+):\s*([^;]+);", body)
@@ -224,6 +232,13 @@ def _assert_contrast_pairs(
     assert not failures, f"{theme} theme contrast failures:\n" + "\n".join(failures)
 
 
+def test_registered_explicit_themes_have_one_palette_file_each() -> None:
+    registered = set(_registered_explicit_themes())
+    palette_files = {path.stem for path in THEME_DIRECTORY.glob("*.css")}
+
+    assert registered == palette_files
+
+
 def test_every_explicit_theme_meets_compact_text_contrast_contract() -> None:
     for theme in _registered_explicit_themes():
         tokens = _theme_tokens(theme)
@@ -249,12 +264,15 @@ def test_every_explicit_theme_meets_non_text_contrast_contract() -> None:
 
 
 def test_faction_accents_remain_supplementary_in_every_explicit_theme() -> None:
+    theme_sources = "".join(
+        _theme_source(theme) for theme in _registered_explicit_themes()
+    )
     faction_names = {
         match.group(1)
-        for match in re.finditer(r"--color-faction-([\w-]+)-primary:", STYLES)
+        for match in re.finditer(r"--color-faction-([\w-]+)-primary:", theme_sources)
     }
     assert faction_names
-    assert "color: var(--color-faction-" not in STYLES
+    assert "color: var(--color-faction-" not in PRESENTATION_RULES
 
     for theme in _registered_explicit_themes():
         tokens = _theme_tokens(theme)

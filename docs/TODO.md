@@ -108,10 +108,11 @@ domain unless required to correct a release-blocking defect.
   geometry on its dark brand surface, simplified for small browser-tab sizes, with SVG as the
   scalable primary icon plus a 32 px PNG fallback and 180 px Apple touch icon.
 
-- [ ] Reorganize frontend design-system ownership after first-class themes are implemented:
-  keep foundational tokens, per-theme values, shared components/layout, and page-specific
-  exceptions visibly separate where that improves maintenance, without adding a CSS build step
-  or reworking the shared visual primitives that are already established.
+- [x] Reorganize frontend design-system ownership after first-class themes are implemented:
+  foundational typography/geometry tokens, one CSS palette file per explicit theme, shared
+  component/layout rules, and late page-specific exceptions now have separate source ownership.
+  `/static/styles.css` remains the stable browser entry point and is composed server-side in the
+  established cascade order, with no CSS build step or visual-primitive rewrite.
 
 ### Release hardening, CI, and operations
 
