@@ -2103,6 +2103,28 @@ def test_player_loading_empty_and_error_states_hide_storage_language(app: Callab
     assert b"Reading Fireteam reference data." not in fireteams
 
 
+def test_equipment_weapons_and_fireteams_intros_use_player_language(app: Callable) -> None:
+    status, _, equipment = request(app, "/equipment")
+    assert status == 200
+    assert b"Browse Equipment rules, variants, and the units that use them." in equipment
+    assert b"current army snapshot" not in equipment.lower()
+
+    status, _, weapons = request(app, "/weapons")
+    assert status == 200
+    assert b"Browse Weapon profiles, ranges, Traits, and the units that use them." in weapons
+    assert b"current army snapshot" not in weapons.lower()
+
+    status, _, fireteams = request(app, "/fireteams")
+    assert status == 200
+    assert (
+        b"Browse Fireteam charts by Army, including membership requirements, FTO options, and "
+        b"Wildcards."
+        in fireteams
+    )
+    assert b"authoritative Infinity Fireteam charts" not in fireteams
+    assert b"each Army's current Fireteam chart" not in fireteams
+
+
 def test_rules_taxonomy_pages_use_player_language(app: Callable) -> None:
     status, _, home = request(app, "/")
     assert status == 200

@@ -76,6 +76,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend:** Rewrite Equipment, Weapons, and Fireteams introductions around the rules
+  information players can browse, removing Army snapshot and source-authority framing from normal
+  page copy.
 - **Web frontend:** Rewrite empty, loading, and error states to describe the player-visible
   situation directly instead of exposing database, snapshot, or source-data terminology.
 - **Web frontend:** Rewrite the About page around what InfinityDB helps players explore, how related
