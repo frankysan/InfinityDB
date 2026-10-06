@@ -85,6 +85,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Deployment:** Make the retained metrics-history database explicitly forward-migrating. Format
+  upgrades now run as transactional one-version steps, failed upgrades keep the previous committed
+  format, and older collectors refuse newer or unversioned non-empty stores without downgrading or
+  deleting retained history. The rollback procedure preserves the history volume even when the
+  target release predates the collector service.
 - **Web frontend:** Rewrite the Armies overview framing around playable forces and roster status,
   removing dataset-oriented wording from the player view.
 - **Web frontend:** Remove remaining source-review qualifiers and imported-table wording from

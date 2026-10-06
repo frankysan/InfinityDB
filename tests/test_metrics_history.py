@@ -131,6 +131,15 @@ def test_history_histogram_allowlists_match_runtime_metrics_vocabulary() -> None
     )
 
 
+def test_history_format_version_has_complete_forward_migration_chain() -> None:
+    plan = metrics_history._migration_plan(0, metrics_history.FORMAT_VERSION)
+
+    assert plan
+    assert plan[0][0] == 0
+    assert plan[-1][1] == metrics_history.FORMAT_VERSION
+    assert all(next_version == previous_version + 1 for previous_version, next_version, _ in plan)
+
+
 def test_history_database_rejects_unknown_schema_version(tmp_path: Path) -> None:
     path = tmp_path / "history.db"
     with sqlite3.connect(path) as connection:
@@ -140,9 +149,99 @@ def test_history_database_rejects_unknown_schema_version(tmp_path: Path) -> None
         connection.execute(
             "INSERT INTO metadata(key, value) VALUES ('format_version', '99')"
         )
+        connection.execute("CREATE TABLE retained_probe (value TEXT NOT NULL)")
+        connection.execute("INSERT INTO retained_probe(value) VALUES ('keep-me')")
 
-    with pytest.raises(ValueError, match="Unsupported metrics-history format version"):
+    with pytest.raises(ValueError, match="will not downgrade"):
         open_history_database(path)
+
+    with sqlite3.connect(path) as connection:
+        assert connection.execute(
+            "SELECT value FROM metadata WHERE key = 'format_version'"
+        ).fetchone() == ("99",)
+        assert connection.execute("SELECT value FROM retained_probe").fetchone() == ("keep-me",)
+
+
+def test_history_database_rejects_unversioned_nonempty_store(tmp_path: Path) -> None:
+    path = tmp_path / "history.db"
+    with sqlite3.connect(path) as connection:
+        connection.execute("CREATE TABLE unknown_history (value TEXT NOT NULL)")
+        connection.execute("INSERT INTO unknown_history(value) VALUES ('keep-me')")
+
+    with pytest.raises(ValueError, match="unversioned non-empty"):
+        open_history_database(path)
+
+    with sqlite3.connect(path) as connection:
+        assert connection.execute("SELECT value FROM unknown_history").fetchone() == ("keep-me",)
+        assert "metadata" not in {
+            str(row[0])
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            )
+        }
+
+
+def test_history_database_applies_registered_forward_migration(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "history.db"
+    with open_history_database(path) as connection:
+        assert connection.execute(
+            "SELECT value FROM metadata WHERE key = 'format_version'"
+        ).fetchone() == ("1",)
+
+    def migrate_1_to_2(connection: sqlite3.Connection) -> None:
+        connection.execute("CREATE TABLE migration_probe (value TEXT NOT NULL)")
+        connection.execute("INSERT INTO migration_probe(value) VALUES ('migrated')")
+
+    monkeypatch.setattr(metrics_history, "FORMAT_VERSION", 2)
+    monkeypatch.setitem(metrics_history._SCHEMA_MIGRATIONS, 1, (2, migrate_1_to_2))
+
+    with open_history_database(path) as connection:
+        assert connection.execute(
+            "SELECT value FROM metadata WHERE key = 'format_version'"
+        ).fetchone() == ("2",)
+        assert connection.execute("SELECT value FROM migration_probe").fetchone() == ("migrated",)
+
+    # Simulate running an older collector after rollback: it must refuse the newer store and leave
+    # the persistent history untouched for a later compatible release.
+    monkeypatch.setattr(metrics_history, "FORMAT_VERSION", 1)
+    with pytest.raises(ValueError, match="will not downgrade"):
+        open_history_database(path)
+    with sqlite3.connect(path) as connection:
+        assert connection.execute(
+            "SELECT value FROM metadata WHERE key = 'format_version'"
+        ).fetchone() == ("2",)
+        assert connection.execute("SELECT value FROM migration_probe").fetchone() == ("migrated",)
+
+
+def test_history_forward_migration_is_transactional(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "history.db"
+    with open_history_database(path):
+        pass
+
+    def failing_migration(connection: sqlite3.Connection) -> None:
+        connection.execute("CREATE TABLE migration_probe (value TEXT NOT NULL)")
+        raise RuntimeError("migration failed")
+
+    monkeypatch.setattr(metrics_history, "FORMAT_VERSION", 2)
+    monkeypatch.setitem(metrics_history._SCHEMA_MIGRATIONS, 1, (2, failing_migration))
+
+    with pytest.raises(RuntimeError, match="migration failed"):
+        open_history_database(path)
+
+    with sqlite3.connect(path) as connection:
+        assert connection.execute(
+            "SELECT value FROM metadata WHERE key = 'format_version'"
+        ).fetchone() == ("1",)
+        assert "migration_probe" not in {
+            str(row[0])
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            )
+        }
 
 
 def test_parse_history_snapshot_rejects_unreviewed_route_labels() -> None:

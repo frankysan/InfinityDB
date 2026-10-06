@@ -371,10 +371,12 @@ the outgoing generation can be closed and the incoming generation opened without
 control over application rollback. Collector/database failures may lose monitoring evidence and must be
 reported, but they do not invalidate a healthy application deployment.
 
-The history database is forward-moving operational state. Its schema requires explicit forward
-migrations; application rollback does not imply history-schema rollback. Rolling back to a release
-without metrics-history support stops the collector but preserves its volume for a later compatible
-release. Isolated local deployments follow the same lifecycle under their own Compose project namespace
+The history database is forward-moving operational state. Its schema uses explicit, transactional,
+one-version-at-a-time forward migrations; unsupported newer formats and non-empty unversioned
+stores are refused without downgrade or destructive recovery. Application rollback does not imply a
+history-schema rollback. Rolling back to a release without metrics-history support stops the collector but
+preserves its volume for a later compatible release. Isolated local deployments follow the same
+lifecycle under their own Compose project namespace
 so their writable history volume cannot collide with production; routine teardown preserves local
 history for update testing, while `stop-local-test.sh --purge` removes only local-test volumes for
 deliberate clean-slate runs. Historical reporting remains an operator-side SQLite/CLI concern rather

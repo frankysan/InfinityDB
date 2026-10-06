@@ -52,8 +52,11 @@ release/audit narrative belongs in the changelog and Git history.
   an implemented `stop-local-test.sh --purge` clean-slate path. The same tool now exposes operator-only
   `periods`, `report`, and `compare` commands over retained week/version/snapshot aggregates; no
   historical HTTP endpoint is added. Live metrics expose shared generation-start and
-  latest-request timestamps for restart/reset detection. `docs/architecture.md` owns the boundary and
-  `docs/TODO.md` owns the unfinished rollout stages.
+  latest-request timestamps for restart/reset detection. Metrics-history schema evolution is
+  forward-only: add an explicit transactional previous -> next migration before raising the persisted
+  format
+  version; older collectors must refuse newer stores without downgrade or destructive recovery.
+  `docs/architecture.md` owns the boundary and `docs/TODO.md` owns the unfinished rollout stages.
 - Future work belongs in `docs/TODO.md`; do not preserve an obsolete task list in architecture or
   this context file.
 

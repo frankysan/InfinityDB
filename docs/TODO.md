@@ -50,7 +50,7 @@ domain unless required to correct a release-blocking defect.
   historical release notes in the browser without maintaining a second hand-edited copy of the
   same content.
 
-- [ ] Refactor the web layer toward the documented backend/frontend responsibility
+- [x] Refactor the web layer toward the documented backend/frontend responsibility
   boundary without changing the current same-origin deployment model.
   - [x] Split API handling, shared page-shell/static delivery, and top-level request
     dispatch into visibly separate Python concerns while preserving existing URLs. The WSGI
@@ -74,7 +74,7 @@ domain unless required to correct a release-blocking defect.
     - [x] Establish a reusable browser view/component boundary: `view-components.js` now owns
       shared page-state panel switching/`aria-busy` behavior and the canonical table-viewport
       wrapper, while page modules retain page state and domain-specific rendering.
-  - [ ] Add focused contract/regression coverage as responsibilities move so domain
+  - [x] Add focused contract/regression coverage as responsibilities move so domain
     interpretation cannot silently migrate back into browser code.
     - [x] Pin Python route ownership so presentation handling does not absorb `/api/*` and API
       handling does not absorb browser pages, and keep packaged-symbol tests coupled to the
@@ -115,7 +115,8 @@ domain unless required to correct a release-blocking defect.
   - [x] Publish the maintained S1–S8 SVG set through one reusable browser renderer with explicit
     physical dimensions and theme-aware monochrome presentation.
   - [x] Show the complete S1–S8 set in the **Silhouette (S)** Glossary entry, preserving one common
-    scale and horizontal scrolling rather than shrinking templates independently on narrow screens.
+    scale and wrapping into responsive equal-width rows rather than shrinking templates
+    independently or widening the Glossary page for this exceptional reference.
   - [x] Add an optional Unit-profile `S` value preview without enlarging the normal statline. For
     S1/S3–S8, compare the selected template with a faded S2 reference at exactly the same scale; S2
     is shown alone, and unsupported values such as S0 remain plain stat text.
@@ -204,7 +205,7 @@ domain unless required to correct a release-blocking defect.
     generation timestamps. App and collector image repositories share the bounded rollback-image
     retention count. Unexpected restarts may lose at most one periodic collection interval;
     generation changes never treat reset counters as deltas.
-  - [ ] Define explicit forward schema migrations before incrementing the persistent
+  - [x] Define explicit forward schema migrations before incrementing the persistent
     metrics-history database format. Application rollback must continue to preserve rather than
     downgrade/delete the history volume, including rollback to a pre-history release.
   - [x] Extend operator reporting for retained history. `metrics_history.py periods/report/compare`

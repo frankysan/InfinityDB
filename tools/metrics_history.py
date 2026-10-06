@@ -369,8 +369,7 @@ def fetch_metrics(url: str, *, timeout: float) -> str:
         return response.read().decode("utf-8")
 
 
-def _initialize(connection: sqlite3.Connection) -> None:
-    connection.execute("PRAGMA foreign_keys = ON")
+def _create_metadata_table(connection: sqlite3.Connection) -> None:
     connection.execute(
         """
         CREATE TABLE IF NOT EXISTS metadata (
@@ -379,16 +378,11 @@ def _initialize(connection: sqlite3.Connection) -> None:
         )
         """
     )
-    row = connection.execute(
-        "SELECT value FROM metadata WHERE key = 'format_version'"
-    ).fetchone()
-    if row is not None and str(row[0]) != str(FORMAT_VERSION):
-        raise ValueError(f"Unsupported metrics-history format version: {row[0]}")
+
+
+def _migrate_0_to_1(connection: sqlite3.Connection) -> None:
+    _create_metadata_table(connection)
     connection.execute(
-        "INSERT OR IGNORE INTO metadata(key, value) VALUES ('format_version', ?)",
-        (str(FORMAT_VERSION),),
-    )
-    connection.executescript(
         """
         CREATE TABLE IF NOT EXISTS scrape_state (
             singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
@@ -398,8 +392,11 @@ def _initialize(connection: sqlite3.Connection) -> None:
             last_request_at REAL,
             collected_at REAL NOT NULL,
             counters_json TEXT NOT NULL
-        );
-
+        )
+        """
+    )
+    connection.execute(
+        """
         CREATE TABLE IF NOT EXISTS weekly_periods (
             week_start TEXT NOT NULL,
             version TEXT NOT NULL,
@@ -409,8 +406,11 @@ def _initialize(connection: sqlite3.Connection) -> None:
             generation_count INTEGER NOT NULL,
             collection_count INTEGER NOT NULL,
             PRIMARY KEY (week_start, version, snapshot_revision)
-        );
-
+        )
+        """
+    )
+    connection.execute(
+        """
         CREATE TABLE IF NOT EXISTS weekly_metrics (
             week_start TEXT NOT NULL,
             version TEXT NOT NULL,
@@ -428,16 +428,155 @@ def _initialize(connection: sqlite3.Connection) -> None:
             FOREIGN KEY (week_start, version, snapshot_revision)
                 REFERENCES weekly_periods (week_start, version, snapshot_revision)
                 ON DELETE CASCADE
-        );
+        )
         """
     )
-    connection.commit()
+
+
+# Each entry upgrades exactly one persisted format version. Add the migration before incrementing
+# FORMAT_VERSION so every supported upgrade path is explicit and can be applied transactionally.
+_SCHEMA_MIGRATIONS: dict[int, tuple[int, Callable[[sqlite3.Connection], None]]] = {
+    0: (1, _migrate_0_to_1),
+}
+
+
+def _database_tables(connection: sqlite3.Connection) -> set[str]:
+    return {
+        str(row[0])
+        for row in connection.execute(
+            """
+            SELECT name
+            FROM sqlite_master
+            WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+            """
+        )
+    }
+
+
+def _stored_format_version(connection: sqlite3.Connection) -> int:
+    tables = _database_tables(connection)
+    if not tables:
+        return 0
+    if "metadata" not in tables:
+        raise ValueError(
+            "Refusing unversioned non-empty metrics-history database; "
+            "no safe forward migration can be selected"
+        )
+
+    row = connection.execute(
+        "SELECT value FROM metadata WHERE key = 'format_version'"
+    ).fetchone()
+    if row is None:
+        other_metadata = connection.execute(
+            "SELECT 1 FROM metadata LIMIT 1"
+        ).fetchone()
+        if tables != {"metadata"} or other_metadata is not None:
+            raise ValueError(
+                "Refusing metrics-history database without a format version; "
+                "no safe forward migration can be selected"
+            )
+        return 0
+
+    raw_version = str(row[0])
+    try:
+        version = int(raw_version)
+    except ValueError as exc:
+        raise ValueError(f"Unsupported metrics-history format version: {raw_version}") from exc
+    if version < 1 or raw_version != str(version):
+        raise ValueError(f"Unsupported metrics-history format version: {raw_version}")
+    return version
+
+
+def _migration_plan(
+    current_version: int,
+    target_version: int,
+) -> tuple[tuple[int, int, Callable[[sqlite3.Connection], None]], ...]:
+    if current_version > target_version:
+        raise ValueError(
+            f"Unsupported metrics-history format version: {current_version}; "
+            f"this collector supports up to {target_version} and will not downgrade it"
+        )
+
+    plan: list[tuple[int, int, Callable[[sqlite3.Connection], None]]] = []
+    version = current_version
+    while version < target_version:
+        migration = _SCHEMA_MIGRATIONS.get(version)
+        if migration is None:
+            raise RuntimeError(
+                f"Missing metrics-history forward migration from format version {version}"
+            )
+        next_version, apply_migration = migration
+        if next_version != version + 1:
+            raise RuntimeError(
+                "Metrics-history migrations must advance exactly one format version: "
+                f"{version} -> {next_version}"
+            )
+        plan.append((version, next_version, apply_migration))
+        version = next_version
+    return tuple(plan)
+
+
+def _record_format_version(
+    connection: sqlite3.Connection,
+    *,
+    previous_version: int,
+    next_version: int,
+) -> None:
+    if previous_version == 0:
+        connection.execute(
+            "INSERT INTO metadata(key, value) VALUES ('format_version', ?)",
+            (str(next_version),),
+        )
+        return
+
+    cursor = connection.execute(
+        """
+        UPDATE metadata
+        SET value = ?
+        WHERE key = 'format_version' AND value = ?
+        """,
+        (str(next_version), str(previous_version)),
+    )
+    if cursor.rowcount != 1:
+        raise RuntimeError(
+            "Metrics-history format version changed while applying a migration"
+        )
+
+
+def _initialize(connection: sqlite3.Connection) -> None:
+    connection.execute("PRAGMA foreign_keys = ON")
+    current_version = _stored_format_version(connection)
+    plan = _migration_plan(current_version, FORMAT_VERSION)
+    for previous_version, next_version, apply_migration in plan:
+        connection.execute("BEGIN IMMEDIATE")
+        try:
+            apply_migration(connection)
+            _record_format_version(
+                connection,
+                previous_version=previous_version,
+                next_version=next_version,
+            )
+        except Exception:
+            connection.rollback()
+            raise
+        else:
+            connection.commit()
+
+    # Preserve the format-1 recovery behavior for an already-versioned database whose tables were
+    # never fully materialized. Future versions should add their own migration/validation contract.
+    if current_version == FORMAT_VERSION == 1:
+        with connection:
+            _migrate_0_to_1(connection)
 
 
 def open_history_database(path: Path) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(path)
-    _initialize(connection)
+    try:
+        _initialize(connection)
+    except Exception:
+        connection.close()
+        raise
     return connection
 
 

@@ -285,8 +285,11 @@ scrape/start failures remain observable warnings rather than application rollbac
 transition path alone may synthesize a generation boundary for legacy metrics that predate the live
 timestamp gauges; continuous collection remains strict. The isolated `infinitydb-test` project gets a
 distinct history volume, preserves it on normal stop, and `--purge` removes only test-project volumes.
-Persistent-store tests still need explicit forward schema-migration coverage before the history format
-is incremented, and rollback procedures must preserve history across a release with no collector.
+Persistent-store tests pin the forward schema-migration contract before any history-format increment:
+registered one-version upgrades commit schema changes and the `format_version` marker atomically,
+failed migrations retain the previous committed format, non-empty unversioned stores are refused, and
+an older collector rejects a newer store without modifying retained history. The production rollback
+procedure separately preserves the named history volume across a release with no collector.
 
 ## CI and release validation
 

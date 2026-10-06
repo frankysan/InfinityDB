@@ -311,11 +311,24 @@ to both `infinity-db:app-*` and `infinity-db-metrics-history:app-*`, so repeated
 silently accumulate collector images. Periodic collection handles normal operation; after an
 unexpected restart, generation detection prevents reset counters from being interpreted as deltas.
 
-The persistent history database is independent forward-moving operational state. Schema changes require
-explicit forward migrations. An application rollback does not imply a history-database downgrade; a
-rollback to a release without metrics-history support stops the collector while preserving the volume
-for a later compatible release. Collector health/status should be reported separately from app/Caddy
-health and must not participate in the deployment success gate.
+The persistent history database is independent forward-moving operational state. Its on-disk format is
+versioned separately from the application. `tools/metrics_history.py` owns an explicit
+one-version-at-a-time forward-migration registry: every persisted format increment must add the
+previous -> next migration before `FORMAT_VERSION` is raised. Each migration and its `format_version`
+update run in one SQLite transaction. A failed migration therefore leaves the previous committed format
+intact and can be retried;
+a non-empty unversioned store is refused rather than guessed. A collector that encounters a history
+format newer than it supports refuses to open it without downgrading, deleting, or rewriting retained
+history.
+
+An application rollback does not imply a history-database downgrade. Before rolling back to a release
+that predates the `metrics-history` service, stop the currently deployed collector from the current
+checkout with `docker compose stop metrics-history`, then perform the application rollback without
+`docker compose down -v` or any explicit removal of the `metrics_history` volume. The stopped collector
+container may be removed as an orphan if needed; the named volume must remain. If a rollback target has
+an older collector that cannot read a newer history format, leave that collector stopped/failed and keep
+the volume for a later compatible release rather than attempting a downgrade. Collector health/status
+is separate from app/Caddy health and must not participate in the deployment success gate.
 
 The isolated local test deployment uses the same transition sequence under
 `COMPOSE_PROJECT_NAME=infinitydb-test`, giving it a separate history volume automatically. Normal local
