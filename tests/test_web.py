@@ -2413,6 +2413,21 @@ def test_landing_page_links_to_fireteams(app: Callable) -> None:
     assert b"<strong>Fireteams</strong>" in body
 
 
+def test_landing_reference_cards_describe_player_tasks(app: Callable) -> None:
+    status, _, body = request(app, "/")
+
+    assert status == 200
+    assert b"Browse Skill rules and see which units use them." in body
+    assert b"Browse Equipment rules, variants, and the units that use them." in body
+    assert b"Browse Weapon profiles, ranges, Traits, and the units that use them." in body
+    assert b"See what Traits mean and where they apply." in body
+    assert b"Browse Program profiles, Devices, targets, and related rules." in body
+    assert b"rules context" not in body
+    assert b"trace related rules" not in body
+    assert b"relationships, and usage" not in body
+    assert b"connected rules" not in body
+
+
 def test_project_favicon_is_shared_versioned_brand_asset(app: Callable) -> None:
     svg_href = f'href="/static/favicon.svg?v={STATIC_ASSET_VERSION}"'.encode()
     png_href = f'href="/static/favicon-32.png?v={STATIC_ASSET_VERSION}"'.encode()
