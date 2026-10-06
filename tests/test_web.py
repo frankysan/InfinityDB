@@ -4247,6 +4247,14 @@ def test_rules_reference_lists_use_browse_language(
     assert b"Gathering catalog entries." not in body
 
 
+def test_rules_reference_detail_usage_captions_use_player_language(app: Callable) -> None:
+    status, _, body = request(app, "/static/catalog-detail.js")
+
+    assert status == 200
+    assert b"Units using this variant" in body
+    assert b"Units using this catalog variant" not in body
+
+
 def test_traits_page_and_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/traits")
     assert status == 200

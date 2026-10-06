@@ -296,7 +296,7 @@ function usageSections(item) {
         if (!section.open || section.dataset.loaded) return;
         const table = document.createElement("table");
         table.className = "data-table--compact data-table--listing data-table--unit-list data-table--unit-usage data-table--interactive";
-        table.innerHTML = "<caption class=\"sr-only\">Units using this catalog variant</caption><thead><tr><th class=\"table-column--primary\" scope=\"col\">Unit</th><th class=\"table-column--descriptor\" scope=\"col\">Armies</th><th class=\"id-column table-column--technical\" scope=\"col\">ID</th></tr></thead>";
+        table.innerHTML = "<caption class=\"sr-only\">Units using this variant</caption><thead><tr><th class=\"table-column--primary\" scope=\"col\">Unit</th><th class=\"table-column--descriptor\" scope=\"col\">Armies</th><th class=\"id-column table-column--technical\" scope=\"col\">ID</th></tr></thead>";
         const body = document.createElement("tbody");
         renderUnitRows(body, variant.units);
         table.append(body);
