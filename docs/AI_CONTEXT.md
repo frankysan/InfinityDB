@@ -44,9 +44,13 @@ release/audit narrative belongs in the changelog and Git history.
   design is a separate private-network metrics-history service with one bounded writable SQLite
   volume; `/metrics` remains a volatile aggregate scrape surface. `tools/metrics_history.py` owns the
   standalone generation-aware weekly aggregation/retention engine; Compose/deployment integration is
-  still separate work. Live metrics expose shared generation-start and latest-request timestamps for
-  restart/reset detection. `docs/architecture.md` owns the boundary and `docs/TODO.md` owns the
-  unfinished rollout stages.
+  still separate work. The collector must stay outside the app availability gate: deployment uses
+  one-shot closing/opening scrapes around app replacement, collector failures are operational warnings,
+  and app rollback preserves rather than downgrades/deletes history state. Local test deployments use
+  the same lifecycle under `COMPOSE_PROJECT_NAME=infinitydb-test`, with a separate preserved history
+  volume and an explicit future purge path. Live metrics expose shared generation-start and
+  latest-request timestamps for restart/reset detection. `docs/architecture.md` owns the boundary and
+  `docs/TODO.md` owns the unfinished rollout stages.
 - Future work belongs in `docs/TODO.md`; do not preserve an obsolete task list in architecture or
   this context file.
 

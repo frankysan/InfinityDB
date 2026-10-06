@@ -363,8 +363,21 @@ run with an immutable root filesystem and no published port, and own one bounded
 containing its SQLite history. The web-facing `app` remains immutable and unaware of historical
 persistence. The live generation timestamps are the canonical restart boundary so application
 restarts cannot be mistaken for negative/request deltas. Retention is automatically enforced by the
-engine rather than relying on operator cleanup. Exact remaining rollout stages are tracked in
-`docs/TODO.md`.
+engine rather than relying on operator cleanup. The collector is operationally subordinate to the
+application: its health/status is observable, but it must not participate in the availability-critical
+app/Caddy health gate or make historical persistence a prerequisite for serving InfinityDB. Deployment
+transitions use the collector image as a one-shot client before and after application replacement so
+the outgoing generation can be closed and the incoming generation opened without giving the collector
+control over application rollback. Collector/database failures may lose monitoring evidence and must be
+reported, but they do not invalidate a healthy application deployment.
+
+The history database is forward-moving operational state. Its schema requires explicit forward
+migrations; application rollback does not imply history-schema rollback. Rolling back to a release
+without metrics-history support stops the collector but preserves its volume for a later compatible
+release. Isolated local deployments follow the same lifecycle under their own Compose project namespace
+so their writable history volume cannot collide with production; routine teardown preserves local
+history for update testing, with explicit purge reserved for deliberate clean-slate runs. Exact
+remaining rollout stages are tracked in `docs/TODO.md`.
 
 Temporary raw request logging is an incident-diagnostic exception, not the normal analytics path,
 and should be minimized and short-lived.

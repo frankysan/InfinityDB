@@ -276,7 +276,13 @@ under the database-size ceiling. The collector state remains one rolling snapsho
 real visitor data or unbounded request labels. When the isolated Compose service is added, deployment
 tests must additionally prove the application container remains read-only, collector state lives only
 in its dedicated history volume, and pre-update/post-health transition scrapes do not make historical
-storage a prerequisite for app startup.
+storage a prerequisite for app startup. Tests should pin the lifecycle order: build/verify both images,
+one-shot closing scrape, availability-critical app/Caddy replacement + health, one-shot opening scrape,
+then continuous collector startup. Collector scrape/start failures must be observable but must not turn
+a healthy application deployment into a rollback. Persistent-store tests must cover explicit forward
+schema migration and preservation across application rollback, including a release with no collector.
+The isolated `infinitydb-test` project must get a distinct history volume, preserve it on normal stop,
+and eventually prove an explicit `--purge` path removes only test-project volumes.
 
 ## CI and release validation
 
