@@ -85,6 +85,7 @@
         "test_compare_runtime_benchmarks",
         "test_create_work_archive",
         "test_deployment_scripts",
+        "test_deployment_alerts",
         "test_deployment_diagnostics",
         "test_deployment_resources",
         "test_migrate_symbol_publication_provenance",

@@ -240,6 +240,7 @@ python tools\compare_runtime_benchmarks.py --help
 python tools\benchmark_test_workers.py --help
 python tools\capacity_test.py --help
 python tools\deployment_resources.py --help
+python tools\deployment_alerts.py --help
 ```
 
 Use runtime benchmarks for repository/query performance and the worker benchmark for deciding whether
@@ -256,8 +257,11 @@ release/snapshot, deployment worker/resource configuration, client location, com
 host/container resource observations with any baseline. `deployment_resources.py` is Linux-host-only
 and can wrap the capacity command while sampling bounded host/Docker resource counters over the same
 interval; its retained JSON intentionally excludes hostnames, IPs, request URLs, and arbitrary Docker
-event payloads. Generated benchmark/capacity/resource reports belong in ignored report/audit storage
-unless a specific result is needed as release evidence.
+event payloads. `deployment_alerts.py` evaluates a fresh resource report together with bounded
+aggregate metrics and health samples, producing monitoring-friendly OK/warning/critical/unknown exit
+codes without retaining endpoint URLs or user/request identity data. Generated benchmark/capacity/
+resource/alert reports belong in ignored report/audit storage unless a specific result is needed as
+release evidence.
 
 ## CI and release validation
 

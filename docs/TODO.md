@@ -150,8 +150,11 @@ domain unless required to correct a release-blocking defect.
     redacts request targets and identity-like values, groups repeated diagnostics by a sanitized
     fingerprint, caps retained samples, and can use the exact time window from a deployment
     resource report. Routine access logging remains disabled.
-  - [ ] Add operational alerts for sustained CPU saturation, memory pressure or OOM kills, low
-    disk space/inodes, elevated 5xx responses, and failed health checks.
+  - [x] Add operational alert evaluation for sustained CPU saturation, host/container memory
+    pressure and OOM/restart events, low filesystem space/inodes, elevated 5xx response deltas,
+    and failed health checks. `tools/deployment_alerts.py` applies documented/configurable warning
+    and critical thresholds to a recent resource report plus two bounded metrics/health samples,
+    emits privacy-safe JSON, and returns monitoring-friendly OK/warning/critical/unknown exit codes.
   - [x] Publish aggregate request counters/histograms using normalized bounded route
     labels: request rate, status class, latency, response size, and active requests. Static
     assets and `/api/` requests remain separately identifiable for future dashboards.

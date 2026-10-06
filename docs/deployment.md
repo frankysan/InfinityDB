@@ -298,8 +298,43 @@ while Docker block-I/O deltas remain available.
 The retained report deliberately omits hostnames, IP addresses, request URLs, arbitrary Docker event
 attributes, and the wrapped command line. Capture the exact Gunicorn/container allocation separately
 with the baseline notes. Do not compare 2-worker and 4-worker results unless the resource allocation
-is recorded and controlled. Sanitized Caddy/Gunicorn error diagnostics and alert thresholds remain
-separate operational work tracked in `docs/TODO.md`.
+is recorded and controlled.
+
+### Operational alert evaluation
+
+After collecting a fresh resource report, evaluate the deployment alert policy against that evidence
+and a bounded aggregate-metrics/health sampling interval:
+
+```bash
+.venv/bin/python tools/deployment_alerts.py --resource-report reports/capacity-resources.json --output reports/deployment-alerts.json
+```
+
+By default the evaluator samples metrics for 60 seconds and checks `/health` at both ends of that
+interval. `INFINITYDB_METRICS_URL` can select the trusted metrics listener; unless
+`INFINITYDB_HEALTH_URL` or `--health-url` is set explicitly, the health URL is derived as `/health`
+beside the metrics URL. Retained JSON does not include either URL.
+
+The initial operational thresholds are deliberately explicit and conservative rather than claimed
+as final SLOs:
+
+- sustained host CPU: warning at 85% average, critical at 95% average, requiring at least a
+  60-second resource window;
+- host/container memory: warning at 85% maximum used, critical at 95%; any observed container OOM
+  kill is immediately critical, while a restart/restarting container is warning-level evidence;
+- filesystem free space and free inodes: warning at 15% remaining, critical at 5%;
+- 5xx responses: warning requires at least 5 errors and 1% of requests during the sampled counter
+  delta; critical requires at least 10 errors and 5%;
+- any failed health probe is critical.
+
+All thresholds can be overridden explicitly on the command line. A stale resource report, a resource
+window too short to establish sustained CPU behavior, unavailable metrics, or metrics counters that
+reset during sampling produces `unknown` evidence rather than a false OK. Exit codes are `0` OK,
+`1` warning, `2` critical, and `3` unknown, making the command suitable for cron/systemd or an
+external notification service without coupling InfinityDB to one alert-delivery provider.
+
+These defaults are an initial operational safety net. Tune them only after retaining representative
+2x4 production/capacity evidence; the separate scale-trigger task should be based on measured latency,
+error, and resource behavior rather than simply copying these alert thresholds.
 
 `deploy.sh` retains the current build and the two newest rollback builds by
 default. After Compose has successfully started and health-checked the new

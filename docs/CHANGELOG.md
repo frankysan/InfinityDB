@@ -9,6 +9,8 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Deployment + Project infrastructure:** Add a privacy-preserving operational alert evaluator for sustained CPU, memory/OOM/restart pressure, filesystem space/inodes, 5xx response deltas, and health failures, with configurable thresholds and monitoring-friendly exit codes.
+
 - **Web frontend + Project infrastructure:** Publish a user-facing privacy policy in the README and
   About page explaining InfinityDB's no-profile/no-visitor-tracking stance, aggregate-only
   operational metrics, session-only browser settings by default, opt-in preference cookies, and
