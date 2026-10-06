@@ -145,9 +145,13 @@ domain unless required to correct a release-blocking defect.
     CPU/memory/block/network usage, and restart/OOM state/events. It can wrap the capacity-test
     command so both retained JSON reports cover the same interval without recording hostnames,
     IP addresses, request URLs, or arbitrary Docker event attributes.
-  - [ ] Retain sanitized Caddy/Gunicorn error diagnostics and add operational alerts for
-    sustained CPU saturation, memory pressure or OOM kills, low disk space/inodes, elevated
-    5xx responses, and failed health checks.
+  - [x] Retain bounded, sanitized Caddy/Gunicorn warning/error diagnostics from the existing
+    Docker log streams. `tools/deployment_diagnostics.py` keeps only warning/error-class events,
+    redacts request targets and identity-like values, groups repeated diagnostics by a sanitized
+    fingerprint, caps retained samples, and can use the exact time window from a deployment
+    resource report. Routine access logging remains disabled.
+  - [ ] Add operational alerts for sustained CPU saturation, memory pressure or OOM kills, low
+    disk space/inodes, elevated 5xx responses, and failed health checks.
   - [x] Publish aggregate request counters/histograms using normalized bounded route
     labels: request rate, status class, latency, response size, and active requests. Static
     assets and `/api/` requests remain separately identifiable for future dashboards.

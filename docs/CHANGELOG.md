@@ -9,6 +9,9 @@ New or materially revised entries use the project-domain labels defined in
 
 ### Added
 
+- **Deployment + Project infrastructure:** Add bounded sanitized deployment diagnostics for the
+  existing Caddy/Gunicorn Docker log streams, retaining warning/error-class summaries and grouped
+  samples while redacting request targets and identity-like values instead of archiving raw logs.
 - **Deployment + Project infrastructure:** Add privacy-preserving Linux host/container resource
   capture for deployment capacity evidence, including CPU, memory/swap, filesystem space/inodes,
   available disk-I/O, network rates, per-container Docker utilization, and restart/OOM events over

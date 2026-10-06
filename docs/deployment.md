@@ -243,6 +243,27 @@ concrete incident, minimize and sanitize the fields, restrict access, and define
 retention before enabling it. Error logs and host/container health data remain appropriate
 when they do not embed request-identifying values.
 
+For routine retained diagnostics, do not archive raw Docker logs. Instead collect a bounded,
+sanitized warning/error report from the existing Caddy/Gunicorn streams:
+
+```sh
+.venv/bin/python tools/deployment_diagnostics.py --output reports/deployment-diagnostics.json
+```
+
+The extractor ignores routine informational lines, discards Caddy structured request fields,
+redacts request targets/URLs/IP addresses and other identity-like key/value fields, redacts Python
+exception messages, groups repeated sanitized events by fingerprint, and caps retained groups. It
+does not enable Caddy or Gunicorn access logging. To align diagnostics exactly with a capacity/resource
+run, reuse the resource report's capture window:
+
+```sh
+.venv/bin/python tools/deployment_diagnostics.py --resource-report reports/capacity-resources.json --output reports/capacity-diagnostics.json
+```
+
+Treat the generated JSON as short-lived operational evidence. If a concrete incident requires the
+raw log stream, inspect it interactively with restricted access rather than adding it to retained
+capacity/release evidence.
+
 ### Repeatable HTTP capacity scenario
 
 Use the dependency-free capacity runner against the HTTP entry point being evaluated, preferably an
