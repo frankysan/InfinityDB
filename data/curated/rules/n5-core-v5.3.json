@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 21,
+    "formatVersion": 22,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -16153,290 +16153,47 @@
                 ]
             },
             "facts": {
-                "definitionVersion": 1,
+                "definitionVersion": 2,
                 "mission": {
-                    "sides": [
-                        {
-                            "id": "side-a",
-                            "name": "Side A"
-                        },
-                        {
-                            "id": "side-b",
-                            "name": "Side B"
-                        }
-                    ],
-                    "gameSizes": [
-                        {
-                            "armyPoints": 150,
-                            "swc": 3,
-                            "configurationId": "150-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 38
-                        },
-                        {
-                            "armyPoints": 200,
-                            "swc": 4,
-                            "configurationId": "200-250-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 50
-                        },
-                        {
-                            "armyPoints": 250,
-                            "swc": 5,
-                            "configurationId": "200-250-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 63
-                        },
-                        {
-                            "armyPoints": 300,
-                            "swc": 6,
-                            "configurationId": "300-400-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 75
-                        },
-                        {
-                            "armyPoints": 350,
-                            "swc": 6,
-                            "configurationId": "300-400-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 88
-                        },
-                        {
-                            "armyPoints": 400,
-                            "swc": 8,
-                            "configurationId": "300-400-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 100
-                        }
-                    ],
+                    "setup": {
+                        "ref": "setup:minimum-vp",
+                        "gameSizeOverrides": [
+                            {
+                                "armyPoints": 350,
+                                "swc": 6
+                            }
+                        ]
+                    },
                     "objectives": [
                         {
-                            "id": "dominate-quadrants",
-                            "name": "Quadrants dominated",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-round",
-                            "aggregation": "exclusive",
-                            "maximumPoints": 6,
-                            "maximumPointsPerRound": 2,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150,
-                                        200,
-                                        250,
-                                        300,
-                                        350,
-                                        400
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "dominated-region-comparison",
-                                        "elementIds": [
-                                            "quadrant-1",
-                                            "quadrant-2",
-                                            "quadrant-3",
-                                            "quadrant-4"
-                                        ],
-                                        "comparison": "equal",
-                                        "minimum": 1
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        150,
-                                        200,
-                                        250,
-                                        300,
-                                        350,
-                                        400
-                                    ],
-                                    "objectivePoints": 2,
-                                    "condition": {
-                                        "kind": "dominated-region-comparison",
-                                        "elementIds": [
-                                            "quadrant-1",
-                                            "quadrant-2",
-                                            "quadrant-3",
-                                            "quadrant-4"
-                                        ],
-                                        "comparison": "greater"
-                                    }
-                                }
-                            ]
+                            "ref": "objective:domination-dominate-quadrants"
                         },
                         {
-                            "id": "hacked-consoles",
-                            "name": "Consoles hacked",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-game",
-                            "aggregation": "cumulative",
-                            "maximumPoints": 4,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150,
-                                        200,
-                                        250,
-                                        300,
-                                        350,
-                                        400
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "element-status-count",
-                                        "elementIds": [
-                                            "console-q1",
-                                            "console-q2",
-                                            "console-q3",
-                                            "console-q4"
-                                        ],
-                                        "status": "hacked"
-                                    }
-                                }
-                            ]
+                            "ref": "objective:domination-hacked-consoles"
                         }
                     ],
                     "rules": [
                         {
                             "id": "dominate-quadrants",
-                            "name": "Dominate Quadrants",
-                            "paragraphs": [
-                                "Count dominated Quadrants at the end of each Game Round, never earlier. Their boundaries are shown in the selected map.",
-                                "A player dominates a Quadrant by having more Victory Points inside it than the opponent. Count only Troopers represented by Models or Markers; Troopers classified as Null do not count.",
-                                "Tokens and Markers for weapons, Equipment, or anything other than a Trooper do not contribute Victory Points.",
-                                "A Trooper is inside a Quadrant only when more than half of its base lies within that Quadrant.",
-                                "A Trooper with [[skill:shasvastii]] inside a Quadrant contributes its Points while [[state:normal|Normal]] or in its Shasvastii-Embryo form."
-                            ]
+                            "ref": "rule:scenario:dominate-quadrants"
                         },
                         {
                             "id": "consoles",
-                            "name": "Consoles",
-                            "paragraphs": [
-                                "Place one Console at the center of each of the four scoring Quadrants, using the maintained marker positions in the selected map.",
-                                "Represent each Console with a Console A Marker or scenery of the same diameter."
-                            ]
-                        },
-                        {
-                            "id": "hack-consoles",
-                            "name": "Hack Consoles",
-                            "paragraphs": [
-                                "Hack Consoles is a Short Skill with the Attack Label. Only a Specialist Troop in Silhouette contact with the Console may declare it.",
-                                "A successful unopposed [[attribute:wip]] Roll Hacks the Console. A failed attempt may be repeated by spending another Short Skill and making another Roll.",
-                                "A Console can be Hacked again after the opponent has Hacked it. Only the most recent player to Hack it counts the Console as Hacked.",
-                                "A [[skill:hacker]] receives a +3 MOD to the unopposed [[attribute:wip]] Roll to Hack a Console."
-                            ]
+                            "ref": "rule:scenario:consoles"
                         },
                         {
                             "id": "specialist-troops",
-                            "name": "Specialist Troops",
-                            "paragraphs": [
-                                "For this mission, Specialist Troops are Troopers with [[skill:doctor]], [[skill:engineer]], [[skill:forward-observer]], [[skill:hacker]], [[skill:paramedic]], [[skill:specialist-operative]], or [[skill:chain-of-command]].",
-                                "[[skill:doctor:plural]] and [[skill:engineer:plural]] cannot use [[skill:peripheral:plural]] for tasks reserved for Specialist Troops."
-                            ]
+                            "ref": "rule:specialist-troops:standard",
+                            "addSkills": [],
+                            "removeSkills": []
                         }
                     ],
                     "endConditions": [
                         {
-                            "id": "round-limit",
-                            "checkAt": "end-of-round",
-                            "finishAt": "end-of-round",
-                            "condition": {
-                                "kind": "round-limit",
-                                "rounds": 3
-                            }
+                            "ref": "end-condition:round-limit"
                         },
                         {
-                            "id": "minimum-victory-points",
-                            "checkAt": "tactical-phase",
-                            "finishAt": "end-of-player-turn",
-                            "condition": {
-                                "kind": "minimum-victory-points",
-                                "text": "During the active player’s Tactical Phase, total the Victory Points of Troopers in their Army List that are not classified as Null. If the total is below the minimum Victory Points in the selected game-size row, finish the mission at the end of that Player Turn."
-                            }
+                            "ref": "end-condition:minimum-victory-points"
                         }
                     ],
                     "sourceIssues": [
@@ -17198,306 +16955,48 @@
                 ]
             },
             "facts": {
-                "definitionVersion": 1,
+                "definitionVersion": 2,
                 "mission": {
-                    "sides": [
-                        {
-                            "id": "side-a",
-                            "name": "Side A"
-                        },
-                        {
-                            "id": "side-b",
-                            "name": "Side B"
-                        }
-                    ],
-                    "gameSizes": [
-                        {
-                            "armyPoints": 150,
-                            "swc": 3,
-                            "configurationId": "150-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 38
-                        },
-                        {
-                            "armyPoints": 200,
-                            "swc": 4,
-                            "configurationId": "200-250-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 50
-                        },
-                        {
-                            "armyPoints": 250,
-                            "swc": 5,
-                            "configurationId": "200-250-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 63
-                        },
-                        {
-                            "armyPoints": 300,
-                            "swc": 6,
-                            "configurationId": "300-400-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 75
-                        },
-                        {
-                            "armyPoints": 350,
-                            "swc": 7,
-                            "configurationId": "300-400-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 88
-                        },
-                        {
-                            "armyPoints": 400,
-                            "swc": 8,
-                            "configurationId": "300-400-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ],
-                            "minimumVictoryPoints": 100
-                        }
-                    ],
+                    "setup": {
+                        "ref": "setup:minimum-vp"
+                    },
                     "objectives": [
                         {
-                            "id": "controlled-boxes",
-                            "name": "Supply Boxes controlled",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-game",
-                            "aggregation": "cumulative",
-                            "maximumPoints": 6,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150,
-                                        200,
-                                        250,
-                                        300,
-                                        350,
-                                        400
-                                    ],
-                                    "objectivePoints": 2,
-                                    "condition": {
-                                        "kind": "element-status-count",
-                                        "elementIds": [
-                                            "supply-box-left",
-                                            "supply-box-center",
-                                            "supply-box-right"
-                                        ],
-                                        "status": "controlled"
-                                    }
-                                }
-                            ]
+                            "ref": "objective:supplies-controlled-boxes"
                         },
                         {
-                            "id": "more-boxes",
-                            "name": "More Supply Boxes controlled",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-game",
-                            "aggregation": "exclusive",
-                            "maximumPoints": 2,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150,
-                                        200,
-                                        250,
-                                        300,
-                                        350,
-                                        400
-                                    ],
-                                    "objectivePoints": 2,
-                                    "condition": {
-                                        "kind": "element-status-comparison",
-                                        "elementIds": [
-                                            "supply-box-left",
-                                            "supply-box-center",
-                                            "supply-box-right"
-                                        ],
-                                        "status": "controlled",
-                                        "comparison": "greater"
-                                    }
-                                }
-                            ]
+                            "ref": "objective:supplies-more-boxes"
                         },
                         {
-                            "id": "all-boxes",
-                            "name": "All Supply Boxes controlled",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-game",
-                            "aggregation": "exclusive",
-                            "maximumPoints": 2,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150,
-                                        200,
-                                        250,
-                                        300,
-                                        350,
-                                        400
-                                    ],
-                                    "objectivePoints": 2,
-                                    "condition": {
-                                        "kind": "element-status-comparison",
-                                        "elementIds": [
-                                            "supply-box-left",
-                                            "supply-box-center",
-                                            "supply-box-right"
-                                        ],
-                                        "status": "controlled",
-                                        "comparison": "all"
-                                    }
-                                }
-                            ]
+                            "ref": "objective:supplies-all-boxes"
                         }
                     ],
                     "rules": [
                         {
                             "id": "supply-boxes",
-                            "name": "Supply Boxes",
-                            "paragraphs": [
-                                "Place three Supply Boxes: one at the center of the table and two on its center line, at the positions shown in the selected map.",
-                                "Represent each Supply Box with a Supply Box Marker or a similar scenery item.",
-                                "Deployment in Silhouette contact with a Supply Box is not permitted."
-                            ]
-                        },
-                        {
-                            "id": "pick-up-supply-boxes",
-                            "name": "Pick Up Supply Boxes",
-                            "paragraphs": [
-                                "Pick Up Supply Boxes is a Short Skill with the Attack Label, available to Specialist Troops.",
-                                "The Specialist must be in Silhouette contact with a Supply Box Token not being carried by a Model, with any Model classified as Null carrying a Supply Box Token, or with an allied Model in [[state:normal|Normal]] carrying a Supply Box Token.",
-                                "Spend one Short Skill to pick up the Supply Box without making a Roll, following the common Supply Box rules."
-                            ]
+                            "ref": "rule:scenario:supply-boxes"
                         },
                         {
                             "id": "carrying-supply-boxes",
-                            "name": "Carrying Supply Boxes",
-                            "paragraphs": [
-                                "Each Specialist Troop may carry at most one Supply Box.",
-                                "Only Models can carry Supply Boxes; Markers cannot carry them.",
-                                "Keep the Supply Box Token on the table even if its carrier becomes classified as Null."
-                            ]
+                            "ref": "rule:scenario:carrying-supply-boxes"
                         },
                         {
                             "id": "controlling-supply-boxes",
-                            "name": "Controlling Supply Boxes",
-                            "paragraphs": [
-                                "At game end, a player controls a Supply Box only if one of their Models is carrying it. A Marker cannot control a Supply Box.",
-                                "The carrier must not be classified as Null and must not be in Silhouette contact with any enemy Model."
-                            ]
+                            "ref": "rule:scenario:controlling-supply-boxes"
                         },
                         {
                             "id": "specialist-troops",
-                            "name": "Specialist Troops",
-                            "paragraphs": [
-                                "For this mission, Specialist Troops are Troopers with [[skill:doctor]], [[skill:engineer]], [[skill:forward-observer]], [[skill:hacker]], [[skill:paramedic]], [[skill:specialist-operative]], or [[skill:chain-of-command]].",
-                                "[[skill:doctor:plural]] and [[skill:engineer:plural]] cannot use [[skill:peripheral:plural]] for tasks reserved for Specialist Troops."
-                            ]
+                            "ref": "rule:specialist-troops:standard",
+                            "addSkills": [],
+                            "removeSkills": []
                         }
                     ],
                     "endConditions": [
                         {
-                            "id": "round-limit",
-                            "checkAt": "end-of-round",
-                            "finishAt": "end-of-round",
-                            "condition": {
-                                "kind": "round-limit",
-                                "rounds": 3
-                            }
+                            "ref": "end-condition:round-limit"
                         },
                         {
-                            "id": "minimum-victory-points",
-                            "checkAt": "tactical-phase",
-                            "finishAt": "end-of-player-turn",
-                            "condition": {
-                                "kind": "minimum-victory-points",
-                                "text": "During the active player’s Tactical Phase, total the Victory Points of Troopers in their Army List that are not classified as Null. If the total is below the minimum Victory Points in the selected game-size row, finish the mission at the end of that Player Turn."
-                            }
+                            "ref": "end-condition:minimum-victory-points"
                         }
                     ],
                     "sourceIssues": [
@@ -17991,650 +17490,34 @@
                 ]
             },
             "facts": {
-                "definitionVersion": 1,
+                "definitionVersion": 2,
                 "mission": {
-                    "sides": [
-                        {
-                            "id": "side-a",
-                            "name": "Side A"
-                        },
-                        {
-                            "id": "side-b",
-                            "name": "Side B"
-                        }
-                    ],
-                    "gameSizes": [
-                        {
-                            "armyPoints": 150,
-                            "swc": 3,
-                            "configurationId": "150-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "armyPoints": 200,
-                            "swc": 4,
-                            "configurationId": "200-250-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "armyPoints": 250,
-                            "swc": 5,
-                            "configurationId": "200-250-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "armyPoints": 300,
-                            "swc": 6,
-                            "configurationId": "300-400-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "armyPoints": 350,
-                            "swc": 7,
-                            "configurationId": "300-400-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "armyPoints": 400,
-                            "swc": 8,
-                            "configurationId": "300-400-points",
-                            "deployments": [
-                                {
-                                    "sideId": "side-a",
-                                    "elementIds": [
-                                        "deployment-a"
-                                    ]
-                                },
-                                {
-                                    "sideId": "side-b",
-                                    "elementIds": [
-                                        "deployment-b"
-                                    ]
-                                }
-                            ]
-                        }
-                    ],
+                    "setup": {
+                        "ref": "setup:standard-opposed"
+                    },
                     "objectives": [
                         {
-                            "id": "destroy-forces",
-                            "name": "Enemy forces eliminated",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-game",
-                            "aggregation": "exclusive",
-                            "maximumPoints": 4,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 40,
-                                        "maximum": 75
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        150
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 76,
-                                        "maximum": 125
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        150
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 126,
-                                        "maximum": null
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        200
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 50,
-                                        "maximum": 100
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        200
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 101,
-                                        "maximum": 150
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        200
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 151,
-                                        "maximum": null
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        250
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 65,
-                                        "maximum": 125
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        250
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 126,
-                                        "maximum": 200
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        250
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 201,
-                                        "maximum": null
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        300
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 75,
-                                        "maximum": 150
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        300
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 151,
-                                        "maximum": 250
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        300
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 251,
-                                        "maximum": null
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        350
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 85,
-                                        "maximum": 175
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        350
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 176,
-                                        "maximum": 270
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        350
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 271,
-                                        "maximum": null
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        400
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 100,
-                                        "maximum": 200
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        400
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 201,
-                                        "maximum": 300
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        400
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "enemy-army-points-killed",
-                                        "minimum": 301,
-                                        "maximum": null
-                                    }
-                                }
-                            ]
+                            "ref": "objective:annihilation-destroy-forces"
                         },
                         {
-                            "id": "preserve-forces",
-                            "name": "Surviving forces",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-game",
-                            "aggregation": "exclusive",
-                            "maximumPoints": 4,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 40,
-                                        "maximum": 75
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        150
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 76,
-                                        "maximum": 125
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        150
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 126,
-                                        "maximum": null
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        200
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 50,
-                                        "maximum": 100
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        200
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 101,
-                                        "maximum": 150
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        200
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 151,
-                                        "maximum": null
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        250
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 65,
-                                        "maximum": 125
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        250
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 126,
-                                        "maximum": 200
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        250
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 201,
-                                        "maximum": null
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        300
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 75,
-                                        "maximum": 150
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        300
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 151,
-                                        "maximum": 250
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        300
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 251,
-                                        "maximum": null
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        350
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 85,
-                                        "maximum": 150
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        350
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 176,
-                                        "maximum": 270
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        350
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 251,
-                                        "maximum": null
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        400
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 100,
-                                        "maximum": 200
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        400
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 201,
-                                        "maximum": 300
-                                    }
-                                },
-                                {
-                                    "armyPoints": [
-                                        400
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "numeric-range",
-                                        "metric": "surviving-victory-points",
-                                        "minimum": 301,
-                                        "maximum": null
-                                    }
-                                }
-                            ]
+                            "ref": "objective:annihilation-preserve-forces"
                         },
                         {
-                            "id": "eliminate-command",
-                            "name": "Enemy command eliminated",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-game",
-                            "aggregation": "exclusive",
-                            "maximumPoints": 2,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150,
-                                        200,
-                                        250,
-                                        300,
-                                        350,
-                                        400
-                                    ],
-                                    "objectivePoints": 2,
-                                    "condition": {
-                                        "kind": "reviewed-prose",
-                                        "text": "Kill the enemy [[skill:lieutenant]]."
-                                    }
-                                }
-                            ]
+                            "ref": "objective:annihilation-eliminate-command"
                         }
                     ],
                     "rules": [
                         {
                             "id": "killing",
-                            "name": "Killing",
-                            "paragraphs": [
-                                "An enemy Trooper counts as killed after entering [[state:dead]] or if it is classified as Null when the game ends.",
-                                "A Trooper that has never deployed on the table as a Model or Marker counts as killed when the game ends."
-                            ]
+                            "ref": "rule:scenario:killing"
                         }
                     ],
                     "endConditions": [
                         {
-                            "id": "round-limit",
-                            "checkAt": "end-of-round",
-                            "finishAt": "end-of-round",
-                            "condition": {
-                                "kind": "round-limit",
-                                "rounds": 3
-                            }
+                            "ref": "end-condition:round-limit"
                         },
                         {
-                            "id": "all-troopers-null",
-                            "checkAt": "tactical-phase",
-                            "finishAt": "end-of-player-turn",
-                            "condition": {
-                                "kind": "reviewed-prose",
-                                "text": "If the active player finds that all Troopers in their Army List are classified as Null during their Tactical Phase, finish the mission at the end of that Player Turn."
-                            }
+                            "ref": "end-condition:all-troopers-null"
                         }
                     ],
                     "sourceIssues": [
@@ -18656,97 +17539,7 @@
                             150
                         ],
                         "geometry": {
-                            "format": "InfinityDB scenario geometry",
-                            "formatVersion": 1,
-                            "title": "Annihilation",
-                            "table": {
-                                "width": 24,
-                                "height": 32,
-                                "unit": "in"
-                            },
-                            "elements": [
-                                {
-                                    "id": "deployment-a",
-                                    "kind": "rectangle",
-                                    "style": "deployment-a",
-                                    "x1": 0,
-                                    "y1": 0,
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": 8
-                                },
-                                {
-                                    "id": "deployment-b",
-                                    "kind": "rectangle",
-                                    "style": "deployment-b",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "bottom",
-                                        "offset": -8
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "bottom"
-                                    }
-                                },
-                                {
-                                    "id": "center-line",
-                                    "kind": "line",
-                                    "style": "guide",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "center"
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "center"
-                                    }
-                                },
-                                {
-                                    "id": "deployment-a-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": 4.0,
-                                    "text": "Deployment Zone A"
-                                },
-                                {
-                                    "id": "deployment-b-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": {
-                                        "anchor": "bottom",
-                                        "offset": -4.0
-                                    },
-                                    "text": "Deployment Zone B"
-                                }
-                            ],
-                            "annotations": [
-                                {
-                                    "id": "deployment-a-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-a",
-                                    "axis": "y",
-                                    "side": "start"
-                                },
-                                {
-                                    "id": "deployment-b-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-b",
-                                    "axis": "y",
-                                    "side": "start"
-                                }
-                            ]
+                            "ref": "geometry:standard-150-points"
                         }
                     },
                     {
@@ -18756,97 +17549,7 @@
                             250
                         ],
                         "geometry": {
-                            "format": "InfinityDB scenario geometry",
-                            "formatVersion": 1,
-                            "title": "Annihilation",
-                            "table": {
-                                "width": 32,
-                                "height": 48,
-                                "unit": "in"
-                            },
-                            "elements": [
-                                {
-                                    "id": "deployment-a",
-                                    "kind": "rectangle",
-                                    "style": "deployment-a",
-                                    "x1": 0,
-                                    "y1": 0,
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": 12
-                                },
-                                {
-                                    "id": "deployment-b",
-                                    "kind": "rectangle",
-                                    "style": "deployment-b",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "bottom",
-                                        "offset": -12
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "bottom"
-                                    }
-                                },
-                                {
-                                    "id": "center-line",
-                                    "kind": "line",
-                                    "style": "guide",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "center"
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "center"
-                                    }
-                                },
-                                {
-                                    "id": "deployment-a-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": 6.0,
-                                    "text": "Deployment Zone A"
-                                },
-                                {
-                                    "id": "deployment-b-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": {
-                                        "anchor": "bottom",
-                                        "offset": -6.0
-                                    },
-                                    "text": "Deployment Zone B"
-                                }
-                            ],
-                            "annotations": [
-                                {
-                                    "id": "deployment-a-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-a",
-                                    "axis": "y",
-                                    "side": "start"
-                                },
-                                {
-                                    "id": "deployment-b-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-b",
-                                    "axis": "y",
-                                    "side": "start"
-                                }
-                            ]
+                            "ref": "geometry:standard-200-250-points"
                         }
                     },
                     {
@@ -18857,97 +17560,7 @@
                             400
                         ],
                         "geometry": {
-                            "format": "InfinityDB scenario geometry",
-                            "formatVersion": 1,
-                            "title": "Annihilation",
-                            "table": {
-                                "width": 48,
-                                "height": 48,
-                                "unit": "in"
-                            },
-                            "elements": [
-                                {
-                                    "id": "deployment-a",
-                                    "kind": "rectangle",
-                                    "style": "deployment-a",
-                                    "x1": 0,
-                                    "y1": 0,
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": 12
-                                },
-                                {
-                                    "id": "deployment-b",
-                                    "kind": "rectangle",
-                                    "style": "deployment-b",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "bottom",
-                                        "offset": -12
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "bottom"
-                                    }
-                                },
-                                {
-                                    "id": "center-line",
-                                    "kind": "line",
-                                    "style": "guide",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "center"
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "center"
-                                    }
-                                },
-                                {
-                                    "id": "deployment-a-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": 6.0,
-                                    "text": "Deployment Zone A"
-                                },
-                                {
-                                    "id": "deployment-b-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": {
-                                        "anchor": "bottom",
-                                        "offset": -6.0
-                                    },
-                                    "text": "Deployment Zone B"
-                                }
-                            ],
-                            "annotations": [
-                                {
-                                    "id": "deployment-a-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-a",
-                                    "axis": "y",
-                                    "side": "start"
-                                },
-                                {
-                                    "id": "deployment-b-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-b",
-                                    "axis": "y",
-                                    "side": "start"
-                                }
-                            ]
+                            "ref": "geometry:standard-300-400-points"
                         }
                     }
                 ]
@@ -18985,8 +17598,604 @@
                 ]
             },
             "facts": {
-                "definitionVersion": 1,
+                "definitionVersion": 2,
                 "mission": {
+                    "setup": {
+                        "ref": "setup:standard-opposed"
+                    },
+                    "objectives": [
+                        {
+                            "ref": "objective:firefight-surviving-specialists"
+                        },
+                        {
+                            "ref": "objective:firefight-killed-specialists"
+                        },
+                        {
+                            "ref": "objective:firefight-killed-lieutenants"
+                        },
+                        {
+                            "ref": "objective:firefight-killed-army-points"
+                        }
+                    ],
+                    "rules": [
+                        {
+                            "id": "killing",
+                            "ref": "rule:scenario:killing"
+                        },
+                        {
+                            "id": "reinforced-tactical-link",
+                            "ref": "rule:scenario:reinforced-tactical-link"
+                        },
+                        {
+                            "id": "designated-landing-area",
+                            "ref": "rule:scenario:designated-landing-area"
+                        },
+                        {
+                            "id": "specialist-troops",
+                            "ref": "rule:specialist-troops:standard",
+                            "addSkills": [],
+                            "removeSkills": []
+                        }
+                    ],
+                    "endConditions": [
+                        {
+                            "ref": "end-condition:round-limit"
+                        },
+                        {
+                            "ref": "end-condition:all-troopers-null"
+                        }
+                    ],
+                    "sourceIssues": []
+                },
+                "configurations": [
+                    {
+                        "id": "150-points",
+                        "armyPoints": [
+                            150
+                        ],
+                        "geometry": {
+                            "ref": "geometry:standard-150-points"
+                        }
+                    },
+                    {
+                        "id": "200-250-points",
+                        "armyPoints": [
+                            200,
+                            250
+                        ],
+                        "geometry": {
+                            "ref": "geometry:standard-200-250-points"
+                        }
+                    },
+                    {
+                        "id": "300-400-points",
+                        "armyPoints": [
+                            300,
+                            350,
+                            400
+                        ],
+                        "geometry": {
+                            "ref": "geometry:standard-300-400-points"
+                        }
+                    }
+                ]
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 155,
+                    "section": "Firefight"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 156,
+                    "section": "Firefight"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "rule:scenario:dominate-quadrants",
+            "kind": "rule",
+            "name": "Dominate Quadrants",
+            "summary": "Rules for Dominate Quadrants.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ],
+                "scenarios": [
+                    "scenario:domination"
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "facts": {
+                "category": "scenario-rule",
+                "effects": [
+                    "Count dominated Quadrants at the end of each Game Round, never earlier. Their boundaries are shown in the selected map.",
+                    "A player dominates a Quadrant by having more Victory Points inside it than the opponent. Count only Troopers represented by Models or Markers; Troopers classified as Null do not count.",
+                    "Tokens and Markers for weapons, Equipment, or anything other than a Trooper do not contribute Victory Points.",
+                    "A Trooper is inside a Quadrant only when more than half of its base lies within that Quadrant.",
+                    "A Trooper with [[skill:shasvastii]] inside a Quadrant contributes its Points while [[state:normal|Normal]] or in its Shasvastii-Embryo form."
+                ],
+                "restrictions": [],
+                "definesSkills": []
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 151,
+                    "section": "Domination — Dominate Quadrants"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "rule:scenario:consoles",
+            "kind": "rule",
+            "name": "Consoles",
+            "summary": "Rules for Consoles.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ],
+                "scenarios": [
+                    "scenario:domination"
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "facts": {
+                "category": "scenario-rule",
+                "effects": [
+                    "Place one Console at the center of each of the four scoring Quadrants, using the maintained marker positions in the selected map.",
+                    "Represent each Console with a Console A Marker or scenery of the same diameter."
+                ],
+                "restrictions": [],
+                "definesSkills": [
+                    "skill:hack-consoles"
+                ]
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 151,
+                    "section": "Domination — Consoles"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "rule:specialist-troops:standard",
+            "kind": "rule",
+            "name": "Specialist Troops",
+            "summary": "Skills that qualify a Trooper as a Specialist for the applicable scenario.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ],
+                "scenarios": [
+                    "scenario:domination",
+                    "scenario:supplies",
+                    "scenario:firefight"
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "facts": {
+                "category": "scenario-rule",
+                "effects": [],
+                "restrictions": [
+                    "[[skill:doctor:plural]] and [[skill:engineer:plural]] cannot use [[skill:peripheral:plural]] for tasks reserved for Specialist Troops.",
+                    "The Non Specialist variant of [[skill:chain-of-command]] does not grant Specialist status through that Skill. Other qualifying Skills still apply."
+                ],
+                "definesSkills": [],
+                "specialists": {
+                    "anyOfSkills": [
+                        "skill:doctor",
+                        "skill:engineer",
+                        "skill:forward-observer",
+                        "skill:hacker",
+                        "skill:paramedic",
+                        "skill:specialist-operative",
+                        "skill:chain-of-command"
+                    ]
+                }
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 152,
+                    "section": "Domination — Specialist Troops"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 154,
+                    "section": "Supplies — Specialist Troops"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 155,
+                    "section": "Firefight — Specialist Troops"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "rule:scenario:supply-boxes",
+            "kind": "rule",
+            "name": "Supply Boxes",
+            "summary": "Rules for Supply Boxes.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ],
+                "scenarios": [
+                    "scenario:supplies"
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "facts": {
+                "category": "scenario-rule",
+                "effects": [
+                    "Place three Supply Boxes: one at the center of the table and two on its center line, at the positions shown in the selected map.",
+                    "Represent each Supply Box with a Supply Box Marker or a similar scenery item.",
+                    "Deployment in Silhouette contact with a Supply Box is not permitted."
+                ],
+                "restrictions": [],
+                "definesSkills": [
+                    "skill:pick-up-supply-boxes"
+                ]
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 153,
+                    "section": "Supplies — Supply Boxes"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "rule:scenario:carrying-supply-boxes",
+            "kind": "rule",
+            "name": "Carrying Supply Boxes",
+            "summary": "Rules for Carrying Supply Boxes.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ],
+                "scenarios": [
+                    "scenario:supplies"
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "facts": {
+                "category": "scenario-rule",
+                "effects": [
+                    "Each Specialist Troop may carry at most one Supply Box.",
+                    "Only Models can carry Supply Boxes; Markers cannot carry them.",
+                    "Keep the Supply Box Token on the table even if its carrier becomes classified as Null."
+                ],
+                "restrictions": [],
+                "definesSkills": []
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 153,
+                    "section": "Supplies — Carrying Supply Boxes"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "rule:scenario:controlling-supply-boxes",
+            "kind": "rule",
+            "name": "Controlling Supply Boxes",
+            "summary": "Rules for Controlling Supply Boxes.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ],
+                "scenarios": [
+                    "scenario:supplies"
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "facts": {
+                "category": "scenario-rule",
+                "effects": [
+                    "At game end, a player controls a Supply Box only if one of their Models is carrying it. A Marker cannot control a Supply Box.",
+                    "The carrier must not be classified as Null and must not be in Silhouette contact with any enemy Model."
+                ],
+                "restrictions": [],
+                "definesSkills": []
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 153,
+                    "section": "Supplies — Controlling Supply Boxes"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "rule:scenario:killing",
+            "kind": "rule",
+            "name": "Killing",
+            "summary": "Rules for Killing.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ],
+                "scenarios": [
+                    "scenario:annihilation",
+                    "scenario:firefight"
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "facts": {
+                "category": "scenario-rule",
+                "effects": [
+                    "An enemy Trooper counts as killed after entering [[state:dead]] or if it is classified as Null when the game ends.",
+                    "A Trooper that has never deployed on the table as a Model or Marker counts as killed when the game ends."
+                ],
+                "restrictions": [],
+                "definesSkills": []
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 150,
+                    "section": "Annihilation — Killing"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 155,
+                    "section": "Firefight — Killing"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "rule:scenario:reinforced-tactical-link",
+            "kind": "rule",
+            "name": "Reinforced Tactical Link",
+            "summary": "Rules for Reinforced Tactical Link.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ],
+                "scenarios": [
+                    "scenario:firefight"
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "facts": {
+                "category": "scenario-rule",
+                "effects": [
+                    "For this mission, the identity of the [[skill:lieutenant]] is always Open Information. If represented by a Marker, identify which Marker is the [[skill:lieutenant]].",
+                    "The [[skill:lieutenant]] must be on the game table at the beginning of the first Game Round, as a Model or Marker.",
+                    "At the start of the Tactical Phase of your Active Turn, if you lack a [[skill:lieutenant]] because that Trooper was not deployed or is classified as Null, appoint a new [[skill:lieutenant]] without spending an Order.",
+                    "The replacement [[skill:lieutenant]] must be a Model or Marker on the table, and its identity is also Open Information."
+                ],
+                "restrictions": [],
+                "definesSkills": []
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 155,
+                    "section": "Firefight — Reinforced Tactical Link"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "rule:scenario:designated-landing-area",
+            "kind": "rule",
+            "name": "Designated Landing Area",
+            "summary": "Rules for Designated Landing Area.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ],
+                "scenarios": [
+                    "scenario:firefight"
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "facts": {
+                "category": "scenario-rule",
+                "effects": [
+                    "The whole game table is a Designated Landing Area. A Trooper with [[skill:combat-jump]] may apply a +3 MOD to its deployment [[attribute:ph]] Roll.",
+                    "This +3 MOD is cumulative with MODs provided by other rules.",
+                    "A Trooper with a Special Skill carrying the Airborne Deployment (AD) Label ignores the prohibition against deploying inside the enemy Deployment Zone."
+                ],
+                "restrictions": [],
+                "definesSkills": []
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 155,
+                    "section": "Firefight — Designated Landing Area"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "skill:hack-consoles",
+            "kind": "skill",
+            "name": "Hack Consoles",
+            "summary": "A Short Skill used by Specialist Troops to Hack a Console.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ],
+                "scenarios": [
+                    "scenario:domination"
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "labelIds": [
+                "attack"
+            ],
+            "facts": {
+                "category": "scenario-skill",
+                "typeIds": [
+                    "short-skill"
+                ],
+                "requirements": [
+                    "Only Specialist Troops may declare this Skill.",
+                    "The Specialist Troop must be in Silhouette contact with a Console."
+                ],
+                "effects": [
+                    "A successful unopposed [[attribute:wip]] Roll Hacks the Console. A failed attempt may be repeated by spending another Short Skill and making another Roll.",
+                    "A Console can be Hacked again after the opponent has Hacked it. Only the most recent player to Hack it counts the Console as Hacked.",
+                    "A [[skill:hacker]] receives a +3 MOD to the unopposed [[attribute:wip]] Roll to Hack a Console."
+                ],
+                "restrictions": []
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 151,
+                    "section": "Hack Consoles"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "skill:pick-up-supply-boxes",
+            "kind": "skill",
+            "name": "Pick Up Supply Boxes",
+            "summary": "A Short Skill used by Specialist Troops to collect a Supply Box.",
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ],
+                "scenarios": [
+                    "scenario:supplies"
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "labelIds": [
+                "attack"
+            ],
+            "facts": {
+                "category": "scenario-skill",
+                "typeIds": [
+                    "short-skill"
+                ],
+                "requirements": [
+                    "Only Specialist Troops may declare this Skill.",
+                    "The Specialist must be in Silhouette contact with a Supply Box Token not being carried by a Model, with any Model classified as Null carrying a Supply Box Token, or with an allied Model in [[state:normal|Normal]] carrying a Supply Box Token."
+                ],
+                "effects": [
+                    "Spend one Short Skill to pick up the Supply Box without making a Roll, following the common Supply Box rules."
+                ],
+                "restrictions": [
+                    "Follow the common Supply Box carrying and control rules for this scenario."
+                ]
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 153,
+                    "section": "Pick Up Supply Boxes"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        }
+    ],
+    "scenarioComponents": {
+        "formatVersion": 1,
+        "definitions": [
+            {
+                "id": "setup:standard-opposed",
+                "kind": "setup",
+                "payload": {
                     "sides": [
                         {
                             "id": "side-a",
@@ -19112,504 +18321,1426 @@
                                 }
                             ]
                         }
-                    ],
-                    "objectives": [
-                        {
-                            "id": "surviving-specialists",
-                            "name": "More surviving Specialist Troops",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-game",
-                            "aggregation": "exclusive",
-                            "maximumPoints": 2,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150,
-                                        200,
-                                        250,
-                                        300,
-                                        350,
-                                        400
-                                    ],
-                                    "objectivePoints": 2,
-                                    "condition": {
-                                        "kind": "metric-comparison",
-                                        "metric": "surviving-specialist-troops",
-                                        "comparison": "greater"
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": "killed-specialists",
-                            "name": "More enemy Specialist Troops killed",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-game",
-                            "aggregation": "exclusive",
-                            "maximumPoints": 1,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150,
-                                        200,
-                                        250,
-                                        300,
-                                        350,
-                                        400
-                                    ],
-                                    "objectivePoints": 1,
-                                    "condition": {
-                                        "kind": "metric-comparison",
-                                        "metric": "enemy-specialist-troops-killed",
-                                        "comparison": "greater"
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": "killed-lieutenants",
-                            "name": "More enemy [[skill:lieutenant:plural]] killed",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-game",
-                            "aggregation": "exclusive",
-                            "maximumPoints": 3,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150,
-                                        200,
-                                        250,
-                                        300,
-                                        350,
-                                        400
-                                    ],
-                                    "objectivePoints": 3,
-                                    "condition": {
-                                        "kind": "metric-comparison",
-                                        "metric": "enemy-lieutenants-killed",
-                                        "comparison": "greater"
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "id": "killed-army-points",
-                            "name": "More enemy Army Points killed",
-                            "sideIds": [
-                                "side-a",
-                                "side-b"
-                            ],
-                            "timing": "end-of-game",
-                            "aggregation": "exclusive",
-                            "maximumPoints": 4,
-                            "awards": [
-                                {
-                                    "armyPoints": [
-                                        150,
-                                        200,
-                                        250,
-                                        300,
-                                        350,
-                                        400
-                                    ],
-                                    "objectivePoints": 4,
-                                    "condition": {
-                                        "kind": "metric-comparison",
-                                        "metric": "enemy-army-points-killed",
-                                        "comparison": "greater"
-                                    }
-                                }
-                            ]
-                        }
-                    ],
-                    "rules": [
-                        {
-                            "id": "killing",
-                            "name": "Killing",
-                            "paragraphs": [
-                                "An enemy Trooper counts as killed after entering [[state:dead]] or if it is classified as Null when the game ends.",
-                                "A Trooper that has never deployed on the table as a Model or Marker counts as killed when the game ends."
-                            ]
-                        },
-                        {
-                            "id": "reinforced-tactical-link",
-                            "name": "Reinforced Tactical Link",
-                            "paragraphs": [
-                                "For this mission, the identity of the [[skill:lieutenant]] is always Open Information. If represented by a Marker, identify which Marker is the [[skill:lieutenant]].",
-                                "The [[skill:lieutenant]] must be on the game table at the beginning of the first Game Round, as a Model or Marker.",
-                                "At the start of the Tactical Phase of your Active Turn, if you lack a [[skill:lieutenant]] because that Trooper was not deployed or is classified as Null, appoint a new [[skill:lieutenant]] without spending an Order.",
-                                "The replacement [[skill:lieutenant]] must be a Model or Marker on the table, and its identity is also Open Information."
-                            ]
-                        },
-                        {
-                            "id": "designated-landing-area",
-                            "name": "Designated Landing Area",
-                            "paragraphs": [
-                                "The whole game table is a Designated Landing Area. A Trooper with [[skill:combat-jump]] may apply a +3 MOD to its deployment [[attribute:ph]] Roll.",
-                                "This +3 MOD is cumulative with MODs provided by other rules.",
-                                "A Trooper with a Special Skill carrying the Airborne Deployment (AD) Label ignores the prohibition against deploying inside the enemy Deployment Zone."
-                            ]
-                        },
-                        {
-                            "id": "specialist-troops",
-                            "name": "Specialist Troops",
-                            "paragraphs": [
-                                "For this mission, Specialist Troops are Troopers with [[skill:doctor]], [[skill:engineer]], [[skill:forward-observer]], [[skill:hacker]], [[skill:paramedic]], [[skill:specialist-operative]], or [[skill:chain-of-command]].",
-                                "[[skill:doctor:plural]] and [[skill:engineer:plural]] cannot use [[skill:peripheral:plural]] for tasks reserved for Specialist Troops."
-                            ]
-                        }
-                    ],
-                    "endConditions": [
-                        {
-                            "id": "round-limit",
-                            "checkAt": "end-of-round",
-                            "finishAt": "end-of-round",
-                            "condition": {
-                                "kind": "round-limit",
-                                "rounds": 3
-                            }
-                        },
-                        {
-                            "id": "all-troopers-null",
-                            "checkAt": "tactical-phase",
-                            "finishAt": "end-of-player-turn",
-                            "condition": {
-                                "kind": "reviewed-prose",
-                                "text": "If the active player finds that all Troopers in their Army List are classified as Null during their Tactical Phase, finish the mission at the end of that Player Turn."
-                            }
-                        }
-                    ],
-                    "sourceIssues": []
+                    ]
                 },
-                "configurations": [
+                "scenarios": [
+                    "scenario:domination",
+                    "scenario:supplies",
+                    "scenario:annihilation",
+                    "scenario:firefight"
+                ],
+                "citations": [
                     {
-                        "id": "150-points",
-                        "armyPoints": [
-                            150
-                        ],
-                        "geometry": {
-                            "format": "InfinityDB scenario geometry",
-                            "formatVersion": 1,
-                            "title": "Firefight",
-                            "table": {
-                                "width": 24,
-                                "height": 32,
-                                "unit": "in"
-                            },
-                            "elements": [
-                                {
-                                    "id": "deployment-a",
-                                    "kind": "rectangle",
-                                    "style": "deployment-a",
-                                    "x1": 0,
-                                    "y1": 0,
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": 8
-                                },
-                                {
-                                    "id": "deployment-b",
-                                    "kind": "rectangle",
-                                    "style": "deployment-b",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "bottom",
-                                        "offset": -8
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "bottom"
-                                    }
-                                },
-                                {
-                                    "id": "center-line",
-                                    "kind": "line",
-                                    "style": "guide",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "center"
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "center"
-                                    }
-                                },
-                                {
-                                    "id": "deployment-a-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": 4.0,
-                                    "text": "Deployment Zone A"
-                                },
-                                {
-                                    "id": "deployment-b-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": {
-                                        "anchor": "bottom",
-                                        "offset": -4.0
-                                    },
-                                    "text": "Deployment Zone B"
-                                }
-                            ],
-                            "annotations": [
-                                {
-                                    "id": "deployment-a-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-a",
-                                    "axis": "y",
-                                    "side": "start"
-                                },
-                                {
-                                    "id": "deployment-b-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-b",
-                                    "axis": "y",
-                                    "side": "start"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "id": "200-250-points",
-                        "armyPoints": [
-                            200,
-                            250
-                        ],
-                        "geometry": {
-                            "format": "InfinityDB scenario geometry",
-                            "formatVersion": 1,
-                            "title": "Firefight",
-                            "table": {
-                                "width": 32,
-                                "height": 48,
-                                "unit": "in"
-                            },
-                            "elements": [
-                                {
-                                    "id": "deployment-a",
-                                    "kind": "rectangle",
-                                    "style": "deployment-a",
-                                    "x1": 0,
-                                    "y1": 0,
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": 12
-                                },
-                                {
-                                    "id": "deployment-b",
-                                    "kind": "rectangle",
-                                    "style": "deployment-b",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "bottom",
-                                        "offset": -12
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "bottom"
-                                    }
-                                },
-                                {
-                                    "id": "center-line",
-                                    "kind": "line",
-                                    "style": "guide",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "center"
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "center"
-                                    }
-                                },
-                                {
-                                    "id": "deployment-a-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": 6.0,
-                                    "text": "Deployment Zone A"
-                                },
-                                {
-                                    "id": "deployment-b-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": {
-                                        "anchor": "bottom",
-                                        "offset": -6.0
-                                    },
-                                    "text": "Deployment Zone B"
-                                }
-                            ],
-                            "annotations": [
-                                {
-                                    "id": "deployment-a-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-a",
-                                    "axis": "y",
-                                    "side": "start"
-                                },
-                                {
-                                    "id": "deployment-b-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-b",
-                                    "axis": "y",
-                                    "side": "start"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "id": "300-400-points",
-                        "armyPoints": [
-                            300,
-                            350,
-                            400
-                        ],
-                        "geometry": {
-                            "format": "InfinityDB scenario geometry",
-                            "formatVersion": 1,
-                            "title": "Firefight",
-                            "table": {
-                                "width": 48,
-                                "height": 48,
-                                "unit": "in"
-                            },
-                            "elements": [
-                                {
-                                    "id": "deployment-a",
-                                    "kind": "rectangle",
-                                    "style": "deployment-a",
-                                    "x1": 0,
-                                    "y1": 0,
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": 12
-                                },
-                                {
-                                    "id": "deployment-b",
-                                    "kind": "rectangle",
-                                    "style": "deployment-b",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "bottom",
-                                        "offset": -12
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "bottom"
-                                    }
-                                },
-                                {
-                                    "id": "center-line",
-                                    "kind": "line",
-                                    "style": "guide",
-                                    "x1": 0,
-                                    "y1": {
-                                        "anchor": "center"
-                                    },
-                                    "x2": {
-                                        "anchor": "right"
-                                    },
-                                    "y2": {
-                                        "anchor": "center"
-                                    }
-                                },
-                                {
-                                    "id": "deployment-a-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": 6.0,
-                                    "text": "Deployment Zone A"
-                                },
-                                {
-                                    "id": "deployment-b-label",
-                                    "kind": "label",
-                                    "style": "label",
-                                    "x": {
-                                        "anchor": "center"
-                                    },
-                                    "y": {
-                                        "anchor": "bottom",
-                                        "offset": -6.0
-                                    },
-                                    "text": "Deployment Zone B"
-                                }
-                            ],
-                            "annotations": [
-                                {
-                                    "id": "deployment-a-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-a",
-                                    "axis": "y",
-                                    "side": "start"
-                                },
-                                {
-                                    "id": "deployment-b-depth",
-                                    "kind": "dimension",
-                                    "target": "deployment-b",
-                                    "axis": "y",
-                                    "side": "start"
-                                }
-                            ]
-                        }
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 150,
+                        "section": "Scenarios"
                     }
                 ]
             },
-            "relations": [],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 155,
-                    "section": "Firefight"
+            {
+                "id": "setup:minimum-vp",
+                "kind": "setup",
+                "payload": {
+                    "ref": "setup:standard-opposed",
+                    "gameSizeOverrides": [
+                        {
+                            "armyPoints": 150,
+                            "minimumVictoryPoints": 38
+                        },
+                        {
+                            "armyPoints": 200,
+                            "minimumVictoryPoints": 50
+                        },
+                        {
+                            "armyPoints": 250,
+                            "minimumVictoryPoints": 63
+                        },
+                        {
+                            "armyPoints": 300,
+                            "minimumVictoryPoints": 75
+                        },
+                        {
+                            "armyPoints": 350,
+                            "minimumVictoryPoints": 88
+                        },
+                        {
+                            "armyPoints": 400,
+                            "minimumVictoryPoints": 100
+                        }
+                    ]
                 },
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 156,
-                    "section": "Firefight"
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-10-07"
+                "scenarios": [
+                    "scenario:domination",
+                    "scenario:supplies"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 151,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "end-condition:round-limit",
+                "kind": "end-condition",
+                "payload": {
+                    "id": "round-limit",
+                    "checkAt": "end-of-round",
+                    "finishAt": "end-of-round",
+                    "condition": {
+                        "kind": "round-limit",
+                        "rounds": 3
+                    }
+                },
+                "scenarios": [
+                    "scenario:domination",
+                    "scenario:supplies",
+                    "scenario:annihilation",
+                    "scenario:firefight"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 150,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "end-condition:all-troopers-null",
+                "kind": "end-condition",
+                "payload": {
+                    "id": "all-troopers-null",
+                    "checkAt": "tactical-phase",
+                    "finishAt": "end-of-player-turn",
+                    "condition": {
+                        "kind": "reviewed-prose",
+                        "text": "If the active player finds that all Troopers in their Army List are classified as Null during their Tactical Phase, finish the mission at the end of that Player Turn."
+                    }
+                },
+                "scenarios": [
+                    "scenario:annihilation",
+                    "scenario:firefight"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 150,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "end-condition:minimum-victory-points",
+                "kind": "end-condition",
+                "payload": {
+                    "id": "minimum-victory-points",
+                    "checkAt": "tactical-phase",
+                    "finishAt": "end-of-player-turn",
+                    "condition": {
+                        "kind": "minimum-victory-points",
+                        "text": "During the active player’s Tactical Phase, total the Victory Points of Troopers in their Army List that are not classified as Null. If the total is below the minimum Victory Points in the selected game-size row, finish the mission at the end of that Player Turn."
+                    }
+                },
+                "scenarios": [
+                    "scenario:domination",
+                    "scenario:supplies"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 152,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "geometry:standard-150-points",
+                "kind": "geometry",
+                "payload": {
+                    "format": "InfinityDB scenario geometry",
+                    "formatVersion": 1,
+                    "title": "Annihilation",
+                    "table": {
+                        "width": 24,
+                        "height": 32,
+                        "unit": "in"
+                    },
+                    "elements": [
+                        {
+                            "id": "deployment-a",
+                            "kind": "rectangle",
+                            "style": "deployment-a",
+                            "x1": 0,
+                            "y1": 0,
+                            "x2": {
+                                "anchor": "right"
+                            },
+                            "y2": 8
+                        },
+                        {
+                            "id": "deployment-b",
+                            "kind": "rectangle",
+                            "style": "deployment-b",
+                            "x1": 0,
+                            "y1": {
+                                "anchor": "bottom",
+                                "offset": -8
+                            },
+                            "x2": {
+                                "anchor": "right"
+                            },
+                            "y2": {
+                                "anchor": "bottom"
+                            }
+                        },
+                        {
+                            "id": "center-line",
+                            "kind": "line",
+                            "style": "guide",
+                            "x1": 0,
+                            "y1": {
+                                "anchor": "center"
+                            },
+                            "x2": {
+                                "anchor": "right"
+                            },
+                            "y2": {
+                                "anchor": "center"
+                            }
+                        },
+                        {
+                            "id": "deployment-a-label",
+                            "kind": "label",
+                            "style": "label",
+                            "x": {
+                                "anchor": "center"
+                            },
+                            "y": 4.0,
+                            "text": "Deployment Zone A"
+                        },
+                        {
+                            "id": "deployment-b-label",
+                            "kind": "label",
+                            "style": "label",
+                            "x": {
+                                "anchor": "center"
+                            },
+                            "y": {
+                                "anchor": "bottom",
+                                "offset": -4.0
+                            },
+                            "text": "Deployment Zone B"
+                        }
+                    ],
+                    "annotations": [
+                        {
+                            "id": "deployment-a-depth",
+                            "kind": "dimension",
+                            "target": "deployment-a",
+                            "axis": "y",
+                            "side": "start"
+                        },
+                        {
+                            "id": "deployment-b-depth",
+                            "kind": "dimension",
+                            "target": "deployment-b",
+                            "axis": "y",
+                            "side": "start"
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:annihilation",
+                    "scenario:firefight"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 150,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "geometry:standard-200-250-points",
+                "kind": "geometry",
+                "payload": {
+                    "format": "InfinityDB scenario geometry",
+                    "formatVersion": 1,
+                    "title": "Annihilation",
+                    "table": {
+                        "width": 32,
+                        "height": 48,
+                        "unit": "in"
+                    },
+                    "elements": [
+                        {
+                            "id": "deployment-a",
+                            "kind": "rectangle",
+                            "style": "deployment-a",
+                            "x1": 0,
+                            "y1": 0,
+                            "x2": {
+                                "anchor": "right"
+                            },
+                            "y2": 12
+                        },
+                        {
+                            "id": "deployment-b",
+                            "kind": "rectangle",
+                            "style": "deployment-b",
+                            "x1": 0,
+                            "y1": {
+                                "anchor": "bottom",
+                                "offset": -12
+                            },
+                            "x2": {
+                                "anchor": "right"
+                            },
+                            "y2": {
+                                "anchor": "bottom"
+                            }
+                        },
+                        {
+                            "id": "center-line",
+                            "kind": "line",
+                            "style": "guide",
+                            "x1": 0,
+                            "y1": {
+                                "anchor": "center"
+                            },
+                            "x2": {
+                                "anchor": "right"
+                            },
+                            "y2": {
+                                "anchor": "center"
+                            }
+                        },
+                        {
+                            "id": "deployment-a-label",
+                            "kind": "label",
+                            "style": "label",
+                            "x": {
+                                "anchor": "center"
+                            },
+                            "y": 6.0,
+                            "text": "Deployment Zone A"
+                        },
+                        {
+                            "id": "deployment-b-label",
+                            "kind": "label",
+                            "style": "label",
+                            "x": {
+                                "anchor": "center"
+                            },
+                            "y": {
+                                "anchor": "bottom",
+                                "offset": -6.0
+                            },
+                            "text": "Deployment Zone B"
+                        }
+                    ],
+                    "annotations": [
+                        {
+                            "id": "deployment-a-depth",
+                            "kind": "dimension",
+                            "target": "deployment-a",
+                            "axis": "y",
+                            "side": "start"
+                        },
+                        {
+                            "id": "deployment-b-depth",
+                            "kind": "dimension",
+                            "target": "deployment-b",
+                            "axis": "y",
+                            "side": "start"
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:annihilation",
+                    "scenario:firefight"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 150,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "geometry:standard-300-400-points",
+                "kind": "geometry",
+                "payload": {
+                    "format": "InfinityDB scenario geometry",
+                    "formatVersion": 1,
+                    "title": "Annihilation",
+                    "table": {
+                        "width": 48,
+                        "height": 48,
+                        "unit": "in"
+                    },
+                    "elements": [
+                        {
+                            "id": "deployment-a",
+                            "kind": "rectangle",
+                            "style": "deployment-a",
+                            "x1": 0,
+                            "y1": 0,
+                            "x2": {
+                                "anchor": "right"
+                            },
+                            "y2": 12
+                        },
+                        {
+                            "id": "deployment-b",
+                            "kind": "rectangle",
+                            "style": "deployment-b",
+                            "x1": 0,
+                            "y1": {
+                                "anchor": "bottom",
+                                "offset": -12
+                            },
+                            "x2": {
+                                "anchor": "right"
+                            },
+                            "y2": {
+                                "anchor": "bottom"
+                            }
+                        },
+                        {
+                            "id": "center-line",
+                            "kind": "line",
+                            "style": "guide",
+                            "x1": 0,
+                            "y1": {
+                                "anchor": "center"
+                            },
+                            "x2": {
+                                "anchor": "right"
+                            },
+                            "y2": {
+                                "anchor": "center"
+                            }
+                        },
+                        {
+                            "id": "deployment-a-label",
+                            "kind": "label",
+                            "style": "label",
+                            "x": {
+                                "anchor": "center"
+                            },
+                            "y": 6.0,
+                            "text": "Deployment Zone A"
+                        },
+                        {
+                            "id": "deployment-b-label",
+                            "kind": "label",
+                            "style": "label",
+                            "x": {
+                                "anchor": "center"
+                            },
+                            "y": {
+                                "anchor": "bottom",
+                                "offset": -6.0
+                            },
+                            "text": "Deployment Zone B"
+                        }
+                    ],
+                    "annotations": [
+                        {
+                            "id": "deployment-a-depth",
+                            "kind": "dimension",
+                            "target": "deployment-a",
+                            "axis": "y",
+                            "side": "start"
+                        },
+                        {
+                            "id": "deployment-b-depth",
+                            "kind": "dimension",
+                            "target": "deployment-b",
+                            "axis": "y",
+                            "side": "start"
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:annihilation",
+                    "scenario:firefight"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 150,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:domination-dominate-quadrants",
+                "kind": "objective",
+                "payload": {
+                    "id": "dominate-quadrants",
+                    "name": "Quadrants dominated",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-round",
+                    "aggregation": "exclusive",
+                    "maximumPoints": 6,
+                    "maximumPointsPerRound": 2,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150,
+                                200,
+                                250,
+                                300,
+                                350,
+                                400
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "dominated-region-comparison",
+                                "elementIds": [
+                                    "quadrant-1",
+                                    "quadrant-2",
+                                    "quadrant-3",
+                                    "quadrant-4"
+                                ],
+                                "comparison": "equal",
+                                "minimum": 1
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                150,
+                                200,
+                                250,
+                                300,
+                                350,
+                                400
+                            ],
+                            "objectivePoints": 2,
+                            "condition": {
+                                "kind": "dominated-region-comparison",
+                                "elementIds": [
+                                    "quadrant-1",
+                                    "quadrant-2",
+                                    "quadrant-3",
+                                    "quadrant-4"
+                                ],
+                                "comparison": "greater"
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:domination"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 151,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:domination-hacked-consoles",
+                "kind": "objective",
+                "payload": {
+                    "id": "hacked-consoles",
+                    "name": "Consoles hacked",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-game",
+                    "aggregation": "cumulative",
+                    "maximumPoints": 4,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150,
+                                200,
+                                250,
+                                300,
+                                350,
+                                400
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "element-status-count",
+                                "elementIds": [
+                                    "console-q1",
+                                    "console-q2",
+                                    "console-q3",
+                                    "console-q4"
+                                ],
+                                "status": "hacked"
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:domination"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 151,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:supplies-controlled-boxes",
+                "kind": "objective",
+                "payload": {
+                    "id": "controlled-boxes",
+                    "name": "Supply Boxes controlled",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-game",
+                    "aggregation": "cumulative",
+                    "maximumPoints": 6,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150,
+                                200,
+                                250,
+                                300,
+                                350,
+                                400
+                            ],
+                            "objectivePoints": 2,
+                            "condition": {
+                                "kind": "element-status-count",
+                                "elementIds": [
+                                    "supply-box-left",
+                                    "supply-box-center",
+                                    "supply-box-right"
+                                ],
+                                "status": "controlled"
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:supplies"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 153,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:supplies-more-boxes",
+                "kind": "objective",
+                "payload": {
+                    "id": "more-boxes",
+                    "name": "More Supply Boxes controlled",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-game",
+                    "aggregation": "exclusive",
+                    "maximumPoints": 2,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150,
+                                200,
+                                250,
+                                300,
+                                350,
+                                400
+                            ],
+                            "objectivePoints": 2,
+                            "condition": {
+                                "kind": "element-status-comparison",
+                                "elementIds": [
+                                    "supply-box-left",
+                                    "supply-box-center",
+                                    "supply-box-right"
+                                ],
+                                "status": "controlled",
+                                "comparison": "greater"
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:supplies"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 153,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:supplies-all-boxes",
+                "kind": "objective",
+                "payload": {
+                    "id": "all-boxes",
+                    "name": "All Supply Boxes controlled",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-game",
+                    "aggregation": "exclusive",
+                    "maximumPoints": 2,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150,
+                                200,
+                                250,
+                                300,
+                                350,
+                                400
+                            ],
+                            "objectivePoints": 2,
+                            "condition": {
+                                "kind": "element-status-comparison",
+                                "elementIds": [
+                                    "supply-box-left",
+                                    "supply-box-center",
+                                    "supply-box-right"
+                                ],
+                                "status": "controlled",
+                                "comparison": "all"
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:supplies"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 153,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:annihilation-destroy-forces",
+                "kind": "objective",
+                "payload": {
+                    "id": "destroy-forces",
+                    "name": "Enemy forces eliminated",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-game",
+                    "aggregation": "exclusive",
+                    "maximumPoints": 4,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 40,
+                                "maximum": 75
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                150
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 76,
+                                "maximum": 125
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                150
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 126,
+                                "maximum": null
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                200
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 50,
+                                "maximum": 100
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                200
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 101,
+                                "maximum": 150
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                200
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 151,
+                                "maximum": null
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                250
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 65,
+                                "maximum": 125
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                250
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 126,
+                                "maximum": 200
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                250
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 201,
+                                "maximum": null
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                300
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 75,
+                                "maximum": 150
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                300
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 151,
+                                "maximum": 250
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                300
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 251,
+                                "maximum": null
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                350
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 85,
+                                "maximum": 175
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                350
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 176,
+                                "maximum": 270
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                350
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 271,
+                                "maximum": null
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                400
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 100,
+                                "maximum": 200
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                400
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 201,
+                                "maximum": 300
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                400
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "enemy-army-points-killed",
+                                "minimum": 301,
+                                "maximum": null
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:annihilation"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 149,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:annihilation-preserve-forces",
+                "kind": "objective",
+                "payload": {
+                    "id": "preserve-forces",
+                    "name": "Surviving forces",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-game",
+                    "aggregation": "exclusive",
+                    "maximumPoints": 4,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 40,
+                                "maximum": 75
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                150
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 76,
+                                "maximum": 125
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                150
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 126,
+                                "maximum": null
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                200
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 50,
+                                "maximum": 100
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                200
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 101,
+                                "maximum": 150
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                200
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 151,
+                                "maximum": null
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                250
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 65,
+                                "maximum": 125
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                250
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 126,
+                                "maximum": 200
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                250
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 201,
+                                "maximum": null
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                300
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 75,
+                                "maximum": 150
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                300
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 151,
+                                "maximum": 250
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                300
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 251,
+                                "maximum": null
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                350
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 85,
+                                "maximum": 150
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                350
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 176,
+                                "maximum": 270
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                350
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 251,
+                                "maximum": null
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                400
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 100,
+                                "maximum": 200
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                400
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 201,
+                                "maximum": 300
+                            }
+                        },
+                        {
+                            "armyPoints": [
+                                400
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "numeric-range",
+                                "metric": "surviving-victory-points",
+                                "minimum": 301,
+                                "maximum": null
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:annihilation"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 149,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:annihilation-eliminate-command",
+                "kind": "objective",
+                "payload": {
+                    "id": "eliminate-command",
+                    "name": "Enemy command eliminated",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-game",
+                    "aggregation": "exclusive",
+                    "maximumPoints": 2,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150,
+                                200,
+                                250,
+                                300,
+                                350,
+                                400
+                            ],
+                            "objectivePoints": 2,
+                            "condition": {
+                                "kind": "reviewed-prose",
+                                "text": "Kill the enemy [[skill:lieutenant]]."
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:annihilation"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 149,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:firefight-surviving-specialists",
+                "kind": "objective",
+                "payload": {
+                    "id": "surviving-specialists",
+                    "name": "More surviving Specialist Troops",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-game",
+                    "aggregation": "exclusive",
+                    "maximumPoints": 2,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150,
+                                200,
+                                250,
+                                300,
+                                350,
+                                400
+                            ],
+                            "objectivePoints": 2,
+                            "condition": {
+                                "kind": "metric-comparison",
+                                "metric": "surviving-specialist-troops",
+                                "comparison": "greater"
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:firefight"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 155,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:firefight-killed-specialists",
+                "kind": "objective",
+                "payload": {
+                    "id": "killed-specialists",
+                    "name": "More enemy Specialist Troops killed",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-game",
+                    "aggregation": "exclusive",
+                    "maximumPoints": 1,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150,
+                                200,
+                                250,
+                                300,
+                                350,
+                                400
+                            ],
+                            "objectivePoints": 1,
+                            "condition": {
+                                "kind": "metric-comparison",
+                                "metric": "enemy-specialist-troops-killed",
+                                "comparison": "greater"
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:firefight"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 155,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:firefight-killed-lieutenants",
+                "kind": "objective",
+                "payload": {
+                    "id": "killed-lieutenants",
+                    "name": "More enemy [[skill:lieutenant:plural]] killed",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-game",
+                    "aggregation": "exclusive",
+                    "maximumPoints": 3,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150,
+                                200,
+                                250,
+                                300,
+                                350,
+                                400
+                            ],
+                            "objectivePoints": 3,
+                            "condition": {
+                                "kind": "metric-comparison",
+                                "metric": "enemy-lieutenants-killed",
+                                "comparison": "greater"
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:firefight"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 155,
+                        "section": "Scenarios"
+                    }
+                ]
+            },
+            {
+                "id": "objective:firefight-killed-army-points",
+                "kind": "objective",
+                "payload": {
+                    "id": "killed-army-points",
+                    "name": "More enemy Army Points killed",
+                    "sideIds": [
+                        "side-a",
+                        "side-b"
+                    ],
+                    "timing": "end-of-game",
+                    "aggregation": "exclusive",
+                    "maximumPoints": 4,
+                    "awards": [
+                        {
+                            "armyPoints": [
+                                150,
+                                200,
+                                250,
+                                300,
+                                350,
+                                400
+                            ],
+                            "objectivePoints": 4,
+                            "condition": {
+                                "kind": "metric-comparison",
+                                "metric": "enemy-army-points-killed",
+                                "comparison": "greater"
+                            }
+                        }
+                    ]
+                },
+                "scenarios": [
+                    "scenario:firefight"
+                ],
+                "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 155,
+                        "section": "Scenarios"
+                    }
+                ]
             }
-        }
-    ]
+        ]
+    }
 }

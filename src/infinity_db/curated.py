@@ -15,7 +15,7 @@ from infinity_db.scenario_definition import (
 )
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 21
+CURATED_FORMAT_VERSION = 22
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
@@ -193,8 +193,18 @@ def _validate_related_categories(facts: dict[str, Any], context: str) -> None:
 def _validate_scope(value: object, context: str) -> None:
     if not isinstance(value, dict):
         raise ValueError(f"{context}: must be an object")
-    if set(value) != {"game", "seasons"}:
-        raise ValueError(f"{context}: must contain only 'game' and 'seasons'")
+    if {"game", "seasons"} - set(value) or set(value) - {"game", "seasons", "scenarios"}:
+        raise ValueError(f"{context}: requires game/seasons and only optional scenarios")
+    if "scenarios" in value:
+        scenario_ids = value["scenarios"]
+        if not isinstance(scenario_ids, list) or not scenario_ids:
+            raise ValueError(f"{context}.scenarios must be a non-empty array")
+        for scenario_id in scenario_ids:
+            validate_typed_domain_id(
+                scenario_id, expected_domain="scenario", context=f"{context}.scenarios"
+            )
+        if len(set(scenario_ids)) != len(scenario_ids):
+            raise ValueError(f"{context}.scenarios contains duplicates")
     _require_string(value.get("game"), "game", context)
     seasons = value.get("seasons")
     if (
@@ -849,7 +859,7 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 )
         if record["kind"] == "scenario" and composition_role == "definition":
             try:
-                parse_scenario_definition_record(record)
+                parse_scenario_definition_record(record, definitions=document)
             except ScenarioDefinitionError as exc:
                 raise ValueError(f"{context}: {exc}") from exc
         if record["kind"] == "training":
@@ -1053,6 +1063,58 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 f"Peripheral type {record_id!r} requires a 'has-subtype' relation "
                 "from 'skill:peripheral'"
             )
+
+    from infinity_db.scenario_components import ScenarioComponents
+
+    registry = ScenarioComponents(document)
+    for record in records:
+        scoped = record["scope"].get("scenarios")
+        if scoped is not None:
+            if record.get("armyLinks"):
+                raise ValueError("Scenario-scoped definitions cannot grant Army profile facts")
+            for scenario_id in scoped:
+                if record_kind_by_id.get(scenario_id) != "scenario":
+                    raise ValueError(f"Unknown scenario applicability {scenario_id!r}")
+        facts = record.get("facts", {})
+        if facts.get("category") == "scenario-rule":
+            if record["kind"] != "rule" or scoped is None:
+                raise ValueError(
+                    "Scenario rule definitions require Rule kind and explicit scenarios"
+                )
+            allowed = {"category", "effects", "restrictions", "definesSkills", "specialists"}
+            if set(facts) - allowed:
+                raise ValueError("Scenario Rule has unsupported facts")
+            for key in ("effects", "restrictions"):
+                if not isinstance(facts.get(key), list) or any(
+                    not isinstance(x, str) for x in facts[key]
+                ):
+                    raise ValueError(f"Scenario Rule {key} must be an array of prose")
+            for scenario_id in scoped:
+                for skill_id in facts.get("definesSkills", []):
+                    registry.record(skill_id, "skill", scenario_id)
+            if "specialists" in facts:
+                baseline = facts["specialists"]
+                if not isinstance(baseline, dict) or set(baseline) != {"anyOfSkills"}:
+                    raise ValueError("Specialist baseline requires anyOfSkills")
+                qualifiers = baseline["anyOfSkills"]
+                if (
+                    not isinstance(qualifiers, list)
+                    or not qualifiers
+                    or len(set(qualifiers)) != len(qualifiers)
+                ):
+                    raise ValueError("Specialist qualifiers must be a unique non-empty array")
+                for skill_id in qualifiers:
+                    if record_kind_by_id.get(skill_id) != "skill":
+                        raise ValueError(f"Unknown Specialist Skill {skill_id!r}")
+    if "scenarioComponents" in document:
+        for component in document["scenarioComponents"]["definitions"]:
+            for citation in component["citations"]:
+                source_id = citation.get("sourceId")
+                if source_id not in source_by_id:
+                    raise ValueError(f"Unknown component citation source {source_id!r}")
+                _validate_reference(
+                    citation, source_by_id[source_id], "scenario component citation"
+                )
 
     validate_maintained_text_syntax(document)
 

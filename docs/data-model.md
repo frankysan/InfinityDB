@@ -44,7 +44,7 @@ Current runtime database versions:
 - Army application database schema: **25**;
 - Army application compatibility revision: **34**;
 - rules database schema: **7**;
-- rules database compatibility revision: **8**.
+- rules database compatibility revision: **9**.
 
 `data/README.md` owns source/snapshot format versions, while `data/curated/README.md` owns the
 curated-rules format version. Schema and compatibility validation is fail-closed. Incompatible
@@ -394,19 +394,52 @@ The maintained policy is documented in `data/curated/README.md`.
 
 ### Current scenario foundation
 
-The generic curated-record envelope has a typed scenario-definition v1 subset for all four N5.3
-core scenarios: `scenario:annihilation`, `scenario:domination`, `scenario:supplies`, and
-`scenario:firefight` each own their three current geometry configurations inside the core-rules
-collection. It validates `definitionVersion`, non-overlapping Army Points groups, and geometry-v1
-documents; the SVG CLI selects maintained geometry by scenario identity + Army Points.
+All four N5.3 core scenarios use authoring definition v2. They compose explicit shared definitions
+by typed identity inside the rules collection; display names never select or merge definitions.
+`scenario_components.py` validates references, applicability, component kinds, override fields, and
+cycles before the normal scenario/geometry validators check the resolved payload. Inline v1 payloads
+remain readable for compatibility. Runtime export materializes the composed v1-shaped payload into
+`rules.db`; runtime queries never need the authoring library or working-tree curation.
 
-All four core scenarios maintain the optional `facts.mission` component, validated by
-`scenario_mission.py`. It owns ordered sides; all six Army Points/SWC rows; per-side Deployment Zone
-references into the selected geometry; objectives and awards; special-rule paragraphs; mission end
-conditions; and scoped source issues. Every geometry-supported Army Points value must have exactly
-one game-size row, and every objective must cover those values. Deployment references must resolve
-to rectangle elements in that row's geometry, with multiple regions per side supported. Objective
-side applicability is explicit rather than assumed symmetric.
+Rules and Skills are separate normal semantic records. Scenario Rules use `facts.category:
+scenario-rule`, ordered `effects`/`restrictions`, and optional `definesSkills` references. Hack
+Consoles and Pick Up Supply Boxes are scoped Skill definitions with the same `typeIds`, `labelIds`,
+Requirements, Effects, Restrictions, and citation contract used by other Skills. Including the owning
+Rule derives the scenario Skill list. `scope.scenarios` explicitly limits applicability; these
+definitions have no Army links and are excluded from default core composition. Contextual composition
+selects them with an explicit scenario slug or typed ID. Same-name functions may have distinct IDs;
+no name-based deduplication or implicit season/revision fallback occurs.
+
+The collection's versioned `scenarioComponents` library owns reusable typed `setup`, `geometry`,
+`objective`, and `end-condition` payloads with citations and explicit scenario applicability. Setup
+inclusions may override named game-size `swc`/`minimumVictoryPoints` fields by exact Army Points.
+The common deployment rows, standard Annihilation/Firefight geometry, three-round ending, all-Null
+ending, and minimum-VP ending are shared. Domination retains its explicit 350-point 6 SWC override.
+Objective definitions use the same reference mechanism; geometry titles come from the including
+scenario as presentation metadata. Unsupported fields and mismatched component kinds fail closed.
+References are collection-local; cross-collection historical/season selection remains future work.
+
+Specialist Troops uses one shared Rule, `rule:specialist-troops:standard`, with
+`facts.specialists.anyOfSkills` as a JSON array of complete Skill IDs. Scenario inclusions author
+only `addSkills` and `removeSkills` differences. Resolution rejects unknown, duplicate, conflicting,
+or non-baseline removals and produces an effective qualifier list without changing the baseline.
+Doctor/Engineer Peripheral restrictions and the Chain of Command (Non Specialist) qualification
+exception are maintained once. That exception affects qualification through Chain of Command,
+without disqualifying a Trooper that has another qualifying Skill. This is a reference list and
+exception statement; the catalog does not evaluate game state or assign permanent profile roles.
+
+`RulesDatabase.scenario_reference()` reads the composed scenario, its included Rule records, and
+its derived Skill records from `rules.db`. Component IDs/citations are retained in `componentSources`.
+Scoped Rule/Skill records include backend-resolved scenario names. The shared Skill-card renderer
+presents their ordinary rule-detail fields and renders Specialist qualifier references as a list.
+Normal browsing/search/glossary calls retain the default unscoped composition; scenario-only content
+does not become universal core help. Dedicated scenario pages/routes remain unimplemented.
+
+The resolved mission owns ordered sides, all six Army Points/SWC rows, deployment references into
+its geometry, objectives/awards, Rule inclusions, Skills, end conditions, and source issues. Every
+geometry-supported Army Points value has exactly one game-size row, and every objective covers
+those values. Deployment regions resolve in the selected geometry with multiple regions per side
+supported; objective side applicability remains explicit.
 
 Scoring awards may use inclusive integer `numeric-range` conditions (an unbounded upper limit is represented
 by `maximum: null`) or `reviewed-prose` conditions with semantic maintained-text tokens. The initial
@@ -477,17 +510,17 @@ targets those two markers for 300, 350, and 400 Army Points and retains both cit
 typed distance tokens. It does not move markers or make a source correction.
 
 Console setup, Hack Consoles, Specialist eligibility and the Peripheral restriction, base overlap,
-and the Shasvastii exception remain ordered, semantically linked mission rules. Dedicated scoped
-Skill/action and role catalog identities remain unimplemented; these rules do not grant permanent
+and the Shasvastii exception remain ordered, semantically linked mission rules. Scenario Skills and the shared Specialist Rule now have distinct scoped identities; these rules
+do not grant permanent
 Unit/Profile capabilities.
 
 Nested mission prose participates in the same syntax, target-resolution, and reviewed-link audits
 as other maintained rules text. The existing rules record payload persists and composes the pilot
 with its collection and citations; no specialized scenario tables or runtime read model have been
-introduced, and rules schema/compatibility remains 7/8. Rebuild `rules.db` after curation changes using
+introduced, and rules schema/compatibility is 7/9. Rebuild `rules.db` after curation changes using
 the existing rules-build workflow.
 
-Full scenario publication/revision/membership indexes, dedicated actions/elements/features,
+Full scenario publication/revision/membership indexes, element/feature vocabulary extensions,
 and browsable scenario access remain design direction. Concrete
 unfinished work belongs to the [1.0 backlog](TODO.md#rules-and-reference-completeness).
 

@@ -35,6 +35,10 @@ OwnerReviewedBatchResiduals = dict[str, Counter[ReviewedBatchResidualKey]]
 def _stable_owner(
     document: dict[str, Any], context: str
 ) -> tuple[str, str, str | None]:
+    component_match = re.match(r"^scenarioComponents\.definitions\[(\d+)\]\.(.*)$", context)
+    if component_match is not None:
+        entry = document["scenarioComponents"]["definitions"][int(component_match.group(1))]
+        return entry["id"], _LIST_INDEX.sub("[]", component_match.group(2)), None
     match = _CONTEXT_INDEX.match(context)
     if match is None:
         raise ValueError(f"Unsupported maintained-text context {context!r}")

@@ -32,6 +32,8 @@ function applicabilityText(rule) {
   if (seasons.length && !(seasons.length === 1 && seasons[0] === "current")) {
     parts.push(seasons.join(", "));
   }
+  const scenarios = Array.isArray(rule.applicable_scenarios) ? rule.applicable_scenarios : [];
+  if (scenarios.length) parts.push(scenarios.map((item) => item.name).join(", "));
   return parts.join(" · ");
 }
 
@@ -191,6 +193,24 @@ function appendRuleDetails(
     for (const [index, fact] of facts[key].entries()) {
       const item = document.createElement("li");
       appendMaintainedText(item, rule.fact_tokens?.[key]?.[index], fact);
+      list.append(item);
+    }
+    group.append(heading, list);
+    container.append(group);
+  }
+
+  const specialists = facts.specialists?.anyOfSkills;
+  if (Array.isArray(specialists) && specialists.length) {
+    const group = document.createElement("div");
+    group.className = "detail-fact-group";
+    const heading = document.createElement("h4");
+    heading.className = "detail-fact-heading";
+    heading.textContent = "Qualifying Skills";
+    const list = document.createElement("ul");
+    list.className = "detail-list";
+    for (const [index, identifier] of specialists.entries()) {
+      const item = document.createElement("li");
+      appendMaintainedText(item, rule.fact_tokens?.specialists?.[index], identifier);
       list.append(item);
     }
     group.append(heading, list);

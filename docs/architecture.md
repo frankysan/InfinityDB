@@ -125,18 +125,20 @@ not competing semantic owners.
 
 ### Planned scenario domain
 
-**Design direction; browsable scenario domain unimplemented.** Typed maintained records own the
-geometry configurations of all four core scenarios, and the deterministic SVG renderer consumes
-them directly. All four core scenarios maintain typed setup, scoring, special rules, and end
-conditions in the existing rules record payload. Domination adds round scoring,
-geometry-referenced objectives, and per-game-size minimum-Victory-Points endings. Supplies adds controlled-marker
-counts/comparisons and retains its carrying/control procedures as reviewed prose. Firefight adds
-comparative combat metrics and scoped Lieutenant/airborne-deployment overlays. Nested mission
-prose uses the shared maintained-text audit pipeline; neither the renderer nor runtime consumers
-recover rules from PDF text.
-[The data model](data-model.md#planned-scenario-model-10) owns this implemented subset. The accepted
-boundary below still describes the remaining scenario publication indexes, full components, and
-browser routes. Concrete work is tracked in
+**Design direction; browsable scenario domain unimplemented.** All four core scenarios maintain
+typed setup, scoring, geometry, special rules, and end conditions. Authoring definition v2 composes
+shared Rules, separate scoped Skills, and typed setup/geometry/objective/ending components by explicit
+identity. Validation/export resolves those references and retains component provenance in the runtime
+record payload. Same display names do not imply shared semantics.
+
+The shared Specialist Rule owns its Skill-reference array and common restrictions; scenarios author
+only additions/removals. Backend composition resolves semantics and scope, while the common Skill-card
+renderer owns labels, links, list formatting, and ordinary Skill detail structure. Scoped definitions
+are excluded from default core help, and cannot grant permanent Army profile facts. Runtime reads
+consume the materialized `rules.db`, independently of curation files.
+
+[The data model](data-model.md#planned-scenario-model-10) owns the implemented contract. Dedicated
+scenario publication indexes, season/revision selection, and browser routes remain tracked in
 [the backlog](TODO.md#rules-and-reference-completeness).
 
 Core-rules scenarios are a required first-class application domain for 1.0. The architecture review

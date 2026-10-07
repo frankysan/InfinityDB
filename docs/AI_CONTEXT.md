@@ -42,23 +42,15 @@ release/audit narrative belongs in the changelog and Git history.
   geometry rather than maintaining duplicate numeric measurements. ITS variation informs
   extensibility, while ITS-only geometry and the interactive editor remain post-1.0. See
   `docs/data-model.md`.
-- All four core scenarios maintain typed mission reference facts inside the existing rules record
-  payload. Domination separates per-round and whole-mission scoring caps, references scoring
-  regions/markers in every applicable geometry configuration, and keeps minimum Victory Points
-  in the game-size row consumed by its end condition.
-  Its game-size deployment references reuse maintained geometry, and nested scoring/rule/end-condition
-  prose must participate in the shared maintained-text audits. Preserve the scoped N5.3 350-point
-  survival-band discrepancy and Domination's printed 350-point 6 SWC row. Source issues target
-  an objective, a game-size field, or geometry elements; they do not imply corrected values or an
-  evaluation priority. Supplies keeps per-box points and the more/all-box bonuses separate, and
-  preserves the written 8-inch outer-box placement plus the large-table diagram's conflicting
-  12-inch labels as a scoped geometry source issue. Geometry issues must resolve in every
-  applicable configuration and cannot authorize overlapping score ranges.
-  Firefight compares surviving Specialists and killed Specialists/Lieutenants/Army Points with
-  the opponent, retains the all-Null ending, and keeps Lieutenant and airborne-deployment
-  overlays scoped to its mission rules rather than rewriting canonical Skills.
-  Dedicated scenario publication indexes and browser access remain design direction. See
-  `docs/data-model.md` and `docs/TODO.md`.
+- Scenario authoring v2 composes shared, explicitly identified Rules/Skills and typed components.
+  Export resolves them into self-contained payloads in `rules.db`; runtime must not read curation
+  files. Same names do not select/merge definitions. `scope.scenarios` is an explicit activation
+  boundary; default core composition excludes scoped records, and scoped records cannot have Army
+  links. The shared Specialist baseline uses full Skill-ID arrays plus explicit inclusion deltas;
+  rendering consumes resolved qualifiers, not an authoring mini-language. Preserve its Non Specialist
+  qualification exception and all three retained core-scenario source issues. See the scenario model
+  in `docs/data-model.md`.
+
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network
   access.
 - Persistent generated artifacts are deterministic across supported platforms for the same inputs

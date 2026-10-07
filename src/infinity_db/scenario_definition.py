@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .domain_slugs import require_domain_slug, validate_typed_domain_id
+from .scenario_components import compose_scenario_record, scenario_typed_id
 from .scenario_geometry import ScenarioGeometry, parse_scenario_geometry
 from .scenario_mission import ScenarioMission, parse_scenario_mission
 
@@ -61,10 +62,21 @@ def _positive_int(value: Any, context: str) -> int:
     return value
 
 
-def parse_scenario_definition_record(record: Any) -> ScenarioDefinition:
+def parse_scenario_definition_record(
+    record: Any, *, definitions: dict[str, Any] | None = None
+) -> ScenarioDefinition:
     """Validate the typed v1 facts of one curated scenario definition record."""
 
     root = _object(record, "scenario record")
+    if isinstance(root.get("facts"), dict) and root["facts"].get("definitionVersion") == 2:
+        if type(root["facts"]["definitionVersion"]) is not int or definitions is None:
+            raise ScenarioDefinitionError(
+                "Scenario definition v2 requires its definition collection"
+            )
+        try:
+            root = compose_scenario_record(root, definitions)
+        except ValueError as exc:
+            raise ScenarioDefinitionError(str(exc)) from exc
     if root.get("kind") != "scenario":
         raise ScenarioDefinitionError("scenario record.kind must be 'scenario'")
 
@@ -85,7 +97,7 @@ def parse_scenario_definition_record(record: Any) -> ScenarioDefinition:
     _only_keys(
         facts,
         {"definitionVersion", "configurations"},
-        {"relatedCategories", "mission"},
+        {"relatedCategories", "mission", "componentSources"},
         "scenario record.facts",
     )
     if (
@@ -171,6 +183,7 @@ def scenario_definition_from_curated_document(
 ) -> ScenarioDefinition:
     """Resolve one maintained scenario definition from a validated curated document."""
 
+    scenario_id = scenario_typed_id(scenario_id)
     root = _object(document, "curated document")
     records = root.get("records")
     if not isinstance(records, list):
@@ -187,7 +200,7 @@ def scenario_definition_from_curated_document(
         raise ScenarioDefinitionError(f"unknown scenario definition {scenario_id!r}")
     if len(matches) != 1:
         raise ScenarioDefinitionError(f"duplicate scenario definition {scenario_id!r}")
-    return parse_scenario_definition_record(matches[0])
+    return parse_scenario_definition_record(matches[0], definitions=root)
 
 
 def select_scenario_geometry(definition: ScenarioDefinition, army_points: int) -> ScenarioGeometry:

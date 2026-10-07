@@ -193,7 +193,8 @@ unimplemented until its corresponding behavior exists.
       - [x] Extend the reference subset with **Domination**: geometry-referenced Quadrant/Console
         scoring, separate per-round/whole-mission caps, literal per-size minimum Victory Points,
         and a typed minimum-VP end condition. Preserve Console interactions and Specialist/control
-        rules as ordered linked prose; standalone scoped Skill/action/role identities remain pending.
+        rules as ordered linked prose; the shared definition v2 step below separates the scoped
+        Skills and shared Specialist data.
         Round-trip the new facts and their printed-page citations through existing rules storage.
       - [x] Extend the reference subset with **Supplies**: controlled-marker counts and more/all
         comparisons, additive scoring bonuses, literal game-size rows, and inherited minimum-VP
@@ -205,6 +206,11 @@ unimplemented until its corresponding behavior exists.
         requirements and Tactical Phase replacement, the Combat Jump modifier and Airborne
         Deployment permission, Killing, and Specialist rules as linked mission-local prose.
         Round-trip the facts/citations and verify that canonical Skill facts remain unchanged.
+      - [x] Replace inline authoring with shared definition v2: separate scoped Rules and Skills,
+        shared setup/geometry/objective/ending references, and one Specialist Skill-array baseline
+        with explicit per-scenario additions/removals. Preserve citations, source discrepancies,
+        same-name/different-ID semantics, cycle validation, and default-core scope isolation.
+        Export resolved payloads and reuse the Skill-detail renderer for Skills and qualifier lists.
     - [ ] Export relational identities/provenance/membership/reference indexes and validated
       component payloads to `rules.db`. Cover broken references, invalid dimensions/placements,
       distinct revisions of one identity, deterministic output, and unsupported formats. Update

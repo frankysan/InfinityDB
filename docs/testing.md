@@ -330,3 +330,12 @@ procedure separately preserves the named history volume across a release with no
 `docs/ci.md` owns the hosted workflow contract. `docs/releasing.md` owns the release gate. Do not
 copy required-check names, branch-protection settings, or release acceptance steps into this file
 unless they directly affect how local checks are invoked.
+
+## Shared scenario composition regression coverage
+
+`tests/test_scenario_components.py` covers explicit component identity, scope isolation,
+Specialist additions/removals, same-name definitions, cycle/unknown-reference failures, and
+self-contained rules-database payloads. A small Node.js harness executes the common Skill-card
+renderer with the two scenario Skills and the resolved Specialist list; it reuses the dev Node
+dependency and adds no JavaScript build step. Existing scenario tests still validate every game-size
+row, score condition, placement, source issue, and SVG output after reference expansion.

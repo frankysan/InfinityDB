@@ -108,7 +108,7 @@ def test_rules_database_projects_curated_summaries_labels_and_relation_semantics
         for _, document in documents
         if document["collection"]["status"] == "current"
         for record in document["records"]
-        if record["composition"]["role"] == "definition"
+        if record["composition"]["role"] == "definition" and not record["scope"].get("scenarios")
     }
     composed = {
         record["id"]: record

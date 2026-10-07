@@ -13,6 +13,7 @@ from infinity_db.maintained_text_policy import (
     validate_reviewed_batch_coverage,
 )
 from infinity_db.rules_database import export_rules_database
+from infinity_db.scenario_components import compose_scenario_document
 
 
 def test_maintained_text_parser_preserves_text_references_distances_and_escapes() -> None:
@@ -456,7 +457,10 @@ def test_scenario_mission_prose_participates_in_shared_reference_validation(
     path: tuple[str | int, ...],
 ) -> None:
     root = Path(__file__).parents[1]
-    documents = load_curated_directory(root / "data" / "curated")
+    documents = [
+        (path, compose_scenario_document(document))
+        for path, document in load_curated_directory(root / "data" / "curated")
+    ]
     core = next(
         document for _, document in documents if document["collection"]["id"] == "n5-core-v5.3"
     )
@@ -471,7 +475,10 @@ def test_scenario_mission_prose_participates_in_shared_reference_validation(
 
 def test_scenario_mission_prose_cannot_bypass_reviewed_link_coverage() -> None:
     root = Path(__file__).parents[1]
-    documents = load_curated_directory(root / "data" / "curated")
+    documents = [
+        (path, compose_scenario_document(document))
+        for path, document in load_curated_directory(root / "data" / "curated")
+    ]
     core = next(
         document for _, document in documents if document["collection"]["id"] == "n5-core-v5.3"
     )
@@ -485,7 +492,10 @@ def test_scenario_mission_prose_cannot_bypass_reviewed_link_coverage() -> None:
 
 def test_domination_minimum_vp_end_prose_uses_shared_reference_validation(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
-    documents = load_curated_directory(root / "data" / "curated")
+    documents = [
+        (path, compose_scenario_document(document))
+        for path, document in load_curated_directory(root / "data" / "curated")
+    ]
     core = next(
         document for _, document in documents if document["collection"]["id"] == "n5-core-v5.3"
     )

@@ -7,6 +7,18 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
+## [Unreleased]
+
+### Player summary
+
+No player-facing changes.
+
+### Upgrade notes
+
+- **Data processing:** Rebuild the rules database when upgrading. Scenario reference data now
+  shares reusable definitions and separates mission Skills from special rules; older generated
+  rules databases are incompatible with the current application.
+
 ## [0.10.0] - 2026-10-07
 
 ### Player summary

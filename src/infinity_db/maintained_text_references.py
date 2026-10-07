@@ -25,15 +25,18 @@ def _pluralize(value: str) -> str:
 
 
 class _Resolver:
-    def __init__(self, database: Database, rules_database: RulesDatabase) -> None:
+    def __init__(
+        self, database: Database, rules_database: RulesDatabase, scenario_id: str | None = None
+    ) -> None:
         self.database = database
         self.rules_database = rules_database
+        self.scenario_id = scenario_id
         self.records: dict[str, dict[str, Any] | None] = {}
 
     def record(self, record_id: str) -> dict[str, Any]:
         if record_id not in self.records:
             self.records[record_id] = self.rules_database.composed_record(
-                record_id, include_army_links=True
+                record_id, include_army_links=True, scenario_id=self.scenario_id
             )
         record = self.records[record_id]
         if record is None:
@@ -50,8 +53,9 @@ class _Resolver:
             label = token.get("display_text") or record["name"]
             if token.get("display_form") == "plural" and not token.get("display_text"):
                 label = _pluralize(label)
-            reference = rule_record_public_reference(self.database, record)
-            if reference is None:
+            contextual = bool((record.get("scope") or {}).get("scenarios"))
+            reference = None if contextual else rule_record_public_reference(self.database, record)
+            if reference is None and not contextual:
                 raise ValueError(
                     f"Maintained-text reference {token['target']!r} has no public route"
                 )
@@ -62,9 +66,7 @@ class _Resolver:
                 "public_reference": reference,
             }
             if include_preview:
-                item["preview_tokens"] = self.tokens(
-                    record["summary"], include_preview=False
-                )
+                item["preview_tokens"] = self.tokens(record["summary"], include_preview=False)
             resolved.append(item)
         return resolved
 
@@ -91,6 +93,12 @@ def _enrich_rule_record(record: dict[str, Any], resolver: _Resolver) -> None:
         values = facts.get(key)
         if isinstance(values, list) and all(isinstance(value, str) for value in values):
             fact_tokens[key] = [resolver.tokens(value) for value in values]
+    specialists = facts.get("specialists")
+    if isinstance(specialists, dict):
+        fact_tokens["specialists"] = [
+            resolver.tokens(f"[[{identifier}]]")
+            for identifier in specialists.get("anyOfSkills", [])
+        ]
     basis = facts.get("basis")
     if isinstance(basis, str):
         fact_tokens["basis"] = resolver.tokens(basis)
@@ -142,13 +150,15 @@ def enrich_maintained_text_references(
     database: Database,
     rules_database: RulesDatabase | None,
     value: dict[str, Any],
+    *,
+    scenario_id: str | None = None,
 ) -> dict[str, Any]:
     """Attach resolved inline-text tokens to nested current rules records."""
 
     result = deepcopy(value)
     if rules_database is None:
         return result
-    resolver = _Resolver(database, rules_database)
+    resolver = _Resolver(database, rules_database, scenario_id)
 
     def walk(node: Any) -> None:
         if isinstance(node, dict):

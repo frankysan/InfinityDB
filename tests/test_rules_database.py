@@ -133,7 +133,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 343
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 354
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -696,6 +696,7 @@ def test_composed_records_attach_current_supplements_without_field_merging(
         "domain": "faq",
         "effectiveFrom": "2026-09-01",
     }
+    supplement.pop("scenarioComponents", None)
     supplement["records"] = [
         {
             "id": "skill:camouflage",
@@ -2265,11 +2266,12 @@ def test_domination_mission_round_trips_scoring_geometry_and_minimum_vp(
     assert mission.end_conditions[1].uses_minimum_victory_points
     assert mission.source_issues[0].game_size_field == "swc"
     assert {(c["source_id"], c["page"]) for c in record["citations"]} == {
-        ("n5-core-v5.3-pdf", 151), ("n5-core-v5.3-pdf", 152),
+        ("n5-core-v5.3-pdf", 151),
+        ("n5-core-v5.3-pdf", 152),
     }
     specialist_rules = mission.rules[-1].paragraphs
-    assert "[[skill:chain-of-command]]" in specialist_rules[0]
-    assert "[[skill:peripheral:plural]]" in specialist_rules[1]
+    assert "skill:chain-of-command" in mission.rules[-1].specialist_skill_ids
+    assert "[[skill:peripheral:plural]]" in specialist_rules[0]
 
 
 def test_supplies_mission_round_trips_control_conditions_and_geometry_issue(

@@ -264,13 +264,13 @@ deployment, and mission constraints. Wiki pages are useful for discovery,
 aliases, cross-links, and concise explanations, but do not override applicable
 official rules or Army data.
 
-### Current v21 contract
+### Current v22 contract
 
 Place one collection per subject or release under `data/curated/rules/`, for
 example `rules/n5-core-v5.3.json`. Each file contains:
 
 - `format`: `InfinityDB curated reference`
-- `formatVersion`: `21`
+- `formatVersion`: `22`
 - `collection`: collection identity/scope/authority
 - `sources`: source-specific PDF or wiki provenance
 - `vocabularySources`: source references for maintained vocabularies
@@ -337,7 +337,7 @@ before ingestion.
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 21,
+    "formatVersion": 22,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -405,48 +405,45 @@ Supported record kinds include `rule`, `skill`, `declaration-category`,
 `interaction`, `fireteam`, `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
 
-Acceptance by the generic record envelope does not imply a published application domain or a
-complete typed fact model. Scenario-definition v1 uses `facts.definitionVersion: 1` plus a non-empty
-`facts.configurations` array; each configuration has a stable `id`, one or more unique `armyPoints`,
-and one validated `InfinityDB scenario geometry` document. Army Points must not overlap between
-configurations. All four N5.3 core scenarios are maintained examples.
+Acceptance by the generic record envelope does not imply a published application domain. Core
+scenario authoring uses `facts.definitionVersion: 2` and composes explicit references from the same
+collection. Inline v1 records remain supported; export resolves v2 into self-contained v1-shaped
+runtime records. The canonical component/data contract is documented in
+[the scenario model](../../docs/data-model.md#planned-scenario-model-10).
 
-The optional `facts.mission` reference component is maintained by all four N5.3 core scenarios.
-Its required arrays are `sides`, `gameSizes`, `objectives`, `rules`, `endConditions`, and `sourceIssues`; only
-`rules` and `sourceIssues` may be empty. A game-size row has `armyPoints`, `swc`, `configurationId`,
-and `deployments` (`sideId` + `elementIds`). It references existing geometry rather than restating
-its dimensions. An optional positive `minimumVictoryPoints` value supports the typed minimum-VP
-end condition; that condition requires a value in every row. Objectives declare `sideIds`, `timing`,
-`aggregation`, `maximumPoints`, and ordered `awards`; each award has `armyPoints`, `objectivePoints`, and a numeric-range or reviewed-prose
-`condition`. `maximumPointsPerRound` is an optional cap for end-of-round objectives, independent
-of the whole-mission `maximumPoints`. Domination additionally uses geometry-referenced
-`dominated-region-comparison` and `element-status-count` conditions. The latter awards points per
-matching marker, requires cumulative aggregation, and supports `status: hacked` or `controlled`.
-Supplies adds `element-status-comparison`, whose
-`greater` and `all` modes award a scalar bonus for more matching markers than the opponent or
-for every referenced marker matching respectively. Referenced elements must resolve in every applicable configuration as rectangles or markers respectively.
-Firefight adds `metric-comparison` conditions with `metric` and `comparison: greater`, comparing
-surviving Specialists, killed enemy Specialists, killed enemy Lieutenants, or killed enemy Army
-Points with the opponent. Unknown metrics, comparison modes, and extra condition fields are
-unsupported. The mission preserves its Lieutenant and airborne-deployment overlays as scoped
-prose rather than rewriting shared Skill facts. Objective titles use semantic tokens where needed.
-Special rules retain ordered `paragraphs`. End conditions distinguish `checkAt` from `finishAt`
-and use round-limit, reviewed-prose, or minimum-victory-points conditions.
+An optional `scenarioComponents` object has `formatVersion: 1` and a `definitions` array. Each
+definition has a typed `id`, `kind` (`setup`, `geometry`, `objective`, or `end-condition`), `payload`,
+non-empty `citations`, and explicit `scenarios` IDs. Inclusions use `{ "ref": "<typed-id>" }`.
+Setups can additionally specify `gameSizeOverrides` entries containing exact `armyPoints` and only
+`swc`/`minimumVictoryPoints` changes. Shared setups can themselves reference another setup; cycles,
+unknown references, unsupported kinds/fields, duplicate IDs, and scope mismatches are errors.
+Geometry titles are projected from the including scenario without changing semantic coordinates.
 
-Unknown fields/condition kinds, invalid geometry/side references, unsupported or missing Army Points,
-and unacknowledged exclusive score-range overlaps fail validation. A `sourceIssues` entry names its
-`armyPoints` and exactly one of `objectiveId`, `gameSizeField` (`swc` or `minimumVictoryPoints`),
-or a non-empty `geometryElementIds` list. Geometry targets must resolve in every applicable
-configuration. It has `status: needs-verification`, and preserves the unresolved source meaning in `description`. Domination retains its printed 350-point 6 SWC row and a game-size issue;
-never derive or replace SWC from another scenario's row. Annihilation retains the inconsistent
-printed 350-point survival bands; do not infer corrected thresholds from the enemy-kills column.
-Supplies retains its written
-8-inch outer-box placements and a geometry issue for the conflicting 12-inch large-table diagram.
-Distance mentions in source-issue prose use maintained-text distance tokens. Nested prose uses
-the semantic maintained-text syntax and shared audits. Existing record storage round-trips this payload and its
-citations without changing the rules database format. The
-[scenario data model](../../docs/data-model.md#planned-scenario-model-10) distinguishes this current
-subset from the remaining publication indexes, actions/features, and browser work.
+Semantic scenario Rules and Skills are ordinary `rule`/`skill` records with optional
+`scope.scenarios`. Scoped records cannot have Army links. Scenario Rules use
+`facts.category: scenario-rule`, `effects`, `restrictions`, `definesSkills`, and optional
+`specialists: { "anyOfSkills": ["skill:doctor", ...] }`. Rules include Skills by ID; Skill definitions
+retain the ordinary declaration-type, Label, Requirements/Effects/Restrictions, review, and citation
+contract. Same names with different behavior require distinct IDs, rather than collection load order.
+
+A v2 mission has `setup`, `rules`, `objectives`, `endConditions`, and `sourceIssues`. Rule inclusions
+have a local ordered `id` and semantic `ref`; Specialist inclusions may have `addSkills`/`removeSkills`
+arrays of complete Skill IDs. Only actual differences belong in those arrays. The baseline and its
+common restrictions are authored once, and rendering consumes the resolved qualifiers. Skill lists
+are derived from the included Rules' `definesSkills`, rather than authored again on each mission.
+
+The resolved mission uses ordered sides/game sizes, geometry-bound deployment regions, typed
+objectives/conditions, included Rules and Skills, endings, and scoped source issues. Its existing
+numeric range, per-round caps, geometry status/comparison, combat metric, and end-condition validators
+still apply after expansion. Source issues preserve the Annihilation scoring discrepancy, Domination
+SWC difference, and Supplies text/diagram placement conflict. Both definition and inclusion source
+provenance remain available; shared reuse does not authorize correcting ambiguous source values.
+
+Shared prose participates in the full semantic maintained-text syntax, target, and reviewed-link
+audits, including objective/ending payloads in the component library. No plain-reference exception
+is broadened for the new model. Rebuild `rules.db` with the current rules builder after migrating
+to format v22; current rules schema/compatibility is 7/9.
+
 
 Embedded `term` records own source-backed Game terminology that does not warrant a standalone
 catalog/detail route. They require `facts.scope` with a stable slug such as `game-element`,
@@ -552,7 +549,7 @@ Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
 reviewed.
 
-Curated-rule files older than format v21 are no longer accepted by the loader and must
+Curated-rule files older than format v22 are no longer accepted by the loader and must
 be migrated to the current source/citation, composition, variant, declaration, and
 Training contracts before ingestion.
 

@@ -210,6 +210,32 @@ def maintained_text_fields(document: dict[str, Any]) -> Iterator[tuple[str, str]
         if isinstance(label, dict) and isinstance(label.get("description"), str):
             yield f"labels[{index}].description", label["description"]
 
+    for component_index, component in enumerate(
+        document.get("scenarioComponents", {}).get("definitions", [])
+    ):
+        payload = component.get("payload", {})
+        if not isinstance(payload, dict):
+            continue
+        condition = payload.get("condition", {})
+        if isinstance(condition, dict) and isinstance(condition.get("text"), str):
+            yield (
+                f"scenarioComponents.definitions[{component_index}].payload.condition.text",
+                condition["text"],
+            )
+        if component.get("kind") == "objective":
+            if isinstance(payload.get("name"), str):
+                yield (
+                    f"scenarioComponents.definitions[{component_index}].payload.name",
+                    payload["name"],
+                )
+            for award_index, award in enumerate(payload.get("awards", [])):
+                condition = award.get("condition", {})
+                if isinstance(condition, dict) and isinstance(condition.get("text"), str):
+                    yield (
+                        f"scenarioComponents.definitions[{component_index}].payload.awards[{award_index}].condition.text",
+                        condition["text"],
+                    )
+
     for index, record in enumerate(document.get("records", [])):
         if not isinstance(record, dict):
             continue

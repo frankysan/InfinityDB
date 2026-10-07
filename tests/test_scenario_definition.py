@@ -7,6 +7,7 @@ from typing import Any
 import pytest
 
 from infinity_db.curated import load_curated_document
+from infinity_db.scenario_components import compose_scenario_record
 from infinity_db.scenario_definition import (
     ScenarioDefinitionError,
     parse_scenario_definition_record,
@@ -304,7 +305,12 @@ def test_scenario_definition_rejects_overlapping_army_points() -> None:
 def annihilation_record() -> dict[str, Any]:
     document = load_curated_document(_CORE_RULES)
     return deepcopy(
-        next(record for record in document["records"] if record["id"] == "scenario:annihilation")
+        compose_scenario_record(
+            next(
+                record for record in document["records"] if record["id"] == "scenario:annihilation"
+            ),
+            document,
+        )
     )
 
 
@@ -495,7 +501,10 @@ def test_mission_does_not_assume_symmetric_objectives_or_one_deployment_zone(
 def domination_record() -> dict[str, Any]:
     document = load_curated_document(_CORE_RULES)
     return deepcopy(
-        next(record for record in document["records"] if record["id"] == "scenario:domination")
+        compose_scenario_record(
+            next(record for record in document["records"] if record["id"] == "scenario:domination"),
+            document,
+        )
     )
 
 
@@ -599,12 +608,15 @@ def test_domination_retains_control_eligibility_and_console_interaction_rules(
     assert "[[state:normal|Normal]]" in rules["dominate-quadrants"]
     assert "Shasvastii-Embryo" in rules["dominate-quadrants"]
     assert "same diameter" in rules["consoles"]
-    assert "Short Skill with the Attack Label" in rules["hack-consoles"]
-    assert "Silhouette contact" in rules["hack-consoles"]
-    assert "failed attempt may be repeated" in rules["hack-consoles"]
-    assert "most recent player" in rules["hack-consoles"]
-    assert "[[skill:hacker]] receives a +3 MOD" in rules["hack-consoles"]
-    assert "[[attribute:wip]]" in rules["hack-consoles"]
+    assert mission.skill_ids == ("skill:hack-consoles",)
+    skill = next(
+        r for r in load_curated_document(_CORE_RULES)["records"] if r["id"] == "skill:hack-consoles"
+    )
+    assert skill["facts"]["typeIds"] == ["short-skill"] and skill["labelIds"] == ["attack"]
+    assert "Silhouette contact" in " ".join(skill["facts"]["requirements"])
+    effects = " ".join(skill["facts"]["effects"])
+    assert "failed attempt may be repeated" in effects and "most recent player" in effects
+    assert "[[skill:hacker]] receives a +3 MOD" in effects and "[[attribute:wip]]" in effects
     for identity in (
         "doctor",
         "engineer",
@@ -614,7 +626,7 @@ def test_domination_retains_control_eligibility_and_console_interaction_rules(
         "specialist-operative",
         "chain-of-command",
     ):
-        assert f"[[skill:{identity}]]" in rules["specialist-troops"]
+        assert f"skill:{identity}" in mission.rules[-1].specialist_skill_ids
     assert "cannot use [[skill:peripheral:plural]]" in rules["specialist-troops"]
 
 
@@ -704,7 +716,11 @@ def test_game_size_source_issue_cannot_excuse_unrelated_scoring_overlap(
 @pytest.fixture
 def supplies_record() -> dict[str, Any]:
     document = load_curated_document(_CORE_RULES)
-    return deepcopy(next(r for r in document["records"] if r["id"] == "scenario:supplies"))
+    return deepcopy(
+        compose_scenario_record(
+            next(r for r in document["records"] if r["id"] == "scenario:supplies"), document
+        )
+    )
 
 
 def test_supplies_preserves_every_game_size_and_minimum_vp(
@@ -767,8 +783,14 @@ def test_supplies_pickup_carrying_and_control_rules_preserve_eligibility(
     assert mission is not None
     rules = {r.id: " ".join(r.paragraphs) for r in mission.rules}
     assert "Deployment in Silhouette contact" in rules["supply-boxes"]
-    pickup = rules["pick-up-supply-boxes"]
-    assert "Short Skill with the Attack Label" in pickup
+    assert mission.skill_ids == ("skill:pick-up-supply-boxes",)
+    skill = next(
+        r
+        for r in load_curated_document(_CORE_RULES)["records"]
+        if r["id"] == "skill:pick-up-supply-boxes"
+    )
+    assert skill["facts"]["typeIds"] == ["short-skill"] and skill["labelIds"] == ["attack"]
+    pickup = " ".join(skill["facts"]["requirements"] + skill["facts"]["effects"])
     assert "not being carried by a Model" in pickup
     assert "any Model classified as Null" in pickup
     assert "an allied Model in [[state:normal|Normal]]" in pickup
@@ -790,7 +812,7 @@ def test_supplies_pickup_carrying_and_control_rules_preserve_eligibility(
         "specialist-operative",
         "chain-of-command",
     ):
-        assert f"[[skill:{identity}]]" in specialists
+        assert f"skill:{identity}" in mission.rules[-1].specialist_skill_ids
     assert "cannot use [[skill:peripheral:plural]]" in specialists
 
 
@@ -908,7 +930,11 @@ def test_geometry_issue_does_not_excuse_an_unrelated_exclusive_scoring_overlap(
 @pytest.fixture
 def firefight_record() -> dict[str, Any]:
     document = load_curated_document(_CORE_RULES)
-    return deepcopy(next(r for r in document["records"] if r["id"] == "scenario:firefight"))
+    return deepcopy(
+        compose_scenario_record(
+            next(r for r in document["records"] if r["id"] == "scenario:firefight"), document
+        )
+    )
 
 
 def test_firefight_preserves_each_game_size_and_all_null_end_condition(
@@ -999,7 +1025,7 @@ def test_firefight_retains_tactical_link_landing_and_specialist_rules(
         "specialist-operative",
         "chain-of-command",
     ):
-        assert f"[[skill:{identity}]]" in specialists
+        assert f"skill:{identity}" in mission.rules[-1].specialist_skill_ids
     assert "cannot use [[skill:peripheral:plural]]" in specialists
 
 
@@ -1030,7 +1056,9 @@ def test_firefight_metric_comparison_rejects_unsupported_semantics(
 def test_all_core_scenarios_now_have_validated_mission_reference_facts() -> None:
     document = load_curated_document(_CORE_RULES)
     definitions = [
-        parse_scenario_definition_record(r) for r in document["records"] if r["kind"] == "scenario"
+        parse_scenario_definition_record(r, definitions=document)
+        for r in document["records"]
+        if r["kind"] == "scenario"
     ]
     assert {d.id for d in definitions} == {
         "scenario:annihilation",

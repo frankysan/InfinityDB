@@ -10,7 +10,7 @@ import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
-from .domain_slugs import require_domain_slug
+from .domain_slugs import require_domain_slug, validate_typed_domain_id
 from .scenario_geometry import MarkerElement, RectangleElement
 
 if TYPE_CHECKING:
@@ -114,6 +114,9 @@ class ScenarioRule:
     id: str
     name: str
     paragraphs: tuple[str, ...]
+    definition_id: str | None = None
+    skill_ids: tuple[str, ...] = ()
+    specialist_skill_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -145,6 +148,7 @@ class ScenarioMission:
     rules: tuple[ScenarioRule, ...]
     end_conditions: tuple[ScenarioEndCondition, ...]
     source_issues: tuple[ScenarioSourceIssue, ...]
+    skill_ids: tuple[str, ...] = ()
 
 
 def _object(value: Any, required: set[str], optional: set[str], context: str) -> dict[str, Any]:
@@ -321,7 +325,7 @@ def parse_scenario_mission(
     raw = _object(
         value,
         {"sides", "gameSizes", "objectives", "rules", "endConditions", "sourceIssues"},
-        set(),
+        {"skills"},
         context,
     )
     side_ids: set[str] = set()
@@ -449,17 +453,39 @@ def parse_scenario_mission(
     rule_ids: set[str] = set()
     for index, item in enumerate(_array(raw["rules"], f"{context}.rules", allow_empty=True)):
         ctx = f"{context}.rules[{index}]"
-        rule = _object(item, {"id", "name", "paragraphs"}, set(), ctx)
+        rule = _object(
+            item, {"id", "name", "paragraphs"}, {"definitionId", "skillIds", "specialists"}, ctx
+        )
         identifier = _slug(rule["id"], f"{ctx}.id")
         _unique(identifier, rule_ids, ctx)
+        definition_id = rule.get("definitionId")
+        if definition_id is not None:
+            validate_typed_domain_id(
+                definition_id, expected_domain="rule", context=f"{ctx}.definitionId"
+            )
+        defined_skills = tuple(
+            validate_typed_domain_id(value, expected_domain="skill", context=ctx)
+            for value in _array(rule.get("skillIds", []), ctx, allow_empty=True)
+        )
+        specialists = rule.get("specialists", {})
+        _object(specialists, set(), {"anyOfSkills"}, f"{ctx}.specialists")
+        qualifiers = tuple(
+            validate_typed_domain_id(value, expected_domain="skill", context=ctx)
+            for value in _array(specialists.get("anyOfSkills", []), ctx, allow_empty=True)
+        )
         rules.append(
             ScenarioRule(
                 identifier,
                 _text(rule["name"], f"{ctx}.name"),
                 tuple(
                     _text(paragraph, f"{ctx}.paragraphs")
-                    for paragraph in _array(rule["paragraphs"], f"{ctx}.paragraphs")
+                    for paragraph in _array(
+                        rule["paragraphs"], f"{ctx}.paragraphs", allow_empty=True
+                    )
                 ),
+                definition_id,
+                defined_skills,
+                qualifiers,
             )
         )
 
@@ -595,6 +621,18 @@ def parse_scenario_mission(
                             f"score ranges for {point} without a source issue"
                         )
 
+    skill_ids = tuple(
+        validate_typed_domain_id(value, expected_domain="skill", context="mission.skills")
+        for value in _array(raw.get("skills", []), "mission.skills", allow_empty=True)
+    )
+    if len(set(skill_ids)) != len(skill_ids):
+        raise ScenarioMissionError("mission.skills contains duplicate references")
     return ScenarioMission(
-        tuple(sides), tuple(game_sizes), tuple(objectives), tuple(rules), tuple(ends), tuple(issues)
+        tuple(sides),
+        tuple(game_sizes),
+        tuple(objectives),
+        tuple(rules),
+        tuple(ends),
+        tuple(issues),
+        skill_ids,
     )
