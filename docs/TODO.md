@@ -376,6 +376,31 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 ### Routing and long-term compatibility
 
+- [ ] Evaluate a v2 short share-link registry that assigns one compact identifier to each
+  unique canonical share state, rather than trying to make every shared URL fully
+  self-contained. Keep existing v1 links decodable for long-term compatibility.
+  - [ ] Define canonicalization before identity assignment so semantically equivalent states
+    deduplicate regardless of parameter order, explicit defaults, or other serialization
+    differences. Store the canonical state/schema version behind the identifier rather than
+    treating the literal incoming query string as identity.
+  - [ ] Compare compact identifier strategies against expected scale and operational needs.
+    Prefer a sequential integer encoded in a URL-safe high radix when minimum URL length is
+    the primary goal; evaluate a collision-checked random 64-bit identifier if enumeration is
+    undesirable, and a truncated content-derived hash only if deterministic decentralized
+    identity provides a concrete benefit. Do not use conventional UUID text when a shorter
+    representation provides the same required semantics.
+  - [ ] Define the resolver route and lifecycle contract (for example `/s/<id>`), including
+    lookup/not-found behavior, immutability, backup/restore, migrations, retention, abuse
+    controls, and the persistence boundary outside replaceable application snapshots/containers.
+    Existing published short links must remain stable across application and data upgrades.
+  - [ ] Keep the registry representation independent of the public identifier. It may store a
+    compact typed v2 payload rather than JSON if that reduces storage and also supports a
+    self-contained v2 encoding; measure both approaches before committing to one.
+  - [ ] Benchmark complete URL length for representative simple and complex Unit Explorer,
+    catalog, and global-search states against v1, a compact self-contained v2 codec, and the
+    registry design. Treat generic compression as an optional optimization only where it
+    produces a measured win.
+
 - [ ] Before retiring or redirecting numeric routes, define and implement a
   per-domain slug-freezing, reviewed-override, alias/redirect, and canonical-URL
   compatibility policy. Until then, preserve the current contract: canonical generated
