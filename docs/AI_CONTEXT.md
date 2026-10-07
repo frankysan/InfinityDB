@@ -37,9 +37,11 @@ release/audit narrative belongs in the changelog and Git history.
   not maintain a second map-geometry corpus. Semantic point markers retain a `markerType`, whose canonical
   marker metadata may include a physical diameter. N5.3 Domination
   makes the Console diameter rules-relevant by requiring a Console A Marker or same-diameter scenery;
-  the ITS token table supplies the explicit 40 mm value. Map measurement annotations are
-  reference-based: the renderer derives rectangle dimensions and area-size labels from semantic
-  geometry rather than maintaining duplicate numeric measurements. Geometry v1 permits asymmetric
+  the ITS token table supplies the explicit 40 mm value. Scenario placement distances are edge-to-edge
+  unless a source explicitly names a center/reference point; marker footprint therefore participates in
+  “X inches from” placement. Map measurement annotations are reference-based: the renderer derives
+  rectangle dimensions, area-size labels, and element-to-table-edge clearances from semantic geometry
+  rather than maintaining duplicate numeric measurements. Geometry v1 permits asymmetric
   and multiple Deployment Zone regions and keeps semantic style/marker identities open; SVG renderer
   v1 separately fails closed when it lacks a supported presentation style or canonical marker metadata.
   ITS variation informs extensibility, while ITS-only geometry and the interactive editor remain post-1.0. See

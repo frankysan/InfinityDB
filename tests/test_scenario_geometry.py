@@ -10,12 +10,14 @@ from infinity_db.scenario_geometry import (
     AnchorCoordinate,
     AreaSizeAnnotation,
     DimensionAnnotation,
+    ElementEdgeDistanceAnnotation,
     LabelElement,
     MarkerElement,
-    PointEdgeDistanceAnnotation,
     RectangleElement,
     ScenarioGeometryError,
+    element_edge_distance_to_table,
     marker_diameter_mm,
+    marker_radius_inches,
     parse_scenario_geometry,
     resolve_coordinate,
 )
@@ -131,12 +133,12 @@ def test_parse_scenario_geometry_validates_derived_annotations() -> None:
     )
 
 
-def test_parse_scenario_geometry_validates_point_to_edge_distance_annotation() -> None:
+def test_parse_scenario_geometry_validates_element_to_edge_distance_annotation() -> None:
     document = _document()
     document["annotations"] = [
         {
             "id": "objective-left-offset",
-            "kind": "point-edge-distance",
+            "kind": "element-edge-distance",
             "target": "objective-center",
             "edge": "left",
             "offset": -1.5,
@@ -146,7 +148,7 @@ def test_parse_scenario_geometry_validates_point_to_edge_distance_annotation() -
     geometry = parse_scenario_geometry(document)
 
     assert geometry.annotations == (
-        PointEdgeDistanceAnnotation(
+        ElementEdgeDistanceAnnotation(
             id="objective-left-offset",
             target="objective-center",
             edge="left",
@@ -155,27 +157,50 @@ def test_parse_scenario_geometry_validates_point_to_edge_distance_annotation() -
     )
 
 
-def test_parse_scenario_geometry_rejects_point_edge_annotation_targeting_rectangle() -> None:
+def test_parse_scenario_geometry_allows_element_edge_annotation_targeting_rectangle() -> None:
     document = _document()
     document["annotations"] = [
         {
             "id": "deployment-left-offset",
-            "kind": "point-edge-distance",
+            "kind": "element-edge-distance",
             "target": "deployment-a",
             "edge": "left",
         }
     ]
 
-    with pytest.raises(ScenarioGeometryError, match="must reference a marker"):
+    geometry = parse_scenario_geometry(document)
+
+    assert geometry.annotations == (
+        ElementEdgeDistanceAnnotation(
+            id="deployment-left-offset",
+            target="deployment-a",
+            edge="left",
+            offset=0.0,
+        ),
+    )
+
+
+def test_parse_scenario_geometry_rejects_element_edge_annotation_targeting_line() -> None:
+    document = _document()
+    document["annotations"] = [
+        {
+            "id": "center-line-offset",
+            "kind": "element-edge-distance",
+            "target": "center-line",
+            "edge": "left",
+        }
+    ]
+
+    with pytest.raises(ScenarioGeometryError, match="must reference a marker or rectangle"):
         parse_scenario_geometry(document)
 
 
-def test_parse_scenario_geometry_rejects_point_edge_annotation_outside_table() -> None:
+def test_parse_scenario_geometry_rejects_element_edge_annotation_outside_table() -> None:
     document = _document()
     document["annotations"] = [
         {
             "id": "objective-left-offset",
-            "kind": "point-edge-distance",
+            "kind": "element-edge-distance",
             "target": "objective-center",
             "edge": "left",
             "offset": -25,
@@ -364,3 +389,16 @@ def test_canonical_scenario_marker_diameters_are_available_by_type() -> None:
     assert marker_diameter_mm("console") == 40
     assert marker_diameter_mm("supply-box") == 25
     assert marker_diameter_mm("future-marker") is None
+    assert marker_radius_inches("supply-box") == pytest.approx(25 / 25.4 / 2)
+
+
+def test_element_edge_distance_uses_physical_marker_boundary() -> None:
+    geometry = parse_scenario_geometry(_document())
+    marker = geometry.elements[3]
+    assert isinstance(marker, MarkerElement)
+
+    distance = element_edge_distance_to_table(
+        marker, edge="left", table=geometry.table
+    )
+
+    assert distance == pytest.approx(24 - (40 / 25.4 / 2))

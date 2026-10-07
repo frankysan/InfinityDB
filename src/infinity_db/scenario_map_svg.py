@@ -8,18 +8,20 @@ from typing import Literal
 from .scenario_geometry import (
     AreaSizeAnnotation,
     Coordinate,
+    ElementEdgeDistanceAnnotation,
     LineElement,
     MarkerElement,
-    PointEdgeDistanceAnnotation,
     RectangleElement,
     ScenarioAnnotation,
     ScenarioElement,
     ScenarioGeometry,
+    element_bounds,
+    element_edge_distance_to_table,
     marker_diameter_mm,
+    marker_radius_inches,
     resolve_coordinate,
 )
 
-_MM_PER_INCH = 25.4
 _RENDERABLE_ELEMENT_STYLES = frozenset(
     {
         "deployment-a",
@@ -98,7 +100,8 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
                 "scenario SVG renderer v1 has no canonical marker metadata for "
                 f"marker type {element.marker_type!r}"
             )
-        radius = diameter_mm / _MM_PER_INCH / 2.0
+        radius = marker_radius_inches(element.marker_type)
+        assert radius is not None
         diameter = f' data-diameter-mm="{_number(diameter_mm)}"'
         return (
             f'<circle id="{element_id}" class="{style}" data-marker-type="{marker_type}"'
@@ -137,48 +140,58 @@ def _render_annotation(
     annotation_id = escape(annotation.id, quote=True)
     target_id = escape(annotation.target, quote=True)
 
-    if isinstance(annotation, PointEdgeDistanceAnnotation):
-        target = markers[annotation.target]
-        x = _resolved(geometry, target.x, "x")
-        y = _resolved(geometry, target.y, "y")
+    if isinstance(annotation, ElementEdgeDistanceAnnotation):
+        target = markers.get(annotation.target) or rectangles.get(annotation.target)
+        if target is None:
+            raise ScenarioMapRenderError(
+                f"scenario SVG renderer v1 cannot measure target {annotation.target!r}"
+            )
+        x1, y1, x2, y2 = element_bounds(target, table=geometry.table)
+        distance = element_edge_distance_to_table(
+            target, edge=annotation.edge, table=geometry.table
+        )
         tick = 0.25
         edge = annotation.edge
         if edge in {"left", "right"}:
             edge_x = 0.0 if edge == "left" else geometry.table.width
-            line_y = y + annotation.offset
-            x1, x2 = sorted((x, edge_x))
+            target_x = x1 if edge == "left" else x2
+            target_y = (y1 + y2) / 2.0
+            line_y = target_y + annotation.offset
+            measure_x1, measure_x2 = sorted((target_x, edge_x))
             label_y = line_y - 0.22 if annotation.offset <= 0 else line_y + 0.72
             return (
                 f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" '
                 f'data-edge="{edge}" data-axis="x">'
-                f'<line x1="{_number(x1)}" y1="{_number(line_y)}" '
-                f'x2="{_number(x2)}" y2="{_number(line_y)}"/>'
-                f'<line x1="{_number(x1)}" y1="{_number(line_y - tick)}" '
-                f'x2="{_number(x1)}" y2="{_number(line_y + tick)}"/>'
-                f'<line x1="{_number(x2)}" y1="{_number(line_y - tick)}" '
-                f'x2="{_number(x2)}" y2="{_number(line_y + tick)}"/>'
-                f'<text class="dimension-label" x="{_number((x1 + x2) / 2.0)}" '
+                f'<line x1="{_number(measure_x1)}" y1="{_number(line_y)}" '
+                f'x2="{_number(measure_x2)}" y2="{_number(line_y)}"/>'
+                f'<line x1="{_number(measure_x1)}" y1="{_number(line_y - tick)}" '
+                f'x2="{_number(measure_x1)}" y2="{_number(line_y + tick)}"/>'
+                f'<line x1="{_number(measure_x2)}" y1="{_number(line_y - tick)}" '
+                f'x2="{_number(measure_x2)}" y2="{_number(line_y + tick)}"/>'
+                f'<text class="dimension-label" x="{_number((measure_x1 + measure_x2) / 2.0)}" '
                 f'y="{_number(label_y)}" text-anchor="middle">'
-                f'{_measurement_text(abs(x - edge_x))}</text></g>'
+                f'{_measurement_text(distance)}</text></g>'
             )
 
         edge_y = 0.0 if edge == "top" else geometry.table.height
-        line_x = x + annotation.offset
-        y1, y2 = sorted((y, edge_y))
+        target_y = y1 if edge == "top" else y2
+        target_x = (x1 + x2) / 2.0
+        line_x = target_x + annotation.offset
+        measure_y1, measure_y2 = sorted((target_y, edge_y))
         label_dy = 0.3 if annotation.offset <= 0 else -0.3
-        mid_y = (y1 + y2) / 2.0
+        mid_y = (measure_y1 + measure_y2) / 2.0
         return (
             f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" '
             f'data-edge="{edge}" data-axis="y">'
-            f'<line x1="{_number(line_x)}" y1="{_number(y1)}" '
-            f'x2="{_number(line_x)}" y2="{_number(y2)}"/>'
-            f'<line x1="{_number(line_x - tick)}" y1="{_number(y1)}" '
-            f'x2="{_number(line_x + tick)}" y2="{_number(y1)}"/>'
-            f'<line x1="{_number(line_x - tick)}" y1="{_number(y2)}" '
-            f'x2="{_number(line_x + tick)}" y2="{_number(y2)}"/>'
+            f'<line x1="{_number(line_x)}" y1="{_number(measure_y1)}" '
+            f'x2="{_number(line_x)}" y2="{_number(measure_y2)}"/>'
+            f'<line x1="{_number(line_x - tick)}" y1="{_number(measure_y1)}" '
+            f'x2="{_number(line_x + tick)}" y2="{_number(measure_y1)}"/>'
+            f'<line x1="{_number(line_x - tick)}" y1="{_number(measure_y2)}" '
+            f'x2="{_number(line_x + tick)}" y2="{_number(measure_y2)}"/>'
             f'<text class="dimension-label" x="{_number(line_x)}" y="{_number(mid_y)}" '
             f'text-anchor="middle" transform="rotate(-90 {_number(line_x)} {_number(mid_y)})" '
-            f'dy="{_number(label_dy)}">{_measurement_text(abs(y - edge_y))}</text></g>'
+            f'dy="{_number(label_dy)}">{_measurement_text(distance)}</text></g>'
         )
 
     target = rectangles[annotation.target]

@@ -87,10 +87,10 @@ def test_scenario_detail_filters_point_specific_source_issues(
     assert {
         (annotation["kind"], annotation["target"], annotation.get("edge"))
         for annotation in annotations
-        if annotation["kind"] == "point-edge-distance"
+        if annotation["kind"] == "element-edge-distance"
     } == {
-        ("point-edge-distance", "supply-box-left", "left"),
-        ("point-edge-distance", "supply-box-right", "right"),
+        ("element-edge-distance", "supply-box-left", "left"),
+        ("element-edge-distance", "supply-box-right", "right"),
     }
 
 

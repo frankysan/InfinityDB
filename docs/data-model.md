@@ -552,11 +552,13 @@ An optional ordered `annotations` layer
 references those semantic elements rather than restating their geometry. Geometry v1 currently supports
 derived rectangle `dimension` annotations and `area-size` annotations; both calculate their displayed
 measurement from the referenced rectangle, so a map cannot silently disagree with maintained zone
-dimensions. It also supports `point-edge-distance` annotations for semantic point markers: the
-displayed distance is derived from the marker coordinate and selected table edge, while an optional
-signed offset controls only where the dimension line is drawn. `marker` is a semantic point with a stable
-`markerType`; per-instance radius is not duplicated in geometry because known marker types resolve to
-canonical marker metadata. Physical diameter is semantic when it defines the represented game object,
+dimensions. It also supports `element-edge-distance` annotations for markers and rectangles: the
+displayed distance is derived from the target element's nearest physical boundary and selected table edge,
+while an optional signed offset controls only where the dimension line is drawn. Scenario source language
+such as “X inches from” is interpreted edge-to-edge unless the source explicitly names a center/reference
+point. `marker` stores a semantic center point with a stable `markerType`; per-instance radius is not
+duplicated in geometry because known marker types resolve to canonical marker metadata. That footprint is
+used when deriving marker clearances. Physical diameter is semantic when it defines the represented game object,
 not merely SVG styling. N5.3 Domination requires each Console to be represented by a Console A Marker
 or scenery of the same diameter, indirectly making that canonical footprint part of the scenario rules.
 The ITS token-diameter table provides the explicit numeric dimensions used by the core fixtures:

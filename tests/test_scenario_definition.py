@@ -17,10 +17,12 @@ from infinity_db.scenario_definition import (
 from infinity_db.scenario_geometry import (
     AreaSizeAnnotation,
     DimensionAnnotation,
+    ElementEdgeDistanceAnnotation,
     LineElement,
     MarkerElement,
-    PointEdgeDistanceAnnotation,
     RectangleElement,
+    element_edge_distance_to_table,
+    marker_radius_inches,
     resolve_coordinate,
 )
 from infinity_db.scenario_mission import (
@@ -130,17 +132,28 @@ def test_maintained_supplies_definition_owns_all_core_map_configurations() -> No
         ]
         assert len(markers) == 3
         assert {marker.marker_type for marker in markers} == {"supply-box"}
+        by_id = {marker.id: marker for marker in markers}
+        radius = marker_radius_inches("supply-box")
+        assert radius is not None
+        assert resolve_coordinate(
+            by_id["supply-box-left"].x, axis="x", table=geometry.table
+        ) == pytest.approx(8 + radius)
+        assert resolve_coordinate(
+            by_id["supply-box-center"].x, axis="x", table=geometry.table
+        ) == width / 2
+        assert resolve_coordinate(
+            by_id["supply-box-right"].x, axis="x", table=geometry.table
+        ) == pytest.approx(width - 8 - radius)
         assert {
-            (
-                resolve_coordinate(marker.x, axis="x", table=geometry.table),
-                resolve_coordinate(marker.y, axis="y", table=geometry.table),
-            )
+            resolve_coordinate(marker.y, axis="y", table=geometry.table)
             for marker in markers
-        } == {
-            (8, height / 2),
-            (width / 2, height / 2),
-            (width - 8, height / 2),
-        }
+        } == {height / 2}
+        assert element_edge_distance_to_table(
+            by_id["supply-box-left"], edge="left", table=geometry.table
+        ) == pytest.approx(8)
+        assert element_edge_distance_to_table(
+            by_id["supply-box-right"], edge="right", table=geometry.table
+        ) == pytest.approx(8)
         dimensions = [
             annotation
             for annotation in geometry.annotations
@@ -149,7 +162,7 @@ def test_maintained_supplies_definition_owns_all_core_map_configurations() -> No
         point_offsets = [
             annotation
             for annotation in geometry.annotations
-            if isinstance(annotation, PointEdgeDistanceAnnotation)
+            if isinstance(annotation, ElementEdgeDistanceAnnotation)
         ]
         assert {annotation.target for annotation in dimensions} == {
             "deployment-a",
@@ -173,7 +186,9 @@ def test_select_maintained_supplies_geometry_uses_army_points() -> None:
         for element in geometry.elements
         if isinstance(element, MarkerElement) and element.id == "supply-box-right"
     )
-    assert resolve_coordinate(right_box.x, axis="x", table=geometry.table) == 24
+    assert element_edge_distance_to_table(
+        right_box, edge="right", table=geometry.table
+    ) == pytest.approx(8)
     assert resolve_coordinate(right_box.y, axis="y", table=geometry.table) == 24
 
 
@@ -826,15 +841,17 @@ def test_supplies_outer_boxes_are_eight_inches_from_edges_at_every_game_size(
     for army_points in (150, 200, 250, 300, 350, 400):
         geometry = select_scenario_geometry(definition, army_points)
         outer = {
-            e.id: resolve_coordinate(e.x, axis="x", table=geometry.table)
+            e.id: e
             for e in geometry.elements
             if isinstance(e, MarkerElement)
             and e.id in {"supply-box-left", "supply-box-right"}
         }
-        assert outer == {
-            "supply-box-left": 8,
-            "supply-box-right": geometry.table.width - 8,
-        }
+        assert element_edge_distance_to_table(
+            outer["supply-box-left"], edge="left", table=geometry.table
+        ) == pytest.approx(8)
+        assert element_edge_distance_to_table(
+            outer["supply-box-right"], edge="right", table=geometry.table
+        ) == pytest.approx(8)
 
 
 @pytest.mark.parametrize(

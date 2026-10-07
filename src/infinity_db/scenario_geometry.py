@@ -10,12 +10,16 @@ from typing import Any, Literal, TypeAlias
 SCENARIO_GEOMETRY_FORMAT = "InfinityDB scenario geometry"
 SCENARIO_GEOMETRY_VERSION = 1
 
+_MM_PER_INCH = 25.4
+
 _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "console": 40.0,
     "supply-box": 25.0,
 }
 
 _ELEMENT_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+
 class ScenarioGeometryError(ValueError):
     """Raised when scenario geometry does not satisfy the versioned contract."""
 
@@ -101,8 +105,8 @@ class AreaSizeAnnotation:
 
 
 @dataclass(frozen=True, slots=True)
-class PointEdgeDistanceAnnotation:
-    """Derived distance from a point marker to one table edge."""
+class ElementEdgeDistanceAnnotation:
+    """Derived clearance from an element boundary to one table edge."""
 
     id: str
     target: str
@@ -111,7 +115,7 @@ class PointEdgeDistanceAnnotation:
 
 
 ScenarioAnnotation: TypeAlias = (
-    DimensionAnnotation | AreaSizeAnnotation | PointEdgeDistanceAnnotation
+    DimensionAnnotation | AreaSizeAnnotation | ElementEdgeDistanceAnnotation
 )
 
 
@@ -129,6 +133,15 @@ def marker_diameter_mm(marker_type: str) -> float | None:
     """Return the canonical physical diameter for a known scenario marker type."""
 
     return _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE.get(marker_type)
+
+
+def marker_radius_inches(marker_type: str) -> float | None:
+    """Return the canonical physical radius in geometry units for a known marker."""
+
+    diameter_mm = marker_diameter_mm(marker_type)
+    if diameter_mm is None:
+        return None
+    return diameter_mm / _MM_PER_INCH / 2.0
 
 
 def _object(value: Any, context: str) -> dict[str, Any]:
@@ -304,14 +317,14 @@ def _parse_annotation(value: Any, index: int) -> ScenarioAnnotation:
             target=_element_id(raw.get("target"), f"{context}.target"),
         )
 
-    if kind == "point-edge-distance":
+    if kind == "element-edge-distance":
         _only_keys(raw, {"id", "kind", "target", "edge"}, {"offset"}, context)
         edge = raw.get("edge")
         if edge not in {"left", "right", "top", "bottom"}:
             raise ScenarioGeometryError(
                 f"{context}.edge must be one of ['bottom', 'left', 'right', 'top']"
             )
-        return PointEdgeDistanceAnnotation(
+        return ElementEdgeDistanceAnnotation(
             id=_element_id(raw.get("id"), f"{context}.id"),
             target=_element_id(raw.get("target"), f"{context}.target"),
             edge=edge,
@@ -320,7 +333,7 @@ def _parse_annotation(value: Any, index: int) -> ScenarioAnnotation:
 
     raise ScenarioGeometryError(
         f"{context}.kind must be one of "
-        "['area-size', 'dimension', 'point-edge-distance']"
+        "['area-size', 'dimension', 'element-edge-distance']"
     )
 
 
@@ -340,6 +353,48 @@ def resolve_coordinate(
     else:
         base = limit
     return base + coordinate.offset
+
+
+def element_bounds(
+    element: RectangleElement | MarkerElement, *, table: ScenarioTable
+) -> tuple[float, float, float, float]:
+    """Resolve the physical bounds of an element in canonical table inches."""
+
+    if isinstance(element, RectangleElement):
+        return (
+            resolve_coordinate(element.x1, axis="x", table=table),
+            resolve_coordinate(element.y1, axis="y", table=table),
+            resolve_coordinate(element.x2, axis="x", table=table),
+            resolve_coordinate(element.y2, axis="y", table=table),
+        )
+
+    radius = marker_radius_inches(element.marker_type)
+    if radius is None:
+        raise ScenarioGeometryError(
+            "element boundary distance requires canonical marker metadata for "
+            f"marker type {element.marker_type!r}"
+        )
+    x = resolve_coordinate(element.x, axis="x", table=table)
+    y = resolve_coordinate(element.y, axis="y", table=table)
+    return x - radius, y - radius, x + radius, y + radius
+
+
+def element_edge_distance_to_table(
+    element: RectangleElement | MarkerElement,
+    *,
+    edge: Literal["left", "right", "top", "bottom"],
+    table: ScenarioTable,
+) -> float:
+    """Return edge-to-edge clearance from an element to the selected table edge."""
+
+    x1, y1, x2, y2 = element_bounds(element, table=table)
+    if edge == "left":
+        return x1
+    if edge == "right":
+        return table.width - x2
+    if edge == "top":
+        return y1
+    return table.height - y2
 
 
 def _validate_resolved_geometry(geometry: ScenarioGeometry) -> None:
@@ -368,6 +423,13 @@ def _validate_resolved_geometry(geometry: ScenarioGeometry) -> None:
         elif isinstance(element, MarkerElement):
             resolved(element.x, "x", f"{context}.x")
             resolved(element.y, "y", f"{context}.y")
+            radius = marker_radius_inches(element.marker_type)
+            if radius is not None:
+                x1, y1, x2, y2 = element_bounds(element, table=table)
+                if x1 < 0 or y1 < 0 or x2 > table.width or y2 > table.height:
+                    raise ScenarioGeometryError(
+                        f"{context} physical marker boundary resolves outside the table"
+                    )
         else:
             resolved(element.x, "x", f"{context}.x")
             resolved(element.y, "y", f"{context}.y")
@@ -380,17 +442,17 @@ def _validate_resolved_geometry(geometry: ScenarioGeometry) -> None:
             raise ScenarioGeometryError(
                 f"{context}.target references unknown element {annotation.target!r}"
             )
-        if isinstance(annotation, PointEdgeDistanceAnnotation):
-            if not isinstance(target, MarkerElement):
+        if isinstance(annotation, ElementEdgeDistanceAnnotation):
+            if not isinstance(target, (MarkerElement, RectangleElement)):
                 raise ScenarioGeometryError(
-                    f"{context}.target must reference a marker element"
+                    f"{context}.target must reference a marker or rectangle element"
                 )
-            x = resolve_coordinate(target.x, axis="x", table=table)
-            y = resolve_coordinate(target.y, axis="y", table=table)
+            x1, y1, x2, y2 = element_bounds(target, table=table)
+            element_edge_distance_to_table(target, edge=annotation.edge, table=table)
             cross_position = (
-                y + annotation.offset
+                ((y1 + y2) / 2.0) + annotation.offset
                 if annotation.edge in {"left", "right"}
-                else x + annotation.offset
+                else ((x1 + x2) / 2.0) + annotation.offset
             )
             cross_limit = (
                 table.height if annotation.edge in {"left", "right"} else table.width

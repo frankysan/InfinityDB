@@ -167,8 +167,11 @@ affects the represented game object. N5.3 Domination requires a Console A Marker
 scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
 Renderer-only styling remains separate. Structured map annotations may reference semantic geometry
 to derive displayed distances and area sizes; they must not duplicate the underlying measurements.
-Geometry v1 includes rectangle dimensions/area sizes plus point-to-table-edge distances, which covers
+Geometry v1 includes rectangle dimensions/area sizes plus element-to-table-edge distances, which covers
 the core Domination and Supplies measurement callouts without introducing arbitrary annotation geometry.
+Scenario placement distances are edge-to-edge by default: when a marker is stated to be a distance from
+an edge or another element, its canonical physical footprint participates in that distance rather than
+its center point, unless the source explicitly says otherwise.
 Semantic style and marker identities are open at the geometry boundary rather than coupled to the current
 SVG palette; renderer v1 separately validates the styles and canonical marker metadata it can faithfully
 project and fails closed for unsupported presentation. Geometry also permits asymmetric and multiple

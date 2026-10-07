@@ -3131,8 +3131,12 @@ Supply Box marker is visibly closer to the table edge than that guide distance. 
 therefore not the Supply Box placement dimension. The 200/250-point and 150-point illustrations also
 show the 8-inch placement.
 
-The maintained geometry uses the explicit written 8-inch placement at every supported Army Points
-value and carries no Supplies placement source issue. The structured scoring reference separately
+Infinity scenario distance language is interpreted edge-to-edge unless the source explicitly names a
+center/reference point. Therefore the maintained geometry places each outer Supply Box so the nearest
+edge of its 25 mm marker is exactly 8 inches from the table edge; the marker center is farther inboard by
+its 12.5 mm radius. The maintained definition carries no Supplies placement source issue.
+
+The structured scoring reference separately
 preserves the three additive end-of-game objectives: 2 points per controlled box, 2 for more
 controlled boxes than the opponent, and 2 extra for all three. Control requires a Model carrier,
 excludes Null carriers and enemy Model contact, and is distinct from the pickup/carriage procedures.

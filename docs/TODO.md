@@ -281,12 +281,14 @@ unimplemented until its corresponding behavior exists.
     - [x] Add reference-based map measurements before freezing geometry v1. Keep annotations separate
       from semantic shapes: rectangle depth/width dimensions and area-size labels resolve their values
       from a target geometry element instead of duplicating numbers. Domination pilots rectangle
-      dimensions and derived Quadrant sizes; Supplies adds point-to-table-edge distances derived from
-      Supply Box coordinates, so its canonical 8-inch placements are never restated in annotation data.
+      dimensions and derived Quadrant sizes; Supplies adds element-to-table-edge distances derived from
+      the Supply Box physical boundaries, so its canonical 8-inch clearances are never restated in
+      annotation data. Scenario distance language such as “8 inches from” is edge-to-edge unless the
+      source explicitly defines a center/reference point.
     - [ ] Make every player-facing scenario measurement except marker size use the shared dynamic
       distance presentation so users can switch between inches and centimeters. This includes
       maintained-text scenario distances **and every measurement rendered inside the generated SVG
-      maps** (table dimensions, Deployment Zones, area sizes, point/edge distances, and future
+      maps** (table dimensions, Deployment Zones, area sizes, element/edge distances, and future
       annotations). Changing the existing in/cm preference must refresh an already-visible scenario map
       as well as DOM text, without requiring the user to reselect the scenario/game size. Keep canonical
       geometry in inches; canonical marker diameters remain fixed physical metadata in millimeters and

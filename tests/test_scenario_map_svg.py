@@ -7,7 +7,7 @@ import pytest
 
 from infinity_db.curated import load_curated_document
 from infinity_db.scenario_definition import scenario_definition_from_curated_document
-from infinity_db.scenario_geometry import parse_scenario_geometry
+from infinity_db.scenario_geometry import marker_radius_inches, parse_scenario_geometry
 from infinity_db.scenario_map_svg import ScenarioMapRenderError, render_scenario_map_svg
 
 
@@ -210,12 +210,14 @@ def test_render_scenario_map_svg_projects_derived_dimensions_and_area_size() -> 
     ) in svg
 
 
-def test_render_scenario_map_svg_projects_point_to_edge_distance() -> None:
+def test_render_scenario_map_svg_projects_element_edge_distance_to_marker_boundary() -> None:
+    radius = marker_radius_inches("supply-box")
+    assert radius is not None
     geometry = parse_scenario_geometry(
         {
             "format": "InfinityDB scenario geometry",
             "formatVersion": 1,
-            "title": "Measured point",
+            "title": "Measured marker",
             "table": {"width": 24, "height": 32, "unit": "in"},
             "elements": [
                 {
@@ -223,14 +225,14 @@ def test_render_scenario_map_svg_projects_point_to_edge_distance() -> None:
                     "kind": "marker",
                     "style": "objective",
                     "markerType": "supply-box",
-                    "x": 8,
+                    "x": 8 + radius,
                     "y": {"anchor": "center"},
                 }
             ],
             "annotations": [
                 {
                     "id": "supply-box-left-offset",
-                    "kind": "point-edge-distance",
+                    "kind": "element-edge-distance",
                     "target": "supply-box-left",
                     "edge": "left",
                     "offset": -1.5,
@@ -247,6 +249,56 @@ def test_render_scenario_map_svg_projects_point_to_edge_distance() -> None:
     ) in svg
     assert '<line x1="0" y1="14.5" x2="8" y2="14.5"/>' in svg
     assert '>8″</text></g>' in svg
+
+
+def test_render_scenario_map_svg_projects_element_edge_distance_for_rectangle() -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Measured region",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "scoring-area",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 6,
+                    "y1": 8,
+                    "x2": 18,
+                    "y2": 24,
+                }
+            ],
+            "annotations": [
+                {
+                    "id": "scoring-area-left-offset",
+                    "kind": "element-edge-distance",
+                    "target": "scoring-area",
+                    "edge": "left",
+                    "offset": -2,
+                }
+            ],
+        }
+    )
+
+    svg = render_scenario_map_svg(geometry)
+
+    assert '<line x1="0" y1="14" x2="6" y2="14"/>' in svg
+    assert '>6″</text></g>' in svg
+
+
+def test_render_maintained_supplies_maps_measure_eight_inches_to_marker_edges() -> None:
+    document = load_curated_document(_CORE_RULES)
+    definition = scenario_definition_from_curated_document(document, "scenario:supplies")
+    namespace = "{http://www.w3.org/2000/svg}"
+
+    for configuration in definition.configurations:
+        root = ElementTree.fromstring(render_scenario_map_svg(configuration.geometry))
+        by_id = {element.attrib.get("id"): element for element in root.iter()}
+        for annotation_id in ("supply-box-left-offset", "supply-box-right-offset"):
+            annotation = by_id[annotation_id]
+            labels = list(annotation.iter(f"{namespace}text"))
+            assert labels[-1].text == "8″"
 
 
 def test_render_scenario_map_svg_fails_closed_for_unknown_style() -> None:

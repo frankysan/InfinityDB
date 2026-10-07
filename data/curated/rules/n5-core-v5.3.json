@@ -17105,7 +17105,10 @@
                                     "id": "supply-box-left",
                                     "kind": "marker",
                                     "style": "objective",
-                                    "x": 8,
+                                    "x": {
+                                        "anchor": "left",
+                                        "offset": 8.492125984251969
+                                    },
                                     "y": {
                                         "anchor": "center"
                                     },
@@ -17127,7 +17130,10 @@
                                     "id": "supply-box-right",
                                     "kind": "marker",
                                     "style": "objective",
-                                    "x": 16,
+                                    "x": {
+                                        "anchor": "right",
+                                        "offset": -8.492125984251969
+                                    },
                                     "y": {
                                         "anchor": "center"
                                     },
@@ -17151,14 +17157,14 @@
                                 },
                                 {
                                     "id": "supply-box-left-offset",
-                                    "kind": "point-edge-distance",
+                                    "kind": "element-edge-distance",
                                     "target": "supply-box-left",
                                     "edge": "left",
                                     "offset": -1.5
                                 },
                                 {
                                     "id": "supply-box-right-offset",
-                                    "kind": "point-edge-distance",
+                                    "kind": "element-edge-distance",
                                     "target": "supply-box-right",
                                     "edge": "right",
                                     "offset": -1.5
@@ -17251,7 +17257,10 @@
                                     "id": "supply-box-left",
                                     "kind": "marker",
                                     "style": "objective",
-                                    "x": 8,
+                                    "x": {
+                                        "anchor": "left",
+                                        "offset": 8.492125984251969
+                                    },
                                     "y": {
                                         "anchor": "center"
                                     },
@@ -17273,7 +17282,10 @@
                                     "id": "supply-box-right",
                                     "kind": "marker",
                                     "style": "objective",
-                                    "x": 24,
+                                    "x": {
+                                        "anchor": "right",
+                                        "offset": -8.492125984251969
+                                    },
                                     "y": {
                                         "anchor": "center"
                                     },
@@ -17297,14 +17309,14 @@
                                 },
                                 {
                                     "id": "supply-box-left-offset",
-                                    "kind": "point-edge-distance",
+                                    "kind": "element-edge-distance",
                                     "target": "supply-box-left",
                                     "edge": "left",
                                     "offset": -1.5
                                 },
                                 {
                                     "id": "supply-box-right-offset",
-                                    "kind": "point-edge-distance",
+                                    "kind": "element-edge-distance",
                                     "target": "supply-box-right",
                                     "edge": "right",
                                     "offset": -1.5
@@ -17398,7 +17410,10 @@
                                     "id": "supply-box-left",
                                     "kind": "marker",
                                     "style": "objective",
-                                    "x": 8,
+                                    "x": {
+                                        "anchor": "left",
+                                        "offset": 8.492125984251969
+                                    },
                                     "y": {
                                         "anchor": "center"
                                     },
@@ -17420,7 +17435,10 @@
                                     "id": "supply-box-right",
                                     "kind": "marker",
                                     "style": "objective",
-                                    "x": 40,
+                                    "x": {
+                                        "anchor": "right",
+                                        "offset": -8.492125984251969
+                                    },
                                     "y": {
                                         "anchor": "center"
                                     },
@@ -17444,14 +17462,14 @@
                                 },
                                 {
                                     "id": "supply-box-left-offset",
-                                    "kind": "point-edge-distance",
+                                    "kind": "element-edge-distance",
                                     "target": "supply-box-left",
                                     "edge": "left",
                                     "offset": -1.5
                                 },
                                 {
                                     "id": "supply-box-right-offset",
-                                    "kind": "point-edge-distance",
+                                    "kind": "element-edge-distance",
                                     "target": "supply-box-right",
                                     "edge": "right",
                                     "offset": -1.5
