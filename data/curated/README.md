@@ -411,7 +411,8 @@ complete typed fact model. Scenario-definition v1 uses `facts.definitionVersion:
 and one validated `InfinityDB scenario geometry` document. Army Points must not overlap between
 configurations. All four N5.3 core scenarios are maintained examples.
 
-The optional `facts.mission` reference component is maintained by Annihilation and Domination.
+The optional `facts.mission` reference component is maintained by Annihilation, Domination,
+and Supplies.
 Its required arrays are `sides`, `gameSizes`, `objectives`, `rules`, `endConditions`, and `sourceIssues`; only
 `rules` and `sourceIssues` may be empty. A game-size row has `armyPoints`, `swc`, `configurationId`,
 and `deployments` (`sideId` + `elementIds`). It references existing geometry rather than restating
@@ -421,18 +422,24 @@ end condition; that condition requires a value in every row. Objectives declare 
 `condition`. `maximumPointsPerRound` is an optional cap for end-of-round objectives, independent
 of the whole-mission `maximumPoints`. Domination additionally uses geometry-referenced
 `dominated-region-comparison` and `element-status-count` conditions. The latter awards points per
-matching marker, requires cumulative aggregation, and currently supports `status: hacked`. Referenced
-elements must resolve in every applicable configuration as rectangles or markers respectively.
+matching marker, requires cumulative aggregation, and supports `status: hacked` or `controlled`.
+Supplies adds `element-status-comparison`, whose
+`greater` and `all` modes award a scalar bonus for more matching markers than the opponent or
+for every referenced marker matching respectively. Referenced elements must resolve in every applicable configuration as rectangles or markers respectively.
 Special rules retain ordered `paragraphs`. End conditions distinguish `checkAt` from `finishAt`
 and use round-limit, reviewed-prose, or minimum-victory-points conditions.
 
 Unknown fields/condition kinds, invalid geometry/side references, unsupported or missing Army Points,
 and unacknowledged exclusive score-range overlaps fail validation. A `sourceIssues` entry names its
-`armyPoints` and exactly one of `objectiveId` or `gameSizeField` (`swc` or `minimumVictoryPoints`),
-has `status: needs-verification`, and preserves the unresolved source meaning in `description`. Domination retains its printed 350-point 6 SWC row and a game-size issue;
+`armyPoints` and exactly one of `objectiveId`, `gameSizeField` (`swc` or `minimumVictoryPoints`),
+or a non-empty `geometryElementIds` list. Geometry targets must resolve in every applicable
+configuration. It has `status: needs-verification`, and preserves the unresolved source meaning in `description`. Domination retains its printed 350-point 6 SWC row and a game-size issue;
 never derive or replace SWC from another scenario's row. Annihilation retains the inconsistent
-printed 350-point survival bands; do not infer corrected thresholds from the enemy-kills column. Nested prose uses the semantic
-maintained-text syntax and shared audits. Existing record storage round-trips this payload and its
+printed 350-point survival bands; do not infer corrected thresholds from the enemy-kills column.
+Supplies retains its written
+8-inch outer-box placements and a geometry issue for the conflicting 12-inch large-table diagram.
+Distance mentions in source-issue prose use maintained-text distance tokens. Nested prose uses
+the semantic maintained-text syntax and shared audits. Existing record storage round-trips this payload and its
 citations without changing the rules database format. The
 [scenario data model](../../docs/data-model.md#planned-scenario-model-10) distinguishes this current
 subset from the remaining publication indexes, actions/features, and browser work.

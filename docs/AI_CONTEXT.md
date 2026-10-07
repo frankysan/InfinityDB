@@ -42,14 +42,18 @@ release/audit narrative belongs in the changelog and Git history.
   geometry rather than maintaining duplicate numeric measurements. ITS variation informs
   extensibility, while ITS-only geometry and the interactive editor remain post-1.0. See
   `docs/data-model.md`.
-- Annihilation and Domination maintain typed mission reference facts inside the existing rules
+- Annihilation, Domination, and Supplies maintain typed mission reference facts inside the existing rules
   record payload. Domination separates per-round and whole-mission scoring caps, references scoring
   regions/markers in every applicable geometry configuration, and keeps minimum Victory Points
   in the game-size row consumed by its end condition.
   Its game-size deployment references reuse maintained geometry, and nested scoring/rule/end-condition
   prose must participate in the shared maintained-text audits. Preserve the scoped N5.3 350-point
   survival-band discrepancy and Domination's printed 350-point 6 SWC row. Source issues target
-  an objective or a game-size field; they do not imply corrected values or an evaluation priority.
+  an objective, a game-size field, or geometry elements; they do not imply corrected values or an
+  evaluation priority. Supplies keeps per-box points and the more/all-box bonuses separate, and
+  preserves the written 8-inch outer-box placement plus the large-table diagram's conflicting
+  12-inch labels as a scoped geometry source issue. Geometry issues must resolve in every
+  applicable configuration and cannot authorize overlapping score ranges.
   Dedicated scenario publication indexes and browser access remain design direction. See
   `docs/data-model.md` and `docs/TODO.md`.
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network

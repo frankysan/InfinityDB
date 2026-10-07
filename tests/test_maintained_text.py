@@ -493,3 +493,13 @@ def test_domination_minimum_vp_end_prose_uses_shared_reference_validation(tmp_pa
     record["facts"]["mission"]["endConditions"][1]["condition"]["text"] += " [[skill:not-current]]"
     with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
         export_rules_database(documents, tmp_path / "rules.db", finalize=False)
+
+
+def test_supplies_placement_issue_uses_shared_distance_validation() -> None:
+    from infinity_db.maintained_text import validate_maintained_text_syntax
+
+    core = load_curated_document(Path("data/curated/rules/n5-core-v5.3.json"))
+    record = next(r for r in core["records"] if r["id"] == "scenario:supplies")
+    record["facts"]["mission"]["sourceIssues"][0]["description"] = "Place the boxes 8 inches away."
+    with pytest.raises(ValueError, match="must use a .*distance"):
+        validate_maintained_text_syntax(core)

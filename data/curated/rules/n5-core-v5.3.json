@@ -17199,6 +17199,324 @@
             },
             "facts": {
                 "definitionVersion": 1,
+                "mission": {
+                    "sides": [
+                        {
+                            "id": "side-a",
+                            "name": "Side A"
+                        },
+                        {
+                            "id": "side-b",
+                            "name": "Side B"
+                        }
+                    ],
+                    "gameSizes": [
+                        {
+                            "armyPoints": 150,
+                            "swc": 3,
+                            "configurationId": "150-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 38
+                        },
+                        {
+                            "armyPoints": 200,
+                            "swc": 4,
+                            "configurationId": "200-250-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 50
+                        },
+                        {
+                            "armyPoints": 250,
+                            "swc": 5,
+                            "configurationId": "200-250-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 63
+                        },
+                        {
+                            "armyPoints": 300,
+                            "swc": 6,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 75
+                        },
+                        {
+                            "armyPoints": 350,
+                            "swc": 7,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 88
+                        },
+                        {
+                            "armyPoints": 400,
+                            "swc": 8,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 100
+                        }
+                    ],
+                    "objectives": [
+                        {
+                            "id": "controlled-boxes",
+                            "name": "Supply Boxes controlled",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-game",
+                            "aggregation": "cumulative",
+                            "maximumPoints": 6,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150,
+                                        200,
+                                        250,
+                                        300,
+                                        350,
+                                        400
+                                    ],
+                                    "objectivePoints": 2,
+                                    "condition": {
+                                        "kind": "element-status-count",
+                                        "elementIds": [
+                                            "supply-box-left",
+                                            "supply-box-center",
+                                            "supply-box-right"
+                                        ],
+                                        "status": "controlled"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "more-boxes",
+                            "name": "More Supply Boxes controlled",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-game",
+                            "aggregation": "exclusive",
+                            "maximumPoints": 2,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150,
+                                        200,
+                                        250,
+                                        300,
+                                        350,
+                                        400
+                                    ],
+                                    "objectivePoints": 2,
+                                    "condition": {
+                                        "kind": "element-status-comparison",
+                                        "elementIds": [
+                                            "supply-box-left",
+                                            "supply-box-center",
+                                            "supply-box-right"
+                                        ],
+                                        "status": "controlled",
+                                        "comparison": "greater"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "all-boxes",
+                            "name": "All Supply Boxes controlled",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-game",
+                            "aggregation": "exclusive",
+                            "maximumPoints": 2,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150,
+                                        200,
+                                        250,
+                                        300,
+                                        350,
+                                        400
+                                    ],
+                                    "objectivePoints": 2,
+                                    "condition": {
+                                        "kind": "element-status-comparison",
+                                        "elementIds": [
+                                            "supply-box-left",
+                                            "supply-box-center",
+                                            "supply-box-right"
+                                        ],
+                                        "status": "controlled",
+                                        "comparison": "all"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "rules": [
+                        {
+                            "id": "supply-boxes",
+                            "name": "Supply Boxes",
+                            "paragraphs": [
+                                "Place three Supply Boxes: one at the center of the table and two on its center line, at the positions shown in the selected map.",
+                                "Represent each Supply Box with a Supply Box Marker or a similar scenery item.",
+                                "Deployment in Silhouette contact with a Supply Box is not permitted."
+                            ]
+                        },
+                        {
+                            "id": "pick-up-supply-boxes",
+                            "name": "Pick Up Supply Boxes",
+                            "paragraphs": [
+                                "Pick Up Supply Boxes is a Short Skill with the Attack Label, available to Specialist Troops.",
+                                "The Specialist must be in Silhouette contact with a Supply Box Token not being carried by a Model, with any Model classified as Null carrying a Supply Box Token, or with an allied Model in [[state:normal|Normal]] carrying a Supply Box Token.",
+                                "Spend one Short Skill to pick up the Supply Box without making a Roll, following the common Supply Box rules."
+                            ]
+                        },
+                        {
+                            "id": "carrying-supply-boxes",
+                            "name": "Carrying Supply Boxes",
+                            "paragraphs": [
+                                "Each Specialist Troop may carry at most one Supply Box.",
+                                "Only Models can carry Supply Boxes; Markers cannot carry them.",
+                                "Keep the Supply Box Token on the table even if its carrier becomes classified as Null."
+                            ]
+                        },
+                        {
+                            "id": "controlling-supply-boxes",
+                            "name": "Controlling Supply Boxes",
+                            "paragraphs": [
+                                "At game end, a player controls a Supply Box only if one of their Models is carrying it. A Marker cannot control a Supply Box.",
+                                "The carrier must not be classified as Null and must not be in Silhouette contact with any enemy Model."
+                            ]
+                        },
+                        {
+                            "id": "specialist-troops",
+                            "name": "Specialist Troops",
+                            "paragraphs": [
+                                "For this mission, Specialist Troops are Troopers with [[skill:doctor]], [[skill:engineer]], [[skill:forward-observer]], [[skill:hacker]], [[skill:paramedic]], [[skill:specialist-operative]], or [[skill:chain-of-command]].",
+                                "[[skill:doctor:plural]] and [[skill:engineer:plural]] cannot use [[skill:peripheral:plural]] for tasks reserved for Specialist Troops."
+                            ]
+                        }
+                    ],
+                    "endConditions": [
+                        {
+                            "id": "round-limit",
+                            "checkAt": "end-of-round",
+                            "finishAt": "end-of-round",
+                            "condition": {
+                                "kind": "round-limit",
+                                "rounds": 3
+                            }
+                        },
+                        {
+                            "id": "minimum-victory-points",
+                            "checkAt": "tactical-phase",
+                            "finishAt": "end-of-player-turn",
+                            "condition": {
+                                "kind": "minimum-victory-points",
+                                "text": "During the active player’s Tactical Phase, total the Victory Points of Troopers in their Army List that are not classified as Null. If the total is below the minimum Victory Points in the selected game-size row, finish the mission at the end of that Player Turn."
+                            }
+                        }
+                    ],
+                    "sourceIssues": [
+                        {
+                            "id": "large-table-box-placement",
+                            "armyPoints": [
+                                300,
+                                350,
+                                400
+                            ],
+                            "geometryElementIds": [
+                                "supply-box-left",
+                                "supply-box-right"
+                            ],
+                            "status": "needs-verification",
+                            "description": "The Supply Boxes rule on N5.3 printed page 153 places the outer boxes [[distance:8:inch]] from the table edges. The 300–400-point diagram on printed page 154 labels [[distance:12:inch]] instead. The map follows the written [[distance:8:inch]] placement. The text/diagram conflict needs verification."
+                        }
+                    ]
+                },
                 "configurations": [
                     {
                         "id": "150-points",

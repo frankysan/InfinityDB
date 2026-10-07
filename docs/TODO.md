@@ -195,6 +195,11 @@ unimplemented until its corresponding behavior exists.
         and a typed minimum-VP end condition. Preserve Console interactions and Specialist/control
         rules as ordered linked prose; standalone scoped Skill/action/role identities remain pending.
         Round-trip the new facts and their printed-page citations through existing rules storage.
+      - [x] Extend the reference subset with **Supplies**: controlled-marker counts and more/all
+        comparisons, additive scoring bonuses, literal game-size rows, and inherited minimum-VP
+        end conditions. Preserve pickup alternatives, carrying capacity, carrier restrictions,
+        and deployment/control rules as linked prose; round-trip facts and citations through
+        existing rules storage. Geometry source issues now validate across every applicable map.
     - [ ] Export relational identities/provenance/membership/reference indexes and validated
       component payloads to `rules.db`. Cover broken references, invalid dimensions/placements,
       distinct revisions of one identity, deterministic output, and unsupported formats. Update
@@ -215,6 +220,10 @@ unimplemented until its corresponding behavior exists.
       printed page 151 specifies 6 SWC, unlike Annihilation's 7 SWC at the same Army Points.
       The maintained mission retains 6 and a game-size source issue; do not infer a universal
       Points-to-SWC formula or silently borrow the value from another scenario.
+    - [ ] Verify **Supplies' large-table outer-box placement** against authoritative clarification.
+      N5.3 page 153 specifies 8 inches from the edges, while page 154's 300–400-point diagram
+      labels 12 inches. Retain the maintained written-rule 8-inch positions and the scoped
+      geometry source issue until the discrepancy is resolved.
   - [ ] Keep the model source/scope-aware and extensible to versioned ITS seasons, but do
     not make ITS scenario content, tournament/event tooling, or a deployment-map editor a
     1.0 requirement.

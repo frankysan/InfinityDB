@@ -400,7 +400,7 @@ core scenarios: `scenario:annihilation`, `scenario:domination`, `scenario:suppli
 collection. It validates `definitionVersion`, non-overlapping Army Points groups, and geometry-v1
 documents; the SVG CLI selects maintained geometry by scenario identity + Army Points.
 
-Annihilation and Domination maintain the optional `facts.mission` component, validated by
+Annihilation, Domination, and Supplies maintain the optional `facts.mission` component, validated by
 `scenario_mission.py`. It owns ordered sides; all six Army Points/SWC rows; per-side Deployment Zone
 references into the selected geometry; objectives and awards; special-rule paragraphs; mission end
 conditions; and scoped source issues. Every geometry-supported Army Points value must have exactly
@@ -425,7 +425,7 @@ which finishes at the end of that Player Turn. Printed pages 149–150 cite the 
 Domination adds geometry-referenced scoring conditions: `dominated-region-comparison` compares
 each player's dominated-region count with the opponent (`equal` or `greater`), with an optional
 minimum own count; `element-status-count` awards the declared points per matching marker element.
-The current status vocabulary is `hacked`. Referenced regions/markers must exist with the right
+The current marker-status vocabulary is `hacked` or `controlled`. Referenced regions/markers must exist with the right
 geometry kind in every Army Points configuration covered by the award. These conditions record
 the reference rule; they do not evaluate ownership, control, or live game state.
 
@@ -438,11 +438,29 @@ requires every row to have that field and distinguishes a Tactical Phase check f
 at the end of that Player Turn. Its reviewed text preserves the strict below-threshold trigger
 and non-Null Trooper basis.
 
-Source issues target exactly one `objectiveId` or `gameSizeField` (`swc` or
-`minimumVictoryPoints`) and list their applicable Army Points. Game-size issues cannot excuse
+Supplies adds `element-status-comparison`: `greater` compares the player's matching-marker count
+with the opponent, while `all` requires every referenced marker to match for that player. Its
+three end-of-game objectives remain additive: 2 points per controlled Supply Box (cap 6), 2 for
+more than the opponent, and 2 extra for all boxes. Each condition references the same three
+maintained Supply Box marker IDs. Carrying is insufficient on its own: control requires a Model
+carrier that is non-Null and not in Silhouette contact with an enemy Model. Pickup alternatives,
+one-box carrying capacity, Model-only carrying, persistent tokens, and deployment restrictions
+remain cited ordered rules; live carriers and control are not stored or evaluated. Supplies
+reuses the literal minimum-VP rows and typed end-condition contract, with 7 SWC at 350 points.
+
+Source issues target exactly one `objectiveId`, `gameSizeField` (`swc` or
+`minimumVictoryPoints`), or non-empty `geometryElementIds` list and name their applicable Army
+Points. Geometry references must resolve in every applicable configuration. Game-size and geometry
+issues cannot excuse
 overlapping exclusive scoring ranges. Domination preserves the source-specific 6 SWC at 350
 points from printed page 151, with a game-size source issue pending verification rather than
 replacing it with the 7 SWC in Annihilation. Printed pages 151–152 cite the mission rules.
+
+Supplies also preserves a source placement discrepancy. Printed page 153 specifies outer boxes
+`8 inches` from the table edges, but the 300–400-point diagram on page 154 labels `12 inches`.
+The maintained outer markers continue to follow the written 8-inch rule. A geometry source issue
+targets those two markers for 300, 350, and 400 Army Points and retains both cited values with
+typed distance tokens. It does not move markers or make a source correction.
 
 Console setup, Hack Consoles, Specialist eligibility and the Peripheral restriction, base overlap,
 and the Shasvastii exception remain ordered, semantically linked mission rules. Dedicated scoped
@@ -456,7 +474,7 @@ introduced, and rules schema/compatibility remains 7/8. Rebuild `rules.db` after
 the existing rules-build workflow.
 
 Full scenario publication/revision/membership indexes, dedicated actions/elements/features,
-Supplies and Firefight reference facts, and browsable scenario access remain design direction. Concrete
+Firefight reference facts, and browsable scenario access remain design direction. Concrete
 unfinished work belongs to the [1.0 backlog](TODO.md#rules-and-reference-completeness).
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses

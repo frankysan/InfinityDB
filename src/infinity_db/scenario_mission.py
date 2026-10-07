@@ -67,8 +67,19 @@ class ElementStatusCount:
     status: str
 
 
+@dataclass(frozen=True, slots=True)
+class ElementStatusComparison:
+    element_ids: tuple[str, ...]
+    status: str
+    comparison: str
+
+
 ScenarioScoreCondition = (
-    NumericRangeCondition | ProseCondition | DominatedRegionComparison | ElementStatusCount
+    NumericRangeCondition
+    | ProseCondition
+    | DominatedRegionComparison
+    | ElementStatusCount
+    | ElementStatusComparison
 )
 
 
@@ -116,6 +127,7 @@ class ScenarioSourceIssue:
     description: str
     status: str = "needs-verification"
     game_size_field: str | None = None
+    geometry_element_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -216,9 +228,15 @@ def _condition(value: Any, context: str) -> ScenarioScoreCondition:
     if kind == "reviewed-prose":
         raw = _object(value, {"kind", "text"}, set(), context)
         return ProseCondition(_text(raw["text"], f"{context}.text"))
-    if isinstance(kind, str) and kind in {"dominated-region-comparison", "element-status-count"}:
+    if isinstance(kind, str) and kind in {
+        "dominated-region-comparison",
+        "element-status-count",
+        "element-status-comparison",
+    }:
         required = {"kind", "elementIds"}
         required.add("comparison" if kind == "dominated-region-comparison" else "status")
+        if kind == "element-status-comparison":
+            required.add("comparison")
         raw = _object(
             value,
             required,
@@ -231,9 +249,12 @@ def _condition(value: Any, context: str) -> ScenarioScoreCondition:
         )
         if len(set(elements)) != len(elements):
             raise ScenarioMissionError(f"{context}.elementIds contains duplicate references")
-        if kind == "element-status-count":
-            status = _choice(raw["status"], {"hacked"}, f"{context}.status")
-            return ElementStatusCount(elements, status)
+        if kind in {"element-status-count", "element-status-comparison"}:
+            status = _choice(raw["status"], {"hacked", "controlled"}, f"{context}.status")
+            if kind == "element-status-count":
+                return ElementStatusCount(elements, status)
+            comparison = _choice(raw["comparison"], {"greater", "all"}, f"{context}.comparison")
+            return ElementStatusComparison(elements, status, comparison)
         comparison = _choice(raw["comparison"], {"equal", "greater"}, f"{context}.comparison")
         minimum = None
         if "minimum" in raw:
@@ -250,7 +271,9 @@ def _validate_score_geometry(
     configurations: tuple[ScenarioConfiguration, ...],
     context: str,
 ) -> None:
-    if not isinstance(condition, (DominatedRegionComparison, ElementStatusCount)):
+    if not isinstance(
+        condition, (DominatedRegionComparison, ElementStatusCount, ElementStatusComparison)
+    ):
         return
     expected = (
         RectangleElement if isinstance(condition, DominatedRegionComparison) else MarkerElement
@@ -473,23 +496,24 @@ def parse_scenario_mission(
         issue = _object(
             item,
             {"id", "armyPoints", "status", "description"},
-            {"objectiveId", "gameSizeField"},
+            {"objectiveId", "gameSizeField", "geometryElementIds"},
             ctx,
         )
         identifier = _slug(issue["id"], f"{ctx}.id")
         _unique(identifier, issue_ids, ctx)
         points = _points(issue["armyPoints"], supported_points, f"{ctx}.armyPoints")
-        if ("objectiveId" in issue) == ("gameSizeField" in issue):
+        if sum(key in issue for key in ("objectiveId", "gameSizeField", "geometryElementIds")) != 1:
             raise ScenarioMissionError(
-                f"{ctx} must target exactly one objectiveId or gameSizeField"
+                f"{ctx} must target exactly one objectiveId, gameSizeField, or geometryElementIds"
             )
         objective_id = None
         game_size_field = None
+        geometry_ids: tuple[str, ...] = ()
         if "objectiveId" in issue:
             objective_id = _slug(issue["objectiveId"], f"{ctx}.objectiveId")
             if objective_id not in objective_ids:
                 raise ScenarioMissionError(f"{ctx} references unknown objective {objective_id!r}")
-        else:
+        elif "gameSizeField" in issue:
             game_size_field = _choice(
                 issue["gameSizeField"], {"swc", "minimumVictoryPoints"}, f"{ctx}.gameSizeField"
             )
@@ -498,6 +522,16 @@ def parse_scenario_mission(
                 for size in game_sizes
             ):
                 raise ScenarioMissionError(f"{ctx} references absent minimumVictoryPoints")
+        else:
+            for configuration in configurations:
+                if not set(points).intersection(configuration.army_points):
+                    continue
+                known = {element.id for element in configuration.geometry.elements}
+                geometry_ids = _references(
+                    issue["geometryElementIds"],
+                    known,
+                    f"{ctx}.geometryElementIds in {configuration.id}",
+                )
         _choice(issue["status"], {"needs-verification"}, f"{ctx}.status")
         issues.append(
             ScenarioSourceIssue(
@@ -506,6 +540,7 @@ def parse_scenario_mission(
                 objective_id,
                 _text(issue["description"], f"{ctx}.description"),
                 game_size_field=game_size_field,
+                geometry_element_ids=geometry_ids,
             )
         )
 

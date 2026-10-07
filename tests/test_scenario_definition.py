@@ -24,6 +24,7 @@ from infinity_db.scenario_geometry import (
 )
 from infinity_db.scenario_mission import (
     DominatedRegionComparison,
+    ElementStatusComparison,
     ElementStatusCount,
     NumericRangeCondition,
     ProseCondition,
@@ -695,5 +696,209 @@ def test_game_size_source_issue_cannot_excuse_unrelated_scoring_overlap(
     issue = annihilation_record["facts"]["mission"]["sourceIssues"][0]
     del issue["objectiveId"]
     issue["gameSizeField"] = "swc"
+    with pytest.raises(ScenarioDefinitionError, match="overlapping score ranges for 350"):
+        parse_scenario_definition_record(annihilation_record)
+
+
+@pytest.fixture
+def supplies_record() -> dict[str, Any]:
+    document = load_curated_document(_CORE_RULES)
+    return deepcopy(next(r for r in document["records"] if r["id"] == "scenario:supplies"))
+
+
+def test_supplies_preserves_every_game_size_and_minimum_vp(
+    supplies_record: dict[str, Any],
+) -> None:
+    mission = parse_scenario_definition_record(supplies_record).mission
+    assert mission is not None
+    assert [(s.army_points, s.swc, s.minimum_victory_points) for s in mission.game_sizes] == [
+        (150, 3, 38),
+        (200, 4, 50),
+        (250, 5, 63),
+        (300, 6, 75),
+        (350, 7, 88),
+        (400, 8, 100),
+    ]
+    assert [s.configuration_id for s in mission.game_sizes] == [
+        "150-points",
+        "200-250-points",
+        "200-250-points",
+        "300-400-points",
+        "300-400-points",
+        "300-400-points",
+    ]
+    assert mission.end_conditions[0].rounds == 3
+    ending = mission.end_conditions[1]
+    assert ending.uses_minimum_victory_points
+    assert (ending.check_at, ending.finish_at) == ("tactical-phase", "end-of-player-turn")
+    assert ending.description and "below" in ending.description
+    assert "not classified as Null" in ending.description
+    assert {(c["sourceId"], c["page"]) for c in supplies_record["citations"]} == {
+        ("n5-core-v5.3-pdf", 153),
+        ("n5-core-v5.3-pdf", 154),
+    }
+
+
+def test_supplies_scoring_keeps_per_box_and_both_additional_bonuses(
+    supplies_record: dict[str, Any],
+) -> None:
+    mission = parse_scenario_definition_record(supplies_record).mission
+    assert mission is not None
+    boxes = ("supply-box-left", "supply-box-center", "supply-box-right")
+    per_box, more, all_boxes = mission.objectives
+    assert [o.maximum_points for o in mission.objectives] == [6, 2, 2]
+    assert [o.aggregation for o in mission.objectives] == ["cumulative", "exclusive", "exclusive"]
+    assert all(o.timing == "end-of-game" for o in mission.objectives)
+    assert all(o.side_ids == ("side-a", "side-b") for o in mission.objectives)
+    assert all(
+        o.awards[0].army_points == (150, 200, 250, 300, 350, 400) for o in mission.objectives
+    )
+    assert [o.awards[0].objective_points for o in mission.objectives] == [2, 2, 2]
+    assert per_box.awards[0].condition == ElementStatusCount(boxes, "controlled")
+    assert more.awards[0].condition == ElementStatusComparison(boxes, "controlled", "greater")
+    assert all_boxes.awards[0].condition == ElementStatusComparison(boxes, "controlled", "all")
+
+
+def test_supplies_pickup_carrying_and_control_rules_preserve_eligibility(
+    supplies_record: dict[str, Any],
+) -> None:
+    mission = parse_scenario_definition_record(supplies_record).mission
+    assert mission is not None
+    rules = {r.id: " ".join(r.paragraphs) for r in mission.rules}
+    assert "Deployment in Silhouette contact" in rules["supply-boxes"]
+    pickup = rules["pick-up-supply-boxes"]
+    assert "Short Skill with the Attack Label" in pickup
+    assert "not being carried by a Model" in pickup
+    assert "any Model classified as Null" in pickup
+    assert "an allied Model in [[state:normal|Normal]]" in pickup
+    assert "without making a Roll" in pickup
+    carrying = rules["carrying-supply-boxes"]
+    assert "at most one" in carrying and "Markers cannot" in carrying
+    assert "on the table even if its carrier becomes classified as Null" in carrying
+    control = rules["controlling-supply-boxes"]
+    assert "one of their Models is carrying" in control and "A Marker cannot control" in control
+    assert "must not be classified as Null" in control
+    assert "any enemy Model" in control
+    specialists = rules["specialist-troops"]
+    for identity in (
+        "doctor",
+        "engineer",
+        "forward-observer",
+        "hacker",
+        "paramedic",
+        "specialist-operative",
+        "chain-of-command",
+    ):
+        assert f"[[skill:{identity}]]" in specialists
+    assert "cannot use [[skill:peripheral:plural]]" in specialists
+
+
+def test_supplies_placement_issue_is_scoped_to_large_table_outer_markers(
+    supplies_record: dict[str, Any],
+) -> None:
+    definition = parse_scenario_definition_record(supplies_record)
+    assert definition.mission is not None
+    issue = definition.mission.source_issues[0]
+    assert issue.army_points == (300, 350, 400)
+    assert issue.objective_id is None and issue.game_size_field is None
+    assert issue.geometry_element_ids == ("supply-box-left", "supply-box-right")
+    assert issue.status == "needs-verification"
+    assert "[[distance:8:inch]]" in issue.description
+    assert "[[distance:12:inch]]" in issue.description
+    geometry = select_scenario_geometry(definition, 350)
+    outer = [
+        e
+        for e in geometry.elements
+        if isinstance(e, MarkerElement) and e.id in issue.geometry_element_ids
+    ]
+    assert [resolve_coordinate(e.x, axis="x", table=geometry.table) for e in outer] == [8, 40]
+
+
+@pytest.mark.parametrize(
+    ("path", "value", "message"),
+    [
+        (("objectives", 1, "awards", 0, "condition", "elementIds"), ["missing"], "scoring element"),
+        (
+            ("objectives", 1, "awards", 0, "condition", "elementIds"),
+            ["deployment-a"],
+            "scoring element",
+        ),
+        (
+            ("objectives", 1, "awards", 0, "condition", "elementIds"),
+            ["supply-box-left"] * 2,
+            "duplicate",
+        ),
+        (("objectives", 1, "awards", 0, "condition", "comparison"), "equal", "one of"),
+        (("objectives", 1, "awards", 0, "condition", "status"), "carried", "one of"),
+        (("objectives", 2, "awards", 0, "condition", "minimum"), 2, "unsupported fields"),
+        (("sourceIssues", 0, "geometryElementIds"), [], "non-empty"),
+        (("sourceIssues", 0, "geometryElementIds"), ["missing"], "unknown references"),
+        (("sourceIssues", 0, "geometryElementIds"), ["supply-box-left"] * 2, "duplicate"),
+        (("sourceIssues", 0, "objectiveId"), "controlled-boxes", "exactly one"),
+    ],
+)
+def test_supplies_rejects_invalid_marker_conditions_and_issue_references(
+    supplies_record: dict[str, Any],
+    path: tuple[str | int, ...],
+    value: Any,
+    message: str,
+) -> None:
+    target = supplies_record["facts"]["mission"]
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    with pytest.raises(ScenarioDefinitionError, match=message):
+        parse_scenario_definition_record(supplies_record)
+
+
+def test_marker_comparison_references_must_resolve_in_every_covered_configuration(
+    supplies_record: dict[str, Any],
+) -> None:
+    # The per-box objective covers 150 Points here, leaving the comparison's wider
+    # scope responsible for checking the missing marker in the middle configuration.
+    supplies_record["facts"]["mission"]["objectives"][0]["awards"][0]["armyPoints"] = [150]
+    configuration = supplies_record["facts"]["configurations"][1]
+    geometry = configuration["geometry"]
+    geometry["elements"] = [e for e in geometry["elements"] if e["id"] != "supply-box-center"]
+    # Keep every objective covering all sizes without referencing the missing marker
+    # in the per-box awards, so the scalar comparison itself must reject this record.
+    first = supplies_record["facts"]["mission"]["objectives"][0]
+    other = deepcopy(first["awards"][0])
+    other["armyPoints"] = [200, 250, 300, 350, 400]
+    other["condition"]["elementIds"] = ["supply-box-left", "supply-box-right"]
+    first["awards"].append(other)
+    with pytest.raises(
+        ScenarioDefinitionError, match="scoring element 'supply-box-center'.*200-250-points"
+    ):
+        parse_scenario_definition_record(supplies_record)
+
+
+def test_geometry_issues_require_references_in_every_applicable_configuration(
+    annihilation_record: dict[str, Any],
+) -> None:
+    issue = {
+        "id": "geometry-note",
+        "armyPoints": [150, 200],
+        "geometryElementIds": ["first-only"],
+        "status": "needs-verification",
+        "description": "An explicitly scoped geometry discrepancy.",
+    }
+    annihilation_record["facts"]["mission"]["sourceIssues"].append(issue)
+    geometry = annihilation_record["facts"]["configurations"][0]["geometry"]
+    extra = deepcopy(geometry["elements"][0])
+    extra["id"] = "first-only"
+    geometry["elements"].append(extra)
+    with pytest.raises(
+        ScenarioDefinitionError, match="geometryElementIds in 200-250-points.*unknown"
+    ):
+        parse_scenario_definition_record(annihilation_record)
+
+
+def test_geometry_issue_does_not_excuse_an_unrelated_exclusive_scoring_overlap(
+    annihilation_record: dict[str, Any],
+) -> None:
+    issue = annihilation_record["facts"]["mission"]["sourceIssues"][0]
+    del issue["objectiveId"]
+    issue["geometryElementIds"] = ["deployment-a"]
     with pytest.raises(ScenarioDefinitionError, match="overlapping score ranges for 350"):
         parse_scenario_definition_record(annihilation_record)
