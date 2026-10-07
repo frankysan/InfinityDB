@@ -6,6 +6,10 @@
 Pyright, Army database-build validation, rules-database validation, asset policy, worker selection,
 and optional reporting under one command contract.
 
+The type-check stage explicitly passes the runner's interpreter to Pyright for dependency
+resolution, so invoking the virtual-environment Python works without first activating that
+environment in the shell.
+
 Use the project virtual-environment interpreter when available:
 
 ```powershell

@@ -73,6 +73,8 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
         sys.executable,
         "-m",
         "pyright",
+        "--pythonpath",
+        sys.executable,
     )
     assert stages[3].command == (
         sys.executable,
@@ -266,7 +268,7 @@ def test_default_lint_targets_cover_complete_tools_tree() -> None:
 def test_type_stage_uses_project_pyright_configuration() -> None:
     [stage] = run_checks.stage_definitions(("type",), [], build_source=None)
 
-    assert stage.command == (sys.executable, "-m", "pyright")
+    assert stage.command == (sys.executable, "-m", "pyright", "--pythonpath", sys.executable)
 
 
 def test_report_without_path_uses_timestamped_repository_filename() -> None:
