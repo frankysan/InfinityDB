@@ -402,10 +402,25 @@ curated scenario revisions or `rules.db`. Remaining implementation belongs to th
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
 `InfinityDB scenario geometry` format version 1, canonical inch table dimensions, ordered unique
 element IDs, and `rectangle`, `line`, `marker`, or `label` elements. Coordinates may be absolute
-inches or table-relative edge/center anchors with offsets. Validation rejects unsupported fields,
-invalid anchors, duplicate IDs, non-finite values, and geometry that resolves outside the table. The
-SVG renderer maps reusable semantic style names to presentation and uses the inch dimensions directly
-as its `viewBox`; it does not infer rules or geometry from diagrams.
+inches or table-relative edge/center anchors with offsets. `marker` is a semantic point with a stable
+`markerType`; per-instance radius is not duplicated in geometry because known marker types resolve to
+canonical marker metadata. Physical diameter is semantic when it defines the represented game object,
+not merely SVG styling. N5.3 Domination requires each Console to be represented by a Console A Marker
+or scenery of the same diameter, indirectly making that canonical footprint part of the scenario rules.
+The ITS token-diameter table provides the explicit numeric dimensions used by the core fixtures:
+**Console 40 mm** and **Supply Box 25 mm**. Validation rejects unsupported fields, invalid anchors,
+duplicate IDs, non-finite values, and geometry
+that resolves outside the table. The SVG renderer maps reusable semantic style names to presentation
+and uses the inch dimensions directly as its `viewBox`; it does not infer rules or geometry from
+diagrams.
+
+Core-map acceptance fixtures cover Annihilation, Domination, Supplies, and Firefight at each distinct
+N5.3 table/deployment configuration (24×32 with 8-inch Deployment Zones, 32×48 with 12-inch
+Deployment Zones, and 48×48 with 12-inch Deployment Zones). They confirm that v1 needs only
+rectangular regions, dividing lines, semantic point markers, labels, and table-relative anchors for
+the core maps. Those fixtures are compatibility evidence while scenario curation is still
+unimplemented; they must not become a second maintained scenario-data source once core scenario
+revisions are curated.
 
 Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
 maintained representation is validated structured JSON; their runtime representation is a deliberate

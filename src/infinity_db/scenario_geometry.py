@@ -10,6 +10,11 @@ from typing import Any, Literal, TypeAlias
 SCENARIO_GEOMETRY_FORMAT = "InfinityDB scenario geometry"
 SCENARIO_GEOMETRY_VERSION = 1
 
+_CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
+    "console": 40.0,
+    "supply-box": 25.0,
+}
+
 _ELEMENT_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _SUPPORTED_STYLES = frozenset(
     {
@@ -71,9 +76,9 @@ class LineElement:
 class MarkerElement:
     id: str
     style: str
+    marker_type: str
     x: Coordinate
     y: Coordinate
-    radius: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,6 +101,12 @@ class ScenarioGeometry:
     title: str
     table: ScenarioTable
     elements: tuple[ScenarioElement, ...]
+
+
+def marker_diameter_mm(marker_type: str) -> float | None:
+    """Return the canonical physical diameter for a known scenario marker type."""
+
+    return _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE.get(marker_type)
 
 
 def _object(value: Any, context: str) -> dict[str, Any]:
@@ -209,14 +220,14 @@ def _parse_element(value: Any, index: int) -> ScenarioElement:
         )
 
     if kind == "marker":
-        required = common_required | {"x", "y", "radius"}
+        required = common_required | {"markerType", "x", "y"}
         _only_keys(raw, required, set(), context)
         return MarkerElement(
             id=_element_id(raw.get("id"), f"{context}.id"),
             style=_style(raw.get("style"), f"{context}.style"),
+            marker_type=_element_id(raw.get("markerType"), f"{context}.markerType"),
             x=_coordinate(raw.get("x"), "x", f"{context}.x"),
             y=_coordinate(raw.get("y"), "y", f"{context}.y"),
-            radius=_positive_number(raw.get("radius"), f"{context}.radius"),
         )
 
     if kind == "label":
@@ -283,17 +294,8 @@ def _validate_resolved_geometry(geometry: ScenarioGeometry) -> None:
                     f"{context} rectangle must resolve to positive width and height"
                 )
         elif isinstance(element, MarkerElement):
-            x = resolved(element.x, "x", f"{context}.x")
-            y = resolved(element.y, "y", f"{context}.y")
-            if (
-                x - element.radius < 0
-                or x + element.radius > table.width
-                or y - element.radius < 0
-                or y + element.radius > table.height
-            ):
-                raise ScenarioGeometryError(
-                    f"{context} marker radius extends outside the table"
-                )
+            resolved(element.x, "x", f"{context}.x")
+            resolved(element.y, "y", f"{context}.y")
         else:
             resolved(element.x, "x", f"{context}.x")
             resolved(element.y, "y", f"{context}.y")

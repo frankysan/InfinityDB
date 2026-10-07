@@ -12,8 +12,12 @@ from .scenario_geometry import (
     RectangleElement,
     ScenarioElement,
     ScenarioGeometry,
+    marker_diameter_mm,
     resolve_coordinate,
 )
+
+_MM_PER_INCH = 25.4
+_DEFAULT_MARKER_RADIUS_IN = 0.35
 
 _STYLE_CSS = """\
 .table{fill:#fff;stroke:#111;stroke-width:.12}
@@ -67,9 +71,17 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
     if isinstance(element, MarkerElement):
         x = _resolved(geometry, element.x, "x")
         y = _resolved(geometry, element.y, "y")
+        marker_type = escape(element.marker_type, quote=True)
+        diameter_mm = marker_diameter_mm(element.marker_type)
+        if diameter_mm is None:
+            radius = _DEFAULT_MARKER_RADIUS_IN
+            diameter = ""
+        else:
+            radius = diameter_mm / _MM_PER_INCH / 2.0
+            diameter = f' data-diameter-mm="{_number(diameter_mm)}"'
         return (
-            f'<circle id="{element_id}" class="{style}" cx="{_number(x)}" cy="{_number(y)}" '
-            f'r="{_number(element.radius)}"/>'
+            f'<circle id="{element_id}" class="{style}" data-marker-type="{marker_type}"'
+            f'{diameter} cx="{_number(x)}" cy="{_number(y)}" r="{_number(radius)}"/>'
         )
 
     x = _resolved(geometry, element.x, "x")

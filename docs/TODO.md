@@ -207,19 +207,25 @@ unimplemented until its corresponding behavior exists.
     - [x] Accept a versioned validated JSON geometry definition and generate deterministic SVG.
       Treat inches as the canonical geometry unit. Support the current **24×32 in, 32×48 in,
       and 48×48 in** table-size configurations while keeping the renderer dimension-agnostic.
-    - [ ] Implement only the semantic primitives needed by the four core scenarios first:
-      table/side-relative anchors, Deployment Zones, rectangular scoring/control regions,
-      center/dividing lines, fixed objective/scenery markers, labels, measurements, and reusable
-      semantic styles. Prefer typed primitives over a general arbitrary SVG-path escape hatch.
+    - [x] Implement the semantic primitives required by the four core scenarios: table-relative
+      anchors, Deployment Zones and scoring/control rectangles, center/dividing lines, fixed
+      objective/scenery point markers, labels, and reusable semantic styles. Keep semantic marker
+      identity in geometry and resolve known marker types through canonical marker metadata rather
+      than duplicating a radius on every element. Console is canonically 40 mm: N5.3 Domination
+      indirectly makes that footprint rules-relevant by requiring a Console A Marker or scenery of
+      the same diameter, while the ITS token table supplies the explicit numeric value. Supply Box is
+      canonically 25 mm from the same token table. Prefer typed primitives over a general arbitrary
+      SVG-path escape hatch.
     - [ ] Keep the schema deliberately extensible using the reviewed ITS evidence: do not bake in
       symmetric sides, one Deployment Zone per side, rectangular-only regions, fixed marker kinds,
       or one season's visual styling. Future schema versions must be able to add repeated/mirrored
       placements, circles/radius regions, Exclusion/Hazard areas, asymmetric roles, access lines,
       custom markers/icons, and per-configuration overrides without redefining the core concepts.
       Unsupported ITS-only constructs should fail explicitly rather than be approximated in v1.
-    - [ ] Validate table bounds, dimensions, required anchors/references, stable element order/IDs,
-      and reproducible SVG bytes where practical. Add deterministic fixtures covering all four core
-      scenarios and every supported core table-size configuration before connecting browser views.
+    - [x] Validate table bounds, dimensions, stable element order/IDs, and reproducible SVG bytes.
+      Deterministic acceptance fixtures now cover all four core scenarios and each distinct supported
+      core table/deployment configuration; replace fixture-only definitions with the same curated
+      geometry consumed by scenario detail data when that domain is implemented.
     - [x] Provide a small development CLI for JSON -> SVG rendering so schema/renderer behavior can
       be tested independently of scenario-page presentation. A browser editor/preview remains
       post-1.0 and must use this same schema/rendering engine when added.

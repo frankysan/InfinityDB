@@ -145,10 +145,15 @@ collection/season membership remain independent.
 Geometry and scoring are maintained semantic data. Diagrams and reference views will be generated
 from that data, with source/season overlays kept distinct from canonical Army or rules facts.
 InfinityDB 1.0 includes a deterministic SVG projection for the four N5.3 core scenarios; geometry
-schema v1 only needs to represent those core maps. Reviewed ITS variation constrains the extension
-points, but ITS-only geometry and an interactive map editor remain post-1.0. Existing catalog
-entities will be referenced by typed identity rather than duplicated locally. Core and ITS scenarios
-share this boundary; tournament pairing, rankings, and mutable match state remain outside it.
+schema v1 only needs to represent those core maps. Point markers retain semantic marker identity;
+known marker types resolve through canonical marker metadata, including physical diameter where that
+affects the represented game object. N5.3 Domination requires a Console A Marker or same-diameter
+scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
+Renderer-only styling remains separate. Reviewed ITS variation constrains the extension points, but
+ITS-only geometry and an interactive map editor remain post-1.0. Existing catalog entities will be referenced by typed
+identity rather than duplicated locally. Core and ITS scenarios share this boundary; tournament
+pairing, rankings, and mutable match state remain outside
+it.
 
 The detailed accepted scenario model belongs to
 [the data model](data-model.md#planned-scenario-model-10). Source comparison and rationale remain in
