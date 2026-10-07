@@ -158,8 +158,9 @@ The workflow downloads the pinned archive, revalidates every member against
 `--assets required`. Record the run SHA together with the result so the pre-merge gate is tied to the
 validated candidate.
 
-A successful pre-merge candidate run satisfies the manual development/release gate recorded in the
-TODO. If the final protected-`main` release commit has a different SHA because the pull request is
+A successful pre-merge candidate run satisfies the optional pre-merge full-assets step in
+[the release checklist](releasing.md#5-land-the-release-commit-verify-hosted-ci-and-tag).
+If the final protected-`main` release commit has a different SHA because the pull request is
 merged or squashed, that earlier run does not count as exact-SHA release evidence. When
 `tools/prepare_release_ci_evidence.py --include-full-assets` is used, dispatch **Full-asset checks**
 again for the final release SHA and require that exact run just like the other hosted workflows.

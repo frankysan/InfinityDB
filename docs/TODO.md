@@ -1,7 +1,7 @@
 # InfinityDB backlog
 
 This is the working implementation backlog. Every unchecked item belongs to exactly
-one release bucket: **0.10.0**, **1.0.0**, or **post-1.0**.
+one release bucket: **1.0.0** or **post-1.0**.
 The buckets are planning commitments, not a promise that a minor release cannot move a
 low-risk item earlier or defer a non-gating item when evidence changes.
 
@@ -20,41 +20,20 @@ when all contained work shares the same owner.
 
 ## Current milestone
 
-The current milestone is **0.10.0 — consistency, presentation, and release hardening**.
-Its implementation and manual acceptance are complete; the candidate still needs to be merged,
-validated at the final release commit, tagged, and published. The next implementation milestone
-is 1.0.0, including current-reference completeness and the core-scenario domain.
+**Project domain:** Project infrastructure
+
+Version **0.10.0** is released and deployed. The current implementation milestone is
+**1.0.0 — current-reference completeness**, with implementation planning below.
 
 General performance/storage experiments, major pipeline refactors,
 persistent-user-data features, ITS season/tournament tooling, and native applications are explicitly
 post-1.0 unless they become necessary to correct a release-blocking defect. Core-rules scenarios are
-part of the 1.0 completeness target; their architecture is now established for later 1.0
-implementation without adding the full scenario surface to 0.10.0.
+part of the 1.0 completeness target; their accepted architecture guides the 1.0 implementation.
 
 The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
-definition lives in `docs/releasing.md`. The sections below contain the remaining release work
-and implementation work for later milestones. Completed substeps are retained only under an
+definition lives in `docs/releasing.md`. The sections below contain the remaining implementation
+and release work for 1.0 and later milestones. Completed substeps are retained only under an
 open parent item.
-
-## 0.10.0 — consistency, presentation, and release hardening
-
-**Project domains:** Web frontend, Deployment, Project infrastructure
-
-- [ ] Finish release publication using [the release checklist](releasing.md). Land the candidate
-  through a pull request, require hosted checks and retained evidence for the final release SHA,
-  then create the annotated tag and publish the release. Deployment acceptance remains a separate
-  step where applicable. Remove this parent item after publication; the changelog and canonical
-  references retain completed implementation outcomes.
-  - [x] Complete pre-merge full-assets acceptance: `Full-asset checks` passed for
-    `7f58d1387f2478aad6650e0311729083c7739800` on 2026-10-07
-    ([run 37579009400](https://github.com/frankysan/InfinityDB/actions/runs/37579009400)).
-    This closes environment/bundle administration; a different final release SHA still needs its
-    own run when collecting optional full-assets evidence.
-  - [x] Complete capacity/load testing and the matched 2x4 versus 4x4 experiment. Retained results,
-    resource boundaries, comparison commands, and the scale-review policy are owned by
-    [deployment guidance](deployment.md#repeatable-http-capacity-scenario).
-  - [x] Complete Silhouette manual browser acceptance. The maintainer confirmed on 2026-10-07 that
-    the [manual checks](testing.md#silhouette-manual-browser-acceptance) were performed and passed.
 
 ## 1.0.0 — current-reference completeness gate
 
@@ -62,12 +41,74 @@ open parent item.
 should resolve remaining material source/rules gaps, add the bounded core-scenario reference
 surface, and validate the whole application without expanding into broader ITS/tournament tooling.
 
+### Development sequence
+
+**Project domains:** Data processing, Web backend, Web frontend, Project infrastructure
+
+This is a proposed implementation sequence within the existing release scope, not a new
+completeness definition. Use [the release gate](releasing.md#version-10-data-completeness-gate)
+to decide whether a gap blocks 1.0. Do not wait until release preparation to discover missing
+information or browser surfaces.
+
+| Stage | Reviewable output | Dependencies |
+| --- | --- | --- |
+| 1. Inventory and scope | Pinned inputs, source-to-browser coverage inventory, prioritized gap batches | Existing Army/rules databases and audit tools |
+| 2. Shared semantics | Scoped identity/clarification contracts, typed Ammunition and annex facts, scenario validation/export pilot | Inventory; reuse current contribution and relation contracts |
+| 3. Complete vertical slices | Reviewed catalog batches, FAQ presentation, all four core scenarios | Relevant Stage 2 contract; each slice includes storage, API, and usable browser access |
+| 4. Derived references | Declaration matrix, enriched lookup rows, variant usage, Restrictions, weapons and Deployables | Reviewed owning facts and exact variant/scope semantics |
+| 5. Closeout | Reconciled completeness evidence and final release acceptance | Every in-scope gap resolved; canonical release checklist |
+
+Stages may overlap where dependencies are satisfied. In particular, ordinary catalog curation can
+continue while the scenario model is implemented, and projections need only their owning facts to
+be ready. Keep model/export, curation, backend, and browser substeps visible under each open parent;
+a populated JSON collection alone does not complete a player-facing task.
+
+For each implementation slice, record the source/version being covered, remaining decisions,
+affected canonical documents, and evidence needed to close it. Extend existing validators and
+audit tools before introducing another coverage system. Keep generated evidence in ignored
+`reports/` or `docs/audits/`; keep maintained semantic decisions in validated curated data or
+configuration. Use [the standard checks](testing.md) for the affected contracts, and add manual
+browser acceptance for new visual/interaction surfaces. Promote durable contracts to their
+canonical owners as implementation lands; the planned scenario model must remain labelled as
+unimplemented until its corresponding behavior exists.
+
+### Source inventory and gap batches
+
+- [ ] **Data processing + Project infrastructure:** Establish the 1.0 completeness baseline
+  before expanding curation.
+  - [ ] Pin the intended Army snapshot, rules/FAQ/annex PDF versions, and supported wiki evidence.
+    Record archive/content hashes as appropriate, publication dates separately from acquisition
+    dates, and the generated database/publication identities. A later source refresh reopens the
+    affected coverage review; normal checks must not acquire newer inputs implicitly.
+  - [ ] Inventory player-relevant information by source section/category, including the four core
+    scenarios. For each category record its canonical identity/model, maintained input, generated
+    storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or
+    justified exclusion. Distinguish missing facts, missing relationships, and missing presentation.
+  - [ ] Reuse `audit_source_presentation.py`, `audit_enrichment_coverage.py`, and
+    `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
+    not establish PDF, FAQ, or scenario completeness or prove browser usability; add the missing
+    source review and presentation checks explicitly.
+  - [ ] Reconcile `data/curated/rules-interactions/reviews.json` and `catalog-scope.json` with the
+    pinned input set. Historical review/defer release labels are evidence, not the active roadmap:
+    reassess pending items against the 1.0 gate and record explicit scope decisions rather than
+    treating every deferred candidate as either automatically required or automatically excluded.
+  - [ ] Turn confirmed gaps into bounded batches under the owning tasks below. Each batch names
+    the concepts/source sections, dependency, missing contract or content, and completion evidence;
+    material source conflicts need a reviewed decision before dependent presentation is closed.
+  - **Completion:** every supported source/category has an explicit coverage disposition and every
+    material in-scope gap has an owning open task. This establishes the baseline, not final acceptance.
+
 ### Rules and reference completeness
 
 - [ ] **Data processing + Web backend + Web frontend:** Close the remaining versioned
   curated rules-reference gaps for N5 v5.3 using
   `data/pdf/rules/n5-rules-v5-3-en.pdf` (dated 2026-08-10) and other explicitly scoped
   current reference sources.
+  - [ ] Plan curation batches from the inventory by missing semantic family or source section.
+    Separate already-reviewed content from absent definitions, unresolved variants, missing typed
+    relations, and facts that exist but cannot yet be reached in the normal browser experience.
+    Reuse the current [curated contract](../data/curated/README.md#curated-rules-reference-data);
+    extend closed fact/relation vocabularies with validation and presentation support before use.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not
@@ -79,12 +120,24 @@ surface, and validate the whole application without expanding into broader ITS/t
     chart. Make the projection source/scope-aware so scenario-only Skills/AROs can be
     represented without appearing in the core N5 matrix or being flagged as missing
     core categories.
+    - [ ] Define projection rows and declaration/scope columns from the existing canonical
+      declaration metadata; expose the owning rule links and cited exceptions. Choose a normal
+      reference entry point rather than leaving the matrix as an audit-only output.
+    - [ ] Validate the pinned core chart against the generated projection. Cover action-like
+      Equipment and Hacking Programs, missing/contradictory categories, scenario-only actions,
+      and phase-scoped exclusions without interpreting absence as permission or prohibition.
   - [ ] Deepen the existing first-class Ammunition model with explicit typed
     relationships. Preserve the eleven published base Ammunition identities, distinguish
     source-defined combined forms, preserve component relationships for Combined
     Ammunition, and keep Ammunition composition separate from Combined Saving Roll
     notation. Link State, Attribute, and Saving-Roll effects explicitly instead of
     deriving them from display names.
+    - [ ] Review the fact/relation schema before curation: components, affected saving Attribute,
+      roll/effect conditions, and State interactions need explicit ownership. Cover a base type,
+      a combined form, and Combined Saving Roll notation in an end-to-end pilot.
+    - [ ] Validate every published base identity and reviewed combined form against the pinned
+      source; prove that weapon links, Ammunition detail, and later comparison views consume the
+      same facts without conflating composition with roll notation.
   - [ ] Include scenario-defined catalog concepts needed for the general rules
     reference, including scenario-only Skills, Equipment when present, contextual
     roles such as Specialist Troop, and the scenario elements those concepts act
@@ -97,6 +150,9 @@ surface, and validate the whole application without expanding into broader ITS/t
     by core, scenario, FAQ, or season material without duplication or collection-
     load-order semantics. This catalog coverage is in scope for 1.0 and should share
     identities/scope with the core-scenario model rather than becoming a parallel representation.
+    - [ ] Reuse current scoped definitions/supplements, then identify any missing applicability
+      validation or presentation contract using one concept shared by core and scenario material.
+      Prove that scope is visible and unrelated scenario/season overlays do not leak into core help.
   - [ ] Add the official Reinforcements Extra as a separately versioned/scoped
     annex source rather than folding it into `n5-core-rules`. Curate `Commlink`
     and `Request Reinforcements`, link the capability they create to the annex
@@ -107,21 +163,62 @@ surface, and validate the whole application without expanding into broader ITS/t
       `Request Reinforcements` can be explicitly classified outside Basic Short/
       Short/Long/ARO instead of being treated as incomplete or assigned a false
       category.
+    - [ ] Deliver the annex as a bounded slice: validated collection/citations, typed parameter
+      and declaration support, generated rules facts, and linked annex/Skill help from the existing
+      Reinforcement Army context. Reuse reviewed Army parent/pool relationships.
+    - [ ] Test ordinary versus Reinforcement context, exact `Commlink (+X)` variants, and explicit
+      phase classification; do not infer roster legality or mutate the core declaration chart.
+  - **Completion:** each covered batch builds into `rules.db`, passes maintained-text and
+    interaction review, and is navigable with citations in normal mode. Use semantic maintained-text
+    tokens; preserve genuine ambiguity with `review-needed` rather than weakening plain-text review.
 
 - [ ] **Data processing + Web backend + Web frontend:** Add the current core-rules
   scenarios as a first-class, browsable scenario domain for 1.0, using the model derived
   from the 0.10.0 core/ITS comparison.
+  - [ ] Implement a model/export pilot from
+    [the accepted scenario model](data-model.md#planned-scenario-model-10). Start with one core
+    scenario selected from the inventory, while checking the schema against the reviewed ITS
+    variation evidence; do not require ITS content publication to validate extensibility.
+    - [ ] Define versioned validated structures for identity, publication revision, collection
+      membership, game-size configuration, sides, geometry, elements, scoring, scoped actions,
+      optional features, and end conditions. Preserve ordered prose where a universal executable
+      condition language would invent semantics.
+    - [ ] Export relational identities/provenance/membership/reference indexes and validated
+      component payloads to `rules.db`. Cover broken references, invalid dimensions/placements,
+      distinct revisions of one identity, deterministic output, and unsupported formats. Update
+      documented rules schema/compatibility and rebuild guidance if those contracts change.
   - [ ] Maintain structured, cited scenario data sufficient to understand setup, objectives,
     scoring, deployment, special rules/elements, and end conditions without relying on an
     unstructured PDF excerpt as the application model.
+    - [ ] Curate **Annihilation, Domination, Supplies, and Firefight**, using N5 v5.3 printed
+      pages 149–156 and the retained [scenario findings](rules-semantics.md#scenarios).
+      Review every supported game-size row, objective/cap/timing, placement rule, special rule,
+      and end condition. Link shared concepts to canonical catalog identities; retain source
+      discrepancies and reviewed resolution instead of copying the nearest chart value.
   - [ ] Keep the model source/scope-aware and extensible to versioned ITS seasons, but do
     not make ITS scenario content, tournament/event tooling, or a deployment-map editor a
     1.0 requirement.
   - [ ] Provide usable scenario list/detail presentation and links to existing canonical
     rule/catalog entities where identities overlap.
+    - [ ] Register scenario capabilities through the application-domain registry and define
+      central slug/revision/collection resolution before adding API/browser consumers. Unknown
+      identities or unsupported selections must have explicit not-found/invalid-input behavior;
+      never silently substitute another season or revision.
+    - [ ] Publish composed list/detail read models with clear source and selected configuration.
+      Render setup, placement, objectives/scoring, special rules, and end conditions using shared
+      browser structures. Decide discovery/search/Glossary participation explicitly in
+      `docs/application-domains.md`; do not require every capability just to register the domain.
+    - [ ] Make geometry understandable through structured placement descriptions/measurements or
+      a bounded generated diagram where needed. The later general deployment-map generator/editor
+      remains post-1.0; any 1.0 diagram must consume the scenario geometry rather than a second map
+      definition. Reuse the common distance presentation contract.
+  - **Completion:** all four scenarios can be found and understood in normal mode for every
+    supported configuration. Review scoring and placement against citations, follow related-rule
+    links, and check keyboard/touch, narrow widths, Light/Dark themes, loading/empty/error behavior,
+    direct navigation, and soft-navigation cleanup. No session state or live scoring engine is required.
 
-- [ ] Add a dated FAQ/errata layer to the existing rules-reference system from
-  current material under `data/pdf/faq/`.
+- [ ] **Data processing + Web backend + Web frontend:** Add a dated FAQ/errata layer to the
+  existing rules-reference system from current material under `data/pdf/faq/`.
   - [ ] Model each ruling as a question, concise answer, rule/topic links,
     applicable scope, document version/date, and source-page citation; do not
     flatten it into the base-rule summary. This preserves the distinction
@@ -140,6 +237,17 @@ surface, and validate the whole application without expanding into broader ITS/t
   - [ ] Define an explicit source-precedence and effective-date policy. An on-screen
     answer must show its source date/version and never silently blend conflicting
     documents.
+    - [ ] Reuse the current definition/supplement boundary. Define the additional ruling identity,
+      applicability, supersession, and source-selection fields needed by FAQ data before authoring
+      batches; publication recency alone must not imply universal applicability. Record accepted
+      semantics in the canonical data model and curated contract.
+  - [ ] Deliver one core clarification and one scenario/season-scoped ruling through validation,
+    export, repository/API composition, and browser presentation before curating the remaining
+    inventory. Show linked questions/answers with dates and affected concepts alongside the base
+    rule; choose a discoverable reference entry point without requiring a new top-level FAQ domain.
+  - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
+    missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
+    or scenario, and the reader can distinguish base rules from applicable clarifications.
 
 - [ ] **Data processing + Web backend + Web frontend:** Extend generated rules-reference
   projections that build on the enriched canonical data rather than duplicating its facts.
@@ -148,36 +256,76 @@ surface, and validate the whole application without expanding into broader ITS/t
     as deployment/session overlays, preserve conditional branches (for example TAG
     versus other Troop Types), and cross-link resolvable outcomes to canonical Skills,
     Equipment, Weapons, and Attributes without rewriting Unit profiles.
+    - [ ] Validate every published lookup row/range and conditional outcome against its cited
+      source. Extend typed outcome support first, then render canonical links from the same rows;
+      no random-result selection or persistent session overlay is required for 1.0.
   - [ ] Add a generated cross-army rule-variant usage index once exact variant
     semantics are reconciled: canonical Skill/Equipment -> Level/MOD/typed parameter
     variant -> Unit/profile/loadout occurrences. Derive it from canonical rules and
     Army occurrence relationships rather than maintaining a second classification.
+    - [ ] Define the occurrence key and counting policy before aggregation so shared payloads,
+      duplicate source Unit representations, and Army-specific variants do not inflate totals or
+      lose context. Link results to the applicable Unit/profile/loadout and exact rule variant.
   - [ ] Model the finite V5.3 Restrictions Chart as explicit cross-domain
     relationships (Troop Type/Training/Equipment/Skill -> restricted action or
     Lieutenant eligibility) and expose it as contextual help/generated reference.
     Do not generalize this into a full live-game action-legality engine.
+    - [ ] Reconcile every chart row and footnote with its owning fact/typed relationship, then
+      test conditional restrictions, positive/negative cases, and scope. Present the condition and
+      source; an absent restriction edge must not be presented as an affirmative legality result.
+  - **Completion:** each projection has a normal browser entry point, source reconciliation, and
+    regression coverage for its exceptional rows. Exact variant reconciliation gates the usage
+    index; it need not block independently ready lookup or Restrictions views.
 
-- [ ] Extend the completed Game States reference catalog with any remaining contextual
-  state links needed by later Fireteam, Hacking, weapon/ammunition, and scenario guidance;
+- [ ] **Data processing + Web backend + Web frontend:** Extend the completed Game States reference
+  catalog with any remaining contextual state links needed by later Fireteam, Hacking,
+  weapon/ammunition, and scenario guidance;
   do not infer a Unit's current in-game State from its static Army profile.
+  - [ ] Drive additions from the coverage inventory and new typed Ammunition/scenario/FAQ facts.
+    Author each relation once and verify derived navigation in both directions; distinguish entry,
+    cancellation, immunity/override, and objective completion from the resulting State.
+  - **Completion:** relevant context is linked from the owning rule and State help with applicable
+    conditions/scope; no duplicate definitions or static assertions of a Trooper's live State.
 
-- [ ] Add a weapon-and-ammunition quick-reference view built from existing
-  weapon profiles plus curated rules data.
+- [ ] **Data processing + Web backend + Web frontend:** Add a weapon-and-ammunition quick-reference
+  view built from existing weapon profiles plus curated rules data.
   - [ ] Normalize display of multi-mode/multi-ammunition profiles, link ammunition
     names and traits to their effects, and provide a unit-neutral
     comparison/filter view. Preserve the field-specific meaning of `+`: Ammunition
     composition and Combined Saving Rolls are separate rules operations. Validate
     the view against Army metadata; do not copy source charts wholesale into the
     application.
+    - [ ] Define a unit-neutral read model and minimal comparison/filter controls using existing
+      weapon identities/profiles and the enriched Ammunition model. Keep mode/profile identity,
+      conditional values, range bands, damage/saving notation, Traits, and unavailable values
+      explicit. Browser code renders these semantics rather than parsing display strings.
+    - [ ] Reconcile representative single/multi-mode, combined-ammunition, Combined Saving Roll,
+      and conditional/sentinel profiles through storage, API, and browser output. Verify the
+      complete published profile set against the inventory, not only representative examples.
   - [ ] Add a generated Deployables profile reference from Weapon/Equipment
     metadata plus curated corrections: ARM/BTS/STR/S for the deployed object,
     originating item/rule, and reverse Unit/loadout uses. Keep deployed-object
     identity separate from the carrier and from catalog domain. Track the V5.3
     Armed Turret S2 detailed-profile versus S1 quick-reference conflict explicitly
     and do not silently choose the summary value without reviewed precedence.
+    - [ ] Inventory deployed objects independently of their carriers. Reuse existing
+      `facts.specialProfile` support where it fits; extend validated metadata/corrections only for
+      confirmed gaps. Resolve or visibly retain the Armed Turret discrepancy with both citations.
+    - [ ] Expose deployed-object profiles and reverse uses through a usable reference entry point.
+      Test objects supplied through Weapons and Equipment, shared objects/multiple carriers,
+      missing/not-applicable values, and carrier-to-object navigation without inventing Unit identity.
+  - **Completion:** players can compare weapon profiles and reach Ammunition/Traits and deployed
+    object statistics without selecting a carrier first; reverse uses preserve Army/loadout context.
 
-- [ ] Add a curated Infinity Wiki URL mapping for traits when authoritative
-  links are available.
+- [ ] **Data processing + Web backend + Web frontend:** Add a curated Infinity Wiki URL mapping
+  for traits when authoritative links are available.
+  - [ ] Inventory Traits with missing or ambiguous official targets and author validated maintained
+    mappings, reusing existing source-link resolution where applicable. Keep renamed/alias labels
+    separate from destination identity; do not generate URLs from display names or invent a page
+    when only a heading exists.
+  - **Completion:** mapped links reach the reviewed official page/heading from normal Trait help;
+    unavailable mappings remain deliberate. Source-link checking is explicit research activity,
+    while automated mapping/resolution tests remain offline.
 
 ### Final 1.0 acceptance
 
@@ -187,6 +335,26 @@ surface, and validate the whole application without expanding into broader ITS/t
   inputs. Resolve every material in-scope gap or document an explicit exclusion with
   rationale, then complete normal project checks, hosted release checks, and
   full-asset validation before tagging 1.0.0.
+  - [ ] Re-run the baseline inventory against the final pinned input set. Follow every in-scope
+    category from source citation through maintained representation and generated storage to a
+    usable normal browser surface; schema coverage, passing validators, and an API route alone
+    are insufficient evidence. Re-review exclusions against the canonical completeness definition.
+  - [ ] Close the 1.0 interaction-review target in the maintained ledger, regenerate the checklist,
+    and require the following check to pass. Never edit the generated checklist manually:
+
+    ```text
+    python tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md --require-release 1.0.0
+    ```
+
+  - [ ] Reconcile cross-source conflicts and empty/unavailable/not-applicable values; retain cited
+    uncertainty where appropriate and fix every defect that materially misrepresents in-scope data.
+    Record evidence by category and source identity in ignored reports/audits rather than keeping
+    completed release narrative in this backlog.
+  - [ ] Run [the complete release checklist](releasing.md), including the mandatory whole-corpus
+    documentation audit, rebuilt release-matched artifacts where needed, local/hosted checks for
+    the final candidate, annotated-tag evidence, and deployed smoke/rollback acceptance where
+    applicable. Capture new scenario/reference browser acceptance in `docs/testing.md` as those
+    surfaces are implemented.
 
 ## Post-1.0 — maintenance and product expansion
 

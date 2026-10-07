@@ -86,12 +86,14 @@ reason and take precedence over catalog-level decisions. Item/relation overrides
 in the selected `infinity.db` + `rules.db` pair; stale or mistyped overrides fail the audit instead
 of silently surviving after the underlying data changes.
 
-For the 0.10 stabilization milestone, missing Weapon rule definitions are retained as
-`later-product-work` because full Weapon rules-reference completeness is part of the 1.0 gate.
-Commlink is likewise deferred explicitly to its separately scoped Reinforcements Extra work.
+The published 0.10.0 scope classified missing Weapon rule definitions as `later-product-work`
+and deferred Commlink to its separately scoped Reinforcements Extra work. These retained
+classifications describe that release's reviewed scope; they do not waive the 1.0 completeness
+gate. Reassess them against the pinned 1.0 inputs as tracked in
+[the backlog](../../docs/TODO.md#source-inventory-and-gap-batches).
 Other defects in those catalogs, including stale citations, ambiguous mappings, unresolved links,
 or unreviewed rules, retain their normal conservative classification and can still block the
-current release. The policy is release-planning metadata only; it must not be consumed as rules
+release under review. The policy is release-planning metadata only; it must not be consumed as rules
 ontology or application runtime behavior.
 
 ### Rules-interaction review policy

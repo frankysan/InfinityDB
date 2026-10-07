@@ -5,8 +5,8 @@ Equipment, Skills, Weapons, and relationships across Armies. It combines
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Release metadata: **0.10.0** (2026-10-07). Unreleased development changes display `+dev`;
-metadata alone does not mean the release has been published.
+Current release: **0.10.0** (2026-10-07), released and deployed.
+Unreleased development changes display `+dev`.
 See the [release process](docs/releasing.md) and [current milestone](docs/TODO.md#current-milestone).
 
 ## Guiding principles
@@ -129,13 +129,13 @@ The current direction is deliberately incremental:
   gaps and made the result searchable, navigable, and understandable.
 - **0.10.x — Stabilize & harden:** completed the application consistency and scenario
   architecture reviews, frontend/theme work, and release/operations hardening.
-- **1.0.0 — Player data-complete:** every useful in-scope game datum collected by
-  InfinityDB has a maintained representation and a meaningful, usable place in the
+- **1.0.0 — Player data-complete (next milestone):** ensure every useful in-scope game datum
+  collected by InfinityDB has a maintained representation and a meaningful, usable place in the
   web reference, including the current core-rules scenarios. ITS season/tournament
   content remains a later extension of the same scenario model.
 
 In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
-0.9 closed application gaps → 0.10 hardens and polishes → 1.0 completes the reference.**
+0.9 closed application gaps → 0.10 hardened and polished → 1.0 completes the reference.**
 Exact minor-release scope may move as audits discover dependencies; the durable 1.0 gate is
 defined in [release process](docs/releasing.md).
 
