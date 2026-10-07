@@ -322,6 +322,7 @@ def test_scenario_browser_routes_are_published_with_shared_navigation(
     assert b'/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?' in script
     assert b'rulesCitationNode(citation)' in script
     assert b'badge.textContent = "uncertain"' in script
+    assert b'wrapper.classList.add("developer-only")' in script
 
     status, _, stylesheet = request(scenario_app, "/static/page-overrides.css")
     assert status == 200

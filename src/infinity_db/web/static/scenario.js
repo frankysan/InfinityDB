@@ -284,7 +284,9 @@ function provenanceSection(item) {
     fact("Content SHA-256", publication.content_sha256 || "—"),
   );
   card.append(heading, facts);
-  return section("Developer details", card);
+  const wrapper = section("Developer details", card);
+  wrapper.classList.add("developer-only");
+  return wrapper;
 }
 
 function render(item) {
