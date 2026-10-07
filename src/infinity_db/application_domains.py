@@ -193,6 +193,18 @@ APPLICATION_DOMAINS: tuple[ApplicationDomain, ...] = (
         published=True,
     ),
     ApplicationDomain(
+        "scenarios",
+        "Scenario",
+        "Scenarios",
+        "top-level",
+        "catalog",
+        record_kinds=("scenario",),
+        landing=True,
+        catalog=True,
+        detail=True,
+        published=False,
+    ),
+    ApplicationDomain(
         "rules",
         "General rule",
         "General Rules",

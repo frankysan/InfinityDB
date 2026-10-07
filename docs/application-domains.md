@@ -113,6 +113,15 @@ catalog/detail, and scoped-view behavior are independent flags rather than conse
 top-level domain. Future evidence may justify another domain, but a new top-level domain requires a
 concrete player-facing browsing/use case rather than merely a new data type.
 
+### Scenario domain scaffold
+
+**Current internal scaffold; not yet player-visible.** `scenarios` is registered as a top-level
+catalog/detail domain owning `scenario:*` records, but remains unpublished until its list/detail API
+and browser surfaces exist. This reserves the application ownership boundary without making routes,
+navigation, search, or Glossary claims ahead of implementation. Scenario slug normalization remains
+the typed `scenario:<slug>` contract used by the maintained scenario layer; publication/revision and
+collection selection must be resolved centrally before the domain is made public.
+
 ## Domain capability registry
 
 **Current.** `src/infinity_db/application_domains.py` is the canonical capability registry for the
