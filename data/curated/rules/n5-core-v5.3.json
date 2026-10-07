@@ -17018,22 +17018,7 @@
                             "ref": "end-condition:minimum-victory-points"
                         }
                     ],
-                    "sourceIssues": [
-                        {
-                            "id": "large-table-box-placement",
-                            "armyPoints": [
-                                300,
-                                350,
-                                400
-                            ],
-                            "geometryElementIds": [
-                                "supply-box-left",
-                                "supply-box-right"
-                            ],
-                            "status": "needs-verification",
-                            "description": "The Supply Boxes rule on N5.3 printed page 153 places the outer boxes [[distance:8:inch]] from the table edges. The 300–400-point diagram on printed page 154 labels [[distance:12:inch]] instead. The map follows the written [[distance:8:inch]] placement. The text/diagram conflict needs verification."
-                        }
-                    ]
+                    "sourceIssues": []
                 },
                 "configurations": [
                     {

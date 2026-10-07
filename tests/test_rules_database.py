@@ -2304,7 +2304,7 @@ def test_domination_mission_round_trips_scoring_geometry_and_minimum_vp(
     assert "[[skill:peripheral:plural]]" in specialist_rules[0]
 
 
-def test_supplies_mission_round_trips_control_conditions_and_geometry_issue(
+def test_supplies_mission_round_trips_control_conditions_and_resolved_geometry(
     current_rules_database: RulesDatabase,
 ) -> None:
     from infinity_db.scenario_definition import parse_scenario_definition_record
@@ -2320,12 +2320,7 @@ def test_supplies_mission_round_trips_control_conditions_and_geometry_issue(
     all_boxes = mission.objectives[2].awards[0].condition
     assert isinstance(all_boxes, ElementStatusComparison) and all_boxes.comparison == "all"
     assert mission.end_conditions[1].uses_minimum_victory_points
-    issue = mission.source_issues[0]
-    assert (issue.army_points, issue.geometry_element_ids) == (
-        (300, 350, 400), ("supply-box-left", "supply-box-right"),
-    )
-    assert "[[distance:8:inch]]" in issue.description
-    assert "[[distance:12:inch]]" in issue.description
+    assert mission.source_issues == ()
     assert {(c["source_id"], c["page"]) for c in record["citations"]} == {
         ("n5-core-v5.3-pdf", 153), ("n5-core-v5.3-pdf", 154),
     }

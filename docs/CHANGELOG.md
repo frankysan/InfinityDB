@@ -13,6 +13,8 @@ are not retroactively relabeled.
 
 - You can now browse the four current core scenarios, choose the exact Army Points value, and see
   setup, objectives, scenario rules, source notes, and a generated deployment map together.
+- Supplies now consistently shows its outer Supply Boxes 8 inches from the table edges at every game
+  size; the 12-inch mark in the large-table source illustration is a guide ruler, not a box offset.
 
 ### Added
 

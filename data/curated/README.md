@@ -444,9 +444,11 @@ are derived from the included Rules' `definesSkills`, rather than authored again
 The resolved mission uses ordered sides/game sizes, geometry-bound deployment regions, typed
 objectives/conditions, included Rules and Skills, endings, and scoped source issues. Its existing
 numeric range, per-round caps, geometry status/comparison, combat metric, and end-condition validators
-still apply after expansion. Source issues preserve the Annihilation scoring discrepancy, Domination
-SWC difference, and Supplies text/diagram placement conflict. Both definition and inclusion source
-provenance remain available; shared reuse does not authorize correcting ambiguous source values.
+still apply after expansion. Source issues preserve the Annihilation scoring discrepancy and Domination
+SWC difference. Supplies no longer carries a placement issue: page 153 explicitly uses an 8-inch
+offset, while re-review of page 154 shows the 12-inch mark as a guide ruler rather than the Supply Box
+offset. Both definition and inclusion source provenance remain available; shared reuse does not
+authorize correcting genuinely ambiguous source values.
 
 Shared prose participates in the full semantic maintained-text syntax, target, and reviewed-link
 audits, including objective/ending payloads in the component library. No plain-reference exception

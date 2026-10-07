@@ -234,10 +234,11 @@ unimplemented until its corresponding behavior exists.
       printed page 151 specifies 6 SWC, unlike Annihilation's 7 SWC at the same Army Points.
       The maintained mission retains 6 and a game-size source issue; do not infer a universal
       Points-to-SWC formula or silently borrow the value from another scenario.
-    - [ ] Verify **Supplies' large-table outer-box placement** against authoritative clarification.
-      N5.3 page 153 specifies 8 inches from the edges, while page 154's 300–400-point diagram
-      labels 12 inches. Retain the maintained written-rule 8-inch positions and the scoped
-      geometry source issue until the discrepancy is resolved.
+    - [x] Verify **Supplies' large-table outer-box placement**. N5.3 page 153 specifies 8 inches
+      from the edges in all cases. Re-review of page 154 confirms that the 12-inch mark in the
+      300–400-point illustration belongs to a guide ruler; the Supply Box marker itself is clearly
+      closer to the table edge and is consistent with the written 8-inch placement. Keep 8 inches
+      for every supported game size and do not retain a source issue for this illustration.
   - [ ] Keep the model source/scope-aware and extensible to versioned ITS seasons, but do
     not make ITS scenario content, tournament/event tooling, or a deployment-map editor a
     1.0 requirement.
@@ -283,10 +284,13 @@ unimplemented until its corresponding behavior exists.
       dimensions and derived Quadrant sizes; Supplies adds point-to-table-edge distances derived from
       Supply Box coordinates, so its canonical 8-inch placements are never restated in annotation data.
     - [ ] Make every player-facing scenario measurement except marker size use the shared dynamic
-      distance presentation so users can switch between inches and centimeters. This includes table/map
-      dimensions and annotations plus maintained-text scenario distances. Keep canonical geometry in
-      inches; canonical marker diameters remain fixed physical metadata in millimeters and do not follow
-      the distance-display preference.
+      distance presentation so users can switch between inches and centimeters. This includes
+      maintained-text scenario distances **and every measurement rendered inside the generated SVG
+      maps** (table dimensions, Deployment Zones, area sizes, point/edge distances, and future
+      annotations). Changing the existing in/cm preference must refresh an already-visible scenario map
+      as well as DOM text, without requiring the user to reselect the scenario/game size. Keep canonical
+      geometry in inches; canonical marker diameters remain fixed physical metadata in millimeters and
+      do not follow the distance-display preference.
     - [x] Validate table bounds, dimensions, stable element order/IDs, and reproducible SVG bytes.
       All four core scenarios now own deterministic maintained geometry for every distinct supported
       table/deployment configuration; renderer acceptance tests consume those curated definitions

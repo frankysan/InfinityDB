@@ -512,11 +512,11 @@ overlapping exclusive scoring ranges. Domination preserves the source-specific 6
 points from printed page 151, with a game-size source issue pending verification rather than
 replacing it with the 7 SWC in Annihilation. Printed pages 151–152 cite the mission rules.
 
-Supplies also preserves a source placement discrepancy. Printed page 153 specifies outer boxes
-`8 inches` from the table edges, but the 300–400-point diagram on page 154 labels `12 inches`.
-The maintained outer markers continue to follow the written 8-inch rule. A geometry source issue
-targets those two markers for 300, 350, and 400 Army Points and retains both cited values with
-typed distance tokens. It does not move markers or make a source correction.
+Supplies uses the written placement consistently at every game size: printed page 153 places the
+outer boxes `8 inches` from the table edges. Re-review of the 300–400-point illustration on page 154
+shows that its `12 inches` mark belongs to a guide ruler; the Supply Box marker itself is visibly
+closer to the edge and is consistent with the written 8-inch position. The maintained geometry
+therefore keeps the outer markers 8 inches from their respective edges without a source issue.
 
 Console setup, Hack Consoles, Specialist eligibility and the Peripheral restriction, base overlap,
 and the Shasvastii exception remain ordered, semantically linked mission rules. Scenario Skills and the shared Specialist Rule now have distinct scoped identities; these rules

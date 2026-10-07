@@ -816,25 +816,25 @@ def test_supplies_pickup_carrying_and_control_rules_preserve_eligibility(
     assert "cannot use [[skill:peripheral:plural]]" in specialists
 
 
-def test_supplies_placement_issue_is_scoped_to_large_table_outer_markers(
+def test_supplies_outer_boxes_are_eight_inches_from_edges_at_every_game_size(
     supplies_record: dict[str, Any],
 ) -> None:
     definition = parse_scenario_definition_record(supplies_record)
     assert definition.mission is not None
-    issue = definition.mission.source_issues[0]
-    assert issue.army_points == (300, 350, 400)
-    assert issue.objective_id is None and issue.game_size_field is None
-    assert issue.geometry_element_ids == ("supply-box-left", "supply-box-right")
-    assert issue.status == "needs-verification"
-    assert "[[distance:8:inch]]" in issue.description
-    assert "[[distance:12:inch]]" in issue.description
-    geometry = select_scenario_geometry(definition, 350)
-    outer = [
-        e
-        for e in geometry.elements
-        if isinstance(e, MarkerElement) and e.id in issue.geometry_element_ids
-    ]
-    assert [resolve_coordinate(e.x, axis="x", table=geometry.table) for e in outer] == [8, 40]
+    assert definition.mission.source_issues == ()
+
+    for army_points in (150, 200, 250, 300, 350, 400):
+        geometry = select_scenario_geometry(definition, army_points)
+        outer = {
+            e.id: resolve_coordinate(e.x, axis="x", table=geometry.table)
+            for e in geometry.elements
+            if isinstance(e, MarkerElement)
+            and e.id in {"supply-box-left", "supply-box-right"}
+        }
+        assert outer == {
+            "supply-box-left": 8,
+            "supply-box-right": geometry.table.width - 8,
+        }
 
 
 @pytest.mark.parametrize(
@@ -867,6 +867,16 @@ def test_supplies_rejects_invalid_marker_conditions_and_issue_references(
     message: str,
 ) -> None:
     target = supplies_record["facts"]["mission"]
+    if path[0] == "sourceIssues":
+        target["sourceIssues"].append(
+            {
+                "id": "test-geometry-issue",
+                "armyPoints": [300],
+                "geometryElementIds": ["supply-box-left"],
+                "status": "needs-verification",
+                "description": "Synthetic issue for source-issue validation coverage.",
+            }
+        )
     for key in path[:-1]:
         target = target[key]
     target[path[-1]] = value

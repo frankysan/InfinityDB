@@ -162,13 +162,7 @@ def test_scenario_detail_api_projects_objective_and_source_issue_tokens(
     )
     assert status == 200
     supplies = json.loads(body)
-    issue = supplies["source_issues"][0]
-    distances = [
-        token["centimeters"]
-        for token in issue["description_tokens"]
-        if token["type"] == "distance"
-    ]
-    assert distances == [20, 30, 20]
+    assert supplies["source_issues"] == []
 
 
 @pytest.mark.parametrize(

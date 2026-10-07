@@ -50,7 +50,10 @@ release/audit narrative belongs in the changelog and Git history.
   boundary; default core composition excludes scoped records, and scoped records cannot have Army
   links. The shared Specialist baseline uses full Skill-ID arrays plus explicit inclusion deltas;
   rendering consumes resolved qualifiers, not an authoring mini-language. Preserve its Non Specialist
-  qualification exception and all three retained core-scenario source issues. Stable scenario-set
+  qualification exception and the retained Annihilation/Domination source issues. Supplies has no
+  placement source issue: its outer Supply Boxes are 8 inches from the table edges at every supported
+  game size; the 12-inch mark in the large-table illustration is a guide ruler, not the box offset.
+  Stable scenario-set
   identity/revision and source publication revision are separate runtime concepts. Current
   `ScenarioCatalog` detail reads require an explicit supported Army Points value; do not invent a
   default configuration in backend composition. The browser follows the same rule: `/scenarios/<slug>`

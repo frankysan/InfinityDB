@@ -82,10 +82,7 @@ def test_scenario_detail_filters_point_specific_source_issues(
     supplies = scenario_catalog.get_scenario("supplies", army_points=300)
 
     assert domination is not None and domination["source_issues"] == []
-    assert supplies is not None
-    assert [issue["id"] for issue in supplies["source_issues"]] == [
-        "large-table-box-placement"
-    ]
+    assert supplies is not None and supplies["source_issues"] == []
     annotations = supplies["placement"]["geometry"]["annotations"]
     assert {
         (annotation["kind"], annotation["target"], annotation.get("edge"))

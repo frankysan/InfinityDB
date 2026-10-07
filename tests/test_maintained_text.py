@@ -505,12 +505,20 @@ def test_domination_minimum_vp_end_prose_uses_shared_reference_validation(tmp_pa
         export_rules_database(documents, tmp_path / "rules.db", finalize=False)
 
 
-def test_supplies_placement_issue_uses_shared_distance_validation() -> None:
+def test_scenario_source_issue_uses_shared_distance_validation() -> None:
     from infinity_db.maintained_text import validate_maintained_text_syntax
 
     core = load_curated_document(Path("data/curated/rules/n5-core-v5.3.json"))
     record = next(r for r in core["records"] if r["id"] == "scenario:supplies")
-    record["facts"]["mission"]["sourceIssues"][0]["description"] = "Place the boxes 8 inches away."
+    record["facts"]["mission"]["sourceIssues"].append(
+        {
+            "id": "synthetic-distance-review",
+            "armyPoints": [300],
+            "geometryElementIds": ["supply-box-left"],
+            "status": "needs-verification",
+            "description": "Place the box 8 inches away.",
+        }
+    )
     with pytest.raises(ValueError, match="must use a .*distance"):
         validate_maintained_text_syntax(core)
 

@@ -3120,26 +3120,24 @@ Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed pages 150–152. 
 objectives, control rules, Consoles, and Hack Consoles are on page 151; Specialist eligibility
 and the Peripheral restriction are on page 152.
 
-### RS-SCN-SUP-001 — Supplies keeps written placement and the contradictory large-table diagram
+### RS-SCN-SUP-001 — Supplies places outer boxes 8 inches from the table edges
 
-**Classification:** source-native text/diagram discrepancy retained by the typed mission reference.
+**Classification:** source-native scenario geometry confirmed by written rule and diagram review.
 
 The Supply Boxes paragraph in N5 Core Rules v5.3 (2026-08-10), printed page 153, places two outer
-boxes on the center line 8 inches from the table edges, with a third box at the table center.
-The 300/350/400-point diagram on printed page 154 labels the outer offset as 12 inches; its
-200/250-point and 150-point diagrams label 8 inches. Visual review of page 154 confirms that the
-large-table discrepancy is in the labelled measurement, not merely inferred from drawing pixels.
+boxes on the center line 8 inches from the table edges, with a third box at the table center. The
+300/350/400-point illustration on printed page 154 includes a 12-inch guide ruler, but the outer
+Supply Box marker is visibly closer to the table edge than that guide distance. The 12-inch label is
+therefore not the Supply Box placement dimension. The 200/250-point and 150-point illustrations also
+show the 8-inch placement.
 
-The maintained geometry continues to follow the explicit written 8-inch placement. The Supplies
-mission preserves a needs-verification issue scoped to both outer marker IDs and 300, 350, and
-400 Army Points. Both citations and measurements remain visible in the maintained reference;
-neither the diagram nor a convention from another mission silently overwrites the geometry.
-
-The structured scoring reference separately preserves the three additive end-of-game objectives:
-2 points per controlled box, 2 for more controlled boxes than the opponent, and 2 extra for all
-three. Control requires a Model carrier, excludes Null carriers and enemy Model contact, and
-is distinct from the pickup/carriage procedures. These are scenario-local reference facts, not
-permanent Unit/Profile capabilities or stored match state.
+The maintained geometry uses the explicit written 8-inch placement at every supported Army Points
+value and carries no Supplies placement source issue. The structured scoring reference separately
+preserves the three additive end-of-game objectives: 2 points per controlled box, 2 for more
+controlled boxes than the opponent, and 2 extra for all three. Control requires a Model carrier,
+excludes Null carriers and enemy Model contact, and is distinct from the pickup/carriage procedures.
+These are scenario-local reference facts, not permanent Unit/Profile capabilities or stored match
+state.
 
 Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed pages 153–154. Page 153 owns
 objectives, placement prose, pickup, carrying, control, and the deployment-contact restriction;
