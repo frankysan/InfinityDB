@@ -53,18 +53,20 @@ running broader validation:
 
 ```powershell
 python tools\run_checks.py --stage test tests/test_availability.py
-python tools\run_checks.py --stage test tests/test_web.py -k fireteam
+python tools\run_checks.py --stage test tests/test_web.py::test_fireteam_chart_page_and_api_use_application_projection
 python tools\run_checks.py --stage lint src/infinity_db/web tests/test_web.py
 python tools\run_checks.py --stage type
 ```
 
 Positional targets are passed to pytest/Ruff for their respective stages. Build/rules stages ignore
-those targets.
+those targets. The runner accepts its documented options and test paths/node IDs, not arbitrary
+pytest flags. For keyword selection or other pytest-specific options, invoke pytest directly.
 
 Direct tool commands remain appropriate when debugging the tool itself:
 
 ```powershell
 python -m pytest tests\test_specific.py -q
+python -m pytest tests/test_web.py -k fireteam -q
 python -m ruff check path\to\file.py
 python -m pyright
 ```
@@ -285,27 +287,10 @@ Docker CPU/memory limits and detected Gunicorn worker/thread counts), while its 
 excludes hostnames, IPs, request URLs, arbitrary container environment/command values, and arbitrary
 Docker event payloads. Record resource boundaries outside Docker separately.
 
-The retained 2026-10-06 2x4 reference run used an 8-CPU/8-GiB LXC, no explicit app-container CPU or
-memory limit, concurrency 8 steady state and concurrency 32 burst. It produced 271.1 req/s at
-8.5/113.6/160.5 ms p50/p95/p99 and 264.8 req/s at 107.9/219.8/262.3 ms respectively, with zero errors.
-Host CPU peaked at 45.6%, app memory peaked near 149 MB, and disk activity remained negligible. The
-throughput plateau plus rising latency motivated a matched worker-count comparison.
-
-For the matched 2026-10-06 comparison, `compose.capacity-4cpu-4g.yaml` applied the same 4-CPU / 4-GiB
-app limit to both runs and `compose.capacity-4x4.yaml` changed only Gunicorn worker count. The 2x4
-control sustained 251.6 req/s with p50/p95/p99 8.5/114.2/164.9 ms; the 4x4 run sustained 432.1 req/s
-with 5.8/87.9/141.5 ms and zero errors in both runs. In the concurrency-32 burst, 4x4 delivered
-366.7 req/s versus 260.5 req/s and improved mean/p50 latency, while p95/p99 were modestly worse
-(241.4/304.3 ms versus 226.9/268.5 ms). This is evidence for 4x4 as the first bounded vertical scale
-step, not a guarantee that more workers continue scaling linearly. Retained reports are comparable only
-when they confirm the intended workers, threads, CPU limit, memory limit, target revision, and scenario.
-
-The operational scale-review trigger derived from this evidence is p95 >=120 ms for about 15 minutes
-while representative request rate is >=200 req/s, or overload-attributable 5xx above 1% for at least
-5 minutes, with resource evidence confirming host/LXC CPU <70% average, memory <80%, and no
-storage/OOM/restart pressure. Re-run the capacity scenario before any worker/resource change. Once 4x4
-reaches the same trigger, test multiple immutable app replicas behind Caddy rather than increasing
-workers without another controlled experiment.
+The recorded capacity baselines, matched worker-count experiment, Compose overrides, and production
+scale-review trigger are maintained in
+[deployment guidance](deployment.md#repeatable-http-capacity-scenario). Keep measured results and
+operational policy there rather than maintaining a second copy in this test reference.
 
 `deployment_alerts.py` evaluates a fresh resource report together with bounded aggregate metrics and
 health samples, producing monitoring-friendly OK/warning/critical/unknown exit codes without retaining

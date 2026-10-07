@@ -174,10 +174,8 @@ versions 2 through 8 as valid historical/intermediate state for compatibility.
 
 The human annotation contract is documented in
 [`curated/snapshot-notes/README.md`](curated/snapshot-notes/README.md). Snapshot
-notes are not application/runtime inputs. Their current version-1 contract still
-uses the exact archive SHA-256; migrating that separate curated contract to the
-logical content identity can be done independently once the new snapshot identity
-has been exercised on real acquisitions.
+notes are not application/runtime inputs. Their version-1 contract uses the exact archive SHA-256;
+logical-content identity in acquisition provenance does not change that maintained binding.
 
 Army JSON `version` values are per-document Corvus Belli source revisions, not
 InfinityDB snapshot versions. Their evidence-backed interpretation and the

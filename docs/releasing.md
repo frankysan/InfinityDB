@@ -151,6 +151,9 @@ will actively guide later work.
 - [ ] Update the package/application version consistently in `pyproject.toml` and
   `src/infinity_army_data/__init__.py`.
 - [ ] Update the current-release statement in `README.md`.
+- [ ] Keep release-metadata preparation distinct from publication: the README may identify the
+  prepared version, but must not claim an unpublished candidate has already been released. Active
+  candidate status belongs in `docs/TODO.md`; tag creation follows exact-commit hosted validation.
 - [ ] Re-run the documentation audit checks affected by those release-metadata edits.
 
 Do not change the released version early merely to mark work in progress; development

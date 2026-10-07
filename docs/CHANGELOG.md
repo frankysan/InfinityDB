@@ -61,10 +61,6 @@ are not retroactively relabeled.
 - **Data processing + Web frontend:** Refresh processed faction, Order, Characteristic, Peripheral,
   and Unit artwork. Preserve distinct contextual variants, publish Peripheral-only artwork in its
   own namespace, and keep mixed-role artwork with its Unit identity.
-- **Project infrastructure:** Retain exact-commit hosted validation evidence in annotated release
-  tags. Release candidates can complete the optional full-assets check before merge using a
-  reproducible checksum-pinned publication bundle; final release evidence remains tied to the
-  resulting release commit.
 
 ### Fixed
 

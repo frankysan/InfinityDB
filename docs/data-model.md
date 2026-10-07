@@ -180,8 +180,9 @@ Profiles and loadouts are treated as structured semantic payloads rather than de
 name alone.
 
 - A **profile payload** owns profile statistics and profile-scoped categorical facts.
-- A **loadout payload** owns loadout costs, weapons/equipment/skills/options and other loadout-local
-  facts.
+- A **loadout payload** owns shared loadout content such as weapons, equipment, skills, Orders,
+  and includes. Points and SWC belong to `loadout_payload_occurrences`, so equivalent content can
+  be shared without erasing Army-specific prices.
 - Context tables connect those canonical payloads back to source Unit, Army, profile-group, and
   loadout occurrences.
 
@@ -390,6 +391,11 @@ passage fingerprints so changed wording reopens review.
 The maintained policy is documented in `data/curated/README.md`.
 
 ## Planned scenario model (1.0)
+
+**Design direction; unimplemented.** The current generic curated-record envelope can retain
+scenario-related kinds, but the structured scenario model, dedicated persistence, and browsable
+scenario domain described here are not implemented. Implementation belongs to the
+[1.0 backlog](TODO.md#rules-and-reference-completeness).
 
 Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
 maintained representation is validated structured JSON; their runtime representation is a deliberate

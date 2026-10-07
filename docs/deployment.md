@@ -24,10 +24,13 @@ For moving an installation to a new host, see the
 
 ## Prerequisites
 
-Install Docker Engine with the Compose plugin on the Linux server. Configure the external
+Install Git, Python 3.11 or newer with `venv`/pip support, and Docker Engine with a Compose plugin
+that supports `up --wait` on the Linux server. Host Python runs the installer and artifact verifier;
+the application itself runs in the container. Configure the external
 reverse proxy to terminate TLS for the public hostname and forward HTTP traffic to this
-deployment's port 80. The Compose configuration publishes only TCP port 80; Caddy does not
-obtain or manage TLS certificates.
+deployment's HTTP port (80 by default). Compose also publishes the separate metrics listener on
+loopback port 9090 by default; it can bind to a specific trusted LAN interface. The application
+container has no host-published port. Caddy does not obtain or manage TLS certificates.
 
 ## Deploy or update
 
@@ -221,14 +224,14 @@ container restarts.
 
 ### Retained metrics history
 
-Retained history must not make the web-facing application container writable. The accepted target
-topology remains a separate `metrics-history` operational service on the private Compose network.
+Retained history does not make the web-facing application container writable. The implemented
+topology uses a separate `metrics-history` operational service on the private Compose network.
 The standalone collection/aggregation/reporting engine is implemented in `tools/metrics_history.py`
 and runs through the dedicated Compose service. The service scrapes
 `http://app:8000/internal/metrics` directly, exposes no public/LAN port, runs with an immutable root
 filesystem, and owns one dedicated writable SQLite
 volume. It must not receive the Docker socket, host filesystem mounts, or writable mounts into `app`.
-The existing LAN-only `/metrics` endpoint remains the interactive/current-state scrape surface.
+The existing loopback/trusted-LAN `/metrics` endpoint remains the interactive/current-state surface.
 
 The collector treats each application metrics generation explicitly. Live metrics expose the
 generation-start and latest completed-request timestamps needed to distinguish restarts even when
@@ -431,7 +434,7 @@ The retained report deliberately omits hostnames, IP addresses, request URLs, ar
 attributes, arbitrary container environment/command values, and the wrapped command line. Record any
 resource boundary outside Docker (for example an LXC/VM allocation) with the baseline notes. Do not
 compare 2-worker and 4-worker results unless the relevant allocation is recorded and controlled; the
-planned matched comparison specifically requires both app-container reports to show the same
+recorded matched comparison requires both app-container reports to show the same
 4-core/4-GiB limit.
 
 For the controlled worker-count comparison, keep resource allocation and workload identical. The

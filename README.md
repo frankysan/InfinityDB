@@ -1,11 +1,13 @@
 # InfinityDB
 
-InfinityDB builds a local database and browser from Corvus Belli Infinity Army
-data. While Infinity Army presents one army at a time, InfinityDB brings those
-views together into a game-wide reference for exploring units, profiles,
-equipment, skills, weapons, and relationships across armies.
+InfinityDB is a read-only Infinity reference for exploring Units, profiles,
+Equipment, Skills, Weapons, and relationships across Armies. It combines
+Infinity Army data with reviewed rules references, bringing information from
+individual Army Lists into one game-wide browser.
 
-Current release: **0.10.0** (2026-10-07).
+Release metadata: **0.10.0** (2026-10-07). Unreleased development changes display `+dev`;
+metadata alone does not mean the release has been published.
+See the [release process](docs/releasing.md) and [current milestone](docs/TODO.md#current-milestone).
 
 ## Guiding principles
 
@@ -83,7 +85,7 @@ its application metrics.
   summaries, classifications, special weapon data, and source citations.
 - Supports centimetre/inch display preferences and a Developer mode for
   inspecting database IDs and other review information.
-- Supports published army, unit, order, and characteristic SVG symbols. Corvus
+- Supports published Army, Unit, Peripheral, Order, and Characteristic SVG symbols. Corvus
   Belli has explicitly permitted InfinityDB to use and redistribute the graphical
   assets used by this non-commercial community project, including processed SVGs
   in public repositories and build packages. Those assets remain Corvus Belli
@@ -125,8 +127,8 @@ The current direction is deliberately incremental:
   Reinforcement parentage, and useful cross-army navigation.
 - **0.9.x — Complete & discover:** closed the remaining application-data presentation
   gaps and made the result searchable, navigable, and understandable.
-- **0.10.x — Stabilize & harden:** audit the completed application model end to end,
-  finish the frontend/theme architecture, and harden release and operations workflows.
+- **0.10.x — Stabilize & harden:** completed the application consistency and scenario
+  architecture reviews, frontend/theme work, and release/operations hardening.
 - **1.0.0 — Player data-complete:** every useful in-scope game datum collected by
   InfinityDB has a maintained representation and a meaningful, usable place in the
   web reference, including the current core-rules scenarios. ITS season/tournament
@@ -152,11 +154,10 @@ Select `.venv` as the Python interpreter in VS Code.
 
 ## Quick start
 
-If an Army snapshot already exists under `data/raw/`, build the database and
-start the local server:
+A normal checkout includes the runtime Army database, rules database, and processed
+graphical publication. After installing the project, start the local server directly:
 
 ```powershell
-infinity-db build --compact
 infinity-db serve
 ```
 
@@ -169,6 +170,9 @@ infinity-db serve --host 127.0.0.1
 ```
 
 Stop the server with `Ctrl+C`.
+
+To rebuild Army data from an existing immutable local snapshot, use `infinity-db build --compact`.
+Rebuilding is a development operation; it is not required to browse the tracked runtime artifacts.
 
 ### Download a fresh Army snapshot
 
@@ -198,10 +202,10 @@ inputs. Human-reviewed rules collections live under `data/curated/rules/`.
 
 ### Acquire and publish graphical symbols
 
-Graphical assets are optional for source development but required for a complete
-local graphical deployment. Use the symbol orchestrator with an existing pinned
-Army snapshot (replace the timestamp with the immutable local snapshot you intend
-to use):
+The processed graphical publication is already tracked in a normal checkout. Regeneration
+is optional for source development and requires separate raw inputs and external tools.
+Use the symbol orchestrator only when preparing a new publication, with an existing pinned
+Army snapshot (replace the timestamp with the immutable local snapshot you intend to use):
 
 ```powershell
 python tools/build_symbols.py --snapshot "data/raw/JSON YYYYMMDD-HHMMSS.zip"
@@ -261,7 +265,7 @@ infinity-db serve --database other-output/infinity.db --port 8001
 infinity-db database-health data/generated/infinity.db --require-raw
 
 # Validate a curated rules file
-infinity-db validate-curated data/curated/rules/example.json
+infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
 
 # Build the independent rules-reference database
 infinity-db build-rules --output data/generated/rules.db

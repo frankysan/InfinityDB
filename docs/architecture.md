@@ -125,42 +125,31 @@ not competing semantic owners.
 
 ### Planned scenario domain
 
+**Design direction; unimplemented.** The accepted boundary below guides the 1.0 implementation
+tracked in [the backlog](TODO.md#rules-and-reference-completeness). It does not describe current
+scenario tables, structured definitions, or browser routes.
+
 Core-rules scenarios are a required first-class application domain for 1.0. The architecture review
 covered the four N5.3 core scenarios, the final ITS Season 17 set, and the current ITS Season 18 set.
 The comparison is retained in `docs/rules-semantics.md`; it establishes that core-only assumptions
 would be too narrow for deployment geometry, scoring cadence, asymmetric sides, Classified
 Objectives, scenario elements, and revision/season provenance.
 
-Scenario definitions are curated rules/reference knowledge, not Army-export facts or mutable match
-state. Maintained scenario source therefore belongs in validated structured documents under the
-rules curation pipeline and is published into `rules.db`, not `infinity.db`. Runtime publication uses
-a deliberate hybrid model: stable/queryable identities, provenance, collection membership, and
-cross-domain references are relational, while ordered/nested scenario structure is retained as a
-validated typed payload rather than flattened into prose or an untyped JSON blob. The exact table
-layout is an implementation concern, but the semantic boundary below is fixed before 1.0 work
-begins.
+The accepted design places scenario definitions in the rules curation pipeline and `rules.db`,
+not in Army export or mutable match state. Publication will use a hybrid model: stable identities,
+provenance, collection membership, and cross-domain references are relational; ordered and nested
+scenario structures remain validated typed payloads. Scenario identity, source revision, and
+collection/season membership remain independent.
 
-A stable scenario identity is independent from both a source publication/revision and membership in
-a collection such as core N5.3, ITS Season 17, or ITS Season 18. A publication can revise a scenario
-without creating a new conceptual identity, and a season can add, remove, or alter scenario
-applicability without mutating that identity. Scenario pages resolve a selected published revision
-and expose its provenance explicitly.
+Geometry and scoring are maintained semantic data. Diagrams and reference views will be generated
+from that data, with source/season overlays kept distinct from canonical Army or rules facts.
+Existing catalog entities will be referenced by typed identity rather than duplicated locally.
+Core and ITS scenarios share this boundary; tournament pairing, rankings, and mutable match state
+remain outside it.
 
-The common scenario model includes force/table configuration, sides, deployment and scoring geometry,
-objectives and score timing, end conditions, scenario rules/actions, objective/scenery elements, and
-typed links to existing canonical rules/catalog entities. Classified Objectives, HVTs, carried
-objects, control regions, asymmetric attacker/defender roles, selectable objective sets, seasonal
-extras, Reinforcements suitability, and similar mechanics are optional reusable features or
-collection-scoped overlays rather than mandatory fields on every scenario. Tournament pairing,
-ranking, and mutable in-game state remain outside the scenario definition domain.
-
-Scenario geometry is semantic data. It uses typed regions/points/anchors and parameterized dimensions
-for supported table/force configurations, including side-relative transforms and placement/exclusion
-constraints. Diagrams are generated presentation, never the canonical geometry. This contract lets
-the same scenario data later drive deployment-map generation and other tooling without introducing a
-second map representation. Scoring is likewise structured by timing, points/caps, side/applicability,
-and typed condition/comparison kinds where known; maintained explanatory text may supplement unusual
-procedures without requiring InfinityDB to become a complete game-state rules engine.
+The detailed accepted scenario model belongs to
+[the data model](data-model.md#planned-scenario-model-10). Source comparison and rationale remain in
+`docs/rules-semantics.md`; concrete implementation tasks remain in `docs/TODO.md`.
 
 ## Identifiers and routing
 
@@ -271,9 +260,11 @@ payload field.
 
 ## Browser boundary
 
-The browser is a progressively enhanced read-only reference client. It owns presentation state,
-responsive composition, accessibility behavior, and local user preferences, while semantic data
-comes from backend/application contracts.
+The browser is a read-only reference client with a shared server-rendered shell and JavaScript
+page modules for data-driven browsing and interaction. Changes renders its release notes on the
+server; Unit Explorer, Glossary entries, and catalog results load through JavaScript/API modules.
+The browser owns presentation state, responsive composition, accessibility behavior,
+and local preferences, while semantic data comes from backend/application contracts.
 
 Current persistent preferences are local browser settings such as distance units, Developer mode,
 and optional availability defaults. Shareable page state is URL-owned and must not overwrite the
@@ -358,10 +349,10 @@ endpoint does not advance either timestamp.
 The accepted boundary for retained metrics history is a separate operational service, not writable
 state inside the application container. `tools/metrics_history.py` now owns the standalone SQLite
 collection/aggregation engine: one rolling scrape state is converted into generation-aware counter
-deltas and bounded weekly summaries keyed by week/version/snapshot. The deployment service that runs
-that engine should scrape the private `app:8000/internal/metrics` endpoint over the Compose network,
-run with an immutable root filesystem and no published port, and own one bounded writable volume
-containing its SQLite history. The web-facing `app` remains immutable and unaware of historical
+deltas and bounded weekly summaries keyed by week/version/snapshot. The deployed service scrapes
+the private `app:8000/internal/metrics` endpoint over the Compose network, runs with an immutable
+root filesystem and no published port, and owns one bounded writable volume containing its SQLite
+history. The web-facing `app` remains immutable and unaware of historical
 persistence. The live generation timestamps are the canonical restart boundary so application
 restarts cannot be mistaken for negative/request deltas. Retention is automatically enforced by the
 engine rather than relying on operator cleanup. The collector is operationally subordinate to the

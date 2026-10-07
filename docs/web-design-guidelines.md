@@ -6,7 +6,12 @@ This document defines InfinityDB's target browser design contract. It is intenti
 
 The browser presentation layer should follow the same engineering philosophy as the rest of the project: define reusable structures, keep responsibilities explicit, simplify repeated behavior, and remove duplication rather than accumulating page-specific exceptions. When current UI behavior conflicts with this document, treat the mismatch as implementation debt to resolve deliberately rather than copying the inconsistency into new work.
 
-`docs/architecture.md` remains authoritative for subsystem boundaries and frontend/backend responsibility. This document owns the reusable visual, interaction, and player-facing language vocabulary and the intended behavior of shared browser structures. `src/infinity_db/web/static/styles.css` implements the visual part of that contract; it is not the specification itself.
+`docs/architecture.md` remains authoritative for subsystem boundaries and frontend/backend
+responsibility. This document owns the reusable visual, interaction, and player-facing language
+vocabulary and the intended behavior of shared browser structures. The CSS source files described
+under [Typography and tokens](#typography-and-tokens) implement the visual contract; the
+presentation layer composes them at `/static/styles.css`. The checked-in `styles.css` only documents
+that entry point and contains no component rules.
 
 ## Design principles
 

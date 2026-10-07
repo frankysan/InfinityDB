@@ -167,22 +167,24 @@ private hosting URL.
 
 ## Protected `main`
 
-GitHub repository settings, not workflow YAML, decide what blocks merging. As externally verified on
-2026-09-29, the active `Protect main` ruleset targets `main`, requires pull requests with resolved
-review threads, blocks deletion/non-fast-forward updates, has no bypass actors, and requires these
-seven checks:
+GitHub repository settings, not workflow YAML, decide what blocks merging. As verified through the
+GitHub API on 2026-10-07, the active [Protect main ruleset](https://github.com/frankysan/InfinityDB/rules/23708734)
+targets `main`, requires pull requests with resolved review threads and checks up to date with the
+base branch, blocks deletion/non-fast-forward updates, and requires these exact status contexts:
 
-- Ubuntu / Python 3.11;
-- Windows / Python 3.11;
-- macOS / Python 3.11;
-- Ubuntu / Python 3.14;
+- `ubuntu-latest / Python 3.11`;
+- `windows-latest / Python 3.11`;
+- `macos-latest / Python 3.11`;
+- `ubuntu-latest / Python 3.14`;
 - Cross-platform deterministic outputs;
 - `deployment-smoke`;
 - `installed-wheel`.
 
 Treat this paragraph as a dated description of an external repository setting. Before relying on it
 for release evidence, verify the current GitHub ruleset rather than assuming documentation controls
-repository administration.
+repository administration. Merge, squash, and rebase are allowed by the reviewed ruleset; exact
+release evidence always uses the resulting release commit. Public API output does not establish
+every account-specific permission or bypass setting.
 
 ## Network, scheduled, and performance workflows
 

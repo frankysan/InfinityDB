@@ -6,6 +6,10 @@ This document records source-authoritative Infinity rules semantics that already
 have a known use in InfinityDB's data interpretation, normalization, validation,
 relationships, querying/filtering, or presentation work.
 
+A known consumer may be current behavior or an accepted design direction. Implementation status
+belongs to the canonical references and `docs/TODO.md`; a reviewed source finding alone does not
+mean its proposed application behavior has been implemented.
+
 It is not a replacement rules reference and must not become a copy of the
 rulebook. Verified findings that do not yet have a concrete InfinityDB consumer
 belong in `rules-research.md`.
@@ -246,9 +250,9 @@ AVA is the number of Troopers from a Unit allowed in a single Army List. It is
 therefore contextual list-construction information rather than an intrinsic
 combat Attribute of a canonical Trooper payload.
 
-This supports InfinityDB keeping availability/occurrence context separate from
-reusable canonical profile payload facts. The Army List audit will refine how
-army-specific AVA variation should be described and validated.
+InfinityDB keeps availability/occurrence context separate from reusable canonical profile
+payloads. The current context-coherent query contract is owned by
+`docs/data-model.md`; Army-specific AVA must not be generalized across occurrences.
 
 Sources:
 
@@ -432,6 +436,11 @@ InfinityDB may store/display the source `S` code compactly, but contextual help,
 geometry-aware filtering, or future tabletop tools should resolve that code
 through the rules-defined template mapping rather than treating `S=2` as a
 literal dimension.
+
+The current Glossary and Unit previews publish the maintained S1–S8 templates through
+`static/silhouette-diagrams.js`. Comparisons use one physical scale; other supported templates
+include an S2 reference, while S2 is shown alone. This implements reference presentation, not live
+tabletop geometry or Silhouette-based filtering.
 
 Sources:
 
@@ -646,22 +655,30 @@ Sources:
 **Classification:** source-native interaction with an InfinityDB presentation consequence.
 
 Skills such as Doctor and Engineer explicitly cancel named States under their own
-requirements. InfinityDB should author that fact once as a typed `cancels-state` edge from
-the Skill to the State and derive the reverse navigation on the State page. The edge says
+requirements. InfinityDB authors that fact once as a typed `cancels-state` edge from
+the Skill to the State and derives the reverse navigation on the State page. The edge says
 that a cancellation path exists. Reviewed self-recovery paths such as Dodge or Reset may
 also be authored as `cancels-state` edges; exact Attribute MODs, declaration conditions,
 Roll outcomes, and automatic phase cancellation remain facts of the owning rules and must
 not be flattened into the edge itself.
 
-This is the first interaction family that requires State identities to be directly browsable:
-a player looking at Targeted, Immobilized-B, or Unconscious should be able to discover the
-relevant Engineer/Doctor rule without already knowing which Skill to search for.
+State detail pages expose those reverse links, so players can discover recovery paths without
+already knowing which Skill or Equipment to search for. The current graph includes Doctor,
+Engineer, Dodge, Reset, MediKit, GizmoKit, Reload, and Baggage where their owning rules define
+the cancellation; eligibility, exceptions, and outcomes stay in the rule facts.
+
+Recovery is not one generic clear-status operation. The source procedures distinguish Dodge for
+Immobilized-A, Reset for Immobilized-B/Isolated/Targeted, VITA/STR recovery through Doctor/Engineer,
+Command Tokens or Total Control for Possessed, and Reload/Baggage for Unloaded. Scenario-specific
+routes and explicit exceptions retain their own scope; this source inventory does not assert that
+every cancellation procedure is already represented by a generic graph edge.
 
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Doctor>
 - Wiki: <https://infinitythewiki.com/Engineer>
 - Wiki: <https://infinitythewiki.com/States>
+- PDF: Infinity N5 V5.3, printed pages 164-172
 
 ### RS-GSG-STATE-005B — State activation and behavioral effects belong in the interaction graph
 
@@ -799,10 +816,9 @@ can become independent battlefield game elements with their own Attributes and
 can be targeted. Deployable Equipment belongs to an Army List; a Deployable
 Weapon may belong to one, depending on the rule.
 
-This is stronger semantics than “an Equipment item carried by a Unit.” If
-InfinityDB later exposes deployable profiles or relationships, carrier/catalog
-identity and deployed-game-element identity must remain separate rather than
-flattening the deployed profile into its carrier.
+Current Weapon/Equipment details can expose a deployed object's defensive profile. That profile
+belongs to the deployed element rather than the carrier. A dedicated deployables projection remains
+in the 1.0 backlog; it must keep carrier/catalog identity and deployed-game-element identity separate.
 
 Sources:
 
@@ -1720,9 +1736,9 @@ define exceptions rather than making that split an immutable type rule:
 Technorganic can allow either recovery route while the Trooper is Unconscious,
 regardless of whether the profile uses VITA or STR.
 
-Future contextual help or relationship data should therefore encode explicit
-rule edges and exceptions, not derive all recovery applicability from VITA/STR
-alone.
+The current graph keeps Doctor/Engineer and MediKit/GizmoKit recovery paths distinct and links
+Technorganic to all four through explicit `applies-effects-to` edges. Exact eligibility and
+exceptions remain in the owning rule facts; VITA/STR alone does not determine every recovery path.
 
 Sources:
 
@@ -1737,7 +1753,7 @@ Cyberplug is an Automatic Special Skill that grants access to Peripherals
 (Cyberplug). Those Peripherals have Controller relationships and Connected/
 Autonomous profile behavior defined by the Peripheral rules.
 
-This supports the current Peripheral design direction: controller eligibility
+This supports the implemented Peripheral contract: controller eligibility
 and Peripheral type are reviewed rules relationships, not strings that should be
 inferred from similar names in Army data. The Skill and the Peripheral remain
 separate concepts connected by a rules-derived edge.
@@ -1943,10 +1959,10 @@ Hacking Device variant grants an explicit Program set, while Hackers may also
 receive Upgrade Programs separately. In N5 V5.3 the standard Device families map
 to finite sets of the twelve core Hacking Programs.
 
-This is a reviewed rules relationship, not a naming convention. InfinityDB should
-model Hacking Program identity and Device-to-Program/Upgrade links in the rules
-reference layer rather than infer them from Equipment labels or flatten them into
-the canonical Hacking Device family.
+InfinityDB materializes baseline Device-to-Program associations from explicit Army metadata and
+composes them with curated Program identities/effects. Source-specific Upgrades remain separate
+from that baseline matrix. Neither association is inferred from Equipment labels or flattened into
+the canonical Hacking Device family; see `RS-EQ-CORE-006`.
 
 Sources:
 
@@ -2281,12 +2297,70 @@ InfinityDB must keep `type` and level/bonus composition separate. A current
 member count can contribute to Level and integrity, but it is not a replacement
 identity for the Fireteam Type.
 
+The current curated `rule:fireteam-general` reference also retains the general creation sizes:
+Duo has two members, Haris three, and Core three to five. `/fireteams` displays those defaults;
+Army-chart conditions remain authoritative for chart-specific eligibility and exceptions.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Fireteams:_Basic_Rules>
 - Wiki: <https://infinitythewiki.com/Fireteams_Chart>, N5 FAQ v0.1
 - PDF: Infinity N5 V5.3, printed pages 132-135
 - FAQ: N5 FAQ v0.1, printed page 3
+
+### RS-FT-TERM-001 — `Linkable` is historical official terminology and modern shorthand
+
+**Classification:** historical-official terminology with a current presentation consumer.
+
+**Scope:** terminology provenance; historical N3 plus current community usage.
+
+`Linkable` was not merely fan terminology: official Human Sphere N3 profile
+material used `Linkable` as a descriptor for Troopers participating in
+Fireteams. Current N5 instead expresses eligibility through the Army Fireteams
+Chart, with Fireteam-specific membership, FTO restrictions, Wildcards,
+min/max/required conditions, and notes.
+
+The current curated Fireteam general reference retains `Linkable` with
+`historical-official` provenance and presents its meaning in the landing page
+Terminology section. It is explanatory reference text, not a universal Unit eligibility
+boolean. Broader search-alias support would need a separate reviewed consumer.
+
+Sources:
+
+- Historical official PDF: Infinity Human Sphere N3, e.g.
+  <https://assets.infinitythegame.net/downloads/hsn3rules/en/v3.2/hsn3rules.pdf>
+  (`Linkable` in Unit/Profile material)
+- Current rules: <https://infinitythewiki.com/Fireteams_Chart>
+
+### RS-FT-TERM-002 — `pure Fireteam` is community shorthand rooted in N4 Composition Bonuses
+
+**Classification:** historical rule facts and community terminology with a current presentation consumer.
+
+**Scope:** terminology provenance; N4/community usage versus current N5.
+
+N4 officially distinguished Fireteam Size Bonuses from **Fireteam Composition
+Bonuses**, with the latter requiring a Fireteam made only from the same Unit
+and/or chart entries identified as such. Contemporary player discourse widely
+called a Fireteam satisfying that composition condition a **pure Fireteam**.
+
+No current N5 rule term `pure Fireteam` was found in this audit. N5.3 instead
+uses a single **Fireteam Level** that increases with the number of same-Unit /
+bracket-equivalent members, so the old pure/impure binary is not a faithful
+current model.
+
+The current curated Fireteam general reference retains `Pure Fireteam` with
+`community-historical` provenance and explains it in the landing page Terminology section.
+It is not presented as a current Fireteam Type or authoritative boolean; any broader
+search-alias support remains separate from the implemented explanatory text.
+
+Sources:
+
+- Historical official N4 Fireteams Annex:
+  <https://downloads.corvusbelli.com/infinity/rules/rules-annex-eng.pdf>
+  (`Fireteam Composition Bonuses`)
+- Current N5: <https://infinitythewiki.com/Fireteam_Bonuses>
+- Community provenance example: Corvus Belli forum archived N4 discussion,
+  `Ridiculous Discovery Bonus for Pure Fireteams` (2022)
 
 ### RS-FT-CHART-002 — Fireteam chart composition is Army-local contextual data
 
@@ -3093,11 +3167,10 @@ Short, Long, and ARO while identifying whether the action comes from Common/
 Special Skills, Hacking, or Equipment. Declaration category and owning catalog
 domain are therefore independent axes.
 
-After the existing N5 declaration-category reconciliation is complete,
-InfinityDB can generate this matrix from reviewed relationships. That generated
-view can also act as a completeness test: a declarable rule with no category, an
-invalid category, or a Skill-only link for an Equipment action becomes visible
-without maintaining a parallel hard-coded chart.
+The N5 declaration-category reconciliation is complete. A generated cross-domain Orders/AROs
+matrix is still unimplemented and belongs to the 1.0 backlog. It can use the reviewed categories
+as a completeness check without maintaining a parallel hard-coded chart, while distinguishing
+core actions from future scenario- or phase-scoped actions.
 
 Sources:
 

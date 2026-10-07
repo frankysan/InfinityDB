@@ -19,6 +19,11 @@ research, or be removed during later review when they do not materially help
 those responsibilities. The official rules remain authoritative for exact rules
 wording and game resolution.
 
+References to current N5 rules mean the reviewed N5 V5.3 baseline described in
+[rules semantics](rules-semantics.md#audited-source-baseline), with FAQ, annex, ITS, and historical
+sources kept separately scoped. They are not a claim that a live wiki page has been rechecked on
+every documentation edit.
+
 ## Entry contract
 
 Record:
@@ -188,10 +193,9 @@ Trooper/profile. HoloMask is especially explicit: a Trooper can present another
 appearance while continuing to use its real Unit Profile, while Hidden Deployment
 can represent the Trooper with no Model/Marker on the table at all.
 
-This is likely useful for a future rules glossary, game-session model, or privacy-
-aware list sharing, but it should not be projected back into canonical Unit
-identity. A reference database should describe the State without attempting to
-infer the current hidden identity of an actual game piece.
+The current State reference describes these rules. Representing a particular game's concealed
+identity or privacy-aware list sharing remains a future session feature; it must not be projected
+back into canonical Unit identity or inferred from the public reference profile.
 
 Sources:
 
@@ -223,25 +227,6 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Isolated_State>
 - Wiki: <https://infinitythewiki.com/Disconnected_State>
 - PDF: Infinity N5 V5.3, printed pages 160 and 168
-
-### RR-GSG-STATE-004 — State cancellation has typed recovery actors and conditions
-
-**Scope:** core N5.
-
-State cancellation is not one generic “clear status” operation. Examples include
-Dodge for Immobilized-A, Reset for Immobilized-B/Isolated/Targeted, Doctor versus
-Engineer depending on VITA/STR for Stunned/Unconscious recovery, Command Tokens
-or Total Control for Possessed, and Reload/Baggage for Unloaded. Some State
-cancellation also has scenario-specific routes or explicit exceptions.
-
-This could support future contextual cross-links such as “ways to cancel this
-State,” but should be curated from explicit rule relationships rather than
-inferred from shared wording.
-
-Sources:
-
-- Wiki: <https://infinitythewiki.com/States> and affected State pages
-- PDF: Infinity N5 V5.3, printed pages 164-172
 
 ## Game States and Glossary / Vocabulary research
 
@@ -392,9 +377,9 @@ can benefit from only one Supportware Program at a time, each Hacker can sustain
 only one, and later Programs or specific Hacker States can cancel the existing
 relationship.
 
-This is a useful reusable rules relationship but not a static Equipment fact. It
-should become a rules-reference relationship before any future session layer
-tries to track active Supportware.
+Current Hacking Program references retain Supportware restrictions as cited rules text and
+reviewed effects. Tracking which Hacker sustains which active effect remains game/session state,
+not a static Equipment fact or an implemented relationship between game instances.
 
 Sources:
 
@@ -558,74 +543,6 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Open_and_Private_Information>
 - PDF: Infinity N5 V5.3, printed page 136
 
-### RR-FT-TERM-001 — `Linkable` is historical official terminology and modern shorthand
-
-**Scope:** terminology provenance; historical N3 plus current community usage.
-
-`Linkable` was not merely fan terminology: official Human Sphere N3 profile
-material used `Linkable` as a descriptor for Troopers participating in
-Fireteams. Current N5 instead expresses eligibility through the Army Fireteams
-Chart, with Fireteam-specific membership, FTO restrictions, Wildcards,
-min/max/required conditions, and notes.
-
-The word remains common and useful shorthand in player discussion, but
-InfinityDB should not reintroduce it as a simple current-rule boolean. A
-thesaurus/search layer can map `linkable` to current Fireteam-chart eligibility
-while labeling the term's historical provenance.
-
-Sources:
-
-- Historical official PDF: Infinity Human Sphere N3, e.g.
-  <https://assets.infinitythegame.net/downloads/hsn3rules/en/v3.2/hsn3rules.pdf>
-  (`Linkable` in Unit/Profile material)
-- Current rules: <https://infinitythewiki.com/Fireteams_Chart>
-
-### RR-FT-TERM-002 — `pure Fireteam` is community shorthand rooted in N4 Composition Bonuses
-
-**Scope:** terminology provenance; N4/community usage versus current N5.
-
-N4 officially distinguished Fireteam Size Bonuses from **Fireteam Composition
-Bonuses**, with the latter requiring a Fireteam made only from the same Unit
-and/or chart entries identified as such. Contemporary player discourse widely
-called a Fireteam satisfying that composition condition a **pure Fireteam**.
-
-No current N5 rule term `pure Fireteam` was found in this audit. N5.3 instead
-uses a single **Fireteam Level** that increases with the number of same-Unit /
-bracket-equivalent members, so the old pure/impure binary is not a faithful
-current model.
-
-InfinityDB should retain `pure Fireteam` as a provenance-aware community alias
-for search/help and explain its relationship to historical Composition Bonuses
-and current Fireteam Level. It should not expose `Pure` as a current Fireteam
-Type or authoritative boolean.
-
-Sources:
-
-- Historical official N4 Fireteams Annex:
-  <https://downloads.corvusbelli.com/infinity/rules/rules-annex-eng.pdf>
-  (`Fireteam Composition Bonuses`)
-- Current N5: <https://infinitythewiki.com/Fireteam_Bonuses>
-- Community provenance example: Corvus Belli forum archived N4 discussion,
-  `Ridiculous Discovery Bonus for Pure Fireteams` (2022)
-
-### RR-FT-TYPE-001 — Fireteam creation sizes are useful reference vocabulary, not identity derivation
-
-**Scope:** core N5.
-
-The general rules define Duo, Haris, and Core creation sizes, while individual
-Army/Sectorial charts can modify Fireteam creation conditions and determine
-which Types a named Fireteam supports.
-
-Those defaults are useful glossary/help material. InfinityDB should nevertheless
-take Type eligibility from the imported Army chart and retain the FAQ distinction
-between Type and later member count, rather than deriving Type from count.
-
-Sources:
-
-- Wiki: <https://infinitythewiki.com/Fireteams:_Basic_Rules>
-- Wiki: <https://infinitythewiki.com/Fireteams_Chart>
-- PDF: Infinity N5 V5.3, printed pages 132-133
-
 ## Command
 
 ### RR-CMD-TOK-001 — Command Token use procedures are session/play-aid material
@@ -678,8 +595,10 @@ spending Command Tokens. They are useful glossary/thesaurus terms because player
 discussion and related Skills can reference one use mode specifically
 (Counterintelligence, for example, targets Strategic Use).
 
-A future thesaurus should link these terms beneath Command Token rather than
-treat them as three token types or new application domains.
+The current General Rules reference already publishes Command Token: Strategic Use for its
+Counterintelligence interaction. Broader coverage of Executive and Operational Use remains
+research; any expansion should keep these as use modes of Command Tokens rather than separate
+token types or application domains.
 
 Sources:
 

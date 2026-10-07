@@ -21,10 +21,9 @@ when all contained work shares the same owner.
 ## Current milestone
 
 The current milestone is **0.10.0 — consistency, presentation, and release hardening**.
-It follows the completed 0.9.0 application-completeness/discoverability milestone by auditing the
-finished application model end to end, establishing the scenario architecture, completing the
-frontend/theme architecture, and hardening release and operations workflows before the 1.0
-data-completeness gate.
+Its implementation and manual acceptance are complete; the candidate still needs to be merged,
+validated at the final release commit, tagged, and published. The next implementation milestone
+is 1.0.0, including current-reference completeness and the core-scenario domain.
 
 General performance/storage experiments, major pipeline refactors,
 persistent-user-data features, ITS season/tournament tooling, and native applications are explicitly
@@ -33,29 +32,29 @@ part of the 1.0 completeness target; their architecture is now established for l
 implementation without adding the full scenario surface to 0.10.0.
 
 The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
-definition lives in `docs/releasing.md`. The sections below record the candidate's completed
-version-specific gates and implementation work that remains open for later releases.
+definition lives in `docs/releasing.md`. The sections below contain the remaining release work
+and implementation work for later milestones. Completed substeps are retained only under an
+open parent item.
 
 ## 0.10.0 — consistency, presentation, and release hardening
 
 **Project domains:** Web frontend, Deployment, Project infrastructure
 
-Implementation and version-specific manual acceptance are complete. Merge, exact-release-commit
-hosted validation, tagging, and publication follow [the release checklist](releasing.md).
-
-- [x] Complete the application consistency, scenario architecture, frontend/theme, and
-  release/operations hardening work recorded in the 0.10.0 changelog.
-- [x] Complete the full-assets candidate gate: `Full-asset checks` passed for
-  `7f58d1387f2478aad6650e0311729083c7739800` on 2026-10-07
-  ([run 37579009400](https://github.com/frankysan/InfinityDB/actions/runs/37579009400)).
-  This closes environment/bundle administration and pre-merge acceptance; a different final release
-  SHA still needs its own run when collecting optional full-assets release evidence.
-- [x] Complete capacity/load testing, the matched 2x4 versus 4x4 experiment, and the production
-  scale-review policy. The retained results, resource boundaries, commands, and scale trigger remain
-  in [deployment guidance](deployment.md#repeatable-http-capacity-scenario) and
-  [testing guidance](testing.md#benchmark-tooling); production still defaults to 2x4.
-- [x] Complete Silhouette manual browser acceptance. The maintainer confirmed on 2026-10-07 that
-  the [manual checks](testing.md#silhouette-manual-browser-acceptance) were performed and passed.
+- [ ] Finish release publication using [the release checklist](releasing.md). Land the candidate
+  through a pull request, require hosted checks and retained evidence for the final release SHA,
+  then create the annotated tag and publish the release. Deployment acceptance remains a separate
+  step where applicable. Remove this parent item after publication; the changelog and canonical
+  references retain completed implementation outcomes.
+  - [x] Complete pre-merge full-assets acceptance: `Full-asset checks` passed for
+    `7f58d1387f2478aad6650e0311729083c7739800` on 2026-10-07
+    ([run 37579009400](https://github.com/frankysan/InfinityDB/actions/runs/37579009400)).
+    This closes environment/bundle administration; a different final release SHA still needs its
+    own run when collecting optional full-assets evidence.
+  - [x] Complete capacity/load testing and the matched 2x4 versus 4x4 experiment. Retained results,
+    resource boundaries, comparison commands, and the scale-review policy are owned by
+    [deployment guidance](deployment.md#repeatable-http-capacity-scenario).
+  - [x] Complete Silhouette manual browser acceptance. The maintainer confirmed on 2026-10-07 that
+    the [manual checks](testing.md#silhouette-manual-browser-acceptance) were performed and passed.
 
 ## 1.0.0 — current-reference completeness gate
 
@@ -257,11 +256,9 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 ### Army snapshot and symbol-pipeline maintenance
 
-Milestone 1 acceptance for the integrated pipeline is complete. Immutable-input acquisition,
-verified resumable checkpoints, deterministic canonical processing, transaction-safe publication,
-and release-bound symbol provenance are established. Remaining work is maintenance, selective
-refactoring, richer diagnostics/performance work, and broader portability coverage rather than a
-prerequisite for the 1.0 application-data gate.
+Remaining pipeline work covers maintenance, selective refactoring, richer diagnostics/performance
+work, and external-tool portability. It is outside the 1.0 application-data gate. The implemented
+pipeline and artifact lifecycle are described in [data guidance](../data/README.md).
 
 - [ ] Let future snapshot-comparison tooling write structured generated diff
   data/reports under manifest/report paths while curated snapshot notes remain
@@ -311,11 +308,11 @@ prerequisite for the 1.0 application-data gate.
     Peripheral variants, parent-Unit artwork reuse, and cross-Unit profile-symbol consensus.
   - [ ] Add explicit fixtures for empty-text cleanup and a small set of troublesome real-world SVG
     conversion cases that should remain stable across tool upgrades.
-  - [ ] Run core portability coverage on Windows, Ubuntu/Linux, and macOS when CI permits,
-    especially executable discovery (`.exe`/`.cmd`), subprocess argument construction, temp files,
-    case-only collisions, snapshot ZIP handling, atomic replacement, and Windows `spawn` behavior.
-    External-tool integration tests may remain conditional when Inkscape, `resvg`, or SVGO are
-    unavailable.
+  - [ ] **Acquisition:** Extend native external-tool integration coverage across Windows, Ubuntu/Linux, and macOS,
+    especially executable discovery (`.exe`/`.cmd`), subprocess arguments, and real
+    Inkscape/`resvg`/SVGO invocation. Hermetic source/pipeline coverage already runs across all three
+    operating systems in required CI; external-tool tests may remain conditional when those
+    executables are unavailable.
 
 ### ITS, scenarios, and game tools
 

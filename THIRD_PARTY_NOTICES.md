@@ -1,5 +1,7 @@
 # Third-party notices
 
+**Project domain:** Project infrastructure
+
 The MIT License in `LICENSE` applies to InfinityDB's original source code and
 original project documentation. It does not automatically apply to third-party
 materials that may be downloaded, generated, or included alongside the
@@ -49,7 +51,7 @@ archives, and other acquisition/provenance inputs remain ignored local build/res
 
 The optional wiki research material under `data/wiki/` and user-supplied rules
 documents under `data/pdf/` are ignored by Git and are not part of the normal
-application package or Docker build. Their text, images, and other contents must
+application package or Docker runtime image. Their text, images, and other contents must
 not be redistributed as MIT-licensed project material.
 
 Curated facts retain provenance appropriate to the source contract. PDF-derived

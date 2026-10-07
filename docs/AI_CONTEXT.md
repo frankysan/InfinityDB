@@ -40,23 +40,12 @@ release/audit narrative belongs in the changelog and Git history.
 - Browser code renders backend-owned semantics rather than recreating data-model policy.
 - Game/reference data is read-only at runtime. Persistent user-authored application data is not part
   of the current model.
-- Retained operational metrics must not make the web-facing `app` container writable. The accepted
-  design is a separate private-network metrics-history service with one bounded writable SQLite
-  volume; `/metrics` remains a volatile aggregate scrape surface. `tools/metrics_history.py` owns the
-  standalone generation-aware weekly aggregation/retention engine; `Dockerfile.metrics-history` and
-  Compose run it as a separate immutable-root service with one writable history volume. The collector
-  stays outside the app availability gate: deployment builds/verifies both images, stops only the old
-  collector, uses one-shot closing/opening scrapes around app replacement, then starts continuous
-  collection; scrape/start failures are operational warnings. Local test deployments use the same
-  lifecycle under `COMPOSE_PROJECT_NAME=infinitydb-test`, with a separate preserved history volume and
-  an implemented `stop-local-test.sh --purge` clean-slate path. The same tool now exposes operator-only
-  `periods`, `report`, and `compare` commands over retained week/version/snapshot aggregates; no
-  historical HTTP endpoint is added. Live metrics expose shared generation-start and
-  latest-request timestamps for restart/reset detection. Metrics-history schema evolution is
-  forward-only: add an explicit transactional previous -> next migration before raising the persisted
-  format
-  version; older collectors must refuse newer stores without downgrade or destructive recovery.
-  `docs/architecture.md` owns the boundary and `docs/deployment.md` owns the implemented lifecycle.
+- Retained metrics live in a separate private collector with one bounded writable volume; the
+  web-facing `app` remains immutable. Collector scrape/start failures do not invalidate a healthy
+  application deployment. History migrations are forward-only; rollback preserves the volume and
+  older collectors refuse newer formats. The architectural boundary is in
+  `docs/architecture.md`; deployment lifecycle, retention, and operator commands are owned by
+  `docs/deployment.md`. Do not turn live metrics or retained aggregates into visitor histories.
 - Future work belongs in `docs/TODO.md`; do not preserve an obsolete task list in architecture or
   this context file.
 
