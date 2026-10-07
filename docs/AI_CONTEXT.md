@@ -37,8 +37,11 @@ release/audit narrative belongs in the changelog and Git history.
   second Domination geometry copy. Semantic point markers retain a `markerType`, whose canonical
   marker metadata may include a physical diameter. N5.3 Domination
   makes the Console diameter rules-relevant by requiring a Console A Marker or same-diameter scenery;
-  the ITS token table supplies the explicit 40 mm value. ITS variation informs extensibility, while
-  ITS-only geometry and the interactive editor remain post-1.0. See `docs/data-model.md`.
+  the ITS token table supplies the explicit 40 mm value. Map measurement annotations are
+  reference-based: the renderer derives rectangle dimensions and area-size labels from semantic
+  geometry rather than maintaining duplicate numeric measurements. ITS variation informs
+  extensibility, while ITS-only geometry and the interactive editor remain post-1.0. See
+  `docs/data-model.md`.
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network
   access.
 - Persistent generated artifacts are deterministic across supported platforms for the same inputs

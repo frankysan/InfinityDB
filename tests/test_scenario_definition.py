@@ -11,7 +11,12 @@ from infinity_db.scenario_definition import (
     scenario_definition_from_curated_document,
     select_scenario_geometry,
 )
-from infinity_db.scenario_geometry import MarkerElement, resolve_coordinate
+from infinity_db.scenario_geometry import (
+    AreaSizeAnnotation,
+    DimensionAnnotation,
+    MarkerElement,
+    resolve_coordinate,
+)
 
 _CORE_RULES = Path("data/curated/rules/n5-core-v5.3.json")
 
@@ -46,6 +51,26 @@ def test_maintained_domination_definition_owns_all_core_map_configurations() -> 
         ]
         assert len(markers) == 4
         assert {marker.marker_type for marker in markers} == {"console"}
+        dimensions = [
+            annotation
+            for annotation in configuration.geometry.annotations
+            if isinstance(annotation, DimensionAnnotation)
+        ]
+        area_sizes = [
+            annotation
+            for annotation in configuration.geometry.annotations
+            if isinstance(annotation, AreaSizeAnnotation)
+        ]
+        assert {annotation.target for annotation in dimensions} == {
+            "deployment-a",
+            "deployment-b",
+        }
+        assert {annotation.target for annotation in area_sizes} == {
+            "quadrant-1",
+            "quadrant-2",
+            "quadrant-3",
+            "quadrant-4",
+        }
 
 
 def test_select_maintained_domination_geometry_uses_army_points() -> None:

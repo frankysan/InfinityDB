@@ -6,10 +6,13 @@ from html import escape
 from typing import Literal
 
 from .scenario_geometry import (
+    AreaSizeAnnotation,
     Coordinate,
+    DimensionAnnotation,
     LineElement,
     MarkerElement,
     RectangleElement,
+    ScenarioAnnotation,
     ScenarioElement,
     ScenarioGeometry,
     marker_diameter_mm,
@@ -27,6 +30,8 @@ _STYLE_CSS = """\
 .objective{fill:#fff;stroke:#111;stroke-width:.1}
 .guide{fill:none;stroke:#6b7280;stroke-width:.06;stroke-dasharray:.35 .25}
 .measurement{fill:none;stroke:#111;stroke-width:.05}
+.dimension-label,.area-size{fill:#111;font-family:sans-serif;font-size:.82px;font-weight:600;
+paint-order:stroke;stroke:#fff;stroke-width:.045;stroke-linejoin:round}
 .label{fill:#111;font-family:sans-serif;font-size:1.15px;font-weight:600}
 """
 
@@ -92,6 +97,72 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
     )
 
 
+def _rectangle_bounds(
+    geometry: ScenarioGeometry, rectangle: RectangleElement
+) -> tuple[float, float, float, float]:
+    return (
+        _resolved(geometry, rectangle.x1, "x"),
+        _resolved(geometry, rectangle.y1, "y"),
+        _resolved(geometry, rectangle.x2, "x"),
+        _resolved(geometry, rectangle.y2, "y"),
+    )
+
+
+def _measurement_text(value: float) -> str:
+    return f"{_number(value)}″"
+
+
+def _render_annotation(
+    geometry: ScenarioGeometry,
+    annotation: ScenarioAnnotation,
+    rectangles: dict[str, RectangleElement],
+) -> str:
+    target = rectangles[annotation.target]
+    x1, y1, x2, y2 = _rectangle_bounds(geometry, target)
+    annotation_id = escape(annotation.id, quote=True)
+    target_id = escape(annotation.target, quote=True)
+
+    if isinstance(annotation, AreaSizeAnnotation):
+        x = (x1 + x2) / 2.0
+        y = y1 + (y2 - y1) * 0.82
+        text = f"{_measurement_text(x2 - x1)} × {_measurement_text(y2 - y1)}"
+        return (
+            f'<text id="{annotation_id}" class="area-size" data-target="{target_id}" '
+            f'x="{_number(x)}" y="{_number(y)}" text-anchor="middle">{text}</text>'
+        )
+
+    tick = 0.25
+    if annotation.axis == "x":
+        y = y1 + annotation.offset if annotation.side == "start" else y2 - annotation.offset
+        mid_x = (x1 + x2) / 2.0
+        label_y = y - 0.22 if annotation.side == "start" else y + 0.72
+        return (
+            f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" data-axis="x">'
+            f'<line x1="{_number(x1)}" y1="{_number(y)}" x2="{_number(x2)}" y2="{_number(y)}"/>'
+            f'<line x1="{_number(x1)}" y1="{_number(y - tick)}" '
+            f'x2="{_number(x1)}" y2="{_number(y + tick)}"/>'
+            f'<line x1="{_number(x2)}" y1="{_number(y - tick)}" '
+            f'x2="{_number(x2)}" y2="{_number(y + tick)}"/>'
+            f'<text class="dimension-label" x="{_number(mid_x)}" y="{_number(label_y)}" '
+            f'text-anchor="middle">{_measurement_text(x2 - x1)}</text></g>'
+        )
+
+    x = x1 + annotation.offset if annotation.side == "start" else x2 - annotation.offset
+    mid_y = (y1 + y2) / 2.0
+    label_dy = 0.3 if annotation.side == "start" else -0.3
+    return (
+        f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" data-axis="y">'
+        f'<line x1="{_number(x)}" y1="{_number(y1)}" x2="{_number(x)}" y2="{_number(y2)}"/>'
+        f'<line x1="{_number(x - tick)}" y1="{_number(y1)}" '
+        f'x2="{_number(x + tick)}" y2="{_number(y1)}"/>'
+        f'<line x1="{_number(x - tick)}" y1="{_number(y2)}" '
+        f'x2="{_number(x + tick)}" y2="{_number(y2)}"/>'
+        f'<text class="dimension-label" x="{_number(x)}" y="{_number(mid_y)}" '
+        f'text-anchor="middle" transform="rotate(-90 {_number(x)} {_number(mid_y)})" '
+        f'dy="{_number(label_dy)}">{_measurement_text(y2 - y1)}</text></g>'
+    )
+
+
 def render_scenario_map_svg(geometry: ScenarioGeometry) -> str:
     """Render deterministic standalone SVG bytes from validated geometry."""
 
@@ -101,6 +172,17 @@ def render_scenario_map_svg(geometry: ScenarioGeometry) -> str:
     elements = "\n".join(_render_element(geometry, element) for element in geometry.elements)
     if elements:
         elements += "\n"
+    rectangles = {
+        element.id: element
+        for element in geometry.elements
+        if isinstance(element, RectangleElement)
+    }
+    annotations = "\n".join(
+        _render_annotation(geometry, annotation, rectangles)
+        for annotation in geometry.annotations
+    )
+    if annotations:
+        annotations += "\n"
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
@@ -109,5 +191,6 @@ def render_scenario_map_svg(geometry: ScenarioGeometry) -> str:
         f'<style>{_STYLE_CSS}</style>\n'
         f'<rect class="table" x="0" y="0" width="{width}" height="{height}"/>\n'
         f"{elements}"
+        f"{annotations}"
         '</svg>\n'
     )

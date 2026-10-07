@@ -151,7 +151,9 @@ schema v1 only needs to represent those core maps. Point markers retain semantic
 known marker types resolve through canonical marker metadata, including physical diameter where that
 affects the represented game object. N5.3 Domination requires a Console A Marker or same-diameter
 scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
-Renderer-only styling remains separate. Reviewed ITS variation constrains the extension points, but
+Renderer-only styling remains separate. Structured map annotations may reference semantic geometry
+to derive displayed distances and area sizes; they must not duplicate the underlying measurements.
+Reviewed ITS variation constrains the extension points, but
 ITS-only geometry and an interactive map editor remain post-1.0. Existing catalog entities will be referenced by typed
 identity rather than duplicated locally. Core and ITS scenarios share this boundary; tournament
 pairing, rankings, and mutable match state remain outside

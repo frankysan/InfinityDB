@@ -11,6 +11,8 @@ from infinity_db.scenario_geometry import (
     SCENARIO_GEOMETRY_FORMAT,
     SCENARIO_GEOMETRY_VERSION,
     AnchorCoordinate,
+    AreaSizeAnnotation,
+    DimensionAnnotation,
     LabelElement,
     LineElement,
     MarkerElement,
@@ -101,6 +103,67 @@ def test_parse_scenario_geometry_resolves_absolute_and_table_relative_coordinate
     assert isinstance(label, LabelElement)
     assert label.align == "middle"
 
+
+
+def test_parse_scenario_geometry_validates_derived_annotations() -> None:
+    document = _document()
+    document["annotations"] = [
+        {
+            "id": "deployment-depth",
+            "kind": "dimension",
+            "target": "deployment-a",
+            "axis": "y",
+            "side": "start",
+        },
+        {
+            "id": "deployment-size",
+            "kind": "area-size",
+            "target": "deployment-a",
+        },
+    ]
+
+    geometry = parse_scenario_geometry(document)
+
+    assert geometry.annotations == (
+        DimensionAnnotation(
+            id="deployment-depth",
+            target="deployment-a",
+            axis="y",
+            side="start",
+            offset=0.75,
+        ),
+        AreaSizeAnnotation(id="deployment-size", target="deployment-a"),
+    )
+
+
+def test_parse_scenario_geometry_rejects_annotation_targeting_non_rectangle() -> None:
+    document = _document()
+    document["annotations"] = [
+        {
+            "id": "center-measurement",
+            "kind": "dimension",
+            "target": "center-line",
+            "axis": "x",
+            "side": "start",
+        }
+    ]
+
+    with pytest.raises(ScenarioGeometryError, match="must reference a rectangle"):
+        parse_scenario_geometry(document)
+
+
+def test_parse_scenario_geometry_rejects_duplicate_annotation_identity() -> None:
+    document = _document()
+    document["annotations"] = [
+        {
+            "id": "deployment-a",
+            "kind": "area-size",
+            "target": "deployment-a",
+        }
+    ]
+
+    with pytest.raises(ScenarioGeometryError, match="duplicate id.*deployment-a"):
+        parse_scenario_geometry(document)
 
 def test_parse_scenario_geometry_rejects_unknown_format_version() -> None:
     document = _document()

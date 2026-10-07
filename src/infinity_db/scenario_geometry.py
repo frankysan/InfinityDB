@@ -95,12 +95,35 @@ ScenarioElement: TypeAlias = RectangleElement | LineElement | MarkerElement | La
 
 
 @dataclass(frozen=True, slots=True)
+class DimensionAnnotation:
+    """Derived width/height measurement for a rectangle element."""
+
+    id: str
+    target: str
+    axis: Literal["x", "y"]
+    side: Literal["start", "end"]
+    offset: float
+
+
+@dataclass(frozen=True, slots=True)
+class AreaSizeAnnotation:
+    """Derived width × height label for a rectangle element."""
+
+    id: str
+    target: str
+
+
+ScenarioAnnotation: TypeAlias = DimensionAnnotation | AreaSizeAnnotation
+
+
+@dataclass(frozen=True, slots=True)
 class ScenarioGeometry:
     """One validated scenario-map geometry definition."""
 
     title: str
     table: ScenarioTable
     elements: tuple[ScenarioElement, ...]
+    annotations: tuple[ScenarioAnnotation, ...]
 
 
 def marker_diameter_mm(marker_type: str) -> float | None:
@@ -252,6 +275,44 @@ def _parse_element(value: Any, index: int) -> ScenarioElement:
     )
 
 
+def _parse_annotation(value: Any, index: int) -> ScenarioAnnotation:
+    context = f"scenario geometry.annotations[{index}]"
+    raw = _object(value, context)
+    kind = _non_empty_string(raw.get("kind"), f"{context}.kind")
+
+    if kind == "dimension":
+        _only_keys(raw, {"id", "kind", "target", "axis", "side"}, {"offset"}, context)
+        axis = raw.get("axis")
+        if axis not in {"x", "y"}:
+            raise ScenarioGeometryError(f"{context}.axis must be one of ['x', 'y']")
+        side = raw.get("side")
+        if side not in {"start", "end"}:
+            raise ScenarioGeometryError(
+                f"{context}.side must be one of ['end', 'start']"
+            )
+        offset = _finite_number(raw.get("offset", 0.75), f"{context}.offset")
+        if offset < 0:
+            raise ScenarioGeometryError(f"{context}.offset must be zero or greater")
+        return DimensionAnnotation(
+            id=_element_id(raw.get("id"), f"{context}.id"),
+            target=_element_id(raw.get("target"), f"{context}.target"),
+            axis=axis,
+            side=side,
+            offset=offset,
+        )
+
+    if kind == "area-size":
+        _only_keys(raw, {"id", "kind", "target"}, set(), context)
+        return AreaSizeAnnotation(
+            id=_element_id(raw.get("id"), f"{context}.id"),
+            target=_element_id(raw.get("target"), f"{context}.target"),
+        )
+
+    raise ScenarioGeometryError(
+        f"{context}.kind must be one of ['area-size', 'dimension']"
+    )
+
+
 def resolve_coordinate(
     coordinate: Coordinate, *, axis: Literal["x", "y"], table: ScenarioTable
 ) -> float:
@@ -300,6 +361,29 @@ def _validate_resolved_geometry(geometry: ScenarioGeometry) -> None:
             resolved(element.x, "x", f"{context}.x")
             resolved(element.y, "y", f"{context}.y")
 
+    elements_by_id = {element.id: element for element in geometry.elements}
+    for annotation in geometry.annotations:
+        context = f"scenario geometry annotation {annotation.id!r}"
+        target = elements_by_id.get(annotation.target)
+        if target is None:
+            raise ScenarioGeometryError(
+                f"{context}.target references unknown element {annotation.target!r}"
+            )
+        if not isinstance(target, RectangleElement):
+            raise ScenarioGeometryError(
+                f"{context}.target must reference a rectangle element"
+            )
+        x1 = resolve_coordinate(target.x1, axis="x", table=table)
+        y1 = resolve_coordinate(target.y1, axis="y", table=table)
+        x2 = resolve_coordinate(target.x2, axis="x", table=table)
+        y2 = resolve_coordinate(target.y2, axis="y", table=table)
+        if isinstance(annotation, DimensionAnnotation):
+            cross_size = (y2 - y1) if annotation.axis == "x" else (x2 - x1)
+            if annotation.offset * 2 > cross_size:
+                raise ScenarioGeometryError(
+                    f"{context}.offset is too large for target {annotation.target!r}"
+                )
+
 
 def parse_scenario_geometry(document: Any) -> ScenarioGeometry:
     """Validate and compile one scenario geometry v1 document."""
@@ -308,7 +392,7 @@ def parse_scenario_geometry(document: Any) -> ScenarioGeometry:
     _only_keys(
         root,
         {"format", "formatVersion", "title", "table", "elements"},
-        set(),
+        {"annotations"},
         "scenario geometry",
     )
     if root.get("format") != SCENARIO_GEOMETRY_FORMAT:
@@ -340,10 +424,24 @@ def parse_scenario_geometry(document: Any) -> ScenarioGeometry:
             "scenario geometry.elements contains duplicate id(s): " + ", ".join(duplicates)
         )
 
+    annotations_raw = root.get("annotations", [])
+    if not isinstance(annotations_raw, list):
+        raise ScenarioGeometryError("scenario geometry.annotations must be an array")
+    annotations = tuple(
+        _parse_annotation(value, index) for index, value in enumerate(annotations_raw)
+    )
+    all_ids = ids + [annotation.id for annotation in annotations]
+    if len(set(all_ids)) != len(all_ids):
+        duplicates = sorted({value for value in all_ids if all_ids.count(value) > 1})
+        raise ScenarioGeometryError(
+            "scenario geometry contains duplicate id(s): " + ", ".join(duplicates)
+        )
+
     geometry = ScenarioGeometry(
         title=_non_empty_string(root.get("title"), "scenario geometry.title"),
         table=table,
         elements=elements,
+        annotations=annotations,
     )
     _validate_resolved_geometry(geometry)
     return geometry

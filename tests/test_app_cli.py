@@ -405,6 +405,9 @@ def test_render_scenario_map_command_uses_maintained_scenario_definition(
     svg = output.read_text(encoding="utf-8")
     assert 'viewBox="0 0 32 48"' in svg
     assert 'data-marker-type="console" data-diameter-mm="40"' in svg
+    assert 'id="deployment-a-depth" class="measurement"' in svg
+    assert '>12″</text></g>' in svg
+    assert '>16″ × 12″</text>' in svg
     assert f"Scenario map ready: {output}" in capsys.readouterr().out
 
 

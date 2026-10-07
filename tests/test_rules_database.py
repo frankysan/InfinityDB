@@ -169,6 +169,17 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
             configuration["armyPoints"]
             for configuration in scenario_facts["configurations"]
         ] == [[150], [200, 250], [300, 350, 400]]
+        first_annotations = scenario_facts["configurations"][0]["geometry"][
+            "annotations"
+        ]
+        assert {annotation["target"] for annotation in first_annotations} == {
+            "deployment-a",
+            "deployment-b",
+            "quadrant-1",
+            "quadrant-2",
+            "quadrant-3",
+            "quadrant-4",
+        }
         assert connection.execute(
             "SELECT relation_type, related_record_id FROM record_relations "
             "WHERE record_id = 'skill:camouflage' ORDER BY position LIMIT 1"

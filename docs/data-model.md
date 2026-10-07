@@ -404,7 +404,11 @@ domain described here are not implemented. Remaining implementation belongs to t
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
 `InfinityDB scenario geometry` format version 1, canonical inch table dimensions, ordered unique
 element IDs, and `rectangle`, `line`, `marker`, or `label` elements. Coordinates may be absolute
-inches or table-relative edge/center anchors with offsets. `marker` is a semantic point with a stable
+inches or table-relative edge/center anchors with offsets. An optional ordered `annotations` layer
+references those semantic elements rather than restating their geometry. Geometry v1 currently supports
+derived rectangle `dimension` annotations and `area-size` annotations; both calculate their displayed
+measurement from the referenced rectangle, so a map cannot silently disagree with maintained zone
+dimensions. `marker` is a semantic point with a stable
 `markerType`; per-instance radius is not duplicated in geometry because known marker types resolve to
 canonical marker metadata. Physical diameter is semantic when it defines the represented game object,
 not merely SVG styling. N5.3 Domination requires each Console to be represented by a Console A Marker
@@ -415,6 +419,10 @@ duplicate IDs, non-finite values, and geometry
 that resolves outside the table. The SVG renderer maps reusable semantic style names to presentation
 and uses the inch dimensions directly as its `viewBox`; it does not infer rules or geometry from
 diagrams.
+
+Domination now also exercises the annotation boundary: its Deployment Zones have derived depth
+dimensions and its four Quadrants have derived width × height labels. These annotations are map
+presentation metadata referencing semantic geometry, not a second copy of scenario measurements.
 
 The initial core-map acceptance corpus covered Annihilation, Domination, Supplies, and Firefight at
 each distinct N5.3 table/deployment configuration (24×32 with 8-inch Deployment Zones, 32×48 with

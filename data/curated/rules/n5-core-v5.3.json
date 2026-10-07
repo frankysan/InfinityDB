@@ -16352,6 +16352,42 @@
                                     "y": 18.5,
                                     "text": "Quadrant 4"
                                 }
+                            ],
+                            "annotations": [
+                                {
+                                    "id": "deployment-a-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-a",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "deployment-b-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-b",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "quadrant-1-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-1"
+                                },
+                                {
+                                    "id": "quadrant-2-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-2"
+                                },
+                                {
+                                    "id": "quadrant-3-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-3"
+                                },
+                                {
+                                    "id": "quadrant-4-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-4"
+                                }
                             ]
                         }
                     },
@@ -16552,6 +16588,42 @@
                                     "x": 24.0,
                                     "y": 28.5,
                                     "text": "Quadrant 4"
+                                }
+                            ],
+                            "annotations": [
+                                {
+                                    "id": "deployment-a-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-a",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "deployment-b-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-b",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "quadrant-1-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-1"
+                                },
+                                {
+                                    "id": "quadrant-2-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-2"
+                                },
+                                {
+                                    "id": "quadrant-3-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-3"
+                                },
+                                {
+                                    "id": "quadrant-4-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-4"
                                 }
                             ]
                         }
@@ -16754,6 +16826,42 @@
                                     "x": 36.0,
                                     "y": 28.5,
                                     "text": "Quadrant 4"
+                                }
+                            ],
+                            "annotations": [
+                                {
+                                    "id": "deployment-a-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-a",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "deployment-b-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-b",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "quadrant-1-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-1"
+                                },
+                                {
+                                    "id": "quadrant-2-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-2"
+                                },
+                                {
+                                    "id": "quadrant-3-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-3"
+                                },
+                                {
+                                    "id": "quadrant-4-size",
+                                    "kind": "area-size",
+                                    "target": "quadrant-4"
                                 }
                             ]
                         }

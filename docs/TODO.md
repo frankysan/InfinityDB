@@ -226,6 +226,11 @@ unimplemented until its corresponding behavior exists.
       placements, circles/radius regions, Exclusion/Hazard areas, asymmetric roles, access lines,
       custom markers/icons, and per-configuration overrides without redefining the core concepts.
       Unsupported ITS-only constructs should fail explicitly rather than be approximated in v1.
+    - [x] Add reference-based map measurements before freezing geometry v1. Keep annotations separate
+      from semantic shapes: rectangle depth/width dimensions and area-size labels resolve their values
+      from a target geometry element instead of duplicating numbers. Domination pilots this with
+      Deployment Zone depth indicators and derived Quadrant sizes; extend the same contract as the
+      remaining core scenarios move from fixtures into maintained definitions.
     - [x] Validate table bounds, dimensions, stable element order/IDs, and reproducible SVG bytes.
       The maintained Domination definition plus deterministic acceptance fixtures for the remaining
       three core scenarios cover every distinct supported core table/deployment configuration. Replace

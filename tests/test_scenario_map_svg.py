@@ -152,3 +152,51 @@ def test_render_core_scenario_geometry_fixtures_are_deterministic_and_well_forme
     root = ElementTree.fromstring(first)
     assert root.tag == "{http://www.w3.org/2000/svg}svg"
     assert root.attrib["viewBox"] == f"0 0 {geometry.table.width:g} {geometry.table.height:g}"
+
+
+def test_render_scenario_map_svg_projects_derived_dimensions_and_area_size() -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Measured region",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": {"anchor": "right"},
+                    "y2": 8,
+                }
+            ],
+            "annotations": [
+                {
+                    "id": "deployment-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "start",
+                },
+                {
+                    "id": "deployment-size",
+                    "kind": "area-size",
+                    "target": "deployment-a",
+                },
+            ],
+        }
+    )
+
+    svg = render_scenario_map_svg(geometry)
+
+    assert (
+        '<g id="deployment-depth" class="measurement" data-target="deployment-a" '
+        'data-axis="y">'
+    ) in svg
+    assert '>8″</text></g>' in svg
+    assert (
+        '<text id="deployment-size" class="area-size" data-target="deployment-a" '
+        'x="12" y="6.56" text-anchor="middle">24″ × 8″</text>'
+    ) in svg
