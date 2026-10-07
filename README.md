@@ -5,7 +5,7 @@ data. While Infinity Army presents one army at a time, InfinityDB brings those
 views together into a game-wide reference for exploring units, profiles,
 equipment, skills, weapons, and relationships across armies.
 
-Current release: **0.9.1** (2026-09-30).
+Current release: **0.10.0** (2026-10-07).
 
 ## Guiding principles
 
@@ -69,6 +69,8 @@ its application metrics.
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Includes global search and a federated Glossary across player-facing reference domains, with
   embedded Attributes and scoped Game terms routed back to their canonical owning surfaces.
+- Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
+  with an S2 reference alongside other supported Silhouettes.
 - Supports System, Light, and Dark themes from Settings; System follows the operating-system
   preference, while an explicit choice can be remembered with the other browser settings.
 - Uses `/fireteams` as a general Fireteam-rules landing page and switches to Army-scoped charts when

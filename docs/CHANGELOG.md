@@ -7,197 +7,93 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
-## Unreleased
+## [0.10.0] - 2026-10-07
 
 ### Player summary
 
-- Choose System, Light, or Dark themes, with improved contrast and readability across the interface.
-- Use the new **What's changed** page and expanded privacy information to see visible updates and
-  understand what InfinityDB stores.
-- Unit, Army, Fireteam, Skill-reference, and symbol presentation received navigation, filtering,
-  glossary-help, artwork, and small-screen fixes.
-- Reference descriptions and Unit help now explain game information more clearly.
+- Choose System, Light, or Dark themes, with improved contrast and readability.
+- Compare S1–S8 Silhouette templates in the Glossary and Unit previews at a shared scale.
+- Read the new **What's changed** page and privacy information.
+- Browse clearer rules descriptions and Unit help, with improved navigation, filtering,
+  artwork, and small-screen layouts.
 
 ### Added
 
-- **Project infrastructure:** Add a deterministic full-asset bundle builder for the optional manual
-  CI workflow, producing exactly the validated symbol publication with normalized ZIP metadata and
-  the pinned SHA-256 used by the `full-assets` environment.
-
-- **Project infrastructure:** Allow the manual full-asset workflow to validate an authorized
-  release-candidate branch before merge; exact-SHA release evidence can still require a rerun on the
-  final `main` commit when merge or squash changes the SHA.
-
-- **Web frontend:** Add scale-preserving S1–S8 Silhouette diagrams to the Glossary and optional Unit
-  statline previews. Non-S2 profiles include a faded S2 comparison at the same physical scale, while
-  the normal Unit statline stays compact.
-
-- **Data processing + Web frontend:** Add **FTO (Fireteam Option)** to the Glossary, explaining that
-  FTO is an option-name identifier rather than a standalone rule and that Fireteam charts can
-  require FTO or a specific FTO variant such as FTO-2.
-
-- **Deployment + Project infrastructure:** Add operator-side retained metrics history reporting and
-  comparison by week/version/snapshot, including request/status/error summaries, normalized-route
-  activity, cumulative latency/response-size histograms, bounded percentile estimates, and JSON output
-  without introducing another network endpoint or request-level persistence.
-
-- **Deployment + Project infrastructure:** Run retained aggregate metrics in a dedicated
-  immutable-root `metrics-history` container with one bounded writable SQLite volume, bracket
-  application updates with non-blocking closing/opening scrapes, preserve isolated history across
-  normal local-test restarts, and provide an explicit local `--purge` clean-slate path.
-
-- **Deployment + Project infrastructure:** Add a bounded, version-aware metrics-history collector
-  engine that converts volatile request counters into generation-safe weekly SQLite summaries,
-  retains only one rolling scrape state, and automatically enforces age and database-size limits
-  without storing user/request identity data.
-
-- **Deployment + Project infrastructure:** Expose live metrics-generation start and latest completed-request timestamps, and show the generation observation span in the operator metrics report so restarts and counter lifetimes are explicit before retained history is introduced.
-
-- **Deployment + Project infrastructure:** Add a privacy-preserving operational alert evaluator for sustained CPU, memory/OOM/restart pressure, filesystem space/inodes, 5xx response deltas, and health failures, with configurable thresholds and monitoring-friendly exit codes.
-
-- **Web frontend + Project infrastructure:** Publish a user-facing privacy policy in the README and
-  About page explaining InfinityDB's no-profile/no-visitor-tracking stance, aggregate-only
-  operational metrics, session-only browser settings by default, opt-in preference cookies, and
-  shareable URL state. The cookie-consent dialog links directly to the policy.
-- **Deployment + Project infrastructure:** Add bounded sanitized deployment diagnostics for the
-  existing Caddy/Gunicorn Docker log streams, retaining warning/error-class summaries and grouped
-  samples while redacting request targets and identity-like values instead of archiving raw logs.
-- **Deployment + Project infrastructure:** Add privacy-preserving Linux host/container resource
-  capture for deployment capacity evidence, including CPU, memory/swap, filesystem space/inodes,
-  available disk-I/O, network rates, per-container Docker utilization, restart/OOM events, and the
-  bounded CPU/memory/Gunicorn configuration needed to interpret capacity comparisons, over the same
-  interval as an optionally wrapped capacity-test command.
-- **Deployment + Project infrastructure:** Add a repeatable HTTP capacity-test scenario for deployed
-  InfinityDB stacks, covering representative Unit browsing, search, detail, and API traffic with
-  warm-cache steady and burst phases plus retained p50/p95/p99, throughput, error, and response-size
-  evidence tied to the target version and snapshot.
-- **Deployment + Project infrastructure:** Record the first controlled 2x4 capacity baseline on the
-  isolated deployment, including the enclosing 8-CPU/8-GiB LXC boundary, zero-error throughput and
-  latency results, resource observations, and the resulting evidence that the synthetic workload
-  reaches an application-concurrency plateau before exhausting host CPU, memory, or disk.
-- **Deployment + Project infrastructure:** Add capacity-test-only Compose overrides for a matched
-  worker-count experiment: a shared 4-vCPU/4-GiB app resource boundary plus a separate 4x4 Gunicorn
-  override, allowing 2x4 and 4x4 to be measured under identical limits without changing production
-  or image defaults.
-- **Deployment + Project infrastructure:** Record the matched 2x4-versus-4x4 capacity result under
-  identical 4-vCPU/4-GiB limits: 4x4 improves concurrency-8 throughput by 71.8% while reducing
-  p50/p95/p99 latency, and improves concurrency-32 throughput by 40.8% while exposing continued
-  tail-latency pressure at overload. Keep production at 2x4 by default, document the bounded 4x4
-  scale step and explicit latency/error/resource trigger, and note that Docker must be restarted after
-  an LXC CPU-allocation change before controlled CPU limits/cpusets can be trusted.
-- **Deployment + Project infrastructure:** Add `infinity-db database-health` for operational
-  validation of published Army databases, reporting schema/compatibility revisions and validation
-  timing with optional application/raw export-pair verification and machine-readable JSON output.
-- **Web frontend:** Add a project favicon derived from the InfinityDB logo, simplified for clear
-  recognition at small browser-tab sizes and high contrast in both light and dark browser chrome,
-  with SVG as the scalable primary icon plus a 32 px PNG fallback and Apple touch icon.
 - **Web frontend:** Add System, Light, and Dark theme selection in Settings. System follows the
-  operating-system color preference by default, explicit choices can be remembered with existing
-  Settings persistence, and the selected theme is applied before first paint.
-- **Web frontend + Project infrastructure:** Add a What's changed page that leads with player-facing
-  summaries and keeps the complete Added/Changed/Fixed/Upgrade notes in expandable detail, all
-  published directly from the project's canonical changelog.
-- **Acquisition:** Add Human Sphere as an English-only wiki research source using the existing
-  deterministic snapshot/history pipeline. Human Sphere acquisitions use their own archive
-  identity, normalize bare/`www` host aliases, enumerate MediaWiki content pages before rendered
-  link discovery to include orphaned main-namespace pages, store rendered pages with a
-  collision-safe `.html` suffix, pace requests conservatively, and reuse already-downloaded assets
-  when resuming incomplete work. Snapshot completeness is anchored to the API-enumerated
-  main-namespace inventory: failed enumerated pages remain fatal, while Talk/service URLs and stale
-  link-discovered HTTP 404s are retained as ignored diagnostics instead of blocking publication.
+  operating-system preference; explicit choices use existing Settings persistence and apply before
+  first paint. Add a project favicon that stays legible in light and dark browser chrome.
+- **Web frontend:** Add scale-preserving S1–S8 Silhouette diagrams to the Glossary and Unit
+  statline previews. Other supported Silhouettes include a faded S2 reference at the same scale;
+  S2 appears alone and the normal statline stays compact.
+- **Web frontend + Project infrastructure:** Add a **What's changed** page with concise player
+  summaries and expandable release details, plus a public privacy policy linked from cookie
+  consent. Explain aggregate-only monitoring, session settings, opt-in preference cookies, and
+  shareable URL state.
+- **Data processing + Web frontend:** Add **FTO (Fireteam Option)** to the Glossary, explaining
+  option-name identifiers and chart requirements for specific variants such as FTO-2.
+- **Deployment:** Add bounded aggregate metrics history and operator reports by week, version,
+  and snapshot. A separate private collector retains request/status/error summaries and latency
+  estimates without visitor identities. Updates capture outgoing and incoming generations without
+  blocking a healthy application; history survives restarts and rollback, and format upgrades are
+  transactional with older collectors refusing newer stores.
+- **Deployment:** Add privacy-preserving resource capture, sanitized warning/error diagnostics,
+  and configurable operational alerts for CPU, memory, storage, errors, and health failures.
+- **Deployment:** Add repeatable HTTP capacity testing and controlled worker/resource comparisons.
+  The matched 2x4 versus 4x4 experiment establishes 4x4 as the first bounded scale step, with an
+  explicit latency/error/resource trigger for review. Production continues to default to 2x4;
+  measured results and comparison commands are retained in deployment guidance.
+- **Deployment:** Add `infinity-db database-health` to validate Army databases and optionally
+  verify their application/raw export pair, with revision, timing, and JSON output.
+- **Acquisition:** Add English-only Human Sphere wiki research snapshots, including orphaned
+  content pages, deterministic archive identities, and resumable downloads. Missing required pages
+  block publication; unrelated Talk/service pages and stale discovered 404s remain diagnostics.
 
 ### Changed
 
-- **Deployment:** Make the retained metrics-history database explicitly forward-migrating. Format
-  upgrades now run as transactional one-version steps, failed upgrades keep the previous committed
-  format, and older collectors refuse newer or unversioned non-empty stores without downgrading or
-  deleting retained history. The rollback procedure preserves the history volume even when the
-  target release predates the collector service.
-- **Web frontend:** Rewrite the Armies overview framing around playable forces and roster status,
-  removing dataset-oriented wording from the player view.
-- **Web frontend:** Remove remaining source-review qualifiers and imported-table wording from
-  Hacking Program and Fireteam copy, including Hacking Program access labels and empty Fireteam
-  member states, keeping the player view focused on rules content and gameplay meaning.
-- **Web frontend:** Rename Unit-detail **Source notes** to **Unit notes**, keeping the
-  Army-specific applicability visible, and clarify Peripheral choices and faction membership
-  without exposing source-processing terminology in the player view.
-- **Web frontend:** Present unresolved maintained rules text as **Needs verification** with an
-  **uncertain** marker and player-readable reasons, while keeping the underlying review marker
-  available to the curation workflow.
-- **Web frontend:** Rewrite Equipment, Weapons, and Fireteams introductions around the rules
-  information players can browse, removing Army snapshot and source-authority framing from normal
-  page copy and giving Fireteams a direct **Fireteam reference** label.
-- **Web backend + Web frontend:** Rewrite empty, loading, invalid-link, and error states, including
-  Army, Unit, Skill, rules-reference failures, and invalid filter selections, to describe the
-  player-visible situation directly instead of exposing database, snapshot, source-data, catalog,
-  or URL-address terminology. Unexpected reference failures keep technical details in diagnostics
-  and show players a clear unavailable-information message.
-- **Web frontend:** Rewrite the About page and Home/About introductory framing around what InfinityDB
-  helps players explore, how related rules information is connected, and how uncertainty is
-  presented, replacing data-pipeline, generic data framing, and internal release-planning language
-  with player-relevant reference language and project goals.
-- **Data processing + Web frontend:** Explain Skill levels, Attribute-replacement variants,
-  TinBot options, and profile notation in game terms, keeping their rules effects, applicable
-  modifiers, and official references clear.
-- **Web frontend:** Rewrite Labels, General Rules, and Glossary framing around the rules information
-  players can look up, removing internal taxonomy and data-model terminology from those surfaces.
-- **Web frontend:** Replace database/domain/indexing/catalog-oriented page framing with InfinityDB
-  and player-reference language across navigation breadcrumbs and sidebar framing/accessibility, the
-  landing page and its reference-card descriptions, Unit Explorer and Unit details, global Search,
-  rules-reference lists, rules-reference accessibility captions and supplemental-rules headings,
-  and the What's changed release-history framing.
-- **Data processing:** Bind each generated Army application/raw database pair to one deterministic
-  full-export fingerprint and make application-database replacement the publication commit point.
-  Interrupted paired publication now fails closed for raw-dependent audits and recovers by rerunning
-  the export without putting normal serving onto an unvalidated application database.
-- **Web backend + Web frontend:** Normalize Army Fireteam limit sentinels into explicit application
-  semantics before they reach the browser, and include curated legacy Armies in global search with
-  links to the Armies overview.
-- **Data processing + Web backend + Web frontend:** Rework symbol publication around semantic
-  ownership instead of Army source naming. Peripheral-only artwork now publishes under a dedicated
-  main-Army namespace, mixed-role profile names remain Unit-owned, distinct contextual variants are
-  preserved, and byte-identical artwork prefers ordinary Unit/Peripheral identities over
-  Reinforcement-only aliases for canonical public naming.
-- **Data processing + Web frontend:** Refresh the tracked processed SVG corpus with maintained
-  reconstructions and cleanup across affected faction, Order, Characteristic, Peripheral, and Unit
-  artwork, including corrected gradients/geometry and removal of hidden or redundant source
-  structure where appropriate.
+- **Web frontend:** Use clearer game/reference language throughout navigation, page introductions,
+  Unit notes, profile notation, rules help, and empty/error/loading states. Unresolved reference
+  information appears as **Needs verification** with an **uncertain** marker and readable reasons.
+- **Data processing:** Publish validated application/raw exports as one matching generation.
+  Interrupted publication preserves the previous serving database, rejects mismatched raw-dependent
+  audits, and recovers by rerunning the export.
+- **Web backend + Web frontend:** Interpret Fireteam limit sentinels explicitly and include legacy
+  Armies in global search, linking to their entries on the Armies overview.
+- **Data processing + Web frontend:** Refresh processed faction, Order, Characteristic, Peripheral,
+  and Unit artwork. Preserve distinct contextual variants, publish Peripheral-only artwork in its
+  own namespace, and keep mixed-role artwork with its Unit identity.
+- **Project infrastructure:** Retain exact-commit hosted validation evidence in annotated release
+  tags. Release candidates can complete the optional full-assets check before merge using a
+  reproducible checksum-pinned publication bundle; final release evidence remains tied to the
+  resulting release commit.
 
 ### Fixed
 
-- **Web frontend:** Make Unit Profile row headers follow the same reference behavior as Attribute labels: profile concepts now show maintained tooltips and open their Glossary entries, with separate Skills, Equipment, and Weapons concepts, and the redundant Profile notation introduction is removed.
-- **Web frontend:** Tune Light and Dark semantic theme colors against an executable contrast audit
-  for compact/muted text, links, focus cues, status and range values, tables, dialogs, menus, and
-  related badges while keeping faction accents supplementary to textual identity.
-- **Web frontend:** Keep Fireteam Member/Requirements columns aligned with a compact, stable split
-  across viewport widths, and reserve more room for cm-mode MOV values so profile statlines do not
-  crowd adjacent attributes.
-- **Web frontend:** Army results that open the Armies overview now target, scroll to, and highlight the matching Army card instead of dropping users at the top of the page.
-- **Web backend + Web frontend:** Clarify Unit pages when optional-unit Settings hide every profile,
-  remove redundant one-Unit source Characteristics from the Unit Explorer picker, and treat Army's
-  combined Headquarters/Mechanized classification as matching both component filters.
-- **Deployment:** Include the published Peripheral SVG namespace in wheel/container package data,
-  and pin package-data coverage against the tracked symbol-publication manifest so a complete source
-  tree cannot produce an incomplete release image.
-- **Web backend:** Reject unknown or duplicate semantic query parameters on Fireteam and Unit-detail
-  APIs instead of silently ignoring malformed requests, while retaining the Developer-mode cache-bust
-  parameter.
-- **Web frontend:** Display stationary MOV profiles with an em dash (`—`) instead of treating
-  Army's `-1/-1` sentinel as a negative distance, while keeping Army/rules distance conversion
-  consistent across Unit profiles, Skill parameters, maintained rules text, and Weapon ranges.
-- **Data processing:** Revalidate Armed Turret against the current N5 v5.3 core rules and
-  replace its stale N5.2 citation with the current primary source while preserving the documented
-  source conflict in its deployable-profile Silhouette.
-- **Acquisition:** Apply a local symbol override to every same-category Army asset that is
-  byte-identical upstream, so correcting one duplicated Army symbol no longer leaves equivalent
-  Unit/profile occurrences on the original artwork. Conflicting overrides for the same upstream
-  symbol now fail explicitly instead of producing ambiguous output.
-- **Data processing + Web backend + Web frontend:** Resolve Unit and General-profile symbols as
-  semantic assignments instead of blindly following each Army profile-logo occurrence. General
-  profiles now have one effective symbol with Unit fallback, source-primary artwork remains
-  available when it belongs to a distinct General profile after Unit identity consolidation, and
-  high-confidence cross-Unit consensus repairs repeated upstream assignments such as Crabbots on
-  Cutters and Dragões without discarding the original Army logo URLs used as provenance.
+- **Web frontend:** Give Unit Profile row headers maintained help and Glossary links, keep
+  Fireteam columns and cm-mode statlines readable at narrow widths, and improve text, status,
+  link, and focus contrast in both themes. Army links now scroll to and highlight the matching card.
+- **Web backend + Web frontend:** Explain when optional-unit Settings hide all Unit profiles,
+  remove redundant one-Unit Characteristics from filter choices, and match the combined
+  Headquarters/Mechanized classification through either component filter.
+- **Web backend:** Reject unknown or duplicate semantic parameters on Fireteam and Unit-detail
+  APIs while preserving the Developer-mode cache-bust parameter.
+- **Web frontend:** Display stationary MOV as an em dash rather than a negative distance, and
+  keep cm/in conversion consistent across profiles, rules help, and Weapon ranges.
+- **Data processing:** Update Armed Turret to current N5 v5.3 citations while preserving the
+  documented conflict between sources for its deployable-profile Silhouette.
+- **Acquisition:** Apply symbol overrides to all same-category upstream-identical artwork;
+  conflicting overrides fail explicitly rather than producing ambiguous results.
+- **Data processing + Web backend + Web frontend:** Correct Unit and General-profile symbol
+  assignments, preserve genuine profile-specific artwork, and repair repeated upstream
+  misassignments such as Crabbots on Cutters and Dragões while retaining source provenance.
+- **Deployment:** Include published Peripheral artwork in installed packages and release images.
+
+### Upgrade notes
+
+- **Deployment:** Deploy the release-matched tracked Army database, rules database, and complete
+  processed SVG publication together. Normal server upgrades consume these artifacts without
+  rebuilding databases in production.
+- **Deployment:** Preserve the metrics-history volume during updates and rollback. Older
+  collectors refuse newer history formats; rollback must not downgrade or delete retained history.
 
 ## [0.9.1] - 2026-09-30
 

@@ -33,239 +33,29 @@ part of the 1.0 completeness target; their architecture is now established for l
 implementation without adding the full scenario surface to 0.10.0.
 
 The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
-definition lives in `docs/releasing.md`. The sections below contain only
-implementation work that remains open.
+definition lives in `docs/releasing.md`. The sections below record the candidate's completed
+version-specific gates and implementation work that remains open for later releases.
 
 ## 0.10.0 — consistency, presentation, and release hardening
 
-0.10.0 is the stabilization pass before 1.0. The end-to-end application consistency
-audit and scenario architecture review are complete; the remaining work is frontend/theme
-architecture and release/operations hardening. It should avoid introducing another major game-data
-domain unless required to correct a release-blocking defect.
+**Project domains:** Web frontend, Deployment, Project infrastructure
 
-### Frontend architecture and theming
+Implementation and version-specific manual acceptance are complete. Merge, exact-release-commit
+hosted validation, tagging, and publication follow [the release checklist](releasing.md).
 
-- [x] **Web frontend + Project infrastructure:** Add a user-facing **What's changed** page backed by
-  `docs/CHANGELOG.md`, which remains the canonical release-history source. Present current and
-  historical release notes in the browser without maintaining a second hand-edited copy of the
-  same content.
-
-- [x] Refactor the web layer toward the documented backend/frontend responsibility
-  boundary without changing the current same-origin deployment model.
-  - [x] Split API handling, shared page-shell/static delivery, and top-level request
-    dispatch into visibly separate Python concerns while preserving existing URLs. The WSGI
-    composition/instrumentation layer now delegates browser/static delivery to
-    `src/infinity_db/web/presentation.py` and JSON/domain handling to
-    `src/infinity_db/web/api_handler.py`, with shared route
-    identities and response values kept separate from both.
-  - [x] Organize browser code around explicit API transport, preferences/theme
-    state, reusable view/components, and page modules; keep JSON API access routed
-    through `api.js`.
-    - [x] Decouple application API wrappers from preference/UI modules: `api.js` now delegates
-      request mechanics to an explicit transport module, while page modules pass optional-Unit
-      visibility state into API calls instead of the API layer reading browser controls itself.
-    - [x] Separate preference state/persistence from shared Settings UI wiring: page modules now
-      consume stored preference values without initializing shell controls, `settings.js` owns the
-      persistent Settings bindings/events, and reusable distance formatting is independent of both.
-    - [x] Make page-module ownership explicit: the Unit Explorer now uses `units.js`, current pages
-      no longer load the legacy `app.js` entry point, and server-rendered Changes/Glossary pages do
-      not execute Unit Explorer code. `/static/app.js` remains only as a compatibility URL alias for
-      cached pre-refactor Unit Explorer documents.
-    - [x] Establish a reusable browser view/component boundary: `view-components.js` now owns
-      shared page-state panel switching/`aria-busy` behavior and the canonical table-viewport
-      wrapper, while page modules retain page state and domain-specific rendering.
-  - [x] Add focused contract/regression coverage as responsibilities move so domain
-    interpretation cannot silently migrate back into browser code.
-    - [x] Pin Python route ownership so presentation handling does not absorb `/api/*` and API
-      handling does not absorb browser pages, and keep packaged-symbol tests coupled to the
-      presentation concern rather than top-level WSGI dispatch.
-    - [x] Add browser/backend semantic-boundary coverage while moving remaining inferred domain
-      labels/symbol roles out of page modules.
-
-- [x] Implement first-class theme selection using the semantic theme contract documented in
-  `docs/architecture.md`, with Light and Dark as the initial themes rather than an architectural
-  limit.
-  - [x] Separate semantic theme tokens from theme-neutral layout/component rules
-    and remove remaining hard-coded light-theme assumptions. The current Light palette now lives
-    entirely in the explicit semantic theme contract, while component/layout rules consume tokens.
-  - [x] Use the operating-system color-scheme preference as the default (`System`) startup
-    behavior; an explicit Light/Dark user choice wins. A synchronous same-origin bootstrap resolves
-    the concrete theme before the stylesheet is applied.
-  - [x] Add a data-driven theme selector to Settings with System, Light, and Dark as the initial
-    choices. Theme selection uses the existing session/cookie preference contract, resolves before
-    first meaningful paint, and exposes a registry that can accept additional explicit themes
-    without changing persistence logic.
-  - [x] Audit contrast and distinguishability for status/range colors, links, focus,
-    muted text, tables, dialogs, menus, and faction accents in every shipped theme
-    (initially Light and Dark). Compact text/status roles now have executable contrast
-    thresholds, focus and other meaningful graphical cues have non-text thresholds, and
-    faction gradients remain supplementary to textual identity rather than carrying meaning alone.
-  - [x] Add regression coverage for initialization, switching, persistence, and
-    representative core pages across every shipped theme.
-
-- [x] Add a project favicon derived from `infinitydb-logo.svg` and keep it legible
-  in light and dark browser chrome where practical. The favicon uses the logo's infinity-ribbon
-  geometry on its dark brand surface, simplified for small browser-tab sizes, with SVG as the
-  scalable primary icon plus a 32 px PNG fallback and 180 px Apple touch icon.
-
-- [ ] **Web frontend:** Add scale-preserving Silhouette diagrams to player reference surfaces.
-  Whenever multiple templates are shown together they must use one shared physical scale and aligned
-  baselines so the S1–S8 size differences remain meaningful rather than fitting each image
-  independently.
-  - [x] Publish the maintained S1–S8 SVG set through one reusable browser renderer with explicit
-    physical dimensions and theme-aware monochrome presentation.
-  - [x] Show the complete S1–S8 set in the **Silhouette (S)** Glossary entry, preserving one common
-    scale and wrapping into responsive equal-width rows rather than shrinking templates
-    independently or widening the Glossary page for this exceptional reference.
-  - [x] Add an optional Unit-profile `S` value preview without enlarging the normal statline. For
-    S1/S3–S8, compare the selected template with a faded S2 reference at exactly the same scale; S2
-    is shown alone, and unsupported values such as S0 remain plain stat text.
-  - [ ] Complete manual browser review of the Glossary strip and Unit popup in Light/Dark themes,
-    keyboard/focus and touch interaction, and narrow-screen layouts before closing the item.
-
-- [x] Reorganize frontend design-system ownership after first-class themes are implemented:
-  foundational typography/geometry tokens, one CSS palette file per explicit theme, shared
-  component/layout rules, and late page-specific exceptions now have separate source ownership.
-  `/static/styles.css` remains the stable browser entry point and is composed server-side in the
-  established cascade order, with no CSS build step or visual-primitive rewrite.
-
-### Release hardening, CI, and operations
-
-- [x] Define a paired-export replacement policy. Temporary application/raw candidates are
-  validated and fingerprinted as one generation; publication replaces the raw archive first and
-  the application database last as the commit point. Interruption leaves serving on the previous
-  valid application database, raw-dependent tooling rejects mismatched generations, and rerunning
-  export is the tested roll-forward recovery path.
-
-- [x] Integrate curated snapshot-note validation into routine project checks so
-  every checked-in file under `data/curated/snapshot-notes/` is validated even
-  when no downloader or comparison workflow happens to load it. Routine pytest now recursively
-  validates every maintained JSON note and rejects unsupported stray files in that directory.
-
-- [x] Retain release evidence for the configured hosted workflows. Release preparation now
-  verifies the exact candidate commit against successful `Source checks`, `Installed wheel smoke`,
-  and `Deployment smoke test` runs, writes an ignored machine-readable evidence record, and embeds
-  the run identities/URLs in the immutable annotated release-tag message so evidence does not require
-  modifying the already-validated release commit.
-
-- [ ] Complete optional/manual full-asset CI administration by adding authorized
-  `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` secrets to the existing
-  `full-assets` environment, authorize the current release-candidate branch for that environment,
-  then record one successful manual run for the candidate SHA before merge.
-  - [x] Add a deterministic bundle-builder for the validated tracked publication so the external
-    archive and pinned SHA-256 used by the environment can be reproduced instead of assembled by
-    hand.
-
-- [x] Establish privacy-preserving production monitoring and a repeatable capacity test
-  for the Docker deployment.
-  - [x] Add privacy-preserving host/container resource capture for capacity evidence.
-    `tools/deployment_resources.py` samples Linux CPU, memory/swap, filesystem space/inodes,
-    backing-device I/O when exposed, aggregate host network rates, per-container Docker
-    CPU/memory/block/network usage, and restart/OOM state/events. It can wrap the capacity-test
-    command so both retained JSON reports cover the same interval without recording hostnames,
-    IP addresses, request URLs, or arbitrary Docker event attributes.
-  - [x] Retain bounded, sanitized Caddy/Gunicorn warning/error diagnostics from the existing
-    Docker log streams. `tools/deployment_diagnostics.py` keeps only warning/error-class events,
-    redacts request targets and identity-like values, groups repeated diagnostics by a sanitized
-    fingerprint, caps retained samples, and can use the exact time window from a deployment
-    resource report. Routine access logging remains disabled.
-  - [x] Add operational alert evaluation for sustained CPU saturation, host/container memory
-    pressure and OOM/restart events, low filesystem space/inodes, elevated 5xx response deltas,
-    and failed health checks. `tools/deployment_alerts.py` applies documented/configurable warning
-    and critical thresholds to a recent resource report plus two bounded metrics/health samples,
-    emits privacy-safe JSON, and returns monitoring-friendly OK/warning/critical/unknown exit codes.
-  - [x] Publish aggregate request counters/histograms using normalized bounded route
-    labels: request rate, status class, latency, response size, and active requests. Static
-    assets and `/api/` requests remain separately identifiable for future dashboards.
-  - [x] Add explicit live-metrics generation timestamps. `/metrics` remains a volatile
-    Prometheus scrape surface, but now exposes `infinitydb_metrics_started_timestamp_seconds`
-    and `infinitydb_metrics_last_request_timestamp_seconds` so operators and the planned history
-    collector can identify the exact observation span and distinguish application restarts even
-    when version/snapshot identity is unchanged.
-  - [x] Add an isolated `metrics-history` service outside the immutable web-facing `app`
-    container. `Dockerfile.metrics-history` builds a separate unprivileged image containing only
-    the standard-library collector engine; Compose runs it read-only with no published port, no
-    Docker socket/host-filesystem access, and exactly one writable `metrics_history` volume. The
-    collector scrapes `app:8000/internal/metrics` over the private Compose network and remains
-    outside the app/Caddy availability gate. The `infinitydb-test` project runs the same service
-    with an automatically isolated history volume; normal stop preserves that volume and
-    `stop-local-test.sh --purge` removes only the local-test project's volumes.
-  - [x] Implement bounded version-aware metrics-history aggregation.
-    `tools/metrics_history.py` keeps only one rolling scrape state for counter deltas, treats each
-    metrics-generation identity as a fresh zero-based counter set, and folds deltas into weekly
-    summaries keyed by ISO week + InfinityDB version + snapshot revision. Its continuous mode
-    defaults to a 5-minute interval. The store retains the current week plus 52 completed weeks,
-    prunes after successful collection, enforces a 64-MiB safety ceiling by removing oldest
-    completed weeks first, and reports earliest/latest retained observations, week count, and
-    current database size. Unexplained counter decreases fail closed and reset only rolling state
-    rather than inflating retained history.
-  - [x] Integrate metrics-history collection with deployment transitions. Deployment builds and
-    verifies both images before touching the running stack, stops only the continuous collector,
-    takes a one-shot closing scrape of the old app, replaces/waits for the availability-critical
-    app/Caddy services, takes an opening scrape after app health passes, and then starts the
-    continuous collector. Closing/opening scrape or collector-start failures are warnings and do
-    not roll back/block a healthy application update. A transition-only legacy fallback lets the
-    first collector-enabled release retain outgoing counters from older deployments that lack live
-    generation timestamps. App and collector image repositories share the bounded rollback-image
-    retention count. Unexpected restarts may lose at most one periodic collection interval;
-    generation changes never treat reset counters as deltas.
-  - [x] Define explicit forward schema migrations before incrementing the persistent
-    metrics-history database format. Application rollback must continue to preserve rather than
-    downgrade/delete the history volume, including rollback to a pre-history release.
-  - [x] Extend operator reporting for retained history. `metrics_history.py periods/report/compare`
-    can inspect exact or aggregated week/version/snapshot selections, expose request/status/error
-    counts, normalized-route activity, cumulative latency/response-size histograms and bounded
-    p50/p95/p99 estimates, and compare retained selections without retaining raw URLs,
-    query/search terms, request identities, or per-user history. JSON output exposes the same
-    aggregate structures for later automation.
-  - [x] Do not collect IP/geolocation, user-agent/fingerprint, referrer, cookie/session/
-    preference values, query/search terms, persistent visitor IDs, unique/returning-user
-    analytics, or per-user navigation histories. Raw URLs and unbounded request values are
-    excluded from metric labels.
-  - [x] Disable the routine Gunicorn access-log stream while retaining stderr error logs.
-    If raw request logging is temporarily required for a concrete incident, minimize/sanitize
-    its fields, restrict access, and define short retention before enabling it.
-  - [x] Define a representative load-test scenario: `tools/capacity_test.py` discovers
-    current public Unit/Skill/Equipment/Weapon identities from the deployed snapshot, warms and
-    exercises Unit browsing, global search, Unit/catalog details, and matching JSON APIs, then
-    records separate steady-state and short-burst phases with p50/p95/p99 latency, request/error
-    rate, status classes, and response sizes. The health endpoint is not part of the workload.
-  - [x] Make retained resource evidence self-describing for capacity comparisons: record only the
-    app/container CPU and memory limits plus detected Gunicorn worker/thread counts from Docker
-    metadata, without retaining arbitrary commands, environment values, bind mounts, or addresses.
-  - [x] Establish and record the initial 2 Gunicorn workers x 4 threads baseline on the
-    isolated deployment. The enclosing LXC is limited to 8 CPUs/8 GiB RAM; the app container
-    had no explicit Docker CPU/memory limits. The default scenario sustained 271.1 req/s at
-    concurrency 8 with 0 errors and p50/p95/p99 8.5/113.6/160.5 ms, while the concurrency-32
-    burst delivered 264.8 req/s with 0 errors and p50/p95/p99 107.9/219.8/262.3 ms. App CPU
-    averaged 265.9% and peaked at 338.3%; host CPU averaged 41.6% and peaked at 45.6%; memory
-    and disk I/O remained low. Treat the throughput plateau plus rising latency as evidence that
-    2x4 is application-concurrency-bound under this synthetic workload, not host-resource-bound.
-  - [x] Add isolated capacity-test Compose overrides that separate the controlled 4-vCPU/4-GiB
-    app-container boundary from the 4-worker x 4-thread Gunicorn change. Production Compose/image
-    defaults remain 2x4 and uncapped at the Docker layer.
-  - [x] Run a matched 2x4-control versus 4x4 comparison with both app containers limited to the
-    same 4 vCPUs/4 GiB. The 4x4 steady phase improved throughput from 251.6 to 432.1 req/s
-    (+71.8%) while reducing mean/p50/p95/p99 latency by about 41.8%/32.3%/23.0%/14.2%, with
-    zero errors in both runs. Under the concurrency-32 burst, 4x4 still improved throughput by
-    40.8% and median latency by 37.6%, but p95/p99 rose by about 6.4%/13.4%, showing that 4x4
-    raises useful capacity substantially without removing tail-latency pressure at heavier overload.
-    Resource evidence confirmed identical 4-vCPU/4-GiB limits, 2x4 versus 4x4 Gunicorn settings,
-    no restart/OOM events, and low memory/disk pressure.
-  - [x] Set an explicit production scale-review trigger. Treat the current 2x4 deployment as due
-    for a 4x4 review when representative traffic sustains aggregate p95 latency >=120 ms for
-    about 15 minutes while request rate is >=200 req/s, or when overload-attributable 5xx exceeds
-    1% for at least 5 minutes, provided fresh resource evidence shows host/LXC CPU below 70%
-    average, memory below 80%, and no storage/OOM/restart pressure. Re-run the representative
-    capacity test before changing production. The matched experiment validates 4x4 as the first
-    bounded vertical step; if the same trigger is later reached on 4x4, prefer multiple immutable
-    app replicas behind Caddy over further unbounded worker growth.
-
-- [x] Add a benchmark/health-check command that validates the application database,
-  confirms its expected raw archive when requested, and reports schema and
-  compatibility revisions. `infinity-db database-health` now reports actual/expected revision
-  metadata and validation timing, optionally verifies the export-paired raw sibling, and supports
-  machine-readable JSON for retained operational evidence.
+- [x] Complete the application consistency, scenario architecture, frontend/theme, and
+  release/operations hardening work recorded in the 0.10.0 changelog.
+- [x] Complete the full-assets candidate gate: `Full-asset checks` passed for
+  `7f58d1387f2478aad6650e0311729083c7739800` on 2026-10-07
+  ([run 37579009400](https://github.com/frankysan/InfinityDB/actions/runs/37579009400)).
+  This closes environment/bundle administration and pre-merge acceptance; a different final release
+  SHA still needs its own run when collecting optional full-assets release evidence.
+- [x] Complete capacity/load testing, the matched 2x4 versus 4x4 experiment, and the production
+  scale-review policy. The retained results, resource boundaries, commands, and scale trigger remain
+  in [deployment guidance](deployment.md#repeatable-http-capacity-scenario) and
+  [testing guidance](testing.md#benchmark-tooling); production still defaults to 2x4.
+- [x] Complete Silhouette manual browser acceptance. The maintainer confirmed on 2026-10-07 that
+  the [manual checks](testing.md#silhouette-manual-browser-acceptance) were performed and passed.
 
 ## 1.0.0 — current-reference completeness gate
 

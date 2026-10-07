@@ -71,7 +71,7 @@ Every deploy requires these release-controlled files to be present in the checko
 data/generated/infinity.db
 data/generated/rules.db
 data/manifests/symbol-publication.json
-src/infinity_db/web/static/{armies,characteristics,orders,units}/...
+src/infinity_db/web/static/{armies,characteristics,orders,peripherals,units}/...
 ```
 
 `deploy.sh` runs `tools/verify_deployment_assets.py` before Docker is allowed to build. The
@@ -575,8 +575,9 @@ reset during sampling produces `unknown` evidence rather than a false OK. Exit c
 external notification service without coupling InfinityDB to one alert-delivery provider.
 
 These defaults are an initial operational safety net. Tune them only after retaining representative
-2x4 production/capacity evidence; the separate scale-trigger task should be based on measured latency,
-error, and resource behavior rather than simply copying these alert thresholds.
+production/capacity evidence. The scale-review trigger defined in the matched worker-count
+comparison above uses measured latency, error, and resource behavior rather than copying these
+alert thresholds.
 
 `deploy.sh` retains the current build and the two newest rollback builds by
 default. After the application health gate and metrics-history transition/start

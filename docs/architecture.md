@@ -333,7 +333,8 @@ entry and semantic-token implementation, not new persistence logic.
 Theme contrast is enforced as a browser design contract: compact/normal text roles must retain at
 least 4.5:1 contrast against their owned surfaces, while meaningful focus/status/graphical cues use
 a 3:1 minimum. Faction gradients are supplementary identity accents and do not replace textual
-identity. Remaining cross-theme page regression work is tracked only in `docs/TODO.md`.
+identity. Automated theme regressions are complemented by the browser acceptance guidance in
+`docs/testing.md`.
 
 ## Privacy-preserving observability
 
@@ -383,7 +384,8 @@ deliberate clean-slate runs. Historical reporting remains an operator-side SQLit
 than another network service: exact or aggregated week/version/snapshot selections can expose only the
 already-bounded status, normalized-route, latency-histogram, and response-size-histogram dimensions.
 Percentile values are derived only as histogram upper-bound estimates; raw request timing/size samples
-are never reconstructed or retained. Exact remaining rollout stages are tracked in `docs/TODO.md`.
+are never reconstructed or retained. `docs/deployment.md` owns the implemented collector lifecycle
+and operator commands.
 
 Temporary raw request logging is an incident-diagnostic exception, not the normal analytics path,
 and should be minimized and short-lived.

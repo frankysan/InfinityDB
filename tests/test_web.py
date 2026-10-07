@@ -384,16 +384,20 @@ def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
     assert b"<strong>What&#x27;s changed</strong>" in body
     assert b"Player-visible highlights are shown first" in body
     assert b'href="/changes" aria-current="page"' in body
-    assert b'id="changes-unreleased"' in body
-    assert b"<h2>Unreleased</h2>" in body
+    assert b'id="changes-0-10-0"' in body
+    assert b"<h2>Version 0.10.0</h2>" in body
     assert b'<section class="changes-player-summary">' in body
     assert b"<h3>For players</h3>" not in body
-    assert b"Use the new <strong>What&#x27;s changed</strong> page" in body
+    assert b"Read the new <strong>What&#x27;s changed</strong> page" in body
     assert b'<details class="changes-details">' in body
     assert b"Detailed changes" in body
     assert (
         b"<strong>Web frontend + Project infrastructure:</strong> "
-        b"Add a What&#x27;s changed page" in body
+        b"Add a <strong>What&#x27;s changed</strong> page" in body
+    )
+    assert (
+        b'<time class="changes-release-date" datetime="2026-10-07">'
+        b"October 7, 2026</time>" in body
     )
     assert b'id="changes-0-9-1"' in body
     assert (

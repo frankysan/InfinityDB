@@ -56,7 +56,7 @@ release/audit narrative belongs in the changelog and Git history.
   forward-only: add an explicit transactional previous -> next migration before raising the persisted
   format
   version; older collectors must refuse newer stores without downgrade or destructive recovery.
-  `docs/architecture.md` owns the boundary and `docs/TODO.md` owns the unfinished rollout stages.
+  `docs/architecture.md` owns the boundary and `docs/deployment.md` owns the implemented lifecycle.
 - Future work belongs in `docs/TODO.md`; do not preserve an obsolete task list in architecture or
   this context file.
 

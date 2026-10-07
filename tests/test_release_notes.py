@@ -15,14 +15,15 @@ from infinity_db.web.release_notes import (
 def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     releases = load_release_notes()
 
-    assert releases[0].version is None
-    assert releases[0].released_on is None
+    assert releases[0].version == "0.10.0"
+    assert releases[0].released_on == date(2026, 10, 7)
     assert releases[0].sections[0].heading == "Player summary"
     assert any("What's changed" in item for item in releases[0].player_summary)
     assert [section.heading for section in releases[0].detail_sections] == [
         "Added",
         "Changed",
         "Fixed",
+        "Upgrade notes",
     ]
     assert all(release.sections[0].heading == "Player summary" for release in releases)
 
