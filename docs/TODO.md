@@ -204,6 +204,10 @@ unimplemented until its corresponding behavior exists.
     definitions and ITS-only geometry remain post-1.0.
     - [ ] Consume the same validated scenario geometry that backs scenario detail data. Do not
       maintain a second map-specific definition or recover geometry from source diagrams.
+      - [x] Pilot this ownership boundary with **Domination**: its three N5.3 map configurations now
+        live in the maintained `scenario:domination` curated record, validate through the typed
+        scenario-definition layer, and can be rendered directly with `render-scenario-map` by
+        scenario identity + Army Points. Remove the duplicate Domination geometry from test fixtures.
     - [x] Accept a versioned validated JSON geometry definition and generate deterministic SVG.
       Treat inches as the canonical geometry unit. Support the current **24×32 in, 32×48 in,
       and 48×48 in** table-size configurations while keeping the renderer dimension-agnostic.
@@ -223,9 +227,9 @@ unimplemented until its corresponding behavior exists.
       custom markers/icons, and per-configuration overrides without redefining the core concepts.
       Unsupported ITS-only constructs should fail explicitly rather than be approximated in v1.
     - [x] Validate table bounds, dimensions, stable element order/IDs, and reproducible SVG bytes.
-      Deterministic acceptance fixtures now cover all four core scenarios and each distinct supported
-      core table/deployment configuration; replace fixture-only definitions with the same curated
-      geometry consumed by scenario detail data when that domain is implemented.
+      The maintained Domination definition plus deterministic acceptance fixtures for the remaining
+      three core scenarios cover every distinct supported core table/deployment configuration. Replace
+      each remaining fixture-only definition with curated geometry as that scenario is implemented.
     - [x] Provide a small development CLI for JSON -> SVG rendering so schema/renderer behavior can
       be tested independently of scenario-page presentation. A browser editor/preview remains
       post-1.0 and must use this same schema/rendering engine when added.

@@ -192,10 +192,15 @@ def test_core_scenario_geometry_fixture_inventory_covers_all_core_configurations
     assert marker_diameter_mm("console") == 40
     assert marker_diameter_mm("supply-box") == 25
     assert marker_diameter_mm("future-marker") is None
-    assert len(_CORE_CASES) == 12
+    assert len(_CORE_CASES) == 9
+    assert {case["scenario"] for case in _CORE_CASES} == {
+        "annihilation",
+        "supplies",
+        "firefight",
+    }
 
     expected_groups = {(150,), (200, 250), (300, 350, 400)}
-    for scenario in {"annihilation", "domination", "supplies", "firefight"}:
+    for scenario in {"annihilation", "supplies", "firefight"}:
         groups = {
             tuple(case["armyPoints"])
             for case in _CORE_CASES
@@ -240,27 +245,7 @@ def test_core_scenario_geometry_v1_represents_current_core_maps(
     markers = [
         element for element in geometry.elements if isinstance(element, MarkerElement)
     ]
-    if scenario == "domination":
-        assert len(markers) == 4
-        assert {marker.marker_type for marker in markers} == {"console"}
-        expected_positions = {
-            (width / 4, (deployment_depth + height / 2) / 2),
-            (width * 3 / 4, (deployment_depth + height / 2) / 2),
-            (width / 4, (height / 2 + height - deployment_depth) / 2),
-            (width * 3 / 4, (height / 2 + height - deployment_depth) / 2),
-        }
-        actual_positions = {
-            (
-                resolve_coordinate(marker.x, axis="x", table=geometry.table),
-                resolve_coordinate(marker.y, axis="y", table=geometry.table),
-            )
-            for marker in markers
-        }
-        assert actual_positions == expected_positions
-        for quadrant in range(1, 5):
-            element = _element_by_id(geometry, f"quadrant-{quadrant}")
-            assert isinstance(element, RectangleElement)
-    elif scenario == "supplies":
+    if scenario == "supplies":
         assert len(markers) == 3
         assert {marker.marker_type for marker in markers} == {"supply-box"}
         actual_positions = {

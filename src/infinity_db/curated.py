@@ -9,6 +9,10 @@ from typing import Any
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 from infinity_db.maintained_text import validate_maintained_text_syntax
 from infinity_db.rule_relations import RULE_RELATION_TYPES
+from infinity_db.scenario_definition import (
+    ScenarioDefinitionError,
+    parse_scenario_definition_record,
+)
 
 CURATED_FORMAT = "InfinityDB curated reference"
 CURATED_FORMAT_VERSION = 21
@@ -843,6 +847,11 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 _validate_weapon_special_profile(
                     facts["specialProfile"], f"{context}.facts.specialProfile"
                 )
+        if record["kind"] == "scenario" and composition_role == "definition":
+            try:
+                parse_scenario_definition_record(record)
+            except ScenarioDefinitionError as exc:
+                raise ValueError(f"{context}: {exc}") from exc
         if record["kind"] == "training":
             facts = record.get("facts", {})
             if composition_role == "definition":

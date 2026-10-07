@@ -40,6 +40,7 @@
         "test_relation_group_dependencies",
         "test_rule_relations",
         "test_rules_database",
+        "test_scenario_definition",
         "test_scenario_geometry",
         "test_scenario_map_svg",
         "test_skill_config",

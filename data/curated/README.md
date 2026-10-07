@@ -406,8 +406,13 @@ Supported record kinds include `rule`, `skill`, `declaration-category`,
 `unit-annotation`.
 
 Acceptance by the generic record envelope does not imply a published application domain or a
-complete typed fact model. In particular, scenario-related records do not yet implement the
-[planned scenario model](../../docs/data-model.md#planned-scenario-model-10).
+complete typed fact model. Scenario definitions currently implement only the first typed v1 subset
+needed by the map-generator pilot: a definition record uses `facts.definitionVersion: 1` plus a
+non-empty `facts.configurations` array; each configuration has a stable `id`, one or more unique
+`armyPoints`, and one validated `InfinityDB scenario geometry` document. Army Points must not overlap
+between configurations. `scenario:domination` is the first maintained example. Scoring, actions,
+roles, end conditions, publication/query tables, and the rest of the
+[planned scenario model](../../docs/data-model.md#planned-scenario-model-10) remain future work.
 
 Embedded `term` records own source-backed Game terminology that does not warrant a standalone
 catalog/detail route. They require `facts.scope` with a stable slug such as `game-element`,

@@ -1,4 +1,5 @@
 import copy
+import json
 import os
 import sqlite3
 from pathlib import Path
@@ -132,7 +133,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 339
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 340
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -157,6 +158,17 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute(
             "SELECT url FROM sources WHERE id = 'n5-core-v5.3-pdf'"
         ).fetchone()[0] == "https://experience.corvusbelli.com/en/infinity/resources"
+        scenario_row = connection.execute(
+            "SELECT kind, facts_json FROM records WHERE id = 'scenario:domination'"
+        ).fetchone()
+        assert scenario_row is not None
+        assert scenario_row[0] == "scenario"
+        scenario_facts = json.loads(scenario_row[1])
+        assert scenario_facts["definitionVersion"] == 1
+        assert [
+            configuration["armyPoints"]
+            for configuration in scenario_facts["configurations"]
+        ] == [[150], [200, 250], [300, 350, 400]]
         assert connection.execute(
             "SELECT relation_type, related_record_id FROM record_relations "
             "WHERE record_id = 'skill:camouflage' ORDER BY position LIMIT 1"

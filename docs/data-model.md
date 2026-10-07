@@ -392,11 +392,13 @@ The maintained policy is documented in `data/curated/README.md`.
 
 ## Planned scenario model (1.0)
 
-**Design direction; scenario domain unimplemented.** The current generic curated-record envelope can
-retain scenario-related kinds, but the structured scenario model, dedicated persistence, and
-browsable scenario domain described here are not implemented. The standalone geometry v1 validator
-and deterministic SVG renderer are implemented as the first foundation and are not yet connected to
-curated scenario revisions or `rules.db`. Remaining implementation belongs to the
+**Design direction; scenario domain unimplemented.** The generic curated-record envelope now has a
+first typed scenario-definition pilot: `scenario:domination` owns its three N5.3 geometry
+configurations inside the current core-rules collection. The scenario-definition v1 subset validates
+`definitionVersion`, non-overlapping Army Points groups, and the existing geometry-v1 documents; the
+SVG CLI can select that maintained geometry directly by scenario identity + Army Points. Full
+scenario persistence/query structures, scoring/actions/end conditions, and the browsable scenario
+domain described here are not implemented. Remaining implementation belongs to the
 [1.0 backlog](TODO.md#rules-and-reference-completeness).
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
@@ -414,13 +416,13 @@ that resolves outside the table. The SVG renderer maps reusable semantic style n
 and uses the inch dimensions directly as its `viewBox`; it does not infer rules or geometry from
 diagrams.
 
-Core-map acceptance fixtures cover Annihilation, Domination, Supplies, and Firefight at each distinct
-N5.3 table/deployment configuration (24×32 with 8-inch Deployment Zones, 32×48 with 12-inch
-Deployment Zones, and 48×48 with 12-inch Deployment Zones). They confirm that v1 needs only
+The initial core-map acceptance corpus covered Annihilation, Domination, Supplies, and Firefight at
+each distinct N5.3 table/deployment configuration (24×32 with 8-inch Deployment Zones, 32×48 with
+12-inch Deployment Zones, and 48×48 with 12-inch Deployment Zones). It confirmed that v1 needs only
 rectangular regions, dividing lines, semantic point markers, labels, and table-relative anchors for
-the core maps. Those fixtures are compatibility evidence while scenario curation is still
-unimplemented; they must not become a second maintained scenario-data source once core scenario
-revisions are curated.
+the core maps. As each scenario is curated, its maintained definition replaces the duplicate test
+geometry: Domination is the first such migration, while the acceptance fixture retains the remaining
+three scenarios until they acquire maintained definitions.
 
 Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
 maintained representation is validated structured JSON; their runtime representation is a deliberate

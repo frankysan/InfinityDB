@@ -1721,6 +1721,12 @@
       "targetRelease": "1.0.0",
       "status": "pending",
       "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "scenario:domination",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, objective interactions, and other scenario rule semantics remains 1.0 work."
     }
   ],
   "futureInteractions": [

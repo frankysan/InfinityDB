@@ -32,8 +32,10 @@ release/audit narrative belongs in the changelog and Git history.
 - Runtime read paths consume materialized application data. They do not reinterpret raw normalized
   tables or working-tree curation on demand.
 - Scenario geometry is maintained semantic data, not diagram pixels. The 1.0 SVG renderer and
-  geometry-schema v1 target only the four N5.3 core scenarios; semantic point markers retain a
-  `markerType`, whose canonical marker metadata may include a physical diameter. N5.3 Domination
+  geometry-schema v1 target only the four N5.3 core scenarios. `scenario:domination` is the first
+  typed maintained scenario record to own its geometry configurations; test fixtures must not keep a
+  second Domination geometry copy. Semantic point markers retain a `markerType`, whose canonical
+  marker metadata may include a physical diameter. N5.3 Domination
   makes the Console diameter rules-relevant by requiring a Console A Marker or same-diameter scenery;
   the ITS token table supplies the explicit 40 mm value. ITS variation informs extensibility, while
   ITS-only geometry and the interactive editor remain post-1.0. See `docs/data-model.md`.

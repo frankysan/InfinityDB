@@ -23,6 +23,10 @@ from .peripheral_identities import (
 )
 from .peripheral_identity_coverage import audit_peripheral_identity_coverage
 from .rules_database import export_rules_database
+from .scenario_definition import (
+    scenario_definition_from_curated_document,
+    select_scenario_geometry,
+)
 from .scenario_geometry import parse_scenario_geometry
 from .scenario_map_svg import render_scenario_map_svg
 from .source_anomalies import (
@@ -187,8 +191,20 @@ def cmd_build_rules(args: argparse.Namespace) -> int:
 
 
 def cmd_render_scenario_map(args: argparse.Namespace) -> int:
-    document = json.loads(args.input.read_text(encoding="utf-8"))
-    geometry = parse_scenario_geometry(document)
+    if args.scenario_id is None:
+        if args.army_points is not None:
+            raise ValueError("--army-points requires --scenario-id")
+        document = json.loads(args.input.read_text(encoding="utf-8"))
+        geometry = parse_scenario_geometry(document)
+    else:
+        if args.army_points is None:
+            raise ValueError("--scenario-id requires --army-points")
+        document = load_curated_document(args.input)
+        definition = scenario_definition_from_curated_document(
+            document, args.scenario_id
+        )
+        geometry = select_scenario_geometry(definition, args.army_points)
+
     svg = render_scenario_map_svg(geometry)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(svg, encoding="utf-8", newline="\n")
@@ -331,10 +347,23 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_scenario_map = sub.add_parser(
         "render-scenario-map",
-        help="Render validated scenario geometry JSON as deterministic SVG",
+        help="Render standalone or maintained scenario geometry as deterministic SVG",
     )
-    p_scenario_map.add_argument("input", type=Path, help="Scenario geometry JSON input")
+    p_scenario_map.add_argument(
+        "input",
+        type=Path,
+        help="Scenario geometry JSON or curated rules collection",
+    )
     p_scenario_map.add_argument("output", type=Path, help="SVG output path")
+    p_scenario_map.add_argument(
+        "--scenario-id",
+        help="Typed maintained scenario id, for example scenario:domination",
+    )
+    p_scenario_map.add_argument(
+        "--army-points",
+        type=int,
+        help="Army Points configuration to select for a maintained scenario",
+    )
     p_scenario_map.set_defaults(func=cmd_render_scenario_map)
 
     p_peripherals = sub.add_parser(
@@ -368,3 +397,7 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError, KeyError, TypeError, sqlite3.Error) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

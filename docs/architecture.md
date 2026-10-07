@@ -126,9 +126,11 @@ not competing semantic owners.
 ### Planned scenario domain
 
 **Design direction; scenario domain unimplemented.** A standalone versioned scenario-geometry
-validator and deterministic SVG renderer now provide the first 1.0 foundation, but the accepted
-boundary below still describes planned scenario tables, structured definitions, and browser routes.
-Concrete remaining work is tracked in [the backlog](TODO.md#rules-and-reference-completeness).
+validator and deterministic SVG renderer provide the first 1.0 foundation. Domination now pilots the
+next boundary: one typed maintained scenario record owns its geometry configurations and the renderer
+can consume them directly. The accepted boundary below still describes the remaining scenario tables,
+full structured facts, and browser routes. Concrete work is tracked in
+[the backlog](TODO.md#rules-and-reference-completeness).
 
 Core-rules scenarios are a required first-class application domain for 1.0. The architecture review
 covered the four N5.3 core scenarios, the final ITS Season 17 set, and the current ITS Season 18 set.

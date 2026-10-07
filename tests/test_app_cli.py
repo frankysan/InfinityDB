@@ -381,6 +381,33 @@ def test_render_scenario_map_command_writes_svg(
     assert f"Scenario map ready: {output}" in capsys.readouterr().out
 
 
+def test_render_scenario_map_command_uses_maintained_scenario_definition(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    output = tmp_path / "domination-250.svg"
+
+    assert (
+        main(
+            [
+                "render-scenario-map",
+                str(source),
+                str(output),
+                "--scenario-id",
+                "scenario:domination",
+                "--army-points",
+                "250",
+            ]
+        )
+        == 0
+    )
+
+    svg = output.read_text(encoding="utf-8")
+    assert 'viewBox="0 0 32 48"' in svg
+    assert 'data-marker-type="console" data-diameter-mm="40"' in svg
+    assert f"Scenario map ready: {output}" in capsys.readouterr().out
+
+
 def test_render_scenario_map_command_reports_invalid_geometry(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
