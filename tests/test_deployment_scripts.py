@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import fnmatch
+import io
 import json
 import tomllib
 from pathlib import Path
+
+import pytest
+
+from infinity_db.web import release_notes
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -212,6 +217,53 @@ def test_container_build_packages_canonical_changelog() -> None:
 
     documentation = project["tool"]["setuptools"]["data-files"]["share/infinity-db/docs"]
     assert documentation == ["docs/CHANGELOG.md"]
+
+
+@pytest.mark.parametrize("heading", ["## Unreleased", "## [0.10.0] - 2026-10-07"])
+@pytest.mark.parametrize("matching_content", [True, False])
+def test_container_smoke_validates_canonical_notes_in_both_release_states(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    heading: str,
+    matching_content: bool,
+) -> None:
+    changelog = tmp_path / "CHANGELOG.md"
+    changelog.write_text(
+        f"# Changelog\n\n{heading}\n\n### Player summary\n\n"
+        "- New player highlight.\n\n### Fixed\n\n- Corrected behavior.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(release_notes, "maintained_documentation_path", lambda *_: changelog)
+    monkeypatch.setenv("INFINITY_DB_DISPLAY_VERSION", "")
+    page = release_notes.render_current_release_notes_html()
+    if not matching_content:
+        page = page.replace("New player highlight.", "Outdated player highlight.")
+    page = f'<section aria-label="InfinityDB release notes">{page}</section>'
+    payloads = {
+        "/api/armies": {
+            "items": [
+                {"id": 101, "role": "main", "group_id": None},
+                {"id": 102, "role": "sectorial", "group_id": 101},
+            ]
+        },
+        "/api/skills/74": {"rules": ["Super-Jump"]},
+        "/api/version": {"version": "0.10.0", "snapshot_revision": "fixture"},
+    }
+
+    def urlopen(url: str, timeout: int) -> io.BytesIO:
+        route = url.removeprefix("http://127.0.0.1:8000")
+        body = page if route == "/changes" else json.dumps(payloads[route])
+        return io.BytesIO(body.encode("utf-8"))
+
+    monkeypatch.setattr("urllib.request.urlopen", urlopen)
+    script = _read("scripts/verify-container-image.sh")
+    runtime_probe = script.split('docker exec "$container" python -c \'\n', 1)[1]
+    runtime_probe = runtime_probe.split("\n'", 1)[0]
+    if matching_content:
+        exec(compile(runtime_probe, "verify-container-image.sh", "exec"), {})
+    else:
+        with pytest.raises(SystemExit, match="canonical changelog"):
+            exec(compile(runtime_probe, "verify-container-image.sh", "exec"), {})
 
 
 def test_installed_wheel_smoke_runs_database_health_check() -> None:

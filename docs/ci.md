@@ -85,6 +85,9 @@ release `infinity.db`, `rules.db`, and processed SVG publication, then runs
 
 Deployment smoke tests the exact artifact model used by tagged production deployment. It does not
 rebuild runtime databases and is not a substitute for the source or installed-wheel checks.
+The `/changes` probe compares the served release-note content with the installed canonical
+changelog. It accepts both development notes under `Unreleased` and finalized version sections,
+and rejects stale or missing release-note content.
 
 ## Release evidence retention
 

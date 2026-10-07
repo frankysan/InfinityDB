@@ -205,6 +205,8 @@ import json
 import os
 from urllib.request import urlopen
 
+from infinity_db.web.release_notes import render_current_release_notes_html
+
 with urlopen("http://127.0.0.1:8000/api/armies", timeout=3) as response:
     armies = {item["id"]: item for item in json.load(response)["items"]}
 if not armies:
@@ -238,7 +240,8 @@ if expected_display_version:
 
 with urlopen("http://127.0.0.1:8000/changes", timeout=3) as response:
     changes = response.read().decode("utf-8")
-if "InfinityDB release notes" not in changes or "Unreleased" not in changes:
+expected_release_notes = render_current_release_notes_html()
+if not expected_release_notes or expected_release_notes not in changes:
     raise SystemExit("/changes did not render the installed canonical changelog")
 '
 
