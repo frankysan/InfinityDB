@@ -135,8 +135,24 @@ This workflow is an independent publication-bundle check, not a way to supply as
 normal source CI. Staging enforces archive safety/size/path constraints and does not upload the
 expanded graphical tree as a workflow artifact.
 
+Build the external bundle from a validated tracked publication with:
+
+```powershell
+python tools\build_full_asset_bundle.py --output reports\full-assets.zip
+```
+
+The builder includes exactly the five published symbol categories, normalizes ZIP metadata so the
+same publication produces the same archive bytes, and prints the archive SHA-256. Host that ZIP at
+a stable HTTPS URL reachable by the GitHub runner (the URL itself remains secret), configure the
+`full-assets` environment secrets
+`FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` from that output, then manually dispatch
+**Full-asset checks** on `main`. The workflow downloads the pinned archive, revalidates every member
+against `data/manifests/symbol-publication.json`, stages it atomically, and runs the full project
+checks with `--assets required`.
+
 Environment configuration for this optional workflow is repository administration and is tracked as
-unfinished work only in `docs/TODO.md` when applicable.
+unfinished work only in `docs/TODO.md` when applicable. Do not commit the generated ZIP or its
+private hosting URL.
 
 ## Protected `main`
 

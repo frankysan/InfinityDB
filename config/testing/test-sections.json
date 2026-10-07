@@ -104,6 +104,7 @@
       "description": "Processed graphical assets, symbols, SVG tooling, fonts, and asset publication.",
       "modules": [
         "test_asset_validation",
+        "test_build_full_asset_bundle",
         "test_build_symbols",
         "test_download_army_symbols",
         "test_prepare_web_fonts",

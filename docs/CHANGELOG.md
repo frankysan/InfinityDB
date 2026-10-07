@@ -20,6 +20,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Project infrastructure:** Add a deterministic full-asset bundle builder for the optional manual
+  CI workflow, producing exactly the validated symbol publication with normalized ZIP metadata and
+  the pinned SHA-256 used by the `full-assets` environment.
+
 - **Web frontend:** Add scale-preserving S1–S8 Silhouette diagrams to the Glossary and optional Unit
   statline previews. Non-S2 profiles include a faded S2 comparison at the same physical scale, while
   the normal Unit statline stays compact.

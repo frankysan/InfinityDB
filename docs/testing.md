@@ -77,6 +77,25 @@ JavaScript build dependency. The development dependency set already provides Nod
 Representative server-rendered pages separately verify that the shared pre-paint bootstrap and
 semantic theme stylesheet are present in the correct order.
 
+## Silhouette manual browser acceptance
+
+The scale-preserving Silhouette renderer has automated structural coverage, but the release gate
+retains a small real-browser review because clipping, touch behavior, and theme rendering are visual
+interaction concerns. Use the current generated database and check these representative Unit pages:
+
+- `/units/cadin-firststrike-donn` — S2, shown without a duplicate reference;
+- `/units/ajax-the-great-myrmidon-officer` — S5 plus the faded S2 reference;
+- `/units/gator-squadron` — S7 plus the faded S2 reference;
+- `/units/maghariba-guard` — S8 plus the faded S2 reference.
+
+Also check `/glossary#attribute-s`. In both Light and Dark themes, confirm the Glossary S1–S8 set
+keeps one common relative scale, wraps into equal-width rows without horizontal clipping, and does
+not widen the normal Glossary content column. On the Unit examples, confirm the `S` value opens the
+preview with mouse hover, keyboard focus, and touch/click; the popup must remain on-screen at narrow
+widths, preserve the selected-template/S2 relative scale, and close normally when focus/pointer
+moves away or the touch/click interaction is dismissed. Record completion in `docs/TODO.md`; do not
+replace this acceptance check with screenshot-only or DOM-only evidence.
+
 ## Maintained snapshot-note validation
 
 The routine pytest suite recursively validates every maintained JSON snapshot note under
