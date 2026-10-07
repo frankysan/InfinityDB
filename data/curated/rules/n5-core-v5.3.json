@@ -16154,6 +16154,303 @@
             },
             "facts": {
                 "definitionVersion": 1,
+                "mission": {
+                    "sides": [
+                        {
+                            "id": "side-a",
+                            "name": "Side A"
+                        },
+                        {
+                            "id": "side-b",
+                            "name": "Side B"
+                        }
+                    ],
+                    "gameSizes": [
+                        {
+                            "armyPoints": 150,
+                            "swc": 3,
+                            "configurationId": "150-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 38
+                        },
+                        {
+                            "armyPoints": 200,
+                            "swc": 4,
+                            "configurationId": "200-250-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 50
+                        },
+                        {
+                            "armyPoints": 250,
+                            "swc": 5,
+                            "configurationId": "200-250-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 63
+                        },
+                        {
+                            "armyPoints": 300,
+                            "swc": 6,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 75
+                        },
+                        {
+                            "armyPoints": 350,
+                            "swc": 6,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 88
+                        },
+                        {
+                            "armyPoints": 400,
+                            "swc": 8,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ],
+                            "minimumVictoryPoints": 100
+                        }
+                    ],
+                    "objectives": [
+                        {
+                            "id": "dominate-quadrants",
+                            "name": "Quadrants dominated",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-round",
+                            "aggregation": "exclusive",
+                            "maximumPoints": 6,
+                            "maximumPointsPerRound": 2,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150,
+                                        200,
+                                        250,
+                                        300,
+                                        350,
+                                        400
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "dominated-region-comparison",
+                                        "elementIds": [
+                                            "quadrant-1",
+                                            "quadrant-2",
+                                            "quadrant-3",
+                                            "quadrant-4"
+                                        ],
+                                        "comparison": "equal",
+                                        "minimum": 1
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        150,
+                                        200,
+                                        250,
+                                        300,
+                                        350,
+                                        400
+                                    ],
+                                    "objectivePoints": 2,
+                                    "condition": {
+                                        "kind": "dominated-region-comparison",
+                                        "elementIds": [
+                                            "quadrant-1",
+                                            "quadrant-2",
+                                            "quadrant-3",
+                                            "quadrant-4"
+                                        ],
+                                        "comparison": "greater"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "hacked-consoles",
+                            "name": "Consoles hacked",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-game",
+                            "aggregation": "cumulative",
+                            "maximumPoints": 4,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150,
+                                        200,
+                                        250,
+                                        300,
+                                        350,
+                                        400
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "element-status-count",
+                                        "elementIds": [
+                                            "console-q1",
+                                            "console-q2",
+                                            "console-q3",
+                                            "console-q4"
+                                        ],
+                                        "status": "hacked"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "rules": [
+                        {
+                            "id": "dominate-quadrants",
+                            "name": "Dominate Quadrants",
+                            "paragraphs": [
+                                "Count dominated Quadrants at the end of each Game Round, never earlier. Their boundaries are shown in the selected map.",
+                                "A player dominates a Quadrant by having more Victory Points inside it than the opponent. Count only Troopers represented by Models or Markers; Troopers classified as Null do not count.",
+                                "Tokens and Markers for weapons, Equipment, or anything other than a Trooper do not contribute Victory Points.",
+                                "A Trooper is inside a Quadrant only when more than half of its base lies within that Quadrant.",
+                                "A Trooper with [[skill:shasvastii]] inside a Quadrant contributes its Points while [[state:normal|Normal]] or in its Shasvastii-Embryo form."
+                            ]
+                        },
+                        {
+                            "id": "consoles",
+                            "name": "Consoles",
+                            "paragraphs": [
+                                "Place one Console at the center of each of the four scoring Quadrants, using the maintained marker positions in the selected map.",
+                                "Represent each Console with a Console A Marker or scenery of the same diameter."
+                            ]
+                        },
+                        {
+                            "id": "hack-consoles",
+                            "name": "Hack Consoles",
+                            "paragraphs": [
+                                "Hack Consoles is a Short Skill with the Attack Label. Only a Specialist Troop in Silhouette contact with the Console may declare it.",
+                                "A successful unopposed [[attribute:wip]] Roll Hacks the Console. A failed attempt may be repeated by spending another Short Skill and making another Roll.",
+                                "A Console can be Hacked again after the opponent has Hacked it. Only the most recent player to Hack it counts the Console as Hacked.",
+                                "A [[skill:hacker]] receives a +3 MOD to the unopposed [[attribute:wip]] Roll to Hack a Console."
+                            ]
+                        },
+                        {
+                            "id": "specialist-troops",
+                            "name": "Specialist Troops",
+                            "paragraphs": [
+                                "For this mission, Specialist Troops are Troopers with [[skill:doctor]], [[skill:engineer]], [[skill:forward-observer]], [[skill:hacker]], [[skill:paramedic]], [[skill:specialist-operative]], or [[skill:chain-of-command]].",
+                                "[[skill:doctor:plural]] and [[skill:engineer:plural]] cannot use [[skill:peripheral:plural]] for tasks reserved for Specialist Troops."
+                            ]
+                        }
+                    ],
+                    "endConditions": [
+                        {
+                            "id": "round-limit",
+                            "checkAt": "end-of-round",
+                            "finishAt": "end-of-round",
+                            "condition": {
+                                "kind": "round-limit",
+                                "rounds": 3
+                            }
+                        },
+                        {
+                            "id": "minimum-victory-points",
+                            "checkAt": "tactical-phase",
+                            "finishAt": "end-of-player-turn",
+                            "condition": {
+                                "kind": "minimum-victory-points",
+                                "text": "During the active player’s Tactical Phase, total the Victory Points of Troopers in their Army List that are not classified as Null. If the total is below the minimum Victory Points in the selected game-size row, finish the mission at the end of that Player Turn."
+                            }
+                        }
+                    ],
+                    "sourceIssues": [
+                        {
+                            "id": "350-point-swc",
+                            "armyPoints": [
+                                350
+                            ],
+                            "gameSizeField": "swc",
+                            "status": "needs-verification",
+                            "description": "The Domination Forces and Deployment chart on N5.3 printed page 151 assigns 6 SWC to a 350-point game. This differs from the 7 SWC in the Annihilation chart for the same Army Points. The scenario-specific printed value is retained; whether the difference is intentional needs verification."
+                        }
+                    ]
+                },
                 "configurations": [
                     {
                         "id": "150-points",

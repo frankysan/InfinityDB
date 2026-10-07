@@ -481,3 +481,15 @@ def test_scenario_mission_prose_cannot_bypass_reviewed_link_coverage() -> None:
         validate_reviewed_batch_coverage(
             documents, root / "data" / "curated" / "maintained-text-link-reviews.json"
         )
+
+
+def test_domination_minimum_vp_end_prose_uses_shared_reference_validation(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    core = next(
+        document for _, document in documents if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    record = next(record for record in core["records"] if record["id"] == "scenario:domination")
+    record["facts"]["mission"]["endConditions"][1]["condition"]["text"] += " [[skill:not-current]]"
+    with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
+        export_rules_database(documents, tmp_path / "rules.db", finalize=False)

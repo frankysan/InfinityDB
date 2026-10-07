@@ -127,8 +127,9 @@ not competing semantic owners.
 
 **Design direction; browsable scenario domain unimplemented.** Typed maintained records own the
 geometry configurations of all four core scenarios, and the deterministic SVG renderer consumes
-them directly. Annihilation now pilots typed setup, scoring, special rules, and end conditions in
-the existing rules record payload. Nested mission prose uses the shared maintained-text audit
+them directly. Annihilation and Domination maintain typed setup, scoring, special rules, and end
+conditions in the existing rules record payload. Domination adds round scoring, geometry-referenced
+objectives, and per-game-size minimum-Victory-Points endings. Nested mission prose uses the shared maintained-text audit
 pipeline; neither the renderer nor runtime consumers recover rules from PDF text.
 [The data model](data-model.md#planned-scenario-model-10) owns this implemented subset. The accepted
 boundary below still describes the remaining scenario publication indexes, full components, and

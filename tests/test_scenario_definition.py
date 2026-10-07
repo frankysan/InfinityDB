@@ -22,7 +22,12 @@ from infinity_db.scenario_geometry import (
     RectangleElement,
     resolve_coordinate,
 )
-from infinity_db.scenario_mission import NumericRangeCondition, ProseCondition
+from infinity_db.scenario_mission import (
+    DominatedRegionComparison,
+    ElementStatusCount,
+    NumericRangeCondition,
+    ProseCondition,
+)
 
 _CORE_RULES = Path("data/curated/rules/n5-core-v5.3.json")
 
@@ -482,3 +487,213 @@ def test_mission_does_not_assume_symmetric_objectives_or_one_deployment_zone(
     assert parsed.objectives[0].side_ids == ("side-a",)
     assert len(parsed.game_sizes[0].deployments[0].element_ids) == 2
     assert parsed.objectives[2].maximum_points == 2  # Cumulative awards are capped.
+
+
+@pytest.fixture
+def domination_record() -> dict[str, Any]:
+    document = load_curated_document(_CORE_RULES)
+    return deepcopy(
+        next(record for record in document["records"] if record["id"] == "scenario:domination")
+    )
+
+
+def test_domination_preserves_each_game_size_and_source_specific_swc(
+    domination_record: dict[str, Any],
+) -> None:
+    mission = parse_scenario_definition_record(domination_record).mission
+    assert mission is not None
+    assert [
+        (size.army_points, size.swc, size.minimum_victory_points) for size in mission.game_sizes
+    ] == [
+        (150, 3, 38),
+        (200, 4, 50),
+        (250, 5, 63),
+        (300, 6, 75),
+        (350, 6, 88),
+        (400, 8, 100),
+    ]
+    assert [size.configuration_id for size in mission.game_sizes] == [
+        "150-points",
+        "200-250-points",
+        "200-250-points",
+        "300-400-points",
+        "300-400-points",
+        "300-400-points",
+    ]
+    for size in mission.game_sizes:
+        assert [(d.side_id, d.element_ids) for d in size.deployments] == [
+            ("side-a", ("deployment-a",)),
+            ("side-b", ("deployment-b",)),
+        ]
+    issue = mission.source_issues[0]
+    assert (issue.army_points, issue.objective_id, issue.game_size_field, issue.status) == (
+        (350,),
+        None,
+        "swc",
+        "needs-verification",
+    )
+    assert "6 SWC" in issue.description and "7 SWC" in issue.description
+    assert {(c["sourceId"], c["page"]) for c in domination_record["citations"]} == {
+        ("n5-core-v5.3-pdf", 151),
+        ("n5-core-v5.3-pdf", 152),
+    }
+
+
+def test_domination_scoring_references_regions_and_consoles_with_explicit_cadence(
+    domination_record: dict[str, Any],
+) -> None:
+    mission = parse_scenario_definition_record(domination_record).mission
+    assert mission is not None
+    regions, consoles = mission.objectives
+    assert (
+        regions.timing,
+        regions.aggregation,
+        regions.maximum_points,
+        regions.maximum_points_per_round,
+    ) == ("end-of-round", "exclusive", 6, 2)
+    assert [a.objective_points for a in regions.awards] == [1, 2]
+    quadrants = ("quadrant-1", "quadrant-2", "quadrant-3", "quadrant-4")
+    assert [a.condition for a in regions.awards] == [
+        DominatedRegionComparison(quadrants, "equal", 1),
+        DominatedRegionComparison(quadrants, "greater", None),
+    ]
+    assert all(a.army_points == (150, 200, 250, 300, 350, 400) for a in regions.awards)
+    assert (
+        consoles.timing,
+        consoles.aggregation,
+        consoles.maximum_points,
+        consoles.maximum_points_per_round,
+    ) == ("end-of-game", "cumulative", 4, None)
+    assert consoles.awards[0].objective_points == 1
+    assert consoles.awards[0].condition == ElementStatusCount(
+        ("console-q1", "console-q2", "console-q3", "console-q4"),
+        "hacked",
+    )
+    limit, threshold = mission.end_conditions
+    assert (
+        limit.rounds,
+        threshold.check_at,
+        threshold.finish_at,
+        threshold.uses_minimum_victory_points,
+    ) == (
+        3,
+        "tactical-phase",
+        "end-of-player-turn",
+        True,
+    )
+    assert threshold.description and "below" in threshold.description
+    assert "not classified as Null" in threshold.description
+
+
+def test_domination_retains_control_eligibility_and_console_interaction_rules(
+    domination_record: dict[str, Any],
+) -> None:
+    mission = parse_scenario_definition_record(domination_record).mission
+    assert mission is not None
+    rules = {rule.id: " ".join(rule.paragraphs) for rule in mission.rules}
+    assert "more than half" in rules["dominate-quadrants"]
+    assert "anything other than a Trooper" in rules["dominate-quadrants"]
+    assert "[[skill:shasvastii]]" in rules["dominate-quadrants"]
+    assert "[[state:normal|Normal]]" in rules["dominate-quadrants"]
+    assert "Shasvastii-Embryo" in rules["dominate-quadrants"]
+    assert "same diameter" in rules["consoles"]
+    assert "Short Skill with the Attack Label" in rules["hack-consoles"]
+    assert "Silhouette contact" in rules["hack-consoles"]
+    assert "failed attempt may be repeated" in rules["hack-consoles"]
+    assert "most recent player" in rules["hack-consoles"]
+    assert "[[skill:hacker]] receives a +3 MOD" in rules["hack-consoles"]
+    assert "[[attribute:wip]]" in rules["hack-consoles"]
+    for identity in (
+        "doctor",
+        "engineer",
+        "forward-observer",
+        "hacker",
+        "paramedic",
+        "specialist-operative",
+        "chain-of-command",
+    ):
+        assert f"[[skill:{identity}]]" in rules["specialist-troops"]
+    assert "cannot use [[skill:peripheral:plural]]" in rules["specialist-troops"]
+
+
+@pytest.mark.parametrize(
+    ("path", "value", "message"),
+    [
+        (("gameSizes", 0, "minimumVictoryPoints"), True, "integer"),
+        (("gameSizes", 0, "minimumVictoryPoints"), 0, "integer"),
+        (("gameSizes", 0, "minimumVictoryPoints"), 151, "exceeds Army Points"),
+        (("objectives", 0, "maximumPointsPerRound"), True, "integer"),
+        (("objectives", 0, "maximumPointsPerRound"), 7, "invalid maximumPointsPerRound"),
+        (("objectives", 0, "maximumPointsPerRound"), 1, "exceeds"),
+        (("objectives", 0, "timing"), "end-of-game", "invalid maximumPointsPerRound"),
+        (
+            ("objectives", 0, "awards", 0, "condition", "elementIds"),
+            ["missing"],
+            "incompatible scoring element",
+        ),
+        (
+            ("objectives", 0, "awards", 0, "condition", "elementIds"),
+            ["console-q1"],
+            "incompatible scoring element",
+        ),
+        (("objectives", 0, "awards", 0, "condition", "minimum"), 5, "exceeds the number"),
+        (("objectives", 0, "awards", 0, "condition", "minimum"), True, "integer"),
+        (("objectives", 0, "awards", 0, "condition", "comparison"), "approximately", "one of"),
+        (
+            ("objectives", 0, "awards", 0, "condition", "elementIds"),
+            ["quadrant-1", "quadrant-1"],
+            "duplicate",
+        ),
+        (
+            ("objectives", 1, "awards", 0, "condition", "elementIds"),
+            ["quadrant-1"],
+            "incompatible scoring element",
+        ),
+        (("objectives", 1, "awards", 0, "condition", "status"), "destroyed", "one of"),
+        (("objectives", 1, "aggregation"), "exclusive", "per-element awards require cumulative"),
+        (("endConditions", 1, "finishAt"), "immediate", "Tactical Phase/Player Turn"),
+        (("sourceIssues", 0, "gameSizeField"), "unimplemented", "one of"),
+        (("sourceIssues", 0, "objectiveId"), "dominate-quadrants", "exactly one"),
+    ],
+)
+def test_domination_rejects_invalid_extensions(
+    domination_record: dict[str, Any],
+    path: tuple[str | int, ...],
+    value: Any,
+    message: str,
+) -> None:
+    target = domination_record["facts"]["mission"]
+    for segment in path[:-1]:
+        target = target[segment]
+    target[path[-1]] = value
+    with pytest.raises(ScenarioDefinitionError, match=message):
+        parse_scenario_definition_record(domination_record)
+
+
+def test_domination_requires_scoring_elements_in_every_applicable_configuration(
+    domination_record: dict[str, Any],
+) -> None:
+    geometry = domination_record["facts"]["configurations"][1]["geometry"]
+    geometry["elements"] = [e for e in geometry["elements"] if e["id"] != "console-q1"]
+    with pytest.raises(
+        ScenarioDefinitionError, match="scoring element 'console-q1'.*200-250-points"
+    ):
+        parse_scenario_definition_record(domination_record)
+
+
+def test_domination_end_condition_requires_every_game_size_threshold(
+    domination_record: dict[str, Any],
+) -> None:
+    del domination_record["facts"]["mission"]["gameSizes"][4]["minimumVictoryPoints"]
+    with pytest.raises(ScenarioDefinitionError, match="minimumVictoryPoints for every game size"):
+        parse_scenario_definition_record(domination_record)
+
+
+def test_game_size_source_issue_cannot_excuse_unrelated_scoring_overlap(
+    annihilation_record: dict[str, Any],
+) -> None:
+    issue = annihilation_record["facts"]["mission"]["sourceIssues"][0]
+    del issue["objectiveId"]
+    issue["gameSizeField"] = "swc"
+    with pytest.raises(ScenarioDefinitionError, match="overlapping score ranges for 350"):
+        parse_scenario_definition_record(annihilation_record)

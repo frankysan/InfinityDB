@@ -190,6 +190,11 @@ unimplemented until its corresponding behavior exists.
         publication indexes and the remaining scenario components are still pending.
       - [x] Prove that the pilot payload and printed-page citations round-trip through existing
         rules record storage without changing map rendering or the rules database format.
+      - [x] Extend the reference subset with **Domination**: geometry-referenced Quadrant/Console
+        scoring, separate per-round/whole-mission caps, literal per-size minimum Victory Points,
+        and a typed minimum-VP end condition. Preserve Console interactions and Specialist/control
+        rules as ordered linked prose; standalone scoped Skill/action/role identities remain pending.
+        Round-trip the new facts and their printed-page citations through existing rules storage.
     - [ ] Export relational identities/provenance/membership/reference indexes and validated
       component payloads to `rules.db`. Cover broken references, invalid dimensions/placements,
       distinct revisions of one identity, deterministic output, and unsupported formats. Update
@@ -206,6 +211,10 @@ unimplemented until its corresponding behavior exists.
       authoritative clarification. N5.3 printed page 149 leaves 151–175 uncovered and overlaps
       251–270. The maintained pilot preserves the printed bands and a scoped needs-verification
       issue; do not silently copy the enemy-kills thresholds or invent a scoring priority.
+    - [ ] Verify **Domination's 350-point SWC row** against authoritative clarification. N5.3
+      printed page 151 specifies 6 SWC, unlike Annihilation's 7 SWC at the same Army Points.
+      The maintained mission retains 6 and a game-size source issue; do not infer a universal
+      Points-to-SWC formula or silently borrow the value from another scenario.
   - [ ] Keep the model source/scope-aware and extensible to versioned ITS seasons, but do
     not make ITS scenario content, tournament/event tooling, or a deployment-map editor a
     1.0 requirement.

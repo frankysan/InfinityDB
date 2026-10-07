@@ -400,7 +400,7 @@ core scenarios: `scenario:annihilation`, `scenario:domination`, `scenario:suppli
 collection. It validates `definitionVersion`, non-overlapping Army Points groups, and geometry-v1
 documents; the SVG CLI selects maintained geometry by scenario identity + Army Points.
 
-Annihilation additionally pilots the optional `facts.mission` component, validated by
+Annihilation and Domination maintain the optional `facts.mission` component, validated by
 `scenario_mission.py`. It owns ordered sides; all six Army Points/SWC rows; per-side Deployment Zone
 references into the selected geometry; objectives and awards; special-rule paragraphs; mission end
 conditions; and scoped source issues. Every geometry-supported Army Points value must have exactly
@@ -408,7 +408,7 @@ one game-size row, and every objective must cover those values. Deployment refer
 to rectangle elements in that row's geometry, with multiple regions per side supported. Objective
 side applicability is explicit rather than assumed symmetric.
 
-Scoring awards use inclusive integer `numeric-range` conditions (an absent upper limit is represented
+Scoring awards may use inclusive integer `numeric-range` conditions (an unbounded upper limit is represented
 by `maximum: null`) or `reviewed-prose` conditions with semantic maintained-text tokens. The initial
 numeric metrics are killed enemy Army Points and surviving Victory Points. Each objective declares
 its scoring timing, `exclusive` or `cumulative` aggregation, and Objective Point cap. This records
@@ -422,14 +422,41 @@ more than 250 awards 4. The 151–175 gap and 251–270 overlap remain explicit 
 Its end conditions distinguish the third-Game-Round limit from the Tactical Phase all-Null check,
 which finishes at the end of that Player Turn. Printed pages 149–150 cite the full pilot.
 
+Domination adds geometry-referenced scoring conditions: `dominated-region-comparison` compares
+each player's dominated-region count with the opponent (`equal` or `greater`), with an optional
+minimum own count; `element-status-count` awards the declared points per matching marker element.
+The current status vocabulary is `hacked`. Referenced regions/markers must exist with the right
+geometry kind in every Army Points configuration covered by the award. These conditions record
+the reference rule; they do not evaluate ownership, control, or live game state.
+
+An end-of-round objective may declare `maximumPointsPerRound` separately from its whole-mission
+`maximumPoints` cap. Domination awards 1 point for a tie with at least one dominated Quadrant, or 2
+for more Quadrants, capped at 2 per round and 6 over three rounds. It separately awards 1 point per
+Hacked Console held at game end, capped at 4. All six game-size rows own literal
+`minimumVictoryPoints` values (38, 50, 63, 75, 88, 100). The `minimum-victory-points` end condition
+requires every row to have that field and distinguishes a Tactical Phase check from completion
+at the end of that Player Turn. Its reviewed text preserves the strict below-threshold trigger
+and non-Null Trooper basis.
+
+Source issues target exactly one `objectiveId` or `gameSizeField` (`swc` or
+`minimumVictoryPoints`) and list their applicable Army Points. Game-size issues cannot excuse
+overlapping exclusive scoring ranges. Domination preserves the source-specific 6 SWC at 350
+points from printed page 151, with a game-size source issue pending verification rather than
+replacing it with the 7 SWC in Annihilation. Printed pages 151–152 cite the mission rules.
+
+Console setup, Hack Consoles, Specialist eligibility and the Peripheral restriction, base overlap,
+and the Shasvastii exception remain ordered, semantically linked mission rules. Dedicated scoped
+Skill/action and role catalog identities remain unimplemented; these rules do not grant permanent
+Unit/Profile capabilities.
+
 Nested mission prose participates in the same syntax, target-resolution, and reviewed-link audits
 as other maintained rules text. The existing rules record payload persists and composes the pilot
 with its collection and citations; no specialized scenario tables or runtime read model have been
 introduced, and rules schema/compatibility remains 7/8. Rebuild `rules.db` after curation changes using
 the existing rules-build workflow.
 
-Full scenario publication/revision/membership indexes, actions/elements/features, the remaining
-three missions' reference facts, and browsable scenario access remain design direction. Concrete
+Full scenario publication/revision/membership indexes, dedicated actions/elements/features,
+Supplies and Firefight reference facts, and browsable scenario access remain design direction. Concrete
 unfinished work belongs to the [1.0 backlog](TODO.md#rules-and-reference-completeness).
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses

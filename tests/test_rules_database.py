@@ -2245,3 +2245,28 @@ def test_annihilation_mission_round_trips_through_existing_rules_storage(
         ("n5-core-v5.3-pdf", 149),
         ("n5-core-v5.3-pdf", 150),
     }
+
+
+def test_domination_mission_round_trips_scoring_geometry_and_minimum_vp(
+    current_rules_database: RulesDatabase,
+) -> None:
+    from infinity_db.scenario_definition import parse_scenario_definition_record
+    from infinity_db.scenario_mission import DominatedRegionComparison, ElementStatusCount
+
+    record = current_rules_database.composed_record("scenario:domination")
+    assert record is not None
+    mission = parse_scenario_definition_record(record).mission
+    assert mission is not None
+    assert [size.minimum_victory_points for size in mission.game_sizes] == [38, 50, 63, 75, 88, 100]
+    assert mission.game_sizes[4].swc == 6
+    assert isinstance(mission.objectives[0].awards[0].condition, DominatedRegionComparison)
+    assert isinstance(mission.objectives[1].awards[0].condition, ElementStatusCount)
+    assert mission.objectives[0].maximum_points_per_round == 2
+    assert mission.end_conditions[1].uses_minimum_victory_points
+    assert mission.source_issues[0].game_size_field == "swc"
+    assert {(c["source_id"], c["page"]) for c in record["citations"]} == {
+        ("n5-core-v5.3-pdf", 151), ("n5-core-v5.3-pdf", 152),
+    }
+    specialist_rules = mission.rules[-1].paragraphs
+    assert "[[skill:chain-of-command]]" in specialist_rules[0]
+    assert "[[skill:peripheral:plural]]" in specialist_rules[1]

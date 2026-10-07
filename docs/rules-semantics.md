@@ -3099,6 +3099,27 @@ authoritative clarification remains pending in `docs/TODO.md`.
 Source: N5 Core Rules v5.3 (2026-08-10), `data/pdf/rules/n5-rules-v5-3-en.pdf`, printed page 149.
 The pilot's setup, Killing definition, and end conditions are cited to printed page 150.
 
+### RS-SCN-DOM-001 — Domination keeps scenario-specific SWC and minimum-VP values
+
+**Classification:** source-native game-size values retained by the typed mission reference.
+
+The Domination Forces and Deployment chart in N5 Core Rules v5.3 (2026-08-10), printed page 151,
+gives 3, 4, 5, 6, 6, and 8 SWC for 150, 200, 250, 300, 350, and 400 Army Points. The 350-point
+6 SWC row differs from the 7 SWC in Annihilation on printed page 150. Neither another mission's
+chart nor an inferred Points-to-SWC formula authorizes rewriting Domination's value. The maintained
+record retains 6 SWC and a source issue scoped to the 350-point `swc` field; whether the difference
+is intentional remains pending verification.
+
+The same chart gives minimum Victory Points of 38, 50, 63, 75, 88, and 100 respectively. Printed
+page 152 ends the mission at the end of the active Player Turn if the Tactical Phase count of
+non-Null Troopers' Victory Points is below that row's minimum. This is distinct from both the
+three-Game-Round limit and Annihilation's all-Null condition. The maintained definition keeps literal
+thresholds and separate check/finish timings rather than deriving a threshold from Army Points.
+
+Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed pages 150–152. Domination's
+objectives, control rules, Consoles, and Hack Consoles are on page 151; Specialist eligibility
+and the Peripheral restriction are on page 152.
+
 ## Quick Reference Charts
 
 ### RS-QR-PROJ-001 — Quick-reference charts are derived projections of owning rule facts
