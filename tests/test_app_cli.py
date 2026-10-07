@@ -411,6 +411,36 @@ def test_render_scenario_map_command_uses_maintained_scenario_definition(
     assert f"Scenario map ready: {output}" in capsys.readouterr().out
 
 
+def test_render_scenario_map_command_uses_maintained_supplies_definition(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    output = tmp_path / "supplies-250.svg"
+
+    assert (
+        main(
+            [
+                "render-scenario-map",
+                str(source),
+                str(output),
+                "--scenario-id",
+                "scenario:supplies",
+                "--army-points",
+                "250",
+            ]
+        )
+        == 0
+    )
+
+    svg = output.read_text(encoding="utf-8")
+    assert 'viewBox="0 0 32 48"' in svg
+    assert 'data-marker-type="supply-box" data-diameter-mm="25"' in svg
+    assert 'id="supply-box-left-offset" class="measurement"' in svg
+    assert 'id="supply-box-right-offset" class="measurement"' in svg
+    assert svg.count(">8″</text></g>") >= 2
+    assert f"Scenario map ready: {output}" in capsys.readouterr().out
+
+
 def test_render_scenario_map_command_reports_invalid_geometry(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

@@ -408,7 +408,9 @@ inches or table-relative edge/center anchors with offsets. An optional ordered `
 references those semantic elements rather than restating their geometry. Geometry v1 currently supports
 derived rectangle `dimension` annotations and `area-size` annotations; both calculate their displayed
 measurement from the referenced rectangle, so a map cannot silently disagree with maintained zone
-dimensions. `marker` is a semantic point with a stable
+dimensions. It also supports `point-edge-distance` annotations for semantic point markers: the
+displayed distance is derived from the marker coordinate and selected table edge, while an optional
+signed offset controls only where the dimension line is drawn. `marker` is a semantic point with a stable
 `markerType`; per-instance radius is not duplicated in geometry because known marker types resolve to
 canonical marker metadata. Physical diameter is semantic when it defines the represented game object,
 not merely SVG styling. N5.3 Domination requires each Console to be represented by a Console A Marker
@@ -420,17 +422,19 @@ that resolves outside the table. The SVG renderer maps reusable semantic style n
 and uses the inch dimensions directly as its `viewBox`; it does not infer rules or geometry from
 diagrams.
 
-Domination now also exercises the annotation boundary: its Deployment Zones have derived depth
-dimensions and its four Quadrants have derived width × height labels. These annotations are map
-presentation metadata referencing semantic geometry, not a second copy of scenario measurements.
+Domination exercises the rectangle annotation boundary: its Deployment Zones have derived depth
+dimensions and its four Quadrants have derived width × height labels. Supplies exercises the point
+boundary: the outer Supply Boxes are maintained at their semantic coordinates while the SVG derives
+their `8″` distance to the left/right table edges. These annotations are map presentation metadata
+referencing semantic geometry, not a second copy of scenario measurements.
 
 The initial core-map acceptance corpus covered Annihilation, Domination, Supplies, and Firefight at
 each distinct N5.3 table/deployment configuration (24×32 with 8-inch Deployment Zones, 32×48 with
 12-inch Deployment Zones, and 48×48 with 12-inch Deployment Zones). It confirmed that v1 needs only
 rectangular regions, dividing lines, semantic point markers, labels, and table-relative anchors for
 the core maps. As each scenario is curated, its maintained definition replaces the duplicate test
-geometry: Domination is the first such migration, while the acceptance fixture retains the remaining
-three scenarios until they acquire maintained definitions.
+geometry. Domination was the first such migration and Supplies the second; the acceptance fixture now
+retains only Annihilation and Firefight until they acquire maintained definitions.
 
 Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
 maintained representation is validated structured JSON; their runtime representation is a deliberate

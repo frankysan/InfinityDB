@@ -8,9 +8,9 @@ from typing import Literal
 from .scenario_geometry import (
     AreaSizeAnnotation,
     Coordinate,
-    DimensionAnnotation,
     LineElement,
     MarkerElement,
+    PointEdgeDistanceAnnotation,
     RectangleElement,
     ScenarioAnnotation,
     ScenarioElement,
@@ -116,11 +116,57 @@ def _render_annotation(
     geometry: ScenarioGeometry,
     annotation: ScenarioAnnotation,
     rectangles: dict[str, RectangleElement],
+    markers: dict[str, MarkerElement],
 ) -> str:
-    target = rectangles[annotation.target]
-    x1, y1, x2, y2 = _rectangle_bounds(geometry, target)
     annotation_id = escape(annotation.id, quote=True)
     target_id = escape(annotation.target, quote=True)
+
+    if isinstance(annotation, PointEdgeDistanceAnnotation):
+        target = markers[annotation.target]
+        x = _resolved(geometry, target.x, "x")
+        y = _resolved(geometry, target.y, "y")
+        tick = 0.25
+        edge = annotation.edge
+        if edge in {"left", "right"}:
+            edge_x = 0.0 if edge == "left" else geometry.table.width
+            line_y = y + annotation.offset
+            x1, x2 = sorted((x, edge_x))
+            label_y = line_y - 0.22 if annotation.offset <= 0 else line_y + 0.72
+            return (
+                f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" '
+                f'data-edge="{edge}" data-axis="x">'
+                f'<line x1="{_number(x1)}" y1="{_number(line_y)}" '
+                f'x2="{_number(x2)}" y2="{_number(line_y)}"/>'
+                f'<line x1="{_number(x1)}" y1="{_number(line_y - tick)}" '
+                f'x2="{_number(x1)}" y2="{_number(line_y + tick)}"/>'
+                f'<line x1="{_number(x2)}" y1="{_number(line_y - tick)}" '
+                f'x2="{_number(x2)}" y2="{_number(line_y + tick)}"/>'
+                f'<text class="dimension-label" x="{_number((x1 + x2) / 2.0)}" '
+                f'y="{_number(label_y)}" text-anchor="middle">'
+                f'{_measurement_text(abs(x - edge_x))}</text></g>'
+            )
+
+        edge_y = 0.0 if edge == "top" else geometry.table.height
+        line_x = x + annotation.offset
+        y1, y2 = sorted((y, edge_y))
+        label_dy = 0.3 if annotation.offset <= 0 else -0.3
+        mid_y = (y1 + y2) / 2.0
+        return (
+            f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" '
+            f'data-edge="{edge}" data-axis="y">'
+            f'<line x1="{_number(line_x)}" y1="{_number(y1)}" '
+            f'x2="{_number(line_x)}" y2="{_number(y2)}"/>'
+            f'<line x1="{_number(line_x - tick)}" y1="{_number(y1)}" '
+            f'x2="{_number(line_x + tick)}" y2="{_number(y1)}"/>'
+            f'<line x1="{_number(line_x - tick)}" y1="{_number(y2)}" '
+            f'x2="{_number(line_x + tick)}" y2="{_number(y2)}"/>'
+            f'<text class="dimension-label" x="{_number(line_x)}" y="{_number(mid_y)}" '
+            f'text-anchor="middle" transform="rotate(-90 {_number(line_x)} {_number(mid_y)})" '
+            f'dy="{_number(label_dy)}">{_measurement_text(abs(y - edge_y))}</text></g>'
+        )
+
+    target = rectangles[annotation.target]
+    x1, y1, x2, y2 = _rectangle_bounds(geometry, target)
 
     if isinstance(annotation, AreaSizeAnnotation):
         x = (x1 + x2) / 2.0
@@ -177,8 +223,13 @@ def render_scenario_map_svg(geometry: ScenarioGeometry) -> str:
         for element in geometry.elements
         if isinstance(element, RectangleElement)
     }
+    markers = {
+        element.id: element
+        for element in geometry.elements
+        if isinstance(element, MarkerElement)
+    }
     annotations = "\n".join(
-        _render_annotation(geometry, annotation, rectangles)
+        _render_annotation(geometry, annotation, rectangles, markers)
         for annotation in geometry.annotations
     )
     if annotations:

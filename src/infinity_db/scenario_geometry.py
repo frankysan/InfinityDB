@@ -113,7 +113,19 @@ class AreaSizeAnnotation:
     target: str
 
 
-ScenarioAnnotation: TypeAlias = DimensionAnnotation | AreaSizeAnnotation
+@dataclass(frozen=True, slots=True)
+class PointEdgeDistanceAnnotation:
+    """Derived distance from a point marker to one table edge."""
+
+    id: str
+    target: str
+    edge: Literal["left", "right", "top", "bottom"]
+    offset: float
+
+
+ScenarioAnnotation: TypeAlias = (
+    DimensionAnnotation | AreaSizeAnnotation | PointEdgeDistanceAnnotation
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -308,8 +320,23 @@ def _parse_annotation(value: Any, index: int) -> ScenarioAnnotation:
             target=_element_id(raw.get("target"), f"{context}.target"),
         )
 
+    if kind == "point-edge-distance":
+        _only_keys(raw, {"id", "kind", "target", "edge"}, {"offset"}, context)
+        edge = raw.get("edge")
+        if edge not in {"left", "right", "top", "bottom"}:
+            raise ScenarioGeometryError(
+                f"{context}.edge must be one of ['bottom', 'left', 'right', 'top']"
+            )
+        return PointEdgeDistanceAnnotation(
+            id=_element_id(raw.get("id"), f"{context}.id"),
+            target=_element_id(raw.get("target"), f"{context}.target"),
+            edge=edge,
+            offset=_finite_number(raw.get("offset", 0), f"{context}.offset"),
+        )
+
     raise ScenarioGeometryError(
-        f"{context}.kind must be one of ['area-size', 'dimension']"
+        f"{context}.kind must be one of "
+        "['area-size', 'dimension', 'point-edge-distance']"
     )
 
 
@@ -369,6 +396,27 @@ def _validate_resolved_geometry(geometry: ScenarioGeometry) -> None:
             raise ScenarioGeometryError(
                 f"{context}.target references unknown element {annotation.target!r}"
             )
+        if isinstance(annotation, PointEdgeDistanceAnnotation):
+            if not isinstance(target, MarkerElement):
+                raise ScenarioGeometryError(
+                    f"{context}.target must reference a marker element"
+                )
+            x = resolve_coordinate(target.x, axis="x", table=table)
+            y = resolve_coordinate(target.y, axis="y", table=table)
+            cross_position = (
+                y + annotation.offset
+                if annotation.edge in {"left", "right"}
+                else x + annotation.offset
+            )
+            cross_limit = (
+                table.height if annotation.edge in {"left", "right"} else table.width
+            )
+            if cross_position < 0 or cross_position > cross_limit:
+                raise ScenarioGeometryError(
+                    f"{context}.offset places the dimension outside the table"
+                )
+            continue
+
         if not isinstance(target, RectangleElement):
             raise ScenarioGeometryError(
                 f"{context}.target must reference a rectangle element"

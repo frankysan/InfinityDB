@@ -126,9 +126,9 @@ not competing semantic owners.
 ### Planned scenario domain
 
 **Design direction; scenario domain unimplemented.** A standalone versioned scenario-geometry
-validator and deterministic SVG renderer provide the first 1.0 foundation. Domination now pilots the
-next boundary: one typed maintained scenario record owns its geometry configurations and the renderer
-can consume them directly. The accepted boundary below still describes the remaining scenario tables,
+validator and deterministic SVG renderer provide the first 1.0 foundation. Domination and Supplies now
+exercise the next boundary: typed maintained scenario records own their geometry configurations and the
+renderer consumes them directly. The accepted boundary below still describes the remaining scenario tables,
 full structured facts, and browser routes. Concrete work is tracked in
 [the backlog](TODO.md#rules-and-reference-completeness).
 
@@ -153,6 +153,8 @@ affects the represented game object. N5.3 Domination requires a Console A Marker
 scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
 Renderer-only styling remains separate. Structured map annotations may reference semantic geometry
 to derive displayed distances and area sizes; they must not duplicate the underlying measurements.
+Geometry v1 includes rectangle dimensions/area sizes plus point-to-table-edge distances, which covers
+the core Domination and Supplies measurement callouts without introducing arbitrary annotation geometry.
 Reviewed ITS variation constrains the extension points, but
 ITS-only geometry and an interactive map editor remain post-1.0. Existing catalog entities will be referenced by typed
 identity rather than duplicated locally. Core and ITS scenarios share this boundary; tournament

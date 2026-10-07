@@ -16,6 +16,7 @@ from infinity_db.scenario_geometry import (
     LabelElement,
     LineElement,
     MarkerElement,
+    PointEdgeDistanceAnnotation,
     RectangleElement,
     ScenarioElement,
     ScenarioGeometry,
@@ -134,6 +135,61 @@ def test_parse_scenario_geometry_validates_derived_annotations() -> None:
         ),
         AreaSizeAnnotation(id="deployment-size", target="deployment-a"),
     )
+
+
+def test_parse_scenario_geometry_validates_point_to_edge_distance_annotation() -> None:
+    document = _document()
+    document["annotations"] = [
+        {
+            "id": "objective-left-offset",
+            "kind": "point-edge-distance",
+            "target": "objective-center",
+            "edge": "left",
+            "offset": -1.5,
+        }
+    ]
+
+    geometry = parse_scenario_geometry(document)
+
+    assert geometry.annotations == (
+        PointEdgeDistanceAnnotation(
+            id="objective-left-offset",
+            target="objective-center",
+            edge="left",
+            offset=-1.5,
+        ),
+    )
+
+
+def test_parse_scenario_geometry_rejects_point_edge_annotation_targeting_rectangle() -> None:
+    document = _document()
+    document["annotations"] = [
+        {
+            "id": "deployment-left-offset",
+            "kind": "point-edge-distance",
+            "target": "deployment-a",
+            "edge": "left",
+        }
+    ]
+
+    with pytest.raises(ScenarioGeometryError, match="must reference a marker"):
+        parse_scenario_geometry(document)
+
+
+def test_parse_scenario_geometry_rejects_point_edge_annotation_outside_table() -> None:
+    document = _document()
+    document["annotations"] = [
+        {
+            "id": "objective-left-offset",
+            "kind": "point-edge-distance",
+            "target": "objective-center",
+            "edge": "left",
+            "offset": -25,
+        }
+    ]
+
+    with pytest.raises(ScenarioGeometryError, match="outside the table"):
+        parse_scenario_geometry(document)
 
 
 def test_parse_scenario_geometry_rejects_annotation_targeting_non_rectangle() -> None:
@@ -255,15 +311,14 @@ def test_core_scenario_geometry_fixture_inventory_covers_all_core_configurations
     assert marker_diameter_mm("console") == 40
     assert marker_diameter_mm("supply-box") == 25
     assert marker_diameter_mm("future-marker") is None
-    assert len(_CORE_CASES) == 9
+    assert len(_CORE_CASES) == 6
     assert {case["scenario"] for case in _CORE_CASES} == {
         "annihilation",
-        "supplies",
         "firefight",
     }
 
     expected_groups = {(150,), (200, 250), (300, 350, 400)}
-    for scenario in {"annihilation", "supplies", "firefight"}:
+    for scenario in {"annihilation", "firefight"}:
         groups = {
             tuple(case["armyPoints"])
             for case in _CORE_CASES
@@ -308,20 +363,4 @@ def test_core_scenario_geometry_v1_represents_current_core_maps(
     markers = [
         element for element in geometry.elements if isinstance(element, MarkerElement)
     ]
-    if scenario == "supplies":
-        assert len(markers) == 3
-        assert {marker.marker_type for marker in markers} == {"supply-box"}
-        actual_positions = {
-            (
-                resolve_coordinate(marker.x, axis="x", table=geometry.table),
-                resolve_coordinate(marker.y, axis="y", table=geometry.table),
-            )
-            for marker in markers
-        }
-        assert actual_positions == {
-            (8, height / 2),
-            (width / 2, height / 2),
-            (width - 8, height / 2),
-        }
-    else:
-        assert markers == []
+    assert markers == []

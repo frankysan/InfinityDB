@@ -200,3 +200,42 @@ def test_render_scenario_map_svg_projects_derived_dimensions_and_area_size() -> 
         '<text id="deployment-size" class="area-size" data-target="deployment-a" '
         'x="12" y="6.56" text-anchor="middle">24″ × 8″</text>'
     ) in svg
+
+
+def test_render_scenario_map_svg_projects_point_to_edge_distance() -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Measured point",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "supply-box-left",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "supply-box",
+                    "x": 8,
+                    "y": {"anchor": "center"},
+                }
+            ],
+            "annotations": [
+                {
+                    "id": "supply-box-left-offset",
+                    "kind": "point-edge-distance",
+                    "target": "supply-box-left",
+                    "edge": "left",
+                    "offset": -1.5,
+                }
+            ],
+        }
+    )
+
+    svg = render_scenario_map_svg(geometry)
+
+    assert (
+        '<g id="supply-box-left-offset" class="measurement" '
+        'data-target="supply-box-left" data-edge="left" data-axis="x">'
+    ) in svg
+    assert '<line x1="0" y1="14.5" x2="8" y2="14.5"/>' in svg
+    assert '>8″</text></g>' in svg

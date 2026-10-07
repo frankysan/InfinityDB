@@ -133,7 +133,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 340
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 341
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -179,6 +179,28 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
             "quadrant-2",
             "quadrant-3",
             "quadrant-4",
+        }
+        supplies_row = connection.execute(
+            "SELECT kind, facts_json FROM records WHERE id = 'scenario:supplies'"
+        ).fetchone()
+        assert supplies_row is not None
+        assert supplies_row[0] == "scenario"
+        supplies_facts = json.loads(supplies_row[1])
+        assert [
+            configuration["armyPoints"]
+            for configuration in supplies_facts["configurations"]
+        ] == [[150], [200, 250], [300, 350, 400]]
+        supplies_annotations = supplies_facts["configurations"][0]["geometry"][
+            "annotations"
+        ]
+        assert {
+            (annotation["kind"], annotation["target"])
+            for annotation in supplies_annotations
+        } == {
+            ("dimension", "deployment-a"),
+            ("dimension", "deployment-b"),
+            ("point-edge-distance", "supply-box-left"),
+            ("point-edge-distance", "supply-box-right"),
         }
         assert connection.execute(
             "SELECT relation_type, related_record_id FROM record_relations "

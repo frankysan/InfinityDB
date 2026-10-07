@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **87/99** complete, **12** pending.
+- Supporting semantic identities: **87/100** complete, **13** pending.
 - Current authored outgoing relations: **262**.
 - Explicitly tracked future/deferred interactions: **115**.
 
@@ -898,9 +898,11 @@ review. `declaration-category` projection records are excluded.
 - [ ] **T2 Ammunition** (`ammunition:t2`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
 
-#### Scenario (0/1)
+#### Scenario (0/2)
 
 - [ ] **Domination** (`scenario:domination`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, objective interactions, and other scenario rule semantics remains 1.0 work.
+  - outgoing: none
+- [ ] **Supplies** (`scenario:supplies`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Supply Box interactions, Specialist Troop rules, and other scenario semantics remains 1.0 work.
   - outgoing: none
 
 ## Future interaction queue

@@ -15,6 +15,7 @@ from infinity_db.scenario_geometry import (
     AreaSizeAnnotation,
     DimensionAnnotation,
     MarkerElement,
+    PointEdgeDistanceAnnotation,
     resolve_coordinate,
 )
 
@@ -89,6 +90,78 @@ def test_select_maintained_domination_geometry_uses_army_points() -> None:
     )
     assert resolve_coordinate(console.x, axis="x", table=geometry.table) == 8
     assert resolve_coordinate(console.y, axis="y", table=geometry.table) == 18
+
+
+def test_maintained_supplies_definition_owns_all_core_map_configurations() -> None:
+    document = load_curated_document(_CORE_RULES)
+    definition = scenario_definition_from_curated_document(document, "scenario:supplies")
+
+    assert definition.name == "Supplies"
+    assert [configuration.id for configuration in definition.configurations] == [
+        "150-points",
+        "200-250-points",
+        "300-400-points",
+    ]
+    assert [configuration.army_points for configuration in definition.configurations] == [
+        (150,),
+        (200, 250),
+        (300, 350, 400),
+    ]
+
+    for configuration in definition.configurations:
+        geometry = configuration.geometry
+        width = geometry.table.width
+        height = geometry.table.height
+        markers = [
+            element for element in geometry.elements if isinstance(element, MarkerElement)
+        ]
+        assert len(markers) == 3
+        assert {marker.marker_type for marker in markers} == {"supply-box"}
+        assert {
+            (
+                resolve_coordinate(marker.x, axis="x", table=geometry.table),
+                resolve_coordinate(marker.y, axis="y", table=geometry.table),
+            )
+            for marker in markers
+        } == {
+            (8, height / 2),
+            (width / 2, height / 2),
+            (width - 8, height / 2),
+        }
+        dimensions = [
+            annotation
+            for annotation in geometry.annotations
+            if isinstance(annotation, DimensionAnnotation)
+        ]
+        point_offsets = [
+            annotation
+            for annotation in geometry.annotations
+            if isinstance(annotation, PointEdgeDistanceAnnotation)
+        ]
+        assert {annotation.target for annotation in dimensions} == {
+            "deployment-a",
+            "deployment-b",
+        }
+        assert {(annotation.target, annotation.edge) for annotation in point_offsets} == {
+            ("supply-box-left", "left"),
+            ("supply-box-right", "right"),
+        }
+
+
+def test_select_maintained_supplies_geometry_uses_army_points() -> None:
+    document = load_curated_document(_CORE_RULES)
+    definition = scenario_definition_from_curated_document(document, "scenario:supplies")
+
+    geometry = select_scenario_geometry(definition, 250)
+
+    assert (geometry.table.width, geometry.table.height) == (32, 48)
+    right_box = next(
+        element
+        for element in geometry.elements
+        if isinstance(element, MarkerElement) and element.id == "supply-box-right"
+    )
+    assert resolve_coordinate(right_box.x, axis="x", table=geometry.table) == 24
+    assert resolve_coordinate(right_box.y, axis="y", table=geometry.table) == 24
 
 
 def test_select_scenario_geometry_rejects_unsupported_army_points() -> None:
