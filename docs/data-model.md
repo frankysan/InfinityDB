@@ -392,10 +392,20 @@ The maintained policy is documented in `data/curated/README.md`.
 
 ## Planned scenario model (1.0)
 
-**Design direction; unimplemented.** The current generic curated-record envelope can retain
-scenario-related kinds, but the structured scenario model, dedicated persistence, and browsable
-scenario domain described here are not implemented. Implementation belongs to the
+**Design direction; scenario domain unimplemented.** The current generic curated-record envelope can
+retain scenario-related kinds, but the structured scenario model, dedicated persistence, and
+browsable scenario domain described here are not implemented. The standalone geometry v1 validator
+and deterministic SVG renderer are implemented as the first foundation and are not yet connected to
+curated scenario revisions or `rules.db`. Remaining implementation belongs to the
 [1.0 backlog](TODO.md#rules-and-reference-completeness).
+
+The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
+`InfinityDB scenario geometry` format version 1, canonical inch table dimensions, ordered unique
+element IDs, and `rectangle`, `line`, `marker`, or `label` elements. Coordinates may be absolute
+inches or table-relative edge/center anchors with offsets. Validation rejects unsupported fields,
+invalid anchors, duplicate IDs, non-finite values, and geometry that resolves outside the table. The
+SVG renderer maps reusable semantic style names to presentation and uses the inch dimensions directly
+as its `viewBox`; it does not infer rules or geometry from diagrams.
 
 Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
 maintained representation is validated structured JSON; their runtime representation is a deliberate
@@ -451,10 +461,18 @@ component payload remains the canonical ordered scenario structure consumed by t
 code receives composed presentation data and must not reinterpret score conditions, geometry, or
 source-specific feature semantics.
 
-The geometry component is also the sole semantic input for later deployment-map generation. A map
-renderer may project it to SVG/other presentation formats, but map-specific coordinates must not
-become an independent maintained source. Likewise, future ITS support extends publication/collection
-and optional-feature data rather than creating an ITS-only scenario schema.
+The geometry component is also the sole semantic input for scenario-map generation. The 1.0 renderer
+and geometry-schema v1 only need to cover the four N5.3 core scenarios: Annihilation, Domination,
+Supplies, and Firefight. A renderer may project that geometry to SVG/other presentation formats, but
+map-specific coordinates must not become an independent maintained source.
+
+That v1 compatibility boundary must not be mistaken for a core-only architecture. The reviewed ITS
+variation remains design evidence: geometry identities and primitives must not assume symmetric
+roles, one Deployment Zone per side, rectangular-only regions, fixed marker vocabularies, or one
+collection's styling. ITS-only constructs may remain unsupported by schema v1 and should fail
+explicitly rather than be approximated; later versioned extensions should add those capabilities
+without redefining the core semantic concepts. Likewise, future ITS support extends
+publication/collection and optional-feature data rather than creating an ITS-only scenario schema.
 
 ## SQLite storage contract
 

@@ -198,6 +198,31 @@ unimplemented until its corresponding behavior exists.
   - [ ] Keep the model source/scope-aware and extensible to versioned ITS seasons, but do
     not make ITS scenario content, tournament/event tooling, or a deployment-map editor a
     1.0 requirement.
+  - [ ] **Data processing + Web frontend:** Add the first version of the scenario-map SVG
+    generator as part of the core-scenario 1.0 work. Its v1 schema only needs to represent the
+    geometry required by **Annihilation, Domination, Supplies, and Firefight**; ITS scenario
+    definitions and ITS-only geometry remain post-1.0.
+    - [ ] Consume the same validated scenario geometry that backs scenario detail data. Do not
+      maintain a second map-specific definition or recover geometry from source diagrams.
+    - [x] Accept a versioned validated JSON geometry definition and generate deterministic SVG.
+      Treat inches as the canonical geometry unit. Support the current **24×32 in, 32×48 in,
+      and 48×48 in** table-size configurations while keeping the renderer dimension-agnostic.
+    - [ ] Implement only the semantic primitives needed by the four core scenarios first:
+      table/side-relative anchors, Deployment Zones, rectangular scoring/control regions,
+      center/dividing lines, fixed objective/scenery markers, labels, measurements, and reusable
+      semantic styles. Prefer typed primitives over a general arbitrary SVG-path escape hatch.
+    - [ ] Keep the schema deliberately extensible using the reviewed ITS evidence: do not bake in
+      symmetric sides, one Deployment Zone per side, rectangular-only regions, fixed marker kinds,
+      or one season's visual styling. Future schema versions must be able to add repeated/mirrored
+      placements, circles/radius regions, Exclusion/Hazard areas, asymmetric roles, access lines,
+      custom markers/icons, and per-configuration overrides without redefining the core concepts.
+      Unsupported ITS-only constructs should fail explicitly rather than be approximated in v1.
+    - [ ] Validate table bounds, dimensions, required anchors/references, stable element order/IDs,
+      and reproducible SVG bytes where practical. Add deterministic fixtures covering all four core
+      scenarios and every supported core table-size configuration before connecting browser views.
+    - [x] Provide a small development CLI for JSON -> SVG rendering so schema/renderer behavior can
+      be tested independently of scenario-page presentation. A browser editor/preview remains
+      post-1.0 and must use this same schema/rendering engine when added.
   - [ ] Provide usable scenario list/detail presentation and links to existing canonical
     rule/catalog entities where identities overlap.
     - [ ] Register scenario capabilities through the application-domain registry and define
@@ -208,10 +233,10 @@ unimplemented until its corresponding behavior exists.
       Render setup, placement, objectives/scoring, special rules, and end conditions using shared
       browser structures. Decide discovery/search/Glossary participation explicitly in
       `docs/application-domains.md`; do not require every capability just to register the domain.
-    - [ ] Make geometry understandable through structured placement descriptions/measurements or
-      a bounded generated diagram where needed. The later general deployment-map generator/editor
-      remains post-1.0; any 1.0 diagram must consume the scenario geometry rather than a second map
-      definition. Reuse the common distance presentation contract.
+    - [ ] Make geometry understandable through structured placement descriptions/measurements and
+      the core-scenario SVG renderer where useful. Generated diagrams must consume the scenario
+      geometry rather than a second map definition. Reuse the common distance presentation contract;
+      the interactive map editor and ITS-only rendering extensions remain post-1.0.
   - **Completion:** all four scenarios can be found and understood in normal mode for every
     supported configuration. Review scoring and placement against citations, follow related-rule
     links, and check keyboard/touch, narrow widths, Light/Dark themes, loading/empty/error behavior,
@@ -530,32 +555,17 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
   - [ ] Scenario pages should expose the selected season prominently and link
     season-specific terms to the relevant rules/state references.
 
-- [ ] **Data processing + Web frontend:** Add a deployment-map SVG
-  generator for scenario maps. The first iteration should accept a validated JSON map
-  definition and generate deterministic SVGs for the three officially supported table-size
-  presets: **24×32 in, 32×48 in, and 48×48 in**. Treat inches as the canonical geometry unit
-  in the schema rather than rounding dimensions to nominal feet. Keep the renderer itself
-  dimension-agnostic so historical, future, and scenario-specific formats do not require
-  renderer changes.
-  - [ ] Define a flexible coordinate/geometry model with absolute and relative anchors to
-    table edges, center lines, other objects, and repeated/mirrored placements; allow
-    per-table-size overrides where geometry genuinely differs rather than scaling blindly.
-  - [ ] Support layered map primitives for Deployment Zones, Exclusion/Hazard/Scoring areas,
-    center or dividing lines, rectangular and circular regions, access/opening lines, objective
-    markers and scenery elements, labels, measurements, player-side/Attacker/Defender context,
-    legends, and scenario-specific icons. Styling should support fills, opacity, strokes, hatching,
-    symbols, and reusable semantic styles without baking one ITS season's artwork into the schema.
-  - [ ] Research current and archived ITS scenario maps before freezing the schema. Cover examples
-    with changing Deployment Zone depths, central Exclusion Zones, hazardous areas such as
-    Biotechvore regions, exact Console/Server placements, asymmetric roles, and maps containing
-    special access lines or scenario-specific objective markers. Preserve season/scenario source
-    provenance for any definitions derived from official material.
-  - [ ] Validate generated geometry and metadata deterministically: table bounds, dimensions,
-    required references/anchors, stable element order/IDs, reproducible SVG bytes where practical,
-    and readable output at print and screen sizes. Keep the JSON schema versioned so map
-    definitions can evolve without silently changing old output.
-  - [ ] Later, build a web-based editor/preview UI over the same schema and rendering engine rather
-    than creating a separate browser-only map format.
+- [ ] **Data processing + Web frontend:** Extend the 1.0 core-scenario SVG renderer for ITS
+  geometry after the seasonal scenario data is curated. Reuse the same versioned geometry model and
+  rendering engine rather than creating an ITS-only map format.
+  - [ ] Add ITS-required geometry only when supported by curated scenario evidence, including
+    repeated/mirrored placements, circular/radius regions, Exclusion/Hazard/Scoring areas,
+    asymmetric roles, access/opening lines, scenario-specific markers/icons, and genuine
+    per-table-size overrides rather than blind scaling.
+  - [ ] Preserve season/scenario source provenance and add compatibility fixtures from current and
+    archived ITS material before promoting new geometry features into the schema contract.
+  - [ ] Build a web-based editor/preview UI over the same schema and rendering engine rather than
+    creating a separate browser-only map format.
 
 - [ ] **Web backend + Web frontend:** Add an interactive Fireteam builder within a
   selected Army context. Build compositions from the canonical Fireteam projection and general

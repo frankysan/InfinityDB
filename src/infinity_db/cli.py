@@ -23,6 +23,8 @@ from .peripheral_identities import (
 )
 from .peripheral_identity_coverage import audit_peripheral_identity_coverage
 from .rules_database import export_rules_database
+from .scenario_geometry import parse_scenario_geometry
+from .scenario_map_svg import render_scenario_map_svg
 from .source_anomalies import (
     load_source_anomaly_baseline,
     source_anomaly_baseline_applies,
@@ -184,6 +186,16 @@ def cmd_build_rules(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_render_scenario_map(args: argparse.Namespace) -> int:
+    document = json.loads(args.input.read_text(encoding="utf-8"))
+    geometry = parse_scenario_geometry(document)
+    svg = render_scenario_map_svg(geometry)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(svg, encoding="utf-8", newline="\n")
+    print(f"Scenario map ready: {args.output}")
+    return 0
+
+
 def cmd_validate_peripheral_identities(args: argparse.Namespace) -> int:
     curated = load_peripheral_identity_curated(args.input)
     print(f"Validated Peripheral identity contract: {args.input}")
@@ -316,6 +328,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_rules.add_argument("input", nargs="?", type=Path, default=DEFAULT_CURATED_RULES)
     p_rules.add_argument("--output", type=Path, default=DEFAULT_RULES_DATABASE)
     p_rules.set_defaults(func=cmd_build_rules)
+
+    p_scenario_map = sub.add_parser(
+        "render-scenario-map",
+        help="Render validated scenario geometry JSON as deterministic SVG",
+    )
+    p_scenario_map.add_argument("input", type=Path, help="Scenario geometry JSON input")
+    p_scenario_map.add_argument("output", type=Path, help="SVG output path")
+    p_scenario_map.set_defaults(func=cmd_render_scenario_map)
 
     p_peripherals = sub.add_parser(
         "validate-peripheral-identities",

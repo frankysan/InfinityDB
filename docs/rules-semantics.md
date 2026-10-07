@@ -2961,7 +2961,7 @@ parameterized by force/table configuration; source diagrams are presentation evi
 machine geometry. Objectives likewise need explicit timing, Objective Points/caps, side/applicability,
 and typed comparison/threshold semantics where practical. Reviewed prose can supplement unusual
 procedures without requiring a complete game-state execution engine. This structured geometry is the
-canonical input for later deployment-map generation.
+canonical input for the 1.0 core-scenario SVG renderer and later ITS map-generation extensions.
 
 Sources:
 

@@ -125,9 +125,10 @@ not competing semantic owners.
 
 ### Planned scenario domain
 
-**Design direction; unimplemented.** The accepted boundary below guides the 1.0 implementation
-tracked in [the backlog](TODO.md#rules-and-reference-completeness). It does not describe current
-scenario tables, structured definitions, or browser routes.
+**Design direction; scenario domain unimplemented.** A standalone versioned scenario-geometry
+validator and deterministic SVG renderer now provide the first 1.0 foundation, but the accepted
+boundary below still describes planned scenario tables, structured definitions, and browser routes.
+Concrete remaining work is tracked in [the backlog](TODO.md#rules-and-reference-completeness).
 
 Core-rules scenarios are a required first-class application domain for 1.0. The architecture review
 covered the four N5.3 core scenarios, the final ITS Season 17 set, and the current ITS Season 18 set.
@@ -143,9 +144,11 @@ collection/season membership remain independent.
 
 Geometry and scoring are maintained semantic data. Diagrams and reference views will be generated
 from that data, with source/season overlays kept distinct from canonical Army or rules facts.
-Existing catalog entities will be referenced by typed identity rather than duplicated locally.
-Core and ITS scenarios share this boundary; tournament pairing, rankings, and mutable match state
-remain outside it.
+InfinityDB 1.0 includes a deterministic SVG projection for the four N5.3 core scenarios; geometry
+schema v1 only needs to represent those core maps. Reviewed ITS variation constrains the extension
+points, but ITS-only geometry and an interactive map editor remain post-1.0. Existing catalog
+entities will be referenced by typed identity rather than duplicated locally. Core and ITS scenarios
+share this boundary; tournament pairing, rankings, and mutable match state remain outside it.
 
 The detailed accepted scenario model belongs to
 [the data model](data-model.md#planned-scenario-model-10). Source comparison and rationale remain in

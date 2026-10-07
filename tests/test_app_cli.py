@@ -345,3 +345,60 @@ def test_serve_reports_an_already_bound_port(capsys: pytest.CaptureFixture[str])
         assert main(["serve", "--host", "127.0.0.1", "--port", str(port)]) == 1
 
     assert f"Port {port} is already in use on 127.0.0.1" in capsys.readouterr().err
+
+
+def test_render_scenario_map_command_writes_svg(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = tmp_path / "map.json"
+    output = tmp_path / "rendered" / "map.svg"
+    source.write_text(
+        json.dumps(
+            {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Annihilation",
+                "table": {"width": 24, "height": 32, "unit": "in"},
+                "elements": [
+                    {
+                        "id": "deployment-a",
+                        "kind": "rectangle",
+                        "style": "deployment-a",
+                        "x1": 0,
+                        "y1": 0,
+                        "x2": {"anchor": "right"},
+                        "y2": 8,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert main(["render-scenario-map", str(source), str(output)]) == 0
+    assert output.is_file()
+    assert 'viewBox="0 0 24 32"' in output.read_text(encoding="utf-8")
+    assert f"Scenario map ready: {output}" in capsys.readouterr().out
+
+
+def test_render_scenario_map_command_reports_invalid_geometry(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = tmp_path / "invalid-map.json"
+    output = tmp_path / "map.svg"
+    source.write_text(
+        json.dumps(
+            {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 99,
+                "title": "Invalid",
+                "table": {"width": 24, "height": 32, "unit": "in"},
+                "elements": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert main(["render-scenario-map", str(source), str(output)]) == 1
+    assert "formatVersion must be 1" in capsys.readouterr().err
+    assert not output.exists()

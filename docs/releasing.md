@@ -30,7 +30,10 @@ season material, tournament/event tooling, and a complete historical ITS library
 1.0 requirement unless they are necessary to interpret otherwise in-scope data. Scenario-specific
 Skills, Equipment, States, Traits, contextual roles, objective elements, or other named rules
 concepts remain in scope when needed by the core scenarios or the general catalog/reference
-experience; preserve their scenario/season scope. Final visual polish, every planned
+experience; preserve their scenario/season scope. Core-scenario geometry must also drive the
+versioned deterministic SVG renderer so the four supported missions do not depend on manually
+maintained diagrams. Geometry schema v1 only needs to cover those core missions; ITS-only map
+features and an interactive editor remain outside the 1.0 gate. Final visual polish, every planned
 search/filter/comparison feature, exhaustive performance work, optional themes, deployment
 conveniences, and unrelated architectural refactors likewise do not block 1.0.
 
