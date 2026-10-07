@@ -1733,6 +1733,18 @@
       "targetRelease": "1.0.0",
       "status": "pending",
       "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Supply Box interactions, Specialist Troop rules, and other scenario semantics remains 1.0 work."
+    },
+    {
+      "recordId": "scenario:annihilation",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, force-destruction objectives, and other scenario rule semantics remains 1.0 work."
+    },
+    {
+      "recordId": "scenario:firefight",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Classified Objective interactions, and other scenario rule semantics remains 1.0 work."
     }
   ],
   "futureInteractions": [

@@ -441,6 +441,45 @@ def test_render_scenario_map_command_uses_maintained_supplies_definition(
     assert f"Scenario map ready: {output}" in capsys.readouterr().out
 
 
+@pytest.mark.parametrize(
+    ("scenario_id", "filename"),
+    [
+        ("scenario:annihilation", "annihilation-250.svg"),
+        ("scenario:firefight", "firefight-250.svg"),
+    ],
+)
+def test_render_scenario_map_command_uses_maintained_standard_deployment_scenarios(
+    scenario_id: str,
+    filename: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    source = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    output = tmp_path / filename
+
+    assert (
+        main(
+            [
+                "render-scenario-map",
+                str(source),
+                str(output),
+                "--scenario-id",
+                scenario_id,
+                "--army-points",
+                "250",
+            ]
+        )
+        == 0
+    )
+
+    svg = output.read_text(encoding="utf-8")
+    assert 'viewBox="0 0 32 48"' in svg
+    assert 'id="deployment-a-depth" class="measurement"' in svg
+    assert 'id="deployment-b-depth" class="measurement"' in svg
+    assert svg.count(">12″</text></g>") == 2
+    assert f"Scenario map ready: {output}" in capsys.readouterr().out
+
+
 def test_render_scenario_map_command_reports_invalid_geometry(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

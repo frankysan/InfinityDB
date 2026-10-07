@@ -393,12 +393,13 @@ The maintained policy is documented in `data/curated/README.md`.
 ## Planned scenario model (1.0)
 
 **Design direction; scenario domain unimplemented.** The generic curated-record envelope now has a
-first typed scenario-definition pilot: `scenario:domination` owns its three N5.3 geometry
-configurations inside the current core-rules collection. The scenario-definition v1 subset validates
-`definitionVersion`, non-overlapping Army Points groups, and the existing geometry-v1 documents; the
-SVG CLI can select that maintained geometry directly by scenario identity + Army Points. Full
-scenario persistence/query structures, scoring/actions/end conditions, and the browsable scenario
-domain described here are not implemented. Remaining implementation belongs to the
+typed scenario-definition v1 subset for all four N5.3 core scenarios: `scenario:annihilation`,
+`scenario:domination`, `scenario:supplies`, and `scenario:firefight` each own their three current
+geometry configurations inside the core-rules collection. The subset validates `definitionVersion`,
+non-overlapping Army Points groups, and geometry-v1 documents; the SVG CLI selects maintained
+geometry directly by scenario identity + Army Points. Full scenario persistence/query structures,
+scoring/actions/end conditions, and the browsable scenario domain described here are not
+implemented. Remaining implementation belongs to the
 [1.0 backlog](TODO.md#rules-and-reference-completeness).
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
@@ -432,9 +433,9 @@ The initial core-map acceptance corpus covered Annihilation, Domination, Supplie
 each distinct N5.3 table/deployment configuration (24×32 with 8-inch Deployment Zones, 32×48 with
 12-inch Deployment Zones, and 48×48 with 12-inch Deployment Zones). It confirmed that v1 needs only
 rectangular regions, dividing lines, semantic point markers, labels, and table-relative anchors for
-the core maps. As each scenario is curated, its maintained definition replaces the duplicate test
-geometry. Domination was the first such migration and Supplies the second; the acceptance fixture now
-retains only Annihilation and Firefight until they acquire maintained definitions.
+the core maps. All four scenarios now own those configurations in maintained curated definitions,
+and renderer acceptance tests consume that maintained geometry directly instead of keeping a second
+fixture-only map corpus.
 
 Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
 maintained representation is validated structured JSON; their runtime representation is a deliberate

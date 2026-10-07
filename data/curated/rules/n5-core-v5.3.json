@@ -17360,6 +17360,680 @@
                 "status": "reviewed",
                 "reviewedOn": "2026-10-07"
             }
+        },
+        {
+            "id": "scenario:annihilation",
+            "kind": "scenario",
+            "name": "Annihilation",
+            "summary": "Core scenario focused on destroying enemy forces and preserving your own.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "definitionVersion": 1,
+                "configurations": [
+                    {
+                        "id": "150-points",
+                        "armyPoints": [
+                            150
+                        ],
+                        "geometry": {
+                            "format": "InfinityDB scenario geometry",
+                            "formatVersion": 1,
+                            "title": "Annihilation",
+                            "table": {
+                                "width": 24,
+                                "height": 32,
+                                "unit": "in"
+                            },
+                            "elements": [
+                                {
+                                    "id": "deployment-a",
+                                    "kind": "rectangle",
+                                    "style": "deployment-a",
+                                    "x1": 0,
+                                    "y1": 0,
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": 8
+                                },
+                                {
+                                    "id": "deployment-b",
+                                    "kind": "rectangle",
+                                    "style": "deployment-b",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "bottom",
+                                        "offset": -8
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "bottom"
+                                    }
+                                },
+                                {
+                                    "id": "center-line",
+                                    "kind": "line",
+                                    "style": "guide",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "center"
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "center"
+                                    }
+                                },
+                                {
+                                    "id": "deployment-a-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": 4.0,
+                                    "text": "Deployment Zone A"
+                                },
+                                {
+                                    "id": "deployment-b-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": {
+                                        "anchor": "bottom",
+                                        "offset": -4.0
+                                    },
+                                    "text": "Deployment Zone B"
+                                }
+                            ],
+                            "annotations": [
+                                {
+                                    "id": "deployment-a-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-a",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "deployment-b-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-b",
+                                    "axis": "y",
+                                    "side": "start"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "id": "200-250-points",
+                        "armyPoints": [
+                            200,
+                            250
+                        ],
+                        "geometry": {
+                            "format": "InfinityDB scenario geometry",
+                            "formatVersion": 1,
+                            "title": "Annihilation",
+                            "table": {
+                                "width": 32,
+                                "height": 48,
+                                "unit": "in"
+                            },
+                            "elements": [
+                                {
+                                    "id": "deployment-a",
+                                    "kind": "rectangle",
+                                    "style": "deployment-a",
+                                    "x1": 0,
+                                    "y1": 0,
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": 12
+                                },
+                                {
+                                    "id": "deployment-b",
+                                    "kind": "rectangle",
+                                    "style": "deployment-b",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "bottom",
+                                        "offset": -12
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "bottom"
+                                    }
+                                },
+                                {
+                                    "id": "center-line",
+                                    "kind": "line",
+                                    "style": "guide",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "center"
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "center"
+                                    }
+                                },
+                                {
+                                    "id": "deployment-a-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": 6.0,
+                                    "text": "Deployment Zone A"
+                                },
+                                {
+                                    "id": "deployment-b-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": {
+                                        "anchor": "bottom",
+                                        "offset": -6.0
+                                    },
+                                    "text": "Deployment Zone B"
+                                }
+                            ],
+                            "annotations": [
+                                {
+                                    "id": "deployment-a-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-a",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "deployment-b-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-b",
+                                    "axis": "y",
+                                    "side": "start"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "id": "300-400-points",
+                        "armyPoints": [
+                            300,
+                            350,
+                            400
+                        ],
+                        "geometry": {
+                            "format": "InfinityDB scenario geometry",
+                            "formatVersion": 1,
+                            "title": "Annihilation",
+                            "table": {
+                                "width": 48,
+                                "height": 48,
+                                "unit": "in"
+                            },
+                            "elements": [
+                                {
+                                    "id": "deployment-a",
+                                    "kind": "rectangle",
+                                    "style": "deployment-a",
+                                    "x1": 0,
+                                    "y1": 0,
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": 12
+                                },
+                                {
+                                    "id": "deployment-b",
+                                    "kind": "rectangle",
+                                    "style": "deployment-b",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "bottom",
+                                        "offset": -12
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "bottom"
+                                    }
+                                },
+                                {
+                                    "id": "center-line",
+                                    "kind": "line",
+                                    "style": "guide",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "center"
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "center"
+                                    }
+                                },
+                                {
+                                    "id": "deployment-a-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": 6.0,
+                                    "text": "Deployment Zone A"
+                                },
+                                {
+                                    "id": "deployment-b-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": {
+                                        "anchor": "bottom",
+                                        "offset": -6.0
+                                    },
+                                    "text": "Deployment Zone B"
+                                }
+                            ],
+                            "annotations": [
+                                {
+                                    "id": "deployment-a-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-a",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "deployment-b-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-b",
+                                    "axis": "y",
+                                    "side": "start"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 149,
+                    "section": "Annihilation"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 150,
+                    "section": "Annihilation"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "scenario:firefight",
+            "kind": "scenario",
+            "name": "Firefight",
+            "summary": "Core scenario using the standard opposing Deployment Zone map with scenario-specific combat objectives.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "definitionVersion": 1,
+                "configurations": [
+                    {
+                        "id": "150-points",
+                        "armyPoints": [
+                            150
+                        ],
+                        "geometry": {
+                            "format": "InfinityDB scenario geometry",
+                            "formatVersion": 1,
+                            "title": "Firefight",
+                            "table": {
+                                "width": 24,
+                                "height": 32,
+                                "unit": "in"
+                            },
+                            "elements": [
+                                {
+                                    "id": "deployment-a",
+                                    "kind": "rectangle",
+                                    "style": "deployment-a",
+                                    "x1": 0,
+                                    "y1": 0,
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": 8
+                                },
+                                {
+                                    "id": "deployment-b",
+                                    "kind": "rectangle",
+                                    "style": "deployment-b",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "bottom",
+                                        "offset": -8
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "bottom"
+                                    }
+                                },
+                                {
+                                    "id": "center-line",
+                                    "kind": "line",
+                                    "style": "guide",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "center"
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "center"
+                                    }
+                                },
+                                {
+                                    "id": "deployment-a-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": 4.0,
+                                    "text": "Deployment Zone A"
+                                },
+                                {
+                                    "id": "deployment-b-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": {
+                                        "anchor": "bottom",
+                                        "offset": -4.0
+                                    },
+                                    "text": "Deployment Zone B"
+                                }
+                            ],
+                            "annotations": [
+                                {
+                                    "id": "deployment-a-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-a",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "deployment-b-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-b",
+                                    "axis": "y",
+                                    "side": "start"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "id": "200-250-points",
+                        "armyPoints": [
+                            200,
+                            250
+                        ],
+                        "geometry": {
+                            "format": "InfinityDB scenario geometry",
+                            "formatVersion": 1,
+                            "title": "Firefight",
+                            "table": {
+                                "width": 32,
+                                "height": 48,
+                                "unit": "in"
+                            },
+                            "elements": [
+                                {
+                                    "id": "deployment-a",
+                                    "kind": "rectangle",
+                                    "style": "deployment-a",
+                                    "x1": 0,
+                                    "y1": 0,
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": 12
+                                },
+                                {
+                                    "id": "deployment-b",
+                                    "kind": "rectangle",
+                                    "style": "deployment-b",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "bottom",
+                                        "offset": -12
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "bottom"
+                                    }
+                                },
+                                {
+                                    "id": "center-line",
+                                    "kind": "line",
+                                    "style": "guide",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "center"
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "center"
+                                    }
+                                },
+                                {
+                                    "id": "deployment-a-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": 6.0,
+                                    "text": "Deployment Zone A"
+                                },
+                                {
+                                    "id": "deployment-b-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": {
+                                        "anchor": "bottom",
+                                        "offset": -6.0
+                                    },
+                                    "text": "Deployment Zone B"
+                                }
+                            ],
+                            "annotations": [
+                                {
+                                    "id": "deployment-a-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-a",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "deployment-b-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-b",
+                                    "axis": "y",
+                                    "side": "start"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "id": "300-400-points",
+                        "armyPoints": [
+                            300,
+                            350,
+                            400
+                        ],
+                        "geometry": {
+                            "format": "InfinityDB scenario geometry",
+                            "formatVersion": 1,
+                            "title": "Firefight",
+                            "table": {
+                                "width": 48,
+                                "height": 48,
+                                "unit": "in"
+                            },
+                            "elements": [
+                                {
+                                    "id": "deployment-a",
+                                    "kind": "rectangle",
+                                    "style": "deployment-a",
+                                    "x1": 0,
+                                    "y1": 0,
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": 12
+                                },
+                                {
+                                    "id": "deployment-b",
+                                    "kind": "rectangle",
+                                    "style": "deployment-b",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "bottom",
+                                        "offset": -12
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "bottom"
+                                    }
+                                },
+                                {
+                                    "id": "center-line",
+                                    "kind": "line",
+                                    "style": "guide",
+                                    "x1": 0,
+                                    "y1": {
+                                        "anchor": "center"
+                                    },
+                                    "x2": {
+                                        "anchor": "right"
+                                    },
+                                    "y2": {
+                                        "anchor": "center"
+                                    }
+                                },
+                                {
+                                    "id": "deployment-a-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": 6.0,
+                                    "text": "Deployment Zone A"
+                                },
+                                {
+                                    "id": "deployment-b-label",
+                                    "kind": "label",
+                                    "style": "label",
+                                    "x": {
+                                        "anchor": "center"
+                                    },
+                                    "y": {
+                                        "anchor": "bottom",
+                                        "offset": -6.0
+                                    },
+                                    "text": "Deployment Zone B"
+                                }
+                            ],
+                            "annotations": [
+                                {
+                                    "id": "deployment-a-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-a",
+                                    "axis": "y",
+                                    "side": "start"
+                                },
+                                {
+                                    "id": "deployment-b-depth",
+                                    "kind": "dimension",
+                                    "target": "deployment-b",
+                                    "axis": "y",
+                                    "side": "start"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "relations": [],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 155,
+                    "section": "Firefight"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 156,
+                    "section": "Firefight"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-07"
+            }
         }
     ]
 }

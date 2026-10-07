@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Any
 from xml.etree import ElementTree
 
 import pytest
 
+from infinity_db.curated import load_curated_document
+from infinity_db.scenario_definition import scenario_definition_from_curated_document
 from infinity_db.scenario_geometry import parse_scenario_geometry
 from infinity_db.scenario_map_svg import render_scenario_map_svg
 
@@ -131,27 +131,35 @@ def test_render_scenario_map_svg_supports_core_table_size_presets(
     assert f'viewBox="0 0 {width} {height}"' in svg
 
 
-_CORE_FIXTURE_PATH = (
-    Path(__file__).parent / "fixtures" / "scenario_geometry" / "core-v1.json"
+_CORE_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+
+
+@pytest.mark.parametrize(
+    "scenario_id",
+    [
+        "scenario:annihilation",
+        "scenario:domination",
+        "scenario:supplies",
+        "scenario:firefight",
+    ],
 )
-_CORE_CASES: list[dict[str, Any]] = json.loads(
-    _CORE_FIXTURE_PATH.read_text(encoding="utf-8")
-)["cases"]
-
-
-@pytest.mark.parametrize("case", _CORE_CASES, ids=lambda case: case["id"])
-def test_render_core_scenario_geometry_fixtures_are_deterministic_and_well_formed(
-    case: dict[str, Any],
+def test_render_maintained_core_scenario_maps_are_deterministic_and_well_formed(
+    scenario_id: str,
 ) -> None:
-    geometry = parse_scenario_geometry(case["geometry"])
+    document = load_curated_document(_CORE_RULES)
+    definition = scenario_definition_from_curated_document(document, scenario_id)
 
-    first = render_scenario_map_svg(geometry)
-    second = render_scenario_map_svg(geometry)
+    for configuration in definition.configurations:
+        geometry = configuration.geometry
+        first = render_scenario_map_svg(geometry)
+        second = render_scenario_map_svg(geometry)
 
-    assert first == second
-    root = ElementTree.fromstring(first)
-    assert root.tag == "{http://www.w3.org/2000/svg}svg"
-    assert root.attrib["viewBox"] == f"0 0 {geometry.table.width:g} {geometry.table.height:g}"
+        assert first == second
+        root = ElementTree.fromstring(first)
+        assert root.tag == "{http://www.w3.org/2000/svg}svg"
+        assert root.attrib["viewBox"] == (
+            f"0 0 {geometry.table.width:g} {geometry.table.height:g}"
+        )
 
 
 def test_render_scenario_map_svg_projects_derived_dimensions_and_area_size() -> None:

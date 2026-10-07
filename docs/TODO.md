@@ -202,7 +202,7 @@ unimplemented until its corresponding behavior exists.
     generator as part of the core-scenario 1.0 work. Its v1 schema only needs to represent the
     geometry required by **Annihilation, Domination, Supplies, and Firefight**; ITS scenario
     definitions and ITS-only geometry remain post-1.0.
-    - [ ] Consume the same validated scenario geometry that backs scenario detail data. Do not
+    - [x] Consume the same validated scenario geometry that backs scenario detail data. Do not
       maintain a second map-specific definition or recover geometry from source diagrams.
       - [x] Pilot this ownership boundary with **Domination**: its three N5.3 map configurations now
         live in the maintained `scenario:domination` curated record, validate through the typed
@@ -211,6 +211,9 @@ unimplemented until its corresponding behavior exists.
       - [x] Migrate **Supplies** to the same maintained-definition path. Its Supply Box placements
         and Deployment Zones now render from `scenario:supplies`; remove duplicate Supplies geometry
         from the acceptance fixture.
+      - [x] Migrate **Annihilation** and **Firefight** to maintained definitions. Both now own
+        their three standard table/Deployment Zone configurations and derived Deployment Zone depth
+        annotations; remove the last fixture-only core geometry.
     - [x] Accept a versioned validated JSON geometry definition and generate deterministic SVG.
       Treat inches as the canonical geometry unit. Support the current **24×32 in, 32×48 in,
       and 48×48 in** table-size configurations while keeping the renderer dimension-agnostic.
@@ -235,10 +238,9 @@ unimplemented until its corresponding behavior exists.
       dimensions and derived Quadrant sizes; Supplies adds point-to-table-edge distances derived from
       Supply Box coordinates, so its canonical 8-inch placements are never restated in annotation data.
     - [x] Validate table bounds, dimensions, stable element order/IDs, and reproducible SVG bytes.
-      The maintained Domination and Supplies definitions plus deterministic acceptance fixtures for
-      the remaining two core scenarios cover every distinct supported core table/deployment
-      configuration. Replace each remaining fixture-only definition with curated geometry as that
-      scenario is implemented.
+      All four core scenarios now own deterministic maintained geometry for every distinct supported
+      table/deployment configuration; renderer acceptance tests consume those curated definitions
+      directly, with no second fixture-only geometry corpus.
     - [x] Provide a small development CLI for JSON -> SVG rendering so schema/renderer behavior can
       be tested independently of scenario-page presentation. A browser editor/preview remains
       post-1.0 and must use this same schema/rendering engine when added.
