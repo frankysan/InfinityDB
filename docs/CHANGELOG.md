@@ -11,11 +11,13 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Choose System, Light, or Dark themes, with improved contrast and readability.
-- Compare S1–S8 Silhouette templates in the Glossary and Unit previews at a shared scale.
-- Read the new **What's changed** page and privacy information.
-- Browse clearer rules descriptions and Unit help, with improved navigation, filtering,
-  artwork, and small-screen layouts.
+- You can now choose a Light or Dark theme, or let InfinityDB follow your device's settings.
+- Silhouette diagrams in the Glossary and Unit previews show templates at the same scale,
+  making their sizes easier to compare.
+- The new **What's changed** page collects release notes in one place, and the privacy policy
+  explains what InfinityDB stores.
+- Rules descriptions and Unit help are clearer, artwork has been corrected, and Unit and Fireteam
+  pages are easier to read on small screens.
 
 ### Added
 
@@ -95,10 +97,11 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Shared Unit Explorer links now show clearly when optional-unit choices differ from your saved
-  Settings without overwriting those Settings.
-- Order references, Strategos, Multispectral Visor, and dense Army-availability displays are clearer
-  and more complete.
+- Shared Unit Explorer links show when their optional-unit choices differ from your Settings,
+  without changing your saved preferences.
+- Order references are more complete, and Strategos and Multispectral Visor levels are easier
+  to compare.
+- Army symbols wrap more neatly when a Unit is available to many Armies.
 
 ### Changed
 
@@ -132,12 +135,12 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Browse new **Ammunition**, **Labels**, and **General Rules** references, use the federated
-  **Glossary**, and search across the whole player-facing reference.
-- Filter Units by more profile characteristics, inspect extended profile data, and browse a new
-  Armies overview with current and legacy forces.
-- Rules text, Fireteams, Army context, and shareable browser state are more deeply linked and more
-  consistent across desktop and narrow screens.
+- New **Ammunition**, **Labels**, and **General Rules** pages, a **Glossary**, and site-wide search
+  make rules easier to find.
+- Unit Explorer has more filters and an optional view of profile stats. The Armies page covers
+  both current and legacy forces.
+- Rules text links to related references, and shared links preserve search, filter, and Army
+  selections. Pages are easier to use on small screens.
 
 ### Added
 
@@ -212,9 +215,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Hacking Programs now use the same declaration language and detail-card style as Skills.
-- Typography is more consistent across the site, and the sidebar now shows when the contained Army
-  data last changed rather than the snapshot download time.
+- Hacking Programs use the same action labels and page layout as Skills.
+- Fonts are more consistent across the site, and the sidebar shows when Army data last changed.
 
 ### Changed
 
@@ -246,10 +248,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Browse first-class **Hacking Programs** and Army-scoped **Fireteams** with rules, limits,
-  Wildcards, FTO options, and Unit links.
-- Unit details expose more useful relationships and selection context, while profile artwork and
-  Fireteam presentation are more accurate and compact.
+- Hacking Programs have their own reference pages, and Fireteam charts can be browsed by Army,
+  with rules, limits, Wildcards, and FTO options.
+- Unit pages show linked profiles, Peripherals, Controllers, and selection requirements more
+  clearly. Profile artwork and Fireteam layouts have also been improved.
 
 ### Added
 
@@ -293,11 +295,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Settings and reference pages are clearer by default: inches and all optional Unit types are
-  enabled initially, troop types use rules-facing names, and Unit health is shown as **VITA** or
-  **STR**.
-- Desktop Settings can collapse and the shared typography/layout has been refined for easier
-  reading.
+- On first use, distances are shown in inches and all optional Unit types are included.
+  Troop Type names are clearer, and profiles show **VITA** or **STR** as appropriate.
+- Settings can be collapsed on desktop, and text and layouts are easier to read.
 
 ### Changed
 
@@ -323,10 +323,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Equipment that declares actions, such as MediKit, GizmoKit, and Deactivator, is now presented with
-  the same action-card language as Skills.
-- Paramedic correctly links to MediKit, and rebuilt browser assets no longer risk leaving stale
-  reference content behind.
+- Equipment such as MediKit, GizmoKit, and Deactivator uses the same action presentation as Skills.
+- Paramedic links correctly to MediKit, and reference pages refresh correctly after an app update.
 
 ### Changed
 
@@ -354,11 +352,11 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Skills, Equipment, Traits, and States now have a substantially richer rules-backed reference,
-  including the complete current State catalog.
-- Skill details expose structured Hacking Program, Martial Arts, Booty, and MetaChemistry data, and
-  Cube/Cube 2.0 usage is linked through Equipment.
-- Very narrow Unit-detail layouts are easier to read.
+- Skills, Equipment, Traits, and States have fuller rules explanations and more links to related
+  rules, including a complete State reference.
+- Skill pages include Hacking Program, Martial Arts, Booty, and MetaChemistry tables.
+  Cube and Cube 2.0 pages list the Units that use them.
+- Unit pages are easier to read on very small screens.
 
 ### Added
 
@@ -401,10 +399,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Doctor, Engineer, Cyberplug, Peripheral, and Controller relationships are represented more
-  explicitly in the reference.
-- Unit/Profile/Loadout dependencies and reviewed selection constraints are more complete, improving
-  how related options are explained.
+- Doctor, Engineer, Cyberplug, and Peripheral references explain which Controllers can use
+  each type of Peripheral.
+- Unit pages show which profiles and loadouts are linked and explain requirements that affect
+  those choices.
 
 ### Added
 
@@ -430,9 +428,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Browser links now use readable names instead of numeric IDs wherever a stable public name exists.
-- Unit Explorer shows visible-versus-total Unit counts with an availability breakdown, and grouped
-  Skill/Equipment/Weapon filters behave more consistently.
+- Browser links use readable names instead of numbers.
+- Unit Explorer shows how many Units match your filters and breaks down their availability.
+  Skill, Equipment, and Weapon filters also include related variants more consistently.
 
 ### Added
 
@@ -462,9 +460,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Unit, Army, Skill, Equipment, and Weapon browsing now uses more consistent canonical identities
-  across different Army views.
-- Army totals count actual logical Units instead of duplicate source representations.
+- Units, Skills, Equipment, and Weapons are shown consistently across Army views.
+- Army totals count each Unit once, even when it appears in several related Army Lists.
 
 ### Changed
 
@@ -489,8 +486,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Unit availability, faction presentation, symbols, and weapon-range information are more
-  consistent and better grounded in authoritative source relationships.
+- Unit availability, Army labels, symbols, and Weapon ranges are more accurate and consistent.
 
 ### Added
 
@@ -564,8 +560,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Filter the Unit catalog by Skills, Equipment, and Weapons.
-- Browse a new **Traits** catalog with concise summaries and links to where each trait is used.
+- Unit lists can be filtered by Skills, Equipment, and Weapons.
+- The new **Traits** pages explain their effects and link to the Weapons, Skills, and Equipment
+  that use them.
 
 ### Added
 
@@ -590,8 +587,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Optional-unit settings now apply consistently to mercenary and reinforcement availability without
-  stale browser results.
+- Mercenary and Reinforcement results now follow your optional-unit settings without leaving
+  outdated results on screen.
 
 ### Fixed
 
@@ -602,7 +599,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Support questions, suggestions, and feedback now point to the project's GitHub page.
+- Support and feedback links now take you to the project's GitHub page.
 
 ### Changed
 
@@ -612,9 +609,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- High-volume Unit and catalog browsing is more responsive, with clearer navigation feedback while
-  pages load.
-- The browser now refreshes automatically when the deployed release or source data changes.
+- Unit and reference pages respond faster, and it is clearer when a page is still loading.
+- The browser refreshes automatically after an app update or a change to Army data.
 
 ### Added
 
@@ -635,8 +631,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Catalog and detail pages no longer risk getting stuck in a loading state after an application
-  update.
+- Reference lists and detail pages no longer get stuck loading after an app update.
 
 ### Fixed
 
@@ -647,10 +642,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Use global controls to include mercenaries, Spec-Ops, Team Operations, and reinforcements, and
-  optionally remember browsing preferences on the current device.
-- Browser updates are handled more reliably, and optional-unit settings and external wiki labels are
-  applied more consistently.
+- Settings let you include mercenaries, Spec-Ops, Team Operations, and Reinforcements,
+  and remember your preferences on this device.
+- The browser detects app updates more reliably, and optional-unit settings and wiki-link labels
+  are consistent across pages.
 
 ### Added
 
@@ -674,9 +669,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Settings became a reusable responsive menu, while Unit search and catalog presentation gained
-  clearer Army-color accents.
-- Movement values and mobile navigation were corrected.
+- Settings adapt to different screen sizes, and Army colours make Unit and reference pages
+  easier to scan.
+- Movement values are displayed correctly, and mobile navigation works more reliably.
 
 ### Added
 
@@ -696,8 +691,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- The browser gained a landing page, compact navigation, division badges, and a more consistent
-  responsive visual system.
+- A new home page, simpler navigation, and division badges make the site easier to browse.
+  Pages also adapt more consistently to smaller screens.
 
 ### Added
 
@@ -719,8 +714,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- The About page now explains InfinityDB's purpose, data flow, current reference features, future
-  direction, and independent-project status in more detail.
+- The About page explains what InfinityDB offers, where its data comes from, and that it's
+  an independent community project.
 
 ### Changed
 
@@ -731,11 +726,11 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Browse searchable **Skills**, **Equipment**, and **Weapons** catalogs with detail pages linked
-  back to the Unit profiles and loadouts that use them.
-- Weapon profiles now include ammunition, traits, ranges, special data, and relevant icons, while
-  Unit-detail presentation is more complete.
-- Displayed AVA, literal punctuation searches, missing assets, and packaged symbols were corrected.
+- Skills, Equipment, and Weapons have searchable pages with links to the Units and loadouts
+  that use them.
+- Weapon profiles show Ammunition, Traits, ranges, icons, and special rules, and Unit pages show
+  more complete profile and loadout details.
+- AVA values display correctly, searches handle punctuation, and symbol display is more reliable.
 
 ### Added
 
@@ -766,9 +761,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Unit rows are clickable, search ignores case/accents/punctuation, and the browser shows the Army
-  snapshot download date.
-- Reinforcement matching and profile grouping are more reliable despite source naming variations.
+- Unit rows open their detail pages, and search ignores differences in case, accents, and
+  punctuation. The browser also shows when Army data was downloaded.
+- Reinforcements and related profiles are grouped more reliably when their names differ between
+  Army Lists.
 
 ### Added
 
@@ -788,10 +784,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Choose centimetres or inches, browse Skill Modifiers, and control reinforcement visibility and
-  availability.
-- General profiles show type/classification, equivalent Army lists group more cleanly, and
-  narrow-screen profile/loadout rows are more usable.
+- You can switch between centimetres and inches, look up Skill Modifiers, and choose whether
+  to include Reinforcements.
+- General profiles show Troop Type and Classification. Equivalent Army Lists are grouped together
+  in filters, and profile and loadout tables are easier to read on small screens.
 
 ### Added
 
@@ -813,10 +809,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- InfinityDB's first release provides a local browser for Units, Armies, profiles, loadouts, Skills,
-  Equipment, Weapons, AVA, and optional-unit availability.
-- Army/faction labels, mercenary availability, symbols, and shared versus Army-specific Unit details
-  already receive validation and presentation fixes in the initial release.
+- The first release lets you browse Units across Armies and look up their profiles, loadouts,
+  Skills, Equipment, Weapons, and availability.
+- Unit pages bring shared and Army-specific details together, with symbols and mercenary
+  availability.
 
 ### Added
 
