@@ -348,9 +348,10 @@ async function initialize() {
     }
     updateDocumentIdentity(summary);
     populatePoints(summary);
-    const requested = selectedArmyPointsFromUrl();
+    const { points: requested, source } = selectedArmyPointsFromUrl();
     if (requested != null && summary.supported_army_points.includes(requested)) {
       elements.points.value = String(requested);
+      if (source !== "token") setSelectedArmyPoints(requested);
       await loadDetail(requested);
       return;
     }

@@ -804,6 +804,12 @@ html:not([data-developer-mode="true"])
   width: 100%;
 }
 
+.scenario-rules > .detail-section {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
 .scenario-end-list {
   margin: 0;
   padding: 16px 20px 16px 40px;

@@ -316,10 +316,17 @@ def test_scenario_browser_routes_are_published_with_shared_navigation(
     assert b'writeShareState(' in script
     assert b'"scenario",' in script
     assert b'army_points: String(value)' in script
+    assert b'const { points: requested, source } = selectedArmyPointsFromUrl();' in script
+    assert b'if (source !== "token") setSelectedArmyPoints(requested);' in script
     assert b'new URLSearchParams(window.location.search).get("army_points")' not in script
     assert b'/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?' in script
     assert b'rulesCitationNode(citation)' in script
     assert b'badge.textContent = "uncertain"' in script
+
+    status, _, stylesheet = request(scenario_app, "/static/page-overrides.css")
+    assert status == 200
+    assert b".scenario-rules > .detail-section {" in stylesheet
+    assert b"padding: 16px;" in stylesheet
 
 
 @pytest.mark.parametrize(
