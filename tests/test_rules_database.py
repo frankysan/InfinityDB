@@ -2297,3 +2297,31 @@ def test_supplies_mission_round_trips_control_conditions_and_geometry_issue(
     assert {(c["source_id"], c["page"]) for c in record["citations"]} == {
         ("n5-core-v5.3-pdf", 153), ("n5-core-v5.3-pdf", 154),
     }
+
+
+def test_firefight_mission_round_trips_without_changing_canonical_skill_facts(
+    current_rules_database: RulesDatabase,
+) -> None:
+    from infinity_db.curated import load_curated_document
+    from infinity_db.scenario_definition import parse_scenario_definition_record
+    from infinity_db.scenario_mission import MetricComparison
+
+    record = current_rules_database.composed_record("scenario:firefight")
+    assert record is not None
+    mission = parse_scenario_definition_record(record).mission
+    assert mission is not None
+    assert [o.awards[0].objective_points for o in mission.objectives] == [2, 1, 3, 4]
+    assert all(isinstance(o.awards[0].condition, MetricComparison) for o in mission.objectives)
+    assert "[[skill:lieutenant:plural]]" in mission.objectives[2].name
+    assert not mission.end_conditions[1].uses_minimum_victory_points
+    assert {(c["source_id"], c["page"]) for c in record["citations"]} == {
+        ("n5-core-v5.3-pdf", 155), ("n5-core-v5.3-pdf", 156),
+    }
+    rules = {r.id: " ".join(r.paragraphs) for r in mission.rules}
+    assert "always Open Information" in rules["reinforced-tactical-link"]
+    assert "+3 MOD" in rules["designated-landing-area"]
+    core = load_curated_document(Path("data/curated/rules/n5-core-v5.3.json"))
+    for identifier in ("skill:lieutenant", "skill:combat-jump"):
+        source = next(r for r in core["records"] if r["id"] == identifier)
+        canonical = current_rules_database.composed_record(identifier)
+        assert canonical is not None and canonical["facts"] == source["facts"]

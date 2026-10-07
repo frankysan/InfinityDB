@@ -42,8 +42,8 @@ release/audit narrative belongs in the changelog and Git history.
   geometry rather than maintaining duplicate numeric measurements. ITS variation informs
   extensibility, while ITS-only geometry and the interactive editor remain post-1.0. See
   `docs/data-model.md`.
-- Annihilation, Domination, and Supplies maintain typed mission reference facts inside the existing rules
-  record payload. Domination separates per-round and whole-mission scoring caps, references scoring
+- All four core scenarios maintain typed mission reference facts inside the existing rules record
+  payload. Domination separates per-round and whole-mission scoring caps, references scoring
   regions/markers in every applicable geometry configuration, and keeps minimum Victory Points
   in the game-size row consumed by its end condition.
   Its game-size deployment references reuse maintained geometry, and nested scoring/rule/end-condition
@@ -54,6 +54,9 @@ release/audit narrative belongs in the changelog and Git history.
   preserves the written 8-inch outer-box placement plus the large-table diagram's conflicting
   12-inch labels as a scoped geometry source issue. Geometry issues must resolve in every
   applicable configuration and cannot authorize overlapping score ranges.
+  Firefight compares surviving Specialists and killed Specialists/Lieutenants/Army Points with
+  the opponent, retains the all-Null ending, and keeps Lieutenant and airborne-deployment
+  overlays scoped to its mission rules rather than rewriting canonical Skills.
   Dedicated scenario publication indexes and browser access remain design direction. See
   `docs/data-model.md` and `docs/TODO.md`.
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network

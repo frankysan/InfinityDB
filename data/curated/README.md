@@ -411,8 +411,7 @@ complete typed fact model. Scenario-definition v1 uses `facts.definitionVersion:
 and one validated `InfinityDB scenario geometry` document. Army Points must not overlap between
 configurations. All four N5.3 core scenarios are maintained examples.
 
-The optional `facts.mission` reference component is maintained by Annihilation, Domination,
-and Supplies.
+The optional `facts.mission` reference component is maintained by all four N5.3 core scenarios.
 Its required arrays are `sides`, `gameSizes`, `objectives`, `rules`, `endConditions`, and `sourceIssues`; only
 `rules` and `sourceIssues` may be empty. A game-size row has `armyPoints`, `swc`, `configurationId`,
 and `deployments` (`sideId` + `elementIds`). It references existing geometry rather than restating
@@ -426,6 +425,11 @@ matching marker, requires cumulative aggregation, and supports `status: hacked` 
 Supplies adds `element-status-comparison`, whose
 `greater` and `all` modes award a scalar bonus for more matching markers than the opponent or
 for every referenced marker matching respectively. Referenced elements must resolve in every applicable configuration as rectangles or markers respectively.
+Firefight adds `metric-comparison` conditions with `metric` and `comparison: greater`, comparing
+surviving Specialists, killed enemy Specialists, killed enemy Lieutenants, or killed enemy Army
+Points with the opponent. Unknown metrics, comparison modes, and extra condition fields are
+unsupported. The mission preserves its Lieutenant and airborne-deployment overlays as scoped
+prose rather than rewriting shared Skill facts. Objective titles use semantic tokens where needed.
 Special rules retain ordered `paragraphs`. End conditions distinguish `checkAt` from `finishAt`
 and use round-limit, reviewed-prose, or minimum-victory-points conditions.
 

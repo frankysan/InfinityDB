@@ -50,6 +50,12 @@ class NumericRangeCondition:
 
 
 @dataclass(frozen=True, slots=True)
+class MetricComparison:
+    metric: str
+    comparison: str
+
+
+@dataclass(frozen=True, slots=True)
 class ProseCondition:
     text: str
 
@@ -76,6 +82,7 @@ class ElementStatusComparison:
 
 ScenarioScoreCondition = (
     NumericRangeCondition
+    | MetricComparison
     | ProseCondition
     | DominatedRegionComparison
     | ElementStatusCount
@@ -225,6 +232,20 @@ def _condition(value: Any, context: str) -> ScenarioScoreCondition:
         if maximum is not None:
             maximum = _integer(maximum, f"{context}.maximum", minimum=minimum)
         return NumericRangeCondition(metric, minimum, maximum)
+    if kind == "metric-comparison":
+        raw = _object(value, {"kind", "metric", "comparison"}, set(), context)
+        metric = _choice(
+            raw["metric"],
+            {
+                "surviving-specialist-troops",
+                "enemy-specialist-troops-killed",
+                "enemy-lieutenants-killed",
+                "enemy-army-points-killed",
+            },
+            f"{context}.metric",
+        )
+        comparison = _choice(raw["comparison"], {"greater"}, f"{context}.comparison")
+        return MetricComparison(metric, comparison)
     if kind == "reviewed-prose":
         raw = _object(value, {"kind", "text"}, set(), context)
         return ProseCondition(_text(raw["text"], f"{context}.text"))

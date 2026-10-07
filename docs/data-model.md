@@ -400,7 +400,7 @@ core scenarios: `scenario:annihilation`, `scenario:domination`, `scenario:suppli
 collection. It validates `definitionVersion`, non-overlapping Army Points groups, and geometry-v1
 documents; the SVG CLI selects maintained geometry by scenario identity + Army Points.
 
-Annihilation, Domination, and Supplies maintain the optional `facts.mission` component, validated by
+All four core scenarios maintain the optional `facts.mission` component, validated by
 `scenario_mission.py`. It owns ordered sides; all six Army Points/SWC rows; per-side Deployment Zone
 references into the selected geometry; objectives and awards; special-rule paragraphs; mission end
 conditions; and scoped source issues. Every geometry-supported Army Points value must have exactly
@@ -448,6 +448,20 @@ one-box carrying capacity, Model-only carrying, persistent tokens, and deploymen
 remain cited ordered rules; live carriers and control are not stored or evaluated. Supplies
 reuses the literal minimum-VP rows and typed end-condition contract, with 7 SWC at 350 points.
 
+Firefight adds `metric-comparison` conditions, currently supporting strict `greater` comparisons
+with the opponent for surviving Specialist Troops, killed enemy Specialist Troops, killed enemy
+Lieutenants, and killed enemy Army Points. Its four end-of-game awards are 2, 1, 3, and 4 points
+respectively; tied metrics do not satisfy a strict-greater condition. Metrics do not imply a
+match-state evaluator or derive Specialist eligibility from static Unit/Profile flags.
+
+Its Reinforced Tactical Link, Designated Landing Area, Specialist eligibility, and Killing
+procedures remain ordered, semantically linked mission rules. Lieutenant identity is Open
+Information; the first-round table requirement and Tactical Phase replacement procedure are
+mission-local overlays. The Combat Jump +3 PH modifier and Airborne Deployment permission remain
+mission-local too; neither canonical Skill definition is rewritten. Firefight retains the three-
+round limit and all-Null ending, with no minimum-VP field on its game-size rows. Printed pages
+155–156 cite the mission reference and maps.
+
 Source issues target exactly one `objectiveId`, `gameSizeField` (`swc` or
 `minimumVictoryPoints`), or non-empty `geometryElementIds` list and name their applicable Army
 Points. Geometry references must resolve in every applicable configuration. Game-size and geometry
@@ -474,7 +488,7 @@ introduced, and rules schema/compatibility remains 7/8. Rebuild `rules.db` after
 the existing rules-build workflow.
 
 Full scenario publication/revision/membership indexes, dedicated actions/elements/features,
-Firefight reference facts, and browsable scenario access remain design direction. Concrete
+and browsable scenario access remain design direction. Concrete
 unfinished work belongs to the [1.0 backlog](TODO.md#rules-and-reference-completeness).
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses

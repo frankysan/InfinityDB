@@ -200,6 +200,11 @@ unimplemented until its corresponding behavior exists.
         end conditions. Preserve pickup alternatives, carrying capacity, carrier restrictions,
         and deployment/control rules as linked prose; round-trip facts and citations through
         existing rules storage. Geometry source issues now validate across every applicable map.
+      - [x] Extend the reference subset with **Firefight**: strict comparative combat metrics,
+        all six game-size rows, and the all-Null ending. Preserve Lieutenant disclosure/table
+        requirements and Tactical Phase replacement, the Combat Jump modifier and Airborne
+        Deployment permission, Killing, and Specialist rules as linked mission-local prose.
+        Round-trip the facts/citations and verify that canonical Skill facts remain unchanged.
     - [ ] Export relational identities/provenance/membership/reference indexes and validated
       component payloads to `rules.db`. Cover broken references, invalid dimensions/placements,
       distinct revisions of one identity, deterministic output, and unsupported formats. Update
@@ -207,11 +212,12 @@ unimplemented until its corresponding behavior exists.
   - [ ] Maintain structured, cited scenario data sufficient to understand setup, objectives,
     scoring, deployment, special rules/elements, and end conditions without relying on an
     unstructured PDF excerpt as the application model.
-    - [ ] Curate **Annihilation, Domination, Supplies, and Firefight**, using N5 v5.3 printed
-      pages 149–156 and the retained [scenario findings](rules-semantics.md#scenarios).
+    - [x] Curate **Annihilation, Domination, Supplies, and Firefight** in the implemented reference
+      subset, using N5 v5.3 printed pages 149–156 and the retained [scenario findings](rules-semantics.md#scenarios).
       Review every supported game-size row, objective/cap/timing, placement rule, special rule,
       and end condition. Link shared concepts to canonical catalog identities; retain source
-      discrepancies and reviewed resolution instead of copying the nearest chart value.
+      discrepancies and reviewed resolution instead of copying the nearest chart value. Dedicated
+      scoped action/role/element identities and publication indexes remain separate pending work.
     - [ ] Resolve the **Annihilation 350-point surviving-Victory-Points discrepancy** against
       authoritative clarification. N5.3 printed page 149 leaves 151–175 uncovered and overlaps
       251–270. The maintained pilot preserves the printed bands and a scoped needs-verification

@@ -503,3 +503,15 @@ def test_supplies_placement_issue_uses_shared_distance_validation() -> None:
     record["facts"]["mission"]["sourceIssues"][0]["description"] = "Place the boxes 8 inches away."
     with pytest.raises(ValueError, match="must use a .*distance"):
         validate_maintained_text_syntax(core)
+
+
+def test_firefight_objective_titles_use_shared_reference_validation(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    core = next(
+        document for _, document in documents if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    record = next(r for r in core["records"] if r["id"] == "scenario:firefight")
+    record["facts"]["mission"]["objectives"][2]["name"] = "More [[skill:not-current]] killed"
+    with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
+        export_rules_database(documents, tmp_path / "rules.db", finalize=False)

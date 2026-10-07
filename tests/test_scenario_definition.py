@@ -26,6 +26,7 @@ from infinity_db.scenario_mission import (
     DominatedRegionComparison,
     ElementStatusComparison,
     ElementStatusCount,
+    MetricComparison,
     NumericRangeCondition,
     ProseCondition,
 )
@@ -902,3 +903,148 @@ def test_geometry_issue_does_not_excuse_an_unrelated_exclusive_scoring_overlap(
     issue["geometryElementIds"] = ["deployment-a"]
     with pytest.raises(ScenarioDefinitionError, match="overlapping score ranges for 350"):
         parse_scenario_definition_record(annihilation_record)
+
+
+@pytest.fixture
+def firefight_record() -> dict[str, Any]:
+    document = load_curated_document(_CORE_RULES)
+    return deepcopy(next(r for r in document["records"] if r["id"] == "scenario:firefight"))
+
+
+def test_firefight_preserves_each_game_size_and_all_null_end_condition(
+    firefight_record: dict[str, Any],
+) -> None:
+    mission = parse_scenario_definition_record(firefight_record).mission
+    assert mission is not None
+    assert [(s.army_points, s.swc, s.configuration_id) for s in mission.game_sizes] == [
+        (150, 3, "150-points"),
+        (200, 4, "200-250-points"),
+        (250, 5, "200-250-points"),
+        (300, 6, "300-400-points"),
+        (350, 7, "300-400-points"),
+        (400, 8, "300-400-points"),
+    ]
+    assert all(s.minimum_victory_points is None for s in mission.game_sizes)
+    assert mission.end_conditions[0].rounds == 3
+    ending = mission.end_conditions[1]
+    assert not ending.uses_minimum_victory_points
+    assert (ending.id, ending.check_at, ending.finish_at) == (
+        "all-troopers-null",
+        "tactical-phase",
+        "end-of-player-turn",
+    )
+    assert ending.description and "all Troopers" in ending.description
+    assert "classified as Null" in ending.description
+    assert not mission.source_issues
+    assert {(c["sourceId"], c["page"]) for c in firefight_record["citations"]} == {
+        ("n5-core-v5.3-pdf", 155),
+        ("n5-core-v5.3-pdf", 156),
+    }
+
+
+def test_firefight_comparative_objectives_preserve_the_four_awards(
+    firefight_record: dict[str, Any],
+) -> None:
+    mission = parse_scenario_definition_record(firefight_record).mission
+    assert mission is not None
+    assert [(o.id, o.maximum_points, o.awards[0].condition) for o in mission.objectives] == [
+        ("surviving-specialists", 2, MetricComparison("surviving-specialist-troops", "greater")),
+        ("killed-specialists", 1, MetricComparison("enemy-specialist-troops-killed", "greater")),
+        ("killed-lieutenants", 3, MetricComparison("enemy-lieutenants-killed", "greater")),
+        ("killed-army-points", 4, MetricComparison("enemy-army-points-killed", "greater")),
+    ]
+    assert all(
+        o.timing == "end-of-game" and o.aggregation == "exclusive" for o in mission.objectives
+    )
+    assert all(o.maximum_points_per_round is None for o in mission.objectives)
+    assert all(o.side_ids == ("side-a", "side-b") for o in mission.objectives)
+    assert [o.awards[0].objective_points for o in mission.objectives] == [2, 1, 3, 4]
+    assert all(
+        o.awards[0].army_points == (150, 200, 250, 300, 350, 400) for o in mission.objectives
+    )
+    assert "[[skill:lieutenant:plural]]" in mission.objectives[2].name
+
+
+def test_firefight_retains_tactical_link_landing_and_specialist_rules(
+    firefight_record: dict[str, Any],
+) -> None:
+    mission = parse_scenario_definition_record(firefight_record).mission
+    assert mission is not None
+    rules = {r.id: " ".join(r.paragraphs) for r in mission.rules}
+    assert "[[state:dead]]" in rules["killing"]
+    assert "never deployed" in rules["killing"]
+    link = rules["reinforced-tactical-link"]
+    assert "identity of the [[skill:lieutenant]] is always Open Information" in link
+    assert "identify which Marker" in link
+    assert "beginning of the first Game Round" in link
+    assert "start of the Tactical Phase" in link
+    assert "not deployed or is classified as Null" in link
+    assert "without spending an Order" in link
+    assert "replacement [[skill:lieutenant]] must be a Model or Marker on the table" in link
+    assert "[[state:isolated]]" not in link  # Do not invent an additional replacement trigger.
+    landing = rules["designated-landing-area"]
+    assert "whole game table" in landing
+    assert "[[skill:combat-jump]] may apply a +3 MOD" in landing
+    assert "[[attribute:ph]] Roll" in landing
+    assert "cumulative with MODs provided by other rules" in landing
+    assert "Special Skill carrying the Airborne Deployment (AD) Label" in landing
+    assert "inside the enemy Deployment Zone" in landing
+    specialists = rules["specialist-troops"]
+    for identity in (
+        "doctor",
+        "engineer",
+        "forward-observer",
+        "hacker",
+        "paramedic",
+        "specialist-operative",
+        "chain-of-command",
+    ):
+        assert f"[[skill:{identity}]]" in specialists
+    assert "cannot use [[skill:peripheral:plural]]" in specialists
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("metric", "unknown-statistic", "one of"),
+        ("metric", True, "one of"),
+        ("comparison", "equal", "one of"),
+        ("comparison", "greater-or-equal", "one of"),
+        ("comparison", True, "one of"),
+        ("minimum", 1, "unsupported fields"),
+        ("elementIds", ["deployment-a"], "unsupported fields"),
+    ],
+)
+def test_firefight_metric_comparison_rejects_unsupported_semantics(
+    firefight_record: dict[str, Any],
+    field: str,
+    value: Any,
+    message: str,
+) -> None:
+    condition = firefight_record["facts"]["mission"]["objectives"][0]["awards"][0]["condition"]
+    condition[field] = value
+    with pytest.raises(ScenarioDefinitionError, match=message):
+        parse_scenario_definition_record(firefight_record)
+
+
+def test_all_core_scenarios_now_have_validated_mission_reference_facts() -> None:
+    document = load_curated_document(_CORE_RULES)
+    definitions = [
+        parse_scenario_definition_record(r) for r in document["records"] if r["kind"] == "scenario"
+    ]
+    assert {d.id for d in definitions} == {
+        "scenario:annihilation",
+        "scenario:domination",
+        "scenario:supplies",
+        "scenario:firefight",
+    }
+    for definition in definitions:
+        assert definition.mission is not None
+        assert [s.army_points for s in definition.mission.game_sizes] == [
+            150,
+            200,
+            250,
+            300,
+            350,
+            400,
+        ]

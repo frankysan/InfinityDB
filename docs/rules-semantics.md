@@ -3145,6 +3145,31 @@ Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed pages 153–154. 
 objectives, placement prose, pickup, carrying, control, and the deployment-contact restriction;
 page 154 owns Specialist eligibility, the Peripheral restriction, and end conditions.
 
+### RS-SCN-FF-001 — Firefight compares combat metrics and retains mission-local overlays
+
+**Classification:** source-native scenario reference facts with scoped overlay ownership.
+
+N5 Core Rules v5.3 (2026-08-10), printed page 155, awards Firefight 2 points for more surviving
+Specialist Troops than the opponent, 1 for killing more Specialist Troops, 3 for killing more
+Lieutenants, and 4 for killing more Army Points. The maintained definition records four distinct
+strict-greater metrics and end-of-game awards, retaining the scenario Killing and Specialist
+definitions as ordered rules rather than deriving them from static profile fields.
+
+Reinforced Tactical Link makes Lieutenant identity Open Information, requires the Lieutenant on
+the table at the beginning of the first round as a Model or Marker, and provides a Tactical Phase
+replacement procedure for an undeployed or Null Lieutenant. It does not justify adding an Isolated
+replacement trigger absent from that scenario text. The new Lieutenant must be on the table and
+its identity remains Open Information.
+
+Designated Landing Area gives Combat Jump a cumulative +3 deployment PH modifier across the whole
+table and lets Troopers with an Airborne Deployment-labelled Skill ignore the enemy Deployment
+Zone prohibition. These overlays remain Firefight-local; canonical Lieutenant and Combat Jump
+facts are unchanged. The scenario finishes after the third Game Round or at the end of a Player
+Turn following an all-Null Tactical Phase check, without a minimum-VP chart.
+
+Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed page 155 (objectives, game-size
+chart, special rules, Specialist eligibility, and endings) and page 156 (deployment diagrams).
+
 ## Quick Reference Charts
 
 ### RS-QR-PROJ-001 — Quick-reference charts are derived projections of owning rule facts

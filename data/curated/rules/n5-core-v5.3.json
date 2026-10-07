@@ -18986,6 +18986,310 @@
             },
             "facts": {
                 "definitionVersion": 1,
+                "mission": {
+                    "sides": [
+                        {
+                            "id": "side-a",
+                            "name": "Side A"
+                        },
+                        {
+                            "id": "side-b",
+                            "name": "Side B"
+                        }
+                    ],
+                    "gameSizes": [
+                        {
+                            "armyPoints": 150,
+                            "swc": 3,
+                            "configurationId": "150-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "armyPoints": 200,
+                            "swc": 4,
+                            "configurationId": "200-250-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "armyPoints": 250,
+                            "swc": 5,
+                            "configurationId": "200-250-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "armyPoints": 300,
+                            "swc": 6,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "armyPoints": 350,
+                            "swc": 7,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "armyPoints": 400,
+                            "swc": 8,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "objectives": [
+                        {
+                            "id": "surviving-specialists",
+                            "name": "More surviving Specialist Troops",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-game",
+                            "aggregation": "exclusive",
+                            "maximumPoints": 2,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150,
+                                        200,
+                                        250,
+                                        300,
+                                        350,
+                                        400
+                                    ],
+                                    "objectivePoints": 2,
+                                    "condition": {
+                                        "kind": "metric-comparison",
+                                        "metric": "surviving-specialist-troops",
+                                        "comparison": "greater"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "killed-specialists",
+                            "name": "More enemy Specialist Troops killed",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-game",
+                            "aggregation": "exclusive",
+                            "maximumPoints": 1,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150,
+                                        200,
+                                        250,
+                                        300,
+                                        350,
+                                        400
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "metric-comparison",
+                                        "metric": "enemy-specialist-troops-killed",
+                                        "comparison": "greater"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "killed-lieutenants",
+                            "name": "More enemy [[skill:lieutenant:plural]] killed",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-game",
+                            "aggregation": "exclusive",
+                            "maximumPoints": 3,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150,
+                                        200,
+                                        250,
+                                        300,
+                                        350,
+                                        400
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "metric-comparison",
+                                        "metric": "enemy-lieutenants-killed",
+                                        "comparison": "greater"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "killed-army-points",
+                            "name": "More enemy Army Points killed",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-game",
+                            "aggregation": "exclusive",
+                            "maximumPoints": 4,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150,
+                                        200,
+                                        250,
+                                        300,
+                                        350,
+                                        400
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "metric-comparison",
+                                        "metric": "enemy-army-points-killed",
+                                        "comparison": "greater"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "rules": [
+                        {
+                            "id": "killing",
+                            "name": "Killing",
+                            "paragraphs": [
+                                "An enemy Trooper counts as killed after entering [[state:dead]] or if it is classified as Null when the game ends.",
+                                "A Trooper that has never deployed on the table as a Model or Marker counts as killed when the game ends."
+                            ]
+                        },
+                        {
+                            "id": "reinforced-tactical-link",
+                            "name": "Reinforced Tactical Link",
+                            "paragraphs": [
+                                "For this mission, the identity of the [[skill:lieutenant]] is always Open Information. If represented by a Marker, identify which Marker is the [[skill:lieutenant]].",
+                                "The [[skill:lieutenant]] must be on the game table at the beginning of the first Game Round, as a Model or Marker.",
+                                "At the start of the Tactical Phase of your Active Turn, if you lack a [[skill:lieutenant]] because that Trooper was not deployed or is classified as Null, appoint a new [[skill:lieutenant]] without spending an Order.",
+                                "The replacement [[skill:lieutenant]] must be a Model or Marker on the table, and its identity is also Open Information."
+                            ]
+                        },
+                        {
+                            "id": "designated-landing-area",
+                            "name": "Designated Landing Area",
+                            "paragraphs": [
+                                "The whole game table is a Designated Landing Area. A Trooper with [[skill:combat-jump]] may apply a +3 MOD to its deployment [[attribute:ph]] Roll.",
+                                "This +3 MOD is cumulative with MODs provided by other rules.",
+                                "A Trooper with a Special Skill carrying the Airborne Deployment (AD) Label ignores the prohibition against deploying inside the enemy Deployment Zone."
+                            ]
+                        },
+                        {
+                            "id": "specialist-troops",
+                            "name": "Specialist Troops",
+                            "paragraphs": [
+                                "For this mission, Specialist Troops are Troopers with [[skill:doctor]], [[skill:engineer]], [[skill:forward-observer]], [[skill:hacker]], [[skill:paramedic]], [[skill:specialist-operative]], or [[skill:chain-of-command]].",
+                                "[[skill:doctor:plural]] and [[skill:engineer:plural]] cannot use [[skill:peripheral:plural]] for tasks reserved for Specialist Troops."
+                            ]
+                        }
+                    ],
+                    "endConditions": [
+                        {
+                            "id": "round-limit",
+                            "checkAt": "end-of-round",
+                            "finishAt": "end-of-round",
+                            "condition": {
+                                "kind": "round-limit",
+                                "rounds": 3
+                            }
+                        },
+                        {
+                            "id": "all-troopers-null",
+                            "checkAt": "tactical-phase",
+                            "finishAt": "end-of-player-turn",
+                            "condition": {
+                                "kind": "reviewed-prose",
+                                "text": "If the active player finds that all Troopers in their Army List are classified as Null during their Tactical Phase, finish the mission at the end of that Player Turn."
+                            }
+                        }
+                    ],
+                    "sourceIssues": []
+                },
                 "configurations": [
                     {
                         "id": "150-points",
