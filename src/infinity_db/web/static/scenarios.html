@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="Browse current Infinity scenarios, supported game sizes, objectives, rules, and deployment maps.">
+    <title>Scenarios · InfinityDB</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script type="module" src="/static/scenarios.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to scenarios</a>
+    <!-- navigation -->
+    <main id="main" class="main" tabindex="-1">
+      <!-- page-header -->
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Scenario reference</p>
+          <h1 id="page-title">Scenarios<span>.</span></h1>
+          <p class="intro-copy">Browse current core scenarios, then choose an Army Points value to see the exact setup, objectives, special rules, and deployment map for that game size.</p>
+        </div>
+      </section>
+      <section class="surface surface--clipped content-frame scenario-catalog" aria-labelledby="scenario-list-heading">
+        <div class="section-heading">
+          <h2 id="scenario-list-heading">Current scenarios</h2>
+          <span id="scenario-count" class="section-index">Loading…</span>
+        </div>
+        <div id="scenario-results" class="results" aria-busy="true">
+          <div id="scenario-loading" class="state-panel"><span class="spinner" aria-hidden="true"></span><h3>Loading scenarios</h3><p>Loading current scenario information.</p></div>
+          <div id="scenario-error" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">!</span><h3>Scenarios could not be loaded</h3><p id="scenario-error-message">Please try again.</p></div>
+          <div id="scenario-empty" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">⌕</span><h3>No scenarios available</h3><p>There are no published scenarios to browse right now.</p></div>
+          <div id="scenario-grid" class="scenario-grid" hidden></div>
+        </div>
+      </section>
+      <!-- page-footer -->
+    </main>
+  </body>
+</html>

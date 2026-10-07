@@ -4483,7 +4483,7 @@ def test_browser_share_state_codec_is_versioned_scoped_and_legacy_compatible(app
     assert status == 200
     assert b'const TOKEN_PARAMETER = "s";' in script
     assert b'const TOKEN_VERSION = "v1";' in script
-    for scope in (b'u', b'c', b'f', b'd', b's', b'g'):
+    for scope in (b'u', b'c', b'f', b'd', b's', b'g', b'n'):
         assert b'scope: "' + scope + b'"' in script
     assert b'base64UrlEncode(bytes)' in script
     assert b'appendVarUint(bytes, encoded.length)' in script

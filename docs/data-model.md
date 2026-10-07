@@ -536,8 +536,11 @@ Rebuild `rules.db` after curation changes using the existing rules-build workflo
 resolved by stable collection ID plus exact collection revision; omitting a revision considers only
 publications backed by `current` source collections. Historical revisions require an explicit
 collection/revision pair. Unknown selections return no match, malformed or ambiguous selections fail
-explicitly, and no other season/revision is substituted. Element/feature vocabulary extensions and
-browsable scenario access remain unfinished work in the
+explicitly, and no other season/revision is substituted. The player-facing `/scenarios` catalog and
+detail pages consume `ScenarioCatalog` through the JSON API, require an explicit Army Points selection,
+and render the selected maintained geometry through the deterministic SVG endpoint. Browser selection
+state uses the common versioned share-state token; legacy explicit `army_points` input remains readable.
+Element/feature vocabulary extensions and source-discrepancy resolution remain unfinished work in the
 [1.0 backlog](TODO.md#rules-and-reference-completeness).
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses

@@ -199,10 +199,11 @@ APPLICATION_DOMAINS: tuple[ApplicationDomain, ...] = (
         "top-level",
         "catalog",
         record_kinds=("scenario",),
+        navigation=True,
         landing=True,
         catalog=True,
         detail=True,
-        published=False,
+        published=True,
     ),
     ApplicationDomain(
         "rules",

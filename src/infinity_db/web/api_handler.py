@@ -38,6 +38,8 @@ from infinity_db.maintained_text_references import (
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.scenario_catalog import ScenarioCatalog
+from infinity_db.scenario_geometry import parse_scenario_geometry
+from infinity_db.scenario_map_svg import render_scenario_map_svg
 from infinity_db.search_catalog import SearchCatalog
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
@@ -62,6 +64,7 @@ from infinity_db.web.routes import (
     LABEL_API_PATH,
     RULE_API_PATH,
     SCENARIO_API_PATH,
+    SCENARIO_MAP_API_PATH,
     SKILL_API_PATH,
     STATE_API_PATH,
     TRAIT_API_PATH,
@@ -185,6 +188,23 @@ def _enrich_scenario_api_item(
                 if isinstance(component, dict):
                     enrich_component(component)
     return result
+
+
+def _scenario_army_points(query_string: str) -> int:
+    params = _validated_query_params(query_string, {"army_points", "cache_bust"})
+    if "army_points" not in params:
+        raise ValueError("Provide army_points exactly once")
+    army_points = _integer(params, "army_points", None, 1, 10000)
+    if army_points is None:
+        raise ValueError("Provide army_points exactly once")
+    return army_points
+
+
+def _scenario_summary(catalog: ScenarioCatalog, identifier: str) -> dict[str, Any] | None:
+    return next(
+        (item for item in catalog.list_scenarios() if item["slug"] == identifier),
+        None,
+    )
 
 
 def _integer(params: dict, key: str, default: int | None, low: int, high: int) -> int | None:
@@ -852,18 +872,10 @@ class ApiHandler:
                 payload = {
                     "error": "Scenario information is unavailable. Please try again."
                 }
-        elif match := SCENARIO_API_PATH.fullmatch(path):
+        elif match := SCENARIO_MAP_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
-                params = _validated_query_params(
-                    query_string,
-                    {"army_points", "cache_bust"},
-                )
-                if "army_points" not in params:
-                    raise ValueError("Provide army_points exactly once")
-                army_points = _integer(params, "army_points", None, 1, 10000)
-                if army_points is None:
-                    raise ValueError("Provide army_points exactly once")
+                army_points = _scenario_army_points(query_string)
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)},
@@ -872,14 +884,63 @@ class ApiHandler:
                 )
             try:
                 identifier = match.group("identifier")
-                summary = next(
-                    (
-                        item
-                        for item in self.scenario_catalog.list_scenarios()
-                        if item["slug"] == identifier
-                    ),
-                    None,
+                summary = _scenario_summary(self.scenario_catalog, identifier)
+                if summary is None:
+                    return WebResponse.json(
+                        {"error": "Scenario not found"},
+                        status=HTTPStatus.NOT_FOUND,
+                        cache_control=cache_control,
+                    )
+                if army_points not in summary["supported_army_points"]:
+                    supported = ", ".join(
+                        str(value) for value in summary["supported_army_points"]
+                    )
+                    return WebResponse.json(
+                        {
+                            "error": (
+                                f"This scenario does not support {army_points} Army Points. "
+                                f"Supported values: {supported}."
+                            )
+                        },
+                        status=HTTPStatus.BAD_REQUEST,
+                        cache_control=cache_control,
+                    )
+                scenario = self.scenario_catalog.get_scenario(
+                    identifier,
+                    army_points=army_points,
                 )
+                if scenario is None:
+                    return WebResponse.json(
+                        {"error": "Scenario not found"},
+                        status=HTTPStatus.NOT_FOUND,
+                        cache_control=cache_control,
+                    )
+                geometry = parse_scenario_geometry(scenario["placement"]["geometry"])
+                return WebResponse(
+                    body=render_scenario_map_svg(geometry).encode("utf-8"),
+                    content_type="image/svg+xml; charset=utf-8",
+                    cache_control=cache_control,
+                )
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not render scenario map")
+                return WebResponse.json(
+                    {"error": "Scenario map is unavailable. Please try again."},
+                    status=HTTPStatus.SERVICE_UNAVAILABLE,
+                    cache_control=cache_control,
+                )
+        elif match := SCENARIO_API_PATH.fullmatch(path):
+            cache_control = API_CACHE_CONTROL
+            try:
+                army_points = _scenario_army_points(query_string)
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)},
+                    status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                identifier = match.group("identifier")
+                summary = _scenario_summary(self.scenario_catalog, identifier)
                 if summary is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Scenario not found"}

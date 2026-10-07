@@ -27,6 +27,7 @@ from infinity_db.web.routes import (
     ORDER_SYMBOL_PATH,
     PERIPHERAL_SYMBOL_PATH,
     RULE_PAGE_PATH,
+    SCENARIO_PAGE_PATH,
     SKILL_PAGE_PATH,
     STATE_PAGE_PATH,
     TRAIT_PAGE_PATH,
@@ -79,6 +80,8 @@ ASSETS = {
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
     "/static/search.js": ("search.js", "text/javascript; charset=utf-8"),
+    "/static/scenarios.js": ("scenarios.js", "text/javascript; charset=utf-8"),
+    "/static/scenario.js": ("scenario.js", "text/javascript; charset=utf-8"),
     "/static/glossary.js": ("glossary.js", "text/javascript; charset=utf-8"),
     "/static/hacking-program-detail.js": (
         "hacking-program-detail.js",
@@ -312,6 +315,12 @@ _FIXED_PAGES = {
             summary_heading="Rules reference",
         ),
     ),
+    "/scenarios": PageSpec(
+        "scenarios.html",
+        (("InfinityDB", "/"), ("Scenarios", None)),
+        "Scenario reference",
+        "scenarios",
+    ),
     "/changes": PageSpec(
         "changes.html",
         (("InfinityDB", "/"), ("What's changed", None)),
@@ -435,6 +444,15 @@ _DETAIL_PAGES = (
         ),
     ),
     (
+        SCENARIO_PAGE_PATH,
+        PageSpec(
+            "scenario.html",
+            (("InfinityDB", "/"), ("Scenarios", "/scenarios"), ("Details", None)),
+            "Scenario reference",
+            "scenarios",
+        ),
+    ),
+    (
         HACKING_PROGRAM_PAGE_PATH,
         PageSpec(
             "hacking-program-detail.html",
@@ -532,6 +550,7 @@ def _render_page(
         "ammunition": "AMMUNITION_CURRENT",
         "labels": "LABELS_CURRENT",
         "rules": "RULES_CURRENT",
+        "scenarios": "SCENARIOS_CURRENT",
         "skill-extras": "SKILL_EXTRAS_CURRENT",
         "fireteams": "FIRETEAMS_CURRENT",
         "glossary": "GLOSSARY_CURRENT",

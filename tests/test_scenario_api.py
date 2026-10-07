@@ -263,6 +263,20 @@ def test_scenario_api_routes_use_bounded_metric_labels(
     )
     assert b"domination" not in metrics
 
+    status, _, _ = request(
+        scenario_app,
+        "/api/scenarios/domination/map.svg",
+        query="army_points=300",
+    )
+    assert status == 200
+
+    status, _, metrics = request(scenario_app, "/internal/metrics")
+    assert status == 200
+    assert (
+        b'infinitydb_http_requests_total{route="/api/scenarios/:id/map.svg",status_class="2xx"}'
+        in metrics
+    )
+    assert b"domination" not in metrics
 
 
 def test_browser_api_module_owns_scenario_endpoint_shapes(
@@ -280,10 +294,77 @@ def test_browser_api_module_owns_scenario_endpoint_shapes(
         in script
     )
 
-def test_scenario_browser_routes_remain_unpublished(
+def test_scenario_browser_routes_are_published_with_shared_navigation(
     scenario_app: Application,
 ) -> None:
     status, _, body = request(scenario_app, "/scenarios")
+    assert status == 200
+    assert b"Current scenarios" in body
+    assert b'href="/scenarios" aria-current="page"' in body
+    assert b'src="/static/scenarios.js?' in body
 
-    assert status == 404
-    assert json.loads(body) == {"error": "Resource not found"}
+    status, _, body = request(scenario_app, "/scenarios/domination")
+    assert status == 200
+    assert b"Choose Army Points" in body
+    assert b'href="/scenarios" aria-current="page"' in body
+    assert b'src="/static/scenario.js?' in body
+
+    status, _, script = request(scenario_app, "/static/scenario.js")
+    assert status == 200
+    assert b'from "./share-state.js"' in script
+    assert b'readShareState("scenario")' in script
+    assert b'writeShareState(' in script
+    assert b'"scenario",' in script
+    assert b'army_points: String(value)' in script
+    assert b'new URLSearchParams(window.location.search).get("army_points")' not in script
+    assert b'/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?' in script
+    assert b'rulesCitationNode(citation)' in script
+    assert b'badge.textContent = "uncertain"' in script
+
+
+@pytest.mark.parametrize(
+    "slug",
+    ["annihilation", "domination", "supplies", "firefight"],
+)
+def test_scenario_map_api_renders_every_supported_configuration(
+    scenario_app: Application,
+    slug: str,
+) -> None:
+    status, _, body = request(scenario_app, "/api/scenarios")
+    assert status == 200
+    summary = next(item for item in json.loads(body)["items"] if item["slug"] == slug)
+
+    for army_points in summary["supported_army_points"]:
+        status, headers, svg = request(
+            scenario_app,
+            f"/api/scenarios/{slug}/map.svg",
+            query=f"army_points={army_points}",
+        )
+        assert status == 200
+        assert headers["content-type"].startswith("image/svg+xml")
+        assert b'<svg xmlns="http://www.w3.org/2000/svg"' in svg
+
+
+def test_scenario_map_api_renders_selected_maintained_geometry(
+    scenario_app: Application,
+) -> None:
+    status, headers, body = request(
+        scenario_app,
+        "/api/scenarios/domination/map.svg",
+        query="army_points=300",
+    )
+
+    assert status == 200
+    assert headers["content-type"].startswith("image/svg+xml")
+    assert b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"' in body
+    assert b'data-unit="in"' in body
+    assert b'id="quadrant-1-size" class="area-size"' in body
+    assert "24″ × 12″".encode() in body
+
+    status, _, body = request(
+        scenario_app,
+        "/api/scenarios/domination/map.svg",
+        query="army_points=175",
+    )
+    assert status == 400
+    assert json.loads(body)["error"].startswith("This scenario does not support 175 Army Points")

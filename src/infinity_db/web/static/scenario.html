@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="View an Infinity scenario for a selected Army Points value, including setup, objectives, rules, and deployment map.">
+    <title>Scenario · InfinityDB</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script type="module" src="/static/scenario.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to scenario details</a>
+    <!-- navigation -->
+    <main id="main" class="main" tabindex="-1">
+      <!-- page-header -->
+      <section class="intro" aria-labelledby="scenario-name">
+        <div>
+          <p class="eyebrow">Scenario details</p>
+          <h1 id="scenario-name">Loading<span>.</span></h1>
+          <p id="scenario-description" class="intro-copy"></p>
+        </div>
+      </section>
+      <section id="scenario-config" class="surface surface--subtle content-frame scenario-config" aria-labelledby="scenario-config-heading" hidden>
+        <div>
+          <h2 id="scenario-config-heading">Game size</h2>
+          <p>Choose the Army Points value for the game. Scenario setup and scoring can differ by game size.</p>
+        </div>
+        <label class="scenario-points-field" for="scenario-army-points">
+          <span>Army Points</span>
+          <select id="scenario-army-points">
+            <option value="">Choose Army Points</option>
+          </select>
+        </label>
+      </section>
+      <div id="scenario-state" class="scenario-state" aria-busy="true">
+        <p id="scenario-status" class="state-panel" role="status">Loading scenario.</p>
+        <div id="scenario-error" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">!</span><h3>Scenario could not be loaded</h3><p id="scenario-error-message">Please try again.</p></div>
+        <div id="scenario-choice" class="state-panel" hidden><span class="state-symbol" aria-hidden="true">↕</span><h3>Choose a game size</h3><p>Select Army Points above to load the matching setup, scoring, and map.</p></div>
+        <div id="scenario-content" class="scenario-detail" hidden></div>
+      </div>
+      <!-- page-footer -->
+    </main>
+  </body>
+</html>

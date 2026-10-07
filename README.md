@@ -1,7 +1,7 @@
 # InfinityDB
 
 InfinityDB is a read-only Infinity reference for exploring Units, profiles,
-Equipment, Skills, Weapons, and relationships across Armies. It combines
+Equipment, Skills, Weapons, core Scenarios, and relationships across Armies. It combines
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
@@ -71,6 +71,9 @@ its application metrics.
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Includes global search and a federated Glossary across player-facing reference domains, with
   embedded Attributes and scoped Game terms routed back to their canonical owning surfaces.
+- Includes a browsable core **Scenarios** reference with explicit Army Points selection, structured
+  setup/objectives/scoring, scenario Rules and Skills, source-verification notes, and deterministic
+  deployment maps generated from the same maintained geometry as the scenario data.
 - Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
   with an S2 reference alongside other supported Silhouettes.
 - Supports System, Light, and Dark themes from Settings; System follows the operating-system

@@ -11,7 +11,18 @@ are not retroactively relabeled.
 
 ### Player summary
 
-No player-facing changes.
+- You can now browse the four current core scenarios, choose the exact Army Points value, and see
+  setup, objectives, scenario rules, source notes, and a generated deployment map together.
+
+### Added
+
+- **Data processing + Web backend + Web frontend:** Publish the bounded core **Scenarios** domain for
+  Annihilation, Domination, Supplies, and Firefight. Scenario detail requires an explicit supported
+  Army Points selection, keeps point-dependent scoring/source issues scoped correctly, links existing
+  rules references, and renders deterministic SVG maps from the same maintained geometry used by the
+  scenario data. Scenarios are discoverable from primary navigation and the landing page without
+  joining global search or the Glossary. Browser configuration uses the shared versioned share-state
+  contract rather than a scenario-specific URL format.
 
 ### Upgrade notes
 

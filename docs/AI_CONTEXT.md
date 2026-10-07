@@ -51,7 +51,11 @@ release/audit narrative belongs in the changelog and Git history.
   qualification exception and all three retained core-scenario source issues. Stable scenario-set
   identity/revision and source publication revision are separate runtime concepts. Current
   `ScenarioCatalog` detail reads require an explicit supported Army Points value; do not invent a
-  default configuration in backend composition. See the scenario model in `docs/data-model.md`.
+  default configuration in backend composition. The browser follows the same rule: `/scenarios/<slug>`
+  must require an explicit user selection, store that selection through the common versioned `s=`
+  share-state codec, and render maps through the canonical SVG endpoint backed by the selected
+  maintained geometry. Do not recreate scenario geometry or scoring semantics in JavaScript. See the
+  scenario model in `docs/data-model.md`.
 
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network
   access.

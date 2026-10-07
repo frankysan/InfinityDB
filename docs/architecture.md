@@ -123,10 +123,10 @@ not competing semantic owners.
 
 `docs/application-domains.md` owns the detailed domain/presentation contract.
 
-### Planned scenario domain
+### Scenario domain
 
-**Design direction; browsable scenario domain unimplemented.** All four core scenarios maintain
-typed setup, scoring, geometry, special rules, and end conditions. Authoring definition v2 composes
+**Current bounded core-scenario surface.** All four core scenarios maintain typed setup, scoring,
+geometry, special rules, and end conditions. Authoring definition v2 composes
 shared Rules, separate scoped Skills, and typed setup/geometry/objective/ending components by explicit
 identity. Validation/export resolves those references and retains component provenance in the runtime
 record payload. Same display names do not imply shared semantics.
@@ -138,10 +138,13 @@ are excluded from default core help, and cannot grant permanent Army profile fac
 consume the materialized `rules.db`, independently of curation files.
 
 [The data model](data-model.md#planned-scenario-model-10) owns the implemented contract. Dedicated
-scenario collection/publication indexes and central revision-aware selection live in `rules.db`, and
-the JSON API now exposes the current list plus exact Army-Points detail projections. Browser routes
-and normal-mode discovery remain tracked in
-[the backlog](TODO.md#rules-and-reference-completeness).
+scenario collection/publication indexes and central revision-aware selection live in `rules.db`. The
+JSON API exposes the current list plus exact Army-Points detail projections, and `/scenarios` plus
+`/scenarios/<slug>` provide the corresponding player-facing catalog/detail surface. Army Points is
+always selected explicitly; browser state uses the common versioned share-state token and the map is
+rendered from the same maintained geometry through the SVG API. Scenarios participate in primary
+navigation and the landing page, while global search and Glossary participation remain deliberately
+disabled because the bounded core set is already directly discoverable.
 
 Core-rules scenarios are a required first-class application domain for 1.0. The architecture review
 covered the four N5.3 core scenarios, the final ITS Season 17 set, and the current ITS Season 18 set.
@@ -150,12 +153,12 @@ would be too narrow for deployment geometry, scoring cadence, asymmetric sides, 
 Objectives, scenario elements, and revision/season provenance.
 
 The accepted design places scenario definitions in the rules curation pipeline and `rules.db`,
-not in Army export or mutable match state. Publication will use a hybrid model: stable identities,
+not in Army export or mutable match state. Publication uses a hybrid model: stable identities,
 provenance, collection membership, and cross-domain references are relational; ordered and nested
 scenario structures remain validated typed payloads. Scenario identity, source revision, and
 collection/season membership remain independent.
 
-Geometry and scoring are maintained semantic data. Diagrams and reference views will be generated
+Geometry and scoring are maintained semantic data. Core diagrams and reference views are generated
 from that data, with source/season overlays kept distinct from canonical Army or rules facts.
 InfinityDB 1.0 includes a deterministic SVG projection for the four N5.3 core scenarios; geometry
 schema v1 only needs to represent those core maps. Point markers retain semantic marker identity;

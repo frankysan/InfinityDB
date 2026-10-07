@@ -301,13 +301,14 @@ unimplemented until its corresponding behavior exists.
     - [x] Expose the read models through JSON API routes. `/api/scenarios` stays configuration-neutral;
       `/api/scenarios/<slug>` requires an explicit supported `army_points` value and returns
       scenario-context maintained-text/public-reference projections without publishing the domain.
-    - [ ] Add list/detail browser surfaces using shared browser structures. Decide
-      discovery/search/Glossary participation explicitly in `docs/application-domains.md`; do not
-      require every capability just to register the domain.
-    - [ ] Make geometry understandable through structured placement descriptions/measurements and
-      the core-scenario SVG renderer where useful. Generated diagrams must consume the scenario
-      geometry rather than a second map definition. Reuse the common distance presentation contract;
-      the interactive map editor and ITS-only rendering extensions remain post-1.0.
+    - [x] Add list/detail browser surfaces using shared browser structures. Scenarios now participate
+      in primary navigation and the landing page; global search and Glossary participation remain
+      deliberately disabled for this bounded core set. Detail pages require an explicit Army Points
+      selection and store it through the common versioned browser share-state contract.
+    - [x] Make geometry understandable through structured setup facts, derived measurements, and the
+      core-scenario SVG renderer. The browser map endpoint consumes the selected maintained scenario
+      geometry rather than a second map definition. The interactive map editor and ITS-only rendering
+      extensions remain post-1.0.
   - **Completion:** all four scenarios can be found and understood in normal mode for every
     supported configuration. Review scoring and placement against citations, follow related-rule
     links, and check keyboard/touch, narrow widths, Light/Dark themes, loading/empty/error behavior,

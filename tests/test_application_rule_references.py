@@ -161,12 +161,12 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
     assert scenarios.landing is True
     assert scenarios.catalog is True
     assert scenarios.detail is True
-    assert scenarios.navigation is False
+    assert scenarios.navigation is True
     assert scenarios.search is False
     assert scenarios.glossary is False
-    assert scenarios.published is False
-    assert scenarios.route is None
-    assert semantic_record_domain("scenario") is None
+    assert scenarios.published is True
+    assert scenarios.route == "/scenarios"
+    assert semantic_record_domain("scenario") == scenarios
 
     fireteams = application_domain("fireteams")
     assert fireteams.presentation == "scoped"
@@ -212,7 +212,7 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
     assert public_rule_domain("term") is None
     assert semantic_record_domain("term") == terms
     assert public_rule_domain("rule") is None
-    assert public_rule_domain("scenario") is None
+    assert public_rule_domain("scenario") == scenarios
     assert public_rule_record_domain(
         {"kind": "rule", "facts": {"category": "basic-rule"}}
     ) == general_rules

@@ -113,23 +113,27 @@ catalog/detail, and scoped-view behavior are independent flags rather than conse
 top-level domain. Future evidence may justify another domain, but a new top-level domain requires a
 concrete player-facing browsing/use case rather than merely a new data type.
 
-### Scenario domain scaffold
+### Scenario domain
 
-**Current internal scaffold; not yet player-visible.** `scenarios` is registered as a top-level
-catalog/detail domain owning `scenario:*` records, but remains unpublished while its browser surfaces
-and normal-mode discovery are unfinished. This reserves the application ownership boundary without
-making navigation, search, or Glossary claims ahead of implementation. Scenario slug normalization
-remains the typed `scenario:<slug>` contract used by the maintained scenario layer. Rules export keeps
-stable scenario collection identity, collection revision, ordered membership, source publication
-revision, and deterministic content identity separate. `RulesDatabase` owns central selection: default
-reads consider only `current` publications, historical revisions require an explicit collection/revision
-pair, and unsupported selections never fall back silently. `ScenarioCatalog` composes current
-publication list/detail read models in maintained collection order. Detail reads require an explicit
-supported Army Points value and project setup, geometry, scoring, special Rules/Skills, end conditions,
-source issues, and publication provenance for that selection. The JSON API exposes those models at
-`/api/scenarios` and `/api/scenarios/<slug>?army_points=...`; maintained text is resolved in the
-selected scenario context so scoped concepts do not leak into ordinary core help. The domain remains
-unpublished until browser presentation and normal-mode discovery are deliberately completed.
+**Current bounded player-facing domain.** `scenarios` is a published top-level catalog/detail domain
+owning `scenario:*` records. It participates in primary navigation and the landing page; global search
+and Glossary participation are deliberately disabled for the bounded core set. Scenario slug
+normalization remains the typed `scenario:<slug>` contract used by the maintained scenario layer.
+Rules export keeps stable scenario collection identity, collection revision, ordered membership,
+source publication revision, and deterministic content identity separate. `RulesDatabase` owns central
+selection: default reads consider only `current` publications, historical revisions require an explicit
+collection/revision pair, and unsupported selections never fall back silently. `ScenarioCatalog`
+composes current publication list/detail read models in maintained collection order. Detail reads
+require an explicit supported Army Points value and project setup, geometry, scoring, special
+Rules/Skills, end conditions, source issues, and publication provenance for that selection.
+
+The JSON API exposes those models at `/api/scenarios` and
+`/api/scenarios/<slug>?army_points=...`; maintained text is resolved in the selected scenario context
+so scoped concepts do not leak into ordinary core help. The browser publishes `/scenarios` and
+`/scenarios/<slug>`, uses the shared versioned `s=` state token for Army Points selection, and requests
+the canonical SVG from `/api/scenarios/<slug>/map.svg?army_points=...`. Browser code does not derive
+scenario semantics or maintain separate geometry. Search/Glossary participation can be reconsidered
+only if a larger scenario corpus creates a concrete discovery need.
 
 ## Domain capability registry
 

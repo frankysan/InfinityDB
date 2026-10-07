@@ -13,7 +13,7 @@ function citationLabel(citation) {
   return `${source}${version}${location ? `, ${location}` : ""}`;
 }
 
-function citationNode(citation) {
+export function rulesCitationNode(citation) {
   const label = citationLabel(citation);
   if (!citation.source_url) return document.createTextNode(label);
   const link = document.createElement("a");
@@ -233,7 +233,7 @@ function appendRuleDetails(
     citations.className = "detail-source";
     for (const [index, citation] of rule.citations.entries()) {
       if (index) citations.append(" · ");
-      citations.append(citationNode(citation));
+      citations.append(rulesCitationNode(citation));
     }
     container.append(citations);
   }
