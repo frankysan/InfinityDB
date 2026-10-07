@@ -2211,3 +2211,37 @@ def test_command_order_skill_relations_are_bidirectional(
         ("causes-state", "outbound", "Suppressive Fire State"),
         ("enables-use-of", "outbound", "Request Speedball"),
     }
+
+
+def test_annihilation_mission_round_trips_through_existing_rules_storage(
+    current_rules_database: RulesDatabase,
+) -> None:
+    from infinity_db.scenario_definition import parse_scenario_definition_record
+
+    record = current_rules_database.composed_record("scenario:annihilation")
+    assert record is not None
+    definition = parse_scenario_definition_record(record)
+    assert definition.mission is not None
+    assert [size.army_points for size in definition.mission.game_sizes] == [
+        150,
+        200,
+        250,
+        300,
+        350,
+        400,
+    ]
+    issue = definition.mission.source_issues[0]
+    assert (issue.army_points, issue.objective_id, issue.status) == (
+        (350,),
+        "preserve-forces",
+        "needs-verification",
+    )
+    assert "151–175" in issue.description and "251–270" in issue.description
+    assert (
+        "[[skill:lieutenant]]"
+        in record["facts"]["mission"]["objectives"][2]["awards"][0]["condition"]["text"]
+    )
+    assert {(citation["source_id"], citation["page"]) for citation in record["citations"]} == {
+        ("n5-core-v5.3-pdf", 149),
+        ("n5-core-v5.3-pdf", 150),
+    }

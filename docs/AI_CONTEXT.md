@@ -42,6 +42,12 @@ release/audit narrative belongs in the changelog and Git history.
   geometry rather than maintaining duplicate numeric measurements. ITS variation informs
   extensibility, while ITS-only geometry and the interactive editor remain post-1.0. See
   `docs/data-model.md`.
+- Annihilation pilots typed mission reference facts inside the existing rules record payload.
+  Its game-size deployment references reuse maintained geometry, and nested scoring/rule/end-condition
+  prose must participate in the shared maintained-text audits. Preserve the scoped N5.3 350-point
+  survival-band discrepancy; a source issue does not imply a corrected score or evaluation priority.
+  Dedicated scenario publication indexes and browser access remain design direction. See
+  `docs/data-model.md` and `docs/TODO.md`.
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network
   access.
 - Persistent generated artifacts are deterministic across supported platforms for the same inputs

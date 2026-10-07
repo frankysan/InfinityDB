@@ -183,6 +183,13 @@ unimplemented until its corresponding behavior exists.
       membership, game-size configuration, sides, geometry, elements, scoring, scoped actions,
       optional features, and end conditions. Preserve ordered prose where a universal executable
       condition language would invent semantics.
+      - [x] Pilot typed setup/scoring/end conditions with **Annihilation**: preserve all six
+        Army Points/SWC rows and scoring columns, reference maintained deployment geometry,
+        retain ordered Killing prose, and distinguish the round limit from the Tactical Phase
+        all-Null end condition. Nested prose uses shared semantic-link validation. Dedicated
+        publication indexes and the remaining scenario components are still pending.
+      - [x] Prove that the pilot payload and printed-page citations round-trip through existing
+        rules record storage without changing map rendering or the rules database format.
     - [ ] Export relational identities/provenance/membership/reference indexes and validated
       component payloads to `rules.db`. Cover broken references, invalid dimensions/placements,
       distinct revisions of one identity, deterministic output, and unsupported formats. Update
@@ -195,6 +202,10 @@ unimplemented until its corresponding behavior exists.
       Review every supported game-size row, objective/cap/timing, placement rule, special rule,
       and end condition. Link shared concepts to canonical catalog identities; retain source
       discrepancies and reviewed resolution instead of copying the nearest chart value.
+    - [ ] Resolve the **Annihilation 350-point surviving-Victory-Points discrepancy** against
+      authoritative clarification. N5.3 printed page 149 leaves 151–175 uncovered and overlaps
+      251–270. The maintained pilot preserves the printed bands and a scoped needs-verification
+      issue; do not silently copy the enemy-kills thresholds or invent a scoring priority.
   - [ ] Keep the model source/scope-aware and extensible to versioned ITS seasons, but do
     not make ITS scenario content, tournament/event tooling, or a deployment-map editor a
     1.0 requirement.

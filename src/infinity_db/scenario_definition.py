@@ -7,6 +7,7 @@ from typing import Any
 
 from .domain_slugs import require_domain_slug, validate_typed_domain_id
 from .scenario_geometry import ScenarioGeometry, parse_scenario_geometry
+from .scenario_mission import ScenarioMission, parse_scenario_mission
 
 SCENARIO_DEFINITION_VERSION = 1
 
@@ -31,6 +32,7 @@ class ScenarioDefinition:
     id: str
     name: str
     configurations: tuple[ScenarioConfiguration, ...]
+    mission: ScenarioMission | None = None
 
 
 def _object(value: Any, context: str) -> dict[str, Any]:
@@ -39,9 +41,7 @@ def _object(value: Any, context: str) -> dict[str, Any]:
     return value
 
 
-def _only_keys(
-    value: dict[str, Any], required: set[str], optional: set[str], context: str
-) -> None:
+def _only_keys(value: dict[str, Any], required: set[str], optional: set[str], context: str) -> None:
     keys = set(value)
     missing = required - keys
     extra = keys - required - optional
@@ -85,13 +85,15 @@ def parse_scenario_definition_record(record: Any) -> ScenarioDefinition:
     _only_keys(
         facts,
         {"definitionVersion", "configurations"},
-        {"relatedCategories"},
+        {"relatedCategories", "mission"},
         "scenario record.facts",
     )
-    if facts.get("definitionVersion") != SCENARIO_DEFINITION_VERSION:
+    if (
+        type(facts.get("definitionVersion")) is not int
+        or facts["definitionVersion"] != SCENARIO_DEFINITION_VERSION
+    ):
         raise ScenarioDefinitionError(
-            "scenario record.facts.definitionVersion must be "
-            f"{SCENARIO_DEFINITION_VERSION}"
+            f"scenario record.facts.definitionVersion must be {SCENARIO_DEFINITION_VERSION}"
         )
 
     raw_configurations = facts.get("configurations")
@@ -149,10 +151,18 @@ def parse_scenario_definition_record(record: Any) -> ScenarioDefinition:
             )
         )
 
+    mission = None
+    if "mission" in facts:
+        try:
+            mission = parse_scenario_mission(facts["mission"], tuple(configurations))
+        except ValueError as exc:
+            raise ScenarioDefinitionError(str(exc)) from exc
+
     return ScenarioDefinition(
         id=scenario_id,
         name=name,
         configurations=tuple(configurations),
+        mission=mission,
     )
 
 
@@ -180,9 +190,7 @@ def scenario_definition_from_curated_document(
     return parse_scenario_definition_record(matches[0])
 
 
-def select_scenario_geometry(
-    definition: ScenarioDefinition, army_points: int
-) -> ScenarioGeometry:
+def select_scenario_geometry(definition: ScenarioDefinition, army_points: int) -> ScenarioGeometry:
     """Select the maintained geometry applicable to one Army Points value."""
 
     _positive_int(army_points, "army_points")

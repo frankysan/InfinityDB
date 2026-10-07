@@ -17365,7 +17365,7 @@
             "id": "scenario:annihilation",
             "kind": "scenario",
             "name": "Annihilation",
-            "summary": "Core scenario focused on destroying enemy forces and preserving your own.",
+            "summary": "Core scenario scored by enemy forces eliminated, surviving forces, and killing the enemy [[skill:lieutenant]].",
             "composition": {
                 "role": "definition"
             },
@@ -17377,6 +17377,663 @@
             },
             "facts": {
                 "definitionVersion": 1,
+                "mission": {
+                    "sides": [
+                        {
+                            "id": "side-a",
+                            "name": "Side A"
+                        },
+                        {
+                            "id": "side-b",
+                            "name": "Side B"
+                        }
+                    ],
+                    "gameSizes": [
+                        {
+                            "armyPoints": 150,
+                            "swc": 3,
+                            "configurationId": "150-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "armyPoints": 200,
+                            "swc": 4,
+                            "configurationId": "200-250-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "armyPoints": 250,
+                            "swc": 5,
+                            "configurationId": "200-250-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "armyPoints": 300,
+                            "swc": 6,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "armyPoints": 350,
+                            "swc": 7,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "armyPoints": 400,
+                            "swc": 8,
+                            "configurationId": "300-400-points",
+                            "deployments": [
+                                {
+                                    "sideId": "side-a",
+                                    "elementIds": [
+                                        "deployment-a"
+                                    ]
+                                },
+                                {
+                                    "sideId": "side-b",
+                                    "elementIds": [
+                                        "deployment-b"
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "objectives": [
+                        {
+                            "id": "destroy-forces",
+                            "name": "Enemy forces eliminated",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-game",
+                            "aggregation": "exclusive",
+                            "maximumPoints": 4,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 40,
+                                        "maximum": 75
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        150
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 76,
+                                        "maximum": 125
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        150
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 126,
+                                        "maximum": null
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        200
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 50,
+                                        "maximum": 100
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        200
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 101,
+                                        "maximum": 150
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        200
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 151,
+                                        "maximum": null
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        250
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 65,
+                                        "maximum": 125
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        250
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 126,
+                                        "maximum": 200
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        250
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 201,
+                                        "maximum": null
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        300
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 75,
+                                        "maximum": 150
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        300
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 151,
+                                        "maximum": 250
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        300
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 251,
+                                        "maximum": null
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        350
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 85,
+                                        "maximum": 175
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        350
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 176,
+                                        "maximum": 270
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        350
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 271,
+                                        "maximum": null
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        400
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 100,
+                                        "maximum": 200
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        400
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 201,
+                                        "maximum": 300
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        400
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "enemy-army-points-killed",
+                                        "minimum": 301,
+                                        "maximum": null
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "preserve-forces",
+                            "name": "Surviving forces",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-game",
+                            "aggregation": "exclusive",
+                            "maximumPoints": 4,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 40,
+                                        "maximum": 75
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        150
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 76,
+                                        "maximum": 125
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        150
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 126,
+                                        "maximum": null
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        200
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 50,
+                                        "maximum": 100
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        200
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 101,
+                                        "maximum": 150
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        200
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 151,
+                                        "maximum": null
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        250
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 65,
+                                        "maximum": 125
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        250
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 126,
+                                        "maximum": 200
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        250
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 201,
+                                        "maximum": null
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        300
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 75,
+                                        "maximum": 150
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        300
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 151,
+                                        "maximum": 250
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        300
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 251,
+                                        "maximum": null
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        350
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 85,
+                                        "maximum": 150
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        350
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 176,
+                                        "maximum": 270
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        350
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 251,
+                                        "maximum": null
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        400
+                                    ],
+                                    "objectivePoints": 1,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 100,
+                                        "maximum": 200
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        400
+                                    ],
+                                    "objectivePoints": 3,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 201,
+                                        "maximum": 300
+                                    }
+                                },
+                                {
+                                    "armyPoints": [
+                                        400
+                                    ],
+                                    "objectivePoints": 4,
+                                    "condition": {
+                                        "kind": "numeric-range",
+                                        "metric": "surviving-victory-points",
+                                        "minimum": 301,
+                                        "maximum": null
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "eliminate-command",
+                            "name": "Enemy command eliminated",
+                            "sideIds": [
+                                "side-a",
+                                "side-b"
+                            ],
+                            "timing": "end-of-game",
+                            "aggregation": "exclusive",
+                            "maximumPoints": 2,
+                            "awards": [
+                                {
+                                    "armyPoints": [
+                                        150,
+                                        200,
+                                        250,
+                                        300,
+                                        350,
+                                        400
+                                    ],
+                                    "objectivePoints": 2,
+                                    "condition": {
+                                        "kind": "reviewed-prose",
+                                        "text": "Kill the enemy [[skill:lieutenant]]."
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "rules": [
+                        {
+                            "id": "killing",
+                            "name": "Killing",
+                            "paragraphs": [
+                                "An enemy Trooper counts as killed after entering [[state:dead]] or if it is classified as Null when the game ends.",
+                                "A Trooper that has never deployed on the table as a Model or Marker counts as killed when the game ends."
+                            ]
+                        }
+                    ],
+                    "endConditions": [
+                        {
+                            "id": "round-limit",
+                            "checkAt": "end-of-round",
+                            "finishAt": "end-of-round",
+                            "condition": {
+                                "kind": "round-limit",
+                                "rounds": 3
+                            }
+                        },
+                        {
+                            "id": "all-troopers-null",
+                            "checkAt": "tactical-phase",
+                            "finishAt": "end-of-player-turn",
+                            "condition": {
+                                "kind": "reviewed-prose",
+                                "text": "If the active player finds that all Troopers in their Army List are classified as Null during their Tactical Phase, finish the mission at the end of that Player Turn."
+                            }
+                        }
+                    ],
+                    "sourceIssues": [
+                        {
+                            "id": "350-point-survival-bands",
+                            "armyPoints": [
+                                350
+                            ],
+                            "objectiveId": "preserve-forces",
+                            "status": "needs-verification",
+                            "description": "The 350-point surviving-Victory-Points column on printed page 149 lists 85–150 for 1 Objective Point, 176–270 for 3, and more than 250 for 4. It leaves 151–175 uncovered and overlaps at 251–270. These printed values are retained; the applicable score in those intervals needs verification."
+                        }
+                    ]
+                },
                 "configurations": [
                     {
                         "id": "150-points",

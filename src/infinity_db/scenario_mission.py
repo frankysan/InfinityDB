@@ -1,0 +1,409 @@
+"""Typed reference facts for scenario setup, scoring, and mission end conditions.
+
+This is a reference model, not a match-state evaluator. Source ambiguities remain
+explicit and reviewed prose is retained where executable predicates would guess.
+"""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
+
+from .domain_slugs import require_domain_slug
+from .scenario_geometry import RectangleElement
+
+if TYPE_CHECKING:
+    from .scenario_definition import ScenarioConfiguration
+
+
+class ScenarioMissionError(ValueError):
+    """Raised when scenario reference facts violate their typed contract."""
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioSide:
+    id: str
+    name: str
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioDeployment:
+    side_id: str
+    element_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioGameSize:
+    army_points: int
+    swc: float
+    configuration_id: str
+    deployments: tuple[ScenarioDeployment, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class NumericRangeCondition:
+    metric: str
+    minimum: int
+    maximum: int | None
+
+
+@dataclass(frozen=True, slots=True)
+class ProseCondition:
+    text: str
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioAward:
+    army_points: tuple[int, ...]
+    objective_points: int
+    condition: NumericRangeCondition | ProseCondition
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioObjective:
+    id: str
+    name: str
+    side_ids: tuple[str, ...]
+    timing: str
+    aggregation: str
+    maximum_points: int
+    awards: tuple[ScenarioAward, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioRule:
+    id: str
+    name: str
+    paragraphs: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioEndCondition:
+    id: str
+    check_at: str
+    finish_at: str
+    rounds: int | None
+    description: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioSourceIssue:
+    id: str
+    army_points: tuple[int, ...]
+    objective_id: str
+    description: str
+    status: str = "needs-verification"
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioMission:
+    sides: tuple[ScenarioSide, ...]
+    game_sizes: tuple[ScenarioGameSize, ...]
+    objectives: tuple[ScenarioObjective, ...]
+    rules: tuple[ScenarioRule, ...]
+    end_conditions: tuple[ScenarioEndCondition, ...]
+    source_issues: tuple[ScenarioSourceIssue, ...]
+
+
+def _object(value: Any, required: set[str], optional: set[str], context: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise ScenarioMissionError(f"{context} must be an object")
+    missing = required - set(value)
+    extra = set(value) - required - optional
+    if missing:
+        raise ScenarioMissionError(f"{context} is missing required fields: {sorted(missing)}")
+    if extra:
+        raise ScenarioMissionError(f"{context} contains unsupported fields: {sorted(extra)}")
+    return value
+
+
+def _array(value: Any, context: str, *, allow_empty: bool = False) -> list[Any]:
+    if not isinstance(value, list) or (not value and not allow_empty):
+        qualifier = "an" if allow_empty else "a non-empty"
+        raise ScenarioMissionError(f"{context} must be {qualifier} array")
+    return value
+
+
+def _text(value: Any, context: str) -> str:
+    if not isinstance(value, str) or not value.strip() or value != value.strip():
+        raise ScenarioMissionError(f"{context} must be a non-empty trimmed string")
+    return value
+
+
+def _slug(value: Any, context: str) -> str:
+    try:
+        return require_domain_slug(value, context=context)
+    except ValueError as exc:
+        raise ScenarioMissionError(str(exc)) from exc
+
+
+def _integer(value: Any, context: str, *, minimum: int = 1) -> int:
+    if type(value) is not int or value < minimum:
+        raise ScenarioMissionError(f"{context} must be an integer >= {minimum}")
+    return value
+
+
+def _choice(value: Any, choices: set[str], context: str) -> str:
+    if not isinstance(value, str) or value not in choices:
+        raise ScenarioMissionError(f"{context} must be one of {sorted(choices)}")
+    return value
+
+
+def _references(value: Any, known: set[str], context: str) -> tuple[str, ...]:
+    result = tuple(_slug(item, context) for item in _array(value, context))
+    if len(set(result)) != len(result):
+        raise ScenarioMissionError(f"{context} contains duplicate references")
+    unknown = set(result) - known
+    if unknown:
+        raise ScenarioMissionError(f"{context} contains unknown references: {sorted(unknown)}")
+    return result
+
+
+def _points(value: Any, known: set[int], context: str) -> tuple[int, ...]:
+    result = tuple(_integer(item, context) for item in _array(value, context))
+    if len(set(result)) != len(result):
+        raise ScenarioMissionError(f"{context} contains duplicate Army Points")
+    if set(result) - known:
+        raise ScenarioMissionError(f"{context} contains unsupported Army Points")
+    return result
+
+
+def _unique(identifier: str, seen: set[str], context: str) -> None:
+    if identifier in seen:
+        raise ScenarioMissionError(f"{context} duplicates {identifier!r}")
+    seen.add(identifier)
+
+
+def _condition(value: Any, context: str) -> NumericRangeCondition | ProseCondition:
+    if not isinstance(value, dict):
+        raise ScenarioMissionError(f"{context} must be an object")
+    kind = value.get("kind")
+    if kind == "numeric-range":
+        raw = _object(value, {"kind", "metric", "minimum", "maximum"}, set(), context)
+        metric = _choice(
+            raw["metric"],
+            {"enemy-army-points-killed", "surviving-victory-points"},
+            f"{context}.metric",
+        )
+        minimum = _integer(raw["minimum"], f"{context}.minimum", minimum=0)
+        maximum = raw["maximum"]
+        if maximum is not None:
+            maximum = _integer(maximum, f"{context}.maximum", minimum=minimum)
+        return NumericRangeCondition(metric, minimum, maximum)
+    if kind == "reviewed-prose":
+        raw = _object(value, {"kind", "text"}, set(), context)
+        return ProseCondition(_text(raw["text"], f"{context}.text"))
+    raise ScenarioMissionError(f"{context} contains unsupported condition kind {kind!r}")
+
+
+def parse_scenario_mission(
+    value: Any, configurations: tuple[ScenarioConfiguration, ...]
+) -> ScenarioMission:
+    """Validate the optional reference component of a maintained scenario definition."""
+
+    context = "scenario record.facts.mission"
+    raw = _object(
+        value,
+        {"sides", "gameSizes", "objectives", "rules", "endConditions", "sourceIssues"},
+        set(),
+        context,
+    )
+    side_ids: set[str] = set()
+    sides: list[ScenarioSide] = []
+    for index, item in enumerate(_array(raw["sides"], f"{context}.sides")):
+        ctx = f"{context}.sides[{index}]"
+        side = _object(item, {"id", "name"}, set(), ctx)
+        identifier = _slug(side["id"], f"{ctx}.id")
+        _unique(identifier, side_ids, ctx)
+        sides.append(ScenarioSide(identifier, _text(side["name"], f"{ctx}.name")))
+
+    configs = {config.id: config for config in configurations}
+    supported_points = {point for config in configurations for point in config.army_points}
+    seen_points: set[int] = set()
+    game_sizes: list[ScenarioGameSize] = []
+    for index, item in enumerate(_array(raw["gameSizes"], f"{context}.gameSizes")):
+        ctx = f"{context}.gameSizes[{index}]"
+        size = _object(item, {"armyPoints", "swc", "configurationId", "deployments"}, set(), ctx)
+        points = _integer(size["armyPoints"], f"{ctx}.armyPoints")
+        if points in seen_points:
+            raise ScenarioMissionError(f"{ctx} duplicates Army Points {points}")
+        seen_points.add(points)
+        config_id = _slug(size["configurationId"], f"{ctx}.configurationId")
+        config = configs.get(config_id)
+        if config is None or points not in config.army_points:
+            raise ScenarioMissionError(
+                f"{ctx} does not reference the geometry for {points} Army Points"
+            )
+        swc = size["swc"]
+        if type(swc) not in (int, float) or not math.isfinite(swc) or swc < 0:
+            raise ScenarioMissionError(f"{ctx}.swc must be a finite non-negative number")
+        regions = {
+            element.id
+            for element in config.geometry.elements
+            if isinstance(element, RectangleElement)
+        }
+        deployments: list[ScenarioDeployment] = []
+        deployed_sides: set[str] = set()
+        used_regions: set[str] = set()
+        for deployment_index, deployment in enumerate(_array(size["deployments"], ctx)):
+            dep_ctx = f"{ctx}.deployments[{deployment_index}]"
+            dep = _object(deployment, {"sideId", "elementIds"}, set(), dep_ctx)
+            side_id = _slug(dep["sideId"], f"{dep_ctx}.sideId")
+            if side_id not in side_ids:
+                raise ScenarioMissionError(f"{dep_ctx} references unknown side {side_id!r}")
+            _unique(side_id, deployed_sides, dep_ctx)
+            region_ids = _references(dep["elementIds"], regions, f"{dep_ctx}.elementIds")
+            if used_regions.intersection(region_ids):
+                raise ScenarioMissionError(
+                    f"{dep_ctx} assigns a deployment region to multiple sides"
+                )
+            used_regions.update(region_ids)
+            deployments.append(ScenarioDeployment(side_id, region_ids))
+        if deployed_sides != side_ids:
+            raise ScenarioMissionError(f"{ctx} must define deployment for every side")
+        game_sizes.append(ScenarioGameSize(points, float(swc), config_id, tuple(deployments)))
+    if seen_points != supported_points:
+        raise ScenarioMissionError(
+            f"{context}.gameSizes must cover every configured Army Points value"
+        )
+
+    objectives: list[ScenarioObjective] = []
+    objective_ids: set[str] = set()
+    for index, item in enumerate(_array(raw["objectives"], f"{context}.objectives")):
+        ctx = f"{context}.objectives[{index}]"
+        objective = _object(
+            item,
+            {"id", "name", "sideIds", "timing", "aggregation", "maximumPoints", "awards"},
+            set(),
+            ctx,
+        )
+        identifier = _slug(objective["id"], f"{ctx}.id")
+        _unique(identifier, objective_ids, ctx)
+        name = _text(objective["name"], f"{ctx}.name")
+        references = _references(objective["sideIds"], side_ids, f"{ctx}.sideIds")
+        timing = _choice(objective["timing"], {"immediate", "end-of-round", "end-of-game"}, ctx)
+        aggregation = _choice(objective["aggregation"], {"exclusive", "cumulative"}, ctx)
+        maximum = _integer(objective["maximumPoints"], f"{ctx}.maximumPoints")
+        awards: list[ScenarioAward] = []
+        covered: set[int] = set()
+        for award_index, item in enumerate(_array(objective["awards"], f"{ctx}.awards")):
+            award_ctx = f"{ctx}.awards[{award_index}]"
+            award = _object(item, {"armyPoints", "objectivePoints", "condition"}, set(), award_ctx)
+            army_points = _points(award["armyPoints"], supported_points, f"{award_ctx}.armyPoints")
+            covered.update(army_points)
+            objective_points = _integer(award["objectivePoints"], f"{award_ctx}.objectivePoints")
+            if objective_points > maximum:
+                raise ScenarioMissionError(f"{award_ctx} exceeds the objective's maximumPoints")
+            condition = _condition(award["condition"], f"{award_ctx}.condition")
+            awards.append(ScenarioAward(army_points, objective_points, condition))
+        if covered != supported_points:
+            raise ScenarioMissionError(
+                f"{ctx}.awards must cover every configured Army Points value"
+            )
+        objectives.append(
+            ScenarioObjective(
+                identifier, name, references, timing, aggregation, maximum, tuple(awards)
+            )
+        )
+
+    rules: list[ScenarioRule] = []
+    rule_ids: set[str] = set()
+    for index, item in enumerate(_array(raw["rules"], f"{context}.rules", allow_empty=True)):
+        ctx = f"{context}.rules[{index}]"
+        rule = _object(item, {"id", "name", "paragraphs"}, set(), ctx)
+        identifier = _slug(rule["id"], f"{ctx}.id")
+        _unique(identifier, rule_ids, ctx)
+        rules.append(
+            ScenarioRule(
+                identifier,
+                _text(rule["name"], f"{ctx}.name"),
+                tuple(
+                    _text(paragraph, f"{ctx}.paragraphs")
+                    for paragraph in _array(rule["paragraphs"], f"{ctx}.paragraphs")
+                ),
+            )
+        )
+
+    ends: list[ScenarioEndCondition] = []
+    end_ids: set[str] = set()
+    for index, item in enumerate(_array(raw["endConditions"], f"{context}.endConditions")):
+        ctx = f"{context}.endConditions[{index}]"
+        end = _object(item, {"id", "checkAt", "finishAt", "condition"}, set(), ctx)
+        identifier = _slug(end["id"], f"{ctx}.id")
+        _unique(identifier, end_ids, ctx)
+        check_at = _choice(end["checkAt"], {"immediate", "tactical-phase", "end-of-round"}, ctx)
+        finish_at = _choice(
+            end["finishAt"], {"immediate", "end-of-player-turn", "end-of-round"}, ctx
+        )
+        condition = end["condition"]
+        if isinstance(condition, dict) and condition.get("kind") == "round-limit":
+            condition = _object(condition, {"kind", "rounds"}, set(), f"{ctx}.condition")
+            rounds = _integer(condition["rounds"], f"{ctx}.condition.rounds")
+            if check_at != "end-of-round" or finish_at != "end-of-round":
+                raise ScenarioMissionError(
+                    f"{ctx} round-limit must be checked/finished at end-of-round"
+                )
+            description = None
+        else:
+            parsed = _condition(condition, f"{ctx}.condition")
+            if not isinstance(parsed, ProseCondition):
+                raise ScenarioMissionError(f"{ctx} numeric score conditions cannot end a mission")
+            rounds, description = None, parsed.text
+        ends.append(ScenarioEndCondition(identifier, check_at, finish_at, rounds, description))
+
+    issues: list[ScenarioSourceIssue] = []
+    issue_ids: set[str] = set()
+    for index, item in enumerate(
+        _array(raw["sourceIssues"], f"{context}.sourceIssues", allow_empty=True)
+    ):
+        ctx = f"{context}.sourceIssues[{index}]"
+        issue = _object(
+            item, {"id", "armyPoints", "objectiveId", "status", "description"}, set(), ctx
+        )
+        identifier = _slug(issue["id"], f"{ctx}.id")
+        _unique(identifier, issue_ids, ctx)
+        points = _points(issue["armyPoints"], supported_points, f"{ctx}.armyPoints")
+        objective_id = _slug(issue["objectiveId"], f"{ctx}.objectiveId")
+        if objective_id not in objective_ids:
+            raise ScenarioMissionError(f"{ctx} references unknown objective {objective_id!r}")
+        _choice(issue["status"], {"needs-verification"}, f"{ctx}.status")
+        issues.append(
+            ScenarioSourceIssue(
+                identifier, points, objective_id, _text(issue["description"], f"{ctx}.description")
+            )
+        )
+
+    for objective in objectives:
+        if objective.aggregation != "exclusive":
+            continue
+        for index, award in enumerate(objective.awards):
+            condition = award.condition
+            if not isinstance(condition, NumericRangeCondition):
+                continue
+            for other in objective.awards[index + 1 :]:
+                other_condition = other.condition
+                if (
+                    not isinstance(other_condition, NumericRangeCondition)
+                    or condition.metric != other_condition.metric
+                ):
+                    continue
+                overlaps = (
+                    condition.maximum is None or other_condition.minimum <= condition.maximum
+                ) and (
+                    other_condition.maximum is None or condition.minimum <= other_condition.maximum
+                )
+                shared = set(award.army_points).intersection(other.army_points)
+                for point in shared if overlaps else ():
+                    if not any(
+                        issue.objective_id == objective.id and point in issue.army_points
+                        for issue in issues
+                    ):
+                        raise ScenarioMissionError(
+                            f"{context} exclusive objective {objective.id!r} has overlapping "
+                            f"score ranges for {point} without a source issue"
+                        )
+
+    return ScenarioMission(
+        tuple(sides), tuple(game_sizes), tuple(objectives), tuple(rules), tuple(ends), tuple(issues)
+    )

@@ -125,11 +125,14 @@ not competing semantic owners.
 
 ### Planned scenario domain
 
-**Design direction; scenario domain unimplemented.** A standalone versioned scenario-geometry
-validator and deterministic SVG renderer provide the first 1.0 foundation. Domination and Supplies now
-exercise the next boundary: typed maintained scenario records own their geometry configurations and the
-renderer consumes them directly. The accepted boundary below still describes the remaining scenario tables,
-full structured facts, and browser routes. Concrete work is tracked in
+**Design direction; browsable scenario domain unimplemented.** Typed maintained records own the
+geometry configurations of all four core scenarios, and the deterministic SVG renderer consumes
+them directly. Annihilation now pilots typed setup, scoring, special rules, and end conditions in
+the existing rules record payload. Nested mission prose uses the shared maintained-text audit
+pipeline; neither the renderer nor runtime consumers recover rules from PDF text.
+[The data model](data-model.md#planned-scenario-model-10) owns this implemented subset. The accepted
+boundary below still describes the remaining scenario publication indexes, full components, and
+browser routes. Concrete work is tracked in
 [the backlog](TODO.md#rules-and-reference-completeness).
 
 Core-rules scenarios are a required first-class application domain for 1.0. The architecture review

@@ -392,15 +392,45 @@ The maintained policy is documented in `data/curated/README.md`.
 
 ## Planned scenario model (1.0)
 
-**Design direction; scenario domain unimplemented.** The generic curated-record envelope now has a
-typed scenario-definition v1 subset for all four N5.3 core scenarios: `scenario:annihilation`,
-`scenario:domination`, `scenario:supplies`, and `scenario:firefight` each own their three current
-geometry configurations inside the core-rules collection. The subset validates `definitionVersion`,
-non-overlapping Army Points groups, and geometry-v1 documents; the SVG CLI selects maintained
-geometry directly by scenario identity + Army Points. Full scenario persistence/query structures,
-scoring/actions/end conditions, and the browsable scenario domain described here are not
-implemented. Remaining implementation belongs to the
-[1.0 backlog](TODO.md#rules-and-reference-completeness).
+### Current scenario foundation
+
+The generic curated-record envelope has a typed scenario-definition v1 subset for all four N5.3
+core scenarios: `scenario:annihilation`, `scenario:domination`, `scenario:supplies`, and
+`scenario:firefight` each own their three current geometry configurations inside the core-rules
+collection. It validates `definitionVersion`, non-overlapping Army Points groups, and geometry-v1
+documents; the SVG CLI selects maintained geometry by scenario identity + Army Points.
+
+Annihilation additionally pilots the optional `facts.mission` component, validated by
+`scenario_mission.py`. It owns ordered sides; all six Army Points/SWC rows; per-side Deployment Zone
+references into the selected geometry; objectives and awards; special-rule paragraphs; mission end
+conditions; and scoped source issues. Every geometry-supported Army Points value must have exactly
+one game-size row, and every objective must cover those values. Deployment references must resolve
+to rectangle elements in that row's geometry, with multiple regions per side supported. Objective
+side applicability is explicit rather than assumed symmetric.
+
+Scoring awards use inclusive integer `numeric-range` conditions (an absent upper limit is represented
+by `maximum: null`) or `reviewed-prose` conditions with semantic maintained-text tokens. The initial
+numeric metrics are killed enemy Army Points and surviving Victory Points. Each objective declares
+its scoring timing, `exclusive` or `cumulative` aggregation, and Objective Point cap. This records
+reference semantics without evaluating match state. Exclusive numeric ranges must not overlap unless
+a `needs-verification` source issue names that objective and Army Points row. A source issue preserves
+uncertainty; it does not select a winning band or authorize a rules correction.
+
+The Annihilation pilot retains all N5.3 printed values, including the inconsistent 350-point
+surviving-Victory-Points column on page 149: 85–150 awards 1 Objective Point, 176–270 awards 3, and
+more than 250 awards 4. The 151–175 gap and 251–270 overlap remain explicit in the scoped source issue.
+Its end conditions distinguish the third-Game-Round limit from the Tactical Phase all-Null check,
+which finishes at the end of that Player Turn. Printed pages 149–150 cite the full pilot.
+
+Nested mission prose participates in the same syntax, target-resolution, and reviewed-link audits
+as other maintained rules text. The existing rules record payload persists and composes the pilot
+with its collection and citations; no specialized scenario tables or runtime read model have been
+introduced, and rules schema/compatibility remains 7/8. Rebuild `rules.db` after curation changes using
+the existing rules-build workflow.
+
+Full scenario publication/revision/membership indexes, actions/elements/features, the remaining
+three missions' reference facts, and browsable scenario access remain design direction. Concrete
+unfinished work belongs to the [1.0 backlog](TODO.md#rules-and-reference-completeness).
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
 `InfinityDB scenario geometry` format version 1, canonical inch table dimensions, ordered unique
@@ -436,6 +466,8 @@ rectangular regions, dividing lines, semantic point markers, labels, and table-r
 the core maps. All four scenarios now own those configurations in maintained curated definitions,
 and renderer acceptance tests consume that maintained geometry directly instead of keeping a second
 fixture-only map corpus.
+
+### Remaining publication design direction
 
 Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
 maintained representation is validated structured JSON; their runtime representation is a deliberate

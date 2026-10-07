@@ -219,6 +219,39 @@ def maintained_text_fields(document: dict[str, Any]) -> Iterator[tuple[str, str]
         facts = record.get("facts")
         if not isinstance(facts, dict):
             continue
+        mission = facts.get("mission") if record.get("kind") == "scenario" else None
+        if isinstance(mission, dict):
+            for key in ("sides", "objectives", "rules", "endConditions", "sourceIssues"):
+                components = mission.get(key)
+                if not isinstance(components, list):
+                    continue
+                for component_index, component in enumerate(components):
+                    if not isinstance(component, dict):
+                        continue
+                    base = f"records[{index}].facts.mission.{key}[{component_index}]"
+                    for text_key in ("name", "description"):
+                        text = component.get(text_key)
+                        if isinstance(text, str):
+                            yield f"{base}.{text_key}", text
+                    paragraphs = component.get("paragraphs", [])
+                    if isinstance(paragraphs, list):
+                        for paragraph_index, text in enumerate(paragraphs):
+                            if isinstance(text, str):
+                                yield f"{base}.paragraphs[{paragraph_index}]", text
+                    condition = component.get("condition")
+                    if isinstance(condition, dict) and isinstance(condition.get("text"), str):
+                        yield f"{base}.condition.text", condition["text"]
+                    awards = component.get("awards", [])
+                    if isinstance(awards, list):
+                        for award_index, award in enumerate(awards):
+                            condition = award.get("condition") if isinstance(award, dict) else None
+                            if isinstance(condition, dict) and isinstance(
+                                condition.get("text"), str
+                            ):
+                                yield (
+                                    f"{base}.awards[{award_index}].condition.text",
+                                    condition["text"],
+                                )
         for key in ("requirements", "effects", "restrictions", "rules"):
             values = facts.get(key)
             if not isinstance(values, list):

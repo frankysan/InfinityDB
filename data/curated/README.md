@@ -406,13 +406,29 @@ Supported record kinds include `rule`, `skill`, `declaration-category`,
 `unit-annotation`.
 
 Acceptance by the generic record envelope does not imply a published application domain or a
-complete typed fact model. Scenario definitions currently implement only the first typed v1 subset
-needed by the map generator: a definition record uses `facts.definitionVersion: 1` plus a
-non-empty `facts.configurations` array; each configuration has a stable `id`, one or more unique
-`armyPoints`, and one validated `InfinityDB scenario geometry` document. Army Points must not overlap
-between configurations. All four N5.3 core scenarios are maintained examples. Scoring, actions,
-roles, end conditions, publication/query tables, and the rest of the
-[planned scenario model](../../docs/data-model.md#planned-scenario-model-10) remain future work.
+complete typed fact model. Scenario-definition v1 uses `facts.definitionVersion: 1` plus a non-empty
+`facts.configurations` array; each configuration has a stable `id`, one or more unique `armyPoints`,
+and one validated `InfinityDB scenario geometry` document. Army Points must not overlap between
+configurations. All four N5.3 core scenarios are maintained examples.
+
+The optional `facts.mission` reference component is currently piloted by Annihilation. Its required
+arrays are `sides`, `gameSizes`, `objectives`, `rules`, `endConditions`, and `sourceIssues`; only
+`rules` and `sourceIssues` may be empty. A game-size row has `armyPoints`, `swc`, `configurationId`,
+and `deployments` (`sideId` + `elementIds`). It references existing geometry rather than restating
+its dimensions. Objectives declare `sideIds`, `timing`, `aggregation`, `maximumPoints`, and ordered
+`awards`; each award has `armyPoints`, `objectivePoints`, and a numeric-range or reviewed-prose
+`condition`. Special rules retain ordered `paragraphs`. End conditions distinguish `checkAt` from
+`finishAt` and use a round-limit or reviewed-prose condition.
+
+Unknown fields/condition kinds, invalid geometry/side references, unsupported or missing Army Points,
+and unacknowledged exclusive score-range overlaps fail validation. A `sourceIssues` entry names its
+`objectiveId` and `armyPoints`, has `status: needs-verification`, and preserves the unresolved source
+meaning in `description`. Annihilation retains the inconsistent printed 350-point survival bands;
+do not infer corrected thresholds from the enemy-kills column. Nested prose uses the semantic
+maintained-text syntax and shared audits. Existing record storage round-trips this payload and its
+citations without changing the rules database format. The
+[scenario data model](../../docs/data-model.md#planned-scenario-model-10) distinguishes this current
+subset from the remaining publication indexes, actions/features, and browser work.
 
 Embedded `term` records own source-backed Game terminology that does not warrant a standalone
 catalog/detail route. They require `facts.scope` with a stable slug such as `game-element`,

@@ -3081,6 +3081,24 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Firefight>
 - PDF: Infinity N5 V5.3, printed pages 155-156
 
+### RS-SCN-ANN-001 — Preserve the N5.3 Annihilation 350-point survival discrepancy
+
+**Classification:** source-native discrepancy retained by the typed mission reference pilot.
+
+The Annihilation mission-objectives table in N5 v5.3 printed page 149 has inconsistent bands for
+surviving Victory Points in a 350-point game: 85–150 gives 1 Objective Point, 176–270 gives 3, and
+more than 250 gives 4. This leaves 151–175 uncovered and gives two awards for 251–270. The same
+column for killed enemy Army Points instead uses 85–175, 176–270, and more than 270; it is evidence
+of a discrepancy, not authority to rewrite the survival column.
+
+The maintained Annihilation record retains the survival values as printed and a source issue
+scoped to that objective and game size. Its exclusive scoring declaration must not be interpreted
+as an instruction to choose the highest matching award when the source is inconsistent. An
+authoritative clarification remains pending in `docs/TODO.md`.
+
+Source: N5 Core Rules v5.3 (2026-08-10), `data/pdf/rules/n5-rules-v5-3-en.pdf`, printed page 149.
+The pilot's setup, Killing definition, and end conditions are cited to printed page 150.
+
 ## Quick Reference Charts
 
 ### RS-QR-PROJ-001 — Quick-reference charts are derived projections of owning rule facts

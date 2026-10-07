@@ -440,3 +440,44 @@ def test_review_needed_markers_are_explicit_and_excluded_from_unlinked_candidate
     assert review_needed["n5-core-v5.3|state:retreat"][
         ("facts.effects[]", "ambiguous-target", "HoloMask")
     ] == 1
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ("objectives", 2, "awards", 0, "condition", "text"),
+        ("rules", 0, "paragraphs", 0),
+        ("endConditions", 1, "condition", "text"),
+        ("sourceIssues", 0, "description"),
+    ],
+)
+def test_scenario_mission_prose_participates_in_shared_reference_validation(
+    tmp_path: Path,
+    path: tuple[str | int, ...],
+) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    core = next(
+        document for _, document in documents if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    record = next(record for record in core["records"] if record["id"] == "scenario:annihilation")
+    target = record["facts"]["mission"]
+    for segment in path[:-1]:
+        target = target[segment]
+    target[path[-1]] = "Use [[skill:not-a-current-skill]]."
+    with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
+        export_rules_database(documents, tmp_path / "rules.db", finalize=False)
+
+
+def test_scenario_mission_prose_cannot_bypass_reviewed_link_coverage() -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    core = next(
+        document for _, document in documents if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    record = next(record for record in core["records"] if record["id"] == "scenario:annihilation")
+    record["facts"]["mission"]["rules"][0]["paragraphs"][0] = "Use Dodge."
+    with pytest.raises(ValueError, match="unmarked semantic references"):
+        validate_reviewed_batch_coverage(
+            documents, root / "data" / "curated" / "maintained-text-link-reviews.json"
+        )
