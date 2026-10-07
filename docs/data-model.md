@@ -429,7 +429,12 @@ without disqualifying a Trooper that has another qualifying Skill. This is a ref
 exception statement; the catalog does not evaluate game state or assign permanent profile roles.
 
 `RulesDatabase.scenario_reference()` reads the composed scenario, its included Rule records, and
-its derived Skill records from `rules.db`. Component IDs/citations are retained in `componentSources`.
+its derived Skill records from `rules.db`. `ScenarioCatalog` builds the current player-facing backend
+read models on that boundary: list entries retain maintained scenario-set order and publication/source
+identity, while detail reads require one exact supported Army Points value. The selected detail projects
+only that game-size row, its referenced geometry, applicable scoring awards and source issues, and the
+composed scenario Rule/Skill records; it does not choose a default game size or evaluate match state.
+Component IDs/citations are retained in `componentSources`.
 Scoped Rule/Skill records include backend-resolved scenario names. The shared Skill-card renderer
 presents their ordinary rule-detail fields and renders Specialist qualifier references as a list.
 Normal browsing/search/glossary calls retain the default unscoped composition; scenario-only content

@@ -48,8 +48,10 @@ release/audit narrative belongs in the changelog and Git history.
   boundary; default core composition excludes scoped records, and scoped records cannot have Army
   links. The shared Specialist baseline uses full Skill-ID arrays plus explicit inclusion deltas;
   rendering consumes resolved qualifiers, not an authoring mini-language. Preserve its Non Specialist
-  qualification exception and all three retained core-scenario source issues. See the scenario model
-  in `docs/data-model.md`.
+  qualification exception and all three retained core-scenario source issues. Stable scenario-set
+  identity/revision and source publication revision are separate runtime concepts. Current
+  `ScenarioCatalog` detail reads require an explicit supported Army Points value; do not invent a
+  default configuration in backend composition. See the scenario model in `docs/data-model.md`.
 
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network
   access.

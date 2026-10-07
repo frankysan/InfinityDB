@@ -123,8 +123,11 @@ the typed `scenario:<slug>` contract used by the maintained scenario layer. Rule
 stable scenario collection identity, collection revision, ordered membership, source publication
 revision, and deterministic content identity separate. `RulesDatabase` owns central selection: default
 reads consider only `current` publications, historical revisions require an explicit collection/revision
-pair, and unsupported selections never fall back silently. The domain stays unpublished until the
-composed list/detail read models and browser surfaces exist.
+pair, and unsupported selections never fall back silently. `ScenarioCatalog` now composes current
+publication list/detail read models in maintained collection order. Detail reads require an explicit
+supported Army Points value and project setup, geometry, scoring, special Rules/Skills, end conditions,
+source issues, and publication provenance for that selection. The domain stays unpublished until those
+read models are exposed through API/browser surfaces and normal-mode discovery is deliberately chosen.
 
 ## Domain capability registry
 

@@ -294,10 +294,13 @@ unimplemented until its corresponding behavior exists.
       scenario-set identity and revision resolve through dedicated `rules.db` membership/publication
       indexes; unknown or unsupported selections have explicit not-found/invalid-input behavior and
       never silently substitute another collection or revision.
-    - [ ] Publish composed list/detail read models with clear source and selected configuration.
-      Render setup, placement, objectives/scoring, special rules, and end conditions using shared
-      browser structures. Decide discovery/search/Glossary participation explicitly in
-      `docs/application-domains.md`; do not require every capability just to register the domain.
+    - [x] Add composed backend list/detail read models with clear publication/source identity and an
+      explicit selected Army Points configuration. The detail projection exposes setup, placement,
+      objectives/scoring, special Rules/Skills, end conditions, and applicable source issues without
+      inventing a default game size or a second rules representation.
+    - [ ] Expose the read models through API/browser surfaces using shared browser structures. Decide
+      discovery/search/Glossary participation explicitly in `docs/application-domains.md`; do not
+      require every capability just to register the domain.
     - [ ] Make geometry understandable through structured placement descriptions/measurements and
       the core-scenario SVG renderer where useful. Generated diagrams must consume the scenario
       geometry rather than a second map definition. Reuse the common distance presentation contract;
