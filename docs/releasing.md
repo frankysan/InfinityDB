@@ -179,6 +179,9 @@ deployment behavior.
 
 ## 5. Land the release commit, verify hosted CI, and tag
 
+- [ ] Before merge, when the optional checksum-pinned publication bundle is part of the release
+  gate, manually dispatch `Full-asset checks` against the release-candidate branch and record the
+  successful run SHA. This pre-merge validation does not require the candidate to be on `main`.
 - [ ] After the local release checklist is green, create the release-preparation commit and land
   it on protected `main` through the normal pull-request workflow. The resulting `main` revision is
   the candidate release commit; if the repository uses a merge or squash commit, use that resulting
@@ -204,6 +207,8 @@ deployment behavior.
   The command must verify successful `Source checks`, `Installed wheel smoke`, and
   `Deployment smoke test` runs for that exact SHA. Add `--include-full-assets` when this release's
   retained evidence should also require the optional checksum-pinned `Full-asset checks` workflow.
+  If merge/squash created a different SHA from the pre-merge candidate, dispatch the optional
+  workflow again for the final `main` SHA before collecting evidence.
   Set `GITHUB_TOKEN` when authenticated GitHub API access is required or desirable for rate limits.
 - [ ] Create an **annotated** version tag at that exact commit using the generated evidence message:
 

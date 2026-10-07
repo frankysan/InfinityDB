@@ -126,10 +126,13 @@ require graphical assets.
 
 ### Optional external bundle check
 
-`.github/workflows/full-asset-checks.yml` is manual/dispatch-only and restricted to `main`. It uses
-the `full-assets` environment to obtain a checksum-pinned HTTPS bundle, stages it with
-`tools/stage_full_asset_bundle.py`, validates it against the tracked publication manifest, and runs
-full checks with assets required.
+`.github/workflows/full-asset-checks.yml` is manual/dispatch-only. It can be dispatched against an
+authorized candidate branch before merge, and uses the exact selected ref/SHA checked out by GitHub
+Actions. It uses the `full-assets` environment to obtain a checksum-pinned HTTPS bundle, stages it
+with `tools/stage_full_asset_bundle.py`, validates it against the tracked publication manifest, and
+runs full checks with assets required. The environment's deployment-branch/tag policy must allow the
+selected candidate ref; do not restrict the environment to `main` when pre-merge validation is
+required.
 
 This workflow is an independent publication-bundle check, not a way to supply assets missing from
 normal source CI. Staging enforces archive safety/size/path constraints and does not upload the
@@ -146,9 +149,17 @@ same publication produces the same archive bytes, and prints the archive SHA-256
 a stable HTTPS URL reachable by the GitHub runner (the URL itself remains secret), configure the
 `full-assets` environment secrets
 `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` from that output, then manually dispatch
-**Full-asset checks** on `main`. The workflow downloads the pinned archive, revalidates every member
-against `data/manifests/symbol-publication.json`, stages it atomically, and runs the full project
-checks with `--assets required`.
+**Full-asset checks** with the current release-candidate branch selected in the GitHub Actions UI.
+The workflow downloads the pinned archive, revalidates every member against
+`data/manifests/symbol-publication.json`, stages it atomically, and runs the full project checks with
+`--assets required`. Record the run SHA together with the result so the pre-merge gate is tied to the
+validated candidate.
+
+A successful pre-merge candidate run satisfies the manual development/release gate recorded in the
+TODO. If the final protected-`main` release commit has a different SHA because the pull request is
+merged or squashed, that earlier run does not count as exact-SHA release evidence. When
+`tools/prepare_release_ci_evidence.py --include-full-assets` is used, dispatch **Full-asset checks**
+again for the final release SHA and require that exact run just like the other hosted workflows.
 
 Environment configuration for this optional workflow is repository administration and is tracked as
 unfinished work only in `docs/TODO.md` when applicable. Do not commit the generated ZIP or its

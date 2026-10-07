@@ -24,6 +24,10 @@ are not retroactively relabeled.
   CI workflow, producing exactly the validated symbol publication with normalized ZIP metadata and
   the pinned SHA-256 used by the `full-assets` environment.
 
+- **Project infrastructure:** Allow the manual full-asset workflow to validate an authorized
+  release-candidate branch before merge; exact-SHA release evidence can still require a rerun on the
+  final `main` commit when merge or squash changes the SHA.
+
 - **Web frontend:** Add scale-preserving S1–S8 Silhouette diagrams to the Glossary and optional Unit
   statline previews. Non-S2 profiles include a faded S2 comparison at the same physical scale, while
   the normal Unit statline stays compact.

@@ -16,23 +16,25 @@ SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>'
 def _manifest(path: Path, published: list[str]) -> Path:
     digest = hashlib.sha256(SVG.encode()).hexdigest()
     browser = published[:1]
+    faction_path = next((relative for relative in browser if relative.startswith("armies/")), None)
+    unit_path = next((relative for relative in browser if relative.startswith("units/")), None)
+    static_path = next(
+        (
+            relative
+            for relative in browser
+            if relative.startswith(("orders/", "characteristics/"))
+        ),
+        None,
+    )
     document = {
         "format": "InfinityDB symbol publication mapping",
         "formatVersion": 2,
         "summary": {"publishedBytes": len(SVG.encode()) * len(published)},
         "publishedSha256ByPath": {relative: digest for relative in published},
-        "factionIdToPublishedPath": {
-            "1": relative for relative in browser if relative.startswith("armies/")
-        },
-        "unitSlugToPublishedPath": {
-            "unit": relative for relative in browser if relative.startswith("units/")
-        },
+        "factionIdToPublishedPath": {"1": faction_path} if faction_path else {},
+        "unitSlugToPublishedPath": {"unit": unit_path} if unit_path else {},
         "unitProfileLogoToPublishedPath": {},
-        "staticKeyToPublishedPath": {
-            "static": relative
-            for relative in browser
-            if relative.startswith(("orders/", "characteristics/"))
-        },
+        "staticKeyToPublishedPath": {"static": static_path} if static_path else {},
         "browserUsageSummary": {
             "browserReferencedAssetCount": len(browser),
             "unreferencedPublishedAssetCount": len(published) - len(browser),

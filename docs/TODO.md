@@ -150,7 +150,8 @@ domain unless required to correct a release-blocking defect.
 
 - [ ] Complete optional/manual full-asset CI administration by adding authorized
   `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` secrets to the existing
-  `full-assets` environment, then record one successful manual run.
+  `full-assets` environment, authorize the current release-candidate branch for that environment,
+  then record one successful manual run for the candidate SHA before merge.
   - [x] Add a deterministic bundle-builder for the validated tracked publication so the external
     archive and pinned SHA-256 used by the environment can be reproduced instead of assembled by
     hand.

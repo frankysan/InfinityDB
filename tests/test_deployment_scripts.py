@@ -223,6 +223,14 @@ def test_installed_wheel_smoke_runs_database_health_check() -> None:
     ) in workflow
 
 
+def test_full_asset_checks_can_run_against_candidate_branch() -> None:
+    workflow = _read(".github/workflows/full-asset-checks.yml")
+
+    assert "workflow_dispatch:" in workflow
+    assert "name: full-assets" in workflow
+    assert "github.ref == 'refs/heads/main'" not in workflow
+
+
 def test_wheel_packages_runtime_unit_filter_semantics() -> None:
     with (ROOT / "pyproject.toml").open("rb") as handle:
         project = tomllib.load(handle)
