@@ -43,8 +43,8 @@ Current runtime database versions:
 
 - Army application database schema: **25**;
 - Army application compatibility revision: **34**;
-- rules database schema: **7**;
-- rules database compatibility revision: **9**.
+- rules database schema: **8**;
+- rules database compatibility revision: **10**.
 
 `data/README.md` owns source/snapshot format versions, while `data/curated/README.md` owns the
 curated-rules format version. Schema and compatibility validation is fail-closed. Incompatible
@@ -515,14 +515,21 @@ do not grant permanent
 Unit/Profile capabilities.
 
 Nested mission prose participates in the same syntax, target-resolution, and reviewed-link audits
-as other maintained rules text. The existing rules record payload persists and composes the pilot
-with its collection and citations; no specialized scenario tables or runtime read model have been
-introduced, and rules schema/compatibility is 7/9. Rebuild `rules.db` after curation changes using
-the existing rules-build workflow.
+as other maintained rules text. The existing rules record payload remains the canonical composed
+scenario structure, while rules schema/compatibility **8/10** adds relational scenario publication
+indexes. `scenario_collections` owns stable set identity, `scenario_collection_revisions` maps an
+exact set revision to its source collection, `scenario_publications` stores deterministic composed
+content identity, and `scenario_memberships` preserves ordered membership separately from scenario
+identity. Source/citation provenance continues to use the existing collection/source/citation tables.
+Rebuild `rules.db` after curation changes using the existing rules-build workflow.
 
-Full scenario publication/revision/membership indexes, element/feature vocabulary extensions,
-and browsable scenario access remain design direction. Concrete
-unfinished work belongs to the [1.0 backlog](TODO.md#rules-and-reference-completeness).
+`RulesDatabase.resolve_scenario_publication()` is the central selection boundary. A scenario may be
+resolved by stable collection ID plus exact collection revision; omitting a revision considers only
+publications backed by `current` source collections. Historical revisions require an explicit
+collection/revision pair. Unknown selections return no match, malformed or ambiguous selections fail
+explicitly, and no other season/revision is substituted. Element/feature vocabulary extensions and
+browsable scenario access remain unfinished work in the
+[1.0 backlog](TODO.md#rules-and-reference-completeness).
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
 `InfinityDB scenario geometry` format version 1, canonical inch table dimensions, ordered unique
@@ -559,7 +566,7 @@ the core maps. All four scenarios now own those configurations in maintained cur
 and renderer acceptance tests consume that maintained geometry directly instead of keeping a second
 fixture-only map corpus.
 
-### Remaining publication design direction
+### Scenario publication model and remaining design direction
 
 Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
 maintained representation is validated structured JSON; their runtime representation is a deliberate

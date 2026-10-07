@@ -1,6 +1,6 @@
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 22,
+    "formatVersion": 23,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -8,6 +8,25 @@
         "status": "current",
         "effectiveFrom": "2026-08-10",
         "authority": "primary"
+    },
+    "scenarioCollection": {
+        "id": "n5-core",
+        "title": "N5 Core Scenarios",
+        "revision": "5.3",
+        "members": [
+            {
+                "scenarioId": "scenario:annihilation"
+            },
+            {
+                "scenarioId": "scenario:domination"
+            },
+            {
+                "scenarioId": "scenario:supplies"
+            },
+            {
+                "scenarioId": "scenario:firefight"
+            }
+        ]
     },
     "vocabularySources": {
         "skillTypes": [

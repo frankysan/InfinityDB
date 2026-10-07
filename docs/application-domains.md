@@ -119,8 +119,12 @@ concrete player-facing browsing/use case rather than merely a new data type.
 catalog/detail domain owning `scenario:*` records, but remains unpublished until its list/detail API
 and browser surfaces exist. This reserves the application ownership boundary without making routes,
 navigation, search, or Glossary claims ahead of implementation. Scenario slug normalization remains
-the typed `scenario:<slug>` contract used by the maintained scenario layer; publication/revision and
-collection selection must be resolved centrally before the domain is made public.
+the typed `scenario:<slug>` contract used by the maintained scenario layer. Rules export now keeps
+stable scenario collection identity, collection revision, ordered membership, source publication
+revision, and deterministic content identity separate. `RulesDatabase` owns central selection: default
+reads consider only `current` publications, historical revisions require an explicit collection/revision
+pair, and unsupported selections never fall back silently. The domain stays unpublished until the
+composed list/detail read models and browser surfaces exist.
 
 ## Domain capability registry
 

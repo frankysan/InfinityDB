@@ -138,7 +138,8 @@ are excluded from default core help, and cannot grant permanent Army profile fac
 consume the materialized `rules.db`, independently of curation files.
 
 [The data model](data-model.md#planned-scenario-model-10) owns the implemented contract. Dedicated
-scenario publication indexes, season/revision selection, and browser routes remain tracked in
+scenario collection/publication indexes and central revision-aware selection now live in `rules.db`;
+composed list/detail read models and browser routes remain tracked in
 [the backlog](TODO.md#rules-and-reference-completeness).
 
 Core-rules scenarios are a required first-class application domain for 1.0. The architecture review

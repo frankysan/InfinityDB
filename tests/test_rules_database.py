@@ -134,6 +134,33 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
         assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 354
+        assert connection.execute(
+            "SELECT id, title FROM scenario_collections"
+        ).fetchone() == ("n5-core", "N5 Core Scenarios")
+        assert connection.execute(
+            "SELECT collection_id, revision, source_collection_id "
+            "FROM scenario_collection_revisions"
+        ).fetchone() == ("n5-core", "5.3", "n5-core-v5.3")
+        assert connection.execute(
+            "SELECT scenario_id, position FROM scenario_memberships "
+            "ORDER BY position"
+        ).fetchall() == [
+            ("scenario:annihilation", 0),
+            ("scenario:domination", 1),
+            ("scenario:supplies", 2),
+            ("scenario:firefight", 3),
+        ]
+        publication_rows = connection.execute(
+            "SELECT scenario_id, content_sha256 FROM scenario_publications "
+            "ORDER BY scenario_id"
+        ).fetchall()
+        assert [row[0] for row in publication_rows] == [
+            "scenario:annihilation",
+            "scenario:domination",
+            "scenario:firefight",
+            "scenario:supplies",
+        ]
+        assert all(len(row[1]) == 64 for row in publication_rows)
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -658,6 +685,7 @@ def test_army_link_records_use_current_collections_by_default(tmp_path: Path) ->
         "status": "superseded",
         "effectiveFrom": "2026-01-01",
     }
+    superseded["scenarioCollection"]["revision"] = "5.2"
     output = tmp_path / "rules.db"
     export_rules_database(
         [
@@ -697,6 +725,7 @@ def test_composed_records_attach_current_supplements_without_field_merging(
         "effectiveFrom": "2026-09-01",
     }
     supplement.pop("scenarioComponents", None)
+    supplement.pop("scenarioCollection", None)
     supplement["records"] = [
         {
             "id": "skill:camouflage",
@@ -750,6 +779,7 @@ def test_export_rejects_ambiguous_current_definitions(tmp_path: Path) -> None:
         "title": "N5 Annex",
         "domain": "annex",
     }
+    duplicate.pop("scenarioCollection", None)
     duplicate["records"] = [
         next(record for record in duplicate["records"] if record["id"] == "skill:camouflage")
     ]
@@ -2327,3 +2357,115 @@ def test_firefight_mission_round_trips_without_changing_canonical_skill_facts(
         source = next(r for r in core["records"] if r["id"] == identifier)
         canonical = current_rules_database.composed_record(identifier)
         assert canonical is not None and canonical["facts"] == source["facts"]
+
+
+def test_scenario_publication_resolution_separates_identity_collection_and_revision(
+    current_rules_database: RulesDatabase,
+) -> None:
+    publications = current_rules_database.scenario_publications("annihilation")
+    assert len(publications) == 1
+    publication = publications[0]
+    assert publication["scenario_id"] == "scenario:annihilation"
+    assert publication["name"] == "Annihilation"
+    assert publication["collection"] == "n5-core"
+    assert publication["revision"] == "5.3"
+    assert publication["publication_revision"] == "n5-core-v5.3"
+    assert len(publication["content_sha256"]) == 64
+    assert publication["status"] == "current"
+    assert publication["effective_from"] == "2026-08-10"
+    assert [source["version"] for source in publication["sources"]] == ["5.3"]
+
+    assert current_rules_database.resolve_scenario_publication("annihilation") == publication
+    assert (
+        current_rules_database.resolve_scenario_publication(
+            "scenario:annihilation", collection="n5-core"
+        )
+        == publication
+    )
+    assert (
+        current_rules_database.resolve_scenario_publication(
+            "annihilation", collection="n5-core", revision="5.3"
+        )
+        == publication
+    )
+
+
+def test_scenario_publication_resolution_never_falls_back_from_explicit_selection(
+    current_rules_database: RulesDatabase,
+) -> None:
+    assert (
+        current_rules_database.resolve_scenario_publication(
+            "annihilation", collection="missing-set"
+        )
+        is None
+    )
+    assert (
+        current_rules_database.resolve_scenario_publication(
+            "annihilation", collection="n5-core", revision="5.2"
+        )
+        is None
+    )
+    assert (
+        current_rules_database.resolve_scenario_publication(
+            "annihilation",
+            collection="missing-set",
+            revision="5.3",
+        )
+        is None
+    )
+    assert current_rules_database.resolve_scenario_publication("missing") is None
+
+    with pytest.raises(ValueError, match="scenario collection"):
+        current_rules_database.resolve_scenario_publication("annihilation", collection=" ")
+    with pytest.raises(ValueError, match="scenario revision"):
+        current_rules_database.resolve_scenario_publication(
+            "annihilation", collection="n5-core", revision=" v5.3"
+        )
+    with pytest.raises(ValueError, match="requires a scenario collection"):
+        current_rules_database.resolve_scenario_publication("annihilation", revision="5.3")
+
+
+def test_scenario_publication_resolution_can_select_exact_historical_revision(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    core_path, core = next(
+        item for item in documents if item[1]["collection"]["id"] == "n5-core-v5.3"
+    )
+    historical = copy.deepcopy(core)
+    historical["collection"].update(
+        {
+            "id": "n5-core-v5.2",
+            "title": "N5 Core Rules v5.2",
+            "status": "historical",
+            "effectiveFrom": "2026-01-01",
+        }
+    )
+    historical["scenarioCollection"]["revision"] = "5.2"
+    for source in historical["sources"]:
+        if source["id"] == "n5-core-v5.3-pdf":
+            source["version"] = "5.2"
+            source["publishedDate"] = "2026-01-01"
+
+    output = tmp_path / "rules.db"
+    export_rules_database(
+        [*documents, (core_path.with_name("n5-core-v5.2.json"), historical)],
+        output,
+    )
+    database = RulesDatabase(output)
+
+    current = database.resolve_scenario_publication("annihilation")
+    historical_publication = database.resolve_scenario_publication(
+        "annihilation", collection="n5-core", revision="5.2"
+    )
+    assert current is not None and current["revision"] == "5.3"
+    assert current["publication_revision"] == "n5-core-v5.3"
+    assert historical_publication is not None
+    assert historical_publication["revision"] == "5.2"
+    assert historical_publication["publication_revision"] == "n5-core-v5.2"
+    assert historical_publication["status"] == "historical"
+    assert historical_publication["sources"][0]["version"] == "5.2"
+    assert database.resolve_scenario_publication(
+        "annihilation", collection="n5-core", revision="5.2"
+    ) == historical_publication

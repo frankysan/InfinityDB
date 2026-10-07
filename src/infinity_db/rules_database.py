@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sqlite3
@@ -12,6 +13,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
+from infinity_db.domain_slugs import require_domain_slug
 from infinity_db.maintained_text import maintained_text_fields, maintained_text_targets
 from infinity_db.maintained_text_policy import (
     inferred_review_policy_path,
@@ -26,14 +28,25 @@ from infinity_db.sqlite_determinism import (
 )
 
 RULES_APPLICATION_ID = 0x49445231
-RULES_SCHEMA_VERSION = 7
-RULES_COMPATIBILITY_VERSION = 9
+RULES_SCHEMA_VERSION = 8
+RULES_COMPATIBILITY_VERSION = 10
 RULES_METADATA_TABLE = "__rules_metadata"
 ArmyLinkRef = int | str
 
 
 def _json_text(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+
+
+def _content_sha256(value: Any) -> str:
+    payload = json.dumps(
+        value,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _army_link_ref(value: object) -> ArmyLinkRef:
@@ -129,6 +142,41 @@ def _create_schema(connection: sqlite3.Connection) -> None:
             PRIMARY KEY (collection_id, id),
             FOREIGN KEY (collection_id) REFERENCES collections(id)
         );
+        CREATE TABLE scenario_collections (
+            id TEXT PRIMARY KEY,
+            title TEXT NOT NULL
+        );
+        CREATE TABLE scenario_collection_revisions (
+            collection_id TEXT NOT NULL,
+            revision TEXT NOT NULL,
+            source_collection_id TEXT NOT NULL UNIQUE,
+            PRIMARY KEY (collection_id, revision),
+            FOREIGN KEY (collection_id) REFERENCES scenario_collections(id),
+            FOREIGN KEY (source_collection_id) REFERENCES collections(id)
+        );
+        CREATE TABLE scenario_publications (
+            source_collection_id TEXT NOT NULL,
+            scenario_id TEXT NOT NULL,
+            content_sha256 TEXT NOT NULL,
+            PRIMARY KEY (source_collection_id, scenario_id),
+            FOREIGN KEY (source_collection_id, scenario_id)
+                REFERENCES records(collection_id, id)
+        );
+        CREATE TABLE scenario_memberships (
+            collection_id TEXT NOT NULL,
+            collection_revision TEXT NOT NULL,
+            position INTEGER NOT NULL,
+            scenario_id TEXT NOT NULL,
+            publication_collection_id TEXT NOT NULL,
+            PRIMARY KEY (collection_id, collection_revision, scenario_id),
+            UNIQUE (collection_id, collection_revision, position),
+            FOREIGN KEY (collection_id, collection_revision)
+                REFERENCES scenario_collection_revisions(collection_id, revision),
+            FOREIGN KEY (publication_collection_id, scenario_id)
+                REFERENCES scenario_publications(source_collection_id, scenario_id)
+        );
+        CREATE INDEX scenario_memberships_identity ON scenario_memberships(scenario_id);
+        CREATE INDEX scenario_publications_identity ON scenario_publications(scenario_id);
         CREATE TABLE record_citations (
             collection_id TEXT NOT NULL,
             record_id TEXT NOT NULL,
@@ -175,6 +223,8 @@ def _create_schema(connection: sqlite3.Connection) -> None:
 
 def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
     collection_ids: set[str] = set()
+    scenario_collection_titles: dict[str, tuple[str, Path]] = {}
+    scenario_collection_revisions: dict[tuple[str, str], Path] = {}
     current_records: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
     current_labels: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
     for path, document in documents:
@@ -182,6 +232,28 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
         if collection_id in collection_ids:
             raise ValueError(f"Duplicate curated collection id {collection_id!r}: {path}")
         collection_ids.add(collection_id)
+        scenario_collection = document.get("scenarioCollection")
+        if scenario_collection is not None:
+            scenario_collection_id = scenario_collection["id"]
+            scenario_collection_title = scenario_collection["title"]
+            previous = scenario_collection_titles.get(scenario_collection_id)
+            if previous is not None and previous[0] != scenario_collection_title:
+                raise ValueError(
+                    f"Scenario collection {scenario_collection_id!r} has conflicting titles "
+                    f"in {previous[1]} and {path}"
+                )
+            scenario_collection_titles[scenario_collection_id] = (
+                scenario_collection_title,
+                path,
+            )
+            revision_key = (scenario_collection_id, scenario_collection["revision"])
+            previous_revision = scenario_collection_revisions.get(revision_key)
+            if previous_revision is not None:
+                raise ValueError(
+                    f"Duplicate scenario collection revision {revision_key!r}: "
+                    f"{previous_revision}, {path}"
+                )
+            scenario_collection_revisions[revision_key] = path
         if document["collection"]["status"] != "current":
             continue
         for label in document["labels"]:
@@ -300,6 +372,22 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
             collection["authority"],
         ),
     )
+
+    scenario_collection = document.get("scenarioCollection")
+    if scenario_collection is not None:
+        connection.execute(
+            "INSERT OR IGNORE INTO scenario_collections (id, title) VALUES (?, ?)",
+            (scenario_collection["id"], scenario_collection["title"]),
+        )
+        connection.execute(
+            "INSERT INTO scenario_collection_revisions "
+            "(collection_id, revision, source_collection_id) VALUES (?, ?, ?)",
+            (
+                scenario_collection["id"],
+                scenario_collection["revision"],
+                collection_id,
+            ),
+        )
 
     _insert_many(
         connection,
@@ -452,6 +540,28 @@ def _insert_document(connection: sqlite3.Connection, document: dict[str, Any]) -
                 for position, relation in enumerate(record.get("relations", []))
             ],
         )
+    if scenario_collection is not None:
+        records_by_id = {record["id"]: record for record in document["records"]}
+        for position, member in enumerate(scenario_collection["members"]):
+            scenario_id = member["scenarioId"]
+            record = records_by_id[scenario_id]
+            connection.execute(
+                "INSERT INTO scenario_publications "
+                "(source_collection_id, scenario_id, content_sha256) VALUES (?, ?, ?)",
+                (collection_id, scenario_id, _content_sha256(record)),
+            )
+            connection.execute(
+                "INSERT INTO scenario_memberships "
+                "(collection_id, collection_revision, position, scenario_id, "
+                "publication_collection_id) VALUES (?, ?, ?, ?, ?)",
+                (
+                    scenario_collection["id"],
+                    scenario_collection["revision"],
+                    position,
+                    scenario_id,
+                    collection_id,
+                ),
+            )
 
 
 def export_rules_database(
@@ -999,6 +1109,116 @@ class RulesDatabase:
             records = self._compose_records(self._records_from_rows(connection, rows))
             self._attach_reverse_relations(connection, records)
             return records
+
+    def scenario_publications(self, reference: str) -> list[dict[str, Any]]:
+        """Return indexed collection memberships/publications for one scenario identity."""
+
+        identifier = scenario_typed_id(reference)
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT m.scenario_id, r.name, m.collection_id, sc.title AS collection_title, "
+                "m.collection_revision, m.position, m.publication_collection_id, "
+                "p.content_sha256, c.title AS publication_title, c.status, "
+                "c.effective_from, c.authority "
+                "FROM scenario_memberships AS m "
+                "JOIN scenario_collections AS sc ON sc.id = m.collection_id "
+                "JOIN scenario_publications AS p "
+                "ON p.source_collection_id = m.publication_collection_id "
+                "AND p.scenario_id = m.scenario_id "
+                "JOIN collections AS c ON c.id = m.publication_collection_id "
+                "JOIN records AS r ON r.collection_id = m.publication_collection_id "
+                "AND r.id = m.scenario_id "
+                "WHERE m.scenario_id = ? "
+                "ORDER BY c.effective_from DESC, m.collection_id, "
+                "m.collection_revision, m.position",
+                (identifier,),
+            ).fetchall()
+            publications: list[dict[str, Any]] = []
+            for row in rows:
+                source_rows = connection.execute(
+                    "SELECT s.id, s.kind, s.title, s.version, s.published_date, "
+                    "s.retrieved_date, s.language, s.authority "
+                    "FROM record_citations AS rc JOIN sources AS s "
+                    "ON s.collection_id = rc.collection_id AND s.id = rc.source_id "
+                    "WHERE rc.collection_id = ? AND rc.record_id = ? "
+                    "ORDER BY rc.position",
+                    (row["publication_collection_id"], identifier),
+                ).fetchall()
+                sources: list[dict[str, Any]] = []
+                seen_source_ids: set[str] = set()
+                for source in source_rows:
+                    source_id = str(source["id"])
+                    if source_id in seen_source_ids:
+                        continue
+                    seen_source_ids.add(source_id)
+                    sources.append(dict(source))
+                publications.append(
+                    {
+                        "scenario_id": str(row["scenario_id"]),
+                        "name": str(row["name"]),
+                        "collection": str(row["collection_id"]),
+                        "collection_title": str(row["collection_title"]),
+                        "revision": str(row["collection_revision"]),
+                        "position": int(row["position"]),
+                        "publication_revision": str(row["publication_collection_id"]),
+                        "publication_title": str(row["publication_title"]),
+                        "content_sha256": str(row["content_sha256"]),
+                        "status": str(row["status"]),
+                        "effective_from": str(row["effective_from"]),
+                        "authority": str(row["authority"]),
+                        "sources": sources,
+                    }
+                )
+            return publications
+
+    def resolve_scenario_publication(
+        self,
+        reference: str,
+        *,
+        collection: str | None = None,
+        revision: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Resolve one indexed scenario publication without collection/revision fallback.
+
+        ``collection`` is the stable scenario-set identity (for example
+        ``n5-core``); ``revision`` is that collection's exact revision (for
+        example ``5.3``). Without an explicit revision only publications backed
+        by a ``current`` source collection are eligible. Historical revisions
+        therefore require both selectors. Unsupported selections return ``None``;
+        malformed or ambiguous selections raise ``ValueError``.
+        """
+
+        identifier = scenario_typed_id(reference)
+        if collection is not None:
+            collection = require_domain_slug(collection, context="scenario collection")
+        if revision is not None and (
+            not isinstance(revision, str)
+            or not revision.strip()
+            or revision != revision.strip()
+        ):
+            raise ValueError("scenario revision must be a non-empty trimmed string")
+        if revision is not None and collection is None:
+            raise ValueError("scenario revision requires a scenario collection")
+
+        publications = self.scenario_publications(identifier)
+        candidates = [
+            publication
+            for publication in publications
+            if (collection is None or publication["collection"] == collection)
+            and (revision is None or publication["revision"] == revision)
+            and (revision is not None or publication["status"] == "current")
+        ]
+        if not candidates:
+            return None
+        if len(candidates) != 1:
+            selections = ", ".join(
+                f"{item['collection']}@{item['revision']}" for item in candidates
+            )
+            raise ValueError(
+                f"Scenario {identifier!r} selection is ambiguous: {selections}; "
+                "select a collection and exact revision"
+            )
+        return candidates[0]
 
     def scenario_reference(self, reference: str) -> dict[str, Any] | None:
         """Return composed scenario Rules and standard Skill-detail records from rules.db."""

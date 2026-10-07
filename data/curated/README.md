@@ -264,14 +264,15 @@ deployment, and mission constraints. Wiki pages are useful for discovery,
 aliases, cross-links, and concise explanations, but do not override applicable
 official rules or Army data.
 
-### Current v22 contract
+### Current v23 contract
 
 Place one collection per subject or release under `data/curated/rules/`, for
 example `rules/n5-core-v5.3.json`. Each file contains:
 
 - `format`: `InfinityDB curated reference`
-- `formatVersion`: `22`
-- `collection`: collection identity/scope/authority
+- `formatVersion`: `23`
+- `collection`: publication/source collection identity, scope, status, and authority
+- optional `scenarioCollection`: stable scenario-set identity, exact set revision, and ordered members
 - `sources`: source-specific PDF or wiki provenance
 - `vocabularySources`: source references for maintained vocabularies
 - `skillTypes`, `labels`, and typed `records`
@@ -305,6 +306,14 @@ retain their own scope, facts, citations, relations, and publication provenance 
 than being field-merged by load order. Related concepts use typed one-way `relations`;
 reverse navigation is derived by `rules.db`.
 
+Collections that contain scenario definitions also require `scenarioCollection`. Its `id` is the
+stable scenario-set identity (for example `n5-core`), `revision` is the exact revision within that
+set (for example `5.3`), and ordered `members` must match the scenario definitions in that source
+collection exactly. Rules export materializes collection/revision, membership, and publication rows
+separately; each publication carries a deterministic SHA-256 of the fully composed scenario record.
+The source `collection.id` remains the publication revision/provenance key, so a scenario identity,
+its set membership, and the source publication revision are not interchangeable.
+
 The current closed relation vocabulary is defined by `src/infinity_db/rule_relations.py`. It
 distinguishes creation/enabling, State transitions, MOD/effect changes, cancellation/restriction,
 and structural variant relationships rather than collapsing every connection into a generic
@@ -337,7 +346,7 @@ before ingestion.
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 22,
+    "formatVersion": 23,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -442,7 +451,7 @@ provenance remain available; shared reuse does not authorize correcting ambiguou
 Shared prose participates in the full semantic maintained-text syntax, target, and reviewed-link
 audits, including objective/ending payloads in the component library. No plain-reference exception
 is broadened for the new model. Rebuild `rules.db` with the current rules builder after migrating
-to format v22; current rules schema/compatibility is 7/9.
+to format v23; current rules schema/compatibility is 8/10.
 
 
 Embedded `term` records own source-backed Game terminology that does not warrant a standalone
@@ -549,7 +558,7 @@ Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
 reviewed.
 
-Curated-rule files older than format v22 are no longer accepted by the loader and must
+Curated-rule files older than format v23 are no longer accepted by the loader and must
 be migrated to the current source/citation, composition, variant, declaration, and
 Training contracts before ingestion.
 

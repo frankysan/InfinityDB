@@ -15,7 +15,7 @@ from infinity_db.scenario_definition import (
 )
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 22
+CURATED_FORMAT_VERSION = 23
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
@@ -1062,6 +1062,60 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             raise ValueError(
                 f"Peripheral type {record_id!r} requires a 'has-subtype' relation "
                 "from 'skill:peripheral'"
+            )
+
+    scenario_collection = document.get("scenarioCollection")
+    scenario_definition_ids = {
+        record["id"]
+        for record in records
+        if record["kind"] == "scenario" and record["composition"]["role"] == "definition"
+    }
+    if scenario_collection is None:
+        if scenario_definition_ids:
+            raise ValueError(
+                "Collections with scenario definitions require 'scenarioCollection' metadata"
+            )
+    else:
+        context = "scenarioCollection"
+        if not isinstance(scenario_collection, dict):
+            raise ValueError(f"{context}: must be an object")
+        if set(scenario_collection) != {"id", "title", "revision", "members"}:
+            raise ValueError(
+                f"{context}: must contain exactly 'id', 'title', 'revision', and 'members'"
+            )
+        require_domain_slug(scenario_collection["id"], context=f"{context}.id")
+        _require_string(scenario_collection["title"], "title", context)
+        _require_string(scenario_collection["revision"], "revision", context)
+        members = scenario_collection["members"]
+        if not isinstance(members, list) or not members:
+            raise ValueError(f"{context}.members must be a non-empty array")
+        member_ids: list[str] = []
+        for index, member in enumerate(members):
+            member_context = f"{context}.members[{index}]"
+            if not isinstance(member, dict) or set(member) != {"scenarioId"}:
+                raise ValueError(
+                    f"{member_context}: must contain exactly 'scenarioId'"
+                )
+            scenario_id = member["scenarioId"]
+            validate_typed_domain_id(
+                scenario_id, expected_domain="scenario", context=f"{member_context}.scenarioId"
+            )
+            if scenario_id in member_ids:
+                raise ValueError(
+                    f"{member_context}: duplicate scenario membership {scenario_id!r}"
+                )
+            member_ids.append(scenario_id)
+        if set(member_ids) != scenario_definition_ids:
+            missing = sorted(scenario_definition_ids - set(member_ids))
+            unknown = sorted(set(member_ids) - scenario_definition_ids)
+            details = []
+            if missing:
+                details.append(f"missing definitions {missing}")
+            if unknown:
+                details.append(f"unknown/non-definition members {unknown}")
+            raise ValueError(
+                f"{context}.members must match local scenario definitions: "
+                + "; ".join(details)
             )
 
     from infinity_db.scenario_components import ScenarioComponents

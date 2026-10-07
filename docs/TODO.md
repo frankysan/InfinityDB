@@ -186,8 +186,8 @@ unimplemented until its corresponding behavior exists.
       - [x] Pilot typed setup/scoring/end conditions with **Annihilation**: preserve all six
         Army Points/SWC rows and scoring columns, reference maintained deployment geometry,
         retain ordered Killing prose, and distinguish the round limit from the Tactical Phase
-        all-Null end condition. Nested prose uses shared semantic-link validation. Dedicated
-        publication indexes and the remaining scenario components are still pending.
+        all-Null end condition. Nested prose uses shared semantic-link validation. Publication
+        indexes were added after the remaining core scenario components were completed below.
       - [x] Prove that the pilot payload and printed-page citations round-trip through existing
         rules record storage without changing map rendering or the rules database format.
       - [x] Extend the reference subset with **Domination**: geometry-referenced Quadrant/Console
@@ -211,10 +211,11 @@ unimplemented until its corresponding behavior exists.
         with explicit per-scenario additions/removals. Preserve citations, source discrepancies,
         same-name/different-ID semantics, cycle validation, and default-core scope isolation.
         Export resolved payloads and reuse the Skill-detail renderer for Skills and qualifier lists.
-    - [ ] Export relational identities/provenance/membership/reference indexes and validated
-      component payloads to `rules.db`. Cover broken references, invalid dimensions/placements,
-      distinct revisions of one identity, deterministic output, and unsupported formats. Update
-      documented rules schema/compatibility and rebuild guidance if those contracts change.
+    - [x] Export relational identities/provenance/membership/reference indexes and validated
+      component payloads to `rules.db`. Stable scenario collections/revisions, ordered membership,
+      source publication revision, and deterministic composed-content identity are separate indexes;
+      existing typed validation covers broken references/dimensions and rules schema/compatibility is
+      now 8/10. Exact historical revision selection is covered without changing scenario identity.
   - [ ] Maintain structured, cited scenario data sufficient to understand setup, objectives,
     scoring, deployment, special rules/elements, and end conditions without relying on an
     unstructured PDF excerpt as the application model.
@@ -223,7 +224,8 @@ unimplemented until its corresponding behavior exists.
       Review every supported game-size row, objective/cap/timing, placement rule, special rule,
       and end condition. Link shared concepts to canonical catalog identities; retain source
       discrepancies and reviewed resolution instead of copying the nearest chart value. Dedicated
-      scoped action/role/element identities and publication indexes remain separate pending work.
+      scoped action/role/element identities remain separate pending work; publication indexes are now
+      implemented by the export task above.
     - [ ] Resolve the **Annihilation 350-point surviving-Victory-Points discrepancy** against
       authoritative clarification. N5.3 printed page 149 leaves 151–175 uncovered and overlaps
       251–270. The maintained pilot preserves the printed bands and a scoped needs-verification
@@ -287,10 +289,11 @@ unimplemented until its corresponding behavior exists.
       post-1.0 and must use this same schema/rendering engine when added.
   - [ ] Provide usable scenario list/detail presentation and links to existing canonical
     rule/catalog entities where identities overlap.
-    - [ ] Register scenario capabilities through the application-domain registry and define
-      central slug/revision/collection resolution before adding API/browser consumers. Unknown
-      identities or unsupported selections must have explicit not-found/invalid-input behavior;
-      never silently substitute another season or revision.
+    - [x] Register scenario capabilities through the application-domain registry and define
+      central slug/revision/collection resolution before adding API/browser consumers. Stable
+      scenario-set identity and revision resolve through dedicated `rules.db` membership/publication
+      indexes; unknown or unsupported selections have explicit not-found/invalid-input behavior and
+      never silently substitute another collection or revision.
     - [ ] Publish composed list/detail read models with clear source and selected configuration.
       Render setup, placement, objectives/scoring, special rules, and end conditions using shared
       browser structures. Decide discovery/search/Glossary participation explicitly in

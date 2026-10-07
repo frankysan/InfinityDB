@@ -562,6 +562,17 @@ def test_checked_in_n5_collection_is_valid() -> None:
     document = load_curated_document(path)
 
     assert document["collection"]["id"] == "n5-core-v5.3"
+    assert document["scenarioCollection"] == {
+        "id": "n5-core",
+        "title": "N5 Core Scenarios",
+        "revision": "5.3",
+        "members": [
+            {"scenarioId": "scenario:annihilation"},
+            {"scenarioId": "scenario:domination"},
+            {"scenarioId": "scenario:supplies"},
+            {"scenarioId": "scenario:firefight"},
+        ],
+    }
     sources = {source["id"]: source for source in document["sources"]}
     assert sources["n5-core-v5.3-pdf"]["url"] == (
         "https://experience.corvusbelli.com/en/infinity/resources"
@@ -1830,3 +1841,14 @@ def test_checked_in_n5_collection_models_fireteam_general_reference() -> None:
     assert [item["level"] for item in levels["levels"]] == [1, 2, 3, 4, 5]
     assert levels["levels"][1]["bonuses"] == ["[[skill:bs-attack]] (+1 SD)"]
     assert levels["levels"][4]["bonuses"] == ["[[skill:sixth-sense]]"]
+
+
+def test_scenario_collection_membership_must_cover_local_definitions(tmp_path: Path) -> None:
+    source = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = json.loads(source.read_text(encoding="utf-8"))
+    document["scenarioCollection"]["members"].pop()
+    path = tmp_path / "missing-scenario-membership.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="missing definitions"):
+        load_curated_document(path)
