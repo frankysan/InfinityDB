@@ -438,7 +438,11 @@ Component IDs/citations are retained in `componentSources`.
 Scoped Rule/Skill records include backend-resolved scenario names. The shared Skill-card renderer
 presents their ordinary rule-detail fields and renders Specialist qualifier references as a list.
 Normal browsing/search/glossary calls retain the default unscoped composition; scenario-only content
-does not become universal core help. Dedicated scenario pages/routes remain unimplemented.
+does not become universal core help. `/api/scenarios` exposes the current collection without choosing
+a game size. `/api/scenarios/<slug>` requires one explicit `army_points` query value, rejects
+unsupported values instead of substituting another configuration, and projects maintained-text
+tokens/public references in the selected scenario context. Dedicated browser scenario pages remain
+unimplemented.
 
 The resolved mission owns ordered sides, all six Army Points/SWC rows, deployment references into
 its geometry, objectives/awards, Rule inclusions, Skills, end conditions, and source issues. Every

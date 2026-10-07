@@ -49,6 +49,8 @@ ROUTES = (
     "/api/states/:id",
     "/api/skill-extras",
     "/api/search",
+    "/api/scenarios",
+    "/api/scenarios/:id",
     "/static/:asset",
     "/static/:symbol",
     "/other",

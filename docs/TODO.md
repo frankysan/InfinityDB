@@ -298,7 +298,10 @@ unimplemented until its corresponding behavior exists.
       explicit selected Army Points configuration. The detail projection exposes setup, placement,
       objectives/scoring, special Rules/Skills, end conditions, and applicable source issues without
       inventing a default game size or a second rules representation.
-    - [ ] Expose the read models through API/browser surfaces using shared browser structures. Decide
+    - [x] Expose the read models through JSON API routes. `/api/scenarios` stays configuration-neutral;
+      `/api/scenarios/<slug>` requires an explicit supported `army_points` value and returns
+      scenario-context maintained-text/public-reference projections without publishing the domain.
+    - [ ] Add list/detail browser surfaces using shared browser structures. Decide
       discovery/search/Glossary participation explicitly in `docs/application-domains.md`; do not
       require every capability just to register the domain.
     - [ ] Make geometry understandable through structured placement descriptions/measurements and

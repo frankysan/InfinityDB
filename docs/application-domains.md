@@ -116,18 +116,20 @@ concrete player-facing browsing/use case rather than merely a new data type.
 ### Scenario domain scaffold
 
 **Current internal scaffold; not yet player-visible.** `scenarios` is registered as a top-level
-catalog/detail domain owning `scenario:*` records, but remains unpublished until its list/detail API
-and browser surfaces exist. This reserves the application ownership boundary without making routes,
-navigation, search, or Glossary claims ahead of implementation. Scenario slug normalization remains
-the typed `scenario:<slug>` contract used by the maintained scenario layer. Rules export now keeps
+catalog/detail domain owning `scenario:*` records, but remains unpublished while its browser surfaces
+and normal-mode discovery are unfinished. This reserves the application ownership boundary without
+making navigation, search, or Glossary claims ahead of implementation. Scenario slug normalization
+remains the typed `scenario:<slug>` contract used by the maintained scenario layer. Rules export keeps
 stable scenario collection identity, collection revision, ordered membership, source publication
 revision, and deterministic content identity separate. `RulesDatabase` owns central selection: default
 reads consider only `current` publications, historical revisions require an explicit collection/revision
-pair, and unsupported selections never fall back silently. `ScenarioCatalog` now composes current
+pair, and unsupported selections never fall back silently. `ScenarioCatalog` composes current
 publication list/detail read models in maintained collection order. Detail reads require an explicit
 supported Army Points value and project setup, geometry, scoring, special Rules/Skills, end conditions,
-source issues, and publication provenance for that selection. The domain stays unpublished until those
-read models are exposed through API/browser surfaces and normal-mode discovery is deliberately chosen.
+source issues, and publication provenance for that selection. The JSON API exposes those models at
+`/api/scenarios` and `/api/scenarios/<slug>?army_points=...`; maintained text is resolved in the
+selected scenario context so scoped concepts do not leak into ordinary core help. The domain remains
+unpublished until browser presentation and normal-mode discovery are deliberately completed.
 
 ## Domain capability registry
 

@@ -58,6 +58,7 @@
         "test_benchmark_runtime",
         "test_release_notes",
         "test_runtime_import_boundary",
+        "test_scenario_api",
         "test_theme_contrast",
         "test_web",
         "test_web_metrics"

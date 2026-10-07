@@ -40,6 +40,9 @@ RULE_PAGE_PATH = re.compile(rf"/rules/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
 RULE_API_PATH = re.compile(rf"/api/rules/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 TRAIT_PAGE_PATH = re.compile(rf"/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 TRAIT_API_PATH = re.compile(rf"/api/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
+SCENARIO_API_PATH = re.compile(
+    rf"/api/scenarios/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})"
+)
 
 ARMY_SYMBOL_PATH = re.compile(r"/static/armies/[a-z0-9-]+/[a-z0-9-]+\.svg")
 PERIPHERAL_SYMBOL_PATH = re.compile(
@@ -91,6 +94,7 @@ _METRIC_FIXED_PATHS = frozenset(
         "/api/fireteams",
         "/api/search",
         "/api/glossary",
+        "/api/scenarios",
     }
 )
 _METRIC_PARAMETERIZED_PATHS: tuple[tuple[Pattern[str], str], ...] = (
@@ -114,6 +118,7 @@ _METRIC_PARAMETERIZED_PATHS: tuple[tuple[Pattern[str], str], ...] = (
     (AMMUNITION_API_PATH, "/api/ammunition/:id"),
     (LABEL_API_PATH, "/api/labels/:id"),
     (RULE_API_PATH, "/api/rules/:id"),
+    (SCENARIO_API_PATH, "/api/scenarios/:id"),
 )
 _SYMBOL_PATHS = (
     ARMY_SYMBOL_PATH,

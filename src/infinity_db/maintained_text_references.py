@@ -138,12 +138,14 @@ def maintained_text_tokens(
     database: Database,
     rules_database: RulesDatabase | None,
     value: str,
+    *,
+    scenario_id: str | None = None,
 ) -> list[dict[str, Any]] | None:
     """Resolve one maintained-text value for a non-record reference surface."""
 
     if rules_database is None:
         return None
-    return _Resolver(database, rules_database).tokens(value)
+    return _Resolver(database, rules_database, scenario_id).tokens(value)
 
 
 def enrich_maintained_text_references(
