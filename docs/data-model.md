@@ -546,7 +546,9 @@ Element/feature vocabulary extensions and source-discrepancy resolution remain u
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
 `InfinityDB scenario geometry` format version 1, canonical inch table dimensions, ordered unique
 element IDs, and `rectangle`, `line`, `marker`, or `label` elements. Coordinates may be absolute
-inches or table-relative edge/center anchors with offsets. An optional ordered `annotations` layer
+inches or table-relative edge/center anchors with offsets. Element `style` and marker `markerType`
+values are stable kebab-case semantic identities, not a closed list owned by the v1 SVG renderer.
+An optional ordered `annotations` layer
 references those semantic elements rather than restating their geometry. Geometry v1 currently supports
 derived rectangle `dimension` annotations and `area-size` annotations; both calculate their displayed
 measurement from the referenced rectangle, so a map cannot silently disagree with maintained zone
@@ -559,10 +561,13 @@ not merely SVG styling. N5.3 Domination requires each Console to be represented 
 or scenery of the same diameter, indirectly making that canonical footprint part of the scenario rules.
 The ITS token-diameter table provides the explicit numeric dimensions used by the core fixtures:
 **Console 40 mm** and **Supply Box 25 mm**. Validation rejects unsupported fields, invalid anchors,
-duplicate IDs, non-finite values, and geometry
-that resolves outside the table. The SVG renderer maps reusable semantic style names to presentation
-and uses the inch dimensions directly as its `viewBox`; it does not infer rules or geometry from
-diagrams.
+duplicate IDs, non-finite values, unsupported element kinds, and geometry that resolves outside the
+table. Geometry itself does not require symmetric regions or one Deployment Zone per side. The SVG
+renderer owns its narrower presentation capability: it maps the current semantic style identities to
+CSS, requires canonical physical metadata for markers it renders, and raises an explicit render error
+for a valid future style or marker it cannot faithfully project instead of substituting a generic
+appearance or size. It uses the inch dimensions directly as its `viewBox`; it does not infer rules or
+geometry from diagrams.
 
 Domination exercises the rectangle annotation boundary: its Deployment Zones have derived depth
 dimensions and its four Quadrants have derived width × height labels. Supplies exercises the point

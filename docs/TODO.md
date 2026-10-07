@@ -269,17 +269,24 @@ unimplemented until its corresponding behavior exists.
       the same diameter, while the ITS token table supplies the explicit numeric value. Supply Box is
       canonically 25 mm from the same token table. Prefer typed primitives over a general arbitrary
       SVG-path escape hatch.
-    - [ ] Keep the schema deliberately extensible using the reviewed ITS evidence: do not bake in
-      symmetric sides, one Deployment Zone per side, rectangular-only regions, fixed marker kinds,
-      or one season's visual styling. Future schema versions must be able to add repeated/mirrored
-      placements, circles/radius regions, Exclusion/Hazard areas, asymmetric roles, access lines,
-      custom markers/icons, and per-configuration overrides without redefining the core concepts.
-      Unsupported ITS-only constructs should fail explicitly rather than be approximated in v1.
+    - [x] Keep the schema deliberately extensible using the reviewed ITS evidence: geometry v1 does
+      not require symmetric sides or one Deployment Zone per side, and semantic style/marker IDs are
+      not limited to the current renderer palette. Renderer v1 separately allowlists the presentation
+      styles and marker metadata it can faithfully project, and fails explicitly for unsupported
+      styles/markers; unsupported future region kinds such as circles likewise fail schema validation
+      instead of being approximated. Future schema versions can add repeated/mirrored placements,
+      circles/radius regions, Exclusion/Hazard areas, asymmetric roles, access lines, custom
+      markers/icons, and per-configuration overrides without redefining the core concepts.
     - [x] Add reference-based map measurements before freezing geometry v1. Keep annotations separate
       from semantic shapes: rectangle depth/width dimensions and area-size labels resolve their values
       from a target geometry element instead of duplicating numbers. Domination pilots rectangle
       dimensions and derived Quadrant sizes; Supplies adds point-to-table-edge distances derived from
       Supply Box coordinates, so its canonical 8-inch placements are never restated in annotation data.
+    - [ ] Make every player-facing scenario measurement except marker size use the shared dynamic
+      distance presentation so users can switch between inches and centimeters. This includes table/map
+      dimensions and annotations plus maintained-text scenario distances. Keep canonical geometry in
+      inches; canonical marker diameters remain fixed physical metadata in millimeters and do not follow
+      the distance-display preference.
     - [x] Validate table bounds, dimensions, stable element order/IDs, and reproducible SVG bytes.
       All four core scenarios now own deterministic maintained geometry for every distinct supported
       table/deployment configuration; renderer acceptance tests consume those curated definitions

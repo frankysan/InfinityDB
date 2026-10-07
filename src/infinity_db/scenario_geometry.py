@@ -16,19 +16,6 @@ _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
 }
 
 _ELEMENT_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-_SUPPORTED_STYLES = frozenset(
-    {
-        "deployment-a",
-        "deployment-b",
-        "scoring",
-        "objective",
-        "guide",
-        "measurement",
-        "label",
-    }
-)
-
-
 class ScenarioGeometryError(ValueError):
     """Raised when scenario geometry does not satisfy the versioned contract."""
 
@@ -200,12 +187,9 @@ def _element_id(value: Any, context: str) -> str:
 
 
 def _style(value: Any, context: str) -> str:
-    style = _non_empty_string(value, context)
-    if style not in _SUPPORTED_STYLES:
-        raise ScenarioGeometryError(
-            f"{context} must be one of {sorted(_SUPPORTED_STYLES)}"
-        )
-    return style
+    """Validate a semantic presentation-role identity without fixing renderer support."""
+
+    return _element_id(value, context)
 
 
 def _coordinate(value: Any, axis: Literal["x", "y"], context: str) -> Coordinate:

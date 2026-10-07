@@ -20,7 +20,22 @@ from .scenario_geometry import (
 )
 
 _MM_PER_INCH = 25.4
-_DEFAULT_MARKER_RADIUS_IN = 0.35
+_RENDERABLE_ELEMENT_STYLES = frozenset(
+    {
+        "deployment-a",
+        "deployment-b",
+        "scoring",
+        "objective",
+        "guide",
+        "measurement",
+        "label",
+    }
+)
+
+
+class ScenarioMapRenderError(ValueError):
+    """Raised when valid scenario geometry cannot be represented by SVG renderer v1."""
+
 
 _STYLE_CSS = """\
 .table{fill:#fff;stroke:#111;stroke-width:.12}
@@ -79,11 +94,12 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
         marker_type = escape(element.marker_type, quote=True)
         diameter_mm = marker_diameter_mm(element.marker_type)
         if diameter_mm is None:
-            radius = _DEFAULT_MARKER_RADIUS_IN
-            diameter = ""
-        else:
-            radius = diameter_mm / _MM_PER_INCH / 2.0
-            diameter = f' data-diameter-mm="{_number(diameter_mm)}"'
+            raise ScenarioMapRenderError(
+                "scenario SVG renderer v1 has no canonical marker metadata for "
+                f"marker type {element.marker_type!r}"
+            )
+        radius = diameter_mm / _MM_PER_INCH / 2.0
+        diameter = f' data-diameter-mm="{_number(diameter_mm)}"'
         return (
             f'<circle id="{element_id}" class="{style}" data-marker-type="{marker_type}"'
             f'{diameter} cx="{_number(x)}" cy="{_number(y)}" r="{_number(radius)}"/>'
@@ -209,9 +225,27 @@ def _render_annotation(
     )
 
 
+def _validate_renderer_support(geometry: ScenarioGeometry) -> None:
+    for element in geometry.elements:
+        if element.style not in _RENDERABLE_ELEMENT_STYLES:
+            raise ScenarioMapRenderError(
+                "scenario SVG renderer v1 does not support element style "
+                f"{element.style!r}"
+            )
+        if (
+            isinstance(element, MarkerElement)
+            and marker_diameter_mm(element.marker_type) is None
+        ):
+            raise ScenarioMapRenderError(
+                "scenario SVG renderer v1 has no canonical marker metadata for "
+                f"marker type {element.marker_type!r}"
+            )
+
+
 def render_scenario_map_svg(geometry: ScenarioGeometry) -> str:
     """Render deterministic standalone SVG bytes from validated geometry."""
 
+    _validate_renderer_support(geometry)
     width = _number(geometry.table.width)
     height = _number(geometry.table.height)
     title = escape(geometry.title)

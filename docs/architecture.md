@@ -169,8 +169,11 @@ Renderer-only styling remains separate. Structured map annotations may reference
 to derive displayed distances and area sizes; they must not duplicate the underlying measurements.
 Geometry v1 includes rectangle dimensions/area sizes plus point-to-table-edge distances, which covers
 the core Domination and Supplies measurement callouts without introducing arbitrary annotation geometry.
-Reviewed ITS variation constrains the extension points, but
-ITS-only geometry and an interactive map editor remain post-1.0. Existing catalog entities will be referenced by typed
+Semantic style and marker identities are open at the geometry boundary rather than coupled to the current
+SVG palette; renderer v1 separately validates the styles and canonical marker metadata it can faithfully
+project and fails closed for unsupported presentation. Geometry also permits asymmetric and multiple
+Deployment Zone regions without encoding a one-zone-per-side rule. Reviewed ITS variation constrains the
+extension points, but ITS-only geometry and an interactive map editor remain post-1.0. Existing catalog entities will be referenced by typed
 identity rather than duplicated locally. Core and ITS scenarios share this boundary; tournament
 pairing, rankings, and mutable match state remain outside
 it.

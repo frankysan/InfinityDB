@@ -215,6 +215,93 @@ def test_parse_scenario_geometry_rejects_duplicate_annotation_identity() -> None
     with pytest.raises(ScenarioGeometryError, match="duplicate id.*deployment-a"):
         parse_scenario_geometry(document)
 
+
+def test_geometry_v1_allows_asymmetric_and_multiple_deployment_regions() -> None:
+    document = _document()
+    elements = document["elements"]
+    assert isinstance(elements, list)
+    elements[0] = {
+        "id": "deployment-a-primary",
+        "kind": "rectangle",
+        "style": "deployment-a",
+        "x1": 0,
+        "y1": 0,
+        "x2": 18,
+        "y2": 10,
+    }
+    elements[1] = {
+        "id": "deployment-b-primary",
+        "kind": "rectangle",
+        "style": "deployment-b",
+        "x1": 7,
+        "y1": 35,
+        "x2": 48,
+        "y2": 48,
+    }
+    elements.append(
+        {
+            "id": "deployment-a-secondary",
+            "kind": "rectangle",
+            "style": "deployment-a",
+            "x1": 30,
+            "y1": 2,
+            "x2": 46,
+            "y2": 7,
+        }
+    )
+
+    geometry = parse_scenario_geometry(document)
+
+    deployments = [
+        element
+        for element in geometry.elements
+        if isinstance(element, RectangleElement) and element.style.startswith("deployment-")
+    ]
+    assert [element.id for element in deployments] == [
+        "deployment-a-primary",
+        "deployment-b-primary",
+        "deployment-a-secondary",
+    ]
+
+
+def test_geometry_v1_accepts_future_style_and_marker_identities_without_rendering_them() -> None:
+    document = _document()
+    elements = document["elements"]
+    assert isinstance(elements, list)
+    rectangle = elements[0]
+    marker = elements[3]
+    assert isinstance(rectangle, dict)
+    assert isinstance(marker, dict)
+    rectangle["style"] = "future-hazard"
+    marker["markerType"] = "future-objective"
+
+    geometry = parse_scenario_geometry(document)
+
+    assert geometry.elements[0].style == "future-hazard"
+    parsed_marker = geometry.elements[3]
+    assert isinstance(parsed_marker, MarkerElement)
+    assert parsed_marker.marker_type == "future-objective"
+
+
+def test_geometry_v1_rejects_future_region_kind_instead_of_approximating_it() -> None:
+    document = _document()
+    elements = document["elements"]
+    assert isinstance(elements, list)
+    elements.append(
+        {
+            "id": "future-hazard",
+            "kind": "circle",
+            "style": "scoring",
+            "x": {"anchor": "center"},
+            "y": {"anchor": "center"},
+            "radius": 4,
+        }
+    )
+
+    with pytest.raises(ScenarioGeometryError, match="kind must be one of"):
+        parse_scenario_geometry(document)
+
+
 def test_parse_scenario_geometry_rejects_unknown_format_version() -> None:
     document = _document()
     document["formatVersion"] = 2

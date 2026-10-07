@@ -8,7 +8,7 @@ import pytest
 from infinity_db.curated import load_curated_document
 from infinity_db.scenario_definition import scenario_definition_from_curated_document
 from infinity_db.scenario_geometry import parse_scenario_geometry
-from infinity_db.scenario_map_svg import render_scenario_map_svg
+from infinity_db.scenario_map_svg import ScenarioMapRenderError, render_scenario_map_svg
 
 
 def test_render_scenario_map_svg_is_deterministic_and_uses_inch_viewbox() -> None:
@@ -247,3 +247,52 @@ def test_render_scenario_map_svg_projects_point_to_edge_distance() -> None:
     ) in svg
     assert '<line x1="0" y1="14.5" x2="8" y2="14.5"/>' in svg
     assert '>8″</text></g>' in svg
+
+
+def test_render_scenario_map_svg_fails_closed_for_unknown_style() -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Future style",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "hazard",
+                    "kind": "rectangle",
+                    "style": "future-hazard",
+                    "x1": 4,
+                    "y1": 4,
+                    "x2": 20,
+                    "y2": 28,
+                }
+            ],
+        }
+    )
+
+    with pytest.raises(ScenarioMapRenderError, match="does not support element style"):
+        render_scenario_map_svg(geometry)
+
+
+def test_render_scenario_map_svg_fails_closed_for_unknown_marker_type() -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Future marker",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "future-objective",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "future-objective",
+                    "x": {"anchor": "center"},
+                    "y": {"anchor": "center"},
+                }
+            ],
+        }
+    )
+
+    with pytest.raises(ScenarioMapRenderError, match="no canonical marker metadata"):
+        render_scenario_map_svg(geometry)
