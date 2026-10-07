@@ -68,6 +68,42 @@ class GlossaryCatalog:
                     )
         return entries
 
+    def _profile_help_entries(self) -> list[dict[str, Any]]:
+        if self.rules_database is None:
+            return []
+
+        aliases_by_key = {
+            "unit-profile": ["Unit Profile"],
+            "attributes": [],
+            "training-orders": ["Training", "Orders"],
+            "troop-type": ["Type"],
+            "classification": ["Classification"],
+            "isc": [],
+            "hackable": [],
+            "peripheral": ["Peripherals", "Controller access"],
+            "skills": ["Skill"],
+            "equipment": [],
+            "weapons": ["Weapon"],
+            "profile-options": ["Profiles", "Loadouts"],
+        }
+        entries: list[dict[str, Any]] = []
+        for item in self.rules_database.unit_profile_help():
+            identifier = str(item["id"])
+            entries.append(
+                {
+                    "id": identifier,
+                    "kind": "rule",
+                    "domain": "Unit Profile",
+                    "domain_slug": "rules",
+                    "name": item["name"],
+                    "description": item["summary"],
+                    "aliases": aliases_by_key.get(str(item["key"]), []),
+                    "href": f"/glossary#{identifier.replace(':', '-')}",
+                    "embedded": True,
+                }
+            )
+        return entries
+
     def _label_entries(self) -> list[dict[str, Any]]:
         if self.rules_database is None:
             return []
@@ -110,7 +146,11 @@ class GlossaryCatalog:
 
         if self._entries_cache is None:
             self._entries_cache = sorted(
-                [*self._record_entries(), *self._label_entries()],
+                [
+                    *self._record_entries(),
+                    *self._profile_help_entries(),
+                    *self._label_entries(),
+                ],
                 key=lambda item: (
                     accent_insensitive_key(item["name"]),
                     item["kind"],

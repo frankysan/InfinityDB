@@ -52,7 +52,13 @@ from .logical_unit_payloads import materialize_logical_unit_payloads
 from .paths import raw_database_path
 from .peripheral_relationships import materialize_peripheral_relationships
 from .profile_payloads import materialize_profile_payloads
-from .publication import PUBLISHED_CONTENT_SHA256_KEY, published_content_sha256
+from .publication import (
+    EXPORT_PAIR_SHA256_KEY,
+    PUBLISHED_CONTENT_SHA256_KEY,
+    export_pair_sha256,
+    published_content_sha256,
+    validate_database_pair,
+)
 from .relation_constraints import materialize_relation_constraints
 from .relation_group_dependencies import materialize_relation_group_dependencies
 from .schema import (
@@ -480,11 +486,13 @@ def export_database(
                 create_indexes(connection)
                 connection.execute("ANALYZE")
                 metadata[PUBLISHED_CONTENT_SHA256_KEY] = published_content_sha256(connection)
-                connection.execute(
+                metadata[EXPORT_PAIR_SHA256_KEY] = export_pair_sha256(data, metadata)
+                insert_batched(
+                    connection,
                     f"INSERT INTO {quote(METADATA_TABLE)} (key, value) VALUES (?, ?)",
                     (
-                        PUBLISHED_CONTENT_SHA256_KEY,
-                        json_text(metadata[PUBLISHED_CONTENT_SHA256_KEY]),
+                        (key, json_text(metadata[key]))
+                        for key in (PUBLISHED_CONTENT_SHA256_KEY, EXPORT_PAIR_SHA256_KEY)
                     ),
                 )
         except (sqlite3.IntegrityError, OverflowError) as exc:
@@ -527,7 +535,12 @@ def export_database(
             staging_temporary, published_temporary, data, metadata, finalize=finalize
         )
         Database(published_temporary).validate()
+        validate_database_pair(published_temporary, raw_path=archive_temporary)
 
+        # The raw archive is replaced first and the application database last. The
+        # application replacement is the publication commit point: interruption in
+        # between leaves serving on the previous validated application database,
+        # while raw-dependent tooling rejects the mismatched pair until export reruns.
         os.replace(archive_temporary, archive_path)
         os.replace(published_temporary, path)
     finally:

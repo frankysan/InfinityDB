@@ -1,6 +1,7 @@
 import { getCatalogItem } from "./api.js";
 import { rulesReferenceArticle } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
+import { tableViewport } from "./view-components.js";
 
 const itemId = window.location.pathname.split("/").pop();
 const name = document.getElementById("item-name");
@@ -24,8 +25,6 @@ function categoryBadges(categories) {
 
 function programProfileContent(program) {
   const nodes = [];
-  const container = document.createElement("div");
-  container.className = "table-viewport hacking-program-profile-table";
   const table = document.createElement("table");
   table.className = "data-table--compact data-table--profile";
   table.innerHTML =
@@ -52,8 +51,7 @@ function programProfileContent(program) {
   const body = document.createElement("tbody");
   body.append(row);
   table.append(body);
-  container.append(table);
-  nodes.push(container);
+  nodes.push(tableViewport(table, "hacking-program-profile-table"));
 
   if (program.special) {
     const special = document.createElement("div");
@@ -82,8 +80,8 @@ function baselineDevicesGroup(program) {
     const note = document.createElement("p");
     note.className = "detail-copy";
     note.textContent =
-      "No baseline Device association is declared by Army. This Program is available through "
-      + "Upgrade/source-specific associations instead.";
+      "No baseline Hacking Device includes this Program. It may instead be granted separately, "
+      + "including as an Upgrade Program.";
     group.append(note);
     return group;
   }

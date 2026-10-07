@@ -143,14 +143,46 @@ profile identities, classifications, characteristics, or other contextual facts 
 Source profile IDs/names remain available as provenance even when multiple occurrences share one
 application payload identity.
 
+### Unit and General-profile symbols
+
+Every published logical Unit has exactly one effective graphical symbol. A General profile inherits
+that Unit symbol unless InfinityDB can resolve one distinct profile symbol for its normalized profile
+identity. Raw Army `logo` values remain occurrence-level provenance and are not themselves the
+semantic assignment. The tracked publication retains every authoritative profile-logo resolution as
+evidence, including logos that are primary for one source Unit representation, because source Units
+can later collapse into one logical Unit while their distinct General profiles remain meaningful.
+
+Army profiles explicitly identified as Peripherals publish into a dedicated
+`peripherals/<main-army>/<peripheral-name>.svg` namespace when that profile name is Peripheral-only,
+including Units whose primary profile is itself a Peripheral. The Peripheral name comes from Army's
+Peripheral metadata when it can be matched without guessing. Main-army folders follow the same
+faction-parent hierarchy used by Unit symbol publication. Peripheral is contextual Army metadata,
+not a global property of a profile name. When the same physical symbol is evidenced under the same
+profile name in both Peripheral and normal Unit contexts, InfinityDB treats that name as mixed-role:
+its artwork stays Unit-owned under `units/`, including any additional contextual variants of that
+name. Byte-identical occurrences therefore resolve to one Unit-owned symbol, while genuinely
+distinct artwork remains preserved as separate Unit-profile assets. Likewise, if Army reuses parent
+Unit artwork for a Peripheral occurrence, the physical asset remains Unit-owned. Distinct physical
+assets for Peripheral-only names remain preserved as context-suffixed Peripheral variants rather
+than being silently discarded.
+
+The tracked symbol publication may promote a cross-Unit profile-symbol consensus when one
+published symbol is a strict majority across distinct parent Unit symbols for that profile identity
+and is observed as a non-Unit override against at least two different parent Unit symbols. Repeated
+Army occurrences of the same Unit count once. This permits
+InfinityDB to repair repeated Army assignment errors without treating a single Army-specific
+variant as a global graphical identity. Ambiguous contextual evidence falls back to the Unit
+symbol rather than exposing multiple effective symbols for one General profile.
+
 ### Profile and loadout payloads
 
 Profiles and loadouts are treated as structured semantic payloads rather than deduplicated by display
 name alone.
 
 - A **profile payload** owns profile statistics and profile-scoped categorical facts.
-- A **loadout payload** owns loadout costs, weapons/equipment/skills/options and other loadout-local
-  facts.
+- A **loadout payload** owns shared loadout content such as weapons, equipment, skills, Orders,
+  and includes. Points and SWC belong to `loadout_payload_occurrences`, so equivalent content can
+  be shared without erasing Army-specific prices.
 - Context tables connect those canonical payloads back to source Unit, Army, profile-group, and
   loadout occurrences.
 
@@ -207,6 +239,12 @@ When AVA/Points/SWC participates in a query, another selected profile/loadout cr
 satisfied by an unrelated option elsewhere on the same logical Unit. This prevents semantically
 impossible cross-option matches.
 
+Unit Explorer filter vocabulary may also apply a maintained application overlay without rewriting
+the source facts. A combined source Classification can participate in more than one public
+Classification filter, while source Characteristics that duplicate a canonical current Skill can be
+omitted from the picker as redundant. The original category/characteristic rows remain preserved
+and direct identifiers remain queryable for compatibility and provenance.
+
 AVA preserves `Total` as a first-class display/exact-filter value. Negative ancillary/source AVA
 sentinels are not ordinary player-facing AVA values. SWC preserves ordinary costs separately from
 bonus/non-cost source forms such as `+1`, `+1.5`, or `-`; numeric ranges apply only where numeric
@@ -258,7 +296,8 @@ Peripheral JSON directly.
 Fireteam charts are Army-local structured source data. InfinityDB materializes one canonical
 application chart per supported Army/source context while preserving:
 
-- chart/type limits;
+- chart/type limits, including the raw Army value for provenance while projecting explicit
+  `maximum`, `unavailable`, or `unlimited` application semantics before browser use;
 - member requirements;
 - Wildcards and equivalence context;
 - source notes;
@@ -351,6 +390,72 @@ passage fingerprints so changed wording reopens review.
 
 The maintained policy is documented in `data/curated/README.md`.
 
+## Planned scenario model (1.0)
+
+**Design direction; unimplemented.** The current generic curated-record envelope can retain
+scenario-related kinds, but the structured scenario model, dedicated persistence, and browsable
+scenario domain described here are not implemented. Implementation belongs to the
+[1.0 backlog](TODO.md#rules-and-reference-completeness).
+
+Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
+maintained representation is validated structured JSON; their runtime representation is a deliberate
+hybrid in `rules.db`. High-stability/queryable facts are relational, while nested ordered structures
+whose shape legitimately varies by scenario remain validated typed payloads. Runtime code must never
+parse PDF prose, image geometry, or display HTML to recover scenario semantics.
+
+The planned semantic model separates these identities and scopes:
+
+- **Scenario identity:** stable InfinityDB slug/name for the conceptual mission. Reuse across seasons
+  does not duplicate the identity.
+- **Publication/revision:** authoritative source collection, source version/revision, language,
+  reviewed citation, publication date when known, and deterministic content identity. A hotfix or
+  revised mission document creates a new publication revision, not a new scenario identity.
+- **Collection membership:** membership in a source set such as core N5.3 or an ITS season, including
+  collection-local category/ordering and applicability. Membership may change between revisions of a
+  season.
+- **Scenario applicability/configuration:** supported Army Points/SWC, table dimensions, round count,
+  minimum-VP/end thresholds, side configuration, and feature flags such as Reinforcements or
+  collection-specific options. These values can vary by game-size row without changing identity.
+
+Each published scenario revision then composes typed scenario components:
+
+- **Sides and roles:** symmetric Side A/B by default, with named asymmetric roles and role-assignment
+  procedure when required. Objectives/rules may be scoped to a side or role.
+- **Geometry:** a table-local coordinate system plus typed points, lines, rectangles/strips, circles
+  or radius regions, quadrants/sectors, and derived/side-relative regions. Dimensions, anchors,
+  transforms, exclusion areas, and placement constraints remain numeric semantic data rather than
+  pixels from a source diagram.
+- **Elements and tokens:** objective/scenery element types and instances with placement, ownership or
+  alignment, interaction/lifecycle capabilities, and representation metadata. Carrying, destruction,
+  activation, control, and state-like markers are modeled only where the scenario definition needs
+  them; live ownership/carrier/state during a match is not persisted by the scenario catalog.
+- **Objectives and scoring:** ordered objective groups with side/applicability, timing such as
+  immediate/end-of-round/end-of-game, Objective Points, caps, and typed condition/comparison forms.
+  Game-size-dependent thresholds are data. Unusual resolution procedure may retain reviewed prose in
+  addition to typed facts rather than forcing a universal executable scoring language.
+- **Classified Objectives and reusable features:** optional configuration for counts, Common/Private
+  use, points, exclusions, substitutions/alternate use, and scenario-specific interactions. HVTs,
+  Specialists, carried objectives, control areas, selectable objective sets, and season extras follow
+  the same optional-feature principle.
+- **Scenario actions and rules:** local Skills/AROs/interactions, requirements, effects, roll/MOD
+  metadata, timing hooks, and rule overrides where structurally useful. Existing Skills, Equipment,
+  States, Traits, Labels, General Rules, and other canonical entities are referenced by typed ID
+  rather than copied into scenario-local identities.
+- **End conditions:** round/time limits, Retreat-related behavior, all-Null/minimum-VP conditions, and
+  explicit scenario overrides. Definition data records the condition; match-state evaluation remains
+  outside the 1.0 catalog/reference responsibility.
+
+Publication should materialize relational indexes/foreign keys for identity, provenance, collection
+membership, slugs, canonical entity references, and other cross-scenario query needs. The validated
+component payload remains the canonical ordered scenario structure consumed by the backend. Browser
+code receives composed presentation data and must not reinterpret score conditions, geometry, or
+source-specific feature semantics.
+
+The geometry component is also the sole semantic input for later deployment-map generation. A map
+renderer may project it to SVG/other presentation formats, but map-specific coordinates must not
+become an independent maintained source. Likewise, future ITS support extends publication/collection
+and optional-feature data rather than creating an ITS-only scenario schema.
+
 ## SQLite storage contract
 
 Army export first loads normalized source data into validated relational staging, then writes two
@@ -374,7 +479,10 @@ It is not deployed.
 
 Both Army siblings retain the generated metadata needed to bind them to the source/configuration
 that produced them. Important metadata includes source snapshot identity, validated identity-policy
-hashes, publication/raw table boundaries, and deterministic content identity.
+hashes, publication/raw table boundaries, deterministic application-content identity, and the
+shared `export_pair_sha256` fingerprint for the complete application/raw export generation. The
+pair fingerprint includes source-only normalized rows, so a partially published raw archive cannot
+silently masquerade as the companion of an older application database.
 
 When the Army database is built from a ZIP snapshot, `snapshotArchiveSha256` records that exact
 archive identity. Deployment compares it with the Army source identity in the tracked symbol
@@ -386,8 +494,9 @@ validated before normal reads. Export validates integrity, writes planner statis
 canonical physical finalization for deterministic release bytes. Semantic tests may explicitly skip
 only the physical finalization step; they do not bypass schema/input/integrity validation.
 
-Builds publish generated database destinations only after temporary artifacts validate. The exact
-publication/recovery lifecycle is owned by `data/README.md`.
+Builds publish generated database destinations only after temporary artifacts validate. The raw
+archive is replaced first and the application database last, making the application replacement the
+publication commit point. The exact interruption/recovery lifecycle is owned by `data/README.md`.
 
 ## Snapshot provenance
 

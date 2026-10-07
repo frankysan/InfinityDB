@@ -20,7 +20,7 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 276
+    assert report["summary"]["recordCount"] == 279
     assert report["summary"]["authoredOutgoingRelationCount"] == 262
     assert report["summary"]["futureInteractionCount"] == 115
     assert report["summary"]["releases"]["0.7.0"] == {
@@ -40,10 +40,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "percentComplete": 100.0,
     }
     assert report["summary"]["releases"]["0.9.0"] == {
-        "total": 40,
-        "complete": 40,
+        "total": 39,
+        "complete": 39,
         "pending": 0,
-        "reviewed": 40,
+        "reviewed": 39,
         "inherited": 0,
         "percentComplete": 100.0,
     }
@@ -52,6 +52,14 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "complete": 2,
         "pending": 0,
         "reviewed": 2,
+        "inherited": 0,
+        "percentComplete": 100.0,
+    }
+    assert report["summary"]["releases"]["0.10.0"] == {
+        "total": 4,
+        "complete": 4,
+        "pending": 0,
+        "reviewed": 4,
         "inherited": 0,
         "percentComplete": 100.0,
     }
@@ -108,8 +116,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 95
-    assert report["summary"]["supporting"]["complete"] == 84
+    assert report["summary"]["supporting"]["total"] == 98
+    assert report["summary"]["supporting"]["complete"] == 87
     assert report["summary"]["supporting"]["pending"] == 11
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -182,7 +190,6 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     for record_id in {
         "rule:profile-help:attributes",
         "rule:profile-help:classification",
-        "rule:profile-help:equipment-weapons",
         "rule:profile-help:hackable",
         "rule:profile-help:isc",
         "rule:profile-help:peripheral",
@@ -193,6 +200,14 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     }:
         assert items[record_id]["status"] == "reviewed"
         assert items[record_id]["targetRelease"] == "0.9.0"
+    for record_id in {
+        "rule:profile-help:skills",
+        "rule:profile-help:equipment",
+        "rule:profile-help:weapons",
+        "term:fto",
+    }:
+        assert items[record_id]["status"] == "reviewed"
+        assert items[record_id]["targetRelease"] == "0.10.0"
     for record_id in {
         "skill:alert",
         "skill:bs-attack",
@@ -539,7 +554,7 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 84/95 complete, 11 pending" in output
+    assert "Supporting identities: 87/98 complete, 11 pending" in output
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:

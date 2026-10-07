@@ -1,6 +1,6 @@
 <script type="module" src="/static/navigation.js"></script>
 <script type="module" src="/static/page-navigation.js"></script>
-<aside class="sidebar" aria-label="Project navigation">
+<aside class="sidebar" aria-label="InfinityDB navigation">
   <a class="brand" href="/" aria-label="InfinityDB home">
     <img class="brand-mark" src="/static/infinitydb-logo.svg" alt="" data-themed-logo>
     <span>Infinity<span class="brand-suffix">DB</span></span>
@@ -72,6 +72,10 @@
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 4h5a3 3 0 0 1 3 3v9H7a3 3 0 0 0-3 1z"/><path d="M16 4h-2a3 3 0 0 0-2 1v11h1a3 3 0 0 1 3 1z"/></svg>
           Glossary
         </a>
+        <a class="nav-item nav-item--project" href="/changes"{{CHANGES_CURRENT}}>
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 3h10v14H5z"/><path d="M8 7h4M8 10h4M8 13h3"/></svg>
+          What's changed
+        </a>
         <a class="nav-item" href="/about"{{ABOUT_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 9v4"/><path d="M10 6.5h.01"/></svg>
           About InfinityDB
@@ -82,6 +86,10 @@
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="settings-menu">Settings <span aria-hidden="true">⌄</span></button>
       <p class="nav-label menu-label">Settings</p>
       <div id="settings-menu" class="compact-menu-panel" aria-label="Settings">
+        <label class="setting-row setting-row--select" for="theme-selector">
+          <span class="setting-label">Theme</span>
+          <select id="theme-selector" class="setting-select" aria-label="Theme"></select>
+        </label>
         <label class="setting-row setting-row--choice" for="distance-unit-toggle">
           <span class="setting-label">Distance</span>
           <span class="setting-choice"><span>cm</span><input id="distance-unit-toggle" class="setting-switch setting-switch--choice" type="checkbox" checked aria-label="Use inches for movement distances"><span>in</span></span>
@@ -126,7 +134,7 @@
   </div>
   <div class="sidebar-footer">
     <span class="small-label">Built for the Human Sphere</span>
-    <p>Your Infinity data,<br>in one place.</p>
+    <p>Your Infinity reference,<br>in one place.</p>
     {{ARMY_DATA_DATES}}
     <div class="edition"><span aria-hidden="true"></span> InfinityDB / Player reference</div>
   </div>
@@ -134,7 +142,7 @@
 <dialog id="cookie-consent-dialog" class="cookie-consent-dialog" aria-labelledby="cookie-consent-title">
   <form method="dialog">
     <h2 id="cookie-consent-title">Remember settings?</h2>
-    <p>InfinityDB uses browser cookies to remember your distance, optional-unit, Fireteam Wildcard, and developer mode settings on this device.</p>
+    <p>InfinityDB uses first-party browser cookies only to remember your theme, distance, optional-unit, Fireteam Wildcard, and developer mode settings on this device. <a href="/about#privacy-policy">Privacy policy</a></p>
     <div class="cookie-consent-actions">
       <button value="cancel" class="button cookie-consent-cancel">Cancel</button>
       <button value="accept" class="button button-primary">Allow cookies</button>

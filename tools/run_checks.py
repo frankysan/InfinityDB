@@ -222,7 +222,7 @@ def stage_definitions(
             command = [python, "-m", "ruff", "check"]
             command.extend(targets or DEFAULT_LINT_TARGETS)
         elif name == "type":
-            command = [python, "-m", "pyright"]
+            command = [python, "-m", "pyright", "--pythonpath", python]
         elif name == "build":
             command = [python, "-m", "infinity_db", "build"]
             if build_source is not None:

@@ -9,6 +9,23 @@ services:
     security_opt:
       - no-new-privileges:true
 
+  metrics-history:
+    build:
+      context: .
+      dockerfile: Dockerfile.metrics-history
+    image: infinity-db-metrics-history:${METRICS_HISTORY_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      app:
+        condition: service_healthy
+    volumes:
+      - metrics_history:/var/lib/infinitydb-metrics
+
   caddy:
     image: caddy:2.8-alpine
     restart: unless-stopped
@@ -28,3 +45,4 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  metrics_history:

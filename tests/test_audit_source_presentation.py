@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 from pathlib import Path
 
 import pytest
 
+from infinity_db.database import raw_database_path
+from infinity_db.database.publication import EXPORT_PAIR_SHA256_KEY
 from tests.test_audit_runtime_database_surface import _runtime_database
 from tools import audit_source_presentation as audit
 
@@ -52,6 +55,24 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
     assert _field(report, "profile_peripherals", "item_id")["status"] == audit.EXPLICIT
     assert _field(report, "option_peripherals", "item_id")["status"] == audit.EXPLICIT
     assert _field(report, "peripherals", "mercs")["status"] == audit.REDUNDANT
+
+
+def test_source_presentation_audit_rejects_mismatched_raw_generation(
+    tmp_path: Path,
+) -> None:
+    database = _runtime_database(tmp_path)
+    connection = sqlite3.connect(raw_database_path(database))
+    try:
+        with connection:
+            connection.execute(
+                "UPDATE __infinity_metadata SET value = ? WHERE key = ?",
+                (json.dumps("0" * 64), EXPORT_PAIR_SHA256_KEY),
+            )
+    finally:
+        connection.close()
+
+    with pytest.raises(audit.SourcePresentationAuditError, match="different exports"):
+        audit.audit_database(database)
 
 
 def test_source_presentation_audit_records_expected_gap_families(tmp_path: Path) -> None:

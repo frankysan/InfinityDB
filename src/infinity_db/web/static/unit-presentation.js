@@ -1,47 +1,14 @@
-const TROOP_TYPE_LABELS = {
-  LI: "Light Infantry",
-  MI: "Medium Infantry",
-  HI: "Heavy Infantry",
-  REM: "Remote",
-  TAG: "Tactical Armored Gear",
-  WB: "Warband",
-  SK: "Skirmisher",
-  VH: "Vehicle",
-};
-
-const DEVELOPER_ONLY_CHARACTERISTICS = new Set([
-  "no cube",
-  "non hackable",
-  "not impetuous",
-]);
-
-const CHARACTERISTIC_SYMBOLS = {
-  regular: { category: "orders", type: "regular", label: "Regular Order" },
-  irregular: { category: "orders", type: "irregular", label: "Irregular Order" },
-  impetuous: { category: "orders", type: "impetuous", label: "Impetuous" },
-  peripheral: { category: "characteristics", type: "peripheral", label: "Peripheral" },
-  hackable: { category: "characteristics", type: "hackable", label: "Hackable" },
-  cube: { category: "characteristics", type: "cube", label: "Cube" },
-  "cube 2.0": { category: "characteristics", type: "cube-2", label: "Cube 2.0" },
-};
-
-export function troopTypeLabel(value) {
-  return TROOP_TYPE_LABELS[value] || value;
-}
-
-export function characteristicSymbol(value) {
-  return CHARACTERISTIC_SYMBOLS[String(value || "").trim().toLowerCase()] || null;
-}
-
-export function developerOnlyCharacteristic(value) {
-  return DEVELOPER_ONLY_CHARACTERISTICS.has(String(value || "").trim().toLowerCase());
-}
+import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
 
 export function formatMovement(move1, move2, unit) {
   const values = [move1, move2];
   if (values.some((value) => value == null || value === "")) return "—";
+  if (values.every((value) => Number(value) === -1)) return "—";
+  if (values.some((value) => Number(value) < 0)) return "—";
   if (unit === "in") {
-    return `${values.map((value) => Number(value) / 2.5).join("-")}\"`;
+    return `${values
+      .map((value) => Number(value) / DISTANCE_CENTIMETERS_PER_INCH)
+      .join("-")}\"`;
   }
   return `${values.join("-")} cm`;
 }

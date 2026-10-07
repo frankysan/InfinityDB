@@ -1,11 +1,13 @@
 # InfinityDB
 
-InfinityDB builds a local database and browser from Corvus Belli Infinity Army
-data. While Infinity Army presents one army at a time, InfinityDB brings those
-views together into a game-wide reference for exploring units, profiles,
-equipment, skills, weapons, and relationships across armies.
+InfinityDB is a read-only Infinity reference for exploring Units, profiles,
+Equipment, Skills, Weapons, and relationships across Armies. It combines
+Infinity Army data with reviewed rules references, bringing information from
+individual Army Lists into one game-wide browser.
 
-Current release: **0.9.1** (2026-09-30).
+Release metadata: **0.10.0** (2026-10-07). Unreleased development changes display `+dev`;
+metadata alone does not mean the release has been published.
+See the [release process](docs/releasing.md) and [current milestone](docs/TODO.md#current-milestone).
 
 ## Guiding principles
 
@@ -17,6 +19,36 @@ Current release: **0.9.1** (2026-09-30).
   code from third-party data, quoted text, and graphical assets.
 - **Privacy:** collect only the aggregate operational information needed to run
   and improve the service; do not build visitor profiles or persistent tracking.
+
+## Privacy policy
+
+InfinityDB is designed to be useful without an account and without visitor-level
+tracking. The application does not build user profiles, assign persistent visitor
+identifiers, or use advertising trackers, fingerprinting, or per-user analytics.
+
+- **Operational monitoring is aggregate-only.** InfinityDB records bounded route,
+  status-class, latency, response-size, active-request, and build/snapshot metrics.
+  IP addresses/geolocation, user agents or fingerprints, referrers, cookie/session/
+  preference values, query or search terms, unique/returning-user identifiers, and
+  per-user navigation histories are excluded from those metrics.
+- **Temporary settings stay in the browser session.** Theme, distance, optional-unit,
+  Fireteam Wildcard, developer-mode, and related display preferences use browser
+  `sessionStorage` by default. InfinityDB does not use `localStorage`.
+- **Persistent cookies are opt-in.** Enabling **Remember settings** and accepting the
+  confirmation stores first-party preference cookies for up to one year. They contain
+  settings values only, not a visitor identifier. Turning **Remember settings** off
+  deletes those InfinityDB cookies; current-session values can remain until that
+  browser tab/session ends.
+- **Shareable state can appear in the URL.** Search/filter state that needs to be
+  bookmarkable or shareable may be encoded in the URL, so it can also appear in your
+  browser history or in a link you choose to share. InfinityDB does not retain those
+  query/search values in its aggregate metrics.
+
+This policy describes InfinityDB's application-level collection and retention. Hosting
+and network infrastructure necessarily processes connection metadata to deliver HTTP
+traffic, and external links are governed by the destination site's own privacy policy;
+InfinityDB does not use that connection metadata for visitor analytics or store it in
+its application metrics.
 
 ## Current features
 
@@ -39,6 +71,10 @@ Current release: **0.9.1** (2026-09-30).
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Includes global search and a federated Glossary across player-facing reference domains, with
   embedded Attributes and scoped Game terms routed back to their canonical owning surfaces.
+- Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
+  with an S2 reference alongside other supported Silhouettes.
+- Supports System, Light, and Dark themes from Settings; System follows the operating-system
+  preference, while an explicit choice can be remembered with the other browser settings.
 - Uses `/fireteams` as a general Fireteam-rules landing page and switches to Army-scoped charts when
   an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, equivalence
   labels, and N5 rules/bonus context.
@@ -49,7 +85,7 @@ Current release: **0.9.1** (2026-09-30).
   summaries, classifications, special weapon data, and source citations.
 - Supports centimetre/inch display preferences and a Developer mode for
   inspecting database IDs and other review information.
-- Supports published army, unit, order, and characteristic SVG symbols. Corvus
+- Supports published Army, Unit, Peripheral, Order, and Characteristic SVG symbols. Corvus
   Belli has explicitly permitted InfinityDB to use and redistribute the graphical
   assets used by this non-commercial community project, including processed SVGs
   in public repositories and build packages. Those assets remain Corvus Belli
@@ -91,11 +127,12 @@ The current direction is deliberately incremental:
   Reinforcement parentage, and useful cross-army navigation.
 - **0.9.x — Complete & discover:** closed the remaining application-data presentation
   gaps and made the result searchable, navigable, and understandable.
-- **0.10.x — Stabilize & harden:** audit the completed application model end to end,
-  finish the frontend/theme architecture, and harden release and operations workflows.
+- **0.10.x — Stabilize & harden:** completed the application consistency and scenario
+  architecture reviews, frontend/theme work, and release/operations hardening.
 - **1.0.0 — Player data-complete:** every useful in-scope game datum collected by
   InfinityDB has a maintained representation and a meaningful, usable place in the
-  web reference.
+  web reference, including the current core-rules scenarios. ITS season/tournament
+  content remains a later extension of the same scenario model.
 
 In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
 0.9 closed application gaps → 0.10 hardens and polishes → 1.0 completes the reference.**
@@ -117,11 +154,10 @@ Select `.venv` as the Python interpreter in VS Code.
 
 ## Quick start
 
-If an Army snapshot already exists under `data/raw/`, build the database and
-start the local server:
+A normal checkout includes the runtime Army database, rules database, and processed
+graphical publication. After installing the project, start the local server directly:
 
 ```powershell
-infinity-db build --compact
 infinity-db serve
 ```
 
@@ -134,6 +170,9 @@ infinity-db serve --host 127.0.0.1
 ```
 
 Stop the server with `Ctrl+C`.
+
+To rebuild Army data from an existing immutable local snapshot, use `infinity-db build --compact`.
+Rebuilding is a development operation; it is not required to browse the tracked runtime artifacts.
 
 ### Download a fresh Army snapshot
 
@@ -163,10 +202,10 @@ inputs. Human-reviewed rules collections live under `data/curated/rules/`.
 
 ### Acquire and publish graphical symbols
 
-Graphical assets are optional for source development but required for a complete
-local graphical deployment. Use the symbol orchestrator with an existing pinned
-Army snapshot (replace the timestamp with the immutable local snapshot you intend
-to use):
+The processed graphical publication is already tracked in a normal checkout. Regeneration
+is optional for source development and requires separate raw inputs and external tools.
+Use the symbol orchestrator only when preparing a new publication, with an existing pinned
+Army snapshot (replace the timestamp with the immutable local snapshot you intend to use):
 
 ```powershell
 python tools/build_symbols.py --snapshot "data/raw/JSON YYYYMMDD-HHMMSS.zip"
@@ -196,7 +235,16 @@ The wiki snapshot downloader is also available independently:
 ```powershell
 python tools/download_wiki_snapshot.py
 python tools/download_wiki_snapshot.py --language es
+python tools/download_wiki_snapshot.py --site human-sphere
+python tools/download_wiki_snapshot.py --site human-sphere --include-history
 ```
+
+The default site remains the official Infinity Wiki. Human Sphere acquisition is English-only,
+uses a distinct `HUMAN-SPHERE ...zip` archive identity, and enumerates MediaWiki content pages
+before following rendered links so unlinked main-namespace pages are not silently omitted. That
+enumerated main-namespace inventory defines required Human Sphere content; stale discovered 404s,
+Talk pages, and site-service endpoints are recorded as ignored rather than making a healthy mirror
+unpublishable. Both sources keep incomplete work for inspection and publish only complete snapshots.
 
 ## Common commands
 
@@ -213,8 +261,11 @@ infinity-db export data/generated/normalized.json data/generated/infinity.db
 infinity-db build --output-dir other-output --compact
 infinity-db serve --database other-output/infinity.db --port 8001
 
+# Validate a published Army database and its development raw sibling
+infinity-db database-health data/generated/infinity.db --require-raw
+
 # Validate a curated rules file
-infinity-db validate-curated data/curated/rules/example.json
+infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
 
 # Build the independent rules-reference database
 infinity-db build-rules --output data/generated/rules.db
@@ -237,8 +288,11 @@ prevents replacement.
 ## Linux deployment
 
 The supported Docker Compose deployment packages the application, the tracked runtime
-databases, and the tracked processed symbol publication from one release tag into an
-immutable image. Raw Army/wiki/PDF/source-symbol archives are not required on the server.
+databases, and the tracked processed symbol publication from one release tag into an immutable
+application image. Retained aggregate metrics run separately in an immutable-root
+`metrics-history` service with one bounded writable SQLite volume; no writable metrics state is
+mounted into the web-facing application container. Raw Army/wiki/PDF/source-symbol archives are
+not required on the server.
 
 ```sh
 sh ./scripts/install-or-update.sh
@@ -254,7 +308,15 @@ transition.
 
 For a deployment test on the server that must not be reachable from the LAN, use
 `sh ./scripts/deploy-local-test.sh`. It runs as a separate Compose project on
-`127.0.0.1:8080` by default and does not prune production rollback images.
+`127.0.0.1:8080` by default, including an isolated metrics-history volume, and does not prune
+production rollback images. `sh ./scripts/stop-local-test.sh` preserves that test history; add
+`--purge` for a deliberate clean-slate local stack.
+
+Retained aggregate history can be inspected from the collector SQLite store with
+`tools/metrics_history.py periods`, `report`, and `compare`. Reports can select or aggregate by ISO
+week, InfinityDB version, and snapshot revision and expose only the bounded status/route/histogram
+dimensions already collected; no historical HTTP endpoint or request-level log is added. See the
+[Linux deployment guide](docs/deployment.md) for command examples and percentile semantics.
 
 Place the supplied production Caddy service behind a public TLS reverse proxy.
 Deployment validation fails if required databases or graphical assets are missing or

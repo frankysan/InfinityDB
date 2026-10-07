@@ -53,6 +53,48 @@ def _current_core_with_hacking_programs(
     return current_path, current, hacking_programs
 
 
+@pytest.mark.parametrize(
+    ("record_id", "expected"),
+    [
+        *[(f"skill:martial-arts-l{level}", f"Level {level}") for level in range(1, 6)],
+        *[(f"skill:strategos-l{level}", f"Level {level}") for level in range(1, 3)],
+        ("skill:bs-attack", "some variants"),
+        ("skill:cc-attack", "some variants"),
+        ("skill:bs-12", "with 12"),
+        ("skill:bs-11", "with 11"),
+        ("skill:cc-21", "with 21"),
+        ("equipment:tinbot", "listed"),
+        *[
+            (f"equipment:tinbot-{variant}", "Unit Profile")
+            for variant in (
+                "firewall", "neurocinetics", "albedo", "discover", "ecm-guided", "repeater"
+            )
+        ],
+    ],
+)
+def test_published_variant_descriptions_use_game_language(
+    current_rules_database: RulesDatabase, record_id: str, expected: str,
+) -> None:
+    record = current_rules_database.composed_record(record_id)
+    assert record is not None
+    assert expected in record["summary"]
+    assert record["citations"]
+    for internal_copy in ("source variant", "source identity", "occurrence", "modifier values"):
+        assert internal_copy not in record["summary"]
+    if "-l" in record_id:
+        assert "discrete rather than cumulative" in record["summary"]
+
+
+def test_escape_system_threshold_help_refers_to_the_unit_profile(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record("equipment:escape-system")
+    assert record is not None
+    restrictions = " ".join(record["facts"]["restrictions"])
+    assert "listed after [[equipment:escape-system]] in the Unit Profile" in restrictions
+    assert "source profile" not in restrictions
+
+
 def test_rules_export_finalization_is_default_and_can_be_skipped(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -90,7 +132,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 336
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 339
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -258,11 +300,18 @@ def test_unit_profile_help_returns_reviewed_profile_notation_entries(
         "isc",
         "hackable",
         "peripheral",
-        "equipment-weapons",
+        "skills",
+        "equipment",
+        "weapons",
         "profile-options",
     ]
     assert items[2]["name"] == "Training and Orders"
     assert "Regular and Irregular" in items[2]["summary"]
+    assert [item["name"] for item in items[8:11]] == [
+        "Skills",
+        "Equipment",
+        "Weapons",
+    ]
     assert items[-1]["order"] == 100
 
 
@@ -347,7 +396,11 @@ def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> 
         "skills": ["Total Reaction"],
         "ccWeapon": "PARA CC Weapon (-3)",
     }
-    assert records[0]["citations"][0]["heading"] == "Armed Turret Profile"
+    citation = records[0]["citations"][0]
+    assert citation["source_id"] == "n5-core-v5.3-pdf"
+    assert citation["source_version"] == "5.3"
+    assert citation["page"] == 70
+    assert citation["section"] == "Armed Turret Profile"
 
 
 def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> None:

@@ -1,11 +1,11 @@
 import { getArmies, getCatalogItems, getUnitFilters, getUnits } from "./api.js";
 import {
-  initializeDistanceUnitToggle, initializeOptionalUnitToggles, optionalUnitDefaultFilters,
-  optionalUnitFilters, saveUnitAdvancedFiltersOpen, unitAdvancedFiltersOpen,
+  optionalUnitDefaultFilters, optionalUnitFilters, saveUnitAdvancedFiltersOpen,
+  unitAdvancedFiltersOpen,
 } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 import { readShareState, writeShareState } from "./share-state.js";
-import { troopTypeLabel } from "./unit-presentation.js";
+import { createPanelSwitcher } from "./view-components.js";
 
 const PAGE_SIZE = 50;
 const number = new Intl.NumberFormat();
@@ -63,8 +63,6 @@ const numericRangeControls = {
 };
 
 document.querySelector(".results-toolbar").remove();
-initializeDistanceUnitToggle();
-initializeOptionalUnitToggles();
 elements.sortButton = document.createElement("button");
 elements.sortButton.className = "unit-sort-button";
 elements.sortButton.type = "button";
@@ -394,13 +392,17 @@ function updateSortButton() {
   elements.sort.setAttribute("aria-sort", state.descending ? "descending" : "ascending");
 }
 
+const switchPanel = createPanelSwitcher({
+  container: elements.results,
+  loading: elements.loading,
+  panels: [elements.loading, elements.error, elements.empty, elements.table],
+});
+
 function showPanel(panel) {
-  for (const element of [elements.loading, elements.error, elements.empty, elements.table]) {
-    element.hidden = element !== panel;
+  switchPanel(panel);
+  if (panel !== elements.table) {
+    elements.pagination.forEach((pagination) => { pagination.hidden = true; });
   }
-  const loading = panel === elements.loading;
-  elements.results.setAttribute("aria-busy", String(loading));
-  if (panel !== elements.table) elements.pagination.forEach((pagination) => { pagination.hidden = true; });
 }
 
 function armyFilterValue(army) {
@@ -528,8 +530,8 @@ function renderDeclaredMembershipContext(data) {
   }
   const relationship = data.declared_faction;
   const label = relationship?.name || `Faction ${state.declaredFactionId}`;
-  elements.declaredMembership.textContent = `Declared faction membership: ${label}. `
-    + "This relationship is broader than concrete current Army-list availability.";
+  elements.declaredMembership.textContent = `Faction membership: ${label}. `
+    + "This includes units that may not be available in the faction's current Army lists.";
   elements.declaredMembership.hidden = false;
 }
 
@@ -540,10 +542,10 @@ function renderUnits(data) {
   const hasFilters = Boolean(hasActiveFilters());
   if (!data.total) {
     elements.summary.textContent = "0 units found";
-    elements.emptyTitle.textContent = hasFilters ? "No matching units" : "Your catalog is ready for data";
+    elements.emptyTitle.textContent = hasFilters ? "No matching units" : "No units available";
     elements.emptyMessage.textContent = hasFilters
       ? "Try another name or choose a different army."
-      : "No units have been added to this database yet.";
+      : "There are no units to browse right now.";
     elements.emptyClear.hidden = !hasFilters;
     showPanel(elements.empty);
     return;
@@ -596,7 +598,7 @@ async function load() {
       populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
       populateCatalogFilter(
         elements.troopType, unitFilters.troop_types, "Troop types",
-        (item) => troopTypeLabel(item.name),
+        (item) => item.display_name || item.name,
       );
       populateCatalogFilter(elements.classification, unitFilters.classifications, "Classifications");
       populateCatalogFilter(elements.characteristic, unitFilters.characteristics, "Characteristics");
@@ -619,7 +621,7 @@ async function load() {
   } catch (error) {
     if (signal.aborted || currentRequest !== requestNumber) return;
     elements.errorMessage.textContent = error instanceof TypeError
-      ? "Could not connect to the database. Check your connection and try again."
+      ? "Could not reach InfinityDB. Check your connection and try again."
       : error.message || "Something went wrong. Please try again.";
     elements.summary.textContent = "Unable to load units";
     showPanel(elements.error);

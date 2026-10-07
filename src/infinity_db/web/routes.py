@@ -42,6 +42,9 @@ TRAIT_PAGE_PATH = re.compile(rf"/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER}
 TRAIT_API_PATH = re.compile(rf"/api/traits/(?P<identifier>{DOMAIN_ROUTE_IDENTIFIER})")
 
 ARMY_SYMBOL_PATH = re.compile(r"/static/armies/[a-z0-9-]+/[a-z0-9-]+\.svg")
+PERIPHERAL_SYMBOL_PATH = re.compile(
+    r"/static/peripherals/[a-z0-9-]+/[a-z0-9-]+\.svg"
+)
 UNIT_SYMBOL_PATH = re.compile(r"/static/units/[a-z0-9-]+/[a-z0-9-]+\.svg")
 ORDER_SYMBOL_PATH = re.compile(
     r"/static/orders/(regular|irregular|impetuous|tactical|lieutenant)\.svg"
@@ -54,6 +57,7 @@ _METRIC_FIXED_PATHS = frozenset(
     {
         "/",
         "/about",
+        "/changes",
         "/armies",
         "/units",
         "/skills",
@@ -113,6 +117,7 @@ _METRIC_PARAMETERIZED_PATHS: tuple[tuple[Pattern[str], str], ...] = (
 )
 _SYMBOL_PATHS = (
     ARMY_SYMBOL_PATH,
+    PERIPHERAL_SYMBOL_PATH,
     UNIT_SYMBOL_PATH,
     ORDER_SYMBOL_PATH,
     CHARACTERISTIC_SYMBOL_PATH,

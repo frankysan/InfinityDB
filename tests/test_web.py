@@ -6,8 +6,8 @@ import json
 import re
 import shutil
 import sqlite3
+import subprocess
 import sys
-from collections import Counter
 from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 from typing import Any
@@ -251,13 +251,13 @@ def test_internal_metrics_use_bounded_normalized_route_labels(app: Callable) -> 
     status, _, _ = request(
         app,
         "/api/units/ranger-prototype",
-        query="search=private-search-term&visitor=private-id",
+        query="cache_bust=private-search-term-private-id",
     )
     assert status == 200
     status, _, _ = request(
         app,
         "/api/units/not-a-unit",
-        query="search=another-private-term",
+        query="cache_bust=another-private-term",
     )
     assert status == 404
 
@@ -265,6 +265,9 @@ def test_internal_metrics_use_bounded_normalized_route_labels(app: Callable) -> 
     assert status == 200
     assert headers["content-type"].startswith("text/plain; version=0.0.4")
     assert headers["cache-control"] == "no-store"
+    assert b"infinitydb_metrics_started_timestamp_seconds " in body
+    assert b"infinitydb_metrics_last_request_timestamp_seconds " in body
+    assert b"infinitydb_metrics_last_request_timestamp_seconds 0.000000" not in body
     assert b'infinitydb_http_requests_total{route="/api/units/:id",status_class="2xx"} 1' in body
     assert b'infinitydb_http_requests_total{route="/api/units/:id",status_class="4xx"} 1' in body
     assert b'infinitydb_http_request_duration_seconds_bucket{route="/api/units/:id"' in body
@@ -293,6 +296,22 @@ def test_internal_health_and_metrics_do_not_instrument_themselves(app: Callable)
     status, _, after = request(app, "/internal/metrics")
     assert status == 200
     assert after == before
+
+
+def test_internal_health_fails_closed_without_exposing_database_errors(
+    app: Callable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fail_health() -> None:
+        raise sqlite3.DatabaseError("private database failure detail")
+
+    monkeypatch.setattr(app.api, "validate_health", fail_health)
+
+    status, headers, body = request(app, "/internal/health")
+
+    assert status == 503
+    assert headers["cache-control"] == "no-store"
+    assert body == b"unavailable\n"
+    assert b"private database failure detail" not in body
 
 
 def test_curated_army_overview_copy_covers_tracked_player_facing_armies() -> None:
@@ -352,6 +371,204 @@ def test_armies_list_contains_actual_armies_and_counts(app: Callable) -> None:
     assert armies[907]["playable"] is False
 
 
+def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
+    status, headers, body = request(app, "/changes")
+
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
+    assert b"<title>What's changed \xc2\xb7 InfinityDB</title>" in body
+    assert b'<h1 id="page-title">What\'s changed<span>.</span></h1>' in body
+    assert b'<p class="eyebrow">Release history</p>' in body
+    assert b'<span aria-hidden="true"></span> Release history</span>' in body
+    assert b"Project history" not in body
+    assert b"<strong>What&#x27;s changed</strong>" in body
+    assert b"Player-visible highlights are shown first" in body
+    assert b'href="/changes" aria-current="page"' in body
+    assert b'id="changes-0-10-0"' in body
+    assert b"<h2>Version 0.10.0</h2>" in body
+    assert b'<section class="changes-player-summary">' in body
+    assert b"<h3>For players</h3>" not in body
+    assert b"The new <strong>What&#x27;s changed</strong> page" in body
+    assert b'<details class="changes-details">' in body
+    assert b"Detailed changes" in body
+    assert (
+        b"<strong>Web frontend + Project infrastructure:</strong> "
+        b"Add a <strong>What&#x27;s changed</strong> page" in body
+    )
+    assert (
+        b'<time class="changes-release-date" datetime="2026-10-07">'
+        b"October 7, 2026</time>" in body
+    )
+    assert b'id="changes-0-9-1"' in body
+    assert (
+        b'<time class="changes-release-date" datetime="2026-09-30">'
+        b"September 30, 2026</time>" in body
+    )
+
+
+def test_browser_pages_load_only_their_owned_page_modules(app: Callable) -> None:
+    status, _, units = request(app, "/units")
+    assert status == 200
+    assert f'src="/static/units.js?v={STATIC_ASSET_VERSION}"'.encode() in units
+    assert b'/static/app.js' not in units
+
+    status, _, changes = request(app, "/changes")
+    assert status == 200
+    assert b'/static/units.js' not in changes
+    assert b'/static/app.js' not in changes
+
+    status, _, glossary = request(app, "/glossary")
+    assert status == 200
+    assert f'src="/static/glossary.js?v={STATIC_ASSET_VERSION}"'.encode() in glossary
+    assert b'/static/units.js' not in glossary
+    assert b'/static/app.js' not in glossary
+
+
+def test_browser_view_components_own_shared_presentation_primitives(app: Callable) -> None:
+    status, headers, components = request(app, "/static/view-components.js")
+
+    assert status == 200
+    assert headers["content-type"].startswith("text/javascript")
+    assert b"function createPanelSwitcher(" in components
+    assert b'container.setAttribute("aria-busy", String(panel === loading))' in components
+    assert b"function tableViewport(" in components
+    assert (
+        b'container.className = `table-viewport${className ? ` ${className}` : ""}`'
+        in components
+    )
+
+    panel_consumers = (
+        "armies.js",
+        "catalog-list.js",
+        "fireteams.js",
+        "glossary.js",
+        "reference-catalog.js",
+        "search.js",
+        "skill-extras.js",
+        "units.js",
+    )
+    for asset in panel_consumers:
+        status, _, script = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b'from "./view-components.js"' in script
+
+    table_consumers = (
+        "catalog-detail.js",
+        "fireteams.js",
+        "hacking-program-detail.js",
+        "rules-reference.js",
+        "skill.js",
+    )
+    for asset in table_consumers:
+        status, _, script = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b"tableViewport(" in script
+        assert b'className = "table-viewport' not in script
+
+    status, _, catalog_list = request(
+        app, f"/static/catalog-list.js?v={STATIC_ASSET_VERSION}"
+    )
+    assert status == 200
+    assert f'from "./view-components.js?v={STATIC_ASSET_VERSION}"'.encode() in catalog_list
+
+
+def test_silhouette_diagrams_use_shared_scale_and_player_surfaces(app: Callable) -> None:
+    status, headers, renderer = request(
+        app, f"/static/silhouette-diagrams.js?v={STATIC_ASSET_VERSION}"
+    )
+    assert status == 200
+    assert headers["content-type"].startswith("text/javascript")
+    assert headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert f'from "./maintained-text.js?v={STATIC_ASSET_VERSION}"'.encode() in renderer
+    assert b"const SVG_UNITS_PER_MM = 4.23336" in renderer
+    assert b"const GLOSSARY_PIXELS_PER_MM = 2.7" in renderer
+    assert b"const PREVIEW_PIXELS_PER_MM = 2.2" in renderer
+    assert b"(item.viewBoxWidth / SVG_UNITS_PER_MM) * pixelsPerMm" in renderer
+    assert b"(item.viewBoxHeight / SVG_UNITS_PER_MM) * pixelsPerMm" in renderer
+    assert b"row.dataset.pixelsPerMm = String(pixelsPerMm)" in renderer
+    assert 'copy.textContent = "S1–S8 are shown at the same scale'.encode() in renderer
+    assert (
+        b"const comparison = id === 2 ? [selected] : [selected, SILHOUETTE_BY_ID.get(2)]"
+        in renderer
+    )
+    assert b'reference: item.id === 2 && id !== 2' in renderer
+    assert b'if (!selected) return null' in renderer
+
+    expected_viewboxes = {
+        1: (149.027, 155.329),
+        2: (149.376, 218.829),
+        3: (212.875, 184.954),
+        4: (276.375, 184.953),
+        5: (212.875, 239.987),
+        6: (212.875, 282.32),
+        7: (276.375, 333.128),
+        8: (339.875, 345.826),
+    }
+    for silhouette, viewbox in expected_viewboxes.items():
+        status, asset_headers, svg = request(
+            app,
+            f"/static/silhouettes/silhouette-{silhouette}.svg?v={STATIC_ASSET_VERSION}",
+        )
+        assert status == 200
+        assert asset_headers["content-type"] == "image/svg+xml"
+        assert asset_headers["cache-control"] == "public, max-age=31536000, immutable"
+        match = re.search(rb'<svg\b[^>]*viewBox="0 0 ([0-9.]+) ([0-9.]+)"', svg)
+        assert match is not None
+        assert tuple(map(float, match.groups())) == viewbox
+
+    status, _, glossary = request(app, "/static/glossary.js")
+    assert status == 200
+    assert b'from "./silhouette-diagrams.js"' in glossary
+    assert b'item.id === "attribute:s"' in glossary
+    assert b"silhouetteReferenceSet()" in glossary
+
+    status, _, unit = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'from "./silhouette-diagrams.js"' in unit
+    assert b'label === "S" ? silhouetteValuePreview(value) : null' in unit
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".silhouette-diagram-row",
+        {"display": "flex", "align-items": "flex-end"},
+    )
+    assert_css_rule(
+        styles,
+        ".silhouette-reference-viewport .silhouette-diagram-row",
+        {
+            "display": "grid",
+            "grid-template-columns": "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+            "justify-items": "center",
+            "width": "100%",
+        },
+    )
+    assert_css_rule(
+        styles,
+        ".silhouette-figure--reference .silhouette-diagram-image",
+        {"opacity": ".45"},
+    )
+    assert_css_rule(
+        styles,
+        ".silhouette-diagram-image",
+        {"max-width": "none", "filter": "var(--filter-monochrome-artwork)"},
+    )
+    assert_css_rule(
+        styles,
+        ':root[data-theme="dark"]',
+        {"--filter-monochrome-artwork": "invert(1)"},
+    )
+
+
+def test_legacy_app_static_url_serves_unit_explorer(app: Callable) -> None:
+    status, headers, body = request(app, f"/static/app.js?v={STATIC_ASSET_VERSION}")
+
+    assert status == 200
+    assert headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert b'document.querySelector(".results-toolbar").remove()' in body
+
 
 def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) -> None:
     status, headers, body = request(app, "/armies")
@@ -361,6 +578,11 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b"Main armies and Sectorials" in body
     assert b"Generic Army Lists" in body
     assert b'richer <a href="/fireteams">Fireteam</a> charts' in body
+    assert b"see which forces are out of catalog" in body
+    assert b"Loading Army information." in body
+    assert b"catalog status" not in body
+    assert b"current N5 Army data" not in body
+    assert b"Reading the current Army overview" not in body
     assert b'/static/armies.js?v=' in body
     assert b'href="/armies" aria-current="page"' in body
 
@@ -372,6 +594,9 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b"army.overview_description" in script
     assert b'if (army.role === "main") return "Main army";' in script
     assert b"staticSymbolPath(army.symbol_path)" in script
+    assert b"article.id = `army-${armyValue(army)}`;" in script
+    assert b"requestAnimationFrame(revealHashTarget);" in script
+    assert b'target.scrollIntoView({ block: "center" });' in script
     assert b'shareStateHref("/units", "units", { army_id: armyValue(army) })' in script
     assert b"army.overview_group" in script
     assert b"Out of catalog" in script
@@ -482,13 +707,29 @@ def test_fireteam_chart_page_and_api_use_application_projection(
         (101, "zulu-company", 1)
     ]
 
+    for query in (
+        "unknown=1",
+        "army_id=zulu-company&army_id=zulu-company",
+        "cache_bust=1&cache_bust=2",
+    ):
+        status, _, body = request(fireteam_app, "/api/fireteams", query=query)
+        assert status == 400
+        assert json.loads(body)["error"]
+
+    status, _, body = request(
+        fireteam_app, "/api/fireteams", query="army_id=zulu-company&cache_bust=1"
+    )
+    assert status == 200
+
     status, _, body = request(fireteam_app, "/api/fireteams", query="army_id=zulu-company")
     assert status == 200
     chart = json.loads(body)
     assert "reference" not in chart
     assert chart["army"]["public_slug"] == "zulu-company"
     assert chart["description"] == "Current chart note"
-    assert chart["limits"] == [{"type": "CORE", "position": 1, "max_count": 1}]
+    assert chart["limits"] == [
+        {"type": "CORE", "position": 1, "max_count": 1, "limit_kind": "maximum"}
+    ]
     assert chart["teams"][0]["name"] == "Ranger Team"
     assert chart["teams"][0]["types"] == ["CORE"]
     member = chart["teams"][0]["members"][0]
@@ -537,11 +778,19 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'readShareState("fireteams").params.get("army")' in script
     assert b'writeShareState("fireteams", value ? { army: value } : {}, { replace })' in script
     assert b"Counts as:" in script
-    assert b"Authoritative" in script
+    assert b"`${sourceLabel} Fireteam chart.`" in script
+    assert b"No members are listed for this Fireteam." in script
+    assert b"No member rows are defined for this chart entry." not in script
+    assert b"Authoritative" not in script
+    assert b"current Army snapshot" not in script
     assert b'army.role === "reinforcement"' in script
     assert b'army.role === "sectorial" || army.role === "non_aligned"' in script
-    assert b"value === 256" in script
+    assert b"value === 256" not in script
+    assert b"value === 0" not in script
+    assert b'limit.limit_kind || "maximum"' in script
+    assert b'kind === "unlimited"' in script
     assert b"`${limit.type}: unlimited`" in script
+    assert b'kind === "unavailable"' in script
     assert b'element.classList.add("developer-only")' in script
     assert b'["FTO Profiles", true, "table-column--descriptor"]' in script
     assert b'["Notes", true, "table-column--descriptor"]' in script
@@ -636,13 +885,10 @@ def test_fireteam_chart_page_and_api_use_application_projection(
     assert b'html[data-developer-mode="true"] .fireteam-card {' not in styles
     assert_css_rule(styles, ".fireteam-member-table", {"border": "0"})
     assert_css_rule(styles, ".fireteam-member-table table", {"min-width": "520px"})
-    assert (
-        b"""  html:not([data-developer-mode="true"]) .fireteam-member-table table {
-    width: 100%;
-    min-width: 0;
-    table-layout: fixed;
-  }"""
-        in styles
+    assert_css_rule(
+        styles,
+        'html:not([data-developer-mode="true"]) .fireteam-member-table table',
+        {"width": "100%", "min-width": "0", "table-layout": "fixed"},
     )
     assert (
         b"""  .fireteam-member-table table {
@@ -661,12 +907,16 @@ def test_fireteam_chart_page_and_api_use_application_projection(
   }"""
         in styles
     )
-    assert (
-        b"""  html:not([data-developer-mode="true"]) .fireteam-member-table .table-column--primary {
-    width: 54%;
-    min-width: 0;
-  }"""
-        in styles
+    assert_css_rule(
+        styles,
+        'html:not([data-developer-mode="true"]) .fireteam-member-table .table-column--primary',
+        {"width": "70%", "min-width": "0"},
+    )
+    assert_css_rule(
+        styles,
+        'html:not([data-developer-mode="true"]) '
+        '.fireteam-member-table .fireteam-member-requirements',
+        {"width": "30%"},
     )
     assert_css_rule(
         styles,
@@ -795,10 +1045,28 @@ def test_army_api_exposes_source_derived_roles_and_grouping(tmp_path: Path) -> N
         }
     ]
 
+    status, _, body = request(role_app, "/api/units/1", query="reinforcement=0")
+    assert status == 200
+    detail = json.loads(body)
+    detail_armies = {army["id"]: army for army in detail["armies"]}
+    assert detail_armies[101]["presentation_visible"] is True
+    assert detail_armies[198]["presentation_visible"] is False
+    assert detail_armies[198]["presentation_requested"] is False
+
+    status, _, body = request(
+        role_app, "/api/units/1", query="reinforcement=0&army_id=198"
+    )
+    assert status == 200
+    detail = json.loads(body)
+    detail_armies = {army["id"]: army for army in detail["armies"]}
+    assert detail_armies[198]["presentation_visible"] is True
+    assert detail_armies[198]["presentation_requested"] is True
+
     for army_ref in ("901", "non-aligned"):
         status, _, body = request(role_app, "/api/units", query=f"army_id={army_ref}")
         assert status == 400
-        assert "grouping-only identity" in json.loads(body)["error"]
+        assert json.loads(body)["error"] == "Choose a playable Army list to browse its units."
+        assert b"grouping-only identity" not in body
 
 
 def test_army_filter_uses_actual_occurrences(app: Callable) -> None:
@@ -994,6 +1262,17 @@ def test_unit_details_api_exposes_include_relationships(
             "compatible": None,
             "habilities": None,
             "orders": [{"type": "REGULAR", "list": 2, "total": 2}],
+            "order_presentations": [
+                {
+                    "label": "Regular Order",
+                    "symbol_descriptor": {
+                        "type": "regular",
+                        "symbol_path": "orders/regular.svg",
+                        "label": "Regular Order",
+                        "help_key": "training-orders",
+                    },
+                }
+            ],
             "includes": [
                 {
                     "loadout_payload_id": payload_id,
@@ -1068,10 +1347,32 @@ def test_unit_profile_help_is_rules_backed_and_optional(
         "isc",
         "hackable",
         "peripheral",
-        "equipment-weapons",
+        "skills",
+        "equipment",
+        "weapons",
         "profile-options",
     ]
     assert items[6]["name"] == "Hackable"
+    by_key = {item["key"]: item for item in items}
+    assert "language-independent name" in by_key["isc"]["summary"]
+    assert "O-12 intelligence reporting" in by_key["isc"]["summary"]
+    assert by_key["profile-options"]["name"] == "Profiles and Loadouts"
+    assert "selectable options" in by_key["profile-options"]["summary"]
+    references = [
+        token for token in by_key["profile-options"]["summary_tokens"]
+        if token["type"] == "reference"
+    ]
+    assert {token["target"] for token in references} == {
+        "skill:peripheral", "attribute:swc", "attribute:c"
+    }
+    assert all(
+        token["public_reference"].get("href")
+        or (token["public_reference"].get("catalog") and token["public_reference"].get("id"))
+        for token in references
+    )
+    for key in ("isc", "profile-options"):
+        for internal_copy in ("source ", "application identity", "profile rows", "loadout rows"):
+            assert internal_copy not in by_key[key]["summary"]
 
 
 def test_unit_categorical_filters_are_exposed_and_filter_units(app: Callable) -> None:
@@ -1079,7 +1380,12 @@ def test_unit_categorical_filters_are_exposed_and_filter_units(app: Callable) ->
     assert status == 200
     assert json.loads(body) == {
         "troop_types": [
-            {"id": 1, "slug": "line-trooper", "name": "Line Trooper"}
+            {
+                "id": 1,
+                "slug": "line-trooper",
+                "name": "Line Trooper",
+                "display_name": "Line Trooper",
+            }
         ],
         "classifications": [
             {"id": 1, "slug": "light-infantry", "name": "Light Infantry"}
@@ -1150,7 +1456,9 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     profile = item["profiles"][0]
     assert profile["name"] == "Ranger Profile"
     assert profile["type"] == "Line Trooper"
+    assert profile["type_label"] == "Line Trooper"
     assert profile["classification"] == "Light Infantry"
+    assert profile["characteristic_presentations"] == []
     assert {entry["army_id"] for entry in profile["availability"]} == {101, 201}
     assert {entry["ava"] for entry in profile["availability"]} == {2}
 
@@ -1277,11 +1585,60 @@ def test_unit_details_are_available_by_id(app: Callable) -> None:
                 "extras": [{"id": 43, "name": "AP"}],
             }
         ]
+        assert army["profiles"][0]["type_label"] == "Line Trooper"
+        assert army["profiles"][0]["characteristic_presentations"] == []
+        assert army["availability_badges"] == []
+        assert army["profiles"][0]["specific_items"]["skills"] == []
+        assert army["profiles"][0]["specific_items"]["equipment"] == []
+        assert army["loadouts"][0]["symbol_descriptors"] == []
+
+    assert unit["general_profiles"] == [
+        {
+            "profile_identity": "profile ranger",
+            "display_name": "Ranger Profile",
+            "stats": {
+                "move_1": None,
+                "move_2": None,
+                "is_structure": None,
+                "cc": None,
+                "bs": None,
+                "ph": None,
+                "wip": None,
+                "arm": None,
+                "bts": None,
+                "vitality": None,
+                "silhouette": None,
+            },
+            "order_type": "regular",
+            "type": "Line Trooper",
+            "type_label": "Line Trooper",
+            "classification": "Light Infantry",
+            "occurrence_count": 2,
+            "reinforcement_only": False,
+            "symbol_path": None,
+            "shared_items": {
+                "skills": [army["profiles"][0]["skills"][0]],
+                "equipment": [army["profiles"][0]["equipment"][0]],
+                "weapons": [army["loadouts"][0]["weapons"][0]],
+            },
+            "different_stat_labels": [],
+            "symbol_descriptors": [
+                {
+                    "type": "regular",
+                    "symbol_path": "orders/regular.svg",
+                    "label": "Regular Order",
+                    "help_key": "training-orders",
+                }
+            ],
+            "presentation_visible": True,
+        }
+    ]
     status, headers, body = request(app, "/units/1")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"unit.js" in body
-    assert b'aria-label="Project navigation"' in body
+    assert b'aria-label="InfinityDB navigation"' in body
+    assert b'aria-label="Project navigation"' not in body
     assert b"Skip to unit details" in body
 
     status, headers, slug_page = request(app, "/units/ranger-prototype")
@@ -1378,6 +1735,7 @@ def test_unit_details_expose_bidirectional_peripheral_controller_links(
         {
             "id": "peripheral-controller-access:test",
             "type_id": "rule:peripheral-type:cyberplug",
+            "type_label": "Cyberplug",
             "relationship": "access-pool",
             "targets": [{"id": 2, "slug": "beta-scout", "name": "Beta Scout"}],
         }
@@ -1387,10 +1745,14 @@ def test_unit_details_expose_bidirectional_peripheral_controller_links(
     assert status == 200
     target = json.loads(body)
     assert target["peripheral_type_ids"] == ["rule:peripheral-type:cyberplug"]
+    assert target["peripheral_types"] == [
+        {"id": "rule:peripheral-type:cyberplug", "label": "Cyberplug"}
+    ]
     assert target["peripheral_controllers"] == [
         {
             "id": "peripheral-controller-access:test",
             "type_id": "rule:peripheral-type:cyberplug",
+            "type_label": "Cyberplug",
             "relationship": "access-pool",
             "controller_kind": "loadout",
             "controller_option_name": "Rifle loadout",
@@ -1422,6 +1784,25 @@ def test_unit_details_include_occurrence_availability_categories(
     assert status == 200
     unit = json.loads(body)
     assert unit["armies"][0]["availability_flags"] == expected_flags
+
+
+def test_unit_detail_query_rejects_unknown_and_duplicate_parameters(
+    app: Callable,
+) -> None:
+    for query in (
+        "unknown=1",
+        "army_id=101&army_id=101",
+        "cache_bust=1&cache_bust=2",
+    ):
+        status, _, body = request(app, "/api/units/ranger-prototype", query=query)
+        assert status == 400
+        assert json.loads(body)["error"]
+
+    status, _, body = request(
+        app, "/api/units/ranger-prototype", query="army_id=101&cache_bust=1"
+    )
+    assert status == 200
+    assert json.loads(body)["id"] == 1
 
 
 @pytest.mark.parametrize(
@@ -1490,9 +1871,11 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     status, headers, body = request(app, "/")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"Your Infinity reference," in body
+    assert body.count(b"Your Infinity reference,") >= 2
+    assert b"Your Infinity data," not in body
     assert b"in one place." in body
-    assert b'aria-label="Project navigation"' in body
+    assert b'aria-label="InfinityDB navigation"' in body
+    assert b'aria-label="Project navigation"' not in body
     assert b'href="/armies"' in body
     assert b'href="/units"' in body
     assert b'href="/ammunition"' in body
@@ -1558,7 +1941,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
         assert b'id="' + range_filter + b'-range-reset" class="numeric-range-reset"' in body
         assert b'aria-label="Reset ' in body
 
-    status, _, script = request(app, "/static/app.js")
+    status, _, script = request(app, "/static/units.js")
     assert status == 200
     assert b'className = "page-results-summary"' in script
     assert b"renderAvailabilitySummary(data)" in script
@@ -1603,7 +1986,8 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'row.append(nameCell, idCell)' in unit_list_script
     assert b'unit-profile-characteristic-symbol' in unit_list_script
     assert b'unit-profile-characteristic-fallback' in unit_list_script
-    assert b'developerOnlyCharacteristic(characteristic)' in unit_list_script
+    assert b'descriptor.developer_only' in unit_list_script
+    assert b'developerOnlyCharacteristic' not in unit_list_script
     assert b'unit-profile-troop-type-long' in unit_list_script
     assert b'unit-profile-troop-type-short' in unit_list_script
     assert b'className = "army-availability-link"' in unit_list_script
@@ -1612,17 +1996,18 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     status, _, unit_detail_script = request(app, "/static/unit.js")
     assert status == 200
     assert b'readShareState("unit").params.get("army_id")' in unit_detail_script
-    assert b'unit.armies.find(isRequestedArmy)' in unit_detail_script
-    assert b'army === requestedArmy' in unit_detail_script
+    assert b'unit.armies.find((army) => army.presentation_requested)' in unit_detail_script
+    assert b'unit.armies.filter((army) => army.presentation_visible)' in unit_detail_script
 
     status, _, unit_presentation_script = request(app, "/static/unit-presentation.js")
     assert status == 200
     for characteristic in (b"no cube", b"non hackable", b"not impetuous"):
-        assert characteristic in unit_presentation_script
+        assert characteristic not in unit_presentation_script
 
-    status, _, app_script = request(app, "/static/app.js")
+    status, _, units_script = request(app, "/static/units.js")
     assert status == 200
-    assert b'(item) => troopTypeLabel(item.name)' in app_script
+    assert b'(item) => item.display_name || item.name' in units_script
+    assert b'troopTypeLabel' not in units_script
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -1707,7 +2092,7 @@ def test_browser_version_check_uses_an_uncached_server_version(app: Callable) ->
     assert b"window.location.replace(freshUrl)" in script
 
 
-def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> None:
+def test_browser_json_access_is_routed_through_api_and_transport_modules(app: Callable) -> None:
     for asset, helper in (
         ("catalog-list.js", b"getCatalogItems(page, pageController.signal)"),
         ("catalog-detail.js", b"getCatalogItem(catalog, itemId, pageController.signal)"),
@@ -1725,6 +2110,25 @@ def test_browser_json_transport_is_centralized_in_api_module(app: Callable) -> N
         assert b'from "./api.js"' in body
         assert helper in body
         assert b"fetch(" not in body
+
+    status, _, api = request(app, "/static/api.js")
+    assert status == 200
+    assert b'from "./api-transport.js"' in api
+    assert b"preferences.js" not in api
+    assert b"fetch(" not in api
+    assert b"visibleUnitIds(optionalFilters, signal)" in api
+
+    for asset in ("catalog-detail.js", "skill.js"):
+        status, _, body = request(app, f"/static/{asset}")
+        assert status == 200
+        assert b"optionalUnitFilters" in body
+        assert b"visibleUnitIds(optionalUnitFilters(), pageController.signal)" in body
+
+    status, _, transport = request(app, "/static/api-transport.js")
+    assert status == 200
+    assert b"async function getJson(path, signal)" in transport
+    assert b"fetch(cacheBustedUrl(path)" in transport
+    assert b"preferences.js" not in transport
 
 
 @pytest.mark.parametrize(
@@ -1768,6 +2172,307 @@ def test_every_page_uses_the_shared_page_shell(app: Callable, path: str) -> None
     assert f"Version {__display_version__}".encode() in body
 
 
+def test_player_page_framing_uses_reference_language(app: Callable) -> None:
+    for path in ("/armies", "/units", "/search", "/skills", "/equipment", "/weapons"):
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b'<a href="/">InfinityDB</a><span aria-hidden="true">/</span>' in body
+        assert b">Database<" not in body
+
+    status, _, home = request(app, "/")
+    assert status == 200
+    assert b"Explore InfinityDB" in home
+    assert b"Explore the database" not in home
+
+    status, _, units = request(app, "/units")
+    assert status == 200
+    assert b"Browse units<br" in units
+    assert b'<span class="catalog-tag"><span aria-hidden="true"></span> Units</span>' in units
+    assert b'aria-label="Unit counts"' in units
+    assert b">01 / UNITS</span>" in units
+    assert b"Enable JavaScript to browse and filter units." in units
+    assert b'<span class="stat-label">Armies</span>' in units
+    assert b"Unit catalog" not in units
+    assert b"01 / CATALOG" not in units
+    assert b"Browse the database" not in units
+    assert b"Armies indexed" not in units
+
+    status, _, unit_detail = request(app, "/units/example")
+    assert status == 200
+    assert b'<span class="catalog-tag"><span aria-hidden="true"></span> Units</span>' in unit_detail
+    assert b"Unit catalog" not in unit_detail
+
+    status, _, search = request(app, "/search")
+    assert status == 200
+    assert b"All references" in search
+    assert b"database domain" not in search
+
+
+def test_player_unit_tooltips_and_filter_context_use_game_language(app: Callable) -> None:
+    status, _, unit_script = request(app, "/static/unit.js")
+    assert status == 200
+    titles = re.findall(rb'(?:group|item)\.title = "([^"]+)"', unit_script)
+    assert any(b"Peripherals this Controller can select" in title for title in titles)
+    assert any(b"This Controller can select this Peripheral" in title for title in titles)
+    assert all(b"access pool" not in title.lower() for title in titles)
+    assert all(b"ownership" not in title.lower() for title in titles)
+    assert any(b"does not assign" in title for title in titles)
+    assert b"copy.append(maintainedTextFragment(item.summary_tokens, item.summary))" in unit_script
+    assert b"preview_tokens: item.summary_tokens" in unit_script
+    assert b"copy.textContent = item.summary" not in unit_script
+
+    # Technical relationship explanations remain inside Developer-only sections.
+    for function, section, explanation in (
+        ("renderArmyRelationships", "army-relationships", "This source relationship"),
+        ("renderSelectionRelationships", "selection-relationships", "source-defined relationships"),
+    ):
+        block = unit_script.split(f"function {function}(".encode(), 1)[1].split(
+            b"\nfunction ", 1
+        )[0]
+        assert f'detail-group {section} developer-only'.encode() in block
+        assert explanation.encode() in block
+
+    status, _, units_script = request(app, "/static/units.js")
+    assert status == 200
+    assert b"Faction membership:" in units_script
+    assert b"may not be available in the faction's current Army lists" in units_script
+    assert b"concrete current Army-list availability" not in units_script
+
+    status, _, home = request(app, "/")
+    assert status == 200
+    assert b"and N5.3 rules references" in home
+    assert b"maintained N5.3 rules references" not in home
+    status, _, unit = request(app, "/units/example")
+    assert status == 200
+    assert b"Army availability, and related rules" in unit
+    assert b"Army context" not in unit
+
+
+@pytest.mark.parametrize(
+    ("path", "query"),
+    [
+        ("/api/units/1", "army_id=INVALID"),
+        ("/api/fireteams", "army_id=9223372036854775808"),
+        ("/api/units", "skill_id=99999999999999999999"),
+        ("/api/units", "declared_faction_id=99999999999999999999"),
+    ],
+)
+def test_invalid_reference_selections_use_player_language(
+    app: Callable, path: str, query: str,
+) -> None:
+    status, _, body = request(app, path, query=query)
+    assert status == 400
+    assert json.loads(body)["error"] == "This filter selection is invalid."
+    assert b"domain identifier" not in body
+    assert b"slug" not in body
+
+
+def test_player_loading_empty_and_error_states_hide_storage_language(app: Callable) -> None:
+    status, _, armies = request(app, "/armies")
+    assert status == 200
+    assert b"There are no Army lists to browse right now." in armies
+    assert b"current snapshot" not in armies.lower()
+
+    status, _, units = request(app, "/units")
+    assert status == 200
+    assert b"Loading unit information." in units
+    assert b"Units could not be loaded" in units
+    assert b"Loading the unit catalog" not in units
+    assert b"Getting your catalog ready" not in units
+
+    status, _, units_script = request(app, "/static/units.js")
+    assert status == 200
+    assert b"No units available" in units_script
+    assert b"There are no units to browse right now." in units_script
+    assert b"Could not reach InfinityDB. Check your connection and try again." in units_script
+    assert b"No units have been added to this database yet." not in units_script
+    assert b"Could not connect to the database" not in units_script
+
+    status, _, unit_script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"Not currently available" in unit_script
+    assert b"Unavailable in this source data" not in unit_script
+
+    status, _, transport = request(app, "/static/api-transport.js")
+    assert status == 200
+    assert b"This information could not be loaded. Please try again." in transport
+    assert b"The database returned an error" not in transport
+
+    status, _, fireteams = request(app, "/fireteams")
+    assert status == 200
+    assert b"Loading Fireteam rules and Army charts." in fireteams
+    assert b"Reading Fireteam reference data." not in fireteams
+
+
+
+def test_invalid_unit_and_skill_links_use_player_language(app: Callable) -> None:
+    status, _, unit_script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"This Unit link is invalid." in unit_script
+    assert b"requested unit address" not in unit_script.lower()
+
+    status, _, skill_script = request(app, "/static/skill.js")
+    assert status == 200
+    assert b"This Skill link is invalid." in skill_script
+    assert b"requested skill address" not in skill_script.lower()
+
+def test_player_api_failures_hide_storage_language(
+    app: Callable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    cases = [
+        ("/api/armies", "list_armies", "Army information is unavailable. Please try again."),
+        (
+            "/api/visible-unit-ids",
+            "visible_unit_ids",
+            "Unit information is unavailable. Please try again.",
+        ),
+        (
+            "/api/unit-filters",
+            "list_unit_filter_values",
+            "Unit information is unavailable. Please try again.",
+        ),
+        ("/api/units", "list_units", "Unit information is unavailable. Please try again."),
+        (
+            "/api/units/ranger-prototype",
+            "get_unit",
+            "Unit information is unavailable. Please try again.",
+        ),
+    ]
+
+    for path, method_name, expected_error in cases:
+        with monkeypatch.context() as patch:
+            def fail(*args, **kwargs):
+                raise sqlite3.DatabaseError("private database failure detail")
+
+            patch.setattr(app.api.database, method_name, fail)
+            status, _, body = request(app, path)
+
+        assert status == 503
+        payload = json.loads(body)
+        assert payload == {"error": expected_error}
+        assert "database" not in payload["error"].lower()
+        assert b"private database failure detail" not in body
+
+
+def test_rules_reference_api_failures_use_player_language(
+    app: Callable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    cases = [
+        ("/api/skills", app.api.skill_catalog, "list_skills"),
+        ("/api/equipment", app.api.equipment_catalog, "list_equipment"),
+        ("/api/weapons", app.api.database, "list_catalog_items"),
+        ("/api/ammunition", app.api.ammunition_catalog, "list_items"),
+        ("/api/labels", app.api.label_catalog, "list_items"),
+        ("/api/rules", app.api.general_rules_catalog, "list_items"),
+    ]
+
+    for path, owner, method_name in cases:
+        with monkeypatch.context() as patch:
+            def fail(*args, **kwargs):
+                raise sqlite3.DatabaseError("private database failure detail")
+
+            patch.setattr(owner, method_name, fail)
+            status, _, body = request(app, path)
+
+        assert status == 503
+        payload = json.loads(body)
+        assert payload == {
+            "error": "Reference information is unavailable. Please try again."
+        }
+        assert "catalog" not in payload["error"].lower()
+        assert "database" not in payload["error"].lower()
+        assert b"private database failure detail" not in body
+
+
+@pytest.mark.parametrize(
+    ("path", "query", "service_name", "method_name", "message"),
+    [
+        ("/api/search", "q=stealth", "search_catalog", "search",
+         "Search is unavailable. Please try again."),
+        ("/api/fireteams", "", "database", "list_fireteam_armies",
+         "The Fireteam chart is unavailable. Please try again."),
+        ("/api/fireteams", "army_id=101", "database", "get_fireteam_chart",
+         "The Fireteam chart is unavailable. Please try again."),
+        ("/api/skills/stealth", "", "skill_catalog", "get_skill",
+         "The skill is unavailable. Please try again."),
+        ("/api/equipment/1", "", "equipment_catalog", "get_equipment",
+         "The reference item is unavailable. Please try again."),
+        ("/api/weapons/combi-rifle", "", "database", "get_catalog_item",
+         "The reference item is unavailable. Please try again."),
+        ("/api/visible-unit-ids", "", "database", "visible_unit_ids",
+         "Unit information is unavailable. Please try again."),
+        ("/api/units/ranger-prototype", "", "database", "get_unit",
+         "Unit information is unavailable. Please try again."),
+    ],
+)
+def test_internal_value_errors_stay_in_diagnostics(
+    app: Callable, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture,
+    path: str, query: str, service_name: str, method_name: str, message: str,
+) -> None:
+    diagnostic = "Source-specific rule has conflicting curated records and source IDs"
+
+    def fail(*args, **kwargs):
+        raise ValueError(diagnostic)
+
+    monkeypatch.setattr(getattr(app.api, service_name), method_name, fail)
+    status, _, body = request(app, path, query=query)
+    assert status == 503
+    assert json.loads(body) == {"error": message}
+    assert diagnostic.encode() not in body
+    assert diagnostic in caplog.text
+
+
+def test_equipment_weapons_and_fireteams_intros_use_player_language(app: Callable) -> None:
+    status, _, equipment = request(app, "/equipment")
+    assert status == 200
+    assert b"Browse Equipment rules, variants, and the units that use them." in equipment
+    assert b"current army snapshot" not in equipment.lower()
+
+    status, _, weapons = request(app, "/weapons")
+    assert status == 200
+    assert b"Browse Weapon profiles, ranges, Traits, and the units that use them." in weapons
+    assert b"current army snapshot" not in weapons.lower()
+
+    status, _, fireteams = request(app, "/fireteams")
+    assert status == 200
+    assert (
+        b"Browse Fireteam charts by Army, including membership requirements, FTO options, and "
+        b"Wildcards."
+        in fireteams
+    )
+    assert b'<p class="eyebrow">Fireteam reference</p>' in fireteams
+    assert b"Connected game structure" not in fireteams
+    assert b"authoritative Infinity Fireteam charts" not in fireteams
+    assert b"each Army's current Fireteam chart" not in fireteams
+
+
+def test_rules_taxonomy_pages_use_player_language(app: Callable) -> None:
+    status, _, home = request(app, "/")
+    assert status == 200
+    assert b"Browse Labels used to classify Skills, Equipment, and rules effects." in home
+    assert b"Browse core N5 rules that apply across the game." in home
+    assert b"Look up Infinity terms and abbreviations used throughout the reference." in home
+
+    status, _, labels = request(app, "/labels")
+    assert status == 200
+    assert b"Browse Labels used to classify Skills, Equipment, and rules effects." in labels
+    assert b"canonical" not in labels.lower()
+
+    status, _, rules = request(app, "/rules")
+    assert status == 200
+    assert b"Browse core N5 rules that apply across the game." in rules
+    assert b"rules domain" not in rules.lower()
+    assert b"more specific rules catalog" not in rules.lower()
+
+    status, _, glossary = request(app, "/glossary")
+    assert status == 200
+    assert b"Look up Infinity terms and abbreviations used throughout the reference." in glossary
+    assert b"Gathering terms and definitions." in glossary
+    assert b"canonical terminology" not in glossary.lower()
+    assert b"rules domains" not in glossary.lower()
+    assert b"embedded vocabularies" not in glossary.lower()
+
+
 @pytest.mark.parametrize(
     "path",
     [
@@ -1809,6 +2514,7 @@ def test_rules_reference_pages_share_the_same_shell_classification(
         ("/units/example", "/units"),
         ("/skills", "/skills"),
         ("/skills/example", "/skills"),
+        ("/skill-extras", "/skills"),
         ("/equipment", "/equipment"),
         ("/equipment/example", "/equipment"),
         ("/weapons", "/weapons"),
@@ -1837,6 +2543,21 @@ def test_browser_routes_keep_their_parent_navigation_active(
 
     assert status == 200
     assert f'href="{active_href}" aria-current="page"'.encode() in body
+
+
+def test_skill_modifiers_remains_internal_to_the_player_skills_page(app: Callable) -> None:
+    status, _, skills = request(app, "/skills")
+    assert status == 200
+    assert b'href="/skill-extras"' not in skills
+    assert (
+        b"Browse Common and Special Skills, with rules text and Army usage where available."
+        in skills
+    )
+
+    status, _, modifiers = request(app, "/skill-extras")
+    assert status == 200
+    assert b'href="/skills"' in modifiers
+    assert b'href="/skills" aria-current="page"' in modifiers
 
 
 def test_every_browser_page_has_a_meta_description(app: Callable) -> None:
@@ -1871,6 +2592,22 @@ def test_every_browser_page_has_a_meta_description(app: Callable) -> None:
         assert b'<meta name="description"' in body
 
 
+def test_home_and_about_intros_use_reference_language(app: Callable) -> None:
+    status, _, home = request(app, "/")
+    assert status == 200
+    assert b"official Infinity Army information" in home
+    assert b"and N5.3 rules references" in home
+    assert b"official Infinity Army data" not in home
+    assert b"maintained N5.3 rules context" not in home
+
+    status, _, about = request(app, "/about")
+    assert status == 200
+    assert b"official Infinity Army information" in about
+    assert b"Explore units, profiles, and rules" in about
+    assert b"official Infinity Army data" not in about
+    assert b"Explore the game data you already use" not in about
+
+
 def test_landing_page_states_independence_and_asset_permission(app: Callable) -> None:
     status, _, body = request(app, "/")
 
@@ -1884,7 +2621,7 @@ def test_landing_page_states_independence_and_asset_permission(app: Callable) ->
     assert b"assets used by the project" in body
 
 
-def test_landing_database_links_match_primary_navigation_order(app: Callable) -> None:
+def test_landing_reference_links_match_primary_navigation_order(app: Callable) -> None:
     status, _, body = request(app, "/")
 
     assert status == 200
@@ -1900,6 +2637,62 @@ def test_landing_page_links_to_fireteams(app: Callable) -> None:
     assert status == 200
     assert b'<a class="landing-link" href="/fireteams">' in body
     assert b"<strong>Fireteams</strong>" in body
+
+
+def test_landing_reference_cards_describe_player_tasks(app: Callable) -> None:
+    status, _, body = request(app, "/")
+
+    assert status == 200
+    assert b"Browse Skill rules and see which units use them." in body
+    assert b"Browse Equipment rules, variants, and the units that use them." in body
+    assert b"Browse Weapon profiles, ranges, Traits, and the units that use them." in body
+    assert b"See what Traits mean and where they apply." in body
+    assert b"Browse Program profiles, Devices, targets, and related rules." in body
+    assert b"rules context" not in body
+    assert b"trace related rules" not in body
+    assert b"relationships, and usage" not in body
+    assert b"connected rules" not in body
+
+
+def test_project_favicon_is_shared_versioned_brand_asset(app: Callable) -> None:
+    svg_href = f'href="/static/favicon.svg?v={STATIC_ASSET_VERSION}"'.encode()
+    png_href = f'href="/static/favicon-32.png?v={STATIC_ASSET_VERSION}"'.encode()
+    touch_href = (
+        f'href="/static/apple-touch-icon.png?v={STATIC_ASSET_VERSION}"'.encode()
+    )
+
+    for path in ("/", "/units/ranger-prototype", "/changes"):
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b'<link rel="icon" ' + png_href in body
+        assert b'type="image/png" sizes="32x32">' in body
+        assert b'<link rel="icon" ' + svg_href in body
+        assert b'type="image/svg+xml" sizes="any">' in body
+        assert b'<link rel="apple-touch-icon" ' + touch_href in body
+        assert b'sizes="180x180">' in body
+        assert body.index(png_href) < body.index(svg_href) < body.index(touch_href)
+
+    status, headers, favicon = request(
+        app, f"/static/favicon.svg?v={STATIC_ASSET_VERSION}"
+    )
+    assert status == 200
+    assert headers["content-type"] == "image/svg+xml"
+    assert headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' in favicon
+    assert b"Simplified from infinitydb-logo.svg" in favicon
+    assert b'fill="#0d2922"' in favicon
+    assert b"var(" not in favicon
+
+    for asset, size in (("favicon-32.png", 32), ("apple-touch-icon.png", 180)):
+        status, headers, png = request(
+            app, f"/static/{asset}?v={STATIC_ASSET_VERSION}"
+        )
+        assert status == 200
+        assert headers["content-type"] == "image/png"
+        assert headers["cache-control"] == "public, max-age=31536000, immutable"
+        assert png[:8] == b"\x89PNG\r\n\x1a\n"
+        assert int.from_bytes(png[16:20], "big") == size
+        assert int.from_bytes(png[20:24], "big") == size
 
 
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
@@ -2020,7 +2813,7 @@ def test_generated_tables_own_accessible_semantics_and_normal_wrapping(app: Call
     assert b'"Loadouts",' in unit_js
     assert b'"Composite options",' in unit_js
     assert b'"Profiles",' in unit_js
-    assert b'`${profile.name || "Unit"} general profile`' in unit_js
+    assert b'`${profile.display_name || "Unit"} general profile`' in unit_js
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -2086,7 +2879,7 @@ def test_secondary_tables_use_shared_semantic_layout(app: Callable) -> None:
 
     status, _, catalog_detail = request(app, "/static/catalog-detail.js")
     assert status == 200
-    assert b"function tableViewport(table, className = \"\")" in catalog_detail
+    assert b'import { tableViewport } from "./view-components.js";' in catalog_detail
     assert b'data-table--compact data-table--profile weapon-statline' in catalog_detail
     assert (
         b'data-table--compact data-table--listing data-table--unit-list '
@@ -2122,7 +2915,7 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
         styles,
         ".attribute-statline",
         {
-            "--movement-column-width": "68px",
+            "--movement-column-width": "76px",
             "grid-template-columns": ("var(--movement-column-width) repeat(8, minmax(0, 1fr))"),
         },
     )
@@ -2135,7 +2928,7 @@ def test_intermediate_widths_reserve_space_for_movement_values(app: Callable) ->
     assert_css_rule(
         styles,
         ".attribute-statline, .attribute-statline-with-availability",
-        {"grid-template-columns": "68px repeat(4, minmax(0, 1fr))"},
+        {"grid-template-columns": "76px repeat(4, minmax(0, 1fr))"},
     )
     assert_css_rule(
         styles,
@@ -2187,6 +2980,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert status == 200
     assert b'id="developer-mode-toggle"' in body
     assert b'id="remember-settings-toggle"' in body
+    assert b'id="theme-selector" class="setting-select"' in body
     assert (
         b'id="fireteams-include-wildcards-toggle" class="setting-switch" '
         b'type="checkbox" checked'
@@ -2195,11 +2989,14 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'id="cookie-consent-dialog"' in body
     assert b"Allow cookies" in body
     assert b"Remember settings with browser cookies" in body
+    assert b'href="/about#privacy-policy"' in body
     assert b"Fireteam Wildcard" in body
+    assert b"your theme, distance, optional-unit" in body
     assert b"InfinityDB / Player reference" in body
     assert b'<div class="menu settings-menu" data-menu>' in body
     assert b'aria-controls="settings-menu"' in body
     assert body.count(b'class="setting-switch') == 9
+    assert b'class="setting-row setting-row--select"' in body
     assert b'class="setting-row setting-row--choice"' in body
     assert b'class="setting-row developer-only"' in body
     assert b'class="settings-group"' in body
@@ -2233,6 +3030,15 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
         ".setting-switch--choice",
         {"--setting-switch-width": "29px", "--setting-switch-height": "16px"},
     )
+    assert_css_rule(
+        styles,
+        ".setting-select",
+        {
+            "border": "1px solid var(--color-nav-control-border)",
+            "color": "var(--color-nav-text-active)",
+            "background": "var(--color-nav-control-surface)",
+        },
+    )
     assert b".developer-toggle" not in styles
     assert b".optional-unit-toggle" not in styles
     assert b".remember-settings-toggle" not in styles
@@ -2264,6 +3070,7 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     status, _, preferences = request(app, "/static/preferences.js")
     assert status == 200
     assert b'const DEVELOPER_MODE_KEY = "infinity-db-developer-mode";' in preferences
+    assert b'from "./theme.js"' in preferences
     assert b'const REMEMBER_SETTINGS_KEY = "infinity-db-remember-settings";' in preferences
     assert (
         b'const FIRETEAMS_INCLUDE_WILDCARDS_KEY = "infinity-db-fireteams-include-wildcards";'
@@ -2272,25 +3079,67 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b'const UNIT_ADVANCED_FILTERS_KEY = "infinity-db-unit-advanced-filters";' in preferences
     assert b"function unitAdvancedFiltersOpen()" in preferences
     assert b"function saveUnitAdvancedFiltersOpen(open)" in preferences
-    assert b"function initializeFireteamsIncludeWildcardsToggle()" in preferences
     assert b"function fireteamsIncludeWildcards()" in preferences
-    assert b'new CustomEvent("fireteamswildcardschange"' in preferences
-    assert b"function initializeDeveloperModeToggle()" in preferences
-    assert b"function initializeRememberSettingsToggle()" in preferences
-    assert b"dialog.showModal()" in preferences
-    assert b'getElementById("distance-unit-toggle")?.checked ? "in" : "cm"' in preferences
-    assert b'getElementById("developer-mode-toggle")?.checked' in preferences
+    assert b"function rememberSettingsEnabled()" in preferences
+    assert b"function rememberCurrentSettings()" in preferences
+    assert b"function forgetRememberedSettings()" in preferences
+    assert b"function developerModeEnabled()" in preferences
+    assert b"function disableCacheEnabled()" in preferences
+    assert b"function saveDeveloperModeEnabled(enabled)" in preferences
+    assert b"function saveDisableCacheEnabled(enabled)" in preferences
+    assert b"function themeSelection()" in preferences
+    assert b"function saveThemeSelection(selection)" in preferences
+    assert b"[THEME_PREFERENCE_KEY, themeSelection()]" in preferences
     assert b"window.localStorage" not in preferences
     assert b"window.sessionStorage.getItem(name)" in preferences
     assert b"window.sessionStorage.setItem(name, value)" in preferences
-    assert b"if (!isRememberingSettings()) return session;" in preferences
+    assert b"const settingCache = new Map();" in preferences
+    assert b"if (settingCache.has(name)) return settingCache.get(name);" in preferences
     assert b"const persistent = cookieValue(name);" in preferences
-    assert b"if (persistent === undefined) return session;" in preferences
-    assert b"setSessionValue(name, persistent);" in preferences
-    assert b'new CustomEvent("developermodechange"' in preferences
-    assert b'const unit = savedUnit === "cm" ? "cm" : "in";' in preferences
-    assert preferences.count(b"defaultChecked: true") == 4
+    assert b"const value = persistent === undefined ? session : persistent;" in preferences
+    assert b"if (persistent !== undefined) setSessionValue(name, persistent);" in preferences
+    assert b"settingCache.set(name, value);" in preferences
+    assert b'=== "cm" ? "cm" : "in"' in preferences
+    assert preferences.count(b"defaultValue: true") == 4
     assert b"function optionalUnitDefaultFilters()" in preferences
+    assert b"document.getElementById" not in preferences
+    assert b"addEventListener(" not in preferences
+    assert b"CustomEvent(" not in preferences
+    assert b"document.documentElement.dataset" not in preferences
+
+    status, _, settings = request(app, "/static/settings.js")
+    assert status == 200
+    assert b'from "./preferences.js"' in settings
+    assert b'from "./theme.js"' in settings
+    assert b"function initializeSettings()" in settings
+    assert b"function initializeThemeSelector()" in settings
+    assert b'document.getElementById("theme-selector")' in settings
+    assert b"themeOptions().map" in settings
+    assert b'saveThemeSelection(selector.value)' in settings
+    assert b'new CustomEvent("themechange"' in settings
+    assert b"function initializeDistanceUnitToggle()" in settings
+    assert b"function initializeDeveloperModeToggle()" in settings
+    assert b"function initializeDisableCacheToggle()" in settings
+    assert b"function initializeOptionalUnitToggles()" in settings
+    assert b"function initializeFireteamsIncludeWildcardsToggle()" in settings
+    assert b"function initializeRememberSettingsToggle()" in settings
+    assert b'document.getElementById("distance-unit-toggle")' in settings
+    assert b'document.getElementById("developer-mode-toggle")' in settings
+    assert b'document.documentElement.dataset.distanceUnit' in settings
+    assert b'document.documentElement.dataset.developerMode' in settings
+    assert b'document.documentElement.dataset.disableCache' in settings
+    assert b'new CustomEvent("fireteamswildcardschange"' in settings
+    assert b'new CustomEvent("developermodechange"' in settings
+    assert b"dialog.showModal()" in settings
+    assert f'src="/static/theme-startup.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert f'src="/static/settings.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert b'<meta name="color-scheme" content="light dark">' in body
+    startup_src = f'src="/static/theme-startup.js?v={STATIC_ASSET_VERSION}"'.encode()
+    stylesheet_href = f'href="/static/styles.css?v={STATIC_ASSET_VERSION}"'.encode()
+    assert body.index(startup_src) < body.index(stylesheet_href)
+    assert body.index(f'src="/static/settings.js?v={STATIC_ASSET_VERSION}"'.encode()) < body.index(
+        f'src="/static/units.js?v={STATIC_ASSET_VERSION}"'.encode()
+    )
     assert (
         b'id="distance-unit-toggle" class="setting-switch setting-switch--choice" '
         b'type="checkbox" checked'
@@ -2310,6 +3159,118 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     status, _, navigation = request(app, "/static/navigation.js")
     assert status == 200
     assert b'menu.classList.contains("settings-menu")' in navigation
+
+
+def test_theme_selection_uses_prepaint_shared_preference_contract(app: Callable) -> None:
+    status, headers, startup = request(app, "/static/theme-startup.js")
+    assert status == 200
+    assert headers["content-type"].startswith("text/javascript")
+    assert b'const THEME_PREFERENCE_KEY = "infinity-db-theme";' in startup
+    assert b'{ value: "system", label: "System" }' in startup
+    assert b'{ value: "light", label: "Light" }' in startup
+    assert b'{ value: "dark", label: "Dark" }' in startup
+    assert b'window.matchMedia?.("(prefers-color-scheme: dark)")' in startup
+    assert b'document.documentElement.dataset.theme = resolved' in startup
+    assert b"applySelection(savedThemeSelection())" in startup
+
+    status, _, theme = request(app, "/static/theme.js")
+    assert status == 200
+    assert b"window.infinityThemeBootstrap" in theme
+    assert b"function themeOptions()" in theme
+    assert b"function applyThemeSelection(value)" in theme
+
+    status, _, body = request(app, "/")
+    assert status == 200
+    startup_src = f'src="/static/theme-startup.js?v={STATIC_ASSET_VERSION}"'.encode()
+    stylesheet_href = f'href="/static/styles.css?v={STATIC_ASSET_VERSION}"'.encode()
+    assert startup_src in body
+    assert body.index(startup_src) < body.index(stylesheet_href)
+
+
+
+def test_theme_runtime_initialization_switching_and_persistence() -> None:
+    root = Path(__file__).resolve().parents[1]
+    harness = root / "tests" / "theme_runtime_harness.cjs"
+    startup = root / "src" / "infinity_db" / "web" / "static" / "theme-startup.js"
+    preferences = root / "src" / "infinity_db" / "web" / "static" / "preferences.js"
+
+    node = shutil.which("node")
+    if node is not None:
+        command = [node]
+    else:
+        try:
+            importlib.import_module("nodejs_wheel")
+        except ModuleNotFoundError:
+            pytest.fail("Theme runtime regression test requires the dev Node.js dependency.")
+        command = [sys.executable, "-m", "nodejs_wheel"]
+
+    completed = subprocess.run(
+        [*command, str(harness), str(startup), str(preferences)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    runtime = json.loads(completed.stdout)
+
+    assert runtime["options"] == ["system", "light", "dark"]
+    assert runtime["startup"] == {
+        "defaultLight": {"themePreference": "system", "theme": "light"},
+        "defaultDark": {"themePreference": "system", "theme": "dark"},
+        "sessionWinsWithoutRemember": {"themePreference": "dark", "theme": "dark"},
+        "cookieWinsWhenRemembered": {"themePreference": "light", "theme": "light"},
+        "invalidFallsBackToSystem": {"themePreference": "system", "theme": "dark"},
+        "switchDark": {"themePreference": "dark", "theme": "dark"},
+        "switchLight": {"themePreference": "light", "theme": "light"},
+        "systemTracksChange": {"themePreference": "system", "theme": "dark"},
+    }
+    assert runtime["persistence"] == {
+        "transientSave": {"selection": "dark", "session": "dark", "cookie": None},
+        "rememberedSave": {"selection": "light", "session": "light", "cookie": "light"},
+        "restored": {"selection": "dark", "session": "dark", "cookie": "dark"},
+        "invalidNormalized": {"selection": "system", "session": "system", "cookie": "system"},
+        "forgotten": {"selection": "light", "session": "light", "cookie": None},
+    }
+
+
+def test_representative_pages_share_theme_runtime_contract(app: Callable) -> None:
+    status, _, startup = request(app, "/static/theme-startup.js")
+    assert status == 200
+    registered = re.findall(rb'Object\.freeze\(\{ value: "([^"]+)", label:', startup)
+    explicit_themes = [theme for theme in registered if theme != b"system"]
+    assert explicit_themes
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    for theme in explicit_themes:
+        assert b':root[data-theme="' + theme + b'"]' in styles
+
+    startup_src = f'src="/static/theme-startup.js?v={STATIC_ASSET_VERSION}"'.encode()
+    settings_src = f'src="/static/settings.js?v={STATIC_ASSET_VERSION}"'.encode()
+    stylesheet_href = f'href="/static/styles.css?v={STATIC_ASSET_VERSION}"'.encode()
+    representative_paths = (
+        "/",
+        "/units",
+        "/units/ranger-prototype",
+        "/skills",
+        "/skills/11",
+        "/fireteams",
+        "/glossary",
+        "/changes",
+        "/about",
+    )
+
+    for path in representative_paths:
+        status, _, body = request(app, path)
+        assert status == 200
+        assert b'<meta name="color-scheme" content="light dark">' in body
+        assert b'id="theme-selector" class="setting-select"' in body
+        assert startup_src in body
+        assert settings_src in body
+        assert stylesheet_href in body
+        assert body.index(startup_src) < body.index(stylesheet_href)
+        opening_html = re.search(rb"<html\b[^>]*>", body)
+        assert opening_html is not None
+        assert b"data-theme=" not in opening_html.group(0)
 
 
 def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> None:
@@ -2392,7 +3353,10 @@ def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> 
     assert status == 200
     assert b"currentMain.replaceWith(nextMain)" in page_navigation
     assert b"window.infinityNavigate" in page_navigation
-    assert b'"/static/navigation.js", "/static/page-navigation.js"' in page_navigation
+    assert (
+        b'"/static/settings.js", "/static/navigation.js", "/static/page-navigation.js"'
+        in page_navigation
+    )
     assert b'source.searchParams.set("_navigation", String(navigationNumber))' in page_navigation
     assert b"window.document.body.append(script)" in page_navigation
     assert b"const menus = [...document.querySelectorAll" in navigation
@@ -2482,14 +3446,32 @@ def test_about_page_is_served_with_active_navigation(app: Callable) -> None:
     assert b"developed in the open" in body
     assert b"https://github.com/frankysan/InfinityDB" in body
     assert b"LLM code disclosure" in body
-    assert b"Version 0.8 connects more of the game" in body
-    assert b"Version 0.9 closes the remaining application-presentation gaps" in body
-    assert b"0.10 is the consistency, presentation, and release-hardening pass" in body
-    assert b"1.0 completes the current rules/reference coverage" in body
+    assert b'id="privacy-policy"' in body
+    assert b"Privacy policy" in body
+    assert b"No visitor profiles" in body
+    assert b"sessionStorage" in body
+    assert b"localStorage" in body
+    assert b"last for up to one year" in body
+    assert b"query/search values from its aggregate metrics" in body
+    assert b"A more connected Infinity reference." in body
+    assert b"Current work focuses on clearer presentation" in body
+    assert b"Know where information comes from" in body
+    assert b"official Army information, rules references" in body
+    for internal_phrase in (
+        b"imports, normalizes, validates, and reconciles",
+        b"read-only application database",
+        b"Source-native facts",
+        b"curated rules context",
+        b"provenance",
+        b"bidirectional related-rule links",
+        b"application-presentation gaps",
+        b"release-hardening",
+    ):
+        assert internal_phrase not in body
     assert b"not affiliated with Corvus Belli S.L." in body
     assert b"explicitly permitted InfinityDB to use and redistribute" in body
     assert b'href="/about" aria-current="page"' in body
-    assert b"about.js" in body
+    assert b"about.js" not in body
 
 
 def test_web_route_handlers_keep_presentation_and_api_ownership_separate(app: Callable) -> None:
@@ -2515,6 +3497,7 @@ def test_dynamic_symbol_routes_serve_project_owned_svg_fixtures(
         "static/armies/test/101-test.svg",
         "static/characteristics/cube.svg",
         "static/orders/regular.svg",
+        "static/peripherals/test/test-bot.svg",
         "static/units/test/1-test.svg",
     )
     svg = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"></svg>'
@@ -2529,6 +3512,7 @@ def test_dynamic_symbol_routes_serve_project_owned_svg_fixtures(
         "/static/armies/test/101-test.svg",
         "/static/characteristics/cube.svg",
         "/static/orders/regular.svg",
+        "/static/peripherals/test/test-bot.svg",
         "/static/units/test/1-test.svg",
     ):
         status, headers, body = request(app, url)
@@ -2595,6 +3579,44 @@ def test_assets_and_catalog_api_have_release_safe_cache_headers(app: Callable) -
     assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
 
 
+def test_stylesheet_entrypoint_composes_owned_sources_in_order(app: Callable) -> None:
+    parts = (
+        "/static/foundation.css",
+        "/static/themes/light.css",
+        "/static/themes/dark.css",
+        "/static/components.css",
+        "/static/page-overrides.css",
+    )
+    sources: dict[str, bytes] = {}
+    expected = bytearray()
+
+    for path in parts:
+        status, headers, body = request(app, path)
+        assert status == 200
+        assert headers["content-type"].startswith("text/css")
+        sources[path] = body
+        expected.extend(body)
+
+    assert b"@font-face" in sources["/static/foundation.css"]
+    assert b"--font-size-root:" in sources["/static/foundation.css"]
+    assert b"--color-surface-page:" not in sources["/static/foundation.css"]
+    assert b':root[data-theme="light"]' in sources["/static/themes/light.css"]
+    assert b':root[data-theme="dark"]' not in sources["/static/themes/light.css"]
+    assert b"--color-surface-page:" in sources["/static/themes/light.css"]
+    assert b':root[data-theme="dark"]' in sources["/static/themes/dark.css"]
+    assert b':root[data-theme="light"]' not in sources["/static/themes/dark.css"]
+    assert b"--color-surface-page:" in sources["/static/themes/dark.css"]
+    assert b".surface {" in sources["/static/components.css"]
+    assert b".army-overview {" in sources["/static/page-overrides.css"]
+    assert b".fireteam-explorer {" in sources["/static/page-overrides.css"]
+    assert b".changes-list {" in sources["/static/page-overrides.css"]
+
+    status, headers, body = request(app, "/static/styles.css")
+    assert status == 200
+    assert headers["content-type"].startswith("text/css")
+    assert body == bytes(expected)
+
+
 def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> None:
     status, headers, body = request(app, "/api/armies")
 
@@ -2646,11 +3668,11 @@ def test_rebuilt_snapshot_changes_the_catalog_api_etag(app: Callable, tmp_path: 
 
 
 def test_versioned_modules_reference_their_matching_release_dependencies(app: Callable) -> None:
-    status, app_headers, app_body = request(app, f"/static/app.js?v={STATIC_ASSET_VERSION}")
+    status, unit_headers, unit_body = request(app, f"/static/units.js?v={STATIC_ASSET_VERSION}")
     assert status == 200
-    assert app_headers["cache-control"] == "public, max-age=31536000, immutable"
-    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in app_body
-    assert f'from "./share-state.js?v={STATIC_ASSET_VERSION}"'.encode() in app_body
+    assert unit_headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in unit_body
+    assert f'from "./share-state.js?v={STATIC_ASSET_VERSION}"'.encode() in unit_body
 
     status, headers, body = request(app, f"/static/unit.js?v={STATIC_ASSET_VERSION}")
 
@@ -2658,11 +3680,28 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
     assert f'from "./api.js?v={STATIC_ASSET_VERSION}"'.encode() in body
     assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert f'from "./distance.js?v={STATIC_ASSET_VERSION}"'.encode() in body
     assert f'from "./share-state.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+
+    status, _, settings = request(app, f"/static/settings.js?v={STATIC_ASSET_VERSION}")
+    assert status == 200
+    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in settings
+    assert f'from "./theme.js?v={STATIC_ASSET_VERSION}"'.encode() in settings
+
+    status, _, preferences = request(app, f"/static/preferences.js?v={STATIC_ASSET_VERSION}")
+    assert status == 200
+    assert f'from "./theme.js?v={STATIC_ASSET_VERSION}"'.encode() in preferences
+
+    status, _, distance = request(app, f"/static/distance.js?v={STATIC_ASSET_VERSION}")
+    assert status == 200
+    assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in distance
 
     status, _, body = request(app, f"/static/api.js?v={STATIC_ASSET_VERSION}")
     assert status == 200
-    assert f'import("./preferences.js?v={STATIC_ASSET_VERSION}")'.encode() in body
+    assert f'from "./api-transport.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+
+    status, _, body = request(app, f"/static/api-transport.js?v={STATIC_ASSET_VERSION}")
+    assert status == 200
     assert b'cache: "no-store"' in body
 
     status, headers, _ = request(app, "/api/armies")
@@ -2671,7 +3710,7 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
 
 
 def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None:
-    status, _, body = request(app, "/static/app.js")
+    status, _, body = request(app, "/static/units.js")
 
     assert status == 200
     assert b"return army.public_slug || String(army.id);" in body
@@ -2700,7 +3739,7 @@ def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None
 
 
 def test_army_selector_uses_backend_role_and_playability(app: Callable) -> None:
-    status, _, body = request(app, "/static/app.js")
+    status, _, body = request(app, "/static/units.js")
 
     assert status == 200
     assert b"Math.floor(Number(army.id) / 100)" not in body
@@ -2730,7 +3769,10 @@ def test_unit_details_frontend_uses_backend_reinforcement_flags(app: Callable) -
     assert status == 200
     assert b"[98, 99]" not in body
     assert b"function isReinforcementArmy(" not in body
-    assert b'reinforcement: (army.availability_flags || []).includes("reinforcement"),' in body
+    assert b"const generalProfiles = unit.general_profiles || [];" in body
+    assert b"profile.presentation_visible !== false" in body
+    assert b"generalProfiles(allProfiles, allLoadouts)" not in body
+    assert b"isEnabledArmy" not in body
 
 
 def test_unit_details_frontend_uses_backend_faction_metadata(app: Callable) -> None:
@@ -2751,8 +3793,8 @@ def test_unit_details_frontend_collapses_army_profile_tables(app: Callable) -> N
     assert b'document.createElement("details")' in body
     assert b"function isStandardArmy(army)" in body
     assert b"section.open = expanded" in body
-    assert b"const profileKey = profile.profile_identity;" in body
-    assert b"profile.display_name || profile.name" in body
+    assert b"const generalByIdentity = new Map(generalProfiles.map" in body
+    assert b"generalByIdentity.get(profile.profile_identity)" in body
     assert b"(?:REINF|REFUERZOS)" not in body
     assert b"function baseProfileName(" not in body
     assert b"function profileIdentity(" not in body
@@ -2766,7 +3808,8 @@ def test_unit_details_frontend_places_unit_symbols_on_general_profiles(
     status, _, unit_js = request(app, "/static/unit.js")
     assert status == 200
     assert b"staticSymbolPath" in unit_js
-    assert b"profile.symbol_paths || []" in unit_js
+    assert b"profile.symbol_path" in unit_js
+    assert b"profile.symbol_paths || []" not in unit_js
     assert b"general-profile-symbols" in unit_js
     assert b"profileTitle(profile, profileSymbols)" in unit_js
     assert b"unitProfileSymbolPath" not in unit_js
@@ -2824,7 +3867,31 @@ def test_unit_details_frontend_labels_vitality_as_vita_or_str(app: Callable) -> 
     assert b'["W", (profile) => profile.vitality]' not in body
     assert b"profile.is_structure === true || Number(profile.is_structure) === 1" in body
     assert b'label === "VITA" && isStructureProfile(profile) ? "STR" : label' in body
-    assert b'is_structure: mostCommon(profiles, "is_structure")' in body
+    assert b"mostCommon(profiles" not in body
+    status, _, api_body = request(app, "/api/units/1")
+    assert status == 200
+    assert "is_structure" in json.loads(api_body)["general_profiles"][0]["stats"]
+
+
+def test_unit_details_frontend_explains_when_optional_settings_hide_every_profile(
+    app: Callable,
+) -> None:
+    status, _, body = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'army.presentation_visible === false' in body
+    assert b'"Profiles filtered out"' in body
+    assert (
+        b'"This Unit has profile details, but all of them are hidden by your current '
+        b'optional-unit settings.' in body
+    )
+
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert_css_rule(
+        styles,
+        ".unit-filtered-notice",
+        {"width": "min(760px, 100%)", "padding": "18px 20px"},
+    )
 
 
 def test_unit_details_frontend_pluralizes_general_profile_heading(app: Callable) -> None:
@@ -2837,7 +3904,8 @@ def test_unit_details_frontend_pluralizes_general_profile_heading(app: Callable)
 def test_unit_details_frontend_marks_general_stats_that_vary_by_army(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200
-    assert b"function generalStatDifferenceLabels(profile)" in body
+    assert b"new Set(profile.different_stat_labels || [])" in body
+    assert b"function generalStatDifferenceLabels(profile)" not in body
     assert b"general-stat-difference-indicator" in body
     assert b"One or more Army profiles differ from this General profile stat" in body
 
@@ -2865,8 +3933,16 @@ def test_unit_details_frontend_marks_surface_and_deepspace_profiles(app: Callabl
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
-    assert_css_rule(styles, ".division-badge-surface", {"background": "#256d1b"})
-    assert_css_rule(styles, ".division-badge-deepspace", {"background": "#d68623"})
+    assert_css_rule(
+        styles,
+        ".division-badge-surface",
+        {"background": "var(--color-division-surface)"},
+    )
+    assert_css_rule(
+        styles,
+        ".division-badge-deepspace",
+        {"background": "var(--color-division-deepspace)"},
+    )
 
 
 def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> None:
@@ -2892,22 +3968,46 @@ def test_detail_views_reuse_shared_detail_style_primitives(app: Callable) -> Non
     assert b".detail-section-title" not in styles
 
 
-def test_recurring_presentation_colors_use_semantic_tokens(app: Callable) -> None:
+def test_presentation_colors_are_owned_by_semantic_theme_contract(app: Callable) -> None:
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
 
     css = styles.decode("utf-8")
     root = re.search(r":root\s*\{.*?\n\}", css, flags=re.DOTALL)
     assert root is not None
+    assert not re.search(r"(?m)^\s*--(?:color|shadow)-", root.group(0))
 
-    component_css = css[: root.start()] + css[root.end() :]
+    light_theme = re.search(
+        r':root,\s*:root\[data-theme="light"\]\s*\{.*?\n\}',
+        css,
+        flags=re.DOTALL,
+    )
+    assert light_theme is not None
+    assert "color-scheme: light;" in light_theme.group(0)
+
+    dark_theme = re.search(
+        r':root\[data-theme="dark"\]\s*\{.*?\n\}',
+        css,
+        flags=re.DOTALL,
+    )
+    assert dark_theme is not None
+    assert "color-scheme: dark;" in dark_theme.group(0)
+
+    light_tokens = set(re.findall(r"--([\w-]+):", light_theme.group(0)))
+    dark_tokens = set(re.findall(r"--([\w-]+):", dark_theme.group(0)))
+    assert dark_tokens == light_tokens
+
+    component_css = (
+        css[: root.start()]
+        + css[root.end() : light_theme.start()]
+        + css[light_theme.end() : dark_theme.start()]
+        + css[dark_theme.end() :]
+    )
     color_literals = re.findall(
         r"#[0-9a-fA-F]{3,8}\b|(?:rgb|rgba)\([^)]*\)",
         component_css,
     )
-    counts = Counter(literal.lower() for literal in color_literals)
-    repeated = {literal: count for literal, count in counts.items() if count > 1}
-    assert repeated == {}
+    assert color_literals == []
 
     for token in [
         "--color-surface-data-header",
@@ -2918,6 +4018,9 @@ def test_recurring_presentation_colors_use_semantic_tokens(app: Callable) -> Non
         "--color-border-subtle",
         "--color-control-border",
         "--color-link-hover",
+        "--color-availability-mercs-surface",
+        "--color-profile-fallback-surface",
+        "--shadow-dialog",
     ]:
         assert f"{token}:".encode() in styles
 
@@ -2932,7 +4035,7 @@ def test_weapon_range_tables_always_include_canonical_bands(app: Callable) -> No
     assert b".find((range) => Number(range.max) >= maximum);" in body
     assert b'if (!matchingRange) return "--";' in body
     assert b"String(modifier)" in body
-    assert b"maximum / 2.5" in body
+    assert b"maximum / DISTANCE_CENTIMETERS_PER_INCH" in body
     assert b"weaponRangeBands" not in body
 
 
@@ -3111,13 +4214,23 @@ def test_unit_details_frontend_hides_empty_army_profile_item_rows(app: Callable)
     assert body.count(b"if (!items.length) continue;") == 2
 
 
-def test_unit_details_frontend_promotes_sole_loadout_skills_to_general_profile(
+def test_unit_details_api_owns_general_profile_shared_item_semantics(
     app: Callable,
 ) -> None:
-    status, _, body = request(app, "/static/unit.js")
+    status, _, body = request(app, "/api/units/1")
     assert status == 200
-    assert b"function generalProfileSkills(profiles, loadouts)" in body
-    assert b"if (loadouts.length !== 1) return skills;" in body
+    unit = json.loads(body)
+    general = unit["general_profiles"][0]
+    assert general["profile_identity"] == "profile ranger"
+    assert general["order_type"] == "regular"
+    assert [item["name"] for item in general["shared_items"]["skills"]] == ["Stealth"]
+    assert [item["name"] for item in general["shared_items"]["equipment"]] == ["Medikit"]
+    assert [item["name"] for item in general["shared_items"]["weapons"]] == ["Combi Rifle"]
+
+    status, _, script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b"function generalProfileSkills(profiles, loadouts)" not in script
+    assert b"profile.shared_items" in script
 
 
 def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callable) -> None:
@@ -3140,7 +4253,8 @@ def test_unit_details_frontend_presents_include_relationships(app: Callable) -> 
     assert b"details.open = true" in unit_js
     assert b"function compositeOptionTable(options, anchorScope)" in unit_js
     assert b'"Composite option", "PTS", "SWC"' in unit_js
-    assert b"function compositeOptionOrderSummary(orders)" in unit_js
+    assert b"function compositeOptionOrderSummary(option)" in unit_js
+    assert b"option.order_presentations?.[index]?.label" in unit_js
     assert b'section.append(subheading("Composite options"));' in unit_js
 
 
@@ -3160,12 +4274,12 @@ def test_unit_frontend_presents_army_relationships_and_declared_membership_filte
     assert b"broader source-declared faction membership separately" in unit_js
     assert b"this faction identity has no current Army list" in unit_js
 
-    status, _, app_js = request(app, "/static/app.js")
+    status, _, units_js = request(app, "/static/units.js")
     assert status == 200
-    assert b'declaredFactionId = params.get("declared_faction_id") || ""' in app_js
-    assert b'params.set("declared_faction_id", state.declaredFactionId)' in app_js
-    assert b"renderDeclaredMembershipContext(data)" in app_js
-    assert b"broader than concrete current Army-list availability" in app_js
+    assert b'declaredFactionId = params.get("declared_faction_id") || ""' in units_js
+    assert b'params.set("declared_faction_id", state.declaredFactionId)' in units_js
+    assert b"renderDeclaredMembershipContext(data)" in units_js
+    assert b"may not be available in the faction's current Army lists" in units_js
 
     status, _, api_js = request(app, "/static/api.js")
     assert status == 200
@@ -3181,7 +4295,8 @@ def test_unit_details_frontend_presents_source_attributed_notes(app: Callable) -
 
     assert status == 200
     assert b"function renderSourceNotes(unit, armies)" in unit_js
-    assert b'heading("Source notes")' in unit_js
+    assert b'heading("Unit notes")' in unit_js
+    assert b'heading("Source notes")' not in unit_js
     assert b"it is not a rule for every profile shown for this Unit" in unit_js
     assert b'intro.className = "army-relationship-intro developer-only";' in unit_js
     assert b"const appliesToAllShownArmies = shownArmyIds.size > 0" in unit_js
@@ -3231,7 +4346,7 @@ def test_unit_details_frontend_presents_peripheral_relationships(app: Callable) 
     assert b"function renderPeripheralRelationships(unit)" in unit_js
     assert b"const controllers = unit.peripheral_controllers || [];" in unit_js
     assert b"item.append(unitLink(access.controller));" in unit_js
-    assert b"no fixed ownership is implied" in unit_js
+    assert b"this listing does not assign it to a particular Controller" in unit_js
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -3265,20 +4380,12 @@ def test_unit_details_frontend_renders_order_symbols_as_content(app: Callable) -
     assert status == 200
     assert b"function profileTitle(profile, profileSymbols = null)" in body
     assert b"generalProfile.append(profileTitle(profile, profileSymbols), table(" in body
-    assert b"nameWithOrderSymbols(loadout.name, symbolTypes)" in body
-    assert b"function generalProfileOrderType(profiles, loadouts)" in body
-    assert b'hasSkill(loadouts, "regular")' in body
-    assert b'.startsWith("peripheral")' in body
-    assert b'hasSkill([loadout], "impetuous")' in body
-    assert b'hasSkill([loadout], "tactical awareness")' in body
-    assert b"function lieutenantOrderCount(items)" in body
-    assert b"function generalLieutenantOrderCount(profiles, loadouts)" in body
-    assert b'Array(lieutenantOrderCount([loadout])).fill("lieutenant")' in body
-    assert b"function characteristicSymbolTypes(profiles)" in body
-    assert b"characteristic.equipment_reference?.slug" in body
-    assert b"href: `/equipment/${encodeURIComponent(slug)}`" in body
-    assert b"symbol.src = `/static/${symbolCategories[symbolType]}/${symbolType}.svg`" in body
-    assert b"symbol.title = symbolLabels[symbolType]" in body
+    assert b"loadout.symbol_descriptors || []" in body
+    assert b"function generalProfileOrderType(profiles, loadouts)" not in body
+    assert b"function lieutenantOrderCount(items)" not in body
+    assert b"function characteristicSymbolTypes(profiles)" not in body
+    assert b"descriptor.symbol_path" in body
+    assert b"descriptor.label" in body
     assert b'"profile-summary loadout-start"' in body
 
 
@@ -3306,19 +4413,34 @@ def test_rules_badges_and_desktop_sidebar_use_consistent_presentation(app: Calla
     )
 
 
-def test_distance_preference_script_is_served(app: Callable) -> None:
-    status, headers, body = request(app, "/static/preferences.js")
+def test_preference_state_and_distance_formatter_are_served(app: Callable) -> None:
+    status, headers, preferences = request(app, "/static/preferences.js")
     assert status == 200
     assert headers["content-type"].startswith("text/javascript")
-    assert b"distanceunitchange" in body
+    assert b"function distanceUnit()" in preferences
+    assert b"distanceunitchange" not in preferences
+
+    status, _, distance = request(app, "/static/distance.js")
+    assert status == 200
+    assert b'from "./preferences.js"' in distance
+    assert b"function formatDistanceExtra(" in distance
+    assert b"function formatSkillDistanceExtra(" in distance
+
+    status, _, settings = request(app, "/static/settings.js")
+    assert status == 200
+    assert b"distanceunitchange" in settings
 
 
 def test_developer_cache_toggle_is_served(app: Callable) -> None:
-    status, _, body = request(app, "/static/preferences.js")
+    status, _, body = request(app, "/static/settings.js")
     assert status == 200
     assert b"function initializeDisableCacheToggle()" in body
-    assert b"function cacheBustedUrl(path)" in body
     assert b'document.documentElement.dataset.disableCache = "false";' in body
+
+    status, _, transport = request(app, "/static/api-transport.js")
+    assert status == 200
+    assert b"function cacheBustedUrl(path)" in transport
+    assert b'document.documentElement.dataset.disableCache !== "true"' in transport
 
     status, _, body = request(app, "/units")
     assert status == 200
@@ -3327,10 +4449,10 @@ def test_developer_cache_toggle_is_served(app: Callable) -> None:
 
 
 def test_skill_distance_display_uses_api_parameter_semantics(app: Callable) -> None:
-    status, _, preferences = request(app, "/static/preferences.js")
+    status, _, distance = request(app, "/static/distance.js")
     assert status == 200
-    assert b"function formatSkillDistanceExtra(value, parameterSemantics = null)" in preferences
-    assert b"parameterSemantics?.positive_sign" in preferences
+    assert b"function formatSkillDistanceExtra(value, parameterSemantics = null)" in distance
+    assert b"parameterSemantics?.positive_sign" in distance
 
     for asset in ("skill.js", "skill-extras.js", "unit.js"):
         status, _, body = request(app, f"/static/{asset}")
@@ -3396,13 +4518,48 @@ def test_catalog_search_state_is_shareable(app: Callable) -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("path", "heading"),
+    [
+        ("/skills", b">Browse skills</h2>"),
+        ("/equipment", b">Browse equipment</h2>"),
+        ("/weapons", b">Browse weapons</h2>"),
+        ("/traits", b">Browse traits</h2>"),
+        ("/states", b">Browse states</h2>"),
+        ("/hacking-programs", b">Browse Hacking Programs</h2>"),
+        ("/ammunition", b">Browse ammunition</h2>"),
+        ("/labels", b">Browse labels</h2>"),
+        ("/rules", b">Browse general rules</h2>"),
+    ],
+)
+def test_rules_reference_lists_use_browse_language(
+    app: Callable, path: str, heading: bytes
+) -> None:
+    status, _, body = request(app, path)
+
+    assert status == 200
+    assert heading in body
+    assert b" catalog</h2>" not in body
+    assert b" catalog</caption>" not in body
+    assert b"Gathering catalog entries." not in body
+
+
+def test_rules_reference_detail_usage_captions_use_player_language(app: Callable) -> None:
+    status, _, body = request(app, "/static/catalog-detail.js")
+
+    assert status == 200
+    assert b"Units using this variant" in body
+    assert b"Units using this catalog variant" not in body
+
+
 def test_traits_page_and_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/traits")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"catalog-list.js" in body
     assert b'href="/traits" aria-current="page"' in body
-    assert b"Traits catalog" in body
+    assert b">Browse traits</h2>" in body
+    assert b"Traits catalog" not in body
 
     status, headers, body = request(app, "/api/traits")
     assert status == 200
@@ -3435,9 +4592,9 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     app: Callable, tmp_path: Path
 ) -> None:
     for path, heading, current_href in (
-        ("/ammunition", b"Ammunition catalog", b"/ammunition"),
-        ("/labels", b"Labels catalog", b"/labels"),
-        ("/rules", b"General Rules catalog", b"/rules"),
+        ("/ammunition", b"Browse ammunition", b"/ammunition"),
+        ("/labels", b"Browse labels", b"/labels"),
+        ("/rules", b"Browse general rules", b"/rules"),
     ):
         status, headers, body = request(app, path)
         assert status == 200
@@ -3605,7 +4762,14 @@ def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     status, headers, body = request(app, "/hacking-programs")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"Hacking Program catalog" in body
+    assert b">Browse Hacking Programs</h2>" in body
+    assert b"Hacking Program catalog" not in body
+    assert (
+        b"Browse Hacking Program profiles, targets, Devices, Skills, States, and related rules."
+        in body
+    )
+    assert b"reviewed N5.3 rules semantics" not in body
+    assert b"reviewed rules" not in body
     assert b'href="/hacking-programs" aria-current="page"' in body
     assert b'>Uses</th>' not in body
 
@@ -3630,6 +4794,9 @@ def test_hacking_program_pages_and_empty_api_are_served(app: Callable) -> None:
     assert b'from "./skill-categories.js"' in script
     assert b"skillCategoryBadge(category)" in script
     assert b"baselineDevicesGroup(program)" in script
+    assert b"No baseline Hacking Device includes this Program." in script
+    assert b"including as an Upgrade Program." in script
+    assert b"source-specific associations" not in script
     assert (
         b"[\"Targets\", program.targets?.length ? program.targets.join(\", \") : null, "
         b"\"descriptor\"]" in script
@@ -3648,7 +4815,8 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
     status, headers, body = request(app, "/states")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"States catalog" in body
+    assert b">Browse states</h2>" in body
+    assert b"States catalog" not in body
     assert b'href="/states" aria-current="page"' in body
     assert b'>Uses</th>' not in body
 
@@ -3821,7 +4989,7 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     status, headers, body = request(app, "/search?q=alpha")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"Every database domain" in body
+    assert b"All references" in body
     assert b'action="/search" role="search"' in body
     assert b"search.js" in body
 
@@ -3841,6 +5009,14 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
         "schema": "units",
         "values": {"army_id": "alpha-company"},
     }
+
+    status, _, body = request(app, "/api/search", query="q=spiral")
+    assert status == 200
+    assert {
+        "domain": "Army",
+        "name": "Spiral Corps",
+        "href": "/armies#army-spiral-corps",
+    } in json.loads(body)["items"]
 
     status, _, body = request(app, "/api/search", query="q=combi")
     assert status == 200
@@ -3870,7 +5046,7 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     status, headers, body = request(rules_app, "/glossary")
     assert status == 200
     assert headers["content-type"].startswith("text/html")
-    assert b"Canonical terminology" in body
+    assert b"Look up Infinity terms and abbreviations" in body
     assert b"glossary.js" in body
     assert b'href="/glossary" aria-current="page"' in body
 
@@ -3909,6 +5085,64 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
             }
         ],
     }
+    troop_type_help = next(
+        item for item in items if item["id"] == "rule:profile-help:troop-type"
+    )
+    assert troop_type_help == {
+        "id": "rule:profile-help:troop-type",
+        "kind": "rule",
+        "domain": "Unit Profile",
+        "domain_slug": "rules",
+        "name": "Troop Type",
+        "description": (
+            "Troop Type is a rules category such as LI, MI, HI, REM, TAG, WB, SK, "
+            "VH, or Peripheral. It is a separate axis from Trooper Classification "
+            "and can be referenced by rules restrictions."
+        ),
+        "aliases": ["Type"],
+        "href": "/glossary#rule-profile-help-troop-type",
+        "embedded": True,
+        "description_tokens": [
+            {
+                "type": "text",
+                "text": (
+                    "Troop Type is a rules category such as LI, MI, HI, REM, TAG, WB, "
+                    "SK, VH, or Peripheral. It is a separate axis from Trooper "
+                    "Classification and can be referenced by rules restrictions."
+                ),
+            }
+        ],
+    }
+
+    fto_term = next(item for item in items if item["id"] == "term:fto")
+    assert fto_term == {
+        "id": "term:fto",
+        "kind": "term",
+        "domain": "Game term",
+        "domain_slug": "terms",
+        "name": "FTO (Fireteam Option)",
+        "description": (
+            "FTO (Fireteam Option) is an identifier suffix on Unit Profile options, not a rule "
+            "with effects of its own. If a Fireteams Chart requires FTO for a Unit, only options "
+            "with FTO in their option name can join that Fireteam; if it requires a specific form "
+            "such as FTO-2, only that named option qualifies."
+        ),
+        "aliases": ["FTO", "Fireteam Option"],
+        "href": "/glossary#term-fto",
+        "embedded": True,
+        "description_tokens": [
+            {
+                "type": "text",
+                "text": (
+                    "FTO (Fireteam Option) is an identifier suffix on Unit Profile options, not a "
+                    "rule with effects of its own. If a Fireteams Chart requires FTO for a Unit, "
+                    "only options with FTO in their option name can join that Fireteam; if it "
+                    "requires a specific form such as FTO-2, only that named option qualifies."
+                ),
+            }
+        ],
+    }
+
     marker_term = next(item for item in items if item["id"] == "term:marker")
     assert marker_term == {
         "id": "term:marker",
@@ -3940,7 +5174,30 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     assert loss_of_lieutenant["href"] == "/rules/loss-of-lieutenant"
     assert loss_of_lieutenant["embedded"] is False
     assert not any(item["id"] == "rule:fireteam-general" for item in items)
-    assert not any(item["id"] == "rule:profile-help:unit-profile" for item in items)
+    assert any(item["id"] == "rule:profile-help:unit-profile" for item in items)
+    profile_domain_entries = {
+        item["id"]: item
+        for item in items
+        if item["id"] in {
+            "rule:profile-help:skills",
+            "rule:profile-help:equipment",
+            "rule:profile-help:weapons",
+        }
+    }
+    assert {
+        identifier: entry["name"]
+        for identifier, entry in profile_domain_entries.items()
+    } == {
+        "rule:profile-help:skills": "Skills",
+        "rule:profile-help:equipment": "Equipment",
+        "rule:profile-help:weapons": "Weapons",
+    }
+    assert profile_domain_entries["rule:profile-help:skills"]["aliases"] == ["Skill"]
+    assert profile_domain_entries["rule:profile-help:equipment"]["aliases"] == []
+    assert profile_domain_entries["rule:profile-help:weapons"]["aliases"] == ["Weapon"]
+    assert not any(
+        item["id"] == "rule:profile-help:equipment-weapons" for item in items
+    )
 
     camouflage = next(item for item in items if item["id"] == "skill:camouflage")
     assert camouflage["href"] == "/skills/camouflage"
@@ -3955,12 +5212,28 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         if token.get("type") == "reference"
     )
 
+    status, _, body = request(rules_app, "/api/search", query="q=type")
+    assert status == 200
+    assert {
+        "domain": "Unit Profile",
+        "name": "Troop Type",
+        "href": "/glossary#rule-profile-help-troop-type",
+    } in json.loads(body)["items"]
+
     status, _, body = request(rules_app, "/api/search", query="q=movement")
     assert status == 200
     assert {
         "domain": "Attribute",
         "name": "Movement (MOV)",
         "href": "/glossary#attribute-mov",
+    } in json.loads(body)["items"]
+
+    status, _, body = request(rules_app, "/api/search", query="q=fto")
+    assert status == 200
+    assert {
+        "domain": "Game term",
+        "name": "FTO (Fireteam Option)",
+        "href": "/glossary#term-fto",
     } in json.loads(body)["items"]
 
     status, _, body = request(rules_app, "/api/search", query="q=marker")
@@ -4123,7 +5396,22 @@ def test_unit_profile_help_links_are_rendered_from_rules_data(app: Callable) -> 
     assert b'profileHelpLabel("Type", "troop-type")' in unit_js
     assert b'profileHelpLabel("Classification", "classification")' in unit_js
     assert b'profileHelpLabel("Peripherals", "peripheral")' in unit_js
-    assert b'"training-orders"' in unit_js
+    assert b'public_reference: { href: `/glossary#${item.id.replaceAll(":", "-")}` }' in unit_js
+    assert unit_js.count(b'profileHelpLabel(label, property)') == 3
+    assert b'"equipment-weapons"' not in unit_js
+    assert b'label === "Skills" ? "/skills" : null' not in unit_js
+    assert b"InfinityDB keeps profile domains separate" not in unit_js
+    assert b'descriptor.help_key' in unit_js
+    assert b'"training-orders"' not in unit_js
+
+    status, _, body = request(app, "/api/units/1")
+    assert status == 200
+    unit = json.loads(body)
+    assert any(
+        descriptor.get("help_key") == "training-orders"
+        for profile in unit["general_profiles"]
+        for descriptor in profile["symbol_descriptors"]
+    )
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
@@ -4432,6 +5720,8 @@ def test_skill_detail_frontend_renders_structured_reference_tables(
     assert b'"random-chart"' in body
     assert b'"Hacking Programs"' not in body
     assert b"hackingDeviceLinks(row.devices)" in body
+    assert b"Granted separately / Upgrade" in body
+    assert b"Upgrade / source-specific" not in body
 
 
 def test_catalog_usage_summaries_wrap_variant_context_on_narrow_layouts(
@@ -4535,13 +5825,17 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
 
     status, _, renderer = request(rules_app, "/static/maintained-text.js")
     assert status == 200
-    assert b'from "./preferences.js"' in renderer
+    assert b'from "./distance.js"' in renderer
     assert b'node.className = "maintained-distance"' in renderer
     assert b'wrapper.className = "maintained-reference-wrap"' in renderer
+    assert b'function reviewNeededReason(reason)' in renderer
     assert b'function reviewNeededNode(token, { interactive = true } = {})' in renderer
     assert b'marker.className = "maintained-review-needed"' in renderer
-    assert b'badge.textContent = "review"' in renderer
-    assert b'Manual review needed: ${token.reason || "unspecified"}' in renderer
+    assert b'text.textContent = token.text || "Needs verification"' in renderer
+    assert b'badge.textContent = "uncertain"' in renderer
+    assert b'Needs verification: ${reviewNeededReason(token.reason)}.' in renderer
+    assert b'"source-conflict": "the available rules information conflicts"' in renderer
+    assert b'"Manual review needed"' not in renderer
     assert b'tooltip.role = "tooltip"' in renderer
     assert b'{ interactive: false }' in renderer
     assert b'link.setAttribute("aria-describedby", tooltip.id)' in renderer
@@ -4589,7 +5883,8 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"Rules reference" in body
     assert b"rule.collection?.title" in body
     assert b"rule.supplements || []" in body
-    assert b"Additional rules context" in body
+    assert b'supplementTitle.textContent = "Additional rules";' in body
+    assert b"Additional rules context" not in body
     assert b"export function levelEffectsSection(rules)" in body
     assert b"fact_tokens?.levels?.[levelIndex]?.effects" in body
     assert b"level-effects-table" in body
@@ -4646,23 +5941,20 @@ def test_072_detail_and_catalog_presentation_contract(app: Callable, tmp_path: P
 
     status, _, unit_script = request(app, "/static/unit.js")
     assert status == 200
-    assert b"troopTypeLabel(profile.type)" in unit_script
+    assert b"profile.type_label || profile.type" in unit_script
+    assert b"troopTypeLabel" not in unit_script
     assert b"formatMovement(profile.move_1, profile.move_2, distanceUnit())" in unit_script
 
     status, _, presentation_script = request(app, "/static/unit-presentation.js")
     assert status == 200
-    for code, label in (
-        (b"LI", b"Light Infantry"),
-        (b"MI", b"Medium Infantry"),
-        (b"HI", b"Heavy Infantry"),
-        (b"REM", b"Remote"),
-        (b"TAG", b"Tactical Armored Gear"),
-        (b"WB", b"Warband"),
-        (b"SK", b"Skirmisher"),
-        (b"VH", b"Vehicle"),
-    ):
-        assert code in presentation_script
-        assert label in presentation_script
+    assert b"TROOP_TYPE_LABELS" not in presentation_script
+    assert b"CHARACTERISTIC_SYMBOLS" not in presentation_script
+    assert (
+        'if (values.every((value) => Number(value) === -1)) return "—";'.encode()
+        in presentation_script
+    )
+    assert b'Number(value) < 0' in presentation_script
+    assert b'DISTANCE_CENTIMETERS_PER_INCH' in presentation_script
     assert b'join("-")}\\"`' in presentation_script
     assert b'`${values.join("-")} cm`' in presentation_script
 
@@ -4786,6 +6078,8 @@ def test_unit_symbol_is_served(app: Callable) -> None:
     for slug in [
         "fusiliers",
         "clipper-dronbot",
+        "palbots",
+        "sartroids-puzzlers-cyberplugged-forward-remotes",
         "yojimbo-motorized-sword-for-hire",
         "blur-spec-ops",
         "next-wave-team-ops",
@@ -4796,6 +6090,14 @@ def test_unit_symbol_is_served(app: Callable) -> None:
         assert status == 200
         assert headers["content-type"] == "image/svg+xml"
         assert b"<svg" in body
+
+    staldron = catalog.profile_path("ancillary remote staldron", None, "avatar")
+    assert staldron == "peripherals/combined-army/staldron.svg"
+    status, headers, body = request(app, f"/static/{staldron}")
+    assert status == 200
+    assert headers["content-type"] == "image/svg+xml"
+    assert b"<svg" in body
+
     status, _, _ = request(app, "/static/units/unassigned/not-a-unit.svg")
     assert status == 404
     status, _, _ = request(app, "/static/unit-symbol-map.js")
@@ -4937,6 +6239,30 @@ def test_adjacent_rules_database_remains_optional_for_local_use(
     local_app = create_app(database_path)
 
     assert local_app.rules_database is None
+
+
+def test_local_app_without_rules_database_keeps_army_data_available(
+    app: Callable, tmp_path: Path
+) -> None:
+    local_root = tmp_path / "rules-optional"
+    local_root.mkdir()
+    database_path = local_root / "infinity.db"
+    shutil.copy2(app.database.path, database_path)
+
+    local_app = create_app(database_path)
+
+    assert local_app.rules_database is None
+    for path in ("/", "/skills", "/states", "/api/armies", "/api/units"):
+        status, _, _ = request(local_app, path)
+        assert status == 200
+
+    status, _, body = request(local_app, "/api/states")
+    assert status == 200
+    assert json.loads(body) == {"items": []}
+
+    status, _, body = request(local_app, "/api/unit-profile-help")
+    assert status == 200
+    assert json.loads(body)["items"] == []
 
 
 def test_wsgi_uses_explicit_rules_database_from_environment(

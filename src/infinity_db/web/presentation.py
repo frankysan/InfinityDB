@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date
 from hashlib import sha256
@@ -14,6 +15,7 @@ from urllib.parse import parse_qs
 from infinity_army_data.project_resources import maintained_manifest_path
 from infinity_db import __display_version__, __version__
 from infinity_db.application_domains import application_domain
+from infinity_db.web.release_notes import render_current_release_notes_html
 from infinity_db.web.response import WebResponse
 from infinity_db.web.routes import (
     AMMUNITION_PAGE_PATH,
@@ -23,6 +25,7 @@ from infinity_db.web.routes import (
     HACKING_PROGRAM_PAGE_PATH,
     LABEL_PAGE_PATH,
     ORDER_SYMBOL_PATH,
+    PERIPHERAL_SYMBOL_PATH,
     RULE_PAGE_PATH,
     SKILL_PAGE_PATH,
     STATE_PAGE_PATH,
@@ -35,18 +38,28 @@ from infinity_db.web.routes import (
 ASSETS = {
     "/static/version-check.js": ("version-check.js", "text/javascript; charset=utf-8"),
     "/static/styles.css": ("styles.css", "text/css; charset=utf-8"),
-    "/static/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/static/foundation.css": ("foundation.css", "text/css; charset=utf-8"),
+    "/static/themes/light.css": ("themes/light.css", "text/css; charset=utf-8"),
+    "/static/themes/dark.css": ("themes/dark.css", "text/css; charset=utf-8"),
+    "/static/components.css": ("components.css", "text/css; charset=utf-8"),
+    "/static/page-overrides.css": ("page-overrides.css", "text/css; charset=utf-8"),
+    "/static/units.js": ("units.js", "text/javascript; charset=utf-8"),
     "/static/share-state.js": ("share-state.js", "text/javascript; charset=utf-8"),
     "/static/armies.js": ("armies.js", "text/javascript; charset=utf-8"),
     "/static/api.js": ("api.js", "text/javascript; charset=utf-8"),
+    "/static/api-transport.js": ("api-transport.js", "text/javascript; charset=utf-8"),
     "/static/unit-symbols.js": ("unit-symbols.js", "text/javascript; charset=utf-8"),
     "/static/unit-presentation.js": ("unit-presentation.js", "text/javascript; charset=utf-8"),
+    "/static/view-components.js": ("view-components.js", "text/javascript; charset=utf-8"),
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
     "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
+    "/static/theme-startup.js": ("theme-startup.js", "text/javascript; charset=utf-8"),
+    "/static/theme.js": ("theme.js", "text/javascript; charset=utf-8"),
+    "/static/settings.js": ("settings.js", "text/javascript; charset=utf-8"),
+    "/static/distance.js": ("distance.js", "text/javascript; charset=utf-8"),
     "/static/navigation.js": ("navigation.js", "text/javascript; charset=utf-8"),
     "/static/page-navigation.js": ("page-navigation.js", "text/javascript; charset=utf-8"),
     "/static/themed-logo.js": ("themed-logo.js", "text/javascript; charset=utf-8"),
-    "/static/about.js": ("about.js", "text/javascript; charset=utf-8"),
     "/static/skill-extras.js": ("skill-extras.js", "text/javascript; charset=utf-8"),
     "/static/fireteams.js": ("fireteams.js", "text/javascript; charset=utf-8"),
     "/static/catalog-list.js": ("catalog-list.js", "text/javascript; charset=utf-8"),
@@ -72,9 +85,24 @@ ASSETS = {
         "text/javascript; charset=utf-8",
     ),
     "/static/maintained-text.js": ("maintained-text.js", "text/javascript; charset=utf-8"),
+    "/static/silhouette-diagrams.js": (
+        "silhouette-diagrams.js",
+        "text/javascript; charset=utf-8",
+    ),
     "/static/rules-reference.js": ("rules-reference.js", "text/javascript; charset=utf-8"),
     "/static/skill-categories.js": ("skill-categories.js", "text/javascript; charset=utf-8"),
+    "/static/silhouettes/silhouette-1.svg": ("silhouettes/silhouette-1.svg", "image/svg+xml"),
+    "/static/silhouettes/silhouette-2.svg": ("silhouettes/silhouette-2.svg", "image/svg+xml"),
+    "/static/silhouettes/silhouette-3.svg": ("silhouettes/silhouette-3.svg", "image/svg+xml"),
+    "/static/silhouettes/silhouette-4.svg": ("silhouettes/silhouette-4.svg", "image/svg+xml"),
+    "/static/silhouettes/silhouette-5.svg": ("silhouettes/silhouette-5.svg", "image/svg+xml"),
+    "/static/silhouettes/silhouette-6.svg": ("silhouettes/silhouette-6.svg", "image/svg+xml"),
+    "/static/silhouettes/silhouette-7.svg": ("silhouettes/silhouette-7.svg", "image/svg+xml"),
+    "/static/silhouettes/silhouette-8.svg": ("silhouettes/silhouette-8.svg", "image/svg+xml"),
     "/static/infinitydb-logo.svg": ("infinitydb-logo.svg", "image/svg+xml"),
+    "/static/favicon.svg": ("favicon.svg", "image/svg+xml"),
+    "/static/favicon-32.png": ("favicon-32.png", "image/png"),
+    "/static/apple-touch-icon.png": ("apple-touch-icon.png", "image/png"),
     "/static/fonts/Audiowide/Audiowide-Regular.woff2": (
         "fonts/Audiowide/Audiowide-Regular.woff2",
         "font/woff2",
@@ -120,7 +148,15 @@ _MODULE_IMPORT_URL = re.compile(
     r'(?P<prefix>\bfrom\s+|\bimport\s*\(\s*)(?P<quote>["\'])'
     r'(?P<path>\./[^"\']+\.js)(?P=quote)'
 )
+STYLESHEET_PARTS = (
+    "foundation.css",
+    "themes/light.css",
+    "themes/dark.css",
+    "components.css",
+    "page-overrides.css",
+)
 _STATIC_REVISION_FILES = tuple(sorted(filename for filename, _ in ASSETS.values()))
+_LEGACY_STATIC_ASSET_ALIASES = {"/static/app.js": "/static/units.js"}
 
 
 @dataclass(frozen=True, slots=True)
@@ -130,6 +166,7 @@ class PageSpec:
     catalog_tag: str
     active_page: str | None = None
     template_values: tuple[tuple[str, str], ...] = ()
+    body_renderer: Callable[[], str] | None = None
 
 
 def _reference_page_values(
@@ -162,78 +199,78 @@ _FIXED_PAGES = {
     ),
     "/armies": PageSpec(
         "armies.html",
-        (("Database", "/"), ("Armies", None)),
+        (("InfinityDB", "/"), ("Armies", None)),
         "Army overview",
         "armies",
     ),
     "/units": PageSpec(
         "units.html",
-        (("Database", "/"), ("Units", None)),
-        "Unit catalog",
+        (("InfinityDB", "/"), ("Units", None)),
+        "Units",
         "units",
     ),
     "/search": PageSpec(
         "search.html",
-        (("Database", "/"), ("Search", None)),
+        (("InfinityDB", "/"), ("Search", None)),
         "Global search",
     ),
     "/glossary": PageSpec(
         "glossary.html",
-        (("Database", "/"), ("Glossary", None)),
+        (("InfinityDB", "/"), ("Glossary", None)),
         "Rules reference",
         "glossary",
     ),
     "/fireteams": PageSpec(
         "fireteams.html",
-        (("Database", "/"), ("Fireteams", None)),
+        (("InfinityDB", "/"), ("Fireteams", None)),
         "Fireteam charts",
         "fireteams",
     ),
     "/skill-extras": PageSpec(
         "skill-extras.html",
-        (("Database", "/"), ("Skill modifiers", None)),
+        (("InfinityDB", "/"), ("Skills", "/skills"), ("Skill modifiers", None)),
         "Reference data",
-        "skill-extras",
+        "skills",
     ),
     "/skills": PageSpec(
         "skills.html",
-        (("Database", "/"), ("Skills", None)),
+        (("InfinityDB", "/"), ("Skills", None)),
         "Rules reference",
         "skills",
     ),
     "/equipment": PageSpec(
         "equipment.html",
-        (("Database", "/"), ("Equipment", None)),
+        (("InfinityDB", "/"), ("Equipment", None)),
         "Rules reference",
         "equipment",
     ),
     "/weapons": PageSpec(
         "weapons.html",
-        (("Database", "/"), ("Weapons", None)),
+        (("InfinityDB", "/"), ("Weapons", None)),
         "Rules reference",
         "weapons",
     ),
     "/traits": PageSpec(
         "traits.html",
-        (("Database", "/"), ("Traits", None)),
+        (("InfinityDB", "/"), ("Traits", None)),
         "Rules reference",
         "traits",
     ),
     "/states": PageSpec(
         "states.html",
-        (("Database", "/"), ("States", None)),
+        (("InfinityDB", "/"), ("States", None)),
         "Rules reference",
         "states",
     ),
     "/hacking-programs": PageSpec(
         "hacking-programs.html",
-        (("Database", "/"), ("Hacking Programs", None)),
+        (("InfinityDB", "/"), ("Hacking Programs", None)),
         "Rules reference",
         "hacking-programs",
     ),
     "/ammunition": PageSpec(
         "reference-catalog.html",
-        (("Database", "/"), ("Ammunition", None)),
+        (("InfinityDB", "/"), ("Ammunition", None)),
         "Rules reference",
         "ammunition",
         _reference_page_values(
@@ -246,36 +283,41 @@ _FIXED_PAGES = {
     ),
     "/labels": PageSpec(
         "reference-catalog.html",
-        (("Database", "/"), ("Labels", None)),
+        (("InfinityDB", "/"), ("Labels", None)),
         "Rules reference",
         "labels",
         _reference_page_values(
             "labels",
             intro=(
-                "Browse the canonical Labels used to classify Skills, Equipment, and "
-                "rules effects."
+                "Browse Labels used to classify Skills, Equipment, and rules effects."
             ),
-            meta_description="Browse Infinity rules Labels and their canonical definitions.",
-            detail_meta_description="View the canonical definition of an Infinity rules Label.",
+            meta_description="Browse Infinity rules Labels and their definitions.",
+            detail_meta_description="View the definition of an Infinity rules Label.",
         ),
     ),
     "/rules": PageSpec(
         "reference-catalog.html",
-        (("Database", "/"), ("General Rules", None)),
+        (("InfinityDB", "/"), ("General Rules", None)),
         "Rules reference",
         "rules",
         _reference_page_values(
             "rules",
             intro=(
-                "Browse core N5 rules concepts that do not belong to a more specific "
-                "InfinityDB rules domain."
+                "Browse core N5 rules that apply across the game."
             ),
             meta_description=(
-                "Browse Infinity N5 General Rules concepts without a more specific rules catalog."
+                "Browse core Infinity N5 General Rules."
             ),
             detail_meta_description="View an Infinity N5 General Rules reference.",
             summary_heading="Rules reference",
         ),
+    ),
+    "/changes": PageSpec(
+        "changes.html",
+        (("InfinityDB", "/"), ("What's changed", None)),
+        "Release history",
+        "changes",
+        body_renderer=render_current_release_notes_html,
     ),
     "/about": PageSpec(
         "about.html",
@@ -289,8 +331,8 @@ _DETAIL_PAGES = (
         UNIT_PAGE_PATH,
         PageSpec(
             "unit.html",
-            (("Database", "/"), ("Units", "/units"), ("Details", None)),
-            "Unit catalog",
+            (("InfinityDB", "/"), ("Units", "/units"), ("Details", None)),
+            "Units",
             "units",
         ),
     ),
@@ -298,7 +340,7 @@ _DETAIL_PAGES = (
         SKILL_PAGE_PATH,
         PageSpec(
             "skill.html",
-            (("Database", "/"), ("Skills", "/skills"), ("Details", None)),
+            (("InfinityDB", "/"), ("Skills", "/skills"), ("Details", None)),
             "Rules reference",
             "skills",
         ),
@@ -307,7 +349,7 @@ _DETAIL_PAGES = (
         EQUIPMENT_PAGE_PATH,
         PageSpec(
             "equipment-detail.html",
-            (("Database", "/"), ("Equipment", "/equipment"), ("Details", None)),
+            (("InfinityDB", "/"), ("Equipment", "/equipment"), ("Details", None)),
             "Rules reference",
             "equipment",
         ),
@@ -316,7 +358,7 @@ _DETAIL_PAGES = (
         WEAPON_PAGE_PATH,
         PageSpec(
             "weapons-detail.html",
-            (("Database", "/"), ("Weapons", "/weapons"), ("Details", None)),
+            (("InfinityDB", "/"), ("Weapons", "/weapons"), ("Details", None)),
             "Rules reference",
             "weapons",
         ),
@@ -325,7 +367,7 @@ _DETAIL_PAGES = (
         TRAIT_PAGE_PATH,
         PageSpec(
             "traits-detail.html",
-            (("Database", "/"), ("Traits", "/traits"), ("Details", None)),
+            (("InfinityDB", "/"), ("Traits", "/traits"), ("Details", None)),
             "Rules reference",
             "traits",
         ),
@@ -334,7 +376,7 @@ _DETAIL_PAGES = (
         STATE_PAGE_PATH,
         PageSpec(
             "states-detail.html",
-            (("Database", "/"), ("States", "/states"), ("Details", None)),
+            (("InfinityDB", "/"), ("States", "/states"), ("Details", None)),
             "Rules reference",
             "states",
         ),
@@ -343,7 +385,7 @@ _DETAIL_PAGES = (
         AMMUNITION_PAGE_PATH,
         PageSpec(
             "reference-detail.html",
-            (("Database", "/"), ("Ammunition", "/ammunition"), ("Details", None)),
+            (("InfinityDB", "/"), ("Ammunition", "/ammunition"), ("Details", None)),
             "Rules reference",
             "ammunition",
             _reference_page_values(
@@ -361,19 +403,14 @@ _DETAIL_PAGES = (
         LABEL_PAGE_PATH,
         PageSpec(
             "reference-detail.html",
-            (("Database", "/"), ("Labels", "/labels"), ("Details", None)),
+            (("InfinityDB", "/"), ("Labels", "/labels"), ("Details", None)),
             "Rules reference",
             "labels",
             _reference_page_values(
                 "labels",
-                intro=(
-                    "Browse the canonical Labels used to classify Skills, Equipment, and "
-                    "rules effects."
-                ),
-                meta_description="Browse Infinity rules Labels and their canonical definitions.",
-                detail_meta_description=(
-                    "View the canonical definition of an Infinity rules Label."
-                ),
+                intro="Browse Labels used to classify Skills, Equipment, and rules effects.",
+                meta_description="Browse Infinity rules Labels and their definitions.",
+                detail_meta_description="View the definition of an Infinity rules Label.",
             ),
         ),
     ),
@@ -381,18 +418,16 @@ _DETAIL_PAGES = (
         RULE_PAGE_PATH,
         PageSpec(
             "reference-detail.html",
-            (("Database", "/"), ("General Rules", "/rules"), ("Details", None)),
+            (("InfinityDB", "/"), ("General Rules", "/rules"), ("Details", None)),
             "Rules reference",
             "rules",
             _reference_page_values(
                 "rules",
                 intro=(
-                    "Browse core N5 rules concepts that do not belong to a more specific "
-                    "InfinityDB rules domain."
+                    "Browse core N5 rules that apply across the game."
                 ),
                 meta_description=(
-                    "Browse Infinity N5 General Rules concepts without a more specific "
-                    "rules catalog."
+                    "Browse core Infinity N5 General Rules."
                 ),
                 detail_meta_description="View an Infinity N5 General Rules reference.",
                 summary_heading="Rules reference",
@@ -404,7 +439,7 @@ _DETAIL_PAGES = (
         PageSpec(
             "hacking-program-detail.html",
             (
-                ("Database", "/"),
+                ("InfinityDB", "/"),
                 ("Hacking Programs", "/hacking-programs"),
                 ("Details", None),
             ),
@@ -444,6 +479,13 @@ def _version_static_urls(document: str) -> str:
         ),
         document,
     )
+
+
+def _composed_stylesheet() -> bytes:
+    """Compose the stable stylesheet entry point from owned source layers."""
+
+    static = files("infinity_db.web").joinpath("static")
+    return b"".join(static.joinpath(filename).read_bytes() for filename in STYLESHEET_PARTS)
 
 
 def _asset_cache_control(query: str) -> str:
@@ -493,6 +535,7 @@ def _render_page(
         "skill-extras": "SKILL_EXTRAS_CURRENT",
         "fireteams": "FIRETEAMS_CURRENT",
         "glossary": "GLOSSARY_CURRENT",
+        "changes": "CHANGES_CURRENT",
         "about": "ABOUT_CURRENT",
     }
     for page, marker_name in navigation_markers.items():
@@ -546,6 +589,8 @@ def _render_page(
     document = static.joinpath(spec.filename).read_text(encoding="utf-8")
     for key, value in spec.template_values:
         document = document.replace(f"{{{{{key}}}}}", escape(value, quote=True))
+    if spec.body_renderer is not None:
+        document = document.replace("{{PAGE_CONTENT}}", spec.body_renderer())
     return _version_static_urls(
         document.replace(
             '<html lang="en">',
@@ -553,6 +598,20 @@ def _render_page(
             f'data-static-version="{STATIC_ASSET_VERSION}" '
             f'data-static-revision="{STATIC_ASSET_REVISION}" '
             f'data-snapshot-revision="{snapshot_revision}">',
+        )
+        .replace(
+            '<meta charset="utf-8">',
+            (
+                '<meta charset="utf-8">'
+                '<link rel="icon" href="/static/favicon-32.png" '
+                'type="image/png" sizes="32x32">'
+                '<link rel="icon" href="/static/favicon.svg" '
+                'type="image/svg+xml" sizes="any">'
+                '<link rel="apple-touch-icon" '
+                'href="/static/apple-touch-icon.png" sizes="180x180">'
+                '<script src="/static/theme-startup.js"></script>'
+                '<script type="module" src="/static/settings.js"></script>'
+            ),
         )
         .replace(
             "</head>",
@@ -599,11 +658,15 @@ class PresentationHandler:
         if spec := _FIXED_PAGES.get(path):
             return self._page_response(spec)
 
-        if path in ASSETS:
-            filename, content_type = ASSETS[path]
-            body = files("infinity_db.web").joinpath(
-                "static", *filename.split("/")
-            ).read_bytes()
+        asset_path = _LEGACY_STATIC_ASSET_ALIASES.get(path, path)
+        if asset_path in ASSETS:
+            filename, content_type = ASSETS[asset_path]
+            if asset_path == "/static/styles.css":
+                body = _composed_stylesheet()
+            else:
+                body = files("infinity_db.web").joinpath(
+                    "static", *filename.split("/")
+                ).read_bytes()
             version = parse_qs(query).get("v")
             if filename.endswith(".js") and version == [STATIC_ASSET_VERSION]:
                 body = _version_module_imports(body.decode("utf-8")).encode("utf-8")
@@ -628,6 +691,11 @@ class PresentationHandler:
         if ARMY_SYMBOL_PATH.fullmatch(path):
             filename = path.removeprefix("/static/armies/")
             asset = files("infinity_db.web").joinpath("static", "armies", filename)
+        elif PERIPHERAL_SYMBOL_PATH.fullmatch(path):
+            filename = path.removeprefix("/static/peripherals/")
+            asset = files("infinity_db.web").joinpath(
+                "static", "peripherals", filename
+            )
         elif UNIT_SYMBOL_PATH.fullmatch(path):
             filename = path.removeprefix("/static/units/")
             asset = files("infinity_db.web").joinpath("static", "units", filename)

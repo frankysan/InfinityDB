@@ -122,6 +122,13 @@
       "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
     },
     {
+      "recordId": "term:fto",
+      "targetRelease": "0.10.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-06",
+      "note": "Canonical embedded game-term identity for Fireteam option naming. FTO has no independent rule effect; its gameplay consequence is the Fireteam-chart restriction to matching Unit Profile option names."
+    },
+    {
       "recordId": "term:hostile",
       "targetRelease": "0.9.0",
       "status": "reviewed",
@@ -1626,10 +1633,22 @@
       "reviewedOn": "2026-09-28"
     },
     {
-      "recordId": "rule:profile-help:equipment-weapons",
-      "targetRelease": "0.9.0",
+      "recordId": "rule:profile-help:skills",
+      "targetRelease": "0.10.0",
       "status": "reviewed",
-      "reviewedOn": "2026-09-28"
+      "reviewedOn": "2026-10-06"
+    },
+    {
+      "recordId": "rule:profile-help:equipment",
+      "targetRelease": "0.10.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-06"
+    },
+    {
+      "recordId": "rule:profile-help:weapons",
+      "targetRelease": "0.10.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-06"
     },
     {
       "recordId": "rule:profile-help:profile-options",

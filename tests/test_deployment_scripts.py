@@ -1,6 +1,14 @@
 from __future__ import annotations
 
+import fnmatch
+import io
+import json
+import tomllib
 from pathlib import Path
+
+import pytest
+
+from infinity_db.web import release_notes
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -17,6 +25,69 @@ def test_compose_supports_explicit_bind_address_and_host_port() -> None:
         in compose
     )
 
+
+
+
+def test_metrics_history_service_is_immutable_private_and_volume_backed() -> None:
+    compose = _read("compose.yaml")
+    dockerfile = _read("Dockerfile.metrics-history")
+
+    assert "metrics-history:" in compose
+    assert "dockerfile: Dockerfile.metrics-history" in compose
+    assert "infinity-db-metrics-history:${METRICS_HISTORY_IMAGE_TAG:-latest}" in compose
+    assert "read_only: true" in compose
+    assert "- metrics_history:/var/lib/infinitydb-metrics" in compose
+    assert "metrics_history:" in compose
+    assert "ports:" not in compose.split("  metrics-history:", 1)[1].split("  caddy:", 1)[0]
+    metrics_service = compose.split("  metrics-history:", 1)[1].split("  caddy:", 1)[0]
+    assert "condition: service_healthy" in metrics_service
+
+    assert "FROM python:3.11-slim" in dockerfile
+    assert "COPY tools/metrics_history.py /app/metrics_history.py" in dockerfile
+    assert "USER metrics" in dockerfile
+    assert "ENTRYPOINT" in dockerfile
+    assert 'CMD ["run"]' in dockerfile
+
+
+def test_deploy_brackets_app_replacement_with_noncritical_metrics_history_scrapes() -> None:
+    script = _read("scripts/deploy.sh")
+
+    app_build = script.index(
+        'docker compose build --build-arg "INFINITY_DB_DISPLAY_VERSION=$display_version" app'
+    )
+    history_build = script.index("docker compose build metrics-history")
+    history_verify = script.index("verify-metrics-history-image.sh")
+    stop_history = script.index("\nstop_metrics_history\n", history_verify)
+    closing = script.index('collect_metrics_history "closing"')
+    app_up = script.index("docker compose up -d --no-build --wait app caddy")
+    opening = script.index('collect_metrics_history "opening"')
+    history_start = script.index("start_metrics_history", opening)
+
+    assert app_build < history_build < history_verify
+    assert history_verify < stop_history < closing < app_up < opening < history_start
+    assert 'warn "metrics-history $phase sample failed' in script
+    assert "application deployment remains active" in script
+    assert "--no-deps metrics-history collect" in script
+    assert "--legacy-generation-at-collection" in script
+    assert "docker compose up -d --no-build metrics-history" in script
+
+
+def test_metrics_history_image_verifier_uses_read_only_ephemeral_state() -> None:
+    script = _read("scripts/verify-metrics-history-image.sh")
+
+    assert "docker run --rm" in script
+    assert "--read-only" in script
+    assert "--tmpfs /tmp" in script
+    assert "INFINITYDB_METRICS_HISTORY_DATABASE=/tmp/history.db" in script
+    assert '"$image" status' in script
+
+
+def test_deployment_image_pruning_covers_app_and_metrics_history() -> None:
+    script = _read("scripts/prune-app-images.sh")
+
+    assert "prune_repository infinity-db app application" in script
+    assert "prune_repository infinity-db-metrics-history metrics-history metrics-history" in script
+    assert 'reference=$repository:app-*' in script
 
 def test_runtime_databases_are_tracked_release_artifact_paths() -> None:
     gitignore = _read(".gitignore")
@@ -50,6 +121,37 @@ def test_release_installer_hands_off_to_target_release_installer_before_prompts(
     assert script.index(handoff) < script.index(prompt)
 
 
+def test_capacity_overrides_separate_resource_boundary_from_worker_count() -> None:
+    resources = _read("compose.capacity-4cpu-4g.yaml")
+    workers = _read("compose.capacity-4x4.yaml")
+
+    assert "services:" in resources
+    assert "  app:" in resources
+    assert "cpus: 4.0" in resources
+    assert "mem_limit: 4g" in resources
+    assert "command:" not in resources
+    assert "caddy:" not in resources
+    assert "metrics-history:" not in resources
+
+    assert "services:" in workers
+    assert "  app:" in workers
+    assert "command:" in workers
+    assert "- --workers" in workers
+    assert '- "4"' in workers
+    assert "- --threads" in workers
+    assert "cpus:" not in workers
+    assert "mem_limit:" not in workers
+    assert "caddy:" not in workers
+    assert "metrics-history:" not in workers
+
+    compose = _read("compose.yaml")
+    dockerfile = _read("Dockerfile")
+    app_service = compose.split("  app:", 1)[1].split("  metrics-history:", 1)[0]
+    assert "cpus:" not in app_service
+    assert "mem_limit:" not in app_service
+    assert '"--workers", "2", "--threads", "4"' in dockerfile
+
+
 def test_local_test_deployment_is_loopback_only_and_isolated() -> None:
     script = _read("scripts/deploy-local-test.sh")
     assert "COMPOSE_PROJECT_NAME=infinitydb-test" in script
@@ -59,12 +161,16 @@ def test_local_test_deployment_is_loopback_only_and_isolated() -> None:
     assert "DOMAIN=localhost" in script
     assert "PRUNE_APP_IMAGES=0" in script
     assert "sh ./scripts/deploy.sh" in script
+    assert "isolated infinitydb-test volume" in script
 
 
-def test_stop_local_test_targets_only_isolated_compose_project() -> None:
+def test_stop_local_test_preserves_by_default_and_purges_only_isolated_project() -> None:
     script = _read("scripts/stop-local-test.sh")
+
     assert "COMPOSE_PROJECT_NAME=infinitydb-test docker compose down" in script
-    assert "docker compose down -v" not in script
+    assert "COMPOSE_PROJECT_NAME=infinitydb-test docker compose down -v" in script
+    assert "--purge" in script
+    assert "preserving its volumes" in script
     assert "prune-app-images" not in script
     assert "Production deployment was not targeted." in script
 
@@ -73,7 +179,7 @@ def test_low_level_deploy_can_disable_image_pruning() -> None:
     script = _read("scripts/deploy.sh")
     assert ': "${PRUNE_APP_IMAGES:=1}"' in script
     assert '[ "$PRUNE_APP_IMAGES" = "1" ]' in script
-    assert "Application image pruning skipped for this deployment." in script
+    assert "Deployment image pruning skipped for this deployment." in script
 
 
 def test_deploy_bakes_display_version_into_container_image() -> None:
@@ -98,6 +204,129 @@ def test_docker_build_copies_curated_wheel_data_inputs() -> None:
     assert "COPY data/curated/identities /app/data/curated/identities" in dockerfile
     assert "COPY data/curated/peripherals /app/data/curated/peripherals" in dockerfile
     assert "rm -rf /app/config /app/data/curated" in dockerfile
+
+
+def test_container_build_packages_canonical_changelog() -> None:
+    dockerfile = _read("Dockerfile")
+
+    assert "COPY docs/CHANGELOG.md /app/docs/CHANGELOG.md" in dockerfile
+    assert "rm -rf /app/config /app/data/curated /app/docs /app/data/manifests" in dockerfile
+
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)
+
+    documentation = project["tool"]["setuptools"]["data-files"]["share/infinity-db/docs"]
+    assert documentation == ["docs/CHANGELOG.md"]
+
+
+@pytest.mark.parametrize("heading", ["## Unreleased", "## [0.10.0] - 2026-10-07"])
+@pytest.mark.parametrize("matching_content", [True, False])
+def test_container_smoke_validates_canonical_notes_in_both_release_states(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    heading: str,
+    matching_content: bool,
+) -> None:
+    changelog = tmp_path / "CHANGELOG.md"
+    changelog.write_text(
+        f"# Changelog\n\n{heading}\n\n### Player summary\n\n"
+        "- New player highlight.\n\n### Fixed\n\n- Corrected behavior.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(release_notes, "maintained_documentation_path", lambda *_: changelog)
+    monkeypatch.setenv("INFINITY_DB_DISPLAY_VERSION", "")
+    page = release_notes.render_current_release_notes_html()
+    if not matching_content:
+        page = page.replace("New player highlight.", "Outdated player highlight.")
+    page = f'<section aria-label="InfinityDB release notes">{page}</section>'
+    payloads = {
+        "/api/armies": {
+            "items": [
+                {"id": 101, "role": "main", "group_id": None},
+                {"id": 102, "role": "sectorial", "group_id": 101},
+            ]
+        },
+        "/api/skills/74": {"rules": ["Super-Jump"]},
+        "/api/version": {"version": "0.10.0", "snapshot_revision": "fixture"},
+    }
+
+    def urlopen(url: str, timeout: int) -> io.BytesIO:
+        route = url.removeprefix("http://127.0.0.1:8000")
+        body = page if route == "/changes" else json.dumps(payloads[route])
+        return io.BytesIO(body.encode("utf-8"))
+
+    monkeypatch.setattr("urllib.request.urlopen", urlopen)
+    script = _read("scripts/verify-container-image.sh")
+    runtime_probe = script.split('docker exec "$container" python -c \'\n', 1)[1]
+    runtime_probe = runtime_probe.split("\n'", 1)[0]
+    if matching_content:
+        exec(compile(runtime_probe, "verify-container-image.sh", "exec"), {})
+    else:
+        with pytest.raises(SystemExit, match="canonical changelog"):
+            exec(compile(runtime_probe, "verify-container-image.sh", "exec"), {})
+
+
+def test_installed_wheel_smoke_runs_database_health_check() -> None:
+    workflow = _read(".github/workflows/installed-wheel.yml")
+
+    assert (
+        '"$RUNNER_TEMP/wheel-venv/bin/infinity-db" database-health '
+        "generated/infinity.db --require-raw"
+    ) in workflow
+
+
+def test_full_asset_checks_can_run_against_candidate_branch() -> None:
+    workflow = _read(".github/workflows/full-asset-checks.yml")
+
+    assert "workflow_dispatch:" in workflow
+    assert "name: full-assets" in workflow
+    assert "github.ref == 'refs/heads/main'" not in workflow
+
+
+def test_wheel_packages_runtime_unit_filter_semantics() -> None:
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)
+
+    catalog_data = project["tool"]["setuptools"]["data-files"][
+        "share/infinity-db/config/catalogs"
+    ]
+    assert "config/catalogs/unit-filter-semantics.json" in catalog_data
+
+
+def test_wheel_package_data_includes_browser_icon_rasters() -> None:
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)
+
+    patterns = project["tool"]["setuptools"]["package-data"]["infinity_db.web"]
+    assert "static/*.png" in patterns
+
+
+def test_wheel_package_data_includes_theme_palettes() -> None:
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)
+
+    patterns = project["tool"]["setuptools"]["package-data"]["infinity_db.web"]
+    assert "static/themes/*.css" in patterns
+
+
+def test_wheel_package_data_covers_every_published_symbol() -> None:
+    with (ROOT / "pyproject.toml").open("rb") as handle:
+        project = tomllib.load(handle)
+    publication = json.loads(
+        (ROOT / "data/manifests/symbol-publication.json").read_text(encoding="utf-8")
+    )
+
+    patterns = project["tool"]["setuptools"]["package-data"]["infinity_db.web"]
+    published = publication["publishedSha256ByPath"]
+    uncovered = [
+        relative
+        for relative in sorted(published)
+        if not any(
+            fnmatch.fnmatchcase(f"static/{relative}", pattern) for pattern in patterns
+        )
+    ]
+
+    assert uncovered == []
 
 
 def test_container_verifier_uses_installed_tracked_publication_provenance() -> None:

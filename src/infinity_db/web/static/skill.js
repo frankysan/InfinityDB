@@ -1,8 +1,10 @@
-import { formatSkillDistanceExtra, initializeDistanceUnitToggle } from "./preferences.js";
+import { formatSkillDistanceExtra } from "./distance.js";
+import { optionalUnitFilters } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
+import { tableViewport } from "./view-components.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
   || window.location.pathname.split("/").pop();
@@ -64,8 +66,6 @@ function structuredTable(titleText, columns, rows) {
   const title = document.createElement("h2");
   title.className = "detail-heading";
   title.textContent = titleText;
-  const container = document.createElement("div");
-  container.className = "table-viewport";
   const table = document.createElement("table");
   table.className = "data-table--compact data-table--reference";
   const caption = document.createElement("caption");
@@ -88,8 +88,7 @@ function structuredTable(titleText, columns, rows) {
     body.append(row);
   }
   table.append(caption, head, body);
-  container.append(table);
-  section.append(title, container);
+  section.append(title, tableViewport(table));
   return section;
 }
 
@@ -101,7 +100,7 @@ function hackingProgramLink(row) {
 }
 
 function hackingDeviceLinks(devices) {
-  if (!devices?.length) return "Upgrade / source-specific";
+  if (!devices?.length) return "Granted separately / Upgrade";
   const fragment = document.createDocumentFragment();
   for (const [index, device] of devices.entries()) {
     if (index) fragment.append(", ");
@@ -206,10 +205,7 @@ function variantSection(variant, parameterSemantics) {
     const body = document.createElement("tbody");
     renderUnitRows(body, variant.units);
     table.append(body);
-    const container = document.createElement("div");
-    container.className = "table-viewport";
-    container.append(table);
-    section.append(container);
+    section.append(tableViewport(table));
     section.dataset.loaded = "true";
   });
   return section;
@@ -257,18 +253,17 @@ document.addEventListener(
   () => pageController.abort(),
   { once: true },
 );
-initializeDistanceUnitToggle();
 window.addEventListener("distanceunitchange", () => {
   if (currentSkill) render(currentSkill);
 }, { signal: pageController.signal });
 if (!skillId) {
   name.firstChild.textContent = "Skill unavailable";
-  status.textContent = "The requested skill address is invalid.";
+  status.textContent = "This Skill link is invalid.";
 } else {
   getCatalogItem("skills", skillId, pageController.signal).then((skill) => {
     currentSkill = skill;
     render(skill);
-    return visibleUnitIds(pageController.signal)
+    return visibleUnitIds(optionalUnitFilters(), pageController.signal)
       .then((ids) => render(withVisibleUnits(skill, ids)));
   }).catch((error) => {
     if (error.name === "AbortError") return;
@@ -278,7 +273,7 @@ if (!skillId) {
 }
 window.addEventListener("optionalunitschange", () => {
   if (!currentSkill) return;
-  visibleUnitIds(pageController.signal)
+  visibleUnitIds(optionalUnitFilters(), pageController.signal)
     .then((ids) => render(withVisibleUnits(currentSkill, ids)))
     .catch((error) => {
       if (error.name !== "AbortError") throw error;

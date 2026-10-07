@@ -23,7 +23,7 @@ REPORT_FORMAT = "InfinityDB rules enrichment coverage audit"
 REPORT_FORMAT_VERSION = 3
 CATALOGS = ("skills", "equipment", "weapons", "traits", "states")
 CLASSIFICATION_FORMAT = "InfinityDB enrichment coverage classifications"
-CLASSIFICATION_FORMAT_VERSION = 1
+CLASSIFICATION_FORMAT_VERSION = 2
 CLASSIFICATIONS = frozenset(
     {"release-blocker", "intentional-omission", "supporting-identity", "later-product-work"}
 )
@@ -81,7 +81,10 @@ def _load_classification_policy(path: Path) -> dict[str, Any]:
         ) from exc
     if not isinstance(document, dict):
         raise EnrichmentCoverageAuditError("Classification policy root must be an object")
-    expected = {"format", "formatVersion", "gapCodes", "supportingIdentity", "overrides"}
+    expected = {
+        "format", "formatVersion", "gapCodes", "catalogGapCodes",
+        "supportingIdentity", "overrides"
+    }
     if set(document) != expected:
         raise EnrichmentCoverageAuditError(
             f"Classification policy must contain exactly {sorted(expected)}"
@@ -110,6 +113,31 @@ def _load_classification_policy(path: Path) -> dict[str, Any]:
         code: _classification_decision(raw_gap_codes[code], f"gapCodes.{code}")
         for code in sorted(KNOWN_GAP_CODES)
     }
+
+    raw_catalog_gap_codes = document.get("catalogGapCodes")
+    if not isinstance(raw_catalog_gap_codes, dict):
+        raise EnrichmentCoverageAuditError(
+            "Classification policy catalogGapCodes must be an object"
+        )
+    catalog_gap_codes: dict[tuple[str, str], dict[str, str]] = {}
+    for catalog, raw_catalog in raw_catalog_gap_codes.items():
+        if catalog not in CATALOGS:
+            raise EnrichmentCoverageAuditError(
+                f"catalogGapCodes catalog must be one of {list(CATALOGS)}: {catalog!r}"
+            )
+        if not isinstance(raw_catalog, dict):
+            raise EnrichmentCoverageAuditError(
+                f"catalogGapCodes.{catalog} must be an object"
+            )
+        for gap_code, raw_decision in raw_catalog.items():
+            if gap_code not in KNOWN_GAP_CODES - {"unresolved_related_item_link"}:
+                raise EnrichmentCoverageAuditError(
+                    f"catalogGapCodes.{catalog} contains non-catalog gap code {gap_code!r}"
+                )
+            catalog_gap_codes[(catalog, gap_code)] = _classification_decision(
+                raw_decision, f"catalogGapCodes.{catalog}.{gap_code}"
+            )
+
     supporting = _classification_decision(
         document.get("supportingIdentity"), "supportingIdentity"
     )
@@ -196,6 +224,7 @@ def _load_classification_policy(path: Path) -> dict[str, Any]:
 
     return {
         "gapCodes": gap_codes,
+        "catalogGapCodes": catalog_gap_codes,
         "supportingIdentity": supporting,
         "catalogOverrides": catalog_overrides,
         "relationOverrides": relation_overrides,
@@ -215,6 +244,13 @@ def _catalog_gap_classification(
     if override is not None:
         matched_overrides.add(("catalog", *key))
         return {"code": gap_code, **override, "source": "override"}
+    catalog_decision = policy["catalogGapCodes"].get((catalog, gap_code))
+    if catalog_decision is not None:
+        return {
+            "code": gap_code,
+            **catalog_decision,
+            "source": "catalog-gap-code",
+        }
     return {"code": gap_code, **policy["gapCodes"][gap_code], "source": "gap-code"}
 
 

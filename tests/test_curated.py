@@ -626,6 +626,16 @@ def test_checked_in_n5_collection_is_valid() -> None:
             "section": "Trooper Characteristics",
         }
     ]
+    fto = records["term:fto"]
+    assert fto["name"] == "FTO (Fireteam Option)"
+    assert fto["aliases"] == ["FTO", "Fireteam Option"]
+    assert fto["facts"] == {"scope": "fireteam-eligibility"}
+    assert fto["citations"] == [
+        {
+            "sourceId": "wiki-fireteams-chart-oldid-4116",
+            "heading": "Fireteams Chart",
+        }
+    ]
     assert records["state:camouflaged"]["kind"] == "state"
     assert records["state:camouflaged"]["labelIds"] == ["marker"]
     assert records["state:camouflaged"]["review"]["status"] == "reviewed"
@@ -679,6 +689,9 @@ def test_checked_in_n5_collection_is_valid() -> None:
         {"entity": "weapon", "id": "armed-turret"}
     ]
     assert records["weapon:armed-turret"]["facts"]["specialProfile"]["skills"] == ["Total Reaction"]
+    assert records["weapon:armed-turret"]["citations"] == [
+        {"sourceId": "n5-core-v5.3-pdf", "page": 70, "section": "Armed Turret Profile"}
+    ]
     assert all(len(skill_type["labels"]) == 2 for skill_type in document["skillTypes"])
     assert all(
         set(skill_type["descriptions"]) == {"singular", "plural"}

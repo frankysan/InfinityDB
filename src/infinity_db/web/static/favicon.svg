@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Simplified from infinitydb-logo.svg for legibility at browser-favicon sizes. -->
+  <defs>
+    <linearGradient id="ribbon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e0f4b5"/>
+      <stop offset="0.55" stop-color="#bcd890"/>
+      <stop offset="1" stop-color="#759f69"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="#0d2922"/>
+  <path
+    d="M7.168 31.2 C7.168 20 17.28 17.76 25.088 24.96 L40.64 39.2 C48.256 46.24 58.368 42.4 58.368 30.56 C58.368 19.68 48.256 17.6 40.448 24.8 L24.96 39.04 C17.408 46 7.168 42.4 7.168 31.2"
+    fill="none"
+    stroke="#365c4d"
+    stroke-width="7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    transform="translate(0 1)"/>
+  <path
+    d="M7.168 31.2 C7.168 20 17.28 17.76 25.088 24.96 L40.64 39.2 C48.256 46.24 58.368 42.4 58.368 30.56 C58.368 19.68 48.256 17.6 40.448 24.8 L24.96 39.04 C17.408 46 7.168 42.4 7.168 31.2"
+    fill="none"
+    stroke="url(#ribbon)"
+    stroke-width="5.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+</svg>

@@ -94,7 +94,7 @@ if not isinstance(expected, dict) or not expected or not isinstance(summary, dic
 if summary.get("publishedAssetCount") != len(expected):
     raise SystemExit("Installed symbol publication manifest count does not match its paths")
 
-categories = {"armies", "characteristics", "orders", "units"}
+categories = {"armies", "characteristics", "orders", "peripherals", "units"}
 actual = set()
 for category in categories:
     category_root = root / category
@@ -205,6 +205,8 @@ import json
 import os
 from urllib.request import urlopen
 
+from infinity_db.web.release_notes import render_current_release_notes_html
+
 with urlopen("http://127.0.0.1:8000/api/armies", timeout=3) as response:
     armies = {item["id"]: item for item in json.load(response)["items"]}
 if not armies:
@@ -235,6 +237,12 @@ if expected_display_version:
         raise SystemExit(
             f"Browser footer does not show built display version {expected_display_version!r}"
         )
+
+with urlopen("http://127.0.0.1:8000/changes", timeout=3) as response:
+    changes = response.read().decode("utf-8")
+expected_release_notes = render_current_release_notes_html()
+if not expected_release_notes or expected_release_notes not in changes:
+    raise SystemExit("/changes did not render the installed canonical changelog")
 '
 
 if [ "$packaged_assets" -eq 1 ]; then
@@ -248,11 +256,13 @@ publication = json.loads(
     maintained_manifest_path("symbol-publication.json").read_text(encoding="utf-8")
 )
 paths = sorted(publication["publishedSha256ByPath"])
-for category in ("armies", "characteristics", "orders", "units"):
-    try:
-        relative = next(path for path in paths if path.startswith(category + "/"))
-    except StopIteration as exc:
-        raise SystemExit(f"Installed symbol publication has no {category} asset") from exc
+present_categories = {path.split("/", 1)[0] for path in paths}
+required_categories = {"armies", "characteristics", "orders", "units"}
+if not required_categories <= present_categories:
+    missing = sorted(required_categories - present_categories)
+    raise SystemExit(f"Installed symbol publication is missing categories: {missing!r}")
+for category in sorted(present_categories):
+    relative = next(path for path in paths if path.startswith(category + "/"))
     with urlopen(f"http://127.0.0.1:8000/static/{relative}", timeout=3) as response:
         if response.status != 200:
             raise SystemExit(f"Published symbol route returned {response.status}: {relative}")

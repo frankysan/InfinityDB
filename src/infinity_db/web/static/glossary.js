@@ -1,7 +1,8 @@
 import { getGlossary } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
-import { initializeDistanceUnitToggle } from "./preferences.js";
+import { silhouetteReferenceSet } from "./silhouette-diagrams.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
+import { createPanelSwitcher } from "./view-components.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -17,12 +18,11 @@ const elements = {
 const controller = new AbortController();
 const query = readShareState("glossary").params.get("q")?.trim().slice(0, 200) || "";
 
-function show(panel) {
-  for (const element of [elements.loading, elements.error, elements.empty, elements.list]) {
-    element.hidden = element !== panel;
-  }
-  elements.results.setAttribute("aria-busy", String(panel === elements.loading));
-}
+const show = createPanelSwitcher({
+  container: elements.results,
+  loading: elements.loading,
+  panels: [elements.loading, elements.error, elements.empty, elements.list],
+});
 
 function anchorId(item) {
   return item.id.replaceAll(":", "-");
@@ -61,6 +61,8 @@ function entryNode(item) {
   description.className = "glossary-description";
   appendMaintainedText(description, item.description_tokens, item.description);
   article.append(header, description);
+
+  if (item.id === "attribute:s") article.append(silhouetteReferenceSet());
 
   if (item.aliases?.length) {
     const aliases = document.createElement("p");
@@ -115,5 +117,4 @@ elements.search.form?.addEventListener("submit", (event) => {
 });
 document.addEventListener("infinity:beforenavigation", () => controller.abort(), { once: true });
 window.addEventListener("hashchange", revealHashTarget);
-initializeDistanceUnitToggle();
 load();

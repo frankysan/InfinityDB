@@ -1,7 +1,7 @@
 import { getCatalogItems } from "./api.js";
 import { readCatalogSearchQuery, replaceCatalogSearchQuery } from "./catalog-search-state.js";
-import { initializeDistanceUnitToggle } from "./preferences.js";
 import { skillCategoryBadge } from "./skill-categories.js";
+import { createPanelSwitcher } from "./view-components.js";
 
 const page = document.body.dataset.catalog;
 const title = page === "traits" ? "traits" : page;
@@ -31,12 +31,11 @@ function searchableItem(item) {
   };
 }
 
-function show(panel) {
-  for (const element of [elements.loading, elements.error, elements.empty, elements.table]) {
-    element.hidden = element !== panel;
-  }
-  elements.results.setAttribute("aria-busy", String(panel === elements.loading));
-}
+const show = createPanelSwitcher({
+  container: elements.results,
+  loading: elements.loading,
+  panels: [elements.loading, elements.error, elements.empty, elements.table],
+});
 
 function render() {
   const query = elements.search.value.trim().toLocaleLowerCase();
@@ -133,5 +132,4 @@ document.addEventListener("infinity:beforenavigation", () => {
 }, { once: true });
 elements.search.value = readCatalogSearchQuery();
 replaceCatalogSearchQuery(elements.search.value);
-initializeDistanceUnitToggle();
 load();

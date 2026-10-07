@@ -156,6 +156,62 @@ def test_complete_discovery_preserves_every_reference_and_unique_url() -> None:
     assert all(row["authoritative"] is False for row in resume_refs)
 
 
+def test_discovery_marks_embedded_peripheral_profiles_from_source_metadata() -> None:
+    module = load_module()
+    primary = unit_url("cutter")
+    crabbot = unit_url("crabbot")
+    documents = [
+        module.SourceDocument(
+            "metadata.json",
+            {
+                "factions": [],
+                "skills": [{"id": 243, "name": "Peripheral"}],
+            },
+        ),
+        module.SourceDocument(
+            "101-panoceania.json",
+            {
+                "filters": {
+                    "peripheral": [
+                        {"id": 1, "name": "CRABBOT"},
+                        {"id": 2, "name": "PALBOT"},
+                    ]
+                },
+                "units": [
+                    {
+                        "id": 12,
+                        "slug": "cutters",
+                        "profileGroups": [
+                            {
+                                "profiles": [
+                                    {"name": "CUTTER", "logo": primary},
+                                    {
+                                        "name": "Crabbot Ancillary Remote Unit",
+                                        "logo": crabbot,
+                                        "skills": [{"id": 243}],
+                                    },
+                                ]
+                            }
+                        ],
+                    }
+                ],
+                "resume": [],
+            },
+        ),
+    ]
+
+    discovery = module.discover_symbols(
+        documents,
+        static_symbols=[],
+        static_source="config/symbols/static-symbols.json",
+    )
+
+    unit_refs = [row for row in discovery.references if row["kind"] == "unit-profile"]
+    assert "peripheralName" not in unit_refs[0]
+    assert unit_refs[1]["peripheralName"] == "CRABBOT"
+
+
+
 def test_legacy_army_logos_are_authoritative_faction_references() -> None:
     module = load_module()
     legacy = module.LegacyArmy(
@@ -456,8 +512,18 @@ def test_main_writes_snapshot_and_build_manifests(tmp_path: Path, monkeypatch) -
     }
 
 
-def _single_asset_army_snapshot(tmp_path: Path, module, *, url: str) -> tuple[Path, Path]:
+def _asset_army_snapshot(
+    tmp_path: Path, module, *, urls: list[str]
+) -> tuple[Path, Path]:
     source = tmp_path / "army.zip"
+    units = [
+        {
+            "id": index,
+            "slug": f"test-unit-{index}",
+            "profileGroups": [{"profiles": [{"logo": url}]}],
+        }
+        for index, url in enumerate(urls, start=1)
+    ]
     with zipfile.ZipFile(source, "w") as archive:
         archive.writestr("metadata.json", json.dumps({"factions": []}))
         archive.writestr(
@@ -465,13 +531,7 @@ def _single_asset_army_snapshot(tmp_path: Path, module, *, url: str) -> tuple[Pa
             json.dumps(
                 {
                     "version": "7.26246.158",
-                    "units": [
-                        {
-                            "id": 1,
-                            "slug": "test-unit",
-                            "profileGroups": [{"profiles": [{"logo": url}]}],
-                        }
-                    ],
+                    "units": units,
                     "resume": [],
                 }
             ),
@@ -492,6 +552,10 @@ def _single_asset_army_snapshot(tmp_path: Path, module, *, url: str) -> tuple[Pa
         language="en",
     )
     return source, manifest
+
+
+def _single_asset_army_snapshot(tmp_path: Path, module, *, url: str) -> tuple[Path, Path]:
+    return _asset_army_snapshot(tmp_path, module, urls=[url])
 
 
 def test_override_resolution_uses_stable_category_and_disambiguates_collisions() -> None:
@@ -528,7 +592,9 @@ def test_override_resolution_uses_stable_category_and_disambiguates_collisions()
     assert plan.override_paths[first] != plan.override_paths[second]
 
 
-def test_matching_override_suppresses_cache_and_network(tmp_path: Path) -> None:
+def test_matching_override_replaces_output_after_upstream_identity_resolution(
+    tmp_path: Path,
+) -> None:
     module = load_module()
     url = unit_url("test-unit")
     source, manifest = _single_asset_army_snapshot(tmp_path, module, url=url)
@@ -542,9 +608,17 @@ def test_matching_override_suppresses_cache_and_network(tmp_path: Path) -> None:
     unused.write_bytes(b"<svg id='unused'/>")
     static = static_config(tmp_path / "static.json")
     progress: list[str] = []
+    upstream = b"<svg id='upstream'/>"
 
-    def fail_network(*_args, **_kwargs):
-        raise AssertionError("network must not be used for a matching override")
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self):
+            return upstream
 
     result = module.acquire_symbol_snapshot(
         source,
@@ -555,7 +629,7 @@ def test_matching_override_suppresses_cache_and_network(tmp_path: Path) -> None:
         legacy_armies_path=None,
         delay=0,
         project_root=tmp_path,
-        opener=fail_network,
+        opener=lambda *_args, **_kwargs: Response(),
         progress=progress.append,
         army_snapshot_manifest=manifest,
         override_root=override_root,
@@ -566,11 +640,254 @@ def test_matching_override_suppresses_cache_and_network(tmp_path: Path) -> None:
     from infinity_db.symbol_manifest import load_symbol_manifest
 
     build = load_symbol_manifest(result.build_manifest)
-    assert build["assets"][0]["sourceMethod"] == "override"
+    asset = build["assets"][0]
+    assert asset["sourceMethod"] == "override"
+    assert asset["upstreamSha256"] == module.hashlib.sha256(upstream).hexdigest()
     assert any("Symbol sources: override 1 | cache 0 | network 0" in row for row in progress)
+    assert any("Upstream identities: cache 0 | manifest 0 | network 1" in row for row in progress)
     assert any("units/unused.svg" in row for row in progress)
     with zipfile.ZipFile(result.archive) as archive:
-        assert archive.read(build["assets"][0]["archivePath"]) == b"<svg id='override'/>"
+        assert archive.read(asset["archivePath"]) == b"<svg id='override'/>"
+
+
+def test_override_propagates_to_upstream_equivalent_unit_symbols(tmp_path: Path) -> None:
+    module = load_module()
+    first = unit_url("shared-a")
+    second = unit_url("shared-b")
+    source, manifest = _asset_army_snapshot(tmp_path, module, urls=[first, second])
+    override_root = tmp_path / "image_overrides"
+    override = override_root / "units" / "shared-a.svg"
+    override.parent.mkdir(parents=True)
+    override_body = b"<svg id='override'/>"
+    override.write_bytes(override_body)
+    upstream = b"<svg id='same-upstream'/>"
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self):
+            return upstream
+
+    result = module.acquire_symbol_snapshot(
+        source,
+        tmp_path / "symbols",
+        manifest.parent,
+        tmp_path / "army-symbol-build.json",
+        static_symbols_path=static_config(tmp_path / "static.json"),
+        legacy_armies_path=None,
+        delay=0,
+        project_root=tmp_path,
+        opener=lambda *_args, **_kwargs: Response(),
+        army_snapshot_manifest=manifest,
+        override_root=override_root,
+        refresh_symbols=True,
+        acquired_at=datetime(2026, 9, 18, 13, 0, tzinfo=UTC),
+    )
+
+    from infinity_db.symbol_manifest import load_symbol_manifest
+
+    build = load_symbol_manifest(result.build_manifest)
+    upstream_sha256 = module.hashlib.sha256(upstream).hexdigest()
+    assert len(build["assets"]) == 2
+    assert {asset["sourceMethod"] for asset in build["assets"]} == {"override"}
+    assert {asset["upstreamSha256"] for asset in build["assets"]} == {upstream_sha256}
+    assert len({asset["sha256"] for asset in build["assets"]}) == 1
+    with zipfile.ZipFile(result.archive) as archive:
+        for asset in build["assets"]:
+            assert archive.read(asset["archivePath"]) == override_body
+
+
+def test_override_propagation_does_not_cross_symbol_categories(tmp_path: Path) -> None:
+    module = load_module()
+    unit = unit_url("shared-unit")
+    faction = faction_url("shared-faction")
+    source, manifest = _single_asset_army_snapshot(tmp_path, module, url=unit)
+    discovery = module.Discovery(
+        references=[
+            {
+                "kind": "unit-profile",
+                "authoritative": True,
+                "sourceDocument": "101-test.json",
+                "jsonPath": "$.units[0].profileGroups[0].profiles[0].logo",
+                "assetUrl": unit,
+                "unitId": 1,
+                "unitSlug": "test-unit",
+            },
+            {
+                "kind": "faction",
+                "authoritative": True,
+                "sourceDocument": "metadata.json",
+                "jsonPath": "$.factions[0].logo",
+                "assetUrl": faction,
+                "factionId": 101,
+                "factionSlug": "test",
+            },
+        ],
+        authoritative_urls={unit, faction},
+        audit={
+            "unitProfileReferenceCount": 1,
+            "uniqueUnitUrlCount": 1,
+            "factionReferenceCount": 1,
+            "uniqueFactionUrlCount": 1,
+            "semanticReferenceCount": 2,
+            "uniqueSemanticUrlCount": 2,
+            "resumeReferenceCount": 0,
+            "uniqueResumeUrlCount": 0,
+            "staticReferenceCount": 0,
+            "recursiveReferenceCount": 2,
+            "uniqueRecursiveUrlCount": 2,
+            "unknownReferenceCount": 0,
+        },
+        source_document_count=2,
+    )
+    override_root = tmp_path / "image_overrides"
+    override = override_root / "units" / "shared-unit.svg"
+    override.parent.mkdir(parents=True)
+    override.write_bytes(b"<svg id='override'/>")
+    upstream = b"<svg id='same-upstream'/>"
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self):
+            return upstream
+
+    result = module.acquire_symbol_snapshot(
+        source,
+        tmp_path / "symbols",
+        manifest.parent,
+        tmp_path / "army-symbol-build.json",
+        static_symbols_path=static_config(tmp_path / "static.json"),
+        legacy_armies_path=None,
+        delay=0,
+        project_root=tmp_path,
+        discovery=discovery,
+        opener=lambda *_args, **_kwargs: Response(),
+        army_snapshot_manifest=manifest,
+        override_root=override_root,
+        refresh_symbols=True,
+        acquired_at=datetime(2026, 9, 18, 13, 0, tzinfo=UTC),
+    )
+
+    from infinity_db.symbol_manifest import load_symbol_manifest
+
+    assets = {
+        asset["url"]: asset
+        for asset in load_symbol_manifest(result.build_manifest)["assets"]
+    }
+    assert assets[unit]["sourceMethod"] == "override"
+    assert assets[faction]["sourceMethod"] == "network"
+
+
+def test_conflicting_overrides_for_same_upstream_symbol_fail(tmp_path: Path) -> None:
+    module = load_module()
+    first = unit_url("shared-a")
+    second = unit_url("shared-b")
+    source, manifest = _asset_army_snapshot(tmp_path, module, urls=[first, second])
+    override_root = tmp_path / "image_overrides" / "units"
+    override_root.mkdir(parents=True)
+    (override_root / "shared-a.svg").write_bytes(b"<svg id='override-a'/>")
+    (override_root / "shared-b.svg").write_bytes(b"<svg id='override-b'/>")
+    upstream = b"<svg id='same-upstream'/>"
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self):
+            return upstream
+
+    with pytest.raises(ValueError, match="Conflicting image overrides target the same upstream"):
+        module.acquire_symbol_snapshot(
+            source,
+            tmp_path / "symbols",
+            manifest.parent,
+            tmp_path / "army-symbol-build.json",
+            static_symbols_path=static_config(tmp_path / "static.json"),
+            legacy_armies_path=None,
+            delay=0,
+            project_root=tmp_path,
+            opener=lambda *_args, **_kwargs: Response(),
+            army_snapshot_manifest=manifest,
+            override_root=tmp_path / "image_overrides",
+            refresh_symbols=True,
+            acquired_at=datetime(2026, 9, 18, 13, 0, tzinfo=UTC),
+        )
+
+
+def test_cached_upstream_identity_keeps_propagated_override_offline(tmp_path: Path) -> None:
+    module = load_module()
+    first = unit_url("shared-a")
+    second = unit_url("shared-b")
+    source, manifest = _asset_army_snapshot(tmp_path, module, urls=[first, second])
+    destination = tmp_path / "symbols"
+    build_manifest = tmp_path / "army-symbol-build.json"
+    override_root = tmp_path / "image_overrides"
+    override = override_root / "units" / "shared-a.svg"
+    override.parent.mkdir(parents=True)
+    override.write_bytes(b"<svg id='override'/>")
+    upstream = b"<svg id='same-upstream'/>"
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return None
+
+        def read(self):
+            return upstream
+
+    module.acquire_symbol_snapshot(
+        source,
+        destination,
+        manifest.parent,
+        build_manifest,
+        static_symbols_path=static_config(tmp_path / "static.json"),
+        legacy_armies_path=None,
+        delay=0,
+        project_root=tmp_path,
+        opener=lambda *_args, **_kwargs: Response(),
+        army_snapshot_manifest=manifest,
+        override_root=override_root,
+        refresh_symbols=True,
+        acquired_at=datetime(2026, 9, 18, 13, 0, tzinfo=UTC),
+    )
+
+    def fail_network(*_args, **_kwargs):
+        raise AssertionError("cached upstream identity must avoid repeated network lookup")
+
+    result = module.acquire_symbol_snapshot(
+        source,
+        destination,
+        manifest.parent,
+        build_manifest,
+        static_symbols_path=tmp_path / "static.json",
+        legacy_armies_path=None,
+        delay=0,
+        project_root=tmp_path,
+        opener=fail_network,
+        army_snapshot_manifest=manifest,
+        override_root=override_root,
+        acquired_at=datetime(2026, 9, 18, 14, 0, tzinfo=UTC),
+    )
+
+    from infinity_db.symbol_manifest import load_symbol_manifest
+
+    build = load_symbol_manifest(result.build_manifest)
+    assert {asset["sourceMethod"] for asset in build["assets"]} == {"override"}
+    assert all("upstreamSha256" in asset for asset in build["assets"])
 
 
 def test_invalid_matching_override_fails_without_network(tmp_path: Path) -> None:

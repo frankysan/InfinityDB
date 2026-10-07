@@ -10,10 +10,11 @@ provenance/state, and build outputs.
 - `raw/` — immutable downloaded Corvus Belli Army snapshot archives. Army
   acquisition writes `JSON YYYYMMDD-HHMMSS.zip`; symbol acquisition uses the
   `raw/symbols/` subtree for `SYMBOLS YYYYMMDD-HHMMSS.zip`. Ignored by Git.
-- `wiki/` — local wiki research material. The current downloader persists
-  immutable `WIKI-<language> YYYYMMDD-HHMMSS.zip` snapshots here. English (`en`)
-  is the downloader default; Spanish (`es`) is an explicit alternative. Ignored
-  by Git.
+- `wiki/` — local wiki research material. The downloader persists immutable
+  `WIKI-<language> YYYYMMDD-HHMMSS.zip` Infinity Wiki snapshots here; English (`en`)
+  is the default and Spanish (`es`) is an explicit alternative. Human Sphere uses the
+  distinct English-only `HUMAN-SPHERE YYYYMMDD-HHMMSS.zip` identity. History-enabled
+  acquisitions add `-history` before the timestamp. Ignored by Git.
 - `pdf/` — local rules/FAQ/ITS research documents. Ignored by Git.
 - `work/wiki/` — local wiki crawl work. Successful acquisitions remove their
   work directory after publishing the immutable archive and provenance;
@@ -68,9 +69,32 @@ production will serve. Generated snapshot manifests remain local provenance reco
 than maintained project knowledge.
 
 Generated Army database data is replaceable. Builds create temporary application
-and raw-archive siblings, validate both before publication, and replace each
-destination atomically. The pair is not yet one atomic transaction: recovery
-from interruption between the two replacements remains an explicit backlog item.
+and raw-archive siblings, validate both before publication, and bind them with the
+same deterministic `export_pair_sha256` metadata. That fingerprint covers the full
+normalized source model plus the shared build metadata, including source-only rows
+that do not appear in the application database.
+
+The two destination files cannot be replaced as one filesystem transaction, so
+publication has an explicit commit order and recovery policy:
+
+1. replace `infinity.raw.db` first;
+2. replace `infinity.db` last; the application replacement is the commit point.
+
+If a process stops before the raw replacement, the previous pair remains. If it
+stops between replacements, normal serving remains on the previous validated
+`infinity.db`, while the newer raw archive is intentionally treated as unpaired.
+Raw-dependent audit tooling must validate the pair metadata and fail closed rather
+than combine generations. Rerunning the export rolls both siblings forward and is
+the supported recovery operation; temporary files are not a rollback contract. On
+a first-ever publication, the same interruption may leave only the raw sibling, and
+a rerun completes the pair. If the process stops after the application replacement,
+both destination siblings already belong to the new generation.
+
+Older pairs created before `export_pair_sha256` remain acceptable when their full
+shared metadata dictionaries match. New exports always carry the stronger pair
+fingerprint. `infinity-db database-health data/generated/infinity.db --require-raw` is the
+operator-facing validation command for this pair contract; omitting `--require-raw` validates only
+the published application database.
 
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;
@@ -86,17 +110,19 @@ provenance` documents under `manifests/snapshots/`. Version 3 retains the logica
 content and exact archive identities introduced in version 2 and adds
 `source.dataChangedOn` for Army snapshots. Version-1 and version-2 manifests remain
 valid historical provenance.
-Wiki acquisition is fail-closed for required content: if any required eligible
-URL discovered during the crawl cannot be fetched, the run reports the failed
-URLs, publishes neither a `WIKI-<language> ...zip` archive nor snapshot
-provenance, and preserves the partial crawl under `work/wiki/`. Optional site
-chrome/project links that are not part of the mirrored content contract—currently
-`/favicon.ico` and pages in the `Infinity:` MediaWiki project namespace—are
-reported as ignored rather than failures. Wiki crawls are language-scoped:
-English is the default, Spanish is selected explicitly, same-language pages are
-mirrored, and cross-language assets are included only when an included page
-references them. Only a complete successful crawl becomes an immutable wiki
-snapshot.
+Wiki acquisition is fail-closed for required content: if any required eligible URL or required
+MediaWiki enumeration request cannot be fetched, the run reports the failed URLs, publishes no
+archive or snapshot provenance, and preserves the partial crawl under `work/wiki/`. Optional site
+chrome/project links that are not part of the mirrored content contract—such as `/favicon.ico`
+and configured MediaWiki project namespaces—are reported as ignored rather than failures. Infinity
+Wiki crawls are language-scoped: English is the default, Spanish is selected explicitly,
+same-language pages are mirrored, and cross-language assets are included only when an included
+page references them. Human Sphere is currently English-only; its MediaWiki-enumerated
+main-namespace page inventory is the required content contract, so orphaned content pages remain
+covered while stale link-discovered HTTP 404s do not block publication. Human Sphere Talk pages and
+site-service endpoints are also ignored as non-content, while transient/server failures and any
+failed API-enumerated page remain fatal. Requests use a source-specific courtesy delay. Only a
+complete successful crawl becomes an immutable wiki snapshot.
 
 The manifest filename mirrors the archive label with a `.json` suffix. Version 2
 and later store two separate SHA-256 values:
@@ -148,10 +174,8 @@ versions 2 through 8 as valid historical/intermediate state for compatibility.
 
 The human annotation contract is documented in
 [`curated/snapshot-notes/README.md`](curated/snapshot-notes/README.md). Snapshot
-notes are not application/runtime inputs. Their current version-1 contract still
-uses the exact archive SHA-256; migrating that separate curated contract to the
-logical content identity can be done independently once the new snapshot identity
-has been exercised on real acquisitions.
+notes are not application/runtime inputs. Their version-1 contract uses the exact archive SHA-256;
+logical-content identity in acquisition provenance does not change that maintained binding.
 
 Army JSON `version` values are per-document Corvus Belli source revisions, not
 InfinityDB snapshot versions. Their evidence-backed interpretation and the

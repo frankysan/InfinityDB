@@ -1,6 +1,6 @@
 {
   "format": "InfinityDB enrichment coverage classifications",
-  "formatVersion": 1,
+  "formatVersion": 2,
   "gapCodes": {
     "ambiguous_family_mapping": {
       "classification": "release-blocker",
@@ -35,9 +35,26 @@
       "reason": "Draft or otherwise unreviewed contributions cannot satisfy the 0.7.0 reviewed-enrichment gate."
     }
   },
+  "catalogGapCodes": {
+    "weapons": {
+      "missing_rule_definition": {
+        "classification": "later-product-work",
+        "reason": "Complete Weapon rule-definition coverage belongs to the 1.0 data-completeness gate. During 0.10 stabilization, missing Weapon definitions remain tracked but do not block release; other Weapon gap codes retain their normal classifications."
+      }
+    }
+  },
   "supportingIdentity": {
     "classification": "supporting-identity",
     "reason": "The related rules identity supports an exposed item but does not require its own standalone browser surface for 0.7.0."
   },
-  "overrides": []
+  "overrides": [
+    {
+      "scope": "catalog",
+      "catalog": "skills",
+      "itemId": 260,
+      "gapCode": "missing_rule_definition",
+      "classification": "later-product-work",
+      "reason": "Commlink is owned by the separately versioned Reinforcements Extra planned for the 1.0 completeness gate, so its missing definition is intentionally deferred from 0.10."
+    }
+  ]
 }

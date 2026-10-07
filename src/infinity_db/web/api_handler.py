@@ -41,6 +41,12 @@ from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.trait_catalog import TraitCatalog
+from infinity_db.unit_presentation import (
+    OPTIONAL_AVAILABILITY_FLAGS,
+    enrich_unit_filter_presentation,
+    enrich_unit_list_presentation,
+    enrich_unit_presentation,
+)
 from infinity_db.unit_slugs import (
     attach_public_unit_slug,
     enrich_nested_unit_slugs,
@@ -144,12 +150,38 @@ def _domain_filter_identifier(params: dict, key: str) -> int | str | None:
     raw = params[key][0]
     if raw.isdigit():
         if len(raw) > 19:
-            raise ValueError(f"{key} must be a valid domain identifier")
+            raise ValueError("This filter selection is invalid.")
         value = int(raw)
         if value > 2**63 - 1:
-            raise ValueError(f"{key} must be a valid domain identifier")
+            raise ValueError("This filter selection is invalid.")
         return value
-    return require_domain_slug(raw, context=key)
+    try:
+        return require_domain_slug(raw, context=key)
+    except ValueError as exc:
+        raise ValueError("This filter selection is invalid.") from exc
+
+
+def _validated_query_params(query: str, allowed: set[str]) -> dict[str, list[str]]:
+    params = parse_qs(query, keep_blank_values=True, max_num_fields=40)
+    unknown = sorted(set(params) - allowed)
+    if unknown:
+        raise ValueError(f"Unknown query parameter: {unknown[0]}")
+    for key, values in params.items():
+        if len(values) != 1:
+            raise ValueError(f"Provide {key} only once")
+    return params
+
+
+def _unit_detail_presentation_query(query: str) -> tuple[dict[str, bool], str | None]:
+    params = _validated_query_params(
+        query, {"army_id", "cache_bust", *OPTIONAL_AVAILABILITY_FLAGS}
+    )
+    optional_filters = {
+        flag: (_flag(params, flag) if flag in params else True)
+        for flag in OPTIONAL_AVAILABILITY_FLAGS
+    }
+    requested_army = _domain_filter_identifier(params, "army_id")
+    return optional_filters, None if requested_army is None else str(requested_army)
 
 
 def _unit_query(query: str) -> dict:
@@ -212,11 +244,14 @@ def _unit_query(query: str) -> dict:
         if minimum is not None and maximum is not None and minimum > maximum:
             raise ValueError(f"{name}_min must be less than or equal to {name}_max")
 
+    try:
+        declared_faction_id = _integer(params, "declared_faction_id", None, 0, 2**63 - 1)
+    except ValueError as exc:
+        raise ValueError("This filter selection is invalid.") from exc
+
     return {
         "army_id": _domain_filter_identifier(params, "army_id"),
-        "declared_faction_id": _integer(
-            params, "declared_faction_id", None, 0, 2**63 - 1
-        ),
+        "declared_faction_id": declared_faction_id,
         "search": search,
         "skill_id": _domain_filter_identifier(params, "skill_id"),
         "equipment_id": _domain_filter_identifier(params, "equipment_id"),
@@ -268,6 +303,7 @@ class ApiHandler:
         self.label_catalog = LabelCatalog(rules_database)
         self.general_rules_catalog = RulesRecordCatalog(rules_database, "rules")
         self.glossary_catalog = GlossaryCatalog(database, rules_database)
+        self.legacy_armies = load_legacy_armies()
         self.search_catalog = SearchCatalog(
             database,
             self.skill_catalog,
@@ -279,10 +315,10 @@ class ApiHandler:
             self.label_catalog,
             self.general_rules_catalog,
             self.glossary_catalog,
+            self.legacy_armies,
         )
         self.catalog_rules = CatalogRules(rules_database)
         self.symbol_catalog = SymbolCatalog()
-        self.legacy_armies = load_legacy_armies()
         self.army_overview_summaries = load_army_overview_copy()
         self.fireteam_rules_reference = fireteam_reference(rules_database)
         if self.fireteam_rules_reference is not None:
@@ -329,11 +365,14 @@ class ApiHandler:
                     raise ValueError("q must be at most 200 characters")
                 if len(params.get("cache_bust", [])) > 1:
                     raise ValueError("Provide cache_bust only once")
-                payload = {"items": self.search_catalog.search(query)}
             except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                payload = {"items": self.search_catalog.search(query)}
+            except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not search the database")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "Search is unavailable. Please try again."}
@@ -353,8 +392,16 @@ class ApiHandler:
         elif path == "/api/fireteams":
             cache_control = API_CACHE_CONTROL
             try:
-                params = parse_qs(query_string, keep_blank_values=True)
+                params = _validated_query_params(
+                    query_string, {"army_id", "cache_bust"}
+                )
                 army_ref = _domain_filter_identifier(params, "army_id")
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
                 if army_ref is None:
                     items = [dict(item) for item in self.database.list_fireteam_armies()]
                     for item in items:
@@ -367,10 +414,7 @@ class ApiHandler:
                         payload = {"error": "Fireteam chart not found"}
                     else:
                         attach_public_army_slug(self.database, payload["army"])
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
+            except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Fireteam chart")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The Fireteam chart is unavailable. Please try again."}
@@ -382,6 +426,10 @@ class ApiHandler:
                     if self.rules_database is not None
                     else []
                 )
+                for item in items:
+                    item["summary_tokens"] = maintained_text_tokens(
+                        self.database, self.rules_database, item["summary"]
+                    )
                 attributes = [
                     item
                     for item in self.glossary_catalog.embedded_entries()
@@ -421,7 +469,7 @@ class ApiHandler:
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read catalog")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The catalog is unavailable. Please try again."}
+                payload = {"error": "Reference information is unavailable. Please try again."}
         elif path == "/api/traits":
             cache_control = API_CACHE_CONTROL
             try:
@@ -460,7 +508,7 @@ class ApiHandler:
                 LOGGER.exception("Could not read rules-reference catalog")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {
-                    "error": "The reference catalog is unavailable. Please try again."
+                    "error": "Reference information is unavailable. Please try again."
                 }
         elif match := SKILL_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
@@ -479,10 +527,7 @@ class ApiHandler:
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
+            except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read skill")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The skill is unavailable. Please try again."}
@@ -510,10 +555,7 @@ class ApiHandler:
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
+            except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read reference item")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The reference item is unavailable. Please try again."}
@@ -537,10 +579,7 @@ class ApiHandler:
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
+            except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read reference item")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {"error": "The reference item is unavailable. Please try again."}
@@ -715,11 +754,17 @@ class ApiHandler:
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read armies")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
+                payload = {"error": "Army information is unavailable. Please try again."}
         elif path == "/api/visible-unit-ids":
             cache_control = API_CACHE_CONTROL
             try:
                 filters = _unit_query(query_string)
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
                 payload = {
                     "ids": self.database.visible_unit_ids(
                         mercs=filters["mercs"],
@@ -728,21 +773,20 @@ class ApiHandler:
                         reinforcement=filters["reinforcement"],
                     )
                 }
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
+            except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read visible unit IDs")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
+                payload = {"error": "Unit information is unavailable. Please try again."}
         elif path == "/api/unit-filters":
             cache_control = API_CACHE_CONTROL
             try:
-                payload = self.database.list_unit_filter_values()
+                payload = enrich_unit_filter_presentation(
+                    self.database.list_unit_filter_values()
+                )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Unit filter values")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
+                payload = {"error": "Unit information is unavailable. Please try again."}
         elif path == "/api/units":
             cache_control = API_CACHE_CONTROL
             try:
@@ -765,15 +809,25 @@ class ApiHandler:
                     }
                     payload = enrich_army_references(self.database, payload)
                     self.symbol_catalog.enrich_units(payload["items"])
-                except ArmySelectionError as exc:
+                    enrich_unit_list_presentation(payload["items"])
+                except ArmySelectionError:
                     status = HTTPStatus.BAD_REQUEST
-                    payload = {"error": str(exc)}
+                    payload = {"error": "Choose a playable Army list to browse its units."}
                 except (OSError, ValueError, sqlite3.Error):
                     LOGGER.exception("Could not read units")
                     status = HTTPStatus.SERVICE_UNAVAILABLE
-                    payload = {"error": "The database is unavailable. Please try again."}
+                    payload = {"error": "Unit information is unavailable. Please try again."}
         elif match := UNIT_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
+            try:
+                optional_filters, requested_army = _unit_detail_presentation_query(
+                    query_string
+                )
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
             try:
                 identifier = match.group("identifier")
                 unit_ref = int(identifier) if identifier.isdigit() else identifier
@@ -789,16 +843,18 @@ class ApiHandler:
                     attach_public_unit_slug(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
                     self.symbol_catalog.enrich_unit(payload)
+                    payload = enrich_unit_presentation(
+                        payload,
+                        optional_filters=optional_filters,
+                        requested_army=requested_army,
+                    )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}
-            except ValueError as exc:
-                status = HTTPStatus.BAD_REQUEST
-                payload = {"error": str(exc)}
-            except (OSError, sqlite3.Error):
+            except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read unit")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
-                payload = {"error": "The database is unavailable. Please try again."}
+                payload = {"error": "Unit information is unavailable. Please try again."}
         else:
             status = HTTPStatus.NOT_FOUND
             payload = {"error": "Resource not found"}

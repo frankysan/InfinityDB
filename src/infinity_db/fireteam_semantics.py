@@ -81,6 +81,15 @@ def is_wildcard_name(name: str | None) -> bool:
     return "WILDCARD" in ascii_upper(name)
 
 
+def fireteam_limit_kind(raw_limit: int) -> str:
+    """Return the application meaning of one Army Fireteam limit value."""
+    if raw_limit == 0:
+        return "unavailable"
+    if raw_limit == 256:
+        return "unlimited"
+    return "maximum"
+
+
 def decode_fireteam_spec(value: Any, army_id: int) -> dict[str, int]:
     """Decode and validate one source Fireteam type-limit mapping."""
     if value in (None, ""):

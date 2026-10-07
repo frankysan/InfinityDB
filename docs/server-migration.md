@@ -13,9 +13,11 @@ Record the deployed revision on the old host:
 
 ```sh
 git rev-parse HEAD
+git describe --tags --exact-match
 ```
 
-Clone the repository on the replacement host and check out the same release tag or commit. No
+Clone the repository on the replacement host and check out the same release tag, confirming that it
+resolves to the recorded commit. No
 runtime database or symbol files need to be copied separately: their exact bytes are part of that
 Git revision.
 
@@ -33,15 +35,31 @@ Caddy named volumes are operational state rather than InfinityDB release inputs.
 their state matters. Certificates/configuration owned by an external TLS reverse proxy must be
 migrated through that system separately.
 
-After the checkout and deployment config are in place:
+The `metrics_history` named volume is also persistent operational state. To preserve retained
+history, take a consistent backup with the old collector stopped (or use SQLite's online backup
+facility), and restore it into the replacement stack's history volume before starting its collector.
+Keep the same Compose project name or explicitly map the restored volume so Compose does not create
+an empty store under a different name. Preserve ownership for the image's unprivileged collector
+user; do not migrate `.venv` or substitute the history database for a runtime game database.
+The [history format and rollback contract](deployment.md#retained-metrics-history) remains applicable:
+an older collector must not downgrade or delete a newer history store.
+
+For an exact-version migration, prepare the virtual environment from the checked-out release and
+invoke its low-level deployment script. For releases with the current deployment contract:
 
 ```sh
-sh ./scripts/install-or-update.sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -e .
+release_tag="$(git describe --tags --exact-match)"
+# Replace the example hostname and restore the recorded metrics/retention settings as needed.
+DOMAIN=example.com IMAGE_TAG="app-$release_tag" RETAIN_APP_IMAGES=3 \
+  METRICS_BIND_ADDRESS=127.0.0.1 METRICS_PORT=9090 sh ./scripts/deploy.sh
 ```
 
-For an existing server still running 0.8.0, first use the one-time 0.8.0-to-0.8.1 installer
-bootstrap in [Linux deployment](deployment.md); the 0.8.0 installer itself can rebuild the
-database after checking out the newer tag.
+`deploy.sh` does not read `.infinity-db-deploy.env`; pass the restored values explicitly as above.
+`install-or-update.sh` selects the newest available release tag, so use it only when an upgrade is
+intended, not when preserving the recorded version. For an upgrade from 0.8.0, follow the one-time
+bootstrap in [Linux deployment](deployment.md).
 
 The deployment guard validates the tracked databases and complete processed symbol publication and
 proves that `infinity.db` and `symbol-publication.json` name the same Army source ZIP SHA-256 before
@@ -126,13 +144,19 @@ They matter only when preserving a development/research/rebuild environment.
 
 ## Verification after migration
 
-Confirm the intended revision and clean tracked state, then deploy normally:
+Confirm that the replacement host runs the recorded release and has clean tracked state:
 
 ```sh
 git rev-parse HEAD
+git describe --tags --exact-match
 git status --short
-sh ./scripts/install-or-update.sh
+docker compose ps
 ```
+
+Verify application version/snapshot and the collector's retained periods after restoration, using
+[deployment guidance](deployment.md#retained-metrics-history). Check the application and relevant
+browser paths before retiring the old host. If migrating a development candidate instead of a
+released server, use the isolated local-test deployment described there.
 
 For development-side validation before publishing a release, run the normal project checks with
 required tracked assets and the deployment verifier as documented in

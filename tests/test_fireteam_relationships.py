@@ -11,6 +11,7 @@ from infinity_db.database.fireteam_relationships import (
     validate_application_fireteams,
 )
 from infinity_db.database.schema import create_schema
+from infinity_db.fireteam_semantics import fireteam_limit_kind
 
 
 def _insert(connection: sqlite3.Connection, table: str, **values: object) -> None:
@@ -20,6 +21,16 @@ def _insert(connection: sqlite3.Connection, table: str, **values: object) -> Non
         f'INSERT INTO "{table}" ({columns}) VALUES ({placeholders})',
         tuple(values.values()),
     )
+
+
+@pytest.mark.parametrize(
+    ("raw_limit", "expected"),
+    [(0, "unavailable"), (1, "maximum"), (2, "maximum"), (256, "unlimited")],
+)
+def test_fireteam_limit_kind_normalizes_army_sentinels(
+    raw_limit: int, expected: str
+) -> None:
+    assert fireteam_limit_kind(raw_limit) == expected
 
 
 def _fixture_connection() -> sqlite3.Connection:

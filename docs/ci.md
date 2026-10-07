@@ -65,12 +65,17 @@ The job verifies:
 - `infinity-db` and `infinity-army` entry points;
 - installed Army build and rules build/validation;
 - packaged maintained configuration resolution;
-- runtime `Database` / `RulesDatabase` validation; and
-- application startup against generated test databases.
+- runtime `Database` / `RulesDatabase` validation;
+- application startup against generated test databases; and
+- a specialized installed runtime after the third-party SVG category trees are deliberately removed,
+  proving that the application and non-symbol static resources remain usable without that optional
+  graphical tree.
 
 This is deliberately different from source-tree tests: installed build commands may use packaged
 shared configuration, while runtime opening of already-built databases must remain independent of
-repository-relative normalization policy.
+repository-relative normalization policy. The asset-free subcheck mutates only the disposable wheel
+virtual environment after the normal installed-package contract has already passed; production
+images still require the complete tracked publication through deployment-smoke validation.
 
 ## Deployment smoke
 
@@ -80,6 +85,37 @@ release `infinity.db`, `rules.db`, and processed SVG publication, then runs
 
 Deployment smoke tests the exact artifact model used by tagged production deployment. It does not
 rebuild runtime databases and is not a substitute for the source or installed-wheel checks.
+The `/changes` probe compares the served release-note content with the installed canonical
+changelog. It accepts both development notes under `Unreleased` and finalized version sections,
+and rejects stale or missing release-note content.
+
+## Release evidence retention
+
+`tools/prepare_release_ci_evidence.py` verifies the three required hosted workflows for one exact
+40-character candidate release commit: `Source checks`, `Installed wheel smoke`, and
+`Deployment smoke test`. It queries each workflow by its maintained workflow filename and commit SHA,
+uses the latest completed run for that workflow/commit, and fails if that run is not successful. An
+older successful run therefore cannot hide a later failed rerun for the same candidate.
+
+The tool writes two ignored local files under `reports/` during release preparation:
+
+- machine-readable JSON containing the repository, candidate commit, workflow/run identity, attempt,
+  trigger, timestamps, conclusion, and GitHub run URL; and
+- an annotated-tag message containing the candidate commit and the successful run identities/URLs.
+
+The JSON is local release-working evidence and must not be committed back into the candidate release
+commit. The annotated Git tag is the durable project record: it can be created only after the hosted
+checks are green, so retaining evidence does not mutate the commit whose CI status it proves. GitHub
+Actions logs remain subject to GitHub's own retention policy, but the immutable tag annotation keeps
+the exact run IDs, attempts, outcomes, and URLs in Git history.
+
+The GitHub REST workflow-runs endpoint is readable without authentication for public repositories;
+set `GITHUB_TOKEN` when authentication is required or to avoid anonymous API rate limits. A token used
+for this read-only collection needs Actions read access, not repository write access. When the
+checksum-pinned external bundle should also be part of release evidence, pass `--include-full-assets`;
+that makes a successful `Full-asset checks` run for the same commit mandatory without changing the
+normal three-workflow release gate. The canonical release commands and tag ordering live in
+`docs/releasing.md`.
 
 ## Published-asset validation
 
@@ -93,36 +129,65 @@ require graphical assets.
 
 ### Optional external bundle check
 
-`.github/workflows/full-asset-checks.yml` is manual/dispatch-only and restricted to `main`. It uses
-the `full-assets` environment to obtain a checksum-pinned HTTPS bundle, stages it with
-`tools/stage_full_asset_bundle.py`, validates it against the tracked publication manifest, and runs
-full checks with assets required.
+`.github/workflows/full-asset-checks.yml` is manual/dispatch-only. It can be dispatched against an
+authorized candidate branch before merge, and uses the exact selected ref/SHA checked out by GitHub
+Actions. It uses the `full-assets` environment to obtain a checksum-pinned HTTPS bundle, stages it
+with `tools/stage_full_asset_bundle.py`, validates it against the tracked publication manifest, and
+runs full checks with assets required. The environment's deployment-branch/tag policy must allow the
+selected candidate ref; do not restrict the environment to `main` when pre-merge validation is
+required.
 
 This workflow is an independent publication-bundle check, not a way to supply assets missing from
 normal source CI. Staging enforces archive safety/size/path constraints and does not upload the
 expanded graphical tree as a workflow artifact.
 
+Build the external bundle from a validated tracked publication with:
+
+```powershell
+python tools\build_full_asset_bundle.py --output reports\full-assets.zip
+```
+
+The builder includes exactly the five published symbol categories, normalizes ZIP metadata so the
+same publication produces the same archive bytes, and prints the archive SHA-256. Host that ZIP at
+a stable HTTPS URL reachable by the GitHub runner (the URL itself remains secret), configure the
+`full-assets` environment secrets
+`FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` from that output, then manually dispatch
+**Full-asset checks** with the current release-candidate branch selected in the GitHub Actions UI.
+The workflow downloads the pinned archive, revalidates every member against
+`data/manifests/symbol-publication.json`, stages it atomically, and runs the full project checks with
+`--assets required`. Record the run SHA together with the result so the pre-merge gate is tied to the
+validated candidate.
+
+A successful pre-merge candidate run satisfies the manual development/release gate recorded in the
+TODO. If the final protected-`main` release commit has a different SHA because the pull request is
+merged or squashed, that earlier run does not count as exact-SHA release evidence. When
+`tools/prepare_release_ci_evidence.py --include-full-assets` is used, dispatch **Full-asset checks**
+again for the final release SHA and require that exact run just like the other hosted workflows.
+
 Environment configuration for this optional workflow is repository administration and is tracked as
-unfinished work only in `docs/TODO.md` when applicable.
+unfinished work only in `docs/TODO.md` when applicable. Do not commit the generated ZIP or its
+private hosting URL.
 
 ## Protected `main`
 
-GitHub repository settings, not workflow YAML, decide what blocks merging. As externally verified on
-2026-09-29, the active `Protect main` ruleset targets `main`, requires pull requests with resolved
-review threads, blocks deletion/non-fast-forward updates, has no bypass actors, and requires these
-seven checks:
+GitHub repository settings, not workflow YAML, decide what blocks merging. As verified through the
+GitHub API on 2026-10-07, the active [Protect main ruleset](https://github.com/frankysan/InfinityDB/rules/23708734)
+targets `main`, requires pull requests with resolved review threads and checks up to date with the
+base branch, blocks deletion/non-fast-forward updates, and requires these exact status contexts:
 
-- Ubuntu / Python 3.11;
-- Windows / Python 3.11;
-- macOS / Python 3.11;
-- Ubuntu / Python 3.14;
+- `ubuntu-latest / Python 3.11`;
+- `windows-latest / Python 3.11`;
+- `macos-latest / Python 3.11`;
+- `ubuntu-latest / Python 3.14`;
 - Cross-platform deterministic outputs;
 - `deployment-smoke`;
 - `installed-wheel`.
 
 Treat this paragraph as a dated description of an external repository setting. Before relying on it
 for release evidence, verify the current GitHub ruleset rather than assuming documentation controls
-repository administration.
+repository administration. Merge, squash, and rebase are allowed by the reviewed ruleset; exact
+release evidence always uses the resulting release commit. Public API output does not establish
+every account-specific permission or bypass setting.
 
 ## Network, scheduled, and performance workflows
 

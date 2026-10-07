@@ -123,6 +123,34 @@ not competing semantic owners.
 
 `docs/application-domains.md` owns the detailed domain/presentation contract.
 
+### Planned scenario domain
+
+**Design direction; unimplemented.** The accepted boundary below guides the 1.0 implementation
+tracked in [the backlog](TODO.md#rules-and-reference-completeness). It does not describe current
+scenario tables, structured definitions, or browser routes.
+
+Core-rules scenarios are a required first-class application domain for 1.0. The architecture review
+covered the four N5.3 core scenarios, the final ITS Season 17 set, and the current ITS Season 18 set.
+The comparison is retained in `docs/rules-semantics.md`; it establishes that core-only assumptions
+would be too narrow for deployment geometry, scoring cadence, asymmetric sides, Classified
+Objectives, scenario elements, and revision/season provenance.
+
+The accepted design places scenario definitions in the rules curation pipeline and `rules.db`,
+not in Army export or mutable match state. Publication will use a hybrid model: stable identities,
+provenance, collection membership, and cross-domain references are relational; ordered and nested
+scenario structures remain validated typed payloads. Scenario identity, source revision, and
+collection/season membership remain independent.
+
+Geometry and scoring are maintained semantic data. Diagrams and reference views will be generated
+from that data, with source/season overlays kept distinct from canonical Army or rules facts.
+Existing catalog entities will be referenced by typed identity rather than duplicated locally.
+Core and ITS scenarios share this boundary; tournament pairing, rankings, and mutable match state
+remain outside it.
+
+The detailed accepted scenario model belongs to
+[the data model](data-model.md#planned-scenario-model-10). Source comparison and rationale remain in
+`docs/rules-semantics.md`; concrete implementation tasks remain in `docs/TODO.md`.
+
 ## Identifiers and routing
 
 Application-facing identities use stable domain-local slugs where the domain supports them. Numeric
@@ -180,7 +208,8 @@ Current semantic/storage details are in `docs/data-model.md`.
 The processed SVG publication under `src/infinity_db/web/static/` is tracked release content and is
 bound by `data/manifests/symbol-publication.json`. The manifest owns published paths/hashes, browser
 mappings, and the compact Army source identity needed to prove that runtime Army data and symbols
-come from the intended source snapshot.
+come from the intended source snapshot. Peripheral profile artwork has its own
+`peripherals/<main-army>/` publication namespace rather than inheriting parent-Unit filenames.
 
 Raw/source symbol archives, conversion work trees, detailed stage reports, and terminal build state
 remain local processing evidence. Production deployment requires the tracked publication, not the
@@ -231,14 +260,30 @@ payload field.
 
 ## Browser boundary
 
-The browser is a progressively enhanced read-only reference client. It owns presentation state,
-responsive composition, accessibility behavior, and local user preferences, while semantic data
-comes from backend/application contracts.
+The browser is a read-only reference client with a shared server-rendered shell and JavaScript
+page modules for data-driven browsing and interaction. Changes renders its release notes on the
+server; Unit Explorer, Glossary entries, and catalog results load through JavaScript/API modules.
+The browser owns presentation state, responsive composition, accessibility behavior,
+and local preferences, while semantic data comes from backend/application contracts.
 
 Current persistent preferences are local browser settings such as distance units, Developer mode,
 and optional availability defaults. Shareable page state is URL-owned and must not overwrite the
 recipient's saved preferences. A page may seed missing share state from preferences, but explicit
-URL state wins for that view.
+URL state wins for that view. Preference values and persistence are owned by `static/preferences.js`;
+the shared Settings controls and their browser events are bound by `static/settings.js`. Page modules
+consume preference state but do not initialize or read those shared controls directly. Reusable
+distance formatting is separate from both concerns in `static/distance.js`.
+
+Browser JSON access is routed through `static/api.js`, which owns application endpoint shapes and
+delegates same-origin request mechanics to `static/api-transport.js`. Transport does not import
+preference/UI modules; page modules pass presentation-derived request state explicitly. Page-specific
+modules are named for and loaded only by the pages that own them; shell-only or server-rendered pages
+must not load an unrelated page module just to obtain shared behavior.
+
+Reusable browser view primitives that encode shared presentation contracts live in
+`static/view-components.js`. They own generic behaviors such as mutually exclusive page-state panels
+with `aria-busy` synchronization and the canonical table-viewport wrapper; they must not absorb
+domain interpretation or page-specific state.
 
 Soft navigation must preserve the shared shell while disposing transient page listeners/requests
 before replacing content. Release/static/snapshot revision changes trigger a clean reload rather than
@@ -247,14 +292,45 @@ mixing incompatible module/data generations.
 Visual/component rules, responsive table behavior, typography, Developer-mode presentation, and
 accessibility are owned by `docs/web-design-guidelines.md`.
 
-### Design direction: theming
+### Browser theming
 
-The current CSS token layer should continue moving toward a first-class semantic theme system rather
-than page-local colors or layout exceptions. Light/Dark selection and any later themes are design
-direction, not current user-facing behavior. Components must not encode a specific palette as game
-semantics. Concrete unfinished theming work is tracked only in `docs/TODO.md`.
+The browser CSS separates theme-neutral geometry/typography from an explicit semantic theme
+contract. Component and layout rules consume semantic color/shadow roles rather than concrete
+palette literals. Light and Dark are the initial implementations of that contract. Domain identity
+colors such as faction and rules-category accents remain semantic data roles inside the theme layer
+so each theme can provide contrast-safe values without changing domain meaning.
+
+CSS source ownership is explicit without introducing a build pipeline: `static/foundation.css` owns
+font declarations and theme-neutral foundational tokens, each explicit theme owns one semantic
+palette file under `static/themes/` (currently `light.css` and `dark.css`),
+`static/components.css` owns the established shared layout/component rules, and
+`static/page-overrides.css` owns late page-specific exceptions that intentionally sit after the
+shared rules. `/static/styles.css` remains the stable public stylesheet URL; the presentation layer
+composes those sources in that order at request time. This preserves the existing cascade and cache
+contract while keeping maintainership boundaries visible in source. A new explicit theme therefore
+adds a registry entry plus its own `static/themes/<theme>.css` implementation instead of extending a
+shared theme stylesheet.
+
+Theme preference defaults to **System**, which follows the operating-system color-scheme preference;
+an explicit user selection wins. The selected preference uses the same session-first, optional-cookie
+persistence contract as other Settings. `static/theme-startup.js` is the intentionally small
+synchronous bootstrap exception to normal browser-module loading: it reads that preference and sets
+the resolved `data-theme` before the stylesheet can produce the first meaningful paint. It also owns
+the data-driven theme registry consumed by `static/theme.js` and the Settings selector.
+`static/preferences.js` owns persistence of the selected theme, while `static/settings.js` owns the
+selector and live System-preference updates. Adding another explicit theme should require a registry
+entry and semantic-token implementation, not new persistence logic.
+
+Theme contrast is enforced as a browser design contract: compact/normal text roles must retain at
+least 4.5:1 contrast against their owned surfaces, while meaningful focus/status/graphical cues use
+a 3:1 minimum. Faction gradients are supplementary identity accents and do not replace textual
+identity. Automated theme regressions are complemented by the browser acceptance guidance in
+`docs/testing.md`.
 
 ## Privacy-preserving observability
+
+The user-facing privacy policy is published in the project `README.md` and on `/about#privacy-policy`.
+This architecture section owns the implementation constraints behind that policy.
 
 Production observability is aggregate-first. InfinityDB may collect bounded metrics such as
 normalized-route request counts, status classes, latency/response-size histograms, active requests,
@@ -265,10 +341,51 @@ The preloaded Gunicorn application uses a fixed-cardinality shared request regis
 `/internal/metrics` and `/internal/health` are not public application routes; the public Caddy site
 blocks `/internal/*`. An optional separate Caddy listener may expose only `/metrics` and `/health`
 on loopback or an explicitly configured trusted LAN address. Deployment refuses wildcard metrics
-binds.
+binds. The live metrics surface is volatile process-lifetime state, not the historical store. It exposes
+shared generation-start and latest-completed-request Unix timestamps alongside build identity so a
+restart is observable even when version and snapshot revision are unchanged. Reading the metrics
+endpoint does not advance either timestamp.
+
+The accepted boundary for retained metrics history is a separate operational service, not writable
+state inside the application container. `tools/metrics_history.py` now owns the standalone SQLite
+collection/aggregation engine: one rolling scrape state is converted into generation-aware counter
+deltas and bounded weekly summaries keyed by week/version/snapshot. The deployed service scrapes
+the private `app:8000/internal/metrics` endpoint over the Compose network, runs with an immutable
+root filesystem and no published port, and owns one bounded writable volume containing its SQLite
+history. The web-facing `app` remains immutable and unaware of historical
+persistence. The live generation timestamps are the canonical restart boundary so application
+restarts cannot be mistaken for negative/request deltas. Retention is automatically enforced by the
+engine rather than relying on operator cleanup. The collector is operationally subordinate to the
+application: its health/status is observable, but it must not participate in the availability-critical
+app/Caddy health gate or make historical persistence a prerequisite for serving InfinityDB. Deployment
+transitions use the collector image as a one-shot client before and after application replacement so
+the outgoing generation can be closed and the incoming generation opened without giving the collector
+control over application rollback. Collector/database failures may lose monitoring evidence and must be
+reported, but they do not invalidate a healthy application deployment.
+
+The history database is forward-moving operational state. Its schema uses explicit, transactional,
+one-version-at-a-time forward migrations; unsupported newer formats and non-empty unversioned
+stores are refused without downgrade or destructive recovery. Application rollback does not imply a
+history-schema rollback. Rolling back to a release without metrics-history support stops the collector but
+preserves its volume for a later compatible release. Isolated local deployments follow the same
+lifecycle under their own Compose project namespace
+so their writable history volume cannot collide with production; routine teardown preserves local
+history for update testing, while `stop-local-test.sh --purge` removes only local-test volumes for
+deliberate clean-slate runs. Historical reporting remains an operator-side SQLite/CLI concern rather
+than another network service: exact or aggregated week/version/snapshot selections can expose only the
+already-bounded status, normalized-route, latency-histogram, and response-size-histogram dimensions.
+Percentile values are derived only as histogram upper-bound estimates; raw request timing/size samples
+are never reconstructed or retained. `docs/deployment.md` owns the implemented collector lifecycle
+and operator commands.
 
 Temporary raw request logging is an incident-diagnostic exception, not the normal analytics path,
 and should be minimized and short-lived.
+
+Capacity/resource evidence follows the same boundary. Retained host/container reports may contain
+bounded CPU, memory/swap, filesystem/inode, disk-I/O, network, container utilization, and
+restart/OOM state, but not hostnames, IP addresses, request URLs/query values, arbitrary Docker
+event attributes, or wrapped command lines. Missing platform counters are reported as unavailable
+rather than inferred from unrelated signals.
 
 ## Determinism, portability, and validation
 

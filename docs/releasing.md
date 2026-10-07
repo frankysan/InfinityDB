@@ -21,16 +21,18 @@ maintained structured layer and accessible through the web application in a usab
 form. A specialized or final-form UI is not required when a basic presentation makes
 the information understandable and navigable.
 
-ITS-specific rules, missions, season material, classifications, and tournament
-content are deliberately outside the 1.0 requirement unless they become necessary to
-interpret otherwise in-scope data. A complete core/ITS scenario library and scenario
-list/detail pages are likewise outside the 1.0 requirement. Scenario-specific Skills,
-Equipment, States, Traits, contextual roles, objective elements, or other named rules
-concepts remain in scope when they are needed to complete the general catalog/reference
-experience; preserve their scenario/season scope rather than requiring full mission
-modeling. Final visual polish, every planned search/filter/comparison feature,
-exhaustive performance work, optional themes, deployment conveniences, and unrelated
-architectural refactors likewise do not block 1.0.
+The current core-rules scenarios are part of the 1.0 requirement: they must have a
+maintained structured representation and a usable browsable presentation. The planned model is
+defined by the completed comparative review of the core scenarios and ITS Seasons 17 and 18 in
+`docs/architecture.md` and `docs/data-model.md`, so the 1.0 implementation must preserve that
+extensibility rather than introducing a simpler core-only representation. ITS-specific missions,
+season material, tournament/event tooling, and a complete historical ITS library remain outside the
+1.0 requirement unless they are necessary to interpret otherwise in-scope data. Scenario-specific
+Skills, Equipment, States, Traits, contextual roles, objective elements, or other named rules
+concepts remain in scope when needed by the core scenarios or the general catalog/reference
+experience; preserve their scenario/season scope. Final visual polish, every planned
+search/filter/comparison feature, exhaustive performance work, optional themes, deployment
+conveniences, and unrelated architectural refactors likewise do not block 1.0.
 
 The 1.0 release gate requires:
 
@@ -120,6 +122,10 @@ During the audit:
   remaining work accurately describe what is still unimplemented.
 - [ ] Review `docs/AI_CONTEXT.md` for durable, non-obvious invariants that changed
   during the release, without duplicating ordinary reference documentation.
+- [ ] Audit normal player-visible browser copy against `docs/web-design-guidelines.md`: titles,
+  introductions, navigation, controls, badges, and empty/error/loading states should use player/game
+  language rather than implementation or maintainer-workflow vocabulary, and data-review-only
+  surfaces should not be discoverable through the normal player journey.
 - [ ] Check documentation links and references to renamed, removed, or superseded
   files and sections.
 - [ ] Search deliberately for stale references to the previous release and previous
@@ -139,12 +145,15 @@ will actively guide later work.
 ## 3. Prepare release notes and metadata
 
 - [ ] Review the complete `Unreleased` section of `docs/CHANGELOG.md` as one release:
-  merge overlapping entries, remove implementation-only detail, and make upgrade
-  consequences explicit.
+  make its `Player summary` concise and player-visible only, merge overlapping detailed entries,
+  remove implementation-only detail, and make upgrade consequences explicit.
 - [ ] Move the finalized entries to a section for the target version and release date.
 - [ ] Update the package/application version consistently in `pyproject.toml` and
   `src/infinity_army_data/__init__.py`.
 - [ ] Update the current-release statement in `README.md`.
+- [ ] Keep release-metadata preparation distinct from publication: the README may identify the
+  prepared version, but must not claim an unpublished candidate has already been released. Active
+  candidate status belongs in `docs/TODO.md`; tag creation follows exact-commit hosted validation.
 - [ ] Re-run the documentation audit checks affected by those release-metadata edits.
 
 Do not change the released version early merely to mark work in progress; development
@@ -173,6 +182,9 @@ deployment behavior.
 
 ## 5. Land the release commit, verify hosted CI, and tag
 
+- [ ] Before merge, when the optional checksum-pinned publication bundle is part of the release
+  gate, manually dispatch `Full-asset checks` against the release-candidate branch and record the
+  successful run SHA. This pre-merge validation does not require the candidate to be on `main`.
 - [ ] After the local release checklist is green, create the release-preparation commit and land
   it on protected `main` through the normal pull-request workflow. The resulting `main` revision is
   the candidate release commit; if the repository uses a merge or squash commit, use that resulting
@@ -187,9 +199,30 @@ deployment behavior.
 - [ ] If a hosted failure requires any code, data, generated-artifact, or documentation change, land
   a new candidate release commit and repeat the affected local and hosted validation. Do not tag the
   superseded candidate.
-- [ ] Create the version tag `v<version>` at the exact hosted-green release commit.
-- [ ] Push the tag, then verify that the remote tag resolves to the intended commit.
-- [ ] Retain the required hosted-workflow evidence for that release commit/tag.
+- [ ] For the exact hosted-green candidate SHA, prepare the retained workflow evidence and annotated
+  tag message. The outputs belong under ignored `reports/`; do not commit them back into the release
+  candidate:
+
+  ```text
+  python tools/prepare_release_ci_evidence.py --repository OWNER/REPO --commit <release-sha> --tag v<version> --json-output reports/release-ci-v<version>.json --tag-message-output reports/release-tag-v<version>.txt
+  ```
+
+  The command must verify successful `Source checks`, `Installed wheel smoke`, and
+  `Deployment smoke test` runs for that exact SHA. Add `--include-full-assets` when this release's
+  retained evidence should also require the optional checksum-pinned `Full-asset checks` workflow.
+  If merge/squash created a different SHA from the pre-merge candidate, dispatch the optional
+  workflow again for the final `main` SHA before collecting evidence.
+  Set `GITHUB_TOKEN` when authenticated GitHub API access is required or desirable for rate limits.
+- [ ] Create an **annotated** version tag at that exact commit using the generated evidence message:
+
+  ```text
+  git tag -a v<version> <release-sha> -F reports/release-tag-v<version>.txt
+  ```
+
+  The annotation is the durable hosted-CI evidence record; a lightweight tag does not satisfy this
+  release contract.
+- [ ] Push the tag, then verify that the remote annotated tag resolves to the intended commit and its
+  annotation contains the expected three hosted workflow records.
 
 A published release tag is immutable project history. Correct a material release
 error with a subsequent release rather than silently moving a published tag.

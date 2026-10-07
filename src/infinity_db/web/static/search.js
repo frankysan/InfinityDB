@@ -1,6 +1,6 @@
 import { getSearchResults } from "./api.js";
-import { initializeDistanceUnitToggle } from "./preferences.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
+import { createPanelSwitcher } from "./view-components.js";
 
 const byId = (id) => document.getElementById(id);
 const elements = {
@@ -12,12 +12,17 @@ const elements = {
 const controller = new AbortController();
 const query = readShareState("search").params.get("q")?.trim().slice(0, 200) || "";
 
-function show(panel) {
-  for (const element of [elements.prompt, elements.loading, elements.error, elements.empty, elements.list]) {
-    element.hidden = element !== panel;
-  }
-  elements.results.setAttribute("aria-busy", String(panel === elements.loading));
-}
+const show = createPanelSwitcher({
+  container: elements.results,
+  loading: elements.loading,
+  panels: [
+    elements.prompt,
+    elements.loading,
+    elements.error,
+    elements.empty,
+    elements.list,
+  ],
+});
 
 function render(items) {
   elements.count.textContent = `${items.length.toLocaleString()} result${items.length === 1 ? "" : "s"}`;
@@ -62,5 +67,4 @@ elements.form.addEventListener("submit", (event) => {
   window.location.href = shareStateHref("/search", "search", nextQuery ? { q: nextQuery } : {});
 });
 document.addEventListener("infinity:beforenavigation", () => controller.abort(), { once: true });
-initializeDistanceUnitToggle();
 search();

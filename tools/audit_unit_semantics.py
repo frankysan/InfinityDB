@@ -89,12 +89,6 @@ EXPECTED_COLUMNS: dict[str, tuple[str, ...]] = {
         "habilities",
         "raw",
     ),
-    "unit_option_characteristics": (
-        "unit_id",
-        "option_id",
-        "position",
-        "characteristic_id",
-    ),
     "unit_option_orders": (
         "unit_id",
         "option_id",
@@ -137,12 +131,12 @@ EXPECTED_COLUMNS: dict[str, tuple[str, ...]] = {
         "raw",
     ),
     "unit_option_weapon_extras": ("occurrence_id", "position", "extra_id"),
-    "unit_option_includes": (
+    "unit_option_include_targets": (
         "unit_id",
         "option_id",
         "position",
-        "target_group_id",
-        "target_option_id",
+        "target_army_id",
+        "target_loadout_payload_id",
         "quantity",
         "raw",
     ),
@@ -327,12 +321,11 @@ UNIT_OPTION_FIELD_CLASSIFICATION: dict[str, dict[str, str]] = {
 }
 
 UNIT_OPTION_RELATION_TABLES = (
-    "unit_option_characteristics",
     "unit_option_orders",
     "unit_option_skills",
     "unit_option_equipment",
     "unit_option_weapons",
-    "unit_option_includes",
+    "unit_option_include_targets",
 )
 
 UNIT_OPTION_EXTRA_TABLES = {

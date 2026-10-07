@@ -258,12 +258,12 @@ def _fixture_database(tmp_path: Path) -> Path:
             )
             _insert(
                 connection,
-                "unit_option_includes",
+                "unit_option_include_targets",
                 unit_id=source_id,
                 option_id=1,
                 position=1,
-                target_group_id=1,
-                target_option_id=1,
+                target_army_id=101,
+                target_loadout_payload_id=1,
                 quantity=1,
                 raw=None,
             )
@@ -283,12 +283,12 @@ def _fixture_database(tmp_path: Path) -> Path:
             )
             _insert(
                 connection,
-                "unit_option_includes",
+                "unit_option_include_targets",
                 unit_id=source_id,
                 option_id=1,
                 position=1,
-                target_group_id=1,
-                target_option_id=1,
+                target_army_id=101,
+                target_loadout_payload_id=1,
                 quantity=1,
                 raw=None,
             )
@@ -351,7 +351,7 @@ def test_unit_semantics_audit_classifies_representative_and_contextual_data(
     assert options["relationships"]["unit_option_orders"][
         "variantRepeatedObservationalKeyCount"
     ] == 0
-    assert options["relationships"]["unit_option_includes"][
+    assert options["relationships"]["unit_option_include_targets"][
         "variantRepeatedObservationalKeyCount"
     ] == 0
 

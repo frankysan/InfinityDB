@@ -1,6 +1,8 @@
-import { distanceUnit, initializeDistanceUnitToggle } from "./preferences.js";
+import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
+import { distanceUnit, optionalUnitFilters } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { renderUnitRows } from "./unit-list.js";
+import { tableViewport } from "./view-components.js";
 import {
   gameplayVariantRules,
   levelEffectsSection,
@@ -60,13 +62,6 @@ function text(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
 }
 
-function tableViewport(table, className = "") {
-  const container = document.createElement("div");
-  container.className = `table-viewport${className ? ` ${className}` : ""}`;
-  container.append(table);
-  return container;
-}
-
 function weaponTraitLinks(traits) {
   const fragment = document.createDocumentFragment();
   for (const [index, trait] of traits.entries()) {
@@ -111,7 +106,9 @@ function rangeModifier(ranges, maximum) {
 const canonicalWeaponRangeBands = [20, 40, 60, 80, 100, 120, 240];
 
 function rangeBandLabel(maximum) {
-  return distanceUnit() === "in" ? `${maximum / 2.5}"` : `${maximum} cm`;
+  return distanceUnit() === "in"
+    ? `${maximum / DISTANCE_CENTIMETERS_PER_INCH}"`
+    : `${maximum} cm`;
 }
 
 function specialWeaponProfile(profile) {
@@ -299,14 +296,11 @@ function usageSections(item) {
         if (!section.open || section.dataset.loaded) return;
         const table = document.createElement("table");
         table.className = "data-table--compact data-table--listing data-table--unit-list data-table--unit-usage data-table--interactive";
-        table.innerHTML = "<caption class=\"sr-only\">Units using this catalog variant</caption><thead><tr><th class=\"table-column--primary\" scope=\"col\">Unit</th><th class=\"table-column--descriptor\" scope=\"col\">Armies</th><th class=\"id-column table-column--technical\" scope=\"col\">ID</th></tr></thead>";
+        table.innerHTML = "<caption class=\"sr-only\">Units using this variant</caption><thead><tr><th class=\"table-column--primary\" scope=\"col\">Unit</th><th class=\"table-column--descriptor\" scope=\"col\">Armies</th><th class=\"id-column table-column--technical\" scope=\"col\">ID</th></tr></thead>";
         const body = document.createElement("tbody");
         renderUnitRows(body, variant.units);
         table.append(body);
-        const container = document.createElement("div");
-        container.className = "table-viewport";
-        container.append(table);
-        section.append(container);
+        section.append(tableViewport(table));
         section.dataset.loaded = "true";
       });
       return section;
@@ -408,7 +402,6 @@ document.addEventListener(
   () => pageController.abort(),
   { once: true },
 );
-initializeDistanceUnitToggle();
 window.addEventListener("distanceunitchange", () => {
   if (currentItem && catalog === "weapons") render(currentItem);
 }, { signal: pageController.signal });
@@ -416,7 +409,7 @@ getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
   currentItem = item;
   render(item);
   if (catalog === "states") return null;
-  return visibleUnitIds(pageController.signal).then((ids) => render(withVisibleUnits(item, ids)));
+  return visibleUnitIds(optionalUnitFilters(), pageController.signal).then((ids) => render(withVisibleUnits(item, ids)));
 }).catch((error) => {
   if (error.name === "AbortError") return;
   name.firstChild.textContent = "Item unavailable";
@@ -424,7 +417,7 @@ getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
 });
 window.addEventListener("optionalunitschange", () => {
   if (!currentItem) return;
-  visibleUnitIds(pageController.signal)
+  visibleUnitIds(optionalUnitFilters(), pageController.signal)
     .then((ids) => render(withVisibleUnits(currentItem, ids)))
     .catch((error) => {
       if (error.name !== "AbortError") throw error;

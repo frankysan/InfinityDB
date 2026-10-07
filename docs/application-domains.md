@@ -209,7 +209,7 @@ army's Units.
 **Current.** Fireteams are a top-level domain with an **overview landing state** and an
 **army-scoped view**.
 
-The intended behavior is:
+The current behavior is:
 
 ```text
 /fireteams

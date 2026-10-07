@@ -12,6 +12,7 @@ import pytest
 import infinity_db.cli as app_cli
 from infinity_army_data.merge import reconstruct_source
 from infinity_db.cli import build_parser, main
+from infinity_db.database import SCHEMA_VERSION, raw_database_path
 from infinity_db.display_identities import (
     DISPLAY_IDENTITY_METADATA_KEY,
     DISPLAY_IDENTITY_SHA256_METADATA_KEY,
@@ -212,6 +213,91 @@ def test_serve_defaults_and_explicit_binding() -> None:
     assert configured.database == Path("custom.db")
     assert configured.host == "0.0.0.0"
     assert configured.port == 9000
+
+
+def test_database_health_command_defaults_and_options() -> None:
+    parser = build_parser()
+    defaults = parser.parse_args(["database-health"])
+    assert defaults.database == Path("data/generated/infinity.db")
+    assert defaults.require_raw is False
+    assert defaults.json is False
+
+    configured = parser.parse_args(
+        ["database-health", "custom.db", "--require-raw", "--json"]
+    )
+    assert configured.database == Path("custom.db")
+    assert configured.require_raw is True
+    assert configured.json is True
+
+
+def test_database_health_command_reports_and_validates_pair(
+    source_directory: Path,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output_dir = tmp_path / "generated"
+    assert main(["build", str(source_directory), "--output-dir", str(output_dir), "--compact"]) == 0
+    capsys.readouterr()
+    database = output_dir / "infinity.db"
+
+    assert main(["database-health", str(database)]) == 0
+    output = capsys.readouterr().out
+    assert "Database health: healthy" in output
+    assert f"Schema revision: {SCHEMA_VERSION} (expected {SCHEMA_VERSION})" in output
+    assert "Compatibility revision:" in output
+    assert "Raw archive: not checked" in output
+
+    assert main(["database-health", str(database), "--require-raw", "--json"]) == 0
+    report = json.loads(capsys.readouterr().out)
+    assert report["status"] == "healthy"
+    assert report["application"]["status"] == "valid"
+    assert report["application"]["schemaRevision"] == SCHEMA_VERSION
+    assert report["application"]["compatibilityRevision"] == report["application"][
+        "expectedCompatibilityRevision"
+    ]
+    assert report["application"]["bytes"] > 0
+    assert report["application"]["validationMs"] >= 0
+    assert report["rawArchive"]["status"] == "valid"
+    assert report["rawArchive"]["bytes"] > 0
+    assert len(report["rawArchive"]["pairSha256"]) == 64
+    assert report["rawArchive"]["validationMs"] >= 0
+
+    raw_database = raw_database_path(database)
+    original_raw = raw_database.read_bytes()
+    connection = sqlite3.connect(raw_database)
+    try:
+        connection.execute(
+            "UPDATE __infinity_metadata SET value = ? WHERE key = 'export_pair_sha256'",
+            (json.dumps("0" * 64),),
+        )
+        connection.commit()
+    finally:
+        connection.close()
+    assert main(["database-health", str(database), "--require-raw", "--json"]) == 1
+    mismatched_pair = json.loads(capsys.readouterr().out)
+    assert mismatched_pair["status"] == "unhealthy"
+    assert mismatched_pair["rawArchive"]["status"] == "invalid"
+    assert "different exports" in mismatched_pair["rawArchive"]["error"]
+    raw_database.write_bytes(original_raw)
+
+    raw_database.unlink()
+    assert main(["database-health", str(database)]) == 0
+    capsys.readouterr()
+    assert main(["database-health", str(database), "--require-raw", "--json"]) == 1
+    missing_raw = json.loads(capsys.readouterr().out)
+    assert missing_raw["status"] == "unhealthy"
+    assert missing_raw["application"]["status"] == "valid"
+    assert missing_raw["rawArchive"]["status"] == "invalid"
+    assert "does not exist" in missing_raw["rawArchive"]["error"]
+
+    with sqlite3.connect(database) as connection:
+        connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION + 1}")
+    assert main(["database-health", str(database), "--json"]) == 1
+    wrong_schema = json.loads(capsys.readouterr().out)
+    assert wrong_schema["status"] == "unhealthy"
+    assert wrong_schema["application"]["schemaRevision"] == SCHEMA_VERSION + 1
+    assert wrong_schema["application"]["expectedSchemaRevision"] == SCHEMA_VERSION
+    assert "Unsupported InfinityDB database" in wrong_schema["application"]["error"]
 
 
 def test_validate_curated_command_parses() -> None:

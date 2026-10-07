@@ -1,6 +1,7 @@
 import { getArmies } from "./api.js";
 import { shareStateHref } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
+import { createPanelSwitcher } from "./view-components.js";
 
 const number = new Intl.NumberFormat();
 const byId = (id) => document.getElementById(id);
@@ -15,12 +16,11 @@ const elements = {
 };
 const controller = new AbortController();
 
-function show(panel) {
-  for (const element of [elements.loading, elements.error, elements.empty, elements.groups]) {
-    element.hidden = element !== panel;
-  }
-  elements.results.setAttribute("aria-busy", String(panel === elements.loading));
-}
+const show = createPanelSwitcher({
+  container: elements.results,
+  loading: elements.loading,
+  panels: [elements.loading, elements.error, elements.empty, elements.groups],
+});
 
 function armyValue(army) {
   return army.public_slug || army.slug || String(army.id);
@@ -57,6 +57,8 @@ function armyStatuses(army) {
 function renderArmy(army) {
   const article = document.createElement("article");
   article.className = "surface surface--subtle surface--raised army-overview-card";
+  article.id = `army-${armyValue(army)}`;
+  article.tabIndex = -1;
 
   const heading = document.createElement("div");
   heading.className = "army-overview-card-heading";
@@ -136,6 +138,21 @@ function render(items) {
   }
   elements.groups.replaceChildren(fragment);
   show(elements.groups);
+  requestAnimationFrame(revealHashTarget);
+}
+
+function revealHashTarget() {
+  if (!window.location.hash) return;
+  let targetId;
+  try {
+    targetId = decodeURIComponent(window.location.hash.slice(1));
+  } catch {
+    return;
+  }
+  const target = document.getElementById(targetId);
+  if (!target?.classList.contains("army-overview-card")) return;
+  target.scrollIntoView({ block: "center" });
+  target.focus({ preventScroll: true });
 }
 
 async function initialize() {
@@ -151,4 +168,5 @@ async function initialize() {
 }
 
 document.addEventListener("infinity:beforenavigation", () => controller.abort(), { once: true });
+window.addEventListener("hashchange", revealHashTarget);
 initialize();

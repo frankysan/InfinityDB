@@ -1,6 +1,5 @@
 import { getCatalogItem } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
-import { initializeDistanceUnitToggle } from "./preferences.js";
 import { rulesReferenceSection } from "./rules-reference.js";
 
 const { catalog, singular, summaryHeading } = document.body.dataset;
@@ -150,7 +149,6 @@ document.addEventListener(
   () => pageController.abort(),
   { once: true },
 );
-initializeDistanceUnitToggle();
 getCatalogItem(catalog, itemId, pageController.signal).then(render).catch((error) => {
   if (error.name === "AbortError") return;
   name.firstChild.textContent = `${singular} unavailable`;

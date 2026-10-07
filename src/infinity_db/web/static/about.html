@@ -4,12 +4,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <meta name="description"
-    content="Learn how InfinityDB connects official Infinity Army data with maintained N5.3 rules context in an open-source community reference.">
+    content="Learn how InfinityDB helps players explore official Infinity Army information and connected N5.3 rules references in one community-built reference.">
   <title>About · InfinityDB</title>
   <link rel="stylesheet" href="/static/styles.css">
-  <script type="module" src="/static/about.js"></script>
 </head>
 
 <body>
@@ -22,7 +21,7 @@
       <div>
         <p class="eyebrow">An open-source community reference for Infinity</p>
         <h1 id="page-title">Know your options.<span></span></h1>
-        <p class="intro-copy">InfinityDB connects official Infinity Army data with maintained N5.3 rules context so you can move between armies, profiles, Fireteams, equipment, weapons, Skills, Traits, States, Hacking Programs, and the rules that relate them without having to reconstruct those connections yourself.</p>
+        <p class="intro-copy">InfinityDB brings official Infinity Army information and N5.3 rules references together so you can move between armies, profiles, Fireteams, Equipment, Weapons, Skills, Traits, States, Hacking Programs, and related rules without having to piece those connections together yourself.</p>
       </div>
       <img class="about-logo" src="/static/infinitydb-logo.svg" alt="" data-themed-logo>
     </section>
@@ -31,48 +30,67 @@
       <article class="about-feature">
         <span class="about-number" aria-hidden="true">01</span>
         <div>
-          <h2>Explore the game data you already use</h2>
-          <p>Browse units by army, profile, availability, Skill, Equipment, and Weapon, or inspect an Army's Fireteam chart directly. Unit pages bring together profiles, loadouts, AVA, characteristics, and army-specific relationships, while the dedicated catalogs let you approach the same data from the rules or equipment side.</p>
+          <h2>Explore units, profiles, and rules</h2>
+          <p>Browse units by Army, profile, availability, Skill, Equipment, and Weapon, or inspect an Army's Fireteam chart directly. Unit pages bring together profiles, loadouts, AVA, characteristics, and Army-specific relationships, while the reference pages let you approach the same information from the rules or equipment side.</p>
         </div>
       </article>
       <article class="about-feature">
         <span class="about-number" aria-hidden="true">02</span>
         <div>
           <h2>Follow rules instead of hunting for them</h2>
-          <p>Skills, Equipment, Traits, States, and Hacking Programs include concise reviewed summaries, authoritative source links, structured classifications, and bidirectional related-rule links where the interaction can be represented accurately. The goal is not to replace the rules, but to make the relationships around the data easier to understand.</p>
+          <p>Skills, Equipment, Traits, States, and Hacking Programs include concise summaries, links to source material, and related rules where the connection is clear. The goal is not to replace the rules, but to make relevant information easier to find and follow.</p>
         </div>
       </article>
       <article class="about-feature">
         <span class="about-number" aria-hidden="true">03</span>
         <div>
-          <h2>Keep source and interpretation visible</h2>
-          <p>InfinityDB imports, normalizes, validates, and reconciles its maintained sources before publishing a read-only application database. Source-native facts, curated rules context, and InfinityDB-specific interpretations are kept distinct so useful presentation does not erase provenance or uncertainty.</p>
+          <h2>Know where information comes from</h2>
+          <p>InfinityDB keeps official Army information, rules references, and project-added explanations distinguishable. When the available sources are incomplete or ambiguous, that uncertainty should remain visible instead of being presented as certainty.</p>
         </div>
       </article>
     </section>
 
     <section class="surface surface--highlighted about-callout" aria-labelledby="about-callout-title">
       <p class="eyebrow">Where the project is going</p>
-      <h2 id="about-callout-title">From reference data to a connected Infinity reference.</h2>
-      <p>Version 0.8 connects more of the game's structure directly: Fireteams, Peripherals and Controllers, include and selection relationships, Reinforcement parentage, declared faction membership, and Hacking Programs. Version 0.9 closes the remaining application-presentation gaps and improves search and discoverability; 0.10 is the consistency, presentation, and release-hardening pass before 1.0 completes the current rules/reference coverage.</p>
+      <h2 id="about-callout-title">A more connected Infinity reference.</h2>
+      <p>The aim is to make units, Armies, Fireteams, Skills, Equipment, Weapons, Traits, States, Hacking Programs, and related rules easy to follow from one another. Current work focuses on clearer presentation, consistent navigation, better search and discovery, and broader coverage of the current N5 rules.</p>
       <a class="button button-primary" href="/units">Explore units <span aria-hidden="true">→</span></a>
     </section>
 
     <section class="surface about-principles" aria-labelledby="about-principles-title">
-      <p class="eyebrow">How InfinityDB is built</p>
+      <p class="eyebrow">What guides InfinityDB</p>
       <h2 id="about-principles-title">Three principles</h2>
       <div class="about-principles-grid">
         <article>
           <h3>Accuracy</h3>
-          <p>InfinityDB uses maintained primary sources and aims to preserve what they actually say. When sources are incomplete, version-specific, or ambiguous, that uncertainty should remain visible rather than being silently guessed away.</p>
+          <p>InfinityDB aims to reflect official sources faithfully. When information is incomplete, version-specific, or ambiguous, that uncertainty should remain visible rather than being silently guessed away.</p>
         </article>
         <article>
           <h3>Connectivity</h3>
-          <p>Useful facts should link to the other facts that give them context. InfinityDB prefers explicit, reviewed relationships over name matching or duplicated prose, while avoiding links that would imply more than the rules support.</p>
+          <p>Related information should be easy to follow. InfinityDB links rules and game information when the connection is clear, while avoiding links that would imply more than the rules support.</p>
         </article>
         <article>
           <h3>Transparency</h3>
           <p>InfinityDB is a non-commercial open-source community project and is not affiliated with Corvus Belli S.L. The Infinity artwork, logos, symbols, and game data remain the property of Corvus Belli, which has explicitly permitted InfinityDB to use and redistribute the graphical assets used by the project. Those materials are separate from InfinityDB's MIT-licensed original work.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="privacy-policy" class="surface about-principles about-privacy" aria-labelledby="privacy-policy-title">
+      <p class="eyebrow">Privacy policy</p>
+      <h2 id="privacy-policy-title">Private by default.</h2>
+      <div class="about-principles-grid">
+        <article>
+          <h3>No visitor profiles</h3>
+          <p>InfinityDB does not require an account, assign persistent visitor identifiers, or use advertising trackers, fingerprinting, or visitor-level analytics. Operational monitoring is aggregate-only and excludes IP/geolocation, user-agent/fingerprint, referrer, cookie/session/preference values, query/search terms, and per-user navigation histories.</p>
+        </article>
+        <article>
+          <h3>Browser settings stay yours</h3>
+          <p>Settings use browser <code>sessionStorage</code> by default and InfinityDB does not use <code>localStorage</code>. Persistent first-party cookies are created only after you enable <strong>Remember settings</strong> and accept the confirmation. They contain settings values only, last for up to one year, and are deleted when Remember settings is turned off.</p>
+        </article>
+        <article>
+          <h3>Shareable state is explicit</h3>
+          <p>Search and filter state may be encoded in a URL so it can be bookmarked or shared; that URL can therefore also appear in your browser history or wherever you choose to share it. InfinityDB excludes those query/search values from its aggregate metrics. Hosting/network infrastructure still has to process connection metadata to deliver the site, and external links follow the destination site's own privacy policy.</p>
         </article>
       </div>
     </section>

@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Remove old InfinityDB application image tags without affecting other images.
+# Remove old InfinityDB deployment image tags without affecting other repositories.
 set -eu
 
 retain="${1:-3}"
@@ -15,32 +15,40 @@ if [ "$retain" -lt 1 ]; then
   exit 2
 fi
 
-# Always protect the image used by the running Compose app container, even if
-# it is not one of the most recently-created local images. If the app is not
-# running (for example, when this script is invoked manually), retain the
-# newest images instead.
-current_image="$(docker compose ps -q app | sed -n '1p')"
-if [ -n "$current_image" ]; then
-  current_image="$(docker inspect --format '{{.Image}}' "$current_image")"
-fi
+prune_repository() {
+  repository="$1"
+  service="$2"
+  description="$3"
 
-# `docker image ls` returns images newest first. Restrict both discovery and
-# deletion to this repository's versioned application tags; Caddy, Portainer,
-# dangling images, and all other repositories are deliberately untouched.
-docker image ls --no-trunc --filter 'reference=infinity-db:app-*' --format '{{.Tag}} {{.ID}}' |
-awk -v current="$current_image" -v retain="$retain" '
-  BEGIN {
-    if (current != "") {
-      seen[current] = 1
-      builds = 1
+  # Always protect the image used by the running Compose service, even if it
+  # is not one of the most recently-created local images. If the service is
+  # not running, retain the newest images instead.
+  current_image="$(docker compose ps -q "$service" | sed -n '1p')"
+  if [ -n "$current_image" ]; then
+    current_image="$(docker inspect --format '{{.Image}}' "$current_image")"
+  fi
+
+  # Tags are newest first. Restrict discovery/deletion to this one InfinityDB
+  # repository; Caddy, Portainer, dangling images, and unrelated repositories
+  # are deliberately untouched.
+  docker image ls --no-trunc --filter "reference=$repository:app-*" --format '{{.Tag}} {{.ID}}' |
+  awk -v current="$current_image" -v retain="$retain" -v repository="$repository" '
+    BEGIN {
+      if (current != "") {
+        seen[current] = 1
+        builds = 1
+      }
     }
-  }
-  $2 == current { next }
-  !seen[$2]++ { builds++ }
-  builds > retain { print "infinity-db:" $1 }
-' |
-while IFS= read -r image; do
-  [ -n "$image" ] || continue
-  echo "Removing old application image tag: $image"
-  docker image rm "$image"
-done
+    $2 == current { next }
+    !seen[$2]++ { builds++ }
+    builds > retain { print repository ":" $1 }
+  ' |
+  while IFS= read -r image; do
+    [ -n "$image" ] || continue
+    echo "Removing old $description image tag: $image"
+    docker image rm "$image"
+  done
+}
+
+prune_repository infinity-db app application
+prune_repository infinity-db-metrics-history metrics-history metrics-history

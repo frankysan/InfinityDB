@@ -21,209 +21,46 @@ when all contained work shares the same owner.
 ## Current milestone
 
 The current milestone is **0.10.0 — consistency, presentation, and release hardening**.
-It follows the completed 0.9.0 application-completeness/discoverability milestone by auditing the
-finished application model end to end, completing the frontend/theme architecture, and hardening
-release and operations workflows before the 1.0 data-completeness gate.
+Its implementation and manual acceptance are complete; the candidate still needs to be merged,
+validated at the final release commit, tagged, and published. The next implementation milestone
+is 1.0.0, including current-reference completeness and the core-scenario domain.
 
 General performance/storage experiments, major pipeline refactors,
-persistent-user-data features, ITS tooling, and native applications are explicitly
-post-1.0 unless they become necessary to correct a release-blocking defect.
+persistent-user-data features, ITS season/tournament tooling, and native applications are explicitly
+post-1.0 unless they become necessary to correct a release-blocking defect. Core-rules scenarios are
+part of the 1.0 completeness target; their architecture is now established for later 1.0
+implementation without adding the full scenario surface to 0.10.0.
 
 The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
-definition lives in `docs/releasing.md`. The sections below contain only
-implementation work that remains open.
+definition lives in `docs/releasing.md`. The sections below contain the remaining release work
+and implementation work for later milestones. Completed substeps are retained only under an
+open parent item.
 
 ## 0.10.0 — consistency, presentation, and release hardening
 
-0.10.0 is the stabilization pass before 1.0: audit the completed application model end
-to end, finish the frontend/theme architecture, and harden release/operations workflows.
-It should avoid introducing another major game-data domain; correctness fixes discovered
-by the audit remain in scope.
+**Project domains:** Web frontend, Deployment, Project infrastructure
 
-### End-to-end application consistency
-
-- [ ] Perform a systematic end-to-end consistency audit after the canonical-model
-  groundwork above is sufficiently established. This remains an audit and bounded
-  correctness-fix effort rather than a visual redesign or broad frontend
-  restructuring project.
-  - [ ] Establish one pinned production audit baseline before inspecting behavior:
-    the Git commit, tracked `infinity.db` and `rules.db`, tracked release-matched symbol
-    publication manifest, and the local raw/provenance evidence used to build them.
-    Verify that the runtime database and symbol publication derive from the same Army
-    snapshot. Keep raw/local evidence and the working audit matrix under the gitignored
-    `docs/audits/` workspace, then promote durable conclusions into their canonical
-    documentation owners and release-visible outcomes into `CHANGELOG.md`; do not mix production
-    observations with synthetic test fixtures.
-  - [ ] Create and maintain an explicit audit matrix for each concept, recording
-    its semantic-provenance category, source meaning/evidence, storage
-    representation, derivation or canonical/application interpretation, API
-    representation, browser consumers, canonical documentation location, existing
-    coverage, and audit result. Cover logical/source unit identity; army hierarchy, role,
-    and playability; faction/display identity; optional availability;
-    names/slugs; profiles and loadouts; catalog/rules enrichment; distance/range
-    semantics; symbols; source/wiki/rules provenance;
-    filtering/search/sorting/counts; and deep-link identifiers.
-  - [ ] Begin with the army/unit identity and availability vertical slice. Trace
-    `main_army_id` and `display_army_id`, faction grouping, role/playability,
-    mercenary and reinforcement availability, logical identity, and their unit
-    explorer/detail consumers from storage through the API to the browser.
-  - [ ] Audit the backend and API contracts before browser presentation. Trace
-    generated database rows through the canonical/application model, repository
-    queries, and application-level composition (including `SkillCatalog`,
-    `TraitCatalog`, and `CatalogRules`) to the JSON API. Add focused contract
-    coverage wherever intentional behavior is not sufficiently pinned.
-  - [ ] Audit browser semantic ownership. Inventory domain interpretation in
-    browser modules, beginning with `unit.js`, the army selector, catalog detail
-    modules, symbol lookup, rules links, and optional-unit filtering. Keep display
-    formatting in JavaScript, but expose game/data semantics through the backend
-    API when duplicate interpretation could disagree. Route JSON API access
-    through `api.js` to match the documented boundary; static/HTML fetches are not
-    part of that API-transport requirement.
-  - [ ] Perform route-by-route parity checks for the Unit explorer and details;
-    landing/About; Fireteams; Skill Modifiers; Skills, Equipment, Weapons, Traits,
-    States, and Hacking Programs list/detail pages; shared navigation/settings; and
-    version refresh. Compare API output with
-    rendered behavior, including filtering, result counts, ordering, labels,
-    deep-link state, cross-links, optional-unit behavior, source/rules links,
-    catalog-item Unit usage where applicable, and symbol identity. Use a deliberate manual browser
-    pass unless lightweight browser automation is added for a concrete audit need.
-  - [x] Verify Fireteam source retention through the canonical application projection
-    and first-class repository/API/browser chart surface. Keep the broader consistency
-    audit responsible for route/API/render parity rather than reopening Fireteam domain
-    modeling that is already tracked in the 0.8 connected-data workstream.
-  - [ ] Exercise degraded states deliberately: rules database available versus
-    unavailable; asset validation disabled versus required; complete tracked published
-    assets versus an intentionally asset-free specialized package/test layout; unknown
-    unit/catalog/trait IDs; empty search
-    or filter results; invalid query parameters; missing catalog enrichment;
-    stale version/snapshot detection; and database/symbol snapshot mismatch.
-  - [ ] Verify the supported validation/runtime contexts independently: a normal
-    source checkout with the tracked processed publication, a specialized package/test
-    layout where the third-party SVG tree is deliberately absent and asset checks are
-    disabled or allowed to fall back, local development with explicitly supplied
-    generated runtime artifacts, and production deployment that fails closed for
-    incomplete or mismatched databases/assets. Passing one context does not establish
-    the others.
-  - [ ] Fix discovered inconsistencies incrementally and add focused regression
-    coverage where practical. Record intentional deferrals in the working audit evidence and
-    `TODO.md` rather than silently leaving them unresolved. Keep CI hardening,
-    unrelated storage experiments, the Changes page, visual theming, and broader
-    UI restructuring outside this audit unless required for a minimal correctness
-    or 1.0-completeness fix.
-  - [ ] Close with a second source-to-storage-to-browser matrix pass, complete
-    normal project checks, and full-asset validation against the pinned production
-    publication when it is available. Update canonical documentation, `TODO.md`,
-    and `CHANGELOG.md` for material findings before closing the audit; feed any
-    resulting corrections into the remaining frontend-architecture or theming work.
-
-### Frontend architecture and theming
-
-- [ ] **Web frontend + Project infrastructure:** Add a user-facing **Changes** page backed by
-  `docs/CHANGELOG.md`, which remains the canonical release-history source. Present current and
-  historical release notes in the browser without maintaining a second hand-edited copy of the
-  same content.
-
-- [ ] Refactor the web layer toward the documented backend/frontend responsibility
-  boundary without changing the current same-origin deployment model.
-  - [x] Split API handling, shared page-shell/static delivery, and top-level request
-    dispatch into visibly separate Python concerns while preserving existing URLs. The WSGI
-    composition/instrumentation layer now delegates browser/static delivery to
-    `src/infinity_db/web/presentation.py` and JSON/domain handling to
-    `src/infinity_db/web/api_handler.py`, with shared route
-    identities and response values kept separate from both.
-  - [ ] Organize browser code around explicit API transport, preferences/theme
-    state, reusable view/components, and page modules; keep JSON API access routed
-    through `api.js`.
-  - [ ] Add focused contract/regression coverage as responsibilities move so domain
-    interpretation cannot silently migrate back into browser code.
-    - [x] Pin Python route ownership so presentation handling does not absorb `/api/*` and API
-      handling does not absorb browser pages, and keep packaged-symbol tests coupled to the
-      presentation concern rather than top-level WSGI dispatch.
-    - [ ] Add browser/backend semantic-boundary coverage while moving remaining inferred domain
-      labels/symbol roles out of page modules.
-
-- [ ] Implement first-class theme selection using the semantic theme contract documented in
-  `docs/architecture.md`, with Light and Dark as the initial themes rather than an architectural
-  limit.
-  - [ ] Separate semantic theme tokens from theme-neutral layout/component rules
-    and remove remaining hard-coded light-theme assumptions.
-  - [ ] Decide and document the default startup behavior (for example, operating-
-    system preference versus a fixed project default); an explicit user choice wins.
-  - [ ] Add a theme selector to Settings that is data-driven rather than hard-coded as a binary
-    Light/Dark switch, resolve the selected theme before first meaningful paint, and keep
-    persistence on the existing preference contract so additional themes can be added without new
-    state logic.
-  - [ ] Audit contrast and distinguishability for status/range colors, links, focus,
-    muted text, tables, dialogs, menus, and faction accents in every shipped theme
-    (initially Light and Dark).
-  - [ ] Add regression coverage for initialization, switching, persistence, and
-    representative core pages across every shipped theme.
-
-- [ ] Add a project favicon derived from `infinitydb-logo.svg` and keep it legible
-  in light and dark browser chrome where practical.
-
-- [ ] Reorganize frontend design-system ownership after first-class themes are implemented:
-  keep foundational tokens, per-theme values, shared components/layout, and page-specific
-  exceptions visibly separate where that improves maintenance, without adding a CSS build step
-  or reworking the shared visual primitives that are already established.
-
-### Release hardening, CI, and operations
-
-- [ ] Define a paired-export replacement policy. The application and raw archive
-  are currently built as temporary siblings; document and test recovery when a
-  process stops between replacing either output.
-
-- [ ] Integrate curated snapshot-note validation into routine project checks so
-  every checked-in file under `data/curated/snapshot-notes/` is validated even
-  when no downloader or comparison workflow happens to load it.
-
-- [ ] Retain release evidence for the configured hosted workflows. Before
-  claiming a release has passed hosted CI, record successful `Source checks`,
-  `Installed wheel smoke`, and `Deployment smoke test` runs for the release
-  commit or tag.
-
-- [ ] Complete optional/manual full-asset CI administration by adding authorized
-  `FULL_ASSET_BUNDLE_URL` and `FULL_ASSET_BUNDLE_SHA256` secrets to the existing
-  `full-assets` environment, then record one successful manual run.
-
-- [ ] Establish privacy-preserving production monitoring and a repeatable capacity test
-  for the Docker deployment.
-  - [ ] Record host and container CPU, memory, swap, disk-space/inode, disk-I/O,
-    and network utilization; retain Docker restart/OOM events and sanitized Caddy/Gunicorn
-    error diagnostics. Alert on sustained CPU saturation, memory pressure or OOM kills,
-    low disk space, elevated 5xx responses, and failed health checks.
-  - [x] Publish aggregate request counters/histograms using normalized bounded route
-    labels: request rate, status class, latency, response size, and active requests. Static
-    assets and `/api/` requests remain separately identifiable for future dashboards.
-  - [x] Do not collect IP/geolocation, user-agent/fingerprint, referrer, cookie/session/
-    preference values, query/search terms, persistent visitor IDs, unique/returning-user
-    analytics, or per-user navigation histories. Raw URLs and unbounded request values are
-    excluded from metric labels.
-  - [x] Disable the routine Gunicorn access-log stream while retaining stderr error logs.
-    If raw request logging is temporarily required for a concrete incident, minimize/sanitize
-    its fields, restrict access, and define short retention before enabling it.
-  - [ ] Define a representative load-test scenario: browse the unit list, search,
-    open unit/catalog details, and fetch API endpoints using a current
-    production-like SQLite snapshot. Include a warm-cache steady-state run and
-    a short burst run; do not benchmark only the health endpoint.
-  - [ ] Establish a baseline at 2 Gunicorn workers x 4 threads, then test 4 x 4
-    only with a matching 4-vCPU/4-GiB container allocation. Record p50/p95/p99
-    latency, request/error rate, CPU, memory, and SQLite/disk behavior at each
-    concurrency level.
-  - [ ] Set an explicit scale trigger (for example, a sustained p95 latency or
-    error-rate SLO breach while CPU is not otherwise constrained). Prefer
-    multiple immutable app replicas behind Caddy over unbounded worker growth;
-    re-run the test before changing worker counts or deployment resources.
-
-- [ ] Add a benchmark/health-check command that validates the application database,
-  confirms its expected raw archive when requested, and reports schema and
-  compatibility revisions.
+- [ ] Finish release publication using [the release checklist](releasing.md). Land the candidate
+  through a pull request, require hosted checks and retained evidence for the final release SHA,
+  then create the annotated tag and publish the release. Deployment acceptance remains a separate
+  step where applicable. Remove this parent item after publication; the changelog and canonical
+  references retain completed implementation outcomes.
+  - [x] Complete pre-merge full-assets acceptance: `Full-asset checks` passed for
+    `7f58d1387f2478aad6650e0311729083c7739800` on 2026-10-07
+    ([run 37579009400](https://github.com/frankysan/InfinityDB/actions/runs/37579009400)).
+    This closes environment/bundle administration; a different final release SHA still needs its
+    own run when collecting optional full-assets evidence.
+  - [x] Complete capacity/load testing and the matched 2x4 versus 4x4 experiment. Retained results,
+    resource boundaries, comparison commands, and the scale-review policy are owned by
+    [deployment guidance](deployment.md#repeatable-http-capacity-scenario).
+  - [x] Complete Silhouette manual browser acceptance. The maintainer confirmed on 2026-10-07 that
+    the [manual checks](testing.md#silhouette-manual-browser-acceptance) were performed and passed.
 
 ## 1.0.0 — current-reference completeness gate
 
 1.0.0 is the final completeness release for the supported current reference data. It
-should resolve remaining material source/rules gaps and validate the whole application;
-it should not introduce a large new product surface.
+should resolve remaining material source/rules gaps, add the bounded core-scenario reference
+surface, and validate the whole application without expanding into broader ITS/tournament tooling.
 
 ### Rules and reference completeness
 
@@ -258,8 +95,8 @@ it should not introduce a large new product surface.
     Akial Interference`. Keep semantic identity, source publication provenance, and
     applicability separate so the same canonical concept can be cited or overlaid
     by core, scenario, FAQ, or season material without duplication or collection-
-    load-order semantics. This catalog coverage is in scope for 1.0; a complete
-    scenario library and scenario list/detail pages are not.
+    load-order semantics. This catalog coverage is in scope for 1.0 and should share
+    identities/scope with the core-scenario model rather than becoming a parallel representation.
   - [ ] Add the official Reinforcements Extra as a separately versioned/scoped
     annex source rather than folding it into `n5-core-rules`. Curate `Commlink`
     and `Request Reinforcements`, link the capability they create to the annex
@@ -270,6 +107,18 @@ it should not introduce a large new product surface.
       `Request Reinforcements` can be explicitly classified outside Basic Short/
       Short/Long/ARO instead of being treated as incomplete or assigned a false
       category.
+
+- [ ] **Data processing + Web backend + Web frontend:** Add the current core-rules
+  scenarios as a first-class, browsable scenario domain for 1.0, using the model derived
+  from the 0.10.0 core/ITS comparison.
+  - [ ] Maintain structured, cited scenario data sufficient to understand setup, objectives,
+    scoring, deployment, special rules/elements, and end conditions without relying on an
+    unstructured PDF excerpt as the application model.
+  - [ ] Keep the model source/scope-aware and extensible to versioned ITS seasons, but do
+    not make ITS scenario content, tournament/event tooling, or a deployment-map editor a
+    1.0 requirement.
+  - [ ] Provide usable scenario list/detail presentation and links to existing canonical
+    rule/catalog entities where identities overlap.
 
 - [ ] Add a dated FAQ/errata layer to the existing rules-reference system from
   current material under `data/pdf/faq/`.
@@ -407,82 +256,63 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 ### Army snapshot and symbol-pipeline maintenance
 
-Milestone 1 acceptance for the integrated pipeline is complete. The remaining work is
-maintenance, refactoring, richer diagnostics, incremental performance, and broader
-portability coverage rather than a prerequisite for the 1.0 application-data gate.
+Remaining pipeline work covers maintenance, selective refactoring, richer diagnostics/performance
+work, and external-tool portability. It is outside the 1.0 application-data gate. The implemented
+pipeline and artifact lifecycle are described in [data guidance](../data/README.md).
 
 - [ ] Let future snapshot-comparison tooling write structured generated diff
   data/reports under manifest/report paths while curated snapshot notes remain
   the human interpretation of those results.
 
-- [ ] Refactor stage scripts into thin CLIs over reusable Python functions and a
-  small shared symbol-pipeline utility layer.
-  - [ ] Make the symbol-downloader input contract match its CLI and tests. Prefer
-    the immutable raw Army ZIP as the authoritative input; either fully support
-    directory/current merged-master inputs end to end or stop advertising them.
-    In particular, do not claim legacy/current `master.json` compatibility unless
-    discovery can consume that schema without treating ordinary embedded SVG
-    references as unknown fields.
-  - [ ] `svg_processor.py`: keep font audit, alias normalization, complete-set
-    duplicate detection, deterministic representative ranking, persistent
-    Inkscape conversion, and reports. Duplicate/canonical and text-conversion
-    state are integrated into the build manifest; multi-category processing
-    beyond the current canonical flow remains.
-  - [ ] `path_sanitization.py`: remain shared infrastructure for external/mirror
-    naming; pipeline-generated asset names should use one host-independent
-    policy.
-  - [ ] Longer-term reusable modules may be split into `snapshot`, `discovery`,
-    `manifest`, `downloader`, `audit`, `deduplicate`, `convert`, `compress`, and
-    `publish` helpers when that reduces duplication rather than adding ceremony.
+- [ ] Refactor legacy/standalone stage CLIs around the integrated pipeline only where doing so
+  removes duplicated contracts or platform handling.
+  - [ ] Resolve the standalone symbol-downloader input mismatch. The maintained integrated build
+    requires an immutable raw Army ZIP, while the downloader help still advertises discovery-only
+    directory/master inputs that are not supported consistently end to end. Either implement that
+    discovery-only contract deliberately or remove it from the CLI/documentation.
+  - [ ] Consolidate shared executable discovery, native/project-relative path conversion, atomic
+    writes, and subprocess invocation where conversion/compression/orchestration still duplicate
+    those rules.
+  - [ ] Split additional `snapshot`, `discovery`, `manifest`, `downloader`, `audit`, `deduplicate`,
+    `convert`, `compress`, or `publish` helpers only when the split reduces duplication rather than
+    adding ceremony.
 
-- [ ] Make every integrated symbol stage idempotent and traceable before adding
-  sophisticated incremental caching.
-  - [ ] Changes to an override SHA-256 invalidate downstream processing for that
-    asset. Removing an override falls back to validated symbol archives/cache or
-    network by the normal resolution rules.
-  - [ ] After the integrated build is stable, consider cache keys based on snapshot
-    SHA-256, source SVG SHA-256, processor/tool versions, font-alias config,
-    duplicate renderer/settings, conversion backend/settings, and compression
-    profile/settings.
+- [ ] Evaluate content-addressed incremental reuse only after measuring the current full rebuild.
+  If worthwhile, derive cache keys from the pinned snapshot/source SVG hashes plus processor/tool
+  versions, font-alias configuration, duplicate-render settings, conversion settings, and
+  compression profile/settings. Do not weaken the current manifest/hash validation or immutable
+  raw-symbol snapshot boundary to gain incremental speed.
 
-- [ ] Standardize symbol-pipeline reports around detailed machine/human outputs
-  plus one concise build summary.
-  - [ ] Preserve/report discovery counts, unknown SVG references, font audit,
-    missing fonts, unused font declarations, SVG parse errors, duplicate groups,
-    duplicate-render errors/separation/summary, text-to-path results/summary,
-    compression report/candidates/run metadata, overrides used/unused, raw-cache
-    hits, network downloads, manual static assets, canonical counts, published
-    asset counts, application-mapping counts, and per-stage/total runtime.
-  - [ ] Existing report filenames from the plan may be retained where useful:
-    `symbol-discovery.csv`, `unknown-svg-references.csv`, `svg-font-report.csv`,
-    `missing-fonts.csv`, `unused-font-declarations.csv`, `svg-parse-errors.csv`,
-    `duplicate-groups.csv`, `duplicate-render-errors.csv`,
-    `duplicate-separation.csv`, `duplicate-summary.csv`,
-    `svg-text-to-path-report.csv`, `text-conversion-summary.csv`,
-    `compression-report.csv`, `compression-candidates.csv`, and
-    `compression-run.json`.
+- [ ] Finish symbol-pipeline reporting for machine-to-machine comparison.
+  - [x] Persist the detailed acquisition/source counts, SVG preflight, font audit, duplicate
+    detection, text-conversion, compression, publication mapping/change data, override usage, and
+    cache/network provenance while keeping the interactive console concise and the verbose build
+    log complete.
+  - [ ] Add one compact machine-readable build-summary artifact with per-stage and total runtime so
+    repeated builds can be compared without scraping the verbose log or individual reports.
+  - [ ] Add separate discovery/unknown-reference CSV outputs only if future audit tooling needs
+    row-oriented data beyond the build manifest and current JSON/CSV stage reports.
 
-- [ ] Add focused end-to-end and cross-platform regression coverage for the
-  integrated Army/symbol pipeline.
-  - [ ] Snapshot/discovery tests: metadata/faction validation, complete archive,
-    snapshot identity/hash, all profile/faction logos, multiple logos for one
-    unit, one logo shared by units, duplicate URLs, static declarations,
-    override suppression of network, override over cache, invalid/unused
-    overrides, filename collisions, unexpected SVG fields, and proof that
-    `resume` is not required for complete discovery.
-  - [ ] SVG fixtures: exact duplicate, XML-different visual duplicate, no-text,
-    normal text, alias-font, missing-font, empty-text cleanup, and troublesome
-    real-world conversion cases.
-  - [ ] Run core portability coverage on Windows, Ubuntu/Linux, and macOS when CI
-    permits: project-relative path generation, path sanitization, executable
-    discovery including `.exe`/`.cmd`, subprocess argument construction without
-    shell quoting, temp files, case-only collisions, snapshot ZIP handling,
-    override lookup, static-symbol manifest loading, atomic replacement, and
-    Windows `spawn` compatibility. External-tool integration tests may be
-    conditional when Inkscape, `resvg`, or SVGO are unavailable.
-  - [ ] Add a shared utility layer for executable discovery, native/project-relative
-    path conversion, atomic writes, subprocess invocation, and platform-neutral
-    generated filenames before orchestration otherwise duplicates those rules.
+- [ ] Extend the remaining regression and portability coverage for the integrated Army/symbol
+  pipeline.
+  - [x] Cover pinned snapshot/provenance validation, complete Unit/profile/faction discovery,
+    multiple/shared/duplicate URLs, static declarations, category-safe filename collisions,
+    override precedence and upstream-equivalent propagation, conflicting/invalid/unused overrides,
+    validated cache reuse, refresh behavior, and unavailable-source handling.
+  - [x] Cover verified materialization/resume behavior, persisted failed audits, exact-first visual
+    deduplication and deterministic representative ranking, text-conversion failure preservation,
+    compression/report binding, publication collision detection, removed-symbol backups, and
+    transactional publication rollback.
+  - [x] Cover semantic publication cases for Unit/Profile fallback, distinct General-profile
+    artwork, Reinforcement aliases, Peripheral-only and mixed-role identities, contextual
+    Peripheral variants, parent-Unit artwork reuse, and cross-Unit profile-symbol consensus.
+  - [ ] Add explicit fixtures for empty-text cleanup and a small set of troublesome real-world SVG
+    conversion cases that should remain stable across tool upgrades.
+  - [ ] **Acquisition:** Extend native external-tool integration coverage across Windows, Ubuntu/Linux, and macOS,
+    especially executable discovery (`.exe`/`.cmd`), subprocess arguments, and real
+    Inkscape/`resvg`/SVGO invocation. Hermetic source/pipeline coverage already runs across all three
+    operating systems in required CI; external-tool tests may remain conditional when those
+    executables are unavailable.
 
 ### ITS, scenarios, and game tools
 
@@ -497,8 +327,8 @@ portability coverage rather than a prerequisite for the 1.0 application-data gat
     InfinityDB may provide read-only explanation and planning support, but must
     label its snapshot/date and avoid claiming tournament validation.
 
-- [ ] Add ITS scenario list and detail pages backed by a curated seasonal data
-  model, rather than PDF excerpts.
+- [ ] Extend the 1.0 scenario domain with ITS scenario list/detail coverage backed by
+  curated seasonal data, rather than creating a separate ITS-only model or using PDF excerpts.
   - [ ] Capture structured, cited scenario facts: objectives and scoring, game
     rounds/end conditions, force/point/SWC/table/deployment configuration,
     deployment map or geometry, exclusion zones, token types/diameters,

@@ -4,9 +4,14 @@
 
 This document defines InfinityDB's target browser design contract. It is intentionally aspirational: it describes what the interface should converge toward, not every detail of the current implementation.
 
-The visual layer should follow the same engineering philosophy as the rest of the project: define reusable structures, keep responsibilities explicit, simplify repeated behavior, and remove duplication rather than accumulating page-specific exceptions. When current UI behavior conflicts with this document, treat the mismatch as implementation debt to resolve deliberately rather than copying the inconsistency into new work.
+The browser presentation layer should follow the same engineering philosophy as the rest of the project: define reusable structures, keep responsibilities explicit, simplify repeated behavior, and remove duplication rather than accumulating page-specific exceptions. When current UI behavior conflicts with this document, treat the mismatch as implementation debt to resolve deliberately rather than copying the inconsistency into new work.
 
-`docs/architecture.md` remains authoritative for subsystem boundaries and frontend/backend responsibility. This document owns the reusable visual and interaction vocabulary and the intended behavior of shared browser structures. `src/infinity_db/web/static/styles.css` implements that contract; it is not the specification itself.
+`docs/architecture.md` remains authoritative for subsystem boundaries and frontend/backend
+responsibility. This document owns the reusable visual, interaction, and player-facing language
+vocabulary and the intended behavior of shared browser structures. The CSS source files described
+under [Typography and tokens](#typography-and-tokens) implement the visual contract; the
+presentation layer composes them at `/static/styles.css`. The checked-in `styles.css` only documents
+that entry point and contains no component rules.
 
 ## Design principles
 
@@ -46,6 +51,36 @@ Player-facing information should dominate the normal view. Provenance, internal 
 
 Developer mode should add technical depth rather than redefine the primary presentation.
 
+### Write player-facing copy for players
+
+Normal browser surfaces should describe Infinity concepts, player choices, and visible outcomes
+rather than InfinityDB's implementation. A player should not need to understand the data pipeline,
+persistence model, source-processing vocabulary, or maintainer workflow to understand a page,
+control, status message, or empty state.
+
+Prefer game/reference language and direct user outcomes. Avoid implementation-facing terms such
+as `database`, `snapshot`, `domain`, `canonical`, `normalized`, `source-native`, `provenance`, or
+`application database` in ordinary player copy when a clearer player-facing description exists.
+These terms remain appropriate in Developer mode, operator/deployment surfaces, privacy/security
+explanations where precision matters, and documentation aimed at maintainers. This rule does not
+replace legitimate Infinity terminology: game concepts such as AVA, SWC, Sectorial, Fireteam,
+Reinforcements, Common Skill, and similar terms should remain precise when they are the concepts
+being presented. Do not perform mechanical terminology replacement without considering context.
+
+Data-review and maintainer-diagnostic surfaces may remain directly addressable when useful for
+development, but they must not be presented as normal player features or linked from ordinary
+player navigation unless the information itself has a genuine player use. Route availability is
+not a security boundary; sensitive information must still be protected independently.
+
+When source uncertainty or incomplete review affects rules meaning, keep that uncertainty
+visible, but describe the uncertainty rather than the maintainer workflow. For example, prefer
+language such as **Needs verification** or **Uncertain** over copy such as **Manual review needed**.
+Do not hide ambiguity merely to make the interface sound simpler.
+
+Apply the same rule to titles, introductions, breadcrumbs, control labels, helper text, badges,
+empty/error/loading states, and release summaries. Copy should explain what the player can find,
+compare, or do before explaining how InfinityDB stores or derives it.
+
 ### Make responsiveness a content-priority decision
 
 Responsive design is not simply shrinking desktop geometry. At narrower widths, preserve the most important information and relationships first, then deliberately choose whether secondary content should wrap, scroll, collapse, or transform.
@@ -56,9 +91,24 @@ Breakpoints should correspond to layout failure or content need rather than arbi
 
 Reusable structures must remain usable with keyboard navigation, visible focus, screen readers, user font scaling, reduced motion where relevant, and non-color-only meaning. A component is not complete if its intended interaction depends on a mouse, a specific viewport width, or a specific color perception.
 
+### Keep browser-chrome branding self-contained
+
+The project favicon is a small-size derivative of the InfinityDB logo rather than a second brand
+design. It uses a self-contained high-contrast surface so it remains recognizable in light and
+dark browser chrome without depending on page-theme CSS. Keep the SVG as the scalable primary
+icon with `sizes="any"`, provide a small raster fallback for older browser favicon handling, and
+derive the Apple touch icon from the same simplified mark rather than introducing alternate
+branding.
+
 ### Keep theme and layout concerns separate
 
 Themes define semantic color and appearance roles. Layout primitives define structure, spacing, sizing, and interaction behavior. Components should consume both without baking a particular theme into geometry or duplicating layout for individual theme variants.
+
+### Maintain measurable contrast and non-color meaning
+
+Normal and compact text roles must maintain at least 4.5:1 contrast against the surfaces they own in every shipped theme. Meaningful focus indicators and other graphical cues that communicate state or structure must maintain at least 3:1 against the adjacent audited surface. Disabled controls and purely decorative separators are not treated as normal readable content.
+
+Status, range, rules-category, and similar semantic colors must retain readable text or another explicit label/value so meaning never depends on hue alone. Faction colors are supplementary identity accents: Unit/Army names and symbols remain the identity source, so faction gradients may stay visually subtle instead of being forced into text-contrast roles. The executable palette audit lives in `tests/test_theme_contrast.py`; new theme tokens that carry readable or state-bearing content should be added to that contract.
 
 ## Design vocabulary
 
@@ -285,6 +335,15 @@ When the same literal presentation color recurs, treat that as a signal to ident
 
 Each theme should therefore replace semantic token values, not duplicate component/layout rules. Light and Dark are the initial first-class themes, not an architectural limit: additional themes should plug into the same semantic token contract. Theme work may need theme-specific contrast-safe values for domain accents, but should preserve the component contract and non-color meaning.
 
+CSS source ownership mirrors that contract. Foundational font/geometry/typography tokens live in
+`foundation.css`; each explicit theme owns one complete semantic palette in `themes/<theme>.css`;
+established reusable layout and component rules live in `components.css`; and late route-specific
+deltas that should not become shared primitives live in `page-overrides.css`. The browser continues
+to request the single `/static/styles.css` entry point, which composes those sources in order. A new
+theme should be added as a new palette file rather than appended to another theme's file. Do not
+bypass the stable entry point from templates, introduce a CSS build step merely to concatenate the
+files, or move a recurring component rule into page overrides to avoid identifying its shared role.
+
 Text hierarchy should communicate function: identity/title, section heading, normal content, compact/tabular content, metadata, and technical identifiers are different semantic roles. Pages should not invent new type sizes or weights merely to make one local element appear important.
 
 ## Exceptions and evolution
@@ -312,6 +371,12 @@ Use this checklist when adding or materially changing a browser surface:
 - For tables, is the width policy explicit and are column roles defined?
 - Do primary names avoid unnecessary line breaks while short columns remain compact?
 - Does developer mode add information without destabilizing the core layout?
+- Does normal player-facing copy use game/reference language instead of implementation,
+  data-pipeline, or maintainer-workflow vocabulary?
+- Are data-review and maintainer-diagnostic surfaces absent from normal player discovery unless
+  they provide genuine player value?
+- Do empty, error, loading, and uncertainty states describe the player's situation rather than
+  internal database or review mechanics?
 - Does the narrow-screen behavior preserve the important data and relationships?
 - Are focus, keyboard, touch, screen-reader, scaling, and non-color meaning preserved?
 - Would another page solving the same problem be expected to use the same structure?

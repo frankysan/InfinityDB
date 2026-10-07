@@ -40,6 +40,12 @@ release/audit narrative belongs in the changelog and Git history.
 - Browser code renders backend-owned semantics rather than recreating data-model policy.
 - Game/reference data is read-only at runtime. Persistent user-authored application data is not part
   of the current model.
+- Retained metrics live in a separate private collector with one bounded writable volume; the
+  web-facing `app` remains immutable. Collector scrape/start failures do not invalidate a healthy
+  application deployment. History migrations are forward-only; rollback preserves the volume and
+  older collectors refuse newer formats. The architectural boundary is in
+  `docs/architecture.md`; deployment lifecycle, retention, and operator commands are owned by
+  `docs/deployment.md`. Do not turn live metrics or retained aggregates into visitor histories.
 - Future work belongs in `docs/TODO.md`; do not preserve an obsolete task list in architecture or
   this context file.
 
@@ -79,6 +85,8 @@ validated set. Production must not substitute a server-side rebuild.
 - Peripheral identity, Unit-backed Peripheral mappings, Controller access pools, include
   relationships, selection/dependency constraints, and Fireteam membership are explicit application
   relationships. Do not infer ownership from names.
+- Fireteam chart limit sentinels are source encoding, not browser semantics. Preserve the raw limit
+  for provenance/compatibility and expose the interpreted limit kind from the backend.
 
 ## Query-coherence invariant
 
@@ -87,6 +95,10 @@ logical Unit. In particular, AVA is contextual to an Army/profile occurrence, wh
 are loadout facts. When those constraints participate in a query, other selected profile/loadout
 criteria must be satisfiable in the same compatible context. Unit-wide option facts remain Unit-wide
 because the source does not attach them to a profile group.
+
+- Unit Explorer source-filter overlays are maintained semantics, not source rewrites. Combined source
+  Classifications may match multiple public Classification filters, and redundant source
+  Characteristics may be hidden from the picker while remaining preserved/queryable.
 
 ## Rules/reference invariants
 
@@ -101,6 +113,10 @@ because the source does not attach them to a profile group.
   identity instead of merging by label.
 - Maintained prose must use typed semantic links for supported reference namespaces. The migration
   is complete: reviewed batches reject newly introduced plain semantic candidates.
+- Gameplay distance presentation uses the Army/rules round-trip convention **2.5 cm = 1 inch**, not
+  the SI physical conversion. Preserve Army metric storage, typed maintained-rule distances, and
+  the `-1/-1` MOV sentinel (stationary) as distinct semantics; render it as an em dash (`—`) and
+  never convert the sentinel as a numeric distance.
 - Use `[[review-needed:<reason>|...]]` for genuinely ambiguous maintained prose rather than choosing
   a target without evidence. Reviewed ordinary-text collisions are fingerprinted to exact passages,
   so wording changes reopen review.
@@ -124,13 +140,29 @@ Browser state rules:
 - Legacy explicit browser parameters remain accepted for compatibility and normalize to canonical
   state; do not remove them casually.
 - URL-owned state wins for the current view and must not overwrite persistent local Settings.
+- `static/preferences.js` owns preference values/persistence; `static/settings.js` alone binds the
+  shared Settings controls. Page modules consume state instead of initializing shell controls.
+- Theme preference defaults to System and resolves before first paint through the synchronous
+  `theme-startup.js` bootstrap. Theme persistence remains owned by `preferences.js`; Settings owns
+  user selection. Do not move theme resolution back into page modules or defer initial resolution
+  until after stylesheet paint.
 - Soft-navigation page code must dispose transient listeners/requests when content is replaced.
 - Browser display should use backend-provided canonical references/relationship labels instead of
   inventing semantic mappings in JavaScript.
+- Normal player-facing copy describes Infinity concepts and user-visible outcomes, not InfinityDB's
+  storage, pipeline, provenance, or maintainer workflow. Data-review-only surfaces must not be
+  discoverable through ordinary player navigation; genuine source uncertainty remains visible but is
+  phrased as uncertainty rather than an internal review instruction. `docs/web-design-guidelines.md`
+  owns the complete browser-language contract.
 
-Visual/layout implementation must follow `docs/web-design-guidelines.md`, especially semantic table
-columns, bounded overflow, progressive disclosure, Developer-mode additive columns, reusable
-surfaces, and separation of theme tokens from component geometry.
+Browser visual/layout and copy implementation must follow `docs/web-design-guidelines.md`,
+especially semantic table columns, bounded overflow, progressive disclosure, Developer-mode
+additive columns, reusable surfaces, player-facing language, and separation of theme tokens from
+component geometry.
+CSS source ownership is `foundation.css` (font and theme-neutral tokens), one semantic palette file
+per explicit theme under `themes/`, `components.css` (shared layout/components), and
+`page-overrides.css` (late page-specific exceptions). `/static/styles.css` is a server-composed
+stable entry point; do not add a CSS build step or link the source parts directly from page templates.
 
 ## Snapshot and symbol invariants
 
@@ -142,6 +174,18 @@ surfaces, and separation of theme tokens from component geometry.
 - `tools/build_symbols.py` is the maintained symbol orchestration entry point. Local build state is
   resumable/forward-only; final production publication is represented by the tracked publication
   manifest, not by terminal local build state.
+- Peripheral-only profile artwork publishes under
+  `peripherals/<main-army>/<peripheral-name>.svg`; when one physical symbol proves that a profile
+  name is used in both Peripheral and normal Unit contexts, that mixed-role name stays Unit-owned
+  in every context. Source-reused parent Unit artwork also stays Unit-owned, while distinct
+  same-name Peripheral-only artwork is retained as contextual variants.
+- `unitProfileLogoToPublishedPath` is occurrence evidence, not an override-only table: retain every
+  authoritative Army profile-logo resolution so logical-Unit consolidation can still distinguish a
+  genuine General-profile symbol from the Unit fallback.
+- Image overrides replace an upstream symbol identity within the same symbol category, not only
+  one URL occurrence. Exact upstream-equivalent assets inherit the same override; conflicting
+  non-identical overrides for one upstream identity fail acquisition. The build manifest retains
+  `upstreamSha256` separately from the effective asset SHA-256 so this equivalence survives caches.
 - The processed SVG publication is redistributable under Corvus Belli's explicit non-commercial
   permission but remains outside InfinityDB's MIT license.
 
@@ -155,6 +199,10 @@ surfaces, and separation of theme tokens from component geometry.
 - A release requires a project-wide documentation audit, release-matched runtime artifacts, hosted
   checks green for the exact release commit, an immutable version tag, and post-deployment smoke
   verification where deployed.
+- Hosted release evidence is retained without mutating the validated release commit: prepare the
+  exact-commit workflow evidence after CI is green, then create an annotated `v<version>` tag whose
+  message records the required GitHub Actions run identities/URLs. Lightweight release tags do not
+  satisfy the release-evidence contract.
 - `scripts/install-or-update.sh` hands off to the installer from the target release before checkout.
   Historical upgrade exceptions and operator commands are owned by `docs/deployment.md`.
 

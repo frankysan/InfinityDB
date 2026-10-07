@@ -1,11 +1,107 @@
 # Changelog
 
 All notable user- or operator-relevant changes to InfinityDB are documented here.
-Entries describe meaningful release outcomes rather than detailed implementation history.
-New or materially revised entries use the project-domain labels defined in
-`docs/project-domains.md`; historical release notes are not retroactively relabeled.
+Each release begins with a concise **Player summary** containing only changes visible or useful to
+players; the remaining sections preserve fuller user/operator release detail. Entries describe
+meaningful release outcomes rather than detailed implementation history. New or materially revised
+entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
+are not retroactively relabeled.
+
+## [0.10.0] - 2026-10-07
+
+### Player summary
+
+- You can now choose a Light or Dark theme, or let InfinityDB follow your device's settings.
+- Silhouette diagrams in the Glossary and Unit previews show templates at the same scale,
+  making their sizes easier to compare.
+- The new **What's changed** page collects release notes in one place, and the privacy policy
+  explains what InfinityDB stores.
+- Rules descriptions and Unit help are clearer, artwork has been corrected, and Unit and Fireteam
+  pages are easier to read on small screens.
+
+### Added
+
+- **Web frontend:** Add System, Light, and Dark theme selection in Settings. System follows the
+  operating-system preference; explicit choices use existing Settings persistence and apply before
+  first paint. Add a project favicon that stays legible in light and dark browser chrome.
+- **Web frontend:** Add scale-preserving S1–S8 Silhouette diagrams to the Glossary and Unit
+  statline previews. Other supported Silhouettes include a faded S2 reference at the same scale;
+  S2 appears alone and the normal statline stays compact.
+- **Web frontend + Project infrastructure:** Add a **What's changed** page with concise player
+  summaries and expandable release details, plus a public privacy policy linked from cookie
+  consent. Explain aggregate-only monitoring, session settings, opt-in preference cookies, and
+  shareable URL state.
+- **Data processing + Web frontend:** Add **FTO (Fireteam Option)** to the Glossary, explaining
+  option-name identifiers and chart requirements for specific variants such as FTO-2.
+- **Deployment:** Add bounded aggregate metrics history and operator reports by week, version,
+  and snapshot. A separate private collector retains request/status/error summaries and latency
+  estimates without visitor identities. Updates capture outgoing and incoming generations without
+  blocking a healthy application; history survives restarts and rollback, and format upgrades are
+  transactional with older collectors refusing newer stores.
+- **Deployment:** Add privacy-preserving resource capture, sanitized warning/error diagnostics,
+  and configurable operational alerts for CPU, memory, storage, errors, and health failures.
+- **Deployment:** Add repeatable HTTP capacity testing and controlled worker/resource comparisons.
+  The matched 2x4 versus 4x4 experiment establishes 4x4 as the first bounded scale step, with an
+  explicit latency/error/resource trigger for review. Production continues to default to 2x4;
+  measured results and comparison commands are retained in deployment guidance.
+- **Deployment:** Add `infinity-db database-health` to validate Army databases and optionally
+  verify their application/raw export pair, with revision, timing, and JSON output.
+- **Acquisition:** Add English-only Human Sphere wiki research snapshots, including orphaned
+  content pages, deterministic archive identities, and resumable downloads. Missing required pages
+  block publication; unrelated Talk/service pages and stale discovered 404s remain diagnostics.
+
+### Changed
+
+- **Web frontend:** Use clearer game/reference language throughout navigation, page introductions,
+  Unit notes, profile notation, rules help, and empty/error/loading states. Unresolved reference
+  information appears as **Needs verification** with an **uncertain** marker and readable reasons.
+- **Data processing:** Publish validated application/raw exports as one matching generation.
+  Interrupted publication preserves the previous serving database, rejects mismatched raw-dependent
+  audits, and recovers by rerunning the export.
+- **Web backend + Web frontend:** Interpret Fireteam limit sentinels explicitly and include legacy
+  Armies in global search, linking to their entries on the Armies overview.
+- **Data processing + Web frontend:** Refresh processed faction, Order, Characteristic, Peripheral,
+  and Unit artwork. Preserve distinct contextual variants, publish Peripheral-only artwork in its
+  own namespace, and keep mixed-role artwork with its Unit identity.
+
+### Fixed
+
+- **Web frontend:** Give Unit Profile row headers maintained help and Glossary links, keep
+  Fireteam columns and cm-mode statlines readable at narrow widths, and improve text, status,
+  link, and focus contrast in both themes. Army links now scroll to and highlight the matching card.
+- **Web backend + Web frontend:** Explain when optional-unit Settings hide all Unit profiles,
+  remove redundant one-Unit Characteristics from filter choices, and match the combined
+  Headquarters/Mechanized classification through either component filter.
+- **Web backend:** Reject unknown or duplicate semantic parameters on Fireteam and Unit-detail
+  APIs while preserving the Developer-mode cache-bust parameter.
+- **Web frontend:** Display stationary MOV as an em dash rather than a negative distance, and
+  keep cm/in conversion consistent across profiles, rules help, and Weapon ranges.
+- **Data processing:** Update Armed Turret to current N5 v5.3 citations while preserving the
+  documented conflict between sources for its deployable-profile Silhouette.
+- **Acquisition:** Apply symbol overrides to all same-category upstream-identical artwork;
+  conflicting overrides fail explicitly rather than producing ambiguous results.
+- **Data processing + Web backend + Web frontend:** Correct Unit and General-profile symbol
+  assignments, preserve genuine profile-specific artwork, and repair repeated upstream
+  misassignments such as Crabbots on Cutters and Dragões while retaining source provenance.
+- **Deployment:** Include published Peripheral artwork in installed packages and release images.
+
+### Upgrade notes
+
+- **Deployment:** Deploy the release-matched tracked Army database, rules database, and complete
+  processed SVG publication together. Normal server upgrades consume these artifacts without
+  rebuilding databases in production.
+- **Deployment:** Preserve the metrics-history volume during updates and rollback. Older
+  collectors refuse newer history formats; rollback must not downgrade or delete retained history.
 
 ## [0.9.1] - 2026-09-30
+
+### Player summary
+
+- Shared Unit Explorer links show when their optional-unit choices differ from your Settings,
+  without changing your saved preferences.
+- Order references are more complete, and Strategos and Multispectral Visor levels are easier
+  to compare.
+- Army symbols wrap more neatly when a Unit is available to many Armies.
 
 ### Changed
 
@@ -36,6 +132,15 @@ New or materially revised entries use the project-domain labels defined in
 - No Army database rebuild is required solely for 0.9.1.
 
 ## [0.9.0] - 2026-09-29
+
+### Player summary
+
+- New **Ammunition**, **Labels**, and **General Rules** pages, a **Glossary**, and site-wide search
+  make rules easier to find.
+- Unit Explorer has more filters and an optional view of profile stats. The Armies page covers
+  both current and legacy forces.
+- Rules text links to related references, and shared links preserve search, filter, and Army
+  selections. Pages are easier to use on small screens.
 
 ### Added
 
@@ -108,6 +213,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.8.1] - 2026-09-27
 
+### Player summary
+
+- Hacking Programs use the same action labels and page layout as Skills.
+- Fonts are more consistent across the site, and the sidebar shows when Army data last changed.
+
 ### Changed
 
 - **Web backend + Web frontend:** Present Hacking Programs with the same declaration language and
@@ -135,6 +245,13 @@ New or materially revised entries use the project-domain labels defined in
   Army/wiki/PDF/source-symbol archives used during release preparation.
 
 ## [0.8.0] - 2026-09-26
+
+### Player summary
+
+- Hacking Programs have their own reference pages, and Fireteam charts can be browsed by Army,
+  with rules, limits, Wildcards, and FTO options.
+- Unit pages show linked profiles, Peripherals, Controllers, and selection requirements more
+  clearly. Profile artwork and Fireteam layouts have also been improved.
 
 ### Added
 
@@ -176,6 +293,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.7.2] - 2026-09-26
 
+### Player summary
+
+- On first use, distances are shown in inches and all optional Unit types are included.
+  Troop Type names are clearer, and profiles show **VITA** or **STR** as appropriate.
+- Settings can be collapsed on desktop, and text and layouts are easier to read.
+
 ### Changed
 
 - **Deployment + Web backend:** Replace routine per-request production access logging with bounded,
@@ -197,6 +320,11 @@ New or materially revised entries use the project-domain labels defined in
   databases remain usable.
 
 ## [0.7.1] - 2026-09-25
+
+### Player summary
+
+- Equipment such as MediKit, GizmoKit, and Deactivator uses the same action presentation as Skills.
+- Paramedic links correctly to MediKit, and reference pages refresh correctly after an app update.
 
 ### Changed
 
@@ -221,6 +349,14 @@ New or materially revised entries use the project-domain labels defined in
 - No Army database rebuild is required solely for 0.7.1.
 
 ## [0.7.0] - 2026-09-25
+
+### Player summary
+
+- Skills, Equipment, Traits, and States have fuller rules explanations and more links to related
+  rules, including a complete State reference.
+- Skill pages include Hacking Program, Martial Arts, Booty, and MetaChemistry tables.
+  Cube and Cube 2.0 pages list the Units that use them.
+- Unit pages are easier to read on very small screens.
 
 ### Added
 
@@ -261,6 +397,13 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.6.3] - 2026-09-22
 
+### Player summary
+
+- Doctor, Engineer, Cyberplug, and Peripheral references explain which Controllers can use
+  each type of Peripheral.
+- Unit pages show which profiles and loadouts are linked and explain requirements that affect
+  those choices.
+
 ### Added
 
 - Add reviewed N5.3 Doctor, Engineer, Cyberplug, Peripheral, and Peripheral-type reference data,
@@ -282,6 +425,12 @@ New or materially revised entries use the project-domain labels defined in
   earlier combined storage layout.
 
 ## [0.6.2] - 2026-09-21
+
+### Player summary
+
+- Browser links use readable names instead of numbers.
+- Unit Explorer shows how many Units match your filters and breaks down their availability.
+  Skill, Equipment, and Weapon filters also include related variants more consistently.
 
 ### Added
 
@@ -309,6 +458,11 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.6.1] - 2026-09-20
 
+### Player summary
+
+- Units, Skills, Equipment, and Weapons are shown consistently across Army views.
+- Army totals count each Unit once, even when it appears in several related Army Lists.
+
 ### Changed
 
 - Move Unit, Army, profile/loadout, Skill, Equipment, and Weapon browsing onto canonical
@@ -329,6 +483,10 @@ New or materially revised entries use the project-domain labels defined in
   previous application-data layout.
 
 ## [0.6.0] - 2026-09-19
+
+### Player summary
+
+- Unit availability, Army labels, symbols, and Weapon ranges are more accurate and consistent.
 
 ### Added
 
@@ -372,6 +530,10 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.5.1a] - 2026-09-15
 
+### Player summary
+
+- No player-facing changes.
+
 ### Added
 
 - Add the foundation for cited curated rules data and archived wiki sources.
@@ -385,22 +547,48 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.5.1] - 2026-09-14
 
+### Player summary
+
+- No player-facing changes.
+
+### Fixed
+
+- Mark the deployment, install/update, and application-image pruning scripts executable so the
+  documented server maintenance commands work directly from a release checkout.
+
+## [0.5.0] - 2026-09-14
+
+### Player summary
+
+- Unit lists can be filtered by Skills, Equipment, and Weapons.
+- The new **Traits** pages explain their effects and link to the Weapons, Skills, and Equipment
+  that use them.
+
 ### Added
 
 - Add advanced unit-catalog filters for skills, equipment, and weapons.
-- Add Traits catalog and detail pages with concise summaries and usage links.
-- Add deployment maintenance tools and a Developer-mode cache bypass for local review.
+- Add a Traits catalog and detail pages covering traits used by weapons, Skills, and Equipment,
+  with concise summaries and usage grouped by catalog type.
+- Add server deployment, install/update, and application-image pruning scripts with documented
+  image-retention behavior.
+- Add a Developer-mode control for bypassing cached API responses while reviewing a local
+  deployment.
 
 ### Changed
 
-- Improve deployment guidance and ensure browsers load matching release assets after
-  an update.
+- Document the release deployment workflow and refresh immutable static-asset URLs so linked
+  browser modules load their matching release versions after deployment.
 
 ### Fixed
 
 - Remove incompatible browser theme metadata from static pages.
 
 ## [0.4.2] - 2026-09-14
+
+### Player summary
+
+- Mercenary and Reinforcement results now follow your optional-unit settings without leaving
+  outdated results on screen.
 
 ### Fixed
 
@@ -409,11 +597,20 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.4.1] - 2026-09-13
 
+### Player summary
+
+- Support and feedback links now take you to the project's GitHub page.
+
 ### Changed
 
 - Direct support questions, suggestions, and feedback to the project GitHub page.
 
 ## [0.4.0] - 2026-09-13
+
+### Player summary
+
+- Unit and reference pages respond faster, and it is clearer when a page is still loading.
+- The browser refreshes automatically after an app update or a change to Army data.
 
 ### Added
 
@@ -432,12 +629,23 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.3.3] - 2026-09-13
 
+### Player summary
+
+- Reference lists and detail pages no longer get stuck loading after an app update.
+
 ### Fixed
 
 - Prevent cached browser modules from mixing releases and leaving catalog or detail
   pages in a loading state.
 
 ## [0.3.2] - 2026-09-13
+
+### Player summary
+
+- Settings let you include mercenaries, Spec-Ops, Team Operations, and Reinforcements,
+  and remember your preferences on this device.
+- The browser detects app updates more reliably, and optional-unit settings and wiki-link labels
+  are consistent across pages.
 
 ### Added
 
@@ -459,6 +667,12 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.3.1] - 2026-09-13
 
+### Player summary
+
+- Settings adapt to different screen sizes, and Army colours make Unit and reference pages
+  easier to scan.
+- Movement values are displayed correctly, and mobile navigation works more reliably.
+
 ### Added
 
 - Add a reusable responsive Settings menu.
@@ -474,6 +688,11 @@ New or materially revised entries use the project-domain labels defined in
 - Correct movement-value presentation and mobile navigation behavior.
 
 ## [0.3.0] - 2026-09-12
+
+### Player summary
+
+- A new home page, simpler navigation, and division badges make the site easier to browse.
+  Pages also adapt more consistently to smaller screens.
 
 ### Added
 
@@ -493,12 +712,25 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.2.1] - 2026-09-12
 
+### Player summary
+
+- The About page explains what InfinityDB offers, where its data comes from, and that it's
+  an independent community project.
+
 ### Changed
 
 - Expand the About page with InfinityDB's purpose, local data flow, current reference
   features, future direction, and independent-project disclosures.
 
 ## [0.2.0] - 2026-09-11
+
+### Player summary
+
+- Skills, Equipment, and Weapons have searchable pages with links to the Units and loadouts
+  that use them.
+- Weapon profiles show Ammunition, Traits, ranges, icons, and special rules, and Unit pages show
+  more complete profile and loadout details.
+- AVA values display correctly, searches handle punctuation, and symbol display is more reliable.
 
 ### Added
 
@@ -527,6 +759,13 @@ New or materially revised entries use the project-domain labels defined in
 
 ## [0.1.2] - 2026-09-11
 
+### Player summary
+
+- Unit rows open their detail pages, and search ignores differences in case, accents, and
+  punctuation. The browser also shows when Army data was downloaded.
+- Reinforcements and related profiles are grouped more reliably when their names differ between
+  Army Lists.
+
 ### Added
 
 - Add an About page, snapshot download dates in the browser, and clickable unit
@@ -542,6 +781,13 @@ New or materially revised entries use the project-domain labels defined in
 - Rebuild existing databases before deploying 0.1.2.
 
 ## [0.1.1] - 2026-09-11
+
+### Player summary
+
+- You can switch between centimetres and inches, look up Skill Modifiers, and choose whether
+  to include Reinforcements.
+- General profiles show Troop Type and Classification. Equivalent Army Lists are grouped together
+  in filters, and profile and loadout tables are easier to read on small screens.
 
 ### Added
 
@@ -560,6 +806,13 @@ New or materially revised entries use the project-domain labels defined in
   narrow screens.
 
 ## [0.1.0] - 2026-09-10
+
+### Player summary
+
+- The first release lets you browse Units across Armies and look up their profiles, loadouts,
+  Skills, Equipment, Weapons, and availability.
+- Unit pages bring shared and Army-specific details together, with symbols and mercenary
+  availability.
 
 ### Added
 

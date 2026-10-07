@@ -1,5 +1,6 @@
 import { appendMaintainedText, maintainedTextFragment } from "./maintained-text.js";
 import { skillCategoryBadge } from "./skill-categories.js";
+import { tableViewport } from "./view-components.js";
 
 function citationLabel(citation) {
   const source = citation.source_title || citation.source_id || "Source";
@@ -258,8 +259,6 @@ export function levelEffectsSection(rules) {
   heading.className = "detail-heading";
   heading.textContent = `${rule.name} levels`;
 
-  const viewport = document.createElement("div");
-  viewport.className = "table-viewport";
   const table = document.createElement("table");
   table.className = "data-table--compact data-table--reference level-effects-table";
   const caption = document.createElement("caption");
@@ -291,8 +290,7 @@ export function levelEffectsSection(rules) {
   }
 
   table.append(caption, head, body);
-  viewport.append(table);
-  section.append(heading, viewport);
+  section.append(heading, tableViewport(table));
   return section;
 }
 
@@ -317,7 +315,7 @@ export function rulesReferenceArticle(
     const supplemental = document.createElement("div");
     supplemental.className = "rules-supplement";
     const supplementTitle = document.createElement("h4");
-    supplementTitle.textContent = "Additional rules context";
+    supplementTitle.textContent = "Additional rules";
     supplemental.append(supplementTitle);
     appendRuleDetails(supplemental, supplement);
     article.append(supplemental);

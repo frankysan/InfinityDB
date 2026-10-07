@@ -19,6 +19,7 @@ BROWSER_PATHS = (
     "units/panoceania/1-test-unit.svg",
     "orders/regular.svg",
     "characteristics/cube.svg",
+    "peripherals/panoceania/crabbot.svg",
 )
 
 
@@ -52,6 +53,11 @@ def _write_manifest(
         for index, relative in enumerate(browser_paths, start=1)
         if relative.startswith(("orders/", "characteristics/"))
     }
+    profile_logos = {
+        f"https://example.test/profile-{index}.svg": relative
+        for index, relative in enumerate(browser_paths, start=1)
+        if relative.startswith("peripherals/")
+    }
     document = {
         "format": "InfinityDB symbol publication mapping",
         "formatVersion": 2,
@@ -59,7 +65,7 @@ def _write_manifest(
         "publishedSha256ByPath": {relative: digest for relative in expected},
         "factionIdToPublishedPath": armies,
         "unitSlugToPublishedPath": units,
-        "unitProfileLogoToPublishedPath": {},
+        "unitProfileLogoToPublishedPath": profile_logos,
         "staticKeyToPublishedPath": static,
         "browserUsageSummary": {
             "browserReferencedAssetCount": len(set(browser_paths)),

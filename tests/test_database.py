@@ -29,11 +29,17 @@ from infinity_db.curated import load_curated_directory
 from infinity_db.database import (
     Database,
     raw_database_path,
+    validate_database_pair,
 )
 from infinity_db.database import (
     export_database as export_release_database,
 )
 from infinity_db.database.importer import BATCH_SIZE, batched, reinforcement_unit_matches
+from infinity_db.database.publication import (
+    EXPORT_PAIR_SHA256_KEY,
+    PUBLISHED_CONTENT_SHA256_KEY,
+    export_pair_sha256,
+)
 from infinity_db.database.repository import (
     army_required_flags,
     availability_summary,
@@ -74,6 +80,8 @@ from infinity_db.rules_database import (
 )
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.trait_catalog import TraitCatalog
+from infinity_db.unit_filter_config import load_unit_filter_config
+from infinity_db.unit_presentation import enrich_unit_filter_presentation
 
 FINALIZE_TEST_DATABASES = os.environ.get("INFINITYDB_TEST_FINALIZE_SQLITE") == "1"
 
@@ -326,6 +334,14 @@ def test_database_splits_lossless_source_from_published_application_data(
             (DATABASE_COMPATIBILITY_KEY,),
         ).fetchone()[0]
         assert json.loads(compatibility) == DATABASE_COMPATIBILITY_VERSION
+        pair_sha256 = json.loads(
+            connection.execute(
+                f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
+                (EXPORT_PAIR_SHA256_KEY,),
+            ).fetchone()[0]
+        )
+        assert len(pair_sha256) == 64
+        assert validate_database_pair(path) == pair_sha256
         reinforcement_matches = connection.execute(
             f"SELECT value FROM {quote(METADATA_TABLE)} WHERE key = ?",
             (REINFORCEMENT_UNIT_MATCHES_KEY,),
@@ -467,7 +483,7 @@ def test_fireteam_repository_exposes_army_scoped_application_chart(
     assert chart["source"]["army_id"] == 101
     assert chart["source"]["kind"] == "faction"
     assert chart["limits"] == [
-        {"type": "MAX", "position": 1, "max_count": 2}
+        {"type": "MAX", "position": 1, "max_count": 2, "limit_kind": "maximum"}
     ]
     assert len(chart["teams"]) == 1
     team = chart["teams"][0]
@@ -2110,6 +2126,102 @@ def test_database_uses_exported_reinforcement_mapping(
     assert details["source_ids"] == [1, 1649]
 
 
+def test_export_pair_fingerprint_covers_source_only_normalized_rows(normalized: dict) -> None:
+    metadata = {PUBLISHED_CONTENT_SHA256_KEY: "a" * 64}
+    original = export_pair_sha256(normalized, metadata)
+    changed = copy.deepcopy(normalized)
+    source_only_table = next(
+        name for name in sorted(SOURCE_ONLY_TABLES) if changed["tables"].get(name)
+    )
+    changed["tables"][source_only_table][0]["pair_test_marker"] = "changed"
+
+    assert export_pair_sha256(changed, metadata) != original
+
+
+def test_legacy_database_pair_without_generation_fingerprint_remains_valid(
+    tmp_path: Path, normalized: dict
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    for sibling in (path, raw_database_path(path)):
+        connection = sqlite3.connect(sibling)
+        try:
+            with connection:
+                connection.execute(
+                    f"DELETE FROM {quote(METADATA_TABLE)} WHERE key = ?",
+                    (EXPORT_PAIR_SHA256_KEY,),
+                )
+        finally:
+            connection.close()
+
+    assert validate_database_pair(path) is None
+
+
+def test_interrupted_pair_replacement_keeps_application_commit_point_and_rerun_recovers(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    export_database(normalized, path)
+    old_application = path.read_bytes()
+    old_archive = raw_database_path(path).read_bytes()
+    old_pair_sha256 = validate_database_pair(path)
+    updated = copy.deepcopy(normalized)
+    updated["armyMetadata"]["sourceSha256"] = "updated-source"
+
+    original_replace = database_importer.os.replace
+
+    def interrupt_before_application_commit(source: Path, destination: Path) -> None:
+        if Path(destination) == path:
+            raise RuntimeError("simulated process interruption")
+        original_replace(source, destination)
+
+    monkeypatch.setattr(
+        database_importer.os, "replace", interrupt_before_application_commit
+    )
+    with pytest.raises(RuntimeError, match="simulated process interruption"):
+        export_database(updated, path)
+
+    assert path.read_bytes() == old_application
+    assert raw_database_path(path).read_bytes() != old_archive
+    Database(path).validate()
+    with pytest.raises(ValueError, match="different exports"):
+        validate_database_pair(path)
+
+    monkeypatch.setattr(database_importer.os, "replace", original_replace)
+    export_database(updated, path)
+
+    recovered_pair_sha256 = validate_database_pair(path)
+    assert recovered_pair_sha256 is not None
+    assert recovered_pair_sha256 != old_pair_sha256
+
+
+def test_interrupted_first_pair_publication_recovers_on_rerun(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "army.sqlite3"
+    original_replace = database_importer.os.replace
+
+    def interrupt_before_application_commit(source: Path, destination: Path) -> None:
+        if Path(destination) == path:
+            raise RuntimeError("simulated process interruption")
+        original_replace(source, destination)
+
+    monkeypatch.setattr(
+        database_importer.os, "replace", interrupt_before_application_commit
+    )
+    with pytest.raises(RuntimeError, match="simulated process interruption"):
+        export_database(normalized, path)
+
+    assert not path.exists()
+    assert raw_database_path(path).is_file()
+    with pytest.raises(ValueError, match="does not exist"):
+        validate_database_pair(path)
+
+    monkeypatch.setattr(database_importer.os, "replace", original_replace)
+    export_database(normalized, path)
+    assert validate_database_pair(path) is not None
+
+
 @pytest.mark.parametrize(
     "mutation",
     [
@@ -2844,6 +2956,54 @@ def test_unit_catalog_filter_expands_logical_equipment_identity(
     for equipment_ref in (244, 235, "tinbot"):
         result = database.list_units(equipment_id=equipment_ref)
         assert {item["id"] for item in result["items"]} == expected_ids
+
+
+def test_tracked_unit_filter_semantics_preserve_source_facts_and_public_filter_meaning() -> None:
+    database = Database(Path("data/generated/infinity.db"))
+    raw = database.list_unit_filter_values()
+    public = enrich_unit_filter_presentation(raw)
+    config = load_unit_filter_config()
+
+    raw_characteristics = {item["slug"] for item in raw["characteristics"]}
+    public_characteristics = {item["slug"] for item in public["characteristics"]}
+    assert config.hidden_characteristics <= raw_characteristics
+    assert config.hidden_characteristics.isdisjoint(public_characteristics)
+
+    membership = config.classification_memberships[0]
+    raw_classifications = {item["slug"] for item in raw["classifications"]}
+    public_classifications = {item["slug"] for item in public["classifications"]}
+    assert membership.source_classification in raw_classifications
+    assert membership.source_classification not in public_classifications
+    assert set(membership.matches) <= public_classifications
+
+    combined = database.list_units(
+        classification=membership.source_classification, limit=500
+    )["items"]
+    assert [item["name"] for item in combined] == ["MARUTS"]
+    for classification in membership.matches:
+        names = {
+            item["name"]
+            for item in database.list_units(classification=classification, limit=500)["items"]
+        }
+        assert "MARUTS" in names
+        contextual_names = {
+            item["name"]
+            for item in database.list_units(
+                classification=classification, points=86, limit=500
+            )["items"]
+        }
+        assert "MARUTS" in contextual_names
+
+    hidden_expected = {
+        "mechanical-transmutation": "SÙ-JIÀN Immediate Action Unit",
+        "shasvastii": "Shasvastii Airborne Infiltration Group CADMUS",
+    }
+    for characteristic, expected_unit in hidden_expected.items():
+        names = {
+            item["name"]
+            for item in database.list_units(characteristic=characteristic, limit=500)["items"]
+        }
+        assert names == {expected_unit}
 
 
 def test_unit_categorical_filters_use_stable_public_slugs(

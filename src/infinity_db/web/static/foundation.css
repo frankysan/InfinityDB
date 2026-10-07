@@ -1,0 +1,117 @@
+@font-face {
+  font-family: "Audiowide";
+  src: url("/static/fonts/Audiowide/Audiowide-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Oxanium";
+  src: url("/static/fonts/Oxanium/Oxanium-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/static/fonts/IBM_Plex_Sans/IBMPlexSans-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 700;
+  font-stretch: 75% 100%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/static/fonts/IBM_Plex_Sans/IBMPlexSans-Italic-Variable.woff2") format("woff2");
+  font-style: italic;
+  font-weight: 100 700;
+  font-stretch: 75% 100%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans Condensed";
+  src: url("/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans Condensed";
+  src: url("/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans Condensed";
+  src: url("/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-SemiBold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans Condensed";
+  src: url("/static/fonts/IBM_Plex_Sans_Condensed/IBMPlexSansCondensed-Bold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/static/fonts/IBM_Plex_Mono/IBMPlexMono-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  font-family: var(--font-family-body);
+  color: var(--color-text-primary);
+  background: var(--color-surface-page);
+  font-synthesis: none;
+  --radius-sm: 5px;
+  --radius-md: 9px;
+  --radius-lg: 15px;
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --control-height: 42px;
+  /* Canonical typography families. Components select semantic roles instead of
+     naming concrete faces so future themes can replace the typography globally. */
+  --font-family-brand: "Audiowide", "Arial Black", sans-serif;
+  --font-family-display: "Oxanium", "Segoe UI", sans-serif;
+  --font-family-body: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --font-family-compact: "IBM Plex Sans Condensed", "Arial Narrow",
+    "IBM Plex Sans", sans-serif;
+  --font-family-mono: "IBM Plex Mono", Consolas, "Courier New", monospace;
+
+  /* Canonical typography scale. The root scale is the only base size; fixed
+     tiers are rem ratios so changing it scales the interface coherently.
+     Percentage root sizing preserves the user's browser font-size preference. */
+  --font-size-root: 93.75%;
+  font-size: var(--font-size-root);
+  --font-size-xs: 0.733333rem;
+  --font-size-sm: 0.8rem;
+  --font-size-md: 0.866667rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.133333rem;
+  --font-size-xl: 1.266667rem;
+  --font-size-2xl: 1.4rem;
+  --font-size-3xl: 1.6rem;
+  --font-size-4xl: 1.933333rem;
+  --font-size-5xl: 2.266667rem;
+  --font-size-title-sm: 2.533333rem;
+  --font-size-title-md: 2.8rem;
+  --font-size-title: clamp(2.266667rem, 3.5vw, 3.4rem);
+  --font-size-hero-compact: clamp(2.4rem, 10vw, 3.2rem);
+  --font-size-hero: clamp(2.8rem, 5vw, 4.533333rem);
+}

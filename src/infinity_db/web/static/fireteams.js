@@ -2,6 +2,7 @@ import { getFireteamArmies, getFireteamChart } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { fireteamsIncludeWildcards } from "./preferences.js";
 import { readShareState, writeShareState } from "./share-state.js";
+import { createPanelSwitcher, tableViewport } from "./view-components.js";
 
 const number = new Intl.NumberFormat();
 const byId = (id) => document.getElementById(id);
@@ -31,14 +32,17 @@ let currentReference = null;
 let requestController = null;
 const pageController = new AbortController();
 
-function show(panel) {
-  for (const element of [
-    elements.loading, elements.error, elements.empty, elements.landing, elements.content,
-  ]) {
-    element.hidden = element !== panel;
-  }
-  elements.results.setAttribute("aria-busy", String(panel === elements.loading));
-}
+const show = createPanelSwitcher({
+  container: elements.results,
+  loading: elements.loading,
+  panels: [
+    elements.loading,
+    elements.error,
+    elements.empty,
+    elements.landing,
+    elements.content,
+  ],
+});
 
 function armyValue(army) {
   return army.public_slug || army.slug || String(army.id);
@@ -188,13 +192,11 @@ function renderTeam(team) {
   if (!(team.members || []).length && !(team.wildcard_members || []).length) {
     const empty = document.createElement("p");
     empty.className = "detail-copy";
-    empty.textContent = "No member rows are defined for this chart entry.";
+    empty.textContent = "No members are listed for this Fireteam.";
     article.append(empty);
     return article;
   }
 
-  const tableContainer = document.createElement("div");
-  tableContainer.className = "table-viewport fireteam-member-table";
   const table = document.createElement("table");
   table.className = "data-table--reference";
   const caption = document.createElement("caption");
@@ -243,19 +245,18 @@ function renderTeam(team) {
   for (const member of team.members || []) appendMemberRow(member);
   for (const member of team.wildcard_members || []) appendMemberRow(member, { wildcard: true });
   table.append(caption, head, body);
-  tableContainer.append(table);
-  article.append(tableContainer);
+  article.append(tableViewport(table, "fireteam-member-table"));
   return article;
 }
 
 function fireteamLimitBadge(limit) {
-  const value = Number(limit.max_count);
+  const kind = String(limit.limit_kind || "maximum");
   let label;
-  if (value === 0) label = `${limit.type}: unavailable`;
-  else if (value === 256) label = `${limit.type}: unlimited`;
-  else label = `${limit.type}: max ${value}`;
+  if (kind === "unavailable") label = `${limit.type}: unavailable`;
+  else if (kind === "unlimited") label = `${limit.type}: unlimited`;
+  else label = `${limit.type}: max ${limit.max_count}`;
   const element = badge(label);
-  if (value === 0) element.classList.add("developer-only");
+  if (kind === "unavailable") element.classList.add("developer-only");
   return element;
 }
 
@@ -357,8 +358,6 @@ function renderReference(reference) {
   const basis = document.createElement("p");
   basis.className = "detail-copy";
   appendMaintainedText(basis, levels.fact_tokens?.basis, levelFacts.basis);
-  const tableContainer = document.createElement("div");
-  tableContainer.className = "table-viewport fireteam-reference-table";
   const table = document.createElement("table");
   table.className = "data-table--reference";
   const caption = document.createElement("caption");
@@ -406,11 +405,15 @@ function renderReference(reference) {
     body.append(row);
   }
   table.append(caption, head, body);
-  tableContainer.append(table);
   const cumulative = document.createElement("p");
   cumulative.className = "fireteam-reference-note";
   if (levelFacts.cumulative) cumulative.textContent = "Fireteam Level bonuses are cumulative.";
-  fragment.append(levelHeading, basis, tableContainer, cumulative);
+  fragment.append(
+    levelHeading,
+    basis,
+    tableViewport(table, "fireteam-reference-table"),
+    cumulative,
+  );
 
   const terminology = generalFacts.terminology || [];
   if (terminology.length) {
@@ -461,8 +464,9 @@ function renderChart(chart) {
   }
   const sourceKind = chart.source.kind
     ? chart.source.kind.replaceAll("_", " ")
-    : "Army";
-  elements.source.textContent = `Authoritative ${sourceKind} chart from the current Army snapshot.`;
+    : "army";
+  const sourceLabel = sourceKind[0].toUpperCase() + sourceKind.slice(1);
+  elements.source.textContent = `${sourceLabel} Fireteam chart.`;
   const sourceDetails = [`Source Army #${chart.source.army_id}`];
   if (chart.source.file) sourceDetails.push(chart.source.file);
   if (chart.source.sha256) sourceDetails.push(chart.source.sha256);

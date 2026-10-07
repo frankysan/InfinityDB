@@ -39,7 +39,7 @@ The sections below document the implemented `curated/rules/` contract.
 ### Maintained rules-text semantic-link policy
 
 Maintained rules prose must use typed `[[kind:slug]]` references when it names an existing
-player-routable Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program, or
+supported Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program, or
 Attribute. The pre-token migration is complete: `maintained-text-link-reviews.json` records explicit
 completed review coverage for every supported reference namespace, and the rules build rejects any
 new plain semantic candidate directly.
@@ -75,16 +75,24 @@ ordinary text when manual review proves it is not a reference.
 `enrichment-coverage/classifications.json` is the maintained release-scope policy for
 `tools/audit_enrichment_coverage.py`. Every gap code known to the audit must have an explicit
 default classification: `release-blocker`, `intentional-omission`, `supporting-identity`,
-or `later-product-work`. The policy was introduced for the 0.7.0 enrichment gate and remains deliberately
-conservative: detected user-facing coverage gaps require explicit review, while rules-only
-relation targets that already support an exposed item are classified separately as
+or `later-product-work`. The policy was introduced for the 0.7.0 enrichment gate and remains
+deliberately conservative: detected user-facing coverage gaps require explicit review, while
+rules-only relation targets that already support an exposed item are classified separately as
 `supporting-identity`.
 
-Item- or relation-specific `overrides` record reviewed exceptions with a reason. Overrides
-must match a gap in the selected `infinity.db` + `rules.db` pair; stale or mistyped overrides
-fail the audit instead of silently surviving after the underlying data changes. The policy is
-release-planning metadata only. It must not be consumed as rules ontology or application
-runtime behavior.
+`catalogGapCodes` records reviewed release-scope decisions that apply to one gap kind across a
+whole catalog. More-specific item or relation `overrides` record reviewed exceptions with a
+reason and take precedence over catalog-level decisions. Item/relation overrides must match a gap
+in the selected `infinity.db` + `rules.db` pair; stale or mistyped overrides fail the audit instead
+of silently surviving after the underlying data changes.
+
+For the 0.10 stabilization milestone, missing Weapon rule definitions are retained as
+`later-product-work` because full Weapon rules-reference completeness is part of the 1.0 gate.
+Commlink is likewise deferred explicitly to its separately scoped Reinforcements Extra work.
+Other defects in those catalogs, including stale citations, ambiguous mappings, unresolved links,
+or unreviewed rules, retain their normal conservative classification and can still block the
+current release. The policy is release-planning metadata only; it must not be consumed as rules
+ontology or application runtime behavior.
 
 ### Rules-interaction review policy
 
@@ -140,7 +148,7 @@ without blocking the selected release.
 `peripherals/army-identities.json` is the reviewed boundary between Army Peripheral
 source encodings and canonical application identity. The contract is deliberately separate
 from both rules records and the display-identity contract. It pins the Army snapshot used as
-evidence and supports two source mechanisms:
+evidence and supports three source mechanisms:
 
 - embedded `peripherals` rows resolve through reviewed `peripheral:<slug>` entities, optional
   `peripheral-profile:<slug>` profiles, and `peripheral-mapping:<slug>` mappings keyed by
@@ -320,7 +328,9 @@ Order.
 
 ### Document shape
 
-The main collection structure is:
+The main collection structure is illustrated below. This is a schema example, not reviewed rules
+content: sample summaries, dates, and citations must be replaced with verified authored evidence
+before ingestion.
 
 ```json
 {
@@ -388,9 +398,14 @@ The main collection structure is:
 ```
 
 Supported record kinds include `rule`, `skill`, `declaration-category`,
-`equipment`, `weapon`, `ammunition`, `trait`, `state`, `attribute`, `term`, `glossary`,
+`equipment`, `weapon`, `ammunition`, `trait`, `state`, `attribute`, `term`, `training`,
+`hacking-program`, `glossary`,
 `interaction`, `fireteam`, `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
+
+Acceptance by the generic record envelope does not imply a published application domain or a
+complete typed fact model. In particular, scenario-related records do not yet implement the
+[planned scenario model](../../docs/data-model.md#planned-scenario-model-10).
 
 Embedded `term` records own source-backed Game terminology that does not warrant a standalone
 catalog/detail route. They require `facts.scope` with a stable slug such as `game-element`,

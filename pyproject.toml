@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "infinity-db"
-version = "0.9.1"
+version = "0.10.0"
 description = "Infinity database, data ingestion tools, and extensible web unit browser"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -41,11 +41,15 @@ where = ["src"]
 license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 
 [tool.setuptools.data-files]
+"share/infinity-db/docs" = [
+  "docs/CHANGELOG.md",
+]
 "share/infinity-db/config/catalogs" = [
   "config/catalogs/weapon-categories.json",
   "config/catalogs/weapon-overrides.json",
   "config/catalogs/skill-source-classifications.json",
   "config/catalogs/equipment-presentation-encodings.json",
+  "config/catalogs/unit-filter-semantics.json",
 ]
 "share/infinity-db/config/identity" = [
   "config/identity/source-identities.json",
@@ -69,11 +73,15 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 "infinity_db.web" = [
   "static/*.html",
   "static/*.css",
+  "static/themes/*.css",
   "static/*.js",
   "static/*.svg",
+  "static/*.png",
+  "static/silhouettes/*.svg",
   "static/armies/**/*.svg",
   "static/characteristics/*.svg",
   "static/orders/*.svg",
+  "static/peripherals/**/*.svg",
   "static/units/**/*.svg",
   "static/fonts/**/*.woff2",
   "static/fonts/**/OFL.txt",

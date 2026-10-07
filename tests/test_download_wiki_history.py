@@ -197,7 +197,7 @@ def test_download_history_keeps_raw_oldid_pages_and_writes_index(
     monkeypatch.setattr(
         module,
         "fetch_page_revisions",
-        lambda _page, *, language="en": ("BS Attack", revisions),
+        lambda _page, *, language="en", site=module.DEFAULT_SITE: ("BS Attack", revisions),
     )
     fetched: list[str] = []
 
@@ -246,7 +246,7 @@ def test_download_history_reuses_existing_oldid_file(
     monkeypatch.setattr(
         module,
         "fetch_page_revisions",
-        lambda _page, *, language="en": ("BS Attack", revisions),
+        lambda _page, *, language="en", site=module.DEFAULT_SITE: ("BS Attack", revisions),
     )
     existing = tmp_path / "_history" / "oldid" / "10.html"
     existing.parent.mkdir(parents=True)
@@ -315,6 +315,7 @@ def test_main_history_failure_preserves_work_without_publishing(
         staging: Path,
         *,
         language: str = "en",
+        site=module.DEFAULT_SITE,
         progress=None,
     ) -> Any:
         assert root_url == module.ROOT_URL
@@ -331,6 +332,7 @@ def test_main_history_failure_preserves_work_without_publishing(
         staging: Path,
         *,
         language: str = "en",
+        site=module.DEFAULT_SITE,
         progress=None,
     ) -> Any:
         assert len(pages) == 1

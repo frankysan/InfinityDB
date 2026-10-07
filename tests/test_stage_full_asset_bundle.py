@@ -103,6 +103,23 @@ def test_stage_asset_bundle_installs_complete_published_set(tmp_path: Path) -> N
         assert (static / relative).is_file()
 
 
+def test_stage_asset_bundle_clears_omitted_empty_category(tmp_path: Path) -> None:
+    static = _static_root(tmp_path)
+    stale = static / "peripherals" / "legacy.svg"
+    stale.parent.mkdir()
+    stale.write_text(SVG, encoding="utf-8")
+    archive = _bundle(tmp_path / "assets.zip", BROWSER_PATHS)
+    manifest = _publication_manifest(
+        tmp_path / "symbol-publication.json", BROWSER_PATHS, BROWSER_PATHS
+    )
+
+    validation = stage_asset_bundle(archive, static, publication_manifest=manifest)
+
+    assert validation.complete
+    assert (static / "peripherals").is_dir()
+    assert not stale.exists()
+
+
 def test_stage_asset_bundle_failure_preserves_existing_assets(tmp_path: Path) -> None:
     static = _static_root(tmp_path)
     existing = static / "armies" / "legacy.svg"

@@ -213,6 +213,8 @@ def _install_staging(staging_root: Path, static_root: Path, backup_root: Path) -
             staged = staging_root / name
             target = static_root / name
             backup = backup_root / name
+            if not staged.exists():
+                staged.mkdir(parents=True)
             if target.exists():
                 backup.parent.mkdir(parents=True, exist_ok=True)
                 os.replace(target, backup)

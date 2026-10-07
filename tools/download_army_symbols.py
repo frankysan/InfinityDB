@@ -89,6 +89,123 @@ class ResolutionPlan(NamedTuple):
     collisions: dict[str, list[str]]
 
 
+class UpstreamResolution(NamedTuple):
+    """Original Army symbol identity plus reusable bytes when the cache still has them."""
+
+    sha256: str
+    body: bytes | None
+    source_method: str | None
+
+
+def _normalized_label(value: object) -> str:
+    """Return one source-label comparison form without inventing semantic aliases."""
+    return _slugify_label(str(value or "")).replace("-", " ")
+
+
+def _slugify_label(value: str) -> str:
+    """Return the same readable ASCII slug shape used by published symbol names."""
+    return sanitize_filename(value).removesuffix(".svg")
+
+
+def _peripheral_skill_ids(documents: list[SourceDocument]) -> set[int]:
+    """Return source Skill IDs explicitly named Peripheral by metadata."""
+    result: set[int] = set()
+    for document in documents:
+        if document.name != "metadata.json":
+            continue
+        skills = document.data.get("skills")
+        if not isinstance(skills, list):
+            continue
+        for skill in skills:
+            if (
+                isinstance(skill, dict)
+                and type(skill.get("id")) is int
+                and isinstance(skill.get("name"), str)
+                and skill["name"].strip().casefold() == "peripheral"
+            ):
+                result.add(skill["id"])
+    return result
+
+
+def _profile_is_peripheral(profile: dict[str, Any], peripheral_skill_ids: set[int]) -> bool:
+    skills = profile.get("skills")
+    if not isinstance(skills, list):
+        return False
+    for skill in skills:
+        if not isinstance(skill, dict):
+            continue
+        if type(skill.get("id")) is int and skill["id"] in peripheral_skill_ids:
+            return True
+        name = skill.get("name")
+        if isinstance(name, str) and name.strip().casefold() == "peripheral":
+            return True
+    return False
+
+
+def _army_peripheral_names(document: dict[str, Any]) -> list[str]:
+    filters = document.get("filters")
+    if not isinstance(filters, dict):
+        return []
+    rows = filters.get("peripheral")
+    if not isinstance(rows, list):
+        return []
+    names: list[str] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        name = row.get("name")
+        if isinstance(name, str) and name.strip():
+            names.append(name.strip())
+    return names
+
+
+def _peripheral_name(profile_name: str, source_names: list[str]) -> str:
+    """Prefer the Army-local Peripheral name embedded in one profile label.
+
+    Exact and prefix matches are intentionally preferred over generic substring
+    matches.  This keeps labels such as ``BÂTARD, Merc Antipode`` attached to
+    BÂTARD rather than the more generic ANTIPODE definition.  When Army does not
+    expose a matching filter label, the profile name remains the source-backed
+    fallback instead of guessing a maintained identity.
+    """
+    normalized_profile = _normalized_label(profile_name)
+    if not normalized_profile:
+        return profile_name.strip()
+
+    candidates = [
+        (name, _normalized_label(name))
+        for name in source_names
+        if _normalized_label(name)
+    ]
+    exact = [name for name, normalized in candidates if normalized == normalized_profile]
+    if len(exact) == 1:
+        return exact[0]
+
+    prefix = [
+        (name, normalized)
+        for name, normalized in candidates
+        if normalized_profile.startswith(normalized + " ")
+    ]
+    if prefix:
+        longest = max(len(normalized) for _name, normalized in prefix)
+        winners = [name for name, normalized in prefix if len(normalized) == longest]
+        if len(winners) == 1:
+            return winners[0]
+
+    padded_profile = f" {normalized_profile} "
+    contained = [
+        (name, normalized)
+        for name, normalized in candidates
+        if f" {normalized} " in padded_profile
+    ]
+    if contained:
+        longest = max(len(normalized) for _name, normalized in contained)
+        winners = [name for name, normalized in contained if len(normalized) == longest]
+        if len(winners) == 1:
+            return winners[0]
+    return profile_name.strip()
+
+
 def destination_name(url: str) -> str:
     """Return one deterministic, Windows-safe SVG filename for an asset URL."""
     parsed = urlparse(url)
@@ -204,6 +321,7 @@ def discover_symbols(
     semantic: list[dict[str, Any]] = []
     resume: list[dict[str, Any]] = []
     known_locations: set[tuple[str, str]] = set()
+    peripheral_skill_ids = _peripheral_skill_ids(documents)
 
     for document in documents:
         if document.name == "metadata.json":
@@ -238,6 +356,7 @@ def discover_symbols(
         army_match = ARMY_FILE.match(document.name)
         army_id = int(army_match.group("id")) if army_match else None
         army_slug = army_match.group("slug") if army_match else None
+        peripheral_names = _army_peripheral_names(document.data)
         for unit_index, unit in enumerate(units):
             if not isinstance(unit, dict):
                 continue
@@ -279,6 +398,11 @@ def discover_symbols(
                         profile_name = profile.get("name") or profile.get("isc")
                         if isinstance(profile_name, str) and profile_name.strip():
                             reference["profileName"] = profile_name
+                            if _profile_is_peripheral(profile, peripheral_skill_ids):
+                                reference["peripheralName"] = _peripheral_name(
+                                    profile_name,
+                                    peripheral_names,
+                                )
                         semantic.append(reference)
                         known_locations.add((document.name, path))
 
@@ -587,6 +711,30 @@ def _cached_svg(cache: SymbolCache, archive: zipfile.ZipFile, url: str) -> bytes
     return _svg_bytes(body, context=f"cache {cache.archive.name}#{archive_path}")
 
 
+def _cached_upstream_resolution(
+    cache: SymbolCache,
+    archive: zipfile.ZipFile,
+    url: str,
+) -> UpstreamResolution | None:
+    """Recover original Army identity from cache without mistaking overrides for upstream."""
+    asset = cache.assets.get(url)
+    if asset is None:
+        return None
+
+    body = _cached_svg(cache, archive, url)
+    assert body is not None
+    effective_sha256 = hashlib.sha256(body).hexdigest()
+    upstream_sha256 = asset.get("upstreamSha256")
+    if isinstance(upstream_sha256, str):
+        if effective_sha256 == upstream_sha256:
+            return UpstreamResolution(upstream_sha256, body, "cache")
+        return UpstreamResolution(upstream_sha256, None, None)
+
+    if asset.get("sourceMethod") != "override":
+        return UpstreamResolution(effective_sha256, body, "cache")
+    return None
+
+
 def _write_bytes(path: Path, body: bytes) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.parent.mkdir(parents=True, exist_ok=True)
@@ -729,34 +877,150 @@ def acquire_symbol_snapshot(
             unavailable_assets: list[dict[str, Any]] = []
             used_overrides: set[str] = set()
             source_counts = {"override": 0, "cache": 0, "network": 0}
+            upstream_counts = {"cache": 0, "manifest": 0, "network": 0}
             urls = sorted(discovery.authoritative_urls)
-            for index, url in enumerate(urls, start=1):
-                relative = paths[url]
+
+            direct_overrides: dict[str, tuple[str, str, bytes, str]] = {}
+            for url in urls:
                 override_relative = resolution_plan.override_paths[url]
                 override_key = override_relative.casefold()
                 override = overrides.get(override_key)
-                if override is not None:
-                    body = _svg_bytes(
-                        override.read_bytes(),
-                        context=f"override {override}",
+                if override is None:
+                    continue
+                body = _svg_bytes(
+                    override.read_bytes(),
+                    context=f"override {override}",
+                )
+                direct_overrides[url] = (
+                    override_key,
+                    override.relative_to(override_root).as_posix(),
+                    body,
+                    hashlib.sha256(body).hexdigest(),
+                )
+
+            def network_upstream(url: str, index: int) -> bytes | None:
+                upstream_counts["network"] += 1
+                try:
+                    with opener(url, timeout=30) as response:
+                        body = response.read()
+                except HTTPError as exc:
+                    if exc.code != 404:
+                        raise
+                    if index < len(urls) and delay:
+                        sleeper(delay)
+                    return None
+                body = _svg_bytes(body, context=f"network {url}")
+                if index < len(urls) and delay:
+                    sleeper(delay)
+                return body
+
+            upstream_by_url: dict[str, UpstreamResolution] = {}
+            upstream_unavailable: set[str] = set()
+            for index, url in enumerate(urls, start=1):
+                cached_resolution = None
+                if cache is not None:
+                    assert isinstance(cache_archive, zipfile.ZipFile)
+                    cached_resolution = _cached_upstream_resolution(
+                        cache, cache_archive, url
                     )
-                    source_method = "override"
-                    used_overrides.add(override_key)
-                else:
-                    cached = None
-                    if cache is not None:
-                        assert isinstance(cache_archive, zipfile.ZipFile)
-                        cached = _cached_svg(cache, cache_archive, url)
-                    if cached is not None:
-                        body = cached
-                        source_method = "cache"
+                if cached_resolution is not None:
+                    upstream_by_url[url] = cached_resolution
+                    if cached_resolution.body is None:
+                        upstream_counts["manifest"] += 1
                     else:
-                        try:
-                            with opener(url, timeout=30) as response:
-                                body = response.read()
-                        except HTTPError as exc:
-                            if exc.code != 404:
-                                raise
+                        upstream_counts["cache"] += 1
+                    continue
+
+                body = network_upstream(url, index)
+                if body is None:
+                    upstream_unavailable.add(url)
+                    continue
+                upstream_by_url[url] = UpstreamResolution(
+                    hashlib.sha256(body).hexdigest(), body, "network"
+                )
+
+            override_groups: dict[
+                tuple[str, str], list[tuple[str, str, str, bytes, str]]
+            ] = {}
+            for url, (override_key, relative, body, override_sha256) in direct_overrides.items():
+                upstream = upstream_by_url.get(url)
+                if upstream is None:
+                    continue
+                category = Path(resolution_plan.override_paths[url]).parent.as_posix().casefold()
+                override_groups.setdefault((category, upstream.sha256), []).append(
+                    (url, override_key, relative, body, override_sha256)
+                )
+
+            group_override: dict[
+                tuple[str, str], tuple[str, str, str, bytes, str]
+            ] = {}
+            for group_key, candidates in sorted(override_groups.items()):
+                override_hashes = {candidate[4] for candidate in candidates}
+                if len(override_hashes) > 1:
+                    details = "; ".join(
+                        f"{relative} -> {url}"
+                        for url, _key, relative, _body, _sha256 in sorted(candidates)
+                    )
+                    raise ValueError(
+                        "Conflicting image overrides target the same upstream symbol "
+                        f"({group_key[1]}): {details}"
+                    )
+                chosen = min(
+                    candidates,
+                    key=lambda candidate: (candidate[2].casefold(), candidate[0]),
+                )
+                group_override[group_key] = chosen
+                used_overrides.update(candidate[1] for candidate in candidates)
+
+            for index, url in enumerate(urls, start=1):
+                relative = paths[url]
+                upstream = upstream_by_url.get(url)
+                direct_override = direct_overrides.get(url)
+                selected_override = None
+                if upstream is not None:
+                    category = (
+                        Path(resolution_plan.override_paths[url])
+                        .parent.as_posix()
+                        .casefold()
+                    )
+                    selected_override = group_override.get((category, upstream.sha256))
+                if selected_override is None and direct_override is not None:
+                    override_key, override_relative, body, override_sha256 = direct_override
+                    selected_override = (
+                        url,
+                        override_key,
+                        override_relative,
+                        body,
+                        override_sha256,
+                    )
+                    used_overrides.add(override_key)
+
+                if selected_override is not None:
+                    body = selected_override[3]
+                    source_method = "override"
+                else:
+                    if upstream is None:
+                        assert url in upstream_unavailable
+                        unavailable_assets.append(
+                            {
+                                "url": url,
+                                "sourceFilename": Path(urlparse(url).path).name
+                                or destination_name(url),
+                                "archivePath": relative,
+                                "sourceMethod": "network",
+                                "httpStatus": 404,
+                            }
+                        )
+                        progress(
+                            f"[{index}/{len(urls)}] {relative} "
+                            "[unavailable HTTP 404]"
+                        )
+                        continue
+                    body = upstream.body
+                    source_method = upstream.source_method
+                    if body is None:
+                        body = network_upstream(url, index)
+                        if body is None:
                             unavailable_assets.append(
                                 {
                                     "url": url,
@@ -771,28 +1035,29 @@ def acquire_symbol_snapshot(
                                 f"[{index}/{len(urls)}] {relative} "
                                 "[unavailable HTTP 404]"
                             )
-                            if index < len(urls) and delay:
-                                sleeper(delay)
                             continue
-                        body = _svg_bytes(body, context=f"network {url}")
+                        upstream = UpstreamResolution(
+                            hashlib.sha256(body).hexdigest(), body, "network"
+                        )
+                        upstream_by_url[url] = upstream
                         source_method = "network"
-                        if index < len(urls) and delay:
-                            sleeper(delay)
+                    assert source_method in {"cache", "network"}
 
                 path = staging_path / Path(relative)
                 _write_bytes(path, body)
                 files.append(path)
                 source_counts[source_method] += 1
-                assets.append(
-                    {
-                        "url": url,
-                        "sourceFilename": Path(urlparse(url).path).name
-                        or destination_name(url),
-                        "archivePath": relative,
-                        "sha256": hashlib.sha256(body).hexdigest(),
-                        "sourceMethod": source_method,
-                    }
-                )
+                asset = {
+                    "url": url,
+                    "sourceFilename": Path(urlparse(url).path).name
+                    or destination_name(url),
+                    "archivePath": relative,
+                    "sha256": hashlib.sha256(body).hexdigest(),
+                    "sourceMethod": source_method,
+                }
+                if upstream is not None:
+                    asset["upstreamSha256"] = upstream.sha256
+                assets.append(asset)
                 progress(f"[{index}/{len(urls)}] {relative} [{source_method}]")
 
             unused_overrides = sorted(
@@ -806,6 +1071,12 @@ def acquire_symbol_snapshot(
                 f"cache {source_counts['cache']} | "
                 f"network {source_counts['network']} | "
                 f"unavailable {len(unavailable_assets)}"
+            )
+            progress(
+                "Upstream identities: "
+                f"cache {upstream_counts['cache']} | "
+                f"manifest {upstream_counts['manifest']} | "
+                f"network {upstream_counts['network']}"
             )
             if unused_overrides:
                 progress(f"Unused image overrides ({len(unused_overrides)}):")

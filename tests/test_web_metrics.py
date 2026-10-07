@@ -23,8 +23,16 @@ def test_request_metrics_record_bounded_histograms() -> None:
     worker_slot = metrics.start_request()
     metrics.finish_request(worker_slot, "/api/units/:id", 200, 0.02, 2048)
 
+    snapshot = metrics.snapshot()
     body = metrics.render_prometheus(version="0.7.2", snapshot_revision="abc123")
 
+    assert snapshot.metrics_started_timestamp_seconds > 0
+    assert (
+        snapshot.metrics_last_request_timestamp_seconds
+        >= snapshot.metrics_started_timestamp_seconds
+    )
+    assert b"infinitydb_metrics_started_timestamp_seconds " in body
+    assert b"infinitydb_metrics_last_request_timestamp_seconds " in body
     assert b"infinitydb_http_requests_active 0" in body
     assert (
         b'infinitydb_http_requests_total{route="/api/units/:id",status_class="2xx"} 1'
@@ -40,6 +48,30 @@ def test_request_metrics_record_bounded_histograms() -> None:
         in body
     )
 
+
+
+
+def test_request_metrics_generation_timestamps_are_stable_until_a_request_completes() -> None:
+    metrics = RequestMetrics()
+
+    initial = metrics.snapshot()
+    first_render = metrics.render_prometheus(version="0.7.2", snapshot_revision="abc123")
+    second_render = metrics.render_prometheus(version="0.7.2", snapshot_revision="abc123")
+
+    assert initial.metrics_started_timestamp_seconds > 0
+    assert initial.metrics_last_request_timestamp_seconds == 0
+    assert first_render == second_render
+    assert b"infinitydb_metrics_last_request_timestamp_seconds 0.000000" in first_render
+
+    worker_slot = metrics.start_request()
+    metrics.finish_request(worker_slot, "/units", 200, 0.01, 1024)
+    completed = metrics.snapshot()
+
+    assert completed.metrics_started_timestamp_seconds == initial.metrics_started_timestamp_seconds
+    assert (
+        completed.metrics_last_request_timestamp_seconds
+        >= initial.metrics_started_timestamp_seconds
+    )
 
 class _ForkProcessContext(Protocol):
     Process: Callable[..., multiprocessing.Process]

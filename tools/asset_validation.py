@@ -10,7 +10,9 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
 ASSET_MODES = ("off", "auto", "required")
-PUBLISHED_ASSET_CATEGORIES = ("armies", "characteristics", "orders", "units")
+PUBLISHED_ASSET_CATEGORIES = (
+    "armies", "characteristics", "orders", "peripherals", "units"
+)
 PUBLICATION_MANIFEST_FORMAT = "InfinityDB symbol publication mapping"
 PUBLICATION_MANIFEST_VERSION = 2
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -139,6 +141,18 @@ def _publication_manifest(
                     f"Published symbol manifest {field} values must be strings"
                 )
             browser_paths.add(relative)
+
+    semantic_profiles = document.get("profileIdentityToPublishedPath", {})
+    if not isinstance(semantic_profiles, dict):
+        raise AssetValidationError(
+            "Published symbol manifest profileIdentityToPublishedPath must be an object"
+        )
+    for relative in semantic_profiles.values():
+        if not isinstance(relative, str):
+            raise AssetValidationError(
+                "Published symbol manifest profileIdentityToPublishedPath values must be strings"
+            )
+        browser_paths.add(relative)
 
     browser_count = usage.get("browserReferencedAssetCount")
     unreferenced_count = usage.get("unreferencedPublishedAssetCount")

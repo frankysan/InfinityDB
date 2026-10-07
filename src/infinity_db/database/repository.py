@@ -29,6 +29,7 @@ from infinity_db.domain_slugs import (
     require_domain_slug,
     resolve_domain_slug_candidates,
 )
+from infinity_db.fireteam_semantics import fireteam_limit_kind
 from infinity_db.identities import (
     IDENTITY_CONFIG_METADATA_KEY,
     IDENTITY_CONFIG_SHA256_METADATA_KEY,
@@ -38,6 +39,7 @@ from infinity_db.identities import (
     parse_identity_metadata,
     strip_reinforcement_prefix,
 )
+from infinity_db.unit_filter_config import load_unit_filter_config
 
 from .application_armies import (
     ARMY_ROLE_REINFORCEMENT,
@@ -1825,6 +1827,7 @@ class Database:
                     "type": row["fireteam_type"],
                     "position": int(row["position"]),
                     "max_count": int(row["raw_limit"]),
+                    "limit_kind": fireteam_limit_kind(int(row["raw_limit"])),
                 }
                 for row in limits
             ],
@@ -2102,9 +2105,46 @@ class Database:
         return None if item is None else int(item["id"])
 
     @instance_lru_cache(maxsize=128)
+    def _classification_filter_source_ids(
+        self, item_ref: int | str
+    ) -> tuple[int, ...]:
+        item_id = self._unit_filter_source_id("classifications", item_ref)
+        if item_id is None:
+            return ()
+        items = self.list_unit_filter_values()["classifications"]
+        by_id = {int(item["id"]): item for item in items}
+        by_slug = {str(item["slug"]): item for item in items}
+        selected = by_id[item_id]
+        source_ids = {item_id}
+        for membership in load_unit_filter_config().classification_memberships:
+            if selected["slug"] not in membership.matches:
+                continue
+            source = by_slug.get(membership.source_classification)
+            if source is not None:
+                source_ids.add(int(source["id"]))
+        return tuple(sorted(source_ids))
+
+    @instance_lru_cache(maxsize=128)
     def _logical_unit_ids_for_unit_filter(
         self, public_name: str, item_ref: int | str
     ) -> frozenset[int]:
+        if public_name == "classifications":
+            classification_ids = self._classification_filter_source_ids(item_ref)
+            if not classification_ids:
+                return frozenset()
+            placeholders = ", ".join("?" for _ in classification_ids)
+            with self._connect() as connection:
+                rows = connection.execute(
+                    "SELECT DISTINCT p.logical_unit_id AS logical_unit_id "
+                    "FROM profile_payload_occurrences AS o "
+                    "JOIN profile_payloads AS p ON p.id = o.profile_payload_id "
+                    "JOIN profile_groups AS g ON g.army_id = o.army_id "
+                    "AND g.unit_id = o.unit_id AND g.group_id = o.group_id "
+                    f"WHERE g.category_id IN ({placeholders})",
+                    classification_ids,
+                ).fetchall()
+            return frozenset(int(row["logical_unit_id"]) for row in rows)
+
         item_id = self._unit_filter_source_id(public_name, item_ref)
         if item_id is None:
             return frozenset()
@@ -2113,16 +2153,6 @@ class Database:
                 rows = connection.execute(
                     "SELECT DISTINCT logical_unit_id FROM profile_payloads "
                     "WHERE type_id = ?",
-                    (item_id,),
-                ).fetchall()
-            elif public_name == "classifications":
-                rows = connection.execute(
-                    "SELECT DISTINCT p.logical_unit_id AS logical_unit_id "
-                    "FROM profile_payload_occurrences AS o "
-                    "JOIN profile_payloads AS p ON p.id = o.profile_payload_id "
-                    "JOIN profile_groups AS g ON g.army_id = o.army_id "
-                    "AND g.unit_id = o.unit_id AND g.group_id = o.group_id "
-                    "WHERE g.category_id = ?",
                     (item_id,),
                 ).fetchall()
             elif public_name == "characteristics":
@@ -2185,7 +2215,7 @@ class Database:
         army_id: int | None,
         rule_source_ids: Mapping[str, tuple[int, ...]],
         troop_type_id: int | None,
-        classification_id: int | None,
+        classification_ids: tuple[int, ...] | None,
         characteristic_id: int | None,
         ava: int | str | None,
         ava_min: int | None,
@@ -2314,13 +2344,15 @@ class Database:
         if troop_type_id is not None:
             where.append(same_group_profile("fpp.type_id = ?"))
             parameters.append(troop_type_id)
-        if classification_id is not None:
+        if classification_ids:
+            placeholders = ", ".join("?" for _ in classification_ids)
             where.append(
                 "EXISTS (SELECT 1 FROM profile_groups AS fg "
                 f"WHERE fg.army_id = {base}.army_id AND fg.unit_id = {base}.unit_id "
-                f"AND fg.group_id = {base}.group_id AND fg.category_id = ?)"
+                f"AND fg.group_id = {base}.group_id "
+                f"AND fg.category_id IN ({placeholders}))"
             )
-            parameters.append(classification_id)
+            parameters.extend(classification_ids)
         if characteristic_id is not None:
             profile_clause = (
                 "EXISTS (SELECT 1 FROM profile_payload_occurrences AS cp "
@@ -2822,11 +2854,21 @@ class Database:
             "classifications": classification,
             "characteristics": characteristic,
         }
-        unit_filter_ids = {
-            public_name: self._unit_filter_source_id(public_name, item_ref)
-            for public_name, item_ref in unit_filter_refs.items()
-            if item_ref is not None
-        }
+        troop_type_filter_id = (
+            self._unit_filter_source_id("troop_types", troop_type)
+            if troop_type is not None
+            else None
+        )
+        classification_filter_ids = (
+            self._classification_filter_source_ids(classification)
+            if classification is not None
+            else None
+        )
+        characteristic_filter_id = (
+            self._unit_filter_source_id("characteristics", characteristic)
+            if characteristic is not None
+            else None
+        )
         logical_unit_filters = []
         if _logical_unit_ids is not None:
             logical_unit_filters.append(_logical_unit_ids)
@@ -2929,9 +2971,9 @@ class Database:
             self._contextual_unit_filter_matches(
                 army_id=army_id,
                 rule_source_ids=rule_source_ids,
-                troop_type_id=unit_filter_ids.get("troop_types"),
-                classification_id=unit_filter_ids.get("classifications"),
-                characteristic_id=unit_filter_ids.get("characteristics"),
+                troop_type_id=troop_type_filter_id,
+                classification_ids=classification_filter_ids,
+                characteristic_id=characteristic_filter_id,
                 ava=ava,
                 ava_min=ava_min,
                 ava_max=ava_max,
