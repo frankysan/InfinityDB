@@ -21,6 +21,7 @@
         "test_audit_source_presentation",
         "test_audit_unit_semantics",
         "test_audit_weapon_chart_profiles",
+        "test_audit_weapon_traits_prose",
         "test_availability",
         "test_availability_schema",
         "test_catalog_rules",

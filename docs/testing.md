@@ -422,5 +422,27 @@ The supplied v5.3 PDF yields 171/171 uniquely aligned rows, with 170 five-field
 matches and 170 range-band matches. Kobra Pistol CC Mode has a Saving Rolls
 source discrepancy candidate (PDF 1, Army 2); Katyusha MRL prints unsigned `3`
 where Army has `+3`. The separate Disco Ball object's attributes match.
-This remains partial evidence: full Traits, other auxiliary/equipment profiles,
-special-weapon prose, and API/browser projection still need review.
+This remains partial evidence: other auxiliary/equipment profiles, special-weapon
+prose semantics, and API/browser projection still need review.
+
+## 1.0 Weapon Traits and special-weapon source inventory
+
+`tools/audit_weapon_traits_prose.py` uses the same optional N5 v5.3 PDF and
+generated Army database, plus `rules.db`, to compare positionally reconstructed
+Traits against raw Army `metadata_weapons.properties`. The offline check keeps
+printed wording, mode identities, source page, and Army properties in each report.
+It also indexes 12 named special-weapon prose sections on pp. 68–74 against
+named curated Weapon definitions, without treating a missing dedicated Weapon
+record as proof that no gameplay rule representation exists.
+
+```powershell
+python tools/audit_weapon_traits_prose.py --core-pdf "C:\path\to\n5-rules-v5-3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
+```
+
+The supplied PDF currently yields 145 literal Trait-list matches, 24 review
+candidates, and two positional source deferrals across the 171 aligned chart
+rows. These candidates are **not confirmed source-data defects**: spelling and
+shorthand differences, omitted/extra printed Traits, and extraction limitations
+require separate review. The report does not compare prose clauses, rule
+relationships, or player-facing completeness. The PDF remains an optional
+offline dependency only; normal tests and CI require no PDF or PyMuPDF.

@@ -132,8 +132,17 @@ unimplemented until its corresponding behavior exists.
       This is a source-notation review candidate, not a curated-data change.
     - [ ] Review Katyusha MRL's unsigned positive range MOD in the N5 v5.3
       chart before interpreting it as a source mistake or normalizing it.
-    - [ ] Reconcile printed Traits, unusual auxiliary/equipment object profiles,
-      and special-weapon prose separately from the five-field/range audit.
+    - [x] Establish a read-only Weapon Traits and special-prose section inventory with
+      `tools/audit_weapon_traits_prose.py` against the N5 v5.3 PDF. The 171
+      Burst-anchored chart rows yield 145 literal Trait-list matches, 24 review
+      candidates (including shorthand and source spelling differences), and two
+      PDF-layout deferrals; all 12 indexed prose sections on pp. 68–74 are present.
+      This is not evidence of rule-definition, relationship, or browser completeness.
+    - [ ] Adjudicate Weapon Trait differences against printed source rows and
+      maintained identities, including Pheroware, Kobra Pistol, WildParrot,
+      state aliases, spelling variants, and ambiguous PDF cell boundaries.
+      Reconcile auxiliary/equipment object profiles and special-weapon prose
+      clause by clause; identify missing facts, relationships and browser coverage.
     - [ ] Review the six unmatched chart-text names as aliases, multi-mode entries,
       or source-specific rules (including Chest Mine and SymbioBomb). Reconcile all
       Weapon Chart rows and special-weapon text against N5 v5.3 pp. 68–74 and 176–188,
