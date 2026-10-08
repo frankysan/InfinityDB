@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from tools.audit_weapon_chart_profiles import (
+    _printed_name_and_mode,
     _value,
     compare_rows,
     markdown_report,
@@ -103,19 +104,85 @@ def test_absent_values_are_equivalent_but_a_number_is_not() -> None:
     assert _value(" 1 ") != _value("--")
 
 
-def test_multimode_and_wrapped_names_are_deferred_not_guessed() -> None:
-    first = _pdf_row("")
-    second = _pdf_row("MULTI Red Fury")
-    result = compare_rows(
-        [first, second],
-        {"multiredfury": [
-            _army_row("MULTI Red Fury"),
-            {**_army_row("MULTI Red Fury"), "mode": "Shock Mode"},
-        ]},
+def test_wrapped_name_is_reconstructed_within_row_boundaries() -> None:
+    words = [
+        (34.0, 197.8, "AP+DA"),
+        (60.0, 197.8, "CC"),
+        (38.0, 207.4, "WEAPON"),
+        (274.0, 202.6, "8"),
+        (297.0, 202.6, "1"),
+        (329.0, 202.6, "AP+DA"),
+        (376.0, 202.6, "ARM/2"),
+        (430.0, 202.6, "2"),
+        (24.0, 224.2, "AP+EXP"),
+        (40.0, 233.8, "WEAPON"),
+        (274.0, 229.0, "8"),
+        (297.0, 229.0, "1"),
+    ]
+    rows = rows_from_words(words, 177)
+    assert [row["name"] for row in rows] == ["AP+DA CC WEAPON", "AP+EXP WEAPON"]
+    assert rows[0]["ammunition"] == "AP+DA"
+
+
+def test_explicit_mode_disambiguates_repeated_weapon_name() -> None:
+    source = _pdf_row("MULTI Red Fury (Anti-Materiel Mode)")
+    primary = {**_army_row("MULTI Red Fury"), "mode": "Antimaterial Mode"}
+    secondary = {**_army_row("MULTI Red Fury"), "mode": "Shock Mode",
+                 "ammunition": "SHOCK"}
+    result = compare_rows([source], {"multiredfury": [primary, secondary]})
+    assert result["matchingRows"] == 1
+    assert result["compared"][0]["mode"] == "Antimaterial Mode"
+    assert result["compared"][0]["printedName"] == source["name"]
+    assert _printed_name_and_mode("Kobra Pistol (CC Mode)") == (
+        "Kobra Pistol", "CC Mode"
     )
-    assert result["unambiguousRowsCompared"] == 0
-    assert result["deferredRows"] == 2
+
+
+def test_mine_plural_is_a_narrow_source_name_alias() -> None:
+    result = compare_rows([_pdf_row("AP MINES")], {"apmine": [_army_row("AP Mine")]})
+    assert result["matchingRows"] == 1
+
+
+def test_missing_or_unknown_mode_stays_deferred() -> None:
+    rows = [
+        _pdf_row("MULTI Red Fury"),
+        _pdf_row("MULTI Red Fury (Blast Mode)"),
+    ]
+    options = [
+        {**_army_row("MULTI Red Fury"), "mode": "AP Mode"},
+        {**_army_row("MULTI Red Fury"), "mode": "Shock Mode"},
+    ]
+    result = compare_rows(rows, {"multiredfury": options})
     assert result["deferredReasons"] == {
-        "multiple-army-modes": 1,
-        "no-exact-single-line-name": 1,
+        "missing-mode-disambiguation": 1,
+        "unresolved-army-mode": 1,
     }
+
+
+def test_incomplete_multiline_profile_cell_is_deferred_not_mismatch() -> None:
+    row = _pdf_row("Plasma Carbine (Blast Mode)")
+    row["savingAttribute"] = ""
+    result = compare_rows(
+        [row], {"plasmacarbine": [
+            {**_army_row("Plasma Carbine"), "mode": "Blast Mode"},
+            {**_army_row("Plasma Carbine"), "mode": "Hit Mode"},
+        ]}
+    )
+    assert result["candidateDiscrepancies"] == 0
+    assert result["deferredReasons"] == {"incomplete-pdf-cells": 1}
+
+
+def test_resolved_multimode_profile_can_report_real_field_discrepancy() -> None:
+    row = _pdf_row("Kobra Pistol (CC Mode)")
+    row["savingRolls"] = "1"
+    army = {**_army_row("Kobra Pistol"), "mode": "CC Mode", "savingRolls": "1"}
+    result = compare_rows(
+        [row], {"kobrapistol": [
+            {**army, "mode": "BS Mode"},
+            {**army, "mode": "CC Mode", "savingRolls": "2"},
+        ]}
+    )
+    assert result["candidateDiscrepancies"] == 1
+    assert result["compared"][0]["differences"] == [
+        {"field": "savingRolls", "pdf": "1", "army": "2"}
+    ]

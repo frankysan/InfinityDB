@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Compare unambiguous N5 v5.3 PDF Weapon Chart rows with shipped Army metadata.
+"""Compare identifiable N5 v5.3 PDF Weapon Chart rows with shipped Army metadata.
 
-The PDF's wrapped names and multi-mode layouts require a separate review. This
-report checks only exact single-line name matches and explicitly names its limits.
+Reassemble wrapped weapon names, and select explicit mode names only on an
+unambiguous match. Unresolved printed identities and cells remain deferred.
 Nothing in this tool modifies game data or treats a profile as a rule definition.
 """
 
@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Any
 
 FORMAT = "InfinityDB N5 Weapon Chart profile evidence"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
 PDF_PAGES = range(176, 189)
 _FIELDS = ("ps", "burst", "ammunition", "savingAttribute", "savingRolls")
 
@@ -74,19 +74,36 @@ def _cell(words: list[tuple[float, float, str]], y: float, left: float,
 
 def rows_from_words(words: list[tuple[float, float, str]], page_number: int
                     ) -> list[dict[str, Any]]:
-    """Extract only rows whose name shares the printed Burst value's baseline.
+    """Reassemble rows of the *specific* N5 v5.3 Weapon Chart layout.
 
-    These coordinates describe the *specific* N5 v5.3 core Weapon Chart. If the
-    PDF layout changes, this audit must be reviewed rather than silently reused.
+    Burst values anchor table rows. Name text may span up to four baselines;
+    midpoints between Burst anchors stop adjacent names from merging. Limit
+    the name window to the printed name column and 19.3 vertical points.
+    Unreadable cells are left blank, never reconstructed by guessing.
     """
+    anchors = [
+        (y, word) for x, y, word in words
+        if 294 <= x <= 310 and 175 < y < 800
+        and re.fullmatch(r"(?:[1-9]|10|--)", word)
+    ]
+    anchors.sort()
     result: list[dict[str, Any]] = []
-    for x, y, word in words:
-        if not (294 <= x <= 310 and 175 < y < 800):
-            continue
-        if re.fullmatch(r"(?:[1-9]|10|--)", word) is None:
-            continue
-        name = _cell(words, y, 13, 90)
-        row = {
+    for index, (y, _) in enumerate(anchors):
+        low = max(y - 19.3, (anchors[index - 1][0] + y) / 2) if index else y - 19.3
+        high = (
+            min(y + 19.3, (anchors[index + 1][0] + y) / 2)
+            if index + 1 < len(anchors) else y + 19.3
+        )
+        name_words = [
+            (wy, x, word) for x, wy, word in words
+            if 12 <= x < 90 and low < wy < high and word != "NAME"
+        ]
+        name = " ".join(
+            word for _, _, word in sorted(
+                name_words, key=lambda entry: (round(entry[0] / 4.8), entry[1])
+            )
+        )
+        result.append({
             "page": page_number,
             "name": name,
             "ps": _cell(words, y, 263, 293),
@@ -94,9 +111,34 @@ def rows_from_words(words: list[tuple[float, float, str]], page_number: int
             "ammunition": _cell(words, y, 315, 367),
             "savingAttribute": _cell(words, y, 367, 418),
             "savingRolls": _cell(words, y, 418, 462),
-        }
-        result.append(row)
+        })
     return result
+
+
+def _printed_name_and_mode(name: str) -> tuple[str, str]:
+    """Keep the printed identity separate from an explicit parenthesized mode."""
+    match = re.fullmatch(r"(.+?)\s*\(([^()]*)\s+Mode\)", name, re.IGNORECASE)
+    if match is None:
+        return name, ""
+    return match.group(1).strip(), match.group(2).strip() + " Mode"
+
+
+def _mode_identity(mode: str) -> str:
+    # N5's Anti-Materiel and Army's Anti-Material/Antimaterial spellings
+    # designate the same named mode; do not collapse unrelated mode names.
+    return _identity(mode).replace("antimaterial", "antimateriel")
+
+
+def _army_options(
+    name: str, metadata: dict[str, list[dict[str, str]]]
+) -> list[dict[str, str]]:
+    key = _identity(name)
+    options = metadata.get(key, []) if key else []
+    # The chart labels tokenized Mines in the plural; Army models the type
+    # as a singular weapon. Limit this alias to a trailing "Mines" word.
+    if not options and key.endswith("mines"):
+        options = metadata.get(key[:-1], [])
+    return options
 
 
 def _metadata(db: Path) -> tuple[dict[str, list[dict[str, str]]], int]:
@@ -125,17 +167,35 @@ def _metadata(db: Path) -> tuple[dict[str, list[dict[str, str]]], int]:
 
 def compare_rows(chart_rows: list[dict[str, Any]], metadata: dict[str, list[dict[str, str]]]
                  ) -> dict[str, Any]:
-    """Count a row as comparable only when exactly one mode/identity matches."""
+    """Compare only exact, uniquely resolved printed identity/mode pairs."""
     compared: list[dict[str, Any]] = []
     deferred: list[dict[str, Any]] = []
     for row in chart_rows:
-        key = _identity(row["name"])
-        options = metadata.get(key, []) if key else []
-        if len(options) != 1:
+        printed_name, printed_mode = _printed_name_and_mode(row["name"])
+        options = _army_options(printed_name, metadata)
+        reason = ""
+        if not options:
+            reason = "no-matching-army-identity"
+        elif printed_mode:
+            options = [
+                option for option in options
+                if _mode_identity(option["mode"]) == _mode_identity(printed_mode)
+            ]
+            if len(options) != 1:
+                reason = "unresolved-army-mode"
+        elif len(options) != 1:
+            reason = "missing-mode-disambiguation"
+        elif options[0]["mode"]:
+            reason = "missing-printed-mode"
+        # A blank extracted cell is not the chart's explicit `--` notation.
+        # It can indicate wrapped columns, e.g. the combined Plasma save;
+        # such rows require a separate structured extraction review.
+        if not reason and any(not row[field].strip() for field in _FIELDS):
+            reason = "incomplete-pdf-cells"
+        if reason:
             deferred.append({
                 "page": row["page"], "extractedName": row["name"],
-                "reason": "no-exact-single-line-name" if not options
-                else "multiple-army-modes",
+                "reason": reason,
             })
             continue
         army = options[0]
@@ -145,6 +205,7 @@ def compare_rows(chart_rows: list[dict[str, Any]], metadata: dict[str, list[dict
         ]
         compared.append({
             "page": row["page"], "name": army["name"],
+            "mode": army["mode"], "printedName": row["name"],
             "pdf": {field: row[field] for field in _FIELDS},
             "army": {field: army[field] for field in _FIELDS},
             "differences": differences,
@@ -197,7 +258,7 @@ def audit_chart(pdf: Path, army_db: Path) -> dict[str, Any]:
         "armyMetadataProfiles": count,
         "comparison": result,
         "notCompared": [
-            "wrapped-name and multimode Weapon Chart rows",
+            "unresolved Weapon Chart identities, modes, and multiline save fields",
             "range band breakpoints and modifiers",
             "Traits, mode variants, and special-weapon prose on pages 68-74",
             "profile-to-API/browser projection and standalone rule-definition coverage",
@@ -208,7 +269,7 @@ def audit_chart(pdf: Path, army_db: Path) -> dict[str, Any]:
 def markdown_report(report: dict[str, Any]) -> str:
     result = report["comparison"]
     lines = [
-        "# 1.0 N5 v5.3 Weapon Chart — first structured comparison",
+        "# 1.0 N5 v5.3 Weapon Chart — wrapped names and explicit modes",
         "",
         "**Partial evidence, not a completeness verdict.** Uses the official PDF pp. 176–188.",
         "No upstream source, Army metadata, or curated gameplay facts are modified.",
@@ -216,7 +277,7 @@ def markdown_report(report: dict[str, Any]) -> str:
         f"- Core PDF SHA-256: `{report['corePdfSha256']}`",
         f"- Published Army metadata profile rows: **{report['armyMetadataProfiles']}**.",
         f"- PDF chart rows located: **{result['chartRowsLocated']}**.",
-        ("- Exact, single-line, unique-mode rows compared: "
+        ("- Unique printed identity/mode rows compared: "
          f"**{result['unambiguousRowsCompared']}**."),
         f"- Rows with all five compared fields matching: **{result['matchingRows']}**.",
         f"- Candidate discrepancies: **{result['candidateDiscrepancies']}**.",
@@ -228,7 +289,8 @@ def markdown_report(report: dict[str, Any]) -> str:
     for row in result["compared"]:
         for issue in row["differences"]:
             lines.append(
-                f"- **{row['name']}** (p. {row['page']}), {issue['field']}: "
+                f"- **{row['name']}** ({row['mode'] or 'standard'}, "
+                f"p. {row['page']}), {issue['field']}: "
                 f"PDF `{issue['pdf']}` vs Army `{issue['army']}`."
             )
     if not result["candidateDiscrepancies"]:
@@ -236,14 +298,21 @@ def markdown_report(report: dict[str, Any]) -> str:
     lines.extend([
         "", "## Important limitations", "",
         "- A compared row is not proof of complete Weapon facts or a rule definition.",
-        "- The chart extractor accepts only names on the same text baseline as Burst.",
-        "- It does not guess across wrapped names or silently select one of several modes.",
+        "- The chart extractor groups wrapped names around each printed Burst baseline.",
+        "- Modes are selected only by an explicit printed mode name;",
+        "  unresolved identities remain deferred.",
+        "- Incomplete multi-line profile fields are deferred, not inferred.",
         "- Blank, `-` and `--` represent the same absent value for this comparison.",
         "- A Saving Roll multiplier is non-operative without a Saving Attribute;",
         "  an Army `savingNum=1` with `saving=-` matches the chart's `--`.",
         "- The remaining rows and the categories below require dedicated audit work:",
     ])
     lines.extend(f"  - {entry}" for entry in report["notCompared"])
+    lines.extend(["", "## Deferred source rows", ""])
+    for row in result["deferred"]:
+        lines.append(
+            f"- p. {row['page']}: `{row['extractedName']}` — {row['reason']}."
+        )
     lines.append("")
     return "\n".join(lines)
 

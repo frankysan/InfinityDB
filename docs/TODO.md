@@ -112,8 +112,18 @@ unimplemented until its corresponding behavior exists.
       all 74 match when interpreting Saving Roll multipliers together with their
       Saving Attributes. Mine Dispenser's `savingNum=1` is non-operative because
       `saving=-`, matching the printed `--`. This is not full Weapon Chart coverage.
-    - [ ] Expand PDF row alignment for wrapped names and multi-mode profiles,
-      then compare range breakpoints/MODs, Traits, and special-weapon prose.
+    - [x] Expand conservative PDF/Army alignment to wrapped names and explicit
+      multi-mode profiles. The supplied N5 v5.3 PDF now aligns 163 of 171 chart
+      rows across five profile fields: 162 match and Kobra Pistol (CC Mode) has
+      a Saving Rolls discrepancy (printed 1, Army 2). Six Plasma-mode rows have
+      multiline saving cells; two Disco Baller rows need identity/mode review.
+      This is partial profile evidence, not full Weapon Chart completeness.
+    - [ ] Verify Kobra Pistol (CC Mode) against the published source/version and
+      determine whether the 1-versus-2 Saving Rolls difference is an Army
+      metadata error, a chart error, or a documented source-specific exception.
+    - [ ] Reconcile the remaining six Plasma saving cells and two Disco Baller
+      identities/modes, then compare range breakpoints/MODs, Traits, and
+      special-weapon prose.
     - [ ] Review the six unmatched chart-text names as aliases, multi-mode entries,
       or source-specific rules (including Chest Mine and SymbioBomb). Reconcile all
       Weapon Chart rows and special-weapon text against N5 v5.3 pp. 68–74 and 176–188,

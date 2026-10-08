@@ -398,8 +398,11 @@ row, score condition, placement, source issue, and SVG output after reference ex
 
 ## 1.0 Weapon Chart partial evidence audit
 
-The read-only `tools/audit_weapon_chart_profiles.py` compares only uniquely aligned
-single-line, single-mode N5 v5.3 chart rows against the shipped Army metadata.
+The read-only `tools/audit_weapon_chart_profiles.py` compares N5 v5.3 chart
+rows against shipped Army metadata when their printed names and explicit modes
+uniquely identify a source profile. Wrapped names are reconstructed from row
+baselines; unmatched identities/modes and incomplete multiline fields are
+reported as deferred, never normalized speculatively.
 The official core PDF is supplied locally and is **not** included in Git. This
 offline audit additionally requires PyMuPDF (`python -m pip install pymupdf`);
 normal CI and tests do not need that optional dependency. Run from the repository root:
@@ -412,5 +415,8 @@ The output includes the source PDF SHA-256 and distinguishes matching fields,
 candidate discrepancies, and deferred rows. It interprets Saving Roll multipliers
 in context: an Army `savingNum=1` with no Saving Attribute is non-operative and
 matches a printed `--` (while the raw values remain visible). Absence of a
-discrepancy is not a completeness claim: range bands, Traits, wrapped/multi-mode
-rows, special-weapon prose, and browser projection still need review.
+discrepancy is not a completeness claim: range bands, Traits,
+complex multiline saving cells, special-weapon prose, and browser projection
+still need review. The supplied v5.3 PDF currently yields 163/171 compared
+rows; the Kobra Pistol CC Mode Saving Rolls value needs source review (PDF 1,
+Army 2). Six Plasma rows and two Disco Baller rows remain deferred.
