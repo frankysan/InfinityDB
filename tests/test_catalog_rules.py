@@ -1,9 +1,13 @@
 import copy
+import json
 from pathlib import Path
+from typing import Any
+from wsgiref.util import setup_testing_defaults
 
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import RulesDatabase, export_rules_database
+from infinity_db.web import create_app
 
 
 def _rules_database(tmp_path: Path) -> RulesDatabase:
@@ -220,3 +224,109 @@ def test_equipment_catalog_adds_curated_declaration_categories(tmp_path: Path) -
     ]
     assert [rule["id"] for rule in result["rules"]] == ["equipment:medikit"]
     assert result["rules"][0]["declaration_categories"] == result["categories"]
+
+
+def test_weapon_source_mode_rules_do_not_leak_between_same_id_profiles(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    core_path, core = next(
+        (path, document) for path, document in documents
+        if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    test_core = copy.deepcopy(core)
+    shared = {
+        "kind": "weapon",
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 182}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-10-08"},
+    }
+    test_core["records"].extend(
+        [
+        {
+            **shared, "id": "weapon:kobra-pistol-test",
+            "name": "Kobra test shared", "summary": "Synthetic shared reference.",
+            "armyLinks": [{"entity": "weapon", "id": "kobra-pistol"}],
+            "variantSemantics": {"inheritance": "family"},
+        },
+        {
+            **shared, "id": "weapon:kobra-pistol-cc-test",
+            "name": "Kobra CC test", "summary": "Synthetic CC-only reference.",
+            "armyLinks": [{"entity": "weapon", "id": 221}],
+            "variantSemantics": {"inheritance": "source", "sourceMode": "CC Mode"},
+            "relations": [{"type": "variant-of", "recordId": "weapon:kobra-pistol-test"}],
+        },
+        ]
+    )
+    path = tmp_path / "rules.db"
+    export_rules_database(
+        [(core_path, test_core), *(entry for entry in documents if entry[0] != core_path)],
+        path,
+    )
+    rules = RulesDatabase(path)
+    record = rules.composed_records_for_army_link("weapon", 221)
+    assert next(rule for rule in record if rule["id"] == "weapon:kobra-pistol-cc-test")[
+        "variant_semantics"
+    ] == {"inheritance": "source", "source_mode": "CC Mode"}
+    # Exact-source variant labels are separate from per-mode rules.
+    assert 221 not in rules.catalog_source_variant_semantics("weapon")
+
+    def profiles() -> list[dict]:
+        return [
+            {"id": 221, "mode": "BS Mode", "ammunition": "Shock"},
+            {"id": 221, "mode": "CC Mode", "ammunition": "DA"},
+        ]
+
+    item = {
+        "id": 221, "name": "Kobra Pistol", "slug": "kobra-pistol",
+        "profiles": profiles(),
+        "weapon_variants": [{"id": 221, "name": "Kobra Pistol", "profiles": profiles()}],
+        "variants": [{"item_id": 221, "item_name": "Kobra Pistol", "units": [], "extras": []}],
+    }
+    result = CatalogRules(rules).enrich_catalog_item("weapons", item)
+    assert [rule["id"] for rule in result["rules"]] == ["weapon:kobra-pistol-test"]
+    assert "rules" not in result["variants"][0]
+    assert "source_variant" not in result["variants"][0]
+    for field in ("profiles", "weapon_variants"):
+        rendered = (
+            result[field] if field == "profiles" else result[field][0]["profiles"]
+        )
+        assert "rules" not in rendered[0]
+        assert [rule["id"] for rule in rendered[1]["rules"]] == [
+            "weapon:kobra-pistol-cc-test"
+        ]
+    assert item["profiles"][1].get("rules") is None
+
+    # Confirm the HTTP API uses the same exact-mode enrichment without changing
+    # the imported Army profiles or contaminating the other mode.
+    app = create_app(
+        root / "data/generated/infinity.db", rules_database_path=path
+    )
+    environ: dict[str, Any] = {}
+    setup_testing_defaults(environ)
+    environ.update(PATH_INFO="/api/weapons/kobra-pistol", REQUEST_METHOD="GET")
+    statuses: list[str] = []
+
+    def start_response(
+        status: str, headers: list[tuple[str, str]], exc_info: Any = None
+    ) -> None:
+        statuses.append(status)
+
+    response = app(environ, start_response)
+    try:
+        payload = json.loads(b"".join(response))
+    finally:
+        close = getattr(response, "close", None)
+        if close:
+            close()
+    assert statuses == ["200 OK"]
+    assert "rules" not in payload["profiles"][0]
+    assert [rule["id"] for rule in payload["profiles"][1]["rules"]] == [
+        "weapon:kobra-pistol-cc-test"
+    ]
+    assert "rules" not in payload["weapon_variants"][0]["profiles"][0]
+    assert [
+        rule["id"] for rule in payload["weapon_variants"][0]["profiles"][1]["rules"]
+    ] == ["weapon:kobra-pistol-cc-test"]

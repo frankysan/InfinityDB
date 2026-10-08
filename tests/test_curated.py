@@ -1875,3 +1875,46 @@ def test_weapon_variant_rule_references_validate_membership_and_shape(
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match=message):
         load_curated_document(path)
+
+
+def test_source_mode_qualifier_is_weapon_only_and_excludes_source_variant(
+    tmp_path: Path,
+) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record.update(
+        id="weapon:kobra-pistol-cc-review",
+        kind="weapon",
+        armyLinks=[{"entity": "weapon", "id": 221}],
+        variantSemantics={"inheritance": "source", "sourceMode": "CC Mode"},
+    )
+    path = tmp_path / "mode.json"
+
+    def check() -> None:
+        path.write_text(json.dumps(document), encoding="utf-8")
+        load_curated_document(path)
+
+    check()
+    record["variantSemantics"]["sourceMode"] = "  "
+    with pytest.raises(ValueError, match="sourceMode.*non-empty"):
+        check()
+    record["variantSemantics"]["sourceMode"] = "CC Mode"
+    record["variantSemantics"]["sourceVariant"] = {"kind": "named", "label": "CC"}
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        check()
+    del record["variantSemantics"]["sourceVariant"]
+    record["kind"] = "skill"
+    record["id"] = "skill:kobra-pistol-cc-review"
+    record["armyLinks"] = [{"entity": "skill", "id": 221}]
+    with pytest.raises(ValueError, match="sourceMode requires source-specific Weapon"):
+        check()
+    record["kind"] = "weapon"
+    record["id"] = "weapon:kobra-pistol-cc-review"
+    record["armyLinks"] = [{"entity": "weapon", "id": 221}]
+    record["variantSemantics"]["inheritance"] = "family"
+    with pytest.raises(ValueError, match="sourceMode requires source-specific Weapon"):
+        check()
+    record["variantSemantics"]["inheritance"] = "source"
+    record["armyLinks"] = [{"entity": "weapon", "id": "kobra-pistol"}]
+    with pytest.raises(ValueError, match="numeric Army source id"):
+        check()

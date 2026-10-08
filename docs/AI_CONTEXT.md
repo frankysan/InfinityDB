@@ -104,7 +104,9 @@ validated set. Production must not substitute a server-side rebuild.
 
 ## Army/application identity invariants
 
-- Source IDs are provenance, not a sufficient application ontology.
+- Source IDs are provenance, not a sufficient application ontology. Kobra Pistol
+  BS/CC profiles share Weapon source ID `221`; `variantSemantics.sourceMode` enables
+  exact-mode curated rules without silently applying CC effects to BS Mode.
 - `application_armies` is the canonical runtime Army projection. Roles/grouping/playability are
   derived from imported relationships plus reviewed policy, not hard-coded Army ID ranges.
 - Canonical source identity `1` is mercenary source provenance; Non-Aligned application grouping is

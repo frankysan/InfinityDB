@@ -659,6 +659,9 @@ def _variant_semantics(value: str | None) -> dict[str, Any] | None:
     source_variant = raw.get("sourceVariant")
     if isinstance(source_variant, dict):
         result["source_variant"] = dict(source_variant)
+    source_mode = raw.get("sourceMode")
+    if isinstance(source_mode, str):
+        result["source_mode"] = source_mode
     return result
 
 

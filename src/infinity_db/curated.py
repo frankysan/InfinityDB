@@ -53,7 +53,7 @@ def _validate_variant_semantics(
 ) -> str:
     if not isinstance(value, dict):
         raise ValueError(f"{context}: must be an object")
-    allowed = {"inheritance", "occurrenceParameters", "sourceVariant"}
+    allowed = {"inheritance", "occurrenceParameters", "sourceVariant", "sourceMode"}
     unknown = set(value) - allowed
     if unknown:
         raise ValueError(f"{context}: unsupported fields {sorted(unknown)}")
@@ -101,6 +101,18 @@ def _validate_variant_semantics(
         seen_parameters.add(key)
 
     source_variant = value.get("sourceVariant")
+    source_mode = value.get("sourceMode")
+    if source_mode is not None:
+        if (
+            inheritance != "source"
+            or len(army_links) != 1
+            or not isinstance(army_links[0], dict)
+            or army_links[0].get("entity") != "weapon"
+        ):
+            raise ValueError(f"{context}: sourceMode requires source-specific Weapon semantics")
+        _require_string(source_mode, "sourceMode", context)
+        if source_variant is not None:
+            raise ValueError(f"{context}: sourceMode and sourceVariant are mutually exclusive")
     if inheritance == "source":
         if len(army_links) != 1:
             raise ValueError(
@@ -111,6 +123,8 @@ def _validate_variant_semantics(
             raise ValueError(
                 f"{context}: source-specific semantics require an exact numeric Army source id"
             )
+        if source_mode is not None:
+            return inheritance
         if not isinstance(source_variant, dict):
             raise ValueError(
                 f"{context}: source-specific semantics require 'sourceVariant'"

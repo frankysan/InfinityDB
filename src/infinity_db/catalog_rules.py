@@ -152,6 +152,7 @@ class CatalogRules:
 
         family_rules: dict[str, dict[str, Any]] = {}
         source_rules: dict[int, dict[str, dict[str, Any]]] = {}
+        mode_rules: dict[tuple[int, str], dict[str, dict[str, Any]]] = {}
 
         def collect_rules(army_ref: ArmyLinkRef, source_id: int | None) -> None:
             for record in rules_database.composed_records_for_army_link(
@@ -168,9 +169,17 @@ class CatalogRules:
                             f"Source-specific {entity} rule {record['id']!r} must be "
                             "linked by numeric source id"
                         )
-                    source_rules.setdefault(source_id, {}).setdefault(
-                        record["id"], record
+                    source_mode = (record.get("variant_semantics") or {}).get(
+                        "source_mode"
                     )
+                    if isinstance(source_mode, str):
+                        mode_rules.setdefault((source_id, source_mode), {}).setdefault(
+                            record["id"], record
+                        )
+                    else:
+                        source_rules.setdefault(source_id, {}).setdefault(
+                            record["id"], record
+                        )
                 else:
                     family_rules.setdefault(record["id"], record)
 
@@ -200,6 +209,22 @@ class CatalogRules:
             variant_rules = source_rules.get(source_id)
             if variant_rules:
                 variant["rules"] = list(variant_rules.values())
+
+        if entity == "weapon" and mode_rules:
+            # Army can reuse one source ID for multiple different weapon modes.
+            # Mode-specific curated rules belong only to matching profile cards.
+            def attach_mode_rules(profiles: list[dict[str, Any]]) -> None:
+                for profile in profiles:
+                    source_id, mode = profile.get("id"), profile.get("mode")
+                    if type(source_id) is not int or not isinstance(mode, str):
+                        continue
+                    matched = mode_rules.get((source_id, mode))
+                    if matched:
+                        profile["rules"] = list(matched.values())
+
+            attach_mode_rules(result.get("profiles", []))
+            for variant in result.get("weapon_variants", []):
+                attach_mode_rules(variant.get("profiles", []))
 
         if catalog != "weapons":
             return result

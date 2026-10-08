@@ -293,6 +293,9 @@ function weaponVariants(variants) {
         traitsRow.append(traitsHeading, traits);
         card.append(traitsRow);
       }
+      if (profile.rules?.length) {
+        card.append(rulesReferenceSection(profile.rules, "Mode rules"));
+      }
       const sourceTraitSlugs = new Set(traitReferences.map((trait) => trait.slug));
       const relatedRules = ruleReferences.filter((reference) => (
         reference.kind !== "ammunition"

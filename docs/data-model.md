@@ -47,6 +47,11 @@ does not create a generic "ordinary Mine" weapon or make the variants interchang
 Variant-specific effects require their own source-derived weapon profile and, where
 necessary, curated exceptions or relationships. A reviewed family clause is not
 evidence that every named weapon variant has complete rules coverage.
+An Army Weapon source ID can also cover multiple modes (Kobra Pistol: source `221`,
+BS Mode and CC Mode). Curated source rules may target an exact source ID *and*
+mode, but must attach to that one profile only, not to the parent Weapon/source
+variant or sibling modes. Mode qualifiers describe identity, not permission to
+resolve a disputed Trait automatically.
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;
 its specific rules are separately curated, and missing Army Trait notation is

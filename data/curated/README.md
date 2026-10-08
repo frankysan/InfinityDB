@@ -491,11 +491,19 @@ Army-linked Skill, Equipment, and Weapon definitions declare
 `variantSemantics.inheritance` as `family` or `source`. Family semantics may be
 presented for the canonical application family. Source semantics require exactly one
 numeric Army source identity, a typed `variant-of` relation to a same-kind family
-definition, and `variantSemantics.sourceVariant`. A numeric Level uses
+definition, and normally `variantSemantics.sourceVariant`. A numeric Level uses
 `{"kind": "level", "value": 2}`; a reviewed named variant uses
 `{"kind": "named", "label": "..."}`; and a reviewed numeric Attribute replacement uses
 `{"kind": "attribute-replacement", "attribute": "BS", "value": 12}`. These apply only
-to that exact source variant.
+to that exact source variant. Weapon definitions alone may instead use
+`variantSemantics.sourceMode: "CC Mode"` to target an exact mode within one numeric
+Army source identity. `sourceMode` is mutually exclusive with `sourceVariant`:
+the former adds a rule to the matching Weapon **profile card**, not to its
+source-wide variant or sibling modes. It must match the source profile's exact
+`mode` string; an unknown mode attaches no rule rather than guessing.
+An authored mode-specific definition still requires the usual numeric Army link,
+`variant-of` relation and cited rule evidence. This does not authorize inferring
+new gameplay effects from an unresolved source disagreement.
 A Weapon family definition can additionally declare `facts.variantRuleReferences`,
 a map of its linked canonical Army Weapon slugs to ordered, existing typed rules
 IDs. These are reviewed **navigation associations**, not inherited statistics or

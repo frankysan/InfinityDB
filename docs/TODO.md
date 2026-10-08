@@ -135,9 +135,12 @@ unimplemented until its corresponding behavior exists.
     - [ ] Independently adjudicate Kobra Pistol CC Mode's `Anti-materiel` Trait:
       current Army/Wiki include it, the N5.3 PDF omits it, and DA Ammunition
       alone does not imply it. Do not conflate this with the explained roll count.
-      BS and CC Mode share Army source ID `221`, so the existing source-ID-only
-      curated variant mechanism cannot safely target CC Mode alone; require
-      an explicit mode-qualified identity before adding a mode-specific card.
+      BS and CC Mode share Army source ID `221`; do not attach CC-only
+      interpretations to the source-wide Weapon variant or BS profile.
+    - [x] Add a validated mode-qualified curated identity, matching numeric Weapon
+      source ID plus exact profile `mode`, with isolated API/browser presentation.
+      The synthetic Kobra fixture proves CC-only rules cannot leak to BS Mode.
+      This is infrastructure only; no disputed Kobra rule has been published.
     - [x] Resolve the six Plasma multiline Saving Roll cells and the two
       Disco Baller/Discover chart-row ambiguities. All 171 Burst-anchored rows
       now align uniquely: 170 match across the five core fields and the Kobra
