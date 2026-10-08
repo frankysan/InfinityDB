@@ -3567,6 +3567,102 @@
             }
         },
         {
+            "id": "weapon:pt",
+            "kind": "weapon",
+            "name": "Pheroware Tactics (PT)",
+            "facts": {},
+            "summary": "The Pheroware Tactics (PT) profiles—Endgame, Eraser, and Mirrorball—are distinct weapons. The N5 v5.3 chart classifies their attacks as [[trait:bs-weapon-wip|BS Weapon (WIP)]], replacing the older [[trait:bs-weapon-wip|Technical Weapon]] label still present in the imported Army profiles. Their individual effects must be read from their own profiles; Endgame’s [[trait:double-shot|Double Shot]] does not apply to Eraser or Mirrorball.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "pt"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:bs-weapon-wip"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 181,
+                    "section": "Pheroware Tactics (PT)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-08"
+            }
+        },
+        {
+            "id": "weapon:pt-endgame",
+            "kind": "weapon",
+            "name": "PT: Endgame",
+            "summary": "In the N5 v5.3 Weapon Chart, PT: Endgame has [[trait:double-shot|Double Shot]]. During the Active Turn it may gain +1 Burst by using both charges of [[trait:disposable-x|Disposable (2)]]. Its base Burst remains 1. The imported Army snapshot retains the legacy [[trait:bs-weapon-wip|Technical Weapon]] label and omits [[trait:double-shot|Double Shot]], while the N5 chart uses [[trait:bs-weapon-wip|BS Weapon (WIP)]] and includes [[trait:double-shot|Double Shot]]. This is an explicit source discrepancy; the imported Army properties are not altered.",
+            "facts": {
+                "effects": [
+                    "In the Active Turn, [[trait:double-shot|Double Shot]] may add +1 Burst at the cost of both [[trait:disposable-x|Disposable (2)]] uses; this applies to Endgame, not other PT profiles."
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": 203
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceVariant": {
+                    "kind": "named",
+                    "label": "Endgame"
+                }
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "weapon:pt"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:double-shot"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 181,
+                    "section": "Pheroware Tactics (PT): Endgame"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-08"
+            }
+        },
+        {
             "id": "weapon:wildparrot",
             "kind": "weapon",
             "name": "WildParrot",

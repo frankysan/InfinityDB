@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- PT: Endgame now has a source-cited Double Shot reference, without applying the rule to
+  Eraser or Mirrorball; the difference from the Army profile is shown explicitly.
 - Mine and Cybermine Weapon pages now explain triggering, camouflage, allied safety,
   Reset, and special effects, with links to each Mine's own ammunition and relevant State rules;
   Chest Mine pages explain their separate BS/CC modes.

@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **102/117** complete, **15** pending.
-- Current authored outgoing relations: **278**.
+- Supporting semantic identities: **104/119** complete, **15** pending.
+- Current authored outgoing relations: **281**.
 - Explicitly tracked future/deferred interactions: **115**.
 
 ## 0.7.0 primary catalog review
@@ -937,7 +937,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
 
-#### Weapon (4/4)
+#### Weapon (6/6)
 
 - [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
@@ -952,6 +952,11 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `uses-effects-of` → Mimetism (`skill:mimetism`)
   - `uses-effects-of` → Place Deployable (`skill:place-deployable`)
+- [x] **Pheroware Tactics (PT)** (`weapon:pt`) — reviewed: The shared PT chart classification is BS Weapon (WIP), while individual PT variant effects stay separate. Army retains legacy Technical Weapon wording.
+  - `uses-effects-of` → BS Weapon (WIP) (`trait:bs-weapon-wip`)
+- [x] **PT: Endgame** (`weapon:pt-endgame`) — reviewed: N5 v5.3 chart and the April 2025 update explicitly add Double Shot to Endgame only. Source-specific Army id 203 prevents applying it to Eraser or Mirrorball; current Army omits Double Shot.
+  - `variant-of` → Pheroware Tactics (PT) (`weapon:pt`)
+  - `uses-effects-of` → Double Shot (`trait:double-shot`)
 - [x] **WildParrot** (`weapon:wildparrot`) — reviewed: Perimeter and E/M Mine interaction with a visible Token/Model instead of CAMO; reviewed typed relationships distinguish this from Boost. N5 p. 74 Non-Lethal remains absent in Army and is presented as an explicit source discrepancy, not an imported Trait.
   - `uses-effects-of` → Perimeter (`trait:perimeter`)
   - `uses-effects-of` → Deployable (`trait:deployable`)

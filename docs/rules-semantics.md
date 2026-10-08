@@ -3373,6 +3373,32 @@ Sources:
 - Source/correction boundary: `config/catalogs/weapon-overrides.json` and
   `data/curated/rules/n5-core-v5.3.json`
 
+### RS-WPN-PT-001 — Pheroware source variants must not inherit each other’s effects
+
+**Classification:** reviewed Weapon Chart-to-Army source discrepancy and exact-variant relationship.
+
+InfinityDB presents the three Pheroware Tactics (PT) profiles (Endgame, Eraser,
+Mirrorball) under the application Weapon slug `/weapons/pt`. They share a chart
+classification of **BS Weapon (WIP)**, whereas the imported Army profiles retain
+legacy **Technical Weapon** wording. N5 v5.3 explicitly gives **Double Shot** to
+**PT: Endgame**: in the Active Turn the user may increase Burst by one, consuming
+both Disposable (2) uses. The imported Endgame profile has base B1 and omits
+Double Shot. The April 2025 official rules update lists the same Trait revision.
+
+`weapon:pt` supplies only the shared source-classification context. The reviewed
+`weapon:pt-endgame` record is linked to numeric Army Weapon source id 203 with
+`variantSemantics.inheritance=source`; only the Endgame source variant exposes
+its gameplay effects and Double Shot relation. It is not applied to Eraser (204)
+or Mirrorball (205). Existing imported source Trait lists remain unchanged;
+a linked, cited rule does not imply source metadata has been corrected.
+
+Sources: N5 v5.3 Weapon Chart p. 181; [April 2025 official rules update]
+(https://infinityuniverse.com/en/news/infinity-n5-rules-update), Pheroware Tactics
+change notice; [archived Wiki Weapon Chart](https://infinitythewiki.com/Weapons_Chart).
+The N5 PDF source is hash-pinned in `docs/n5-source-history.md` and
+`config/validation/weapon-trait-wiki-review.json`. This closes the scoped
+Endgame reference gap, **not** the upstream Army/PDF reconciliation.
+
 ## Reinforcements
 
 ### RS-RF-SCOPE-001 — Reinforcements is a separately scoped annex, not core N5 rules data

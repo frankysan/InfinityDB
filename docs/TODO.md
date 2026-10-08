@@ -190,6 +190,10 @@ unimplemented until its corresponding behavior exists.
       Boost movement. Link E/M and applicable State/Non-Lethal rules without
       synthesizing the missing Army Non-Lethal property. N5 v5.3 p. 74; the
       Army-versus-PDF Trait disagreement remains unresolved.
+    - [x] Publish source-specific PT: Endgame Double Shot rules under grouped `/weapons/pt`,
+      without granting those effects to Eraser or Mirrorball. The N5.3 chart and
+      April 2025 update agree; Army still omits Double Shot and uses the old
+      Technical Weapon label. Preserve the conflict instead of rewriting Army.
     - [ ] Review legacy Army terminology for Drop Bears and Pheroware before
       deciding whether to provide source-aware display aliases. Do not rewrite
       imported Army properties.

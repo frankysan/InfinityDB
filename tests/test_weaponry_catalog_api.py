@@ -250,3 +250,47 @@ def test_boost_perimeter_weapons_do_not_inherit_wildparrot_or_mines_rules(
     assert profile["saving"] == saving
     assert {"weapon:wildparrot", "weapon:mines"}.isdisjoint(_weapon_rules(payload))
     assert "rule_references" not in profile
+
+
+def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
+    weaponry_app: Callable,
+) -> None:
+    """A grouped PT catalog item must not grant Double Shot to other PTs."""
+    payload = _weapon_detail(weaponry_app, "pt")
+    assert payload["name"] == "PT"
+    assert set(_weapon_rules(payload)) == {"weapon:pt"}
+
+    variants = {variant["item_id"]: variant for variant in payload["variants"]}
+    assert set(variants) == {203, 204, 205}
+    endgame = variants[203]
+    assert [rule["id"] for rule in endgame["rules"]] == ["weapon:pt-endgame"]
+    assert endgame["source_variant"] == {"kind": "named", "label": "Endgame"}
+    assert all(not variants[source_id].get("rules") for source_id in (204, 205))
+
+    rule = endgame["rules"][0]
+    assert "Double Shot" in rule["summary"]
+    assert "source discrepancy" in rule["summary"]
+    assert rule["facts"]["effects"]
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["source_version"] == "5.3"
+        and citation["page"] == 181
+        for citation in rule["citations"]
+    )
+    assert any(
+        token.get("target") == "trait:double-shot"
+        and token["public_reference"] == {"catalog": "traits", "id": "double-shot"}
+        for token in rule["summary_tokens"]
+    )
+    assert any(
+        relation["record"]["id"] == "trait:double-shot"
+        and relation["direction"] == "outbound"
+        for relation in rule["display_relations"]
+    )
+
+    # Reviewed N5 additions are supplemental; never rewrite imported Army Traits.
+    profiles = {profile["id"]: profile for profile in payload["profiles"]}
+    assert set(profiles) == {203, 204, 205}
+    assert all("Technical Weapon" in profile["traits"] for profile in profiles.values())
+    assert all("Double Shot" not in profile["traits"] for profile in profiles.values())
+    assert profiles[203]["burst"] == "1"
