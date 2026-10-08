@@ -5,6 +5,7 @@
       "description": "Data model, canonical rules, semantic audits, and database behavior.",
       "modules": [
         "test_application_rule_references",
+        "test_audit_1_0_reference_inputs",
         "test_audit_army_faction_semantics",
         "test_audit_database_separation",
         "test_audit_enrichment_coverage",

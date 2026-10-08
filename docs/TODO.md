@@ -84,6 +84,11 @@ unimplemented until its corresponding behavior exists.
     baseline, separate from the shared local Wiki snapshot; report local source-file
     hash comparisons only when exact bytes are available and distinguish missing and
     unpinned artifacts from verified ones.
+  - [x] Reconcile all 103 currently published Wiki `oldid` identities with exact
+    historical page payloads in the separately supplied 2026-09-28 history archive.
+    `tools/audit_1_0_reference_inputs.py` checks each page title and embedded revision
+    ID, including historical Protheion 3908. This establishes source **availability**,
+    not curation completeness or equivalence to the pinned 2026-09-18 Wiki snapshot.
   - [ ] Pin the intended Army snapshot, rules/FAQ/annex PDF versions, and supported wiki evidence.
     Record archive/content hashes as appropriate, publication dates separately from acquisition
     dates, and the generated database/publication identities. A later source refresh reopens the
@@ -96,6 +101,21 @@ unimplemented until its corresponding behavior exists.
     `audit_rules_interactions.py` as baseline evidence. Their existing Army/catalog coverage does
     not establish PDF, FAQ, or scenario completeness or prove browser usability; add the missing
     source review and presentation checks explicitly.
+    - [x] Cross-check the existing 132 definition gaps against supplied source evidence:
+      131 are Weapon identities and one is the annex-scoped Commlink Skill. The offline
+      report records candidate Weapon Chart name occurrences (125/131 on the inspected
+      Wiki chart) separately from profile-fact coverage; neither source text nor an
+      Army weapon entry proves a complete curated rule definition.
+    - [ ] Review the six unmatched chart-text names as aliases, multi-mode entries,
+      or source-specific rules (including Chest Mine and SymbioBomb). Reconcile all
+      Weapon Chart rows and special-weapon text against N5 v5.3 pp. 68–74 and 176–188,
+      published Weapon identities and their API/browser profiles; classify each gap
+      as missing facts, relationships, or merely missing a standalone definition.
+    - [ ] Register the supplied FAQ v0.1 as its own pinned source publication and
+      reconcile core versus ITS-season applicability before curating rulings. Its
+      content hash and the core PDF/history ZIP hashes are available in the local
+      source-evidence report; the separately versioned Reinforcements Extra remains
+      unavailable and must not be inferred from the related Wiki page.
   - [ ] Reconcile `data/curated/rules-interactions/reviews.json` and `catalog-scope.json` with the
     pinned input set. Historical review/defer release labels are evidence, not the active roadmap:
     reassess pending items against the 1.0 gate and record explicit scope decisions rather than

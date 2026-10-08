@@ -363,6 +363,24 @@ coverage. Each inventory row starts with pending source/relationship/presentatio
 review. Reconcile the report with the existing source-presentation, enrichment, and
 rules-interaction audits before closing the Stage 1 inventory in `TODO.md`.
 
+The separate read-only `tools/audit_1_0_reference_inputs.py` command cross-checks
+provided **source bytes** with the existing enrichment report and the exact archived
+Wiki history pages. The three inputs are explicit, local arguments; they are never
+acquired automatically or committed to the repository:
+
+```powershell
+python tools/audit_1_0_reference_inputs.py --wiki-history "WIKI-en-history.zip" --core-pdf "n5-rules-v5-3-en.pdf" --faq-pdf "n5-faqs-v0-1-en.pdf" --json-output reports/1.0-source-evidence.json --markdown-output docs/audits/1.0-source-evidence.md
+```
+
+The Wiki history ZIP must contain `_history/index.json` and the indexed
+`_history/oldid/*.html` payloads. The audit verifies page identity and embedded
+`wgRevisionId`, not merely a latest-page snapshot or a URL string. It reports the
+supplied PDF/ZIP SHA-256 hashes **without** asserting that an unpinned artifact has
+been independently authenticated. Candidate weapon-name matches in the archived
+Wiki Weapon Chart do not verify profile rows, ammunition, ranges, Traits, or browser
+presentation; the six names not seen verbatim may be alias/mode differences.
+Commlink's related Wiki page is not a substitute for the Reinforcements annex PDF.
+
 ## CI and release validation
 
 `docs/ci.md` owns the hosted workflow contract. `docs/releasing.md` owns the release gate. Do not
