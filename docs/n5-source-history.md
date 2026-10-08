@@ -82,3 +82,27 @@ version ID`, `publication date`, `acquisition date`, `exact revision/commit`,
 `hash when bytes exist`, `scope`, `observed value`, and `interpretation/status`.
 For a source announcement, record each independent changelog section as a
 separate scoped claim; never treat ITS-only changes as core N5 rules.
+
+## Reviewed 1.0 Weapon Trait evidence boundary
+
+The read-only `tools/audit_weapon_trait_cross_sources.py` aligns the nine remaining
+N5 v5.3 Weapon Trait discrepancies with the archived `Weapon_Chart` Wiki revision
+`4083` (exact payload hash in `config/validation/weapon-trait-wiki-review.json`).
+The current Wiki agrees with the PDF Traits for seven rows and with Army for
+Cybermine and Kobra Pistol (CC Mode). These are **corroboration counts**, not
+winning votes. Cybermine's PDF Trait-cell extraction may be truncated and needs
+visual review; the archive's Kobra entry includes a separately identified
+superseded profile which cannot override the current one.
+
+The [April 2025 N5 rules update](https://infinityuniverse.com/en/news/infinity-n5-rules-update)
+explicitly replaced `Technical Weapon` with `BS Weapon (WIP)` in the
+Pheroware chart and revised Endgame. The v5.3 PDF and archived Wiki reflect
+this; current Army properties still carry `Technical Weapon`. The
+[September 2026 N5.3 update](https://infinityuniverse.com/en/news/infinity-rules-update-5-3)
+changes Kobra Pistol's ammunition to Shock (BS) and DA (CC), but does not
+directly resolve its PDF-versus-Wiki/Army Saving Roll count or Anti-materiel Trait.
+
+This audit does **not** modify published metadata, choose an authority on
+conflicting fields, or prove related special-weapon prose is complete. The
+remaining semantic review stays in `docs/TODO.md`. The generated evidence
+report belongs in ignored `docs/audits/` rather than the tracked source tree.

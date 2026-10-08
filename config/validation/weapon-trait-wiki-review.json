@@ -1,0 +1,92 @@
+{
+  "formatVersion": 1,
+  "corePdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+  "candidates": [
+    {
+      "name": "Cybermine",
+      "mode": "",
+      "wikiName": "Cybermines",
+      "reviewNote": "Wiki and Army both identify Comms Attack/Intuitive Attack rather than the PDF extractor’s ATTACK token; verify the printed column visually before treating this as a source error.",
+      "officialUpdate": {
+        "date": "2025-01-09",
+        "url": "https://infinityuniverse.com/en/news/n5-what-is-new",
+        "claim": "Cybermines cause Stunned State and, for Hackable targets, Immobilized-B."
+      }
+    },
+    {
+      "name": "Drop Bears",
+      "mode": "BS Mode",
+      "wikiName": "Drop Bears (BS Mode)",
+      "reviewNote": "The Wiki and PDF omit Throwing Weapon while Army includes it. Review whether it is an implicit throwing classification versus a published chart Trait.",
+      "officialUpdate": {
+        "date": "2025-10-15",
+        "url": "https://infinityuniverse.com/en/news/army-update-october-2025-part2",
+        "claim": "N5 v5.2 revises Drop Bears prose; the post does not independently settle the Throwing Weapon chart Trait."
+      }
+    },
+    {
+      "name": "PARA Mine",
+      "mode": "",
+      "wikiName": "PARA Mines",
+      "reviewNote": "Wiki and PDF use [*], while Army uses [**]. Review the meaning of each footnote and whether the Army variant is intentional."
+    },
+    {
+      "name": "WildParrot",
+      "mode": "",
+      "wikiName": "WildParrot",
+      "reviewNote": "Wiki and PDF include Non-Lethal; Army lacks it. Review the E/M ammunition and immunity interaction before changing properties."
+    },
+    {
+      "name": "PT: Endgame",
+      "mode": "",
+      "wikiName": "PT: Endgame",
+      "reviewNote": "The current Wiki and PDF reflect an explicit N5 April 2025 Pheroware revision; Army retains Technical Weapon and lacks Double Shot.",
+      "officialUpdate": {
+        "date": "2025-04-03",
+        "url": "https://infinityuniverse.com/en/news/infinity-n5-rules-update",
+        "claim": "The Pheroware table replaces Technical Weapon with BS Weapon (WIP); Endgame gains Double Shot."
+      }
+    },
+    {
+      "name": "PT: Eraser",
+      "mode": "",
+      "wikiName": "PT: Eraser",
+      "reviewNote": "The current Wiki and PDF use BS Weapon (WIP), consistent with the April 2025 change; Army retains Technical Weapon.",
+      "officialUpdate": {
+        "date": "2025-04-03",
+        "url": "https://infinityuniverse.com/en/news/infinity-n5-rules-update",
+        "claim": "The Pheroware table replaces Technical Weapon with BS Weapon (WIP); Endgame gains Double Shot."
+      }
+    },
+    {
+      "name": "PT: Mirrorball",
+      "mode": "",
+      "wikiName": "PT: Mirrorball",
+      "reviewNote": "The current Wiki and PDF use BS Weapon (WIP), consistent with the April 2025 change; Army retains Technical Weapon.",
+      "officialUpdate": {
+        "date": "2025-04-03",
+        "url": "https://infinityuniverse.com/en/news/infinity-n5-rules-update",
+        "claim": "The Pheroware table replaces Technical Weapon with BS Weapon (WIP); Endgame gains Double Shot."
+      }
+    },
+    {
+      "name": "Kobra Pistol",
+      "mode": "CC Mode",
+      "wikiName": "Kobra Pistol (CC Mode)",
+      "reviewNote": "The current Wiki and Army agree on Anti-materiel and two Saving Rolls; the v5.3 PDF lacks Anti-materiel and prints one. The Wiki also holds a superseded CC profile, which must not be treated as current.",
+      "officialUpdate": {
+        "date": "2026-09-01",
+        "url": "https://infinityuniverse.com/en/news/infinity-rules-update-5-3",
+        "claim": "Kobra Pistol ammunition changes to Shock (BS) and DA (CC); no explicit Anti-materiel or Saving Roll count statement."
+      }
+    },
+    {
+      "name": "Sepsitor Plus",
+      "mode": "",
+      "wikiName": "Sepsitor Plus",
+      "reviewNote": "The current Wiki and PDF include [*], while Army omits it. Confirm footnote semantics before any change."
+    }
+  ],
+  "wikiRevisionId": 4083,
+  "wikiMemberSha256": "a3a6230051bc3a03e61a6de917306b403bac35ddfa6dcb8962595316bb3722ed"
+}

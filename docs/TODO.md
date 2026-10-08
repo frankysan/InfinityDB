@@ -158,6 +158,14 @@ unimplemented until its corresponding behavior exists.
       match visually checked cells pinned to the exact core PDF SHA-256. No
       source rows remain deferred; 9 Trait membership/classification candidates
       remain open, and no upstream gameplay data is modified.
+    - [x] Cross-check the nine unresolved Trait identities against exact archived
+      Wiki `Weapon_Chart` revision 4083 and official N5 change notices. The Wiki
+      agrees with PDF Traits for 7 rows and Army for 2 (Cybermine, Kobra Pistol
+      CC Mode). Pheroware's `BS Weapon (WIP)` replaces `Technical Weapon` in the
+      April 2025 announcement, but current Army still uses the old classification.
+      Kobra's current Wiki/Army show 2 Saving Rolls and `Anti-materiel` while the
+      v5.3 PDF shows 1 and lacks that Trait. Do not resolve these from majority
+      agreement: all nine require semantic/source adjudication.
     - [ ] Adjudicate the nine remaining Weapon Trait candidates: Cybermine,
       Drop Bears (BS Mode), PARA Mine, WildParrot, PT: Endgame/Eraser/Mirrorball,
       Kobra Pistol (CC Mode), and Sepsitor Plus. Distinguish genuine source

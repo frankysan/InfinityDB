@@ -396,6 +396,24 @@ renderer with the two scenario Skills and the resolved Specialist list; it reuse
 dependency and adds no JavaScript build step. Existing scenario tests still validate every game-size
 row, score condition, placement, source issue, and SVG output after reference expansion.
 
+## 1.0 Weapon Trait archived-Wiki cross-reference
+
+`tools/audit_weapon_trait_cross_sources.py` is an **offline, read-only**
+source-reconciliation tool, not part of normal builds or CI. It requires the
+pinned v5.3 PDF and the exact archived Wiki history ZIP in addition to the
+shipped generated databases. It fails closed if the nine maintained review
+identities or the PDF/Wiki payload hashes no longer match.
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.audit_weapon_trait_cross_sources --core-pdf "C:\path\to\n5-rules-v5-3-en.pdf" --wiki-history "C:\path\to\WIKI-en-history.zip" --json-output docs/audits/weapon-trait-cross-source.json --markdown-output docs/audits/weapon-trait-cross-source.md
+```
+
+This compares **Traits**, not all weapon-profile values or rules prose; the
+Wiki's superseded `original_border` chart rows are kept separate from current
+rows. The exact Wiki member revision and bytes are pinned in
+`config/validation/weapon-trait-wiki-review.json`; authoritative adjudication
+remains manual and source-specific.
+
 ## 1.0 Weapon Chart partial evidence audit
 
 The read-only `tools/audit_weapon_chart_profiles.py` compares the printed N5 v5.3
