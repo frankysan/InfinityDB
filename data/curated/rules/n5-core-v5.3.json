@@ -3567,6 +3567,77 @@
             }
         },
         {
+            "id": "weapon:wildparrot",
+            "kind": "weapon",
+            "name": "WildParrot",
+            "summary": "WildParrots are placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]]. The [[trait:perimeter|Perimeter]] rule places them completely inside the user’s [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact. Once deployed, they work like [[weapon:mines|E/M Mines]], but place a visible WildParrot Token or Model instead of a [[skill:camouflage|Camouflage]] Marker. Unlike [[trait:boost|Boost]] devices such as Crazykoalas and Madtraps, WildParrots do not have that Trait; they follow their own E/M weapon profile (BTS/2, two Saving Rolls). The printed N5 v5.3 Weapon Chart specifies [[trait:non-lethal|Non-Lethal]], which is absent from the current imported Army Trait list. That source discrepancy is retained rather than silently changing the Army profile.",
+            "facts": {
+                "variantRuleReferences": {
+                    "wildparrot": [
+                        "ammunition:em",
+                        "trait:non-lethal",
+                        "state:isolated",
+                        "state:immobilized-b"
+                    ]
+                }
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "wildparrot"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:perimeter"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:deployable"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:place-deployable"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:intuitive-attack"
+                },
+                {
+                    "type": "modifies-use-of",
+                    "recordId": "weapon:mines"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:em"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 74,
+                    "section": "WildParrot"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-08"
+            }
+        },
+        {
             "id": "weapon:mines",
             "kind": "weapon",
             "name": "Mines",

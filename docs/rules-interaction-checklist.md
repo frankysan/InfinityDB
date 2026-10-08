@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **101/116** complete, **15** pending.
-- Current authored outgoing relations: **272**.
+- Supporting semantic identities: **102/117** complete, **15** pending.
+- Current authored outgoing relations: **278**.
 - Explicitly tracked future/deferred interactions: **115**.
 
 ## 0.7.0 primary catalog review
@@ -937,7 +937,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
 
-#### Weapon (3/3)
+#### Weapon (4/4)
 
 - [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
@@ -952,6 +952,13 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `uses-effects-of` → Mimetism (`skill:mimetism`)
   - `uses-effects-of` → Place Deployable (`skill:place-deployable`)
+- [x] **WildParrot** (`weapon:wildparrot`) — reviewed: Perimeter and E/M Mine interaction with a visible Token/Model instead of CAMO; reviewed typed relationships distinguish this from Boost. N5 p. 74 Non-Lethal remains absent in Army and is presented as an explicit source discrepancy, not an imported Trait.
+  - `uses-effects-of` → Perimeter (`trait:perimeter`)
+  - `uses-effects-of` → Deployable (`trait:deployable`)
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
+  - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
+  - `modifies-use-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
 
 ## Future interaction queue
 

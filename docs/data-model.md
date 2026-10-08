@@ -47,6 +47,10 @@ does not create a generic "ordinary Mine" weapon or make the variants interchang
 Variant-specific effects require their own source-derived weapon profile and, where
 necessary, curated exceptions or relationships. A reviewed family clause is not
 evidence that every named weapon variant has complete rules coverage.
+The Perimeter Trait likewise does not imply Boost. A WildParrot uses
+Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;
+its specific rules are separately curated, and missing Army Trait notation is
+not manufactured from the printed rulebook.
 
 Current runtime database versions:
 

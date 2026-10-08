@@ -184,3 +184,69 @@ def test_chest_mine_modes_are_not_a_default_mine_profile(
     }
     assert "weapon:mines" not in _weapon_rules(payload)
     assert "ordinary Mines" not in _weapon_rules(payload)["weapon:chest-mine"]["summary"]
+
+
+def test_wildparrot_rules_keep_perimeter_deployment_separate_from_boost(
+    weaponry_app: Callable,
+) -> None:
+    """WildParrot follows E/M Mine effects, not Boost or CAMO placement."""
+    payload = _weapon_detail(weaponry_app, "wildparrot")
+    profile = payload["profiles"][0]
+    assert profile["ammunition"] == "E/M"
+    assert profile["saving"] == "BTS/2"
+    assert profile["saving_num"] == "2"
+    assert "Perimeter" in profile["traits"]
+    assert "Boost" not in profile["traits"]
+    # PDF v5.3 p. 74 and the Wiki include this Trait, but Army does not.
+    assert "Non-lethal" not in profile["traits"]
+
+    rules = _weapon_rules(payload)
+    assert set(rules) == {"weapon:wildparrot"}
+    record = rules["weapon:wildparrot"]
+    assert "WildParrot Token or Model" in record["summary"]
+    assert "source discrepancy" in record["summary"]
+    assert record["summary_tokens"]
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["source_version"] == "5.3"
+        and citation["page"] == 74
+        for citation in record["citations"]
+    )
+    assert {
+        relation["record"]["id"]
+        for relation in record["display_relations"]
+        if relation["direction"] == "outbound"
+    } >= {"trait:perimeter", "weapon:mines", "ammunition:em"}
+
+    assert any(
+        relation["type"] == "modifies-use-of"
+        and relation["record"]["id"] == "weapon:mines"
+        for relation in record["display_relations"]
+    )
+
+    references = profile["rule_references"]
+    assert {reference["id"] for reference in references} == {
+        "ammunition:em", "trait:non-lethal", "state:isolated",
+        "state:immobilized-b",
+    }
+    for reference in references:
+        target = reference["public_reference"]
+        assert target.get("href") or (target.get("catalog") and target.get("id"))
+    assert payload["weapon_variants"][0]["profiles"][0]["rule_references"] == references
+
+
+@pytest.mark.parametrize("slug,ammunition,saving", (
+    ("crazykoala", "Shock", "ARM"),
+    ("madtraps", "PARA", "PH-6"),
+))
+def test_boost_perimeter_weapons_do_not_inherit_wildparrot_or_mines_rules(
+    weaponry_app: Callable, slug: str, ammunition: str, saving: str
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    profile = payload["profiles"][0]
+    assert "Boost" in profile["traits"]
+    assert "Perimeter" in profile["traits"]
+    assert profile["ammunition"] == ammunition
+    assert profile["saving"] == saving
+    assert {"weapon:wildparrot", "weapon:mines"}.isdisjoint(_weapon_rules(payload))
+    assert "rule_references" not in profile

@@ -91,6 +91,20 @@ shared Mines mechanics. `trait:boost` continues to own Perimeter-specific
 activation, Dodge, blocked-path and Marker restrictions with its page-69
 citation; generic `trait:deployable` remains unchanged.
 
+The independently reviewed `weapon:wildparrot` reference covers N5 v5.3
+Weaponry p. 74: Perimeter/Deployable placement within ZoC followed by E/M Mine
+behavior, except that it deploys as a visible WildParrot Token/Model rather than
+a Camouflage Marker. It does **not** have Boost; sharing Perimeter with
+Crazykoala and Madtraps does not grant their movement/contact/detonation mechanic.
+Its own Army profile remains E/M, BTS/2, two Saving Rolls. The printed source's
+Non-Lethal Trait is absent from the Army source Traits, and the curated card
+explicitly identifies this unresolved source mismatch. Linked E/M, State, and
+Non-Lethal references do not modify the imported source fields. This review
+uses the pinned N5 v5.3 PDF p. 74 and the reviewed exact Wiki Trait discrepancy
+in `config/validation/weapon-trait-wiki-review.json`; the live N5 Wiki
+WildParrot page currently identifies revision 3610, but that live page is not
+a substitute for the pinned PDF or historical source evidence.
+
 The PDF-hash-pinned 21-clause inventory now classifies **all 21 selected clauses
 as explicitly represented** in the curated summaries, rather than inferring
 coverage from neighbouring generic concepts. Its scope remains bounded: the

@@ -185,6 +185,11 @@ unimplemented until its corresponding behavior exists.
       171 rows: 145 literal matches, 16 notation equivalents (including Cybermine),
       2 reviewed cells, 8 unresolved Trait candidates, and 0 deferrals. The
       archived Wiki agrees with both current sources for Cybermine.
+    - [x] Publish a WildParrot-specific curated weapon reference: Perimeter
+      deployment followed by E/M Mine behavior with a visible Token/Model, not
+      Boost movement. Link E/M and applicable State/Non-Lethal rules without
+      synthesizing the missing Army Non-Lethal property. N5 v5.3 p. 74; the
+      Army-versus-PDF Trait disagreement remains unresolved.
     - [ ] Review legacy Army terminology for Drop Bears and Pheroware before
       deciding whether to provide source-aware display aliases. Do not rewrite
       imported Army properties.

@@ -931,6 +931,13 @@
       "note": "Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation."
     },
     {
+      "recordId": "weapon:wildparrot",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Perimeter and E/M Mine interaction with a visible Token/Model instead of CAMO; reviewed typed relationships distinguish this from Boost. N5 p. 74 Non-Lethal remains absent in Army and is presented as an explicit source discrepancy, not an imported Trait."
+    },
+    {
       "recordId": "equipment:360o-visor",
       "targetRelease": "0.7.0",
       "status": "reviewed",
