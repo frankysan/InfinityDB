@@ -201,6 +201,8 @@ def test_mine_family_rules_apply_to_correct_army_weapon_profiles() -> None:
         expected = ({'weapon:mines'} if slug in mine_slugs else set())
         if slug == 'cybermine':
             expected.add('weapon:cybermine')
+        if slug == 'para-mine':
+            expected.add('weapon:para-mine')
         if slug == 'chest-mine':
             expected.add('weapon:chest-mine')
         assert actual == expected, slug

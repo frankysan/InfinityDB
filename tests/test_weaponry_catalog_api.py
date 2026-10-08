@@ -294,3 +294,46 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
     assert all("Technical Weapon" in profile["traits"] for profile in profiles.values())
     assert all("Double Shot" not in profile["traits"] for profile in profiles.values())
     assert profiles[203]["burst"] == "1"
+
+
+def test_para_mine_has_own_reference_without_rewriting_source_marker(
+    weaponry_app: Callable,
+) -> None:
+    para = _weapon_detail(weaponry_app, "para-mine")
+    rules = _weapon_rules(para)
+    assert {"weapon:mines", "weapon:para-mine"} <= rules.keys()
+    assert "weapon:para-mine" not in _weapon_rules(
+        _weapon_detail(weaponry_app, "ap-mine")
+    )
+    record = rules["weapon:para-mine"]
+    assert "unresolved source-reference discrepancy" in record["summary"]
+    assert "[*]" in record["summary"] and "[**]" in record["summary"]
+    assert {72, 176, 181} <= {source["page"] for source in record["citations"]}
+    assert {"weapon:mines", "ammunition:para", "state:immobilized-a"} <= {
+        relation["record"]["id"]
+        for relation in record["display_relations"]
+        if relation["direction"] == "outbound"
+    }
+    assert {"weapon:mines", "ammunition:para", "state:immobilized-a"} <= {
+        token["target"]
+        for token in record["summary_tokens"]
+        if token["type"] == "reference"
+    }
+    profile = para["profiles"][0]
+    assert profile["ammunition"] == "PARA"
+    assert profile["saving"] == "PH-6"
+    assert "[**]" in profile["traits"]
+    assert "[*]" not in profile["traits"]
+
+
+def test_kobra_pistol_modes_share_source_id_but_not_effects(
+    weaponry_app: Callable,
+) -> None:
+    item = _weapon_detail(weaponry_app, "kobra-pistol")
+    profiles = {profile["mode"]: profile for profile in item["profiles"]}
+    assert set(profiles) == {"BS Mode", "CC Mode"}
+    assert profiles["BS Mode"]["id"] == profiles["CC Mode"]["id"] == 221
+    assert profiles["BS Mode"]["ammunition"] == "Shock"
+    assert profiles["CC Mode"]["ammunition"] == "DA"
+    assert "Anti-materiel" not in profiles["BS Mode"]["traits"]
+    assert "Anti-materiel" in profiles["CC Mode"]["traits"]

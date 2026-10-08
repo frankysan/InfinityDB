@@ -158,7 +158,9 @@ still needs verification. Preserve both source values.
   inferred additional N5 Trait.
 - **PARA Mine:** N5.3 p. 181 prints `[*]`, with the Mines-specific rules on
   p. 72; Army prints `[**]`. The N5.3 legend makes these Weaponry versus
-  Ammunition references respectively. This discrepancy remains to review.
+  Ammunition references respectively. The reviewed `weapon:para-mine` card
+  now links to both applicable rules and identifies the mismatch; the Army
+  marker's intent remains unresolved.
 - **WildParrot:** N5.3 pp. 74, 181 explicitly list `Non-Lethal`, and the weapon
   uses E/M Ammunition and operates like an E/M Mine. Army omits that explicit
   Trait; preserve this difference rather than silently adding a property.

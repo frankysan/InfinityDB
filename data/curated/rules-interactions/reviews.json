@@ -917,6 +917,13 @@
       "note": "Shared Mine mechanics: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary."
     },
     {
+      "recordId": "weapon:para-mine",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Source-pinned PARA Mine reference connects shared Mines, PARA Ammunition and Immobilized-A; the N5.3 chart and Army marker discrepancy remains explicitly unresolved, not a gameplay change."
+    },
+    {
       "recordId": "weapon:cybermine",
       "targetRelease": "1.0.0",
       "status": "reviewed",

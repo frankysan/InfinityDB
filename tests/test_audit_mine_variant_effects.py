@@ -47,6 +47,7 @@ def test_mine_source_profile_and_effect_owners_remain_distinct(
     rules = {record["id"] for record in payload["rules"]}
     assert "weapon:mines" in rules
     assert ("weapon:cybermine" in rules) == (entry["slug"] == "cybermine")
+    assert ("weapon:para-mine" in rules) == (entry["slug"] == "para-mine")
     assert "weapon:chest-mine" not in rules
 
     with sqlite3.connect(ROOT / "data/generated/rules.db") as database:

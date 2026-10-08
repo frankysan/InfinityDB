@@ -3953,3 +3953,17 @@ Sources:
 - Wiki: <https://infinitythewiki.com/ITS_FAQ>
 - Official FAQ v0.0 PDF, printed page 3:
   <https://downloads.corvusbelli.com/infinity/rules/infinity-faq-n5-en-v5.0.0.pdf>
+
+### PARA Mine source-reference discrepancy (N5 v5.3)
+
+**Project domain:** Data processing
+
+`weapon:para-mine` is a reviewed, player-visible reference for PARA Mines. It
+connects shared Mines placement/triggering mechanics with PARA ammunition
+(PH-6, Immobilized-A), without replacing any imported Army weapon fields.
+The N5.3 Weapon Chart and pinned Wiki revision 4083 use `[*]` (additional
+Weaponry explanation); Army uses `[**]` (Ammunition under the printed N5.3
+legend). InfinityDB exposes both rule owners, preserving the source-marker
+conflict. This does not establish why Army chose the marker or adjudicate an
+upstream data correction. N5 v5.3 printed pp. 72, 176, 181; PDF SHA-256
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`.

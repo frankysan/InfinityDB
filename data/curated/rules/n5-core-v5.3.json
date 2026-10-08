@@ -3822,6 +3822,66 @@
             }
         },
         {
+            "id": "weapon:para-mine",
+            "kind": "weapon",
+            "name": "PARA Mine",
+            "summary": "This weapon uses the shared [[weapon:mines|Mines]] placement and triggering rules. Hits use [[ammunition:para|Paralysis (PARA) Ammunition]]: a PH-6 Saving Roll, with failure causing [[state:immobilized-a|Immobilized-A]], rather than Wounds. The N5 v5.3 Weapon Chart and reviewed Wiki mark its profile [*], which the N5.3 legend defines as a reference to additional Weaponry rules. The imported Army profile instead has [**], which the N5.3 legend assigns to Ammunition rules. Both the Mine mechanics and PARA ammunition apply. The marker difference is an unresolved source-reference discrepancy; the Army profile is retained unchanged.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "para-mine"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "weapon:mines"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:para"
+                },
+                {
+                    "type": "causes-state",
+                    "recordId": "state:immobilized-a"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 181,
+                    "section": "PARA Mines"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 176,
+                    "section": "Weapon Chart: Reference Legend"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 72,
+                    "section": "Mines"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-08"
+            }
+        },
+        {
             "id": "weapon:cybermine",
             "kind": "weapon",
             "name": "Cybermine",

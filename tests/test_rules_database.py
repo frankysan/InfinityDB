@@ -133,7 +133,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 360
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 361
         assert connection.execute(
             "SELECT id, title FROM scenario_collections"
         ).fetchone() == ("n5-core", "N5 Core Scenarios")

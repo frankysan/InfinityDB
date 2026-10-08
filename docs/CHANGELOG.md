@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- PARA Mine now has its own reference connecting Mine deployment and PARA effects,
+  with the PDF/Wiki versus Army footnote discrepancy explained without changing its profile.
 - PT: Endgame now has a source-cited Double Shot reference, without applying the rule to
   Eraser or Mirrorball; the difference from the Army profile is shown explicitly.
 - Mine and Cybermine Weapon pages now explain triggering, camouflage, allied safety,
@@ -31,6 +33,9 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend:** Add a PARA Mine-specific reference showing
+  shared Mine behavior, PARA ammunition and Immobilized-A, with the conflicting
+  source footnote markers preserved.
 - **Data processing + Web backend:** Add source-cited Mines, Cybermine, and Chest Mine
   Weapon references. Named Mine types share placement and trigger mechanics but retain
   their distinct ammunition, saving rolls, traits, and effects. Cybermine adds its

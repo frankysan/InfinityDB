@@ -135,6 +135,9 @@ unimplemented until its corresponding behavior exists.
     - [ ] Independently adjudicate Kobra Pistol CC Mode's `Anti-materiel` Trait:
       current Army/Wiki include it, the N5.3 PDF omits it, and DA Ammunition
       alone does not imply it. Do not conflate this with the explained roll count.
+      BS and CC Mode share Army source ID `221`, so the existing source-ID-only
+      curated variant mechanism cannot safely target CC Mode alone; require
+      an explicit mode-qualified identity before adding a mode-specific card.
     - [x] Resolve the six Plasma multiline Saving Roll cells and the two
       Disco Baller/Discover chart-row ambiguities. All 171 Burst-anchored rows
       now align uniquely: 170 match across the five core fields and the Kobra
@@ -204,13 +207,16 @@ unimplemented until its corresponding behavior exists.
       that generic/family sections or the other eleven headings lack a proper
       reference representation: names, mode identities, citations, and rules
       semantics are distinct evidence layers.
-    - [ ] Review Endgame's missing Army `Double Shot` Trait, PARA Mine's
-      `[*]` (PDF/Wiki) versus `[**]` (Army), Sepsitor Plus's missing Army `[*]`,
-      and WildParrot's printed `Non-Lethal` against its E/M ammunition effect.
-      The N5.3 footnote legend places PARA Mine's markers in different section
-      categories (Weaponry versus Ammunition). Confirm the intended Army
-      representation, each rules relationship, and browser presentation; the
-      proposed Sepsitor Plus name-matching cause remains hypothetical.
+    - [x] Publish a PARA Mine-specific reference, with both the shared Mines
+      rules and PARA ammunition/Immobilized-A linked. Show the PDF/Wiki `[*]`
+      (Weaponry) versus Army `[**]` (Ammunition) discrepancy without modifying
+      source data. This establishes both rule owners, not why Army chose `[**]`.
+    - [ ] Continue review of PARA Mine's intended Army footnote marker, Sepsitor
+      Plus's missing Army `[*]`, and WildParrot's printed `Non-Lethal` against
+      its E/M ammunition effect; Endgame's missing Army `Double Shot` is already
+      shown with provenance. Confirm each remaining source disagreement and
+      browser presentation; the proposed Sepsitor Plus name-matching cause is
+      still hypothetical.
     - [x] Start a PDF-hash-pinned clause-to-reference review for the **Mines** and
       **Perimeter Weapons** families (N5.3 pp. 69, 72). The read-only
       `tools/audit_weaponry_family_clauses.py` checks 21 selected clauses,
