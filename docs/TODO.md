@@ -127,14 +127,14 @@ unimplemented until its corresponding behavior exists.
       a Saving Rolls discrepancy (printed 1, Army 2). Six Plasma-mode rows have
       multiline saving cells; two Disco Baller rows need identity/mode review.
       This is partial profile evidence, not full Weapon Chart completeness.
-    - [ ] Verify Kobra Pistol (CC Mode) against the published source/version and
-      determine whether the 1-versus-2 Saving Rolls difference is an Army
-      metadata error, a chart error, or a documented source-specific exception.
-      Corvus Belli's 2026-09-01 N5.3 update announcement
-      (<https://infinityuniverse.com/en/news/infinity-rules-update-5-3>) explicitly
-      changes the pistol to Shock (BS Mode) and DA (CC Mode); use that dated
-      clarification when checking how ammunition affects effective Saving Rolls,
-      without treating the announcement as an explanation of the count difference.
+    - [x] Verify Kobra Pistol (CC Mode) effective Saving Rolls: the N5.3 DA
+      Ammunition rule (p. 64) requires two rolls per hit and the dated N5.3
+      update explicitly assigns DA to CC Mode. The Weapon Chart still prints
+      one roll (pp. 68, 182), while Army and the current archived Wiki print
+      two. Retain the inconsistent printed cell as source evidence.
+    - [ ] Independently adjudicate Kobra Pistol CC Mode's `Anti-materiel` Trait:
+      current Army/Wiki include it, the N5.3 PDF omits it, and DA Ammunition
+      alone does not imply it. Do not conflate this with the explained roll count.
     - [x] Resolve the six Plasma multiline Saving Roll cells and the two
       Disco Baller/Discover chart-row ambiguities. All 171 Burst-anchored rows
       now align uniquely: 170 match across the five core fields and the Kobra
@@ -164,14 +164,30 @@ unimplemented until its corresponding behavior exists.
       CC Mode). Pheroware's `BS Weapon (WIP)` replaces `Technical Weapon` in the
       April 2025 announcement, but current Army still uses the old classification.
       Kobra's current Wiki/Army show 2 Saving Rolls and `Anti-materiel` while the
-      v5.3 PDF shows 1 and lacks that Trait. Do not resolve these from majority
-      agreement: all nine require semantic/source adjudication.
-    - [ ] Adjudicate the nine remaining Weapon Trait candidates: Cybermine,
-      Drop Bears (BS Mode), PARA Mine, WildParrot, PT: Endgame/Eraser/Mirrorball,
-      Kobra Pistol (CC Mode), and Sepsitor Plus. Distinguish genuine source
-      differences from rule-scoped implicit Traits and Army classification.
-      Reconcile auxiliary/equipment object profiles and special-weapon prose
-      clause by clause; identify missing facts, relationships and browser coverage.
+      v5.3 PDF shows 1 and lacks that Trait. These are raw comparison results,
+      now supplemented by the reviewed semantic outcomes below; do not infer
+      that source-text differences automatically represent gameplay differences.
+    - [x] Classify all nine cross-source Weapon Trait cases against the N5.3
+      printed Weapon Chart and prose: five explained interpretations and four
+      partially explained. Cybermine's `Comms Attack` is in the PDF (pp. 72,
+      181) but truncated by the extractor; `Throwing Weapon` and `Technical
+      Weapon` are absent from the N5.3 PDF and persist as Army legacy terms;
+      WildParrot explicitly has `Non-Lethal`; Mines and Sepsitor footnote
+      references require their own semantic links. See the version-pinned
+      `config/validation/weapon-trait-wiki-review.json` findings; all original
+      three-way comparison values remain intact.
+    - [ ] Correct the Cybermine PDF Trait-cell extraction without erasing
+      original comparison evidence; review legacy Army terminology for Drop
+      Bears and Pheroware before deciding whether to provide source-aware
+      display aliases. Do not rewrite imported Army properties.
+    - [ ] Review Endgame's missing Army `Double Shot` Trait, PARA Mine's
+      `[*]` (PDF/Wiki) versus `[**]` (Army), Sepsitor Plus's missing Army `[*]`,
+      and WildParrot's printed `Non-Lethal` against its E/M ammunition effect.
+      Confirm each rules relationship and browser presentation; the proposed
+      Sepsitor Plus name-matching cause remains hypothetical.
+    - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
+      prose clause by clause; identify missing facts, relationships, and browser
+      coverage separately from raw source notation differences.
     - [ ] Review the six unmatched chart-text names as aliases, multi-mode entries,
       or source-specific rules (including Chest Mine and SymbioBomb). Reconcile all
       Weapon Chart rows and special-weapon text against N5 v5.3 pp. 68–74 and 176–188,
@@ -590,6 +606,17 @@ unimplemented until its corresponding behavior exists.
 
 These items are intentionally outside the 1.0 completeness gate. They may move earlier
 only when required to fix correctness, reproducibility, or release reliability.
+
+### Source notation and rule references
+
+- [ ] **Data processing + Web frontend:** Give Weapon Chart footnote markers
+  (such as `[*]`, `[**]`, `[***]`) contextual, clickable rule references instead
+  of treating them as ordinary Traits or inventing universal meanings for the
+  symbols. Resolve the target by source publication, chart row/mode, and owning
+  special-weapon section (e.g. Mines or Sepsitor), preserving any mismatched
+  notation from Army and the PDF. Consider tooltips or short explanations and
+  a direct Glossary/rules link; retain raw provenance and explicit unresolved
+  mappings. Do not require this richer display for 1.0 completeness.
 
 ### Per-reference change history
 

@@ -90,19 +90,47 @@ N5 v5.3 Weapon Trait discrepancies with the archived `Weapon_Chart` Wiki revisio
 `4083` (exact payload hash in `config/validation/weapon-trait-wiki-review.json`).
 The current Wiki agrees with the PDF Traits for seven rows and with Army for
 Cybermine and Kobra Pistol (CC Mode). These are **corroboration counts**, not
-winning votes. Cybermine's PDF Trait-cell extraction may be truncated and needs
-visual review; the archive's Kobra entry includes a separately identified
-superseded profile which cannot override the current one.
+winning votes. Cybermine's PDF Trait-cell extraction is truncated: the printed chart on
+p. 181 and the Mines prose on p. 72 both explicitly identify its Comms Attack.
+The archive's Kobra entry includes a separately identified superseded profile,
+which cannot override the current one.
 
 The [April 2025 N5 rules update](https://infinityuniverse.com/en/news/infinity-n5-rules-update)
 explicitly replaced `Technical Weapon` with `BS Weapon (WIP)` in the
 Pheroware chart and revised Endgame. The v5.3 PDF and archived Wiki reflect
 this; current Army properties still carry `Technical Weapon`. The
 [September 2026 N5.3 update](https://infinityuniverse.com/en/news/infinity-rules-update-5-3)
-changes Kobra Pistol's ammunition to Shock (BS) and DA (CC), but does not
-directly resolve its PDF-versus-Wiki/Army Saving Roll count or Anti-materiel Trait.
+changes Kobra Pistol's ammunition to Shock (BS) and DA (CC). The explicit
+DA rule (N5.3 p. 64) requires **two Saving Rolls per hit**; the PDF's one-roll
+CC Mode chart cells (pp. 68, 182) remain contradictory, while Army and Wiki
+show two. **Anti-materiel** is a separate open question: Army/Wiki show it,
+the PDF omits it, and DA alone does not imply it.
 
-This audit does **not** modify published metadata, choose an authority on
-conflicting fields, or prove related special-weapon prose is complete. The
-remaining semantic review stays in `docs/TODO.md`. The generated evidence
-report belongs in ignored `docs/audits/` rather than the tracked source tree.
+The exact-PDF-pinned `semanticReview` results in
+`config/validation/weapon-trait-wiki-review.json` classify all nine comparison
+rows while preserving their raw source fields: **five explained** and
+**four partially explained** interpretations. Additional printed-page evidence:
+
+- **Cybermine:** PDF pp. 72, 181 confirm `Comms Attack`; the apparent difference
+  comes from truncated PDF Trait extraction, not a printed-rule omission.
+- **Drop Bears (BS Mode):** N5.3 pp. 71, 181 use `BS Weapon (PH)`. The term
+  `Throwing Weapon` does not occur in the supplied N5.3 PDF; Army retains it.
+  Absence establishes outdated source terminology, not an inferred new Trait.
+- **PARA Mine:** N5.3 p. 181 prints `[*]`, with the Mines-specific rules on
+  p. 72; Army's `[**]` remains a source-footnote mismatch to review. Footnote
+  markers are *references to context*, not independently defined Traits.
+- **WildParrot:** N5.3 pp. 74, 181 explicitly list `Non-Lethal`, and the weapon
+  uses E/M Ammunition and operates like an E/M Mine. Army omits that explicit
+  Trait; preserve this difference rather than silently adding a property.
+- **PT: Endgame/Eraser/Mirrorball:** the April 2025 announcement replaces
+  `Technical Weapon` with `BS Weapon (WIP)`; the old term does not occur in the
+  supplied N5.3 PDF. Endgame also gains `Double Shot`, missing from current
+  Army properties; that separate difference remains open for presentation.
+- **Sepsitor Plus:** N5.3 p. 187 prints `[*]`, referring to the Sepsitor family
+  prose on p. 73. Army's omission remains visible. A name-specific matching
+  issue in Army is a *hypothesis*, not an observed implementation cause.
+
+This review does **not** change imported source metadata, assume that an
+implicit effect is the same as an explicitly listed Trait, or establish
+complete special-weapon prose links. The remaining work stays in
+`docs/TODO.md`. Generated reports belong in ignored `docs/audits/`.

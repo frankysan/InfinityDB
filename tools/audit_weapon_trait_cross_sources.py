@@ -155,6 +155,8 @@ def reconcile_candidates(
             record["supersededWikiRows"] = superseded[wiki_name]
         if "officialUpdate" in entry:
             record["officialUpdate"] = entry["officialUpdate"]
+        if "semanticReview" in entry:
+            record["semanticReview"] = entry["semanticReview"]
         results.append(record)
     return results
 
@@ -183,6 +185,18 @@ def _load_review(path: Path, pdf_hash: str) -> list[dict[str, Any]]:
                 for key in ("date", "url", "claim")
             ) or not update["url"].startswith("https://infinityuniverse.com/en/news/"):
                 raise WeaponTraitWikiError("Invalid official update evidence")
+    for item in mapping:
+        semantic = item.get("semanticReview")
+        if not isinstance(semantic, dict) or semantic.get("state") not in (
+            "explained", "partial"
+        ) or not all(
+            isinstance(semantic.get(key), str) and semantic[key]
+            for key in ("classification", "finding", "remaining")
+        ) or not isinstance(semantic.get("pdfPages"), list) or not semantic["pdfPages"] or not all(
+            isinstance(page, int) and not isinstance(page, bool) and 1 <= page <= 196
+            for page in semantic["pdfPages"]
+        ):
+            raise WeaponTraitWikiError("Invalid semantic review evidence")
     return mapping
 
 
@@ -228,16 +242,21 @@ def audit_cross_sources(
             "The archived Wiki page and Army metadata corroborate source claims, not authority.",
             "Current Wiki chart rows exclude superseded original-border revisions.",
             "Blog posts describe revisions but do not silently supersede the PDF or Army.",
-            "All nine cases remain open pending verified curation decisions and related rules.",
+            "Source differences remain visible even when their semantics have been reviewed.",
+            "Reviewed interpretation does not alter raw Army metadata or source charts.",
         ],
     }
 
 
 def markdown_report(report: dict[str, Any]) -> str:
     counts = Counter(row["status"] for row in report["candidates"])
+    semantic_counts = Counter(
+        row["semanticReview"]["state"] for row in report["candidates"]
+        if "semanticReview" in row
+    )
     lines = [
         "# 1.0 Weapon Trait cross-source review", "",
-        "**Read-only evidence; no gameplay values changed or conflicts resolved.**", "",
+        "**Read-only source comparisons and reviewed interpretations; no gameplay data changed.**", "",
         f"- Core PDF SHA-256: `{report['corePdfSha256']}`",
         f"- Wiki history ZIP SHA-256: `{report['wikiArchiveSha256']}`",
         f"- Wiki `Weapon_Chart` revision: `{report['wikiRevisionId']}`",
@@ -247,7 +266,10 @@ def markdown_report(report: dict[str, Any]) -> str:
         f"- Wiki agrees with PDF: **{counts['wiki-agrees-with-pdf']}**; "
         f"with Army: **{counts['wiki-agrees-with-army']}**; "
         f"both: **{counts['wiki-agrees-with-both']}**; "
-        f"neither: **{counts['three-way-trait-disagreement']}**.", "",
+        f"neither: **{counts['three-way-trait-disagreement']}**.",
+        f"- Semantic interpretations explained: **{semantic_counts['explained']}**; "
+        f"partial: **{semantic_counts['partial']}**. "
+        "Raw source differences remain intact.", "",
         "## Individual findings", "",
     ]
     for row in report["candidates"]:
@@ -260,6 +282,15 @@ def markdown_report(report: dict[str, Any]) -> str:
             f"Wiki Saving Rolls: `{row['wikiSavingRolls']}`.",
             f"- Review: {row['reviewNote']}",
         ])
+        if "semanticReview" in row:
+            semantic = row["semanticReview"]
+            lines.extend([
+                f"- Semantic review: **{semantic['state']}** "
+                f"(`{semantic['classification']}`); PDF pp. "
+                + ", ".join(str(page) for page in semantic["pdfPages"]) + ".",
+                f"- Finding: {semantic['finding']}",
+                f"- Remaining: {semantic['remaining']}",
+            ])
         if "supersededWikiRows" in row:
             lines.append(
                 f"- Superseded Wiki chart row (not current): "

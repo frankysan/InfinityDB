@@ -28,7 +28,7 @@ def _candidate(name: str = "Kobra Pistol") -> dict[str, Any]:
     }
 
 
-def _mapping(name: str = "Kobra Pistol") -> list[dict[str, str]]:
+def _mapping(name: str = "Kobra Pistol") -> list[dict[str, Any]]:
     return [{"name": name, "mode": "CC Mode", "wikiName": "Kobra Pistol (CC Mode)",
              "reviewNote": "Review against sources."}]
 
@@ -83,7 +83,14 @@ def test_wiki_source_review_requires_exact_pdf_revision_and_member_hash(tmp_path
         "config/validation/weapon-trait-wiki-review.json"
     )
     review = json.loads(source.read_text(encoding="utf-8"))
-    assert len(_load_review(source, review["corePdfSha256"])) == 9
+    mapping = _load_review(source, review["corePdfSha256"])
+    assert len(mapping) == 9
+    assert sum(item["semanticReview"]["state"] == "explained" for item in mapping) == 5
+    assert sum(item["semanticReview"]["state"] == "partial" for item in mapping) == 4
+    assert {item["name"] for item in mapping} == {
+        "Cybermine", "Drop Bears", "PARA Mine", "WildParrot", "PT: Endgame",
+        "PT: Eraser", "PT: Mirrorball", "Kobra Pistol", "Sepsitor Plus",
+    }
     review["wikiMemberSha256"] = "invalid"
     local = tmp_path / "bad-review.json"
     local.write_text(json.dumps(review), encoding="utf-8", newline="\n")
@@ -112,3 +119,41 @@ def test_cross_source_report_keeps_source_evidence_visible() -> None:
     assert "Wiki agrees with PDF: **0**; with Army: **1**" in text
     assert "Superseded Wiki chart row (not current)" in text
     assert "Keep conflict open" in text
+
+
+def test_semantic_review_requires_source_pages_and_explicit_uncertainty(tmp_path: Path) -> None:
+    source = Path(__file__).resolve().parents[1] / (
+        "config/validation/weapon-trait-wiki-review.json"
+    )
+    review = json.loads(source.read_text(encoding="utf-8"))
+    for invalid in ({"pdfPages": []}, {"state": "resolved"}, {"remaining": ""}):
+        bad = json.loads(json.dumps(review))
+        bad["candidates"][0]["semanticReview"].update(invalid)
+        local = tmp_path / "bad-review.json"
+        local.write_text(json.dumps(bad), encoding="utf-8", newline="\n")
+        with pytest.raises(WeaponTraitWikiError, match="semantic review"):
+            _load_review(local, review["corePdfSha256"])
+
+
+def test_semantic_review_is_retained_without_overriding_source_status() -> None:
+    mapping = _mapping()
+    mapping[0]["semanticReview"] = {
+        "classification": "saving-roll-rule-and-source-conflict", "state": "partial",
+        "finding": "DA requires two rolls.", "remaining": "Anti-materiel is unresolved.",
+        "pdfPages": [64, 182],
+    }
+    result = reconcile_candidates(
+        [_candidate()], {"Kobra Pistol (CC Mode)": {
+            "savingRolls": "2", "ammunition": "DA",
+            "traits": "Anti-materiel, CC, [*]",
+        }}, mapping, _reviewed(),
+    )
+    assert result[0]["status"] == "wiki-agrees-with-army"
+    assert result[0]["semanticReview"] == mapping[0]["semanticReview"]
+    text = markdown_report({
+        "corePdfSha256": "p", "wikiArchiveSha256": "w",
+        "wikiRevisionId": 4083, "wikiMemberSha256": "m", "armyDbSha256": "a",
+        "candidates": result, "limitations": [],
+    })
+    assert "Semantic interpretations explained: **0**; partial: **1**" in text
+    assert "Anti-materiel is unresolved." in text
