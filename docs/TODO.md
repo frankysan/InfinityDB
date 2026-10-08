@@ -208,11 +208,17 @@ unimplemented until its corresponding behavior exists.
       10 explicitly selected Army weapon names, and related curated concept
       identities. All names and concept records resolve, but neither family
       has a same-named curated record. This is not semantic or UI completeness.
-    - [ ] Adjudicate these 21 clauses against the *contents* of the curated
-      entries: Boost triggering/path/marker restrictions, Mine triggering and
-      allied-template exclusions, Cybermine Reset, and Chest Mine mode exceptions.
-      Decide whether to add family rules or link/revise existing ones, then
-      verify browser presentation.
+    - [x] Adjudicate the 21 selected clauses against actual curated summaries:
+      **8 represented**, **9 generic-component-only**, **4 not represented**.
+      Complete the `trait:boost` summary with triggering, detonation, blocked
+      paths, Marker exclusions, Dodge, and Deployable-chain restrictions; pin
+      its N5 p. 69 citation and preserve reviewed-text link provenance.
+    - [ ] Curate a distinct **Mines** family reference instead of assigning its
+      specific trigger/placement/allied-safety rules to generic Deployable.
+      Reconcile all 13 remaining partial/absent clauses, including Cybermine
+      Reset and Chest Mine BS/CC exceptions; add verified Army associations and
+      confirm player-facing links/browser presentation. Source-anchor identity
+      or the presence of a related Skill alone does not close these cases.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

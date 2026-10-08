@@ -1,5 +1,5 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "corePdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
   "sourceEdition": "Infinity N5 v5.3 (English)",
   "scope": "Selected Mines/Perimeter Weapons family prose; not a complete clause audit of all Weaponry sections",
@@ -20,21 +20,39 @@
             "skill:place-deployable",
             "trait:perimeter",
             "trait:deployable"
-          ]
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The existing Perimeter summary names the placement rule.",
+            "curatedId": "trait:perimeter",
+            "summaryAnchor": "When placed, applies"
+          }
         },
         {
           "id": "perimeter-zoc",
           "anchor": "totally inside the Zone of Control of the Trooper",
           "relatedCuratedIds": [
             "trait:perimeter"
-          ]
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The Perimeter summary explicitly locates placement inside ZoC.",
+            "curatedId": "trait:perimeter",
+            "summaryAnchor": "completely inside"
+          }
         },
         {
           "id": "boost-trigger",
           "anchor": "it is triggered when an enemy Model declares or performs an Order",
           "relatedCuratedIds": [
             "trait:boost"
-          ]
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Boost summary now includes the compulsory trigger.",
+            "curatedId": "trait:boost",
+            "summaryAnchor": "must trigger when an enemy Model"
+          }
         },
         {
           "id": "boost-dodge",
@@ -42,21 +60,39 @@
           "relatedCuratedIds": [
             "trait:boost",
             "skill:dodge"
-          ]
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Boost summary now states the avoidance method.",
+            "curatedId": "trait:boost",
+            "summaryAnchor": "successful [[skill:dodge]] Roll"
+          }
         },
         {
           "id": "boost-blocked-path",
           "anchor": "the weapon will not trigger if the path from the weapon to the",
           "relatedCuratedIds": [
             "trait:boost"
-          ]
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Boost summary now states blocked-path exclusions.",
+            "curatedId": "trait:boost",
+            "summaryAnchor": "obstacle or too-small gap blocks its path"
+          }
         },
         {
           "id": "boost-marker-exclusions",
           "anchor": "The weapon is not triggered by Camouflage Markers",
           "relatedCuratedIds": [
             "trait:boost"
-          ]
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Boost summary now names the Marker exclusions.",
+            "curatedId": "trait:boost",
+            "summaryAnchor": "[[state:camouflaged|CAMO]], [[state:impersonation-1|IMP-1]]"
+          }
         },
         {
           "id": "boost-no-deployable-chain",
@@ -64,7 +100,13 @@
           "relatedCuratedIds": [
             "trait:boost",
             "trait:deployable"
-          ]
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Boost summary now states the non-activation rule.",
+            "curatedId": "trait:boost",
+            "summaryAnchor": "cannot activate other [[trait:deployable|Deployable]] Weapons"
+          }
         }
       ]
     },
@@ -86,56 +128,88 @@
           "anchor": "he will place a Camouflaged Marker",
           "relatedCuratedIds": [
             "skill:place-deployable"
-          ]
+          ],
+          "semanticReview": {
+            "status": "component-only",
+            "reason": "Place Deployable exists, but does not state Mines use CAMO (-3) rather than a Token."
+          }
         },
         {
           "id": "mine-reveal-token",
           "anchor": "Replace the Camouflage Marker",
           "relatedCuratedIds": [
             "skill:discover"
-          ]
+          ],
+          "semanticReview": {
+            "status": "component-only",
+            "reason": "Discover is defined, but the Mine CAMO-to-Token substitution is absent."
+          }
         },
         {
           "id": "mine-mimetism",
           "anchor": "both benefit from the MODs provided by the Mimetism",
           "relatedCuratedIds": [
             "skill:mimetism"
-          ]
+          ],
+          "semanticReview": {
+            "status": "component-only",
+            "reason": "Mimetism has a definition, but is not applied to both Mine representations."
+          }
         },
         {
           "id": "mine-line-of-fire",
           "anchor": "Mines have a 360º LoF arc",
           "relatedCuratedIds": [
             "trait:deployable"
-          ]
+          ],
+          "semanticReview": {
+            "status": "not-represented",
+            "reason": "No curated Mines definition states their 360-degree LoF."
+          }
         },
         {
           "id": "mine-direct-template",
           "anchor": "when any type of Mine is triggered, a Small",
           "relatedCuratedIds": [
             "trait:direct-template"
-          ]
+          ],
+          "semanticReview": {
+            "status": "component-only",
+            "reason": "Direct Template is defined, but its mandatory Small Teardrop use for Mines is absent."
+          }
         },
         {
           "id": "mine-allied-safety",
           "anchor": "A Mine never triggers if the Small Teardrop Template would affect an ally",
           "relatedCuratedIds": [
             "trait:deployable"
-          ]
+          ],
+          "semanticReview": {
+            "status": "not-represented",
+            "reason": "Mine-specific allied safety restriction does not appear in related curated text."
+          }
         },
         {
           "id": "mine-trigger",
           "anchor": "Mines must trigger when an enemy Model or Marker declares",
           "relatedCuratedIds": [
             "trait:deployable"
-          ]
+          ],
+          "semanticReview": {
+            "status": "not-represented",
+            "reason": "Mine-specific compulsory trigger and template-area evaluation are absent."
+          }
         },
         {
           "id": "mine-disposal",
           "anchor": "Once a Mine triggers, it is removed from play",
           "relatedCuratedIds": [
             "trait:disposable-x"
-          ]
+          ],
+          "semanticReview": {
+            "status": "component-only",
+            "reason": "Disposable describes limited uses, not removing an already placed Mine after triggering."
+          }
         },
         {
           "id": "mine-dodge-mod",
@@ -143,42 +217,68 @@
           "relatedCuratedIds": [
             "skill:dodge",
             "trait:deployable"
-          ]
+          ],
+          "semanticReview": {
+            "status": "component-only",
+            "reason": "Dodge and Deployable are defined, but not the Mine-specific -3 PH MOD."
+          }
         },
         {
           "id": "mine-placement-restriction",
           "anchor": "A Mine cannot be placed if there is an enemy Camouflage Marker",
           "relatedCuratedIds": [
             "skill:place-deployable"
-          ]
+          ],
+          "semanticReview": {
+            "status": "not-represented",
+            "reason": "Place Deployable omits the enemy CAMO Marker restriction and its exceptions."
+          }
         },
         {
           "id": "cybermine-reset",
           "anchor": "they can only be evaded with a Reset",
           "relatedCuratedIds": [
             "skill:reset"
-          ]
+          ],
+          "semanticReview": {
+            "status": "component-only",
+            "reason": "Reset is defined, but Cybermine-only Reset and -3 WIP are not linked here."
+          }
         },
         {
           "id": "chest-mine-bs-exception",
           "anchor": "In BS Weapon Mode, Chest Mines function as a Direct Template Weapon",
           "relatedCuratedIds": [
             "trait:direct-template"
-          ]
+          ],
+          "semanticReview": {
+            "status": "component-only",
+            "reason": "Direct Template exists, but the Chest Mine exclusion from Mines mechanics is not explicit."
+          }
         },
         {
           "id": "chest-mine-cc-exception",
           "anchor": "In CC Weapon Mode, Chest Mines function as a CC Weapon",
           "relatedCuratedIds": [
             "skill:cc-attack"
-          ]
+          ],
+          "semanticReview": {
+            "status": "component-only",
+            "reason": "CC Attack exists, but Chest Mine CC restrictions and Mines exception are absent."
+          }
         },
         {
           "id": "chest-mine-shared-uses",
           "anchor": "The Disposable (2) Trait is shared between all Modes",
           "relatedCuratedIds": [
             "trait:disposable-x"
-          ]
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "The generic Disposable record explicitly states shared modes; the printed Chest Mine count is separately in its profile.",
+            "curatedId": "trait:disposable-x",
+            "summaryAnchor": "all modes share the available uses"
+          }
         }
       ]
     }

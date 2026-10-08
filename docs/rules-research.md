@@ -72,7 +72,7 @@ The page is a URL-backed publication notice, not a locally hashed source snapsho
 ### RR-WPN-FAMILY-001 — Mines and Perimeter Weapons are distinct rules families
 
 **Scope:** current N5 core, Weaponry pp. 69 and 72; `rules.db` and Army snapshot
-from `InfinityDB-work-44bf3678c074.zip`.
+from `InfinityDB-work-021d3921c61f.zip` (with the reviewed Boost curation).
 
 The Perimeter Weapons prose defines placement within the user's Zone of Control,
 while its separate Boost subsection specifies triggering, movement/contact,
@@ -85,12 +85,22 @@ Cybermines require Reset instead of Dodge.
 
 InfinityDB's generated rules database contains `trait:perimeter`, `trait:boost`,
 `trait:deployable`, `skill:place-deployable`, `skill:reset` and associated records,
-but no record named `Mines` or `Perimeter Weapons`. In this snapshot,
-`trait:boost` has a short trigger summary, not the PDF's blocked-path and
-Marker-exclusion clauses. Their absence from that single entry is confirmed;
-whether they appear through another curated domain or player-facing linkage
-remains to be checked. No new runtime rule or imported Army change is justified
-by name matching alone.
+but no record named `Mines` or `Perimeter Weapons`. The Boost Trait summary
+now includes mandatory triggering and detonation, Normal Dodge avoidance,
+blocked-path and Marker exclusions, and prevention of Deployable chain reactions,
+with a direct N5 v5.3 page-69 citation. Existing Perimeter and Disposable summaries
+also cover placement/ZoC and shared-use mechanics respectively. These are
+family-source facts, not inferred properties of every Deployable item.
+
+The PDF-hash-pinned 21-clause review now distinguishes **8 clauses explicitly
+represented** in curated summaries, **9 with only related generic mechanics**, and
+**4 without the family-specific rule**. The 13 incomplete cases are all in the
+Mines/Cybermines/Chest Mines family, most importantly mandatory Mine triggering,
+allied safety, placement exceptions, Cybermine Reset with -3 WIP, and both Chest
+Mine mode exceptions. A Mines family-level curated reference is a better owner for
+the general Mine restrictions than expanding `trait:deployable` globally.
+Neither the count nor matching curated text establishes browser navigation,
+Army-weapon relationships, or an exhaustive Weaponry clause inventory.
 
 An additional **archived Wiki** cross-check identifies the corresponding
 N5 pages `Perimeter_Weapons` (revision 3912), `Mines` (revision 4112), and
@@ -115,7 +125,7 @@ The maintained read-only source anchors and concept associations are in
 `config/validation/weaponry-family-clauses.json`. Reproduce the current
 snapshot comparison using `tools/audit_weaponry_family_clauses.py`. The 21
 reviewed anchors are **not** a complete clause inventory of Weaponry pp. 68–74,
-and concept identity is not proof of rule implementation or browser coverage.
+and a represented summary is not proof of complete relations or browser coverage.
 
 Sources: N5 v5.3 PDF, printed pp. 69 (Perimeter Weapons/Boost), 72 (Mines,
 Cybermines, Chest Mines), PDF SHA-256

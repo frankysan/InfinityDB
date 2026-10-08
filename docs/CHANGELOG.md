@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- The Boost reference now explains blocked paths, exempt Markers, Dodge, and why Deployable
+  weapons cannot trigger one another.
 - You can now browse the four current core scenarios, starting at the common 300-point game size by
   default, and see setup, objectives, scenario rules, source notes, and a generated deployment map together.
 - Supplies now consistently shows 8 inches of clear space between each outer Supply Box marker edge
@@ -34,6 +36,8 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing:** Clarify the Boost rules reference using the N5 Weaponry text, including
+  detonation, obstacle and Marker exclusions, and Deployable-chain restrictions.
 - **Web frontend:** Show no Saving Rolls for Weapon profiles without a Saving Attribute,
   rather than displaying a non-operative Army multiplier.
 - **Data processing + Web frontend:** Correct Annihilation's 350-point surviving-Victory-Points

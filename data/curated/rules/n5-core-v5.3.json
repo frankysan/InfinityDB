@@ -2576,7 +2576,7 @@
             "id": "trait:boost",
             "kind": "trait",
             "name": "Boost",
-            "summary": "Applies the Boost rule when an enemy declares or executes an Order or ARO in its Zone of Control.",
+            "summary": "Once in play, a Boost weapon must trigger when an enemy Model declares or performs an Order or Automatic Reaction Order in its [[trait:zone-of-control-zc|Zone of Control]]; it advances into Silhouette contact, detonates, and is removed. Only a successful [[skill:dodge]] Roll resolved without opposition avoids this attack. The weapon does not trigger if an obstacle or too-small gap blocks its path, or for [[state:camouflaged|CAMO]], [[state:impersonation-1|IMP-1]], [[state:impersonation-2|IMP-2]], and other exempt Markers. Because it is [[trait:deployable|Deployable]], it cannot activate other [[trait:deployable|Deployable]] Weapons or Equipment.",
             "composition": {
                 "role": "definition"
             },
@@ -2590,11 +2590,16 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Boost"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 69,
+                    "section": "Perimeter Weapons and the Boost Trait"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-08"
             }
         },
         {
