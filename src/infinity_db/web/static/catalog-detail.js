@@ -403,17 +403,34 @@ function render(item) {
   status.hidden = true;
 }
 
+// Rule cards arrive after the initial document fragment navigation. Restore
+// that target once the catalog API response has rendered the card.
+function revealHashTarget() {
+  if (!window.location.hash) return;
+  let targetId;
+  try {
+    targetId = decodeURIComponent(window.location.hash.slice(1));
+  } catch {
+    return;
+  }
+  const target = document.getElementById(targetId);
+  if (!target || !content.contains(target)) return;
+  target.scrollIntoView({ block: "start" });
+}
+
 document.addEventListener(
   "infinity:beforenavigation",
   () => pageController.abort(),
   { once: true },
 );
+window.addEventListener("hashchange", revealHashTarget, { signal: pageController.signal });
 window.addEventListener("distanceunitchange", () => {
   if (currentItem && catalog === "weapons") render(currentItem);
 }, { signal: pageController.signal });
 getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
   currentItem = item;
   render(item);
+  requestAnimationFrame(revealHashTarget);
   if (catalog === "states") return null;
   return visibleUnitIds(optionalUnitFilters(), pageController.signal).then((ids) => render(withVisibleUnits(item, ids)));
 }).catch((error) => {

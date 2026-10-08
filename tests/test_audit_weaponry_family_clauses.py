@@ -230,7 +230,7 @@ def test_mines_family_summaries_cover_general_and_exception_mechanics() -> None:
                  '[[state:stunned]]', '[[state:immobilized-b|Immobilized-B]]'):
         assert text in cyber
     chest = records['weapon:chest-mine']['summary']
-    for text in ('does not apply', '[[trait:direct-template]]',
+    for text in ('does not use the shared', '[[trait:direct-template]]',
                  '[[skill:cc-attack|CC attack]]', 'two uses',
                  'does not affect the bearer'):
         assert text in chest

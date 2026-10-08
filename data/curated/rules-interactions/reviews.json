@@ -914,21 +914,21 @@
       "targetRelease": "1.0.0",
       "status": "reviewed",
       "reviewedOn": "2026-10-08",
-      "note": "Ordinary Mine family: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary."
+      "note": "Shared Mine mechanics: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary."
     },
     {
       "recordId": "weapon:cybermine",
       "targetRelease": "1.0.0",
       "status": "reviewed",
       "reviewedOn": "2026-10-08",
-      "note": "Uses the ordinary Mine family but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose."
+      "note": "Uses the shared Mine mechanics but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose."
     },
     {
       "recordId": "weapon:chest-mine",
       "targetRelease": "1.0.0",
       "status": "reviewed",
       "reviewedOn": "2026-10-08",
-      "note": "Independent BS/CC-mode effects and shared Disposable uses, deliberately no ordinary Mines inheritance relation."
+      "note": "Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation."
     },
     {
       "recordId": "equipment:360o-visor",

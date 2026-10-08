@@ -939,15 +939,15 @@ review. `declaration-category` projection records are excluded.
 
 #### Weapon (3/3)
 
-- [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no ordinary Mines inheritance relation.
+- [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
-- [x] **Cybermine** (`weapon:cybermine`) — reviewed: Uses the ordinary Mine family but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose.
+- [x] **Cybermine** (`weapon:cybermine`) — reviewed: Uses the shared Mine mechanics but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose.
   - `uses-effects-of` → Mines (`weapon:mines`)
   - `modifies-use-of` → Reset (`skill:reset`)
   - `causes-state` → Stunned State (`state:stunned`)
   - `causes-state` → Immobilized-B State (`state:immobilized-b`)
-- [x] **Mines** (`weapon:mines`) — reviewed: Ordinary Mine family: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary.
+- [x] **Mines** (`weapon:mines`) — reviewed: Shared Mine mechanics: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary.
   - `uses-effects-of` → Deployable (`trait:deployable`)
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `uses-effects-of` → Mimetism (`skill:mimetism`)

@@ -80,14 +80,14 @@ Dodge resolution, blocked paths, Marker exclusions and prevention of deployable
 chain reactions. The Mines subsection instead specifies camouflage placement,
 mandatory template triggering, friendly-model exclusion, a Dodge MOD, and
 special handling for Cybermines and Chest Mines. These are **not** interchangeable
-rules: Chest Mines explicitly exclude normal Mines mechanics in both modes;
+rules: Chest Mines explicitly exclude the shared Mines mechanics in both modes;
 Cybermines require Reset instead of Dodge.
 
 InfinityDB's current curated rules database now has three distinct N5 page-72
-Weapon definitions: `weapon:mines` for shared ordinary-Mine rules,
+Weapon definitions: `weapon:mines` for shared Mines placement and triggering mechanics,
 `weapon:cybermine` for the Comms Attack/Reset and Saving Roll exceptions, and
 `weapon:chest-mine` for separate BS/CC use modes that **do not inherit** the
-ordinary Mines rules. `trait:boost` continues to own Perimeter-specific
+shared Mines mechanics. `trait:boost` continues to own Perimeter-specific
 activation, Dodge, blocked-path and Marker restrictions with its page-69
 citation; generic `trait:deployable` remains unchanged.
 
@@ -95,8 +95,9 @@ The PDF-hash-pinned 21-clause inventory now classifies **all 21 selected clauses
 as explicitly represented** in the curated summaries, rather than inferring
 coverage from neighbouring generic concepts. Its scope remains bounded: the
 inventory does not establish complete Weaponry prose coverage. Seven verified
-application Weapon slugs (`ap-mine`, `e-m-mine`, `monofilament-mine`, `para-mine`,
-`shock-mine`, `viral-mine`, `cybermine`) link to the shared Mines family;
+named Mine Weapon slugs (`ap-mine`, `e-m-mine`, `monofilament-mine`,
+`para-mine`, `shock-mine`, `viral-mine`, `cybermine`) link to the shared
+Mines family;
 Cybermine additionally exposes its exception record. `chest-mine` links only
 to the Chest Mine exception record, with both Army modes sharing that
 reference; Drop Bears and Mine Dispenser deliberately do not inherit it.
@@ -104,10 +105,13 @@ The catalog-enrichment regression checks these relationships against the
 tracked Army and rules databases. Actual browser visual navigation remains
 to be verified manually. The Weapon detail API now gives links to
 rules already rendered on the same page stable local anchors. In particular,
-Cybermine's ordinary Mines link leads to the adjacent Mines card, not to the
+Cybermine's shared Mines link leads to the adjacent Mines card, not to the
 first unrelated Army weapon sharing that definition. Chest Mine does not show
-ordinary Mines rules, so its comparison link still uses the existing cross-page
-fallback; a canonical shared-family landing route remains an open design decision.
+shared Mines mechanics. Its comparison now links to the Mines card on the first
+linked Army Weapon's detail page (`/weapons/ap-mine#rule-weapon-mines`), with
+fragment navigation restored after the async API render. This is a temporary
+host for the shared definition, **not** a claim that AP Mine owns the rules;
+a dedicated canonical shared-family landing route remains an open design decision.
 
 An additional **archived Wiki** cross-check identifies the corresponding
 N5 pages `Perimeter_Weapons` (revision 3912), `Mines` (revision 4112), and

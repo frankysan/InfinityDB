@@ -6304,3 +6304,11 @@ def test_wsgi_rejects_missing_explicit_rules_database(
 
     with pytest.raises(ValueError, match="Rules database does not exist"):
         importlib.import_module("infinity_db.web.wsgi")
+
+
+def test_catalog_detail_reveals_async_rule_fragment_after_render(app: Callable) -> None:
+    status, _, script = request(app, "/static/catalog-detail.js")
+    assert status == 200
+    assert b'requestAnimationFrame(revealHashTarget)' in script
+    assert b'window.addEventListener("hashchange", revealHashTarget' in script
+    assert b'content.contains(target)' in script

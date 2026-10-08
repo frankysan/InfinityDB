@@ -29,9 +29,11 @@ are not retroactively relabeled.
 ### Added
 
 - **Data processing + Web backend:** Add source-cited Mines, Cybermine, and Chest Mine
-  Weapon references. Ordinary Mines inherit the family mechanics, Cybermine adds its
-  Reset and State effects, and Chest Mines exclude ordinary Mine rules in both modes.
+  Weapon references. Named Mine types share placement and trigger mechanics but retain
+  their distinct ammunition, saving rolls, traits, and effects. Cybermine adds its
+  Reset and State effects; Chest Mines do not use the shared placement rules.
   Link the definitions through reviewed Army Weapon slugs without altering Army profiles.
+  Links from Chest Mine to the shared Mines rules now land on the rule card itself.
 - **Data processing + Web backend + Web frontend:** Publish the bounded core **Scenarios** domain for
   Annihilation, Domination, Supplies, and Firefight. Scenario detail defaults to 300 Army Points when
   no valid shared selection exists, keeps point-dependent scoring/source issues scoped correctly, links

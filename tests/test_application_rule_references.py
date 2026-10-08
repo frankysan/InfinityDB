@@ -15,7 +15,10 @@ from infinity_db.application_domains import (
 )
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database
-from infinity_db.domain_references import enrich_rule_relation_references
+from infinity_db.domain_references import (
+    enrich_rule_relation_references,
+    rule_record_public_reference,
+)
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
@@ -663,3 +666,29 @@ def test_hacking_program_catalog_remains_available_without_rules_database(
     assert carbonite is not None
     assert carbonite["description"] == "DA Ammo. State: IMM-B. Non-Lethal."
     assert "rules" not in carbonite
+
+
+def test_shared_weapon_family_reference_targets_its_card() -> None:
+    family = {
+        "kind": "weapon",
+        "id": "weapon:mines",
+        "variant_semantics": {"inheritance": "family"},
+        "army_links": [
+            {"entity": "weapon", "id": "ap-mine"},
+            {"entity": "weapon", "id": "e-m-mine"},
+        ],
+    }
+    assert rule_record_public_reference(None, family) == {
+        "href": "/weapons/ap-mine#rule-weapon-mines"
+    }
+    # A weapon-specific rule still links to its Weapon page, not an absent anchor.
+    family["army_links"] = [{"entity": "weapon", "id": "cybermine"}]
+    assert rule_record_public_reference(None, family) == {
+        "catalog": "weapons", "id": "cybermine"
+    }
+    # Multi-linked source-specific records do not gain an invented rule-card anchor.
+    family["variant_semantics"] = {"inheritance": "source"}
+    family["army_links"].append({"entity": "weapon", "id": "ap-mine"})
+    assert rule_record_public_reference(None, family) == {
+        "catalog": "weapons", "id": "cybermine"
+    }

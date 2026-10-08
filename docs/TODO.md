@@ -215,10 +215,14 @@ unimplemented until its corresponding behavior exists.
       its N5 p. 69 citation and preserve reviewed-text link provenance.
     - [x] Add a separate **Mines** family reference with complete selected
       trigger/placement/allied-safety mechanics, Cybermine Reset/State exceptions,
-      and Chest Mine BS/CC mode exceptions without applying ordinary Mine rules
+      and Chest Mine BS/CC mode exceptions without applying shared Mines placement/trigger rules
       to Chest Mines. The pinned 21-clause review now reports 21 represented;
       weapon catalog enrichment is regression-tested against all eight associated
-      Army Weapon slugs (seven ordinary family entries and Chest Mine).
+      Army Weapon slugs (seven named Mine variants and Chest Mine).
+    - [ ] Complete an individual-variant review for AP, E/M, Monofilament, PARA,
+      Shock, Viral, and Cybermines against the N5 Weapon Chart, ammunition and
+      State rules, and Army profiles. Shared placement/trigger rules must not be
+      mistaken for identical weapon effects or complete per-variant semantics.
     - [ ] Manually verify Mines/Cybermine/Chest Mine browser detail cards, rule
       links, citation rendering, and both Chest Mine modes; then reconcile any
       resulting navigation/presentation defects. Source-backed API enrichment

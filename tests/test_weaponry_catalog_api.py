@@ -66,7 +66,7 @@ def _weapon_rules(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
         "viral-mine",
     ),
 )
-def test_ordinary_mine_pages_publish_the_shared_rules(
+def test_named_mine_pages_publish_shared_placement_rules(
     weaponry_app: Callable, slug: str
 ) -> None:
     payload = _weapon_detail(weaponry_app, slug)
@@ -77,6 +77,7 @@ def test_ordinary_mine_pages_publish_the_shared_rules(
     assert "weapon:chest-mine" not in rules
 
     mines = rules["weapon:mines"]
+    assert "ordinary Mines" not in mines["summary"]
     assert any(
         source["source_id"] == "n5-core-v5.3-pdf"
         and source["source_version"] == "5.3"
@@ -113,7 +114,7 @@ def test_cybermine_page_retains_both_family_and_exception(
     )
 
 
-def test_chest_mine_page_does_not_inherit_ordinary_mine_rules(
+def test_chest_mine_page_does_not_inherit_shared_mines_rules(
     weaponry_app: Callable,
 ) -> None:
     payload = _weapon_detail(weaponry_app, "chest-mine")
@@ -128,9 +129,58 @@ def test_chest_mine_page_does_not_inherit_ordinary_mine_rules(
         for source in chest_mine["citations"]
     )
     assert chest_mine["summary_tokens"]
-    # No local Mines card is rendered on Chest Mine: retain cross-page navigation.
+    # No local Mines card exists on Chest Mine; land on the shared card elsewhere.
     assert next(
         token["public_reference"]
         for token in chest_mine["summary_tokens"]
         if token.get("target") == "weapon:mines"
-    ) == {"catalog": "weapons", "id": "ap-mine"}
+    ) == {"href": "/weapons/ap-mine#rule-weapon-mines"}
+
+
+def test_named_mine_page_can_host_shared_rule_link(weaponry_app: Callable) -> None:
+    """The chosen cross-page target must actually publish the target card."""
+    payload = _weapon_detail(weaponry_app, "ap-mine")
+    assert "weapon:mines" in _weapon_rules(payload)
+
+
+@pytest.mark.parametrize(
+    ("slug", "ammunition", "damage", "saving", "rolls", "distinct_trait"),
+    (
+        ("ap-mine", "AP", "7", "ARM/2", "1", "Concealed"),
+        ("e-m-mine", "E/M", "7", "BTS/2", "2", "Non-lethal"),
+        ("monofilament-mine", "N", "8", "ARM=0", "1", "State: Dead"),
+        ("para-mine", "PARA", "-", "PH-6", "1", "Non-lethal"),
+        ("shock-mine", "Shock", "7", "ARM", "1", "Concealed"),
+        ("viral-mine", "N", "7", "BTS", "1", "Bioweapon (DA+SHOCK)"),
+        ("cybermine", 0, "5", "BTS", "2", "Comms. Attack"),
+    ),
+)
+def test_named_mines_preserve_distinct_army_profiles(
+    weaponry_app: Callable,
+    slug: str,
+    ammunition: str | int,
+    damage: str,
+    saving: str,
+    rolls: str,
+    distinct_trait: str,
+) -> None:
+    """Family rules must not flatten source-specific ammunition and effects."""
+    payload = _weapon_detail(weaponry_app, slug)
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert (profile["ammunition"], profile["damage"], profile["saving"],
+            profile["saving_num"]) == (ammunition, damage, saving, rolls)
+    assert distinct_trait in profile["traits"]
+    assert "weapon:mines" in _weapon_rules(payload)
+    assert "ordinary Mines" not in _weapon_rules(payload)["weapon:mines"]["summary"]
+
+
+def test_chest_mine_modes_are_not_a_default_mine_profile(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "chest-mine")
+    assert {profile["mode"] for profile in payload["profiles"]} == {
+        "BS Mode", "CC Mode"
+    }
+    assert "weapon:mines" not in _weapon_rules(payload)
+    assert "ordinary Mines" not in _weapon_rules(payload)["weapon:chest-mine"]["summary"]

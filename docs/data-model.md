@@ -39,6 +39,15 @@ rules.db
 The two runtime databases are intentionally separate because Army data and reviewed rules knowledge
 have different sources, provenance, and update cadence.
 
+For weapon families such as Mines, a shared curated rule describes only the common
+mechanics. The individual Army weapon profile identifies ammunition, PS, Saving Rolls,
+and Traits; the corresponding ammunition, State, and Trait rules determine the
+weapon-specific effects. Attaching `weapon:mines` to a weapon
+does not create a generic "ordinary Mine" weapon or make the variants interchangeable.
+Variant-specific effects require their own source-derived weapon profile and, where
+necessary, curated exceptions or relationships. A reviewed family clause is not
+evidence that every named weapon variant has complete rules coverage.
+
 Current runtime database versions:
 
 - Army application database schema: **25**;
