@@ -127,88 +127,112 @@
           "id": "mine-camouflage-placement",
           "anchor": "he will place a Camouflaged Marker",
           "relatedCuratedIds": [
-            "skill:place-deployable"
+            "skill:place-deployable",
+            "weapon:mines"
           ],
           "semanticReview": {
-            "status": "component-only",
-            "reason": "Place Deployable exists, but does not state Mines use CAMO (-3) rather than a Token."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "[[skill:camouflage|CAMO]] (-3) Marker"
           }
         },
         {
           "id": "mine-reveal-token",
           "anchor": "Replace the Camouflage Marker",
           "relatedCuratedIds": [
-            "skill:discover"
+            "skill:discover",
+            "weapon:mines"
           ],
           "semanticReview": {
-            "status": "component-only",
-            "reason": "Discover is defined, but the Mine CAMO-to-Token substitution is absent."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "MINE (-3) Token"
           }
         },
         {
           "id": "mine-mimetism",
           "anchor": "both benefit from the MODs provided by the Mimetism",
           "relatedCuratedIds": [
-            "skill:mimetism"
+            "skill:mimetism",
+            "weapon:mines"
           ],
           "semanticReview": {
-            "status": "component-only",
-            "reason": "Mimetism has a definition, but is not applied to both Mine representations."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "both receive [[skill:mimetism]] (-3)"
           }
         },
         {
           "id": "mine-line-of-fire",
           "anchor": "Mines have a 360º LoF arc",
           "relatedCuratedIds": [
-            "trait:deployable"
+            "trait:deployable",
+            "weapon:mines"
           ],
           "semanticReview": {
-            "status": "not-represented",
-            "reason": "No curated Mines definition states their 360-degree LoF."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "Mines have 360º LoF"
           }
         },
         {
           "id": "mine-direct-template",
           "anchor": "when any type of Mine is triggered, a Small",
           "relatedCuratedIds": [
-            "trait:direct-template"
+            "trait:direct-template",
+            "weapon:mines"
           ],
           "semanticReview": {
-            "status": "component-only",
-            "reason": "Direct Template is defined, but its mandatory Small Teardrop use for Mines is absent."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "Small Teardrop Template reaches that enemy"
           }
         },
         {
           "id": "mine-allied-safety",
           "anchor": "A Mine never triggers if the Small Teardrop Template would affect an ally",
           "relatedCuratedIds": [
-            "trait:deployable"
+            "trait:deployable",
+            "weapon:mines"
           ],
           "semanticReview": {
-            "status": "not-represented",
-            "reason": "Mine-specific allied safety restriction does not appear in related curated text."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "without affecting any ally"
           }
         },
         {
           "id": "mine-trigger",
           "anchor": "Mines must trigger when an enemy Model or Marker declares",
           "relatedCuratedIds": [
-            "trait:deployable"
+            "trait:deployable",
+            "weapon:mines"
           ],
           "semanticReview": {
-            "status": "not-represented",
-            "reason": "Mine-specific compulsory trigger and template-area evaluation are absent."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "a Mine must trigger"
           }
         },
         {
           "id": "mine-disposal",
           "anchor": "Once a Mine triggers, it is removed from play",
           "relatedCuratedIds": [
-            "trait:disposable-x"
+            "trait:disposable-x",
+            "weapon:mines"
           ],
           "semanticReview": {
-            "status": "component-only",
-            "reason": "Disposable describes limited uses, not removing an already placed Mine after triggering."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "then is removed"
           }
         },
         {
@@ -216,55 +240,70 @@
           "anchor": "imposes a -3 PH MOD to any attempt to Dodge",
           "relatedCuratedIds": [
             "skill:dodge",
-            "trait:deployable"
+            "trait:deployable",
+            "weapon:mines"
           ],
           "semanticReview": {
-            "status": "component-only",
-            "reason": "Dodge and Deployable are defined, but not the Mine-specific -3 PH MOD."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "-3 PH on [[skill:dodge]]"
           }
         },
         {
           "id": "mine-placement-restriction",
           "anchor": "A Mine cannot be placed if there is an enemy Camouflage Marker",
           "relatedCuratedIds": [
-            "skill:place-deployable"
+            "skill:place-deployable",
+            "weapon:mines"
           ],
           "semanticReview": {
-            "status": "not-represented",
-            "reason": "Place Deployable omits the enemy CAMO Marker restriction and its exceptions."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker"
           }
         },
         {
           "id": "cybermine-reset",
           "anchor": "they can only be evaded with a Reset",
           "relatedCuratedIds": [
-            "skill:reset"
+            "skill:reset",
+            "weapon:cybermine"
           ],
           "semanticReview": {
-            "status": "component-only",
-            "reason": "Reset is defined, but Cybermine-only Reset and -3 WIP are not linked here."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:cybermine",
+            "summaryAnchor": "[[skill:reset]] at -3 WIP"
           }
         },
         {
           "id": "chest-mine-bs-exception",
           "anchor": "In BS Weapon Mode, Chest Mines function as a Direct Template Weapon",
           "relatedCuratedIds": [
-            "trait:direct-template"
+            "trait:direct-template",
+            "weapon:chest-mine"
           ],
           "semanticReview": {
-            "status": "component-only",
-            "reason": "Direct Template exists, but the Chest Mine exclusion from Mines mechanics is not explicit."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:chest-mine",
+            "summaryAnchor": "In BS Mode it functions"
           }
         },
         {
           "id": "chest-mine-cc-exception",
           "anchor": "In CC Weapon Mode, Chest Mines function as a CC Weapon",
           "relatedCuratedIds": [
-            "skill:cc-attack"
+            "skill:cc-attack",
+            "weapon:chest-mine"
           ],
           "semanticReview": {
-            "status": "component-only",
-            "reason": "CC Attack exists, but Chest Mine CC restrictions and Mines exception are absent."
+            "status": "represented",
+            "reason": "N5 page-72 family/exception rule now explicitly states the reviewed mechanic.",
+            "curatedId": "weapon:chest-mine",
+            "summaryAnchor": "In [[trait:cc|CC]] Mode it is a [[trait:cc|CC]] Weapon"
           }
         },
         {

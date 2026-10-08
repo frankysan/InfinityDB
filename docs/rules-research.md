@@ -83,24 +83,26 @@ special handling for Cybermines and Chest Mines. These are **not** interchangeab
 rules: Chest Mines explicitly exclude normal Mines mechanics in both modes;
 Cybermines require Reset instead of Dodge.
 
-InfinityDB's generated rules database contains `trait:perimeter`, `trait:boost`,
-`trait:deployable`, `skill:place-deployable`, `skill:reset` and associated records,
-but no record named `Mines` or `Perimeter Weapons`. The Boost Trait summary
-now includes mandatory triggering and detonation, Normal Dodge avoidance,
-blocked-path and Marker exclusions, and prevention of Deployable chain reactions,
-with a direct N5 v5.3 page-69 citation. Existing Perimeter and Disposable summaries
-also cover placement/ZoC and shared-use mechanics respectively. These are
-family-source facts, not inferred properties of every Deployable item.
+InfinityDB's current curated rules database now has three distinct N5 page-72
+Weapon definitions: `weapon:mines` for shared ordinary-Mine rules,
+`weapon:cybermine` for the Comms Attack/Reset and Saving Roll exceptions, and
+`weapon:chest-mine` for separate BS/CC use modes that **do not inherit** the
+ordinary Mines rules. `trait:boost` continues to own Perimeter-specific
+activation, Dodge, blocked-path and Marker restrictions with its page-69
+citation; generic `trait:deployable` remains unchanged.
 
-The PDF-hash-pinned 21-clause review now distinguishes **8 clauses explicitly
-represented** in curated summaries, **9 with only related generic mechanics**, and
-**4 without the family-specific rule**. The 13 incomplete cases are all in the
-Mines/Cybermines/Chest Mines family, most importantly mandatory Mine triggering,
-allied safety, placement exceptions, Cybermine Reset with -3 WIP, and both Chest
-Mine mode exceptions. A Mines family-level curated reference is a better owner for
-the general Mine restrictions than expanding `trait:deployable` globally.
-Neither the count nor matching curated text establishes browser navigation,
-Army-weapon relationships, or an exhaustive Weaponry clause inventory.
+The PDF-hash-pinned 21-clause inventory now classifies **all 21 selected clauses
+as explicitly represented** in the curated summaries, rather than inferring
+coverage from neighbouring generic concepts. Its scope remains bounded: the
+inventory does not establish complete Weaponry prose coverage. Seven verified
+application Weapon slugs (`ap-mine`, `e-m-mine`, `monofilament-mine`, `para-mine`,
+`shock-mine`, `viral-mine`, `cybermine`) link to the shared Mines family;
+Cybermine additionally exposes its exception record. `chest-mine` links only
+to the Chest Mine exception record, with both Army modes sharing that
+reference; Drop Bears and Mine Dispenser deliberately do not inherit it.
+The catalog-enrichment regression checks these relationships against the
+tracked Army and rules databases. Actual browser visual navigation remains
+to be verified manually.
 
 An additional **archived Wiki** cross-check identifies the corresponding
 N5 pages `Perimeter_Weapons` (revision 3912), `Mines` (revision 4112), and

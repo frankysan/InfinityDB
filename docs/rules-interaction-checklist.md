@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **98/113** complete, **15** pending.
-- Current authored outgoing relations: **262**.
+- Supporting semantic identities: **101/116** complete, **15** pending.
+- Current authored outgoing relations: **272**.
 - Explicitly tracked future/deferred interactions: **115**.
 
 ## 0.7.0 primary catalog review
@@ -936,6 +936,22 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
+
+#### Weapon (3/3)
+
+- [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no ordinary Mines inheritance relation.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+- [x] **Cybermine** (`weapon:cybermine`) — reviewed: Uses the ordinary Mine family but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `modifies-use-of` → Reset (`skill:reset`)
+  - `causes-state` → Stunned State (`state:stunned`)
+  - `causes-state` → Immobilized-B State (`state:immobilized-b`)
+- [x] **Mines** (`weapon:mines`) — reviewed: Ordinary Mine family: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary.
+  - `uses-effects-of` → Deployable (`trait:deployable`)
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Mimetism (`skill:mimetism`)
+  - `uses-effects-of` → Place Deployable (`skill:place-deployable`)
 
 ## Future interaction queue
 

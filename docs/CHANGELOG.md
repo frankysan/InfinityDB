@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Mine and Cybermine Weapon pages now explain triggering, camouflage, allied safety,
+  Reset, and special effects; Chest Mine pages explain their separate BS/CC modes.
 - The Boost reference now explains blocked paths, exempt Markers, Dodge, and why Deployable
   weapons cannot trigger one another.
 - You can now browse the four current core scenarios, starting at the common 300-point game size by
@@ -26,6 +28,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend:** Add source-cited Mines, Cybermine, and Chest Mine
+  Weapon references. Ordinary Mines inherit the family mechanics, Cybermine adds its
+  Reset and State effects, and Chest Mines exclude ordinary Mine rules in both modes.
+  Link the definitions through reviewed Army Weapon slugs without altering Army profiles.
 - **Data processing + Web backend + Web frontend:** Publish the bounded core **Scenarios** domain for
   Annihilation, Domination, Supplies, and Firefight. Scenario detail defaults to 300 Army Points when
   no valid shared selection exists, keeps point-dependent scoring/source issues scoped correctly, links

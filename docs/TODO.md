@@ -208,17 +208,21 @@ unimplemented until its corresponding behavior exists.
       10 explicitly selected Army weapon names, and related curated concept
       identities. All names and concept records resolve, but neither family
       has a same-named curated record. This is not semantic or UI completeness.
-    - [x] Adjudicate the 21 selected clauses against actual curated summaries:
-      **8 represented**, **9 generic-component-only**, **4 not represented**.
-      Complete the `trait:boost` summary with triggering, detonation, blocked
+    - [x] First adjudication identified **8 represented**, **9 generic-component-only**,
+      and **4 not represented** clauses (subsequently resolved by the Mines family
+      definitions below). Complete the `trait:boost` summary with triggering, detonation, blocked
       paths, Marker exclusions, Dodge, and Deployable-chain restrictions; pin
       its N5 p. 69 citation and preserve reviewed-text link provenance.
-    - [ ] Curate a distinct **Mines** family reference instead of assigning its
-      specific trigger/placement/allied-safety rules to generic Deployable.
-      Reconcile all 13 remaining partial/absent clauses, including Cybermine
-      Reset and Chest Mine BS/CC exceptions; add verified Army associations and
-      confirm player-facing links/browser presentation. Source-anchor identity
-      or the presence of a related Skill alone does not close these cases.
+    - [x] Add a separate **Mines** family reference with complete selected
+      trigger/placement/allied-safety mechanics, Cybermine Reset/State exceptions,
+      and Chest Mine BS/CC mode exceptions without applying ordinary Mine rules
+      to Chest Mines. The pinned 21-clause review now reports 21 represented;
+      weapon catalog enrichment is regression-tested against all eight associated
+      Army Weapon slugs (seven ordinary family entries and Chest Mine).
+    - [ ] Manually verify Mines/Cybermine/Chest Mine browser detail cards, rule
+      links, citation rendering, and both Chest Mine modes; then reconcile any
+      resulting navigation/presentation defects. Source-backed API enrichment
+      alone does not establish browser acceptance.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

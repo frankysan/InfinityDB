@@ -910,6 +910,27 @@
       "reviewedOn": "2026-09-24"
     },
     {
+      "recordId": "weapon:mines",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Ordinary Mine family: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary."
+    },
+    {
+      "recordId": "weapon:cybermine",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Uses the ordinary Mine family but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose."
+    },
+    {
+      "recordId": "weapon:chest-mine",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Independent BS/CC-mode effects and shared Disposable uses, deliberately no ordinary Mines inheritance relation."
+    },
+    {
       "recordId": "equipment:360o-visor",
       "targetRelease": "0.7.0",
       "status": "reviewed",
@@ -1052,8 +1073,7 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
-    }
-  ,
+    },
     {
       "recordId": "skill:combat-jump",
       "targetRelease": "0.7.0",
@@ -1127,34 +1147,34 @@
       "reviewedOn": "2026-09-24"
     },
     {
-        "recordId": "skill:berserk",
-        "targetRelease": "0.7.0",
-        "status": "reviewed",
-        "reviewedOn": "2026-09-24"
+      "recordId": "skill:berserk",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
-        "recordId": "skill:guard",
-        "targetRelease": "0.7.0",
-        "status": "reviewed",
-        "reviewedOn": "2026-09-24"
+      "recordId": "skill:guard",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
-        "recordId": "skill:neurocinetics",
-        "targetRelease": "0.7.0",
-        "status": "reviewed",
-        "reviewedOn": "2026-09-24"
+      "recordId": "skill:neurocinetics",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
-        "recordId": "skill:total-reaction",
-        "targetRelease": "0.7.0",
-        "status": "reviewed",
-        "reviewedOn": "2026-09-24"
+      "recordId": "skill:total-reaction",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
-        "recordId": "skill:triangulated-fire",
-        "targetRelease": "0.7.0",
-        "status": "reviewed",
-        "reviewedOn": "2026-09-24"
+      "recordId": "skill:triangulated-fire",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:aerial",
@@ -1905,7 +1925,7 @@
       "status": "deferred",
       "reason": "Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge."
     },
-        {
+    {
       "sourceRecordId": "equipment:dazer",
       "targetRecordId": "rule:difficult-terrain",
       "relationType": null,
@@ -2041,39 +2061,38 @@
       "status": "deferred",
       "reason": "Indiscriminate allows use or deployment despite Camouflage and Hiding Markers in the Area of Effect, but the current relation vocabulary has no precise bypasses-marker-restriction edge."
     },
-  {
-    "sourceRecordId": "state:stunned",
-    "targetRecordId": "rule:attack-declaration",
-    "relationType": "restricts-use-of",
-    "targetRelease": "post-0.7.0",
-    "status": "planned",
-    "reason": "Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical."
-  },
-  {
-    "sourceRecordId": "state:stunned",
-    "targetRecordId": "rule:roll",
-    "relationType": "modifies-rolls-for",
-    "targetRelease": "post-0.7.0",
-    "status": "planned",
-    "reason": "Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception."
-  },
-  {
-    "sourceRecordId": "state:isolated",
-    "targetRecordId": "state:disconnected",
-    "relationType": "causes-state",
-    "targetRelease": "post-0.7.0",
-    "status": "deferred",
-    "reason": "Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition."
-  },
-  {
-    "sourceRecordId": "rule:null-state",
-    "targetRecordId": "state:disconnected",
-    "relationType": "causes-state",
-    "targetRelease": "post-0.7.0",
-    "status": "deferred",
-    "reason": "A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role."
-  }
-  ,
+    {
+      "sourceRecordId": "state:stunned",
+      "targetRecordId": "rule:attack-declaration",
+      "relationType": "restricts-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical."
+    },
+    {
+      "sourceRecordId": "state:stunned",
+      "targetRecordId": "rule:roll",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception."
+    },
+    {
+      "sourceRecordId": "state:isolated",
+      "targetRecordId": "state:disconnected",
+      "relationType": "causes-state",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition."
+    },
+    {
+      "sourceRecordId": "rule:null-state",
+      "targetRecordId": "state:disconnected",
+      "relationType": "causes-state",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role."
+    },
     {
       "sourceRecordId": "skill:combat-jump",
       "targetRecordId": "rule:partial-cover",
@@ -2123,20 +2142,20 @@
       "reason": "Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge."
     },
     {
-        "sourceRecordId": "skill:triangulated-fire",
-        "targetRecordId": "rule:range-modifiers",
-        "relationType": "ignores-modifiers-from",
-        "targetRelease": "post-0.7.0",
-        "status": "deferred",
-        "reason": "Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity."
+      "sourceRecordId": "skill:triangulated-fire",
+      "targetRecordId": "rule:range-modifiers",
+      "relationType": "ignores-modifiers-from",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity."
     },
     {
-        "sourceRecordId": "skill:triangulated-fire",
-        "targetRecordId": "rule:partial-cover",
-        "relationType": "ignores-modifiers-from",
-        "targetRelease": "post-0.7.0",
-        "status": "deferred",
-        "reason": "Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule."
+      "sourceRecordId": "skill:triangulated-fire",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": "ignores-modifiers-from",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule."
     },
     {
       "sourceRecordId": "skill:climbing-plus",
@@ -2265,8 +2284,7 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics."
-    }
-  ,
+    },
     {
       "sourceRecordId": "state:engaged",
       "targetRecordId": "rule:close-combat-declaration-set",

@@ -67,7 +67,8 @@
         "test_scenario_api",
         "test_theme_contrast",
         "test_web",
-        "test_web_metrics"
+        "test_web_metrics",
+        "test_weaponry_catalog_api"
       ]
     },
     "build": {

@@ -131,7 +131,7 @@ def test_checked_in_semantic_review_separates_full_and_partial_coverage() -> Non
     statuses = [clause['semanticReview']['status']
                 for family in raw['families'] for clause in family['clauses']]
     assert {status: statuses.count(status) for status in set(statuses)} == {
-        'represented': 8, 'component-only': 9, 'not-represented': 4,
+        'represented': 21,
     }
 
 
@@ -158,3 +158,79 @@ def test_curated_boost_rules_are_published_with_source_provenance() -> None:
             "WHERE record_id = 'trait:boost' AND source_id = 'n5-core-v5.3-pdf' "
             "AND page = 69"
         ).fetchone()[0] == 1
+
+
+def test_mine_family_rules_apply_to_correct_army_weapon_profiles() -> None:
+    import sqlite3
+
+    from infinity_db.catalog_rules import CatalogRules
+    from infinity_db.rules_database import RulesDatabase
+
+    root = Path(__file__).resolve().parents[1]
+    curated = json.loads((root / 'data/curated/rules/n5-core-v5.3.json').read_text(
+        encoding='utf-8'))
+    records = {r['id']: r for r in curated['records']}
+    mine_slugs = {
+        'ap-mine', 'e-m-mine', 'monofilament-mine', 'para-mine',
+        'shock-mine', 'viral-mine', 'cybermine',
+    }
+    assert {l['id'] for l in records['weapon:mines']['armyLinks']} == mine_slugs
+    assert records['weapon:cybermine']['armyLinks'] == [
+        {'entity': 'weapon', 'id': 'cybermine'}]
+    assert records['weapon:chest-mine']['armyLinks'] == [
+        {'entity': 'weapon', 'id': 'chest-mine'}]
+    for record_id in ('weapon:mines', 'weapon:cybermine', 'weapon:chest-mine'):
+        record = records[record_id]
+        assert record['variantSemantics'] == {'inheritance': 'family'}
+        section = {'weapon:cybermine': 'Cybermines',
+                   'weapon:chest-mine': 'Chest Mines'}.get(record_id, 'Mines')
+        assert {'sourceId': 'n5-core-v5.3-pdf', 'page': 72,
+                'section': section} in record['citations']
+
+    with sqlite3.connect(root / 'data/generated/infinity.db') as db:
+        slugs = {row[0] for row in db.execute(
+            "SELECT slug FROM application_domain_slugs WHERE domain = 'weapons' "
+            "AND status = 'resolved'")}
+    assert mine_slugs | {'chest-mine'} <= slugs
+
+    composed = CatalogRules(RulesDatabase(root / 'data/generated/rules.db'))
+    for slug in sorted(mine_slugs | {'chest-mine', 'mine-dispenser', 'drop-bears'}):
+        payload = composed.enrich_catalog_item(
+            'weapons', {'id': slug, 'slug': slug, 'variants': []})
+        actual = {r['id'] for r in payload.get('rules', [])}
+        expected = ({'weapon:mines'} if slug in mine_slugs else set())
+        if slug == 'cybermine':
+            expected.add('weapon:cybermine')
+        if slug == 'chest-mine':
+            expected.add('weapon:chest-mine')
+        assert actual == expected, slug
+
+    chest = composed.enrich_catalog_item('weapons', {
+        'id': 'chest-mine', 'slug': 'chest-mine',
+        'variants': [{'item_id': 147, 'mode': 'BS Mode'},
+                     {'item_id': 147, 'mode': 'CC Mode'}],
+    })
+    assert {r['id'] for r in chest['rules']} == {'weapon:chest-mine'}
+    assert all('rules' not in variant for variant in chest['variants'])
+
+
+def test_mines_family_summaries_cover_general_and_exception_mechanics() -> None:
+    root = Path(__file__).resolve().parents[1]
+    curated = json.loads((root / 'data/curated/rules/n5-core-v5.3.json').read_text(
+        encoding='utf-8'))
+    records = {r['id']: r for r in curated['records']}
+    general = records['weapon:mines']['summary']
+    for text in ('360º LoF', 'Small Teardrop Template', 'Total Cover',
+                 'without affecting any ally', '[[state:unconscious|Unconscious]]',
+                 'must trigger', '-3 PH', '[[skill:mimetism]]',
+                 '[[trait:intuitive-attack'):
+        assert text in general
+    cyber = records['weapon:cybermine']['summary']
+    for text in ('[[skill:reset]] at -3 WIP', 'two BTS Saving Rolls',
+                 '[[state:stunned]]', '[[state:immobilized-b|Immobilized-B]]'):
+        assert text in cyber
+    chest = records['weapon:chest-mine']['summary']
+    for text in ('does not apply', '[[trait:direct-template]]',
+                 '[[skill:cc-attack|CC attack]]', 'two uses',
+                 'does not affect the bearer'):
+        assert text in chest

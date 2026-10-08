@@ -3567,6 +3567,184 @@
             }
         },
         {
+            "id": "weapon:mines",
+            "kind": "weapon",
+            "name": "Mines",
+            "summary": "Mines use [[skill:place-deployable]] to put down a [[skill:camouflage|CAMO]] (-3) Marker, which becomes a MINE (-3) Token when Discovered; both receive [[skill:mimetism]] (-3). Mines have 360º LoF. Their Trigger Area is the Small Teardrop Template projected from the base, excluding Total Cover. When an enemy Model or Marker declares or executes a Skill or [[trait:aro|ARO]] within it, a Mine must trigger if its Small Teardrop Template reaches that enemy without affecting any ally, including [[state:unconscious|Unconscious]] allies. If the target is outside the Trigger Area, the Mine remains hidden and does not detonate. A triggered Mine applies its Weapon Chart ammunition and PS, then is removed. Ordinary Mines impose -3 PH on [[skill:dodge]] attempts. A Mine cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid non-camouflaged enemy is also inside it or a [[trait:intuitive-attack|Intuitive Attack]] was declared. [[weapon:cybermine|Cybermines]] replace the [[skill:dodge|Dodge]] response with [[skill:reset]]; [[weapon:chest-mine|Chest Mines]] do not use these ordinary Mine rules.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "ap-mine"
+                },
+                {
+                    "entity": "weapon",
+                    "id": "e-m-mine"
+                },
+                {
+                    "entity": "weapon",
+                    "id": "monofilament-mine"
+                },
+                {
+                    "entity": "weapon",
+                    "id": "para-mine"
+                },
+                {
+                    "entity": "weapon",
+                    "id": "shock-mine"
+                },
+                {
+                    "entity": "weapon",
+                    "id": "viral-mine"
+                },
+                {
+                    "entity": "weapon",
+                    "id": "cybermine"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:deployable"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:direct-template"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:mimetism"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:place-deployable"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 72,
+                    "section": "Mines"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-08"
+            }
+        },
+        {
+            "id": "weapon:cybermine",
+            "kind": "weapon",
+            "name": "Cybermine",
+            "summary": "Cybermines follow the [[weapon:mines|ordinary Mines]] placement and trigger rules, but make a Comms Attack. They can be avoided only with [[skill:reset]] at -3 WIP, not [[skill:dodge]]. A hit forces two BTS Saving Rolls against PS 5. Failure of either causes [[state:stunned]], or [[state:immobilized-b|Immobilized-B]] instead for a Hackable Trooper or [[skill:hacker|Hacker]].",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "cybermine"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "weapon:mines"
+                },
+                {
+                    "type": "modifies-use-of",
+                    "recordId": "skill:reset"
+                },
+                {
+                    "type": "causes-state",
+                    "recordId": "state:stunned"
+                },
+                {
+                    "type": "causes-state",
+                    "recordId": "state:immobilized-b"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 72,
+                    "section": "Cybermines"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-08"
+            }
+        },
+        {
+            "id": "weapon:chest-mine",
+            "kind": "weapon",
+            "name": "Chest Mine",
+            "summary": "This weapon does not apply the [[weapon:mines|ordinary Mines]] rules in either mode. In BS Mode it functions as a [[trait:direct-template]] Weapon. In [[trait:cc|CC]] Mode it is a [[trait:cc|CC]] Weapon: winning the Face to Face Roll affects every enemy Trooper in Silhouette contact with the bearer, but the [[skill:cc-attack|CC attack]] cannot be used while an ally is in Silhouette contact with the bearer. Both modes share two uses under [[trait:disposable-x|Disposable (2)]]. Detonation does not affect the bearer.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "chest-mine"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:direct-template"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:disposable-x"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 72,
+                    "section": "Chest Mines"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-08"
+            }
+        },
+        {
             "id": "declaration-category:automatic:p86",
             "kind": "declaration-category",
             "name": "Automatic",
