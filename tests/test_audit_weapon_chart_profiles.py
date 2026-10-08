@@ -55,22 +55,46 @@ def test_compares_matching_metadata_without_claiming_completeness() -> None:
     assert result["candidateDiscrepancies"] == 0
 
 
-def test_detects_source_discrepancy_without_rewriting_either_value() -> None:
+def test_nonoperative_saving_roll_multiplier_matches_no_rolls() -> None:
     pdf = _pdf_row("Mine Dispenser")
+    pdf["savingAttribute"] = "--"
     pdf["savingRolls"] = "--"
     army = _army_row("Mine Dispenser")
+    army["savingAttribute"] = "-"
     army["savingRolls"] = "1"
     result = compare_rows([pdf], {"minedispenser": [army]})
-    assert result["candidateDiscrepancies"] == 1
-    assert result["compared"][0]["differences"] == [
-        {"field": "savingRolls", "pdf": "--", "army": "1"}
-    ]
+    assert result["matchingRows"] == 1
+    assert result["candidateDiscrepancies"] == 0
+    assert result["compared"][0]["differences"] == []
+    assert result["compared"][0]["army"]["savingRolls"] == "1"
+    assert result["compared"][0]["pdf"]["savingRolls"] == "--"
     report = {
         "corePdfSha256": "abc", "armyMetadataProfiles": 1,
         "comparison": result, "notCompared": ["range bands"],
     }
-    assert "Mine Dispenser" in markdown_report(report)
-    assert army["savingRolls"] == "1"
+    assert "Candidate discrepancies: **0**" in markdown_report(report)
+
+
+def test_detects_saving_roll_mismatch_when_attribute_exists() -> None:
+    pdf = _pdf_row()
+    army = _army_row()
+    army["savingRolls"] = "1"
+    result = compare_rows([pdf], {"tacticalbow": [army]})
+    assert result["candidateDiscrepancies"] == 1
+    assert result["compared"][0]["differences"] == [
+        {"field": "savingRolls", "pdf": "2", "army": "1"}
+    ]
+
+
+def test_missing_saving_attribute_is_still_a_discrepancy() -> None:
+    pdf = _pdf_row()
+    army = _army_row()
+    army["savingAttribute"] = "-"
+    result = compare_rows([pdf], {"tacticalbow": [army]})
+    assert result["candidateDiscrepancies"] == 1
+    assert result["compared"][0]["differences"] == [
+        {"field": "savingAttribute", "pdf": "ARM", "army": "-"},
+    ]
 
 
 def test_absent_values_are_equivalent_but_a_number_is_not() -> None:

@@ -4125,6 +4125,8 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert b'class=\\"table-column--descriptor\\" scope=\\"col\\">Ammunition</th>' in weapon_detail
     assert b'class=\\"table-column--metric\\" scope=\\"col\\">PS</th>' in weapon_detail
     assert b'["PS", profile.damage, "metric"]' in weapon_detail
+    assert b"function weaponSavingDisplay(profile) {" in weapon_detail
+    assert b"const saving = weaponSavingDisplay(profile);" in weapon_detail
     assert b"<th>DAM</th>" not in weapon_detail
     assert b'title.className = "surface-titlebar surface-titlebar--subtle";' in weapon_detail
     assert b"headingText" not in weapon_detail

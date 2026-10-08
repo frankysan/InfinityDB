@@ -109,8 +109,9 @@ unimplemented until its corresponding behavior exists.
     - [x] Establish a conservative five-field PDF/Army profile comparison via
       `tools/audit_weapon_chart_profiles.py`. On the supplied N5 v5.3 PDF, the first
       pass aligns 74 single-line, single-mode rows from 171 located chart rows;
-      73 match and one needs review: Mine Dispenser (PDF saving rolls `--`,
-      published Army metadata `1`). This is not full Weapon Chart coverage.
+      all 74 match when interpreting Saving Roll multipliers together with their
+      Saving Attributes. Mine Dispenser's `savingNum=1` is non-operative because
+      `saving=-`, matching the printed `--`. This is not full Weapon Chart coverage.
     - [ ] Expand PDF row alignment for wrapped names and multi-mode profiles,
       then compare range breakpoints/MODs, Traits, and special-weapon prose.
     - [ ] Review the six unmatched chart-text names as aliases, multi-mode entries,

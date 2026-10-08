@@ -409,6 +409,8 @@ python tools/audit_weapon_chart_profiles.py --core-pdf "C:\path\to\n5-rules-v5-3
 ```
 
 The output includes the source PDF SHA-256 and distinguishes matching fields,
-candidate discrepancies, and deferred rows. Absence of a discrepancy is not a
-completeness claim: range bands, Traits, wrapped/multi-mode rows, special-weapon
-prose, and browser projection still require source-to-presentation review.
+candidate discrepancies, and deferred rows. It interprets Saving Roll multipliers
+in context: an Army `savingNum=1` with no Saving Attribute is non-operative and
+matches a printed `--` (while the raw values remain visible). Absence of a
+discrepancy is not a completeness claim: range bands, Traits, wrapped/multi-mode
+rows, special-weapon prose, and browser projection still need review.

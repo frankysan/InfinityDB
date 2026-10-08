@@ -34,6 +34,8 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Web frontend:** Show no Saving Rolls for Weapon profiles without a Saving Attribute,
+  rather than displaying a non-operative Army multiplier.
 - **Data processing + Web frontend:** Correct Annihilation's 350-point surviving-Victory-Points
   boundaries as a reviewed source typo while preserving the printed discrepancy as a source note.
   Keep Domination's printed 350-point 6 SWC value and explain the unresolved cross-scenario

@@ -39,6 +39,23 @@ def _value(value: object) -> str:
     return "" if text in {"", "-", "--"} else text
 
 
+def _fields_equal(pdf: dict[str, str], army: dict[str, str], field: str) -> bool:
+    """Compare the printed Saving Rolls count with its Army source expression.
+
+    A source multiplier (``savingNum``) is non-operative when both sources have
+    no Saving Attribute and the chart explicitly displays no Saving Rolls.
+    Preserve the raw source values in reports rather than changing the metadata.
+    """
+    if (
+        field == "savingRolls"
+        and not _value(pdf["savingAttribute"])
+        and not _value(army["savingAttribute"])
+        and not _value(pdf["savingRolls"])
+    ):
+        return True
+    return _value(pdf[field]) == _value(army[field])
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -124,7 +141,7 @@ def compare_rows(chart_rows: list[dict[str, Any]], metadata: dict[str, list[dict
         army = options[0]
         differences = [
             {"field": field, "pdf": row[field], "army": army[field]}
-            for field in _FIELDS if _value(row[field]) != _value(army[field])
+            for field in _FIELDS if not _fields_equal(row, army, field)
         ]
         compared.append({
             "page": row["page"], "name": army["name"],
@@ -222,6 +239,8 @@ def markdown_report(report: dict[str, Any]) -> str:
         "- The chart extractor accepts only names on the same text baseline as Burst.",
         "- It does not guess across wrapped names or silently select one of several modes.",
         "- Blank, `-` and `--` represent the same absent value for this comparison.",
+        "- A Saving Roll multiplier is non-operative without a Saving Attribute;",
+        "  an Army `savingNum=1` with `saving=-` matches the chart's `--`.",
         "- The remaining rows and the categories below require dedicated audit work:",
     ])
     lines.extend(f"  - {entry}" for entry in report["notCompared"])

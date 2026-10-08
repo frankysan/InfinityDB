@@ -62,6 +62,14 @@ function text(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
 }
 
+function weaponSavingDisplay(profile) {
+  const saving = profile.saving;
+  if (saving == null || ["", "-", "--"].includes(String(saving).trim())) return "--";
+  return [saving, profile.saving_num]
+    .filter((value) => value !== null && value !== undefined && value !== "")
+    .join(" × ");
+}
+
 function weaponTraitLinks(traits) {
   const fragment = document.createDocumentFragment();
   for (const [index, trait] of traits.entries()) {
@@ -186,9 +194,7 @@ function weaponVariants(variants) {
       statTable.innerHTML = "<thead><tr><th class=\"table-column--descriptor\" scope=\"col\">Ammunition</th><th class=\"table-column--metric\" scope=\"col\">B</th><th class=\"table-column--metric\" scope=\"col\">PS</th><th class=\"table-column--metric\" scope=\"col\">Saving</th></tr></thead>";
       statTable.prepend(statCaption);
       const statRow = document.createElement("tr");
-      const saving = [profile.saving, profile.saving_num]
-        .filter((value) => value !== null && value !== undefined && value !== "")
-        .join(" × ");
+      const saving = weaponSavingDisplay(profile);
       for (const [statLabel, value, role] of [
         ["Ammunition", profile.ammunition, "descriptor"],
         ["B", profile.burst, "metric"],
