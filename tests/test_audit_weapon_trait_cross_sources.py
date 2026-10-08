@@ -69,6 +69,20 @@ def test_wiki_comparison_never_silently_resolves_source_discrepancy() -> None:
     assert result[0]["wikiSavingRolls"] == "2"
 
 
+
+def test_wiki_review_preserves_resolved_pdf_extraction_case() -> None:
+    formerly_unresolved = _candidate("Cybermine")
+    formerly_unresolved["status"] = "notation-equivalent"
+    result = reconcile_candidates(
+        [formerly_unresolved],
+        {"Kobra Pistol (CC Mode)": {
+            "traits": "Anti-materiel, CC, [*]", "ammunition": "DA", "savingRolls": "2",
+        }},
+        _mapping("Cybermine"), _reviewed(),
+    )
+    assert result[0]["pdfArmyStatus"] == "notation-equivalent"
+    assert result[0]["status"] == "wiki-agrees-with-army"
+
 def test_wiki_comparison_fails_on_stale_or_ambiguous_review_identities() -> None:
     with pytest.raises(WeaponTraitWikiError, match="no longer match"):
         reconcile_candidates([_candidate()], {}, _mapping("Wrong"), _reviewed())

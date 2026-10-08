@@ -27,7 +27,7 @@ from tools.audit_weapon_chart_profiles import (
 )
 
 FORMAT = "InfinityDB N5 v5.3 Weapon Traits and prose evidence"
-FORMAT_VERSION = 2
+FORMAT_VERSION = 3
 DEFAULT_REVIEW = Path("config/validation/weapon-trait-source-review.json")
 # Printed N5 v5.3 Weaponry section headings, with their printed pages.
 # These are an inventory of source sections, not invented rule definitions.
@@ -106,16 +106,27 @@ def _trait_cell(
 ) -> str:
     """Read only the printed Traits column within this anchored chart row.
 
-    Multiline traits can extend 24pt from a Burst anchor in tall rows.
-    Midpoint clipping limits leakage, while the shorter 20pt cap on closely
-    spaced rows avoids absorbing neighboring unanchored profile entries.
+    Exceptionally tall rows need a larger window: Cybermines on p.181 spans
+    seven lines, including words outside both anchor midpoints. Only widen
+    when both neighboring Burst anchors are over 50pt away; shorter rows
+    retain the original 20/25pt limits to avoid consuming neighboring Traits.
     """
     spacious = (previous_y is None or y - previous_y > 40) and (
         next_y is None or next_y - y > 40
     )
-    cap = 25 if spacious else 20
-    lower = max(y - cap, (previous_y + y) / 2 if previous_y is not None else y - cap)
-    upper = min(y + cap, (next_y + y) / 2 if next_y is not None else y + cap)
+    tall = (previous_y is None or y - previous_y > 50) and (
+        next_y is None or next_y - y > 50
+    )
+    cap = 30 if tall else 25 if spacious else 20
+    margin = 4 if tall else 0
+    lower = max(
+        y - cap,
+        (previous_y + y) / 2 - margin if previous_y is not None else y - cap,
+    )
+    upper = min(
+        y + cap,
+        (next_y + y) / 2 + margin if next_y is not None else y + cap,
+    )
     selected = [
         (wy, x, word) for x, wy, word in words
         if 460 <= x < 595 and lower <= wy < upper and word.upper() != "TRAITS"
@@ -255,6 +266,71 @@ def prose_inventory(doc: Any, rules_db: Path) -> list[dict[str, Any]]:
     return sections
 
 
+
+def prose_reference_coverage(
+    sections: list[dict[str, Any]], army_db: Path, rules_db: Path,
+) -> list[dict[str, Any]]:
+    """Inventory exact-name links, not inferred family/prose rule completeness.
+
+    A source citation must name the section on its printed page. A matching
+    Army weapon profile is source metadata, not a curated Weaponry definition.
+    """
+    army_uri = f"file:{army_db.resolve().as_posix()}?mode=ro"
+    rules_uri = f"file:{rules_db.resolve().as_posix()}?mode=ro"
+    with sqlite3.connect(army_uri, uri=True) as connection:
+        army_rows = connection.execute(
+            "SELECT name, COALESCE(mode, '') FROM metadata_weapons"
+        ).fetchall()
+    with sqlite3.connect(rules_uri, uri=True) as connection:
+        rules_rows = connection.execute(
+            "SELECT collection_id, id, kind, name FROM records"
+        ).fetchall()
+        citations = connection.execute(
+            "SELECT collection_id, record_id, page, section FROM record_citations "
+            "WHERE source_id = 'n5-core-v5.3-pdf'"
+        ).fetchall()
+        relations = connection.execute(
+            "SELECT collection_id, record_id FROM record_relations"
+        ).fetchall()
+        army_links = connection.execute(
+            "SELECT collection_id, record_id FROM record_army_links"
+        ).fetchall()
+    coverage: list[dict[str, Any]] = []
+    for section in sections:
+        title = section["section"]
+        title_id = _identity(title)
+        matched_army = sorted(
+            ({"name": str(name), "mode": str(mode)} for name, mode in army_rows
+             if _identity(str(name)) == title_id),
+            key=lambda row: (row["name"], row["mode"]),
+        )
+        matched_rules = sorted(
+            ({"collectionId": str(collection), "id": str(record_id),
+              "kind": str(kind), "name": str(name)}
+             for collection, record_id, kind, name in rules_rows
+             if _identity(str(name)) == title_id),
+            key=lambda row: (row["collectionId"], row["id"]),
+        )
+        ids = {(row["collectionId"], row["id"]) for row in matched_rules}
+        cited = sorted({
+            (str(collection), str(record_id))
+            for collection, record_id, page, name in citations
+            if page == section["page"] and isinstance(name, str)
+            and title_id in _identity(name)
+        })
+        coverage.append({
+            "page": section["page"], "section": title,
+            "sourcePresent": section["sourcePresent"],
+            "exactArmyWeaponProfiles": matched_army,
+            "exactCuratedRecords": matched_rules,
+            "sectionCitedRecordIds": [
+                f"{collection}/{record_id}" for collection, record_id in cited
+            ],
+            "exactRecordRelationCount": sum((str(c), str(r)) in ids for c, r in relations),
+            "exactRecordArmyLinkCount": sum((str(c), str(r)) in ids for c, r in army_links),
+        })
+    return coverage
+
 def audit_traits_and_prose(
     pdf: Path, army_db: Path, rules_db: Path,
     review_path: Path = DEFAULT_REVIEW,
@@ -277,6 +353,7 @@ def audit_traits_and_prose(
     traits = compare_traits(
         baseline["comparison"]["compared"], printed, _weapon_properties(army_db), review
     )
+    prose_coverage = prose_reference_coverage(sections, army_db, rules_db)
     reviewed_rows = {
         f"{row['page']}:{row['printedName']}" for row in baseline["comparison"]["compared"]
     }
@@ -297,13 +374,18 @@ def audit_traits_and_prose(
         "traitDeferred": sum(row["status"].startswith("deferred") for row in traits),
         "traits": traits,
         "specialWeaponSections": sections,
+        "specialWeaponReferenceCoverage": prose_coverage,
         "limitations": [
             "Notation equivalence covers only maintained source spelling and shorthand aliases.",
             "Two ambiguous PDF cells are hash-pinned and visually reviewed.",
+            "Cybermine's tall seven-line Trait cell is captured using its printed row spacing.",
             "Residual Trait differences require source/Army review; not confirmed errors.",
             "Matching trait identities do not prove complete rules or links.",
             "A named curated weapon definition is not the only possible rules representation.",
             "Special-weapon prose is indexed, not compared clause by clause with curated rules.",
+            "Reference coverage checks exact named Army profiles, curated records, "
+            "N5 source-section citations and relations only; family/mode aliases "
+            "remain unreviewed.",
             "Auxiliary deployable/object profiles, API and browser completeness remain unverified.",
         ],
     }
@@ -347,6 +429,19 @@ def markdown_report(report: dict[str, Any]) -> str:
         lines.append(
             f"- p. {item['page']}: **{item['section']}** — {item['status']}."
         )
+    if "specialWeaponReferenceCoverage" in report:
+        lines.extend(["", "## Exact-name Weaponry reference coverage", ""])
+        for item in report["specialWeaponReferenceCoverage"]:
+            names = [f"{row['name']} ({row['mode'] or 'standard'})"
+                     for row in item["exactArmyWeaponProfiles"]]
+            records = [f"{row['kind']}:{row['id']}" for row in item["exactCuratedRecords"]]
+            lines.append(
+                f"- p. {item['page']} **{item['section']}**: "
+                f"Army profiles {names}; curated records {records}; "
+                f"source-section citations {item['sectionCitedRecordIds']}; "
+                f"record relations {item['exactRecordRelationCount']}; "
+                f"Army links {item['exactRecordArmyLinkCount']}."
+            )
     lines.extend(["", "## Limitations and next verification", ""])
     lines.extend(f"- {text}" for text in report["limitations"])
     lines.append("")

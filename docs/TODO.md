@@ -170,7 +170,8 @@ unimplemented until its corresponding behavior exists.
     - [x] Classify all nine cross-source Weapon Trait cases against the N5.3
       printed Weapon Chart and prose: five explained interpretations and four
       partially explained. Cybermine's `Comms Attack` is in the PDF (pp. 72,
-      181) but truncated by the extractor; `Throwing Weapon` and `Technical
+      181); the earlier audit extractor truncated the cell, now corrected below.
+      `Throwing Weapon` and `Technical
       Weapon` are absent from the N5.3 PDF and persist as Army legacy terms.
       N4 v1.1 p. 43 confirms both names and their original PH/WIP semantics;
       WildParrot explicitly has `Non-Lethal`; Mines and Sepsitor footnote
@@ -179,10 +180,21 @@ unimplemented until its corresponding behavior exists.
       as Skills and Equipment. See the version-pinned
       `config/validation/weapon-trait-wiki-review.json` findings; all original
       three-way comparison values remain intact.
-    - [ ] Correct the Cybermine PDF Trait-cell extraction without erasing
-      original comparison evidence; review legacy Army terminology for Drop
-      Bears and Pheroware before deciding whether to provide source-aware
-      display aliases. Do not rewrite imported Army properties.
+    - [x] Correct the seven-line Cybermine PDF Trait-cell extraction without
+      erasing the previously reviewed cross-source identity. The new audit checks
+      171 rows: 145 literal matches, 16 notation equivalents (including Cybermine),
+      2 reviewed cells, 8 unresolved Trait candidates, and 0 deferrals. The
+      archived Wiki agrees with both current sources for Cybermine.
+    - [ ] Review legacy Army terminology for Drop Bears and Pheroware before
+      deciding whether to provide source-aware display aliases. Do not rewrite
+      imported Army properties.
+    - [x] Inventory exact-name source/curation links for all 12 N5 v5.3 Weaponry
+      prose headings (pp. 68–74). Eight headings match at least one Army weapon
+      profile; Armed Turret alone has an exact-name curated Weapon record with
+      a section citation, eight relations, and an Army link. This does not prove
+      that generic/family sections or the other eleven headings lack a proper
+      reference representation: names, mode identities, citations, and rules
+      semantics are distinct evidence layers.
     - [ ] Review Endgame's missing Army `Double Shot` Trait, PARA Mine's
       `[*]` (PDF/Wiki) versus `[**]` (Army), Sepsitor Plus's missing Army `[*]`,
       and WildParrot's printed `Non-Lethal` against its E/M ammunition effect.

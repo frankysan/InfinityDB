@@ -6,7 +6,7 @@
       "name": "Cybermine",
       "mode": "",
       "wikiName": "Cybermines",
-      "reviewNote": "The printed p.181 chart and p.72 Mines rule both say Comms Attack; the existing PDF parser truncates the chart cell. Keep the original raw comparison until extraction is fixed.",
+      "reviewNote": "The printed p.181 chart and p.72 Mines rule both say Comms Attack. The revised extraction covers all seven chart lines; the reviewed PDF/Army difference is notation only.",
       "officialUpdate": {
         "date": "2025-01-09",
         "url": "https://infinityuniverse.com/en/news/n5-what-is-new",
@@ -15,8 +15,8 @@
       "semanticReview": {
         "classification": "source-extraction",
         "state": "explained",
-        "finding": "The N5.3 printed chart (p.181) explicitly lists Comms Attack; the Mines prose (p.72) confirms Cybermines make Comms Attacks. The audit extractor truncated the chart cell.",
-        "remaining": "Repair the PDF Trait-cell extraction before using raw comparison counts as evidence of a rule discrepancy.",
+        "finding": "The N5.3 printed chart (p.181) explicitly lists Comms Attack; the Mines prose (p.72) confirms Cybermines make Comms Attacks. The prior extraction lost the first and last lines; the revised full cell compares as notation-equivalent to Army.",
+        "remaining": "Continue preserving literal PDF and Army spelling; no missing Cybermine Trait remains in the current comparison.",
         "pdfPages": [
           72,
           181

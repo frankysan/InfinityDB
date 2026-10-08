@@ -85,13 +85,17 @@ separate scoped claim; never treat ITS-only changes as core N5 rules.
 
 ## Reviewed 1.0 Weapon Trait evidence boundary
 
-The read-only `tools/audit_weapon_trait_cross_sources.py` aligns the nine remaining
-N5 v5.3 Weapon Trait discrepancies with the archived `Weapon_Chart` Wiki revision
-`4083` (exact payload hash in `config/validation/weapon-trait-wiki-review.json`).
-The current Wiki agrees with the PDF Traits for seven rows and with Army for
-Cybermine and Kobra Pistol (CC Mode). These are **corroboration counts**, not
-winning votes. Cybermine's PDF Trait-cell extraction is truncated: the printed chart on
-p. 181 and the Mines prose on p. 72 both explicitly identify its Comms Attack.
+The read-only `tools/audit_weapon_trait_cross_sources.py` retains nine historically
+reviewed N5 v5.3 Weapon Trait identities against archived `Weapon_Chart` Wiki
+revision `4083` (exact payload hash in `config/validation/weapon-trait-wiki-review.json`).
+After correcting the tall Cybermine cell extraction, **eight** PDF/Army Trait
+candidates remain; Cybermine now compares as a **reviewed notation equivalent**.
+For the nine retained cases, the current Wiki agrees with the PDF for seven, Army
+for Kobra Pistol (CC Mode), and **both** for Cybermine. These are corroboration
+counts, not winning votes. Cybermine's printed chart on p. 181 and Mines prose
+on p. 72 both explicitly identify its Comms Attack. Older report evidence still
+records the prior extraction truncation; the current audit does not hide either
+source's actual notation.
 The archive's Kobra entry includes a separately identified superseded profile,
 which cannot override the current one.
 
@@ -145,8 +149,9 @@ still needs verification. Preserve both source values.
 
 ### Reviewed current-source differences
 
-- **Cybermine:** PDF pp. 72, 181 confirm `Comms Attack`; the apparent difference
-  comes from truncated PDF Trait extraction, not a printed-rule omission.
+- **Cybermine:** PDF pp. 72, 181 confirm `Comms Attack`. The corrected seven-line
+  chart extraction includes `Deployable` and `[*]` and matches Army after the
+  maintained spelling and State notation equivalences; this is not a missing rule.
 - **Drop Bears (BS Mode):** N5.3 pp. 71, 181 use `BS Weapon (PH)`. The term
   `Throwing Weapon` does not occur in the supplied N5.3 PDF; Army retains the
   N4-defined term. This establishes historical terminology provenance, not an

@@ -39,6 +39,26 @@ def test_traits_cell_keeps_multiline_text_without_absorbing_next_row() -> None:
     )
 
 
+
+def test_tall_trait_cell_includes_both_extremes_without_next_row() -> None:
+    # The N5 p.181 Cybermines cell extends beyond both Burst-anchor midpoints.
+    words = [
+        (475.0, 298.5, "COMMS"), (503.0, 298.5, "ATTACK,"),
+        (534.0, 298.5, "INTUITIVE"), (484.0, 308.1, "ATTACK,"),
+        (474.0, 327.3, "STUNNED/IMMOBILIZED-B,"),
+        (492.0, 356.1, "DEPLOYABLE,"), (542.0, 356.1, "[*]."),
+        (466.0, 372.9, "BS"), (478.0, 372.9, "WEAPON"),
+    ]
+    text = _trait_cell(words, 327.3, 267.3, 382.5)
+    assert text.startswith("COMMS ATTACK, INTUITIVE ATTACK,")
+    assert text.endswith("DEPLOYABLE, [*].")
+    assert "BS WEAPON" not in text
+
+
+def test_close_trait_rows_keep_the_original_midpoint_clipping() -> None:
+    words = [(485.0, 320.0, "FIRST"), (486.0, 345.0, "NEXT")]
+    assert _trait_cell(words, 320.0, 299.0, 347.0) == "FIRST"
+
 def test_matching_traits_do_not_depend_on_presentation_order() -> None:
     comparison = compare_traits(
         _compared(), {(176, "Tactical Bow"): "ANTI-MATERIEL, SILENT (-6)."},
@@ -120,6 +140,56 @@ def test_prose_inventory_tracks_source_and_named_curated_definition(tmp_path) ->
     assert by_name["D-Charges"]["status"] == "source-heading-unverified"
     assert by_name["Pitcher"]["status"] == "no-named-curated-weapon-definition"
 
+
+
+def test_prose_reference_coverage_does_not_infer_family_links(tmp_path) -> None:
+    import sqlite3
+
+    from tools.audit_weapon_traits_prose import prose_reference_coverage
+
+    army = tmp_path / "army.db"
+    rules = tmp_path / "rules.db"
+    with sqlite3.connect(army) as connection:
+        connection.execute("CREATE TABLE metadata_weapons(name TEXT, mode TEXT)")
+        connection.executemany(
+            "INSERT INTO metadata_weapons VALUES (?, ?)",
+            [("Armed Turret", "AP Rifle"), ("AP Mine", None)],
+        )
+    with sqlite3.connect(rules) as connection:
+        connection.execute(
+            "CREATE TABLE records(collection_id TEXT, id TEXT, kind TEXT, name TEXT)"
+        )
+        connection.execute(
+            "CREATE TABLE record_citations(collection_id TEXT, record_id TEXT, "
+            "page INTEGER, section TEXT, source_id TEXT)"
+        )
+        connection.execute("CREATE TABLE record_relations(collection_id TEXT, record_id TEXT)")
+        connection.execute("CREATE TABLE record_army_links(collection_id TEXT, record_id TEXT)")
+        connection.executemany("INSERT INTO records VALUES (?, ?, ?, ?)", [
+            ("n5", "weapon:armed", "weapon", "Armed Turret"),
+            ("n5", "trait:mine", "trait", "Mine"),
+        ])
+        connection.executemany("INSERT INTO record_citations VALUES (?, ?, ?, ?, ?)", [
+            ("n5", "weapon:armed", 70, "Armed Turret Profile", "n5-core-v5.3-pdf"),
+            ("n5", "trait:mine", 72, "Mine", "n5-core-v5.3-pdf"),
+        ])
+        connection.execute("INSERT INTO record_relations VALUES ('n5', 'weapon:armed')")
+        connection.execute("INSERT INTO record_army_links VALUES ('n5', 'weapon:armed')")
+    sections = [
+        {"page": 70, "section": "Armed Turret", "sourcePresent": True},
+        {"page": 72, "section": "Mines", "sourcePresent": True},
+    ]
+    covered = prose_reference_coverage(sections, army, rules)
+    assert covered[0]["exactArmyWeaponProfiles"] == [
+        {"name": "Armed Turret", "mode": "AP Rifle"}
+    ]
+    assert len(covered[0]["exactCuratedRecords"]) == 1
+    assert covered[0]["sectionCitedRecordIds"] == ["n5/weapon:armed"]
+    assert covered[0]["exactRecordRelationCount"] == 1
+    assert covered[0]["exactRecordArmyLinkCount"] == 1
+    assert covered[1]["exactArmyWeaponProfiles"] == []
+    assert covered[1]["exactCuratedRecords"] == []
+    assert covered[1]["sectionCitedRecordIds"] == []
 
 def test_reviewed_notation_equivalence_does_not_hide_missing_traits(tmp_path) -> None:
     import json

@@ -145,6 +145,7 @@ def reconcile_candidates(
             status = "three-way-trait-disagreement"
         record: dict[str, Any] = {
             "name": entry["name"], "mode": entry["mode"], "page": candidate["page"],
+            "pdfArmyStatus": candidate["status"],
             "wikiName": wiki_name, "wikiTraits": wiki_traits,
             "wikiSavingRolls": wiki["savingRolls"],
             "pdfTraits": candidate["printedTraits"],
@@ -220,15 +221,24 @@ def audit_cross_sources(
         Path("config/validation/weapon-trait-source-review.json"), pdf_hash
     )
     base = audit_traits_and_prose(pdf, army_db, rules_db)
+    review_identities = {(entry["name"], entry["mode"]) for entry in mapping}
     candidates = [
         row for row in base["traits"] if row["status"] == "candidate-discrepancy"
     ]
+    if any((row["name"], row["mode"]) not in review_identities for row in candidates):
+        raise WeaponTraitWikiError("Unreviewed Weapon Trait discrepancy in current sources")
+    # Preserve previously investigated identities after an extraction fix
+    # turns a discrepancy into a reviewed notation equivalence (Cybermine).
+    reviewed_rows = [
+        row for row in base["traits"]
+        if (row["name"], row["mode"]) in review_identities
+    ]
     result = reconcile_candidates(
-        candidates, wiki_rows, mapping, reviewed, superseded
+        reviewed_rows, wiki_rows, mapping, reviewed, superseded
     )
     return {
         "format": "InfinityDB N5 weapon-trait Wiki cross-source evidence",
-        "formatVersion": 1,
+        "formatVersion": 2,
         "status": "source-comparison-only-not-curation",
         "corePdfSha256": pdf_hash,
         "armyDbSha256": base["armyDbSha256"],
@@ -254,6 +264,10 @@ def markdown_report(report: dict[str, Any]) -> str:
         row["semanticReview"]["state"] for row in report["candidates"]
         if "semanticReview" in row
     )
+    remaining = sum(
+        row.get("pdfArmyStatus", "candidate-discrepancy") == "candidate-discrepancy"
+        for row in report["candidates"]
+    )
     lines = [
         "# 1.0 Weapon Trait cross-source review", "",
         "**Read-only source comparisons and reviewed interpretations; "
@@ -263,7 +277,9 @@ def markdown_report(report: dict[str, Any]) -> str:
         f"- Wiki `Weapon_Chart` revision: `{report['wikiRevisionId']}`",
         f"- Wiki member SHA-256: `{report['wikiMemberSha256']}`",
         f"- Army database SHA-256: `{report['armyDbSha256']}`",
-        f"- Reviewed candidates: **{len(report['candidates'])}**.",
+        f"- Reviewed identities: **{len(report['candidates'])}**; "
+        f"remaining PDF/Army Trait candidates: "
+        f"**{remaining}**.",
         f"- Wiki agrees with PDF: **{counts['wiki-agrees-with-pdf']}**; "
         f"with Army: **{counts['wiki-agrees-with-army']}**; "
         f"both: **{counts['wiki-agrees-with-both']}**; "
@@ -276,7 +292,9 @@ def markdown_report(report: dict[str, Any]) -> str:
     for row in report["candidates"]:
         lines.extend([
             f"### {row['name']} ({row['mode'] or 'standard'}) — p. {row['page']}", "",
-            f"- Comparison: **{row['status']}**; Wiki name: `{row['wikiName']}`.",
+            f"- Comparison: **{row['status']}**; "
+            f"PDF/Army: `{row.get('pdfArmyStatus', 'historical-review')}`; "
+            f"Wiki name: `{row['wikiName']}`.",
             f"- PDF Traits: `{row['pdfTraits']}`.",
             f"- Army Traits: `{row['armyTraits']}`.",
             f"- Archived Wiki Traits: `{row['wikiTraits']}`; "
