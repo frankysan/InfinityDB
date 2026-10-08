@@ -150,9 +150,14 @@ unimplemented until its corresponding behavior exists.
     - [x] Compare the chart's vector-drawn range breaks and printed MODs with
       Army range-band metadata. All 171 profiles are aligned: 170 match and
       Katyusha MRL (p. 187) prints unsigned `3` where Army records `+3`.
-      This is a source-notation review candidate, not a curated-data change.
-    - [ ] Review Katyusha MRL's unsigned positive range MOD in the N5 v5.3
-      chart before interpreting it as a source mistake or normalizing it.
+      This is a raw PDF notation difference, not a curated-data change.
+    - [x] Resolve Katyusha MRL's unsigned `3` in the N5 v5.3 chart (p. 187):
+      only `0` may be an unsigned integer range MOD. The bare `3` is invalid
+      chart notation and is a **confirmed omitted plus sign**; Army and N5.3
+      English/Spanish Wiki agree on `+3` at 20–60 cm. Preserve the PDF's
+      literal `3` as source evidence and Army's correct `+3`; do not silently
+      normalize other chart errors. See
+      `config/validation/weapon-range-source-review.json` and RR-SRC-N53-003.
     - [x] Establish a read-only Weapon Traits and special-prose section inventory with
       `tools/audit_weapon_traits_prose.py` against the N5 v5.3 PDF. The 171
       Burst-anchored chart rows yield 145 literal Trait-list matches, 24 review

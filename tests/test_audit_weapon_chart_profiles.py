@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+import sqlite3
+from pathlib import Path
+
 from tools.audit_weapon_chart_profiles import (
     _printed_name_and_mode,
     _value,
@@ -257,6 +261,72 @@ def test_bare_range_number_remains_different_from_signed_modifier() -> None:
     result = compare_rows([row], {"tacticalbow": [army]})
     assert result["rangeCandidates"] == 1
     assert result["candidateDiscrepancies"] == 0
+
+
+def test_katyusha_range_notation_review_preserves_source_values() -> None:
+    """A reviewed chart glyph is not a global signed-MOD normalization."""
+    from tools.audit_weapon_chart_profiles import _metadata
+
+    root = Path(__file__).resolve().parents[1]
+    review = json.loads(
+        (root / "config/validation/weapon-range-source-review.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    trait_review = json.loads(
+        (root / "config/validation/weapon-trait-wiki-review.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert review["formatVersion"] == 1
+    assert review["corePdfSha256"] == trait_review["corePdfSha256"]
+    assert review["wikiRevisionId"] == trait_review["wikiRevisionId"]
+    assert review["wikiMemberSha256"] == trait_review["wikiMemberSha256"]
+
+    (candidate,) = review["candidates"]
+    assert (candidate["weaponId"], candidate["name"], candidate["mode"]) == (
+        49, "Katyusha MRL", "",
+    )
+    assert candidate["pdfPage"] == 187
+    assert candidate["pdfUnsignedLabel"] == "3"
+    assert candidate["classification"] == "confirmed-pdf-sign-omission"
+    assert candidate["resolvedRangeMod"] == "+3"
+    # Only zero may omit its sign; the PDF's nonzero bare integer is invalid.
+    assert candidate["pdfUnsignedLabel"] != "0"
+    assert not candidate["pdfUnsignedLabel"].startswith(("+", "-"))
+    assert candidate["resolvedRangeMod"] == f"+{candidate['pdfUnsignedLabel']}"
+    assert candidate["wikiRangeBands"] == candidate["armyRangeBands"]
+
+    metadata, _ = _metadata(root / "data/generated/infinity.db")
+    (army,) = metadata["katyushamrl"]
+    with sqlite3.connect(root / "data/generated/infinity.db") as connection:
+        assert connection.execute(
+            "SELECT id FROM metadata_weapons WHERE name=? AND mode IS NULL",
+            (candidate["name"],),
+        ).fetchone() == (candidate["weaponId"],)
+    assert army["mode"] == candidate["mode"]
+    assert army["rangeBands"] == candidate["armyRangeBands"]
+    assert army["rangeBands"] == ["-3", "+3", "+3", "0", "0", "-6", None]
+
+    # Reproduce the PDF's unsigned middle-range label as read by the
+    # pinned PDF audit.  The raw difference must remain visible in reports.
+    printed = {
+        **_pdf_row("Katyusha MRL"),
+        "page": 187,
+        **{field: army[field] for field in (
+            "ps", "burst", "ammunition", "savingAttribute", "savingRolls"
+        )},
+        "rangeBands": ["-3", "3", "3", "0", "0", "-6", None],
+    }
+    comparison = compare_rows([printed], {"katyushamrl": [army]})
+    assert comparison["candidateDiscrepancies"] == 0
+    assert comparison["rangeCandidates"] == 1
+    assert comparison["rangeMatches"] == 0
+    assert comparison["compared"][0]["rangeComparison"] == {
+        "pdf": printed["rangeBands"],
+        "army": candidate["armyRangeBands"],
+        "status": "candidate-discrepancy",
+    }
 
 
 def test_disco_ball_is_separate_auxiliary_mode_profile() -> None:

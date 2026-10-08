@@ -77,6 +77,35 @@ A `sourceMode: "CC Mode"` curated Weapon reference now explains the confirmed DA
 
 Sources: [N5.3 release notice](https://infinityuniverse.com/en/news/infinity-rules-update-5-3); [N5.3 Wiki Mixed Weapons, oldid 4082](https://infinitythewiki.com/index.php?title=Mixed_Weapons&oldid=4082); [N5.3 Wiki Weapon Chart, oldid 4083](https://infinitythewiki.com/index.php?title=Weapon_Chart&oldid=4083). Official PDF v5.3 is locally pinned by the SHA-256 in `config/validation/weapon-trait-wiki-review.json`.
 
+### RR-SRC-N53-003 — Katyusha MRL missing plus sign in N5.3 chart
+
+**Scope:** Katyusha MRL range bands, N5 v5.3 core PDF (printed p. 187,
+SHA-256 `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`),
+September 2026 Army snapshot (`data/generated/infinity.db`, weapon source ID 49),
+and N5.3 Wiki `Weapon_Chart` (reviewed revision 4083; pinned content hash in
+`config/validation/weapon-trait-wiki-review.json`).
+
+The PDF chart extraction reports an **unsigned `3`** for the positive
+Katyusha range band, while Army encodes `+3`. The N5.3 English Wiki chart and
+its Spanish chart both show `+3` for the two 20–60 cm bands. Army's complete
+range-band sequence is `-3, +3, +3, 0, 0, -6, --` (20 cm increments).
+Under the Weapon Chart's signed-MOD notation, **only `0` may appear as an
+unsigned integer**; nonzero values must have an explicit `+` or `-`. The PDF's
+bare `3` is therefore an invalid value, and its intended correction is **`+3`**:
+Army and both language versions of the Wiki agree on this value. This is a
+**confirmed PDF sign-omission typo, not an unresolved gameplay rule**. The cause
+of the omission and whether an official erratum exists are unknown, but neither
+changes the interpretation. Preserve the literal `3` in the pinned PDF audit
+and the correct Army `+3`; do not silently normalize other chart values. The
+machine-checkable evidence is in
+`config/validation/weapon-range-source-review.json`.
+
+Sources: [N5.3 English Weapon Chart](https://infinitythewiki.com/Weapon_Chart),
+[Spanish Weapon Chart](https://infinitythewiki.com/es/Tabla_de_Armas);
+locally reviewed N5.3 PDF p. 187 and imported Army snapshot. This closes the
+**interpretation** of this specific discrepancy, not the larger Weapon Chart
+source-provenance or 1.0 completeness review.
+
 ## Weaponry family prose (N5 v5.3)
 
 ### RR-WPN-FAMILY-001 — Mines and Perimeter Weapons are distinct rules families
