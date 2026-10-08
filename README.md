@@ -44,6 +44,14 @@ identifiers, or use advertising trackers, fingerprinting, or per-user analytics.
   browser history or in a link you choose to share. InfinityDB does not retain those
   query/search values in its aggregate metrics.
 
+**Post-1.0 design direction:** Scenario creation and other user-authored tools
+will not require server-side saved content, accounts, or a share-link registry.
+Sharing will use self-contained URLs where practical, with file export/import
+for larger content. Authoring should work with a local, offline InfinityDB
+installation. Shared URLs and exported files are visible to their recipients;
+this direction is not a promise of secret or encrypted links. Existing browser
+settings persistence remains a separate, opt-in preference feature.
+
 This policy describes InfinityDB's application-level collection and retention. Hosting
 and network infrastructure necessarily processes connection metadata to deliver HTTP
 traffic, and external links are governed by the destination site's own privacy policy;

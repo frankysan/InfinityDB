@@ -675,6 +675,51 @@ explicitly rather than be approximated; later versioned extensions should add th
 without redefining the core semantic concepts. Likewise, future ITS support extends
 publication/collection and optional-feature data rather than creating an ITS-only scenario schema.
 
+### Post-1.0 player-authored scenarios (design direction)
+
+A scenario creator/editor should support **new blank scenarios** and **derivatives of
+published scenarios** using the same validated, typed scenario components and
+geometry/map projection as the curated catalog. Authors may select preset
+Deployment Zone/table maps; assemble preset rule groups or individual Rules/Skills;
+add or modify scenario elements, sides/roles, setup, objectives, scoring methods,
+end conditions, and custom additions; or author their own components. Presets are
+starting points, not frozen inherited behavior. A customized official scenario is
+an explicitly labeled *player variant*, never a new official source revision.
+
+The proposed portable scenario definition has explicit identity boundaries:
+
+- A versioned, canonical serialization envelope, including required InfinityDB
+  schema/codec version and reference-data or ruleset revision for reproducible
+  interpretation. It contains the actual authored changes/content, not only a hash.
+- Stable references to official scenario/rule/skill/element identities plus
+  deterministic local overrides/additions. Missing or superseded referenced
+  content must be surfaced, not rebound silently by title or current-version guess.
+- Authored entities carry a local, scenario-scoped namespace; display text does
+  not confer official provenance, canonical rule identity, or execution semantics.
+- Composition records ordered components where order matters and uses canonical
+  ordering for sets/other unordered fields. Avoid redundant copies of reference
+  records when a stable reference and revision suffice.
+
+**Custom typed rules are the difficult boundary.** Provide a small, explicitly
+versioned and validated vocabulary for fields InfinityDB can honestly represent:
+applicability/side, action or trigger, timing, target, scope, quantities/units,
+conditions/comparisons, modifiers, scoring, and referenced States/Skills/Rules.
+Typed components and custom scenario Skills may reuse existing schema concepts,
+but a locally invented rule is not an official Skill or an executable program.
+Author-defined prose remains first-class for rules outside the supported typed
+vocabulary, marked **descriptive/not machine-evaluated** rather than mis-parsed
+or falsely validated. No arbitrary code/evaluation, external URL execution, or
+silent conversion of unsupported user clauses into executable behavior. Explicit
+schema extensions and migration are needed before claiming support for novel
+mechanics. The editor may check structural validity without adjudicating a game.
+
+The authored definition should live in transient browser state and travel via a
+self-contained share URL or user-initiated export/import file; no server storage,
+user uploads, or automatically persisted authored scenarios. Reconstructing from
+URL data and the packaged reference revision must work offline. See the
+stateless-sharing decision in `docs/architecture.md`; this is a post-1.0 goal,
+not an extension of the 1.0 publication or database completeness gate.
+
 ## SQLite storage contract
 
 Army export first loads normalized source data into validated relational staging, then writes two

@@ -181,6 +181,10 @@ Browser state rules:
   search, and Glossary search.
 - Legacy explicit browser parameters remain accepted for compatibility and normalize to canonical
   state; do not remove them casually.
+- Post-1.0 sharing must remain self-contained and decodable offline; no server-side
+  short-link registry or authored-content persistence. A hash alone cannot recover
+  arbitrary shared content. See `docs/architecture.md` (stateless sharing) and
+  `docs/data-model.md` (player-authored scenarios). The current `s=` codec is unchanged.
 - URL-owned state wins for the current view and must not overwrite persistent local Settings.
 - `static/preferences.js` owns preference values/persistence; `static/settings.js` alone binds the
   shared Settings controls. Page modules consume state instead of initializing shell controls.

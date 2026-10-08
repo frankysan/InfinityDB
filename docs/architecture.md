@@ -161,6 +161,11 @@ collection/season membership remain independent.
 
 Geometry and scoring are maintained semantic data. Core diagrams and reference views are generated
 from that data, with source/season overlays kept distinct from canonical Army or rules facts.
+A **post-1.0 scenario editor** will reuse this component model and renderer for
+new player-defined scenarios and edits of existing ones. It will compose local
+copies/overlays, not mutate authoritative source publications or `rules.db`.
+Its serialization follows the stateless-sharing direction below and its custom
+rule semantics follow `docs/data-model.md`.
 InfinityDB 1.0 includes a deterministic SVG projection for the four N5.3 core scenarios; geometry
 schema v1 only needs to represent those core maps. Point markers retain semantic marker identity;
 known marker types resolve through canonical marker metadata, including physical diameter where that
@@ -213,6 +218,49 @@ Browser URLs and JSON API parameters are separate contracts:
   by `src/infinity_db/web/static/share-state.js`.
 - Legacy explicit browser parameters remain readable compatibility inputs and are canonicalized by
   the owning page; they are not the preferred generated link form.
+
+### Design direction — stateless sharing and user-authored content (post-1.0)
+
+**Decision (2026-10-08):** InfinityDB must not require accounts, server-side saved
+user content, a share-link registry, or a mutable server database of URL tokens.
+This supersedes the previously proposed v2 short-link/lookup service. The app's
+release databases remain immutable and replaceable. Operational aggregate metrics
+and the existing opt-in *browser preference* cookies are separate from authored
+scenario/list content; neither may become a repository for user-authored content.
+
+- Shareable state must be **self-contained and versioned**: a recipient can decode
+  it from the URL plus the same locally available app/reference release, with no
+  registration, lookup, or remote dependency. Existing v1 `s=` links and explicit
+  browser parameter compatibility are retained.
+- For potentially sensitive authored content, prefer encoding in the URL **fragment**
+  (not transmitted in normal HTTP requests), subject to testing coexistence with
+  existing fragment anchors/deep links. Browser history, clipboard, shared links,
+  client-side scripts, and extensions can still expose fragments; this is **not**
+  encryption or a confidentiality guarantee. Ordinary non-sensitive filter state
+  may continue to use the current query-based `s=` contract.
+- A deterministic content hash is useful for integrity, comparison, or canonical
+  identity, **not** as a reversible encoding. A hash alone can resolve only data
+  already available in the client's immutable reference bundle or an explicitly
+  imported local file; it must not silently require a remote hash registry.
+- Define a deterministic canonical representation before compression/encoding:
+  schema/codec version, scope, referenced ruleset or source revision, typed values,
+  defaults, ordering semantics, and normalizations are part of the contract.
+  Version migration and missing/changed reference behavior must be explicit.
+- Test realistic URL size limits and decode safety. For content too large to share
+  reliably as a URL, offer portable import/export files containing the same
+  versioned data; **never** silently upload or persist it on the server.
+- No arbitrary execution of shared content. Parsing/validation must bound payload
+  size and complexity, reject unsafe/unknown executable semantics, and escape
+  user-authored text. Importing a shared scenario must not modify canonical rules.
+- Creating, previewing, and decoding user scenarios should work against the locally
+  packaged reference data without Internet access. A local InfinityDB installation
+  can serve the existing backend; a genuinely browser-only/offline distribution
+  requires separate packaging and verification, not an assumption that a remotely
+  hosted website remains usable without connectivity.
+
+Implementation and codec choices remain post-1.0; the current browser `s=` format
+and server behavior are **unchanged** by this decision. See `docs/TODO.md` for
+benchmarks/acceptance tasks and `docs/data-model.md` for the authored-scenario model.
 
 ## Acquisition and snapshot lifecycle
 

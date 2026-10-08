@@ -703,30 +703,27 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 ### Routing and long-term compatibility
 
-- [ ] Evaluate a v2 short share-link registry that assigns one compact identifier to each
-  unique canonical share state, rather than trying to make every shared URL fully
-  self-contained. Keep existing v1 links decodable for long-term compatibility.
-  - [ ] Define canonicalization before identity assignment so semantically equivalent states
-    deduplicate regardless of parameter order, explicit defaults, or other serialization
-    differences. Store the canonical state/schema version behind the identifier rather than
-    treating the literal incoming query string as identity.
-  - [ ] Compare compact identifier strategies against expected scale and operational needs.
-    Prefer a sequential integer encoded in a URL-safe high radix when minimum URL length is
-    the primary goal; evaluate a collision-checked random 64-bit identifier if enumeration is
-    undesirable, and a truncated content-derived hash only if deterministic decentralized
-    identity provides a concrete benefit. Do not use conventional UUID text when a shorter
-    representation provides the same required semantics.
-  - [ ] Define the resolver route and lifecycle contract (for example `/s/<id>`), including
-    lookup/not-found behavior, immutability, backup/restore, migrations, retention, abuse
-    controls, and the persistence boundary outside replaceable application snapshots/containers.
-    Existing published short links must remain stable across application and data upgrades.
-  - [ ] Keep the registry representation independent of the public identifier. It may store a
-    compact typed v2 payload rather than JSON if that reduces storage and also supports a
-    self-contained v2 encoding; measure both approaches before committing to one.
-  - [ ] Benchmark complete URL length for representative simple and complex Unit Explorer,
-    catalog, and global-search states against v1, a compact self-contained v2 codec, and the
-    registry design. Treat generic compression as an optional optimization only where it
-    produces a measured win.
+- [ ] **Web frontend + Project infrastructure:** Design a **stateless, self-contained v2
+  sharing format**, replacing the earlier server-side short-link registry proposal.
+  **No `/s/<id>` lookup service, server-stored share-token strings, or user-authored
+  content database.** Preserve decoding of existing v1 `s=` and legacy explicit links.
+  - [ ] Define a versioned, scope-bound canonical typed payload and deterministic
+    encoding/decoding, including normalization, meaningful ordering, default elision,
+    ruleset/source revision, integrity checking, and error/migration behavior.
+  - [ ] Benchmark complete URL length for realistic Unit Explorer, catalog, search,
+    scenario presets and **large user-defined scenarios** against v1. Evaluate a
+    compact binary codec and measured optional compression, without a server registry.
+  - [ ] Prefer URL fragment payloads for authored content to avoid sending it in
+    ordinary HTTP requests; test coexistence with existing `#rule-*`/other anchors,
+    browser history, browser navigation, clipboard sharing, and soft navigation.
+    Document remaining privacy exposure: fragments are not secret or encrypted.
+  - [ ] Handle payloads too long for practical URLs with an explicit versioned
+    import/export file; a short deterministic hash may verify or identify locally
+    available content but **cannot replace the encoded payload** for arbitrary
+    user-authored content.
+  - [ ] Validate untrusted inputs with resource limits and safe text rendering;
+    test compatibility, corrupt payloads, missing rule revisions, and round-trip
+    behavior on a completely offline local installation.
 
 - [ ] Before retiring or redirecting numeric routes, define and implement a
   per-domain slug-freezing, reviewed-override, alias/redirect, and canonical-URL
@@ -867,7 +864,25 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
   - [ ] Preserve season/scenario source provenance and add compatibility fixtures from current and
     archived ITS material before promoting new geometry features into the schema contract.
   - [ ] Build a web-based editor/preview UI over the same schema and rendering engine rather than
-    creating a separate browser-only map format.
+    creating a separate browser-only map format; coordinate this with the scenario creator below.
+
+- [ ] **Data processing + Web frontend:** Build a **post-1.0 scenario creator/editor**
+  using the canonical scenario component model and map renderer, with no server-side
+  user-content storage (see `docs/data-model.md`).
+  - [ ] Start from a blank scenario or copy/modify a published scenario without
+    changing its authoritative identity, provenance, or rules; label edited copies as
+    player-defined variants.
+  - [ ] Select preset Deployment Zone/table geometry, complete rule sets or individual
+    Rules/Skills; combine them with custom scenario elements, local Skills/rules,
+    objectives, scoring methods, setup, roles, and end conditions.
+  - [ ] Define a safe, extensible **typed custom-rule** vocabulary with explicit
+    applicability, targets, timing, conditions, modifiers, units, and outcomes.
+    Permit prose-only rules when semantics are not representable; do not imply
+    InfinityDB can validate or execute unknown game mechanics.
+  - [ ] Reuse schema validation, renderer and reference resolvers; test composition,
+    conflicting overlays, source-version compatibility, untrusted text, and offline
+    round trips with self-contained URLs and portable file import/export.
+  - [ ] Keep the editor a post-1.0 feature, not a core-scenario release blocker.
 
 - [ ] **Web backend + Web frontend:** Add an interactive Fireteam builder within a
   selected Army context. Build compositions from the canonical Fireteam projection and general
@@ -893,8 +908,8 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
     profiles. They belong to a per-game/session layer, which is not yet part of
     InfinityDB's replaceable imported snapshot.
 
-- [ ] Provide an optional ITS organizer/event companion only after
-  user-authored persistent storage and migrations are established.
+- [ ] Provide an optional ITS organizer/event companion using portable, local
+  event data rather than requiring server-side user-authored storage.
   - [ ] Support season-aware event setup: published scenarios, allowed extras,
     player count/round guidance, pairings, byes, score entry, and a printable
     control-sheet checklist. Do not infer an official ranking submission or
@@ -923,28 +938,32 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
     semantics shared with the web application rather than creating a second interpretation layer;
     revisit the project-domain taxonomy if a permanent native-frontend domain becomes warranted.
 
-### Persistent user data and broader product features
+### User-owned tools and portable data
 
-- [ ] Establish a migration policy for future persistent user-authored data;
-  imported snapshots are intentionally replaced wholesale today.
+- [ ] **Web frontend + Project infrastructure:** For future authored-content tools,
+  provide transient editing, privacy-preserving URL sharing where practical, and
+  deliberate local file import/export. Do **not** introduce server-side user-content
+  storage, account-backed saves, or share-token registries as prerequisites.
+  Evaluate optional device-local saves only as an explicit, separate privacy
+  decision; the baseline works without persistent browser storage.
 
-- [ ] When a saved army-list builder is introduced, use the rules reference to
-  add game-mode and list-review guidance—not hidden-information disclosure.
-  Keep any share/export view privacy-aware and treat the Army app/data as
-  authoritative for list legality.
+- [ ] When an army-list builder/export tool is introduced, use the rules reference
+  to add game-mode and list-review guidance—not hidden-information disclosure.
+  Keep share/export privacy-aware and treat the Army app/data as authoritative
+  for list legality. Use portable state rather than a server-side saved-list store.
 
-- [ ] Create a unit-model image repository.
+- [ ] Create a curated unit-model image repository; do not assume open user uploads.
 
-- [ ] Add a per-user model-collection tracker.
+- [ ] Evaluate a device-local/portable model-collection tracker without accounts
+  or server-hosted collections.
 
-- [ ] Saved army lists, favourites, and personal notes stored separately from
-  the replaceable imported snapshot.
+- [ ] Support portable army lists, favourites and personal notes, with explicit
+  export/import instead of server persistence or coupling to imported snapshots.
 
 - [ ] Unit comparison view for profiles, loadouts, weapons, skills, and
   equipment across selected units or armies.
 
-- [ ] Army-list builder/export integration once user-authored data storage and
-  migrations are established.
+- [ ] Army-list builder/export integration using the same portable-data contract.
 
 - [ ] Data-review screens in Developer mode: normalization warnings, source
   record links through `infinity.raw.db`, and unresolved placeholder records.
