@@ -109,23 +109,59 @@ the PDF omits it, and DA alone does not imply it.
 The exact-PDF-pinned `semanticReview` results in
 `config/validation/weapon-trait-wiki-review.json` classify all nine comparison
 rows while preserving their raw source fields: **five explained** and
-**four partially explained** interpretations. Additional printed-page evidence:
+**four partially explained** interpretations. The evidence below distinguishes
+historical terminology, the chart legend, and current-source differences.
+
+### N4 terminology provenance and N5 chart-reference legend
+
+The official **Infinity N4 v1.1** rulebook (printed p. 43, *Types of Weapons*)
+defines `Technical Weapon` as a BS Weapon using **WIP** instead of BS, and
+`Throwing Weapon` as a BS Weapon using **PH** instead of BS. Its Weapon Chart
+also prints those terms (notably printed pp. 164 and 170). These are genuine
+N4 terms, providing an evidenced historical origin for their persistence in
+Army's N5 properties; the N5.3 PDF instead uses `BS Weapon (WIP)` and
+`BS Weapon (PH)`. Do not treat this as proof that every older profile is
+otherwise mechanically identical to its N5 counterpart.
+
+**N4 provenance:** *Infinity N4 Rulebook*, v1.1, supplied as
+`infinity-rules-en-v1-1.pdf`, SHA-256
+`48d822684ba1cd7a2a1e11571a836f0223928a50229e03837cf57da2674d28d0`;
+printed pp. 43 and 171. This is a **prior-major-edition comparison source**,
+not an N5 authority and not a source file to publish with InfinityDB.
+
+Both the **N4 chart legend** (printed p. 171) and the **N5.3 chart legend**
+(printed p. 176) explicitly define the reference markers:
+
+- `[*]`: additional explanation in **Weaponry**.
+- `[**]`: additional explanation in **Ammunition**.
+- `[***]`: additional explanation in **Skills and Equipment**.
+
+The legend determines the *section category* in that publication; the specific
+rule target still depends on the weapon, mode, and relevant text. These markers
+are cross-references, **not gameplay Traits**. Under the N5.3 legend, the
+Army `[**]` versus PDF/Wiki `[*]` for PARA Mine denotes Ammunition versus
+Weaponry, not merely different spellings. Whether Army intends the same legend
+still needs verification. Preserve both source values.
+
+### Reviewed current-source differences
 
 - **Cybermine:** PDF pp. 72, 181 confirm `Comms Attack`; the apparent difference
   comes from truncated PDF Trait extraction, not a printed-rule omission.
 - **Drop Bears (BS Mode):** N5.3 pp. 71, 181 use `BS Weapon (PH)`. The term
-  `Throwing Weapon` does not occur in the supplied N5.3 PDF; Army retains it.
-  Absence establishes outdated source terminology, not an inferred new Trait.
+  `Throwing Weapon` does not occur in the supplied N5.3 PDF; Army retains the
+  N4-defined term. This establishes historical terminology provenance, not an
+  inferred additional N5 Trait.
 - **PARA Mine:** N5.3 p. 181 prints `[*]`, with the Mines-specific rules on
-  p. 72; Army's `[**]` remains a source-footnote mismatch to review. Footnote
-  markers are *references to context*, not independently defined Traits.
+  p. 72; Army prints `[**]`. The N5.3 legend makes these Weaponry versus
+  Ammunition references respectively. This discrepancy remains to review.
 - **WildParrot:** N5.3 pp. 74, 181 explicitly list `Non-Lethal`, and the weapon
   uses E/M Ammunition and operates like an E/M Mine. Army omits that explicit
   Trait; preserve this difference rather than silently adding a property.
 - **PT: Endgame/Eraser/Mirrorball:** the April 2025 announcement replaces
   `Technical Weapon` with `BS Weapon (WIP)`; the old term does not occur in the
-  supplied N5.3 PDF. Endgame also gains `Double Shot`, missing from current
-  Army properties; that separate difference remains open for presentation.
+  supplied N5.3 PDF, but is explicitly defined in N4 v1.1. Endgame also gains
+  `Double Shot`, missing from current Army properties; that separate difference
+  remains open for presentation.
 - **Sepsitor Plus:** N5.3 p. 187 prints `[*]`, referring to the Sepsitor family
   prose on p. 73. Army's omission remains visible. A name-specific matching
   issue in Army is a *hypothesis*, not an observed implementation cause.

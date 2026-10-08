@@ -256,7 +256,8 @@ def markdown_report(report: dict[str, Any]) -> str:
     )
     lines = [
         "# 1.0 Weapon Trait cross-source review", "",
-        "**Read-only source comparisons and reviewed interpretations; no gameplay data changed.**", "",
+        "**Read-only source comparisons and reviewed interpretations; "
+        "no gameplay data changed.**", "",
         f"- Core PDF SHA-256: `{report['corePdfSha256']}`",
         f"- Wiki history ZIP SHA-256: `{report['wikiArchiveSha256']}`",
         f"- Wiki `Weapon_Chart` revision: `{report['wikiRevisionId']}`",

@@ -171,9 +171,12 @@ unimplemented until its corresponding behavior exists.
       printed Weapon Chart and prose: five explained interpretations and four
       partially explained. Cybermine's `Comms Attack` is in the PDF (pp. 72,
       181) but truncated by the extractor; `Throwing Weapon` and `Technical
-      Weapon` are absent from the N5.3 PDF and persist as Army legacy terms;
+      Weapon` are absent from the N5.3 PDF and persist as Army legacy terms.
+      N4 v1.1 p. 43 confirms both names and their original PH/WIP semantics;
       WildParrot explicitly has `Non-Lethal`; Mines and Sepsitor footnote
-      references require their own semantic links. See the version-pinned
+      references require their own semantic links. N4 p. 171 and N5.3 p. 176
+      explicitly define `[*]` as Weaponry, `[**]` as Ammunition, and `[***]`
+      as Skills and Equipment. See the version-pinned
       `config/validation/weapon-trait-wiki-review.json` findings; all original
       three-way comparison values remain intact.
     - [ ] Correct the Cybermine PDF Trait-cell extraction without erasing
@@ -183,8 +186,10 @@ unimplemented until its corresponding behavior exists.
     - [ ] Review Endgame's missing Army `Double Shot` Trait, PARA Mine's
       `[*]` (PDF/Wiki) versus `[**]` (Army), Sepsitor Plus's missing Army `[*]`,
       and WildParrot's printed `Non-Lethal` against its E/M ammunition effect.
-      Confirm each rules relationship and browser presentation; the proposed
-      Sepsitor Plus name-matching cause remains hypothetical.
+      The N5.3 footnote legend places PARA Mine's markers in different section
+      categories (Weaponry versus Ammunition). Confirm the intended Army
+      representation, each rules relationship, and browser presentation; the
+      proposed Sepsitor Plus name-matching cause remains hypothetical.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
@@ -611,9 +616,10 @@ only when required to fix correctness, reproducibility, or release reliability.
 
 - [ ] **Data processing + Web frontend:** Give Weapon Chart footnote markers
   (such as `[*]`, `[**]`, `[***]`) contextual, clickable rule references instead
-  of treating them as ordinary Traits or inventing universal meanings for the
-  symbols. Resolve the target by source publication, chart row/mode, and owning
-  special-weapon section (e.g. Mines or Sepsitor), preserving any mismatched
+  of treating them as ordinary Traits. Use the published chart legend to identify
+  the section category (Weaponry, Ammunition, or Skills and Equipment), then
+  resolve the actual target by source publication, chart row/mode, and owning
+  rule section (e.g. Mines or Sepsitor), preserving any mismatched
   notation from Army and the PDF. Consider tooltips or short explanations and
   a direct Glossary/rules link; retain raw provenance and explicit unresolved
   mappings. Do not require this richer display for 1.0 completeness.

@@ -48,14 +48,15 @@
       "name": "PARA Mine",
       "mode": "",
       "wikiName": "PARA Mines",
-      "reviewNote": "PDF/Wiki print [*] and the Mines rules appear on p.72; Army prints [**]. Preserve both source symbols until notation mapping is reviewed.",
+      "reviewNote": "The N5.3 chart legend on p.176 defines [*] as Weaponry and [**] as Ammunition. PDF/Wiki PARA Mine uses [*], but Army uses [**]; preserve both source values until Army's intended reference is checked.",
       "semanticReview": {
         "classification": "source-footnote",
         "state": "partial",
-        "finding": "N5.3 chart p.181 prints [*] for PARA Mines; the Mines section on p.72 is the applicable special-weapon rule context. Army records [**].",
-        "remaining": "Determine what each marker denotes in its own source/table; retain the Army [**] value until that mapping is reviewed.",
+        "finding": "The N5.3 chart legend (p.176) defines [*] as a Weaponry reference and [**] as an Ammunition reference. PARA Mines (p.181) prints [*] and the Mines rule is on p.72; Army records [**].",
+        "remaining": "Review whether Army's marker follows the printed chart legend and why its category differs; retain both original source values.",
         "pdfPages": [
           72,
+          176,
           181
         ]
       }
@@ -167,10 +168,11 @@
       "semanticReview": {
         "classification": "source-footnote",
         "state": "partial",
-        "finding": "N5.3 chart p.187 explicitly lists [*] for Sepsitor Plus. The Sepsitor section (p.73) covers the weapon family; Army omits the marker.",
+        "finding": "The N5.3 legend (p.176) defines [*] as a Weaponry reference. N5.3 chart p.187 lists [*] for Sepsitor Plus; the Sepsitor Weaponry section (p.73) covers the weapon family. Army omits the marker.",
         "remaining": "Preserve the source mismatch. The proposed Army name-lookup explanation is a hypothesis, not a verified implementation cause.",
         "pdfPages": [
           73,
+          176,
           187
         ]
       }
