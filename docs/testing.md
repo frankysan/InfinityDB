@@ -439,9 +439,14 @@ record as proof that no gameplay rule representation exists.
 python tools/audit_weapon_traits_prose.py --core-pdf "C:\path\to\n5-rules-v5-3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
 ```
 
-The supplied PDF currently yields 145 literal Trait-list matches, 24 review
-candidates, and two positional source deferrals across the 171 aligned chart
-rows. These candidates are **not confirmed source-data defects**: spelling and
+The supplied N5 v5.3 PDF yields 145 literal Trait-list matches, 15 reviewed
+notation equivalents, two manually checked source-cell matches, and nine remaining
+membership/classification candidates across all 171 chart rows (zero deferrals).
+`config/validation/weapon-trait-source-review.json` maintains the narrow spelling,
+State-notation, and compound footnote equivalences separately from gameplay data.
+The two verified source cells are keyed by printed name/page and can only be reused
+with the exact pinned core PDF hash. Review policy changes are recorded in the
+reproducible evidence report. These candidates are **not confirmed source-data defects**: spelling and
 shorthand differences, omitted/extra printed Traits, and extraction limitations
 require separate review. The report does not compare prose clauses, rule
 relationships, or player-facing completeness. The PDF remains an optional

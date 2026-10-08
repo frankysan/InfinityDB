@@ -138,9 +138,16 @@ unimplemented until its corresponding behavior exists.
       candidates (including shorthand and source spelling differences), and two
       PDF-layout deferrals; all 12 indexed prose sections on pp. 68–74 are present.
       This is not evidence of rule-definition, relationship, or browser completeness.
-    - [ ] Adjudicate Weapon Trait differences against printed source rows and
-      maintained identities, including Pheroware, Kobra Pistol, WildParrot,
-      state aliases, spelling variants, and ambiguous PDF cell boundaries.
+    - [x] Reconcile the 24 initial Weapon Trait candidates against reviewed notation:
+      15 are equivalent under explicitly maintained source spelling/State/footnote
+      aliases, and the two positional deferrals (Chest Mine CC Mode, Deactivator)
+      match visually checked cells pinned to the exact core PDF SHA-256. No
+      source rows remain deferred; 9 Trait membership/classification candidates
+      remain open, and no upstream gameplay data is modified.
+    - [ ] Adjudicate the nine remaining Weapon Trait candidates: Cybermine,
+      Drop Bears (BS Mode), PARA Mine, WildParrot, PT: Endgame/Eraser/Mirrorball,
+      Kobra Pistol (CC Mode), and Sepsitor Plus. Distinguish genuine source
+      differences from rule-scoped implicit Traits and Army classification.
       Reconcile auxiliary/equipment object profiles and special-weapon prose
       clause by clause; identify missing facts, relationships and browser coverage.
     - [ ] Review the six unmatched chart-text names as aliases, multi-mode entries,

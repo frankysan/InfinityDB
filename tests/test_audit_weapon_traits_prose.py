@@ -2,8 +2,12 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 from tools.audit_weapon_traits_prose import (
     _normalized_traits,
+    _review_policy,
+    _reviewed_tokens,
     _trait_cell,
     _traits,
     compare_traits,
@@ -115,3 +119,75 @@ def test_prose_inventory_tracks_source_and_named_curated_definition(tmp_path) ->
     assert by_name["Armed Turret"]["status"] == "named-weapon-definition-present"
     assert by_name["D-Charges"]["status"] == "source-heading-unverified"
     assert by_name["Pitcher"]["status"] == "no-named-curated-weapon-definition"
+
+
+def test_reviewed_notation_equivalence_does_not_hide_missing_traits(tmp_path) -> None:
+    import json
+
+    base = {
+        "formatVersion": 1, "corePdfSha256": "a" * 64,
+        "traitAliases": {
+            "Continous Damage": "Continuous Damage",
+            "State: IMM-A": "State: IMMOBILIZED-A",
+        },
+        "combinedFootnotes": {"NON-LETHAL [**]": ["NON-LETHAL", "[**]"]},
+        "verifiedSourceCells": {},
+    }
+    path = tmp_path / "review.json"
+    path.write_text(json.dumps(base), encoding="utf-8", newline="\n")
+    review = _review_policy(path, "a" * 64)
+    assert _reviewed_tokens(["CONTINUOUS DAMAGE"], review) == _reviewed_tokens(
+        ["Continous Damage"], review
+    )
+    assert _reviewed_tokens(["NON-LETHAL [**]"], review) == _reviewed_tokens(
+        ["Non-lethal", "[**]"], review
+    )
+    result = compare_traits(
+        _compared(), {(176, "Tactical Bow"): "CONTINUOUS DAMAGE"},
+        {("Tactical Bow", ""): ["Continous Damage"]}, review,
+    )
+    assert result[0]["status"] == "notation-equivalent"
+    result = compare_traits(
+        _compared(), {(176, "Tactical Bow"): "CONTINUOUS DAMAGE, NON-LETHAL"},
+        {("Tactical Bow", ""): ["Continous Damage"]}, review,
+    )
+    assert result[0]["status"] == "candidate-discrepancy"
+    assert result[0]["sourceOnlyTraits"] == ["non-lethal"]
+    with pytest.raises(Exception, match="not pinned"):
+        _review_policy(path, "b" * 64)
+
+
+def test_verified_source_cell_is_exact_page_and_printed_identity() -> None:
+    review = {
+        "traitAliases": {}, "combinedFootnotes": {},
+        "verifiedSourceCells": {
+            "186:DEACTIVATOR": ["BS WEAPON (WIP)", "[***]"],
+        },
+    }
+    rows = [{"page": 186, "name": "Deactivator", "mode": "",
+             "printedName": "DEACTIVATOR"}]
+    result = compare_traits(
+        rows, {(186, "DEACTIVATOR"): "ZONE OF CONTROL. BS WEAPON (WIP)"},
+        {("Deactivator", ""): ["BS Weapon (WIP)", "[***]"]}, review,
+    )
+    assert result[0]["status"] == "source-reviewed-match"
+    assert result[0]["sourceCellReviewed"] is True
+    rows[0]["printedName"] = "DIFFERENT SOURCE ROW"
+    assert compare_traits(rows, {}, {("Deactivator", ""): ["BS Weapon (WIP)"]}, review)[
+        0
+    ]["status"] == "deferred-source"
+
+
+def test_reviewed_real_pdf_policy_is_valid_and_bounded() -> None:
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[1] / (
+        "config/validation/weapon-trait-source-review.json"
+    )
+    import json
+
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    review = _review_policy(path, raw["corePdfSha256"])
+    assert len(review["verifiedSourceCells"]) == 2
+    assert len(review["traitAliases"]) == 5
+    assert len(review["combinedFootnotes"]) == 1

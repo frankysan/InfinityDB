@@ -13,6 +13,7 @@ import json
 import re
 import sqlite3
 import unicodedata
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -26,7 +27,8 @@ from tools.audit_weapon_chart_profiles import (
 )
 
 FORMAT = "InfinityDB N5 v5.3 Weapon Traits and prose evidence"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
+DEFAULT_REVIEW = Path("config/validation/weapon-trait-source-review.json")
 # Printed N5 v5.3 Weaponry section headings, with their printed pages.
 # These are an inventory of source sections, not invented rule definitions.
 SPECIAL_SECTIONS = (
@@ -69,6 +71,33 @@ def _normalized_traits(items: list[str]) -> list[str]:
         .replace("−", "-").replace("–", "-")
         for item in items
     )
+
+
+def _review_policy(path: Path, pdf_sha256: str) -> dict[str, Any]:
+    """Load reviewed, source-version-pinned notation and PDF cell exceptions."""
+    review = json.loads(path.read_text(encoding="utf-8"))
+    if review.get("formatVersion") != 1 or review.get("corePdfSha256") != pdf_sha256:
+        raise WeaponChartAuditError("Weapon Trait review is not pinned to this PDF")
+    aliases = review.get("traitAliases")
+    footnotes = review.get("combinedFootnotes")
+    cells = review.get("verifiedSourceCells")
+    if not all(isinstance(item, dict) for item in (aliases, footnotes, cells)):
+        raise WeaponChartAuditError("Invalid Weapon Trait review mappings")
+    if not all(isinstance(a, str) and isinstance(b, str) for a, b in aliases.items()):
+        raise WeaponChartAuditError("Invalid Weapon Trait alias")
+    if not all(isinstance(k, str) and isinstance(v, list) and v
+               and all(isinstance(t, str) for t in v)
+               for mapping in (footnotes, cells) for k, v in mapping.items()):
+        raise WeaponChartAuditError("Invalid reviewed Weapon Trait tokens")
+    return review
+
+
+def _reviewed_tokens(items: list[str], review: dict[str, Any]) -> list[str]:
+    """Normalize reviewed shorthand only, never infer or drop missing Traits."""
+    replacements = review["traitAliases"]
+    combined = review["combinedFootnotes"]
+    expanded = [part for item in items for part in combined.get(item, [item])]
+    return _normalized_traits([replacements.get(item, item) for item in expanded])
 
 
 def _trait_cell(
@@ -127,11 +156,19 @@ def compare_traits(
     compared: list[dict[str, Any]],
     printed: dict[tuple[int, str], str],
     properties: dict[tuple[str, str], list[str]],
+    review: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     result: list[dict[str, Any]] = []
     for row in compared:
         key = (row["page"], row["printedName"])
         source = printed.get(key)
+        source_reviewed = False
+        if review is not None:
+            source_key = f"{row['page']}:{row['printedName']}"
+            if source_key in review["verifiedSourceCells"]:
+                # The edited cell is valid only for the exact, pinned PDF SHA-256.
+                source = ", ".join(review["verifiedSourceCells"][source_key])
+                source_reviewed = True
         # Do not equate absent/unextractable source rows with an empty Traits cell.
         if source is None or ". " in source:
             reason = "deferred-source-layout" if source is not None else "deferred-source"
@@ -151,15 +188,29 @@ def compare_traits(
             continue
         pdf_tokens = _traits(source)
         army_tokens = matches[0]
+        exact = _normalized_traits(pdf_tokens) == _normalized_traits(army_tokens)
+        equivalent = bool(review) and (
+            _reviewed_tokens(pdf_tokens, review) == _reviewed_tokens(army_tokens, review)
+        )
         status = (
-            "traits-match" if _normalized_traits(pdf_tokens) == _normalized_traits(army_tokens)
+            "source-reviewed-match" if source_reviewed and (exact or equivalent)
+            else "traits-match" if exact
+            else "notation-equivalent" if equivalent
             else "candidate-discrepancy"
         )
-        result.append({
+        item: dict[str, Any] = {
             "page": row["page"], "name": row["name"], "mode": row["mode"],
             "printedTraits": pdf_tokens, "armyProperties": army_tokens,
             "status": status,
-        })
+        }
+        if source_reviewed:
+            item["sourceCellReviewed"] = True
+        if status == "candidate-discrepancy" and review is not None:
+            pdf_counts = Counter(_reviewed_tokens(pdf_tokens, review))
+            army_counts = Counter(_reviewed_tokens(army_tokens, review))
+            item["sourceOnlyTraits"] = sorted((pdf_counts - army_counts).elements())
+            item["armyOnlyTraits"] = sorted((army_counts - pdf_counts).elements())
+        result.append(item)
     return result
 
 
@@ -204,7 +255,10 @@ def prose_inventory(doc: Any, rules_db: Path) -> list[dict[str, Any]]:
     return sections
 
 
-def audit_traits_and_prose(pdf: Path, army_db: Path, rules_db: Path) -> dict[str, Any]:
+def audit_traits_and_prose(
+    pdf: Path, army_db: Path, rules_db: Path,
+    review_path: Path = DEFAULT_REVIEW,
+) -> dict[str, Any]:
     try:
         import fitz  # type: ignore[import-untyped]  # Optional offline PDF dependency.
     except ImportError as exc:
@@ -219,9 +273,15 @@ def audit_traits_and_prose(pdf: Path, army_db: Path, rules_db: Path) -> dict[str
     baseline = audit_chart(pdf, army_db)
     if len(printed) != baseline["comparison"]["chartRowsLocated"]:
         raise WeaponChartAuditError("Trait evidence and existing chart row count disagree")
+    review = _review_policy(review_path, _sha256(pdf))
     traits = compare_traits(
-        baseline["comparison"]["compared"], printed, _weapon_properties(army_db)
+        baseline["comparison"]["compared"], printed, _weapon_properties(army_db), review
     )
+    reviewed_rows = {
+        f"{row['page']}:{row['printedName']}" for row in baseline["comparison"]["compared"]
+    }
+    if not set(review["verifiedSourceCells"]).issubset(reviewed_rows):
+        raise WeaponChartAuditError("Reviewed source cell not found in this Weapon Chart")
     return {
         "format": FORMAT, "formatVersion": FORMAT_VERSION,
         "status": "partial-trait-and-prose-inventory-not-rule-completeness",
@@ -231,11 +291,16 @@ def audit_traits_and_prose(pdf: Path, army_db: Path, rules_db: Path) -> dict[str
         "traitRows": len(traits),
         "traitMatches": sum(row["status"] == "traits-match" for row in traits),
         "traitCandidates": sum(row["status"] == "candidate-discrepancy" for row in traits),
+        "traitNotationEquivalent": sum(row["status"] == "notation-equivalent" for row in traits),
+        "traitReviewedCells": sum(row["status"] == "source-reviewed-match" for row in traits),
+        "reviewPolicySha256": _sha256(review_path),
         "traitDeferred": sum(row["status"].startswith("deferred") for row in traits),
         "traits": traits,
         "specialWeaponSections": sections,
         "limitations": [
-            "PDF Trait cells are positionally reconstructed; candidates require visual review.",
+            "Notation equivalence covers only maintained source spelling and shorthand aliases.",
+            "Two ambiguous PDF cells are hash-pinned and visually reviewed.",
+            "Residual Trait differences require source/Army review; not confirmed errors.",
             "Matching trait identities do not prove complete rules or links.",
             "A named curated weapon definition is not the only possible rules representation.",
             "Special-weapon prose is indexed, not compared clause by clause with curated rules.",
@@ -250,21 +315,33 @@ def markdown_report(report: dict[str, Any]) -> str:
         "**Partial source evidence, not a completeness verdict.**",
         "No gameplay data is changed by this audit.", "",
         f"- PDF SHA-256: `{report['corePdfSha256']}`",
+        f"- Source-review policy SHA-256: `{report.get('reviewPolicySha256', 'unreviewed')}`",
         f"- Army database SHA-256: `{report.get('armyDbSha256', 'not recorded')}`",
         f"- Rules database SHA-256: `{report.get('rulesDbSha256', 'not recorded')}`",
         f"- Weapon Chart Trait rows checked: **{report['traitRows']}**.",
-        f"- Matching: **{report['traitMatches']}**; candidates: **{report['traitCandidates']}**; "
-        f"deferred: **{report['traitDeferred']}**.",
+        f"- Literal matches: **{report['traitMatches']}**; reviewed notation: "
+        f"**{report.get('traitNotationEquivalent', 0)}**; reviewed source cells: "
+        f"**{report.get('traitReviewedCells', 0)}**; remaining candidates: "
+        f"**{report['traitCandidates']}**; deferred: **{report['traitDeferred']}**.",
         "", "## Trait comparison candidates", "",
     ]
     for row in report["traits"]:
         if row["status"] == "candidate-discrepancy":
             lines.append(
                 f"- **{row['name']}** ({row['mode'] or 'standard'}, p. {row['page']}): "
-                f"PDF `{row['printedTraits']}`; Army `{row['armyProperties']}`."
+                f"PDF `{row['printedTraits']}`; Army `{row['armyProperties']}`; "
+                f"source-only `{row.get('sourceOnlyTraits', [])}`, "
+                f"Army-only `{row.get('armyOnlyTraits', [])}`."
             )
     if not report["traitCandidates"]:
         lines.append("- None in the current comparison subset.")
+    lines.extend(["", "## Reviewed notation and source cells", ""])
+    for row in report["traits"]:
+        if row["status"] in ("notation-equivalent", "source-reviewed-match"):
+            lines.append(
+                f"- **{row['name']}** ({row['mode'] or 'standard'}, p. {row['page']}): "
+                f"{row['status']}; PDF `{row['printedTraits']}`; Army `{row['armyProperties']}`."
+            )
     lines.extend(["", "## Special-weapon prose section inventory (pp. 68-74)", ""])
     for item in report["specialWeaponSections"]:
         lines.append(
@@ -283,9 +360,12 @@ def main() -> int:
     parser.add_argument("--rules-db", type=Path, default=Path("data/generated/rules.db"))
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--markdown-output", type=Path)
+    parser.add_argument("--trait-review", type=Path, default=DEFAULT_REVIEW)
     args = parser.parse_args()
     try:
-        report = audit_traits_and_prose(args.core_pdf, args.army_db, args.rules_db)
+        report = audit_traits_and_prose(
+            args.core_pdf, args.army_db, args.rules_db, args.trait_review
+        )
     except (OSError, sqlite3.Error, WeaponChartAuditError) as exc:
         parser.error(str(exc))
     result = json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False) + "\n"

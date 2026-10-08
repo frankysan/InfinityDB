@@ -1,0 +1,29 @@
+{
+  "formatVersion": 1,
+  "corePdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+  "traitAliases": {
+    "Continous Damage": "Continuous Damage",
+    "State: IMM-A": "State: IMMOBILIZED-A",
+    "State: Immbolized-B": "State: IMMOBILIZED-B",
+    "Comms. Attack": "Comms Attack",
+    "State: Stunned / Immbolized-B": "State: STUNNED/IMMOBILIZED-B"
+  },
+  "combinedFootnotes": {
+    "NON-LETHAL [**]": [
+      "NON-LETHAL",
+      "[**]"
+    ]
+  },
+  "verifiedSourceCells": {
+    "181:CHEST MINES (CC Mode)": [
+      "CC ATTACK (+3)",
+      "DISPOSABLE (2)",
+      "[*]"
+    ],
+    "186:DEACTIVATOR": [
+      "BS WEAPON (WIP)",
+      "[***]"
+    ]
+  },
+  "reviewScope": "Only token identity and exact visually inspected PDF cells; no gameplay semantics inferred."
+}
