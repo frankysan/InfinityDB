@@ -102,7 +102,12 @@ to the Chest Mine exception record, with both Army modes sharing that
 reference; Drop Bears and Mine Dispenser deliberately do not inherit it.
 The catalog-enrichment regression checks these relationships against the
 tracked Army and rules databases. Actual browser visual navigation remains
-to be verified manually.
+to be verified manually. The Weapon detail API now gives links to
+rules already rendered on the same page stable local anchors. In particular,
+Cybermine's ordinary Mines link leads to the adjacent Mines card, not to the
+first unrelated Army weapon sharing that definition. Chest Mine does not show
+ordinary Mines rules, so its comparison link still uses the existing cross-page
+fallback; a canonical shared-family landing route remains an open design decision.
 
 An additional **archived Wiki** cross-check identifies the corresponding
 N5 pages `Perimeter_Weapons` (revision 3912), `Mines` (revision 4112), and

@@ -174,7 +174,7 @@ def test_mine_family_rules_apply_to_correct_army_weapon_profiles() -> None:
         'ap-mine', 'e-m-mine', 'monofilament-mine', 'para-mine',
         'shock-mine', 'viral-mine', 'cybermine',
     }
-    assert {l['id'] for l in records['weapon:mines']['armyLinks']} == mine_slugs
+    assert {link['id'] for link in records['weapon:mines']['armyLinks']} == mine_slugs
     assert records['weapon:cybermine']['armyLinks'] == [
         {'entity': 'weapon', 'id': 'cybermine'}]
     assert records['weapon:chest-mine']['armyLinks'] == [

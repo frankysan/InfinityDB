@@ -102,12 +102,13 @@ def test_cybermine_page_retains_both_family_and_exception(
     assert any(
         relation["record"]["id"] == "weapon:mines"
         and relation["direction"] == "outbound"
+        and relation["record"]["public_reference"] == {"href": "#rule-weapon-mines"}
         for relation in cybermine["display_relations"]
     )
     assert any(
         token["type"] == "reference"
         and token["target"] == "weapon:mines"
-        and token["public_reference"]
+        and token["public_reference"] == {"href": "#rule-weapon-mines"}
         for token in cybermine["summary_tokens"]
     )
 
@@ -127,3 +128,9 @@ def test_chest_mine_page_does_not_inherit_ordinary_mine_rules(
         for source in chest_mine["citations"]
     )
     assert chest_mine["summary_tokens"]
+    # No local Mines card is rendered on Chest Mine: retain cross-page navigation.
+    assert next(
+        token["public_reference"]
+        for token in chest_mine["summary_tokens"]
+        if token.get("target") == "weapon:mines"
+    ) == {"catalog": "weapons", "id": "ap-mine"}

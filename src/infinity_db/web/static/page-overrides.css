@@ -915,3 +915,8 @@ svg.scenario-map .label {
     padding: 10px;
   }
 }
+
+/* Keep linked rule cards visible below the sticky navigation bar. */
+.rules-reference .detail-section[id] {
+  scroll-margin-top: 6rem;
+}

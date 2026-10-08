@@ -106,9 +106,21 @@ def rule_record_public_reference(
     return {"catalog": catalog, "id": route_id}
 
 
+def local_rule_public_reference(
+    record_id: object, local_rule_ids: frozenset[str]
+) -> dict[str, str] | None:
+    """Link to an existing rule card in the current detail page, when supplied."""
+
+    if isinstance(record_id, str) and record_id in local_rule_ids:
+        return {"href": f"#rule-{record_id.replace(':', '-')}"}
+    return None
+
+
 def enrich_rule_relation_references(
     database: Database,
     value: dict[str, Any],
+    *,
+    local_rule_ids: frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
     """Attach browser-routable references to structured rules relations.
 
@@ -130,7 +142,9 @@ def enrich_rule_relation_references(
                     record = relation.get("record")
                     if not isinstance(record, dict):
                         continue
-                    reference = rule_record_public_reference(database, record)
+                    reference = local_rule_public_reference(
+                        record.get("id"), local_rule_ids
+                    ) or rule_record_public_reference(database, record)
                     if reference is not None:
                         record["public_reference"] = reference
             for child in node.values():

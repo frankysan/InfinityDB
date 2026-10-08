@@ -327,6 +327,7 @@ export function rulesReferenceArticle(
 ) {
   const article = document.createElement("article");
   article.className = "surface surface--subtle detail-section";
+  if (rule.id) article.id = `rule-${rule.id.replaceAll(":", "-")}`;
   const header = document.createElement("header");
   header.className = "surface-titlebar surface-titlebar--ruled rules-card-titlebar";
   const title = document.createElement("h3");

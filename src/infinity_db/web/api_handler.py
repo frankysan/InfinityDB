@@ -713,12 +713,18 @@ class ApiHandler:
                     attach_public_catalog_slug(self.database, "weapons", payload)
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("weapons", payload)
+                    local_rule_ids = frozenset(
+                        rule["id"] for rule in payload.get("rules", [])
+                    )
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, local_rule_ids=local_rule_ids
+                    )
                     payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
+                        self.database, self.rules_database, payload,
+                        local_rule_ids=local_rule_ids,
                     )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read reference item")

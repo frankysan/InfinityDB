@@ -5680,6 +5680,12 @@ def test_equipment_details_frontend_renders_metadata_profiles(app: Callable) -> 
     assert b'link.rel = "noopener noreferrer"' in body
 
 
+def test_rule_cards_expose_stable_in_page_reference_anchors(app: Callable) -> None:
+    status, _, body = request(app, "/static/rules-reference.js")
+    assert status == 200
+    assert b'article.id = `rule-${rule.id.replaceAll(":", "-")}`' in body
+
+
 def test_catalog_detail_frontend_renders_typed_source_variant_labels(
     app: Callable,
 ) -> None:
