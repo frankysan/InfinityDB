@@ -583,6 +583,26 @@ unimplemented until its corresponding behavior exists.
 These items are intentionally outside the 1.0 completeness gate. They may move earlier
 only when required to fix correctness, reproducibility, or release reliability.
 
+### Per-reference change history
+
+- [ ] **Data processing + Web backend + Web frontend:** Show a change-history
+  marker/notice on each updated Rule, Skill, Weapon, Unit/profile, and other
+  applicable reference entity, linking to a player-readable explanation of
+  **when** it changed, **what** changed (before/after), and **why** where an
+  authoritative source documents the reason. Resolve changes by stable entity
+  identity and publication/version; include an effective date only when known.
+  - [ ] Derive reviewed change events by comparing versioned N5 Army snapshots,
+    rules/FAQ PDFs, exact Wiki revisions, and official Corvus Belli update posts.
+    Keep precise source citations and distinguish changed gameplay semantics from
+    editorial wording, source-format changes, and unresolved source conflicts.
+  - [ ] Present concise change badges on affected detail pages, with accessible
+    explanations and links to evidence/history; do not mark unchanged records or
+    claim an inferred motivation as an official reason. Explicitly indicate when
+    the reason or effective date is unknown.
+  - [ ] Preserve multiple successive changes and supersession without overwriting
+    previous revisions. Keep historical events distinct from current canonical
+    facts and do not turn this feature into a 1.0 completeness blocker.
+
 ### List and session configuration
 
 - [ ] **Data processing + Web backend + Web frontend:** Model Spec-Ops/Team-Ops
