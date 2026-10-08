@@ -3663,6 +3663,99 @@
             }
         },
         {
+            "id": "weapon:kobra-pistol",
+            "kind": "weapon",
+            "name": "Kobra Pistol",
+            "summary": "Kobra Pistol is a Mixed Weapon with two separate modes. BS Mode uses [[ammunition:shock|Shock Ammunition]] and the Trooper’s BS Attribute; [[trait:cc|CC]] Mode uses [[ammunition:da|Double Action (DA) Ammunition]] and the Trooper’s [[trait:cc|CC]] Attribute. The individual mode profiles, not this shared description, determine their Traits and Saving Rolls.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "kobra-pistol"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 68,
+                    "section": "Mixed Weapons: Kobra Pistol"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-08"
+            }
+        },
+        {
+            "id": "weapon:kobra-pistol-cc",
+            "kind": "weapon",
+            "name": "Kobra Pistol (CC Mode)",
+            "summary": "[[weapon:kobra-pistol|Kobra Pistol]] has separate BS and [[trait:cc|CC]] modes. In [[trait:cc|CC]] Mode it uses [[ammunition:da|Double Action (DA) Ammunition]], which requires two ARM Saving Rolls per hit. The N5 v5.3 Weapon Chart prints one Saving Roll for this mode, while the DA rule, imported Army profile, and reviewed N5.3 Wiki chart support two. The current Army profile and reviewed Wiki also list [[trait:anti-materiel|Anti-materiel]] for [[trait:cc|CC]] Mode, but the printed v5.3 chart omits that Trait. Its applicability remains an unresolved source discrepancy; this reference does not add or remove that Trait from the Army profile. The BS Mode instead uses [[ammunition:shock|Shock Ammunition]] and does not inherit this [[trait:cc|CC]]-specific reference.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": 221
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "source",
+                "sourceMode": "CC Mode"
+            },
+            "relations": [
+                {
+                    "type": "variant-of",
+                    "recordId": "weapon:kobra-pistol"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:da"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 64,
+                    "section": "Double Action (DA) Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 68,
+                    "section": "Mixed Weapons: Kobra Pistol"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 182,
+                    "section": "Weapon Chart: Pistols"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-08"
+            }
+        },
+        {
             "id": "weapon:wildparrot",
             "kind": "weapon",
             "name": "WildParrot",
@@ -3740,13 +3833,35 @@
             "summary": "Mine types governed by these shared rules use [[skill:place-deployable]] to put down a [[skill:camouflage|CAMO]] (-3) Marker, which becomes a MINE (-3) Token when Discovered; both receive [[skill:mimetism]] (-3). Mines have 360º LoF. Their Trigger Area is the Small Teardrop Template projected from the base, excluding Total Cover. When an enemy Model or Marker declares or executes a Skill or [[trait:aro|ARO]] within it, a Mine must trigger if its Small Teardrop Template reaches that enemy without affecting any ally, including [[state:unconscious|Unconscious]] allies. If the target is outside the Trigger Area, the Mine remains hidden and does not detonate. Each named Mine has its own Weapon Chart ammunition, PS, Saving Rolls, and Traits; a triggered Mine applies its own profile and is then removed. Mines that can be Dodged impose -3 PH on [[skill:dodge]] attempts. A Mine cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid non-camouflaged enemy is also inside it or a [[trait:intuitive-attack|Intuitive Attack]] was declared. [[weapon:cybermine|Cybermines]] replace the [[skill:dodge|Dodge]] response with [[skill:reset]]; [[weapon:chest-mine|Chest Mines]] do not use these shared Mine rules.",
             "facts": {
                 "variantRuleReferences": {
-                    "ap-mine": ["ammunition:ap"],
-                    "e-m-mine": ["ammunition:em", "state:isolated", "state:immobilized-b"],
-                    "monofilament-mine": ["ammunition:normal", "trait:arm-0", "state:dead"],
-                    "para-mine": ["ammunition:para", "state:immobilized-a"],
-                    "shock-mine": ["ammunition:shock"],
-                    "viral-mine": ["ammunition:normal", "trait:bioweapon"],
-                    "cybermine": ["state:stunned", "state:immobilized-b", "skill:reset"]
+                    "ap-mine": [
+                        "ammunition:ap"
+                    ],
+                    "e-m-mine": [
+                        "ammunition:em",
+                        "state:isolated",
+                        "state:immobilized-b"
+                    ],
+                    "monofilament-mine": [
+                        "ammunition:normal",
+                        "trait:arm-0",
+                        "state:dead"
+                    ],
+                    "para-mine": [
+                        "ammunition:para",
+                        "state:immobilized-a"
+                    ],
+                    "shock-mine": [
+                        "ammunition:shock"
+                    ],
+                    "viral-mine": [
+                        "ammunition:normal",
+                        "trait:bioweapon"
+                    ],
+                    "cybermine": [
+                        "state:stunned",
+                        "state:immobilized-b",
+                        "skill:reset"
+                    ]
                 }
             },
             "composition": {

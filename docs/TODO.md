@@ -132,6 +132,7 @@ unimplemented until its corresponding behavior exists.
       update explicitly assigns DA to CC Mode. The Weapon Chart still prints
       one roll (pp. 68, 182), while Army and the current archived Wiki print
       two. Retain the inconsistent printed cell as source evidence.
+    - [x] Publish a mode-scoped Kobra Pistol CC reference for the confirmed DA two-roll behavior, explicitly flagging the still-unresolved Anti-materiel source conflict without adding or removing any imported Trait.
     - [ ] Independently adjudicate Kobra Pistol CC Mode's `Anti-materiel` Trait:
       current Army/Wiki include it, the N5.3 PDF omits it, and DA Ammunition
       alone does not imply it. Do not conflate this with the explained roll count.

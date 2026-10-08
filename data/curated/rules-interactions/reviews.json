@@ -952,6 +952,20 @@
       "note": "N5 v5.3 chart and the April 2025 update explicitly add Double Shot to Endgame only. Source-specific Army id 203 prevents applying it to Eraser or Mirrorball; current Army omits Double Shot."
     },
     {
+      "recordId": "weapon:kobra-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "N5.3 Mixed Weapons rules distinguish BS and CC modes and their ammunition; shared mode description does not assign mode-specific Traits or Saving Rolls."
+    },
+    {
+      "recordId": "weapon:kobra-pistol-cc",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values."
+    },
+    {
       "recordId": "weapon:wildparrot",
       "targetRelease": "1.0.0",
       "status": "reviewed",

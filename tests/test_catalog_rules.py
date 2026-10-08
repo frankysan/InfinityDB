@@ -236,6 +236,11 @@ def test_weapon_source_mode_rules_do_not_leak_between_same_id_profiles(
         if document["collection"]["id"] == "n5-core-v5.3"
     )
     test_core = copy.deepcopy(core)
+    # Keep this synthetic fixture independent of the now-published Kobra records.
+    test_core["records"] = [
+        record for record in test_core["records"]
+        if record["id"] not in {"weapon:kobra-pistol", "weapon:kobra-pistol-cc"}
+    ]
     shared = {
         "kind": "weapon",
         "scope": {"game": "N5", "seasons": ["current"]},

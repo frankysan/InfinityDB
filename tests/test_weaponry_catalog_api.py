@@ -326,6 +326,54 @@ def test_para_mine_has_own_reference_without_rewriting_source_marker(
     assert "[*]" not in profile["traits"]
 
 
+def test_kobra_cc_mode_reference_preserves_anti_materiel_conflict(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "kobra-pistol")
+    shared = _weapon_rules(payload)
+    assert set(shared) == {"weapon:kobra-pistol"}
+    assert "Shock Ammunition" in shared["weapon:kobra-pistol"]["summary"]
+
+    profiles = {profile["mode"]: profile for profile in payload["profiles"]}
+    assert "rules" not in profiles["BS Mode"]
+    assert profiles["BS Mode"]["ammunition"] == "Shock"
+    assert "Anti-materiel" not in profiles["BS Mode"]["traits"]
+
+    cc = profiles["CC Mode"]
+    assert cc["ammunition"] == "DA"
+    assert cc["saving_num"] == "2"
+    assert "Anti-materiel" in cc["traits"]  # The imported value is preserved.
+    assert [rule["id"] for rule in cc["rules"]] == ["weapon:kobra-pistol-cc"]
+    record = cc["rules"][0]
+    assert record["variant_semantics"] == {
+        "inheritance": "source", "source_mode": "CC Mode"
+    }
+    assert "unresolved source discrepancy" in record["summary"]
+    assert "two ARM Saving Rolls" in record["summary"]
+    assert any(
+        token["target"] == "trait:anti-materiel"
+        for token in record["summary_tokens"]
+        if token["type"] == "reference"
+    )
+    assert {64, 68, 182} == {citation["page"] for citation in record["citations"]}
+    assert {
+        (relation["type"], relation["record"]["id"])
+        for relation in record["display_relations"]
+        if relation["direction"] == "outbound"
+    } == {
+        ("variant-of", "weapon:kobra-pistol"),
+        ("uses-effects-of", "ammunition:da"),
+    }
+    for variant in payload["variants"]:
+        assert "rules" not in variant  # No source-wide leak.
+    for variant in payload["weapon_variants"]:
+        by_mode = {p["mode"]: p for p in variant["profiles"]}
+        assert "rules" not in by_mode["BS Mode"]
+        assert [r["id"] for r in by_mode["CC Mode"]["rules"]] == [
+            "weapon:kobra-pistol-cc"
+        ]
+
+
 def test_kobra_pistol_modes_share_source_id_but_not_effects(
     weaponry_app: Callable,
 ) -> None:

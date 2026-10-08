@@ -67,6 +67,16 @@ Source: Corvus Belli, *ITS Season 18 + N5.3 Rules Update*, 2026-09-01,
 sections "ARMY UPDATE CHANGELOG" and "N5.3 RULES CHANGELOG".
 The page is a URL-backed publication notice, not a locally hashed source snapshot.
 
+### RR-SRC-N53-002 — Kobra Pistol CC Mode: DA effect versus Trait attribution
+
+The N5.3 PDF (printed pp. 68, 182) assigns DA ammunition to Kobra Pistol CC Mode but prints one Saving Roll; the explicit DA ammunition rule (p. 64) requires **two** Saving Rolls per hit. The imported Army data and archived Wiki `Weapon_Chart` revision `4083` both show two; this semantic resolution does not change the printed discrepancy.
+
+The Wiki N5.3 updated `Mixed_Weapons` revision `4082` displays an explicit old/new comparison: the earlier CC Mode had Shock and CC Traits; the new version has DA and adds Anti-materiel. That records a Wiki editorial change, **not** an official explanation that the Trait should override the PDF. Current Army/Wiki show Anti-materiel, while the v5.3 PDF omits it. The September 1, 2026 official update names the ammunition change but does not mention Anti-materiel. Consequently the Trait remains disputed.
+
+A `sourceMode: "CC Mode"` curated Weapon reference now explains the confirmed DA mechanics and the conflict on the CC profile alone; BS Mode continues to show its unmodified Shock source profile. No new Anti-materiel membership, gameplay override, or cross-profile inheritance is asserted.
+
+Sources: [N5.3 release notice](https://infinityuniverse.com/en/news/infinity-rules-update-5-3); [N5.3 Wiki Mixed Weapons, oldid 4082](https://infinitythewiki.com/index.php?title=Mixed_Weapons&oldid=4082); [N5.3 Wiki Weapon Chart, oldid 4083](https://infinitythewiki.com/index.php?title=Weapon_Chart&oldid=4083). Official PDF v5.3 is locally pinned by the SHA-256 in `config/validation/weapon-trait-wiki-review.json`.
+
 ## Weaponry family prose (N5 v5.3)
 
 ### RR-WPN-FAMILY-001 — Mines and Perimeter Weapons are distinct rules families

@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **105/120** complete, **15** pending.
-- Current authored outgoing relations: **284**.
+- Supporting semantic identities: **107/122** complete, **15** pending.
+- Current authored outgoing relations: **286**.
 - Explicitly tracked future/deferred interactions: **115**.
 
 ## 0.7.0 primary catalog review
@@ -937,7 +937,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
 
-#### Weapon (7/7)
+#### Weapon (9/9)
 
 - [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
@@ -947,6 +947,11 @@ review. `declaration-category` projection records are excluded.
   - `modifies-use-of` → Reset (`skill:reset`)
   - `causes-state` → Stunned State (`state:stunned`)
   - `causes-state` → Immobilized-B State (`state:immobilized-b`)
+- [x] **Kobra Pistol** (`weapon:kobra-pistol`) — reviewed: N5.3 Mixed Weapons rules distinguish BS and CC modes and their ammunition; shared mode description does not assign mode-specific Traits or Saving Rolls.
+  - outgoing: none
+- [x] **Kobra Pistol (CC Mode)** (`weapon:kobra-pistol-cc`) — reviewed: Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values.
+  - `variant-of` → Kobra Pistol (`weapon:kobra-pistol`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
 - [x] **Mines** (`weapon:mines`) — reviewed: Shared Mine mechanics: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary.
   - `uses-effects-of` → Deployable (`trait:deployable`)
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
