@@ -93,6 +93,15 @@ unimplemented until its corresponding behavior exists.
     Record archive/content hashes as appropriate, publication dates separately from acquisition
     dates, and the generated database/publication identities. A later source refresh reopens the
     affected coverage review; normal checks must not acquire newer inputs implicitly.
+    Include relevant dated official Corvus Belli rules-update posts as supplementary
+    release-change evidence (not replacements for the versioned primary sources).
+  - [x] Establish an initial N5 official update-post index and cross-source research
+    procedure in `docs/n5-source-history.md`; identify the community Army backup
+    as unofficial, versioned historical evidence rather than a new authority.
+  - [ ] Reconcile each N5 update-post changelog item with its applicable versioned
+    Army snapshot, rules/FAQ PDF, exact Wiki revision, and available historical N5
+    versions. Record unmatched announcement claims and unknown release/snapshot
+    boundaries as open review work, not confirmed database defects.
   - [ ] Inventory player-relevant information by source section/category, including the four core
     scenarios. For each category record its canonical identity/model, maintained input, generated
     storage, API/read path, ordinary browser entry point, rules context, and outstanding gap or
@@ -121,6 +130,11 @@ unimplemented until its corresponding behavior exists.
     - [ ] Verify Kobra Pistol (CC Mode) against the published source/version and
       determine whether the 1-versus-2 Saving Rolls difference is an Army
       metadata error, a chart error, or a documented source-specific exception.
+      Corvus Belli's 2026-09-01 N5.3 update announcement
+      (<https://infinityuniverse.com/en/news/infinity-rules-update-5-3>) explicitly
+      changes the pistol to Shock (BS Mode) and DA (CC Mode); use that dated
+      clarification when checking how ammunition affects effective Saving Rolls,
+      without treating the announcement as an explanation of the count difference.
     - [x] Resolve the six Plasma multiline Saving Roll cells and the two
       Disco Baller/Discover chart-row ambiguities. All 171 Burst-anchored rows
       now align uniquely: 170 match across the five core fields and the Kobra

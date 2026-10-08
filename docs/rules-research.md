@@ -39,6 +39,34 @@ Record:
 Keep unresolved interpretations explicitly unresolved. Do not use this file to
 turn an inference into a source-native rule.
 
+## Official publication-change notices
+
+See [N5 source and update history](n5-source-history.md) for the indexed official
+change posts and the reproducible cross-source review policy. Individual findings
+here must still cite the exact relevant publication and scope.
+
+### RR-SRC-N53-001 — N5.3 release changelog helps adjudicate source differences
+
+**Scope:** N5.3 core rules and Army changes; ITS Season 18 changes are separate.
+
+Corvus Belli's dated N5.3 announcement records a rules change to **Kobra Pistol**:
+Shock in BS Mode and DA in CC Mode. It also lists added weapons (Breaker Sniper
+Rifle, AP Red Fury, AP Thunderbolt), the Thunderbolt category, and a Trench-Hammer
+Disposable correction. Its Army changelog is a **separate** list, including a
+Bangbomb classification correction.
+
+This is useful as a change log and corroborating source for the ongoing Weapon
+Chart/Army comparison, not as a replacement for the printed N5.3 Weapon Chart or
+Army metadata. In particular, the announcement confirms the intended Kobra Pistol
+**ammunition by mode** but does **not** state why its printed CC-mode Saving Rolls
+cell differs from the Army value. Keep that mismatch open until the relevant rule
+and profile semantics are reconciled explicitly.
+
+Source: Corvus Belli, *ITS Season 18 + N5.3 Rules Update*, 2026-09-01,
+<https://infinityuniverse.com/en/news/infinity-rules-update-5-3>,
+sections "ARMY UPDATE CHANGELOG" and "N5.3 RULES CHANGELOG".
+The page is a URL-backed publication notice, not a locally hashed source snapshot.
+
 ## Basic Rules / Broader research
 
 ### RR-BR-BASE-001 — Game Modes define finite recommended game presets

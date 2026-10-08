@@ -103,6 +103,22 @@ printed pages. Archived wiki sources bind to an
 exact timestamped ZIP/hash and citations use archive members; exact pinned wiki
 revisions remain URL-backed sources.
 
+Official Corvus Belli news posts can provide **dated, supplementary publication-change
+and clarification evidence**, separate from the underlying rules, Army, FAQ, and ITS
+sources. The relevant N5.3 release announcement is
+<https://infinityuniverse.com/en/news/infinity-rules-update-5-3>, published **2026-09-01**.
+It contains distinct Army and N5.3 rules changelogs, plus ITS Season 18 context.
+Record the post URL/date and the applicable changelog scope when citing a change;
+verify the actual rule or profile against the corresponding versioned primary source
+before changing maintained gameplay data. This web URL is a reference, not a
+byte-pinned local artifact or a new implicit build/network dependency.
+
+Use [N5 source and update history](../docs/n5-source-history.md) for the indexed
+official notices, the historical Army backup source, and the mandatory cross-source
+research procedure. Current Army/PDF/FAQ/Wiki evidence and historical sources must
+be versioned separately; neither a blog post nor a third-party Army backup
+establishes current gameplay truth by itself.
+
 ## Snapshot provenance contract
 
 Army, wiki, and symbol downloaders write version-3 `InfinityDB snapshot

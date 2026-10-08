@@ -211,6 +211,13 @@ When deriving structured facts from these materials:
   when they are not members of that archive;
 - keep core rules, FAQ/errata, ITS season material, and historical sources
   distinct;
+- treat dated official Corvus Belli news/rules-update posts as supplementary
+  publication-change evidence, with their URL/date and scope recorded; do not
+  substitute a blog changelog for the versioned rules PDF, FAQ, or Army data;
+- for N5 questions, cross-check the pinned Army, rules/FAQ/annex, exact Wiki
+  revision, relevant official update posts, and available historical N5 versions;
+  use `docs/n5-source-history.md` for the source timeline and reconciliation policy;
+  keep official current authority distinct from unofficial historical backups;
 - do not bulk-extract or serve copyrighted text or artwork.
 
 Official Infinity Army data and current official publications remain
