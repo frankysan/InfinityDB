@@ -80,6 +80,10 @@ unimplemented until its corresponding behavior exists.
     with `tools/report_reference_baseline.py`. Its initial report is deliberately unverified:
     local research inputs, source-by-section coverage, relationships, and ordinary
     browser paths remain to be checked before any completeness claim.
+  - [x] Preserve each URL-pinned Wiki `oldid` as a distinct review identity in that
+    baseline, separate from the shared local Wiki snapshot; report local source-file
+    hash comparisons only when exact bytes are available and distinguish missing and
+    unpinned artifacts from verified ones.
   - [ ] Pin the intended Army snapshot, rules/FAQ/annex PDF versions, and supported wiki evidence.
     Record archive/content hashes as appropriate, publication dates separately from acquisition
     dates, and the generated database/publication identities. A later source refresh reopens the

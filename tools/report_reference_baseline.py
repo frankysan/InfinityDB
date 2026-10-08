@@ -15,10 +15,11 @@ from collections.abc import Sequence
 from contextlib import closing
 from pathlib import Path, PureWindowsPath
 from typing import Any
+from urllib.parse import parse_qs, urlsplit
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REPORT_FORMAT = "InfinityDB 1.0 reference evidence baseline"
-REPORT_VERSION = 1
+REPORT_VERSION = 2
 
 
 class ReferenceBaselineError(ValueError):
@@ -58,11 +59,52 @@ def _source_location(root: Path, relative: str | None) -> str:
     candidate = Path(relative)
     if (
         candidate.is_absolute()
-        or PureWindowsPath(relative).is_absolute()
+        or bool(PureWindowsPath(relative).drive)
         or ".." in candidate.parts
+        or ".." in PureWindowsPath(relative).parts
+        or not (root / candidate).resolve().is_relative_to(root.resolve())
     ):
         return "unsafe-declared-path"
     return "available" if (root / candidate).is_file() else "missing-local-artifact"
+
+
+def _revision_oldid(url: str | None) -> str | None:
+    """Identify an exact Wiki oldid pin without accessing the network."""
+    if not url:
+        return None
+    values = parse_qs(urlsplit(url).query).get("oldid", [])
+    if len(values) == 1 and values[0].isascii() and values[0].isdigit():
+        return values[0]
+    return None
+
+
+def _artifact_evidence(
+    root: Path, local_path: str | None, url: str | None, hashes: set[str]
+) -> dict[str, Any]:
+    """Compare exact local bytes when possible; never equate an oldid URL with a file."""
+    location = _source_location(root, local_path)
+    actual_sha: str | None = None
+    matches: bool | None = None
+    oldid = _revision_oldid(url) if local_path is None else None
+    if location == "available" and local_path is not None:
+        actual_sha = _sha256(root / local_path)
+        if len(hashes) > 1:
+            status = "conflicting-source-hashes"
+        elif hashes:
+            matches = actual_sha in hashes
+            status = "hash-matched" if matches else "hash-mismatch-needs-review"
+        else:
+            status = "local-file-no-hash-pin"
+    elif location == "url-backed/no-local-artifact":
+        status = "revision-url-pinned" if oldid else "url-without-revision-pin"
+    else:
+        status = location
+    return {
+        "verificationStatus": status,
+        "artifactSha256": actual_sha,
+        "declaredHashMatches": matches,
+        "revisionOldid": oldid,
+    }
 
 
 def _row(
@@ -122,7 +164,9 @@ def build_baseline(
                 raise ReferenceBaselineError("Army archive SHA-256 differs from published metadata")
             archive_status = "hash-verified"
 
-        source_groups: dict[tuple[str, str | None], dict[str, Any]] = {}
+        # Each URL revision is a separate source identity. Only a genuinely shared
+        # local archive should be aggregated across curated collections.
+        source_groups: dict[tuple[str, str, str], dict[str, Any]] = {}
         try:
             source_records = rules.execute(
                 "SELECT collection_id, id, kind, title, version, published_date, "
@@ -136,37 +180,63 @@ def build_baseline(
         except sqlite3.DatabaseError as exc:
             raise ReferenceBaselineError(f"Rules source catalog is unreadable: {exc}") from exc
         for record in source_records:
-            group_key = (record["kind"], record["local_path"])
+            locator_type = "file" if record["local_path"] else "url"
+            locator = record["local_path"] or record["url"] or record["id"]
+            group_key = (record["kind"], locator_type, locator)
             if group_key not in source_groups:
                 source_groups[group_key] = {
                     "kind": record["kind"],
                     "versions": set(),
                     "localPath": record["local_path"],
+                    "url": record["url"] if locator_type == "url" else None,
                     "localStatus": _source_location(root, record["local_path"]),
                     "sourceRows": 0,
                     "sourceIds": set(),
+                    "titles": set(),
                     "collections": set(),
+                    "publishedDates": set(),
+                    "retrievedDates": set(),
+                    "acquiredAt": set(),
                     "declaredSha256": set(),
                 }
             group = source_groups[group_key]
             group["sourceRows"] += 1
             group["versions"].add(record["version"])
             group["sourceIds"].add(record["id"])
+            group["titles"].add(record["title"])
             group["collections"].add(record["collection_id"])
+            for field, column in (
+                ("publishedDates", "published_date"),
+                ("retrievedDates", "retrieved_date"),
+                ("acquiredAt", "acquired_at"),
+            ):
+                if record[column]:
+                    group[field].add(record[column])
             if record["sha256"]:
                 group["declaredSha256"].add(record["sha256"])
 
         source_inventory = [dict(row) for row in source_records]
         sources = []
         for group in source_groups.values():
+            hashes = group["declaredSha256"]
             sources.append({
                 **{k: v for k, v in group.items() if k not in
-                   {"sourceIds", "collections", "declaredSha256", "versions"}},
+                   {"sourceIds", "titles", "collections", "declaredSha256", "versions",
+                    "publishedDates", "retrievedDates", "acquiredAt"}},
                 "uniqueSourceIds": len(group["sourceIds"]),
+                "titles": sorted(group["titles"]),
                 "versions": sorted(group["versions"]),
                 "collections": sorted(group["collections"]),
-                "declaredSha256": sorted(group["declaredSha256"]),
+                "publishedDates": sorted(group["publishedDates"]),
+                "retrievedDates": sorted(group["retrievedDates"]),
+                "acquiredAt": sorted(group["acquiredAt"]),
+                "declaredSha256": sorted(hashes),
+                **_artifact_evidence(root, group["localPath"], group["url"], hashes),
             })
+        verification_counts: dict[str, int] = {}
+        for source in sources:
+            status = source["verificationStatus"]
+            verification_counts[status] = verification_counts.get(status, 0) + 1
 
         evidence_rows: list[dict[str, Any]] = []
         army_families = (
@@ -233,6 +303,7 @@ def build_baseline(
             "metadata": rules_meta, "collections": collections,
         },
         "sourceGroups": sources,
+        "sourceVerificationCounts": dict(sorted(verification_counts.items())),
         "sourceInventory": source_inventory,
         "scenarioMembershipCount": scenario_count,
         "inventory": evidence_rows,
@@ -274,27 +345,45 @@ def render_markdown(report: dict[str, Any]) -> str:
             for item in report["rulesPublication"]["collections"]
         ) + ".",
         f"- Published scenario collection memberships: {report['scenarioMembershipCount']}.",
+        "- Source evidence statuses: " + ", ".join(
+            f"{count} {status}"
+            for status, count in report["sourceVerificationCounts"].items()
+        ) + ".",
         "",
         "## Source artifacts referenced by rules publication",
         "",
-        "| Kind | Version | Curated source rows | Local path | Availability |",
+        "| Kind | Version | Curated rows | Source identity | Evidence |",
         "| --- | --- | ---: | --- | --- |",
     ]
     for source in report["sourceGroups"]:
         versions = source["versions"]
         version_label = versions[0] if len(versions) == 1 else f"{len(versions)} versions"
+        if source["localPath"] is not None:
+            locator = f"`{source['localPath']}`"
+        else:
+            title = source["titles"][0]
+            locator = f"[{title}]({source['url']})" if source["url"] else title
+            if source["revisionOldid"]:
+                locator += f" (`oldid={source['revisionOldid']}`)"
+        escaped_locator = locator.replace("|", "\\|")
         lines.append(
             f"| {source['kind']} | {version_label} | {source['sourceRows']} | "
-            f"`{source['localPath'] or 'URL-backed entries'}` | "
-            f"{source['localStatus']} |"
+            f"{escaped_locator} | {source['verificationStatus']} |"
         )
     lines.extend([
+        "",
+        "The complete source inventory JSON retains individual collection/source IDs, "
+        "publication and acquisition dates, declared SHA-256 values, and URLs. "
+        "The report does not fetch URLs or reinterpret acquisition dates as publication dates.",
         "",
         "The current source table is not an exhaustive publication inventory: "
         "FAQ/errata and annex scope must be reconciled separately.",
         "",
-        "A curated source SHA may identify a logical archive/snapshot, not the exact "
-        "file bytes. Availability alone does not verify any source's identity.",
+        "A local hash match checks exact file bytes against the declared SHA-256, "
+        "but does not verify the source contents. A mismatch may mean a logical "
+        "rather than byte-level hash pin and requires review. URL `oldid=` pins "
+        "identify revisions, not offline content verification. A local PDF without "
+        "a declared SHA-256 cannot be hash-verified.",
         "",
         "## Published category inventory (verification pending)",
         "",

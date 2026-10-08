@@ -349,8 +349,13 @@ python tools/report_reference_baseline.py --json-output reports/1.0-baseline.jso
 
 Optionally pass `--army-archive <path>` to verify the exact Army ZIP SHA-256 against
 the one embedded in `infinity.db`. Missing ignored PDFs/wiki snapshots are explicitly
-reported rather than downloaded or assumed present. Curated wiki hashes may describe
-logical snapshots, so file presence alone does not authenticate their content.
+reported rather than downloaded or assumed present. The report keeps each URL-pinned
+Wiki `oldid=` revision separate from the shared local Wiki archive. If a local source
+file exists, its actual SHA-256 is included and compared to the curated hash when
+one exists. A mismatch must be reviewed because some curated hashes can describe
+logical snapshots; neither file presence nor a URL revision pin authenticates source
+content. A PDF with no declared content hash remains unverified even when available.
+Each source row retains publication and acquisition dates separately.
 
 **This report is not a completeness check.** Citation presence is not source
 correctness, and published row counts do not prove semantic, API, or browser
