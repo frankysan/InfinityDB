@@ -227,6 +227,9 @@ unimplemented until its corresponding behavior exists.
       Shock, Viral, and Cybermines against the N5 Weapon Chart, ammunition and
       State rules, and Army profiles. Shared placement/trigger rules must not be
       mistaken for identical weapon effects or complete per-variant semantics.
+    - [x] Publish individually reviewed Mine effect/reference links from the
+      curated family definition to the Weapon profile, including ammunition
+      and applicable State/Skill links; do not infer effects for unreviewed weapons.
     - [ ] Manually verify Mines/Cybermine/Chest Mine browser detail cards, rule
       links, citation rendering, and both Chest Mine modes; then reconcile any
       resulting navigation/presentation defects. Source-backed API enrichment

@@ -160,6 +160,9 @@ because the source does not attach them to a profile group.
   a target without evidence. Reviewed ordinary-text collisions are fingerprinted to exact passages,
   so wording changes reopen review.
 - Curated relations are authored once in their semantic direction; reverse navigation is derived.
+- Reviewed Weapon-family `facts.variantRuleReferences` link *specific Army Weapon slugs* to
+  existing reference rules without inheriting the same effect across every variant.
+  The source Weapon Chart profile remains authoritative for ammunition and Saving Rolls.
 - `docs/rules-interaction-checklist.md` is generated from the current graph and review ledger. Never
   edit it manually.
 

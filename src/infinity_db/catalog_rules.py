@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
+from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 
 DECLARATION_KIND = "declaration-category"
@@ -48,6 +49,7 @@ class CatalogRules:
         self._source_variant_indexes: dict[
             str, dict[ArmyLinkRef, dict[str, Any]]
         ] = {}
+        self._rule_reference_cache: dict[str, dict[str, Any]] = {}
 
     @staticmethod
     def _application_refs(item: dict[str, Any]) -> tuple[ArmyLinkRef, ...]:
@@ -201,6 +203,41 @@ class CatalogRules:
 
         if catalog != "weapons":
             return result
+
+        # Published references are scoped by the canonical Army Weapon slug:
+        # shared placement rules do not imply identical variant effects.
+        slug = result.get("slug")
+        if isinstance(slug, str):
+            references: dict[str, dict[str, Any]] = {}
+            for record in records:
+                facts = record.get("facts") or {}
+                for record_id in facts.get("variantRuleReferences", {}).get(slug, []):
+                    if record_id in references:
+                        continue
+                    reference = self._rule_reference_cache.get(record_id)
+                    if reference is None:
+                        target = rules_database.composed_record(
+                            record_id, include_army_links=True
+                        )
+                        if target is None:
+                            raise ValueError(f"Unknown variant rule reference {record_id!r}")
+                        public_reference = rule_record_public_reference(None, target)
+                        if public_reference is None:
+                            raise ValueError(f"Unroutable variant rule reference {record_id!r}")
+                        reference = {
+                            "id": record_id,
+                            "name": target["name"],
+                            "kind": target["kind"],
+                            "public_reference": public_reference,
+                        }
+                        self._rule_reference_cache[record_id] = reference
+                    references[record_id] = reference
+            if references:
+                for profile in result.get("profiles", []):
+                    profile["rule_references"] = deepcopy(list(references.values()))
+                for variant in result.get("weapon_variants", []):
+                    for profile in variant.get("profiles", []):
+                        profile["rule_references"] = deepcopy(list(references.values()))
 
         profiles = [
             profile

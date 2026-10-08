@@ -1852,3 +1852,26 @@ def test_scenario_collection_membership_must_cover_local_definitions(tmp_path: P
 
     with pytest.raises(ValueError, match="missing definitions"):
         load_curated_document(path)
+
+
+@pytest.mark.parametrize(
+    ("variant_refs", "message"),
+    [
+        ({"unlinked-weapon": ["ammunition:ap"]}, "requires linked weapon slugs"),
+        ({"ap-mine": ["ammunition:ap", "ammunition:ap"]}, "duplicate variant"),
+        ({"ap-mine": ["invalid"]}, "invalid variant rule target"),
+    ],
+)
+def test_weapon_variant_rule_references_validate_membership_and_shape(
+    tmp_path: Path, variant_refs: dict, message: str,
+) -> None:
+    document = json.loads(
+        (Path(__file__).resolve().parents[1] / "data/curated/rules/n5-core-v5.3.json")
+        .read_text(encoding="utf-8")
+    )
+    record = next(record for record in document["records"] if record["id"] == "weapon:mines")
+    record["facts"]["variantRuleReferences"] = variant_refs
+    path = tmp_path / "invalid.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        load_curated_document(path)

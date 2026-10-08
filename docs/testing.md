@@ -163,6 +163,10 @@ parallel execution unless they are explicitly serialized by their own fixture/co
 Hosted Windows CI intentionally uses serial pytest because automatic xdist scheduling was unstable
 for that runner class; this does not change the normal local default. See `docs/ci.md`.
 
+Pytest uses its platform-default, per-session temporary directory rather than a fixed
+repository-local `.pytest-tmp` directory. This avoids reuse or cleanup collisions
+when local test runs overlap; use `--basetemp=...` explicitly only when needed.
+
 ## Graphical asset modes
 
 Asset-dependent coverage is controlled explicitly:

@@ -3571,7 +3571,17 @@
             "kind": "weapon",
             "name": "Mines",
             "summary": "Mine types governed by these shared rules use [[skill:place-deployable]] to put down a [[skill:camouflage|CAMO]] (-3) Marker, which becomes a MINE (-3) Token when Discovered; both receive [[skill:mimetism]] (-3). Mines have 360º LoF. Their Trigger Area is the Small Teardrop Template projected from the base, excluding Total Cover. When an enemy Model or Marker declares or executes a Skill or [[trait:aro|ARO]] within it, a Mine must trigger if its Small Teardrop Template reaches that enemy without affecting any ally, including [[state:unconscious|Unconscious]] allies. If the target is outside the Trigger Area, the Mine remains hidden and does not detonate. Each named Mine has its own Weapon Chart ammunition, PS, Saving Rolls, and Traits; a triggered Mine applies its own profile and is then removed. Mines that can be Dodged impose -3 PH on [[skill:dodge]] attempts. A Mine cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid non-camouflaged enemy is also inside it or a [[trait:intuitive-attack|Intuitive Attack]] was declared. [[weapon:cybermine|Cybermines]] replace the [[skill:dodge|Dodge]] response with [[skill:reset]]; [[weapon:chest-mine|Chest Mines]] do not use these shared Mine rules.",
-            "facts": {},
+            "facts": {
+                "variantRuleReferences": {
+                    "ap-mine": ["ammunition:ap"],
+                    "e-m-mine": ["ammunition:em", "state:isolated", "state:immobilized-b"],
+                    "monofilament-mine": ["ammunition:normal", "trait:arm-0", "state:dead"],
+                    "para-mine": ["ammunition:para", "state:immobilized-a"],
+                    "shock-mine": ["ammunition:shock"],
+                    "viral-mine": ["ammunition:normal", "trait:bioweapon"],
+                    "cybermine": ["state:stunned", "state:immobilized-b", "skill:reset"]
+                }
+            },
             "composition": {
                 "role": "definition"
             },

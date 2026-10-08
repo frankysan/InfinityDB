@@ -70,12 +70,20 @@ function weaponSavingDisplay(profile) {
     .join(" × ");
 }
 
+function ruleReferenceHref(reference) {
+  if (reference?.href) return reference.href;
+  if (reference?.catalog && reference?.id) {
+    return `/${reference.catalog}/${encodeURIComponent(reference.id)}`;
+  }
+  return null;
+}
+
 function weaponTraitLinks(traits) {
   const fragment = document.createDocumentFragment();
   for (const [index, trait] of traits.entries()) {
     if (index) fragment.append(" · ");
     const label = trait.label || trait.name || "";
-    if (trait.slug) {
+    if (trait.slug && !label.startsWith("State:")) {
       const link = document.createElement("a");
       link.href = `/traits/${encodeURIComponent(trait.slug)}`;
       link.textContent = label;
@@ -194,6 +202,11 @@ function weaponVariants(variants) {
       statTable.innerHTML = "<thead><tr><th class=\"table-column--descriptor\" scope=\"col\">Ammunition</th><th class=\"table-column--metric\" scope=\"col\">B</th><th class=\"table-column--metric\" scope=\"col\">PS</th><th class=\"table-column--metric\" scope=\"col\">Saving</th></tr></thead>";
       statTable.prepend(statCaption);
       const statRow = document.createElement("tr");
+      const ruleReferences = Array.isArray(profile.rule_references)
+        ? profile.rule_references : [];
+      const ammunitionRule = ruleReferences.find((reference) => (
+        reference.kind === "ammunition" && ruleReferenceHref(reference.public_reference)
+      ));
       const saving = weaponSavingDisplay(profile);
       for (const [statLabel, value, role] of [
         ["Ammunition", profile.ammunition, "descriptor"],
@@ -204,7 +217,14 @@ function weaponVariants(variants) {
         const cell = document.createElement("td");
         cell.className = `table-column--${role}`;
         cell.dataset.label = statLabel;
-        cell.textContent = text(value);
+        if (statLabel === "Ammunition" && ammunitionRule) {
+          const link = document.createElement("a");
+          link.href = ruleReferenceHref(ammunitionRule.public_reference);
+          link.textContent = text(value);
+          cell.append(link);
+        } else {
+          cell.textContent = text(value);
+        }
         statRow.append(cell);
       }
       const statBody = document.createElement("tbody");
@@ -272,6 +292,29 @@ function weaponVariants(variants) {
         traits.append(weaponTraitLinks(traitReferences));
         traitsRow.append(traitsHeading, traits);
         card.append(traitsRow);
+      }
+      const sourceTraitSlugs = new Set(traitReferences.map((trait) => trait.slug));
+      const relatedRules = ruleReferences.filter((reference) => (
+        reference.kind !== "ammunition"
+        && !(reference.kind === "trait" && sourceTraitSlugs.has(reference.id.slice(6)))
+      ));
+      if (relatedRules.length) {
+        const row = document.createElement("div");
+        row.className = "weapon-data-row";
+        const heading = document.createElement("h5");
+        heading.className = "weapon-data-heading";
+        heading.textContent = "Related rules";
+        const links = document.createElement("p");
+        links.className = "weapon-data-value";
+        for (const [index, reference] of relatedRules.entries()) {
+          if (index) links.append(" · ");
+          const link = document.createElement("a");
+          link.href = ruleReferenceHref(reference.public_reference);
+          link.textContent = reference.name;
+          links.append(link);
+        }
+        row.append(heading, links);
+        card.append(row);
       }
       variantSection.append(card);
     }

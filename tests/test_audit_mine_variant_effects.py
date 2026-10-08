@@ -108,3 +108,38 @@ def test_non_lethal_does_not_erase_mine_saving_rolls(weaponry_app: Callable) -> 
         ).fetchone()[0]
     assert "not by itself remove Saving Rolls" in summary
     assert "or requires Saving Rolls" not in summary
+
+
+@pytest.mark.parametrize("entry", _review()["variants"], ids=lambda entry: entry["slug"])
+def test_mine_effect_rules_are_routable_from_the_weapon_profile(
+    weaponry_app: Callable, entry: dict[str, Any]
+) -> None:
+    payload = _weapon_detail(weaponry_app, entry["slug"])
+    profiles = payload["weapon_variants"][0]["profiles"]
+    assert len(profiles) == 1
+    profile = profiles[0]
+    refs = profile["rule_references"]
+    ids = [reference["id"] for reference in refs]
+    assert len(ids) == len(set(ids))
+
+    # Source-native Traits and the Cybermine card already provide their own links.
+    expected = set(entry["effectRuleIds"]) - {"trait:non-lethal", "weapon:cybermine"}
+    assert set(ids) == expected
+    assert payload["profiles"][0]["rule_references"] == refs
+    for reference in refs:
+        public = reference["public_reference"]
+        assert public.get("href") or (public.get("catalog") and public.get("id"))
+        assert reference["kind"] in {"ammunition", "trait", "state", "skill"}
+
+    if entry["profile"]["ammunition"] == 0:
+        assert all(reference["kind"] != "ammunition" for reference in refs)
+    else:
+        assert sum(reference["kind"] == "ammunition" for reference in refs) == 1
+
+
+def test_chest_mine_does_not_inherit_variant_mine_references(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "chest-mine")
+    for profile in payload["weapon_variants"][0]["profiles"]:
+        assert "rule_references" not in profile

@@ -12,7 +12,8 @@ are not retroactively relabeled.
 ### Player summary
 
 - Mine and Cybermine Weapon pages now explain triggering, camouflage, allied safety,
-  Reset, and special effects; Chest Mine pages explain their separate BS/CC modes.
+  Reset, and special effects, with links to each Mine's own ammunition and relevant State rules;
+  Chest Mine pages explain their separate BS/CC modes.
 - The Boost reference now explains blocked paths, exempt Markers, Dodge, and why Deployable
   weapons cannot trigger one another.
 - You can now browse the four current core scenarios, starting at the common 300-point game size by

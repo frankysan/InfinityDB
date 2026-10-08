@@ -857,6 +857,41 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 _validate_weapon_special_profile(
                     facts["specialProfile"], f"{context}.facts.specialProfile"
                 )
+            if isinstance(facts, dict) and "variantRuleReferences" in facts:
+                references = facts["variantRuleReferences"]
+                army_refs = {
+                    link.get("id") for link in record.get("armyLinks", [])
+                    if isinstance(link, dict) and link.get("entity") == "weapon"
+                }
+                if (
+                    composition_role != "definition"
+                    or not isinstance(references, dict)
+                    or not references
+                    or any(slug not in army_refs for slug in references)
+                ):
+                    raise ValueError(
+                        f"{context}.facts.variantRuleReferences: requires linked weapon "
+                        "slugs on a definition"
+                    )
+                for slug, targets in references.items():
+                    if not isinstance(slug, str) or not isinstance(targets, list) or not targets:
+                        raise ValueError(f"{context}: invalid variant rule references for {slug!r}")
+                    for target in targets:
+                        if not isinstance(target, str) or ":" not in target:
+                            raise ValueError(f"{context}: invalid variant rule target {target!r}")
+                        kind = target.split(":", 1)[0]
+                        if kind not in {"ammunition", "trait", "state", "skill", "weapon"}:
+                            raise ValueError(
+                                f"{context}: unsupported variant rule target {target!r}"
+                            )
+                        validate_typed_domain_id(
+                            target, expected_domain=kind,
+                            context=f"{context}.facts.variantRuleReferences[{slug!r}]",
+                        )
+                    if len(targets) != len(set(targets)):
+                        raise ValueError(
+                            f"{context}: duplicate variant rule reference for {slug!r}"
+                        )
         if record["kind"] == "scenario" and composition_role == "definition":
             try:
                 parse_scenario_definition_record(record, definitions=document)

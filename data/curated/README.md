@@ -496,6 +496,13 @@ definition, and `variantSemantics.sourceVariant`. A numeric Level uses
 `{"kind": "named", "label": "..."}`; and a reviewed numeric Attribute replacement uses
 `{"kind": "attribute-replacement", "attribute": "BS", "value": 12}`. These apply only
 to that exact source variant.
+A Weapon family definition can additionally declare `facts.variantRuleReferences`,
+a map of its linked canonical Army Weapon slugs to ordered, existing typed rules
+IDs. These are reviewed **navigation associations**, not inherited statistics or
+an executable rules engine. Only associated variants receive those links in
+their profile API; links to Ammunition, Traits, Skills and States use the normal
+published reference routes. Other source profiles and facts remain unchanged.
+
 Supplements inherit Army routing from their definition and therefore do not declare
 their own `armyLinks`.
 

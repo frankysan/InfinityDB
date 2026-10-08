@@ -6,6 +6,7 @@ import json
 import re
 from datetime import datetime
 from pathlib import Path, PurePosixPath
+from time import sleep
 from typing import Any
 
 from infinity_db.snapshot_provenance import portable_project_path, sha256_file
@@ -402,7 +403,16 @@ def write_symbol_manifest(document: dict[str, Any], path: Path) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(payload, encoding="utf-8", newline="\n")
-    temporary.replace(path)
+    # On Windows, an external scanner can briefly deny replacement of the old
+    # manifest. Preserve atomic publication and retry only sharing/access errors.
+    for attempt in range(3):
+        try:
+            temporary.replace(path)
+            break
+        except OSError as exc:
+            if getattr(exc, "winerror", None) not in {5, 32} or attempt == 2:
+                raise
+            sleep(0.05 * (attempt + 1))
     return path
 
 

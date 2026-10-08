@@ -306,6 +306,13 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
                         f"Current rules relation {record_id!r} -> {target_id!r} in {path} "
                         "does not resolve to a current semantic record"
                     )
+            for targets in (record.get("facts") or {}).get("variantRuleReferences", {}).values():
+                for target_id in targets:
+                    if target_id not in current_ids:
+                        raise ValueError(
+                            f"Current variant rule reference {record_id!r} -> "
+                            f"{target_id!r} in {path} does not resolve"
+                        )
 
     for path, document in documents:
         if document["collection"]["status"] != "current":
