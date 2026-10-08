@@ -59,9 +59,9 @@ release/audit narrative belongs in the changelog and Git history.
   Stable scenario-set
   identity/revision and source publication revision are separate runtime concepts. Current
   `ScenarioCatalog` detail reads require an explicit supported Army Points value; do not invent a
-  default configuration in backend composition. The browser follows the same rule: `/scenarios/<slug>`
-  must require an explicit user selection, store that selection through the common versioned `s=`
-  share-state codec, and render maps through the canonical SVG endpoint backed by the selected
+  default configuration in backend composition. The browser defaults a state-less scenario detail
+  visit to 300 Army Points, immediately writes that choice through the common versioned `s=` share-state
+  codec, and lets explicit valid shared/legacy state win. Maps render through the canonical SVG endpoint backed by the selected
   maintained geometry. Do not recreate scenario geometry or scoring semantics in JavaScript. See the
   scenario model in `docs/data-model.md`.
 

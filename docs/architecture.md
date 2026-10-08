@@ -140,9 +140,10 @@ consume the materialized `rules.db`, independently of curation files.
 [The data model](data-model.md#planned-scenario-model-10) owns the implemented contract. Dedicated
 scenario collection/publication indexes and central revision-aware selection live in `rules.db`. The
 JSON API exposes the current list plus exact Army-Points detail projections, and `/scenarios` plus
-`/scenarios/<slug>` provide the corresponding player-facing catalog/detail surface. Army Points is
-always selected explicitly; browser state uses the common versioned share-state token and the map is
-rendered from the same maintained geometry through the SVG API. Scenarios participate in primary
+`/scenarios/<slug>` provide the corresponding player-facing catalog/detail surface. The backend
+remains configuration-explicit; in the browser an absent selection defaults to 300 Army Points and is
+immediately written through the common versioned share-state token, while explicit valid shared state
+wins. The map is rendered from the same maintained geometry through the SVG API. Scenarios participate in primary
 navigation and the landing page, while global search and Glossary participation remain deliberately
 disabled because the bounded core set is already directly discoverable.
 

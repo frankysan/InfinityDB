@@ -11,8 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- You can now browse the four current core scenarios, choose the exact Army Points value, and see
-  setup, objectives, scenario rules, source notes, and a generated deployment map together.
+- You can now browse the four current core scenarios, starting at the common 300-point game size by
+  default, and see setup, objectives, scenario rules, source notes, and a generated deployment map together.
 - Supplies now consistently shows 8 inches of clear space between each outer Supply Box marker edge
   and the table edge at every game size; the 12-inch mark in the large-table source illustration is a
   guide ruler, not a box offset.
@@ -23,12 +23,12 @@ are not retroactively relabeled.
 ### Added
 
 - **Data processing + Web backend + Web frontend:** Publish the bounded core **Scenarios** domain for
-  Annihilation, Domination, Supplies, and Firefight. Scenario detail requires an explicit supported
-  Army Points selection, keeps point-dependent scoring/source issues scoped correctly, links existing
-  rules references, and renders deterministic SVG maps from the same maintained geometry used by the
-  scenario data. Scenarios are discoverable from primary navigation and the landing page without
-  joining global search or the Glossary. Browser configuration uses the shared versioned share-state
-  contract rather than a scenario-specific URL format.
+  Annihilation, Domination, Supplies, and Firefight. Scenario detail defaults to 300 Army Points when
+  no valid shared selection exists, keeps point-dependent scoring/source issues scoped correctly, links
+  existing rules references in compact scenario-context cards, and renders deterministic SVG maps from
+  the same maintained geometry used by the scenario data. Scenarios are discoverable from primary
+  navigation and the landing page without joining global search or the Glossary. Browser configuration
+  uses the shared versioned share-state contract rather than a scenario-specific URL format.
 
 ### Fixed
 

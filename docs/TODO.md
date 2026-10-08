@@ -331,15 +331,15 @@ unimplemented until its corresponding behavior exists.
       core-scenario SVG renderer. The browser map endpoint consumes the selected maintained scenario
       geometry rather than a second map definition. The interactive map editor and ITS-only rendering
       extensions remain post-1.0.
-    - [ ] Default the browser Army Points selector to **300** when opening a scenario without an
-      explicit valid share-state selection. Explicit shared/legacy URL state must win, and the chosen
-      default should be written through the common versioned `s=` state; keep the backend API itself
-      configuration-explicit.
-    - [ ] Remove the redundant **“Rules for …”** scope line from Rule and Skill text cards when they
-      are embedded on a scenario page; the surrounding scenario already supplies that context.
-    - [ ] Match embedded scenario Rule/Skill card margins, padding, and vertical spacing to the normal
-      compact text-card rhythm used elsewhere instead of the current airy reference-page spacing.
-    - [ ] In the **Specialist Troops** card, present **Qualifying Skills** before **Restrictions**.
+    - [x] Default the browser Army Points selector to **300** when opening a scenario without an
+      explicit valid share-state selection. Explicit shared/legacy URL state wins, the default is
+      written through the common versioned `s=` state, and the backend API remains configuration-explicit.
+    - [x] Remove the redundant scenario applicability/scope line from Rule and Skill text cards when
+      they are embedded on a scenario page; citations remain visible and the surrounding scenario
+      supplies the missing context.
+    - [x] Match embedded scenario Rule/Skill card margins, padding, and vertical spacing to the normal
+      compact rule-card rhythm through the shared card-stack styling contract.
+    - [x] In the **Specialist Troops** card, present **Qualifying Skills** before **Restrictions**.
   - **Completion:** all four scenarios can be found and understood in normal mode for every
     supported configuration. Review scoring and placement against citations, follow related-rule
     links, and check keyboard/touch, narrow widths, Light/Dark themes, loading/empty/error behavior,

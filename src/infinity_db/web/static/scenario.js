@@ -17,6 +17,7 @@ const elements = {
   choice: byId("scenario-choice"),
   content: byId("scenario-content"),
 };
+const DEFAULT_ARMY_POINTS = 300;
 const summaryController = new AbortController();
 let detailController = null;
 let summary = null;
@@ -206,12 +207,12 @@ function objectivesSection(item) {
 function rulesSection(item) {
   const cards = [];
   for (const inclusion of item.special_rules || []) {
-    if (inclusion.rule) cards.push(rulesReferenceArticle(inclusion.rule));
+    if (inclusion.rule) cards.push(rulesReferenceArticle(inclusion.rule, { includeApplicability: false }));
   }
-  for (const skill of item.skills || []) cards.push(rulesReferenceArticle(skill));
+  for (const skill of item.skills || []) cards.push(rulesReferenceArticle(skill, { includeApplicability: false }));
   if (!cards.length) return null;
   const group = document.createElement("div");
-  group.className = "scenario-rules";
+  group.className = "scenario-rules rules-card-stack";
   group.append(...cards);
   return section("Scenario rules and Skills", group);
 }
@@ -361,6 +362,12 @@ async function initialize() {
     if (requested != null) {
       elements.errorMessage.textContent = `${requested} Army Points is not supported by this scenario.`;
       show(elements.error);
+      return;
+    }
+    if (summary.supported_army_points.includes(DEFAULT_ARMY_POINTS)) {
+      elements.points.value = String(DEFAULT_ARMY_POINTS);
+      setSelectedArmyPoints(DEFAULT_ARMY_POINTS);
+      await loadDetail(DEFAULT_ARMY_POINTS);
       return;
     }
     show(elements.choice);

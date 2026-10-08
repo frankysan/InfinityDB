@@ -321,8 +321,14 @@ def test_scenario_browser_routes_are_published_with_shared_navigation(
     assert b'writeShareState(' in script
     assert b'"scenario",' in script
     assert b'army_points: String(value)' in script
+    assert b'const DEFAULT_ARMY_POINTS = 300;' in script
     assert b'const { points: requested, source } = selectedArmyPointsFromUrl();' in script
     assert b'if (source !== "token") setSelectedArmyPoints(requested);' in script
+    assert b'summary.supported_army_points.includes(DEFAULT_ARMY_POINTS)' in script
+    assert b'setSelectedArmyPoints(DEFAULT_ARMY_POINTS);' in script
+    assert b'rulesReferenceArticle(inclusion.rule, { includeApplicability: false })' in script
+    assert b'rulesReferenceArticle(skill, { includeApplicability: false })' in script
+    assert b'group.className = "scenario-rules rules-card-stack";' in script
     assert b'new URLSearchParams(window.location.search).get("army_points")' not in script
     assert b'/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?' in script
     assert b'rulesCitationNode(citation)' in script
@@ -330,9 +336,10 @@ def test_scenario_browser_routes_are_published_with_shared_navigation(
     assert b'badge.textContent = reviewed ? "reviewed" : "uncertain"' in script
     assert b'wrapper.classList.add("developer-only")' in script
 
-    status, _, stylesheet = request(scenario_app, "/static/page-overrides.css")
+    status, _, stylesheet = request(scenario_app, "/static/components.css")
     assert status == 200
-    assert b".scenario-rules > .detail-section {" in stylesheet
+    assert b".rules-card-stack>.detail-section {" in stylesheet
+    assert b".rules-card-stack h3," in stylesheet
     assert b"padding: 16px;" in stylesheet
 
 

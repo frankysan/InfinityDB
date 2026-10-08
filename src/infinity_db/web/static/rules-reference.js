@@ -163,10 +163,29 @@ function ruleBadgeRow(rule) {
   return badgeRow;
 }
 
+function appendRuleFactGroup(container, rule, key, label) {
+  const facts = rule.facts || {};
+  if (!Array.isArray(facts[key]) || !facts[key].length) return;
+  const group = document.createElement("div");
+  group.className = "detail-fact-group";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
+  heading.textContent = label;
+  const list = document.createElement("ul");
+  list.className = "detail-list";
+  for (const [index, fact] of facts[key].entries()) {
+    const item = document.createElement("li");
+    appendMaintainedText(item, rule.fact_tokens?.[key]?.[index], fact);
+    list.append(item);
+  }
+  group.append(heading, list);
+  container.append(group);
+}
+
 function appendRuleDetails(
   container,
   rule,
-  { includeBadges = true, beforeRelations = [] } = {},
+  { includeBadges = true, includeApplicability = true, beforeRelations = [] } = {},
 ) {
   const summary = document.createElement("p");
   summary.className = "detail-copy";
@@ -177,27 +196,8 @@ function appendRuleDetails(
   if (badgeRow) container.append(badgeRow);
 
   const facts = rule.facts || {};
-  for (const [key, label] of [
-    ["requirements", "Requirements"],
-    ["effects", "Effects"],
-    ["restrictions", "Restrictions"],
-  ]) {
-    if (!Array.isArray(facts[key]) || !facts[key].length) continue;
-    const group = document.createElement("div");
-    group.className = "detail-fact-group";
-    const heading = document.createElement("h4");
-    heading.className = "detail-fact-heading";
-    heading.textContent = label;
-    const list = document.createElement("ul");
-    list.className = "detail-list";
-    for (const [index, fact] of facts[key].entries()) {
-      const item = document.createElement("li");
-      appendMaintainedText(item, rule.fact_tokens?.[key]?.[index], fact);
-      list.append(item);
-    }
-    group.append(heading, list);
-    container.append(group);
-  }
+  appendRuleFactGroup(container, rule, "requirements", "Requirements");
+  appendRuleFactGroup(container, rule, "effects", "Effects");
 
   const specialists = facts.specialists?.anyOfSkills;
   if (Array.isArray(specialists) && specialists.length) {
@@ -217,10 +217,12 @@ function appendRuleDetails(
     container.append(group);
   }
 
+  appendRuleFactGroup(container, rule, "restrictions", "Restrictions");
+
   container.append(...beforeRelations);
   appendRuleRelations(container, rule);
 
-  const applicability = applicabilityText(rule);
+  const applicability = includeApplicability ? applicabilityText(rule) : "";
   if (applicability) {
     const context = document.createElement("p");
     context.className = "detail-source";
@@ -316,7 +318,12 @@ export function levelEffectsSection(rules) {
 
 export function rulesReferenceArticle(
   rule,
-  { leadingContent = [], headerContent = [], beforeRelations = [] } = {},
+  {
+    leadingContent = [],
+    headerContent = [],
+    beforeRelations = [],
+    includeApplicability = true,
+  } = {},
 ) {
   const article = document.createElement("article");
   article.className = "surface surface--subtle detail-section";
@@ -329,7 +336,11 @@ export function rulesReferenceArticle(
   if (badgeRow) header.append(badgeRow);
   header.append(...headerContent);
   article.append(header, ...leadingContent);
-  appendRuleDetails(article, rule, { includeBadges: false, beforeRelations });
+  appendRuleDetails(article, rule, {
+    includeBadges: false,
+    includeApplicability,
+    beforeRelations,
+  });
 
   for (const supplement of rule.supplements || []) {
     const supplemental = document.createElement("div");
@@ -337,7 +348,7 @@ export function rulesReferenceArticle(
     const supplementTitle = document.createElement("h4");
     supplementTitle.textContent = "Additional rules";
     supplemental.append(supplementTitle);
-    appendRuleDetails(supplemental, supplement);
+    appendRuleDetails(supplemental, supplement, { includeApplicability });
     article.append(supplemental);
   }
   return article;

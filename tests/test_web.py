@@ -5888,13 +5888,19 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"export function levelEffectsSection(rules)" in body
     assert b"fact_tokens?.levels?.[levelIndex]?.effects" in body
     assert b"level-effects-table" in body
-    assert b'["requirements", "Requirements"]' in body
-    assert b'["effects", "Effects"]' in body
-    assert b'["restrictions", "Restrictions"]' in body
-    assert body.index(b'["requirements", "Requirements"]') < body.index(b'["effects", "Effects"]')
+    assert b'appendRuleFactGroup(container, rule, "requirements", "Requirements")' in body
+    assert b'appendRuleFactGroup(container, rule, "effects", "Effects")' in body
+    assert b'appendRuleFactGroup(container, rule, "restrictions", "Restrictions")' in body
+    assert body.index(
+        b'appendRuleFactGroup(container, rule, "requirements", "Requirements")'
+    ) < body.index(b'appendRuleFactGroup(container, rule, "effects", "Effects")')
+    assert body.index(b'heading.textContent = "Qualifying Skills"') < body.index(
+        b'appendRuleFactGroup(container, rule, "restrictions", "Restrictions")'
+    )
     assert body.index(
         b"appendMaintainedText(summary, rule.summary_tokens, rule.summary)"
-    ) < body.index(b"const applicability = applicabilityText(rule)")
+    ) < body.index(b"const applicability = includeApplicability ? applicabilityText(rule)")
+    assert b"includeApplicability = true" in body
     assert b"detail-fact-heading" in body
     assert b'heading.textContent = "Related rules"' in body
     assert b"const presentation = relation.presentation;" in body

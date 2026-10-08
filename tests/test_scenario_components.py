@@ -222,7 +222,15 @@ def test_scoped_skills_and_specialist_arrays_use_the_existing_detail_renderer(
     assert "Domination" in rendered["skills"][0]
     assert "Pick Up Supply Boxes" in rendered["skills"][1] and "Supplies" in rendered["skills"][1]
     assert "Restrictions" in rendered["skills"][1]
+    assert "Domination" not in rendered["embeddedSkills"][0]
+    assert "Supplies" not in rendered["embeddedSkills"][1]
     assert "Qualifying Skills" in rendered["specialist"]
+    assert rendered["specialist"].index("Qualifying Skills") < rendered["specialist"].index(
+        "Restrictions"
+    )
+    assert "Domination" not in rendered["embeddedSpecialist"]
+    assert "Supplies" not in rendered["embeddedSpecialist"]
+    assert "Firefight" not in rendered["embeddedSpecialist"]
     assert "Doctor" in rendered["specialist"] and "Chain of Command" in rendered["specialist"]
     assert "Non Specialist" in rendered["specialist"]
     assert "[[" not in rendered["specialist"] and "[[" not in "".join(rendered["skills"])
