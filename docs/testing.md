@@ -83,6 +83,13 @@ JavaScript build dependency. The development dependency set already provides Nod
 Representative server-rendered pages separately verify that the shared pre-paint bootstrap and
 semantic theme stylesheet are present in the correct order.
 
+## Scenario detail soft-navigation regression
+
+The scenario API tests also execute `scenario.js` in a small Node.js lifecycle harness.
+It verifies that leaving a scenario detail page aborts its pending map/catalog requests,
+removes the distance-unit listener, and rejects late map responses. This is not a
+substitute for the manual scenario-page keyboard, touch, and theme review in `docs/TODO.md`.
+
 ## Silhouette manual browser acceptance
 
 The scale-preserving Silhouette renderer has automated structural coverage, but the release gate

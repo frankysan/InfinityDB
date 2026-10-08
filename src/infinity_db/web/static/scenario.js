@@ -19,6 +19,7 @@ const elements = {
   content: byId("scenario-content"),
 };
 const DEFAULT_ARMY_POINTS = 300;
+const pageController = new AbortController();
 const summaryController = new AbortController();
 let detailController = null;
 let summary = null;
@@ -161,13 +162,13 @@ function mapCard(item) {
   figure.append(heading, image);
   // <img> SVGs cannot inherit theme variables. Inline the same-origin generated
   // SVG, as we do for the themed logo, keeping the image as a network fallback.
-  fetch(image.src)
+  fetch(image.src, { signal: pageController.signal })
     .then((response) => {
       if (!response.ok) throw new Error(`Scenario map request failed (${response.status}).`);
       return response.text();
     })
     .then((markup) => {
-      if (!image.isConnected) return;
+      if (pageController.signal.aborted || !image.isConnected) return;
       const svg = new DOMParser().parseFromString(markup, "image/svg+xml").documentElement;
       if (svg.namespaceURI !== "http://www.w3.org/2000/svg" || svg.localName !== "svg") return;
       // External application CSS owns the inline map; its embedded <style>
@@ -443,8 +444,11 @@ async function initialize() {
 }
 
 elements.points.addEventListener("change", () => choose(elements.points.value));
-window.addEventListener("distanceunitchange", refreshScenarioDistances);
+window.addEventListener("distanceunitchange", refreshScenarioDistances, {
+  signal: pageController.signal,
+});
 document.addEventListener("infinity:beforenavigation", () => {
+  pageController.abort();
   summaryController.abort();
   detailController?.abort();
 }, { once: true });

@@ -338,6 +338,8 @@ unimplemented until its corresponding behavior exists.
     - [x] Match embedded scenario Rule/Skill card margins, padding, and vertical spacing to the normal
       compact rule-card rhythm through the shared card-stack styling contract.
     - [x] In the **Specialist Troops** card, present **Qualifying Skills** before **Restrictions**.
+    - [x] Clean up scenario map requests and unit-change listeners when leaving a detail page
+      through soft navigation; ignore late map responses so an old page cannot be updated.
   - **Completion:** all four scenarios can be found and understood in normal mode for every
     supported configuration. Review scoring and placement against citations, follow related-rule
     links, and check keyboard/touch, narrow widths, Light/Dark themes, loading/empty/error behavior,

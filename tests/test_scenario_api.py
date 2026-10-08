@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import importlib
 import json
+import shutil
 import sqlite3
+import subprocess
+import sys
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
@@ -334,7 +338,8 @@ def test_scenario_browser_routes_are_published_with_shared_navigation(
     assert b'new DOMParser().parseFromString(markup, "image/svg+xml")' in script
     assert b'svg.querySelector("style")?.remove();' in script
     assert b'document.importNode(svg, true)' in script
-    assert b'window.addEventListener("distanceunitchange", refreshScenarioDistances)' in script
+    assert b'window.addEventListener("distanceunitchange", refreshScenarioDistances, {' in script
+    assert b"signal: pageController.signal" in script
     assert b'[data-distance-inches]' in script
     assert b'[data-distance-size-inches]' in script
     assert b'url.searchParams.set("distance_unit", distanceUnit())' in script
@@ -348,6 +353,32 @@ def test_scenario_browser_routes_are_published_with_shared_navigation(
     assert b".rules-card-stack>.detail-section {" in stylesheet
     assert b".rules-card-stack h3," in stylesheet
     assert b"padding: 16px;" in stylesheet
+
+
+def test_scenario_browser_aborts_map_and_unit_listener_on_soft_navigation() -> None:
+    node = shutil.which("node")
+    if node is not None:
+        command = [node]
+    else:
+        try:
+            importlib.import_module("nodejs_wheel")
+        except ImportError:
+            pytest.skip("Node.js is unavailable for scenario browser lifecycle contract")
+        command = [sys.executable, "-m", "nodejs_wheel"]
+    root = Path(__file__).parents[1]
+    completed = subprocess.run(
+        [
+            *command,
+            str(root / "tests" / "scenario_lifecycle_harness.cjs"),
+            str(root / "src" / "infinity_db" / "web" / "static" / "scenario.js"),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    assert "scenario navigation lifecycle: passed" in completed.stdout
 
 
 @pytest.mark.parametrize(
