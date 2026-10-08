@@ -38,6 +38,7 @@
         "test_peripheral_relationships",
         "test_relation_constraints",
         "test_relation_group_dependencies",
+        "test_report_reference_baseline",
         "test_rule_relations",
         "test_rules_database",
         "test_scenario_catalog",

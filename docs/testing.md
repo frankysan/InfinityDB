@@ -337,6 +337,27 @@ failed migrations retain the previous committed format, non-empty unversioned st
 an older collector rejects a newer store without modifying retained history. The production rollback
 procedure separately preserves the named history volume across a release with no collector.
 
+## 1.0 source evidence baseline
+
+The offline `tools/report_reference_baseline.py` command inventories the published Army
+source snapshot identity, rules collections and source citations, and row counts by
+canonical family. Generate ignored review artifacts from the repository root:
+
+```powershell
+python tools/report_reference_baseline.py --json-output reports/1.0-baseline.json --markdown-output docs/audits/1.0-baseline.md
+```
+
+Optionally pass `--army-archive <path>` to verify the exact Army ZIP SHA-256 against
+the one embedded in `infinity.db`. Missing ignored PDFs/wiki snapshots are explicitly
+reported rather than downloaded or assumed present. Curated wiki hashes may describe
+logical snapshots, so file presence alone does not authenticate their content.
+
+**This report is not a completeness check.** Citation presence is not source
+correctness, and published row counts do not prove semantic, API, or browser
+coverage. Each inventory row starts with pending source/relationship/presentation
+review. Reconcile the report with the existing source-presentation, enrichment, and
+rules-interaction audits before closing the Stage 1 inventory in `TODO.md`.
+
 ## CI and release validation
 
 `docs/ci.md` owns the hosted workflow contract. `docs/releasing.md` owns the release gate. Do not

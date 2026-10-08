@@ -76,6 +76,10 @@ unimplemented until its corresponding behavior exists.
 
 - [ ] **Data processing + Project infrastructure:** Establish the 1.0 completeness baseline
   before expanding curation.
+  - [x] Extract read-only publication/source evidence from the two shipped databases
+    with `tools/report_reference_baseline.py`. Its initial report is deliberately unverified:
+    local research inputs, source-by-section coverage, relationships, and ordinary
+    browser paths remain to be checked before any completeness claim.
   - [ ] Pin the intended Army snapshot, rules/FAQ/annex PDF versions, and supported wiki evidence.
     Record archive/content hashes as appropriate, publication dates separately from acquisition
     dates, and the generated database/publication identities. A later source refresh reopens the
