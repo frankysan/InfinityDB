@@ -331,6 +331,9 @@ def test_scenario_browser_routes_are_published_with_shared_navigation(
     assert b'group.className = "scenario-rules rules-card-stack";' in script
     assert b'new URLSearchParams(window.location.search).get("army_points")' not in script
     assert b'/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?' in script
+    assert b'new DOMParser().parseFromString(markup, "image/svg+xml")' in script
+    assert b'svg.querySelector("style")?.remove();' in script
+    assert b'document.importNode(svg, true)' in script
     assert b'rulesCitationNode(citation)' in script
     assert b'issue.status === "reviewed-resolution"' in script
     assert b'badge.textContent = reviewed ? "reviewed" : "uncertain"' in script

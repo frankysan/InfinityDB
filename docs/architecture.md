@@ -166,7 +166,12 @@ schema v1 only needs to represent those core maps. Point markers retain semantic
 known marker types resolve through canonical marker metadata, including physical diameter where that
 affects the represented game object. N5.3 Domination requires a Console A Marker or same-diameter
 scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
-Renderer-only styling remains separate. Structured map annotations may reference semantic geometry
+Renderer-only styling remains separate. Standalone SVGs use a deterministic fallback palette;
+scenario detail inlines the same-origin SVG so its semantic map-color roles inherit from the active
+InfinityDB theme. The browser applies those roles through external CSS rather than SVG `<style>`
+because the application's Content Security Policy blocks injected inline styles. Renderer typography
+scales with table width in viewBox coordinates, without changing scenario geometry. Structured map
+annotations may reference semantic geometry
 to derive displayed distances and area sizes; they must not duplicate the underlying measurements.
 Geometry v1 includes rectangle dimensions/area sizes plus element-to-table-edge distances, which covers
 the core Domination and Supplies measurement callouts without introducing arbitrary annotation geometry.

@@ -62,8 +62,11 @@ release/audit narrative belongs in the changelog and Git history.
   default configuration in backend composition. The browser defaults a state-less scenario detail
   visit to 300 Army Points, immediately writes that choice through the common versioned `s=` share-state
   codec, and lets explicit valid shared/legacy state win. Maps render through the canonical SVG endpoint backed by the selected
-  maintained geometry. Do not recreate scenario geometry or scoring semantics in JavaScript. See the
-  scenario model in `docs/data-model.md`.
+  maintained geometry. The browser inlines the generated SVG to inherit semantic map colors from
+  the current theme; its standalone `<style>` must be removed on injection because of the app CSP,
+  with browser styling provided by the external page CSS. Map labels scale with table width without
+  changing canonical geometry. Do not recreate scenario geometry or scoring semantics in JavaScript.
+  See the scenario model in `docs/data-model.md`.
 
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network
   access.

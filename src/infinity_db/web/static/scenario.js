@@ -116,6 +116,25 @@ function mapCard(item) {
   const params = new URLSearchParams({ army_points: String(item.selected_army_points) });
   image.src = `/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?${params}`;
   figure.append(heading, image);
+  // <img> SVGs cannot inherit theme variables. Inline the same-origin generated
+  // SVG, as we do for the themed logo, keeping the image as a network fallback.
+  fetch(image.src)
+    .then((response) => {
+      if (!response.ok) throw new Error(`Scenario map request failed (${response.status}).`);
+      return response.text();
+    })
+    .then((markup) => {
+      if (!image.isConnected) return;
+      const svg = new DOMParser().parseFromString(markup, "image/svg+xml").documentElement;
+      if (svg.namespaceURI !== "http://www.w3.org/2000/svg" || svg.localName !== "svg") return;
+      // External application CSS owns the inline map; its embedded <style>
+      // is for standalone SVG responses and is blocked by our document CSP.
+      svg.querySelector("style")?.remove();
+      svg.setAttribute("class", "scenario-map");
+      svg.setAttribute("aria-label", image.alt);
+      image.replaceWith(document.importNode(svg, true));
+    })
+    .catch(() => { /* Keep the standalone SVG image fallback. */ });
   return figure;
 }
 

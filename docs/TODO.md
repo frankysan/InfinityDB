@@ -287,13 +287,11 @@ unimplemented until its corresponding behavior exists.
       the Supply Box physical boundaries, so its canonical 8-inch clearances are never restated in
       annotation data. Scenario distance language such as “8 inches from” is edge-to-edge unless the
       source explicitly defines a center/reference point.
-    - [ ] Make scenario-map colors semantic and theme-aware instead of baking the current light-map
-      palette into generated SVG. Deployment Zones, scoring/control areas, guides, markers, text,
-      backgrounds, and measurement strokes must resolve from the active InfinityDB theme so Light,
-      Dark, and future themes remain legible without maintaining unrelated geometry variants.
-    - [ ] Normalize scenario-map typography so labels and measurements have a visually similar size
-      across 24×32, 32×48, and 48×48 maps rather than shrinking with larger table geometry. Prefer
-      larger map text in the first pass, then tune against the surrounding scenario-detail UI.
+    - [x] Make scenario-map colors semantic and theme-aware. The standalone SVG has light-theme
+      fallbacks, while the browser inlines it and applies scenario-map roles from the current theme
+      palette without duplicating geometry or requiring a change to its API.
+    - [x] Normalize scenario-map typography with larger map labels and measurements scaled to the
+      table width across 24×32, 32×48, and 48×48 maps. Fine-tune sizes after browser acceptance.
     - [ ] Make every player-facing scenario measurement except marker size use the shared dynamic
       distance presentation so users can switch between inches and centimeters. This includes
       maintained-text scenario distances **and every measurement rendered inside the generated SVG

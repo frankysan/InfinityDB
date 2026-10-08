@@ -767,6 +767,63 @@ html:not([data-developer-mode="true"])
   background: var(--color-surface-default);
 }
 
+/* SVG images are isolated; once a map is inlined, these external rules
+   replace its standalone <style> (blocked in documents by our CSP). */
+svg.scenario-map .table {
+  fill: var(--color-scenario-map-table);
+  stroke: var(--color-scenario-map-outline);
+  stroke-width: .12;
+}
+svg.scenario-map .deployment-a {
+  fill: var(--color-scenario-map-deployment-a);
+  stroke: var(--color-scenario-map-deployment-a-edge);
+  stroke-width: .09;
+}
+svg.scenario-map .deployment-b {
+  fill: var(--color-scenario-map-deployment-b);
+  stroke: var(--color-scenario-map-deployment-b-edge);
+  stroke-width: .09;
+}
+svg.scenario-map .scoring {
+  fill: var(--color-scenario-map-scoring);
+  fill-opacity: .65;
+  stroke: var(--color-scenario-map-scoring-edge);
+  stroke-width: .07;
+}
+svg.scenario-map .objective {
+  fill: var(--color-scenario-map-marker);
+  stroke: var(--color-scenario-map-outline);
+  stroke-width: .1;
+}
+svg.scenario-map .guide {
+  fill: none;
+  stroke: var(--color-scenario-map-guide);
+  stroke-width: .06;
+  stroke-dasharray: .35 .25;
+}
+svg.scenario-map .measurement {
+  fill: none;
+  stroke: var(--color-scenario-map-measurement);
+  stroke-width: .05;
+}
+svg.scenario-map .dimension-label,
+svg.scenario-map .area-size {
+  fill: var(--color-scenario-map-text);
+  font-family: sans-serif;
+  font-size: var(--scenario-map-measure-size, 1.1px);
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--color-scenario-map-text-halo);
+  stroke-width: .055;
+  stroke-linejoin: round;
+}
+svg.scenario-map .label {
+  fill: var(--color-scenario-map-text);
+  font-family: sans-serif;
+  font-size: var(--scenario-map-label-size, 1.4px);
+  font-weight: 600;
+}
+
 .scenario-objective-grid,
 .scenario-rules {
   display: grid;

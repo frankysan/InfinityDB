@@ -39,17 +39,27 @@ class ScenarioMapRenderError(ValueError):
     """Raised when valid scenario geometry cannot be represented by SVG renderer v1."""
 
 
+# The SVG works as a standalone light-map image with fallbacks, but inherits
+# semantic tokens from InfinityDB when embedded inline in the browser.
 _STYLE_CSS = """\
-.table{fill:#fff;stroke:#111;stroke-width:.12}
-.deployment-a{fill:#dbeafe;fill-opacity:.72;stroke:#2563eb;stroke-width:.09}
-.deployment-b{fill:#fee2e2;fill-opacity:.72;stroke:#dc2626;stroke-width:.09}
-.scoring{fill:#e5e7eb;fill-opacity:.46;stroke:#6b7280;stroke-width:.07}
-.objective{fill:#fff;stroke:#111;stroke-width:.1}
-.guide{fill:none;stroke:#6b7280;stroke-width:.06;stroke-dasharray:.35 .25}
-.measurement{fill:none;stroke:#111;stroke-width:.05}
-.dimension-label,.area-size{fill:#111;font-family:sans-serif;font-size:.82px;font-weight:600;
-paint-order:stroke;stroke:#fff;stroke-width:.045;stroke-linejoin:round}
-.label{fill:#111;font-family:sans-serif;font-size:1.15px;font-weight:600}
+.table{fill:var(--color-scenario-map-table,#fffefa);
+stroke:var(--color-scenario-map-outline,#203b35);stroke-width:.12}
+.deployment-a{fill:var(--color-scenario-map-deployment-a,#dbeafe);
+stroke:var(--color-scenario-map-deployment-a-edge,#2563eb);stroke-width:.09}
+.deployment-b{fill:var(--color-scenario-map-deployment-b,#fee2e2);
+stroke:var(--color-scenario-map-deployment-b-edge,#dc2626);stroke-width:.09}
+.scoring{fill:var(--color-scenario-map-scoring,#e5e7eb);fill-opacity:.65;
+stroke:var(--color-scenario-map-scoring-edge,#6b7280);stroke-width:.07}
+.objective{fill:var(--color-scenario-map-marker,#fffefa);
+stroke:var(--color-scenario-map-outline,#203b35);stroke-width:.1}
+.guide{fill:none;stroke:var(--color-scenario-map-guide,#65716b);
+stroke-width:.06;stroke-dasharray:.35 .25}
+.measurement{fill:none;stroke:var(--color-scenario-map-measurement,#203b35);stroke-width:.05}
+.dimension-label,.area-size{fill:var(--color-scenario-map-text,#203b35);
+font-family:sans-serif;font-size:var(--scenario-map-measure-size,1.1px);font-weight:600;
+paint-order:stroke;stroke:var(--color-scenario-map-text-halo,#fffefa);stroke-width:.055;stroke-linejoin:round}
+.label{fill:var(--color-scenario-map-text,#203b35);
+font-family:sans-serif;font-size:var(--scenario-map-label-size,1.4px);font-weight:600}
 """
 
 
@@ -136,6 +146,7 @@ def _render_annotation(
     annotation: ScenarioAnnotation,
     rectangles: dict[str, RectangleElement],
     markers: dict[str, MarkerElement],
+    text_scale: float,
 ) -> str:
     annotation_id = escape(annotation.id, quote=True)
     target_id = escape(annotation.target, quote=True)
@@ -150,7 +161,7 @@ def _render_annotation(
         distance = element_edge_distance_to_table(
             target, edge=annotation.edge, table=geometry.table
         )
-        tick = 0.25
+        tick = 0.25 * text_scale
         edge = annotation.edge
         if edge in {"left", "right"}:
             edge_x = 0.0 if edge == "left" else geometry.table.width
@@ -158,7 +169,11 @@ def _render_annotation(
             target_y = (y1 + y2) / 2.0
             line_y = target_y + annotation.offset
             measure_x1, measure_x2 = sorted((target_x, edge_x))
-            label_y = line_y - 0.22 if annotation.offset <= 0 else line_y + 0.72
+            label_y = (
+                line_y - 0.4 * text_scale
+                if annotation.offset <= 0
+                else line_y + 1.05 * text_scale
+            )
             return (
                 f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" '
                 f'data-edge="{edge}" data-axis="x">'
@@ -178,7 +193,7 @@ def _render_annotation(
         target_x = (x1 + x2) / 2.0
         line_x = target_x + annotation.offset
         measure_y1, measure_y2 = sorted((target_y, edge_y))
-        label_dy = 0.3 if annotation.offset <= 0 else -0.3
+        label_dy = 0.4 * text_scale if annotation.offset <= 0 else -0.4 * text_scale
         mid_y = (measure_y1 + measure_y2) / 2.0
         return (
             f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" '
@@ -206,11 +221,11 @@ def _render_annotation(
             f'x="{_number(x)}" y="{_number(y)}" text-anchor="middle">{text}</text>'
         )
 
-    tick = 0.25
+    tick = 0.25 * text_scale
     if annotation.axis == "x":
         y = y1 + annotation.offset if annotation.side == "start" else y2 - annotation.offset
         mid_x = (x1 + x2) / 2.0
-        label_y = y - 0.22 if annotation.side == "start" else y + 0.72
+        label_y = y - 0.4 * text_scale if annotation.side == "start" else y + 1.05 * text_scale
         return (
             f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" data-axis="x">'
             f'<line x1="{_number(x1)}" y1="{_number(y)}" x2="{_number(x2)}" y2="{_number(y)}"/>'
@@ -224,7 +239,7 @@ def _render_annotation(
 
     x = x1 + annotation.offset if annotation.side == "start" else x2 - annotation.offset
     mid_y = (y1 + y2) / 2.0
-    label_dy = 0.3 if annotation.side == "start" else -0.3
+    label_dy = 0.4 * text_scale if annotation.side == "start" else -0.4 * text_scale
     return (
         f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" data-axis="y">'
         f'<line x1="{_number(x)}" y1="{_number(y1)}" x2="{_number(x)}" y2="{_number(y2)}"/>'
@@ -275,8 +290,11 @@ def render_scenario_map_svg(geometry: ScenarioGeometry) -> str:
         for element in geometry.elements
         if isinstance(element, MarkerElement)
     }
+    # Increase viewBox-space text on wider tables; at the same on-screen map width,
+    # 48-inch maps should no longer render labels at half the size of 24-inch maps.
+    text_scale = 1.0 + max(0.0, min(24.0, geometry.table.width - 24.0)) / 48.0
     annotations = "\n".join(
-        _render_annotation(geometry, annotation, rectangles, markers)
+        _render_annotation(geometry, annotation, rectangles, markers, text_scale)
         for annotation in geometry.annotations
     )
     if annotations:
@@ -284,7 +302,9 @@ def render_scenario_map_svg(geometry: ScenarioGeometry) -> str:
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
-        f'role="img" aria-labelledby="map-title" data-unit="in">\n'
+        f'role="img" aria-labelledby="map-title" data-unit="in" '
+        f'style="--scenario-map-label-size:{_number(1.4 * text_scale)}px;'
+        f'--scenario-map-measure-size:{_number(1.1 * text_scale)}px">\n'
         f'<title id="map-title">{title}</title>\n'
         f'<style>{_STYLE_CSS}</style>\n'
         f'<rect class="table" x="0" y="0" width="{width}" height="{height}"/>\n'

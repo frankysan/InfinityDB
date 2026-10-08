@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from xml.etree import ElementTree
 
@@ -129,6 +130,53 @@ def test_render_scenario_map_svg_supports_core_table_size_presets(
     svg = render_scenario_map_svg(geometry)
 
     assert f'viewBox="0 0 {width} {height}"' in svg
+
+
+
+def test_scenario_map_theme_roles_are_defined_for_all_explicit_themes() -> None:
+    root = Path(__file__).parents[1] / "src/infinity_db/web/static"
+    page_css = (root / "page-overrides.css").read_text(encoding="utf-8")
+    standalone_css = render_scenario_map_svg(
+        parse_scenario_geometry(
+            {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Theme roles",
+                "table": {"width": 24, "height": 32, "unit": "in"},
+                "elements": [],
+            }
+        )
+    )
+    roles = set(re.findall(r"--color-scenario-map-[\w-]+", standalone_css))
+    assert len(roles) >= 10
+    for role in roles:
+        assert role in page_css
+        for theme in ("light", "dark"):
+            theme_css = (root / "themes" / f"{theme}.css").read_text(encoding="utf-8")
+            assert f"{role}:" in theme_css
+
+
+@pytest.mark.parametrize(
+    ("width", "height", "label_size", "measure_size"),
+    [(24, 32, "1.4", "1.1"), (32, 48, "1.633333", "1.283333"), (48, 48, "2.1", "1.65")],
+)
+def test_scenario_map_typography_scales_with_table_width(
+    width: int, height: int, label_size: str, measure_size: str
+) -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Typography",
+            "table": {"width": width, "height": height, "unit": "in"},
+            "elements": [],
+        }
+    )
+    root = ElementTree.fromstring(render_scenario_map_svg(geometry))
+    assert root.attrib["style"] == (
+        f"--scenario-map-label-size:{label_size}px;"
+        f"--scenario-map-measure-size:{measure_size}px"
+    )
 
 
 _CORE_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
