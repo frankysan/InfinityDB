@@ -398,11 +398,14 @@ row, score condition, placement, source issue, and SVG output after reference ex
 
 ## 1.0 Weapon Chart partial evidence audit
 
-The read-only `tools/audit_weapon_chart_profiles.py` compares N5 v5.3 chart
-rows against shipped Army metadata when their printed names and explicit modes
-uniquely identify a source profile. Wrapped names are reconstructed from row
-baselines; unmatched identities/modes and incomplete multiline fields are
-reported as deferred, never normalized speculatively.
+The read-only `tools/audit_weapon_chart_profiles.py` compares the printed N5 v5.3
+Weapon Chart to the shipped Army metadata. Its PDF layout reader reconstructs
+wrapped names and two-line Plasma saving cells, selects a unique explicit or
+mode-less profile, and keeps Disco Ball's auxiliary object profile separate from
+the Burst-anchored rows. It compares five profile fields plus range-band slots:
+printed MOD text supplies values while the PDF's vector rectangles supply
+breakpoint boundaries. Bare `3` is not silently rewritten to `+3`.
+
 The official core PDF is supplied locally and is **not** included in Git. This
 offline audit additionally requires PyMuPDF (`python -m pip install pymupdf`);
 normal CI and tests do not need that optional dependency. Run from the repository root:
@@ -411,12 +414,13 @@ normal CI and tests do not need that optional dependency. Run from the repositor
 python tools/audit_weapon_chart_profiles.py --core-pdf "C:\path\to\n5-rules-v5-3-en.pdf" --json-output docs/audits/weapon-chart.json --markdown-output docs/audits/weapon-chart.md
 ```
 
-The output includes the source PDF SHA-256 and distinguishes matching fields,
-candidate discrepancies, and deferred rows. It interprets Saving Roll multipliers
-in context: an Army `savingNum=1` with no Saving Attribute is non-operative and
-matches a printed `--` (while the raw values remain visible). Absence of a
-discrepancy is not a completeness claim: range bands, Traits,
-complex multiline saving cells, special-weapon prose, and browser projection
-still need review. The supplied v5.3 PDF currently yields 163/171 compared
-rows; the Kobra Pistol CC Mode Saving Rolls value needs source review (PDF 1,
-Army 2). Six Plasma rows and two Disco Baller rows remain deferred.
+The output includes the source PDF SHA-256, raw compared fields, range-band
+evidence, candidate discrepancies, and any unresolved chart rows. Saving Roll
+multipliers are interpreted together with the Saving Attribute: an Army
+`savingNum=1` with `saving=-` is non-operative and matches a printed `--`.
+The supplied v5.3 PDF yields 171/171 uniquely aligned rows, with 170 five-field
+matches and 170 range-band matches. Kobra Pistol CC Mode has a Saving Rolls
+source discrepancy candidate (PDF 1, Army 2); Katyusha MRL prints unsigned `3`
+where Army has `+3`. The separate Disco Ball object's attributes match.
+This remains partial evidence: full Traits, other auxiliary/equipment profiles,
+special-weapon prose, and API/browser projection still need review.

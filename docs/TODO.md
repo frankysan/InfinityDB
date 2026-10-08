@@ -121,9 +121,19 @@ unimplemented until its corresponding behavior exists.
     - [ ] Verify Kobra Pistol (CC Mode) against the published source/version and
       determine whether the 1-versus-2 Saving Rolls difference is an Army
       metadata error, a chart error, or a documented source-specific exception.
-    - [ ] Reconcile the remaining six Plasma saving cells and two Disco Baller
-      identities/modes, then compare range breakpoints/MODs, Traits, and
-      special-weapon prose.
+    - [x] Resolve the six Plasma multiline Saving Roll cells and the two
+      Disco Baller/Discover chart-row ambiguities. All 171 Burst-anchored rows
+      now align uniquely: 170 match across the five core fields and the Kobra
+      Pistol CC Mode Saving Rolls candidate remains open. The separate Disco
+      Ball object profile agrees with its named Army mode.
+    - [x] Compare the chart's vector-drawn range breaks and printed MODs with
+      Army range-band metadata. All 171 profiles are aligned: 170 match and
+      Katyusha MRL (p. 187) prints unsigned `3` where Army records `+3`.
+      This is a source-notation review candidate, not a curated-data change.
+    - [ ] Review Katyusha MRL's unsigned positive range MOD in the N5 v5.3
+      chart before interpreting it as a source mistake or normalizing it.
+    - [ ] Reconcile printed Traits, unusual auxiliary/equipment object profiles,
+      and special-weapon prose separately from the five-field/range audit.
     - [ ] Review the six unmatched chart-text names as aliases, multi-mode entries,
       or source-specific rules (including Chest Mine and SymbioBomb). Reconcile all
       Weapon Chart rows and special-weapon text against N5 v5.3 pp. 68–74 and 176–188,

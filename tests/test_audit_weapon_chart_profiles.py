@@ -186,3 +186,100 @@ def test_resolved_multimode_profile_can_report_real_field_discrepancy() -> None:
     assert result["compared"][0]["differences"] == [
         {"field": "savingRolls", "pdf": "1", "army": "2"}
     ]
+
+
+def test_plasma_combined_save_is_reconstructed_from_two_baselines() -> None:
+    words = [
+        (24.0, 455.5, "PLASMA"), (50.0, 455.5, "CARBINE"),
+        (28.0, 465.1, "(Blast"), (51.0, 465.1, "Mode)"),
+        (277.0, 460.3, "7"), (297.0, 460.3, "2"),
+        (333.0, 460.3, "N"),
+        (374.0, 455.5, "ARM"), (392.0, 455.5, "and"),
+        (382.0, 465.1, "BTS"),
+        (426.0, 460.3, "1"), (432.0, 460.3, "and"),
+        (447.0, 460.3, "1"),
+    ]
+    row = rows_from_words(words, 176)[0]
+    assert row["name"] == "PLASMA CARBINE (Blast Mode)"
+    assert row["savingAttribute"] == "ARM and BTS"
+    assert row["savingRolls"] == "1 and 1"
+
+
+def test_discover_row_does_not_absorb_disco_ball_object_profile() -> None:
+    words = [
+        (31.0, 557.5, "DISCO"), (54.2, 557.5, "BALL"),
+        (126.6, 557.5, "ARM=0"), (158.0, 557.5, "BTS=0"),
+        (186.0, 557.5, "STR=1"), (214.7, 557.5, "S=1"),
+        (34.0, 574.2, "DISCOVER"), (298.0, 574.2, "--"),
+        (277.0, 574.2, "--"),
+    ]
+    assert rows_from_words(words, 186)[0]["name"] == "DISCOVER"
+
+
+def test_printed_range_mods_follow_vector_slots_not_color_meaning() -> None:
+    from tools.audit_weapon_chart_profiles import (
+        _printed_range_bands,
+        _source_range_bands,
+    )
+
+    colors = [
+        ((87.736, 300.0, 139.303, 319.0), (0.49, 0.66, 0.42)),
+        ((139.303, 300.0, 164.268, 319.0), (0.85, 0.33, 0.33)),
+        ((164.268, 300.0, 266.993, 319.0), (0.13, 0.12, 0.13)),
+    ]
+    words = [
+        (97.0, 305.0, "+6"),
+        (122.0, 305.0, "+3"),
+        (148.0, 305.0, "-6"),
+    ]
+    assert _printed_range_bands(words, 305.0, colors) == [
+        "+6", "+3", "-6", None, None, None, None,
+    ]
+    assert _source_range_bands('{"short":{"max":20,"mod":"+6"},'
+                               '"med":{"max":40,"mod":"+3"},'
+                               '"long":{"max":60,"mod":"-6"}}') == [
+        "+6", "+3", "-6", None, None, None, None,
+    ]
+
+
+def test_bare_range_number_remains_different_from_signed_modifier() -> None:
+    from tools.audit_weapon_chart_profiles import _printed_range_bands
+
+    bands = _printed_range_bands(
+        [(96.0, 305.0, "3")],
+        305.0,
+        [((87.736, 300.0, 113.663, 319.0), (0.49, 0.66, 0.42))],
+    )
+    assert bands == ["3", None, None, None, None, None, None]
+    row = _pdf_row()
+    row["rangeBands"] = bands
+    army = {**_army_row(), "rangeBands": ["+3", None, None, None, None, None, None]}
+    result = compare_rows([row], {"tacticalbow": [army]})
+    assert result["rangeCandidates"] == 1
+    assert result["candidateDiscrepancies"] == 0
+
+
+def test_disco_ball_is_separate_auxiliary_mode_profile() -> None:
+    from tools.audit_weapon_chart_profiles import (
+        _printed_auxiliary_profiles,
+        compare_auxiliary_profiles,
+    )
+
+    words = [
+        (31.0, 557.5, "DISCO"), (31.0, 557.5, "DISCO"),
+        (54.0, 557.5, "BALL"), (54.0, 557.5, "BALL"),
+        (126.0, 557.5, "ARM=0"), (157.0, 557.5, "BTS=0"),
+        (186.0, 557.5, "STR=1"), (214.0, 557.5, "S=1"),
+    ]
+    rows = _printed_auxiliary_profiles(words, 186)
+    assert len(rows) == 1
+    assert rows[0]["name"] == "DISCO BALL"
+    matched = compare_auxiliary_profiles(rows, {
+        "discoballer": [
+            {**_army_row("Disco Baller"), "mode": "", "profile": ""},
+            {**_army_row("Disco Baller"), "mode": "Disco Ball",
+             "profile": "ARM=0, BTS=0, STR=1, S=1"},
+        ]
+    })
+    assert len(matched) == 1
+    assert matched[0]["status"] == "fields-match"
