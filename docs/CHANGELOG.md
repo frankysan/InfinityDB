@@ -16,7 +16,8 @@ are not retroactively relabeled.
 - Supplies now consistently shows 8 inches of clear space between each outer Supply Box marker edge
   and the table edge at every game size; the 12-inch mark in the large-table source illustration is a
   guide ruler, not a box offset.
-- Scenario maps now match your Light or Dark theme and keep labels readable at different table sizes.
+- Scenario maps now match your Light or Dark theme, keep labels readable at different table sizes,
+  and switch measurement labels between inches and centimeters with the existing preference.
 - Annihilation's 350-point surviving-force scoring now uses the reviewed contiguous ranges
   85–175, 176–270, and above 270; Domination continues to show the printed 6 SWC at 350 points with
   a note that the unusual progression remains worth verifying.

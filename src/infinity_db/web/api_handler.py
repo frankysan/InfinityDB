@@ -6,7 +6,7 @@ import logging
 import re
 import sqlite3
 from http import HTTPStatus
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import parse_qs
 
 from infinity_db import __version__
@@ -198,6 +198,21 @@ def _scenario_army_points(query_string: str) -> int:
     if army_points is None:
         raise ValueError("Provide army_points exactly once")
     return army_points
+
+
+def _scenario_map_options(query_string: str) -> tuple[int, Literal["in", "cm"]]:
+    params = _validated_query_params(
+        query_string, {"army_points", "distance_unit", "cache_bust"}
+    )
+    army_points = _integer(params, "army_points", None, 1, 10000)
+    if army_points is None:
+        raise ValueError("Provide army_points exactly once")
+    distance_unit = params.get("distance_unit", ["in"])[0]
+    if distance_unit == "in":
+        return army_points, "in"
+    if distance_unit == "cm":
+        return army_points, "cm"
+    raise ValueError("distance_unit must be in or cm")
 
 
 def _scenario_summary(catalog: ScenarioCatalog, identifier: str) -> dict[str, Any] | None:
@@ -875,7 +890,7 @@ class ApiHandler:
         elif match := SCENARIO_MAP_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
-                army_points = _scenario_army_points(query_string)
+                army_points, distance_unit = _scenario_map_options(query_string)
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)},
@@ -916,8 +931,9 @@ class ApiHandler:
                         cache_control=cache_control,
                     )
                 geometry = parse_scenario_geometry(scenario["placement"]["geometry"])
+                svg = render_scenario_map_svg(geometry, distance_unit=distance_unit)
                 return WebResponse(
-                    body=render_scenario_map_svg(geometry).encode("utf-8"),
+                    body=svg.encode("utf-8"),
                     content_type="image/svg+xml; charset=utf-8",
                     cache_control=cache_control,
                 )

@@ -254,8 +254,69 @@ def test_render_scenario_map_svg_projects_derived_dimensions_and_area_size() -> 
     assert '>8″</text></g>' in svg
     assert (
         '<text id="deployment-size" class="area-size" data-target="deployment-a" '
-        'x="12" y="6.56" text-anchor="middle">24″ × 8″</text>'
+        'x="12" y="6.56" text-anchor="middle" data-distance-size-inches="24,8">24″ × 8″</text>'
     ) in svg
+
+
+def test_scenario_map_measurements_change_units_without_changing_geometry() -> None:
+    radius = marker_radius_inches("supply-box")
+    assert radius is not None
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Unit-aware measurements",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "zone", "kind": "rectangle", "style": "deployment-a",
+                    "x1": 0, "y1": 0, "x2": 24, "y2": 8,
+                },
+                {
+                    "id": "box", "kind": "marker", "style": "objective",
+                    "markerType": "supply-box", "x": 8 + radius, "y": 16,
+                },
+            ],
+            "annotations": [
+                {
+                    "id": "zone-depth", "kind": "dimension", "target": "zone",
+                    "axis": "y", "side": "start",
+                },
+                {"id": "zone-size", "kind": "area-size", "target": "zone"},
+                {
+                    "id": "box-offset", "kind": "element-edge-distance",
+                    "target": "box", "edge": "left",
+                },
+            ],
+        }
+    )
+    inch_root = ElementTree.fromstring(render_scenario_map_svg(geometry))
+    cm_root = ElementTree.fromstring(render_scenario_map_svg(geometry, distance_unit="cm"))
+    namespace = "{http://www.w3.org/2000/svg}"
+    assert inch_root.attrib["viewBox"] == cm_root.attrib["viewBox"] == "0 0 24 32"
+    assert inch_root.attrib["data-unit"] == cm_root.attrib["data-unit"] == "in"
+    assert inch_root.attrib["data-distance-unit"] == "in"
+    assert cm_root.attrib["data-distance-unit"] == "cm"
+    inch_marker = inch_root.find(f".//{namespace}circle")
+    cm_marker = cm_root.find(f".//{namespace}circle")
+    assert inch_marker is not None and cm_marker is not None
+    assert inch_marker.attrib == cm_marker.attrib
+    for root, unit, zone, offset in (
+        (inch_root, "in", "24″ × 8″", "8″"),
+        (cm_root, "cm", "60 cm × 20 cm", "20 cm"),
+    ):
+        assert root.attrib["data-distance-unit"] == unit
+        labels = {node.attrib["id"]: node for node in root.iter() if "id" in node.attrib}
+        assert labels["zone-size"].text == zone
+        assert labels["zone-size"].attrib["data-distance-size-inches"] == "24,8"
+        for annotation_id in ("zone-depth", "box-offset"):
+            text = labels[annotation_id].find(f"{namespace}text")
+            assert text is not None
+            assert text.attrib["data-distance-inches"] == "8"
+            assert text.text == offset
+
+    with pytest.raises(ValueError, match="distance_unit"):
+        render_scenario_map_svg(geometry, distance_unit="mm")  # type: ignore[arg-type]
 
 
 def test_render_scenario_map_svg_projects_element_edge_distance_to_marker_boundary() -> None:

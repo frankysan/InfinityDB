@@ -1,4 +1,5 @@
 import { getScenario, getScenarios } from "./api.js";
+import { distanceUnit } from "./preferences.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { rulesCitationNode, rulesReferenceArticle } from "./rules-reference.js";
 import { readShareState, writeShareState } from "./share-state.js";
@@ -81,6 +82,37 @@ function fact(label, value) {
   return item;
 }
 
+// Match the shared Infinity rules distance convention, not physical marker mm.
+function scenarioDistance(inches) {
+  const value = distanceUnit() === "cm" ? Number((inches * 2.5).toFixed(2)) : inches;
+  return distanceUnit() === "cm" ? `${value} cm` : `${value}″`;
+}
+
+function refreshScenarioDistances() {
+  const table = elements.content.querySelector(".scenario-table-size");
+  if (table) {
+    const width = Number(table.dataset.widthInches);
+    const height = Number(table.dataset.heightInches);
+    table.textContent = `${scenarioDistance(width)} × ${scenarioDistance(height)}`;
+  }
+  const map = elements.content.querySelector(".scenario-map");
+  if (!map) return;
+  if (map.localName === "img") {
+    const url = new URL(map.src);
+    url.searchParams.set("distance_unit", distanceUnit());
+    if (map.src !== url.href) map.src = url.href;
+    return;
+  }
+  map.dataset.distanceUnit = distanceUnit();
+  for (const label of map.querySelectorAll("[data-distance-inches]")) {
+    label.textContent = scenarioDistance(Number(label.dataset.distanceInches));
+  }
+  for (const label of map.querySelectorAll("[data-distance-size-inches]")) {
+    label.textContent = label.dataset.distanceSizeInches.split(",")
+      .map((dimension) => scenarioDistance(Number(dimension))).join(" × ");
+  }
+}
+
 function setupCard(item) {
   const card = document.createElement("section");
   card.className = "surface surface--subtle scenario-setup-card";
@@ -92,13 +124,22 @@ function setupCard(item) {
   const gameSize = item.setup?.game_size || {};
   const geometry = item.placement?.geometry || {};
   const table = geometry.table || {};
+  const tableFact = fact("Table", "—");
   facts.append(
     fact("Army Points", String(item.selected_army_points)),
     fact("SWC", String(gameSize.swc ?? "—")),
-    fact("Table", `${table.width ?? "—"} × ${table.height ?? "—"} in`),
+    tableFact,
   );
   if (gameSize.minimumVictoryPoints != null) {
     facts.append(fact("Minimum Victory Points", String(gameSize.minimumVictoryPoints)));
+  }
+  // Table dimensions are derived from canonical inches, not marker footprint metadata.
+  const tableValue = tableFact.querySelector("dd");
+  if (tableValue && Number.isFinite(table.width) && Number.isFinite(table.height)) {
+    tableValue.className = "scenario-table-size";
+    tableValue.dataset.widthInches = String(table.width);
+    tableValue.dataset.heightInches = String(table.height);
+    tableValue.textContent = `${scenarioDistance(table.width)} × ${scenarioDistance(table.height)}`;
   }
   card.append(heading, facts);
   return card;
@@ -113,7 +154,9 @@ function mapCard(item) {
   const image = document.createElement("img");
   image.className = "scenario-map";
   image.alt = `${item.name} deployment and scenario map for ${item.selected_army_points} Army Points`;
-  const params = new URLSearchParams({ army_points: String(item.selected_army_points) });
+  const params = new URLSearchParams({
+    army_points: String(item.selected_army_points), distance_unit: distanceUnit(),
+  });
   image.src = `/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?${params}`;
   figure.append(heading, image);
   // <img> SVGs cannot inherit theme variables. Inline the same-origin generated
@@ -133,6 +176,7 @@ function mapCard(item) {
       svg.setAttribute("class", "scenario-map");
       svg.setAttribute("aria-label", image.alt);
       image.replaceWith(document.importNode(svg, true));
+      refreshScenarioDistances();
     })
     .catch(() => { /* Keep the standalone SVG image fallback. */ });
   return figure;
@@ -326,6 +370,7 @@ function render(item) {
   ].filter(Boolean);
   elements.content.replaceChildren(...sections);
   show(elements.content);
+  refreshScenarioDistances();
 }
 
 async function loadDetail(points) {
@@ -398,6 +443,7 @@ async function initialize() {
 }
 
 elements.points.addEventListener("change", () => choose(elements.points.value));
+window.addEventListener("distanceunitchange", refreshScenarioDistances);
 document.addEventListener("infinity:beforenavigation", () => {
   summaryController.abort();
   detailController?.abort();

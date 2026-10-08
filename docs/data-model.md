@@ -558,7 +558,13 @@ An optional ordered `annotations` layer
 references those semantic elements rather than restating their geometry. Geometry v1 currently supports
 derived rectangle `dimension` annotations and `area-size` annotations; both calculate their displayed
 measurement from the referenced rectangle, so a map cannot silently disagree with maintained zone
-dimensions. It also supports `element-edge-distance` annotations for markers and rectangles: the
+dimensions. Rendered measurement text carries the canonical inch value in
+`data-distance-inches` or `data-distance-size-inches`, separate from the user-facing display unit.
+The map API accepts optional `distance_unit=in|cm`, using the Infinity distance convention
+of 1 inch = 2.5 cm. The browser updates inlined annotations when the existing unit preference
+changes, without altering the inch viewBox or stored geometry. Marker `data-diameter-mm`
+remains unconverted physical metadata.
+It also supports `element-edge-distance` annotations for markers and rectangles: the
 displayed distance is derived from the target element's nearest physical boundary and selected table edge,
 while an optional signed offset controls only where the dimension line is drawn. Scenario source language
 such as “X inches from” is interpreted edge-to-edge unless the source explicitly names a center/reference

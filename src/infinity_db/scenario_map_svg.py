@@ -137,7 +137,11 @@ def _rectangle_bounds(
     )
 
 
-def _measurement_text(value: float) -> str:
+def _measurement_text(value: float, distance_unit: Literal["in", "cm"]) -> str:
+    if distance_unit == "cm":
+        # Infinity's published distances use 2.5 cm per inch; physical marker
+        # footprints remain fixed millimeters in canonical geometry.
+        return f"{_number(value * 2.5)} cm"
     return f"{_number(value)}″"
 
 
@@ -147,6 +151,7 @@ def _render_annotation(
     rectangles: dict[str, RectangleElement],
     markers: dict[str, MarkerElement],
     text_scale: float,
+    distance_unit: Literal["in", "cm"],
 ) -> str:
     annotation_id = escape(annotation.id, quote=True)
     target_id = escape(annotation.target, quote=True)
@@ -184,8 +189,9 @@ def _render_annotation(
                 f'<line x1="{_number(measure_x2)}" y1="{_number(line_y - tick)}" '
                 f'x2="{_number(measure_x2)}" y2="{_number(line_y + tick)}"/>'
                 f'<text class="dimension-label" x="{_number((measure_x1 + measure_x2) / 2.0)}" '
-                f'y="{_number(label_y)}" text-anchor="middle">'
-                f'{_measurement_text(distance)}</text></g>'
+                f'y="{_number(label_y)}" text-anchor="middle" '
+                f'data-distance-inches="{_number(distance)}">'
+                f'{_measurement_text(distance, distance_unit)}</text></g>'
             )
 
         edge_y = 0.0 if edge == "top" else geometry.table.height
@@ -206,7 +212,8 @@ def _render_annotation(
             f'x2="{_number(line_x + tick)}" y2="{_number(measure_y2)}"/>'
             f'<text class="dimension-label" x="{_number(line_x)}" y="{_number(mid_y)}" '
             f'text-anchor="middle" transform="rotate(-90 {_number(line_x)} {_number(mid_y)})" '
-            f'dy="{_number(label_dy)}">{_measurement_text(distance)}</text></g>'
+            f'dy="{_number(label_dy)}" data-distance-inches="{_number(distance)}">'
+            f'{_measurement_text(distance, distance_unit)}</text></g>'
         )
 
     target = rectangles[annotation.target]
@@ -215,10 +222,15 @@ def _render_annotation(
     if isinstance(annotation, AreaSizeAnnotation):
         x = (x1 + x2) / 2.0
         y = y1 + (y2 - y1) * 0.82
-        text = f"{_measurement_text(x2 - x1)} × {_measurement_text(y2 - y1)}"
+        text = (
+            f"{_measurement_text(x2 - x1, distance_unit)} × "
+            f"{_measurement_text(y2 - y1, distance_unit)}"
+        )
         return (
             f'<text id="{annotation_id}" class="area-size" data-target="{target_id}" '
-            f'x="{_number(x)}" y="{_number(y)}" text-anchor="middle">{text}</text>'
+            f'x="{_number(x)}" y="{_number(y)}" text-anchor="middle" '
+            f'data-distance-size-inches="{_number(x2 - x1)},{_number(y2 - y1)}">'
+            f'{text}</text>'
         )
 
     tick = 0.25 * text_scale
@@ -234,7 +246,8 @@ def _render_annotation(
             f'<line x1="{_number(x2)}" y1="{_number(y - tick)}" '
             f'x2="{_number(x2)}" y2="{_number(y + tick)}"/>'
             f'<text class="dimension-label" x="{_number(mid_x)}" y="{_number(label_y)}" '
-            f'text-anchor="middle">{_measurement_text(x2 - x1)}</text></g>'
+            f'text-anchor="middle" data-distance-inches="{_number(x2 - x1)}">'
+            f'{_measurement_text(x2 - x1, distance_unit)}</text></g>'
         )
 
     x = x1 + annotation.offset if annotation.side == "start" else x2 - annotation.offset
@@ -249,7 +262,8 @@ def _render_annotation(
         f'x2="{_number(x + tick)}" y2="{_number(y2)}"/>'
         f'<text class="dimension-label" x="{_number(x)}" y="{_number(mid_y)}" '
         f'text-anchor="middle" transform="rotate(-90 {_number(x)} {_number(mid_y)})" '
-        f'dy="{_number(label_dy)}">{_measurement_text(y2 - y1)}</text></g>'
+        f'dy="{_number(label_dy)}" data-distance-inches="{_number(y2 - y1)}">'
+        f'{_measurement_text(y2 - y1, distance_unit)}</text></g>'
     )
 
 
@@ -270,9 +284,13 @@ def _validate_renderer_support(geometry: ScenarioGeometry) -> None:
             )
 
 
-def render_scenario_map_svg(geometry: ScenarioGeometry) -> str:
+def render_scenario_map_svg(
+    geometry: ScenarioGeometry, *, distance_unit: Literal["in", "cm"] = "in"
+) -> str:
     """Render deterministic standalone SVG bytes from validated geometry."""
 
+    if distance_unit not in {"in", "cm"}:
+        raise ValueError("distance_unit must be in or cm")
     _validate_renderer_support(geometry)
     width = _number(geometry.table.width)
     height = _number(geometry.table.height)
@@ -294,7 +312,7 @@ def render_scenario_map_svg(geometry: ScenarioGeometry) -> str:
     # 48-inch maps should no longer render labels at half the size of 24-inch maps.
     text_scale = 1.0 + max(0.0, min(24.0, geometry.table.width - 24.0)) / 48.0
     annotations = "\n".join(
-        _render_annotation(geometry, annotation, rectangles, markers, text_scale)
+        _render_annotation(geometry, annotation, rectangles, markers, text_scale, distance_unit)
         for annotation in geometry.annotations
     )
     if annotations:
@@ -303,6 +321,7 @@ def render_scenario_map_svg(geometry: ScenarioGeometry) -> str:
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
         f'role="img" aria-labelledby="map-title" data-unit="in" '
+        f'data-distance-unit="{distance_unit}" '
         f'style="--scenario-map-label-size:{_number(1.4 * text_scale)}px;'
         f'--scenario-map-measure-size:{_number(1.1 * text_scale)}px">\n'
         f'<title id="map-title">{title}</title>\n'

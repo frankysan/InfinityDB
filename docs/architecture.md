@@ -170,9 +170,14 @@ Renderer-only styling remains separate. Standalone SVGs use a deterministic fall
 scenario detail inlines the same-origin SVG so its semantic map-color roles inherit from the active
 InfinityDB theme. The browser applies those roles through external CSS rather than SVG `<style>`
 because the application's Content Security Policy blocks injected inline styles. Renderer typography
-scales with table width in viewBox coordinates, without changing scenario geometry. Structured map
-annotations may reference semantic geometry
-to derive displayed distances and area sizes; they must not duplicate the underlying measurements.
+scales with table width in viewBox coordinates, without changing scenario geometry. The
+map endpoint accepts `distance_unit=in|cm` for deterministic standalone labels; browser-inlined
+SVG retains canonical inch measurements in `data-distance-inches` /
+`data-distance-size-inches` and updates labels immediately on the existing in/cm preference event.
+Table dimensions use the same preference, and existing maintained-text distance tokens already
+refresh through the shared maintained-text renderer. Game geometry remains inch-based, while
+physical marker diameters stay in millimeters. Structured map annotations may reference semantic
+geometry to derive displayed distances and area sizes; they must not duplicate the underlying measurements.
 Geometry v1 includes rectangle dimensions/area sizes plus element-to-table-edge distances, which covers
 the core Domination and Supplies measurement callouts without introducing arbitrary annotation geometry.
 Scenario placement distances are edge-to-edge by default: when a marker is stated to be a distance from

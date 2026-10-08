@@ -292,7 +292,7 @@ unimplemented until its corresponding behavior exists.
       palette without duplicating geometry or requiring a change to its API.
     - [x] Normalize scenario-map typography with larger map labels and measurements scaled to the
       table width across 24×32, 32×48, and 48×48 maps. Fine-tune sizes after browser acceptance.
-    - [ ] Make every player-facing scenario measurement except marker size use the shared dynamic
+    - [x] Make every player-facing scenario measurement except marker size use the shared dynamic
       distance presentation so users can switch between inches and centimeters. This includes
       maintained-text scenario distances **and every measurement rendered inside the generated SVG
       maps** (table dimensions, Deployment Zones, area sizes, element/edge distances, and future

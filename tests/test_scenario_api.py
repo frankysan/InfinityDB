@@ -334,6 +334,10 @@ def test_scenario_browser_routes_are_published_with_shared_navigation(
     assert b'new DOMParser().parseFromString(markup, "image/svg+xml")' in script
     assert b'svg.querySelector("style")?.remove();' in script
     assert b'document.importNode(svg, true)' in script
+    assert b'window.addEventListener("distanceunitchange", refreshScenarioDistances)' in script
+    assert b'[data-distance-inches]' in script
+    assert b'[data-distance-size-inches]' in script
+    assert b'url.searchParams.set("distance_unit", distanceUnit())' in script
     assert b'rulesCitationNode(citation)' in script
     assert b'issue.status === "reviewed-resolution"' in script
     assert b'badge.textContent = reviewed ? "reviewed" : "uncertain"' in script
@@ -367,6 +371,29 @@ def test_scenario_map_api_renders_every_supported_configuration(
         assert status == 200
         assert headers["content-type"].startswith("image/svg+xml")
         assert b'<svg xmlns="http://www.w3.org/2000/svg"' in svg
+
+
+def test_scenario_map_api_supports_cm_and_rejects_invalid_unit_requests(
+    scenario_app: Application,
+) -> None:
+    endpoint = "/api/scenarios/supplies/map.svg"
+    for unit, expected in (("in", "8″"), ("cm", "20 cm")):
+        status, headers, body = request(
+            scenario_app, endpoint, query=f"army_points=300&distance_unit={unit}"
+        )
+        assert status == 200
+        assert headers["content-type"].startswith("image/svg+xml")
+        assert f'data-distance-unit="{unit}"'.encode() in body
+        assert expected.encode() in body
+        assert b'data-diameter-mm="25"' in body
+        assert b'data-unit="in"' in body
+    for query in (
+        "army_points=300&distance_unit=mm",
+        "army_points=300&distance_unit=cm&distance_unit=in",
+    ):
+        status, _, body = request(scenario_app, endpoint, query=query)
+        assert status == 400
+        assert b"distance_unit" in body or b"duplicate" in body.lower()
 
 
 def test_scenario_map_api_renders_selected_maintained_geometry(

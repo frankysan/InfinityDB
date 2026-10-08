@@ -41,8 +41,10 @@ release/audit narrative belongs in the changelog and Git history.
   unless a source explicitly names a center/reference point; marker footprint therefore participates in
   “X inches from” placement. Map measurement annotations are reference-based: the renderer derives
   rectangle dimensions, area-size labels, and element-to-table-edge clearances from semantic geometry
-  rather than maintaining duplicate numeric measurements. Geometry v1 permits asymmetric
-  and multiple Deployment Zone regions and keeps semantic style/marker identities open; SVG renderer
+  rather than maintaining duplicate numeric measurements. The map API supports `distance_unit=in|cm`;
+  inline SVG labels carry canonical inch data attributes and follow the existing in/cm preference
+  without a geometry refetch. Table dimensions switch too, but marker diameters remain physical mm.
+  Geometry v1 permits asymmetric and multiple Deployment Zone regions and keeps semantic style/marker identities open; SVG renderer
   v1 separately fails closed when it lacks a supported presentation style or canonical marker metadata.
   ITS variation informs extensibility, while ITS-only geometry and the interactive editor remain post-1.0. See
   `docs/data-model.md`.
