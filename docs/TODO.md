@@ -343,6 +343,11 @@ unimplemented until its corresponding behavior exists.
     - [x] Ensure rapid game-size changes show a loading state and never let superseded
       responses or errors replace the current configuration, even when cancellation is ignored.
       Keep catalog and objective-card grids usable below their preferred 280px card width.
+    - [x] Complete user-confirmed manual visual review of the scenario browser (2026-10-08).
+      Keep keyboard/touch and non-happy-path interaction acceptance separate from this visual sign-off.
+    - [ ] Complete real-browser keyboard/touch and loading/empty/error-state acceptance,
+      including direct links and soft navigation; automated lifecycle and responsive tests
+      do not replace these interaction checks.
   - **Completion:** all four scenarios can be found and understood in normal mode for every
     supported configuration. Review scoring and placement against citations, follow related-rule
     links, and check keyboard/touch, narrow widths, Light/Dark themes, loading/empty/error behavior,

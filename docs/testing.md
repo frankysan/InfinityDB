@@ -91,8 +91,9 @@ removes the distance-unit listener, and rejects late map responses. A second Nod
 harness checks that rapidly changing Army Points returns to the loading panel,
 ignores superseded results (including stale errors), and displays only the latest
 configuration even when an aborted request still resolves. Responsive grid
-contracts are also checked in the web suite. These are not substitutes for the
-manual scenario-page keyboard, touch, and theme review in `docs/TODO.md`.
+contracts are also checked in the web suite. Scenario browser visual review was
+user-confirmed on 2026-10-08; the separate real-browser keyboard/touch and
+loading/empty/error-state interaction checks remain open in `docs/TODO.md`.
 
 ## Silhouette manual browser acceptance
 
