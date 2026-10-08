@@ -10,6 +10,7 @@
         "test_audit_database_separation",
         "test_audit_enrichment_coverage",
         "test_audit_fireteam_semantics",
+        "test_audit_mine_variant_effects",
         "test_audit_loadout_semantics",
         "test_audit_normalization_links",
         "test_audit_peripheral_semantics",

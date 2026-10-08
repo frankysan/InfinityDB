@@ -1081,3 +1081,45 @@ justify static Unit eligibility or geometry fields in the catalog model.
 Source:
 
 - Wiki: <https://infinitythewiki.com/ITS_FAQ>
+
+### RR-WPN-MINE-002 — Named Mine profile and effect-owner review (N5.3)
+
+**Scope:** N5 v5.3 Weapon Chart printed p. 181 and Mines prose p. 72;
+Army catalog from `InfinityDB-work-368473cf9537.zip`; the pinned PDF SHA-256
+and per-variant review coordinates are recorded in
+`config/validation/mine-variant-effects.json`. The checked-in review reconciles
+seven named Mine profiles with Army's published Weapon detail API and with the
+curated ammunition, trait, state, and exceptional Weapon rule identities.
+This is a **profile/owner mapping**, not proof that every interaction is
+represented by a rule relation or evaluated by the browser.
+
+The profile-specific effects are **not** inherited from `weapon:mines`:
+
+- **AP Mine:** AP, ARM/2, one Saving Roll; see `ammunition:ap`.
+- **E/M Mine:** E/M, BTS/2, two Saving Rolls; the ammunition may impose
+  Isolated and (on particular target types) Immobilized-B. Non-Lethal does
+  not cancel those rolls.
+- **Monofilament Mine:** N, ARM=0, one Saving Roll and a separate State: Dead
+  Trait. This is not AP Ammunition.
+- **PARA Mine:** PARA, PH-6, one Saving Roll; applies its non-Wound
+  Immobilized-A effect. Its PS field is inapplicable.
+- **Shock Mine:** Shock, ARM, one Saving Roll; its special effect belongs
+  to `ammunition:shock`.
+- **Viral Mine:** N, BTS, one printed Saving Roll, plus BioWeapon (DA+Shock)
+  against VITA-bearing targets. Do not silently change the printed roll count
+  to two; the additional effects belong to `trait:bioweapon`.
+- **Cybermine:** no Ammunition designation, PS 5, two BTS Saving Rolls;
+  Comms Attack and the Reset / Stunned / Immobilized-B exceptions belong to
+  `weapon:cybermine`.
+
+The live N5.3 Wiki Weapon Chart and Mines rules corroborate these distinctions,
+but those pages may advance independently of the pinned local sources. The
+PARA Mine PDF/Wiki `[*]` versus Army `[**]` source-notation discrepancy remains
+**unresolved** and the original Army field is preserved. Chest Mine's two
+weapon modes remain outside this seven-variant family review.
+
+The `trait:non-lethal` summary previously implied that all non-lethal attacks
+skip Saving Rolls, contradicting the E/M, PARA, and Cybermine source profiles.
+The corrected definition prohibits Wounds without suppressing the rolls used
+to determine non-Wound effects. Citation: pinned `wiki-traits-oldid-4110`,
+Non-Lethal heading; compare the N5.3 Weapon Chart p. 181.

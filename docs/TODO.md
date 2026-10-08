@@ -219,6 +219,10 @@ unimplemented until its corresponding behavior exists.
       to Chest Mines. The pinned 21-clause review now reports 21 represented;
       weapon catalog enrichment is regression-tested against all eight associated
       Army Weapon slugs (seven named Mine variants and Chest Mine).
+    - [x] Reconcile seven named Mine Army profiles with printed N5.3 chart
+      values and identify the distinct ammunition/trait/state effect owners.
+      Evidence: `config/validation/mine-variant-effects.json` and
+      `docs/rules-research.md` RR-WPN-MINE-002; PARA footnote remains unresolved.
     - [ ] Complete an individual-variant review for AP, E/M, Monofilament, PARA,
       Shock, Viral, and Cybermines against the N5 Weapon Chart, ammunition and
       State rules, and Army profiles. Shared placement/trigger rules must not be

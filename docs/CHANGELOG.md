@@ -44,6 +44,8 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing:** Clarify Non-Lethal rules: these attacks cannot inflict Wounds,
+  but E/M, PARA and Cybermines still require Saving Rolls to determine their effects.
 - **Data processing:** Clarify the Boost rules reference using the N5 Weaponry text, including
   detonation, obstacle and Marker exclusions, and Deployable-chain restrictions.
 - **Web frontend:** Show no Saving Rolls for Weapon profiles without a Saving Attribute,

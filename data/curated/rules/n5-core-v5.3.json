@@ -3078,7 +3078,7 @@
             "id": "trait:non-lethal",
             "kind": "trait",
             "name": "Non-Lethal",
-            "summary": "Never inflicts Wounds or requires Saving Rolls, regardless of ammunition added by other rules.",
+            "summary": "Prevents this Weapon, Equipment, or Hacking Program from inflicting Wounds, even when other Ammunition is added or combined. Non-Lethal does not by itself remove Saving Rolls: some attacks require them to determine non-Wound effects such as [[state:isolated|Isolated]] or [[state:immobilized-a|Immobilized-A]].",
             "composition": {
                 "role": "definition"
             },

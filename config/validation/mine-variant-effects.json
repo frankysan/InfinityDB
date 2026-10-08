@@ -1,0 +1,162 @@
+{
+  "formatVersion": 1,
+  "scope": "Selected named N5.3 Mines, not a complete Weaponry audit or an assertion that these effects have executable game logic.",
+  "sources": {
+    "corePdfVersion": "5.3",
+    "corePdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+    "weaponChartPrintedPage": 181,
+    "mineRulesPrintedPage": 72,
+    "armySnapshot": "InfinityDB-work-368473cf9537.zip",
+    "wikiPages": [
+      "https://infinitythewiki.com/Mines",
+      "https://infinitythewiki.com/Weapon_Chart",
+      "https://infinitythewiki.com/Traits"
+    ]
+  },
+  "variants": [
+    {
+      "slug": "ap-mine",
+      "armyName": "AP Mine",
+      "profile": {
+        "ammunition": "AP",
+        "damage": "7",
+        "saving": "ARM/2",
+        "savingNum": "1"
+      },
+      "effectRuleIds": [
+        "ammunition:ap"
+      ],
+      "requiredSourceTraits": [
+        "Concealed",
+        "Deployable"
+      ],
+      "interpretation": "ARM halved by AP Ammunition."
+    },
+    {
+      "slug": "e-m-mine",
+      "armyName": "E/M Mine",
+      "profile": {
+        "ammunition": "E/M",
+        "damage": "7",
+        "saving": "BTS/2",
+        "savingNum": "2"
+      },
+      "effectRuleIds": [
+        "ammunition:em",
+        "trait:non-lethal",
+        "state:isolated",
+        "state:immobilized-b"
+      ],
+      "requiredSourceTraits": [
+        "Non-lethal",
+        "Deployable"
+      ],
+      "interpretation": "E/M forces two BTS/2 Saves; failures cause Isolated, and IMM-B for specified target types; it does not inflict Wounds."
+    },
+    {
+      "slug": "monofilament-mine",
+      "armyName": "Monofilament Mine",
+      "profile": {
+        "ammunition": "N",
+        "damage": "8",
+        "saving": "ARM=0",
+        "savingNum": "1"
+      },
+      "effectRuleIds": [
+        "ammunition:normal",
+        "trait:arm-0",
+        "state:dead"
+      ],
+      "requiredSourceTraits": [
+        "State: Dead",
+        "Deployable"
+      ],
+      "interpretation": "N Ammunition, ARM=0 against the Saving Roll, with the separate State: Dead Trait; not AP Ammunition."
+    },
+    {
+      "slug": "para-mine",
+      "armyName": "PARA Mine",
+      "profile": {
+        "ammunition": "PARA",
+        "damage": "-",
+        "saving": "PH-6",
+        "savingNum": "1"
+      },
+      "effectRuleIds": [
+        "ammunition:para",
+        "trait:non-lethal",
+        "state:immobilized-a"
+      ],
+      "requiredSourceTraits": [
+        "Non-lethal",
+        "Deployable"
+      ],
+      "interpretation": "PARA uses a PH-6 Saving Roll and IMM-A on failure; PS is inapplicable."
+    },
+    {
+      "slug": "shock-mine",
+      "armyName": "Shock Mine",
+      "profile": {
+        "ammunition": "Shock",
+        "damage": "7",
+        "saving": "ARM",
+        "savingNum": "1"
+      },
+      "effectRuleIds": [
+        "ammunition:shock"
+      ],
+      "requiredSourceTraits": [
+        "Concealed",
+        "Deployable"
+      ],
+      "interpretation": "Shock Ammunition resolves its own special effect."
+    },
+    {
+      "slug": "viral-mine",
+      "armyName": "Viral Mine",
+      "profile": {
+        "ammunition": "N",
+        "damage": "7",
+        "saving": "BTS",
+        "savingNum": "1"
+      },
+      "effectRuleIds": [
+        "ammunition:normal",
+        "trait:bioweapon"
+      ],
+      "requiredSourceTraits": [
+        "Bioweapon (DA+SHOCK)",
+        "Deployable"
+      ],
+      "interpretation": "N Ammunition and BioWeapon (DA+Shock) against targets with VITA; source chart still prints one initial BTS Save."
+    },
+    {
+      "slug": "cybermine",
+      "armyName": "Cybermine",
+      "profile": {
+        "ammunition": 0,
+        "damage": "5",
+        "saving": "BTS",
+        "savingNum": "2"
+      },
+      "effectRuleIds": [
+        "weapon:cybermine",
+        "trait:non-lethal",
+        "state:stunned",
+        "state:immobilized-b",
+        "skill:reset"
+      ],
+      "requiredSourceTraits": [
+        "Comms. Attack",
+        "Non-lethal"
+      ],
+      "interpretation": "No ammunition designation in Army/Weapon Chart; bespoke Comms Attack requires Reset and applies Stunned or IMM-B."
+    }
+  ],
+  "unresolved": [
+    {
+      "slug": "para-mine",
+      "issue": "PDF/Wiki p181 use [*] for Weaponry; Army profile uses [**] for Ammunition. No source string is overwritten."
+    }
+  ]
+}
