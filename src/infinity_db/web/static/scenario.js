@@ -376,13 +376,16 @@ function render(item) {
 
 async function loadDetail(points) {
   detailController?.abort();
-  detailController = new AbortController();
+  const controller = new AbortController();
+  detailController = controller;
   elements.status.textContent = `Loading ${points} Army Point setup.`;
   show(elements.status);
   try {
-    const item = await getScenario(slug, points, detailController.signal);
+    const item = await getScenario(slug, points, controller.signal);
+    if (controller.signal.aborted || pageController.signal.aborted) return;
     render(item);
   } catch (error) {
+    if (controller.signal.aborted || pageController.signal.aborted) return;
     if (error.name === "AbortError") return;
     elements.errorMessage.textContent = error.message || "Could not load this scenario.";
     show(elements.error);
@@ -391,12 +394,14 @@ async function loadDetail(points) {
 
 function choose(points) {
   if (!points) {
+    detailController?.abort();
     setSelectedArmyPoints(null);
     show(elements.choice);
     return;
   }
   const numeric = Number(points);
   if (!summary.supported_army_points.includes(numeric)) {
+    detailController?.abort();
     elements.errorMessage.textContent = `${numeric} Army Points is not supported by this scenario.`;
     show(elements.error);
     return;

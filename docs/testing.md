@@ -87,8 +87,12 @@ semantic theme stylesheet are present in the correct order.
 
 The scenario API tests also execute `scenario.js` in a small Node.js lifecycle harness.
 It verifies that leaving a scenario detail page aborts its pending map/catalog requests,
-removes the distance-unit listener, and rejects late map responses. This is not a
-substitute for the manual scenario-page keyboard, touch, and theme review in `docs/TODO.md`.
+removes the distance-unit listener, and rejects late map responses. A second Node.js
+harness checks that rapidly changing Army Points returns to the loading panel,
+ignores superseded results (including stale errors), and displays only the latest
+configuration even when an aborted request still resolves. Responsive grid
+contracts are also checked in the web suite. These are not substitutes for the
+manual scenario-page keyboard, touch, and theme review in `docs/TODO.md`.
 
 ## Silhouette manual browser acceptance
 

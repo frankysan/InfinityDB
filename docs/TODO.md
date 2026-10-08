@@ -340,6 +340,9 @@ unimplemented until its corresponding behavior exists.
     - [x] In the **Specialist Troops** card, present **Qualifying Skills** before **Restrictions**.
     - [x] Clean up scenario map requests and unit-change listeners when leaving a detail page
       through soft navigation; ignore late map responses so an old page cannot be updated.
+    - [x] Ensure rapid game-size changes show a loading state and never let superseded
+      responses or errors replace the current configuration, even when cancellation is ignored.
+      Keep catalog and objective-card grids usable below their preferred 280px card width.
   - **Completion:** all four scenarios can be found and understood in normal mode for every
     supported configuration. Review scoring and placement against citations, follow related-rule
     links, and check keyboard/touch, narrow widths, Light/Dark themes, loading/empty/error behavior,

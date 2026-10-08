@@ -381,6 +381,46 @@ def test_scenario_browser_aborts_map_and_unit_listener_on_soft_navigation() -> N
     assert "scenario navigation lifecycle: passed" in completed.stdout
 
 
+def test_scenario_selection_ignores_stale_requests() -> None:
+    node = shutil.which("node")
+    if node is not None:
+        command = [node]
+    else:
+        try:
+            importlib.import_module("nodejs_wheel")
+        except ImportError:
+            pytest.skip("Node.js is unavailable for scenario selection regression")
+        command = [sys.executable, "-m", "nodejs_wheel"]
+    root = Path(__file__).parents[1]
+    completed = subprocess.run(
+        [
+            *command,
+            str(root / "tests" / "scenario_selection_harness.cjs"),
+            str(root / "src" / "infinity_db" / "web" / "static" / "scenario.js"),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    assert "scenario selection race: passed" in completed.stdout
+
+
+def test_scenario_grid_can_shrink_to_narrow_viewports(scenario_app: Application) -> None:
+    status, _, stylesheet = request(scenario_app, "/static/page-overrides.css")
+    assert status == 200
+    # Both the catalog cards and objective cards must shrink below 280px
+    # after page gutters/padding are subtracted on narrow mobile screens.
+    assert (
+        b"grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));"
+        in stylesheet
+    )
+    assert stylesheet.count(
+        b"grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));"
+    ) == 2
+
+
 @pytest.mark.parametrize(
     "slug",
     ["annihilation", "domination", "supplies", "firefight"],
