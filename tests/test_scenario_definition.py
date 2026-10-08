@@ -377,11 +377,11 @@ def test_annihilation_mission_setup_reuses_geometry_and_preserves_end_conditions
         (200, [(50, 100), (101, 150), (151, None)], [(50, 100), (101, 150), (151, None)]),
         (250, [(65, 125), (126, 200), (201, None)], [(65, 125), (126, 200), (201, None)]),
         (300, [(75, 150), (151, 250), (251, None)], [(75, 150), (151, 250), (251, None)]),
-        (350, [(85, 175), (176, 270), (271, None)], [(85, 150), (176, 270), (251, None)]),
+        (350, [(85, 175), (176, 270), (271, None)], [(85, 175), (176, 270), (271, None)]),
         (400, [(100, 200), (201, 300), (301, None)], [(100, 200), (201, 300), (301, None)]),
     ],
 )
-def test_annihilation_preserves_each_printed_scoring_row(
+def test_annihilation_preserves_reviewed_scoring_rows(
     annihilation_record: dict[str, Any],
     points: int,
     kill_ranges: list[tuple[int, int | None]],
@@ -460,9 +460,7 @@ def test_geometry_only_definitions_remain_supported(annihilation_record: dict[st
         ),
         (("mission", "endConditions", 0, "condition", "rounds"), 0, "integer"),
         (("mission", "endConditions", 0, "finishAt"), "immediate", "round-limit"),
-        (("mission", "sourceIssues"), [], "overlapping score ranges for 350"),
         (("mission", "sourceIssues", 0, "objectiveId"), "missing", "unknown objective"),
-        (("mission", "sourceIssues", 0, "armyPoints"), [300], "overlapping score ranges for 350"),
         (("mission", "sourceIssues", 0, "status"), "resolved", "one of"),
     ],
 )
@@ -718,10 +716,33 @@ def test_domination_end_condition_requires_every_game_size_threshold(
         parse_scenario_definition_record(domination_record)
 
 
+def _restore_printed_annihilation_350_overlap(annihilation_record: dict[str, Any]) -> None:
+    awards = annihilation_record["facts"]["mission"]["objectives"][1]["awards"]
+    applicable = [award for award in awards if award["armyPoints"] == [350]]
+    one_point, _, four_points = applicable
+    one_point["condition"]["maximum"] = 150
+    four_points["condition"]["minimum"] = 251
+
+
+def test_reviewed_resolution_does_not_excuse_scoring_overlap(
+    annihilation_record: dict[str, Any],
+) -> None:
+    _restore_printed_annihilation_350_overlap(annihilation_record)
+    with pytest.raises(ScenarioDefinitionError, match="overlapping score ranges for 350"):
+        parse_scenario_definition_record(annihilation_record)
+
+    annihilation_record["facts"]["mission"]["sourceIssues"][0]["status"] = (
+        "needs-verification"
+    )
+    parse_scenario_definition_record(annihilation_record)
+
+
 def test_game_size_source_issue_cannot_excuse_unrelated_scoring_overlap(
     annihilation_record: dict[str, Any],
 ) -> None:
+    _restore_printed_annihilation_350_overlap(annihilation_record)
     issue = annihilation_record["facts"]["mission"]["sourceIssues"][0]
+    issue["status"] = "needs-verification"
     del issue["objectiveId"]
     issue["gameSizeField"] = "swc"
     with pytest.raises(ScenarioDefinitionError, match="overlapping score ranges for 350"):
@@ -947,7 +968,9 @@ def test_geometry_issues_require_references_in_every_applicable_configuration(
 def test_geometry_issue_does_not_excuse_an_unrelated_exclusive_scoring_overlap(
     annihilation_record: dict[str, Any],
 ) -> None:
+    _restore_printed_annihilation_350_overlap(annihilation_record)
     issue = annihilation_record["facts"]["mission"]["sourceIssues"][0]
+    issue["status"] = "needs-verification"
     del issue["objectiveId"]
     issue["geometryElementIds"] = ["deployment-a"]
     with pytest.raises(ScenarioDefinitionError, match="overlapping score ranges for 350"):

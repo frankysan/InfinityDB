@@ -579,13 +579,16 @@ def parse_scenario_mission(
                     known,
                     f"{ctx}.geometryElementIds in {configuration.id}",
                 )
-        _choice(issue["status"], {"needs-verification"}, f"{ctx}.status")
+        _choice(
+            issue["status"], {"needs-verification", "reviewed-resolution"}, f"{ctx}.status"
+        )
         issues.append(
             ScenarioSourceIssue(
                 identifier,
                 points,
                 objective_id,
                 _text(issue["description"], f"{ctx}.description"),
+                status=str(issue["status"]),
                 game_size_field=game_size_field,
                 geometry_element_ids=geometry_ids,
             )
@@ -613,7 +616,9 @@ def parse_scenario_mission(
                 shared = set(award.army_points).intersection(other.army_points)
                 for point in shared if overlaps else ():
                     if not any(
-                        issue.objective_id == objective.id and point in issue.army_points
+                        issue.status == "needs-verification"
+                        and issue.objective_id == objective.id
+                        and point in issue.army_points
                         for issue in issues
                     ):
                         raise ScenarioMissionError(

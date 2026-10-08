@@ -444,8 +444,11 @@ are derived from the included Rules' `definesSkills`, rather than authored again
 The resolved mission uses ordered sides/game sizes, geometry-bound deployment regions, typed
 objectives/conditions, included Rules and Skills, endings, and scoped source issues. Its existing
 numeric range, per-round caps, geometry status/comparison, combat metric, and end-condition validators
-still apply after expansion. Source issues preserve the Annihilation scoring discrepancy and Domination
-SWC difference. Supplies no longer carries a placement issue: page 153 explicitly uses an 8-inch
+still apply after expansion. Scenario source-note status is `needs-verification` for unresolved source
+uncertainty or `reviewed-resolution` for an explicit maintained interpretation; only an objective-scoped
+`needs-verification` issue may acknowledge an otherwise-overlapping exclusive scoring row. Annihilation
+uses a reviewed resolution for its corrected 350-point surviving-VP boundaries, while Domination keeps
+its 350-point SWC difference as needs-verification. Supplies no longer carries a placement issue: page 153 explicitly uses an 8-inch
 offset, while re-review of page 154 shows the 12-inch mark as a guide ruler rather than the Supply Box
 offset. Both definition and inclusion source provenance remain available; shared reuse does not
 authorize correcting genuinely ambiguous source values.
@@ -454,7 +457,6 @@ Shared prose participates in the full semantic maintained-text syntax, target, a
 audits, including objective/ending payloads in the component library. No plain-reference exception
 is broadened for the new model. Rebuild `rules.db` with the current rules builder after migrating
 to format v23; current rules schema/compatibility is 8/10.
-
 
 Embedded `term` records own source-backed Game terminology that does not warrant a standalone
 catalog/detail route. They require `facts.scope` with a stable slug such as `game-element`,

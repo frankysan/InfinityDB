@@ -16223,7 +16223,7 @@
                             ],
                             "gameSizeField": "swc",
                             "status": "needs-verification",
-                            "description": "The Domination Forces and Deployment chart on N5.3 printed page 151 assigns 6 SWC to a 350-point game. This differs from the 7 SWC in the Annihilation chart for the same Army Points. The scenario-specific printed value is retained; whether the difference is intentional needs verification."
+                            "description": "The Domination Forces and Deployment chart on N5.3 printed page 151 assigns 6 SWC to a 350-point game, while Annihilation assigns 7 SWC at the same Army Points. InfinityDB retains the scenario-specific printed value of 6 SWC. The difference may be intentional, but is noteworthy because the surrounding standard game-size progression would otherwise suggest 7."
                         }
                     ]
                 },
@@ -17549,8 +17549,8 @@
                                 350
                             ],
                             "objectiveId": "preserve-forces",
-                            "status": "needs-verification",
-                            "description": "The 350-point surviving-Victory-Points column on printed page 149 lists 85–150 for 1 Objective Point, 176–270 for 3, and more than 250 for 4. It leaves 151–175 uncovered and overlaps at 251–270. These printed values are retained; the applicable score in those intervals needs verification."
+                            "status": "reviewed-resolution",
+                            "description": "The 350-point surviving-Victory-Points column on printed page 149 appears to contain two typographical boundary errors: it prints 85–150 for 1 Objective Point and more than 250 for 4, while the surrounding progression and the corresponding enemy-kills column use contiguous bands. InfinityDB therefore uses the reviewed intended ranges 85–175, 176–270, and more than 270 for 1, 3, and 4 Objective Points respectively."
                         }
                     ]
                 },
@@ -19473,7 +19473,7 @@
                                 "kind": "numeric-range",
                                 "metric": "surviving-victory-points",
                                 "minimum": 85,
-                                "maximum": 150
+                                "maximum": 175
                             }
                         },
                         {
@@ -19496,7 +19496,7 @@
                             "condition": {
                                 "kind": "numeric-range",
                                 "metric": "surviving-victory-points",
-                                "minimum": 251,
+                                "minimum": 271,
                                 "maximum": null
                             }
                         },

@@ -243,10 +243,11 @@ function issuesSection(item) {
     const heading = document.createElement("div");
     heading.className = "scenario-source-issue-heading";
     const title = document.createElement("h3");
-    title.textContent = "Needs verification";
+    const reviewed = issue.status === "reviewed-resolution";
+    title.textContent = reviewed ? "Reviewed interpretation" : "Needs verification";
     const badge = document.createElement("span");
     badge.className = "detail-badge";
-    badge.textContent = "uncertain";
+    badge.textContent = reviewed ? "reviewed" : "uncertain";
     heading.append(title, badge);
     const copy = document.createElement("p");
     copy.className = "detail-copy";

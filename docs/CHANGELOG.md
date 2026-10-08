@@ -16,6 +16,9 @@ are not retroactively relabeled.
 - Supplies now consistently shows 8 inches of clear space between each outer Supply Box marker edge
   and the table edge at every game size; the 12-inch mark in the large-table source illustration is a
   guide ruler, not a box offset.
+- Annihilation's 350-point surviving-force scoring now uses the reviewed contiguous ranges
+  85–175, 176–270, and above 270; Domination continues to show the printed 6 SWC at 350 points with
+  a note that the unusual progression remains worth verifying.
 
 ### Added
 
@@ -26,6 +29,13 @@ are not retroactively relabeled.
   scenario data. Scenarios are discoverable from primary navigation and the landing page without
   joining global search or the Glossary. Browser configuration uses the shared versioned share-state
   contract rather than a scenario-specific URL format.
+
+### Fixed
+
+- **Data processing + Web frontend:** Correct Annihilation's 350-point surviving-Victory-Points
+  boundaries as a reviewed source typo while preserving the printed discrepancy as a source note.
+  Keep Domination's printed 350-point 6 SWC value and explain the unresolved cross-scenario
+  inconsistency without silently substituting 7 SWC.
 
 ### Upgrade notes
 

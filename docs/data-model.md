@@ -455,13 +455,17 @@ by `maximum: null`) or `reviewed-prose` conditions with semantic maintained-text
 numeric metrics are killed enemy Army Points and surviving Victory Points. Each objective declares
 its scoring timing, `exclusive` or `cumulative` aggregation, and Objective Point cap. This records
 reference semantics without evaluating match state. Exclusive numeric ranges must not overlap unless
-a `needs-verification` source issue names that objective and Army Points row. A source issue preserves
-uncertainty; it does not select a winning band or authorize a rules correction.
+a `needs-verification` source issue names that objective and Army Points row. A `needs-verification`
+issue preserves unresolved uncertainty; it does not select a winning band or authorize a rules
+correction. A `reviewed-resolution` source note instead records an explicit maintained interpretation
+of a known source discrepancy and cannot excuse overlapping ranges.
 
-The Annihilation pilot retains all N5.3 printed values, including the inconsistent 350-point
-surviving-Victory-Points column on page 149: 85–150 awards 1 Objective Point, 176–270 awards 3, and
-more than 250 awards 4. The 151–175 gap and 251–270 overlap remain explicit in the scoped source issue.
-Its end conditions distinguish the third-Game-Round limit from the Tactical Phase all-Null check,
+The Annihilation 350-point surviving-Victory-Points column on page 149 prints inconsistent boundaries:
+85–150 awards 1 Objective Point, 176–270 awards 3, and more than 250 awards 4. InfinityDB treats the
+two boundaries as typographical errors because the surrounding game-size progression and corresponding
+enemy-kills column both use contiguous bands. The maintained reviewed ranges are therefore 85–175,
+176–270, and more than 270, with a `reviewed-resolution` source note preserving the printed discrepancy
+and the reason for the correction. Its end conditions distinguish the third-Game-Round limit from the Tactical Phase all-Null check,
 which finishes at the end of that Player Turn. Printed pages 149–150 cite the full pilot.
 
 Domination adds geometry-referenced scoring conditions: `dominated-region-comparison` compares
@@ -504,13 +508,15 @@ mission-local too; neither canonical Skill definition is rewritten. Firefight re
 round limit and all-Null ending, with no minimum-VP field on its game-size rows. Printed pages
 155–156 cite the mission reference and maps.
 
-Source issues target exactly one `objectiveId`, `gameSizeField` (`swc` or
+Source notes/issues target exactly one `objectiveId`, `gameSizeField` (`swc` or
 `minimumVictoryPoints`), or non-empty `geometryElementIds` list and name their applicable Army
-Points. Geometry references must resolve in every applicable configuration. Game-size and geometry
-issues cannot excuse
-overlapping exclusive scoring ranges. Domination preserves the source-specific 6 SWC at 350
-points from printed page 151, with a game-size source issue pending verification rather than
-replacing it with the 7 SWC in Annihilation. Printed pages 151–152 cite the mission rules.
+Points. Geometry references must resolve in every applicable configuration. `needs-verification`
+marks unresolved source uncertainty; `reviewed-resolution` records a maintained interpretation after
+review. Only an objective-scoped `needs-verification` issue may acknowledge an otherwise-invalid
+overlap, while game-size, geometry, and reviewed-resolution notes cannot excuse one. Domination
+preserves the source-specific 6 SWC at 350 points from printed page 151, with a game-size
+`needs-verification` note because the value differs from Annihilation's 7 SWC and the usual progression
+but may be intentional. Printed pages 151–152 cite the mission rules.
 
 Supplies uses the written placement consistently at every game size: printed page 153 places the
 outer boxes `8 inches` from the table edges. Re-review of the 300–400-point illustration on page 154

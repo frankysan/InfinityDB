@@ -2248,6 +2248,7 @@ def test_annihilation_mission_round_trips_through_existing_rules_storage(
     current_rules_database: RulesDatabase,
 ) -> None:
     from infinity_db.scenario_definition import parse_scenario_definition_record
+    from infinity_db.scenario_mission import NumericRangeCondition
 
     record = current_rules_database.composed_record("scenario:annihilation")
     assert record is not None
@@ -2265,9 +2266,18 @@ def test_annihilation_mission_round_trips_through_existing_rules_storage(
     assert (issue.army_points, issue.objective_id, issue.status) == (
         (350,),
         "preserve-forces",
-        "needs-verification",
+        "reviewed-resolution",
     )
-    assert "151–175" in issue.description and "251–270" in issue.description
+    assert "85–175" in issue.description and "more than 270" in issue.description
+    survival = definition.mission.objectives[1]
+    ranges: list[tuple[int, int | None]] = []
+    for award in survival.awards:
+        if 350 not in award.army_points:
+            continue
+        condition = award.condition
+        assert isinstance(condition, NumericRangeCondition)
+        ranges.append((condition.minimum, condition.maximum))
+    assert ranges == [(85, 175), (176, 270), (271, None)]
     assert (
         "[[skill:lieutenant]]"
         in record["facts"]["mission"]["objectives"][2]["awards"][0]["condition"]["text"]

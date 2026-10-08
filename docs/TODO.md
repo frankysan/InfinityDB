@@ -226,13 +226,15 @@ unimplemented until its corresponding behavior exists.
       discrepancies and reviewed resolution instead of copying the nearest chart value. Dedicated
       scoped action/role/element identities remain separate pending work; publication indexes are now
       implemented by the export task above.
-    - [ ] Resolve the **Annihilation 350-point surviving-Victory-Points discrepancy** against
-      authoritative clarification. N5.3 printed page 149 leaves 151–175 uncovered and overlaps
-      251–270. The maintained pilot preserves the printed bands and a scoped needs-verification
-      issue; do not silently copy the enemy-kills thresholds or invent a scoring priority.
+    - [x] Resolve the **Annihilation 350-point surviving-Victory-Points discrepancy** as a reviewed
+      source typo. N5.3 printed page 149 leaves 151–175 uncovered and overlaps 251–270; the surrounding
+      progression and corresponding enemy-kills column make the intended contiguous bands
+      **85–175, 176–270, and >270**. Use those ranges and retain a reviewed-resolution source note
+      documenting the printed values rather than silently erasing the discrepancy.
     - [ ] Verify **Domination's 350-point SWC row** against authoritative clarification. N5.3
       printed page 151 specifies 6 SWC, unlike Annihilation's 7 SWC at the same Army Points.
-      The maintained mission retains 6 and a game-size source issue; do not infer a universal
+      Keep the printed scenario-specific value of 6 and a source note explaining that the difference
+      may be intentional but breaks the otherwise expected progression; do not infer a universal
       Points-to-SWC formula or silently borrow the value from another scenario.
     - [x] Verify **Supplies' large-table outer-box placement**. N5.3 page 153 specifies 8 inches
       from the edges in all cases. Re-review of page 154 confirms that the 12-inch mark in the
@@ -285,6 +287,13 @@ unimplemented until its corresponding behavior exists.
       the Supply Box physical boundaries, so its canonical 8-inch clearances are never restated in
       annotation data. Scenario distance language such as “8 inches from” is edge-to-edge unless the
       source explicitly defines a center/reference point.
+    - [ ] Make scenario-map colors semantic and theme-aware instead of baking the current light-map
+      palette into generated SVG. Deployment Zones, scoring/control areas, guides, markers, text,
+      backgrounds, and measurement strokes must resolve from the active InfinityDB theme so Light,
+      Dark, and future themes remain legible without maintaining unrelated geometry variants.
+    - [ ] Normalize scenario-map typography so labels and measurements have a visually similar size
+      across 24×32, 32×48, and 48×48 maps rather than shrinking with larger table geometry. Prefer
+      larger map text in the first pass, then tune against the surrounding scenario-detail UI.
     - [ ] Make every player-facing scenario measurement except marker size use the shared dynamic
       distance presentation so users can switch between inches and centimeters. This includes
       maintained-text scenario distances **and every measurement rendered inside the generated SVG
@@ -322,6 +331,15 @@ unimplemented until its corresponding behavior exists.
       core-scenario SVG renderer. The browser map endpoint consumes the selected maintained scenario
       geometry rather than a second map definition. The interactive map editor and ITS-only rendering
       extensions remain post-1.0.
+    - [ ] Default the browser Army Points selector to **300** when opening a scenario without an
+      explicit valid share-state selection. Explicit shared/legacy URL state must win, and the chosen
+      default should be written through the common versioned `s=` state; keep the backend API itself
+      configuration-explicit.
+    - [ ] Remove the redundant **“Rules for …”** scope line from Rule and Skill text cards when they
+      are embedded on a scenario page; the surrounding scenario already supplies that context.
+    - [ ] Match embedded scenario Rule/Skill card margins, padding, and vertical spacing to the normal
+      compact text-card rhythm used elsewhere instead of the current airy reference-page spacing.
+    - [ ] In the **Specialist Troops** card, present **Qualifying Skills** before **Restrictions**.
   - **Completion:** all four scenarios can be found and understood in normal mode for every
     supported configuration. Review scoring and placement against citations, follow related-rule
     links, and check keyboard/touch, narrow widths, Light/Dark themes, loading/empty/error behavior,

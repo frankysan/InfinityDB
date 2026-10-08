@@ -164,6 +164,17 @@ def test_scenario_detail_api_projects_objective_and_source_issue_tokens(
     supplies = json.loads(body)
     assert supplies["source_issues"] == []
 
+    status, _, body = request(
+        scenario_app,
+        "/api/scenarios/annihilation",
+        query="army_points=350",
+    )
+    assert status == 200
+    annihilation = json.loads(body)
+    issue = annihilation["source_issues"][0]
+    assert issue["status"] == "reviewed-resolution"
+    assert "85–175" in issue["description"] and "more than 270" in issue["description"]
+
 
 @pytest.mark.parametrize(
     ("path", "query", "status", "message"),
@@ -315,7 +326,8 @@ def test_scenario_browser_routes_are_published_with_shared_navigation(
     assert b'new URLSearchParams(window.location.search).get("army_points")' not in script
     assert b'/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?' in script
     assert b'rulesCitationNode(citation)' in script
-    assert b'badge.textContent = "uncertain"' in script
+    assert b'issue.status === "reviewed-resolution"' in script
+    assert b'badge.textContent = reviewed ? "reviewed" : "uncertain"' in script
     assert b'wrapper.classList.add("developer-only")' in script
 
     status, _, stylesheet = request(scenario_app, "/static/page-overrides.css")
