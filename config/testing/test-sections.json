@@ -23,6 +23,7 @@
         "test_audit_weapon_chart_profiles",
         "test_audit_weapon_trait_cross_sources",
         "test_audit_weapon_traits_prose",
+        "test_audit_weaponry_family_clauses",
         "test_availability",
         "test_availability_schema",
         "test_catalog_rules",

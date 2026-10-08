@@ -67,6 +67,63 @@ Source: Corvus Belli, *ITS Season 18 + N5.3 Rules Update*, 2026-09-01,
 sections "ARMY UPDATE CHANGELOG" and "N5.3 RULES CHANGELOG".
 The page is a URL-backed publication notice, not a locally hashed source snapshot.
 
+## Weaponry family prose (N5 v5.3)
+
+### RR-WPN-FAMILY-001 — Mines and Perimeter Weapons are distinct rules families
+
+**Scope:** current N5 core, Weaponry pp. 69 and 72; `rules.db` and Army snapshot
+from `InfinityDB-work-44bf3678c074.zip`.
+
+The Perimeter Weapons prose defines placement within the user's Zone of Control,
+while its separate Boost subsection specifies triggering, movement/contact,
+Dodge resolution, blocked paths, Marker exclusions and prevention of deployable
+chain reactions. The Mines subsection instead specifies camouflage placement,
+mandatory template triggering, friendly-model exclusion, a Dodge MOD, and
+special handling for Cybermines and Chest Mines. These are **not** interchangeable
+rules: Chest Mines explicitly exclude normal Mines mechanics in both modes;
+Cybermines require Reset instead of Dodge.
+
+InfinityDB's generated rules database contains `trait:perimeter`, `trait:boost`,
+`trait:deployable`, `skill:place-deployable`, `skill:reset` and associated records,
+but no record named `Mines` or `Perimeter Weapons`. In this snapshot,
+`trait:boost` has a short trigger summary, not the PDF's blocked-path and
+Marker-exclusion clauses. Their absence from that single entry is confirmed;
+whether they appear through another curated domain or player-facing linkage
+remains to be checked. No new runtime rule or imported Army change is justified
+by name matching alone.
+
+An additional **archived Wiki** cross-check identifies the corresponding
+N5 pages `Perimeter_Weapons` (revision 3912), `Mines` (revision 4112), and
+`Chest_Mines` (revision 3525) from the 2026-09-28 English history snapshot.
+The Perimeter Weapons and general Mines sections support the same reviewed
+clauses. In the Wiki, the Mine line-of-fire notation uses a different degree
+symbol, and Chest Mine mode clauses live on their own page, rather than on the
+Mines page. Thus simple page-local string searches are not a valid semantic
+comparison for those four anchors; they are **not** confirmed rule conflicts.
+Archive SHA-256:
+`d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d`;
+page payload SHA-256 values: Perimeter Weapons
+`7510cf3a66b8147c2070426d4b2255a81061add3b87d33a710b0cb699f90271a`,
+Mines `5f1892817a145bb27a3b77f971829f745bce1757928904dbd6f16f2ad38d89d2`,
+Chest Mines `6f4abda6bc62e1be694921cb4f8b658d98781e43f72820e5c3618aa7939f90f0`.
+Wiki URLs: <https://infinitythewiki.com/Perimeter_Weapons>,
+<https://infinitythewiki.com/Mines>, and
+<https://infinitythewiki.com/Chest_Mines>. No live Wiki revisions have been
+rechecked for this audit, and no older N5 snapshot delta is inferred.
+
+The maintained read-only source anchors and concept associations are in
+`config/validation/weaponry-family-clauses.json`. Reproduce the current
+snapshot comparison using `tools/audit_weaponry_family_clauses.py`. The 21
+reviewed anchors are **not** a complete clause inventory of Weaponry pp. 68–74,
+and concept identity is not proof of rule implementation or browser coverage.
+
+Sources: N5 v5.3 PDF, printed pp. 69 (Perimeter Weapons/Boost), 72 (Mines,
+Cybermines, Chest Mines), PDF SHA-256
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`;
+`data/generated/infinity.db` and `data/generated/rules.db`, with their exact
+hashes emitted by the audit. PDF and generated databases are external audit
+inputs, not redistributed artifacts.
+
 ## Basic Rules / Broader research
 
 ### RR-BR-BASE-001 — Game Modes define finite recommended game presets

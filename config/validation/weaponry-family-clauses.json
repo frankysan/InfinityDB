@@ -1,0 +1,186 @@
+{
+  "formatVersion": 1,
+  "corePdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+  "sourceEdition": "Infinity N5 v5.3 (English)",
+  "scope": "Selected Mines/Perimeter Weapons family prose; not a complete clause audit of all Weaponry sections",
+  "families": [
+    {
+      "name": "Perimeter Weapons",
+      "page": 69,
+      "armyExamples": [
+        "Crazykoala",
+        "Madtraps",
+        "WildParrot"
+      ],
+      "clauses": [
+        {
+          "id": "perimeter-placement",
+          "anchor": "These weapons are placed on the game table using the Place",
+          "relatedCuratedIds": [
+            "skill:place-deployable",
+            "trait:perimeter",
+            "trait:deployable"
+          ]
+        },
+        {
+          "id": "perimeter-zoc",
+          "anchor": "totally inside the Zone of Control of the Trooper",
+          "relatedCuratedIds": [
+            "trait:perimeter"
+          ]
+        },
+        {
+          "id": "boost-trigger",
+          "anchor": "it is triggered when an enemy Model declares or performs an Order",
+          "relatedCuratedIds": [
+            "trait:boost"
+          ]
+        },
+        {
+          "id": "boost-dodge",
+          "anchor": "The only way to avoid this attack is a successful Normal",
+          "relatedCuratedIds": [
+            "trait:boost",
+            "skill:dodge"
+          ]
+        },
+        {
+          "id": "boost-blocked-path",
+          "anchor": "the weapon will not trigger if the path from the weapon to the",
+          "relatedCuratedIds": [
+            "trait:boost"
+          ]
+        },
+        {
+          "id": "boost-marker-exclusions",
+          "anchor": "The weapon is not triggered by Camouflage Markers",
+          "relatedCuratedIds": [
+            "trait:boost"
+          ]
+        },
+        {
+          "id": "boost-no-deployable-chain",
+          "anchor": "the weapon does not activate other Deployable Weapons or Equipment",
+          "relatedCuratedIds": [
+            "trait:boost",
+            "trait:deployable"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mines",
+      "page": 72,
+      "armyExamples": [
+        "AP Mine",
+        "E/M Mine",
+        "Monofilament Mine",
+        "PARA Mine",
+        "Shock Mine",
+        "Viral Mine",
+        "Cybermine"
+      ],
+      "clauses": [
+        {
+          "id": "mine-camouflage-placement",
+          "anchor": "he will place a Camouflaged Marker",
+          "relatedCuratedIds": [
+            "skill:place-deployable"
+          ]
+        },
+        {
+          "id": "mine-reveal-token",
+          "anchor": "Replace the Camouflage Marker",
+          "relatedCuratedIds": [
+            "skill:discover"
+          ]
+        },
+        {
+          "id": "mine-mimetism",
+          "anchor": "both benefit from the MODs provided by the Mimetism",
+          "relatedCuratedIds": [
+            "skill:mimetism"
+          ]
+        },
+        {
+          "id": "mine-line-of-fire",
+          "anchor": "Mines have a 360º LoF arc",
+          "relatedCuratedIds": [
+            "trait:deployable"
+          ]
+        },
+        {
+          "id": "mine-direct-template",
+          "anchor": "when any type of Mine is triggered, a Small",
+          "relatedCuratedIds": [
+            "trait:direct-template"
+          ]
+        },
+        {
+          "id": "mine-allied-safety",
+          "anchor": "A Mine never triggers if the Small Teardrop Template would affect an ally",
+          "relatedCuratedIds": [
+            "trait:deployable"
+          ]
+        },
+        {
+          "id": "mine-trigger",
+          "anchor": "Mines must trigger when an enemy Model or Marker declares",
+          "relatedCuratedIds": [
+            "trait:deployable"
+          ]
+        },
+        {
+          "id": "mine-disposal",
+          "anchor": "Once a Mine triggers, it is removed from play",
+          "relatedCuratedIds": [
+            "trait:disposable-x"
+          ]
+        },
+        {
+          "id": "mine-dodge-mod",
+          "anchor": "imposes a -3 PH MOD to any attempt to Dodge",
+          "relatedCuratedIds": [
+            "skill:dodge",
+            "trait:deployable"
+          ]
+        },
+        {
+          "id": "mine-placement-restriction",
+          "anchor": "A Mine cannot be placed if there is an enemy Camouflage Marker",
+          "relatedCuratedIds": [
+            "skill:place-deployable"
+          ]
+        },
+        {
+          "id": "cybermine-reset",
+          "anchor": "they can only be evaded with a Reset",
+          "relatedCuratedIds": [
+            "skill:reset"
+          ]
+        },
+        {
+          "id": "chest-mine-bs-exception",
+          "anchor": "In BS Weapon Mode, Chest Mines function as a Direct Template Weapon",
+          "relatedCuratedIds": [
+            "trait:direct-template"
+          ]
+        },
+        {
+          "id": "chest-mine-cc-exception",
+          "anchor": "In CC Weapon Mode, Chest Mines function as a CC Weapon",
+          "relatedCuratedIds": [
+            "skill:cc-attack"
+          ]
+        },
+        {
+          "id": "chest-mine-shared-uses",
+          "anchor": "The Disposable (2) Trait is shared between all Modes",
+          "relatedCuratedIds": [
+            "trait:disposable-x"
+          ]
+        }
+      ]
+    }
+  ]
+}

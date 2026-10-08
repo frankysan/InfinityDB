@@ -202,6 +202,17 @@ unimplemented until its corresponding behavior exists.
       categories (Weaponry versus Ammunition). Confirm the intended Army
       representation, each rules relationship, and browser presentation; the
       proposed Sepsitor Plus name-matching cause remains hypothetical.
+    - [x] Start a PDF-hash-pinned clause-to-reference review for the **Mines** and
+      **Perimeter Weapons** families (N5.3 pp. 69, 72). The read-only
+      `tools/audit_weaponry_family_clauses.py` checks 21 selected clauses,
+      10 explicitly selected Army weapon names, and related curated concept
+      identities. All names and concept records resolve, but neither family
+      has a same-named curated record. This is not semantic or UI completeness.
+    - [ ] Adjudicate these 21 clauses against the *contents* of the curated
+      entries: Boost triggering/path/marker restrictions, Mine triggering and
+      allied-template exclusions, Cybermine Reset, and Chest Mine mode exceptions.
+      Decide whether to add family rules or link/revise existing ones, then
+      verify browser presentation.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
