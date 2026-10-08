@@ -20,6 +20,7 @@
         "test_audit_semantic_deduplication",
         "test_audit_source_presentation",
         "test_audit_unit_semantics",
+        "test_audit_weapon_chart_profiles",
         "test_availability",
         "test_availability_schema",
         "test_catalog_rules",

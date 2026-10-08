@@ -106,6 +106,13 @@ unimplemented until its corresponding behavior exists.
       report records candidate Weapon Chart name occurrences (125/131 on the inspected
       Wiki chart) separately from profile-fact coverage; neither source text nor an
       Army weapon entry proves a complete curated rule definition.
+    - [x] Establish a conservative five-field PDF/Army profile comparison via
+      `tools/audit_weapon_chart_profiles.py`. On the supplied N5 v5.3 PDF, the first
+      pass aligns 74 single-line, single-mode rows from 171 located chart rows;
+      73 match and one needs review: Mine Dispenser (PDF saving rolls `--`,
+      published Army metadata `1`). This is not full Weapon Chart coverage.
+    - [ ] Expand PDF row alignment for wrapped names and multi-mode profiles,
+      then compare range breakpoints/MODs, Traits, and special-weapon prose.
     - [ ] Review the six unmatched chart-text names as aliases, multi-mode entries,
       or source-specific rules (including Chest Mine and SymbioBomb). Reconcile all
       Weapon Chart rows and special-weapon text against N5 v5.3 pp. 68–74 and 176–188,

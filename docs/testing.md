@@ -395,3 +395,20 @@ self-contained rules-database payloads. A small Node.js harness executes the com
 renderer with the two scenario Skills and the resolved Specialist list; it reuses the dev Node
 dependency and adds no JavaScript build step. Existing scenario tests still validate every game-size
 row, score condition, placement, source issue, and SVG output after reference expansion.
+
+## 1.0 Weapon Chart partial evidence audit
+
+The read-only `tools/audit_weapon_chart_profiles.py` compares only uniquely aligned
+single-line, single-mode N5 v5.3 chart rows against the shipped Army metadata.
+The official core PDF is supplied locally and is **not** included in Git. This
+offline audit additionally requires PyMuPDF (`python -m pip install pymupdf`);
+normal CI and tests do not need that optional dependency. Run from the repository root:
+
+```powershell
+python tools/audit_weapon_chart_profiles.py --core-pdf "C:\path\to\n5-rules-v5-3-en.pdf" --json-output docs/audits/weapon-chart.json --markdown-output docs/audits/weapon-chart.md
+```
+
+The output includes the source PDF SHA-256 and distinguishes matching fields,
+candidate discrepancies, and deferred rows. Absence of a discrepancy is not a
+completeness claim: range bands, Traits, wrapped/multi-mode rows, special-weapon
+prose, and browser projection still require source-to-presentation review.
