@@ -148,9 +148,13 @@ immunities are projected into individual Weapon profiles. A separate
 `reviewedVulnerabilityCases` entry records the **explicit** Vulnerability (Viral)
 versus Immunity (Enhanced) example (Wiki Vulnerability `oldid=3156`): the rule
 matches a weapon whose *name* contains Viral, not an Ammunition component.
-This example adds no weapon-name parsing at runtime. Other component Immunities,
-BTS conditions and unreviewed combinations remain unresolved; the AP+DA
-example is not an evaluator.
+This example adds no weapon-name parsing at runtime. An independent, explicit
+`reviewedWeaponCases` entry records the pinned Immunity (BTS) versus Flash Pulse
+example (Wiki Immunity `oldid=3643`, Weapon Chart `oldid=4083`): Stun becomes
+Normal, but Non-Lethal and Stunned on a failed Saving Roll remain. Flash Pulse
+has its own cited Weapon reference and semantic links; none of these cases
+executes a Weapon profile calculation. Other component Immunities, BTS
+conditions and unreviewed combinations remain unresolved.
 
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;

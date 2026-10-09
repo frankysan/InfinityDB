@@ -112,8 +112,12 @@ array records a **separate explicit Wiki example** (`Vulnerability` `oldid=3156`
 Immunity (Enhanced) cannot be used against weapons with `Viral` in their names
 when the defender also has Vulnerability (Viral). Its predicate refers to a
 weapon name, **not** the weapon's Ammunition components. Neither fact family is
-executable or projected into Army profiles. Component-specific Immunity remains
-unresolved; do not extrapolate a result for Immunity (AP) versus AP+DA.
+executable or projected into Army profiles. The `reviewedWeaponCases` array
+records the **explicit** N5.3 Wiki Immunity Example 4 (`oldid=3643`): against
+Flash Pulse, Immunity (BTS) treats Stun Ammunition as Normal,
+while Non-Lethal and the failed-Saving-Roll Stunned condition survive. The Weapon
+Chart (`oldid=4083`) separately grounds Flash Pulse's printed profile. Do not
+extrapolate these reviewed, non-executable examples to unreviewed combinations.
 
 ### Rules-enrichment coverage classifications
 

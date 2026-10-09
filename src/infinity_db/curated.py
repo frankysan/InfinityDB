@@ -281,7 +281,7 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
     """Validate source-reviewed Immunity boundaries without evaluating attacks."""
     if not isinstance(value, dict) or set(value) != {
         "coveredAmmunition", "criticalAgainstCoveredAmmunition", "exceptions",
-        "reviewedCombinedCases", "reviewedVulnerabilityCases",
+        "reviewedCombinedCases", "reviewedVulnerabilityCases", "reviewedWeaponCases",
     }:
         raise ValueError(f"{context}: invalid Immunity interaction fields")
     covered = value["coveredAmmunition"]
@@ -315,6 +315,26 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
         ]
     ):
         raise ValueError(f"{context}: invalid Immunity exceptions")
+    # This is the one printed Flash Pulse example, not a weapon/trait evaluator.
+    # In particular, the stunned condition must not be inferred for other weapons.
+    if value["reviewedWeaponCases"] != [
+        {
+            "when": {
+                "weaponId": "weapon:flash-pulse",
+                "immunity": "BTS",
+                "savingAttribute": "BTS",
+                "attackClass": "non-comms",
+            },
+            "ammunitionTreatedAs": "ammunition:normal",
+            "survivingTraits": ["trait:non-lethal", "trait:state"],
+            "stateEffect": {
+                "stateId": "state:stunned",
+                "condition": "failed-saving-roll",
+            },
+            "evidence": "explicit-pinned-wiki-example",
+        }
+    ]:
+        raise ValueError(f"{context}: unsupported Flash Pulse Immunity example")
     # The pinned Vulnerability example names a *weapon*, not just an
     # Ammunition component. Do not turn this into substring-based runtime logic.
     if value["reviewedVulnerabilityCases"] != [

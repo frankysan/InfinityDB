@@ -2207,6 +2207,14 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
          "Immunity exceptions"),
         (lambda f: f["reviewedCombinedCases"][0]["when"].update(immunity="DA"),
          "Immunity applicability"),
+        (lambda f: f["reviewedWeaponCases"][0]["when"].update(
+            immunity="Enhanced"), "Flash Pulse Immunity example"),
+        (lambda f: f["reviewedWeaponCases"][0]["stateEffect"].update(
+            condition="any-hit"), "Flash Pulse Immunity example"),
+        (lambda f: f["reviewedWeaponCases"][0].update(
+            ammunitionTreatedAs="ammunition:stun"), "Flash Pulse Immunity example"),
+        (lambda f: f["reviewedWeaponCases"][0]["when"].update(
+            weaponId="weapon:stun-pistol"), "Flash Pulse Immunity example"),
         (lambda f: f["reviewedVulnerabilityCases"][0]["when"].update(
             weaponNameContains="AP"), "Vulnerability interaction example"),
         (lambda f: f["reviewedVulnerabilityCases"][0].update(

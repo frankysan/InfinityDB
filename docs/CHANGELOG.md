@@ -16,6 +16,8 @@ are not retroactively relabeled.
 - The Immunity reference now explains why Immunity (AP) removes AP's modifier
   from AP+DA but leaves DA's Saving Rolls; other component combinations remain
   subject to separate review.
+- Flash Pulse now has a linked rules reference explaining Stun, Non-Lethal and
+  Stunned, including the printed Immunity (BTS) exception and its failed-roll condition.
 - The Vulnerability rules explain the source-backed Viral weapon-name example
   without inferring a general component-specific Immunity rule.
 - Weapon profiles now link reviewed base Ammunition directly, including the
@@ -73,6 +75,9 @@ are not retroactively relabeled.
   Ammunition references and four reviewed combined forms. Preserve ordered typed
   components separately from Saving Roll data; leave unreviewed forms unlinked.
 - **Data processing + Web backend:** Add an N5.3-sourced Drop Bears reference distinguishing visible Mine placement, thrown BS Mode restrictions and shared ammunition/charge semantics without modifying Army traits.
+- **Data processing + Web backend:** Add a cited Flash Pulse Weapon reference and the
+  printed Immunity (BTS) exception: Stun becomes Normal while Non-Lethal and
+  Stunned-on-failed-save remain effective. No target-specific combat calculation is added.
 - **Data processing + Web backend:** Publish a CC Mode-only Kobra Pistol reference for DA effects and the contradictory printed Saving Roll/Trait values. Do not apply it to BS Mode or override Army profiles.
 - **Data processing + Web backend:** Add a PARA Mine-specific reference showing
   shared Mine behavior, PARA ammunition and Immobilized-A, with the conflicting

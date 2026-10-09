@@ -59,6 +59,14 @@ Combined Ammunition pairs, and should not be turned into a general calculation
 or generalized from weapon-name-specific Vulnerability examples. Historical
 N4/N3 interactions are not authoritative N5 precedents.
 
+### RR-AW-IMM-003 — Printed Immunity (BTS) versus Flash Pulse example
+
+**Scope:** N5.3 Wiki [Immunity Example 4](https://infinitythewiki.com/index.php?title=Immunity&oldid=3643), with the N5.3 [Weapon Chart](https://infinitythewiki.com/index.php?title=Weapon_Chart&oldid=4083) for Flash Pulse's STUN/BTS and Trait profile.
+
+**Explicit printed example:** Immunity (BTS) treats a Flash Pulse hit as Normal Ammunition; **Non-Lethal still prevents Wounds**, and **State: Stunned still applies after a failed Saving Roll**. The example confirms that neutralizing covered Ammunition does not erase these exceptional weapon Traits. Its failed-roll condition is material: the example does not apply Stunned on every hit.
+
+This is weapon-scoped, not a general Immunity (BTS) algorithm for all BTS weapons or for combined components. The curated `skill:immunity` reference records this exact example in `reviewedWeaponCases`, and `weapon:flash-pulse` links the same canonical Traits and State. Further weapon-specific interactions remain open.
+
 ## Official publication-change notices
 
 See [N5 source and update history](n5-source-history.md) for the indexed official

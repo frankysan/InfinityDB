@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **110/125** complete, **15** pending.
-- Current authored outgoing relations: **309**.
+- Supporting semantic identities: **111/126** complete, **15** pending.
+- Current authored outgoing relations: **314**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -938,7 +938,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
 
-#### Weapon (12/12)
+#### Weapon (13/13)
 
 - [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
@@ -956,6 +956,12 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `modifies-use-of` → Mines (`weapon:mines`)
+- [x] **Flash Pulse** (`weapon:flash-pulse`) — reviewed: Reviewed N5.3 Weapon Chart Stun/BTS/Non-Lethal/Stunned semantics and the printed Immunity (BTS) exception (Wiki Immunity oldid 3643, Example 4). No generic state or immunity resolution is inferred.
+  - `uses-effects-of` → Stun Ammunition (`ammunition:stun`)
+  - `uses-effects-of` → BS Weapon (WIP) (`trait:bs-weapon-wip`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+  - `uses-effects-of` → State (`trait:state`)
+  - `causes-state` → Stunned State (`state:stunned`)
 - [x] **Kobra Pistol** (`weapon:kobra-pistol`) — reviewed: N5.3 Mixed Weapons rules distinguish BS and CC modes and their ammunition; shared mode description does not assign mode-specific Traits or Saving Rolls.
   - outgoing: none
 - [x] **Kobra Pistol (CC Mode)** (`weapon:kobra-pistol-cc`) — reviewed: Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values.

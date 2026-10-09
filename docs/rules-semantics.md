@@ -2183,6 +2183,14 @@ Immunity (ARM) example, this does **not** collapse the hit to one roll. The
 original Army source identity remains AP+DA; the DA-only result describes the
 conditional effect, not a mutation to Army data or an official named example.
 
+The **explicitly printed** Immunity (BTS) versus Flash Pulse example (Wiki Immunity
+`oldid=3643`, Example 4; Weapon Chart `oldid=4083`) separately confirms that
+covered STUN Ammunition becomes Normal, but the weapon's Non-Lethal Trait still
+prevents Wounds and its Stunned Trait still applies on a **failed Saving Roll**.
+The source-scoped `reviewedWeaponCases` entry records the surviving Traits and
+failure condition; `weapon:flash-pulse` supplies the corresponding reference
+links. This is not evidence for an arbitrary BTS attack or component resolution.
+
 Other component-specific Immunities, BTS-based Combined Ammunition, additional
 Weapon Traits and conditional State interactions remain unresolved. Do not
 extrapolate an algorithm from these reviewed examples or project outcomes into

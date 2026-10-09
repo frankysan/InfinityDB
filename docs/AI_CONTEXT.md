@@ -45,7 +45,10 @@ release/audit narrative belongs in the changelog and Git history.
   combined components, Weapon profiles, or Critical outcomes. Three conditioned
   examples are rule-derived: AP+DA/AP+Exp versus Immunity (ARM), and AP+DA
   versus Immunity (AP), which ignores AP while retaining DA and its two rolls.
-  These are **not** a general component-level Immunity evaluator. A separate pinned,
+  These are **not** a general component-level Immunity evaluator. A printed
+  Immunity (BTS) versus Flash Pulse example preserves Non-Lethal and the
+  failed-Saving-Roll Stunned effect; it is recorded under `reviewedWeaponCases`
+  and is not generalized to other BTS weapons. A separate pinned,
   explicit Vulnerability (Viral) example is **weapon-name-scoped** and prevents
   Immunity (Enhanced) for that attack; it does not imply component parsing or
   automatic target-specific outcomes. See `docs/rules-semantics.md` RS-AW-IMM-001.

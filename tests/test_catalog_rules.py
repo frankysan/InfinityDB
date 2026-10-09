@@ -884,6 +884,77 @@ def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
         assert "withImmunity" not in source_map[source_id]
 
 
+def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
+    tmp_path: Path,
+) -> None:
+    rules_db = _rules_database(tmp_path)
+    immunity = rules_db.composed_record("skill:immunity")
+    flash = rules_db.composed_record("weapon:flash-pulse")
+    assert immunity is not None and flash is not None
+    assert immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"] == [
+        {
+            "when": {
+                "weaponId": "weapon:flash-pulse",
+                "immunity": "BTS",
+                "savingAttribute": "BTS",
+                "attackClass": "non-comms",
+            },
+            "ammunitionTreatedAs": "ammunition:normal",
+            "survivingTraits": ["trait:non-lethal", "trait:state"],
+            "stateEffect": {
+                "stateId": "state:stunned", "condition": "failed-saving-roll"
+            },
+            "evidence": "explicit-pinned-wiki-example",
+        }
+    ]
+    assert {relation["record_id"] for relation in flash["relations"]} == {
+        "ammunition:stun", "trait:bs-weapon-wip", "trait:non-lethal",
+        "trait:state", "state:stunned",
+    }
+    assert {citation["source_version"] for citation in flash["citations"]} == {
+        "N5.3 / oldid 4083", "N5.3 / oldid 3643",
+    }
+    assert "Saving Roll fails" in flash["summary"]
+
+    root = Path(__file__).resolve().parents[1]
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
+
+    def request(path: str) -> tuple[str, bytes]:
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=path, REQUEST_METHOD="GET")
+        statuses: list[str] = []
+        response = app(
+            environ, lambda status, headers, exc_info=None: statuses.append(status)
+        )
+        try:
+            body = b"".join(response)
+        finally:
+            close = getattr(response, "close", None)
+            if close is not None:
+                close()
+        return statuses[0], body
+
+    status, body = request("/api/weapons/flash-pulse")
+    assert status == "200 OK"
+    item = json.loads(body)
+    assert item["slug"] == "flash-pulse"
+    assert [rule["id"] for rule in item["rules"]] == ["weapon:flash-pulse"]
+    assert item["rules"][0]["citations"][0]["source_version"] == "N5.3 / oldid 4083"
+    assert item["rules"][0]["summary_tokens"]
+
+    status, body = request("/api/skills/immunity")
+    assert status == "200 OK"
+    payload = json.loads(body)
+    assert payload["rules"][0]["facts"]["immunityInteraction"][
+        "reviewedWeaponCases"
+    ][0]["when"]["weaponId"] == "weapon:flash-pulse"
+
+    status, body = request("/weapons/flash-pulse")
+    assert status == "200 OK"
+    assert b"InfinityDB" in body
+
+
 def test_vulnerability_example_is_explicit_and_not_a_component_rule(
     tmp_path: Path,
 ) -> None:

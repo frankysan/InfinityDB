@@ -375,9 +375,12 @@ unimplemented until its corresponding behavior exists.
     - [x] Review Immunity (AP) against AP+DA as a condition-scoped, rule-derived
       case: the AP component is treated as Normal, leaving DA's two full-ARM
       Saving Rolls (three on Critical). Keep the original AP+DA source identity.
+    - [x] Pin the N5.3 printed Immunity (BTS) versus Flash Pulse example:
+      Stun Ammunition becomes Normal, while Non-Lethal and Stunned-on-failed-save
+      remain in effect. Keep the exception weapon-scoped and non-executable.
     - [ ] Review other component-level Immunities, BTS-based variants and
-      weapon-specific exceptions. Do not generalize from this AP+DA case,
-      Immunity (ARM), or the name-scoped Viral Vulnerability example.
+      weapon-specific exceptions. Do not generalize from the reviewed examples
+      or the name-scoped Viral Vulnerability case.
     - [x] Present the existing eleven base Ammunition typed facts in the shared
       rules-card renderer, with explicit failed-Saving-Roll conditions, Critical
       exceptions and separate Smoke/Eclipse visibility behavior. Reuse curated

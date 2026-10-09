@@ -1905,6 +1905,13 @@
       "status": "reviewed",
       "reviewedOn": "2026-10-09",
       "note": "Reviewed N5.3 p.73 Sepsitor rules and p.187 weapon profile. Individual PS and Disposable values remain source-native and are not inherited by the other variant; Cube 2.0 +2 Saving Roll applies to both."
+    },
+    {
+      "recordId": "weapon:flash-pulse",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-09",
+      "note": "Reviewed N5.3 Weapon Chart Stun/BTS/Non-Lethal/Stunned semantics and the printed Immunity (BTS) exception (Wiki Immunity oldid 3643, Example 4). No generic state or immunity resolution is inferred."
     }
   ],
   "futureInteractions": [
