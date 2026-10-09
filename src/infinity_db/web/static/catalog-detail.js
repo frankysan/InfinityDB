@@ -100,7 +100,21 @@ function weaponTraitLinks(traits) {
     if (!href && trait.slug && !label.startsWith("State:")) {
       href = `/traits/${encodeURIComponent(trait.slug)}`;
     }
-    if (href) {
+    if (Array.isArray(trait.state_references) && trait.state_references.length) {
+      fragment.append("State: ");
+      for (const [partIndex, state] of trait.state_references.entries()) {
+        if (partIndex) fragment.append(" / ");
+        const stateHref = ruleReferenceHref(state.public_reference);
+        if (stateHref) {
+          const link = document.createElement("a");
+          link.href = stateHref;
+          link.textContent = state.label;
+          fragment.append(link);
+        } else {
+          fragment.append(state.label);
+        }
+      }
+    } else if (href) {
       const link = document.createElement("a");
       link.href = href;
       link.textContent = label;

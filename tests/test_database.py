@@ -774,16 +774,20 @@ def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
         "label": "Comms. Attack",
         "name": "Comms Attack",
         "slug": None,
+        "public_reference": {"catalog": "labels", "id": "comms-attack"},
+        "source_alias": True,
     }
     assert catalog.reference("No LoF") == {
         "label": "No LoF",
         "name": "No LoF",
         "slug": None,
+        "public_reference": {"catalog": "labels", "id": "no-lof"},
     }
     assert catalog.reference("CC Attack (+3)") == {
         "label": "CC Attack (+3)",
         "name": "CC Attack (+3)",
         "slug": None,
+        "public_reference": {"catalog": "labels", "id": "cc-attack"},
     }
 
     traits = {item["id"]: item for item in catalog.list_traits()}
@@ -793,6 +797,24 @@ def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
     assert "comms-attack" not in traits
     assert "no-lof" not in traits
     assert "cc-attack-3" not in traits
+    assert catalog.reference("State: Stunned / Immbolized-B") == {
+        "label": "State: Stunned / Immbolized-B",
+        "name": "State: Stunned / Immobilized-B",
+        "slug": None,
+        "state_references": [
+            {"label": "Stunned", "public_reference": {"catalog": "states", "id": "stunned"}},
+            {
+                "label": "Immobilized-B",
+                "public_reference": {"catalog": "states", "id": "immobilized-b"},
+            },
+        ],
+        "source_alias": True,
+    }
+    assert catalog.reference("State: Unknown / Stunned") == {
+        "label": "State: Unknown / Stunned",
+        "name": "State: Unknown / Stunned",
+        "slug": None,
+    }
     assert traits["arm-0"]["use_count"] == 0
     assert traits["bs-weapon-ph"]["use_count"] == 1
     assert traits["bs-weapon-wip"]["use_count"] == 1
@@ -801,6 +823,38 @@ def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
     assert arm_zero is not None
     assert arm_zero["variants"] == []
     assert arm_zero["rules"][0]["id"] == "trait:arm-0"
+
+
+def test_published_weapon_properties_have_navigable_reference_destinations() -> None:
+    """Audit all distinct published source properties, not just selected weapons."""
+    root = Path(__file__).resolve().parents[1]
+    database = Database(root / "data" / "generated" / "infinity.db")
+    rules = RulesDatabase(root / "data" / "generated" / "rules.db")
+    catalog = TraitCatalog(database, rules)
+    labels = {label["id"] for label in rules.current_labels()}
+    states = {
+        record["id"].split(":", 1)[1]
+        for record in rules.composed_records_by_kind("state")
+    }
+    trait_slugs = {trait["id"] for trait in catalog.list_traits()}
+    unresolved = []
+    properties = database.list_traits()
+    for source in properties:
+        reference = catalog.reference(source["name"])
+        targets = [reference["public_reference"]] if reference.get("public_reference") else []
+        targets.extend(
+            item["public_reference"] for item in reference.get("state_references", [])
+        )
+        for target in targets:
+            assert target["catalog"] in {"labels", "states"}, reference
+            assert target["id"] in (labels if target["catalog"] == "labels" else states)
+        if reference.get("slug") is not None:
+            assert reference["slug"] in trait_slugs
+        elif not targets:
+            unresolved.append(source["name"])
+    assert len(properties) >= 42
+    assert unresolved == []
+
 
 def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
     tmp_path: Path, normalized: dict

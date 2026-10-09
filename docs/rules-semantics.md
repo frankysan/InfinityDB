@@ -957,6 +957,19 @@ Skill/Equipment modifier notation remain source properties without acquiring a T
 route. Unresolved source properties remain visible provisionally rather than being
 discarded.
 
+**Published-property navigation audit (2026-10-09):** The 42 distinct Army
+weapon properties in the pinned `infinity.db` now resolve to actual references
+rather than being assumed to be Traits. `Comms. Attack` (source abbreviation)
+and `No LoF` resolve to the existing `Comms Attack` and `No LoF` Label pages;
+`CC Attack (+3)` keeps its modifier but links to the `CC Attack` Label.
+Cybermine's source text `State: Stunned / Immbolized-B` contains a spelling
+error and two separate States. The display links to **Stunned** and
+**Immobilized-B** separately, while Developer Mode preserves the raw spelling.
+The typo is retained as a state alias for lookup compatibility, not as
+canonical N5 terminology. This is a link/identity audit only; it does not
+prove complete gameplay rules coverage or imply all curated labels are
+source-native (see RS-GSG-LABEL-002).
+
 This finding is about vocabulary/identity coverage, not full rules coverage. Complete
 attachment of Traits to every relevant Weapon/Equipment/Skill and complete structured
 effect relationships remain separate completeness concerns; the identity count alone

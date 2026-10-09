@@ -4053,11 +4053,24 @@ def test_catalog_detail_frontend_uses_backend_trait_references(
     assert b"sourceAlias.className = \"developer-only weapon-trait-source-alias\"" in body
     assert b"sourceAlias.textContent = ` (Army: ${sourceLabels.join" in body
     assert b"ruleReferenceHref(trait.public_reference)" in body
+    assert b"trait.state_references" in body
+    assert b"state.public_reference" in body
     assert b"href = `/traits/${encodeURIComponent(trait.slug)}`;" in body
     assert b"function canonicalTraitName(" not in body
     assert b"function traitSlug(" not in body
     assert b"Continous Damage" not in body
     assert b"BioWeapon" not in body
+
+
+
+def test_weapon_trait_label_and_composite_state_rendering() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "weapon_trait_links_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "weapon trait and label navigation passed" in result.stdout
 
 
 def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None:

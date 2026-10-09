@@ -10388,7 +10388,8 @@
             "name": "Immobilized-B State",
             "aliases": [
                 "Immobilized-B",
-                "IMM-B"
+                "IMM-B",
+                "Immbolized-B"
             ],
             "summary": "A restrictive State that normally limits the Trooper to [[skill:reset]] at WIP -3.",
             "composition": {

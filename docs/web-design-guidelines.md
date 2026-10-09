@@ -46,6 +46,14 @@ in weapon profiles, not extra text on the player-facing link. A substantial
 rules difference should instead have a separate readable source note in the rules
 card. Developer Mode exposes the original Army label beside its canonical name.
 
+**Link what the source actually names.** Army's weapon `properties` contain
+N5 Traits, Labels, signed modifiers, and State names; they are not all Traits.
+Resolve each through its canonical domain (`/traits`, `/labels`, `/states`),
+without inventing a Trait route for a Label. A property naming multiple States
+should link each resolved State individually. Preserve source spelling in the
+API and, when it differs from canonical wording, in Developer Mode. Unknown
+references must remain unlinked rather than opening an unrelated rule.
+
 ### Give visual rules semantic meaning
 
 Style according to what an element is and what role it serves, not merely where it happens to appear. Prefer concepts such as primary column, metric column, technical metadata, surface header, and status badge over positional rules such as first child, third column, or last row.

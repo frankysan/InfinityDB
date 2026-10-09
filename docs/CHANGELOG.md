@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Weapon profile Labels such as Comms Attack and No LoF now link to their rules;
+  compound State entries link to each State instead of a generic Trait page.
 - Long rules references use shorter, topic-based paragraphs, with separate smaller source
   notes. Weapon Traits show current N5 names without redundant Army wording unless Developer Mode is on.
 - Weapon Trait links now use reviewed N5 names for legacy Army labels, including
@@ -62,6 +64,9 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Web backend + Web frontend:** Link Army weapon properties to the correct Label,
+  Trait or State reference; preserve signed Label modifiers and resolve compound
+  State effects individually without silently linking to the generic State Trait.
 - **Web backend + Web frontend:** Link State effects listed in Weapon Traits directly to
   their matching State references, including Sepsitorized and Dead, without changing Army text.
 - **Data processing:** Clarify Non-Lethal rules: these attacks cannot inflict Wounds,
