@@ -206,9 +206,14 @@ unimplemented until its corresponding behavior exists.
       without granting those effects to Eraser or Mirrorball. The N5.3 chart and
       April 2025 update agree; Army still omits Double Shot and uses the old
       Technical Weapon label. Preserve the conflict instead of rewriting Army.
-    - [ ] Review legacy Army terminology for Drop Bears and Pheroware before
-      deciding whether to provide source-aware display aliases. Do not rewrite
-      imported Army properties.
+    - [x] Publish source-aware Drop Bears guidance for its two N5.3 modes,
+      the shared Disposable (3) uses, visible Mine Token placement, and the
+      legacy Army Throwing Weapon label, without changing source Traits or
+      granting ordinary Mine Camouflage placement. Preserve PDF pp. 71/181
+      provenance and cover both modes through the Weapon API.
+    - [ ] Review remaining legacy Army Technical Weapon terminology in
+      Pheroware and whether source-aware display aliases are needed. Do not
+      rewrite imported Army properties.
     - [x] Inventory exact-name source/curation links for all 12 N5 v5.3 Weaponry
       prose headings (pp. 68–74). Eight headings match at least one Army weapon
       profile; Armed Turret alone has an exact-name curated Weapon record with

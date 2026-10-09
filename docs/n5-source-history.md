@@ -153,9 +153,11 @@ still needs verification. Preserve both source values.
   chart extraction includes `Deployable` and `[*]` and matches Army after the
   maintained spelling and State notation equivalences; this is not a missing rule.
 - **Drop Bears (BS Mode):** N5.3 pp. 71, 181 use `BS Weapon (PH)`. The term
-  `Throwing Weapon` does not occur in the supplied N5.3 PDF; Army retains the
-  N4-defined term. This establishes historical terminology provenance, not an
-  inferred additional N5 Trait.
+  `Throwing Weapon` does not occur in the supplied N5.3 PDF; the imported Army
+  BS profile contains **both** `BS Weapon (PH)` and the older N4-defined
+  `Throwing Weapon`. The curated Drop Bears reference now explains both distinct
+  placement modes and links the historical label to its N5 classification,
+  without introducing an additional gameplay effect or mutating Army metadata.
 - **PARA Mine:** N5.3 p. 181 prints `[*]`, with the Mines-specific rules on
   p. 72; Army prints `[**]`. The N5.3 legend makes these Weaponry versus
   Ammunition references respectively. The reviewed `weapon:para-mine` card

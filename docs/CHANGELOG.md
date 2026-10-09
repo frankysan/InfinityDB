@@ -11,6 +11,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Drop Bears now explains both placement modes, shared charges, and the legacy Throwing Weapon label alongside N5 BS Weapon (PH).
 - Kobra Pistol CC Mode now explains DA's two Saving Rolls and links its rules, while identifying the unresolved Anti-materiel discrepancy without changing Army data.
 - PARA Mine now has its own reference connecting Mine deployment and PARA effects,
   with the PDF/Wiki versus Army footnote discrepancy explained without changing its profile.
@@ -34,6 +35,7 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend:** Add an N5.3-sourced Drop Bears reference distinguishing visible Mine placement, thrown BS Mode restrictions and shared ammunition/charge semantics without modifying Army traits.
 - **Data processing + Web backend:** Publish a CC Mode-only Kobra Pistol reference for DA effects and the contradictory printed Saving Roll/Trait values. Do not apply it to BS Mode or override Army profiles.
 - **Data processing + Web backend:** Add a PARA Mine-specific reference showing
   shared Mine behavior, PARA ammunition and Immobilized-A, with the conflicting

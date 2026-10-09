@@ -385,3 +385,47 @@ def test_kobra_pistol_modes_share_source_id_but_not_effects(
     assert profiles["CC Mode"]["ammunition"] == "DA"
     assert "Anti-materiel" not in profiles["BS Mode"]["traits"]
     assert "Anti-materiel" in profiles["CC Mode"]["traits"]
+
+
+def test_drop_bears_keeps_two_modes_and_explains_n5_throwing_terminology(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "drop-bears")
+    assert payload["id"] == 96
+    assert set(_weapon_rules(payload)) == {"weapon:drop-bears"}
+
+    profiles = {profile["mode"]: profile for profile in payload["profiles"]}
+    assert set(profiles) == {"BS Mode", "Deployable Mode"}
+    bs = profiles["BS Mode"]
+    deployable = profiles["Deployable Mode"]
+    # The Army snapshot really contains both labels; do not silently rewrite it.
+    assert {"BS Weapon (PH)", "Throwing Weapon"} <= set(bs["traits"])
+    assert bs["ammunition"] == 0
+    assert bs["ranges"]["short"] == {"max": 20, "mod": "+3"}
+    assert deployable["ammunition"] == "Shock"
+    assert deployable["saving"] == "ARM"
+    assert "Throwing Weapon" not in deployable["traits"]
+
+    card = _weapon_rules(payload)["weapon:drop-bears"]
+    summary = card["summary"]
+    for phrase in (
+        "Deployable", "BS Mode", "Disposable (3)", "Mine Token",
+        "Camouflage", "Conclusion step", "cannot detonate",
+        "Trigger Area", "Throwing Weapon", "BS Weapon (PH)",
+    ):
+        assert phrase in summary
+    assert all(profile.get("rules", []) == [] for profile in profiles.values())
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["source_version"] == "5.3"
+        and citation["page"] == 71
+        for citation in card["citations"]
+    )
+    assert any(
+        relation["type"] == "modifies-use-of"
+        and relation["record"]["id"] == "weapon:mines"
+        for relation in card["display_relations"]
+    )
+    # Drop Bears are not eligible for the shared Mines card's marker placement.
+    assert "weapon:mines" not in _weapon_rules(payload)
+    assert card["summary_tokens"]

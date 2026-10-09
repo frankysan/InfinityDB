@@ -910,6 +910,13 @@
       "reviewedOn": "2026-09-24"
     },
     {
+      "recordId": "weapon:drop-bears",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "N5.3 Drop Bears BS/Deployable modes share three charges but have different placement restrictions; typed relationships connect PH throwing, Targetless, Deployable/Intuitive placement, Shock and the modified Mines behavior. Imported legacy Throwing Weapon remains source data, not an additional N5 effect."
+    },
+    {
       "recordId": "weapon:mines",
       "targetRelease": "1.0.0",
       "status": "reviewed",

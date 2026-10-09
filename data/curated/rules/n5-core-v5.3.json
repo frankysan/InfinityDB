@@ -3756,6 +3756,77 @@
             }
         },
         {
+            "id": "weapon:drop-bears",
+            "kind": "weapon",
+            "name": "Drop Bears",
+            "summary": "Drop Bears have two different deployment modes, with three shared [[trait:disposable-x|Disposable (3)]] uses. **[[trait:deployable|Deployable]] Mode:** Use [[skill:place-deployable|Place Deployable]] or [[skill:intuitive-attack|Intuitive Attack]] to place a visible Mine Token (Mine -3), not a [[skill:camouflage|Camouflage]] Marker. The deployed Drop Bear uses its own [[ammunition:shock|Shock]] weapon profile. **BS Mode:** Throw the Drop Bear using [[trait:bs-weapon-ph|BS Weapon (PH)]]; [[trait:targetless|Targetless]] means no target is needed. A successful Roll deploys the Mine Token during the Conclusion step; it cannot detonate during the Order in which it was thrown. In BS Mode, it cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid, non-camouflaged enemy is also inside. After placement the Token functions as a Mine, subject to these Drop Bear-specific exceptions. The N5 v5.3 chart classifies the thrown mode as [[trait:bs-weapon-ph|BS Weapon (PH)]], but Army additionally retains the legacy [[trait:bs-weapon-ph|Throwing Weapon]] label. That older label is source metadata, not an additional N5 effect.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "drop-bears"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:disposable-x"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:bs-weapon-ph"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:targetless"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:place-deployable"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:intuitive-attack"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:shock"
+                },
+                {
+                    "type": "modifies-use-of",
+                    "recordId": "weapon:mines"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 71,
+                    "section": "Drop Bears"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 181,
+                    "section": "Weapon Chart: Drop Bears (BS/Deployable Mode)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-08"
+            }
+        },
+        {
             "id": "weapon:wildparrot",
             "kind": "weapon",
             "name": "WildParrot",

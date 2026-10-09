@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **107/122** complete, **15** pending.
-- Current authored outgoing relations: **286**.
+- Supporting semantic identities: **108/123** complete, **15** pending.
+- Current authored outgoing relations: **293**.
 - Explicitly tracked future/deferred interactions: **115**.
 
 ## 0.7.0 primary catalog review
@@ -937,7 +937,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
 
-#### Weapon (9/9)
+#### Weapon (10/10)
 
 - [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
@@ -947,6 +947,14 @@ review. `declaration-category` projection records are excluded.
   - `modifies-use-of` → Reset (`skill:reset`)
   - `causes-state` → Stunned State (`state:stunned`)
   - `causes-state` → Immobilized-B State (`state:immobilized-b`)
+- [x] **Drop Bears** (`weapon:drop-bears`) — reviewed: N5.3 Drop Bears BS/Deployable modes share three charges but have different placement restrictions; typed relationships connect PH throwing, Targetless, Deployable/Intuitive placement, Shock and the modified Mines behavior. Imported legacy Throwing Weapon remains source data, not an additional N5 effect.
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `uses-effects-of` → BS Weapon (PH) (`trait:bs-weapon-ph`)
+  - `uses-effects-of` → Targetless (`trait:targetless`)
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
+  - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `modifies-use-of` → Mines (`weapon:mines`)
 - [x] **Kobra Pistol** (`weapon:kobra-pistol`) — reviewed: N5.3 Mixed Weapons rules distinguish BS and CC modes and their ammunition; shared mode description does not assign mode-specific Traits or Saving Rolls.
   - outgoing: none
 - [x] **Kobra Pistol (CC Mode)** (`weapon:kobra-pistol-cc`) — reviewed: Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values.
