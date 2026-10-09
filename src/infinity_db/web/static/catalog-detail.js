@@ -111,7 +111,10 @@ function weaponTraitLinks(traits) {
     const sourceLabels = trait.source_alias
       ? [trait.label] : (duplicateAliases.get(trait.slug) || []);
     if (sourceLabels.length) {
-      fragment.append(` (Army: ${sourceLabels.join(", ")})`);
+      const sourceAlias = document.createElement("span");
+      sourceAlias.className = "developer-only weapon-trait-source-alias";
+      sourceAlias.textContent = ` (Army: ${sourceLabels.join(", ")})`;
+      fragment.append(sourceAlias);
     }
   }
   return fragment;

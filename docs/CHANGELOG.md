@@ -11,10 +11,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Rules cards display readable paragraphs and bold mode labels; legacy Army terminology
-  and source discrepancies appear as smaller source notes beneath the gameplay rules.
+- Long rules references use shorter, topic-based paragraphs, with separate smaller source
+  notes. Weapon Traits show current N5 names without redundant Army wording unless Developer Mode is on.
 - Weapon Trait links now use reviewed N5 names for legacy Army labels, including
-  Pheroware's BS Weapon (WIP), while still showing the original Army terminology.
+  Pheroware's BS Weapon (WIP); original Army labels remain available in Developer Mode.
 - Drop Bears now explains both placement modes, shared charges, and the legacy Throwing Weapon label alongside N5 BS Weapon (PH).
 - Kobra Pistol CC Mode now explains DA's two Saving Rolls and links its rules, while identifying the unresolved Anti-materiel discrepancy without changing Army data.
 - PARA Mine now has its own reference connecting Mine deployment and PARA effects,

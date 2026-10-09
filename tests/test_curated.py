@@ -1930,3 +1930,19 @@ def test_source_mode_qualifier_is_weapon_only_and_excludes_source_variant(
     record["armyLinks"] = [{"entity": "weapon", "id": "kobra-pistol"}]
     with pytest.raises(ValueError, match="numeric Army source id"):
         check()
+
+
+def test_curated_long_rule_summaries_have_readable_paragraphs() -> None:
+    """Prevent long, unbroken rules cards across all maintained collections."""
+    root = Path(__file__).resolve().parents[1] / "data" / "curated"
+    reviewed = 0
+    for _, document in load_curated_directory(root):
+        for record in document.get("records", []):
+            summary = record.get("summary", "")
+            if len(summary) < 350:
+                continue
+            reviewed += 1
+            paragraphs = re.split(r"\n\s*\n", summary)
+            assert len(paragraphs) >= 2, record["id"]
+            assert max(map(len, paragraphs)) <= 350, record["id"]
+    assert reviewed > 0

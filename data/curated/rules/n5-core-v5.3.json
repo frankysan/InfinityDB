@@ -2576,7 +2576,7 @@
             "id": "trait:boost",
             "kind": "trait",
             "name": "Boost",
-            "summary": "Once in play, a Boost weapon must trigger when an enemy Model declares or performs an Order or Automatic Reaction Order in its [[trait:zone-of-control-zc|Zone of Control]]; it advances into Silhouette contact, detonates, and is removed. Only a successful [[skill:dodge]] Roll resolved without opposition avoids this attack. The weapon does not trigger if an obstacle or too-small gap blocks its path, or for [[state:camouflaged|CAMO]], [[state:impersonation-1|IMP-1]], [[state:impersonation-2|IMP-2]], and other exempt Markers. Because it is [[trait:deployable|Deployable]], it cannot activate other [[trait:deployable|Deployable]] Weapons or Equipment.",
+            "summary": "Once in play, a Boost weapon must trigger when an enemy Model declares or performs an Order or Automatic Reaction Order in its [[trait:zone-of-control-zc|Zone of Control]]; it advances into Silhouette contact, detonates, and is removed.\n\nOnly a successful [[skill:dodge]] Roll resolved without opposition avoids this attack.\n\nThe weapon does not trigger if an obstacle or too-small gap blocks its path, or for [[state:camouflaged|CAMO]], [[state:impersonation-1|IMP-1]], [[state:impersonation-2|IMP-2]], and other exempt Markers.\n\nBecause it is [[trait:deployable|Deployable]], it cannot activate other [[trait:deployable|Deployable]] Weapons or Equipment.",
             "composition": {
                 "role": "definition"
             },
@@ -3570,7 +3570,7 @@
             "id": "weapon:sepsitor",
             "kind": "weapon",
             "name": "Sepsitor",
-            "summary": "Sepsitor is a [[trait:direct-template|Direct Template]] weapon that can affect Troopers with a [[equipment:cube|Cube]] or equivalent Equipment. A hit requires a BTS Saving Roll using the weapon’s PS 4; a Critical causes an additional Saving Roll, and failure causes [[state:sepsitorized|Sepsitorized State]]. It has [[trait:disposable-x|Disposable (2)]]. [[equipment:cube-2|Cube 2.0]] grants +2 to its user’s Saving Roll against this attack. [[weapon:sepsitor-plus|Sepsitor Plus]] has its own weapon profile; do not apply Sepsitor’s PS or Disposable limit to that weapon.",
+            "summary": "Sepsitor is a [[trait:direct-template|Direct Template]] weapon that can affect Troopers with a [[equipment:cube|Cube]] or equivalent Equipment.\n\nA hit requires a BTS Saving Roll using the weapon’s PS 4; a Critical causes an additional Saving Roll, and failure causes [[state:sepsitorized|Sepsitorized State]].\n\nIt has [[trait:disposable-x|Disposable (2)]]. [[equipment:cube-2|Cube 2.0]] grants +2 to its user’s Saving Roll against this attack.\n\n[[weapon:sepsitor-plus|Sepsitor Plus]] has its own weapon profile; do not apply Sepsitor’s PS or Disposable limit to that weapon.",
             "facts": {},
             "composition": {
                 "role": "definition"
@@ -3633,7 +3633,7 @@
             "id": "weapon:sepsitor-plus",
             "kind": "weapon",
             "name": "Sepsitor Plus",
-            "summary": "Sepsitor Plus uses the [[trait:direct-template|Direct Template]] rules described in the N5 Weaponry section against Troopers with a [[equipment:cube|Cube]] or equivalent Equipment. A hit requires a BTS Saving Roll using this weapon’s PS 3; a Critical causes an additional Saving Roll, and failure causes [[state:sepsitorized|Sepsitorized State]]. [[equipment:cube-2|Cube 2.0]] grants +2 to its user’s Saving Roll against this attack. Unlike [[weapon:sepsitor|Sepsitor]], Sepsitor Plus does not list Disposable (2).",
+            "summary": "Sepsitor Plus uses the [[trait:direct-template|Direct Template]] rules described in the N5 Weaponry section against Troopers with a [[equipment:cube|Cube]] or equivalent Equipment.\n\nA hit requires a BTS Saving Roll using this weapon’s PS 3; a Critical causes an additional Saving Roll, and failure causes [[state:sepsitorized|Sepsitorized State]].\n\n[[equipment:cube-2|Cube 2.0]] grants +2 to its user’s Saving Roll against this attack. Unlike [[weapon:sepsitor|Sepsitor]], Sepsitor Plus does not list Disposable (2).",
             "facts": {
                 "sourceNotes": [
                     "The N5 v5.3 Weapon Chart includes a [*] reference to the N5 Weaponry rules for this weapon, but the imported Army profile omits that marker; both sources retain their original values."
@@ -3804,7 +3804,7 @@
             "id": "weapon:kobra-pistol",
             "kind": "weapon",
             "name": "Kobra Pistol",
-            "summary": "Kobra Pistol is a Mixed Weapon with two separate modes. BS Mode uses [[ammunition:shock|Shock Ammunition]] and the Trooper’s BS Attribute; [[trait:cc|CC]] Mode uses [[ammunition:da|Double Action (DA) Ammunition]] and the Trooper’s [[trait:cc|CC]] Attribute. The individual mode profiles, not this shared description, determine their Traits and Saving Rolls.",
+            "summary": "Kobra Pistol is a Mixed Weapon with two separate modes.\n\n**BS Mode:** Uses [[ammunition:shock|Shock Ammunition]] and the Trooper’s BS Attribute.\n\n**[[trait:cc|CC]] Mode:** Uses [[ammunition:da|Double Action (DA) Ammunition]] and the Trooper’s [[trait:cc|CC]] Attribute.\n\nThe individual mode profiles, not this shared description, determine their Traits and Saving Rolls.",
             "facts": {},
             "composition": {
                 "role": "definition"
@@ -3976,7 +3976,7 @@
             "id": "weapon:wildparrot",
             "kind": "weapon",
             "name": "WildParrot",
-            "summary": "WildParrots are placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]]. The [[trait:perimeter|Perimeter]] rule places them completely inside the user’s [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact. Once deployed, they work like [[weapon:mines|E/M Mines]], but place a visible WildParrot Token or Model instead of a [[skill:camouflage|Camouflage]] Marker. Unlike [[trait:boost|Boost]] devices such as Crazykoalas and Madtraps, WildParrots do not have that Trait; they follow their own E/M weapon profile (BTS/2, two Saving Rolls).",
+            "summary": "WildParrots are placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]].\n\nThe [[trait:perimeter|Perimeter]] rule places them completely inside the user’s [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact.\n\nOnce deployed, they work like [[weapon:mines|E/M Mines]], but place a visible WildParrot Token or Model instead of a [[skill:camouflage|Camouflage]] Marker.\n\nUnlike [[trait:boost|Boost]] devices such as Crazykoalas and Madtraps, WildParrots do not have that Trait; they follow their own E/M weapon profile (BTS/2, two Saving Rolls).",
             "facts": {
                 "variantRuleReferences": {
                     "wildparrot": [
@@ -4050,7 +4050,7 @@
             "id": "weapon:mines",
             "kind": "weapon",
             "name": "Mines",
-            "summary": "Mine types governed by these shared rules use [[skill:place-deployable]] to put down a [[skill:camouflage|CAMO]] (-3) Marker, which becomes a MINE (-3) Token when Discovered; both receive [[skill:mimetism]] (-3). Mines have 360º LoF. Their Trigger Area is the Small Teardrop Template projected from the base, excluding Total Cover. When an enemy Model or Marker declares or executes a Skill or [[trait:aro|ARO]] within it, a Mine must trigger if its Small Teardrop Template reaches that enemy without affecting any ally, including [[state:unconscious|Unconscious]] allies. If the target is outside the Trigger Area, the Mine remains hidden and does not detonate. Each named Mine has its own Weapon Chart ammunition, PS, Saving Rolls, and Traits; a triggered Mine applies its own profile and is then removed. Mines that can be Dodged impose -3 PH on [[skill:dodge]] attempts. A Mine cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid non-camouflaged enemy is also inside it or a [[trait:intuitive-attack|Intuitive Attack]] was declared. [[weapon:cybermine|Cybermines]] replace the [[skill:dodge|Dodge]] response with [[skill:reset]]; [[weapon:chest-mine|Chest Mines]] do not use these shared Mine rules.",
+            "summary": "Mine types governed by these shared rules use [[skill:place-deployable]] to put down a [[skill:camouflage|CAMO]] (-3) Marker, which becomes a MINE (-3) Token when Discovered; both receive [[skill:mimetism]] (-3).\n\nMines have 360º LoF. Their Trigger Area is the Small Teardrop Template projected from the base, excluding Total Cover.\n\nWhen an enemy Model or Marker declares or executes a Skill or [[trait:aro|ARO]] within it, a Mine must trigger if its Small Teardrop Template reaches that enemy without affecting any ally, including [[state:unconscious|Unconscious]] allies. If the target is outside the Trigger Area, the Mine remains hidden and does not detonate.\n\nEach named Mine has its own Weapon Chart ammunition, PS, Saving Rolls, and Traits; a triggered Mine applies its own profile and is then removed. Mines that can be Dodged impose -3 PH on [[skill:dodge]] attempts.\n\nA Mine cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid non-camouflaged enemy is also inside it or a [[trait:intuitive-attack|Intuitive Attack]] was declared.\n\n[[weapon:cybermine|Cybermines]] replace the [[skill:dodge|Dodge]] response with [[skill:reset]]; [[weapon:chest-mine|Chest Mines]] do not use these shared Mine rules.",
             "facts": {
                 "variantRuleReferences": {
                     "ap-mine": [
@@ -4224,7 +4224,7 @@
             "id": "weapon:cybermine",
             "kind": "weapon",
             "name": "Cybermine",
-            "summary": "Cybermines use the shared [[weapon:mines|Mines]] placement and triggering mechanics, but have their own Comms Attack effects. They can be avoided only with [[skill:reset]] at -3 WIP, not [[skill:dodge]]. A hit forces two BTS Saving Rolls against PS 5. Failure of either causes [[state:stunned]], or [[state:immobilized-b|Immobilized-B]] instead for a Hackable Trooper or [[skill:hacker|Hacker]].",
+            "summary": "Cybermines use the shared [[weapon:mines|Mines]] placement and triggering mechanics, but have their own Comms Attack effects.\n\nThey can be avoided only with [[skill:reset]] at -3 WIP, not [[skill:dodge]].\n\nA hit forces two BTS Saving Rolls against PS 5. Failure of either causes [[state:stunned]], or [[state:immobilized-b|Immobilized-B]] instead for a Hackable Trooper or [[skill:hacker|Hacker]].",
             "facts": {},
             "composition": {
                 "role": "definition"
@@ -4278,7 +4278,7 @@
             "id": "weapon:chest-mine",
             "kind": "weapon",
             "name": "Chest Mine",
-            "summary": "This weapon does not use the shared [[weapon:mines|Mines]] placement or triggering rules in either mode. In BS Mode it functions as a [[trait:direct-template]] Weapon. In [[trait:cc|CC]] Mode it is a [[trait:cc|CC]] Weapon: winning the Face to Face Roll affects every enemy Trooper in Silhouette contact with the bearer, but the [[skill:cc-attack|CC attack]] cannot be used while an ally is in Silhouette contact with the bearer. Both modes share two uses under [[trait:disposable-x|Disposable (2)]]. Detonation does not affect the bearer.",
+            "summary": "This weapon does not use the shared [[weapon:mines|Mines]] placement or triggering rules in either mode.\n\n**BS Mode:** It functions as a [[trait:direct-template]] Weapon.\n\n**[[trait:cc|CC]] Mode:** It is a [[trait:cc|CC]] Weapon: winning the Face to Face Roll affects every enemy Trooper in Silhouette contact with the bearer, but the [[skill:cc-attack|CC attack]] cannot be used while an ally is in Silhouette contact with the bearer.\n\nBoth modes share two uses under [[trait:disposable-x|Disposable (2)]]. Detonation does not affect the bearer.",
             "facts": {},
             "composition": {
                 "role": "definition"

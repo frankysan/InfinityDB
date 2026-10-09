@@ -4050,7 +4050,8 @@ def test_catalog_detail_frontend_uses_backend_trait_references(
     assert b"trait.source_alias ? trait.name : trait.label" in body
     assert b"const canonicalSlugs = new Set(traits" in body
     assert b"duplicateAliases.get(trait.slug)" in body
-    assert b"(Army: ${sourceLabels.join" in body
+    assert b"sourceAlias.className = \"developer-only weapon-trait-source-alias\"" in body
+    assert b"sourceAlias.textContent = ` (Army: ${sourceLabels.join" in body
     assert b"ruleReferenceHref(trait.public_reference)" in body
     assert b"href = `/traits/${encodeURIComponent(trait.slug)}`;" in body
     assert b"function canonicalTraitName(" not in body

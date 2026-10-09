@@ -23,13 +23,28 @@ Page-specific CSS and markup remain appropriate for genuinely unique content, bu
 
 ### Curated rules text hierarchy
 
-Rules cards should split authored summary paragraphs on blank lines, preserving
-semantic links and inline **bold emphasis** rather than displaying formatting
-markers verbatim. Keep the rules players need to act on at normal body size;
-source-history, Army/PDF mismatches, and legacy terminology belong in separate
-`facts.sourceNotes` entries, rendered in secondary, smaller text. Source notes
-must retain their citations and maintained-text references. Do not embed source
-notes as a final rules-summary paragraph just to achieve a visual difference.
+**Author for scanning, not for source-file density.** Separate setup, triggers,
+resolution, restrictions, exceptions, and distinct modes into meaningful paragraphs
+using blank lines in the curated `summary`. A long summary should not be one unbroken
+block: review summaries over roughly 350 source characters and keep individual
+paragraphs reasonably short. Shorter summaries may remain single paragraphs. Use
+inline **bold emphasis** for useful mode/topic labels, preserving typed semantic
+links and literal source notation such as `[**]` (not Markdown emphasis).
+
+**Separate gameplay rules from editorial provenance.** Keep rules players act on
+at normal body size. Source-history, Army/PDF mismatches, and legacy terminology
+belong in `facts.sourceNotes`, rendered in smaller secondary text; retain their
+citations and maintained-text references. Do not use a final summary paragraph as
+an implicit source note. Important unresolved *gameplay* ambiguities remain visible
+in normal mode with an intelligible explanation; developer mode is not a way to
+hide conflicting rules.
+
+**Prefer canonical player labels.** Present reviewed N5 Trait names and preserve
+source labels in the API. Pure spelling, abbreviation, and duplicate Army labels
+(`Zone of Control` versus `Zone of Control (ZoC)`) are developer-only annotations
+in weapon profiles, not extra text on the player-facing link. A substantial
+rules difference should instead have a separate readable source note in the rules
+card. Developer Mode exposes the original Army label beside its canonical name.
 
 ### Give visual rules semantic meaning
 

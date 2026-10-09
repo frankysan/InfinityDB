@@ -156,6 +156,9 @@ because the source does not attach them to a profile group.
   identity instead of merging by label.
 - Maintained prose must use typed semantic links for supported reference namespaces. The migration
   is complete: reviewed batches reject newly introduced plain semantic candidates.
+- Rule-card summaries use topic/mode paragraphs and inline emphasis; source-history notes belong in
+  `facts.sourceNotes`. Cosmetic Army Trait-name differences appear only in Developer Mode, never
+  as clutter beside canonical player labels. See `docs/web-design-guidelines.md` for the design contract.
 - Gameplay distance presentation uses the Army/rules round-trip convention **2.5 cm = 1 inch**, not
   the SI physical conversion. Preserve Army metric storage, typed maintained-rule distances, and
   the `-1/-1` MOV sentinel (stationary) as distinct semantics; render it as an em dash (`—`) and

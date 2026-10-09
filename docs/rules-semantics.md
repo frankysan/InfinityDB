@@ -3395,9 +3395,12 @@ a linked, cited rule does not imply source metadata has been corrected.
 In Weapon-profile Trait rows, reviewed *exact* curated aliases present the N5
 canonical Trait name as the link, followed by the original Army label. If the
 Army profile already contains both the canonical and legacy names (for example,
-Drop Bears' `BS Weapon (PH)` plus `Throwing Weapon`), the visible row merges those
-references into one canonical link with the extra Army spelling beside it. Raw
-`traits` and `trait_references.label` remain unchanged in the API. Parameterized
+Drop Bears' `BS Weapon (PH)` plus `Throwing Weapon`), the row merges those
+references into one canonical link. The additional Army spelling is shown only
+in Developer Mode, to avoid duplicate or equivalent labels in the player view.
+Material rule/source discrepancies remain in separate, player-readable
+`facts.sourceNotes` rather than being suppressed. Raw `traits` and
+`trait_references.label` remain unchanged in the API. Parameterized
 Traits such as `Disposable (2)` retain their source-specific numbers rather than
 being displayed as the generic `Disposable (X)` record name.
 
