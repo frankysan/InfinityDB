@@ -3,36 +3,40 @@
 **Project domains:** Data processing, Web backend, Web frontend
 
 This appendix is a snapshot inventory for the [main audit](rules-explanation-audit-1.0.md),
-examining commit `859823f8d2899405a40cf126883d2adf5763db7c` on 2026-10-09.
+originally examining `859823f8d2899405a40cf126883d2adf5763db7c` and extended
+against `c5400ab1b950990fdacc509be91c110fe85431fb` on 2026-10-09.
+The inputs and record order are unchanged.
 It is not generated runtime data or a replacement interaction ledger.
 
 ## Coverage totals
 
-- 367 records screened: 217 **D** selected clause reviews and 150 **S** screening-only records.
+- 367 records screened: originally 217 **D** + 150 **S**; follow-up adds 87
+  selected comparisons, yielding **304 D + 63 S**. Every record remains pending
+  full material-source/presentation acceptance; D is not an approval tier.
 - D means the cited material mechanics were compared, not that every source clause or browser path passed.
 - S is reviewed inventory/text structure without independent source adjudication. No existing record was left unenumerated.
-- 60 of the S records are declaration-category metadata; they are not 60 missing gameplay explanations.
+- 60 of the remaining 63 S records are declaration-category metadata; they are not 60 missing gameplay explanations.
 - 24 Labels and 6 Skill Types were screened separately. Selected Label mechanics are discussed in the main findings.
 - 20 scenario components were screened: selected clauses of the 12 objectives, 3 endings and 2 setup components were compared; 3 shared geometry components were structurally inventoried only.
 - 12 scenario geometry configurations and 24 Army-Points selections were inventoried; no independent map visual acceptance.
 - 314 authored relations were enumerated by owner; 113 deferred candidates screened (107 post-0.7.0, 6 targeting 1.0.0).
 - The 307 ledger identities have 282 reviewed, 10 inherited and 15 pending statuses. These are not the D/S audit tiers.
 - 18 interaction families investigated; no exhaustive denominator for all rule combinations established.
-- 37 findings: 24 High, 12 Medium, 1 Low, 0 Critical.
+- 44 findings: 31 High, 12 Medium, 1 Low, 0 Critical; original IDs REA-001–037 retained.
 
 | Kind | Records | D | S |
 | --- | ---: | ---: | ---: |
 | ammunition | 11 | 11 | 0 |
-| attribute | 13 | 0 | 13 |
+| attribute | 13 | 13 | 0 |
 | declaration-category | 60 | 0 | 60 |
-| equipment | 36 | 27 | 9 |
+| equipment | 36 | 36 | 0 |
 | hacking-program | 12 | 12 | 0 |
-| rule | 34 | 16 | 18 |
+| rule | 34 | 34 | 0 |
 | scenario | 4 | 4 | 0 |
-| skill | 106 | 76 | 30 |
+| skill | 106 | 103 | 3 |
 | state | 24 | 24 | 0 |
-| term | 18 | 0 | 18 |
-| training | 2 | 0 | 2 |
+| term | 18 | 18 | 0 |
+| training | 2 | 2 | 0 |
 | trait | 33 | 33 | 0 |
 | weapon | 14 | 14 | 0 |
 
@@ -77,6 +81,81 @@ It is not generated runtime data or a replacement interaction ledger.
 | [REA-035](rules-explanation-audit-1.0.md#rea-035---impersonation-2s-unmodified-discover-wording-overstates-the-exception) | High | P0 | Impersonation-2's "unmodified" Discover wording overstates the exception |
 | [REA-036](rules-explanation-audit-1.0.md#rea-036---deployable-cover-names-a-cap-without-giving-its-value-or-conditions) | High | P1 | Deployable Cover names a cap without giving its value or conditions |
 | [REA-037](rules-explanation-audit-1.0.md#rea-037---armed-turret-has-conflicting-silhouette-values-within-the-pdf) | Medium | P1 | Armed Turret has conflicting Silhouette values within the PDF |
+| [REA-038](rules-explanation-audit-1.0.md#rea-038---direct-doctorengineer-target-allegiance-is-not-established) | High | P0 source decision | Direct Doctor/Engineer target allegiance is not established |
+| [REA-039](rules-explanation-audit-1.0.md#rea-039---tinbot-omits-operational-eligibility-and-fireteam-sharing) | High | P1 | TinBot omits operational eligibility and Fireteam sharing |
+| [REA-040](rules-explanation-audit-1.0.md#rea-040---infinity-spec-ops-links-an-absent-specball-procedure) | High | P1 | Infinity Spec-Ops links an absent SpecBall procedure |
+| [REA-041](rules-explanation-audit-1.0.md#rea-041---spanish-fireteam-dice-reminder-conflicts-with-its-general-sd-rule) | High | P1 | Spanish Fireteam dice reminder conflicts with its general SD rule |
+| [REA-042](rules-explanation-audit-1.0.md#rea-042---dodge-arm3-has-incompatible-englishspanish-conditions) | High | P1 | Dodge (ARM+3) has incompatible English/Spanish conditions |
+| [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | High | P0 | Counterintelligence gives the relaxed limit to the wrong player |
+| [REA-044](rules-explanation-audit-1.0.md#rea-044---breaker-marksman-is-metadata-only-despite-its-current-official-profile) | High | P1 | Breaker Marksman is metadata-only despite its current official profile |
+
+## Audit-completion gate
+
+All **367** records have explicit pending full acceptance. This appendix tracks
+selected source work, not 367 approvals. Closing REA-001–044 does not close the
+review of their owning records, 314 relations, profile variants or browser paths.
+The original 150 S records are partitioned below; the full table retains each
+identity and the actual selected locator. No defect was invented to fill a group.
+
+### Follow-up selected comparisons actually completed
+
+| Original S group / domain | Records / current tier | Clauses compared and existing risk | Next review / unavailable evidence |
+| --- | --- | --- | --- |
+| All `attribute:*` / Data processing | 13 / D | S1 p. 9 definitions, missing numerical values, MOV split, VITA versus STR, list-building values; REA-001/008/038 context | P1: modifiers, absent Attribute and recovery interactions; full source/presentation pending |
+| All `term:*` / Data processing | 18 / D | S1 pp. 173-174 named definitions, Alignment and Null list; `term:fto` separately S4 oldid 4116 chart wording. REA-026/038 | P1: target eligibility and State/list exceptions; glossary comparison alone does not establish allegiance permission |
+| `training:regular`, `training:irregular` / Data processing | 2 / D | S1 p. 11 personal versus group Orders and access to Regular Orders | P1: Loss of Lieutenant, Fireteam conversion and Order Count exceptions; no full acceptance |
+| TinBot family and five previously S subtype records / Data processing | 6 / D | S1 p. 127 owner conditions, Fireteam sharing, stacking and token rules; REA-039. Firewall subtype was already D, making seven authored TinBot records in total | P1: each subtype's effect/profile value and lifecycle; exact S18 remains unavailable where cited |
+| `equipment:360o-visor`, `equipment:x-visor`, `equipment:ecm` / Data processing | 3 / D | S1 pp. 119, 122, 127 LoF arc, range penalties and ECM ownership; p. 75 MODs | P1: full attack/Discover/Suppression context, each variant; S18 citation bytes missing for ECM |
+| All originally S Skills except three numeric replacements / Data processing | 27 / D | Individual clauses/locators in inventory; declaration, deployment, activation, target/copy/assignment and Order/roll ownership. REA-015/017/018/023/026/032/038/040/043 | P0: reversed Counterintelligence actor. P1: significant variant and exception checks; S18 source closure separately pending |
+| `rule:loss-of-lieutenant`, four Order types, `rule:command-token-strategic-use` / Data processing | 6 / D | S1 pp. 11, 17-18, 128 timing, personal/group use, strategic actors/thresholds; REA-026/043 | P0 actor correction; P1 scenario, Fireteam and higher-level exceptions; full acceptance pending |
+| All `rule:profile-help:*` / Data processing + Web frontend | 12 / D | S1 pp. 8-9 selected profile-field meanings and distinct option/Skill/Equipment/weapon ownership | P1: rendered field/help correctness and missing-value handling; no browser acceptance claimed |
+| **Total advanced S to D** | **87** | Actual selected clause comparisons, not inferred ledger review | **304 D + 63 S = 367**, still 367 pending complete acceptance |
+
+### Screening-only work still pending
+
+| Logical group / domain | Identity denominator and current tier | Authority / material deeper checks | Related risk, priority and missing evidence |
+| --- | --- | --- | --- |
+| Automatic declaration metadata / Data processing | All 31 `declaration-category:automatic:p*` records listed below; S | S1 cited pages 86-118 and Army current classification: verify owning headings, Automatic Skill/Equipment identity, compulsory/optional behavior and phase exclusions | P1 category completeness, REA-018/033; no new clause review claimed; owning rule exceptions are not captured by a page number |
+| Deployment declaration metadata / Data processing | All 6 `declaration-category:deployment:p*`; S | S1 pp. 89, 92-94, 102, 111; map actual source headings and deployment-only conditions to supported identities | P1 deployment/variant permission, REA-023/032/033; compare each mapping, not a generated matrix assumption |
+| Short Skill metadata / Data processing | All 10 `declaration-category:short-skill:p*`; S | S1 cited pages 40, 45, 79, 90-92, 112, 121, 123-124; verify labels, ARO permissions, target/State gates | P1 REA-001/002/018/033/038; same-page unrelated headings and Device scopes must not be merged |
+| Basic Short Skill metadata / Data processing | All 2 `declaration-category:basic-short-skill:p*`; S | S1 pp. 78, 103; compare actual basic label, declaration combinations and exceptions | P1 REA-014/033; selected Skill reviews do not automatically promote metadata records |
+| Long Skill metadata / Data processing | All 5 `declaration-category:long-skill:p*`; S | S1 pp. 25, 86, 89, 111, 118 as actually listed; verify long declaration/AD exceptions and Special Dice exclusion | P1 REA-021/026/033; exact record count/table controls page list; no individual mapping adjudicated |
+| ARO metadata / Data processing | All 6 `declaration-category:aro:p*`; S | S1 pp. 40, 45, 78-79, 92, 103; selected Skill labels plus reactive and phase-specific restrictions | P1 REA-014/015/033; explicit permission distinct from absence of category |
+| Numerical replacement Skills / Data processing | `skill:bs-12`, `skill:bs-11`, `skill:cc-21`; S | S1 pp. 40/45 and p. 75 modifier ownership; exact Army profile/source variant should prove replacement value and application | P1: do not treat an illustrative BS 12 statline as proof of the named BS=12 replacement. No adequate variant comparison completed; no new defect asserted |
+
+The six metadata groups total **60** and the numerical group **3**. All retain S;
+their individual identities and authored citations remain in the inventory.
+The whole S1 PDF is available, so these are uncompleted work, not all unavailable
+sources. Exact S18, Spanish PDF, historical Army and any scenario-specific source
+requirements remain separately unavailable where relevant.
+
+### Measurable 1.0 acceptance
+
+1. Give all 367 records a signed-off material-mechanics disposition: supported
+   correctness/explanation approved, explicitly scoped uncertainty approved, or
+   identified pending in-scope blocker. Resolve all 63 screening-only mappings
+   against actual cited headings/profiles; do not promote by record count alone.
+2. For every material supported rule, check conditions, baseline, modification,
+   exception, visible outcome and certainty using the curated explanation standard.
+   Close independently confirmed errors and essential omissions; assign owners
+   to unresolved source decisions. A finding closure records its clause/exception
+   acceptance, not a whole-record approval unless separately established.
+3. Adjudicate the 30 notice subjects, 20 Army update dispositions and nine added
+   FAQ blocks at their correct scopes. Partial historical proof need not block
+   current correctness if authoritative current evidence and scope are sufficient.
+4. Pin source identity or explicitly approve an evidenced migration for the 72
+   S18-dependent records. Decide bilingual/chart conflicts with visible uncertainty;
+   never silently choose a preferred table cell or import ITS applicability.
+5. Verify all material explanations reachable in normal browser mode, with semantic
+   links, source labels, narrow-screen/keyboard behavior and special-case outcomes.
+   Run the applicable validation/release checks after implementation. Audit text
+   and a reviewed graph flag are not substitutes for this acceptance.
+
+Exhaustive historical reconstruction, every weapon/Unit combination, a generalized
+combat engine and optional post-1.0 interaction features are not mandatory gates.
+The essential gate concerns the supported reference's material gameplay and usable
+explanation. Geometry acceptance, full variant checks and other limits from the
+main audit remain open; no complete-record approval is claimed in this follow-up.
 
 ## Record inventory
 
@@ -87,42 +166,42 @@ being listed does not mean the individual record is factually wrong.
 
 | Record identity | File | Tier | Outgoing relations | Related findings | Selected clause evidence / authored citation |
 | --- | --- | --- | ---: | --- | --- |
-| `attribute:mov` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `attribute:cc` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `attribute:bs` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `attribute:ph` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `attribute:wip` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `attribute:arm` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `attribute:bts` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `attribute:vita` | C | S | 0 | [REA-008](rules-explanation-audit-1.0.md#rea-008---protheion-needs-the-overkill-limit-and-profile-mod) | n5-core-v5.3-pdf p. 9 |
-| `attribute:str` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `attribute:ava` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `attribute:s` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `attribute:swc` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `attribute:c` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `term:model` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:marker` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:token` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:state-token` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:deployable-equipment` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:deployable-weapon` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:peripheral` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:scenery-element` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:target` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:trooper` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:unit-profile` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:fto` | C | S | 0 | - | wiki-fireteams-chart-oldid-4116 |
-| `term:victory-points` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:null-state` | C | S | 0 | - | n5-core-v5.3-pdf p. 174 |
-| `term:ally` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:enemy` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:hostile` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
-| `term:neutral` | C | S | 0 | - | n5-core-v5.3-pdf p. 173 |
+| `attribute:mov` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:cc` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:bs` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:ph` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:wip` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:arm` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:bts` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:vita` | C | D | 0 | [REA-008](rules-explanation-audit-1.0.md#rea-008---protheion-needs-the-overkill-limit-and-profile-mod) | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:str` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:ava` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:s` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:swc` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `attribute:c` | C | D | 0 | - | S1 p. 9: named Attribute definition and absent-value gate; MOV first/second distance, VITA/STR, AVA/SWC/C distinctions as applicable |
+| `term:model` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:marker` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:token` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:state-token` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:deployable-equipment` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:deployable-weapon` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:peripheral` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:scenery-element` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:target` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:trooper` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:unit-profile` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:fto` | C | D | 0 | - | S4 oldid 4116: FTO restriction to specified Fireteam option/chart context |
+| `term:victory-points` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:null-state` | C | D | 0 | - | S1 p. 174: five-State Null list and Order/Victory Point effect |
+| `term:ally` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:enemy` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:hostile` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
+| `term:neutral` | C | D | 0 | - | S1 p. 173: named terminology/alignment definition and game-element scope |
 | `state:camouflaged` | C | D | 2 | [REA-015](rules-explanation-audit-1.0.md#rea-015---several-state-cards-lack-their-operative-cancellation-conditions), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 157-172 (State-specific heading) |
 | `skill:camouflage` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 87, 157-158 |
 | `skill:discover` | C | D | 5 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-035](rules-explanation-audit-1.0.md#rea-035---impersonation-2s-unmodified-discover-wording-overstates-the-exception) | S1 pp. 77-78, 166-167 |
 | `skill:super-jump` | C | D | 1 | [REA-032](rules-explanation-audit-1.0.md#rea-032---profile-changing-and-assignable-families-lack-actionable-qualifiers) | S1 pp. 113-114 |
-| `skill:forward-deployment` | C | S | 0 | - | wiki-forward-deployment-oldid-3076 |
+| `skill:forward-deployment` | C | D | 0 | - | S1 p. 92: Deployment Phase distance, own half and scenario qualifications |
 | `trait:anti-materiel` | C | D | 0 | [REA-028](rules-explanation-audit-1.0.md#rea-028---kobras-two-issues-require-separate-source-decisions) | S1 pp. 174-175 |
 | `trait:arm-0` | C | D | 0 | [REA-010](rules-explanation-audit-1.0.md#rea-010---immunity-omits-the-ordinary-trait-protection-behind-its-exceptions) | S1 pp. 174-175 |
 | `trait:aro` | C | D | 0 | - | S1 pp. 174-175 |
@@ -230,8 +309,8 @@ being listed does not mean the individual record is factually wrong.
 | `declaration-category:aro:p79` | C | S | 0 | - | n5-core-v5.3-pdf p. 79 |
 | `declaration-category:aro:p92` | C | S | 0 | - | n5-core-v5.3-pdf p. 92 |
 | `declaration-category:aro:p103` | C | S | 0 | - | n5-core-v5.3-pdf p. 103 |
-| `skill:doctor` | C | D | 3 | [REA-002](rules-explanation-audit-1.0.md#rea-002---doctor-omits-its-ordinary-recovery-gate-and-lethal-failure), [REA-009](rules-explanation-audit-1.0.md#rea-009---recovery-and-re-infliction-in-the-same-order-are-unexplained) | S1 pp. 90, 104, 170 |
-| `skill:engineer` | C | D | 8 | [REA-001](rules-explanation-audit-1.0.md#rea-001---engineer-incorrectly-restricts-all-targets-to-str), [REA-009](rules-explanation-audit-1.0.md#rea-009---recovery-and-re-infliction-in-the-same-order-are-unexplained) | S1 pp. 91, 164-165, 168, 170-171 |
+| `skill:doctor` | C | D | 3 | [REA-002](rules-explanation-audit-1.0.md#rea-002---doctor-omits-its-ordinary-recovery-gate-and-lethal-failure), [REA-009](rules-explanation-audit-1.0.md#rea-009---recovery-and-re-infliction-in-the-same-order-are-unexplained), [REA-038](rules-explanation-audit-1.0.md#rea-038---direct-doctorengineer-target-allegiance-is-not-established) | S1 pp. 90, 104, 170 |
+| `skill:engineer` | C | D | 8 | [REA-001](rules-explanation-audit-1.0.md#rea-001---engineer-incorrectly-restricts-all-targets-to-str), [REA-009](rules-explanation-audit-1.0.md#rea-009---recovery-and-re-infliction-in-the-same-order-are-unexplained), [REA-038](rules-explanation-audit-1.0.md#rea-038---direct-doctorengineer-target-allegiance-is-not-established) | S1 pp. 91, 164-165, 168, 170-171 |
 | `skill:cyberplug` | C | D | 1 | [REA-017](rules-explanation-audit-1.0.md#rea-017---peripheral-subtype-identities-do-not-explain-their-operation) | S1 pp. 90, 107-108 |
 | `skill:peripheral` | C | D | 5 | [REA-017](rules-explanation-audit-1.0.md#rea-017---peripheral-subtype-identities-do-not-explain-their-operation) | S1 pp. 106-108 |
 | `rule:peripheral-type:servant` | C | D | 0 | [REA-017](rules-explanation-audit-1.0.md#rea-017---peripheral-subtype-identities-do-not-explain-their-operation) | S1 pp. 106-108 |
@@ -239,8 +318,8 @@ being listed does not mean the individual record is factually wrong.
 | `rule:peripheral-type:control` | C | D | 0 | [REA-017](rules-explanation-audit-1.0.md#rea-017---peripheral-subtype-identities-do-not-explain-their-operation) | S1 pp. 106-108 |
 | `rule:peripheral-type:ancillary` | C | D | 1 | [REA-017](rules-explanation-audit-1.0.md#rea-017---peripheral-subtype-identities-do-not-explain-their-operation), [REA-030](rules-explanation-audit-1.0.md#rea-030---faq-publication-and-scenario-applicability-remain-uncurated) | S1 pp. 106-108 |
 | `rule:peripheral-type:cyberplug` | C | D | 0 | [REA-017](rules-explanation-audit-1.0.md#rea-017---peripheral-subtype-identities-do-not-explain-their-operation) | S1 pp. 106-108 |
-| `training:regular` | C | S | 0 | - | n5-core-v5.3-pdf p. 11 |
-| `training:irregular` | C | S | 1 | - | n5-core-v5.3-pdf p. 11 |
+| `training:regular` | C | D | 0 | - | S1 p. 11: Regular pooled versus Irregular personal Order; Irregular can use same-group Regular Orders |
+| `training:irregular` | C | D | 1 | - | S1 p. 11: Regular pooled versus Irregular personal Order; Irregular can use same-group Regular Orders |
 | `skill:martial-arts` | C | D | 1 | [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning) | S1 pp. 100-101 |
 | `skill:martial-arts-l1` | C | D | 1 | [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning) | S1 pp. 100 |
 | `skill:martial-arts-l2` | C | D | 1 | [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning) | S1 pp. 100 |
@@ -257,36 +336,36 @@ being listed does not mean the individual record is factually wrong.
 | `skill:cc-21` | C | S | 1 | - | n5-core-v5.3-pdf p. 45 |
 | `equipment:cube` | C | D | 1 | [REA-002](rules-explanation-audit-1.0.md#rea-002---doctor-omits-its-ordinary-recovery-gate-and-lethal-failure), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 121 |
 | `equipment:cube-2` | C | D | 4 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 73, 121 |
-| `equipment:tinbot` | C | S | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | n5-core-v5.3-pdf p. 127 |
-| `equipment:tinbot-firewall` | C | D | 1 | [REA-018](rules-explanation-audit-1.0.md#rea-018---firewall-hacking-area-and-supportware-have-no-adequate-baseline-owner), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 55-56 (Firewall baseline) |
-| `equipment:tinbot-neurocinetics` | C | S | 2 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | n5-core-v5.3-pdf p. 127 |
-| `equipment:tinbot-albedo` | C | S | 2 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | n5-core-v5.3-pdf p. 127 |
-| `equipment:tinbot-discover` | C | S | 2 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | n5-core-v5.3-pdf p. 127 |
-| `equipment:tinbot-ecm-guided` | C | S | 2 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | n5-core-v5.3-pdf p. 127 |
-| `equipment:tinbot-repeater` | C | S | 2 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | n5-core-v5.3-pdf p. 127 |
+| `equipment:tinbot` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-039](rules-explanation-audit-1.0.md#rea-039---tinbot-omits-operational-eligibility-and-fireteam-sharing) | S1 p. 127: owner non-Null/non-Isolated; shared Fireteam benefit, identical-use/nonstacking/best-MOD and token restrictions; variant profile values not certified |
+| `equipment:tinbot-firewall` | C | D | 1 | [REA-018](rules-explanation-audit-1.0.md#rea-018---firewall-hacking-area-and-supportware-have-no-adequate-baseline-owner), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-039](rules-explanation-audit-1.0.md#rea-039---tinbot-omits-operational-eligibility-and-fireteam-sharing) | S1 pp. 55-56 (Firewall baseline) |
+| `equipment:tinbot-neurocinetics` | C | D | 2 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-039](rules-explanation-audit-1.0.md#rea-039---tinbot-omits-operational-eligibility-and-fireteam-sharing) | S1 p. 127: owner non-Null/non-Isolated; shared Fireteam benefit, identical-use/nonstacking/best-MOD and token restrictions; variant profile values not certified |
+| `equipment:tinbot-albedo` | C | D | 2 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-039](rules-explanation-audit-1.0.md#rea-039---tinbot-omits-operational-eligibility-and-fireteam-sharing) | S1 p. 127: owner non-Null/non-Isolated; shared Fireteam benefit, identical-use/nonstacking/best-MOD and token restrictions; variant profile values not certified |
+| `equipment:tinbot-discover` | C | D | 2 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-039](rules-explanation-audit-1.0.md#rea-039---tinbot-omits-operational-eligibility-and-fireteam-sharing) | S1 p. 127: owner non-Null/non-Isolated; shared Fireteam benefit, identical-use/nonstacking/best-MOD and token restrictions; variant profile values not certified |
+| `equipment:tinbot-ecm-guided` | C | D | 2 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-039](rules-explanation-audit-1.0.md#rea-039---tinbot-omits-operational-eligibility-and-fireteam-sharing) | S1 p. 127: owner non-Null/non-Isolated; shared Fireteam benefit, identical-use/nonstacking/best-MOD and token restrictions; variant profile values not certified |
+| `equipment:tinbot-repeater` | C | D | 2 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-039](rules-explanation-audit-1.0.md#rea-039---tinbot-omits-operational-eligibility-and-fireteam-sharing) | S1 p. 127: owner non-Null/non-Isolated; shared Fireteam benefit, identical-use/nonstacking/best-MOD and token restrictions; variant profile values not certified |
 | `skill:mimetism` | C | D | 2 | [REA-019](rules-explanation-audit-1.0.md#rea-019---nfbs-label-does-not-explain-suppression-and-duration) | S1 pp. 102, 125 |
 | `equipment:multispectral-visor` | C | D | 1 | [REA-012](rules-explanation-audit-1.0.md#rea-012---smoke-and-eclipse-describe-zones-without-sufficient-resolution) | S1 pp. 64, 66, 125 |
 | `skill:combat-instinct` | C | D | 2 | [REA-016](rules-explanation-audit-1.0.md#rea-016---stealth-omits-deployables-and-multi-trooper-reaction-reasoning) | S1 pp. 88 |
 | `skill:sixth-sense` | C | D | 3 | [REA-014](rules-explanation-audit-1.0.md#rea-014---dodge-and-reset-lack-multi-effect-conditions), [REA-016](rules-explanation-audit-1.0.md#rea-016---stealth-omits-deployables-and-multi-trooper-reaction-reasoning) | S1 pp. 111-112 |
 | `skill:stealth` | C | D | 1 | [REA-016](rules-explanation-audit-1.0.md#rea-016---stealth-omits-deployables-and-multi-trooper-reaction-reasoning) | S1 pp. 112 |
-| `skill:surprise-attack` | C | S | 0 | - | wiki-surprise-attack-oldid-3943 |
+| `skill:surprise-attack` | C | D | 0 | - | S1 p. 114: Marker requirement, first attack and enemy Face-to-Face MOD; S2 p. 2 combined activation |
 | `state:hidden-deployment` | C | D | 1 | [REA-015](rules-explanation-audit-1.0.md#rea-015---several-state-cards-lack-their-operative-cancellation-conditions) | S1 pp. 157-172 (State-specific heading) |
 | `skill:hidden-deployment` | C | D | 1 | - | S1 pp. 95, 161-162 |
-| `skill:sensor` | C | S | 5 | - | n5-core-v5.3-pdf p. 112 |
+| `skill:sensor` | C | D | 5 | - | S1 p. 111: WIP+6 Sensor area detection, no ordinary Discover MODs and +6 Discover qualification |
 | `skill:marksmanship` | C | D | 1 | - | S1 pp. 100, 125 |
 | `equipment:baggage` | C | D | 2 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 83, 120, 172 |
 | `equipment:albedo` | C | D | 2 | [REA-019](rules-explanation-audit-1.0.md#rea-019---nfbs-label-does-not-explain-suppression-and-duration) | S1 pp. 119 |
 | `skill:natural-born-warrior` | C | D | 2 | - | S1 pp. 103 |
 | `skill:limited-cover` | C | D | 0 | - | S1 pp. 100 |
-| `skill:non-hackable` | C | S | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | wiki-en-20260918-130233 / Non-Hackable |
+| `skill:non-hackable` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 p. 105: override of Hackable eligibility, not immunity to every Program effect |
 | `skill:no-cover` | C | D | 1 | - | S1 pp. 104 |
-| `skill:forward-observer` | C | S | 1 | - | wiki-forward-observer-oldid-3878 |
-| `skill:dodge` | C | D | 2 | [REA-014](rules-explanation-audit-1.0.md#rea-014---dodge-and-reset-lack-multi-effect-conditions) | S1 pp. 79-80, 160 |
+| `skill:forward-observer` | C | D | 1 | - | S1 p. 92: WIP BS Attack, B2, Targeted and equipment requirements |
+| `skill:dodge` | C | D | 2 | [REA-014](rules-explanation-audit-1.0.md#rea-014---dodge-and-reset-lack-multi-effect-conditions), [REA-042](rules-explanation-audit-1.0.md#rea-042---dodge-arm3-has-incompatible-englishspanish-conditions) | S1 pp. 79-80, 160 |
 | `skill:reset` | C | D | 3 | [REA-014](rules-explanation-audit-1.0.md#rea-014---dodge-and-reset-lack-multi-effect-conditions) | S1 pp. 85, 165, 168, 171 |
 | `skill:cautious-movement` | C | D | 0 | - | S1 pp. 32, 112 |
 | `skill:alert` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 77 |
 | `skill:climb` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 32-33, 88 |
-| `skill:idle` | C | S | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | wiki-en-20260918-130233 / Idle |
+| `skill:idle` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 p. 80: activation/ARO, invalid requirements become Idle; Disposable spending and Marker revelation |
 | `skill:intuitive-attack` | C | D | 0 | [REA-003](rules-explanation-audit-1.0.md#rea-003---intuitive-attack-appears-to-require-a-second-attack-roll), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 49 |
 | `skill:jump` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 34, 113 |
 | `skill:move` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 28-31 |
@@ -294,7 +373,7 @@ being listed does not mean the individual record is factually wrong.
 | `skill:place-deployable` | C | D | 0 | [REA-023](rules-explanation-audit-1.0.md#rea-023---placement-cards-defer-essential-geometry-and-deployment-restrictions), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-036](rules-explanation-audit-1.0.md#rea-036---deployable-cover-names-a-cap-without-giving-its-value-or-conditions) | S1 pp. 82-83 |
 | `skill:reload` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 83, 120 |
 | `skill:request-speedball` | C | D | 1 | [REA-007](rules-explanation-audit-1.0.md#rea-007---speedballs-reuse-of-combat-jump-needs-the-faq-exclusion), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S2 printed p. 1 (selected exclusion only) |
-| `skill:speculative-attack` | C | S | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | wiki-en-20260918-130233 / Speculative_Attack |
+| `skill:speculative-attack` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 p. 48: Long Skill B1, -6, no LoF and Impact Template target placement |
 | `skill:suppressive-fire` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 85, 171 |
 | `state:unconscious` | C | D | 2 | [REA-002](rules-explanation-audit-1.0.md#rea-002---doctor-omits-its-ordinary-recovery-gate-and-lethal-failure) | S1 pp. 157-172 (State-specific heading) |
 | `state:disconnected` | C | D | 1 | [REA-015](rules-explanation-audit-1.0.md#rea-015---several-state-cards-lack-their-operative-cancellation-conditions), [REA-017](rules-explanation-audit-1.0.md#rea-017---peripheral-subtype-identities-do-not-explain-their-operation) | S1 pp. 157-172 (State-specific heading) |
@@ -304,9 +383,9 @@ being listed does not mean the individual record is factually wrong.
 | `state:stunned` | C | D | 0 | [REA-002](rules-explanation-audit-1.0.md#rea-002---doctor-omits-its-ordinary-recovery-gate-and-lethal-failure) | S1 pp. 157-172 (State-specific heading) |
 | `state:targeted` | C | D | 5 | [REA-001](rules-explanation-audit-1.0.md#rea-001---engineer-incorrectly-restricts-all-targets-to-str), [REA-014](rules-explanation-audit-1.0.md#rea-014---dodge-and-reset-lack-multi-effect-conditions) | S1 pp. 157-172 (State-specific heading) |
 | `state:unloaded` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 157-172 (State-specific heading) |
-| `equipment:360o-visor` | C | S | 0 | - | wiki-360-visor-oldid-3511 |
+| `equipment:360o-visor` | C | D | 0 | - | S1 p. 119: LoF arc expanded to 360 degrees |
 | `equipment:nanoscreen` | C | D | 1 | - | S1 pp. 100, 125 |
-| `equipment:x-visor` | C | S | 3 | - | wiki-x-visor-oldid-3193 |
+| `equipment:x-visor` | C | D | 3 | - | S1 p. 127: Range penalties reduced, including Suppressive Fire qualification |
 | `equipment:biometric-visor` | C | D | 3 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-035](rules-explanation-audit-1.0.md#rea-035---impersonation-2s-unmodified-discover-wording-overstates-the-exception) | S1 pp. 120, 166-167 |
 | `equipment:dazer` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 121 |
 | `equipment:deactivator` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 121 |
@@ -316,34 +395,34 @@ being listed does not mean the individual record is factually wrong.
 | `equipment:fastpanda` | C | D | 1 | [REA-023](rules-explanation-audit-1.0.md#rea-023---placement-cards-defer-essential-geometry-and-deployment-restrictions), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 82-83, 122 |
 | `equipment:ai-motorcycle` | C | D | 3 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-032](rules-explanation-audit-1.0.md#rea-032---profile-changing-and-assignable-families-lack-actionable-qualifiers) | S1 pp. 107, 117, 119 |
 | `equipment:bangbomb` | C | D | 1 | [REA-014](rules-explanation-audit-1.0.md#rea-014---dodge-and-reset-lack-multi-effect-conditions), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 79-80, 120 |
-| `equipment:ecm` | C | S | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | wiki-en-20260918-130233 / ECM |
+| `equipment:ecm` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 p. 122: opponent Guided/Hacking MOD specified by profile; S1 p. 75 MOD ownership |
 | `equipment:escape-system` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-032](rules-explanation-audit-1.0.md#rea-032---profile-changing-and-assignable-families-lack-actionable-qualifiers) | S1 pp. 117-118 |
 | `equipment:evo-hacking-device` | C | D | 0 | [REA-018](rules-explanation-audit-1.0.md#rea-018---firewall-hacking-area-and-supportware-have-no-adequate-baseline-owner), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 58-61, 123 |
-| `equipment:gizmokit` | C | D | 1 | [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning), [REA-022](rules-explanation-audit-1.0.md#rea-022---kit-recovery-and-disposable-spending-need-multi-roll-rules), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 110, 123 |
+| `equipment:gizmokit` | C | D | 1 | [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning), [REA-022](rules-explanation-audit-1.0.md#rea-022---kit-recovery-and-disposable-spending-need-multi-roll-rules), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-038](rules-explanation-audit-1.0.md#rea-038---direct-doctorengineer-target-allegiance-is-not-established) | S1 pp. 110, 123 |
 | `equipment:hacking-device` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 58, 123 |
 | `equipment:hacking-device-plus` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 58, 123 |
 | `equipment:holomask` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 124, 164 |
 | `equipment:holoprojector` | C | D | 1 | [REA-019](rules-explanation-audit-1.0.md#rea-019---nfbs-label-does-not-explain-suppression-and-duration), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 124, 162-163 |
 | `equipment:killer-hacking-device` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 58, 123 |
-| `equipment:medikit` | C | D | 2 | [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning), [REA-022](rules-explanation-audit-1.0.md#rea-022---kit-recovery-and-disposable-spending-need-multi-roll-rules), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 124 |
+| `equipment:medikit` | C | D | 2 | [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning), [REA-022](rules-explanation-audit-1.0.md#rea-022---kit-recovery-and-disposable-spending-need-multi-roll-rules), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-038](rules-explanation-audit-1.0.md#rea-038---direct-doctorengineer-target-allegiance-is-not-established) | S1 pp. 124 |
 | `equipment:motorcycle` | C | D | 4 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 125 |
 | `equipment:symbiomate` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-032](rules-explanation-audit-1.0.md#rea-032---profile-changing-and-assignable-families-lack-actionable-qualifiers) | S1 pp. 126, 174 |
 | `skill:combat-jump` | C | D | 0 | [REA-006](rules-explanation-audit-1.0.md#rea-006---controlled-jump-lacks-declaration-timing-and-opposing-cancellation) | S1 pp. 59, 89, 155 |
-| `skill:decoy` | C | S | 1 | - | wiki-decoy-oldid-3069 |
+| `skill:decoy` | C | D | 1 | - | S1 p. 90: Deployment-only decoys, Private Information and cancellation/detection conditions |
 | `skill:impersonation` | C | D | 2 | - | S1 pp. 96, 166-167 |
-| `skill:infiltration` | C | S | 0 | - | wiki-infiltration-oldid-3909 |
+| `skill:infiltration` | C | D | 0 | - | S1 p. 97: own-half deployment versus PH-3 enemy-half attempt and failure fallback |
 | `skill:minelayer` | C | D | 0 | [REA-023](rules-explanation-audit-1.0.md#rea-023---placement-cards-defer-essential-geometry-and-deployment-restrictions) | S1 pp. 102 |
 | `skill:parachutist` | C | D | 0 | - | S1 pp. 105, 155 |
-| `skill:sapper` | C | S | 1 | - | wiki-sapper-oldid-3286 |
+| `skill:sapper` | C | D | 1 | - | S1 p. 111: Deployment/Entire Order activation, Foxhole and movement cancellation |
 | `skill:strategic-deployment` | C | D | 1 | - | S1 pp. 112 |
 | `state:decoy` | C | D | 0 | - | S1 pp. 157-172 (State-specific heading) |
 | `state:impersonation-1` | C | D | 1 | [REA-015](rules-explanation-audit-1.0.md#rea-015---several-state-cards-lack-their-operative-cancellation-conditions), [REA-035](rules-explanation-audit-1.0.md#rea-035---impersonation-2s-unmodified-discover-wording-overstates-the-exception) | S1 pp. 157-172 (State-specific heading) |
 | `state:impersonation-2` | C | D | 1 | [REA-015](rules-explanation-audit-1.0.md#rea-015---several-state-cards-lack-their-operative-cancellation-conditions), [REA-035](rules-explanation-audit-1.0.md#rea-035---impersonation-2s-unmodified-discover-wording-overstates-the-exception) | S1 pp. 157-172 (State-specific heading) |
 | `state:foxhole` | C | D | 2 | - | S1 pp. 157-172 (State-specific heading) |
-| `skill:berserk` | C | S | 2 | - | wiki-berserk-oldid-3236 |
+| `skill:berserk` | C | D | 2 | - | S1 p. 86: non-Engaged/LoF requirements, Normal CC rolls and Assault movement; p. 29 Prone exception |
 | `skill:guard` | C | D | 1 | - | S1 pp. 86, 95 |
-| `skill:neurocinetics` | C | S | 1 | - | wiki-neurocinetics-oldid-3111 |
-| `skill:total-reaction` | C | S | 1 | - | wiki-total-reaction-oldid-3147 |
+| `skill:neurocinetics` | C | D | 1 | - | S1 p. 104: Active B1 versus full Reactive Burst; not identical to Total Reaction |
+| `skill:total-reaction` | C | D | 1 | - | S1 p. 116: full weapon Burst in Reactive Turn, with single-target limitation |
 | `skill:triangulated-fire` | C | D | 2 | - | S1 pp. 118 |
 | `skill:aerial` | C | D | 5 | - | S1 pp. 86 |
 | `skill:climbing-plus` | C | D | 3 | - | S1 pp. 88 |
@@ -351,7 +430,7 @@ being listed does not mean the individual record is factually wrong.
 | `skill:warhorse` | C | D | 2 | - | S1 pp. 118 |
 | `skill:courage` | C | D | 0 | - | S1 pp. 90 |
 | `skill:frenzy` | C | D | 7 | - | S1 pp. 93 |
-| `skill:impetuous` | C | S | 4 | - | wiki-impetuous-oldid-4039 |
+| `skill:impetuous` | C | D | 4 | - | S1 p. 97: phase movement/skill restrictions, Cover and end-of-Order Prone clause |
 | `skill:religious-troop` | C | D | 0 | - | S1 pp. 110 |
 | `state:dead` | C | D | 1 | [REA-008](rules-explanation-audit-1.0.md#rea-008---protheion-needs-the-overkill-limit-and-profile-mod) | S1 pp. 157-172 (State-specific heading) |
 | `state:engaged` | C | D | 1 | [REA-014](rules-explanation-audit-1.0.md#rea-014---dodge-and-reset-lack-multi-effect-conditions) | S1 pp. 157-172 (State-specific heading) |
@@ -369,17 +448,17 @@ being listed does not mean the individual record is factually wrong.
 | `skill:shasvastii` | C | D | 1 | - | S1 pp. 111, 151 |
 | `skill:regeneration` | C | D | 1 | - | S1 pp. 109 |
 | `skill:protheion` | C | D | 1 | [REA-008](rules-explanation-audit-1.0.md#rea-008---protheion-needs-the-overkill-limit-and-profile-mod) | S1 pp. 109 |
-| `rule:loss-of-lieutenant` | C | S | 2 | - | wiki-loss-of-lieutenant-oldid-3508 |
-| `rule:regular-order` | C | S | 0 | - | n5-core-v5.3-pdf p. 11 |
-| `rule:irregular-order` | C | S | 0 | - | n5-core-v5.3-pdf p. 11 |
-| `rule:special-lieutenant-order` | C | S | 0 | - | wiki-orders-order-pool-oldid-3589 |
-| `rule:tactical-order` | C | S | 0 | - | wiki-orders-order-pool-oldid-3589 |
-| `rule:command-token-strategic-use` | C | S | 2 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content) | wiki-command-tokens-oldid-3959 |
-| `skill:chain-of-command` | C | S | 2 | - | wiki-chain-of-command-oldid-3799 |
-| `skill:counterintelligence` | C | S | 1 | - | wiki-counterintelligence-oldid-3991 |
+| `rule:loss-of-lieutenant` | C | D | 2 | - | S1 pp. 17-18: check timing, Irregular conversion, recovery and exceptions |
+| `rule:regular-order` | C | D | 0 | - | S1 p. 11: Combat Group Order Pool use |
+| `rule:irregular-order` | C | D | 0 | - | S1 p. 11: own Order retained, same-group Regular Orders still usable |
+| `rule:special-lieutenant-order` | C | D | 0 | - | S1 p. 11: separate Lieutenant use and Open Information |
+| `rule:tactical-order` | C | D | 0 | - | S1 p. 11: own Order plus explicit advanced/Fireteam uses |
+| `rule:command-token-strategic-use` | C | D | 2 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content), [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | S1 p. 128: first/second-player actors, timing, >10 Order threshold, two strategic-use modes |
+| `skill:chain-of-command` | C | D | 2 | - | S1 p. 87: Lieutenant succession conditions and automatic priority |
+| `skill:counterintelligence` | C | D | 1 | [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | S1 p. 90 and p. 128: enemy Order reduction versus user Command Token allowance |
 | `skill:inspiring-leadership` | C | D | 3 | - | S1 pp. 99 |
 | `skill:lieutenant` | C | D | 3 | - | S1 pp. 99 |
-| `skill:mnemonica` | C | S | 2 | - | wiki-mnemonica-oldid-3105 |
+| `skill:mnemonica` | C | D | 2 | - | S1 p. 103: Null trigger, eligible Cube/REM recipient and transmitted WIP/Lieutenant identity |
 | `skill:nco` | C | D | 2 | [REA-020](rules-explanation-audit-1.0.md#rea-020---fireteam-basics-omit-action-ownership-and-integrity-exceptions) | S1 pp. 104, 135 |
 | `skill:tactical-awareness` | C | D | 1 | [REA-020](rules-explanation-audit-1.0.md#rea-020---fireteam-basics-omit-action-ownership-and-integrity-exceptions) | S1 pp. 115, 135 |
 | `skill:paramedic` | C | D | 1 | - | S1 pp. 105 |
@@ -387,35 +466,35 @@ being listed does not mean the individual record is factually wrong.
 | `skill:technorganic` | C | D | 4 | [REA-022](rules-explanation-audit-1.0.md#rea-022---kit-recovery-and-disposable-spending-need-multi-roll-rules) | S1 pp. 116 |
 | `skill:ft-master` | C | D | 0 | [REA-020](rules-explanation-audit-1.0.md#rea-020---fireteam-basics-omit-action-ownership-and-integrity-exceptions) | S1 pp. 93 |
 | `skill:number-2` | C | D | 0 | [REA-020](rules-explanation-audit-1.0.md#rea-020---fireteam-basics-omit-action-ownership-and-integrity-exceptions) | S1 pp. 105 |
-| `skill:specialist-operative` | C | S | 0 | - | wiki-specialist-operative-oldid-3136 |
-| `skill:journalist` | C | S | 0 | - | wiki-journalist-oldid-4086 |
-| `skill:tagcom` | C | S | 0 | - | wiki-tagcom-oldid-3144 |
-| `skill:booty` | C | S | 0 | - | wiki-booty-oldid-3852 |
-| `skill:metachemistry` | C | S | 0 | - | wiki-metachemistry-oldid-3855 |
+| `skill:specialist-operative` | C | D | 0 | - | S1 p. 112: scenario Specialist eligibility, not every profession bonus |
+| `skill:journalist` | C | D | 0 | - | S1 p. 99: scenario-defined effects rather than independent combat benefit |
+| `skill:tagcom` | C | D | 0 | - | S1 p. 115: scenario-defined effects rather than blanket Specialist permission |
+| `skill:booty` | C | D | 0 | - | S1 pp. 86-87: Deployment chart roll/choice and weapon/Equipment acquisition |
+| `skill:metachemistry` | C | D | 0 | - | S1 p. 101: Deployment roll, listed chart result and profile qualification |
 | `skill:explode` | C | D | 2 | - | S1 pp. 92 |
 | `skill:exrah` | C | D | 2 | - | S1 pp. 92 |
 | `skill:immunity` | C | D | 0 | [REA-004](rules-explanation-audit-1.0.md#rea-004---continuous-damage-omits-the-extra-critical-roll-exception), [REA-010](rules-explanation-audit-1.0.md#rea-010---immunity-omits-the-ordinary-trait-protection-behind-its-exceptions), [REA-011](rules-explanation-audit-1.0.md#rea-011---stored-immunity-cases-are-only-partly-presented), [REA-025](rules-explanation-audit-1.0.md#rea-025---nem-is-absent-from-the-reviewed-composition-map), [REA-027](rules-explanation-audit-1.0.md#rea-027---flash-pulses-spanish-chart-disagrees-on-rolls-and-traits) | S1 pp. 95-96 |
 | `skill:vulnerability` | C | D | 1 | [REA-024](rules-explanation-audit-1.0.md#rea-024---bioweapon-needs-a-target-conditioned-explanation-alongside-the-chart) | S1 pp. 118 |
-| `skill:g-jumper` | C | S | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | wiki-en-20260918-130233 / G:_Jumper |
-| `skill:infinity-spec-ops` | C | S | 0 | - | wiki-infinity-spec-ops-oldid-4120 |
-| `skill:morpho-scan` | C | S | 1 | - | wiki-morpho-scan-oldid-3106 |
-| `skill:remdriver` | C | S | 0 | - | wiki-remdriver-oldid-3634 |
+| `skill:g-jumper` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 93-94: Active proxy selection, ARO/control and shared Cost/Loss of Lieutenant/Suppressive Fire |
+| `skill:infinity-spec-ops` | C | D | 0 | [REA-040](rules-explanation-audit-1.0.md#rea-040---infinity-spec-ops-links-an-absent-specball-procedure) | S1 p. 98: Spec-Ops Skill and SpecBall activation/token; S16 pp. 26, 28 ITS distinction |
+| `skill:morpho-scan` | C | D | 1 | - | S1 p. 103: ZoC/LoF target, copying specified Attributes and use limit |
+| `skill:remdriver` | C | D | 0 | - | S1 p. 110: Deployment assignment, one REM and driver Null/removal conditions |
 | `skill:transmutation` | C | D | 0 | [REA-032](rules-explanation-audit-1.0.md#rea-032---profile-changing-and-assignable-families-lack-actionable-qualifiers) | S1 pp. 117-118 |
-| `skill:hacker` | C | S | 1 | [REA-018](rules-explanation-audit-1.0.md#rea-018---firewall-hacking-area-and-supportware-have-no-adequate-baseline-owner) | wiki-hacker-oldid-3646 |
+| `skill:hacker` | C | D | 1 | [REA-018](rules-explanation-audit-1.0.md#rea-018---firewall-hacking-area-and-supportware-have-no-adequate-baseline-owner) | S1 pp. 54-58, 95: Device/Hacking Area, declaration and Hacker/Device eligibility |
 | `rule:fireteam-general` | C | D | 0 | [REA-020](rules-explanation-audit-1.0.md#rea-020---fireteam-basics-omit-action-ownership-and-integrity-exceptions) | S1 pp. 132-136 |
 | `rule:fireteam-level-bonuses` | C | D | 0 | [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning), [REA-034](rules-explanation-audit-1.0.md#rea-034---the-printed-fireteam-level-3-example-includes-a-level-4-bonus) | S1 pp. 135-136 |
-| `rule:profile-help:unit-profile` | C | S | 0 | - | n5-core-v5.3-pdf p. 8 |
-| `rule:profile-help:attributes` | C | S | 0 | - | n5-core-v5.3-pdf p. 9 |
-| `rule:profile-help:training-orders` | C | S | 0 | - | n5-core-v5.3-pdf p. 8 |
-| `rule:profile-help:troop-type` | C | S | 0 | - | n5-core-v5.3-pdf p. 8 |
-| `rule:profile-help:classification` | C | S | 0 | - | n5-core-v5.3-pdf p. 8 |
-| `rule:profile-help:isc` | C | S | 0 | - | n5-core-v5.3-pdf p. 8 |
-| `rule:profile-help:hackable` | C | S | 0 | - | n5-core-v5.3-pdf p. 8 |
-| `rule:profile-help:peripheral` | C | S | 0 | - | n5-core-v5.3-pdf p. 8 |
-| `rule:profile-help:skills` | C | S | 0 | - | n5-core-v5.3-pdf p. 8 |
-| `rule:profile-help:equipment` | C | S | 0 | - | n5-core-v5.3-pdf p. 8 |
-| `rule:profile-help:weapons` | C | S | 0 | - | n5-core-v5.3-pdf p. 8 |
-| `rule:profile-help:profile-options` | C | S | 0 | - | n5-core-v5.3-pdf p. 8 |
+| `rule:profile-help:unit-profile` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
+| `rule:profile-help:attributes` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
+| `rule:profile-help:training-orders` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
+| `rule:profile-help:troop-type` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
+| `rule:profile-help:classification` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
+| `rule:profile-help:isc` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
+| `rule:profile-help:hackable` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
+| `rule:profile-help:peripheral` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
+| `rule:profile-help:skills` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
+| `rule:profile-help:equipment` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
+| `rule:profile-help:weapons` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
+| `rule:profile-help:profile-options` | C | D | 0 | - | S1 pp. 8-9: profile fields, option identity, numeric Attributes and distinct Skill/Equipment/weapon ownership; selected field only |
 | `ammunition:normal` | C | D | 0 | [REA-024](rules-explanation-audit-1.0.md#rea-024---bioweapon-needs-a-target-conditioned-explanation-alongside-the-chart), [REA-025](rules-explanation-audit-1.0.md#rea-025---nem-is-absent-from-the-reviewed-composition-map), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 63 |
 | `ammunition:ap` | C | D | 0 | [REA-013](rules-explanation-audit-1.0.md#rea-013---ap-rounding-and-t2-die-identification-are-missing-player-actions), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 63 |
 | `ammunition:da` | C | D | 0 | [REA-024](rules-explanation-audit-1.0.md#rea-024---bioweapon-needs-a-target-conditioned-explanation-alongside-the-chart), [REA-028](rules-explanation-audit-1.0.md#rea-028---kobras-two-issues-require-separate-source-decisions), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 64 |
@@ -496,7 +575,10 @@ coordinate/footprint calculations and visual rendering were not independently ac
 
 ## FAQ coverage disposition
 
-All four numbered FAQ content pages were read. The table groups the questions by
+All four numbered FAQ content pages were read. Follow-up also compared all S15
+v0.0 pages against S2 v0.1: 28 common Q&A blocks plus nine additions = 37.
+The [reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md#faq-comparison-and-its-boundaries)
+records those additions separately. The table below groups the questions by
 mechanic instead of claiming an individual ruling migration. Source S2 is not registered
 in C/H, and no FAQ data was authored. ITS headings retain ITS applicability.
 
@@ -522,8 +604,10 @@ in C/H, and no FAQ data was authored. ITS headings retain ITS applicability.
 | 3 | ITS: Oppose Activation, Netrod/Imetron deployment, Akial card timing/reuse/history/tracking | Screened as outside complete core curation; existing RR/RS research distinguished |
 | 4 | ITS: nearest Deployment Zone during Impetuous; undeployed Ancillary not Killed | Scope question retained; REA-030; not silently applied to core missions |
 
-## Validation results
+## Original audit validation results
 
+Historical results from the original audit at `859823f8`; they describe that
+earlier four-file change and 217/150 coverage, not this follow-up's changed paths.
 Validation date: 2026-10-09. Commands used the project virtual environment.
 No findings were implemented or data regenerated.
 
@@ -553,3 +637,39 @@ No dedicated Markdown/documentation validation stage was found in the standard
 check runner; read-only link/anchor/identity/arithmetic checks supplied the relevant
 lightweight verification. Semantic findings and unresolved research questions were
 reviewed once more for overlap and inconsistent conclusions before finalizing.
+
+## Validation results
+
+Follow-up validation date: 2026-10-09, examined HEAD `c5400ab1`.
+Commands used the project virtual environment. No code, JSON, schemas, tests,
+source artifacts, manifests, generated outputs or runtime configuration changed.
+
+| Check | Exact result | Limits |
+| --- | --- | --- |
+| Full and docs-scoped `git diff --check` | Both exit 0, no output or diagnostics | Current tracked diff; differs from the original restricted-access result above |
+| Two new appendices, `git diff --no-index --check` against empty | No whitespace diagnostics, exit 1 for each file's expected nonempty difference | Checked without staging |
+| Portable relative links/anchors | 336 local link occurrences valid against Git-tracked target paths and headings, plus the two intended new appendices; 13 distinct external URLs identified | Ignored local artifacts are literal external requirements; URL reachability not blanket certified |
+| Stable finding IDs and index | 44 contiguous unique IDs; REA-001–037 titles retained; all 44 indexed and covered by proposed batches A-I | Seven new High findings; 31 High + 12 Medium + 1 Low = 44; no Critical |
+| Required finding fields | Classification, evidence, severity, priority, affected identities, fix and dependencies checked for all 44; new findings also state 1.0 relevance | Confirmed, Derived and Unresolved conclusions remain distinct |
+| Inventory | All 367 identities in unchanged collection order; 304 D + 63 S; 314 outgoing relations | 87 actual S-to-D promotions; 13 Attributes, 18 terms, 2 Training, 9 Equipment, 27 Skills and 18 Rules, including 12 profile-help entries; not full-record approval |
+| Remaining S identities | 60 declaration records plus exactly BS=12, BS=11 and CC=21 | Six metadata groups: 31 Automatic, 6 Deployment, 10 Short, 2 Basic Short, 5 Long, 6 ARO; all explicitly pending |
+| Notice denominator | Exactly N53-01–26, ESX-01–04, ARMY-01–20 and FAQ-01–09; English ordinals 1-26 and Spanish 1-30 each covered once | Rules union: 9 Verified, 16 Partially verified, 4 Discrepancy, 1 Not applicable; Army all 20 partial; FAQ nine additions compared, ITS scope separate |
+| Provenance | Nine available local primary artifact SHA-256 values and 19 selected Wiki member hashes match; expected S18 unchanged, ZIP still absent | Eight artifacts substantively compared, S5 availability/hash only; Spanish PDF still unavailable; no hash invented |
+| Protected inputs | All 35 baseline JSON/database/configuration SHA-256 values unchanged | Includes existing runtime databases; raw artifact checks separately listed above |
+| Repository boundary | Exactly five task paths, all Markdown under `docs/`; three modified, two new; no staging or commit | README ownership/integration links from original audit retained; no change needed there |
+| Original SVG access anomaly | All 783 formerly inaccessible/deleted-looking paths now readable after user enabled filesystem access; every file's Git blob hash matches the index | No asset write/restoration performed; visibility changed, not content |
+| Read-only interaction checklist | Exit 0: 182/182 primary, 111/126 supporting, 15 pending; 314 relations, 113 future candidates | Historical graph policy, not the 1.0 explanation acceptance gate |
+
+The five paths are the main audit, this inventory, the source manifest, the N5.3
+reconciliation appendix and `docs/TODO.md`. Checks used ad hoc read-only analysis
+outside the repository; no validation script or report artifact is added here.
+`pypdfium2` 5.14.0 was available from a temporary installation outside the project:
+eight English pages were rendered at scale 2 and visually inspected. No missing
+renderer limitation remains for those cells; source authority conflicts remain.
+
+No application tests, Ruff/Pyright, data builds, checklist regeneration or browser
+acceptance were run for this documentation-only task. No dedicated Markdown
+validation stage was found; the relevant link/anchor, identity, source-hash,
+arithmetic and whitespace checks supplied the documentation verification.
+The final contextual sweep checked independent fixes versus unresolved gates,
+exception scope, historical/current validation claims and coverage wording.

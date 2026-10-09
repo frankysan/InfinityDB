@@ -312,10 +312,19 @@ unimplemented until its corresponding behavior exists.
     as well as the authored text, and keep source conflicts visible.
     - [ ] Review and implement accepted batches from the
       [1.0 explanation audit](rules-explanation-audit-1.0.md#prioritized-remediation-plan).
-      Begin with recovery and Intuitive Attack (REA-001, REA-002, REA-003,
-      REA-009, REA-022); separately decide source conflicts and FAQ applicability
-      before dependent curation. The report is an assessment, not accepted replacement
-      semantics, and its selected clause reviews do not certify complete source coverage.
+      Adjudicate direct Doctor/Engineer allegiance (REA-038) before accepting
+      changed target wording; confirmed recovery/Intuitive Attack mechanics
+      (REA-001/002/003/009/022) and Counterintelligence's actor correction
+      (REA-043) can proceed independently within supported conditions. Separately
+      decide source conflicts and FAQ applicability before dependent curation.
+      Use the [source manifest](rules-explanation-audit-1.0-sources.md) and
+      [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).
+      Complete the [coverage gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate):
+      304 selected clause reviews and 63 screening-only records are not 367 full
+      approvals. Track TinBot sharing/SpecBall (REA-039/040), bilingual conflicts
+      (REA-041/042), and targeted current metadata-only Weapon publication
+      (REA-044) without promoting optional exhaustive research into a release blocker.
+      The report remains an assessment, not accepted replacement semantics.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not

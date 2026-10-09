@@ -4,7 +4,9 @@
 
 **Audit date:** 2026-10-09
 
-**Examined commit:** `859823f8d2899405a40cf126883d2adf5763db7c`
+**Examined commit (follow-up):** `c5400ab1b950990fdacc509be91c110fe85431fb`
+
+**Original audit commit:** `859823f8d2899405a40cf126883d2adf5763db7c`
 **Status:** Assessment for review; no rules, code, schemas, tests, databases, or runtime configuration changed.
 
 ## Executive summary
@@ -55,13 +57,15 @@ records, depend on it. Later ZIPs and exact archived revisions were used as
 available locally but has no curated publication; its ITS headings require
 scope adjudication before applying rulings to core scenarios (REA-030).
 
-All **367 records** were screened: **217 selected clause reviews** and **150
-screening-only records**, alongside **24 Labels, 6 Skill Types, 20
+All **367 records** were screened. The original **217 selected clause reviews**
+and **150 screening-only records** reconcile exactly to the unchanged inputs.
+Follow-up compares **87 additional records**, yielding **304 selected clause
+reviews and 63 screening-only records**, alongside **24 Labels, 6 Skill Types, 20
 scenario components, 314 authored relations, and 113 deferred interaction
 candidates**. Selected clause reviews are identified individually in the
 [inventory](rules-explanation-audit-1.0-inventory.md); screening is not a
 source-by-source approval. This report investigates **18 interaction families**
-and registers **37 findings: 24 High, 12 Medium, 1 Low, and 0 Critical**.
+and now registers **44 findings: 31 High, 12 Medium, 1 Low, and 0 Critical**.
 The precise review-tier totals are recorded in the inventory. It does not certify every Weapon profile,
 Spanish publication, Wiki member, or browser surface.
 
@@ -70,6 +74,22 @@ REA-001, REA-002, REA-003, REA-009, and REA-022. These have direct English PDF
 evidence and can largely be addressed using existing prose fields and links.
 Resolve source conflicts separately; retain the positive patterns below. The
 remediation plan is a proposal, not accepted replacement semantics.
+
+**Follow-up qualification:** REA-038 adds a source-decision gate for the friendly
+target qualifier. No universal Allied-only restriction was established, but
+absence of a prohibition is not treated as explicit permission for every
+enemy/neutral case. Do not widen target allegiance while fixing independently
+verified recovery mechanics. Counterintelligence's reversed Command Token actor
+(REA-043) is a new confirmed P0 correction. TinBot sharing (REA-039), missing
+SpecBall procedure (REA-040), two Spanish Wiki conflicts (REA-041/042), and
+the metadata-only Breaker Marksman reference (REA-044) add focused follow-ups.
+
+Use the [source manifest](rules-explanation-audit-1.0-sources.md) for portable
+provenance and the [complete notice reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md)
+for all 26 English rules bullets plus four additional Spanish subjects. Closing
+findings does not close source verification: the inventory's
+[completion gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate)
+retains explicit pending dispositions.
 
 ## Methodology and scope
 
@@ -135,7 +155,7 @@ reproduction, hash source bytes with SHA-256, inspect ZIP members with `zipfile`
 and select printed PDF pages with `PdfReader(...).pages[printed_page - 1]`
 for S1. The inventory's D list is an authored review disposition, not a value
 that can be inferred from a `review.status` flag. Git check-ignore exits 1
-with no output for the two new non-ignored documents, as expected.
+with no output for non-ignored audit documentation, as expected.
 
 ### Coverage and denominators
 
@@ -170,6 +190,12 @@ support one.
 
 ## Source register
 
+The [portable provenance manifest](rules-explanation-audit-1.0-sources.md)
+extends this original S1–S12 register with S13–S19 and derived S20. It is the
+canonical follow-up owner for artifact availability, checksums, acquisition and
+revision/member identity. Local evidence is an external reproduction requirement,
+not a download included in a clean tracked checkout.
+
 References to **S1 p. N** below mean the numbered printed page of the exact
 English v5.3 file, not an arbitrary PDF viewer page. Its cover occupies file page
 1 and the subsequent numbered pages align with file page numbers. FAQ printed
@@ -177,12 +203,12 @@ page 1 is file page 2. Acquisition time is not publication time.
 
 | ID | Source and identity | Use and verification |
 | --- | --- | --- |
-| S1 | Local official English [N5 rules v5.3](../data/pdf/rules/n5-rules-v5-3-en.pdf), 196 pages; curated publication date 2026-08-10; PDF creation metadata 2026-08-10 | Direct clause/chart text comparison; SHA-256 below |
-| S2 | Local official English [FAQ v0.1](../data/pdf/faq/n5-faqs-v0-1-en.pdf), 5 file pages / 4 numbered content pages; PDF creation metadata 2026-08-25 | All content pages read; core and ITS sections kept distinct; metadata date is not a verified publication date |
-| S3 | Local [N5 v5.2 English](../data/pdf/rules/n5-rules-v5-2-en.pdf), 194 pages; PDF creation metadata 2025-10-15 | Selected historical Kobra p. 68 comparison only; not current authority |
-| S4 | `data/wiki/WIKI-en-history 20260928-165727.zip`, 3592 members, `_history/index.json` | Exact revision payloads 3643, 4083, 3000, 3156 checked; later acquisition does not turn older revisions into N5.3 publications |
+| S1 | Local official English N5 rules v5.3 (external requirement S1), 196 pages; curated publication date 2026-08-10; PDF creation metadata 2026-08-10 | Direct clause/chart text comparison; SHA-256 below |
+| S2 | Local official English FAQ v0.1 (external requirement S2), 5 file pages / 4 numbered content pages; PDF creation metadata 2026-08-25 | All content pages read; core and ITS sections kept distinct; metadata date is not a verified publication date |
+| S3 | Local N5 v5.2 English (external requirement S3), 194 pages; PDF creation metadata 2025-10-15 | Original Kobra p. 68 comparison; follow-up selected change comparisons in appendix; not current authority |
+| S4 | `data/wiki/WIKI-en-history 20260928-165727.zip`, 3592 members, `_history/index.json` | Exact revision payloads 3643, 4083, 3000, 3156 checked originally; 3979, 3980 and 4116 added in follow-up; later acquisition does not turn older revisions into N5.3 publications |
 | S5 | `data/wiki/WIKI-en 20260926-200832.zip` | Available comparison archive; not the September 18 collection source; not a full member-by-member audit |
-| S6 | [Army snapshot manifest](../data/manifests/snapshots/JSON%2020260929-114335.json), archive `data/raw/JSON 20260929-114335.zip`, acquired 2026-09-29 11:43:35 +02:00; manifest source data-change date 2026-09-03 | Direct `metadata.json` profiles and `101-panoceania.json` version `7.26246.158`; not a fresh live Army acquisition |
+| S6 | Army snapshot manifest (ignored external evidence S6), archive `data/raw/JSON 20260929-114335.zip`, acquired 2026-09-29 11:43:35 +02:00; manifest source data-change date 2026-09-03 | Direct `metadata.json` profiles and `101-panoceania.json` version `7.26246.158`; not a fresh live Army acquisition |
 | S7 | [Spanish Immunity](https://infinitythewiki.com/es/Inmunidad), footer revision 3677 | Live web response retrieved 2026-10-09; general clauses and Example 4 compared; exact oldid URL initially inaccessible |
 | S8 | [Spanish Weapon Chart](https://infinitythewiki.com/es/Tabla_de_Armas), footer revision 3987 | Live web response retrieved 2026-10-09; Flash Pulse row compared; retained old/current table blocks must be distinguished |
 | S9 | [Spanish Engineer](https://infinitythewiki.com/es/Ingeniero), footer revision 3823 | Live response retrieved 2026-10-09; separates STR repair from other State cancellation; shows historical reroll wording separately |
@@ -215,8 +241,9 @@ Exact S4 payload provenance:
 
 These four revisions corroborate selected rules also printed in S1. The current
 Wiki banner is not evidence that an unchanged April 2025 revision was authored
-in September 2026. Spanish revision timestamps and bytes were not acquired or
-hashed in this audit.
+in September 2026. Spanish revision timestamps remain unknown. Original URL evidence was not
+hash-pinned; follow-up independently checked selected exact member bytes in S14,
+including the original Spanish Immunity/Weapon Chart/Engineer revisions.
 
 The official resource page and the candidate Spanish v5.3 PDF URL were tried,
 but no Spanish v5.3 PDF content was obtained. GitHub, raw README, and public API
@@ -271,6 +298,11 @@ examples: a VITA Trooper's Targeted State can be canceled by Engineer; its
 Stunned State requires Doctor. **Fix:** curated text and links; future validation.
 **Dependencies:** REA-009 and REA-022 for broader recovery, not prerequisites.
 
+**Follow-up evidence:** Allegiance follow-up: REA-038 is an independent source-decision gate. Correct
+the STR-only State-cancellation error without making a universal claim about
+enemy treatment. Allied examples remain supported, but do not prove an Allied-only
+restriction. Full closure of eligibility requires the recorded allegiance decision.
+
 ### REA-002 - Doctor omits its ordinary recovery gate and lethal failure
 
 **Classification:** correctness, completeness. **Severity:** High. **Priority:** P0.
@@ -289,12 +321,19 @@ Technorganic (p. 116) provide distinct applicable exceptions. Doctor (2W),
 Doctor (ReRoll WIP=X), and the subsequent Command Token reroll have explicit
 conditions; the replacement WIP does not apply to the Command Token reroll.
 
-**Before/after proposal:** "Restores a lost Wound" becomes "Normally, treat an
-Unconscious ally with VITA in contact: pass WIP to remove one Wound; failure
+**Before/after proposal:** "Restores a lost Wound" becomes "For ordinary recovery,
+the target has VITA, is Unconscious, and is in contact: pass WIP to remove one Wound; failure
 causes Dead. Other States and Skills can allow treatment under their own rules."
 Add those exception links rather than listing them as universally eligible.
 **Fix:** text/links; variant facts only if needed. **Dependencies:** REA-001,
-REA-009, REA-022; preserve NWI and Technorganic qualifications.
+REA-009, REA-022, REA-038; preserve NWI and Technorganic qualifications.
+Allegiance is intentionally omitted from this proposed baseline until REA-038
+is adjudicated; this is not implicit permission to treat all enemies.
+
+**Follow-up evidence:** Allegiance follow-up: S14 Médico 3822 and S4 Doctor 3979 corroborate the
+ordinary recovery requirements but do not establish the universal friendly qualifier.
+REA-038 separates direct treatment, delegated Allied use, self-use and Engaged
+prohibitions; the neutral recovery proposal above deliberately leaves it open.
 
 ### REA-003 - Intuitive Attack appears to require a second attack roll
 
@@ -573,6 +612,14 @@ cancellation rule: Impersonation and HoloMask have distinct restrictions.
 **Dependencies:** REA-014, REA-017, REA-020, REA-035. REA-035 owns Discover
 MOD wording rather than duplicating this lifecycle finding.
 
+**Follow-up evidence:** Additional selected N5.3 comparisons: S1 p. 29 adds Berserk to Prone
+transition restrictions, while p. 169's shorter list omits it. S1 p. 97 adds
+Impetuous end-of-Order Prone wording that is not adequately explained by a
+phase-only restriction. Camouflaged p. 157 restricts ARO declaration, not merely
+execution, and requires the actual permitted-ARO list. These extend this finding;
+do not infer that every movement/CC Skill or every Impetuous Order has the same
+exception. The reconciliation records the previous/current clauses.
+
 ### REA-016 - Stealth omits Deployables and multi-Trooper reaction reasoning
 
 **Classification:** completeness. **Severity:** High. **Priority:** P1.
@@ -843,6 +890,13 @@ procedures into each Skill. **Fix:** new curated definitions and publication
 integration; not a game engine. **Dependencies:** supports REA-009, REA-013,
 REA-014, REA-018, REA-021, REA-025. Full procedural simulation is outside scope.
 
+**Follow-up evidence:** Follow-up selects the parameter rules on S1 p. 75: Dodge (ARM+3) and
+PARA CCW (-6) need a shared modifier baseline distinguishing the user's Attribute,
+the opponent's Face-to-Face penalty and the separate PARA Saving Roll. REA-042
+retains the bilingual condition conflict. S1 pp. 93-94 also requires the
+G: Jumper shared-Cost, Loss of Lieutenant and Suppressive Fire qualifications;
+these are linked-baseline work, not a request for an execution engine.
+
 ### REA-027 - Flash Pulse's Spanish chart disagrees on rolls and Traits
 
 **Classification:** source discrepancy. **Severity:** High. **Priority:** P1.
@@ -864,6 +918,12 @@ seek a scoped official correction if necessary. Retain all source values and
 the established English baseline in the meantime. **Fix:** research, evidence,
 then reviewed text/source-note changes if justified. **Dependencies:** REA-010,
 REA-029. No claim that Spanish is inherently superior or that every hit stuns.
+
+**Follow-up evidence:** Follow-up visual check: rendered English p. 186 confirms one BTS save,
+Non-Lethal and State: Stunned. Independently hashed S14 Weapon Chart 3987 retains
+two saves/missing Trait; Immunity 3677 still illustrates failed-save Stunned.
+No Spanish N5.3 PDF was acquired; a candidate endpoint returned 404. The chart
+disagreement remains unresolved, not settled by another page's example.
 
 ### REA-028 - Kobra's two issues require separate source decisions
 
@@ -888,6 +948,11 @@ easy to identify alongside the CC profile and investigate its source history.
 Do not change the BS sibling mode. **Fix:** source research/prose/presentation
 review, not a guessed profile repair. **Dependencies:** REA-031.
 
+**Follow-up evidence:** Follow-up visual check: S1 p. 182 actually prints CC DA, one save and no
+Anti-materiel; extraction was not the cause. S6/S4 corroborate two DA saves;
+that stronger mechanical interpretation does not adjudicate Anti-materiel.
+The edition, mode and Trait decisions remain separate.
+
 ### REA-029 - The collections' exact Wiki archive is unavailable locally
 
 **Classification:** source discrepancy, completeness of evidence. **Severity:** Medium.
@@ -909,6 +974,12 @@ a deliberate re-review against a new selected source. Never just rename or
 replace the path. **Fix:** acquisition/evidence follow-up; curated provenance
 only after review. **Dependencies:** limits H and Ammunition evidence, and
 REA-027; it is an environment/evidence gap, not proof that 72 rules are wrong.
+
+**Follow-up evidence:** Follow-up provenance: the ignored September 18 acquisition manifest was
+located and its expected ZIP hash agrees with C/H. The ZIP itself is still absent.
+No artifact mismatch or recovery was claimed; 72 records / 74 citations retain
+their original dependency. S14 is separately identified Spanish evidence and
+neither it nor S4/S5 repairs the missing English capture.
 
 ### REA-030 - FAQ publication and scenario applicability remain uncurated
 
@@ -935,6 +1006,14 @@ ruling, and decide applicability explicitly. Present the Ancillary question
 as unresolved for core until that decision. **Fix:** source/collection/scoped
 content and links. **Dependencies:** REA-007, REA-008, REA-016, REA-017,
 REA-020, REA-023. No ITS-only wording was applied to core data here.
+
+**Follow-up evidence:** Follow-up compared all English FAQ v0.0/v0.1 pages: 28 common Q&A blocks
+and nine additions account for 37 current blocks (eight outside ITS, one ITS).
+No material answer change in the common blocks was observed. The new Ancillary
+scoring answer is under ITS; core-scenario applicability remains unresolved.
+S16 Season 18 pp. 26/28 confirms the scoped ordinary Spec-Ops ban versus TEAM-OPS;
+this does not establish all historical/core ITS applicability. Publication date
+remains unverified despite PDF creation metadata and the notice's release context.
 
 ### REA-031 - Kobra's CC Attribute link points to the Weapon Trait
 
@@ -1022,6 +1101,11 @@ exact Spanish example/English Wiki revisions; add a scoped note if players
 encounter this confusion. **Fix:** source research and explanatory note.
 **Dependencies:** REA-020, REA-021. This is not a confirmed defect in C's table.
 
+**Follow-up evidence:** Follow-up visual check: S1 p. 138 really labels the three-Morat example
+Level 3 while including the Level 4 +1 BS bonus. S14 Spanish example revision
+3443 repeats it. Repetition corroborates the conflict, not the extra bonus's
+legality; missing Spanish PDF remains an evidence limit.
+
 ### REA-035 - Impersonation-2's "unmodified" Discover wording overstates the exception
 
 **Classification:** correctness, clarity. **Severity:** High. **Priority:** P0.
@@ -1065,6 +1149,11 @@ example, retaining ordinary Cover as a separate selectable benefit.
 **Fix:** text/links and optionally reviewed facts. **Dependencies:** REA-023,
 REA-026, REA-030; do not cap the final PS-inclusive Success Value at 12.
 
+**Follow-up evidence:** S1 p. 122 also identifies Disposable (2) and Perimeter.
+The authored Deployable Cover definition states ZoC placement but omits those
+explicit properties; review their player-visible ownership with the cap and
+placement baseline, rather than assuming a named metadata profile supplies them.
+
 ### REA-037 - Armed Turret has conflicting Silhouette values within the PDF
 
 **Classification:** source discrepancy. **Severity:** Medium. **Priority:** P1.
@@ -1076,14 +1165,232 @@ There is no note about the differing deployable summary profile.
 
 **Evidence/result:** S1 p. 70 lists S2 in the detailed Armed Turret profile;
 p. 74's Deployable Profiles table lists S1. S6's weapon modes do not independently
-supply a resolving Silhouette value. This changes physical footprint/placement
-and cannot be dismissed as an alias. The current S2 value is faithfully cited,
+supply a resolving Silhouette value. S1 p. 18 gives both S1 and S2 a 25 mm base,
+but heights of 25 and 40 mm respectively: the disputed value affects height,
+LoF and clearance, not a different base footprint. It is not an alias. The current S2 value is faithfully cited,
 but is not an adjudication of the conflicting table.
 
-**Action:** Visually verify both cells and compare Spanish PDF/exact Wiki
-Armed Turret revisions; retain S2's detailed-profile provenance and the open
+**Action:** Visual cells and selected Spanish Wiki comparison are now verified;
+obtain the Spanish PDF/any resolving official ruling. Retain S2's detailed-profile provenance and the open
 conflict pending review. **Fix:** source research and visible source note after
 review, not an automatic stat change. **Dependencies:** REA-023.
+
+**Follow-up evidence:** Follow-up visual check: pp. 70, 74 and 195 confirm detailed S2 versus both
+summary S1 cells. Spanish Wiki S14 Torreta Artillada 3754 gives detailed S2.
+The Spanish N5.3 PDF remains unavailable and no precedence rule resolving the
+internal English contradiction was located. Preserve the source conflict;
+the earlier footprint claim is corrected above to the verified height difference.
+
+### REA-038 - Direct Doctor/Engineer target allegiance is not established
+
+**Classification:** correctness risk, completeness of evidence. **Severity:** High.
+**Priority:** P0 source decision. **Evidence:** Explicit scoped clauses;
+universal direct non-Allied eligibility Unresolved. **Confidence:** High about
+the unsupported qualifier, limited about unexamined scenario exceptions.
+**Affected:** C `skill:doctor`, `skill:engineer`, `equipment:medikit`,
+`equipment:gizmokit`, `skill:peripheral`, `state:engaged`, `state:stunned`.
+
+**Current:** Both direct Skill requirements add a friendly target gate. REA-001
+and REA-002 originally retained Allied wording in proposed examples without
+separately proving it. This could preserve an unsupported restriction.
+
+**Evidence and reasoning:** S1 pp. 90-91 and exact English Wiki Doctor 3979 /
+Engineer 3980 specify contact and the relevant recovery conditions, without
+a universal Allied-only requirement. Spanish S14 `es/Medico` 3822 and
+`es/Ingeniero` 3823 have the same structural distinction. S1 pp. 123-124 explicitly
+require Allied Models for Kits; pp. 106-107 explicitly require an Allied Model
+for delegated Servant/Cyberplug treatment. These are local clauses, not a global
+Doctor/Engineer prerequisite.
+
+General target terminology/alignment (p. 173) defines ownership; it does not
+make every Skill Allied-only. The Attack prohibition (p. 174) governs Attacks,
+while Doctor/Engineer are Optional Short Skills without the Attack Label.
+Declaration checks (pp. 14-15) enforce the selected Skill's requirements but do
+not supply a general friendly gate. However, p. 51's **Interacting with a Close
+Combat** expressly bars Doctor/Engineer on an Engaged target in that contact
+situation; p. 160 separately restricts an acting Trooper's Engaged declarations.
+Engaged activation on p. 160 requires neither contact participant to be
+Immobilized or Null, except that Sepsitorized/Possessed still allow Engaged.
+Thus ordinary enemy contact can prohibit the acting Doctor/Engineer, while
+contact with an ordinary Unconscious or Immobilized enemy does not itself
+activate Engaged. These are explicit State conditions supporting contextual
+eligibility reasoning, not an explicit universal enemy-treatment ruling.
+
+| Target/use category | Evidence disposition |
+| --- | --- |
+| Allied Kit target and Allied Peripheral-mediated treatment | Explicit local permissions when requirements are met; non-Allied use fails their express gate |
+| Self-use outside Null with an applicable effect | Explicit on pp. 90-91; self-use in Null prohibited; NWI supplies its specific exception |
+| Prohibited Engaged interaction | Explicit prohibition on pp. 51/160; allegiance does not remove it |
+| Contact with an ordinary non-Null, non-Immobilized enemy Trooper | General Engaged activation supplies the declaration restriction; do not treat an absence of Allied wording as permission |
+| Direct eligible Allied target | Supported by requirements and official Allied examples; State/Attribute/contact still apply |
+| Direct non-Allied Unconscious/Immobilized/State target | No universal friendly prohibition found in checked general rules; permissive reading is Derived from their requirements, not an explicit universal ruling |
+| Hostile/Neutral or scenario-specific target | Unresolved without the actual scenario/profile/target rules; not inferred from silence |
+
+**Expected interpretation/action:** Treat the universal qualifier as unverified.
+Find a scoped official ruling or explicitly accept a documented derived decision
+before widening/removing it. Separate Wound removal from State cancellation,
+direct from delegated use, and all of these from Engaged restrictions.
+**Fix:** source review, then text/links/validation if accepted.
+**Dependencies:** REA-001/002/009/017/022. No accepted rules semantics are changed
+and not every enemy is declared a legal treatment target.
+**1.0 relevance:** Adjudicate this qualifier before accepting the complete
+target-eligibility explanation; confirmed recovery clauses can proceed separately.
+
+### REA-039 - TinBot omits operational eligibility and Fireteam sharing
+
+**Classification:** completeness, consistency. **Severity:** High. **Priority:** P1.
+**Evidence:** Explicit; high confidence. **Affected:** C `equipment:tinbot`
+and all six `equipment:tinbot-*` variants, `rule:fireteam-general`.
+
+**Current:** Family/variant text covers only the listed benefit, omitting
+owner Isolated/Null eligibility, Fireteam sharing, token nature and stacking.
+Two correct variant identities do not explain who benefits or whether buffs stack.
+
+**Evidence/result:** S1 p. 127 requires the owner not be Null or Isolated;
+TinBot representations are State Tokens, do not block LoF/movement and cannot
+be targeted. Every Fireteam member benefits when the owner belongs to it.
+Identical advantages are used only once per Order/ARO; differing MODs to the
+same advantage use the most advantageous one. Each listed benefit still comes
+from the specific option/profile, not a universal union of variants.
+
+**Action:** Add one family baseline and linked variant conditions; connect
+Firewall without duplicating it. **Fix:** text/links and focused validation/
+presentation if needed. **Dependencies:** REA-018/020. Future cases should cover
+owner Isolation, membership loss, shared Firewall, identical buffs and different strengths.
+**1.0 relevance:** TinBot is supported Equipment; its shared/disabled conditions
+are material to gameplay, independently of optional exhaustive variant research.
+
+### REA-040 - Infinity Spec-Ops links an absent SpecBall procedure
+
+**Classification:** completeness, scope/provenance. **Severity:** High. **Priority:** P1.
+**Evidence:** Explicit; high confidence about absence and printed mechanics.
+**Affected:** C `skill:infinity-spec-ops`; absent `skill:request-specball` owner;
+profile transitions and Marker cancellation.
+
+**Current:** Customization and enhanced-profile collection are described,
+but no definition explains Request SpecBall. The deferred ledger knows its
+endpoint; a plain name is not an adequate explanation.
+
+**Evidence/result:** S1 p. 98 requires a non-Null Spec-Ops Trooper, Active Turn
+in Game Round 2 or 3, one use per game, a 55 mm token/PH 15 drop outside the
+Order sequence, and two different items. Allied non-Null Spec-Ops pickup cancels
+Marker State, applies the Enhanced Profile at the end of the Order, retains
+Wounds/applicable States, and places a chosen SpecBot in contact. The effect
+intro says Speedball within the SpecBall rule: retain this apparent copy error
+as evidence rather than treating the two procedures as interchangeable.
+
+S16 pp. 26/28 confirms that ordinary Spec-Ops is prohibited in Season 18
+tournaments; TEAM-OPS is a separate optional Extra and does not permit this Skill.
+That is scoped Season 18 evidence, not an eternal rule of the core edition.
+
+**Action:** Supply the core procedure/reference and needed item links; pin the
+ITS restriction separately. No full tournament tool is needed. **Fix:** curated
+identity/text/links and publication after review. **Dependencies:** REA-015/023/
+026/030/032. Future tests distinguish SpecBall, Speedball and TEAM-OPS Tacball,
+and cover round, Null and once-per-game conditions.
+**1.0 relevance:** Explain the supported new core procedure; complete ITS season
+tools and all customization options are outside this focused requirement.
+
+### REA-041 - Spanish Fireteam dice reminder conflicts with its general SD rule
+
+**Classification:** source discrepancy. **Severity:** High. **Priority:** P1.
+**Evidence:** Conflict Explicit; Spanish publication reconciliation Unresolved.
+**Confidence:** High about captured text, not the missing Spanish PDF.
+**Affected:** `rule:fireteam-level-bonuses`, `skill:martial-arts`, SD baseline.
+
+**Current:** The English SD explanation excludes extra dice from the Burst cap.
+The contradictory Spanish Fireteam reminder was not previously examined.
+
+**Evidence/result:** S1 pp. 75/136 cap Burst at 6 and exclude +1 SD. S14
+`es/Modificadores_(MOD)_Detallados` 4012 agrees. However, its
+`es/Bonos_de_Fireteam` 3918 limits total dice to 6 including extra dice from
+Skills/MODs/bonuses. This differs for B6 plus SD and conflicts within the Spanish
+capture itself. A stale reminder is plausible; S17 PDF/erratum evidence is missing.
+
+**Action:** Keep the sourced English baseline and check Spanish PDF/history
+before asserting alignment. Do not invent a special Fireteam cap exception.
+**Fix:** evidence and a visible note after review. **Dependencies:** REA-021/029/034;
+separate from the Level 3 example's extra bonus.
+**1.0 relevance:** A scoped source disposition and visible uncertainty are needed
+for supported Special Dice explanations; missing bilingual proof is not certainty.
+
+### REA-042 - Dodge (ARM+3) has incompatible English/Spanish conditions
+
+**Classification:** source discrepancy, completeness. **Severity:** High. **Priority:** P1.
+**Evidence:** Different conditions Explicit; supersession Unresolved.
+**Confidence:** High about the texts. **Affected:** `skill:dodge`, modifier
+baseline under REA-026, profile-listed Dodge (ARM+3).
+
+**Current:** No curated explanation defines this parameter's saving benefit.
+A generic positive-Dodge-MOD explanation could apply +3 to PH instead of ARM
+or retain an older conditional benefit.
+
+**Evidence/result:** S1 p. 75 adds +3 ARM for Saving Rolls when Dodge is declared,
+using an unconditional formulation. S14 modifier revision 4012 instead makes
+the benefit conditional on failing PH, in a paragraph marked May 2026 Mazebreaker.
+S11/S13 both announce a clarification, but cannot verify the missing Spanish PDF.
+This may be a stale Wiki paragraph versus newer clarified wording; it remains open.
+
+**Action:** Preserve language/version boundaries and verify the Spanish PDF/history.
+Future prose must distinguish Dodge PH, ARM protection, failing a roll versus
+losing opposition, and same-Order scope. **Fix:** evidence, then parameter
+text/links and focused regressions after a source decision. **Dependencies:**
+REA-014/026 and S17. No generic saving bonus for ordinary Dodge is inferred.
+**1.0 relevance:** Resolve or explicitly scope the material parameter conditions
+before accepting its explanation; exhaustive bilingual history is optional.
+
+### REA-043 - Counterintelligence gives the relaxed limit to the wrong player
+
+**Classification:** correctness, clarity. **Severity:** High. **Priority:** P0.
+**Evidence:** Explicit clauses combined; high confidence. **Affected:** C
+`skill:counterintelligence`, `rule:command-token-strategic-use`.
+
+**Current:** Its alternative effect increases the Command Tokens the **adversary**
+may use to two, reversing who benefits.
+
+**Evidence/result:** S1 p. 128 lets the second-turn player limit the opponent's
+first-turn Command Tokens to one. Counterintelligence p. 90 counteracts the
+limit imposed by the adversary, allowing the affected player's allowance of two.
+The other option separately reduces the adversary's Order removal from two to
+one. Neither grants that adversary an extra allowance.
+
+**Action:** Explain both options from the correct perspectives. Proposed text:
+when your opponent limits your first-turn Command Tokens, Counterintelligence
+lets you use two instead of one. Preserve timing and the separate Order-removal
+option. **Fix:** text/links and a future actor/timing regression. **Dependencies:**
+REA-026 for the shared Strategic Use baseline; no unresolved source conflict is needed.
+**1.0 relevance:** Confirmed wrong beneficiary is a P0 gameplay correction and
+can be the smallest independent first implementation slice.
+
+### REA-044 - Breaker Marksman is metadata-only despite its current official profile
+
+**Classification:** completeness, presentation; supplementary source terminology.
+**Severity:** High. **Priority:** P1. **Evidence:** Official profile Explicit;
+publication absence Observed; notice terminology reconciliation Derived.
+**Confidence:** High about the examined runtime baseline. **Affected:** Army
+Weapon source 225, public Weapons domain; no corresponding C definition.
+
+**Current:** S6 preserves Breaker Marksman Rifle (AP, BTS/2, PS 7, B3, one save,
+Suppressive Fire), but the application identity graph/getter does not publish
+it. Numeric 225 and slug lookups return None. This is preserved-but-inaccessible
+content, not a missing source profile.
+
+**Evidence/result:** Rendered S1 p. 180 shows the new blue Marksman row; p. 185
+has no distinct Breaker Sniper row. S14's matching profile is under FUSILES DE
+PRECISIÓN, separate from Francotirador/Sniper. S13 names that Spanish weapon;
+S11 calls it Breaker Sniper Rifle. Matched profiles and sections support a notice
+translation interpretation, not inventing a second Sniper or aliasing by name
+alone. S20's embedded metadata pins S6. Read-only central resolver, list and
+getter confirm the publication gap; no browser was launched.
+
+**Action:** Review a current metadata-only Weapon publication slice with explicit
+profile/provenance and without requiring a referencing Army Unit. Keep unused
+historical metadata separately scoped, instead of publishing every legacy row.
+**Fix:** future processing/backend/reference publication and validation.
+**Dependencies:** source completeness and REA-026. Do not fabricate raw Army
+fields or an unsupported Sniper statline.
+**1.0 relevance:** The current supported Weapon reference needs this preserved
+official profile to be reachable; publishing every unused historical row is not required.
 
 ## Flash Pulse benchmark and positive findings
 
@@ -1180,8 +1487,12 @@ unverified inference. "Unresolved" preserves the actual competing claims.
 | Flash Pulse saves and State Trait | English S1 p. 186 / S4 4083 / Army S6: one BTS save with Stunned; Spanish S8 3987: two PB saves without it | **Unresolved**, REA-027; Spanish PDF inaccessible. Immunity's failed-save Stunned exception is separately corroborated |
 | Kobra CC save count | S1 pp. 68/182: DA, one save; DA p. 64 / S4 4083 / S6: two | **Resolved interpretation**: DA requires two; preserve contradictory chart bytes. S3/S11 establish ammunition change, not an independently published chart correction |
 | Kobra Anti-materiel | S1 omits; S4/S6 include | **Unresolved**, REA-028; DA is insufficient evidence for this Trait |
-| Fireteam Level 3 example | S1 p. 138 Case 2 includes +1 BS; tables pp. 135-136 assign it to Level 4 | **Likely resolved but insufficiently verified** as an example typo, REA-034; keep current table interpretation, verify Spanish/Wiki/errata |
-| Armed Turret Silhouette | S1 detailed p. 70: S2; deployable table p. 74: S1 | **Unresolved**, REA-037; visual cell/Spanish/Wiki check remains necessary |
+| Fireteam Level 3 example | S1 p. 138 visually includes +1 BS; tables pp. 135-136 assign it to Level 4; S14 Spanish example repeats the discrepancy | **Likely example typo, no resolving ruling**, REA-034; keep table provenance, Spanish PDF/erratum not verified |
+| Armed Turret Silhouette | S1 visually verified detailed p. 70: S2; summaries pp. 74/195: S1; S14 Spanish detail: S2 | **Unresolved**, REA-037; visual check completed, Spanish PDF/precedence ruling still missing; height differs, both bases 25 mm |
+| Direct Doctor/Engineer allegiance | S1/S4/S14 direct requirements lack a universal Allied gate; Kits/delegation explicitly impose it | **Unresolved universal interpretation**, REA-038; no general rule supplying the gate found, no universal enemy permission inferred |
+| Spanish Fireteam dice reminder | S14 Fireteam reminder includes SD in six total dice; S1 and S14 general MODs exclude SD from Burst cap | **Unresolved supersession**, REA-041; do not invent a separate Fireteam cap |
+| Dodge (ARM+3) condition | S1 p. 75 grants ARM benefit when declared; S14 older paragraph requires PH failure | **Unresolved bilingual/version alignment**, REA-042; missing Spanish PDF, not a PH bonus |
+| Breaker notice weapon label | English S11 says Sniper; rendered S1 p. 180/S6 225/S14 Spanish section match Marksman | **Derived terminology reconciliation**, REA-044; profile-backed match, no separate Sniper invented; public reference still absent |
 | Prone/Berserk | S1 general movement p. 29 excludes Berserk; Prone p. 169 repeats only Jump | **Resolved current exception** by p. 29 and S2 p. 1; record-level Prone prose still needs it in the lifecycle batch |
 | Old Kobra ammunition | S3 p. 68: Normal BS / Shock CC; S1/S11: Shock BS / DA CC | **Resolved historical supersession**; do not use the old one-save CC row as current authority |
 | Viral one-save profile versus DA+Shock | S1 pp. 174/181 and S6 weapon 63 | **Derived conditional reconciliation**, REA-024: Trait modifies VITA case; not a blanket typo or universal two-save profile |
@@ -1231,22 +1542,32 @@ source-code inspection here does not prove them.
 
 ## Prioritized remediation plan
 
+**Source preflight:** REA-038 must be explicitly adjudicated before accepting
+changed direct-target allegiance. The confirmed STR/recovery/roll corrections
+can proceed within supported Allied examples without widening eligibility;
+their full eligibility closure remains dependent on that decision. REA-043 is
+an independently confirmed first-batch actor correction. Recover S18 and obtain
+Spanish PDF evidence before closing dependent source claims, or accept an
+explicit scoped uncertainty/migration disposition with fresh comparison.
+
 These are independently reviewable proposed batches. Future code/JSON/schema
 edits, generated outputs and regression tests belong to those tasks, not this
 documentation-only audit.
 
 | Batch | Finding IDs | Scope and dependencies | Suggested acceptance / future regression cases |
 | --- | --- | --- | --- |
-| A. Recovery and Intuitive Attack | REA-001, REA-002, REA-003, REA-009, REA-022 | First batch; direct source-backed prose fixes; link current exceptions, retain Kit/profile ownership | VITA Targeted versus Stunned Engineer eligibility; ordinary wounded VITA cannot receive ordinary Doctor healing; failed Doctor versus failed State cancellation; one Intuitive WIP roll/opposed ARO/Main Target Critical; cancellation then new PARA State; mixed Kit PH success/failure; SD does not consume charges |
+| A. Recovery and Intuitive Attack | REA-001, REA-002, REA-003, REA-009, REA-022, REA-038 | First batch; source-backed mechanics, with allegiance preflight; direct/delegated/self use and Kit ownership stay distinct | VITA Targeted versus Stunned Engineer eligibility; ordinary wounded VITA cannot receive ordinary Doctor healing; failed Doctor versus failed State cancellation; one Intuitive WIP roll/opposed ARO/Main Target Critical; cancellation then new PARA State; mixed Kit PH success/failure; SD does not consume charges; Engaged prohibition; explicit delegated Allied gate; unresolved direct allegiance must not become an accepted universal claim |
 | B. Ammunition/Traits and Criticals | REA-004, REA-005, REA-010, REA-013, REA-024, REA-025 | Restore omitted exceptions; add N+E/M owner/map review; keep explicit and Derived examples separate | Ordinary versus extra Continuous Damage save; WIP+Shock prohibition versus ordinary WIP weapon; two whole-ARM cases versus partial AP; Normal+BTS is still BTS; odd defense rounds up; T2 dice designated before saves; N+E/M Wounds/States; Viral VITA/STR comparison |
 | C. Hacking, NFB, visibility | REA-006, REA-007, REA-012, REA-018, REA-019 | Shared baseline content then Program-local timing; FAQ scope from F | Immediate Controlled Jump ARO; opposing Programs cancel each other's effects while Firefight +3 remains; Speedball no benefit; one Supportware/Hacker and beneficiary; replacement Fairy Dust example; one chosen Firewall; active versus disabled Device; MSV ordinary Smoke/Eclipse difference; White Noise owner NFB duration |
 | D. States, declarations and general baselines | REA-008, REA-014, REA-015, REA-016, REA-026, REA-035 | Reusable baseline references before broad cross-links; preserve per-State differences | IMM-B+Isolated and Targeted/capped MODs; Sixth Sense retained penalties; valid/blocked Engaged exit; simultaneous Mine and gun Dodge; Prone/Berserk and recovery cancellation; Hidden Deployment Order/ARO; Marker full-Order revelation; Stealth mixed activation; IMP-2 Range MOD and IMP-1 multiple successes; Protheion overkill |
-| E. Fireteams, Peripherals and placement | REA-017, REA-020, REA-021, REA-023, REA-032, REA-036 | Common action/placement baselines then subtype/variant exceptions; depends on D for lifecycle context | Controller/Peripheral mixed Idle; Servant and Cyberplug Doctor roll ownership; Ancillary eligibility/recovery; leader versus member departure and Number 2; Haris remains Haris at two members; original profile Training versus FT Master conversion; SD/BS bonuses versus Discover and WIP/PH; Perimeter blocked path; occupied placement fallback; Vitroferro cap before PS; AI remount contact; after-Guts Transmutation |
-| F. Sources and scoped FAQ | REA-027, REA-028, REA-029, REA-030, REA-034, REA-037 | Recover/pin sources, obtain Spanish PDF, classify FAQ by scope; independently review each discrepancy | Exact archive hash/member; one/two Flash saves; Kobra DA separate from Anti-materiel; current versus old chart blocks; FAQ Ancillary applicability explicitly decided; Fireteam example versus table; both Armed Turret S cells visually checked |
+| E. Fireteams, Peripherals and placement | REA-017, REA-020, REA-021, REA-023, REA-032, REA-036, REA-039, REA-040 | Common action/placement baselines then subtype/variant exceptions; depends on D for lifecycle context | Controller/Peripheral mixed Idle; Servant and Cyberplug Doctor roll ownership; Ancillary eligibility/recovery; leader versus member departure and Number 2; Haris remains Haris at two members; original profile Training versus FT Master conversion; SD/BS bonuses versus Discover and WIP/PH; Perimeter blocked path; occupied placement fallback; Vitroferro cap before PS; AI remount contact; after-Guts Transmutation; TinBot owner disabled/sharing/identical versus different-strength benefits; SpecBall round/once/Null/Enhanced Profile and Marker conditions; TEAM-OPS scoped separately |
+| F. Sources and scoped FAQ | REA-027, REA-028, REA-029, REA-030, REA-034, REA-037, REA-041, REA-042 | Recover/pin sources, obtain Spanish PDF, classify FAQ by scope; independently review each discrepancy | Exact archive hash/member; one/two Flash saves; Kobra DA separate from Anti-materiel; current versus old chart blocks; FAQ Ancillary applicability explicitly decided; Fireteam example versus table; Armed Turret visually verified S1/S2 still needs a source decision; B6 versus B6+SD cap; Dodge ARM effect versus failed PH; publication/language/supersession separated |
 | G. Presentation, links and acceptance evidence | REA-011, REA-031, REA-033 | Follow content decisions; current prose rendering first; optional structured display later | AP+DA before/after conditions visible; Derived versus Explicit labels; correct CC Attribute target; material uncertainty visible in normal mode; keyboard/narrow-screen links and citations; actual explanation review cannot pass solely on graph count |
+| H. Command Token actor | REA-043 | Small independent P0 correction; share Strategic Use baseline from D | Opponent imposes limit on user's first turn; Counterintelligence allows user two; separate enemy Order-removal branch and >10 threshold |
+| I. Current Weapon publication | REA-044 | Target current metadata-only profiles; source 225 does not require a referencing Unit; no blanket publication of historical rows | Numeric/slug public lookup, matched Marksman profile/ranges, name/source-note visibility; no fabricated Sniper or raw data mutation |
 
 **Potential 1.0 blockers:** confirmed misleading eligibility/roll statements
-(REA-001, REA-002, REA-003, REA-035) and material omitted exceptions such as
+(REA-001, REA-002, REA-003, REA-035, REA-043) and material omitted exceptions such as
 REA-004 through REA-006. Other High findings are potential completeness blockers
 when their mechanics belong to the supported player reference; assess them
 against `releasing.md`, not their historical ledger target. REA-027/REA-028 need
@@ -1260,6 +1581,15 @@ schema, automatic evaluator, exhaustive historical ITS library, session-state
 model, interactive editor and every possible combat combination are not
 prerequisites for concise source-backed explanations. Do not defer an essential
 sentence merely to wait for those larger features.
+
+Closing a batch requires its conditions, normal case and explicit exceptions
+to be accepted together. Common modifier, placement, recovery and Fireteam
+baselines should own repeated reasoning; subtype/State cards link to and qualify
+them. A corrected finding does not approve the rest of its record. The
+[coverage gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate)
+tracks all 63 remaining S records and pending material/source/presentation work
+for all 367. None of the larger optional schemas or an automatic combat evaluator
+is needed to write these concise explanations.
 
 ## Remaining audit gaps and limitations
 
@@ -1288,12 +1618,14 @@ sentence merely to wait for those larger features.
 - Source-note visibility and structured-case omissions were assessed through
   current code. No browser/server was launched and no visual, responsive,
   keyboard or end-to-end rendering acceptance is claimed.
-- PDF text was read with `pypdf`. Poppler, MuPDF, PDFium and PyMuPDF were
-  unavailable in the project environment; no new renderer was installed.
-  Exact textual contradictions are reported, but disputed chart cells need
-  visual verification before an implementation decision (especially REA-037).
-- Live web responses identify footer revisions, but are not a freshly acquired
-  hash-pinned bilingual archive. Some direct oldid URLs and the GitHub backup
+- Original audit used `pypdf` text without a renderer. Follow-up used temporary
+  `pypdfium2` 5.14.0 outside the repository to render and inspect eight S1 pages
+  at scale 2: 70, 74, 138, 180, 182, 185, 186, 195. The disputed cells were visually
+  verified; that confirms what is printed, not which conflicting source governs.
+  No renderer dependency, PDF, screenshot or generated artifact was committed.
+- Original live responses identified footer revisions without pinned Spanish
+  bytes. Follow-up discovered and hash-checked selected S14 Spanish members;
+  this is not the missing Spanish PDF or the missing S18 English capture. Some direct oldid URLs and the GitHub backup
   failed; these failures were retained, not treated as evidence of absence.
 - Prior research such as Katyusha range normalization was consulted for
   discovery but is not presented as independently reverified current evidence.
