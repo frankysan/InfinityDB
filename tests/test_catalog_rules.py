@@ -655,3 +655,146 @@ def test_remaining_base_ammunition_facts_are_source_cited_and_published(
             "blocked" if slug == "eclipse" else "can-draw-lof"
         )
         assert "ammunitionResolution" not in facts
+
+
+def test_combined_saving_roll_review_covers_exact_six_plasma_modes() -> None:
+    """The N5.3 Critical ARM rule is independent of Ammunition composition."""
+    from infinity_db.database.repository import Database
+    from infinity_db.weapon_combined_saving_rolls import (
+        WeaponCombinedSavingRolls,
+        load_combined_saving_roll_map,
+    )
+
+    root = Path(__file__).parents[1]
+    database = Database(root / "data/generated/infinity.db")
+    resolver = WeaponCombinedSavingRolls()
+    mapping = load_combined_saving_roll_map()
+    assert set(mapping) == {
+        (weapon_id, mode)
+        for weapon_id in (40, 111, 113)
+        for mode in ("Blast Mode", "Hit Mode")
+    }
+    for slug in ("plasma-rifle", "plasma-carbine", "plasma-sniper-rifle"):
+        weapon = database.get_catalog_item("weapons", slug)
+        assert weapon is not None
+        assert {profile["mode"] for profile in weapon["profiles"]} == {
+            "Blast Mode", "Hit Mode"
+        }
+        for profile in weapon["profiles"]:
+            assert resolver.for_profile(profile) == {
+                "kind": "combined-saving-roll",
+                "rolls": [
+                    {"attribute": "ARM", "count": 1},
+                    {"attribute": "BTS", "count": 1},
+                ],
+                "critical": {"additionalRolls": 1, "attribute": "ARM"},
+                "source": {"sourceId": "n5-core-v5.3", "page": 67},
+            }
+            assert profile["ammunition"] == "N"
+    feuerbach = database.get_catalog_item("weapons", "feuerbach")
+    assert feuerbach is not None
+    assert all(resolver.for_profile(p) is None for p in feuerbach["profiles"])
+    plasma = database.get_catalog_item("weapons", "plasma-carbine")
+    assert plasma is not None
+    changed = plasma["profiles"][0].copy()
+    for field, value in (
+        ("id", 999), ("name", "Other"), ("mode", "Unknown"),
+        ("ammunition", "AP+DA"), ("ammunition_source_id", 10),
+        ("saving", "ARM"), ("saving_num", "2"),
+    ):
+        candidate = changed.copy()
+        candidate[field] = value
+        assert resolver.for_profile(candidate) is None, field
+
+
+def test_combined_saving_roll_review_is_published_without_ammunition_composition() -> None:
+    from infinity_db.database.repository import Database
+
+    root = Path(__file__).parents[1]
+    database = Database(root / "data/generated/infinity.db")
+    rules = CatalogRules(RulesDatabase(root / "data/generated/rules.db"))
+    plasma = database.get_catalog_item("weapons", "plasma-carbine")
+    assert plasma is not None
+    enriched = rules.enrich_catalog_item("weapons", plasma)
+    for profile in enriched["profiles"]:
+        assert profile["combined_saving_roll"]["critical"] == {
+            "additionalRolls": 1, "attribute": "ARM"
+        }
+        assert (profile["saving"], profile["saving_num"]) == (
+            "ARM and BTS", "1 and 1"
+        )
+        assert "ammunition_composition" not in profile
+    for variant in enriched["weapon_variants"]:
+        for profile in variant.get("profiles", []):
+            assert profile["combined_saving_roll"]["kind"] == "combined-saving-roll"
+    feuerbach = database.get_catalog_item("weapons", "feuerbach")
+    assert feuerbach is not None
+    enriched_feuerbach = rules.enrich_catalog_item("weapons", feuerbach)
+    assert all("combined_saving_roll" not in p for p in enriched_feuerbach["profiles"])
+    assert any("ammunition_composition" in p for p in enriched_feuerbach["profiles"])
+
+
+@pytest.mark.parametrize("mutation", (
+    lambda d: d["critical"].update({"attribute": "BTS"}),
+    lambda d: d["critical"].update({"additionalRolls": 2}),
+    lambda d: d["critical"].update({"additionalRolls": True}),
+    lambda d: d["source"].update({"page": 66}),
+    lambda d: d["profiles"][0]["modes"].append("Hit Mode"),
+    lambda d: d["profiles"].append(copy.deepcopy(d["profiles"][0])),
+    lambda d: d["profiles"][0].update({"saving": "ARM+BTS"}),
+    lambda d: d["profiles"][0].update({"weaponId": True}),
+))
+def test_combined_saving_roll_map_rejects_unsupported_or_ambiguous_inputs(
+    tmp_path: Path, mutation: Any,
+) -> None:
+    from infinity_db.weapon_combined_saving_rolls import load_combined_saving_roll_map
+
+    source = Path(__file__).parents[1] / "config/catalogs/weapon-combined-saving-rolls.json"
+    document = json.loads(source.read_text(encoding="utf-8"))
+    mutation(document)
+    target = tmp_path / "invalid-combined-saving-rolls.json"
+    target.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="Combined Saving Roll"):
+        load_combined_saving_roll_map(target)
+
+
+def test_plasma_combined_saving_roll_critical_reaches_weapon_api() -> None:
+    root = Path(__file__).parents[1]
+    app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+
+    def detail(slug: str) -> dict[str, Any]:
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ["REQUEST_METHOD"] = "GET"
+        environ["PATH_INFO"] = f"/api/weapons/{slug}"
+        statuses: list[str] = []
+        body = b"".join(
+            app(environ, lambda status, headers, exc_info=None: statuses.append(status))
+        )
+        assert statuses == ["200 OK"]
+        return json.loads(body)
+
+    for slug in ("plasma-carbine", "plasma-rifle", "plasma-sniper-rifle"):
+        result = detail(slug)
+        for profile in result["profiles"]:
+            assert profile["combined_saving_roll"]["critical"] == {
+                "additionalRolls": 1, "attribute": "ARM"
+            }
+            assert profile["combined_saving_roll"]["source"] == {
+                "sourceId": "n5-core-v5.3", "page": 67
+            }
+            assert (profile["saving"], profile["saving_num"]) == (
+                "ARM and BTS", "1 and 1"
+            )
+            assert "ammunition_composition" not in profile
+        for variant in result["weapon_variants"]:
+            for profile in variant.get("profiles", []):
+                assert profile["combined_saving_roll"]["kind"] == "combined-saving-roll"
+    feuerbach = detail("feuerbach")
+    for profile in feuerbach["profiles"]:
+        assert "combined_saving_roll" not in profile
+    burst = next(p for p in feuerbach["profiles"] if p["mode"] == "Burst Mode")
+    assert burst["ammunition_composition"]["kind"] == "combined"

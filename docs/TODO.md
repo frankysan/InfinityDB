@@ -355,6 +355,11 @@ unimplemented until its corresponding behavior exists.
       roll-bearing base Ammunition facts, preserving T2's one-Wound Critical
       exception and excluding Smoke/Eclipse. Do not sum the Critical extra roll
       per component or infer totals from the four combined source mappings.
+    - [x] Publish a bounded, exact-source Combined Saving Roll Critical reference
+      for the six Plasma Weapon Hit/Blast profiles: one ARM plus one BTS Saving
+      Roll, with one additional ARM roll on a Critical. Keep the reviewed source
+      signatures separate from Ammunition composition and leave unreviewed
+      profiles unchanged; this remains descriptive, not a roll evaluator.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view

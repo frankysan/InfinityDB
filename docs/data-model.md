@@ -117,6 +117,18 @@ different extra-roll target rule and remain outside this fact pilot.
 The other Ammunition effects, complete combined Critical interactions,
 and broader semantic relationships still require source review.
 
+The separate reviewed Combined Saving Roll projection now pins the six
+Plasma Carbine, Plasma Rifle, and Plasma Sniper Rifle Hit/Blast source profiles
+(including the source spelling of each name). Only exact source ID, mode,
+Ammunition identity, and Saving Roll fields receive
+`combined_saving_roll: {kind, rolls, critical}` in the Weapon API. The pinned
+N5.3 rule specifies one additional **ARM** Saving Roll for a Critical, on top
+of the ARM and BTS Saving Rolls from the hit. This is a reviewed source-profile
+annotation, not a roll evaluator, an Ammunition effect, or an inferred
+`ammunition_composition`. Other Weapon Saving Roll notations remain untouched.
+Full cross-source Combined Saving Roll coverage and immunity interactions remain
+open.
+
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;
 its specific rules are separately curated, and missing Army Trait notation is

@@ -1,0 +1,50 @@
+{
+  "format": "InfinityDB reviewed combined saving rolls",
+  "version": 1,
+  "source": {
+    "sourceId": "n5-core-v5.3",
+    "page": 67
+  },
+  "critical": {
+    "additionalRolls": 1,
+    "attribute": "ARM"
+  },
+  "profiles": [
+    {
+      "weaponId": 40,
+      "weaponName": "Plasma Rifle",
+      "modes": [
+        "Blast Mode",
+        "Hit Mode"
+      ],
+      "ammunitionSourceId": 2,
+      "ammunition": "N",
+      "saving": "ARM and BTS",
+      "savingNum": "1 and 1"
+    },
+    {
+      "weaponId": 111,
+      "weaponName": "Plasma Carbine",
+      "modes": [
+        "Blast Mode",
+        "Hit Mode"
+      ],
+      "ammunitionSourceId": 2,
+      "ammunition": "N",
+      "saving": "ARM and BTS",
+      "savingNum": "1 and 1"
+    },
+    {
+      "weaponId": 113,
+      "weaponName": "Plasma\u00a0Sniper Rifle",
+      "modes": [
+        "Blast Mode",
+        "Hit Mode"
+      ],
+      "ammunitionSourceId": 2,
+      "ammunition": "N",
+      "saving": "ARM and BTS",
+      "savingNum": "1 and 1"
+    }
+  ]
+}

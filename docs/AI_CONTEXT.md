@@ -35,6 +35,11 @@ release/audit narrative belongs in the changelog and Git history.
   not to Army source-ID navigation mappings. The initial AP/DA/E/M typed pilot
   is descriptive and non-executable; combined Ammunition components and
   Combined Saving Roll notation are separate source/profile dimensions.
+- Combined Saving Roll Criticals are distinct from combined Ammunition
+  Criticals. The six reviewed Plasma Hit/Blast profiles have source-exact
+  `combined_saving_roll` annotations: one ARM and one BTS roll, plus one
+  additional ARM roll for a Critical. Do not infer this from display punctuation
+  or transfer it to base `ammunition:*` facts. See `docs/data-model.md`.
 - Scenario geometry is maintained semantic data, not diagram pixels. The 1.0 SVG renderer and
   geometry-schema v1 target only the four N5.3 core scenarios. All four core scenario records now
   own their geometry configurations; renderer tests consume those maintained definitions and must

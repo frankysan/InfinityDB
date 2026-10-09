@@ -2168,6 +2168,18 @@ The `+` token is therefore field-scoped syntax. InfinityDB must retain typed
 field context when parsing, normalizing, validating, or presenting Weapon
 profiles instead of assigning a universal meaning to the character.
 
+**Implemented source-profile pilot (Data processing + Web backend):** N5.3
+specifies that a Critical with a Combined Saving Roll adds one Saving Roll
+against **ARM**, not one additional roll against every combined Attribute.
+All six source profiles for Plasma Carbine, Plasma Rifle, and Plasma Sniper Rifle
+(Blast and Hit modes) carry an exact-match `combined_saving_roll` API annotation
+with one ARM roll, one BTS roll, and the additional Critical ARM roll. Reviewed
+profile signatures live in `config/catalogs/weapon-combined-saving-rolls.json`;
+neither the browser nor the API interprets textual separators to infer this
+behavior. The annotation is descriptive, and missing/mismatched profile
+signatures stay unannotated. It does not change the Normal Ammunition identity
+or create `ammunition_composition`.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Combined_Saving_Roll>

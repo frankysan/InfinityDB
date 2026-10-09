@@ -8,6 +8,7 @@ from typing import Any
 from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 from infinity_db.weapon_ammunition_references import WeaponAmmunitionReferences
+from infinity_db.weapon_combined_saving_rolls import WeaponCombinedSavingRolls
 
 DECLARATION_KIND = "declaration-category"
 
@@ -51,6 +52,9 @@ class CatalogRules:
             str, dict[ArmyLinkRef, dict[str, Any]]
         ] = {}
         self._rule_reference_cache: dict[str, dict[str, Any]] = {}
+        self._combined_saving_rolls = (
+            WeaponCombinedSavingRolls() if rules_database is not None else None
+        )
         self._ammunition_references = (
             WeaponAmmunitionReferences(rules_database)
             if rules_database is not None else None
@@ -217,6 +221,7 @@ class CatalogRules:
 
         ammunition_references = self._ammunition_references
         if entity == "weapon" and ammunition_references is not None:
+            combined_saving_rolls = self._combined_saving_rolls
             # Resolve source metadata, not display punctuation: AP+DA is an
             # Ammunition composition, while Saving Roll x2 is a separate field.
             def attach_ammunition_references(profiles: list[dict[str, Any]]) -> None:
@@ -227,6 +232,10 @@ class CatalogRules:
                     composition = ammunition_references.composition_for_profile(profile)
                     if composition is not None:
                         profile["ammunition_composition"] = composition
+                    if combined_saving_rolls is not None:
+                        saving_roll = combined_saving_rolls.for_profile(profile)
+                        if saving_roll is not None:
+                            profile["combined_saving_roll"] = saving_roll
 
             attach_ammunition_references(result.get("profiles", []))
             for variant in result.get("weapon_variants", []):
