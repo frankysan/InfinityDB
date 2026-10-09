@@ -371,6 +371,34 @@ def test_hacking_programs_reuse_canonical_current_labels(
     ]
 
 
+def test_reviewed_trait_critical_and_wip_restrictions_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    continuous = current_rules_database.composed_record("trait:continuous-damage")
+    assert continuous is not None
+    assert "Each failed Saving Roll required by a hit" in continuous["summary"]
+    assert "inflicts a Wound" in continuous["summary"]
+    assert "additional roll does not apply Continuous Damage" in continuous["summary"]
+    assert "failing it does not start another chain" in continuous["summary"]
+    assert "[[skill:immunity]]" in continuous["summary"]
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf" and citation["page"] == 175
+        for citation in continuous["citations"]
+    )
+
+    wip = current_rules_database.composed_record("trait:bs-weapon-wip")
+    assert wip is not None
+    assert "using WIP instead of BS" in wip["summary"]
+    assert "BS Attack (Shock)" in wip["summary"]
+    assert "BS Attack (Guided)" in wip["summary"]
+    assert "not [[ammunition:shock|Shock Ammunition]] in general" in wip["summary"]
+    assert {
+        citation["page"]
+        for citation in wip["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+    } == {39, 175}
+
+
 def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")

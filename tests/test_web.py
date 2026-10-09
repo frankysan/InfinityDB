@@ -5505,10 +5505,22 @@ def test_trait_apis_compose_army_usage_with_curated_rules(app: Callable, tmp_pat
     assert status == 200
     payload = json.loads(body)
     assert payload["slug"] == "continuous-damage"
-    assert payload["description"].startswith("After a failed Saving Roll")
+    assert payload["description"].startswith("Each failed Saving Roll required by a hit")
+    assert "additional roll does not apply Continuous Damage" in payload["description"]
+    assert "\n\nA Critical" in payload["description"]
     assert payload["variants"][0]["item_id"] == 31
     assert payload["variants"][0]["item_slug"] == "combi-rifle"
     assert payload["rules"][0]["citations"][0]["source_version"] == "N5.3 / oldid 4110"
+
+    status, _, body = request(rules_app, "/api/traits/bs-weapon-wip")
+    assert status == 200
+    wip_payload = json.loads(body)
+    assert "BS Attack (Shock)" in wip_payload["description"]
+    assert "BS Attack (Guided)" in wip_payload["description"]
+    assert (
+        "not [[ammunition:shock|Shock Ammunition]] in general"
+        in wip_payload["description"]
+    )
 
 
 def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_path: Path) -> None:

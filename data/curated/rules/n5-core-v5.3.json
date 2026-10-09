@@ -2679,7 +2679,7 @@
             "aliases": [
                 "Technical Weapon"
             ],
-            "summary": "Makes [[skill:bs-attack:plural]] using WIP instead of BS; BS rules and MODs affect WIP instead.",
+            "summary": "Makes [[skill:bs-attack:plural]] using WIP instead of BS; BS rules and MODs affect WIP instead. Weapons with this Trait cannot use [[skill:bs-attack|BS Attack (Shock)]] or [[skill:bs-attack|BS Attack (Guided)]]. These restrictions concern the named attack Skills, not [[ammunition:shock|Shock Ammunition]] in general.",
             "composition": {
                 "role": "definition"
             },
@@ -2693,11 +2693,21 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "BS Weapon (WIP)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "BS Weapon (WIP)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 39,
+                    "section": "BS Attack (Guided)"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-09"
             },
             "relations": [
                 {
@@ -2847,7 +2857,7 @@
             "id": "trait:continuous-damage",
             "kind": "trait",
             "name": "Continuous Damage",
-            "summary": "After a failed Saving Roll, the target keeps making Saving Rolls until one succeeds or it enters [[state:dead]].",
+            "summary": "Each failed Saving Roll required by a hit with Continuous Damage inflicts a Wound and requires another Saving Roll, until one succeeds or the target enters [[state:dead]].\n\nA Critical adds an extra Saving Roll, but that additional roll does not apply Continuous Damage: failing it does not start another chain. Applicable [[skill:immunity]] can suppress this Trait.",
             "composition": {
                 "role": "definition"
             },
@@ -2861,11 +2871,21 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Continuous Damage"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Continuous Damage"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 95,
+                    "section": "Immunity"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-09"
             },
             "aliases": [
                 "Continous Damage"

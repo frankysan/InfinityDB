@@ -316,7 +316,10 @@ unimplemented until its corresponding behavior exists.
       have been revised in curated data and need player-facing review. Adjudicate
       direct Doctor/Engineer target allegiance (REA-038) before closing eligibility;
       Counterintelligence's actor correction (REA-043) is implemented in curated
-      data; verify its player-facing wording in the browser. Separately
+      data; verify its player-facing wording in the browser. The Continuous Damage
+      Critical exception (REA-004) and BS Weapon (WIP) Skill restrictions (REA-005)
+      are now documented in curated Trait summaries; verify their player-facing
+      wording and keep deferred typed-variant edges separate. Separately
       decide source conflicts and FAQ applicability before dependent curation.
       Use the [source manifest](rules-explanation-audit-1.0-sources.md) and
       [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).

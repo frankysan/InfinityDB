@@ -1463,9 +1463,11 @@ PH or WIP for the corresponding weapon. InfinityDB therefore authors
 `modifies-rolls-for` from each Trait to the canonical BS Attack Skill; the exact replacement
 Attribute remains part of the Trait definition rather than being encoded in the edge.
 
-The additional prohibitions involving BS Attack (Guided), and BS Attack (Shock) for the WIP
-form, remain in the future-interaction ledger until those exact BS Attack forms have canonical
-rules identities. They must not be flattened into a restriction on ordinary BS Attack.
+The BS Weapon (WIP) curated summary explicitly states that BS Attack (Shock) and BS Attack
+(Guided) cannot use weapons with this Trait. This restriction applies to the named attack
+Skills, not automatically to Shock Ammunition. The exact attack forms still lack separate
+canonical rule identities, so their typed restriction edges remain in the future-interaction
+ledger. Neither is flattened into a restriction on ordinary BS Attack.
 
 Sources:
 
@@ -1509,8 +1511,10 @@ retains them explicitly instead of creating broader current edges:
   uses and results in Unloaded State;
 - Indiscriminate bypasses the normal restriction created by Camouflage and Hiding Markers in
   its Area of Effect; and
-- Continuous Damage can continue Saving Rolls until Dead State, but that indirect outcome is
-  not equivalent to an unconditional `causes-state` edge.
+- Continuous Damage repeats Saving Rolls after a failed ordinary hit save until success or
+  Dead State, but its additional Critical Saving Roll never starts that repetition. Applicable
+  Immunity can suppress this Trait. The indirect Dead outcome is not equivalent to an
+  unconditional `causes-state` edge.
 
 This is the same fail-closed policy used elsewhere in the rules graph: keep exact behavior in
 the owning definition and preserve unresolved relationships in the future queue until both
