@@ -2155,10 +2155,28 @@ target has, whether it matches a particular component or weapon Trait, or a
 combined outcome. Do not apply the generic Critical count or a hypothetical
 Immunity override to a Weapon profile without matching its explicit sources.
 
+Two **rule-derived, non-executable examples** now document the intersection of
+these rules for **non-Comms ARM Saving Roll attacks**. Against an AP+DA hit (two
+rolls, three on Critical) or AP+EXP hit (three rolls, four on Critical), a
+defender with **Immunity (ARM)** instead treats the covered combined Ammunition
+as Normal: one ARM Saving Roll for a hit, or two for a Critical unless
+Immunity (Critical) also applies. These examples are derived from the general
+N5.3 clauses, **not** independently printed Immunity examples. Their explicit
+preconditions must accompany any presentation; they are not a universal
+Immunity result or a computation for arbitrary Weapon profiles.
+
+The record's `reviewedCombinedCases` gives the exact Army Ammunition source ID,
+ordered component IDs, applicability, original rolls and covered-attack rolls.
+Partial/component-specific Immunity (for example, whether Immunity (AP) affects
+all or part of an AP+DA attack), attacks using BTS, Comms Attacks, different
+Weapon Traits, Vulnerability, and conditional State interactions are **not**
+settled by these examples. No automatic per-Weapon or per-target projection is
+allowed.
+
 Sources: N5.3 Wiki [Immunity](https://infinitythewiki.com/Immunity)
 (`oldid=3643`) and [Combined Ammunition](https://infinitythewiki.com/Combined_Ammunition)
-(`oldid=3000`). This records the Wiki's explicit boundary; cross-source and
-conditional combined-effect precedence review remains open.
+(`oldid=3000`). The base rules are explicit; the two conditioned examples are
+reviewed deductions, with wider interaction precedence still open.
 
 ### RS-AW-AMMO-003 — Combined Ammunition is explicit composition
 

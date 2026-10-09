@@ -204,10 +204,59 @@ def _validate_related_categories(facts: dict[str, Any], context: str) -> None:
         )
 
 
+def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> None:
+    """Validate conditional reviewed examples, never a general roll evaluator."""
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"{context}: expected reviewed combined examples")
+    seen: set[int] = set()
+    for index, case in enumerate(value):
+        item = f"{context}[{index}]"
+        if not isinstance(case, dict) or set(case) != {
+            "sourceAmmunitionId", "sourceAmmunitionName", "components", "when",
+            "withoutImmunity", "withImmunity", "evidence",
+        }:
+            raise ValueError(f"{item}: invalid combined Immunity case fields")
+        source_id = case["sourceAmmunitionId"]
+        if type(source_id) is not int or source_id < 1 or source_id in seen:
+            raise ValueError(f"{item}: invalid or duplicate source Ammunition ID")
+        seen.add(source_id)
+        _require_string(case["sourceAmmunitionName"], "sourceAmmunitionName", item)
+        components = case["components"]
+        if not isinstance(components, list) or len(components) != 2:
+            raise ValueError(f"{item}: expected two reviewed component identities")
+        for component in components:
+            validate_typed_domain_id(
+                component, expected_domain="ammunition", context=f"{item}.components"
+            )
+        if len(set(components)) != 2:
+            raise ValueError(f"{item}: duplicate combined component")
+        if case["when"] != {
+            "immunity": "ARM", "savingAttribute": "ARM", "attackClass": "non-comms"
+        }:
+            raise ValueError(f"{item}: unsupported Immunity applicability")
+        original = case["withoutImmunity"]
+        if (
+            not isinstance(original, dict)
+            or set(original) != {"hitRolls", "criticalRolls"}
+            or type(original["hitRolls"]) is not int
+            or original["hitRolls"] < 2
+            or type(original["criticalRolls"]) is not int
+            or original["criticalRolls"] != original["hitRolls"] + 1
+        ):
+            raise ValueError(f"{item}: invalid source hit/Critical Saving Roll counts")
+        if case["withImmunity"] != {
+            "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
+        }:
+            raise ValueError(f"{item}: unsupported covered-attack result")
+        if case["evidence"] != "derived-from-pinned-general-rules":
+            raise ValueError(f"{item}: evidence must identify the rule-derived conclusion")
+
+
 def _validate_immunity_interaction(value: object, context: str) -> None:
     """Validate source-reviewed Immunity boundaries without evaluating attacks."""
     if not isinstance(value, dict) or set(value) != {
         "coveredAmmunition", "criticalAgainstCoveredAmmunition", "exceptions",
+        "reviewedCombinedCases",
     }:
         raise ValueError(f"{context}: invalid Immunity interaction fields")
     covered = value["coveredAmmunition"]
@@ -241,6 +290,9 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
         ]
     ):
         raise ValueError(f"{context}: invalid Immunity exceptions")
+    _validate_reviewed_immunity_combined_cases(
+        value["reviewedCombinedCases"], f"{context}.reviewedCombinedCases"
+    )
 
 
 def _validate_ammunition_resolution(value: object, context: str) -> None:

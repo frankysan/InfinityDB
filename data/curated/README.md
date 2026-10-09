@@ -100,8 +100,15 @@ covered Ammunition (treat as Normal and ignore its special effects, Saving
 Roll Attribute MODs and Saving Roll-count MODs), the remaining single Critical
 roll unless Immunity (Critical) applies, and the exceptions for Comms Attacks,
 Non-Lethal and State: Stunned. Only `skill:immunity` may own this fact family.
-It is sourced to Wiki Immunity `oldid=3643` and is non-executable; it does
-**not** assign immunity results to Army profiles or Combined Ammunition.
+The optional `reviewedCombinedCases` array records source-qualified, derived
+examples for an Immunity (ARM) defender against an ARM-based, non-Comms combined
+attack. Every case must specify the Army source Ammunition ID/name, two typed
+component IDs, applicability, original and covered hit/Critical Saving Roll
+counts, Normal treatment, and evidence class `derived-from-pinned-general-rules`.
+The validator rejects unsupported conditions, duplicate IDs, and impossible
+Critical counts. These examples cite Wiki Immunity `oldid=3643` together with
+Combined Ammunition `oldid=3000`. They are **not executable** and must not be
+projected into Army profiles or interpreted as generic component-level Immunity.
 
 ### Rules-enrichment coverage classifications
 

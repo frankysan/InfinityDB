@@ -364,6 +364,13 @@ unimplemented until its corresponding behavior exists.
       covered Ammunition uses Normal effects, Immunity (Critical) removes the
       otherwise remaining extra Critical roll, and Comms Attack/Non-Lethal/
       Stunned exceptions are explicit. This is *not* a combined-effect evaluator.
+    - [x] Review two conditional Combined Ammunition/Immunity (ARM) intersections:
+      AP+DA and AP+Exp when the attack uses ARM and is not a Comms Attack.
+      Preserve source identity, ordinary/Critical roll counts and the distinction
+      between rule-derived examples and printed examples; keep them non-executable.
+    - [ ] Review component-level Immunity (such as Immunity (AP) on AP+DA),
+      BTS-based variants, Vulnerability and weapon-specific exceptions. Do not
+      generalize from the conditional Immunity (ARM) examples.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view

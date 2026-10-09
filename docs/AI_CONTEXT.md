@@ -42,7 +42,9 @@ release/audit narrative belongs in the changelog and Git history.
   or transfer it to base `ammunition:*` facts. See `docs/data-model.md`.
 - The N5.3 Immunity exception boundary lives on `skill:immunity` as validated,
   non-executable `facts.immunityInteraction`; do not apply it automatically to
-  combined components, Weapon profiles, or Critical outcomes. See
+  combined components, Weapon profiles, or Critical outcomes. Two explicitly
+  conditioned AP+DA/AP+Exp vs Immunity (ARM) examples are rule-derived evidence,
+  **not** general component-level Immunity semantics. See
   `docs/rules-semantics.md` RS-AW-IMM-001.
 - Scenario geometry is maintained semantic data, not diagram pixels. The 1.0 SVG renderer and
   geometry-schema v1 target only the four N5.3 core scenarios. All four core scenario records now

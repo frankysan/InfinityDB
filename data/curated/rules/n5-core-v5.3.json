@@ -1103,6 +1103,15 @@
             "retrievedDate": "2026-09-24"
         },
         {
+            "id": "wiki-combined-ammunition-oldid-3000",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Combined Ammunition revision 3000",
+            "version": "N5.3 / oldid 3000",
+            "url": "https://infinitythewiki.com/index.php?title=Combined_Ammunition&oldid=3000",
+            "authority": "secondary",
+            "retrievedDate": "2026-10-09"
+        },
+        {
             "id": "wiki-immunity-oldid-3643",
             "kind": "wiki",
             "title": "Infinity Wiki — Immunity revision 3643",
@@ -15688,7 +15697,43 @@
                             "trait:non-lethal",
                             "state:stunned"
                         ]
-                    }
+                    },
+                    "reviewedCombinedCases": [
+                        {
+                            "sourceAmmunitionId": 10,
+                            "sourceAmmunitionName": "AP+DA",
+                            "components": ["ammunition:ap", "ammunition:da"],
+                            "when": {
+                                "immunity": "ARM",
+                                "savingAttribute": "ARM",
+                                "attackClass": "non-comms"
+                            },
+                            "withoutImmunity": {"hitRolls": 2, "criticalRolls": 3},
+                            "withImmunity": {
+                                "hitRolls": 1,
+                                "criticalRolls": 2,
+                                "treatedAs": "ammunition:normal"
+                            },
+                            "evidence": "derived-from-pinned-general-rules"
+                        },
+                        {
+                            "sourceAmmunitionId": 13,
+                            "sourceAmmunitionName": "AP+Exp",
+                            "components": ["ammunition:ap", "ammunition:exp"],
+                            "when": {
+                                "immunity": "ARM",
+                                "savingAttribute": "ARM",
+                                "attackClass": "non-comms"
+                            },
+                            "withoutImmunity": {"hitRolls": 3, "criticalRolls": 4},
+                            "withImmunity": {
+                                "hitRolls": 1,
+                                "criticalRolls": 2,
+                                "treatedAs": "ammunition:normal"
+                            },
+                            "evidence": "derived-from-pinned-general-rules"
+                        }
+                    ]
                 }
             },
             "labelIds": [
@@ -15704,6 +15749,10 @@
                 {
                     "sourceId": "wiki-immunity-oldid-3643",
                     "heading": "Immunity"
+                },
+                {
+                    "sourceId": "wiki-combined-ammunition-oldid-3000",
+                    "heading": "Combined Ammunition"
                 }
             ],
             "review": {

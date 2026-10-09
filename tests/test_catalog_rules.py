@@ -835,6 +835,39 @@ def test_immunity_ammunition_boundaries_reach_rules_database(tmp_path: Path) -> 
         assert len(source_entry["components"]) == 2
 
 
+def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
+    tmp_path: Path,
+) -> None:
+    """A reviewed ARM case is not a generic partial-component Immunity rule."""
+    rules_db = _rules_database(tmp_path)
+    immunity = rules_db.composed_record("skill:immunity")
+    assert immunity is not None
+    source_map = load_ammunition_reference_map()
+    facts = immunity["facts"]["immunityInteraction"]
+    cases = facts["reviewedCombinedCases"]
+    assert {case["sourceAmmunitionId"] for case in cases} == {10, 13}
+    for case, normal, critical in zip(cases, (2, 3), (3, 4), strict=True):
+        source = source_map[case["sourceAmmunitionId"]]
+        assert case["sourceAmmunitionName"] == source["name"]
+        assert case["components"] == source["components"]
+        assert case["when"] == {
+            "immunity": "ARM", "savingAttribute": "ARM", "attackClass": "non-comms"
+        }
+        assert case["withoutImmunity"] == {
+            "hitRolls": normal, "criticalRolls": critical
+        }
+        assert case["withImmunity"] == {
+            "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
+        }
+        assert case["evidence"] == "derived-from-pinned-general-rules"
+    assert {citation["source_version"] for citation in immunity["citations"]} == {
+        "N5.3 / oldid 3643", "N5.3 / oldid 3000"
+    }
+    # The source-owned mapping remains descriptive: no target Immunity is inferred.
+    for source_id in (10, 13, 30, 40):
+        assert "withImmunity" not in source_map[source_id]
+
+
 def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:
     rules_db = _rules_database(tmp_path)
     root = Path(__file__).resolve().parents[1]
@@ -856,3 +889,6 @@ def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:
         "rollEffects": "normal-ammunition",
     }
     assert rules[0]["citations"][0]["source_version"] == "N5.3 / oldid 3643"
+    assert [case["sourceAmmunitionId"] for case in rules[0]["facts"][
+        "immunityInteraction"
+    ]["reviewedCombinedCases"]] == [10, 13]

@@ -136,8 +136,14 @@ modifiers, the default additional Critical Saving Roll (unless the defender has
 Immunity (Critical)), and the Comms Attack/Non-Lethal/Stunned exceptions. These
 facts belong to Immunity, **not** to the ordered Combined Ammunition mapping:
 checking whether a defender's particular Immunity covers an entire attack or
-one or more constituent effects remains unimplemented. No roll counts, State
-outcomes, or immunities are projected into individual Weapon profiles.
+one or more constituent effects remains unimplemented. Two `reviewedCombinedCases`
+now give **rule-derived, conditional** examples for source IDs 10 (AP+DA) and
+13 (AP+Exp), *only* with Immunity (ARM), an ARM Saving Roll and a non-Comms
+attack. Each preserves before/after hit and Critical counts with source IDs,
+components and explicit evidence status. They are stored on Immunity rather
+than on the Ammunition navigation mapping. No roll counts, State outcomes, or
+immunities are projected into individual Weapon profiles; partial component
+Immunities, BTS conditions and other combinations remain unresolved.
 
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;
