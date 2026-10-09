@@ -4048,7 +4048,8 @@ def test_catalog_detail_frontend_uses_backend_trait_references(
     assert b"profile.trait_references" in body
     assert b"function weaponTraitLinks(traits)" in body
     assert b"const label = trait.label || trait.name ||" in body
-    assert b"link.href = `/traits/${encodeURIComponent(trait.slug)}`;" in body
+    assert b"ruleReferenceHref(trait.public_reference)" in body
+    assert b"href = `/traits/${encodeURIComponent(trait.slug)}`;" in body
     assert b"function canonicalTraitName(" not in body
     assert b"function traitSlug(" not in body
     assert b"Continous Damage" not in body
@@ -4142,7 +4143,8 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
         b"title.textContent = catalogName[0].toUpperCase() + catalogName.slice(1);" in weapon_detail
     )
     assert b'title.className = "trait-catalog-heading";' in weapon_detail
-    assert b"link.href = `/traits/${encodeURIComponent(trait.slug)}`;" in weapon_detail
+    assert b"ruleReferenceHref(trait.public_reference)" in weapon_detail
+    assert b"href = `/traits/${encodeURIComponent(trait.slug)}`;" in weapon_detail
     assert b".weapon-data-heading" in styles
     assert b'profileRow.className = "weapon-data-row"' in weapon_detail
     assert b'profileStats.className = "weapon-data-value"' in weapon_detail

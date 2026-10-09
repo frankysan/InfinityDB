@@ -15,6 +15,7 @@ from wsgiref.util import setup_testing_defaults
 
 import pytest
 
+from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app
 
 
@@ -429,3 +430,71 @@ def test_drop_bears_keeps_two_modes_and_explains_n5_throwing_terminology(
     # Drop Bears are not eligible for the shared Mines card's marker placement.
     assert "weapon:mines" not in _weapon_rules(payload)
     assert card["summary_tokens"]
+
+
+def test_monofilament_state_trait_links_to_dead_state(weaponry_app: Callable) -> None:
+    profile = _weapon_detail(weaponry_app, "monofilament-mine")["profiles"][0]
+    state = next(
+        reference for reference in profile["trait_references"]
+        if reference["label"] == "State: Dead"
+    )
+    assert state["public_reference"] == {"catalog": "states", "id": "dead"}
+    assert state["slug"] is None  # States are not Traits.
+
+
+@pytest.mark.parametrize(
+    ("slug", "ps", "disposable", "rule_id"),
+    (
+        ("sepsitor", "4", True, "weapon:sepsitor"),
+        ("sepsitor-plus", "3", False, "weapon:sepsitor-plus"),
+    ),
+)
+def test_sepsitor_weaponry_rules_keep_distinct_army_profiles(
+    weaponry_app: Callable, slug: str, ps: str, disposable: bool, rule_id: str
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert (profile["damage"], profile["saving"], profile["saving_num"]) == (
+        ps, "BTS", "1"
+    )
+    assert ("Disposable (2)" in profile["traits"]) is disposable
+    assert ("[*]" in profile["traits"]) is disposable
+    assert "State: Sepsitorized" in profile["traits"]
+    references = {ref["label"]: ref for ref in profile["trait_references"]}
+    assert references["State: Sepsitorized"] == {
+        "label": "State: Sepsitorized",
+        "name": "Sepsitorized State",
+        "slug": None,
+        "public_reference": {"catalog": "states", "id": "sepsitorized"},
+    }
+
+    rules = _weapon_rules(payload)
+    assert set(rules) == {rule_id}
+    rule = rules[rule_id]
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["source_version"] == "5.3"
+        and citation["page"] == 73
+        for citation in rule["citations"]
+    )
+    assert rule["summary_tokens"]
+    linked = {
+        relation["record"]["id"]
+        for relation in rule["display_relations"]
+        if relation["record"] is not None
+    }
+    assert {"state:sepsitorized", "equipment:cube", "equipment:cube-2"} <= linked
+    assert ("trait:disposable-x" in linked) is disposable
+
+
+def test_cube_two_references_both_sepsitor_variants() -> None:
+    db = RulesDatabase(Path(__file__).resolve().parents[1] / "data/generated/rules.db")
+    record = db.composed_record("equipment:cube-2")
+    assert record is not None
+    links = {
+        relation["record_id"]
+        for relation in record["relations"]
+        if relation["type"] == "modifies-rolls-for"
+    }
+    assert {"weapon:sepsitor", "weapon:sepsitor-plus"} <= links

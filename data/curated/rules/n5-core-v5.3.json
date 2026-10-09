@@ -3567,6 +3567,133 @@
             }
         },
         {
+            "id": "weapon:sepsitor",
+            "kind": "weapon",
+            "name": "Sepsitor",
+            "summary": "Sepsitor is a [[trait:direct-template|Direct Template]] weapon that can affect Troopers with a [[equipment:cube|Cube]] or equivalent Equipment. A hit requires a BTS Saving Roll using the weapon’s PS 4; a Critical causes an additional Saving Roll, and failure causes [[state:sepsitorized|Sepsitorized State]]. It has [[trait:disposable-x|Disposable (2)]]. [[equipment:cube-2|Cube 2.0]] grants +2 to its user’s Saving Roll against this attack. [[weapon:sepsitor-plus|Sepsitor Plus]] has its own weapon profile; do not apply Sepsitor’s PS or Disposable limit to that weapon.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "sepsitor"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:direct-template"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:intuitive-attack"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:disposable-x"
+                },
+                {
+                    "type": "causes-state",
+                    "recordId": "state:sepsitorized"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:cube"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 73,
+                    "section": "Sepsitor"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 187,
+                    "section": "Weapon Chart: Sepsitor"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-09"
+            }
+        },
+        {
+            "id": "weapon:sepsitor-plus",
+            "kind": "weapon",
+            "name": "Sepsitor Plus",
+            "summary": "Sepsitor Plus uses the [[trait:direct-template|Direct Template]] rules described in the N5 Weaponry section against Troopers with a [[equipment:cube|Cube]] or equivalent Equipment. A hit requires a BTS Saving Roll using this weapon’s PS 3; a Critical causes an additional Saving Roll, and failure causes [[state:sepsitorized|Sepsitorized State]]. [[equipment:cube-2|Cube 2.0]] grants +2 to its user’s Saving Roll against this attack. Unlike [[weapon:sepsitor|Sepsitor]], Sepsitor Plus does not list Disposable (2). The N5 v5.3 Weapon Chart includes a [*] reference to the N5 Weaponry rules for this weapon, but the imported Army profile omits that marker; both sources retain their original values.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "sepsitor-plus"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:direct-template"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:intuitive-attack"
+                },
+                {
+                    "type": "causes-state",
+                    "recordId": "state:sepsitorized"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:cube"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 73,
+                    "section": "Sepsitor"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 187,
+                    "section": "Weapon Chart: Sepsitor Plus"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 176,
+                    "section": "Weapon Chart: Reference Legend"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-09"
+            }
+        },
+        {
             "id": "weapon:pt",
             "kind": "weapon",
             "name": "Pheroware Tactics (PT)",
@@ -7870,7 +7997,7 @@
             "id": "equipment:cube-2",
             "kind": "equipment",
             "name": "Cube 2.0",
-            "summary": "Automatic Equipment represented by a Unit Profile symbol that includes [[equipment:cube]] recovery rerolls and improves Saving Rolls against Sepsitor attacks.",
+            "summary": "Automatic Equipment represented by a Unit Profile symbol that includes [[equipment:cube]] recovery rerolls and improves Saving Rolls against [[weapon:sepsitor|Sepsitor]] and [[weapon:sepsitor-plus|Sepsitor Plus]] attacks.",
             "composition": {
                 "role": "definition"
             },
@@ -7883,7 +8010,7 @@
             "facts": {
                 "effects": [
                     "When [[skill:doctor]] or another Special Skill or piece of Equipment explicitly permits it, a Command Token may be spent to reroll the failed recovery Roll for a Trooper with a Cube 2.0.",
-                    "The user applies a +2 MOD to Saving Rolls against Sepsitor and Sepsitor Plus attacks."
+                    "The user applies a +2 MOD to Saving Rolls against [[weapon:sepsitor|Sepsitor]] and [[weapon:sepsitor-plus|Sepsitor Plus]] attacks."
                 ]
             },
             "armyLinks": [
@@ -7900,6 +8027,14 @@
                 {
                     "type": "modifies-rolls-for",
                     "recordId": "skill:doctor"
+                },
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "weapon:sepsitor"
+                },
+                {
+                    "type": "modifies-rolls-for",
+                    "recordId": "weapon:sepsitor-plus"
                 }
             ],
             "citations": [
@@ -13615,7 +13750,7 @@
             "aliases": [
                 "Sepsitorized"
             ],
-            "summary": "A Null State caused by a failed Saving Roll against Sepsitor that transfers practical control of the Trooper to the opposing player.",
+            "summary": "A Null State caused by a failed Saving Roll against [[weapon:sepsitor|Sepsitor]] that transfers practical control of the Trooper to the opposing player.",
             "composition": {
                 "role": "definition"
             },
@@ -13633,7 +13768,7 @@
                     "The Trooper contributes no Orders, counts for neither player’s Victory Points, and cannot belong to a Fireteam."
                 ],
                 "requirements": [
-                    "A Cube-wearing Trooper fails a Saving Roll against a Sepsitor Attack."
+                    "A Cube-wearing Trooper fails a Saving Roll against a [[weapon:sepsitor|Sepsitor]] Attack."
                 ],
                 "restrictions": []
             },

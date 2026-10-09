@@ -1176,3 +1176,24 @@ skip Saving Rolls, contradicting the E/M, PARA, and Cybermine source profiles.
 The corrected definition prohibits Wounds without suppressing the rolls used
 to determine non-Wound effects. Citation: pinned `wiki-traits-oldid-4110`,
 Non-Lethal heading; compare the N5.3 Weapon Chart p. 181.
+
+### Sepsitor and Sepsitor Plus (N5.3; 2026-10-09)
+
+**Project domain:** Data processing
+
+The pinned N5 v5.3 Weaponry section (p. 73) governs both Sepsitor weapons.
+The N5.3 Weapon Chart (p. 187) gives Sepsitor PS 4 and Disposable (2), and
+Sepsitor Plus PS 3 without Disposable (2). Both require a BTS Saving Roll
+against a Cube-bearing target (or equivalent Equipment); a failed roll causes
+Sepsitorized State, and a Critical adds a Saving Roll. Cube 2.0's +2 MOD against
+both weapons comes from p. 121.
+
+Army weapon IDs **73** (Sepsitor) and **114** (Sepsitor Plus) preserve those
+individual values. Army omits N5.3's `[*]` Weaponry marker on Sepsitor Plus;
+the N5.3 PDF chart and Wiki include it. InfinityDB publishes distinct
+`weapon:sepsitor` and `weapon:sepsitor-plus` references, linked to the shared
+State and Cube 2.0 rules, without copying the Sepsitor Disposable Trait to
+Sepsitor Plus. This resolves navigation coverage, **not** the unexplained
+Army/PDF marker discrepancy; a proposed name-lookup explanation remains
+hypothetical. The exact older Wiki revision and source comparison are retained
+in `config/validation/weapon-trait-wiki-review.json`.

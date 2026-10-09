@@ -225,12 +225,15 @@ unimplemented until its corresponding behavior exists.
       rules and PARA ammunition/Immobilized-A linked. Show the PDF/Wiki `[*]`
       (Weaponry) versus Army `[**]` (Ammunition) discrepancy without modifying
       source data. This establishes both rule owners, not why Army chose `[**]`.
+    - [x] Publish separate, cited Sepsitor and Sepsitor Plus references for the
+      shared p. 73 attack rules, distinct PS and Disposable profiles,
+      Sepsitorized State and Cube 2.0 Saving Roll interaction. Both Weapon pages
+      link directly to their own rules; no Army Trait is synthesized.
     - [ ] Continue review of PARA Mine's intended Army footnote marker, Sepsitor
       Plus's missing Army `[*]`, and WildParrot's printed `Non-Lethal` against
       its E/M ammunition effect; Endgame's missing Army `Double Shot` is already
-      shown with provenance. Confirm each remaining source disagreement and
-      browser presentation; the proposed Sepsitor Plus name-matching cause is
-      still hypothetical.
+      shown with provenance. Both Sepsitor variants now link to the p. 73 rules,
+      but the cause of the missing Army footnote remains unverified.
     - [x] Start a PDF-hash-pinned clause-to-reference review for the **Mines** and
       **Perimeter Weapons** families (N5.3 pp. 69, 72). The read-only
       `tools/audit_weaponry_family_clauses.py` checks 21 selected clauses,

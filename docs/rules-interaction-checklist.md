@@ -31,9 +31,9 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **108/123** complete, **15** pending.
-- Current authored outgoing relations: **293**.
-- Explicitly tracked future/deferred interactions: **115**.
+- Supporting semantic identities: **110/125** complete, **15** pending.
+- Current authored outgoing relations: **304**.
+- Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
 
@@ -414,8 +414,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Cube 2.0** (`equipment:cube-2`) — reviewed
   - `uses-effects-of` → Cube (`equipment:cube`)
   - `modifies-rolls-for` → Doctor (`skill:doctor`)
-  - future [post-0.7.0; planned]: `modifies-rolls-for` → `weapon:sepsitor` — Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph.
-  - future [post-0.7.0; planned]: `modifies-rolls-for` → `weapon:sepsitor-plus` — Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph.
+  - `modifies-rolls-for` → Sepsitor (`weapon:sepsitor`)
+  - `modifies-rolls-for` → Sepsitor Plus (`weapon:sepsitor-plus`)
 - [x] **Dazer** (`equipment:dazer`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:difficult-terrain` — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
@@ -937,7 +937,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
 
-#### Weapon (10/10)
+#### Weapon (12/12)
 
 - [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
@@ -974,6 +974,17 @@ review. `declaration-category` projection records are excluded.
 - [x] **PT: Endgame** (`weapon:pt-endgame`) — reviewed: N5 v5.3 chart and the April 2025 update explicitly add Double Shot to Endgame only. Source-specific Army id 203 prevents applying it to Eraser or Mirrorball; current Army omits Double Shot.
   - `variant-of` → Pheroware Tactics (PT) (`weapon:pt`)
   - `uses-effects-of` → Double Shot (`trait:double-shot`)
+- [x] **Sepsitor** (`weapon:sepsitor`) — reviewed: Reviewed N5.3 p.73 Sepsitor rules and p.187 weapon profile. Individual PS and Disposable values remain source-native and are not inherited by the other variant; Cube 2.0 +2 Saving Roll applies to both.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `causes-state` → Sepsitorized State (`state:sepsitorized`)
+  - `uses-effects-of` → Cube (`equipment:cube`)
+- [x] **Sepsitor Plus** (`weapon:sepsitor-plus`) — reviewed: Reviewed N5.3 p.73 Sepsitor rules and p.187 weapon profile. Individual PS and Disposable values remain source-native and are not inherited by the other variant; Cube 2.0 +2 Saving Roll applies to both.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
+  - `causes-state` → Sepsitorized State (`state:sepsitorized`)
+  - `uses-effects-of` → Cube (`equipment:cube`)
 - [x] **WildParrot** (`weapon:wildparrot`) — reviewed: Perimeter and E/M Mine interaction with a visible Token/Model instead of CAMO; reviewed typed relationships distinguish this from Boost. N5 p. 74 Non-Lethal remains absent in Army and is presented as an explicit source discrepancy, not an imported Trait.
   - `uses-effects-of` → Perimeter (`trait:perimeter`)
   - `uses-effects-of` → Deployable (`trait:deployable`)
@@ -990,8 +1001,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] Shasvastii (`skill:shasvastii`) → Shock Ammunition (`ammunition:shock`); `relation type TBD`; **1.0.0 / planned** — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass.
 - [ ] BioWeapon (`trait:bioweapon`) → Double Action (DA) Ammunition (`ammunition:da`); `uses-effects-of`; **1.0.0 / planned** — BioWeapon explicitly applies DA together with Shock Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
 - [ ] BioWeapon (`trait:bioweapon`) → Shock Ammunition (`ammunition:shock`); `uses-effects-of`; **1.0.0 / planned** — BioWeapon explicitly applies Shock together with DA Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
-- [ ] Cube 2.0 (`equipment:cube-2`) → `weapon:sepsitor`; `modifies-rolls-for`; **post-0.7.0 / planned** — Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph.
-- [ ] Cube 2.0 (`equipment:cube-2`) → `weapon:sepsitor-plus`; `modifies-rolls-for`; **post-0.7.0 / planned** — Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.

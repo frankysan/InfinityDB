@@ -17,6 +17,8 @@ are not retroactively relabeled.
   with the PDF/Wiki versus Army footnote discrepancy explained without changing its profile.
 - PT: Endgame now has a source-cited Double Shot reference, without applying the rule to
   Eraser or Mirrorball; the difference from the Army profile is shown explicitly.
+- Sepsitor and Sepsitor Plus now have separate weapon rules references covering
+  Sepsitorized State and Cube 2.0 without conflating their PS or Disposable values.
 - Mine and Cybermine Weapon pages now explain triggering, camouflage, allied safety,
   Reset, and special effects, with links to each Mine's own ammunition and relevant State rules;
   Chest Mine pages explain their separate BS/CC modes.
@@ -56,6 +58,8 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Web backend + Web frontend:** Link State effects listed in Weapon Traits directly to
+  their matching State references, including Sepsitorized and Dead, without changing Army text.
 - **Data processing:** Clarify Non-Lethal rules: these attacks cannot inflict Wounds,
   but E/M, PARA and Cybermines still require Saving Rolls to determine their effects.
 - **Data processing:** Clarify the Boost rules reference using the N5 Weaponry text, including

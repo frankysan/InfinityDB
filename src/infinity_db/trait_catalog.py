@@ -7,7 +7,7 @@ from copy import deepcopy
 from typing import Any
 
 from infinity_db.database.repository import Database, accent_insensitive_key
-from infinity_db.domain_references import public_slug_for_reference
+from infinity_db.domain_references import public_slug_for_reference, rule_record_public_reference
 from infinity_db.domain_slugs import route_slug_from_typed_domain_id
 from infinity_db.rules_database import RulesDatabase
 
@@ -46,6 +46,7 @@ class TraitCatalog:
         self._prefixes: list[tuple[str, dict[str, Any]]] | None = None
         self._labels: dict[str, dict[str, Any]] | None = None
         self._modifier_bases: set[str] | None = None
+        self._state_aliases: dict[str, dict[str, Any]] | None = None
 
     def _ensure_index(self) -> None:
         if self._records is not None:
@@ -91,6 +92,17 @@ class TraitCatalog:
         self._prefixes = prefixes
         self._labels = labels
         self._modifier_bases = modifier_bases
+        state_aliases: dict[str, dict[str, Any]] = {}
+        if self.rules_database is not None:
+            for state in self.rules_database.composed_records_by_kind("state"):
+                for alias in [state["name"], *state.get("aliases", [])]:
+                    key = str(alias).strip().casefold()
+                    if key:
+                        existing = state_aliases.get(key)
+                        if existing is not None and existing["id"] != state["id"]:
+                            raise ValueError(f"State identity {alias!r} is ambiguous")
+                        state_aliases[key] = state
+        self._state_aliases = state_aliases
 
     def _record_for_label(self, label: object) -> dict[str, Any] | None:
         text = str(label or "").strip()
@@ -134,6 +146,20 @@ class TraitCatalog:
         text = str(label or "").strip()
         if not text or text.startswith("["):
             return {"label": text, "name": None, "slug": None}
+        if text.casefold().startswith("state:"):
+            self._ensure_index()
+            assert self._state_aliases is not None
+            state_name = text.split(":", 1)[1].strip().casefold()
+            state = self._state_aliases.get(state_name)
+            if state is not None:
+                public_reference = rule_record_public_reference(self.database, state)
+                if public_reference is not None:
+                    return {
+                        "label": text,
+                        "name": state["name"],
+                        "slug": None,
+                        "public_reference": public_reference,
+                    }
         record = self._record_for_label(text)
         if record is None:
             non_trait = self._non_trait_source_property(text)

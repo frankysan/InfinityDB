@@ -83,9 +83,13 @@ function weaponTraitLinks(traits) {
   for (const [index, trait] of traits.entries()) {
     if (index) fragment.append(" · ");
     const label = trait.label || trait.name || "";
-    if (trait.slug && !label.startsWith("State:")) {
+    let href = ruleReferenceHref(trait.public_reference);
+    if (!href && trait.slug && !label.startsWith("State:")) {
+      href = `/traits/${encodeURIComponent(trait.slug)}`;
+    }
+    if (href) {
       const link = document.createElement("a");
-      link.href = `/traits/${encodeURIComponent(trait.slug)}`;
+      link.href = href;
       link.textContent = label;
       fragment.append(link);
     } else {
