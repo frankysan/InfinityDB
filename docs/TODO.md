@@ -310,6 +310,12 @@ unimplemented until its corresponding behavior exists.
     resulting game effect, and source certainty; do not generalize a printed
     example into an undocumented rules engine. Sample the normal browser view
     as well as the authored text, and keep source conflicts visible.
+    - [ ] Review and implement accepted batches from the
+      [1.0 explanation audit](rules-explanation-audit-1.0.md#prioritized-remediation-plan).
+      Begin with recovery and Intuitive Attack (REA-001, REA-002, REA-003,
+      REA-009, REA-022); separately decide source conflicts and FAQ applicability
+      before dependent curation. The report is an assessment, not accepted replacement
+      semantics, and its selected clause reviews do not certify complete source coverage.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not
