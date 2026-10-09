@@ -17,6 +17,17 @@
     "labels": [],
     "sources": [
         {
+            "id": "n5-core-v5.3-pdf",
+            "kind": "pdf",
+            "title": "N5 Core Rules",
+            "version": "5.3",
+            "publishedDate": "2026-08-10",
+            "localPath": "data/pdf/rules/n5-rules-v5-3-en.pdf",
+            "pageCount": 196,
+            "authority": "primary",
+            "url": "https://experience.corvusbelli.com/en/infinity/resources"
+        },
+        {
             "id": "wiki-en-20260918-130233",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
@@ -119,7 +130,7 @@
             "id": "hacking-program:controlled-jump",
             "kind": "hacking-program",
             "name": "Controlled Jump",
-            "summary": "Supportware that modifies [[skill:combat-jump]] PH Rolls for allied and enemy Troopers across the table.",
+            "summary": "Supportware that takes effect immediately, modifying [[skill:combat-jump]] PH Rolls across the table; opposing instances cancel each other's effects.",
             "composition": {
                 "role": "definition"
             },
@@ -131,9 +142,13 @@
             },
             "facts": {
                 "effects": [
-                    "Allied [[skill:combat-jump]] Rolls receive +3 while enemy [[skill:combat-jump]] Rolls receive -3 while the Program is active."
+                    "This Program takes effect as soon as it is declared, before the Resolution step; place its Supportware Token beside the [[skill:hacker]].",
+                    "While active, allied Troopers receive +3 and enemy Troopers receive -3 on [[skill:combat-jump]] PH Rolls anywhere on the table, even if the Troopers are not Hackable.",
+                    "A [[skill:hacker]] can declare this Program as an ARO against an enemy [[skill:combat-jump]] anywhere on the table. Its -3 MOD immediately applies to the same [[skill:combat-jump]] PH Roll."
                 ],
                 "restrictions": [
+                    "Declaring this Program as an ARO is optional; the [[skill:hacker]] may declare another eligible ARO instead.",
+                    "If both players have this Program active, their Programs' effects cancel. This does not cancel independent MODs, such as Firefight's Designated Landing Area +3.",
                     "A player cannot have more than one Controlled Jump Program active."
                 ]
             },
@@ -144,6 +159,16 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 59,
+                    "section": "Controlled Jump"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 155,
+                    "section": "Firefight — Designated Landing Area"
+                },
                 {
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "Controlled_Jump",

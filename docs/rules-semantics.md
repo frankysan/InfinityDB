@@ -2101,6 +2101,38 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Quantronic_Combat_%28Hacking%29>
 - PDF: Infinity N5 V5.3, printed pages 57-62
 
+### RS-CM-HACK-005 — Controlled Jump applies on declaration, not at Resolution
+
+**Classification:** source-native; published as a curated Hacking Program explanation.
+
+Controlled Jump is a No Roll Supportware Short Skill / ARO. Unlike the usual
+Resolution timing, its effect begins immediately when the Hacker declares it.
+That makes a reactive declaration against an enemy Combat Jump meaningful:
+the -3 PH MOD affects the Combat Jump currently being resolved, even if the
+Hacker is elsewhere on the game table. The ARO is optional; the Hacker can
+choose another legal reaction instead. The table-wide effect applies to
+Troopers without the Hackable Characteristic as well.
+
+While active, Controlled Jump gives allied Combat Jump PH Rolls +3 and enemy
+ones -3. If both players have Controlled Jump active, **both Programs' effects
+cancel**. This is an explicit Program-specific exception, not a general rule
+that opposing MODs cancel. Independent rules remain effective; Firefight's
+Designated Landing Area +3 is explicitly cumulative with other MODs. A
+player can have only one Controlled Jump Program active.
+
+The maintained text links Combat Jump and Hacker where canonical identities
+exist. Scenario-rule identities are not currently valid maintained-text link
+targets, so the Firefight example remains plain text with a PDF citation.
+The separate Request Speedball exclusion (FAQ v0.1, printed p. 1) is still
+pending under REA-007; a Speedball is not a Trooper merely because its
+placement reuses Combat Jump mechanics.
+
+Sources:
+
+- English PDF: Infinity N5 V5.3, printed p. 59 (Controlled Jump), p. 155 (Firefight).
+- Spanish PDF: Infinity N5 V5.3, printed p. 61 (Salto Controlado).
+- FAQ: Infinity N5 v0.1, printed p. 1 (Controlled Jump and Speedballs).
+
 ## Ammunition and Weaponry
 
 ### RS-AW-AMMO-001 — Ammunition is a typed rules-effect vocabulary

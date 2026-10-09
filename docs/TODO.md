@@ -319,8 +319,12 @@ unimplemented until its corresponding behavior exists.
       data; verify its player-facing wording in the browser. The Continuous Damage
       Critical exception (REA-004) and BS Weapon (WIP) Skill restrictions (REA-005)
       are now documented in curated Trait summaries; verify their player-facing
-      wording and keep deferred typed-variant edges separate. Separately
-      decide source conflicts and FAQ applicability before dependent curation.
+      wording and keep deferred typed-variant edges separate. Controlled Jump
+      (REA-006) now explains immediate declaration, optional table-wide ARO,
+      opposing-Program cancellation, and preservation of separate scenario MODs;
+      verify the player-facing Program page. Request Speedball's FAQ exclusion
+      (REA-007) and common Supportware rules (REA-018) remain separate work.
+      Separately decide source conflicts and FAQ applicability before dependent curation.
       Use the [source manifest](rules-explanation-audit-1.0-sources.md) and
       [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).
       Complete the [coverage gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate):

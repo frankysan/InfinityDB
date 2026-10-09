@@ -371,6 +371,41 @@ def test_hacking_programs_reuse_canonical_current_labels(
     ]
 
 
+def test_controlled_jump_immediate_aro_and_opposing_effects_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    program = current_rules_database.composed_record("hacking-program:controlled-jump")
+    assert program is not None
+    assert "immediately" in program["summary"]
+
+    effects = " ".join(program["facts"]["effects"])
+    restrictions = " ".join(program["facts"]["restrictions"])
+    assert "as soon as it is declared" in effects
+    assert "before the Resolution step" in effects
+    assert "Supportware Token" in effects
+    assert "allied Troopers receive +3" in effects
+    assert "enemy Troopers receive -3" in effects
+    assert "even if the Troopers are not Hackable" in effects
+    assert "[[skill:combat-jump]]" in effects
+    assert "ARO" in effects and "anywhere on the table" in effects
+    assert "immediately applies to the same [[skill:combat-jump]] PH Roll" in effects
+    assert "ARO is optional" in restrictions
+    assert "their Programs' effects cancel" in restrictions
+    assert "This does not cancel independent MODs" in restrictions
+    assert "Firefight's Designated Landing Area +3" in restrictions
+    assert "one Controlled Jump Program active" in restrictions
+    assert {
+        citation["page"]
+        for citation in program["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+    } == {59, 155}
+    assert any(
+        relation["type"] == "modifies-rolls-for"
+        and relation["record_id"] == "skill:combat-jump"
+        for relation in program["relations"]
+    )
+
+
 def test_reviewed_trait_critical_and_wip_restrictions_are_published(
     current_rules_database: RulesDatabase,
 ) -> None:
