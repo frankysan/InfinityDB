@@ -694,11 +694,13 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
         "label": "Suppressive Fire",
         "name": "Suppressive Fire (SF)",
         "slug": "suppressive-fire",
+        "source_alias": True,
     }
     assert catalog.reference("Continous Damage") == {
         "label": "Continous Damage",
         "name": "Continuous Damage",
         "slug": "continuous-damage",
+        "source_alias": True,
     }
     assert catalog.reference("Disposable (2)") == {
         "label": "Disposable (2)",
@@ -760,11 +762,13 @@ def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
         "label": "Technical Weapon",
         "name": "BS Weapon (WIP)",
         "slug": "bs-weapon-wip",
+        "source_alias": True,
     }
     assert catalog.reference("Throwing Weapon") == {
         "label": "Throwing Weapon",
         "name": "BS Weapon (PH)",
         "slug": "bs-weapon-ph",
+        "source_alias": True,
     }
     assert catalog.reference("Comms. Attack") == {
         "label": "Comms. Attack",
@@ -844,6 +848,7 @@ def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
         "label": "Continous Damage",
         "name": "Persistent Damage",
         "slug": "continuous-damage",
+        "source_alias": True,
     }
     detail = catalog.get_trait("continuous-damage")
     assert detail is not None

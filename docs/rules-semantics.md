@@ -3392,6 +3392,15 @@ its gameplay effects and Double Shot relation. It is not applied to Eraser (204)
 or Mirrorball (205). Existing imported source Trait lists remain unchanged;
 a linked, cited rule does not imply source metadata has been corrected.
 
+In Weapon-profile Trait rows, reviewed *exact* curated aliases present the N5
+canonical Trait name as the link, followed by the original Army label. If the
+Army profile already contains both the canonical and legacy names (for example,
+Drop Bears' `BS Weapon (PH)` plus `Throwing Weapon`), the visible row merges those
+references into one canonical link with the extra Army spelling beside it. Raw
+`traits` and `trait_references.label` remain unchanged in the API. Parameterized
+Traits such as `Disposable (2)` retain their source-specific numbers rather than
+being displayed as the generic `Disposable (X)` record name.
+
 Sources: N5 v5.3 Weapon Chart p. 181; [April 2025 official rules update]
 (https://infinityuniverse.com/en/news/infinity-n5-rules-update), Pheroware Tactics
 change notice; [archived Wiki Weapon Chart](https://infinitythewiki.com/Weapons_Chart).

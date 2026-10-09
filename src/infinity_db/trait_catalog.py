@@ -178,11 +178,17 @@ class TraitCatalog:
                 "name": text,
                 "slug": None if source is None else source["slug"],
             }
-        return {
+        reference = {
             "label": text,
             "name": record["name"],
             "slug": _record_slug(record),
         }
+        # Exact curated aliases are safe display substitutions. Do not relabel
+        # parameterized source properties such as Disposable (2) as Disposable (X).
+        assert self._exact is not None
+        if text.casefold() != record["name"].casefold() and text.casefold() in self._exact:
+            reference["source_alias"] = True
+        return reference
 
     def _trait_groups(self) -> list[dict[str, Any]]:
         groups: dict[str, dict[str, Any]] = {}

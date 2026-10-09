@@ -80,9 +80,22 @@ function ruleReferenceHref(reference) {
 
 function weaponTraitLinks(traits) {
   const fragment = document.createDocumentFragment();
-  for (const [index, trait] of traits.entries()) {
+  const canonicalSlugs = new Set(traits
+    .filter((trait) => trait.slug && !trait.source_alias)
+    .map((trait) => trait.slug));
+  const duplicateAliases = new Map();
+  for (const trait of traits) {
+    if (!trait.source_alias || !canonicalSlugs.has(trait.slug)) continue;
+    const aliases = duplicateAliases.get(trait.slug) || [];
+    aliases.push(trait.label);
+    duplicateAliases.set(trait.slug, aliases);
+  }
+  const visibleTraits = traits.filter((trait) => !(
+    trait.source_alias && canonicalSlugs.has(trait.slug)
+  ));
+  for (const [index, trait] of visibleTraits.entries()) {
     if (index) fragment.append(" · ");
-    const label = trait.label || trait.name || "";
+    const label = (trait.source_alias ? trait.name : trait.label) || trait.name || "";
     let href = ruleReferenceHref(trait.public_reference);
     if (!href && trait.slug && !label.startsWith("State:")) {
       href = `/traits/${encodeURIComponent(trait.slug)}`;
@@ -94,6 +107,11 @@ function weaponTraitLinks(traits) {
       fragment.append(link);
     } else {
       fragment.append(label);
+    }
+    const sourceLabels = trait.source_alias
+      ? [trait.label] : (duplicateAliases.get(trait.slug) || []);
+    if (sourceLabels.length) {
+      fragment.append(` (Army: ${sourceLabels.join(", ")})`);
     }
   }
   return fragment;

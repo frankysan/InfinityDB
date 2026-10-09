@@ -211,9 +211,12 @@ unimplemented until its corresponding behavior exists.
       legacy Army Throwing Weapon label, without changing source Traits or
       granting ordinary Mine Camouflage placement. Preserve PDF pp. 71/181
       provenance and cover both modes through the Weapon API.
-    - [ ] Review remaining legacy Army Technical Weapon terminology in
-      Pheroware and whether source-aware display aliases are needed. Do not
-      rewrite imported Army properties.
+    - [x] Review legacy Army `Technical Weapon` terminology in Pheroware and
+      present the reviewed N5 `BS Weapon (WIP)` Trait as the primary Weapon-page
+      link, retaining the original Army label alongside it. Exact curated aliases
+      are source-aware, but parameterized Traits retain their source parameters;
+      Drop Bears' duplicate `BS Weapon (PH)` / `Throwing Weapon` resolves to one
+      visible canonical link without modifying imported Army properties.
     - [x] Inventory exact-name source/curation links for all 12 N5 v5.3 Weaponry
       prose headings (pp. 68–74). Eight headings match at least one Army weapon
       profile; Armed Turret alone has an exact-name curated Weapon record with

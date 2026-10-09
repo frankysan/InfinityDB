@@ -4047,7 +4047,10 @@ def test_catalog_detail_frontend_uses_backend_trait_references(
     assert status == 200
     assert b"profile.trait_references" in body
     assert b"function weaponTraitLinks(traits)" in body
-    assert b"const label = trait.label || trait.name ||" in body
+    assert b"trait.source_alias ? trait.name : trait.label" in body
+    assert b"const canonicalSlugs = new Set(traits" in body
+    assert b"duplicateAliases.get(trait.slug)" in body
+    assert b"(Army: ${sourceLabels.join" in body
     assert b"ruleReferenceHref(trait.public_reference)" in body
     assert b"href = `/traits/${encodeURIComponent(trait.slug)}`;" in body
     assert b"function canonicalTraitName(" not in body
@@ -5470,6 +5473,7 @@ def test_trait_apis_compose_army_usage_with_curated_rules(app: Callable, tmp_pat
             "label": "Continous Damage",
             "name": "Continuous Damage",
             "slug": "continuous-damage",
+            "source_alias": True,
         },
         {
             "label": "Disposable (2)",

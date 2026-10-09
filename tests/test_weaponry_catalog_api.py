@@ -294,6 +294,17 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
     assert set(profiles) == {203, 204, 205}
     assert all("Technical Weapon" in profile["traits"] for profile in profiles.values())
     assert all("Double Shot" not in profile["traits"] for profile in profiles.values())
+    for profile in profiles.values():
+        alias = next(
+            reference for reference in profile["trait_references"]
+            if reference["label"] == "Technical Weapon"
+        )
+        assert alias == {
+            "label": "Technical Weapon",
+            "name": "BS Weapon (WIP)",
+            "slug": "bs-weapon-wip",
+            "source_alias": True,
+        }
     assert profiles[203]["burst"] == "1"
 
 
@@ -401,6 +412,11 @@ def test_drop_bears_keeps_two_modes_and_explains_n5_throwing_terminology(
     deployable = profiles["Deployable Mode"]
     # The Army snapshot really contains both labels; do not silently rewrite it.
     assert {"BS Weapon (PH)", "Throwing Weapon"} <= set(bs["traits"])
+    bs_refs = {reference["label"]: reference for reference in bs["trait_references"]}
+    assert bs_refs["Throwing Weapon"]["source_alias"] is True
+    assert bs_refs["Throwing Weapon"]["name"] == "BS Weapon (PH)"
+    assert bs_refs["BS Weapon (PH)"]["slug"] == "bs-weapon-ph"
+    assert "source_alias" not in bs_refs["BS Weapon (PH)"]
     assert bs["ammunition"] == 0
     assert bs["ranges"]["short"] == {"max": 20, "mod": "+3"}
     assert deployable["ammunition"] == "Shock"
