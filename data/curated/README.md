@@ -344,8 +344,11 @@ source Ammunition map above does not own effects. Supported fields are:
   multiplicity. It does **not** replace the Army Weapon's `saving_num` field.
 - `stateEffects`: reviewed records with canonical `stateId`,
   `condition: "failed-saving-roll"`, and optional `targetTypes` (from
-  `HI`, `TAG`, `REM`, `VH`). Conditions and target restrictions are part of the
-  fact; the State must not be presented as unconditional.
+  `HI`, `TAG`, `REM`, `VH`). Shock additionally permits exactly
+  `targetAttribute: {"name": "VITA", "equals": 1}` and
+  `application: "bypass-unconscious"` together when linking to `state:dead`.
+  Conditions and target restrictions are part of the fact; the State must not
+  be presented as unconditional.
 - `savingRoll: {"attribute": "PH", "modifier": -6, "missingAttribute": "no-effect"}`:
   a PH-based Saving Roll with an explicit negative MOD, with no roll or
   Ammunition effect if the target lacks PH. Currently validated only for PH
@@ -353,7 +356,17 @@ source Ammunition map above does not own effects. Supported fields are:
 - `woundsPerFailedSave: {"hit": 2, "criticalAdditionalRoll": 1}`:
   Wounds from failing a Saving Roll for a normal hit versus the *separately
   generated* additional roll for a Critical. The latter must not inherit
-  the two-Wound result of a normal T2 hit.
+  the two-Wound result of a normal T2 hit. Normal and Shock each specify
+  `{ "hit": 1, "criticalAdditionalRoll": 1 }`.
+- `gutsEffect`: exactly a failed-Saving-Roll automatic Guts failure with a
+  `courage-or-equivalent` exception (Stun). It is not a generic Guts evaluator.
+
+`facts.visibilityZone` is a **separate** reviewed fact family for Smoke and
+Eclipse: Circular Zero Visibility Zone, infinite height, expires at the start
+of the States Phase. `multispectralVisor` distinguishes `can-draw-lof` (Smoke)
+from `blocked` (Eclipse). No Saving Roll, automatic success, or generic Face to
+Face outcome is implied. Visibility-zone data is validated only on Ammunition
+records, and it cannot coexist with `ammunitionResolution` on one record.
 
 The validator rejects unsupported operations, unknown Attributes, invalid
 PH Saving Roll specifications, invalid Wound-count exceptions, invalid
@@ -361,8 +374,9 @@ State domains, duplicate States, invalid target restrictions, and ownership on
 non-Ammunition records. It does not execute saving rolls or derive properties
 of combined ammunition. Each record retains its existing N5/Wiki provenance;
 Army data, combination component IDs, and profile Saving Roll notation stay
-separate. AP, DA, E/M, EXP, PARA, and T2 form the reviewed pilot. Additional Ammunition
-effects and composition precedence remain 1.0 audit work.
+separate. All eleven published base identities have reviewed typed facts, but
+critical interactions, target exceptions, visibility Face to Face cases, and
+combined-effect precedence remain 1.0 audit work.
 
 The current closed relation vocabulary is defined by `src/infinity_db/rule_relations.py`. It
 distinguishes creation/enabling, State transitions, MOD/effect changes, cancellation/restriction,

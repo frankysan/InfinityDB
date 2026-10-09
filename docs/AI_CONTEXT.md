@@ -87,9 +87,12 @@ release/audit narrative belongs in the changelog and Git history.
   for the four reviewed combined forms (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`);
   their API `ammunition_composition` field is only present on exact matching
   source profiles. Alternatives remain unlinked. Curated `ammunitionResolution`
-  remains a non-executable, source-cited fact contract: AP, DA, E/M, EXP, PARA,
-  and T2 are reviewed. PARA's no-PH exception and T2's reduced Wound outcome
-  for the *additional Critical roll* cannot be dropped when consuming facts.
+  remains a non-executable, source-cited fact contract: all eleven base
+  Ammunition identities are reviewed. PARA's no-PH exception, T2's reduced Wound
+  outcome for an *additional Critical roll*, Shock's VITA-1 exception, and Stun's
+  Guts/Courage exception cannot be dropped when consuming facts. Smoke/Eclipse
+  use separate `facts.visibilityZone` data with distinct MSV behavior; do not
+  interpret it as a Saving Roll.
   This is not an effects engine.
   See `docs/data-model.md` and `weapon-ammunition-references.json`.
 - Game/reference data is read-only at runtime. Persistent user-authored application data is not part

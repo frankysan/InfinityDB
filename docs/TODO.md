@@ -344,10 +344,13 @@ unimplemented until its corresponding behavior exists.
       PARA's PH-6/no-PH exception and Immobilized-A on failure, and T2's different
       Wound outcomes for a hit versus an additional Critical Saving Roll.
       Preserve those distinct conditions without evaluating combined ammunition.
-    - [ ] Extend that pilot to the remaining base types and review the full fact/relation
-      schema, including combined-effect precedence, Criticals, affected Attributes,
+    - [x] Add source-backed facts for Normal, Shock, Stun, Smoke and Eclipse;
+      isolate Smoke/Eclipse visibility zones from Saving Roll facts and preserve
+      Shock's VITA-1 restriction and Stun's Courage/Guts exception.
+    - [ ] Review the remaining fact/relation completeness, including combined-effect
+      precedence, Criticals, affected Attributes, visibility Face to Face outcomes,
       conditional State cross-links, and comparison-view consumption. Do not infer
-      executable mechanics from a subset of curated effects.
+      executable mechanics from reviewed reference facts.
     - [ ] Validate every published base identity and reviewed combined form against the pinned
       source; prove that weapon links, Ammunition detail, and later comparison views consume the
       same facts without conflating composition with roll notation.

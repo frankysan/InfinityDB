@@ -47,6 +47,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend:** Publish reviewed typed effects for the remaining
+  base Ammunition: Normal, Shock, Stun, Smoke, and Eclipse. Preserve conditional
+  VITA/State and Guts effects and keep visibility zones separate from Saving Rolls.
+  These are reference facts, not calculated combat outcomes.
 - **Data processing + Web backend:** Make reviewed EXP, PARA, and T2 Ammunition
   effects available as source-cited, structured reference facts, retaining the
   PARA no-PH exception and T2's different additional Critical-roll effect.

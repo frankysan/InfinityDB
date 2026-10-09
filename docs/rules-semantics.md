@@ -2094,6 +2094,30 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Ammunition_Summary_Chart>
 - PDF: Infinity N5 V5.3, printed pages 63-67
 
+### RS-AW-AMMO-002A — Saving Roll facts and visibility zones are distinct
+
+**Classification:** source-native semantics with a curated-data boundary.
+
+Normal and Shock inflict one Wound for each failed Saving Roll; Shock additionally
+skips Unconscious for VITA-1 targets on failure. Stun applies Stunned State on
+failure and forces failure of the subsequent Guts Roll unless Courage or an
+equivalent rule applies. Smoke generates a Zero Visibility Zone through which
+Multispectral Visors can draw LoF; Eclipse is Reflective and blocks even those
+Visors. Zone expiration and area shape are independent of Saving Roll resolution.
+
+InfinityDB stores these reviewed properties as `facts.ammunitionResolution` or
+`facts.visibilityZone`, never by deriving effects from Weapon Chart syntax.
+The typed facts describe source semantics; they do not adjudicate Face to Face
+rolls, Criticals, immunity, or Combined Ammunition.
+
+Sources: N5 v5.3 Ammunition definitions, pinned Wiki snapshot
+`wiki-en-20260918-130233` (Normal, Shock, Stun, Smoke, Eclipse); current N5.3
+Wiki pages <https://infinitythewiki.com/N>,
+<https://infinitythewiki.com/SHOCK>,
+<https://infinitythewiki.com/Stun_Ammunition>,
+<https://infinitythewiki.com/Smoke_Ammunition>, and
+<https://infinitythewiki.com/Eclipse_Ammunition>.
+
 ### RS-AW-AMMO-003 — Combined Ammunition is explicit composition
 
 **Classification:** source-native relationship semantics.

@@ -16662,7 +16662,16 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
+                "reviewedOn": "2026-10-09"
+            },
+            "facts": {
+                "ammunitionResolution": {
+                    "rollsPerHit": 1,
+                    "woundsPerFailedSave": {
+                        "hit": 1,
+                        "criticalAdditionalRoll": 1
+                    }
+                }
             }
         },
         {
@@ -16756,7 +16765,16 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
+                "reviewedOn": "2026-10-09"
+            },
+            "facts": {
+                "visibilityZone": {
+                    "visibility": "zero",
+                    "template": "circular",
+                    "height": "infinite",
+                    "expires": "start-of-states-phase",
+                    "multispectralVisor": "blocked"
+                }
             }
         },
         {
@@ -16908,7 +16926,27 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
+                "reviewedOn": "2026-10-09"
+            },
+            "facts": {
+                "ammunitionResolution": {
+                    "rollsPerHit": 1,
+                    "woundsPerFailedSave": {
+                        "hit": 1,
+                        "criticalAdditionalRoll": 1
+                    },
+                    "stateEffects": [
+                        {
+                            "stateId": "state:dead",
+                            "condition": "failed-saving-roll",
+                            "targetAttribute": {
+                                "name": "VITA",
+                                "equals": 1
+                            },
+                            "application": "bypass-unconscious"
+                        }
+                    ]
+                }
             }
         },
         {
@@ -16934,7 +16972,16 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
+                "reviewedOn": "2026-10-09"
+            },
+            "facts": {
+                "visibilityZone": {
+                    "visibility": "zero",
+                    "template": "circular",
+                    "height": "infinite",
+                    "expires": "start-of-states-phase",
+                    "multispectralVisor": "can-draw-lof"
+                }
             }
         },
         {
@@ -16960,7 +17007,23 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
+                "reviewedOn": "2026-10-09"
+            },
+            "facts": {
+                "ammunitionResolution": {
+                    "rollsPerHit": 1,
+                    "stateEffects": [
+                        {
+                            "stateId": "state:stunned",
+                            "condition": "failed-saving-roll"
+                        }
+                    ],
+                    "gutsEffect": {
+                        "condition": "failed-saving-roll",
+                        "result": "automatic-failure",
+                        "exception": "courage-or-equivalent"
+                    }
+                }
             }
         },
         {

@@ -552,3 +552,54 @@ def test_ammunition_resolution_pilot_preserves_separate_source_operations(
         (profile["saving"], profile["saving_num"]) == ("ARM and BTS", "1 and 1")
         for profile in plasma["profiles"]
     )
+
+
+@pytest.mark.parametrize("slug", (
+    "normal", "shock", "stun", "smoke", "eclipse",
+))
+def test_remaining_base_ammunition_facts_are_source_cited_and_published(
+    tmp_path: Path, slug: str,
+) -> None:
+    rules_db = _rules_database(tmp_path)
+    record = rules_db.composed_record(f"ammunition:{slug}")
+    assert record is not None
+    assert record["citations"]
+    facts = record["facts"]
+    assert ("visibilityZone" in facts) != ("ammunitionResolution" in facts)
+
+    root = Path(__file__).parents[1]
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
+    environ: dict[str, Any] = {}
+    setup_testing_defaults(environ)
+    environ["REQUEST_METHOD"] = "GET"
+    environ["PATH_INFO"] = f"/api/ammunition/{slug}"
+    statuses: list[str] = []
+    body = b"".join(app(environ, lambda status, headers, exc_info=None: statuses.append(status)))
+    assert statuses == ["200 OK"]
+    payload = json.loads(body)
+    assert payload["rules"][0]["facts"] == facts
+
+    if slug == "normal":
+        assert facts["ammunitionResolution"]["woundsPerFailedSave"] == {
+            "hit": 1, "criticalAdditionalRoll": 1,
+        }
+    elif slug == "shock":
+        dead = facts["ammunitionResolution"]["stateEffects"][0]
+        assert dead["stateId"] == "state:dead"
+        assert dead["targetAttribute"] == {"name": "VITA", "equals": 1}
+        assert dead["application"] == "bypass-unconscious"
+        assert rules_db.composed_record(dead["stateId"]) is not None
+    elif slug == "stun":
+        resolution = facts["ammunitionResolution"]
+        assert resolution["stateEffects"] == [{
+            "stateId": "state:stunned", "condition": "failed-saving-roll",
+        }]
+        assert resolution["gutsEffect"]["exception"] == "courage-or-equivalent"
+        assert rules_db.composed_record("state:stunned") is not None
+    else:
+        zone = facts["visibilityZone"]
+        assert zone["visibility"] == "zero"
+        assert zone["multispectralVisor"] == (
+            "blocked" if slug == "eclipse" else "can-draw-lof"
+        )
+        assert "ammunitionResolution" not in facts

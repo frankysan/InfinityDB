@@ -1982,6 +1982,19 @@ def test_curated_long_rule_summaries_have_readable_paragraphs() -> None:
                 }
             ]
         },
+        {"gutsEffect": {"condition": "hit", "result": "automatic-failure",
+                        "exception": "courage-or-equivalent"}},
+        {"gutsEffect": {"condition": "failed-saving-roll", "result": "no-guts-roll",
+                        "exception": "courage-or-equivalent"}},
+        {"stateEffects": [{"stateId": "state:dead", "condition": "failed-saving-roll",
+                           "targetAttribute": {"name": "VITA", "equals": 2},
+                           "application": "bypass-unconscious"}]},
+        {"stateEffects": [{"stateId": "state:stunned", "condition": "failed-saving-roll",
+                           "targetAttribute": {"name": "VITA", "equals": 1},
+                           "application": "bypass-unconscious"}]},
+        {"stateEffects": [{"stateId": "state:dead", "condition": "failed-saving-roll",
+                           "targetAttribute": {"name": "VITA", "equals": True},
+                           "application": "bypass-unconscious"}]},
         {"unreviewedOperation": "auto-resolve"},
     ],
 )
@@ -2012,4 +2025,61 @@ def test_ammunition_resolution_is_owned_only_by_ammunition(tmp_path: Path) -> No
     path = tmp_path / "rules.json"
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="only Ammunition"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize("invalid", [
+    {},
+    {"visibility": "low", "template": "circular", "height": "infinite",
+     "expires": "start-of-states-phase", "multispectralVisor": "blocked"},
+    {"visibility": "zero", "template": "circular", "height": "infinite",
+     "expires": "start-of-states-phase", "multispectralVisor": "ignores-zone"},
+    {"visibility": "zero", "template": "circular", "height": "infinite",
+     "expires": "start-of-states-phase", "multispectralVisor": []},
+    {"visibility": "zero", "template": "circular", "height": "infinite",
+     "expires": "start-of-states-phase", "multispectralVisor": "blocked",
+     "unreviewed": True},
+])
+def test_ammunition_visibility_zone_rejects_unreviewed_facts(
+    tmp_path: Path, invalid: dict,
+) -> None:
+    document = valid_document()
+    document["records"].append({
+        "id": "ammunition:pilot", "kind": "ammunition", "name": "Pilot",
+        "summary": "A visibility-zone fixture.",
+        "facts": {"visibilityZone": invalid},
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "citations": [{"sourceId": "n5-core-v5.3", "page": 64}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-10-09"},
+    })
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="visibilityZone"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize("kind", ["skill", "ammunition"])
+def test_ammunition_visibility_zone_cannot_mix_domains_or_rolls(
+    tmp_path: Path, kind: str,
+) -> None:
+    document = valid_document()
+    record = {
+        "id": f"{kind}:pilot", "kind": kind, "name": "Pilot",
+        "summary": "A visibility-zone fixture.",
+        "facts": {"visibilityZone": {
+            "visibility": "zero", "template": "circular", "height": "infinite",
+            "expires": "start-of-states-phase", "multispectralVisor": "blocked",
+        }},
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "citations": [{"sourceId": "n5-core-v5.3", "page": 64}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-10-09"},
+    }
+    if kind == "ammunition":
+        record["facts"]["ammunitionResolution"] = {"rollsPerHit": 1}
+    document["records"].append(record)
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="visibilityZone"):
         load_curated_document(path)

@@ -76,15 +76,28 @@ failure conditions and eligible target categories. The EXP, PARA, and T2
 extensions add three rolls per EXP hit; a PH-6 Saving Roll with no effect
 against targets lacking PH and Immobilized-A on failure for PARA; and
 separate T2 Wound counts for a failed hit roll versus a failed additional
-Critical roll (2 versus 1). These facts flow through `rules.db` to
-Ammunition detail APIs with the records' existing citations. The
+Critical roll (2 versus 1). Normal and Shock record one Saving Roll and
+one Wound per failed roll; Shock's direct-to-Dead outcome applies only to
+failed rolls against targets with VITA 1. Stun records the Stunned State
+and automatic Guts Roll failure on a failed Saving Roll, except with Courage
+or equivalent rules. These facts flow through `rules.db` to Ammunition detail
+APIs with the records' existing citations. Smoke and Eclipse instead use a
+separate `facts.visibilityZone` shape recording the Circular Zero Visibility
+Zone, infinite height, expiration, and the distinction between Smoke's MSV
+exception and Eclipse's Reflective blocking of all MSV Levels. This is
+visibility reference data, never a synthetic Saving Roll or a guarantee
+that a Smoke Template succeeds against all attacks. The
 Weapon API separately exposes source-authored profiles and reviewed combined
 component IDs. It does **not** merge these facts into an inferred roll result:
 Feuerbach's AP+DA source combination remains distinct from its `ARM/2` and `2`
 fields, and Plasma Carbine's `ARM and BTS` / `1 and 1` remains a Combined Saving
 Roll with Normal Ammunition, never a synthetic composition.
 
-This is not yet a complete curated Ammunition effect/relation model or a
+All eleven published base Ammunition identities now carry reviewed typed
+facts, but the contract is deliberately non-executable: it does not model
+critical attack resolution generally, Smoke/Eclipse Face to Face adjudication,
+all conditional immunity/target interactions, or combined-Ammunition
+precedence. This is not yet a complete curated Ammunition effect/relation model or a
 general combined-Ammunition evaluator. Missing effects, combined Critical
 interactions, and broader State cross-links still require source review.
 

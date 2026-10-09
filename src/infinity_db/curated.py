@@ -211,7 +211,7 @@ def _validate_ammunition_resolution(value: object, context: str) -> None:
         or not value
         or set(value) - {
             "defenseModifier", "rollsPerHit", "stateEffects", "savingRoll",
-            "woundsPerFailedSave",
+            "woundsPerFailedSave", "gutsEffect",
         }
     ):
         raise ValueError(f"{context}: unsupported ammunition resolution facts")
@@ -247,6 +247,16 @@ def _validate_ammunition_resolution(value: object, context: str) -> None:
         or any(type(wounds[key]) is not int or wounds[key] < 1 for key in wounds)
     ):
         raise ValueError(f"{context}.woundsPerFailedSave: invalid Wound specification")
+    guts = value.get("gutsEffect")
+    if guts is not None and (
+        not isinstance(guts, dict)
+        or guts != {
+            "condition": "failed-saving-roll",
+            "result": "automatic-failure",
+            "exception": "courage-or-equivalent",
+        }
+    ):
+        raise ValueError(f"{context}.gutsEffect: unsupported Guts effect")
     rolls = value.get("rollsPerHit")
     if rolls is not None and (type(rolls) is not int or rolls < 1):
         raise ValueError(f"{context}.rollsPerHit: must be a positive integer")
@@ -260,6 +270,7 @@ def _validate_ammunition_resolution(value: object, context: str) -> None:
             if not isinstance(state, dict) or set(state) not in (
                 {"stateId", "condition"},
                 {"stateId", "condition", "targetTypes"},
+                {"stateId", "condition", "targetAttribute", "application"},
             ):
                 raise ValueError(f"{state_context}: invalid State effect fields")
             validate_typed_domain_id(
@@ -270,6 +281,16 @@ def _validate_ammunition_resolution(value: object, context: str) -> None:
             seen.add(state["stateId"])
             if state["condition"] != "failed-saving-roll":
                 raise ValueError(f"{state_context}: unsupported State effect condition")
+            target_attribute = state.get("targetAttribute")
+            application = state.get("application")
+            if (target_attribute is not None or application is not None) and (
+                not isinstance(target_attribute, dict)
+                or target_attribute != {"name": "VITA", "equals": 1}
+                or type(target_attribute["equals"]) is not int
+                or application != "bypass-unconscious"
+                or state["stateId"] != "state:dead"
+            ):
+                raise ValueError(f"{state_context}: invalid conditional State transition")
             types = state.get("targetTypes")
             if types is not None and (
                 not isinstance(types, list)
@@ -281,6 +302,23 @@ def _validate_ammunition_resolution(value: object, context: str) -> None:
                 or len(set(types)) != len(types)
             ):
                 raise ValueError(f"{state_context}.targetTypes: invalid target restriction")
+
+
+def _validate_ammunition_visibility_zone(value: object, context: str) -> None:
+    """Keep non-damaging visibility facts separate from Saving Roll resolution."""
+    if (
+        not isinstance(value, dict)
+        or set(value) != {
+            "visibility", "template", "height", "expires", "multispectralVisor"
+        }
+        or value["visibility"] != "zero"
+        or value["template"] != "circular"
+        or value["height"] != "infinite"
+        or value["expires"] != "start-of-states-phase"
+        or not isinstance(value["multispectralVisor"], str)
+        or value["multispectralVisor"] not in {"can-draw-lof", "blocked"}
+    ):
+        raise ValueError(f"{context}: unsupported Ammunition visibility zone")
 
 
 def _validate_scope(value: object, context: str) -> None:
@@ -873,6 +911,17 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 _validate_ammunition_resolution(
                     resolution, f"{context}.facts.ammunitionResolution"
                 )
+            zone = facts.get("visibilityZone")
+            if zone is not None:
+                if record["kind"] != "ammunition":
+                    raise ValueError(
+                        f"{context}.facts.visibilityZone: only Ammunition may own effects"
+                    )
+                if resolution is not None:
+                    raise ValueError(
+                        f"{context}.facts.visibilityZone: must not mix with Saving Roll facts"
+                    )
+                _validate_ammunition_visibility_zone(zone, f"{context}.facts.visibilityZone")
         if record["kind"] == "skill":
             facts = record.get("facts")
             if composition_role == "definition":
