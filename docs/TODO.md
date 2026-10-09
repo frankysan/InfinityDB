@@ -323,7 +323,8 @@ unimplemented until its corresponding behavior exists.
       (REA-006) now explains immediate declaration, optional table-wide ARO,
       opposing-Program cancellation, and preservation of separate scenario MODs;
       verify the player-facing Program page. Request Speedball's FAQ exclusion
-      (REA-007) and common Supportware rules (REA-018) remain separate work.
+      (REA-007) is now explained in both curated records; verify the player-facing
+      Skill and Program cards. Common Supportware rules (REA-018) remain separate work.
       Separately decide source conflicts and FAQ applicability before dependent curation.
       Use the [source manifest](rules-explanation-audit-1.0-sources.md) and
       [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).

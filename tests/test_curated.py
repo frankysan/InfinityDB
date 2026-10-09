@@ -1584,6 +1584,19 @@ def test_checked_in_n5_collection_keeps_new_common_skill_facts_source_faithful()
     assert speedball["requirements"] == ["The player must have two Speedball Tokens."]
     assert "two 55 mm Speedball Tokens" in speedball["effects"][0]
     assert "PH 15" in speedball["effects"][0]
+    assert (
+        "[[hacking-program:controlled-jump]]"
+        in records["skill:request-speedball"]["summary"]
+    )
+    assert "FAQ restricts that Program to Troopers" in speedball["effects"][1]
+    assert "Speedballs are Tokens" in speedball["effects"][1]
+    assert {
+        (citation["sourceId"], citation.get("page"))
+        for citation in records["skill:request-speedball"]["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 84),
+        ("n5-faq-v0.1-en-pdf", 1),
+    }
 
     reload = records["skill:reload"]["facts"]
     assert "must both be in non-Null States" in reload["requirements"][0]

@@ -253,6 +253,17 @@
             "url": "https://experience.corvusbelli.com/en/infinity/resources"
         },
         {
+            "id": "n5-faq-v0.1-en-pdf",
+            "kind": "pdf",
+            "title": "N5 FAQs — English",
+            "version": "0.1",
+            "publishedDate": "2026-09-01",
+            "localPath": "data/pdf/faq/n5-faqs-v0-1-en.pdf",
+            "pageCount": 5,
+            "authority": "primary",
+            "url": "https://experience.corvusbelli.com/en/infinity/resources"
+        },
+        {
             "id": "wiki-en-20260918-130233",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
@@ -10245,7 +10256,7 @@
             "id": "skill:request-speedball",
             "kind": "skill",
             "name": "Request Speedball",
-            "summary": "An Automatic Common Skill that calls airborne support by placing two Speedball Tokens.",
+            "summary": "Call two Speedball Tokens using [[skill:combat-jump]] placement and PH 15 Rolls. [[hacking-program:controlled-jump]] does not affect Speedballs.",
             "composition": {
                 "role": "definition"
             },
@@ -10264,7 +10275,8 @@
                     "The player must have two Speedball Tokens."
                 ],
                 "effects": [
-                    "During the Active Turn, place two 55 mm Speedball Tokens using the [[skill:combat-jump]] rules and make a PH 15 Roll for each token."
+                    "During the Active Turn, place two 55 mm Speedball Tokens using the [[skill:combat-jump]] rules and make a PH 15 Roll for each token.",
+                    "The [[hacking-program:controlled-jump]] +3/-3 MODs do not apply to these Rolls: the FAQ restricts that Program to Troopers, while Speedballs are Tokens."
                 ],
                 "restrictions": [
                     "Request Speedball cannot be performed partway through the Order Expenditure Sequence."
@@ -10278,6 +10290,16 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "Request_Speedball",
                     "heading": "Request Speedball"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 84,
+                    "section": "Request Speedball"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 1,
+                    "section": "Quantronic Combat (Hacking) — Controlled Jump and Speedballs"
                 }
             ],
             "review": {

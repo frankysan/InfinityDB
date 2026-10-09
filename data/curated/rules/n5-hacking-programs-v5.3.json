@@ -28,6 +28,17 @@
             "url": "https://experience.corvusbelli.com/en/infinity/resources"
         },
         {
+            "id": "n5-faq-v0.1-en-pdf",
+            "kind": "pdf",
+            "title": "N5 FAQs — English",
+            "version": "0.1",
+            "publishedDate": "2026-09-01",
+            "localPath": "data/pdf/faq/n5-faqs-v0-1-en.pdf",
+            "pageCount": 5,
+            "authority": "primary",
+            "url": "https://experience.corvusbelli.com/en/infinity/resources"
+        },
+        {
             "id": "wiki-en-20260918-130233",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
@@ -149,7 +160,8 @@
                 "restrictions": [
                     "Declaring this Program as an ARO is optional; the [[skill:hacker]] may declare another eligible ARO instead.",
                     "If both players have this Program active, their Programs' effects cancel. This does not cancel independent MODs, such as Firefight's Designated Landing Area +3.",
-                    "A player cannot have more than one Controlled Jump Program active."
+                    "A player cannot have more than one Controlled Jump Program active.",
+                    "This Program does not affect Speedball Tokens placed with [[skill:request-speedball]], even though their placement uses [[skill:combat-jump]] rules. The FAQ limits this Program to Troopers."
                 ]
             },
             "relations": [
@@ -173,6 +185,11 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "Controlled_Jump",
                     "heading": "Controlled Jump"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 1,
+                    "section": "Quantronic Combat (Hacking) — Controlled Jump and Speedballs"
                 }
             ],
             "review": {

@@ -13,6 +13,7 @@ from infinity_db.rules_database import export_rules_database
 from tools.audit_enrichment_coverage import (
     DEFAULT_CLASSIFICATION_PATH,
     EnrichmentCoverageAuditError,
+    _record_gap_codes,
     audit_coverage,
     main,
 )
@@ -112,6 +113,28 @@ def _fixture_classification_policy(tmp_path: Path) -> Path:
     return path
 
 
+@pytest.mark.parametrize(
+    ("source_version", "expected_gaps"),
+    [
+        ("0.1", []),  # FAQ version, not an N5 rulebook version.
+        ("v0.1", []),
+        ("5.3", []),
+        ("N5.3 / oldid 3987", []),
+        ("5.2", ["stale_citation_source"]),
+        ("N5.2 / oldid 3677", ["stale_citation_source"]),
+        ("N4.2", ["stale_citation_source"]),
+    ],
+)
+def test_enrichment_coverage_distinguishes_source_revisions_from_rules_editions(
+    source_version: str, expected_gaps: list[str]
+) -> None:
+    record = {
+        "reviewContributions": [{"review": {"status": "reviewed"}}],
+        "citations": [{"collection_version": "5.3", "source_version": source_version}],
+    }
+    assert _record_gap_codes(record) == expected_gaps
+
+
 def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_path: Path) -> None:
     report = audit_coverage(
         _fixture_database(tmp_path),
@@ -136,6 +159,7 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert skills["Camouflage"]["gapCodes"] == []
     assert skills["CC Attack"]["gapCodes"] == []
     assert skills["Missing Skill"]["gapCodes"] == ["missing_rule_definition"]
+    assert skills["Request Speedball"]["gapCodes"] == []
     assert skills["Missing Skill"]["gapClassifications"][0]["classification"] == (
         "release-blocker"
     )

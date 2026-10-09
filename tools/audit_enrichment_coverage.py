@@ -286,14 +286,24 @@ def _json(value: str | None, default: Any) -> Any:
         return default
 
 
-def _rules_version(value: object) -> str | None:
+def _rules_version(value: object, *, compared_to: str | None = None) -> str | None:
     text = str(value or "").strip()
-    match = re.search(r"(?:\bN|\bv)(\d+\.\d+)\b", text, re.IGNORECASE)
+    # An explicit N-edition marker is authoritative, even for an older edition.
+    match = re.search(r"\bN(\d+\.\d+)\b", text, re.IGNORECASE)
     if match:
         return match.group(1)
-    if re.fullmatch(r"\d+\.\d+", text):
-        return text
-    return None
+    # Bare or v-prefixed numbers can instead be source-specific revisions
+    # (for example, FAQ v0.1). Only compare them within the current N series.
+    match = re.search(r"\bv(\d+\.\d+)\b", text, re.IGNORECASE)
+    if match:
+        version = match.group(1)
+    elif re.fullmatch(r"\d+\.\d+", text):
+        version = text
+    else:
+        return None
+    if compared_to and version.split(".", 1)[0] != compared_to.split(".", 1)[0]:
+        return None
+    return version
 
 
 def _rules_index(path: Path) -> tuple[dict[str, dict[str, Any]], dict[tuple[str, str], list[str]]]:
@@ -381,7 +391,9 @@ def _record_gap_codes(record: dict[str, Any]) -> list[str]:
         gaps.append("missing_citation")
     for citation in record.get("citations", []):
         current_version = citation.get("collection_version")
-        source_version = _rules_version(citation.get("source_version"))
+        source_version = _rules_version(
+            citation.get("source_version"), compared_to=current_version
+        )
         if current_version and source_version and source_version != current_version:
             gaps.append("stale_citation_source")
             break

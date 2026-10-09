@@ -406,6 +406,40 @@ def test_controlled_jump_immediate_aro_and_opposing_effects_are_published(
     )
 
 
+def test_speedball_faq_exclusion_is_published_on_both_rule_cards(
+    current_rules_database: RulesDatabase,
+) -> None:
+    speedball = current_rules_database.composed_record("skill:request-speedball")
+    program = current_rules_database.composed_record("hacking-program:controlled-jump")
+    assert speedball is not None and program is not None
+
+    assert "PH 15" in speedball["summary"]
+    assert "[[skill:combat-jump]]" in speedball["summary"]
+    assert "[[hacking-program:controlled-jump]]" in speedball["summary"]
+    assert "Troopers" in " ".join(speedball["facts"]["effects"])
+    assert "Speedballs are Tokens" in " ".join(speedball["facts"]["effects"])
+    assert "does not affect Speedball Tokens" in " ".join(
+        program["facts"]["restrictions"]
+    )
+    assert "[[skill:request-speedball]]" in " ".join(
+        program["facts"]["restrictions"]
+    )
+    assert "FAQ limits this Program to Troopers" in " ".join(
+        program["facts"]["restrictions"]
+    )
+    for record in (speedball, program):
+        assert any(
+            citation["source_id"] == "n5-faq-v0.1-en-pdf"
+            and citation["page"] == 1
+            for citation in record["citations"]
+        )
+    assert any(
+        relation["type"] == "uses-effects-of"
+        and relation["record_id"] == "skill:combat-jump"
+        for relation in speedball["relations"]
+    )
+
+
 def test_reviewed_trait_critical_and_wip_restrictions_are_published(
     current_rules_database: RulesDatabase,
 ) -> None:

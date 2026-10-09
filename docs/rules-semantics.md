@@ -2123,9 +2123,19 @@ player can have only one Controlled Jump Program active.
 The maintained text links Combat Jump and Hacker where canonical identities
 exist. Scenario-rule identities are not currently valid maintained-text link
 targets, so the Firefight example remains plain text with a PDF citation.
-The separate Request Speedball exclusion (FAQ v0.1, printed p. 1) is still
-pending under REA-007; a Speedball is not a Trooper merely because its
-placement reuses Combat Jump mechanics.
+The separate Request Speedball exclusion is now explicit in both curated
+references: Request Speedball uses Combat Jump *placement* rules with PH 15 for
+each Speedball Token, but this does not make the Tokens Troopers. The FAQ
+expressly limits Controlled Jump to Troopers, so neither its +3 nor its -3
+modifies Speedball rolls. The `uses-effects-of` link from Request Speedball to
+Combat Jump is not a claim that every Trooper-only modifier applies to it.
+This is an explicit FAQ exception (v0.1, printed p. 1), not a general rule
+about every other Combat Jump modifier (REA-007).
+The FAQ source is cited as `n5-faq-v0.1-en-pdf` on both cards. Its
+`publishedDate` uses the official 2026-09-01 N5.3/FAQ announcement as a
+release-era source anchor; the FAQ PDF's exact separate publication date is
+not independently established (see source manifest S2). It must not be
+presented as a verified per-file publication date.
 
 Sources:
 
