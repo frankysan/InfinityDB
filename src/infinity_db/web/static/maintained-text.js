@@ -253,20 +253,33 @@ function reviewNeededNode(token, { interactive = true } = {}) {
 
 export function maintainedTextFragment(tokens, fallback = "", { interactive = true } = {}) {
   const fragment = document.createDocumentFragment();
-  if (!Array.isArray(tokens)) {
-    fragment.append(document.createTextNode(fallback || ""));
-    return fragment;
-  }
-  for (const token of tokens) {
+  const items = Array.isArray(tokens) ? tokens : [{ type: "text", text: fallback || "" }];
+  let bold = null;
+  for (const token of items) {
     if (token?.type === "text") {
-      fragment.append(document.createTextNode(token.text || ""));
-    } else if (token?.type === "distance" && Number.isFinite(Number(token.centimeters))) {
-      fragment.append(distanceNode(token));
-    } else if (token?.type === "reference") {
-      fragment.append(referenceNode(token, { interactive }));
-    } else if (token?.type === "review-needed") {
-      fragment.append(reviewNeededNode(token, { interactive }));
+      for (const part of (token.text || "").split(/(\[\*\*\]|\*\*)/)) {
+        if (part === "**") {
+          if (bold) {
+            bold = null;
+          } else {
+            bold = document.createElement("strong");
+            fragment.append(bold);
+          }
+        } else if (part) {
+          (bold || fragment).append(document.createTextNode(part));
+        }
+      }
+      continue;
     }
+    let node = null;
+    if (token?.type === "distance" && Number.isFinite(Number(token.centimeters))) {
+      node = distanceNode(token);
+    } else if (token?.type === "reference") {
+      node = referenceNode(token, { interactive });
+    } else if (token?.type === "review-needed") {
+      node = reviewNeededNode(token, { interactive });
+    }
+    if (node) (bold || fragment).append(node);
   }
   return fragment;
 }

@@ -245,6 +245,9 @@ def maintained_text_fields(document: dict[str, Any]) -> Iterator[tuple[str, str]
         facts = record.get("facts")
         if not isinstance(facts, dict):
             continue
+        for note_index, note in enumerate(facts.get("sourceNotes", [])):
+            if isinstance(note, str):
+                yield f"records[{index}].facts.sourceNotes[{note_index}]", note
         mission = facts.get("mission") if record.get("kind") == "scenario" else None
         if isinstance(mission, dict):
             for key in ("sides", "objectives", "rules", "endConditions", "sourceIssues"):

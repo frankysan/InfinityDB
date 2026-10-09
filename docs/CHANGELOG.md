@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Rules cards display readable paragraphs and bold mode labels; legacy Army terminology
+  and source discrepancies appear as smaller source notes beneath the gameplay rules.
 - Weapon Trait links now use reviewed N5 names for legacy Army labels, including
   Pheroware's BS Weapon (WIP), while still showing the original Army terminology.
 - Drop Bears now explains both placement modes, shared charges, and the legacy Throwing Weapon label alongside N5 BS Weapon (PH).

@@ -5885,6 +5885,16 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     assert b"var(--color-status-warning-surface)" in styles
 
 
+def test_rules_summary_rendering_preserves_links_emphasis_and_source_notes() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "rules_text_render_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "4 paragraphs; bold links; separate source note" in result.stdout
+
+
 def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) -> None:
     for asset in ("skill.js", "catalog-detail.js"):
         status, _, body = request(app, f"/static/{asset}")
@@ -5912,7 +5922,7 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
         b'appendRuleFactGroup(container, rule, "restrictions", "Restrictions")'
     )
     assert body.index(
-        b"appendMaintainedText(summary, rule.summary_tokens, rule.summary)"
+        b"appendMaintainedText(paragraph, paragraphTokens)"
     ) < body.index(b"const applicability = includeApplicability ? applicabilityText(rule)")
     assert b"includeApplicability = true" in body
     assert b"detail-fact-heading" in body

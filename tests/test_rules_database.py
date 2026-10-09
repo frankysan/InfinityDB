@@ -122,6 +122,26 @@ def test_rules_export_finalization_is_default_and_can_be_skipped(
     assert calls == []
 
 
+@pytest.mark.parametrize(
+    "record_id",
+    (
+        "weapon:drop-bears", "weapon:sepsitor-plus", "weapon:pt",
+        "weapon:pt-endgame", "weapon:kobra-pistol-cc",
+        "weapon:wildparrot", "weapon:para-mine",
+    ),
+)
+def test_weapon_source_notes_remain_distinct_from_gameplay_summary(
+    current_rules_database: RulesDatabase, record_id: str,
+) -> None:
+    record = current_rules_database.composed_record(record_id)
+    assert record is not None
+    notes = record["facts"]["sourceNotes"]
+    assert len(notes) == 1
+    assert "Army" in notes[0]
+    assert notes[0] not in record["summary"]
+    assert record["citations"]
+
+
 def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")

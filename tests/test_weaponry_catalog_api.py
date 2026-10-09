@@ -205,7 +205,7 @@ def test_wildparrot_rules_keep_perimeter_deployment_separate_from_boost(
     assert set(rules) == {"weapon:wildparrot"}
     record = rules["weapon:wildparrot"]
     assert "WildParrot Token or Model" in record["summary"]
-    assert "source discrepancy" in record["summary"]
+    assert "source discrepancy" in record["facts"]["sourceNotes"][0]
     assert record["summary_tokens"]
     assert any(
         citation["source_id"] == "n5-core-v5.3-pdf"
@@ -270,7 +270,7 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
 
     rule = endgame["rules"][0]
     assert "Double Shot" in rule["summary"]
-    assert "source discrepancy" in rule["summary"]
+    assert "source discrepancy" in rule["facts"]["sourceNotes"][0]
     assert rule["facts"]["effects"]
     assert any(
         citation["source_id"] == "n5-core-v5.3-pdf"
@@ -318,8 +318,9 @@ def test_para_mine_has_own_reference_without_rewriting_source_marker(
         _weapon_detail(weaponry_app, "ap-mine")
     )
     record = rules["weapon:para-mine"]
-    assert "unresolved source-reference discrepancy" in record["summary"]
-    assert "[*]" in record["summary"] and "[**]" in record["summary"]
+    assert "unresolved source-reference discrepancy" in record["facts"]["sourceNotes"][0]
+    note = record["facts"]["sourceNotes"][0]
+    assert "[*]" in note and "[**]" in note
     assert {72, 176, 181} <= {source["page"] for source in record["citations"]}
     assert {"weapon:mines", "ammunition:para", "state:immobilized-a"} <= {
         relation["record"]["id"]
@@ -360,11 +361,11 @@ def test_kobra_cc_mode_reference_preserves_anti_materiel_conflict(
     assert record["variant_semantics"] == {
         "inheritance": "source", "source_mode": "CC Mode"
     }
-    assert "unresolved source discrepancy" in record["summary"]
+    assert "unresolved source discrepancy" in record["facts"]["sourceNotes"][0]
     assert "two ARM Saving Rolls" in record["summary"]
     assert any(
         token["target"] == "trait:anti-materiel"
-        for token in record["summary_tokens"]
+        for token in record["fact_tokens"]["sourceNotes"][0]
         if token["type"] == "reference"
     )
     assert {64, 68, 182} == {citation["page"] for citation in record["citations"]}
@@ -428,9 +429,18 @@ def test_drop_bears_keeps_two_modes_and_explains_n5_throwing_terminology(
     for phrase in (
         "Deployable", "BS Mode", "Disposable (3)", "Mine Token",
         "Camouflage", "Conclusion step", "cannot detonate",
-        "Trigger Area", "Throwing Weapon", "BS Weapon (PH)",
+        "Trigger Area", "BS Weapon (PH)",
     ):
         assert phrase in summary
+    assert summary.count("\n\n") == 3
+    assert "**BS Mode:**" in summary
+    assert "Throwing Weapon" not in summary
+    assert len(card["facts"]["sourceNotes"]) == 1
+    assert "Throwing Weapon" in card["facts"]["sourceNotes"][0]
+    assert any(
+        token.get("target") == "trait:bs-weapon-ph"
+        for token in card["fact_tokens"]["sourceNotes"][0]
+    )
     assert all(profile.get("rules", []) == [] for profile in profiles.values())
     assert any(
         citation["source_id"] == "n5-core-v5.3-pdf"

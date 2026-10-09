@@ -1336,6 +1336,13 @@ h1>span {
   margin: 0;
 }
 
+/* Editorial source discrepancies remain readable without competing with rules. */
+.rules-source-note {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
 .rules-card-titlebar {
   padding-bottom: 8px;
 }

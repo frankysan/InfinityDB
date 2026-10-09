@@ -775,6 +775,13 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         _validate_review(record["review"], f"{context}.review")
         if "facts" in record and not isinstance(record["facts"], dict):
             raise ValueError(f"{context}: 'facts' must be an object")
+        notes = (record.get("facts") or {}).get("sourceNotes")
+        if notes is not None and (
+            not isinstance(notes, list)
+            or not notes
+            or any(not isinstance(note, str) or not note.strip() for note in notes)
+        ):
+            raise ValueError(f"{context}: 'facts.sourceNotes' must be non-empty strings")
         facts = record.get("facts")
         if isinstance(facts, dict):
             _validate_related_categories(facts, f"{context}.facts")

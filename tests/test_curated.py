@@ -97,6 +97,18 @@ def test_load_curated_document_requires_provenance(tmp_path: Path) -> None:
     assert load_curated_document(path)["records"][0]["citations"][0]["page"] == 12
 
 
+@pytest.mark.parametrize("notes", [[], [""], [None], "not a list"])
+def test_curated_source_notes_reject_empty_or_invalid_entries(
+    tmp_path: Path, notes: object,
+) -> None:
+    document = valid_document()
+    document["records"][0]["facts"]["sourceNotes"] = notes
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="facts.sourceNotes"):
+        load_curated_document(path)
+
+
 def test_skill_definition_supports_multiple_categories(tmp_path: Path) -> None:
     document = valid_document()
     document["skillTypes"].append(

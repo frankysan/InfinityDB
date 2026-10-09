@@ -182,15 +182,38 @@ function appendRuleFactGroup(container, rule, key, label) {
   container.append(group);
 }
 
+// Blank lines mark semantic paragraphs in maintained summaries. Preserve inline
+// links and emphasis when a paragraph boundary falls inside a text token.
+function summaryParagraphs(tokens, fallback = "") {
+  const paragraphs = [[]];
+  const source = Array.isArray(tokens) ? tokens : [{ type: "text", text: fallback }];
+  for (const token of source) {
+    if (token?.type !== "text") {
+      paragraphs[paragraphs.length - 1].push(token);
+      continue;
+    }
+    const parts = (token.text || "").split(/\n\s*\n/);
+    for (const [index, part] of parts.entries()) {
+      if (index) paragraphs.push([]);
+      if (part) paragraphs[paragraphs.length - 1].push({ type: "text", text: part });
+    }
+  }
+  return paragraphs.filter((tokens) => tokens.some(
+    (token) => token.type !== "text" || token.text.trim(),
+  ));
+}
+
 function appendRuleDetails(
   container,
   rule,
   { includeBadges = true, includeApplicability = true, beforeRelations = [] } = {},
 ) {
-  const summary = document.createElement("p");
-  summary.className = "detail-copy";
-  appendMaintainedText(summary, rule.summary_tokens, rule.summary);
-  container.append(summary);
+  for (const paragraphTokens of summaryParagraphs(rule.summary_tokens, rule.summary)) {
+    const paragraph = document.createElement("p");
+    paragraph.className = "detail-copy";
+    appendMaintainedText(paragraph, paragraphTokens);
+    container.append(paragraph);
+  }
 
   const badgeRow = includeBadges ? ruleBadgeRow(rule) : null;
   if (badgeRow) container.append(badgeRow);
@@ -221,6 +244,13 @@ function appendRuleDetails(
 
   container.append(...beforeRelations);
   appendRuleRelations(container, rule);
+
+  for (const [index, note] of (rule.facts?.sourceNotes || []).entries()) {
+    const paragraph = document.createElement("p");
+    paragraph.className = "rules-source-note";
+    appendMaintainedText(paragraph, rule.fact_tokens?.sourceNotes?.[index], note);
+    container.append(paragraph);
+  }
 
   const applicability = includeApplicability ? applicabilityText(rule) : "";
   if (applicability) {

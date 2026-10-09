@@ -3633,8 +3633,12 @@
             "id": "weapon:sepsitor-plus",
             "kind": "weapon",
             "name": "Sepsitor Plus",
-            "summary": "Sepsitor Plus uses the [[trait:direct-template|Direct Template]] rules described in the N5 Weaponry section against Troopers with a [[equipment:cube|Cube]] or equivalent Equipment. A hit requires a BTS Saving Roll using this weapon’s PS 3; a Critical causes an additional Saving Roll, and failure causes [[state:sepsitorized|Sepsitorized State]]. [[equipment:cube-2|Cube 2.0]] grants +2 to its user’s Saving Roll against this attack. Unlike [[weapon:sepsitor|Sepsitor]], Sepsitor Plus does not list Disposable (2). The N5 v5.3 Weapon Chart includes a [*] reference to the N5 Weaponry rules for this weapon, but the imported Army profile omits that marker; both sources retain their original values.",
-            "facts": {},
+            "summary": "Sepsitor Plus uses the [[trait:direct-template|Direct Template]] rules described in the N5 Weaponry section against Troopers with a [[equipment:cube|Cube]] or equivalent Equipment. A hit requires a BTS Saving Roll using this weapon’s PS 3; a Critical causes an additional Saving Roll, and failure causes [[state:sepsitorized|Sepsitorized State]]. [[equipment:cube-2|Cube 2.0]] grants +2 to its user’s Saving Roll against this attack. Unlike [[weapon:sepsitor|Sepsitor]], Sepsitor Plus does not list Disposable (2).",
+            "facts": {
+                "sourceNotes": [
+                    "The N5 v5.3 Weapon Chart includes a [*] reference to the N5 Weaponry rules for this weapon, but the imported Army profile omits that marker; both sources retain their original values."
+                ]
+            },
             "composition": {
                 "role": "definition"
             },
@@ -3697,8 +3701,12 @@
             "id": "weapon:pt",
             "kind": "weapon",
             "name": "Pheroware Tactics (PT)",
-            "facts": {},
-            "summary": "The Pheroware Tactics (PT) profiles—Endgame, Eraser, and Mirrorball—are distinct weapons. The N5 v5.3 chart classifies their attacks as [[trait:bs-weapon-wip|BS Weapon (WIP)]], replacing the older [[trait:bs-weapon-wip|Technical Weapon]] label still present in the imported Army profiles. Their individual effects must be read from their own profiles; Endgame’s [[trait:double-shot|Double Shot]] does not apply to Eraser or Mirrorball.",
+            "facts": {
+                "sourceNotes": [
+                    "The N5 v5.3 chart classifiestheir attacks as [[trait:bs-weapon-wip|BS Weapon (WIP)]], replacing the older [[trait:bs-weapon-wip|Technical Weapon]] label still present in the imported Army profiles."
+                ]
+            },
+            "summary": "The Pheroware Tactics (PT) profiles—Endgame, Eraser, and Mirrorball—are distinct weapons. Their individual effects must be read from their own profiles; Endgame’s [[trait:double-shot|Double Shot]] does not apply to Eraser or Mirrorball.",
             "composition": {
                 "role": "definition"
             },
@@ -3739,10 +3747,13 @@
             "id": "weapon:pt-endgame",
             "kind": "weapon",
             "name": "PT: Endgame",
-            "summary": "In the N5 v5.3 Weapon Chart, PT: Endgame has [[trait:double-shot|Double Shot]]. During the Active Turn it may gain +1 Burst by using both charges of [[trait:disposable-x|Disposable (2)]]. Its base Burst remains 1. The imported Army snapshot retains the legacy [[trait:bs-weapon-wip|Technical Weapon]] label and omits [[trait:double-shot|Double Shot]], while the N5 chart uses [[trait:bs-weapon-wip|BS Weapon (WIP)]] and includes [[trait:double-shot|Double Shot]]. This is an explicit source discrepancy; the imported Army properties are not altered.",
+            "summary": "In the N5 v5.3 Weapon Chart, PT: Endgame has [[trait:double-shot|Double Shot]]. During the Active Turn it may gain +1 Burst by using both charges of [[trait:disposable-x|Disposable (2)]]. Its base Burst remains 1.",
             "facts": {
                 "effects": [
                     "In the Active Turn, [[trait:double-shot|Double Shot]] may add +1 Burst at the cost of both [[trait:disposable-x|Disposable (2)]] uses; this applies to Endgame, not other PT profiles."
+                ],
+                "sourceNotes": [
+                    "The imported Army snapshot retains the legacy [[trait:bs-weapon-wip|Technical Weapon]] label and omits [[trait:double-shot|Double Shot]], while the N5 chart uses [[trait:bs-weapon-wip|BS Weapon (WIP)]] and includes [[trait:double-shot|Double Shot]]. This is an explicit source discrepancy; the imported Army properties are not altered."
                 ]
             },
             "composition": {
@@ -3829,8 +3840,12 @@
             "id": "weapon:kobra-pistol-cc",
             "kind": "weapon",
             "name": "Kobra Pistol (CC Mode)",
-            "summary": "[[weapon:kobra-pistol|Kobra Pistol]] has separate BS and [[trait:cc|CC]] modes. In [[trait:cc|CC]] Mode it uses [[ammunition:da|Double Action (DA) Ammunition]], which requires two ARM Saving Rolls per hit. The N5 v5.3 Weapon Chart prints one Saving Roll for this mode, while the DA rule, imported Army profile, and reviewed N5.3 Wiki chart support two. The current Army profile and reviewed Wiki also list [[trait:anti-materiel|Anti-materiel]] for [[trait:cc|CC]] Mode, but the printed v5.3 chart omits that Trait. Its applicability remains an unresolved source discrepancy; this reference does not add or remove that Trait from the Army profile. The BS Mode instead uses [[ammunition:shock|Shock Ammunition]] and does not inherit this [[trait:cc|CC]]-specific reference.",
-            "facts": {},
+            "summary": "[[weapon:kobra-pistol|Kobra Pistol]] has separate BS and [[trait:cc|CC]] modes. In [[trait:cc|CC]] Mode it uses [[ammunition:da|Double Action (DA) Ammunition]], which requires two ARM Saving Rolls per hit. \n\nThe BS Mode instead uses [[ammunition:shock|Shock Ammunition]] and does not inherit this [[trait:cc|CC]]-specific reference.",
+            "facts": {
+                "sourceNotes": [
+                    "The N5 v5.3 Weapon Chart printsone Saving Roll for this mode, while the DA rule, imported Army profile, and reviewed N5.3 Wiki chart support two. The current Army profile and reviewed Wiki also list [[trait:anti-materiel|Anti-materiel]] for [[trait:cc|CC]] Mode, but the printed v5.3 chart omits that Trait. Its applicability remains an unresolved source discrepancy; this reference does not add or remove that Trait from the Army profile."
+                ]
+            },
             "composition": {
                 "role": "definition"
             },
@@ -3886,8 +3901,12 @@
             "id": "weapon:drop-bears",
             "kind": "weapon",
             "name": "Drop Bears",
-            "summary": "Drop Bears have two different deployment modes, with three shared [[trait:disposable-x|Disposable (3)]] uses. **[[trait:deployable|Deployable]] Mode:** Use [[skill:place-deployable|Place Deployable]] or [[skill:intuitive-attack|Intuitive Attack]] to place a visible Mine Token (Mine -3), not a [[skill:camouflage|Camouflage]] Marker. The deployed Drop Bear uses its own [[ammunition:shock|Shock]] weapon profile. **BS Mode:** Throw the Drop Bear using [[trait:bs-weapon-ph|BS Weapon (PH)]]; [[trait:targetless|Targetless]] means no target is needed. A successful Roll deploys the Mine Token during the Conclusion step; it cannot detonate during the Order in which it was thrown. In BS Mode, it cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid, non-camouflaged enemy is also inside. After placement the Token functions as a Mine, subject to these Drop Bear-specific exceptions. The N5 v5.3 chart classifies the thrown mode as [[trait:bs-weapon-ph|BS Weapon (PH)]], but Army additionally retains the legacy [[trait:bs-weapon-ph|Throwing Weapon]] label. That older label is source metadata, not an additional N5 effect.",
-            "facts": {},
+            "summary": "Drop Bears have two different deployment modes, with three shared [[trait:disposable-x|Disposable (3)]] uses.\n\n**[[trait:deployable|Deployable]] Mode:** Use [[skill:place-deployable|Place Deployable]] or [[skill:intuitive-attack|Intuitive Attack]] to place a visible Mine Token (Mine -3), not a [[skill:camouflage|Camouflage]] Marker. The deployed Drop Bear uses its own [[ammunition:shock|Shock]] weapon profile.\n\n**BS Mode:** Throw the Drop Bear using [[trait:bs-weapon-ph|BS Weapon (PH)]]; [[trait:targetless|Targetless]] means no target is needed. A successful Roll deploys the Mine Token during the Conclusion step; it cannot detonate during the Order in which it was thrown.\n\nIn BS Mode, it cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid, non-camouflaged enemy is also inside. After placement the Token functions as a Mine, subject to these Drop Bear-specific exceptions.",
+            "facts": {
+                "sourceNotes": [
+                    "The N5 v5.3 chart classifies the thrown mode as [[trait:bs-weapon-ph|BS Weapon (PH)]], but Army additionally retains the legacy [[trait:bs-weapon-ph|Throwing Weapon]] label. That older label is source metadata, not an additional N5 effect."
+                ]
+            },
             "composition": {
                 "role": "definition"
             },
@@ -3957,7 +3976,7 @@
             "id": "weapon:wildparrot",
             "kind": "weapon",
             "name": "WildParrot",
-            "summary": "WildParrots are placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]]. The [[trait:perimeter|Perimeter]] rule places them completely inside the user’s [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact. Once deployed, they work like [[weapon:mines|E/M Mines]], but place a visible WildParrot Token or Model instead of a [[skill:camouflage|Camouflage]] Marker. Unlike [[trait:boost|Boost]] devices such as Crazykoalas and Madtraps, WildParrots do not have that Trait; they follow their own E/M weapon profile (BTS/2, two Saving Rolls). The printed N5 v5.3 Weapon Chart specifies [[trait:non-lethal|Non-Lethal]], which is absent from the current imported Army Trait list. That source discrepancy is retained rather than silently changing the Army profile.",
+            "summary": "WildParrots are placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]]. The [[trait:perimeter|Perimeter]] rule places them completely inside the user’s [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact. Once deployed, they work like [[weapon:mines|E/M Mines]], but place a visible WildParrot Token or Model instead of a [[skill:camouflage|Camouflage]] Marker. Unlike [[trait:boost|Boost]] devices such as Crazykoalas and Madtraps, WildParrots do not have that Trait; they follow their own E/M weapon profile (BTS/2, two Saving Rolls).",
             "facts": {
                 "variantRuleReferences": {
                     "wildparrot": [
@@ -3966,7 +3985,10 @@
                         "state:isolated",
                         "state:immobilized-b"
                     ]
-                }
+                },
+                "sourceNotes": [
+                    "The printed N5 v5.3 Weapon Chart specifies [[trait:non-lethal|Non-Lethal]], which is absent from the current imported Army Trait list. That source discrepancy is retained rather than silently changing the Army profile."
+                ]
             },
             "composition": {
                 "role": "definition"
@@ -4138,8 +4160,12 @@
             "id": "weapon:para-mine",
             "kind": "weapon",
             "name": "PARA Mine",
-            "summary": "This weapon uses the shared [[weapon:mines|Mines]] placement and triggering rules. Hits use [[ammunition:para|Paralysis (PARA) Ammunition]]: a PH-6 Saving Roll, with failure causing [[state:immobilized-a|Immobilized-A]], rather than Wounds. The N5 v5.3 Weapon Chart and reviewed Wiki mark its profile [*], which the N5.3 legend defines as a reference to additional Weaponry rules. The imported Army profile instead has [**], which the N5.3 legend assigns to Ammunition rules. Both the Mine mechanics and PARA ammunition apply. The marker difference is an unresolved source-reference discrepancy; the Army profile is retained unchanged.",
-            "facts": {},
+            "summary": "This weapon uses the shared [[weapon:mines|Mines]] placement and triggering rules. Hits use [[ammunition:para|Paralysis (PARA) Ammunition]]: a PH-6 Saving Roll, with failure causing [[state:immobilized-a|Immobilized-A]], rather than Wounds.",
+            "facts": {
+                "sourceNotes": [
+                    "The N5 v5.3 Weapon Chart and reviewed Wiki mark its profile [*], which the N5.3 legend defines as a reference to additional Weaponry rules. The imported Army profile instead has [**], which the N5.3 legend assigns to Ammunition rules. Both the Mine mechanics and PARA ammunition apply. The marker difference is an unresolved source-reference discrepancy; the Army profile is retained unchanged."
+                ]
+            },
             "composition": {
                 "role": "definition"
             },

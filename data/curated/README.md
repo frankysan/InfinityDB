@@ -63,9 +63,19 @@ python tools\audit_maintained_text_links.py
 The audit prints unlinked candidates, reviewed-batch residuals, and explicit `review-needed` markers.
 The first two inventories must remain zero. When a passage is ambiguous or its source meaning is not
 clear enough to choose a semantic target, use
-`[[review-needed:<reason>|<visible text>]]` rather than guessing. Reason codes are lowercase
-kebab-case; prefer reusable codes such as `ambiguous-target`, `unclear-source-meaning`,
-`source-conflict`, or `scope-unclear`. `[[review-needed:<reason>]]` is valid for a standalone marker.
+`[[review-needed:<reason>|<visible text>]]` rather than guessing.
+
+Reason codes are lowercase kebab-case; prefer reusable codes such as
+`ambiguous-target`, `unclear-source-meaning`, `source-conflict`, or
+`scope-unclear`. `[[review-needed:<reason>]]` is valid for a standalone marker.
+
+Rules summaries may separate paragraphs with blank lines (`\n\n`) and use
+`**emphasis**` around mode labels; the browser renders both without breaking
+maintained-text links. Editorial source discrepancies, legacy Army terminology,
+and other non-gameplay notes belong in an optional `facts.sourceNotes` array of
+non-empty maintained-text strings. These are shown beneath the primary rules in
+smaller type and remain subject to reference auditing.
+
 The audit lists all review-needed markers separately so reviewed uncertainty remains easy to locate
 and cannot disappear into ordinary prose. Resolve each marker to a typed semantic reference, or to
 ordinary text when manual review proves it is not a reference.

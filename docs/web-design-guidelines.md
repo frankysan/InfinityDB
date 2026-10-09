@@ -21,6 +21,16 @@ Recurring UI behavior should be represented by shared primitives with explicit s
 
 Page-specific CSS and markup remain appropriate for genuinely unique content, but they should not redefine common concepts such as surfaces, table geometry, badges, headers, controls, spacing, responsive behavior, or developer-only presentation.
 
+### Curated rules text hierarchy
+
+Rules cards should split authored summary paragraphs on blank lines, preserving
+semantic links and inline **bold emphasis** rather than displaying formatting
+markers verbatim. Keep the rules players need to act on at normal body size;
+source-history, Army/PDF mismatches, and legacy terminology belong in separate
+`facts.sourceNotes` entries, rendered in secondary, smaller text. Source notes
+must retain their citations and maintained-text references. Do not embed source
+notes as a final rules-summary paragraph just to achieve a visual difference.
+
 ### Give visual rules semantic meaning
 
 Style according to what an element is and what role it serves, not merely where it happens to appear. Prefer concepts such as primary column, metric column, technical metadata, surface header, and status badge over positional rules such as first child, third column, or last row.
