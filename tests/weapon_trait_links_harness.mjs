@@ -19,8 +19,9 @@ const document = {
     return { tag, textContent: "", className: "", href: "" };
   },
 };
-const render = vm.runInNewContext(
-  `${code.slice(start, end)}\nweaponTraitLinks`, { document, encodeURIComponent },
+const { render, groupProperties } = vm.runInNewContext(
+  `${code.slice(start, end)}\n({ render: weaponTraitLinks, groupProperties: groupWeaponProperties })`,
+  { document, encodeURIComponent },
 );
 const output = render([
   { label: "Comms. Attack", name: "Comms Attack", slug: null,
@@ -49,4 +50,32 @@ assert.equal(aliases.length, 2);
 assert(aliases[0].textContent.includes("Comms. Attack"));
 assert(aliases[1].textContent.includes("Immbolized-B"));
 assert(output.children.includes("State: Unknown / Stunned"));
+// Source 'properties' are a mixed bucket; display canonical rule domains separately.
+const grouped = groupProperties([
+  { label: "Disposable (2)", name: "Disposable (X)", slug: "disposable-x" },
+  { label: "Comms. Attack", name: "Comms Attack", slug: null,
+    public_reference: { catalog: "labels", id: "comms-attack" } },
+  { label: "State: Sepsitorized", name: "Sepsitorized State", slug: null,
+    public_reference: { catalog: "states", id: "sepsitorized" } },
+  { label: "State: Stunned / Immbolized-B", name: "State: Stunned / Immobilized-B",
+    slug: null, state_references: [
+      { label: "Stunned", public_reference: { catalog: "states", id: "stunned" } },
+      { label: "Immobilized-B", public_reference: { catalog: "states", id: "immobilized-b" } },
+    ] },
+  { label: "State: Unknown / Stunned", name: "State: Unknown / Stunned", slug: null },
+  { label: "Unreviewed Property", name: "Unreviewed Property", slug: null },
+]);
+assert.equal(grouped.Traits.length, 1);
+assert.equal(grouped.Labels.length, 1);
+assert.equal(grouped.States.length, 3);
+assert.equal(grouped.Properties.length, 1);
+assert.deepEqual(grouped.States.map((item) => item.label).join("|"),
+  "State: Sepsitorized|State: Stunned / Immbolized-B|State: Unknown / Stunned");
+const stateOutput = render(grouped.States, false);
+assert(!stateOutput.children.includes("State: "));
+assert(stateOutput.children.some((item) => item.tag === "a"
+  && item.href === "/states/sepsitorized" && item.textContent === "Sepsitorized"));
+assert(stateOutput.children.some((item) => item.tag === "a"
+  && item.href === "/states/stunned" && item.textContent === "Stunned"));
+assert(stateOutput.children.includes("Unknown / Stunned"));
 console.log("weapon trait and label navigation passed");

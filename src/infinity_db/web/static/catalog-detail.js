@@ -78,7 +78,29 @@ function ruleReferenceHref(reference) {
   return null;
 }
 
-function weaponTraitLinks(traits) {
+function groupWeaponProperties(references) {
+  // Army has one source property bucket, but N5 publishes separate rule domains.
+  const groups = { Traits: [], Labels: [], States: [], Properties: [] };
+  for (const reference of references) {
+    const catalogName = reference.public_reference?.catalog;
+    if (catalogName === "labels") {
+      groups.Labels.push(reference);
+    } else if (
+      catalogName === "states"
+      || reference.state_references?.length
+      || /^state:/i.test(reference.label || "")
+    ) {
+      groups.States.push(reference);
+    } else if (reference.slug) {
+      groups.Traits.push(reference);
+    } else {
+      groups.Properties.push(reference);
+    }
+  }
+  return groups;
+}
+
+function weaponTraitLinks(traits, showStatePrefix = true) {
   const fragment = document.createDocumentFragment();
   const canonicalSlugs = new Set(traits
     .filter((trait) => trait.slug && !trait.source_alias)
@@ -101,7 +123,7 @@ function weaponTraitLinks(traits) {
       href = `/traits/${encodeURIComponent(trait.slug)}`;
     }
     if (Array.isArray(trait.state_references) && trait.state_references.length) {
-      fragment.append("State: ");
+      if (showStatePrefix) fragment.append("State: ");
       for (const [partIndex, state] of trait.state_references.entries()) {
         if (partIndex) fragment.append(" / ");
         const stateHref = ruleReferenceHref(state.public_reference);
@@ -117,10 +139,10 @@ function weaponTraitLinks(traits) {
     } else if (href) {
       const link = document.createElement("a");
       link.href = href;
-      link.textContent = label;
+      link.textContent = showStatePrefix ? label : label.replace(/^State:\s*/i, "");
       fragment.append(link);
     } else {
-      fragment.append(label);
+      fragment.append(showStatePrefix ? label : label.replace(/^State:\s*/i, ""));
     }
     const sourceLabels = trait.source_alias
       ? [trait.label] : (duplicateAliases.get(trait.slug) || []);
@@ -320,17 +342,18 @@ function weaponVariants(variants) {
       const traitReferences = Array.isArray(profile.trait_references)
         ? profile.trait_references
         : [];
-      if (traitReferences.length) {
-        const traitsRow = document.createElement("div");
-        traitsRow.className = "weapon-data-row";
-        const traitsHeading = document.createElement("h5");
-        traitsHeading.className = "weapon-data-heading";
-        traitsHeading.textContent = "Traits";
-        const traits = document.createElement("p");
-        traits.className = "weapon-data-value";
-        traits.append(weaponTraitLinks(traitReferences));
-        traitsRow.append(traitsHeading, traits);
-        card.append(traitsRow);
+      for (const [heading, properties] of Object.entries(groupWeaponProperties(traitReferences))) {
+        if (!properties.length) continue;
+        const propertiesRow = document.createElement("div");
+        propertiesRow.className = "weapon-data-row";
+        const propertiesHeading = document.createElement("h5");
+        propertiesHeading.className = "weapon-data-heading";
+        propertiesHeading.textContent = heading;
+        const propertiesText = document.createElement("p");
+        propertiesText.className = "weapon-data-value";
+        propertiesText.append(weaponTraitLinks(properties, heading !== "States"));
+        propertiesRow.append(propertiesHeading, propertiesText);
+        card.append(propertiesRow);
       }
       if (profile.rules?.length) {
         card.append(rulesReferenceSection(profile.rules, "Mode rules"));

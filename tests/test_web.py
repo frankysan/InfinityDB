@@ -4046,7 +4046,7 @@ def test_catalog_detail_frontend_uses_backend_trait_references(
 
     assert status == 200
     assert b"profile.trait_references" in body
-    assert b"function weaponTraitLinks(traits)" in body
+    assert b"function weaponTraitLinks(traits, showStatePrefix = true)" in body
     assert b"trait.source_alias ? trait.name : trait.label" in body
     assert b"const canonicalSlugs = new Set(traits" in body
     assert b"duplicateAliases.get(trait.slug)" in body
@@ -4054,6 +4054,10 @@ def test_catalog_detail_frontend_uses_backend_trait_references(
     assert b"sourceAlias.textContent = ` (Army: ${sourceLabels.join" in body
     assert b"ruleReferenceHref(trait.public_reference)" in body
     assert b"trait.state_references" in body
+    assert b"function groupWeaponProperties(references)" in body
+    assert b"groups.Labels.push(reference)" in body
+    assert b"groups.States.push(reference)" in body
+    assert b"groups.Properties.push(reference)" in body
     assert b"state.public_reference" in body
     assert b"href = `/traits/${encodeURIComponent(trait.slug)}`;" in body
     assert b"function canonicalTraitName(" not in body
@@ -4150,9 +4154,10 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert b"headingText" not in weapon_detail
     assert b"variantTitle" not in weapon_detail
     assert b'profileHeading.textContent = "Profile";' in weapon_detail
-    assert b'traitsHeading.textContent = "Traits";' in weapon_detail
-    assert b"if (traitReferences.length)" in weapon_detail
-    assert b"function weaponTraitLinks(traits)" in weapon_detail
+    assert b'propertiesHeading.textContent = heading;' in weapon_detail
+    assert b'groupWeaponProperties(traitReferences)' in weapon_detail
+    assert b'weaponTraitLinks(properties, heading !== "States")' in weapon_detail
+    assert b"function weaponTraitLinks(traits, showStatePrefix = true)" in weapon_detail
     assert b"function canonicalTraitName(" not in weapon_detail
     assert b"function traitSlug(" not in weapon_detail
     assert b"function traitUsageSectionGroup(item)" in weapon_detail

@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Weapon profile properties now appear under their correct Traits, Labels or States
+  headings, instead of all being presented as Traits; unknown properties stay visible.
 - Weapon profile Labels such as Comms Attack and No LoF now link to their rules;
   compound State entries link to each State instead of a generic Trait page.
 - Long rules references use shorter, topic-based paragraphs, with separate smaller source

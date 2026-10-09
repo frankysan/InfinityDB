@@ -52,7 +52,12 @@ Resolve each through its canonical domain (`/traits`, `/labels`, `/states`),
 without inventing a Trait route for a Label. A property naming multiple States
 should link each resolved State individually. Preserve source spelling in the
 API and, when it differs from canonical wording, in Developer Mode. Unknown
-references must remain unlinked rather than opening an unrelated rule.
+references must remain unlinked rather than opening an unrelated rule. For Weapon profiles, group the resolved properties
+under their actual rules-domain headings (**Traits**, **Labels**, and **States**)
+rather than presenting every Army property as a Trait. Keep unknown properties
+visible under **Properties** without assigning an unverified domain. Preserve
+source order within each heading and avoid duplicating a `State:` prefix under a
+States heading.
 
 ### Give visual rules semantic meaning
 
