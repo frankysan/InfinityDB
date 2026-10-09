@@ -2660,6 +2660,7 @@ class Database:
                 "mode": profile["mode"],
                 "type": profile["type"],
                 "ammunition": profile["ammunition_name"] or profile["ammunition"],
+                "ammunition_source_id": profile["ammunition"],
                 "burst": profile["burst"],
                 "damage": profile["damage"],
                 "saving": profile["saving"],

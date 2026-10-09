@@ -598,6 +598,7 @@ def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: di
             "mode": "Standard",
             "type": "BS",
             "ammunition": "Normal",
+            "ammunition_source_id": 2,
             "burst": "3",
             "damage": "7",
             "saving": "ARM",

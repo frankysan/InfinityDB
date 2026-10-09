@@ -59,6 +59,17 @@ visible under **Properties** without assigning an unverified domain. Preserve
 source order within each heading and avoid duplicating a `State:` prefix under a
 States heading.
 
+### Ammunition reference navigation
+
+Weapon statline Ammunition may be a single base type, a source-defined combined
+form, or an unresolved alternative. Display the imported source name and link only
+individual component spans that the backend identifies from reviewed source
+metadata; keep operators such as `+` as literal text. Do not split names in
+JavaScript, treat a `/` as a generic composition operator, or infer Ammunition
+components from Saving Roll notation such as `ARM/2 × 2`. If the server has no
+reviewed component reference, leave the source name readable without fabricating
+a destination. The Ammunition detail page remains the canonical semantic owner.
+
 ### Give visual rules semantic meaning
 
 Style according to what an element is and what role it serves, not merely where it happens to appear. Prefer concepts such as primary column, metric column, technical metadata, surface header, and status badge over positional rules such as first child, third column, or last row.

@@ -524,3 +524,50 @@ def test_cube_two_references_both_sepsitor_variants() -> None:
         if relation["type"] == "modifies-rolls-for"
     }
     assert {"weapon:sepsitor", "weapon:sepsitor-plus"} <= links
+
+
+def test_ammunition_metadata_links_are_reviewed_base_types(
+    weaponry_app: Callable,
+) -> None:
+    # N, AP and DA are different source identities even when their weapon
+    # profile stats or Saving Roll notations happen to look alike.
+    cases = {
+        "ap-heavy-machine-gun": ("AP", "ap", "ARM/2"),
+        "da-cc-weapon": ("DA", "da", "ARM"),
+    }
+    for slug, (name, target, saving) in cases.items():
+        payload = _weapon_detail(weaponry_app, slug)
+        profile = payload["profiles"][0]
+        assert profile["ammunition"] == name
+        assert profile["saving"] == saving
+        assert profile["ammunition_parts"] == [
+            {
+                "text": name,
+                "public_reference": {"catalog": "ammunition", "id": target},
+            }
+        ]
+
+
+def test_combined_ammunition_components_do_not_change_saving_rolls(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "feuerbach")
+    profile = next(profile for profile in payload["profiles"] if profile["mode"] == "Burst Mode")
+    assert profile["ammunition"] == "AP+DA"
+    assert profile["ammunition_source_id"] == 10
+    assert profile["ammunition_parts"] == [
+        {"text": "AP", "public_reference": {"catalog": "ammunition", "id": "ap"}},
+        {"text": "+"},
+        {"text": "DA", "public_reference": {"catalog": "ammunition", "id": "da"}},
+    ]
+    assert profile["saving"] == "ARM/2"
+    assert str(profile["saving_num"]) == "2"
+
+
+def test_unreviewed_ammunition_identity_is_not_inferred_from_punctuation(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "missile-launcher")
+    profile = next(profile for profile in payload["profiles"] if profile["mode"] == "Hit Mode")
+    assert profile["ammunition"] == "AP+Exp"
+    assert "ammunition_parts" not in profile

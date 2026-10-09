@@ -7,6 +7,7 @@ from typing import Any
 
 from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
+from infinity_db.weapon_ammunition_references import WeaponAmmunitionReferences
 
 DECLARATION_KIND = "declaration-category"
 
@@ -50,6 +51,10 @@ class CatalogRules:
             str, dict[ArmyLinkRef, dict[str, Any]]
         ] = {}
         self._rule_reference_cache: dict[str, dict[str, Any]] = {}
+        self._ammunition_references = (
+            WeaponAmmunitionReferences(rules_database)
+            if rules_database is not None else None
+        )
 
     @staticmethod
     def _application_refs(item: dict[str, Any]) -> tuple[ArmyLinkRef, ...]:
@@ -209,6 +214,20 @@ class CatalogRules:
             variant_rules = source_rules.get(source_id)
             if variant_rules:
                 variant["rules"] = list(variant_rules.values())
+
+        ammunition_references = self._ammunition_references
+        if entity == "weapon" and ammunition_references is not None:
+            # Resolve source metadata, not display punctuation: AP+DA is an
+            # Ammunition composition, while Saving Roll x2 is a separate field.
+            def attach_ammunition_references(profiles: list[dict[str, Any]]) -> None:
+                for profile in profiles:
+                    segments = ammunition_references.for_profile(profile)
+                    if segments is not None:
+                        profile["ammunition_parts"] = segments
+
+            attach_ammunition_references(result.get("profiles", []))
+            for variant in result.get("weapon_variants", []):
+                attach_ammunition_references(variant.get("profiles", []))
 
         if entity == "weapon" and mode_rules:
             # Army can reuse one source ID for multiple different weapon modes.

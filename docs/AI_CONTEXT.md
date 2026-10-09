@@ -77,6 +77,10 @@ release/audit narrative belongs in the changelog and Git history.
 - Slugs are the preferred application-facing identifiers when a domain has a stable slug; numeric
   IDs remain compatibility/provenance forms.
 - Browser code renders backend-owned semantics rather than recreating data-model policy.
+- Weapon Ammunition navigation maps exact Army metadata identity/name pairs to
+  reviewed base reference segments, with no client-side parsing of combined notation
+  and no inference from Saving Roll notation. Missing mappings stay unlinked.
+  See `docs/data-model.md` and the maintained `weapon-ammunition-references.json`.
 - Game/reference data is read-only at runtime. Persistent user-authored application data is not part
   of the current model.
 - Retained metrics live in a separate private collector with one bounded writable volume; the

@@ -52,6 +52,19 @@ BS Mode and CC Mode). Curated source rules may target an exact source ID *and*
 mode, but must attach to that one profile only, not to the parent Weapon/source
 variant or sibling modes. Mode qualifiers describe identity, not permission to
 resolve a disputed Trait automatically.
+Weapon Ammunition navigation is a reviewed *projection*, not executable Ammunition
+composition. `config/catalogs/weapon-ammunition-references.json` pins exact Army
+metadata Ammunition IDs and names to canonical published base Ammunition references.
+The repository preserves the source metadata ID as `ammunition_source_id` in each
+Weapon profile; the catalog API attaches ordered `ammunition_parts` only when both
+that ID and its name match the reviewed map. A base type links to one reference;
+source-defined `AP+DA` links both separately with its literal `+`. Unreviewed
+combined, alternative (`/`), absent, or mismatched values remain source text;
+they are not guessed from punctuation. Saving Roll notation (`ARM/2`, `x2`, etc.)
+remains a distinct, unchanged source field and is never interpreted as Ammunition
+composition. The 1.0 typed effects/relationships and comparison view remain
+separate incomplete work; these links do not assert their completeness.
+
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;
 its specific rules are separately curated, and missing Army Trait notation is

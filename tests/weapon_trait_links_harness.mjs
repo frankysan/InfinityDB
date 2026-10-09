@@ -19,9 +19,9 @@ const document = {
     return { tag, textContent: "", className: "", href: "" };
   },
 };
-const { render, groupProperties } = vm.runInNewContext(
-  `${code.slice(start, end)}\n({ render: weaponTraitLinks, groupProperties: groupWeaponProperties })`,
-  { document, encodeURIComponent },
+const { render, groupProperties, renderAmmo } = vm.runInNewContext(
+  `${code.slice(start, end)}\n({ render: weaponTraitLinks, groupProperties: groupWeaponProperties, renderAmmo: appendWeaponAmmunition })`,
+  { document, encodeURIComponent, text: (value) => value == null ? "—" : String(value) },
 );
 const output = render([
   { label: "Comms. Attack", name: "Comms Attack", slug: null,
@@ -78,4 +78,20 @@ assert(stateOutput.children.some((item) => item.tag === "a"
 assert(stateOutput.children.some((item) => item.tag === "a"
   && item.href === "/states/stunned" && item.textContent === "Stunned"));
 assert(stateOutput.children.includes("Unknown / Stunned"));
-console.log("weapon trait and label navigation passed");
+const ammoCell = fragment();
+renderAmmo(ammoCell, {
+  ammunition: "AP+DA",
+  ammunition_parts: [
+    { text: "AP", public_reference: { catalog: "ammunition", id: "ap" } },
+    { text: "+" },
+    { text: "DA", public_reference: { catalog: "ammunition", id: "da" } },
+  ],
+}, null);
+assert.deepEqual(ammoCell.children.map((item) =>
+  typeof item === "string" ? item : [item.textContent, item.href]), [
+  ["AP", "/ammunition/ap"], "+", ["DA", "/ammunition/da"],
+]);
+const unknownAmmo = fragment();
+renderAmmo(unknownAmmo, { ammunition: "AP/DA" }, null);
+assert.equal(unknownAmmo.textContent, "AP/DA");
+console.log("weapon trait and label navigation passed; ammunition navigation passed");

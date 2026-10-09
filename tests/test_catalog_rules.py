@@ -1,12 +1,19 @@
 import copy
 import json
+import sqlite3
 from pathlib import Path
 from typing import Any
 from wsgiref.util import setup_testing_defaults
 
+import pytest
+
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import RulesDatabase, export_rules_database
+from infinity_db.weapon_ammunition_references import (
+    WeaponAmmunitionReferences,
+    load_ammunition_reference_map,
+)
 from infinity_db.web import create_app
 
 
@@ -335,3 +342,47 @@ def test_weapon_source_mode_rules_do_not_leak_between_same_id_profiles(
     assert [
         rule["id"] for rule in payload["weapon_variants"][0]["profiles"][1]["rules"]
     ] == ["weapon:kobra-pistol-cc-test"]
+
+
+def test_reviewed_ammunition_references_preserve_exact_army_identity(tmp_path: Path) -> None:
+    mapping = load_ammunition_reference_map()
+    assert len(mapping) == 12
+    refs = WeaponAmmunitionReferences(_rules_database(tmp_path))
+    assert refs.for_profile({"ammunition_source_id": 10, "ammunition": "AP+DA"}) == [
+        {"text": "AP", "public_reference": {"catalog": "ammunition", "id": "ap"}},
+        {"text": "+"},
+        {"text": "DA", "public_reference": {"catalog": "ammunition", "id": "da"}},
+    ]
+    assert refs.for_profile({"ammunition_source_id": 10, "ammunition": "AP/DA"}) is None
+    assert refs.for_profile({"ammunition_source_id": 17, "ammunition": "AP/DA"}) is None
+    assert refs.for_profile({"ammunition_source_id": 0, "ammunition": "--"}) is None
+
+    # A maintained mapping must exactly reconstruct the source notation.
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text(json.dumps({
+        "format": "InfinityDB weapon ammunition references",
+        "version": 1,
+        "sourceEntries": {"10": {
+            "name": "AP+DA",
+            "segments": [{"text": "AP", "ruleId": "ammunition:ap"}],
+        }},
+    }), encoding="utf-8")
+    with pytest.raises(ValueError, match="reproduce source name"):
+        load_ammunition_reference_map(invalid)
+
+
+def test_reviewed_ammunition_source_names_match_published_army_snapshot() -> None:
+    root = Path(__file__).resolve().parents[1]
+    with sqlite3.connect(root / "data/generated/infinity.db") as connection:
+        published = dict(connection.execute("SELECT id, name FROM metadata_ammunitions"))
+        source_count = connection.execute("SELECT COUNT(*) FROM metadata_weapons").fetchone()[0]
+        reviewed_ids = tuple(load_ammunition_reference_map())
+        reviewed_count = connection.execute(
+            "SELECT COUNT(*) FROM metadata_weapons WHERE ammunition IN ("
+            + ", ".join("?" for _ in reviewed_ids) + ")",
+            reviewed_ids,
+        ).fetchone()[0]
+    assert source_count >= reviewed_count
+    assert reviewed_count >= len(reviewed_ids)
+    for source_id, entry in load_ammunition_reference_map().items():
+        assert published[source_id] == entry["name"]

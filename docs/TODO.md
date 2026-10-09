@@ -326,6 +326,10 @@ unimplemented until its corresponding behavior exists.
     Ammunition, and keep Ammunition composition separate from Combined Saving Roll
     notation. Link State, Attribute, and Saving-Roll effects explicitly instead of
     deriving them from display names.
+    - [x] Add a bounded source-identity navigation pilot for the 11 published base Ammunition
+      references and source-defined `AP+DA`, using exact Army metadata IDs and names.
+      Keep unreviewed forms unlinked and Saving Roll notation independent; this does
+      not complete typed Ammunition effects or the quick-reference view.
     - [ ] Review the fact/relation schema before curation: components, affected saving Attribute,
       roll/effect conditions, and State interactions need explicit ownership. Cover a base type,
       a combined form, and Combined Saving Roll notation in an end-to-end pilot.

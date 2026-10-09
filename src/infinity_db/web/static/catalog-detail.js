@@ -78,6 +78,33 @@ function ruleReferenceHref(reference) {
   return null;
 }
 
+function appendWeaponAmmunition(cell, profile, fallbackReference) {
+  if (Array.isArray(profile.ammunition_parts)) {
+    // All parts come from reviewed metadata IDs, never parsed from display notation.
+    for (const part of profile.ammunition_parts) {
+      const href = ruleReferenceHref(part.public_reference);
+      if (href) {
+        const link = document.createElement("a");
+        link.href = href;
+        link.textContent = part.text;
+        cell.append(link);
+      } else {
+        cell.append(part.text);
+      }
+    }
+    return;
+  }
+  const href = ruleReferenceHref(fallbackReference);
+  if (href) {
+    const link = document.createElement("a");
+    link.href = href;
+    link.textContent = text(profile.ammunition);
+    cell.append(link);
+  } else {
+    cell.textContent = text(profile.ammunition);
+  }
+}
+
 function groupWeaponProperties(references) {
   // Army has one source property bucket, but N5 publishes separate rule domains.
   const groups = { Traits: [], Labels: [], States: [], Properties: [] };
@@ -278,11 +305,8 @@ function weaponVariants(variants) {
         const cell = document.createElement("td");
         cell.className = `table-column--${role}`;
         cell.dataset.label = statLabel;
-        if (statLabel === "Ammunition" && ammunitionRule) {
-          const link = document.createElement("a");
-          link.href = ruleReferenceHref(ammunitionRule.public_reference);
-          link.textContent = text(value);
-          cell.append(link);
+        if (statLabel === "Ammunition") {
+          appendWeaponAmmunition(cell, profile, ammunitionRule?.public_reference);
         } else {
           cell.textContent = text(value);
         }
