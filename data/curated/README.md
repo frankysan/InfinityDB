@@ -80,6 +80,14 @@ The audit lists all review-needed markers separately so reviewed uncertainty rem
 and cannot disappear into ordinary prose. Resolve each marker to a typed semantic reference, or to
 ordinary text when manual review proves it is not a reference.
 
+For `ammunition:*` records, authored `causes-state` relations must contain
+exactly the State identities in `facts.ammunitionResolution.stateEffects`.
+The condition and target restrictions belong to the typed facts; a generic
+related-rule edge is a navigational link, **not** an unconditional game effect.
+The validator rejects an omitted, extra, or mismatched State relation so the
+player-facing graph and source-cited facts cannot drift apart. Other
+Ammunition effects remain independent of these State links.
+
 ### Rules-enrichment coverage classifications
 
 `enrichment-coverage/classifications.json` is the maintained release-scope policy for

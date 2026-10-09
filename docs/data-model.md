@@ -98,8 +98,14 @@ facts, but the contract is deliberately non-executable: it does not model
 critical attack resolution generally, Smoke/Eclipse Face to Face adjudication,
 all conditional immunity/target interactions, or combined-Ammunition
 precedence. This is not yet a complete curated Ammunition effect/relation model or a
-general combined-Ammunition evaluator. Missing effects, combined Critical
-interactions, and broader State cross-links still require source review.
+general combined-Ammunition evaluator. Conditional State outcomes are also
+published as authored `causes-state` rules-graph links for E/M, PARA, Shock,
+and Stun. The curated validator requires the set of targets on these links to
+match `facts.ammunitionResolution.stateEffects` exactly; target/attribute
+restrictions and Saving Roll failure conditions remain in the typed facts,
+not on the simple relation edge. Both directions of each link are available in
+reference pages. The other Ammunition effects, combined Critical interactions,
+and broader semantic relationships still require source review.
 
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;

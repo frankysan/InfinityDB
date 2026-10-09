@@ -32,7 +32,7 @@ review. `declaration-category` projection records are excluded.
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
 - Supporting semantic identities: **110/125** complete, **15** pending.
-- Current authored outgoing relations: **304**.
+- Current authored outgoing relations: **309**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -882,19 +882,20 @@ review. `declaration-category` projection records are excluded.
 - [ ] **Eclipse Ammunition** (`ammunition:eclipse`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
 - [ ] **Electromagnetic (E/M) Ammunition** (`ammunition:em`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
-  - outgoing: none
+  - `causes-state` → Isolated State (`state:isolated`)
+  - `causes-state` → Immobilized-B State (`state:immobilized-b`)
 - [ ] **Explosive (EXP) Ammunition** (`ammunition:exp`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
 - [ ] **Normal (N) Ammunition** (`ammunition:normal`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
 - [ ] **Paralysis (PARA) Ammunition** (`ammunition:para`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
-  - outgoing: none
+  - `causes-state` → Immobilized-A State (`state:immobilized-a`)
 - [ ] **Shock Ammunition** (`ammunition:shock`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
-  - outgoing: none
+  - `causes-state` → Dead State (`state:dead`)
 - [ ] **Smoke Ammunition** (`ammunition:smoke`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
 - [ ] **Stun Ammunition** (`ammunition:stun`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
-  - outgoing: none
+  - `causes-state` → Stunned State (`state:stunned`)
 - [ ] **T2 Ammunition** (`ammunition:t2`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
 

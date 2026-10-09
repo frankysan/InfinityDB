@@ -347,6 +347,10 @@ unimplemented until its corresponding behavior exists.
     - [x] Add source-backed facts for Normal, Shock, Stun, Smoke and Eclipse;
       isolate Smoke/Eclipse visibility zones from Saving Roll facts and preserve
       Shock's VITA-1 restriction and Stun's Courage/Guts exception.
+    - [x] Connect the five reviewed conditional State outcomes from E/M, PARA,
+      Shock and Stun to canonical State pages with bidirectional rules relations.
+      Check the authored targets against typed State facts without losing failure,
+      target-type or VITA restrictions; the full interaction audit stays open.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, Criticals, affected Attributes, visibility Face to Face outcomes,
       conditional State cross-links, and comparison-view consumption. Do not infer

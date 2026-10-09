@@ -911,6 +911,22 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 _validate_ammunition_resolution(
                     resolution, f"{context}.facts.ammunitionResolution"
                 )
+            # State links are authored as relations, not inferred by clients.
+            # Keep the graph and the conditional facts synchronized so a link
+            # never invents or silently loses a State outcome.
+            if record["kind"] == "ammunition":
+                state_effects = resolution.get("stateEffects", []) if resolution else []
+                fact_states = {effect["stateId"] for effect in state_effects}
+                relation_states = {
+                    relation["recordId"]
+                    for relation in relations
+                    if relation["type"] == "causes-state"
+                }
+                if fact_states != relation_states:
+                    raise ValueError(
+                        f"{context}: Ammunition causes-state relations must match "
+                        "facts.ammunitionResolution.stateEffects exactly"
+                    )
             zone = facts.get("visibilityZone")
             if zone is not None:
                 if record["kind"] != "ammunition":

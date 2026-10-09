@@ -2083,3 +2083,80 @@ def test_ammunition_visibility_zone_cannot_mix_domains_or_rolls(
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="visibilityZone"):
         load_curated_document(path)
+
+
+@pytest.mark.parametrize("case", ["missing", "extra", "wrong"])
+def test_ammunition_state_graph_must_match_conditional_effect_facts(
+    tmp_path: Path, case: str
+) -> None:
+    document = valid_document()
+    record = {
+        "id": "ammunition:pilot",
+        "kind": "ammunition",
+        "name": "Pilot ammunition",
+        "summary": "A typed State-effect graph fixture.",
+        "facts": {
+            "ammunitionResolution": {
+                "stateEffects": [
+                    {"stateId": "state:isolated", "condition": "failed-saving-roll"}
+                ]
+            }
+        },
+        "relations": [{"type": "causes-state", "recordId": "state:isolated"}],
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "citations": [{"sourceId": "n5-core-v5.3", "page": 64}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-10-09"},
+    }
+    document["records"].append(record)
+    path = tmp_path / "state-graph.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_curated_document(path)
+    if case == "missing":
+        record["relations"] = []
+    elif case == "extra":
+        record["relations"].append(
+            {"type": "causes-state", "recordId": "state:immobilized-b"}
+        )
+    else:
+        record["relations"][0]["recordId"] = "state:stunned"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="causes-state relations must match"):
+        load_curated_document(path)
+
+
+def test_current_ammunition_state_relations_preserve_conditional_effects() -> None:
+    path = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    records = {item["id"]: item for item in load_curated_document(path)["records"]}
+    expected = {
+        "ammunition:em": {"state:isolated", "state:immobilized-b"},
+        "ammunition:para": {"state:immobilized-a"},
+        "ammunition:shock": {"state:dead"},
+        "ammunition:stun": {"state:stunned"},
+    }
+    for record_id, state_ids in expected.items():
+        record = records[record_id]
+        assert {relation["recordId"] for relation in record["relations"]} == state_ids
+        fact_states = record["facts"]["ammunitionResolution"]["stateEffects"]
+        assert {effect["stateId"] for effect in fact_states} == state_ids
+    for record_id in (
+        "ammunition:normal",
+        "ammunition:ap",
+        "ammunition:da",
+        "ammunition:exp",
+        "ammunition:t2",
+        "ammunition:smoke",
+        "ammunition:eclipse",
+    ):
+        assert not any(
+            relation["type"] == "causes-state"
+            for relation in records[record_id].get("relations", [])
+        )
+    conditional = records["ammunition:em"]["facts"]["ammunitionResolution"][
+        "stateEffects"
+    ]
+    assert conditional[1]["targetTypes"] == ["HI", "TAG", "REM", "VH"]
+    shock = records["ammunition:shock"]["facts"]["ammunitionResolution"][
+        "stateEffects"
+    ]
+    assert shock[0]["targetAttribute"] == {"name": "VITA", "equals": 1}

@@ -21,7 +21,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
     assert report["summary"]["recordCount"] == 306
-    assert report["summary"]["authoredOutgoingRelationCount"] == 304
+    assert report["summary"]["authoredOutgoingRelationCount"] == 309
     assert report["summary"]["futureInteractionCount"] == 113
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 209,

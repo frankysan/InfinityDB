@@ -2495,3 +2495,31 @@ def test_scenario_publication_resolution_can_select_exact_historical_revision(
     assert database.resolve_scenario_publication(
         "annihilation", collection="n5-core", revision="5.2"
     ) == historical_publication
+
+
+def test_ammunition_conditional_state_links_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    ammunition = {
+        record["id"]: record
+        for record in current_rules_database.composed_records_by_kind("ammunition")
+    }
+    states = {
+        record["id"]: record
+        for record in current_rules_database.composed_records_by_kind("state")
+    }
+    for ammunition_id, state_id in (
+        ("ammunition:em", "state:isolated"),
+        ("ammunition:em", "state:immobilized-b"),
+        ("ammunition:para", "state:immobilized-a"),
+        ("ammunition:shock", "state:dead"),
+        ("ammunition:stun", "state:stunned"),
+    ):
+        assert ("causes-state", "outbound", state_id) in {
+            (relation["type"], relation["direction"], relation["record"]["id"])
+            for relation in ammunition[ammunition_id]["display_relations"]
+        }
+        assert ("causes-state", "inbound", ammunition_id) in {
+            (relation["type"], relation["direction"], relation["record"]["id"])
+            for relation in states[state_id]["display_relations"]
+        }

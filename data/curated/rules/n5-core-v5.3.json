@@ -16827,8 +16827,18 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
-            }
+                "reviewedOn": "2026-10-09"
+            },
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:isolated"
+                },
+                {
+                    "type": "causes-state",
+                    "recordId": "state:immobilized-b"
+                }
+            ]
         },
         {
             "id": "ammunition:exp",
@@ -16900,8 +16910,14 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
-            }
+                "reviewedOn": "2026-10-09"
+            },
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:immobilized-a"
+                }
+            ]
         },
         {
             "id": "ammunition:shock",
@@ -16947,7 +16963,13 @@
                         }
                     ]
                 }
-            }
+            },
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:dead"
+                }
+            ]
         },
         {
             "id": "ammunition:smoke",
@@ -17024,7 +17046,13 @@
                         "exception": "courage-or-equivalent"
                     }
                 }
-            }
+            },
+            "relations": [
+                {
+                    "type": "causes-state",
+                    "recordId": "state:stunned"
+                }
+            ]
         },
         {
             "id": "ammunition:t2",

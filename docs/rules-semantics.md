@@ -2175,6 +2175,16 @@ has no PH Attribute. T2 inflicts two Wounds for a failed hit Saving Roll; a fail
 preserve that exception explicitly instead of treating all failed T2 rolls as
 identical. None of these operations is calculated by InfinityDB.
 
+For E/M, PARA, Shock, and Stun, the authored `causes-state` edges now point
+to the canonical State records already named by `stateEffects`. The curated
+validator rejects missing, additional, or mismatched edges. A graph edge
+means the Ammunition **can** cause the State under its reviewed conditions;
+it does not mean that every hit or failed Saving Roll causes every linked
+State. In particular E/M's Immobilized-B is restricted to HI/TAG/REM/VH,
+Shock's Dead transition requires VITA 1, and PARA has no effect without PH.
+The individual `stateEffects` facts retain those qualifications. These
+relationships do not adjudicate Criticals or compose effects between types.
+
 Feuerbach's reviewed `AP+DA` metadata identifies two component rules, but
 `ARM/2` and `2` remain the independent, authoritative source profile fields.
 Plasma Carbine uses Normal Ammunition and a combined `ARM and BTS` Saving Roll;

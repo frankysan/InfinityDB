@@ -47,6 +47,10 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend:** Connect reviewed E/M, PARA, Shock and Stun
+  Ammunition references to their possible State outcomes, preserving the
+  conditional restrictions in each Ammunition definition and enabling reverse
+  navigation from State reference pages.
 - **Data processing + Web backend:** Publish reviewed typed effects for the remaining
   base Ammunition: Normal, Shock, Stun, Smoke, and Eclipse. Preserve conditional
   VITA/State and Guts effects and keep visibility zones separate from Saving Rolls.
