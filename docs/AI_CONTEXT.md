@@ -40,6 +40,10 @@ release/audit narrative belongs in the changelog and Git history.
   `combined_saving_roll` annotations: one ARM and one BTS roll, plus one
   additional ARM roll for a Critical. Do not infer this from display punctuation
   or transfer it to base `ammunition:*` facts. See `docs/data-model.md`.
+- The N5.3 Immunity exception boundary lives on `skill:immunity` as validated,
+  non-executable `facts.immunityInteraction`; do not apply it automatically to
+  combined components, Weapon profiles, or Critical outcomes. See
+  `docs/rules-semantics.md` RS-AW-IMM-001.
 - Scenario geometry is maintained semantic data, not diagram pixels. The 1.0 SVG renderer and
   geometry-schema v1 target only the four N5.3 core scenarios. All four core scenario records now
   own their geometry configurations; renderer tests consume those maintained definitions and must

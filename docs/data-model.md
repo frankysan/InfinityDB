@@ -129,6 +129,16 @@ annotation, not a roll evaluator, an Ammunition effect, or an inferred
 Full cross-source Combined Saving Roll coverage and immunity interactions remain
 open.
 
+A bounded Immunity cross-reference now publishes `skill:immunity`'s validated
+`facts.immunityInteraction` (N5.3 Wiki Immunity `oldid=3643`). It describes
+covered Ammunition as Normal, the loss of special effects and Saving Roll
+modifiers, the default additional Critical Saving Roll (unless the defender has
+Immunity (Critical)), and the Comms Attack/Non-Lethal/Stunned exceptions. These
+facts belong to Immunity, **not** to the ordered Combined Ammunition mapping:
+checking whether a defender's particular Immunity covers an entire attack or
+one or more constituent effects remains unimplemented. No roll counts, State
+outcomes, or immunities are projected into individual Weapon profiles.
+
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;
 its specific rules are separately curated, and missing Army Trait notation is

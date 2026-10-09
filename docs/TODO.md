@@ -360,6 +360,10 @@ unimplemented until its corresponding behavior exists.
       Roll, with one additional ARM roll on a Critical. Keep the reviewed source
       signatures separate from Ammunition composition and leave unreviewed
       profiles unchanged; this remains descriptive, not a roll evaluator.
+    - [x] Pin the reviewed Immunity boundary on its owning Skill reference:
+      covered Ammunition uses Normal effects, Immunity (Critical) removes the
+      otherwise remaining extra Critical roll, and Comms Attack/Non-Lethal/
+      Stunned exceptions are explicit. This is *not* a combined-effect evaluator.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view

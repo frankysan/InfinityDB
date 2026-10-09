@@ -15667,7 +15667,29 @@
                     "Except for Immunity (State), Immunity does not apply against Comms Attacks.",
                     "Immunity does not prevent the [[trait:non-lethal|Non-Lethal]] or [[trait:state|State: Stunned]] Traits, which are always applied.",
                     "Unless the user has Immunity (Critical), a Critical hit still causes its additional Saving Roll even when the underlying Ammunition or effect is otherwise covered by Immunity."
-                ]
+                ],
+                "immunityInteraction": {
+                    "coveredAmmunition": {
+                        "treatAs": "ammunition:normal",
+                        "ignore": [
+                            "special-effects",
+                            "saving-roll-attribute-modifiers",
+                            "saving-roll-count-modifiers"
+                        ]
+                    },
+                    "criticalAgainstCoveredAmmunition": {
+                        "additionalSavingRolls": 1,
+                        "unless": "immunity-critical",
+                        "rollEffects": "normal-ammunition"
+                    },
+                    "exceptions": {
+                        "commsAttacks": "immunity-state-only",
+                        "notNegatedByImmunity": [
+                            "trait:non-lethal",
+                            "state:stunned"
+                        ]
+                    }
+                }
             },
             "labelIds": [
                 "obligatory"
@@ -15686,7 +15708,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-10-09"
             },
             "variantSemantics": {
                 "inheritance": "family"

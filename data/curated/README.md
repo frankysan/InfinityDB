@@ -94,6 +94,15 @@ Wounds inflicted on failure of that extra roll. Smoke/Eclipse use
 `facts.visibilityZone` and no Saving Roll facts. Other
 Ammunition effects remain independent of these State links.
 
+The `skill:immunity` definition may also carry the closed
+`facts.immunityInteraction` object. It records the reviewed N5.3 boundary for
+covered Ammunition (treat as Normal and ignore its special effects, Saving
+Roll Attribute MODs and Saving Roll-count MODs), the remaining single Critical
+roll unless Immunity (Critical) applies, and the exceptions for Comms Attacks,
+Non-Lethal and State: Stunned. Only `skill:immunity` may own this fact family.
+It is sourced to Wiki Immunity `oldid=3643` and is non-executable; it does
+**not** assign immunity results to Army profiles or Combined Ammunition.
+
 ### Rules-enrichment coverage classifications
 
 `enrichment-coverage/classifications.json` is the maintained release-scope policy for

@@ -1,5 +1,6 @@
 import json
 import re
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -2187,3 +2188,61 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
         "stateEffects"
     ]
     assert shock[0]["targetAttribute"] == {"name": "VITA", "equals": 1}
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        (lambda f: f["coveredAmmunition"].update(treatAs="ammunition:ap"),
+         "covered Ammunition"),
+        (lambda f: f["coveredAmmunition"]["ignore"].pop(),
+         "covered Ammunition"),
+        (lambda f: f["criticalAgainstCoveredAmmunition"].update(
+            additionalSavingRolls=2), "Critical exception"),
+        (lambda f: f["criticalAgainstCoveredAmmunition"].update(
+            unless="none"), "Critical exception"),
+        (lambda f: f["exceptions"].update(commsAttacks="always-immune"),
+         "Immunity exceptions"),
+        (lambda f: f["exceptions"]["notNegatedByImmunity"].pop(),
+         "Immunity exceptions"),
+        (lambda f: f.update(automaticResolution=True),
+         "Immunity interaction fields"),
+    ],
+)
+def test_immunity_interaction_rejects_unreviewed_semantics(
+    tmp_path: Path, change, message: str
+) -> None:
+    """Immunity facts must not become an inferred combined-attack evaluator."""
+    root = Path(__file__).resolve().parents[1]
+    source = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    record = deepcopy(next(r for r in source["records"] if r["id"] == "skill:immunity"))
+    record["labelIds"] = ["example-label"]  # The standalone fixture uses its own Label.
+    record["citations"] = [{"sourceId": "n5-core-v5.3", "page": 1}]
+    doc = valid_document()
+    doc["records"].append(record)
+    path = tmp_path / "immunity.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    assert load_curated_document(path)
+
+    change(record["facts"]["immunityInteraction"])
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        load_curated_document(path)
+
+
+def test_immunity_interaction_is_not_accepted_on_other_skills(tmp_path: Path) -> None:
+    doc = valid_document()
+    root = Path(__file__).resolve().parents[1]
+    source = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    immunity = next(r for r in source["records"] if r["id"] == "skill:immunity")
+    doc["records"][0]["facts"]["immunityInteraction"] = immunity["facts"][
+        "immunityInteraction"
+    ]
+    path = tmp_path / "invalid-owner.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(ValueError, match="only the Immunity Skill"):
+        load_curated_document(path)

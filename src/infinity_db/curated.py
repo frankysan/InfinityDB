@@ -204,6 +204,45 @@ def _validate_related_categories(facts: dict[str, Any], context: str) -> None:
         )
 
 
+def _validate_immunity_interaction(value: object, context: str) -> None:
+    """Validate source-reviewed Immunity boundaries without evaluating attacks."""
+    if not isinstance(value, dict) or set(value) != {
+        "coveredAmmunition", "criticalAgainstCoveredAmmunition", "exceptions",
+    }:
+        raise ValueError(f"{context}: invalid Immunity interaction fields")
+    covered = value["coveredAmmunition"]
+    if (
+        not isinstance(covered, dict)
+        or set(covered) != {"treatAs", "ignore"}
+        or covered["treatAs"] != "ammunition:normal"
+        or covered["ignore"] != [
+            "special-effects", "saving-roll-attribute-modifiers",
+            "saving-roll-count-modifiers",
+        ]
+    ):
+        raise ValueError(f"{context}: invalid covered Ammunition treatment")
+    critical = value["criticalAgainstCoveredAmmunition"]
+    if (
+        not isinstance(critical, dict)
+        or set(critical) != {"additionalSavingRolls", "unless", "rollEffects"}
+        or type(critical["additionalSavingRolls"]) is not int
+        or critical["additionalSavingRolls"] != 1
+        or critical["unless"] != "immunity-critical"
+        or critical["rollEffects"] != "normal-ammunition"
+    ):
+        raise ValueError(f"{context}: invalid Immunity Critical exception")
+    exceptions = value["exceptions"]
+    if (
+        not isinstance(exceptions, dict)
+        or set(exceptions) != {"commsAttacks", "notNegatedByImmunity"}
+        or exceptions["commsAttacks"] != "immunity-state-only"
+        or exceptions["notNegatedByImmunity"] != [
+            "trait:non-lethal", "state:stunned",
+        ]
+    ):
+        raise ValueError(f"{context}: invalid Immunity exceptions")
+
+
 def _validate_ammunition_resolution(value: object, context: str) -> None:
     """Validate reviewed effects without treating them as executable roll logic."""
     if (
@@ -907,6 +946,15 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         facts = record.get("facts")
         if isinstance(facts, dict):
             _validate_related_categories(facts, f"{context}.facts")
+            immunity = facts.get("immunityInteraction")
+            if immunity is not None:
+                if record["id"] != "skill:immunity":
+                    raise ValueError(
+                        f"{context}.facts.immunityInteraction: only the Immunity Skill may own it"
+                    )
+                _validate_immunity_interaction(
+                    immunity, f"{context}.facts.immunityInteraction"
+                )
             resolution = facts.get("ammunitionResolution")
             if resolution is not None:
                 if record["kind"] != "ammunition":

@@ -2135,6 +2135,31 @@ Wiki pages <https://infinitythewiki.com/N>,
 <https://infinitythewiki.com/Smoke_Ammunition>, and
 <https://infinitythewiki.com/Eclipse_Ammunition>.
 
+### RS-AW-IMM-001 — Immunity changes covered effects, not the attack identity
+
+**Classification:** reviewed source-native exception boundary; non-executable.
+
+When an applicable Immunity (Ammunition), (ARM), (BTS) or (Enhanced) covers an
+attack, covered Ammunition is treated as Normal: its special effects and its
+Saving Roll Attribute/count modifiers are ignored. An otherwise covered
+Critical still requires the additional Saving Roll with Normal effects; only
+Immunity (Critical) suppresses that extra roll. General Immunity does not
+apply to Comms Attacks (except Immunity (State)), and does not negate the
+Non-Lethal or State: Stunned Traits. Those Traits still require their own
+normal conditions: this does **not** assert that every attack stuns a target.
+
+`skill:immunity` owns the validated `facts.immunityInteraction` object. The
+source-ID mapping of `AP+DA`, `AP+Exp`, `AP+Shock` and `AP+T2` continues to
+publish **components only**. The typed facts do not decide which Immunity a
+target has, whether it matches a particular component or weapon Trait, or a
+combined outcome. Do not apply the generic Critical count or a hypothetical
+Immunity override to a Weapon profile without matching its explicit sources.
+
+Sources: N5.3 Wiki [Immunity](https://infinitythewiki.com/Immunity)
+(`oldid=3643`) and [Combined Ammunition](https://infinitythewiki.com/Combined_Ammunition)
+(`oldid=3000`). This records the Wiki's explicit boundary; cross-source and
+conditional combined-effect precedence review remains open.
+
 ### RS-AW-AMMO-003 — Combined Ammunition is explicit composition
 
 **Classification:** source-native relationship semantics.

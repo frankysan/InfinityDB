@@ -798,3 +798,61 @@ def test_plasma_combined_saving_roll_critical_reaches_weapon_api() -> None:
         assert "combined_saving_roll" not in profile
     burst = next(p for p in feuerbach["profiles"] if p["mode"] == "Burst Mode")
     assert burst["ammunition_composition"]["kind"] == "combined"
+
+
+def test_immunity_ammunition_boundaries_reach_rules_database(tmp_path: Path) -> None:
+    rules_db = _rules_database(tmp_path)
+    immunity = rules_db.composed_record("skill:immunity")
+    assert immunity is not None
+    assert immunity["citations"]
+    interaction = immunity["facts"]["immunityInteraction"]
+    assert interaction["coveredAmmunition"] == {
+        "treatAs": "ammunition:normal",
+        "ignore": [
+            "special-effects", "saving-roll-attribute-modifiers",
+            "saving-roll-count-modifiers",
+        ],
+    }
+    assert interaction["criticalAgainstCoveredAmmunition"] == {
+        "additionalSavingRolls": 1,
+        "unless": "immunity-critical",
+        "rollEffects": "normal-ammunition",
+    }
+    assert interaction["exceptions"] == {
+        "commsAttacks": "immunity-state-only",
+        "notNegatedByImmunity": ["trait:non-lethal", "state:stunned"],
+    }
+    for record_id in ("ammunition:ap", "ammunition:da", "ammunition:exp",
+                      "ammunition:shock", "ammunition:t2"):
+        record = rules_db.composed_record(record_id)
+        assert record is not None
+        assert "immunityInteraction" not in record["facts"]
+
+    mapping = load_ammunition_reference_map()
+    for name in ("AP+DA", "AP+Exp", "AP+Shock", "AP+T2"):
+        source_entry = next(entry for entry in mapping.values() if entry["name"] == name)
+        assert "immunityInteraction" not in source_entry
+        assert len(source_entry["components"]) == 2
+
+
+def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:
+    rules_db = _rules_database(tmp_path)
+    root = Path(__file__).resolve().parents[1]
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
+    environ: dict[str, Any] = {}
+    setup_testing_defaults(environ)
+    environ["PATH_INFO"] = "/api/skills/immunity"
+    environ["REQUEST_METHOD"] = "GET"
+    statuses: list[str] = []
+    body = b"".join(
+        app(environ, lambda status, headers, exc_info=None: statuses.append(status))
+    )
+    assert statuses == ["200 OK"]
+    rules = json.loads(body)["rules"]
+    assert [rule["id"] for rule in rules] == ["skill:immunity"]
+    assert rules[0]["facts"]["immunityInteraction"]["criticalAgainstCoveredAmmunition"] == {
+        "additionalSavingRolls": 1,
+        "unless": "immunity-critical",
+        "rollEffects": "normal-ammunition",
+    }
+    assert rules[0]["citations"][0]["source_version"] == "N5.3 / oldid 3643"
