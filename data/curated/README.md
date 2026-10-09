@@ -324,6 +324,15 @@ separately; each publication carries a deterministic SHA-256 of the fully compos
 The source `collection.id` remains the publication revision/provenance key, so a scenario identity,
 its set membership, and the source publication revision are not interchangeable.
 
+Weapon Ammunition source-identity navigation is maintained separately in
+`config/catalogs/weapon-ammunition-references.json` (format version 2).
+Each source row has an exact Army ID and name with ordered display/link segments.
+Reviewed Combined Ammunition entries additionally require `components`, an ordered
+list of typed base `ammunition:*` IDs matching the linked segments exactly, separated
+only by `+`. This source projection is not a curated effect relationship, nor is
+Saving Roll notation parsed to infer composition. See `docs/data-model.md` for the
+current runtime boundary and remaining 1.0 work.
+
 The current closed relation vocabulary is defined by `src/infinity_db/rule_relations.py`. It
 distinguishes creation/enabling, State transitions, MOD/effect changes, cancellation/restriction,
 and structural variant relationships rather than collapsing every connection into a generic

@@ -1,6 +1,6 @@
 {
   "format": "InfinityDB weapon ammunition references",
-  "version": 1,
+  "version": 2,
   "sourceEntries": {
     "2": {"name": "N", "segments": [{"text": "N", "ruleId": "ammunition:normal"}]},
     "3": {"name": "AP", "segments": [{"text": "AP", "ruleId": "ammunition:ap"}]},
@@ -13,7 +13,35 @@
         {"text": "AP", "ruleId": "ammunition:ap"},
         {"text": "+"},
         {"text": "DA", "ruleId": "ammunition:da"}
-      ]
+      ],
+      "components": ["ammunition:ap", "ammunition:da"]
+    },
+    "13": {
+      "name": "AP+Exp",
+      "segments": [
+        {"text": "AP", "ruleId": "ammunition:ap"},
+        {"text": "+"},
+        {"text": "Exp", "ruleId": "ammunition:exp"}
+      ],
+      "components": ["ammunition:ap", "ammunition:exp"]
+    },
+    "30": {
+      "name": "AP+Shock",
+      "segments": [
+        {"text": "AP", "ruleId": "ammunition:ap"},
+        {"text": "+"},
+        {"text": "Shock", "ruleId": "ammunition:shock"}
+      ],
+      "components": ["ammunition:ap", "ammunition:shock"]
+    },
+    "40": {
+      "name": "AP+T2",
+      "segments": [
+        {"text": "AP", "ruleId": "ammunition:ap"},
+        {"text": "+"},
+        {"text": "T2", "ruleId": "ammunition:t2"}
+      ],
+      "components": ["ammunition:ap", "ammunition:t2"]
     },
     "14": {"name": "E/M", "segments": [{"text": "E/M", "ruleId": "ammunition:em"}]},
     "18": {"name": "T2", "segments": [{"text": "T2", "ruleId": "ammunition:t2"}]},

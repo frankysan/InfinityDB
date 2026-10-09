@@ -58,12 +58,18 @@ metadata Ammunition IDs and names to canonical published base Ammunition referen
 The repository preserves the source metadata ID as `ammunition_source_id` in each
 Weapon profile; the catalog API attaches ordered `ammunition_parts` only when both
 that ID and its name match the reviewed map. A base type links to one reference;
-source-defined `AP+DA` links both separately with its literal `+`. Unreviewed
-combined, alternative (`/`), absent, or mismatched values remain source text;
-they are not guessed from punctuation. Saving Roll notation (`ARM/2`, `x2`, etc.)
-remains a distinct, unchanged source field and is never interpreted as Ammunition
-composition. The 1.0 typed effects/relationships and comparison view remain
-separate incomplete work; these links do not assert their completeness.
+source-defined `AP+DA`, `AP+Exp`, `AP+Shock`, and `AP+T2` link their reviewed
+components separately. Version 2 of the maintained mapping also records those
+ordered components as canonical `ammunition:*` IDs; the validator requires exact
+agreement with the linked display segments and literal `+` separators. The
+Weapon API exposes `ammunition_composition: {kind: "combined", components: [...]}`
+only for an exact Army source ID/name pair with published reference targets.
+Single Ammunition profiles do not receive a synthetic composition. Alternative
+(`/`), absent, or mismatched values remain source text; they are not guessed
+from punctuation. Saving Roll notation (`ARM/2`, `x2`, etc.) remains a distinct,
+unchanged source field and is never interpreted as Ammunition composition.
+These source-backed component links are not yet a complete curated Ammunition
+fact/effect model or a general combined-Ammunition rules evaluator.
 
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;

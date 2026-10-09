@@ -7,6 +7,7 @@ Only exact source metadata IDs/names in the maintained map receive links.
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -25,7 +26,7 @@ def load_ammunition_reference_map(
     if (
         not isinstance(document, dict)
         or document.get("format") != "InfinityDB weapon ammunition references"
-        or document.get("version") != 1
+        or document.get("version") != 2
         or set(document) != {"format", "version", "sourceEntries"}
     ):
         raise ValueError("Unsupported weapon ammunition reference config")
@@ -40,7 +41,9 @@ def load_ammunition_reference_map(
             or str(int(source_id)) != source_id
         ):
             raise ValueError(f"Invalid source ammunition ID {source_id!r}")
-        if not isinstance(entry, dict) or set(entry) != {"name", "segments"}:
+        if not isinstance(entry, dict) or set(entry) not in (
+            {"name", "segments"}, {"name", "segments", "components"}
+        ):
             raise ValueError(f"Invalid source ammunition entry {source_id}")
         name, segments = entry["name"], entry["segments"]
         if not isinstance(name, str) or not name.strip() or not isinstance(segments, list):
@@ -69,6 +72,27 @@ def load_ammunition_reference_map(
                 link_count += 1
         if "".join(collected) != name or not link_count:
             raise ValueError(f"Ammunition segments must reproduce source name {name!r}")
+        components = entry.get("components")
+        if components is not None:
+            if (
+                not isinstance(components, list)
+                or len(components) < 2
+                or any(not isinstance(rule_id, str) for rule_id in components)
+                or len(set(components)) != len(components)
+                or len(segments) != 2 * len(components) - 1
+                or any(
+                    segments[index] != {"text": "+"}
+                    for index in range(1, len(segments), 2)
+                )
+                or [segment.get("ruleId") for segment in segments[::2]] != components
+            ):
+                raise ValueError(
+                    f"Combined ammunition {name!r} needs ordered, linked components"
+                )
+        elif link_count != 1 or len(segments) != 1:
+            raise ValueError(
+                f"Ammunition {name!r} needs an explicit combined components list"
+            )
         mapping[int(source_id)] = entry
     return mapping
 
@@ -79,6 +103,7 @@ class WeaponAmmunitionReferences:
     def __init__(self, rules_database: RulesDatabase) -> None:
         self._mapping = load_ammunition_reference_map()
         self._resolved: dict[int, list[dict[str, Any]]] = {}
+        self._compositions: dict[int, dict[str, Any]] = {}
         for source_id, entry in self._mapping.items():
             segments = []
             for segment in entry["segments"]:
@@ -99,9 +124,23 @@ class WeaponAmmunitionReferences:
                 segments.append(result)
             if segments:
                 self._resolved[source_id] = segments
+                if "components" in entry:
+                    component_segments = segments[::2]
+                    self._compositions[source_id] = {
+                        "kind": "combined",
+                        "components": [
+                            {
+                                "record_id": rule_id,
+                                "public_reference": segment["public_reference"],
+                            }
+                            for rule_id, segment in zip(
+                                entry["components"], component_segments, strict=True
+                            )
+                        ],
+                    }
 
-    def for_profile(self, profile: dict[str, Any]) -> list[dict[str, Any]] | None:
-        """Refuse to link if the Army ID/name pair differs from reviewed evidence."""
+    def _matched_id(self, profile: dict[str, Any]) -> int | None:
+        """Only reviewed Army ID/name pairs can carry semantic references."""
         source_id = profile.get("ammunition_source_id")
         if type(source_id) is not int:
             return None
@@ -112,4 +151,21 @@ class WeaponAmmunitionReferences:
             or profile.get("ammunition") != entry["name"]
         ):
             return None
+        return source_id
+
+    def for_profile(self, profile: dict[str, Any]) -> list[dict[str, Any]] | None:
+        """Return player-facing reference spans for an exact source identity."""
+        source_id = self._matched_id(profile)
+        if source_id is None:
+            return None
         return [segment.copy() for segment in self._resolved[source_id]]
+
+    def composition_for_profile(self, profile: dict[str, Any]) -> dict[str, Any] | None:
+        """Return explicitly reviewed composition, never derived from display syntax."""
+        source_id = self._matched_id(profile)
+        if source_id is None:
+            return None
+        composition = self._compositions.get(source_id)
+        if composition is None:
+            return None
+        return deepcopy(composition)

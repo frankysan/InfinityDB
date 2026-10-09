@@ -11,8 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Weapon profiles now link reviewed base Ammunition directly, including separate AP
-  and DA references for the combined AP+DA profile, without changing Saving Rolls.
+- Weapon profiles now link reviewed base Ammunition directly, including the
+  component references for AP+DA, AP+Exp, AP+Shock and AP+T2, without changing Saving Rolls.
 - Weapon profile properties now appear under their correct Traits, Labels or States
   headings, instead of all being presented as Traits; unknown properties stay visible.
 - Weapon profile Labels such as Comms Attack and No LoF now link to their rules;
@@ -49,7 +49,8 @@ are not retroactively relabeled.
 
 - **Data processing + Web backend + Web frontend:** Use exact reviewed Army ammunition
   metadata identities for Weapon statline links to the eleven published base
-  Ammunition references and AP+DA; leave unreviewed forms unlinked.
+  Ammunition references and four reviewed combined forms. Preserve ordered typed
+  components separately from Saving Roll data; leave unreviewed forms unlinked.
 - **Data processing + Web backend:** Add an N5.3-sourced Drop Bears reference distinguishing visible Mine placement, thrown BS Mode restrictions and shared ammunition/charge semantics without modifying Army traits.
 - **Data processing + Web backend:** Publish a CC Mode-only Kobra Pistol reference for DA effects and the contradictory printed Saving Roll/Trait values. Do not apply it to BS Mode or override Army profiles.
 - **Data processing + Web backend:** Add a PARA Mine-specific reference showing

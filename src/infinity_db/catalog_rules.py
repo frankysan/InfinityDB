@@ -224,6 +224,9 @@ class CatalogRules:
                     segments = ammunition_references.for_profile(profile)
                     if segments is not None:
                         profile["ammunition_parts"] = segments
+                    composition = ammunition_references.composition_for_profile(profile)
+                    if composition is not None:
+                        profile["ammunition_composition"] = composition
 
             attach_ammunition_references(result.get("profiles", []))
             for variant in result.get("weapon_variants", []):

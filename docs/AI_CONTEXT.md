@@ -78,9 +78,12 @@ release/audit narrative belongs in the changelog and Git history.
   IDs remain compatibility/provenance forms.
 - Browser code renders backend-owned semantics rather than recreating data-model policy.
 - Weapon Ammunition navigation maps exact Army metadata identity/name pairs to
-  reviewed base reference segments, with no client-side parsing of combined notation
-  and no inference from Saving Roll notation. Missing mappings stay unlinked.
-  See `docs/data-model.md` and the maintained `weapon-ammunition-references.json`.
+  reviewed base reference segments, without client-side parsing or inference from
+  Saving Roll notation. The maintained map (version 2) records ordered components
+  for the four reviewed combined forms (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`);
+  their API `ammunition_composition` field is only present on exact matching
+  source profiles. Alternatives remain unlinked. This is not an effects engine.
+  See `docs/data-model.md` and `weapon-ammunition-references.json`.
 - Game/reference data is read-only at runtime. Persistent user-authored application data is not part
   of the current model.
 - Retained metrics live in a separate private collector with one bounded writable volume; the

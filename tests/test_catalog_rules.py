@@ -346,14 +346,35 @@ def test_weapon_source_mode_rules_do_not_leak_between_same_id_profiles(
 
 def test_reviewed_ammunition_references_preserve_exact_army_identity(tmp_path: Path) -> None:
     mapping = load_ammunition_reference_map()
-    assert len(mapping) == 12
+    assert len(mapping) == 15
     refs = WeaponAmmunitionReferences(_rules_database(tmp_path))
     assert refs.for_profile({"ammunition_source_id": 10, "ammunition": "AP+DA"}) == [
         {"text": "AP", "public_reference": {"catalog": "ammunition", "id": "ap"}},
         {"text": "+"},
         {"text": "DA", "public_reference": {"catalog": "ammunition", "id": "da"}},
     ]
+    assert refs.composition_for_profile({"ammunition_source_id": 10, "ammunition": "AP+DA"}) == {
+        "kind": "combined",
+        "components": [
+            {
+                "record_id": "ammunition:ap",
+                "public_reference": {"catalog": "ammunition", "id": "ap"},
+            },
+            {
+                "record_id": "ammunition:da",
+                "public_reference": {"catalog": "ammunition", "id": "da"},
+            },
+        ],
+    }
+    fresh = refs.composition_for_profile({"ammunition_source_id": 10, "ammunition": "AP+DA"})
+    assert fresh is not None
+    fresh["components"][0]["public_reference"]["id"] = "unrelated"
+    unchanged = refs.composition_for_profile({"ammunition_source_id": 10, "ammunition": "AP+DA"})
+    assert unchanged is not None
+    assert unchanged["components"][0]["public_reference"]["id"] == "ap"
+    assert refs.composition_for_profile({"ammunition_source_id": 3, "ammunition": "AP"}) is None
     assert refs.for_profile({"ammunition_source_id": 10, "ammunition": "AP/DA"}) is None
+    assert refs.composition_for_profile({"ammunition_source_id": 10, "ammunition": "AP/DA"}) is None
     assert refs.for_profile({"ammunition_source_id": 17, "ammunition": "AP/DA"}) is None
     assert refs.for_profile({"ammunition_source_id": 0, "ammunition": "--"}) is None
 
@@ -361,7 +382,7 @@ def test_reviewed_ammunition_references_preserve_exact_army_identity(tmp_path: P
     invalid = tmp_path / "invalid.json"
     invalid.write_text(json.dumps({
         "format": "InfinityDB weapon ammunition references",
-        "version": 1,
+        "version": 2,
         "sourceEntries": {"10": {
             "name": "AP+DA",
             "segments": [{"text": "AP", "ruleId": "ammunition:ap"}],
@@ -369,6 +390,59 @@ def test_reviewed_ammunition_references_preserve_exact_army_identity(tmp_path: P
     }), encoding="utf-8")
     with pytest.raises(ValueError, match="reproduce source name"):
         load_ammunition_reference_map(invalid)
+
+
+@pytest.mark.parametrize(
+    ("source_name", "components"),
+    [
+        ("AP+DA", ["ammunition:ap", "ammunition:shock"]),
+        ("AP/DA", ["ammunition:ap", "ammunition:da"]),
+        ("AP+DA", ["ammunition:ap", "ammunition:ap"]),
+    ],
+)
+def test_combined_ammunition_source_requires_exact_component_order(
+    tmp_path: Path, source_name: str, components: list[str]
+) -> None:
+    config = {
+        "format": "InfinityDB weapon ammunition references",
+        "version": 2,
+        "sourceEntries": {
+            "10": {
+                "name": source_name,
+                "segments": [
+                    {"text": "AP", "ruleId": "ammunition:ap"},
+                    {"text": "+" if "+" in source_name else "/"},
+                    {"text": "DA", "ruleId": "ammunition:da"},
+                ],
+                "components": components,
+            }
+        },
+    }
+    path = tmp_path / "invalid-composition.json"
+    path.write_text(json.dumps(config), encoding="utf-8")
+    with pytest.raises(ValueError, match="ordered, linked components"):
+        load_ammunition_reference_map(path)
+
+
+def test_combined_ammunition_components_are_not_inferred_from_roll_notation(
+    tmp_path: Path,
+) -> None:
+    references = WeaponAmmunitionReferences(_rules_database(tmp_path))
+    source = {
+        "ammunition_source_id": 13,
+        "ammunition": "AP+Exp",
+        "saving": "ARM/2",
+        "saving_num": "3",
+    }
+    composition = references.composition_for_profile(source)
+    assert composition is not None
+    assert [part["record_id"] for part in composition["components"]] == [
+        "ammunition:ap", "ammunition:exp"
+    ]
+    assert source["saving"] == "ARM/2"
+    assert source["saving_num"] == "3"
+    assert references.composition_for_profile({**source, "ammunition_source_id": 17}) is None
+    assert references.composition_for_profile({**source, "ammunition": "AP/Exp"}) is None
 
 
 def test_reviewed_ammunition_source_names_match_published_army_snapshot() -> None:

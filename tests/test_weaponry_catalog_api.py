@@ -560,8 +560,50 @@ def test_combined_ammunition_components_do_not_change_saving_rolls(
         {"text": "+"},
         {"text": "DA", "public_reference": {"catalog": "ammunition", "id": "da"}},
     ]
+    assert profile["ammunition_composition"]["kind"] == "combined"
+    assert [
+        component["record_id"]
+        for component in profile["ammunition_composition"]["components"]
+    ] == ["ammunition:ap", "ammunition:da"]
     assert profile["saving"] == "ARM/2"
     assert str(profile["saving_num"]) == "2"
+
+
+@pytest.mark.parametrize(
+    ("slug", "source_id", "ammunition", "components", "saving", "rolls"),
+    (
+        ("missile-launcher", 13, "AP+Exp", ("ap", "exp"), "ARM/2", "3"),
+        ("uragan-mrl", 30, "AP+Shock", ("ap", "shock"), "ARM/2", "1"),
+        ("ap-t2-cc-weapon", 40, "AP+T2", ("ap", "t2"), "ARM/2", "1"),
+    ),
+)
+def test_reviewed_combined_ammunition_exposes_typed_components(
+    weaponry_app: Callable,
+    slug: str,
+    source_id: int,
+    ammunition: str,
+    components: tuple[str, str],
+    saving: str,
+    rolls: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    profile = next(p for p in payload["profiles"] if p["ammunition_source_id"] == source_id)
+    assert profile["ammunition"] == ammunition
+    assert profile["ammunition_composition"] == {
+        "kind": "combined",
+        "components": [
+            {
+                "record_id": f"ammunition:{component}",
+                "public_reference": {"catalog": "ammunition", "id": component},
+            }
+            for component in components
+        ],
+    }
+    assert [segment["text"] for segment in profile["ammunition_parts"]] == [
+        "AP", "+", ammunition.split("+", 1)[1],
+    ]
+    assert profile["saving"] == saving
+    assert str(profile["saving_num"]) == rolls
 
 
 def test_unreviewed_ammunition_identity_is_not_inferred_from_punctuation(
@@ -569,5 +611,7 @@ def test_unreviewed_ammunition_identity_is_not_inferred_from_punctuation(
 ) -> None:
     payload = _weapon_detail(weaponry_app, "missile-launcher")
     profile = next(profile for profile in payload["profiles"] if profile["mode"] == "Hit Mode")
-    assert profile["ammunition"] == "AP+Exp"
-    assert "ammunition_parts" not in profile
+    assert profile["ammunition_composition"]["kind"] == "combined"
+    assert profile["saving"] == "ARM/2"
+    # A matching Saving Roll expression is not an additional ammunition component.
+    assert len(profile["ammunition_composition"]["components"]) == 2

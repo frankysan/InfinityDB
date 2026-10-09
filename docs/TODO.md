@@ -330,6 +330,12 @@ unimplemented until its corresponding behavior exists.
       references and source-defined `AP+DA`, using exact Army metadata IDs and names.
       Keep unreviewed forms unlinked and Saving Roll notation independent; this does
       not complete typed Ammunition effects or the quick-reference view.
+    - [x] Represent the four reviewed combined Army Ammunition source forms
+      (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`) with exact, ordered canonical
+      component identities and project those identities into Weapon API profiles.
+      Validate against source ID/name and source display notation; keep alternate
+      ammunition choices and Saving Roll expressions out of composition semantics.
+      This is a source-to-API pilot, not a replacement for curated effect facts.
     - [ ] Review the fact/relation schema before curation: components, affected saving Attribute,
       roll/effect conditions, and State interactions need explicit ownership. Cover a base type,
       a combined form, and Combined Saving Roll notation in an end-to-end pilot.
