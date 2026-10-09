@@ -2175,11 +2175,18 @@ contains a Viral Ammunition component. This exact case does not establish a
 component-specific Immunity algorithm, nor is it run against Army profiles.
 The `skill:vulnerability` reference gives players the original example.
 
-Partial/component-specific Immunity (for example, whether Immunity (AP) affects
-all or part of an AP+DA attack), BTS-based Combined Ammunition, other weapon
-Traits and conditional State interactions are **not** settled by either the
-derived ARM cases or the explicit Vulnerability example. No automatic per-Weapon
-or per-target projection is allowed.
+A third **rule-derived, non-executable example** covers Immunity (AP) against
+an ARM-based AP+DA attack. The AP component is treated as Normal while the DA
+component retains its two Saving Rolls: effectively N+DA = DA. The target
+therefore makes two rolls using full ARM, or three for a Critical. Unlike the
+Immunity (ARM) example, this does **not** collapse the hit to one roll. The
+original Army source identity remains AP+DA; the DA-only result describes the
+conditional effect, not a mutation to Army data or an official named example.
+
+Other component-specific Immunities, BTS-based Combined Ammunition, additional
+Weapon Traits and conditional State interactions remain unresolved. Do not
+extrapolate an algorithm from these reviewed examples or project outcomes into
+individual Weapon profiles.
 
 Sources: N5.3 Wiki [Immunity](https://infinitythewiki.com/Immunity)
 (`oldid=3643`), [Combined Ammunition](https://infinitythewiki.com/Combined_Ammunition)

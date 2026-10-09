@@ -42,9 +42,10 @@ release/audit narrative belongs in the changelog and Git history.
   or transfer it to base `ammunition:*` facts. See `docs/data-model.md`.
 - The N5.3 Immunity exception boundary lives on `skill:immunity` as validated,
   non-executable `facts.immunityInteraction`; do not apply it automatically to
-  combined components, Weapon profiles, or Critical outcomes. Two explicitly
-  conditioned AP+DA/AP+Exp vs Immunity (ARM) examples are rule-derived evidence,
-  **not** general component-level Immunity semantics. A separate pinned,
+  combined components, Weapon profiles, or Critical outcomes. Three conditioned
+  examples are rule-derived: AP+DA/AP+Exp versus Immunity (ARM), and AP+DA
+  versus Immunity (AP), which ignores AP while retaining DA and its two rolls.
+  These are **not** a general component-level Immunity evaluator. A separate pinned,
   explicit Vulnerability (Viral) example is **weapon-name-scoped** and prevents
   Immunity (Enhanced) for that attack; it does not imply component parsing or
   automatic target-specific outcomes. See `docs/rules-semantics.md` RS-AW-IMM-001.

@@ -39,26 +39,25 @@ Record:
 Keep unresolved interpretations explicitly unresolved. Do not use this file to
 turn an inference into a source-native rule.
 
-### RR-AW-IMM-002 — Component-named Immunity on Combined Ammunition is not settled
+### RR-AW-IMM-002 — Component-specific Immunity: reviewed AP+DA case
 
-**Scope:** N5.3 Immunity (Ammunition) on a Combined Ammunition attack such as
-AP+DA; no published effect outcome is asserted.
+**Scope:** N5.3 Immunity (AP) applied to an ARM-based AP+DA attack.
 
-The N5.3 [Immunity](https://infinitythewiki.com/index.php?title=Immunity&oldid=3643)
-rule says the listed Ammunition is treated as Normal. The N5.3
+The pinned [Immunity](https://infinitythewiki.com/index.php?title=Immunity&oldid=3643)
+rule treats its named Ammunition as Normal; the pinned
 [Combined Ammunition](https://infinitythewiki.com/index.php?title=Combined_Ammunition&oldid=3000)
-rule says the combination acts as a single Ammunition with constituent effects.
-Neither clause explicitly illustrates **Immunity (AP) against AP+DA** or says
-whether matching one component negates its own effect, the entire combined
-attack, or neither. The published [Vulnerability](https://infinitythewiki.com/index.php?title=Vulnerability&oldid=3156)
-example does not resolve that question: it explicitly matches a *weapon name*
-containing Viral with Vulnerability (Viral), under Immunity (Enhanced).
+rule preserves the effects of each constituent type. Together, they support
+**AP+DA → N+DA, effectively DA** when Immunity (AP) negates only AP: the
+ARM-halving effect is removed, while DA still requires **two full-ARM Saving
+Rolls**, or **three** on a Critical. This interpretation was clarified during
+the 2026-10-09 project review and is **derived from the general rules**, not
+an example explicitly printed on the cited pages. It is recorded as a reviewed,
+non-executable case in `skill:immunity` and RS-AW-IMM-001.
 
-This is a provenance-bounded interpretation gap, not a verified game ruling.
-Do not apply the reviewed Immunity (ARM) roll-count examples to Immunity (AP),
-and do not infer matching from a string containing `+`. A future ruling or
-explicit authoritative example is required before adding a typed outcome.
-Historical N4/N3 interactions are not authoritative N5 precedents.
+This exact example does not settle other named-component Immunities or other
+Combined Ammunition pairs, and should not be turned into a general calculation
+or generalized from weapon-name-specific Vulnerability examples. Historical
+N4/N3 interactions are not authoritative N5 precedents.
 
 ## Official publication-change notices
 

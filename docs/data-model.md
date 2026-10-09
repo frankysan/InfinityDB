@@ -136,18 +136,21 @@ modifiers, the default additional Critical Saving Roll (unless the defender has
 Immunity (Critical)), and the Comms Attack/Non-Lethal/Stunned exceptions. These
 facts belong to Immunity, **not** to the ordered Combined Ammunition mapping:
 checking whether a defender's particular Immunity covers an entire attack or
-one or more constituent effects remains unimplemented. Two `reviewedCombinedCases`
-now give **rule-derived, conditional** examples for source IDs 10 (AP+DA) and
-13 (AP+Exp), *only* with Immunity (ARM), an ARM Saving Roll and a non-Comms
-attack. Each preserves before/after hit and Critical counts with source IDs,
+one or more constituent effects remains unimplemented. Three `reviewedCombinedCases`
+now give **rule-derived, conditional** examples: Immunity (ARM) against source
+IDs 10 (AP+DA) and 13 (AP+Exp), plus Immunity (AP) against AP+DA only.
+The AP case records its ignored AP component and surviving DA effect, retaining
+two full-ARM rolls (three on Critical), instead of collapsing to Normal.
+Each example preserves before/after hit and Critical counts with source IDs,
 components and explicit evidence status. They are stored on Immunity rather
 than on the Ammunition navigation mapping. No roll counts, State outcomes, or
 immunities are projected into individual Weapon profiles. A separate
 `reviewedVulnerabilityCases` entry records the **explicit** Vulnerability (Viral)
 versus Immunity (Enhanced) example (Wiki Vulnerability `oldid=3156`): the rule
 matches a weapon whose *name* contains Viral, not an Ammunition component.
-This example adds no weapon-name parsing at runtime. Partial component
-Immunities, BTS conditions and other combinations remain unresolved.
+This example adds no weapon-name parsing at runtime. Other component Immunities,
+BTS conditions and unreviewed combinations remain unresolved; the AP+DA
+example is not an evaluator.
 
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;

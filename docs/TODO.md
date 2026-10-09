@@ -372,11 +372,12 @@ unimplemented until its corresponding behavior exists.
       example: the Immunity is unavailable against a weapon named Viral, regardless
       of any inference about Ammunition composition. Cite Wiki Vulnerability
       revision 3156; leave it non-executable.
-    - [ ] Review component-level Immunity (such as Immunity (AP) on AP+DA),
-      BTS-based variants and other weapon-specific exceptions. The pinned general
-      definitions do not explicitly settle whether a single named component
-      disables part or all of a Combined Ammunition attack. Do not generalize from
-      Immunity (ARM) or the name-scoped Viral Vulnerability example.
+    - [x] Review Immunity (AP) against AP+DA as a condition-scoped, rule-derived
+      case: the AP component is treated as Normal, leaving DA's two full-ARM
+      Saving Rolls (three on Critical). Keep the original AP+DA source identity.
+    - [ ] Review other component-level Immunities, BTS-based variants and
+      weapon-specific exceptions. Do not generalize from this AP+DA case,
+      Immunity (ARM), or the name-scoped Viral Vulnerability example.
     - [x] Present the existing eleven base Ammunition typed facts in the shared
       rules-card renderer, with explicit failed-Saving-Roll conditions, Critical
       exceptions and separate Smoke/Eclipse visibility behavior. Reuse curated

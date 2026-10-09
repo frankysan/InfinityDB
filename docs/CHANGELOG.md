@@ -13,8 +13,11 @@ are not retroactively relabeled.
 
 - Ammunition reference pages now show compact, reviewed mechanics alongside the full rules,
   including Saving Roll and State conditions, Critical exceptions, and Smoke/Eclipse visibility.
-- The Vulnerability rules now explain the source-backed Viral weapon-name example,
-  without treating unresolved component-specific Immunity as a ruling.
+- The Immunity reference now explains why Immunity (AP) removes AP's modifier
+  from AP+DA but leaves DA's Saving Rolls; other component combinations remain
+  subject to separate review.
+- The Vulnerability rules explain the source-backed Viral weapon-name example
+  without inferring a general component-specific Immunity rule.
 - Weapon profiles now link reviewed base Ammunition directly, including the
   component references for AP+DA, AP+Exp, AP+Shock and AP+T2, without changing Saving Rolls.
 - Weapon profile properties now appear under their correct Traits, Labels or States

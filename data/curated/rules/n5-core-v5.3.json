@@ -15670,7 +15670,8 @@
                     "Immunity (Ammunition) treats the listed Ammunition as Normal Ammunition, ignoring its special effects and its MODs to the Saving Roll Attribute and number of Saving Rolls.",
                     "Immunity (ARM) or (BTS) treats Ammunition that uses the named Saving Roll Attribute as Normal Ammunition; Immunity (Enhanced) combines both protections.",
                     "Immunity (State) prevents the listed State from being caused by Comms Attacks or special rule effects.",
-                    "Immunity (Critical) removes the additional Saving Roll normally caused by a Critical hit."
+                    "Immunity (Critical) removes the additional Saving Roll normally caused by a Critical hit.",
+                    "For the reviewed [[ammunition:ap|AP]]+[[ammunition:da|DA]] case, Immunity (AP) negates AP’s ARM modifier, but not DA’s two Saving Rolls: the attack has two rolls against full ARM, or three for a Critical. This is a rule-derived case, not a separately printed example."
                 ],
                 "restrictions": [
                     "Except for Immunity (State), Immunity does not apply against Comms Attacks.",
@@ -15741,6 +15742,35 @@
                                 "hitRolls": 1,
                                 "criticalRolls": 2,
                                 "treatedAs": "ammunition:normal"
+                            },
+                            "evidence": "derived-from-pinned-general-rules"
+                        },
+                        {
+                            "sourceAmmunitionId": 10,
+                            "sourceAmmunitionName": "AP+DA",
+                            "components": [
+                                "ammunition:ap",
+                                "ammunition:da"
+                            ],
+                            "when": {
+                                "immunity": "AP",
+                                "savingAttribute": "ARM",
+                                "attackClass": "non-comms"
+                            },
+                            "withoutImmunity": {
+                                "hitRolls": 2,
+                                "criticalRolls": 3
+                            },
+                            "withImmunity": {
+                                "hitRolls": 2,
+                                "criticalRolls": 3,
+                                "treatedAs": "ammunition:da",
+                                "ignoredComponents": [
+                                    "ammunition:ap"
+                                ],
+                                "remainingComponents": [
+                                    "ammunition:da"
+                                ]
                             },
                             "evidence": "derived-from-pinned-general-rules"
                         }

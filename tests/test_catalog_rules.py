@@ -838,15 +838,16 @@ def test_immunity_ammunition_boundaries_reach_rules_database(tmp_path: Path) -> 
 def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
     tmp_path: Path,
 ) -> None:
-    """A reviewed ARM case is not a generic partial-component Immunity rule."""
+    """ARM removes combined effects; AP removes only the reviewed AP component."""
     rules_db = _rules_database(tmp_path)
     immunity = rules_db.composed_record("skill:immunity")
     assert immunity is not None
     source_map = load_ammunition_reference_map()
     facts = immunity["facts"]["immunityInteraction"]
     cases = facts["reviewedCombinedCases"]
-    assert {case["sourceAmmunitionId"] for case in cases} == {10, 13}
-    for case, normal, critical in zip(cases, (2, 3), (3, 4), strict=True):
+    assert [(case["sourceAmmunitionId"], case["when"]["immunity"])
+            for case in cases] == [(10, "ARM"), (13, "ARM"), (10, "AP")]
+    for case, normal, critical in zip(cases[:2], (2, 3), (3, 4), strict=True):
         source = source_map[case["sourceAmmunitionId"]]
         assert case["sourceAmmunitionName"] == source["name"]
         assert case["components"] == source["components"]
@@ -860,6 +861,21 @@ def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
             "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
         }
         assert case["evidence"] == "derived-from-pinned-general-rules"
+    ap_case = cases[2]
+    assert ap_case["sourceAmmunitionName"] == source_map[10]["name"]
+    assert ap_case["components"] == source_map[10]["components"]
+    assert ap_case["when"] == {
+        "immunity": "AP", "savingAttribute": "ARM", "attackClass": "non-comms"
+    }
+    assert ap_case["withoutImmunity"] == {"hitRolls": 2, "criticalRolls": 3}
+    assert ap_case["withImmunity"] == {
+        "hitRolls": 2,
+        "criticalRolls": 3,
+        "treatedAs": "ammunition:da",
+        "ignoredComponents": ["ammunition:ap"],
+        "remainingComponents": ["ammunition:da"],
+    }
+    assert ap_case["evidence"] == "derived-from-pinned-general-rules"
     assert {citation["source_version"] for citation in immunity["citations"]} == {
         "N5.3 / oldid 3643", "N5.3 / oldid 3000", "N5.3 / oldid 3156"
     }
@@ -921,4 +937,4 @@ def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:
     assert rules[0]["citations"][0]["source_version"] == "N5.3 / oldid 3643"
     assert [case["sourceAmmunitionId"] for case in rules[0]["facts"][
         "immunityInteraction"
-    ]["reviewedCombinedCases"]] == [10, 13]
+    ]["reviewedCombinedCases"]] == [10, 13, 10]

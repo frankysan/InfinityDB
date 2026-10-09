@@ -2205,7 +2205,7 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
          "Immunity exceptions"),
         (lambda f: f["exceptions"]["notNegatedByImmunity"].pop(),
          "Immunity exceptions"),
-        (lambda f: f["reviewedCombinedCases"][0]["when"].update(immunity="AP"),
+        (lambda f: f["reviewedCombinedCases"][0]["when"].update(immunity="DA"),
          "Immunity applicability"),
         (lambda f: f["reviewedVulnerabilityCases"][0]["when"].update(
             weaponNameContains="AP"), "Vulnerability interaction example"),
@@ -2219,6 +2219,12 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
             criticalRolls=4), "source hit/Critical Saving Roll counts"),
         (lambda f: f["reviewedCombinedCases"][0]["withImmunity"].update(
             hitRolls=2), "covered-attack result"),
+        (lambda f: f["reviewedCombinedCases"][2]["withImmunity"].update(
+            remainingComponents=["ammunition:normal"]), "covered-attack result"),
+        (lambda f: f["reviewedCombinedCases"][2]["when"].update(
+            immunity="Shock"), "Immunity applicability"),
+        (lambda f: f["reviewedCombinedCases"][2].update(
+            sourceAmmunitionId=13), "Immunity applicability"),
         (lambda f: f["reviewedCombinedCases"][1].update(
             sourceAmmunitionId=10), "duplicate source Ammunition ID"),
         (lambda f: f["reviewedCombinedCases"][0].update(
