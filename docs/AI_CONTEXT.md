@@ -52,6 +52,13 @@ release/audit narrative belongs in the changelog and Git history.
   explicit Vulnerability (Viral) example is **weapon-name-scoped** and prevents
   Immunity (Enhanced) for that attack; it does not imply component parsing or
   automatic target-specific outcomes. See `docs/rules-semantics.md` RS-AW-IMM-001.
+- For any material player-facing rules interaction, the curated explanation must
+  identify its applicable conditions, ordinary mechanism, modifying rule,
+  explicit exception, conditional outcome, and evidence. A correct outcome or
+  reviewed relation alone is insufficient; distinguish printed cases from
+  deductions and leave conflicts explicit. This is a curation/review standard,
+  not an executable interaction resolver. See `data/curated/README.md` and
+  `docs/web-design-guidelines.md` for the canonical contracts.
 - Scenario geometry is maintained semantic data, not diagram pixels. The 1.0 SVG renderer and
   geometry-schema v1 target only the four N5.3 core scenarios. All four core scenario records now
   own their geometry configurations; renderer tests consume those maintained definitions and must

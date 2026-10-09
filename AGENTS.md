@@ -223,6 +223,12 @@ When deriving structured facts from these materials:
 Official Infinity Army data and current official publications remain
 authoritative where they supersede archived local material.
 
+When curating material player-facing rules interactions, follow the explanation standard in
+`data/curated/README.md#explaining-rules-interactions`: make conditions, baseline mechanic,
+modifying rule, explicit exceptions, outcome, and source certainty understandable to players.
+Do not mark an interaction adequately explained solely because its result or relation is correct.
+The browser presentation target is in `docs/web-design-guidelines.md`.
+
 Maintained rules prose must use the semantic maintained-text token syntax whenever it names an
 existing supported Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program,
 or Attribute. The pre-token migration is complete: reviewed batches reject newly authored plain

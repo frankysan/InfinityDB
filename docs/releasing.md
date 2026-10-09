@@ -56,6 +56,11 @@ The 1.0 release gate requires:
 - [ ] Import or curate useful explanatory rules knowledge for every referenced skill,
   equipment item, weapon trait, state, terminology entry, or other gameplay concept,
   using concise player-oriented summaries where direct reproduction is inappropriate.
+- [ ] Review material player-facing rules interactions for a concise explanation
+  of their scope, baseline rule, modifying rule, explicit exception (if any),
+  and conditional gameplay outcome, with citations and honest uncertainty.
+  A correct result or a relationship edge alone does not meet the
+  [curated interaction explanation standard](../data/curated/README.md#explaining-rules-interactions).
 - [ ] Preserve rules/source provenance so users can identify the official material
   behind summaries or interpretations; distinguish InfinityDB summaries and
   abstractions from verbatim/source-native facts.

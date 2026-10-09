@@ -119,6 +119,51 @@ while Non-Lethal and the failed-Saving-Roll Stunned condition survive. The Weapo
 Chart (`oldid=4083`) separately grounds Flash Pulse's printed profile. Do not
 extrapolate these reviewed, non-executable examples to unreviewed combinations.
 
+### Explaining rules interactions
+
+**Accepted authoring and review standard, not a new JSON schema or a rules engine.**
+A material interaction between rules is not adequately explained by stating the
+correct outcome alone. A concise player-facing explanation should make the
+reasoning traceable, using the existing curated `summary`, typed links, citations,
+and `facts.sourceNotes` where appropriate:
+
+1. **Scope and trigger:** identify the relevant weapon/Skill, target conditions,
+   roll Attribute, and when the interaction applies. Do not imply that a
+   conditional effect always occurs.
+2. **General rule and modification:** explain the baseline mechanic and precisely
+   what the interacting rule changes. Keep Ammunition effects, Saving Roll
+   Attributes, and Weapon Traits distinct.
+3. **Exception or precedence:** cite the *actual* clause that preserves,
+   overrides, or limits an effect. A printed example establishes its own result,
+   but does not prove an otherwise undocumented general mechanism.
+4. **Gameplay result:** say what the player rolls or does, and what happens on
+   success or failure, including Wounds and States where relevant. Make the
+   difference between a hit and a failed Saving Roll explicit.
+5. **Evidence and certainty:** cite the scoped official rule text and, when
+   available, the matching example/FAQ and Army profile. Distinguish an
+   **explicit ruling**, a **rule-derived interpretation**, and an **unresolved
+   conflict**. Compare pinned English/Spanish versions and available historical
+   editions when their wording or profiles materially differ; preserve source
+   version/revision and do not silently choose a convenient reading.
+
+Keep the explanation short enough to use during a game; link the relevant full
+rules instead of reproducing them. Put historical/editorial differences in
+`facts.sourceNotes`, but leave unresolved questions that change gameplay clearly
+visible in ordinary rules text (using `review-needed` when appropriate). Do not
+manufacture an explanation when the official material supports only an outcome;
+label its evidence and scope instead. Relation-review status or a correct
+conditional result alone does not establish explanatory completeness.
+
+**Example — Immunity (BTS) and Flash Pulse:** Flash Pulse calls for a BTS Saving
+Roll with Stun Ammunition. Immunity (BTS) treats that Ammunition as Normal but
+does not turn the roll into ARM. The explicit *IMPORTANT* exception preserves
+Non-Lethal and State: Stunned; a failed BTS Saving Roll therefore causes
+Stunned but no Wounds. The English Weapon Chart includes the State: Stunned
+Trait, whereas the Spanish N5.3 wiki chart omits it and reports a different
+roll count. That discrepancy is a source note, not grounds for inventing a
+general exception for other States or weapons. The pinned evidence and exact
+scope are recorded in [RS-AW-IMM-001](../../docs/rules-semantics.md#rs-aw-imm-001--immunity-changes-covered-effects-not-the-attack-identity).
+
 ### Rules-enrichment coverage classifications
 
 `enrichment-coverage/classifications.json` is the maintained release-scope policy for

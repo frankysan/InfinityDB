@@ -59,6 +59,26 @@ visible under **Properties** without assigning an unverified domain. Preserve
 source order within each heading and avoid duplicating a `State:` prefix under a
 States heading.
 
+### Explain rules interactions, not just outcomes
+
+**Target design direction:** When showing a reviewed interaction, give the
+player the result first, then the shortest useful chain of reasoning: ordinary
+rule, applicable modifier, explicit exception, and resulting roll/State/Wound
+condition. Link each rule at its point of relevance and keep its source
+traceable. A compact answer should make it possible to explain the result to
+an opponent without reading implementation metadata; deeper citations and
+source discrepancies can remain in the normal rules card's existing detail
+and source-note areas. Do not imply the app simulates combat or resolves
+unreviewed cases.
+
+When a conflict affects the outcome, explain the uncertainty visibly rather
+than presenting a confident result with a hidden caveat. Editorial source
+history belongs in secondary notes, but a material gameplay ambiguity must
+remain readable in normal mode. This is a presentation target, **not** a claim
+that every current page already provides a structured interaction explanation.
+The curation review standard and Flash Pulse example live in
+[the curated-data contract](../data/curated/README.md#explaining-rules-interactions).
+
 ### Ammunition reference navigation
 
 Weapon statline Ammunition may be a single base type, a source-defined combined

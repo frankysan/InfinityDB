@@ -303,6 +303,13 @@ unimplemented until its corresponding behavior exists.
     relations, and facts that exist but cannot yet be reached in the normal browser experience.
     Reuse the current [curated contract](../data/curated/README.md#curated-rules-reference-data);
     extend closed fact/relation vocabularies with validation and presentation support before use.
+  - [ ] Review player-facing explanations of material rules interactions during
+    remaining curation batches against the
+    [explanation standard](../data/curated/README.md#explaining-rules-interactions).
+    Verify conditions, the general rule, modifiers, explicit exceptions, the
+    resulting game effect, and source certainty; do not generalize a printed
+    example into an undocumented rules engine. Sample the normal browser view
+    as well as the authored text, and keep source conflicts visible.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not
