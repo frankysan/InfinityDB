@@ -16666,6 +16666,7 @@
             },
             "facts": {
                 "ammunitionResolution": {
+                    "criticalAdditionalSavingRolls": 1,
                     "rollsPerHit": 1,
                     "woundsPerFailedSave": {
                         "hit": 1,
@@ -16681,6 +16682,7 @@
             "summary": "Armor-piercing Ammunition that reduces the target’s applicable ARM or BTS value by half for its Saving Roll.",
             "facts": {
                 "ammunitionResolution": {
+                    "criticalAdditionalSavingRolls": 1,
                     "defenseModifier": {
                         "operation": "halve",
                         "attributes": [
@@ -16718,6 +16720,7 @@
             "summary": "High-impact Ammunition that requires two Saving Rolls for each successful hit.",
             "facts": {
                 "ammunitionResolution": {
+                    "criticalAdditionalSavingRolls": 1,
                     "rollsPerHit": 2
                 }
             },
@@ -16784,6 +16787,7 @@
             "summary": "Electromagnetic Ammunition that forces multiple reduced-BTS Saving Rolls and can disable affected targets.",
             "facts": {
                 "ammunitionResolution": {
+                    "criticalAdditionalSavingRolls": 1,
                     "defenseModifier": {
                         "operation": "halve",
                         "attributes": [
@@ -16847,6 +16851,7 @@
             "summary": "Explosive Ammunition that requires three Saving Rolls for each successful hit.",
             "facts": {
                 "ammunitionResolution": {
+                    "criticalAdditionalSavingRolls": 1,
                     "rollsPerHit": 3
                 }
             },
@@ -16878,6 +16883,7 @@
             "summary": "Non-lethal Ammunition that uses a modified PH Saving Roll and can immobilize affected targets.",
             "facts": {
                 "ammunitionResolution": {
+                    "criticalAdditionalSavingRolls": 1,
                     "savingRoll": {
                         "attribute": "PH",
                         "modifier": -6,
@@ -16946,6 +16952,7 @@
             },
             "facts": {
                 "ammunitionResolution": {
+                    "criticalAdditionalSavingRolls": 1,
                     "rollsPerHit": 1,
                     "woundsPerFailedSave": {
                         "hit": 1,
@@ -17033,6 +17040,7 @@
             },
             "facts": {
                 "ammunitionResolution": {
+                    "criticalAdditionalSavingRolls": 1,
                     "rollsPerHit": 1,
                     "stateEffects": [
                         {
@@ -17061,6 +17069,7 @@
             "summary": "High-damage Ammunition whose failed Saving Rolls normally inflict two Wounds.",
             "facts": {
                 "ammunitionResolution": {
+                    "criticalAdditionalSavingRolls": 1,
                     "woundsPerFailedSave": {
                         "hit": 2,
                         "criticalAdditionalRoll": 1

@@ -2107,8 +2107,25 @@ Visors. Zone expiration and area shape are independent of Saving Roll resolution
 
 InfinityDB stores these reviewed properties as `facts.ammunitionResolution` or
 `facts.visibilityZone`, never by deriving effects from Weapon Chart syntax.
-The typed facts describe source semantics; they do not adjudicate Face to Face
-rolls, Criticals, immunity, or Combined Ammunition.
+The nine base Ammunition types that produce Saving Rolls each document
+`criticalAdditionalSavingRolls: 1`; Smoke and Eclipse have no Saving Roll
+fact. A Critical with Combined Ammunition produces **one** additional Saving
+Roll for the combined hit, retaining the applicable effects from its components.
+This is not one additional roll *per component* (AP+DA has two rolls from its
+hit and one additional Critical roll; AP+EXP has three plus one). A failed
+additional Critical roll for T2 inflicts one Wound rather than the two
+associated with its regular hit. This is reviewed, non-executable reference
+data; the component mapping does not calculate a combined roll total.
+
+Combined Saving Rolls follow a different rule: the additional Critical
+Saving Roll is against ARM (see RS-AW-SAVE-001). The typed facts do not
+adjudicate Face to Face rolls, immunity, or general Combined Ammunition.
+
+Sources: N5 v5.3 Combined Ammunition and Combined Saving Roll rules,
+Ammunition Summary Chart and T2 Ammunition rules; pinned Wiki N5.3
+pages <https://infinitythewiki.com/Combined_Ammunition>,
+<https://infinitythewiki.com/Combined_Saving_Roll>, and
+<https://infinitythewiki.com/Ammunition_Summary_Chart>.
 
 Sources: N5 v5.3 Ammunition definitions, pinned Wiki snapshot
 `wiki-en-20260918-130233` (Normal, Shock, Stun, Smoke, Eclipse); current N5.3

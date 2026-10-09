@@ -351,10 +351,14 @@ unimplemented until its corresponding behavior exists.
       Shock and Stun to canonical State pages with bidirectional rules relations.
       Check the authored targets against typed State facts without losing failure,
       target-type or VITA restrictions; the full interaction audit stays open.
+    - [x] Record the single additional Critical Saving Roll on all nine
+      roll-bearing base Ammunition facts, preserving T2's one-Wound Critical
+      exception and excluding Smoke/Eclipse. Do not sum the Critical extra roll
+      per component or infer totals from the four combined source mappings.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
-      precedence, Criticals, affected Attributes, visibility Face to Face outcomes,
-      conditional State cross-links, and comparison-view consumption. Do not infer
-      executable mechanics from reviewed reference facts.
+      precedence, full Critical interactions, affected Attributes, visibility Face
+      to Face outcomes, conditional State cross-links, and comparison-view
+      consumption. Do not infer executable mechanics from reviewed reference facts.
     - [ ] Validate every published base identity and reviewed combined form against the pinned
       source; prove that weapon links, Ammunition detail, and later comparison views consume the
       same facts without conflating composition with roll notation.

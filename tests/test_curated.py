@@ -1957,6 +1957,10 @@ def test_curated_long_rule_summaries_have_readable_paragraphs() -> None:
         {"defenseModifier": {"operation": "halve", "attributes": [{}]}},
         {"rollsPerHit": 0},
         {"rollsPerHit": True},
+        {"criticalAdditionalSavingRolls": 0},
+        {"criticalAdditionalSavingRolls": 2},
+        {"criticalAdditionalSavingRolls": True},
+        {"criticalAdditionalSavingRolls": "1"},
         {"savingRoll": {"attribute": "ARM", "modifier": -6, "missingAttribute": "no-effect"}},
         {"savingRoll": {"attribute": "PH", "modifier": True, "missingAttribute": "no-effect"}},
         {"savingRoll": {"attribute": "PH", "modifier": -6, "missingAttribute": "roll"}},
@@ -2123,6 +2127,29 @@ def test_ammunition_state_graph_must_match_conditional_effect_facts(
     path.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="causes-state relations must match"):
         load_curated_document(path)
+
+
+def test_critical_roll_fact_is_single_and_only_on_saving_roll_ammunition() -> None:
+    """One Critical adds one roll; it does not multiply with DA/EXP rolls."""
+    path = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    records = {item["id"]: item for item in load_curated_document(path)["records"]}
+    per_hit = {
+        "normal": 1, "da": 2, "em": 2, "exp": 3,
+        "para": 1, "shock": 1, "stun": 1,
+    }
+    for slug in ("normal", "ap", "da", "em", "exp", "para", "shock", "stun", "t2"):
+        record = records[f"ammunition:{slug}"]
+        facts = record["facts"]["ammunitionResolution"]
+        assert facts["criticalAdditionalSavingRolls"] == 1
+        if slug in per_hit:
+            assert facts["rollsPerHit"] == per_hit[slug]
+        assert record["citations"], slug
+    for slug in ("smoke", "eclipse"):
+        assert "ammunitionResolution" not in records[f"ammunition:{slug}"]["facts"]
+    # T2's additional Critical roll inflicts 1 Wound, not its normal 2.
+    assert records["ammunition:t2"]["facts"]["ammunitionResolution"][
+        "woundsPerFailedSave"
+    ] == {"hit": 2, "criticalAdditionalRoll": 1}
 
 
 def test_current_ammunition_state_relations_preserve_conditional_effects() -> None:

@@ -47,6 +47,9 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend:** Document the additional Critical Saving Roll
+  for reviewed base Ammunition without altering Weapon Saving Rolls or treating
+  Combined Ammunition components as separate Criticals.
 - **Data processing + Web backend:** Connect reviewed E/M, PARA, Shock and Stun
   Ammunition references to their possible State outcomes, preserving the
   conditional restrictions in each Ammunition definition and enabling reverse

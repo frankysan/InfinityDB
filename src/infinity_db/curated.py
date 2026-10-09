@@ -211,7 +211,7 @@ def _validate_ammunition_resolution(value: object, context: str) -> None:
         or not value
         or set(value) - {
             "defenseModifier", "rollsPerHit", "stateEffects", "savingRoll",
-            "woundsPerFailedSave", "gutsEffect",
+            "woundsPerFailedSave", "gutsEffect", "criticalAdditionalSavingRolls",
         }
     ):
         raise ValueError(f"{context}: unsupported ammunition resolution facts")
@@ -257,6 +257,11 @@ def _validate_ammunition_resolution(value: object, context: str) -> None:
         }
     ):
         raise ValueError(f"{context}.gutsEffect: unsupported Guts effect")
+    critical = value.get("criticalAdditionalSavingRolls")
+    if critical is not None and (type(critical) is not int or critical != 1):
+        raise ValueError(
+            f"{context}.criticalAdditionalSavingRolls: must be exactly one extra roll"
+        )
     rolls = value.get("rollsPerHit")
     if rolls is not None and (type(rolls) is not int or rolls < 1):
         raise ValueError(f"{context}.rollsPerHit: must be a positive integer")

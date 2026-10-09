@@ -8,7 +8,7 @@ from wsgiref.util import setup_testing_defaults
 import pytest
 
 from infinity_db.catalog_rules import CatalogRules
-from infinity_db.curated import load_curated_directory
+from infinity_db.curated import load_curated_directory, load_curated_document
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.weapon_ammunition_references import (
     WeaponAmmunitionReferences,
@@ -344,6 +344,49 @@ def test_weapon_source_mode_rules_do_not_leak_between_same_id_profiles(
     ] == ["weapon:kobra-pistol-cc-test"]
 
 
+def test_reviewed_combined_ammunition_critical_is_not_per_component(
+    tmp_path: Path,
+) -> None:
+    """Components retain independent facts; the shared extra roll is not summed."""
+    root = Path(__file__).parents[1]
+    records = {
+        record["id"]: record
+        for record in load_curated_document(
+            root / "data/curated/rules/n5-core-v5.3.json"
+        )["records"]
+    }
+    refs = WeaponAmmunitionReferences(_rules_database(tmp_path))
+    expected = {
+        (10, "AP+DA"): ("ap", "da", 2),
+        (13, "AP+Exp"): ("ap", "exp", 3),
+        (30, "AP+Shock"): ("ap", "shock", 1),
+        (40, "AP+T2"): ("ap", "t2", None),
+    }
+    for (source_id, name), (first, second, rolls) in expected.items():
+        composition = refs.composition_for_profile(
+            {"ammunition_source_id": source_id, "ammunition": name}
+        )
+        assert composition is not None
+        assert composition["kind"] == "combined"
+        assert [part["record_id"] for part in composition["components"]] == [
+            f"ammunition:{first}", f"ammunition:{second}"
+        ]
+        # A Critical is one extra Saving Roll for the *whole* combination.
+        # The mapping exposes components but does not calculate Saving Rolls.
+        assert "criticalAdditionalSavingRolls" not in composition
+        for slug in (first, second):
+            assert records[f"ammunition:{slug}"]["facts"]["ammunitionResolution"][
+                "criticalAdditionalSavingRolls"
+            ] == 1
+        if rolls is not None:
+            assert records[f"ammunition:{second}"]["facts"]["ammunitionResolution"][
+                "rollsPerHit"
+            ] == rolls
+    assert refs.composition_for_profile(
+        {"ammunition_source_id": 10, "ammunition": "ARM+BTS"}
+    ) is None
+
+
 def test_reviewed_ammunition_references_preserve_exact_army_identity(tmp_path: Path) -> None:
     mapping = load_ammunition_reference_map()
     assert len(mapping) == 15
@@ -472,9 +515,13 @@ def test_ammunition_resolution_pilot_preserves_separate_source_operations(
     em = rules_db.composed_record("ammunition:em")
     assert ap is not None and da is not None and em is not None
     assert ap["facts"]["ammunitionResolution"] == {
-        "defenseModifier": {"operation": "halve", "attributes": ["ARM", "BTS"]}
+        "criticalAdditionalSavingRolls": 1,
+        "defenseModifier": {"operation": "halve", "attributes": ["ARM", "BTS"]},
     }
-    assert da["facts"]["ammunitionResolution"] == {"rollsPerHit": 2}
+    assert da["facts"]["ammunitionResolution"] == {
+        "criticalAdditionalSavingRolls": 1,
+        "rollsPerHit": 2,
+    }
     assert em["facts"]["ammunitionResolution"]["stateEffects"] == [
         {"stateId": "state:isolated", "condition": "failed-saving-roll"},
         {
@@ -491,8 +538,12 @@ def test_ammunition_resolution_pilot_preserves_separate_source_operations(
     para = rules_db.composed_record("ammunition:para")
     t2 = rules_db.composed_record("ammunition:t2")
     assert exp is not None and para is not None and t2 is not None
-    assert exp["facts"]["ammunitionResolution"] == {"rollsPerHit": 3}
+    assert exp["facts"]["ammunitionResolution"] == {
+        "criticalAdditionalSavingRolls": 1,
+        "rollsPerHit": 3,
+    }
     assert para["facts"]["ammunitionResolution"] == {
+        "criticalAdditionalSavingRolls": 1,
         "savingRoll": {"attribute": "PH", "modifier": -6, "missingAttribute": "no-effect"},
         "rollsPerHit": 1,
         "stateEffects": [{
@@ -500,6 +551,7 @@ def test_ammunition_resolution_pilot_preserves_separate_source_operations(
         }],
     }
     assert t2["facts"]["ammunitionResolution"] == {
+        "criticalAdditionalSavingRolls": 1,
         "woundsPerFailedSave": {"hit": 2, "criticalAdditionalRoll": 1}
     }
     assert rules_db.composed_record("state:immobilized-a") is not None

@@ -85,7 +85,13 @@ exactly the State identities in `facts.ammunitionResolution.stateEffects`.
 The condition and target restrictions belong to the typed facts; a generic
 related-rule edge is a navigational link, **not** an unconditional game effect.
 The validator rejects an omitted, extra, or mismatched State relation so the
-player-facing graph and source-cited facts cannot drift apart. Other
+player-facing graph and source-cited facts cannot drift apart. Nine Saving-Roll-bearing Ammunition records additionally use the strictly
+validated `facts.ammunitionResolution.criticalAdditionalSavingRolls: 1`.
+This is one additional Saving Roll for a Critical with that Ammunition,
+not one additional roll per component in a combined profile. T2's
+`woundsPerFailedSave.criticalAdditionalRoll` separately describes the
+Wounds inflicted on failure of that extra roll. Smoke/Eclipse use
+`facts.visibilityZone` and no Saving Roll facts. Other
 Ammunition effects remain independent of these State links.
 
 ### Rules-enrichment coverage classifications

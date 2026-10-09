@@ -104,7 +104,17 @@ and Stun. The curated validator requires the set of targets on these links to
 match `facts.ammunitionResolution.stateEffects` exactly; target/attribute
 restrictions and Saving Roll failure conditions remain in the typed facts,
 not on the simple relation edge. Both directions of each link are available in
-reference pages. The other Ammunition effects, combined Critical interactions,
+reference pages. Nine roll-bearing base Ammunition records now also carry
+`criticalAdditionalSavingRolls: 1`. This represents the single extra Saving
+Roll from a Critical, not a multiplicative roll count per combined component.
+Smoke and Eclipse retain only visibility-zone facts and no Saving Roll facts.
+For the four reviewed Combined Ammunition forms, the component mapping still
+publishes identities only: it does not add, multiply, or adjudicate those rolls.
+The additional roll retains applicable constituent effects; T2's
+`woundsPerFailedSave.criticalAdditionalRoll` remains distinct from its regular
+hit effect. Combined Saving Rolls (including Plasma's ARM/BTS case) have a
+different extra-roll target rule and remain outside this fact pilot.
+The other Ammunition effects, complete combined Critical interactions,
 and broader semantic relationships still require source review.
 
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
