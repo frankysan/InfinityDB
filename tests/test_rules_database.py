@@ -2208,6 +2208,28 @@ def test_remaining_equipment_slice_relations_are_bidirectional(
         for relation in tinbot_repeater["display_relations"]
     }
 
+def test_counterintelligence_protects_owners_first_turn_command_tokens(
+    current_rules_database: RulesDatabase,
+) -> None:
+    counterintelligence = current_rules_database.composed_record("skill:counterintelligence")
+    assert counterintelligence is not None
+    assert "opponent's Strategic Use" in counterintelligence["summary"]
+    assert "your first Turn" in counterintelligence["summary"]
+
+    order_removal, token_limit = counterintelligence["facts"]["effects"]
+    assert "opponent uses Strategic Use to remove two Regular Orders" in order_removal
+    assert "reduces the removal to one" in order_removal
+    assert "more than ten Regular, Irregular, and Tactical Orders in total" in order_removal
+    assert "opponent uses Strategic Use to limit your Command Token spending" in token_limit
+    assert "lets you spend up to two instead" in token_limit
+    assert "adversary may use" not in token_limit
+    assert ("applies-effects-to", "outbound", "Command Token: Strategic Use") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in counterintelligence["display_relations"]
+    }
+    assert counterintelligence["citations"]
+
+
 def test_command_order_skill_relations_are_bidirectional(
     current_rules_database: RulesDatabase,
 ) -> None:

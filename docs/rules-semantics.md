@@ -2767,7 +2767,14 @@ Sources:
 Some static profile/catalog facts interact with Command Tokens only when their
 game/list conditions apply. A Lieutenant option can provide `+1 Command Token`
 when that Trooper is selected as the Lieutenant. Counterintelligence modifies
-specific effects of the opponent's Strategic Use of a Command Token.
+specific effects of the opponent's Strategic Use of a Command Token. During
+its owner's first Turn, Counterintelligence reduces the opponent's attempted
+two-Order removal to one, or, alternatively, allows its owner to spend up to
+two Command Tokens despite the opponent's one-token restriction. The removal
+option itself requires more than ten Regular, Irregular, and Tactical Orders
+(excluding Troopers in Hidden Deployment or off-table via Airborne Deployment);
+neither effect grants the opponent an additional token.
+These are alternate conditional protections, not unconditional extra resources.
 
 InfinityDB should preserve the source Skill/profile facts and may curate these
 relationships for explanation or search. It should not materialize their

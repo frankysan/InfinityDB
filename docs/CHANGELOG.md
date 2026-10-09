@@ -11,6 +11,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Counterintelligence now correctly explains that it protects **your** first-turn Command Token allowance or reduces the opponent's Order removal; it does not grant the opponent extra tokens.
 - Doctor, Engineer, MediKit, GizmoKit, and Intuitive Attack now explain their distinct roll conditions, failed-roll outcomes, and key exceptions; Disposable and Double Shot clarify charge spending.
 - Ammunition reference pages now show compact, reviewed mechanics alongside the full rules,
   including Saving Roll and State conditions, Critical exceptions, and Smoke/Eclipse visibility.

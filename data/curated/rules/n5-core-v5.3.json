@@ -14712,7 +14712,7 @@
             "id": "skill:counterintelligence",
             "kind": "skill",
             "name": "Counterintelligence",
-            "summary": "An optional private Automatic Special Skill that reduces the opponent's first-turn Command Token Strategic Use effects.",
+            "summary": "An optional private Automatic Special Skill that counters either of two effects of the opponent's Strategic Use of a Command Token during your first Turn.",
             "composition": {
                 "role": "definition"
             },
@@ -14729,8 +14729,8 @@
                 ],
                 "requirements": [],
                 "effects": [
-                    "Reduce to one the number of Orders the adversary can nullify with Strategic Use of a Command Token.",
-                    "Alternatively, increase to two the number of Command Tokens the adversary may use when Strategic Use would otherwise limit them to one."
+                    "If the opponent uses Strategic Use to remove two Regular Orders from your Order Pool during your first Turn, Counterintelligence reduces the removal to one. That option requires more than ten Regular, Irregular, and Tactical Orders in total, excluding Troopers in [[state:hidden-deployment|Hidden Deployment]] or off-table via Airborne Deployment.",
+                    "Alternatively, if the opponent uses Strategic Use to limit your Command Token spending to one during your first Turn, Counterintelligence lets you spend up to two instead."
                 ],
                 "restrictions": []
             },

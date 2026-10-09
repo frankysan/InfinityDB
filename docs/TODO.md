@@ -315,7 +315,8 @@ unimplemented until its corresponding behavior exists.
       The confirmed recovery/Intuitive Attack explanations (REA-001/002/003/009/022)
       have been revised in curated data and need player-facing review. Adjudicate
       direct Doctor/Engineer target allegiance (REA-038) before closing eligibility;
-      Counterintelligence's actor correction (REA-043) remains independent. Separately
+      Counterintelligence's actor correction (REA-043) is implemented in curated
+      data; verify its player-facing wording in the browser. Separately
       decide source conflicts and FAQ applicability before dependent curation.
       Use the [source manifest](rules-explanation-audit-1.0-sources.md) and
       [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).
