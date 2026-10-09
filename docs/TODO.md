@@ -321,8 +321,11 @@ unimplemented until its corresponding behavior exists.
       [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).
       Complete the [coverage gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate):
       304 selected clause reviews and 63 screening-only records are not 367 full
-      approvals. Track TinBot sharing/SpecBall (REA-039/040), bilingual conflicts
-      (REA-041/042), and targeted current metadata-only Weapon publication
+      approvals. Track TinBot sharing/SpecBall (REA-039/040), official Spanish PDF
+      source contradictions (REA-034/037/041), and Spanish Wiki-versus-PDF
+      discrepancies (REA-027/042). Preserve the S17/S21 provenance and seek
+      scoped errata rather than silently normalizing conflicting publications.
+      Also track targeted current metadata-only Weapon publication
       (REA-044) without promoting optional exhaustive research into a release blocker.
       The report remains an assessment, not accepted replacement semantics.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,

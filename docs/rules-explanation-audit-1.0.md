@@ -41,14 +41,18 @@ the curated Immunity family omits the ordinary ARM/BTS protection against
 State/Wound/Attribute Traits, leaving the reason for the exception incomplete
 (REA-010). Spanish Weapon Chart revision 3987 still lists two rolls and omits
 State: Stunned; the English chart and Army list one roll and the Trait. The
-Spanish N5.3 PDF could not be verified, so that source discrepancy remains open
-(REA-027).
+the official Spanish N5.3 PDF p. 196 agrees with English on one
+Saving Roll and both Traits. The unresolved discrepancy is specifically the
+Spanish Wiki chart versus the two published N5.3 PDFs (REA-027).
 
 Kobra Pistol's DA/two-roll interpretation is supported while Anti-materiel
 remains disputed (REA-028). Two additional internal PDF contradictions need
 review: a Level 3 Fireteam example includes the Level 4 bonus (REA-034), and
 Armed Turret's detailed profile and deployable table disagree on Silhouette
-(REA-037). Neither disagreement authorizes silently rewriting source data.
+(REA-037). The supplied Spanish PDF reproduces both internal contradictions.
+It also contains a conflicting six-dice Fireteam reminder (REA-041), even
+though its general Special Dice rule agrees with English. Neither disagreement
+authorizes silently rewriting source data.
 
 Reproducibility is also limited: the exact September 18 Wiki ZIP named by both
 collections is missing locally. Seventy-four record citations, across 72
@@ -81,7 +85,7 @@ absence of a prohibition is not treated as explicit permission for every
 enemy/neutral case. Do not widen target allegiance while fixing independently
 verified recovery mechanics. Counterintelligence's reversed Command Token actor
 (REA-043) is a new confirmed P0 correction. TinBot sharing (REA-039), missing
-SpecBall procedure (REA-040), two Spanish Wiki conflicts (REA-041/042), and
+SpecBall procedure (REA-040), Spanish PDF/Wiki conflicts (REA-041/042), and
 the metadata-only Breaker Marksman reference (REA-044) add focused follow-ups.
 
 Use the [source manifest](rules-explanation-audit-1.0-sources.md) for portable
@@ -241,12 +245,15 @@ Exact S4 payload provenance:
 
 These four revisions corroborate selected rules also printed in S1. The current
 Wiki banner is not evidence that an unchanged April 2025 revision was authored
-in September 2026. Spanish revision timestamps remain unknown. Original URL evidence was not
+in September 2026. Spanish oldid revision timestamps and independently hashed historical bytes
+are now recorded under S21 in the source manifest. Original URL evidence was not
 hash-pinned; follow-up independently checked selected exact member bytes in S14,
 including the original Spanish Immunity/Weapon Chart/Engineer revisions.
 
-The official resource page and the candidate Spanish v5.3 PDF URL were tried,
-but no Spanish v5.3 PDF content was obtained. GitHub, raw README, and public API
+The original follow-up could not access the Spanish v5.3 PDF from its
+candidate URL; **a separately supplied official Spanish v5.3 PDF has now been
+hashed and inspected as S17**, without equating its creation timestamp to
+publication time. GitHub, raw README, and public API
 requests for [the unofficial Army backup](https://github.com/massayoshi/infinity-army-backup)
 returned inaccessible/cache-miss responses. No historical backup commit or file
 was verified. S3 and available local Army archives are the historical evidence
@@ -255,8 +262,8 @@ used here; the repository's prior backup research remains prior research.
 Failed Spanish PDF endpoint:
 `https://downloads.corvusbelli.com/infinity/rules/infinity-rules-n5-es-v5.3.pdf`.
 This was an access attempt, not verification that the URL identifies the
-current official Spanish download. The resource page did not expose a verifiable
-Spanish v5.3 PDF payload through the research tool.
+current official Spanish download. That failed retrieval remains part of the research history; it no longer
+means that Spanish N5.3 PDF evidence is unavailable.
 
 ## Findings register
 
@@ -900,30 +907,30 @@ these are linked-baseline work, not a request for an execution engine.
 ### REA-027 - Flash Pulse's Spanish chart disagrees on rolls and Traits
 
 **Classification:** source discrepancy. **Severity:** High. **Priority:** P1.
-**Evidence:** Disagreement Explicit; reconciliation Unresolved.
+**Evidence:** Profile baseline confirmed in both N5.3 PDFs; Wiki conflict Explicit.
 **Affected:** `weapon:flash-pulse`, `skill:immunity`, `ammunition:stun`.
 
-**Current:** C uses the English one-BTS-save profile and names the Spanish
-two-roll/missing-Trait issue in source notes. The outcome is not silently hidden.
-That transparency is good, but the discrepancy is not resolved.
+**Current:** C uses the English one-BTS-save profile and records the competing
+Spanish Wiki numbers/Traits in its source notes. Its described gameplay outcome
+is supported and should be preserved.
 
-**Evidence/result:** S1 p. 186, S4 Weapon Chart 4083 and S6 weapon 72 agree on
-STUN/BTS/one save/Non-Lethal/State: Stunned. S8 revision 3987 prints two PB saves
-and omits the State Trait. S1 p. 96 and S7 revision 3677 both establish failed-save
-Stunned under Immunity (BTS). Language disagreement about the profile is distinct
-from agreement about that exception. Spanish PDF verification is unavailable.
+**Evidence/result:** S1 p. 186 and **S17 p. 196** both print Flash Pulse / Pulso
+Flash with STUN/Aturdidora, **one BTS/PB Saving Roll**, and the separate
+**Non-Lethal/No Letal** and **State: Stunned/Estado: Aturdido** Traits. The
+English archived Weapon Chart 4083 and Army S6 weapon 72 agree. Spanish Wiki
+revision 3987, timestamp **2026-08-27T14:20:08Z** from S21, instead prints two
+PB rolls and omits the State Trait. S1 p. 96 and S17 p. 99 explicitly preserve
+failed-save Stunned under Immunity (BTS/PB). Thus the *PDF-language* comparison
+is resolved; the **Spanish Wiki publication discrepancy** is not. The Wiki
+revision being later than the PDF's creation metadata does not establish a
+superseding official rule or prove the reason for the difference.
 
-**Action:** Obtain and pin the Spanish v5.3 PDF and relevant revision history;
-seek a scoped official correction if necessary. Retain all source values and
-the established English baseline in the meantime. **Fix:** research, evidence,
-then reviewed text/source-note changes if justified. **Dependencies:** REA-010,
-REA-029. No claim that Spanish is inherently superior or that every hit stuns.
-
-**Follow-up evidence:** Follow-up visual check: rendered English p. 186 confirms one BTS save,
-Non-Lethal and State: Stunned. Independently hashed S14 Weapon Chart 3987 retains
-two saves/missing Trait; Immunity 3677 still illustrates failed-save Stunned.
-No Spanish N5.3 PDF was acquired; a candidate endpoint returned 404. The chart
-disagreement remains unresolved, not settled by another page's example.
+**Action:** Preserve the verified one-BTS-save curated explanation and cite
+both language PDFs plus the Immunity exception. Document the Spanish Wiki
+conflict as a separate source issue and seek an official Wiki correction or
+erratum where feasible. **Fix:** evidence/source-note maintenance only unless
+later authoritative evidence changes the result. **Dependencies:** REA-010,
+REA-029. Do not infer that every hit automatically Stuns.
 
 ### REA-028 - Kobra's two issues require separate source decisions
 
@@ -1085,26 +1092,24 @@ is not counted as a second gameplay defect for each affected card.
 ### REA-034 - The printed Fireteam Level 3 example includes a Level 4 bonus
 
 **Classification:** source discrepancy. **Severity:** Medium. **Priority:** P1.
-**Evidence:** Internal contradiction Explicit; intended correction Unresolved.
+**Evidence:** Internal contradiction Explicit in both language PDFs; intended
+editorial correction Unresolved.
 **Affected:** `rule:fireteam-level-bonuses`, source Fireteam examples.
 
-**Current:** C follows the Level table: +1 BS at Level 4. S1 p. 138 Case 2
-describes only three same-Unit/equivalent members, calls it Level 3, yet includes
-+1 BS in its concluding bonus list.
+**Current:** C follows the Fireteam Level table, which grants +1 BS at Level 4.
 
-**Evidence/result:** S1 pp. 135-136 place that bonus at Level 4. The contradiction
-does not justify promoting the example's extra bonus. Its intended correction
-is likely an example typo, but no Spanish PDF/official erratum was verified.
+**Evidence/result:** English S1 p. 138 and Spanish S17 p. 142 both describe a
+three-Morat/equivalent-members example as **Level 3**, then include **+1 BS/CD**
+in its bonus list; each language's Fireteam tables place that modifier at
+**Level 4** (S1 pp. 135-136; S17 pp. 139-140). The Spanish Wiki example 3443
+also repeats the misleading example. Agreement between PDFs confirms the
+publication contradiction, not entitlement to an extra bonus.
 
-**Action:** Preserve the table-based current interpretation and investigate the
-exact Spanish example/English Wiki revisions; add a scoped note if players
-encounter this confusion. **Fix:** source research and explanatory note.
-**Dependencies:** REA-020, REA-021. This is not a confirmed defect in C's table.
-
-**Follow-up evidence:** Follow-up visual check: S1 p. 138 really labels the three-Morat example
-Level 3 while including the Level 4 +1 BS bonus. S14 Spanish example revision
-3443 repeats it. Repetition corroborates the conflict, not the extra bonus's
-legality; missing Spanish PDF remains an evidence limit.
+**Action:** Keep the table-based interpretation with a scoped explanation of
+the conflicting examples; seek an official correction if practical.
+**Fix:** citation/source note after acceptance; do not alter the derived
+Fireteam Level for the example. **Dependencies:** REA-020/021. Not a confirmed
+curated-level-table defect.
 
 ### REA-035 - Impersonation-2's "unmodified" Discover wording overstates the exception
 
@@ -1157,29 +1162,24 @@ placement baseline, rather than assuming a named metadata profile supplies them.
 ### REA-037 - Armed Turret has conflicting Silhouette values within the PDF
 
 **Classification:** source discrepancy. **Severity:** Medium. **Priority:** P1.
-**Evidence:** Values Explicit; reconciliation Unresolved.
+**Evidence:** Both values Explicit in both N5.3 PDFs; precedence Unresolved.
 **Affected:** `weapon:armed-turret`, `facts.specialProfile`.
 
-**Current:** The curated special profile records S2 with a p. 70 citation.
-There is no note about the differing deployable summary profile.
+**Current:** C's detailed profile uses S2, citing English S1 p. 70; it omits
+the conflict with the summary tables.
 
-**Evidence/result:** S1 p. 70 lists S2 in the detailed Armed Turret profile;
-p. 74's Deployable Profiles table lists S1. S6's weapon modes do not independently
-supply a resolving Silhouette value. S1 p. 18 gives both S1 and S2 a 25 mm base,
-but heights of 25 and 40 mm respectively: the disputed value affects height,
-LoF and clearance, not a different base footprint. It is not an alias. The current S2 value is faithfully cited,
-but is not an adjudication of the conflicting table.
+**Evidence/result:** English S1 p. 70 and Spanish S17 p. 74 both give the
+**detailed** Armed Turret/Torreta Artillada profile **S2**. Both languages'
+**deployable summary** tables give **S1** (S1 pp. 74/195; S17 pp. 74/203).
+The Spanish Wiki detailed Turret revision 3754 also gives S2. S1 p. 18 shows
+S1 and S2 share a 25-mm base, but differ in height (25 versus 40 mm), affecting
+LoF/clearance. Neither language's table resolves the disagreement.
 
-**Action:** Visual cells and selected Spanish Wiki comparison are now verified;
-obtain the Spanish PDF/any resolving official ruling. Retain S2's detailed-profile provenance and the open
-conflict pending review. **Fix:** source research and visible source note after
-review, not an automatic stat change. **Dependencies:** REA-023.
-
-**Follow-up evidence:** Follow-up visual check: pp. 70, 74 and 195 confirm detailed S2 versus both
-summary S1 cells. Spanish Wiki S14 Torreta Artillada 3754 gives detailed S2.
-The Spanish N5.3 PDF remains unavailable and no precedence rule resolving the
-internal English contradiction was located. Preserve the source conflict;
-the earlier footprint claim is corrected above to the verified height difference.
+**Action:** Preserve the S2 detailed-profile provenance and mark the conflict
+rather than silently changing the stat. Seek an applicable official erratum;
+**do not** assume either the detailed profile or summary always prevails.
+**Fix:** source research and a visible note following review.
+**Dependencies:** REA-023.
 
 ### REA-038 - Direct Doctor/Engineer target allegiance is not established
 
@@ -1294,50 +1294,61 @@ tools and all customization options are outside this focused requirement.
 ### REA-041 - Spanish Fireteam dice reminder conflicts with its general SD rule
 
 **Classification:** source discrepancy. **Severity:** High. **Priority:** P1.
-**Evidence:** Conflict Explicit; Spanish publication reconciliation Unresolved.
-**Confidence:** High about captured text, not the missing Spanish PDF.
+**Evidence:** Contradiction Explicit within official Spanish N5.3 PDF;
+precedence/erratum Unresolved. **Confidence:** High about source contents.
 **Affected:** `rule:fireteam-level-bonuses`, `skill:martial-arts`, SD baseline.
 
-**Current:** The English SD explanation excludes extra dice from the Burst cap.
-The contradictory Spanish Fireteam reminder was not previously examined.
+**Current:** English S1 pp. 75/136 and the current curated explanation separate
+Burst from Special Dice and do not count +1 SD toward the six-Burst cap.
 
-**Evidence/result:** S1 pp. 75/136 cap Burst at 6 and exclude +1 SD. S14
-`es/Modificadores_(MOD)_Detallados` 4012 agrees. However, its
-`es/Bonos_de_Fireteam` 3918 limits total dice to 6 including extra dice from
-Skills/MODs/bonuses. This differs for B6 plus SD and conflicts within the Spanish
-capture itself. A stale reminder is plausible; S17 PDF/erratum evidence is missing.
+**Evidence/result:** Spanish S17 p. 75 explicitly excludes +1DE from the
+maximum **Ráfaga 6** because extra Special Dice do not increase Burst. Yet
+S17 p. 140, in the Fireteam section, says the maximum of six **dice** includes
+extra dice from Skills, MODs, and bonuses. The contradiction is therefore
+present **within the Spanish PDF itself**, not merely between a Spanish Wiki
+page and English PDF. Spanish Wiki revision 4012 (2026-09-08) reflects the
+exclusion and Fireteam bonuses revision 3918 (2025-11-28) retains the
+inclusive reminder; these are separate publications with different dates.
+English S1 consistently distinguishes Burst and SD, and FAQ S2 p. 2 confirms
+SD does not change Burst for Coordinated Orders. Neither establishes why the
+Spanish Fireteam reminder was retained.
 
-**Action:** Keep the sourced English baseline and check Spanish PDF/history
-before asserting alignment. Do not invent a special Fireteam cap exception.
-**Fix:** evidence and a visible note after review. **Dependencies:** REA-021/029/034;
-separate from the Level 3 example's extra bonus.
-**1.0 relevance:** A scoped source disposition and visible uncertainty are needed
-for supported Special Dice explanations; missing bilingual proof is not certainty.
+**Action:** Keep the evidenced Burst-versus-SD baseline for now, visibly
+register the Spanish PDF contradiction, and seek a scoped official erratum.
+Do not invent a Fireteam-specific dice cap by inference. **Fix:** evidence and
+reviewed source note after adjudication. **Dependencies:** REA-021/029/034.
+**1.0 relevance:** Player explanations should be clear about the adopted
+sourced interpretation and outstanding source contradiction.
 
 ### REA-042 - Dodge (ARM+3) has incompatible English/Spanish conditions
 
-**Classification:** source discrepancy, completeness. **Severity:** High. **Priority:** P1.
-**Evidence:** Different conditions Explicit; supersession Unresolved.
-**Confidence:** High about the texts. **Affected:** `skill:dodge`, modifier
-baseline under REA-026, profile-listed Dodge (ARM+3).
+**Classification:** source discrepancy, completeness. **Severity:** High.
+**Priority:** P1. **Evidence:** PDF/Wiki conflict Explicit; cause Unresolved.
+**Confidence:** High about compared clauses. **Affected:** `skill:dodge`,
+modifier baseline REA-026 and profile-listed Dodge (ARM+3).
 
-**Current:** No curated explanation defines this parameter's saving benefit.
-A generic positive-Dodge-MOD explanation could apply +3 to PH instead of ARM
-or retain an older conditional benefit.
+**Current:** No complete curated explanation defines this parameter's effect.
+A generic +3-to-Dodge-PH explanation or an undocumented conditional rule would
+be misleading.
 
-**Evidence/result:** S1 p. 75 adds +3 ARM for Saving Rolls when Dodge is declared,
-using an unconditional formulation. S14 modifier revision 4012 instead makes
-the benefit conditional on failing PH, in a paragraph marked May 2026 Mazebreaker.
-S11/S13 both announce a clarification, but cannot verify the missing Spanish PDF.
-This may be a stale Wiki paragraph versus newer clarified wording; it remains open.
+**Evidence/result:** **Both N5.3 PDFs agree:** English S1 p. 75 says Dodge
+(ARM+3) always provides +3 ARM when Dodge is declared and the relevant Saving
+Roll occurs; Spanish S17 p. 75 says Esquivar (BLI+3) *siempre* gives +3 BLI
+when Esquivar is declared. Spanish Wiki revision 4012 (timestamp
+2026-09-08T10:04:10Z in S21) instead uses a condition involving a failed PH
+roll in a May-update paragraph. Thus this is no longer an unverified bilingual
+PDF alignment; it is a **Spanish Wiki-versus-two-PDF** conflict. That Wiki
+revision postdates the PDFs' creation metadata, but no explicit supersession
+or erratum was verified.
 
-**Action:** Preserve language/version boundaries and verify the Spanish PDF/history.
-Future prose must distinguish Dodge PH, ARM protection, failing a roll versus
-losing opposition, and same-Order scope. **Fix:** evidence, then parameter
-text/links and focused regressions after a source decision. **Dependencies:**
-REA-014/026 and S17. No generic saving bonus for ordinary Dodge is inferred.
-**1.0 relevance:** Resolve or explicitly scope the material parameter conditions
-before accepting its explanation; exhaustive bilingual history is optional.
+**Action:** Preserve the common PDF-based interpretation as supported while
+recording the Wiki conflict; seek a scoped correction/erratum. Future prose
+must distinguish Dodge PH, ARM/BLI protection, failed rolls and simultaneous
+Order resolution. **Fix:** evidence, then modifier text/links and focused
+regressions. **Dependencies:** REA-014/026. Do not infer a universal ordinary
+Dodge ARM bonus.
+**1.0 relevance:** A sourced player-facing conditional explanation remains
+necessary; the upstream discrepancy should be visible rather than hidden.
 
 ### REA-043 - Counterintelligence gives the relaxed limit to the wrong player
 
@@ -1484,14 +1495,14 @@ unverified inference. "Unresolved" preserves the actual competing claims.
 
 | Case | Sources/values | Disposition and consequence |
 | --- | --- | --- |
-| Flash Pulse saves and State Trait | English S1 p. 186 / S4 4083 / Army S6: one BTS save with Stunned; Spanish S8 3987: two PB saves without it | **Unresolved**, REA-027; Spanish PDF inaccessible. Immunity's failed-save Stunned exception is separately corroborated |
+| Flash Pulse saves and State Trait | S1 p. 186 and S17 p. 196: one BTS/PB save, Non-Lethal and State: Stunned; Spanish Wiki S8/S21 3987: two PB saves without State Trait | **Current PDF baseline verified in both languages**; **Spanish Wiki publication conflict remains**, REA-027; Immunity example in both PDFs confirms failed-save Stunned |
 | Kobra CC save count | S1 pp. 68/182: DA, one save; DA p. 64 / S4 4083 / S6: two | **Resolved interpretation**: DA requires two; preserve contradictory chart bytes. S3/S11 establish ammunition change, not an independently published chart correction |
 | Kobra Anti-materiel | S1 omits; S4/S6 include | **Unresolved**, REA-028; DA is insufficient evidence for this Trait |
-| Fireteam Level 3 example | S1 p. 138 visually includes +1 BS; tables pp. 135-136 assign it to Level 4; S14 Spanish example repeats the discrepancy | **Likely example typo, no resolving ruling**, REA-034; keep table provenance, Spanish PDF/erratum not verified |
-| Armed Turret Silhouette | S1 visually verified detailed p. 70: S2; summaries pp. 74/195: S1; S14 Spanish detail: S2 | **Unresolved**, REA-037; visual check completed, Spanish PDF/precedence ruling still missing; height differs, both bases 25 mm |
+| Fireteam Level 3 example | S1 p. 138 and S17 p. 142 include Level 4 +1 BS/CD in a Level 3 example; both languages' tables place it at Level 4 | **Confirmed within-PDF contradiction in both languages; intended correction unresolved**, REA-034 |
+| Armed Turret Silhouette | S1 detailed p. 70 / S17 detailed p. 74: S2; S1 summaries pp. 74/195 / S17 summaries pp. 74/203: S1 | **Confirmed within-PDF conflict in both languages; precedence unresolved**, REA-037; affects silhouette height |
 | Direct Doctor/Engineer allegiance | S1/S4/S14 direct requirements lack a universal Allied gate; Kits/delegation explicitly impose it | **Unresolved universal interpretation**, REA-038; no general rule supplying the gate found, no universal enemy permission inferred |
-| Spanish Fireteam dice reminder | S14 Fireteam reminder includes SD in six total dice; S1 and S14 general MODs exclude SD from Burst cap | **Unresolved supersession**, REA-041; do not invent a separate Fireteam cap |
-| Dodge (ARM+3) condition | S1 p. 75 grants ARM benefit when declared; S14 older paragraph requires PH failure | **Unresolved bilingual/version alignment**, REA-042; missing Spanish PDF, not a PH bonus |
+| Spanish Fireteam dice reminder | S17 p. 75 excludes Special Dice from Burst-6; S17 p. 140 Fireteam reminder includes extra dice in six total; S14 Wiki mirrors split | **Confirmed internal contradiction in official Spanish PDF; ruling precedence unresolved**, REA-041; do not invent a separate Fireteam cap |
+| Dodge (ARM+3) condition | S1 and S17 p. 75 agree on always +3 ARM/BLI for applicable Saving Rolls when declared; S14/S21 4012 conditions on failed PH | **PDF-language alignment verified; Spanish Wiki publication discrepancy remains**, REA-042; not +3 PH |
 | Breaker notice weapon label | English S11 says Sniper; rendered S1 p. 180/S6 225/S14 Spanish section match Marksman | **Derived terminology reconciliation**, REA-044; profile-backed match, no separate Sniper invented; public reference still absent |
 | Prone/Berserk | S1 general movement p. 29 excludes Berserk; Prone p. 169 repeats only Jump | **Resolved current exception** by p. 29 and S2 p. 1; record-level Prone prose still needs it in the lifecycle batch |
 | Old Kobra ammunition | S3 p. 68: Normal BS / Shock CC; S1/S11: Shock BS / DA CC | **Resolved historical supersession**; do not use the old one-save CC row as current authority |
@@ -1546,9 +1557,9 @@ source-code inspection here does not prove them.
 changed direct-target allegiance. The confirmed STR/recovery/roll corrections
 can proceed within supported Allied examples without widening eligibility;
 their full eligibility closure remains dependent on that decision. REA-043 is
-an independently confirmed first-batch actor correction. Recover S18 and obtain
-Spanish PDF evidence before closing dependent source claims, or accept an
-explicit scoped uncertainty/migration disposition with fresh comparison.
+an independently confirmed first-batch actor correction. Recover S18 and adjudicate the **now verified bilingual PDF-versus-Wiki**
+conflicts before closing dependent source claims, or accept an explicit scoped
+uncertainty/migration disposition with fresh comparison.
 
 These are independently reviewable proposed batches. Future code/JSON/schema
 edits, generated outputs and regression tests belong to those tasks, not this
@@ -1561,7 +1572,7 @@ documentation-only audit.
 | C. Hacking, NFB, visibility | REA-006, REA-007, REA-012, REA-018, REA-019 | Shared baseline content then Program-local timing; FAQ scope from F | Immediate Controlled Jump ARO; opposing Programs cancel each other's effects while Firefight +3 remains; Speedball no benefit; one Supportware/Hacker and beneficiary; replacement Fairy Dust example; one chosen Firewall; active versus disabled Device; MSV ordinary Smoke/Eclipse difference; White Noise owner NFB duration |
 | D. States, declarations and general baselines | REA-008, REA-014, REA-015, REA-016, REA-026, REA-035 | Reusable baseline references before broad cross-links; preserve per-State differences | IMM-B+Isolated and Targeted/capped MODs; Sixth Sense retained penalties; valid/blocked Engaged exit; simultaneous Mine and gun Dodge; Prone/Berserk and recovery cancellation; Hidden Deployment Order/ARO; Marker full-Order revelation; Stealth mixed activation; IMP-2 Range MOD and IMP-1 multiple successes; Protheion overkill |
 | E. Fireteams, Peripherals and placement | REA-017, REA-020, REA-021, REA-023, REA-032, REA-036, REA-039, REA-040 | Common action/placement baselines then subtype/variant exceptions; depends on D for lifecycle context | Controller/Peripheral mixed Idle; Servant and Cyberplug Doctor roll ownership; Ancillary eligibility/recovery; leader versus member departure and Number 2; Haris remains Haris at two members; original profile Training versus FT Master conversion; SD/BS bonuses versus Discover and WIP/PH; Perimeter blocked path; occupied placement fallback; Vitroferro cap before PS; AI remount contact; after-Guts Transmutation; TinBot owner disabled/sharing/identical versus different-strength benefits; SpecBall round/once/Null/Enhanced Profile and Marker conditions; TEAM-OPS scoped separately |
-| F. Sources and scoped FAQ | REA-027, REA-028, REA-029, REA-030, REA-034, REA-037, REA-041, REA-042 | Recover/pin sources, obtain Spanish PDF, classify FAQ by scope; independently review each discrepancy | Exact archive hash/member; one/two Flash saves; Kobra DA separate from Anti-materiel; current versus old chart blocks; FAQ Ancillary applicability explicitly decided; Fireteam example versus table; Armed Turret visually verified S1/S2 still needs a source decision; B6 versus B6+SD cap; Dodge ARM effect versus failed PH; publication/language/supersession separated |
+| F. Sources and scoped FAQ | REA-027, REA-028, REA-029, REA-030, REA-034, REA-037, REA-041, REA-042 | Recover S18; integrate verified Spanish PDF/oldid provenance, classify FAQ by scope; adjudicate remaining publication contradictions individually | Exact archive hash/member; verified PDF one-save Flash Pulse versus conflicting Spanish Wiki; Kobra DA separate from Anti-materiel; FAQ Ancillary applicability; bilingual Fireteam Level 3 example; bilingual Armed Turret S2/S1; Spanish PDF internal B6 versus B6+SD reminder; bilingual PDF Dodge modifier versus Spanish Wiki; document any official correction without overriding evidence |
 | G. Presentation, links and acceptance evidence | REA-011, REA-031, REA-033 | Follow content decisions; current prose rendering first; optional structured display later | AP+DA before/after conditions visible; Derived versus Explicit labels; correct CC Attribute target; material uncertainty visible in normal mode; keyboard/narrow-screen links and citations; actual explanation review cannot pass solely on graph count |
 | H. Command Token actor | REA-043 | Small independent P0 correction; share Strategic Use baseline from D | Opponent imposes limit on user's first turn; Counterintelligence allows user two; separate enemy Order-removal branch and >10 threshold |
 | I. Current Weapon publication | REA-044 | Target current metadata-only profiles; source 225 does not require a referencing Unit; no blanket publication of historical rows | Numeric/slug public lookup, matched Marksman profile/ranges, name/source-note visibility; no fabricated Sniper or raw data mutation |
@@ -1596,7 +1607,7 @@ is needed to write these concise explanations.
 - Every record was screened, but only the inventory's D subset received a
   selected official-clause comparison. There is no source-by-source approval
   of all 367 records or all 314 authored edges.
-- The exact September 18 archive, Spanish v5.3 PDF, Spanish FAQ, separately
+- The exact September 18 English Wiki archive, Spanish FAQ, separately
   versioned Reinforcements Extra/annex and a pinned historical Army backup
   commit were not verified. Later archives cannot repair that provenance by inference.
 - The 185 Army Weapon rows and all Unit/profile variants were not individually
@@ -1625,7 +1636,8 @@ is needed to write these concise explanations.
   No renderer dependency, PDF, screenshot or generated artifact was committed.
 - Original live responses identified footer revisions without pinned Spanish
   bytes. Follow-up discovered and hash-checked selected S14 Spanish members;
-  this is not the missing Spanish PDF or the missing S18 English capture. Some direct oldid URLs and the GitHub backup
+  the supplementary review has now also pinned Spanish PDF S17 and oldid
+  history S21; neither is the missing S18 English capture. Some direct oldid URLs and the GitHub backup
   failed; these failures were retained, not treated as evidence of absence.
 - Prior research such as Katyusha range normalization was consulted for
   discovery but is not presented as independently reverified current evidence.

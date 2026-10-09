@@ -126,7 +126,7 @@ identity and the actual selected locator. No defect was invented to fill a group
 The six metadata groups total **60** and the numerical group **3**. All retain S;
 their individual identities and authored citations remain in the inventory.
 The whole S1 PDF is available, so these are uncompleted work, not all unavailable
-sources. Exact S18, Spanish PDF, historical Army and any scenario-specific source
+sources. Exact S18, earlier Spanish PDF history, historical Army and any scenario-specific source
 requirements remain separately unavailable where relevant.
 
 ### Measurable 1.0 acceptance
@@ -654,7 +654,7 @@ source artifacts, manifests, generated outputs or runtime configuration changed.
 | Inventory | All 367 identities in unchanged collection order; 304 D + 63 S; 314 outgoing relations | 87 actual S-to-D promotions; 13 Attributes, 18 terms, 2 Training, 9 Equipment, 27 Skills and 18 Rules, including 12 profile-help entries; not full-record approval |
 | Remaining S identities | 60 declaration records plus exactly BS=12, BS=11 and CC=21 | Six metadata groups: 31 Automatic, 6 Deployment, 10 Short, 2 Basic Short, 5 Long, 6 ARO; all explicitly pending |
 | Notice denominator | Exactly N53-01–26, ESX-01–04, ARMY-01–20 and FAQ-01–09; English ordinals 1-26 and Spanish 1-30 each covered once | Rules union: 9 Verified, 16 Partially verified, 4 Discrepancy, 1 Not applicable; Army all 20 partial; FAQ nine additions compared, ITS scope separate |
-| Provenance | Nine available local primary artifact SHA-256 values and 19 selected Wiki member hashes match; expected S18 unchanged, ZIP still absent | Eight artifacts substantively compared, S5 availability/hash only; Spanish PDF still unavailable; no hash invented |
+| Provenance | Original follow-up: nine available local primary artifact SHA-256 values and 19 selected Wiki member hashes matched; S18 expected-only | Supplementary verification: S17 Spanish N5.3 PDF and S21 Spanish Wiki history ZIP independently hashed; selected printed PDF cells and nine oldid bytes/timestamps checked; S18 remains missing. This is a later evidence addendum, not a retroactive change to initial test results |
 | Protected inputs | All 35 baseline JSON/database/configuration SHA-256 values unchanged | Includes existing runtime databases; raw artifact checks separately listed above |
 | Repository boundary | Exactly five task paths, all Markdown under `docs/`; three modified, two new; no staging or commit | README ownership/integration links from original audit retained; no change needed there |
 | Original SVG access anomaly | All 783 formerly inaccessible/deleted-looking paths now readable after user enabled filesystem access; every file's Git blob hash matches the index | No asset write/restoration performed; visibility changed, not content |

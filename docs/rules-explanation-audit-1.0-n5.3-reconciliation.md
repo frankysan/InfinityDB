@@ -6,7 +6,9 @@ This follow-up appendix belongs to the [audit](rules-explanation-audit-1.0.md).
 Source identifiers and exact artifact hashes are in the
 [provenance manifest](rules-explanation-audit-1.0-sources.md).
 Research date: 2026-10-09; examined commit
-`c5400ab1b950990fdacc509be91c110fe85431fb`. No corrections were implemented.
+`c5400ab1b950990fdacc509be91c110fe85431fb`. Supplementary Spanish PDF
+(S17) and Wiki history (S21) verification on 2026-10-09 updates the evidence
+without changing rule/data implementations.
 
 ## Denominator and interpretation
 
@@ -58,7 +60,7 @@ that the rest of its card has adequate explanation; related gaps remain listed.
 | N53-06 / EN 6, ES 6 | Firewall category | S3 p. 55 says Equipment; S1 p. 55 says Automatic Equipment; S2 p. 1 ties Device benefit to being enabled | No adequate canonical Firewall owner; `skill:hacker`, Devices and Programs are insufficient substitutes | REA-018; Partially verified; category/source verified, contextual explanation missing |
 | N53-07 / EN 7, ES 7 | Kobra modes | S3 p. 68 differs from S1 p. 68; S1 p. 182 visually shows BS SHOCK and CC DA, yet CC one-save/no Anti-materiel. S6 221 has CC two saves/Anti-materiel | `weapon:kobra-pistol` preserves mode distinction and source uncertainty; DA interpretation and Anti-materiel need separate decisions | REA-028/031; Discrepancy; do not equate resolving DA saves with settling Anti-materiel |
 | N53-08 / EN 8, ES 8 | Trench-Hammer charges | S3 p. 68 has Disposable (3); S1 p. 68 and S6 177's BS/CC modes omit it | `weapon:trench-hammer` does not impose the old charge limit; selected modes agree | Verified; no new defect; full weapon/profile audit remains separate |
-| N53-09 / EN 9, ES 9 | Dodge armor modifier | S1 p. 75 grants ARM +3 whenever that Dodge is declared; S14 Spanish detailed MODs 4012 still conditions it on failed PH, in an older May-update paragraph | No complete modifier baseline; this is an ARM effect, not +3 to the Dodge PH roll | REA-026/042; Discrepancy; Spanish PDF unavailable, source decision needed |
+| N53-09 / EN 9, ES 9 | Dodge armor modifier | S1 and S17 p. 75 agree on the unconditional ARM/BLI +3 when the Dodge is declared; Spanish Wiki S14/S21 revision 4012 retains a failed-PH condition | No complete modifier baseline; this is an ARM effect, not +3 to the Dodge PH roll | REA-026/042; Discrepancy is now Wiki-versus-both-PDFs, not English-versus-Spanish PDFs; source correction status unresolved |
 | N53-10 / EN 10, ES 10 | PARA profile modifier | S1 p. 75 distinguishes the opponent's Face-to-Face penalty from the PH-6 PARA Saving Roll | `ammunition:para`, `skill:dodge` and PARA-weapon profile context need that distinction in the common modifier reference | REA-026; Partially verified; selected rule checked, explanation missing; never apply the profile penalty to every save |
 | N53-11 / EN 11, ES 11 | Speedball landing | S3 p. 84 PH 14 becomes S1 p. 84 PH 15; S2 retains Controlled Jump exclusion | `skill:request-speedball` has PH 15; landing clause correct | Verified; REA-007/026 separately retain FAQ context and uncompleted pickup/item lifecycle review |
 | N53-12 / EN 12, ES 12 | Aerial / Boost | S3 p. 86 lacks the exception; S1 p. 86 explicitly excludes triggering Boost | `skill:aerial` and `trait:boost` explain the exception instead of inferring ordinary approach behavior | Verified; preserve positive explanation pattern |
@@ -79,16 +81,17 @@ that the rest of its card has adequate explanation; related gaps remain listed.
 
 ## Additional Spanish-list subjects
 
-These are not duplicates of the nearby shared bullet. Previous Spanish PDFs are
-unavailable, so present Spanish Wiki annotations cannot prove the historical
-Spanish PDF delta. S14 member/revision hashes are in the source manifest.
+These are not duplicates of the nearby shared bullet. Current Spanish PDF S17
+is now available and checked for selected clauses; **previous Spanish N5.2 PDF**
+remains unavailable, so these are not independently verified historical Spanish
+PDF deltas. S14 current-member and S21 oldid hashes are in the source manifest.
 
 | ID / exact S13 rules ordinal | Subject | Previous/current clauses and representation | Findings / status / unresolved evidence |
 | --- | --- | --- | --- |
-| ESX-01 / 17 | Stealth alignment | S14 `es/Sigilo` 4004 has N5.3 annotation restricting reactions to Basic Short Movement/Idle without LoF, with Deployable/Sixth Sense/combat exclusions; compare S1 p. 113 and `skill:stealth` | REA-016; Partially verified; current selected alignment checked, previous/current Spanish PDF absent and combined activation explanation incomplete |
+| ESX-01 / 17 | Stealth alignment | S14 `es/Sigilo` 4004 has N5.3 annotation restricting reactions to Basic Short Movement/Idle without LoF, with Deployable/Sixth Sense/combat exclusions; compare S1 p. 113 and `skill:stealth` | REA-016; Partially verified; previous Spanish baseline and combined activation explanation incomplete; S17 is available but this clause was not compared in the supplementary check |
 | ESX-02 / 19 | Jet Propulsion wording | Notice explicitly identifies an English-only change. S3 p. 112 versus S1 p. 113 permits repeated direction changes mid-air; S14 `es/Super-Salto` 3964 retains older landing-oriented wording | `skill:super-jump` family lacks actionable Jet Propulsion operation, REA-032; Partially verified; do not extend bracket-distance rule to every Jump |
 | ESX-03 / 23 | MSV3 turn limit | S14 `es/Visor_Multiespectral` 4013's N5.3 clause agrees with S1 p. 125's Active-Turn-only attack on Camouflage without prior Discover; `equipment:multispectral-visor`'s L3 explanation has the turn qualification | REA-015; Partially verified; additional Spanish wording about disclosure to other Troopers needs ordinary save/revelation scope review; not blanket permission to remain a Marker after an attack |
-| ESX-04 / 28 | AP+T2 CC property | S14 `es/Tabla_de_Armas` 3987 and S1 p. 177 show Anti-materiel on AP+T2 CC; source profile context agrees | `trait:anti-materiel`, AP/T2 component explanations; Partially verified; no new defect, but pre-change and current Spanish PDF not checked; unrelated Kobra uncertainty remains REA-028 |
+| ESX-04 / 28 | AP+T2 CC property | S14 `es/Tabla_de_Armas` 3987 and S1 p. 177 show Anti-materiel on AP+T2 CC; source profile context agrees | `trait:anti-materiel`, AP/T2 component explanations; Partially verified; no new defect, but previous Spanish PDF and the S17 AP+T2 chart row were not rechecked in this supplementary pass; unrelated Kobra uncertainty remains REA-028 |
 
 ## Army update, separately scoped
 
@@ -160,7 +163,10 @@ Reinforcements annex and Spanish FAQ remain outside completed source verificatio
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an
-unresolved decision REA-038 and the additional bilingual conflicts REA-041/042.
+unresolved decision REA-038 and the verified Spanish PDF/Wiki source
+conflicts REA-041/042. S17 independently confirms the one-save Flash Pulse
+profile (REA-027), the bilingual Level 3 Fireteam example (REA-034), and the
+within-PDF Armed Turret Silhouette conflict (REA-037).
 Existing IDs retain their original subject; a second observation on Prone or
 Camouflaged extends REA-015 rather than creating duplicate findings.
 
