@@ -1758,6 +1758,56 @@ Sources:
 - Wiki: Doctor, Engineer, GizmoKit, and MediKit pages
 - PDF: Infinity N5 V5.3, printed pages 90-91, 116, and 123-124
 
+### RS-SE-RECOVERY-002 — Recovery, State cancellation, and failed Rolls are separate cases
+
+**Classification:** source-native mechanics with source-scoped reference explanations.
+
+Doctor's ordinary recovery requires Silhouette contact, a VITA target and
+Unconscious State. A successful WIP Roll removes one Wound and cancels
+Unconscious; failure causes Dead. Other State/Skill rules, such as Stunned,
+No Wound Incapacitation and Technorganic, provide specific exceptions.
+Engineer instead has separate effects: repair an STR target (a failed WIP Roll
+inflicts a Wound), or cancel eligible non-Unconscious States (failure has no
+negative consequence). The Stunned cancellation rule distinguishes VITA
+(Doctor) from STR (Engineer). Direct target **allegiance** remains under
+investigation (REA-038); the explicit Allied restrictions on MediKit/GizmoKit
+cannot be silently generalized to the Skills.
+
+MediKit and GizmoKit resolve target PH Rolls, not Saving Rolls. If multiple
+successful hits/uses occur in one Order, any successful target PH Roll gives
+at most one ordinary recovered Wound; Remote Presence and other explicit
+exceptions can alter that outcome. For simultaneous positive and negative
+State/Wound changes, apply recovery first, then the new detrimental effect.
+A Disposable Burst increase spends more charges; a Special Die does not.
+Double Shot with Disposable (2) needs both charges unspent.
+
+**Current consumer:** reviewed `skill:doctor`, `skill:engineer`,
+`equipment:medikit`, `equipment:gizmokit`, `trait:disposable-x`, and
+`trait:double-shot` curated references. This is explanatory knowledge, not
+an executable recovery resolver.
+
+Sources: N5.3 English and Spanish rules, printed pages 15, 90-91,
+104, 110, 116, 123-124 and 175 (English pagination); review evidence
+REA-001, REA-002, REA-009, REA-022 and REA-038.
+
+### RS-SE-INTUITIVE-001 — Intuitive Attack resolves with its WIP Roll
+
+**Classification:** source-native Skill resolution and placement exception.
+
+Intuitive Attack uses **one unmodified WIP Roll** to resolve a Burst 1 attack,
+not an initial WIP gate followed by another BS Roll. Applicable Attack/Dodge
+reactions oppose that WIP Roll. A Critical affects only the Main Target as a
+Critical. Placing a Deployable with a Camouflaged enemy Marker in its Trigger
+Area uses this Skill unless a valid non-camouflaged enemy Model is also there;
+failed placement does not put the weapon on the table and spends one
+Disposable use when applicable.
+
+**Current consumer:** `skill:intuitive-attack` curated reference. Do not
+extrapolate placement requirements to unrelated Deployables.
+
+Sources: N5.3 English PDF printed page 49 and Spanish PDF printed page 48;
+review evidence REA-003.
+
 ### RS-SE-PERIPHERAL-001 — Cyberplug is an explicit Skill-to-Peripheral relationship
 
 **Classification:** source-native relationship semantics.

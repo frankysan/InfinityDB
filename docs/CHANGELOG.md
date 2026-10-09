@@ -11,6 +11,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Doctor, Engineer, MediKit, GizmoKit, and Intuitive Attack now explain their distinct roll conditions, failed-roll outcomes, and key exceptions; Disposable and Double Shot clarify charge spending.
 - Ammunition reference pages now show compact, reviewed mechanics alongside the full rules,
   including Saving Roll and State conditions, Critical exceptions, and Smoke/Eclipse visibility.
 - The Immunity reference now explains why Immunity (AP) removes AP's modifier
@@ -97,6 +98,8 @@ are not retroactively relabeled.
   uses the shared versioned share-state contract rather than a scenario-specific URL format.
 
 ### Fixed
+
+- **Data processing + Web backend:** Correct misleading Doctor and Engineer recovery eligibility and failure text; distinguish State cancellation, clarify the one-roll Intuitive Attack procedure, and explain multi-hit Kits and Disposable use. Direct target allegiance remains under source review.
 
 - **Web backend + Web frontend:** Link Army weapon properties to the correct Label,
   Trait or State reference; preserve signed Label modifiers and resolve compound

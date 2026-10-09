@@ -2938,7 +2938,7 @@
             "id": "trait:disposable-x",
             "kind": "trait",
             "name": "Disposable (X)",
-            "summary": "Has limited uses. Each use is expended when declared, and all modes share the available uses.",
+            "summary": "Each declared use consumes one charge, including a failed or invalid declaration. Burst increases consume additional charges, capped by remaining uses; +1 SD does not spend an extra charge. Modes share charges.",
             "composition": {
                 "role": "definition"
             },
@@ -2952,11 +2952,16 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Disposable (X)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Disposable (X)"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-10-09"
             },
             "facts": {
                 "sourceIdentity": {
@@ -2976,7 +2981,7 @@
             "id": "trait:double-shot",
             "kind": "trait",
             "name": "Double Shot",
-            "summary": "In the Active Turn, may apply +1 Burst; with Disposable (2), this spends both uses.",
+            "summary": "During the Active Turn may apply +1 Burst. On a [[trait:disposable-x|Disposable (2)]] weapon or item, it requires both uses to remain and spends both when applied.",
             "composition": {
                 "role": "definition"
             },
@@ -2990,11 +2995,16 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Double Shot"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Double Shot"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-09"
             }
         },
         {
@@ -6657,7 +6667,7 @@
             "id": "skill:doctor",
             "kind": "skill",
             "name": "Doctor",
-            "summary": "A Short Special Skill that restores VITA-based allies and can cancel applicable states.",
+            "summary": "A Short Special Skill that normally recovers a [[state:unconscious|Unconscious]] VITA Trooper; separate rules allow cancellation of certain other conditions.",
             "composition": {
                 "role": "definition"
             },
@@ -6673,13 +6683,18 @@
                     "short-skill"
                 ],
                 "requirements": [
-                    "The target must be a friendly VITA-based Trooper in Silhouette contact with the user."
+                    "The user must be in Silhouette contact with the target.",
+                    "For ordinary recovery, the target must have VITA and be in [[state:unconscious|Unconscious State]]. Other rules may expressly permit cancellation outside ordinary recovery."
                 ],
                 "effects": [
-                    "A successful WIP Roll restores a lost Wound or cancels an applicable State."
+                    "For ordinary recovery, a successful [[attribute:wip|WIP]] Roll cancels [[state:unconscious|Unconscious State]] and removes one Wound (or more if a specific rule permits). A failed Roll puts the target directly into [[state:dead|Dead State]].",
+                    "[[state:stunned|Stunned State]] may instead be canceled on a successful WIP Roll for a VITA target under that condition's cancellation rule.",
+                    "Doctor (2W) removes two Wounds on successful ordinary recovery. Doctor (ReRoll WIP=X) permits one reroll of a failed Roll per Order at the stated WIP value; that replacement value does not apply to a subsequent Command Token reroll."
                 ],
                 "restrictions": [
-                    "The target's State and the Doctor rule determine whether the Roll is permitted and its result."
+                    "Self-use can cancel applicable conditions only while the user is not in a Null State; [[skill:no-wound-incapacitation|No Wound Incapacitation]] and [[skill:technorganic|Technorganic]] have explicit recovery exceptions.",
+                    "Direct-use target allegiance remains under source review; the Allied-only requirement for [[equipment:medikit]] is not a general Doctor rule. Ordinary [[state:engaged|Engaged]] restrictions still apply.",
+                    "When the same Order removes and inflicts Wounds or conditions, resolve the positive effect first, then the negative effect (N5.3 p. 15)."
                 ]
             },
             "labelIds": [
@@ -6700,7 +6715,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-22"
+                "reviewedOn": "2026-10-09"
             },
             "relations": [
                 {
@@ -6724,7 +6739,7 @@
             "id": "skill:engineer",
             "kind": "skill",
             "name": "Engineer",
-            "summary": "A Short Special Skill that repairs STR-based allies and cancels applicable states.",
+            "summary": "A Short Special Skill that repairs STR targets or separately cancels eligible conditions on Troopers; these are distinct WIP Roll effects.",
             "composition": {
                 "role": "definition"
             },
@@ -6740,13 +6755,18 @@
                     "short-skill"
                 ],
                 "requirements": [
-                    "The target must be a friendly STR-based Trooper, piece of Equipment, or Scenery item in Silhouette contact with the user."
+                    "The user must be in Silhouette contact with the target.",
+                    "STR is required to remove Wounds by ordinary repair, but not to cancel conditions covered by [[skill:engineer]]; condition-specific restrictions still apply."
                 ],
                 "effects": [
-                    "A successful WIP Roll restores a lost Structure or cancels an applicable State."
+                    "Repair: a successful [[attribute:wip|WIP]] Roll removes one Wound from a STR target (and cancels [[state:unconscious|Unconscious State]] where applicable). On failure, the target receives a Wound, entering [[state:unconscious|Unconscious]] or [[state:dead|Dead State]] where applicable.",
+                    "Condition cancellation: a successful WIP Roll cancels all applicable conditions except [[state:unconscious|Unconscious]]; a failed condition-cancellation Roll has no negative consequence. For [[state:stunned|Stunned State]], Engineer applies to STR targets, while [[skill:doctor]] applies to VITA targets.",
+                    "With [[skill:remote-presence|Remote Presence]], one successful repair Roll removes enough Wounds to cancel either level of [[state:unconscious|Unconscious State]]. Engineer (ReRoll WIP=X) allows one failed Roll reroll per Order at the stated WIP; that replacement value does not apply to a later Command Token reroll."
                 ],
                 "restrictions": [
-                    "The target's State and the Engineer rule determine whether the Roll is permitted and its result."
+                    "Self-use is permitted to repair Wounds or cancel applicable conditions only while the user is not in a Null State.",
+                    "Direct-use target allegiance remains under source review; the Allied-only requirement for [[equipment:gizmokit]] does not establish a universal Engineer restriction. Ordinary [[state:engaged|Engaged]] restrictions still apply.",
+                    "If a condition is canceled and a new one inflicted in the same Order, apply cancellation first, then the new effect. For example, canceling [[state:immobilized-a|IMM-A]] does not prevent a simultaneous failed [[ammunition:para|PARA]] Saving Roll from inflicting that condition again (N5.3 p. 15)."
                 ]
             },
             "labelIds": [
@@ -6767,7 +6787,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-22"
+                "reviewedOn": "2026-10-09"
             },
             "relations": [
                 {
@@ -9903,7 +9923,7 @@
             "id": "skill:intuitive-attack",
             "kind": "skill",
             "name": "Intuitive Attack",
-            "summary": "A Long Common Skill that uses a BS Weapon with the [[trait:intuitive-attack|Intuitive Attack]] Trait against a target that normally cannot be attacked directly.",
+            "summary": "A Long Common Skill resolving a Burst 1 [[skill:bs-attack|BS Attack]] against an otherwise protected target with one unmodified [[attribute:wip|WIP]] Roll, or placing a [[trait:deployable|Deployable]] Weapon under its specific conditions.",
             "composition": {
                 "role": "definition"
             },
@@ -9920,14 +9940,16 @@
                 ],
                 "requirements": [
                     "The user must employ a BS Weapon with the [[trait:intuitive-attack|Intuitive Attack]] Trait.",
-                    "The target must be outside the user's LoF because of a Zero Visibility Zone, or be in a State that normally requires [[skill:discover]] before it can be attacked."
+                    "The target (or Main Target for a Template) must be outside LoF because of a Zero Visibility Zone, or be in a condition normally requiring [[skill:discover]] before it can be attacked."
                 ],
                 "effects": [
-                    "The user makes an unmodified WIP Roll; on success, the user performs a single [[skill:bs-attack]] Roll against the target with Burst 1."
+                    "Resolve the Burst 1 [[skill:bs-attack|BS Attack]] using one unmodified [[attribute:wip|WIP]] Roll; do not make a second attack Roll on success. An eligible Attack or [[skill:dodge|Dodge]] reaction opposes that WIP Roll, when a Face to Face Roll applies.",
+                    "For attacks affecting multiple enemies, choose exactly one Main Target. A Critical on the WIP Roll counts as Critical only against that Main Target; it is an ordinary success against other affected targets.",
+                    "To place a [[trait:deployable|Deployable]] Weapon whose Trigger Area contains an enemy [[state:camouflaged|Camouflaged]] Marker, declare this Skill unless a valid non-camouflaged enemy Model is also in that area. On a failed WIP Roll, do not place the weapon; if it has [[trait:disposable-x|Disposable]], spend one use."
                 ],
                 "restrictions": [
-                    "MODs from Partial Cover, Special Skills, Equipment, and other sources do not apply to the required WIP Roll.",
-                    "After a failed WIP Roll, the user cannot attempt another Intuitive Attack against the same target until the next Active Turn."
+                    "The Burst for this Skill is always 1, regardless of weapon Burst or Burst MODs; Partial Cover, Special Skills, Equipment and all other MODs do not modify its WIP Roll.",
+                    "After a failed WIP Roll, the user cannot attempt this Skill again against the same target until the next Active Turn."
                 ]
             },
             "labelIds": [
@@ -9938,11 +9960,16 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "Intuitive_Attack",
                     "heading": "Intuitive Attack"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Intuitive Attack"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-10-09"
             }
         },
         {
@@ -11533,9 +11560,10 @@
                     "Remote use requires LoF; contact use requires Silhouette contact."
                 ],
                 "effects": [
-                    "Remote use is a [[trait:non-lethal|Non-Lethal]] BS Weapon; contact use spends a Short Skill without an attack Roll.",
-                    "On a successful target PH Roll, remove one Wound and cancel [[state:unconscious]] if applicable.",
-                    "On a failed target PH Roll, the target receives a Wound instead."
+                    "At range, a successful [[skill:bs-attack|BS Attack]] hits as a [[trait:non-lethal|Non-Lethal]] Weapon; in Silhouette contact, use a Short Skill without an attack Roll. Each successful hit/use makes the target roll [[attribute:ph|PH]], not a Saving Roll.",
+                    "If the target passes PH, remove one Wound and cancel [[state:unconscious|Unconscious State]] when applicable. If PH fails, the target receives a Wound, entering [[state:unconscious|Unconscious]] or [[state:dead|Dead State]] when applicable.",
+                    "If several GizmoKit hits/uses succeed in the same Order, any one successful target PH Roll removes only one Wound in total, even if several PH Rolls succeed.",
+                    "Self-use is possible to remove Wounds or cancel applicable conditions only outside a Null State. With [[skill:remote-presence|Remote Presence]], one successful PH Roll removes enough Wounds to cancel either level of [[state:unconscious|Unconscious State]]. A target's printed GizmoKit PH value takes precedence when specified."
                 ]
             },
             "armyLinks": [
@@ -11555,11 +11583,16 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "GizmoKit",
                     "heading": "GizmoKit"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 123,
+                    "section": "GizmoKit"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-10-09"
             },
             "variantSemantics": {
                 "inheritance": "family"
@@ -11816,9 +11849,10 @@
                     "Remote use requires LoF; contact use requires Silhouette contact."
                 ],
                 "effects": [
-                    "Remote use is a [[trait:non-lethal|Non-Lethal]] BS Weapon; contact use spends a Short Skill without an attack Roll.",
-                    "On a successful target PH Roll, remove one Wound and cancel [[state:unconscious]].",
-                    "On a failed target PH Roll, the target enters [[state:dead]]."
+                    "At range, a successful [[skill:bs-attack|BS Attack]] hits as a [[trait:non-lethal|Non-Lethal]] Weapon; in Silhouette contact, use a Short Skill without an attack Roll. Each successful hit/use makes the target roll [[attribute:ph|PH]], not a Saving Roll.",
+                    "On a single successful use, passing PH removes one Wound and cancels [[state:unconscious|Unconscious State]]; failing PH puts the target in [[state:dead|Dead State]].",
+                    "If several MediKit hits/uses succeed in the same Order, any one successful target PH Roll is enough to recover; even if multiple PH Rolls succeed, only one Wound is removed in total.",
+                    "Self-use can cancel applicable conditions only outside a Null State; a PH value printed with MediKit on a target's Unit Profile replaces that target's PH for this Roll."
                 ]
             },
             "armyLinks": [
@@ -11842,11 +11876,16 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "MediKit",
                     "heading": "MediKit"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 124,
+                    "section": "MediKit"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-10-09"
             },
             "variantSemantics": {
                 "inheritance": "family"

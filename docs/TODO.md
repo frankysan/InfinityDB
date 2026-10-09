@@ -312,10 +312,10 @@ unimplemented until its corresponding behavior exists.
     as well as the authored text, and keep source conflicts visible.
     - [ ] Review and implement accepted batches from the
       [1.0 explanation audit](rules-explanation-audit-1.0.md#prioritized-remediation-plan).
-      Adjudicate direct Doctor/Engineer allegiance (REA-038) before accepting
-      changed target wording; confirmed recovery/Intuitive Attack mechanics
-      (REA-001/002/003/009/022) and Counterintelligence's actor correction
-      (REA-043) can proceed independently within supported conditions. Separately
+      The confirmed recovery/Intuitive Attack explanations (REA-001/002/003/009/022)
+      have been revised in curated data and need player-facing review. Adjudicate
+      direct Doctor/Engineer target allegiance (REA-038) before closing eligibility;
+      Counterintelligence's actor correction (REA-043) remains independent. Separately
       decide source conflicts and FAQ applicability before dependent curation.
       Use the [source manifest](rules-explanation-audit-1.0-sources.md) and
       [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).

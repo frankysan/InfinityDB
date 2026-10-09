@@ -129,13 +129,6 @@
           ]
         },
         {
-          "text": "Intuitive Attack",
-          "reason": "skill-name-not-trait",
-          "occurrenceSha256s": [
-            "c9f0fa6a48562c583f52f63d5439bea2a93ebb12661fec0df521ae6baea52d6d"
-          ]
-        },
-        {
           "text": "Non-lethal",
           "reason": "descriptive-adjective-not-trait",
           "occurrenceSha256s": [
@@ -172,6 +165,7 @@
             "2c590860d694b5b2dfc72e95755bfc5de916e6a5118ec6111769dcf3fa6fa3b2",
             "2e39603dfe0af1c77ab20283c3b10a80696e8c284bb0c794812c3d6643358540",
             "2e6267cca3dd7dc8b3f86f68b30fd2e06682da12a4c61b1d845d380b8e071f7d",
+            "31386643c90d5296941d4b8b0356ade750052fa263280b39cb7e3a025e2ea795",
             "315c8655ae7130f296f97dabe1fe5c89fef069686794094ac047f308d67b4b2a",
             "31b683f0bebeb23f5fca9d33c8fad6a001185433b8b5ab22b6bfaca64b339c49",
             "362725526ef6787abeecb11033ecde8488c05fc69334eeae1cae4dd9469a2a06",
@@ -183,6 +177,7 @@
             "49eb00dcea39c2e64500944af077173eeb8e7d2a8570969a2c155815dceb1c30",
             "4c0dae90acdb9aa28ee4e24b01e59fca2d1c2d01747f9262541a4fa536b7d5b6",
             "562aacb12fe43bc8a4220b5633b0d985618acd49f6a600c8316376f99d32cc1c",
+            "5cd968f8db8c8b2c393a3129f22a2bdfda6833d93956bea6c3d36e80a21ea9b2",
             "5f02635be9281fe505dc90f8468c790318e4e499a348d89f886091e6e055b255",
             "5f38fc3ade2945fdbef9c72d6ba90f0d44d4ae501d74cb5d4434c6ceb59dc62d",
             "5f80fe56624ce1b477dcdda0ce46f4caab999941e060be141da17cf95e7dfdb7",
@@ -203,7 +198,6 @@
             "87477c1534318f0a4d49cd1b3e98933b9c7e9a5eea90cc79447c667992046502",
             "882f19bdeccdf041dbbd1707d24481415f22525c981ec66f16dffbb6d5c4f488",
             "88a53a4fee22dabeaeb6ab5d4ebfcc1dd49db22887ab74037eedd1ba0bdc534c",
-            "8c5c989315591df9b9002151a119d3dc1e919878760d102431db7d0dddee0706",
             "8cd18c40b5949dc1a6c401df4ec4f0f104c9109b1ddcd2fa6ecfb4115ef38643",
             "8eb9ae5676920bd7a278b5ad299d39fbb2da6b3acf03f2da14b9ced511c684bc",
             "90c42539f5fed6918362d0f6b80834fd9b0f0dc24a3e8190480e649b91b7ce3a",
@@ -220,18 +214,16 @@
             "a611d1a70d11ec98ea75d71724fcaa9187be3e7c173539e5478086048aded655",
             "a8a3bb10d32910f52c257a678ae8801aa17b5bd0a7c09818d4e5d85fe15505b1",
             "a994b5d9539911c80109d6c5db267e6bbb2f056ddd3f2101a4af3db4541b62be",
+            "a9e8018d17ad059134dcbb2547325ed23bf96431f70fff5ed62430ac79ab84c0",
             "abd3b43605604c4fd602e42011ca0a193e7899edc72e1db1669426f1dd383f86",
-            "ad77267a2873f403eb25262e2692abfd478bcd2c6fe4b980addb2a208bf50c85",
-            "adbb7ef05b983f7913ca96821356e6a16be4390406662cd7fbcba680b4a61a6a",
-            "ae086287f73d216dcbb85164ac2d1c57bcea67c525f043bade80c54aeb30884e",
             "b052a0220edf4e0acf1433f727708d4e7b2a145364e7865693ad9a7c30ff7e13",
+            "b3afe6ce3e983ab3e8d128732e264065ab67b9f55c9eac2304fa8c050dc88de1",
             "b3ddd244f076d7ce3a09398ade3e56f2ec54475e9953dd6fe31eb66d0536be9a",
             "b56d3c1571a0a24548de0661ad2759b6ea2654c5590f35f134bab4974d65a49b",
             "b6e13baadbca4bc92fa04114b9b43dcaf26015bb7fb5e8429617c9f61de4143e",
             "b7746c11ad5ef23d195e56be960c8338ed305d426b61690df760c795904cddd6",
             "bb94b005803ac02f7ffbff8fd522d433fce5939a1e1e046f95bd40efdb5f37fb",
             "bd668cc29582ab649fa0fa4cc002a7d7c052a4104913292aaac0744204862e8d",
-            "c13f394617a11d3c35577be9740250bdcf4a2765408d4e70f4a0e2d9a14e2050",
             "c2d78e4b868c043fd7f5632eba59ee38b012858662e1f647140a107e4bd060ea",
             "c2f2d7bd6c492e9d4cf8873528dae1dc130e6eb72251cef39a28d78fbaa60c1d",
             "c547d9236ba9e8a96d6f23ca915bc6deb52d6dc8ed1c2907eedccd874270e36a",
@@ -323,9 +315,7 @@
           "occurrenceSha256s": [
             "0dcc728686295a11f378c527a9eb0822716c45cb0d460828eebc805d574c2081",
             "377757109e4186e91f3b062e9047a3ef0e516eb9012f2dbce874f5e699f419af",
-            "7d9f8062874c4ae5b855f0624dd9cab05b30569ba53df39f67d5739abcc3760c",
-            "bf5c8b656df7885e8f4bf74e027ac6f5347768d51f69fe92fe66e6d18b6dc9bb",
-            "d2922b50bb0cae00d2ccfe51b74f2bc860e769897478ee6232213bf62acc958e"
+            "bf5c8b656df7885e8f4bf74e027ac6f5347768d51f69fe92fe66e6d18b6dc9bb"
           ]
         },
         {

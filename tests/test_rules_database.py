@@ -2523,3 +2523,101 @@ def test_ammunition_conditional_state_links_are_bidirectional(
             (relation["type"], relation["direction"], relation["record"]["id"])
             for relation in states[state_id]["display_relations"]
         }
+
+
+@pytest.mark.parametrize(
+    ("record_id", "required_fragments"),
+    [
+        (
+            "skill:doctor",
+            (
+                "must have VITA and be in [[state:unconscious|Unconscious State]]",
+                "A failed Roll puts the target directly into [[state:dead|Dead State]]",
+                "[[state:stunned|Stunned State]] may instead be canceled",
+                "replacement value does not apply to a subsequent Command Token reroll",
+                "Direct-use target allegiance remains under source review",
+            ),
+        ),
+        (
+            "skill:engineer",
+            (
+                "STR is required to remove Wounds by ordinary repair, but not to cancel",
+                "a failed condition-cancellation Roll has no negative consequence",
+                "[[state:stunned|Stunned State]], Engineer applies to STR",
+                "cancellation first, then the new effect",
+                "Direct-use target allegiance remains under source review",
+            ),
+        ),
+        (
+            "skill:intuitive-attack",
+            (
+                "one unmodified [[attribute:wip|WIP]] Roll",
+                "do not make a second attack Roll",
+                "reaction opposes that WIP Roll",
+                "Critical only against that Main Target",
+                "On a failed WIP Roll, do not place the weapon",
+            ),
+        ),
+        (
+            "equipment:medikit",
+            (
+                "target roll [[attribute:ph|PH]], not a Saving Roll",
+                "any one successful target PH Roll is enough to recover",
+                "only one Wound is removed in total",
+            ),
+        ),
+        (
+            "equipment:gizmokit",
+            (
+                "target roll [[attribute:ph|PH]], not a Saving Roll",
+                "any one successful target PH Roll removes only one Wound",
+                "cancel either level of [[state:unconscious|Unconscious State]]",
+            ),
+        ),
+        (
+            "trait:disposable-x",
+            (
+                "Burst increases consume additional charges",
+                "+1 SD does not spend an extra charge",
+            ),
+        ),
+        (
+            "trait:double-shot",
+            (
+                "it requires both uses to remain",
+                "spends both when applied",
+            ),
+        ),
+    ],
+)
+def test_recovery_and_intuitive_attack_explanations_survive_rules_export(
+    current_rules_database: RulesDatabase,
+    record_id: str,
+    required_fragments: tuple[str, ...],
+) -> None:
+    """N5.3 corrections must be available in published composed rules, not just JSON."""
+    record = current_rules_database.composed_record(record_id)
+    assert record is not None
+    facts = record.get("facts") or {}
+    sections = ("requirements", "effects", "restrictions")
+    text = " ".join(
+        [record["summary"]]
+        + [part for key in sections for part in facts.get(key, [])]
+    )
+    for fragment in required_fragments:
+        assert fragment in text
+    assert any(citation["source_id"] == "n5-core-v5.3-pdf" for citation in record["citations"])
+
+
+def test_recovery_and_intuitive_attack_avoid_the_old_misleading_baselines(
+    current_rules_database: RulesDatabase,
+) -> None:
+    doctor = current_rules_database.composed_record("skill:doctor")
+    engineer = current_rules_database.composed_record("skill:engineer")
+    intuitive = current_rules_database.composed_record("skill:intuitive-attack")
+    assert doctor is not None and engineer is not None and intuitive is not None
+    assert "friendly VITA-based" not in " ".join(doctor["facts"]["requirements"])
+    assert "friendly STR-based" not in " ".join(engineer["facts"]["requirements"])
+    assert "on success, the user performs a single" not in " ".join(
+        intuitive["facts"]["effects"]
+    )
