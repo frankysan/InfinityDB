@@ -368,9 +368,15 @@ unimplemented until its corresponding behavior exists.
       AP+DA and AP+Exp when the attack uses ARM and is not a Comms Attack.
       Preserve source identity, ordinary/Critical roll counts and the distinction
       between rule-derived examples and printed examples; keep them non-executable.
+    - [x] Pin the explicit N5.3 Vulnerability (Viral) versus Immunity (Enhanced)
+      example: the Immunity is unavailable against a weapon named Viral, regardless
+      of any inference about Ammunition composition. Cite Wiki Vulnerability
+      revision 3156; leave it non-executable.
     - [ ] Review component-level Immunity (such as Immunity (AP) on AP+DA),
-      BTS-based variants, Vulnerability and weapon-specific exceptions. Do not
-      generalize from the conditional Immunity (ARM) examples.
+      BTS-based variants and other weapon-specific exceptions. The pinned general
+      definitions do not explicitly settle whether a single named component
+      disables part or all of a Combined Ammunition attack. Do not generalize from
+      Immunity (ARM) or the name-scoped Viral Vulnerability example.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view

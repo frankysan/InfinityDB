@@ -142,7 +142,11 @@ now give **rule-derived, conditional** examples for source IDs 10 (AP+DA) and
 attack. Each preserves before/after hit and Critical counts with source IDs,
 components and explicit evidence status. They are stored on Immunity rather
 than on the Ammunition navigation mapping. No roll counts, State outcomes, or
-immunities are projected into individual Weapon profiles; partial component
+immunities are projected into individual Weapon profiles. A separate
+`reviewedVulnerabilityCases` entry records the **explicit** Vulnerability (Viral)
+versus Immunity (Enhanced) example (Wiki Vulnerability `oldid=3156`): the rule
+matches a weapon whose *name* contains Viral, not an Ammunition component.
+This example adds no weapon-name parsing at runtime. Partial component
 Immunities, BTS conditions and other combinations remain unresolved.
 
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses

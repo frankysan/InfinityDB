@@ -39,6 +39,27 @@ Record:
 Keep unresolved interpretations explicitly unresolved. Do not use this file to
 turn an inference into a source-native rule.
 
+### RR-AW-IMM-002 — Component-named Immunity on Combined Ammunition is not settled
+
+**Scope:** N5.3 Immunity (Ammunition) on a Combined Ammunition attack such as
+AP+DA; no published effect outcome is asserted.
+
+The N5.3 [Immunity](https://infinitythewiki.com/index.php?title=Immunity&oldid=3643)
+rule says the listed Ammunition is treated as Normal. The N5.3
+[Combined Ammunition](https://infinitythewiki.com/index.php?title=Combined_Ammunition&oldid=3000)
+rule says the combination acts as a single Ammunition with constituent effects.
+Neither clause explicitly illustrates **Immunity (AP) against AP+DA** or says
+whether matching one component negates its own effect, the entire combined
+attack, or neither. The published [Vulnerability](https://infinitythewiki.com/index.php?title=Vulnerability&oldid=3156)
+example does not resolve that question: it explicitly matches a *weapon name*
+containing Viral with Vulnerability (Viral), under Immunity (Enhanced).
+
+This is a provenance-bounded interpretation gap, not a verified game ruling.
+Do not apply the reviewed Immunity (ARM) roll-count examples to Immunity (AP),
+and do not infer matching from a string containing `+`. A future ruling or
+explicit authoritative example is required before adding a typed outcome.
+Historical N4/N3 interactions are not authoritative N5 precedents.
+
 ## Official publication-change notices
 
 See [N5 source and update history](n5-source-history.md) for the indexed official

@@ -861,11 +861,41 @@ def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
         }
         assert case["evidence"] == "derived-from-pinned-general-rules"
     assert {citation["source_version"] for citation in immunity["citations"]} == {
-        "N5.3 / oldid 3643", "N5.3 / oldid 3000"
+        "N5.3 / oldid 3643", "N5.3 / oldid 3000", "N5.3 / oldid 3156"
     }
     # The source-owned mapping remains descriptive: no target Immunity is inferred.
     for source_id in (10, 13, 30, 40):
         assert "withImmunity" not in source_map[source_id]
+
+
+def test_vulnerability_example_is_explicit_and_not_a_component_rule(
+    tmp_path: Path,
+) -> None:
+    rules_db = _rules_database(tmp_path)
+    immunity = rules_db.composed_record("skill:immunity")
+    vulnerability = rules_db.composed_record("skill:vulnerability")
+    assert immunity is not None
+    assert vulnerability is not None
+    examples = immunity["facts"]["immunityInteraction"]["reviewedVulnerabilityCases"]
+    assert examples == [
+        {
+            "when": {
+                "immunity": "Enhanced",
+                "vulnerability": "Viral",
+                "weaponNameContains": "Viral",
+            },
+            "result": "cannot-apply-immunity",
+            "evidence": "explicit-pinned-wiki-example",
+        }
+    ]
+    assert any(
+        citation["source_version"] == "N5.3 / oldid 3156"
+        for citation in immunity["citations"]
+    )
+    assert "Vulnerability (Viral)" in " ".join(vulnerability["facts"]["effects"])
+    for source_id in (10, 13, 30, 40):
+        # Explicit name-scoped Vulnerability is not an Ammunition-ID lookup.
+        assert "reviewedVulnerabilityCases" not in load_ammunition_reference_map()[source_id]
 
 
 def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:

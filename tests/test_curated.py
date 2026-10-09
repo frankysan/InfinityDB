@@ -2207,6 +2207,12 @@ def test_current_ammunition_state_relations_preserve_conditional_effects() -> No
          "Immunity exceptions"),
         (lambda f: f["reviewedCombinedCases"][0]["when"].update(immunity="AP"),
          "Immunity applicability"),
+        (lambda f: f["reviewedVulnerabilityCases"][0]["when"].update(
+            weaponNameContains="AP"), "Vulnerability interaction example"),
+        (lambda f: f["reviewedVulnerabilityCases"][0].update(
+            evidence="rule-derived"), "Vulnerability interaction example"),
+        (lambda f: f["reviewedVulnerabilityCases"][0].update(
+            withImmunity={"hitRolls": 1}), "Vulnerability interaction example"),
         (lambda f: f["reviewedCombinedCases"][0]["when"].update(
             savingAttribute="BTS"), "Immunity applicability"),
         (lambda f: f["reviewedCombinedCases"][0]["withoutImmunity"].update(

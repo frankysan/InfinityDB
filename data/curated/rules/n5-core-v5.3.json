@@ -15698,6 +15698,17 @@
                             "state:stunned"
                         ]
                     },
+                    "reviewedVulnerabilityCases": [
+                        {
+                            "when": {
+                                "immunity": "Enhanced",
+                                "vulnerability": "Viral",
+                                "weaponNameContains": "Viral"
+                            },
+                            "result": "cannot-apply-immunity",
+                            "evidence": "explicit-pinned-wiki-example"
+                        }
+                    ],
                     "reviewedCombinedCases": [
                         {
                             "sourceAmmunitionId": 10,
@@ -15753,6 +15764,10 @@
                 {
                     "sourceId": "wiki-combined-ammunition-oldid-3000",
                     "heading": "Combined Ammunition"
+                },
+                {
+                    "sourceId": "wiki-vulnerability-oldid-3156",
+                    "heading": "Vulnerability"
                 }
             ],
             "review": {
@@ -15785,7 +15800,8 @@
                 "requirements": [],
                 "effects": [
                     "The value in brackets on the Unit Profile identifies an Attack, weapon, or Ammunition to which the user is vulnerable.",
-                    "When facing that listed Attack, weapon, or Ammunition, the user cannot apply its [[skill:immunity]] Special Skill."
+                    "When facing that listed Attack, weapon, or Ammunition, the user cannot apply its [[skill:immunity]] Special Skill.",
+                    "In the N5.3 source example, Vulnerability (Viral) prevents using [[skill:immunity|Immunity]] (Enhanced) against a weapon with Viral in its name. This example does not define a generic combined-ammunition component rule."
                 ],
                 "restrictions": []
             },

@@ -44,8 +44,10 @@ release/audit narrative belongs in the changelog and Git history.
   non-executable `facts.immunityInteraction`; do not apply it automatically to
   combined components, Weapon profiles, or Critical outcomes. Two explicitly
   conditioned AP+DA/AP+Exp vs Immunity (ARM) examples are rule-derived evidence,
-  **not** general component-level Immunity semantics. See
-  `docs/rules-semantics.md` RS-AW-IMM-001.
+  **not** general component-level Immunity semantics. A separate pinned,
+  explicit Vulnerability (Viral) example is **weapon-name-scoped** and prevents
+  Immunity (Enhanced) for that attack; it does not imply component parsing or
+  automatic target-specific outcomes. See `docs/rules-semantics.md` RS-AW-IMM-001.
 - Scenario geometry is maintained semantic data, not diagram pixels. The 1.0 SVG renderer and
   geometry-schema v1 target only the four N5.3 core scenarios. All four core scenario records now
   own their geometry configurations; renderer tests consume those maintained definitions and must

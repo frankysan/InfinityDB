@@ -107,8 +107,13 @@ component IDs, applicability, original and covered hit/Critical Saving Roll
 counts, Normal treatment, and evidence class `derived-from-pinned-general-rules`.
 The validator rejects unsupported conditions, duplicate IDs, and impossible
 Critical counts. These examples cite Wiki Immunity `oldid=3643` together with
-Combined Ammunition `oldid=3000`. They are **not executable** and must not be
-projected into Army profiles or interpreted as generic component-level Immunity.
+Combined Ammunition `oldid=3000`. The closed `reviewedVulnerabilityCases`
+array records a **separate explicit Wiki example** (`Vulnerability` `oldid=3156`):
+Immunity (Enhanced) cannot be used against weapons with `Viral` in their names
+when the defender also has Vulnerability (Viral). Its predicate refers to a
+weapon name, **not** the weapon's Ammunition components. Neither fact family is
+executable or projected into Army profiles. Component-specific Immunity remains
+unresolved; do not extrapolate a result for Immunity (AP) versus AP+DA.
 
 ### Rules-enrichment coverage classifications
 

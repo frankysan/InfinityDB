@@ -256,7 +256,7 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
     """Validate source-reviewed Immunity boundaries without evaluating attacks."""
     if not isinstance(value, dict) or set(value) != {
         "coveredAmmunition", "criticalAgainstCoveredAmmunition", "exceptions",
-        "reviewedCombinedCases",
+        "reviewedCombinedCases", "reviewedVulnerabilityCases",
     }:
         raise ValueError(f"{context}: invalid Immunity interaction fields")
     covered = value["coveredAmmunition"]
@@ -290,6 +290,20 @@ def _validate_immunity_interaction(value: object, context: str) -> None:
         ]
     ):
         raise ValueError(f"{context}: invalid Immunity exceptions")
+    # The pinned Vulnerability example names a *weapon*, not just an
+    # Ammunition component. Do not turn this into substring-based runtime logic.
+    if value["reviewedVulnerabilityCases"] != [
+        {
+            "when": {
+                "immunity": "Enhanced",
+                "vulnerability": "Viral",
+                "weaponNameContains": "Viral",
+            },
+            "result": "cannot-apply-immunity",
+            "evidence": "explicit-pinned-wiki-example",
+        }
+    ]:
+        raise ValueError(f"{context}: unsupported Vulnerability interaction example")
     _validate_reviewed_immunity_combined_cases(
         value["reviewedCombinedCases"], f"{context}.reviewedCombinedCases"
     )

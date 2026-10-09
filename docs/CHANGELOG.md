@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- The Vulnerability rules now explain the source-backed Viral weapon-name example,
+  without treating unresolved component-specific Immunity as a ruling.
 - Weapon profiles now link reviewed base Ammunition directly, including the
   component references for AP+DA, AP+Exp, AP+Shock and AP+T2, without changing Saving Rolls.
 - Weapon profile properties now appear under their correct Traits, Labels or States

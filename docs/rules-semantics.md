@@ -2167,16 +2167,25 @@ Immunity result or a computation for arbitrary Weapon profiles.
 
 The record's `reviewedCombinedCases` gives the exact Army Ammunition source ID,
 ordered component IDs, applicability, original rolls and covered-attack rolls.
+An additional **explicit source example** now has its own validated
+`reviewedVulnerabilityCases` entry: a defender with Immunity (Enhanced) and
+Vulnerability (Viral) cannot use that Immunity against a weapon whose **name**
+contains `Viral`. The match is on the weapon name, not on whether an attack
+contains a Viral Ammunition component. This exact case does not establish a
+component-specific Immunity algorithm, nor is it run against Army profiles.
+The `skill:vulnerability` reference gives players the original example.
+
 Partial/component-specific Immunity (for example, whether Immunity (AP) affects
-all or part of an AP+DA attack), attacks using BTS, Comms Attacks, different
-Weapon Traits, Vulnerability, and conditional State interactions are **not**
-settled by these examples. No automatic per-Weapon or per-target projection is
-allowed.
+all or part of an AP+DA attack), BTS-based Combined Ammunition, other weapon
+Traits and conditional State interactions are **not** settled by either the
+derived ARM cases or the explicit Vulnerability example. No automatic per-Weapon
+or per-target projection is allowed.
 
 Sources: N5.3 Wiki [Immunity](https://infinitythewiki.com/Immunity)
-(`oldid=3643`) and [Combined Ammunition](https://infinitythewiki.com/Combined_Ammunition)
-(`oldid=3000`). The base rules are explicit; the two conditioned examples are
-reviewed deductions, with wider interaction precedence still open.
+(`oldid=3643`), [Combined Ammunition](https://infinitythewiki.com/Combined_Ammunition)
+(`oldid=3000`), and [Vulnerability](https://infinitythewiki.com/Vulnerability)
+(`oldid=3156`). The ARM cases are reviewed deductions; the named Viral example
+is printed in the Wiki. Broader precedence remains open.
 
 ### RS-AW-AMMO-003 — Combined Ammunition is explicit composition
 
