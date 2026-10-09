@@ -346,13 +346,22 @@ source Ammunition map above does not own effects. Supported fields are:
   `condition: "failed-saving-roll"`, and optional `targetTypes` (from
   `HI`, `TAG`, `REM`, `VH`). Conditions and target restrictions are part of the
   fact; the State must not be presented as unconditional.
+- `savingRoll: {"attribute": "PH", "modifier": -6, "missingAttribute": "no-effect"}`:
+  a PH-based Saving Roll with an explicit negative MOD, with no roll or
+  Ammunition effect if the target lacks PH. Currently validated only for PH
+  rolls with a negative MOD and the `no-effect` missing-Attribute case.
+- `woundsPerFailedSave: {"hit": 2, "criticalAdditionalRoll": 1}`:
+  Wounds from failing a Saving Roll for a normal hit versus the *separately
+  generated* additional roll for a Critical. The latter must not inherit
+  the two-Wound result of a normal T2 hit.
 
 The validator rejects unsupported operations, unknown Attributes, invalid
+PH Saving Roll specifications, invalid Wound-count exceptions, invalid
 State domains, duplicate States, invalid target restrictions, and ownership on
 non-Ammunition records. It does not execute saving rolls or derive properties
 of combined ammunition. Each record retains its existing N5/Wiki provenance;
 Army data, combination component IDs, and profile Saving Roll notation stay
-separate. AP, DA, and E/M form the initial reviewed pilot. Additional Ammunition
+separate. AP, DA, E/M, EXP, PARA, and T2 form the reviewed pilot. Additional Ammunition
 effects and composition precedence remain 1.0 audit work.
 
 The current closed relation vocabulary is defined by `src/infinity_db/rule_relations.py`. It

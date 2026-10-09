@@ -86,7 +86,11 @@ release/audit narrative belongs in the changelog and Git history.
   Saving Roll notation. The maintained map (version 2) records ordered components
   for the four reviewed combined forms (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`);
   their API `ammunition_composition` field is only present on exact matching
-  source profiles. Alternatives remain unlinked. This is not an effects engine.
+  source profiles. Alternatives remain unlinked. Curated `ammunitionResolution`
+  remains a non-executable, source-cited fact contract: AP, DA, E/M, EXP, PARA,
+  and T2 are reviewed. PARA's no-PH exception and T2's reduced Wound outcome
+  for the *additional Critical roll* cannot be dropped when consuming facts.
+  This is not an effects engine.
   See `docs/data-model.md` and `weapon-ammunition-references.json`.
 - Game/reference data is read-only at runtime. Persistent user-authored application data is not part
   of the current model.

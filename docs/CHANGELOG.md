@@ -47,6 +47,9 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend:** Make reviewed EXP, PARA, and T2 Ammunition
+  effects available as source-cited, structured reference facts, retaining the
+  PARA no-PH exception and T2's different additional Critical-roll effect.
 - **Data processing + Web backend + Web frontend:** Use exact reviewed Army ammunition
   metadata identities for Weapon statline links to the eleven published base
   Ammunition references and four reviewed combined forms. Preserve ordered typed

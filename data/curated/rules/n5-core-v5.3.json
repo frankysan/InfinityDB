@@ -16817,6 +16817,11 @@
             "kind": "ammunition",
             "name": "Explosive (EXP) Ammunition",
             "summary": "Explosive Ammunition that requires three Saving Rolls for each successful hit.",
+            "facts": {
+                "ammunitionResolution": {
+                    "rollsPerHit": 3
+                }
+            },
             "composition": {
                 "role": "definition"
             },
@@ -16843,6 +16848,22 @@
             "kind": "ammunition",
             "name": "Paralysis (PARA) Ammunition",
             "summary": "Non-lethal Ammunition that uses a modified PH Saving Roll and can immobilize affected targets.",
+            "facts": {
+                "ammunitionResolution": {
+                    "savingRoll": {
+                        "attribute": "PH",
+                        "modifier": -6,
+                        "missingAttribute": "no-effect"
+                    },
+                    "rollsPerHit": 1,
+                    "stateEffects": [
+                        {
+                            "stateId": "state:immobilized-a",
+                            "condition": "failed-saving-roll"
+                        }
+                    ]
+                }
+            },
             "composition": {
                 "role": "definition"
             },
@@ -16947,6 +16968,14 @@
             "kind": "ammunition",
             "name": "T2 Ammunition",
             "summary": "High-damage Ammunition whose failed Saving Rolls normally inflict two Wounds.",
+            "facts": {
+                "ammunitionResolution": {
+                    "woundsPerFailedSave": {
+                        "hit": 2,
+                        "criticalAdditionalRoll": 1
+                    }
+                }
+            },
             "composition": {
                 "role": "definition"
             },

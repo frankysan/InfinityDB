@@ -487,6 +487,23 @@ def test_ammunition_resolution_pilot_preserves_separate_source_operations(
         state = rules_db.composed_record(effect["stateId"])
         assert state is not None and state["kind"] == "state"
 
+    exp = rules_db.composed_record("ammunition:exp")
+    para = rules_db.composed_record("ammunition:para")
+    t2 = rules_db.composed_record("ammunition:t2")
+    assert exp is not None and para is not None and t2 is not None
+    assert exp["facts"]["ammunitionResolution"] == {"rollsPerHit": 3}
+    assert para["facts"]["ammunitionResolution"] == {
+        "savingRoll": {"attribute": "PH", "modifier": -6, "missingAttribute": "no-effect"},
+        "rollsPerHit": 1,
+        "stateEffects": [{
+            "stateId": "state:immobilized-a", "condition": "failed-saving-roll"
+        }],
+    }
+    assert t2["facts"]["ammunitionResolution"] == {
+        "woundsPerFailedSave": {"hit": 2, "criticalAdditionalRoll": 1}
+    }
+    assert rules_db.composed_record("state:immobilized-a") is not None
+
     root = Path(__file__).parents[1]
     app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
 
@@ -502,12 +519,23 @@ def test_ammunition_resolution_pilot_preserves_separate_source_operations(
         assert statuses == ["200 OK"]
         return json.loads(body)
 
-    for slug, record in (("ap", ap), ("da", da), ("em", em)):
+    for slug, record in (
+        ("ap", ap), ("da", da), ("em", em),
+        ("exp", exp), ("para", para), ("t2", t2),
+    ):
         ammunition_detail = detail(f"/api/ammunition/{slug}")
         assert ammunition_detail["rules"][0]["facts"]["ammunitionResolution"] == (
             record["facts"]["ammunitionResolution"]
         )
         assert ammunition_detail["rules"][0]["citations"]
+
+    para_rules = detail("/api/ammunition/para")["rules"]
+    assert para_rules[0]["facts"]["ammunitionResolution"]["stateEffects"][0][
+        "condition"
+    ] == "failed-saving-roll"
+    assert detail("/api/ammunition/t2")["rules"][0]["facts"][
+        "ammunitionResolution"
+    ]["woundsPerFailedSave"]["criticalAdditionalRoll"] == 1
 
     feuerbach = detail("/api/weapons/feuerbach")
     burst = next(profile for profile in feuerbach["profiles"] if profile["mode"] == "Burst Mode")

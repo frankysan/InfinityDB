@@ -72,8 +72,12 @@ The first reviewed Ammunition effect pilot now lives on canonical `ammunition:*`
 records, not on Army mapping entries. The validated, non-executable
 `facts.ammunitionResolution` object can describe halving the applicable ARM/BTS
 Attribute (AP), two Saving Rolls per hit (DA/E/M), and E/M State outcomes with
-failure conditions and eligible target categories. These facts flow through
-`rules.db` to Ammunition detail APIs with the records' existing citations. The
+failure conditions and eligible target categories. The EXP, PARA, and T2
+extensions add three rolls per EXP hit; a PH-6 Saving Roll with no effect
+against targets lacking PH and Immobilized-A on failure for PARA; and
+separate T2 Wound counts for a failed hit roll versus a failed additional
+Critical roll (2 versus 1). These facts flow through `rules.db` to
+Ammunition detail APIs with the records' existing citations. The
 Weapon API separately exposes source-authored profiles and reviewed combined
 component IDs. It does **not** merge these facts into an inferred roll result:
 Feuerbach's AP+DA source combination remains distinct from its `ARM/2` and `2`

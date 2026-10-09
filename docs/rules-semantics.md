@@ -2144,6 +2144,13 @@ Ammunition rules, not to every weapon bearing the name. The initial
 `facts.ammunitionResolution` pilot retains those operations with reviewed
 citations and typed State identities, without treating them as executable rules.
 
+The reviewed EXP rule requires three Saving Rolls per hit. PARA requires a PH-6
+Saving Roll and applies Immobilized-A on failure, but has no effect when a target
+has no PH Attribute. T2 inflicts two Wounds for a failed hit Saving Roll; a failed
+*additional Critical* Saving Roll inflicts only one Wound. Curated facts
+preserve that exception explicitly instead of treating all failed T2 rolls as
+identical. None of these operations is calculated by InfinityDB.
+
 Feuerbach's reviewed `AP+DA` metadata identifies two component rules, but
 `ARM/2` and `2` remain the independent, authoritative source profile fields.
 Plasma Carbine uses Normal Ammunition and a combined `ARM and BTS` Saving Roll;
@@ -2152,7 +2159,11 @@ existing profile/API pilot enforces these different ownership boundaries.
 
 Sources:
 
-- Pinned Wiki revision `wiki-en-20260918-130233`: AP, DA, and E/M Ammunition.
+- Pinned Wiki revision `wiki-en-20260918-130233`: AP, DA, E/M, EXP, PARA,
+  and T2 Ammunition.
+- Current N5.3 Wiki: <https://infinitythewiki.com/EXP>,
+  <https://infinitythewiki.com/Paralysis_(PARA)_Ammunition>, and
+  <https://infinitythewiki.com/T2> (effects and Critical exception).
 - Current N5.3 Wiki: <https://infinitythewiki.com/Combined_Ammunition>
   and <https://infinitythewiki.com/Combined_Saving_Roll>.
 - PDF: Infinity N5 V5.3, printed pages 63-67.

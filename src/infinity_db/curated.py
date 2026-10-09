@@ -209,7 +209,10 @@ def _validate_ammunition_resolution(value: object, context: str) -> None:
     if (
         not isinstance(value, dict)
         or not value
-        or set(value) - {"defenseModifier", "rollsPerHit", "stateEffects"}
+        or set(value) - {
+            "defenseModifier", "rollsPerHit", "stateEffects", "savingRoll",
+            "woundsPerFailedSave",
+        }
     ):
         raise ValueError(f"{context}: unsupported ammunition resolution facts")
     modifier = value.get("defenseModifier")
@@ -227,6 +230,23 @@ def _validate_ammunition_resolution(value: object, context: str) -> None:
             or len(set(modifier["attributes"])) != len(modifier["attributes"])
         ):
             raise ValueError(f"{context}.defenseModifier: invalid defense modifier")
+    saving_roll = value.get("savingRoll")
+    if saving_roll is not None and (
+        not isinstance(saving_roll, dict)
+        or set(saving_roll) != {"attribute", "modifier", "missingAttribute"}
+        or saving_roll["attribute"] != "PH"
+        or type(saving_roll["modifier"]) is not int
+        or saving_roll["modifier"] >= 0
+        or saving_roll["missingAttribute"] != "no-effect"
+    ):
+        raise ValueError(f"{context}.savingRoll: invalid PH Saving Roll specification")
+    wounds = value.get("woundsPerFailedSave")
+    if wounds is not None and (
+        not isinstance(wounds, dict)
+        or set(wounds) != {"hit", "criticalAdditionalRoll"}
+        or any(type(wounds[key]) is not int or wounds[key] < 1 for key in wounds)
+    ):
+        raise ValueError(f"{context}.woundsPerFailedSave: invalid Wound specification")
     rolls = value.get("rollsPerHit")
     if rolls is not None and (type(rolls) is not int or rolls < 1):
         raise ValueError(f"{context}.rollsPerHit: must be a positive integer")

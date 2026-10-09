@@ -340,6 +340,10 @@ unimplemented until its corresponding behavior exists.
       records (AP defense halving, DA roll multiplicity, E/M conditional State effects),
       with a source-to-rules-API pilot for AP+DA and a negative Combined Saving Roll case.
       Preserve independent Army profile values and source-cited fact ownership.
+    - [x] Extend typed facts to EXP, PARA, and T2, explicitly modeling EXP's three rolls,
+      PARA's PH-6/no-PH exception and Immobilized-A on failure, and T2's different
+      Wound outcomes for a hit versus an additional Critical Saving Roll.
+      Preserve those distinct conditions without evaluating combined ammunition.
     - [ ] Extend that pilot to the remaining base types and review the full fact/relation
       schema, including combined-effect precedence, Criticals, affected Attributes,
       conditional State cross-links, and comparison-view consumption. Do not infer
