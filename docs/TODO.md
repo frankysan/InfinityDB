@@ -377,6 +377,10 @@ unimplemented until its corresponding behavior exists.
       definitions do not explicitly settle whether a single named component
       disables part or all of a Combined Ammunition attack. Do not generalize from
       Immunity (ARM) or the name-scoped Viral Vulnerability example.
+    - [x] Present the existing eleven base Ammunition typed facts in the shared
+      rules-card renderer, with explicit failed-Saving-Roll conditions, Critical
+      exceptions and separate Smoke/Eclipse visibility behavior. Reuse curated
+      State links and preserve the full cited summaries; do not calculate rolls.
     - [ ] Review the remaining fact/relation completeness, including combined-effect
       precedence, full Critical interactions, affected Attributes, visibility Face
       to Face outcomes, conditional State cross-links, and comparison-view

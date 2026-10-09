@@ -1,4 +1,5 @@
 import { appendMaintainedText, maintainedTextFragment } from "./maintained-text.js";
+import { ammunitionFactRows } from "./ammunition-facts.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 import { tableViewport } from "./view-components.js";
 
@@ -182,6 +183,46 @@ function appendRuleFactGroup(container, rule, key, label) {
   container.append(group);
 }
 
+function appendAmmunitionFacts(container, rule) {
+  if (rule.kind !== "ammunition") return;
+  const states = new Map((rule.display_relations || [])
+    .filter((relation) => relation.record?.kind === "state")
+    .map((relation) => [relation.record.id, relation.record]));
+  const stateNames = Object.fromEntries(
+    [...states].map(([id, state]) => [id, state.name])
+  );
+  const rows = ammunitionFactRows(rule.facts, stateNames);
+  if (!rows.length) return;
+  const group = document.createElement("div");
+  group.className = "detail-fact-group ammunition-mechanics";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
+  heading.textContent = "Reviewed mechanics";
+  const list = document.createElement("dl");
+  list.className = "ammunition-mechanics-list";
+  for (const [label, value, stateId] of rows) {
+    const term = document.createElement("dt");
+    const state = stateId ? states.get(stateId) : null;
+    const href = state ? relationHref(state) : null;
+    if (href) {
+      const link = document.createElement("a");
+      link.href = href;
+      link.textContent = label;
+      term.append(link);
+    } else {
+      term.textContent = label;
+    }
+    const description = document.createElement("dd");
+    description.textContent = value;
+    list.append(term, description);
+  }
+  const caveat = document.createElement("p");
+  caveat.className = "detail-source";
+  caveat.textContent = "See the rules above for all conditions and exceptions.";
+  group.append(heading, list, caveat);
+  container.append(group);
+}
+
 // Blank lines mark semantic paragraphs in maintained summaries. Preserve inline
 // links and emphasis when a paragraph boundary falls inside a text token.
 function summaryParagraphs(tokens, fallback = "") {
@@ -221,6 +262,7 @@ function appendRuleDetails(
   const facts = rule.facts || {};
   appendRuleFactGroup(container, rule, "requirements", "Requirements");
   appendRuleFactGroup(container, rule, "effects", "Effects");
+  appendAmmunitionFacts(container, rule);
 
   const specialists = facts.specialists?.anyOfSkills;
   if (Array.isArray(specialists) && specialists.length) {

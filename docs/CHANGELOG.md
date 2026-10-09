@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Ammunition reference pages now show compact, reviewed mechanics alongside the full rules,
+  including Saving Roll and State conditions, Critical exceptions, and Smoke/Eclipse visibility.
 - The Vulnerability rules now explain the source-backed Viral weapon-name example,
   without treating unresolved component-specific Immunity as a ruling.
 - Weapon profiles now link reviewed base Ammunition directly, including the

@@ -5914,6 +5914,27 @@ def test_rules_summary_rendering_preserves_links_emphasis_and_source_notes() -> 
     assert "4 paragraphs; bold links; separate source note" in result.stdout
 
 
+def test_ammunition_reference_cards_render_reviewed_effects(app: Callable) -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "ammunition_facts_render_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "11 ammunition cards; source conditions and linked states" in result.stdout
+
+    status, _, renderer = request(app, "/static/rules-reference.js")
+    assert status == 200
+    assert b'from "./ammunition-facts.js"' in renderer
+    assert b"appendAmmunitionFacts(container, rule)" in renderer
+    status, _, helper = request(app, "/static/ammunition-facts.js")
+    assert status == 200
+    assert b"export function ammunitionFactRows(" in helper
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert b".ammunition-mechanics-list" in styles
+
+
 def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) -> None:
     for asset in ("skill.js", "catalog-detail.js"):
         status, _, body = request(app, f"/static/{asset}")

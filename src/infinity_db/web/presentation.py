@@ -93,6 +93,7 @@ ASSETS = {
         "text/javascript; charset=utf-8",
     ),
     "/static/rules-reference.js": ("rules-reference.js", "text/javascript; charset=utf-8"),
+    "/static/ammunition-facts.js": ("ammunition-facts.js", "text/javascript; charset=utf-8"),
     "/static/skill-categories.js": ("skill-categories.js", "text/javascript; charset=utf-8"),
     "/static/silhouettes/silhouette-1.svg": ("silhouettes/silhouette-1.svg", "image/svg+xml"),
     "/static/silhouettes/silhouette-2.svg": ("silhouettes/silhouette-2.svg", "image/svg+xml"),

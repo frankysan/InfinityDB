@@ -70,6 +70,17 @@ components from Saving Roll notation such as `ARM/2 × 2`. If the server has no
 reviewed component reference, leave the source name readable without fabricating
 a destination. The Ammunition detail page remains the canonical semantic owner.
 
+### Present reviewed Ammunition mechanics without calculating outcomes
+
+The eleven canonical Ammunition reference cards show the existing source-cited
+`ammunitionResolution` or `visibilityZone` facts as compact, labeled mechanics
+below the prose. Display roll counts, applicable Attributes, failed-roll State
+conditions, Critical exceptions, and Smoke/Eclipse visibility separately; link
+States through the existing curated relationships. Do not turn these facts into
+a combat calculator or infer component-level Immunity, combined Saving Roll
+results, or exceptions that are not in the data. Keep the source-cited summary
+and relation links visible: the compact facts are not a substitute for full rules.
+
 ### Give visual rules semantic meaning
 
 Style according to what an element is and what role it serves, not merely where it happens to appear. Prefer concepts such as primary column, metric column, technical metadata, surface header, and status badge over positional rules such as first child, third column, or last row.
