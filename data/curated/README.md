@@ -333,6 +333,28 @@ only by `+`. This source projection is not a curated effect relationship, nor is
 Saving Roll notation parsed to infer composition. See `docs/data-model.md` for the
 current runtime boundary and remaining 1.0 work.
 
+Ammunition definitions may additionally publish reviewed, **non-executable**
+`facts.ammunitionResolution` operations. This is a bounded typed-effects pilot; the
+source Ammunition map above does not own effects. Supported fields are:
+
+- `defenseModifier: {"operation": "halve", "attributes": ["ARM", "BTS"]}`:
+  halves the *applicable* Saving Roll Attribute, not necessarily both Attributes
+  for one hit. A subset such as `["BTS"]` is allowed.
+- `rollsPerHit`: a positive integer when the Ammunition itself specifies a
+  multiplicity. It does **not** replace the Army Weapon's `saving_num` field.
+- `stateEffects`: reviewed records with canonical `stateId`,
+  `condition: "failed-saving-roll"`, and optional `targetTypes` (from
+  `HI`, `TAG`, `REM`, `VH`). Conditions and target restrictions are part of the
+  fact; the State must not be presented as unconditional.
+
+The validator rejects unsupported operations, unknown Attributes, invalid
+State domains, duplicate States, invalid target restrictions, and ownership on
+non-Ammunition records. It does not execute saving rolls or derive properties
+of combined ammunition. Each record retains its existing N5/Wiki provenance;
+Army data, combination component IDs, and profile Saving Roll notation stay
+separate. AP, DA, and E/M form the initial reviewed pilot. Additional Ammunition
+effects and composition precedence remain 1.0 audit work.
+
 The current closed relation vocabulary is defined by `src/infinity_db/rule_relations.py`. It
 distinguishes creation/enabling, State transitions, MOD/effect changes, cancellation/restriction,
 and structural variant relationships rather than collapsing every connection into a generic

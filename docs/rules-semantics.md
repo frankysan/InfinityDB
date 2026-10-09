@@ -2132,6 +2132,31 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Combined_Saving_Roll>
 - PDF: Infinity N5 V5.3, printed page 67
 
+### RS-AW-AMMO-004 — Reviewed effects belong to canonical Ammunition rules
+
+**Classification:** N5 source-native effects with an InfinityDB typed-fact pilot.
+
+The AP Ammunition rule halves the *applicable* ARM or BTS Attribute; the DA
+rule requires two Saving Rolls for each hit. E/M uses BTS/2 and two Saving
+Rolls and can cause Isolated after any failed roll, plus Immobilized-B for a
+failed roll by an HI, TAG, REM, or VH target. These conditions belong to the
+Ammunition rules, not to every weapon bearing the name. The initial
+`facts.ammunitionResolution` pilot retains those operations with reviewed
+citations and typed State identities, without treating them as executable rules.
+
+Feuerbach's reviewed `AP+DA` metadata identifies two component rules, but
+`ARM/2` and `2` remain the independent, authoritative source profile fields.
+Plasma Carbine uses Normal Ammunition and a combined `ARM and BTS` Saving Roll;
+there must be no `ammunition_composition` inferred from that notation. The
+existing profile/API pilot enforces these different ownership boundaries.
+
+Sources:
+
+- Pinned Wiki revision `wiki-en-20260918-130233`: AP, DA, and E/M Ammunition.
+- Current N5.3 Wiki: <https://infinitythewiki.com/Combined_Ammunition>
+  and <https://infinitythewiki.com/Combined_Saving_Roll>.
+- PDF: Infinity N5 V5.3, printed pages 63-67.
+
 ### RS-AW-WPN-001 — Canonical Weapon identity and mode profile are separate
 
 **Classification:** source-native with an InfinityDB canonicalization

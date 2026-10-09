@@ -336,9 +336,14 @@ unimplemented until its corresponding behavior exists.
       Validate against source ID/name and source display notation; keep alternate
       ammunition choices and Saving Roll expressions out of composition semantics.
       This is a source-to-API pilot, not a replacement for curated effect facts.
-    - [ ] Review the fact/relation schema before curation: components, affected saving Attribute,
-      roll/effect conditions, and State interactions need explicit ownership. Cover a base type,
-      a combined form, and Combined Saving Roll notation in an end-to-end pilot.
+    - [x] Establish an initial typed, non-executable Ammunition effect contract on canonical
+      records (AP defense halving, DA roll multiplicity, E/M conditional State effects),
+      with a source-to-rules-API pilot for AP+DA and a negative Combined Saving Roll case.
+      Preserve independent Army profile values and source-cited fact ownership.
+    - [ ] Extend that pilot to the remaining base types and review the full fact/relation
+      schema, including combined-effect precedence, Criticals, affected Attributes,
+      conditional State cross-links, and comparison-view consumption. Do not infer
+      executable mechanics from a subset of curated effects.
     - [ ] Validate every published base identity and reviewed combined form against the pinned
       source; prove that weapon links, Ammunition detail, and later comparison views consume the
       same facts without conflating composition with roll notation.

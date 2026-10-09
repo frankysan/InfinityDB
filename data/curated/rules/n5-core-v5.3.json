@@ -16670,6 +16670,17 @@
             "kind": "ammunition",
             "name": "Armor Piercing (AP) Ammunition",
             "summary": "Armor-piercing Ammunition that reduces the target’s applicable ARM or BTS value by half for its Saving Roll.",
+            "facts": {
+                "ammunitionResolution": {
+                    "defenseModifier": {
+                        "operation": "halve",
+                        "attributes": [
+                            "ARM",
+                            "BTS"
+                        ]
+                    }
+                }
+            },
             "composition": {
                 "role": "definition"
             },
@@ -16696,6 +16707,11 @@
             "kind": "ammunition",
             "name": "Double Action (DA) Ammunition",
             "summary": "High-impact Ammunition that requires two Saving Rolls for each successful hit.",
+            "facts": {
+                "ammunitionResolution": {
+                    "rollsPerHit": 2
+                }
+            },
             "composition": {
                 "role": "definition"
             },
@@ -16748,6 +16764,33 @@
             "kind": "ammunition",
             "name": "Electromagnetic (E/M) Ammunition",
             "summary": "Electromagnetic Ammunition that forces multiple reduced-BTS Saving Rolls and can disable affected targets.",
+            "facts": {
+                "ammunitionResolution": {
+                    "defenseModifier": {
+                        "operation": "halve",
+                        "attributes": [
+                            "BTS"
+                        ]
+                    },
+                    "rollsPerHit": 2,
+                    "stateEffects": [
+                        {
+                            "stateId": "state:isolated",
+                            "condition": "failed-saving-roll"
+                        },
+                        {
+                            "stateId": "state:immobilized-b",
+                            "condition": "failed-saving-roll",
+                            "targetTypes": [
+                                "HI",
+                                "TAG",
+                                "REM",
+                                "VH"
+                            ]
+                        }
+                    ]
+                }
+            },
             "composition": {
                 "role": "definition"
             },

@@ -1946,3 +1946,63 @@ def test_curated_long_rule_summaries_have_readable_paragraphs() -> None:
             assert len(paragraphs) >= 2, record["id"]
             assert max(map(len, paragraphs)) <= 350, record["id"]
     assert reviewed > 0
+
+
+@pytest.mark.parametrize(
+    "invalid",
+    [
+        {"defenseModifier": {"operation": "double", "attributes": ["ARM"]}},
+        {"defenseModifier": {"operation": "halve", "attributes": ["WIP"]}},
+        {"defenseModifier": {"operation": "halve", "attributes": ["ARM", "ARM"]}},
+        {"defenseModifier": {"operation": "halve", "attributes": [{}]}},
+        {"rollsPerHit": 0},
+        {"rollsPerHit": True},
+        {"stateEffects": []},
+        {"stateEffects": [{"stateId": "skill:reset", "condition": "failed-saving-roll"}]},
+        {"stateEffects": [{"stateId": "state:isolated", "condition": "hit"}]},
+        {
+            "stateEffects": [
+                {"stateId": "state:isolated", "condition": "failed-saving-roll"},
+                {"stateId": "state:isolated", "condition": "failed-saving-roll"},
+            ]
+        },
+        {
+            "stateEffects": [
+                {
+                    "stateId": "state:immobilized-b",
+                    "condition": "failed-saving-roll",
+                    "targetTypes": ["HI", "WIP"],
+                }
+            ]
+        },
+        {"unreviewedOperation": "auto-resolve"},
+    ],
+)
+def test_ammunition_resolution_rejects_invalid_typed_facts(
+    tmp_path: Path, invalid: dict,
+) -> None:
+    document = valid_document()
+    document["records"].append({
+        "id": "ammunition:pilot",
+        "kind": "ammunition",
+        "name": "Pilot ammunition",
+        "summary": "A typed fact validation fixture.",
+        "facts": {"ammunitionResolution": invalid},
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "citations": [{"sourceId": "n5-core-v5.3", "page": 64}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-10-09"},
+    })
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="ammunitionResolution"):
+        load_curated_document(path)
+
+
+def test_ammunition_resolution_is_owned_only_by_ammunition(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"][0]["facts"]["ammunitionResolution"] = {"rollsPerHit": 2}
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="only Ammunition"):
+        load_curated_document(path)

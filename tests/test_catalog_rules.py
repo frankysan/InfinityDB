@@ -460,3 +460,67 @@ def test_reviewed_ammunition_source_names_match_published_army_snapshot() -> Non
     assert reviewed_count >= len(reviewed_ids)
     for source_id, entry in load_ammunition_reference_map().items():
         assert published[source_id] == entry["name"]
+
+
+def test_ammunition_resolution_pilot_preserves_separate_source_operations(
+    tmp_path: Path,
+) -> None:
+    """Typed base effects, source composition, and saving syntax stay independent."""
+    rules_db = _rules_database(tmp_path)
+    ap = rules_db.composed_record("ammunition:ap")
+    da = rules_db.composed_record("ammunition:da")
+    em = rules_db.composed_record("ammunition:em")
+    assert ap is not None and da is not None and em is not None
+    assert ap["facts"]["ammunitionResolution"] == {
+        "defenseModifier": {"operation": "halve", "attributes": ["ARM", "BTS"]}
+    }
+    assert da["facts"]["ammunitionResolution"] == {"rollsPerHit": 2}
+    assert em["facts"]["ammunitionResolution"]["stateEffects"] == [
+        {"stateId": "state:isolated", "condition": "failed-saving-roll"},
+        {
+            "stateId": "state:immobilized-b",
+            "condition": "failed-saving-roll",
+            "targetTypes": ["HI", "TAG", "REM", "VH"],
+        },
+    ]
+    for effect in em["facts"]["ammunitionResolution"]["stateEffects"]:
+        state = rules_db.composed_record(effect["stateId"])
+        assert state is not None and state["kind"] == "state"
+
+    root = Path(__file__).parents[1]
+    app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
+
+    def detail(path: str) -> dict[str, Any]:
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ["REQUEST_METHOD"] = "GET"
+        environ["PATH_INFO"] = path
+        statuses: list[str] = []
+        body = b"".join(
+            app(environ, lambda status, headers, exc_info=None: statuses.append(status))
+        )
+        assert statuses == ["200 OK"]
+        return json.loads(body)
+
+    for slug, record in (("ap", ap), ("da", da), ("em", em)):
+        ammunition_detail = detail(f"/api/ammunition/{slug}")
+        assert ammunition_detail["rules"][0]["facts"]["ammunitionResolution"] == (
+            record["facts"]["ammunitionResolution"]
+        )
+        assert ammunition_detail["rules"][0]["citations"]
+
+    feuerbach = detail("/api/weapons/feuerbach")
+    burst = next(profile for profile in feuerbach["profiles"] if profile["mode"] == "Burst Mode")
+    assert [part["record_id"] for part in burst["ammunition_composition"]["components"]] == [
+        "ammunition:ap", "ammunition:da"
+    ]
+    assert (burst["saving"], burst["saving_num"]) == ("ARM/2", "2")
+    assert "ammunitionResolution" not in burst
+
+    plasma = detail("/api/weapons/plasma-carbine")
+    assert all(profile["ammunition"] == "N" for profile in plasma["profiles"])
+    assert all("ammunition_composition" not in profile for profile in plasma["profiles"])
+    assert all(
+        (profile["saving"], profile["saving_num"]) == ("ARM and BTS", "1 and 1")
+        for profile in plasma["profiles"]
+    )

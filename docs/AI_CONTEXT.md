@@ -31,6 +31,10 @@ release/audit narrative belongs in the changelog and Git history.
   consumer-specific code.
 - Runtime read paths consume materialized application data. They do not reinterpret raw normalized
   tables or working-tree curation on demand.
+- Ammunition effect operations belong to reviewed canonical `ammunition:*` facts,
+  not to Army source-ID navigation mappings. The initial AP/DA/E/M typed pilot
+  is descriptive and non-executable; combined Ammunition components and
+  Combined Saving Roll notation are separate source/profile dimensions.
 - Scenario geometry is maintained semantic data, not diagram pixels. The 1.0 SVG renderer and
   geometry-schema v1 target only the four N5.3 core scenarios. All four core scenario records now
   own their geometry configurations; renderer tests consume those maintained definitions and must

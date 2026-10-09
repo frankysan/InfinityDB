@@ -204,6 +204,65 @@ def _validate_related_categories(facts: dict[str, Any], context: str) -> None:
         )
 
 
+def _validate_ammunition_resolution(value: object, context: str) -> None:
+    """Validate reviewed effects without treating them as executable roll logic."""
+    if (
+        not isinstance(value, dict)
+        or not value
+        or set(value) - {"defenseModifier", "rollsPerHit", "stateEffects"}
+    ):
+        raise ValueError(f"{context}: unsupported ammunition resolution facts")
+    modifier = value.get("defenseModifier")
+    if modifier is not None:
+        if (
+            not isinstance(modifier, dict)
+            or set(modifier) != {"operation", "attributes"}
+            or modifier["operation"] != "halve"
+            or not isinstance(modifier["attributes"], list)
+            or not modifier["attributes"]
+            or any(
+                not isinstance(attribute, str) or attribute not in {"ARM", "BTS"}
+                for attribute in modifier["attributes"]
+            )
+            or len(set(modifier["attributes"])) != len(modifier["attributes"])
+        ):
+            raise ValueError(f"{context}.defenseModifier: invalid defense modifier")
+    rolls = value.get("rollsPerHit")
+    if rolls is not None and (type(rolls) is not int or rolls < 1):
+        raise ValueError(f"{context}.rollsPerHit: must be a positive integer")
+    states = value.get("stateEffects")
+    if states is not None:
+        if not isinstance(states, list) or not states:
+            raise ValueError(f"{context}.stateEffects: must be a non-empty array")
+        seen: set[str] = set()
+        for index, state in enumerate(states):
+            state_context = f"{context}.stateEffects[{index}]"
+            if not isinstance(state, dict) or set(state) not in (
+                {"stateId", "condition"},
+                {"stateId", "condition", "targetTypes"},
+            ):
+                raise ValueError(f"{state_context}: invalid State effect fields")
+            validate_typed_domain_id(
+                state["stateId"], expected_domain="state", context=state_context
+            )
+            if state["stateId"] in seen:
+                raise ValueError(f"{state_context}: duplicate State effect")
+            seen.add(state["stateId"])
+            if state["condition"] != "failed-saving-roll":
+                raise ValueError(f"{state_context}: unsupported State effect condition")
+            types = state.get("targetTypes")
+            if types is not None and (
+                not isinstance(types, list)
+                or not types
+                or any(
+                    not isinstance(kind, str) or kind not in {"HI", "TAG", "REM", "VH"}
+                    for kind in types
+                )
+                or len(set(types)) != len(types)
+            ):
+                raise ValueError(f"{state_context}.targetTypes: invalid target restriction")
+
+
 def _validate_scope(value: object, context: str) -> None:
     if not isinstance(value, dict):
         raise ValueError(f"{context}: must be an object")
@@ -785,6 +844,15 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         facts = record.get("facts")
         if isinstance(facts, dict):
             _validate_related_categories(facts, f"{context}.facts")
+            resolution = facts.get("ammunitionResolution")
+            if resolution is not None:
+                if record["kind"] != "ammunition":
+                    raise ValueError(
+                        f"{context}.facts.ammunitionResolution: only Ammunition may own effects"
+                    )
+                _validate_ammunition_resolution(
+                    resolution, f"{context}.facts.ammunitionResolution"
+                )
         if record["kind"] == "skill":
             facts = record.get("facts")
             if composition_role == "definition":

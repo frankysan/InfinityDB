@@ -68,8 +68,21 @@ Single Ammunition profiles do not receive a synthetic composition. Alternative
 (`/`), absent, or mismatched values remain source text; they are not guessed
 from punctuation. Saving Roll notation (`ARM/2`, `x2`, etc.) remains a distinct,
 unchanged source field and is never interpreted as Ammunition composition.
-These source-backed component links are not yet a complete curated Ammunition
-fact/effect model or a general combined-Ammunition rules evaluator.
+The first reviewed Ammunition effect pilot now lives on canonical `ammunition:*`
+records, not on Army mapping entries. The validated, non-executable
+`facts.ammunitionResolution` object can describe halving the applicable ARM/BTS
+Attribute (AP), two Saving Rolls per hit (DA/E/M), and E/M State outcomes with
+failure conditions and eligible target categories. These facts flow through
+`rules.db` to Ammunition detail APIs with the records' existing citations. The
+Weapon API separately exposes source-authored profiles and reviewed combined
+component IDs. It does **not** merge these facts into an inferred roll result:
+Feuerbach's AP+DA source combination remains distinct from its `ARM/2` and `2`
+fields, and Plasma Carbine's `ARM and BTS` / `1 and 1` remains a Combined Saving
+Roll with Normal Ammunition, never a synthetic composition.
+
+This is not yet a complete curated Ammunition effect/relation model or a
+general combined-Ammunition evaluator. Missing effects, combined Critical
+interactions, and broader State cross-links still require source review.
 
 The Perimeter Trait likewise does not imply Boost. A WildParrot uses
 Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;
