@@ -2185,11 +2185,15 @@ conditional effect, not a mutation to Army data or an official named example.
 
 The **explicitly printed** Immunity (BTS) versus Flash Pulse example (Wiki Immunity
 `oldid=3643`, Example 4; Weapon Chart `oldid=4083`) separately confirms that
-covered STUN Ammunition becomes Normal, but the weapon's Non-Lethal Trait still
-prevents Wounds and its Stunned Trait still applies on a **failed Saving Roll**.
-The source-scoped `reviewedWeaponCases` entry records the surviving Traits and
-failure condition; `weapon:flash-pulse` supplies the corresponding reference
-links. This is not evidence for an arbitrary BTS attack or component resolution.
+covered STUN Ammunition is treated as Normal **without changing the BTS Saving
+Roll to ARM**. The rule's **IMPORTANT** exception explicitly preserves the weapon's
+Non-Lethal Trait (no Wounds) and State: Stunned Trait (**Stunned only if the BTS
+Saving Roll fails**). The [Spanish Immunity rule](https://infinitythewiki.com/wiki-es/index.php?title=Inmunidad&oldid=3677)
+(N5.2, Example 4) confirms the outcome. The [Spanish N5.3 Weapon Chart](https://infinitythewiki.com/wiki-es/index.php?title=Tabla_de_Armas&oldid=3987)
+nonetheless omits State: Stunned and lists two BTS rolls, unlike the English
+N5.3 chart (one BTS roll and the State Trait); verification against the Spanish
+N5.3 PDF remains open. The source-scoped `reviewedWeaponCases` preserves the confirmed
+interaction without providing a general BTS attack or component evaluator.
 
 Other component-specific Immunities, BTS-based Combined Ammunition, additional
 Weapon Traits and conditional State interactions remain unresolved. Do not

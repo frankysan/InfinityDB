@@ -913,8 +913,14 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
     }
     assert {citation["source_version"] for citation in flash["citations"]} == {
         "N5.3 / oldid 4083", "N5.3 / oldid 3643",
+        "N5.2 / oldid 3677 (es)", "N5.3 / oldid 3987 (es)",
     }
-    assert "Saving Roll fails" in flash["summary"]
+    assert "Saving Roll remains BTS, not ARM" in flash["summary"]
+    assert "explicitly exempts these two Traits" in flash["summary"]
+    assert "only if the BTS Saving Roll fails" in flash["summary"]
+    assert "two PB/BTS Saving Rolls" in flash["facts"]["sourceNotes"][0]
+    assert "Saving Roll stays BTS, not ARM" in immunity["facts"]["effects"][6]
+    assert "explicitly exempts" in immunity["facts"]["restrictions"][1]
 
     root = Path(__file__).resolve().parents[1]
     app = create_app(root / "data/generated/infinity.db", rules_database_path=rules_db.path)
@@ -942,6 +948,8 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
     assert [rule["id"] for rule in item["rules"]] == ["weapon:flash-pulse"]
     assert item["rules"][0]["citations"][0]["source_version"] == "N5.3 / oldid 4083"
     assert item["rules"][0]["summary_tokens"]
+    assert "Saving Roll remains BTS, not ARM" in item["rules"][0]["summary"]
+    assert "two PB/BTS Saving Rolls" in item["rules"][0]["facts"]["sourceNotes"][0]
 
     status, body = request("/api/skills/immunity")
     assert status == "200 OK"

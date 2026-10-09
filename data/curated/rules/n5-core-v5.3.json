@@ -1130,6 +1130,24 @@
             "retrievedDate": "2026-10-09"
         },
         {
+            "id": "wiki-es-immunity-oldid-3677",
+            "kind": "wiki",
+            "title": "Infinity Wiki (Spanish) — Inmunidad revision 3677",
+            "version": "N5.2 / oldid 3677 (es)",
+            "url": "https://infinitythewiki.com/wiki-es/index.php?title=Inmunidad&oldid=3677",
+            "authority": "secondary",
+            "retrievedDate": "2026-10-09"
+        },
+        {
+            "id": "wiki-es-weapon-chart-oldid-3987",
+            "kind": "wiki",
+            "title": "Infinity Wiki (Spanish) — Tabla de Armas revision 3987",
+            "version": "N5.3 / oldid 3987 (es)",
+            "url": "https://infinitythewiki.com/wiki-es/index.php?title=Tabla_de_Armas&oldid=3987",
+            "authority": "secondary",
+            "retrievedDate": "2026-10-09"
+        },
+        {
             "id": "wiki-vulnerability-oldid-3156",
             "kind": "wiki",
             "title": "Infinity Wiki — Vulnerability revision 3156",
@@ -3470,8 +3488,12 @@
             "id": "weapon:flash-pulse",
             "kind": "weapon",
             "name": "Flash Pulse",
-            "summary": "Flash Pulse is a [[trait:bs-weapon-wip|BS Weapon (WIP)]] using [[ammunition:stun|Stun Ammunition]]: PS 7, Burst 1, and one BTS Saving Roll on a hit. Its [[trait:non-lethal|Non-Lethal]] Trait prevents Wounds, while its [[trait:state|State: Stunned]] Trait causes [[state:stunned|Stunned State]] if the Saving Roll fails.\n\nThe printed [[skill:immunity|Immunity (BTS)]] example treats a Flash Pulse hit as [[ammunition:normal|Normal Ammunition]], but neither [[trait:non-lethal|Non-Lethal]] nor the conditional [[state:stunned|Stunned]] effect is cancelled by that protection.",
-            "facts": {},
+            "summary": "Flash Pulse is a [[trait:bs-weapon-wip|BS Weapon (WIP)]] using [[ammunition:stun|Stun Ammunition]] (PS 7, Burst 1; one BTS Saving Roll per hit). It has [[trait:non-lethal|Non-Lethal]] and [[trait:state|State: Stunned]] Traits.\n\nAgainst [[skill:immunity|Immunity (BTS)]], STUN is treated as [[ammunition:normal|Normal Ammunition]], but the Saving Roll remains BTS, not ARM. The rule explicitly exempts these two Traits: [[trait:non-lethal|Non-Lethal]] prevents Wounds, and [[state:stunned|Stunned]] applies only if the BTS Saving Roll fails (Example 4).",
+            "facts": {
+                "sourceNotes": [
+                    "The Spanish N5.3 Wiki Weapon Chart (Pulso Flash, oldid 3987) omits [[trait:state|State: Stunned]] and lists two PB/BTS Saving Rolls; the English N5.3 chart (oldid 4083) lists the Trait and one BTS roll. The Spanish [[skill:immunity|Immunity]] rule (oldid 3677, Example 4) still confirms [[state:stunned|Stunned]] after a failed roll. The chart discrepancy awaits verification against the Spanish N5.3 PDF."
+                ]
+            },
             "composition": {
                 "role": "definition"
             },
@@ -3517,6 +3539,14 @@
                 {
                     "sourceId": "wiki-immunity-oldid-3643",
                     "heading": "Immunity Examples: Example 4"
+                },
+                {
+                    "sourceId": "wiki-es-immunity-oldid-3677",
+                    "heading": "Ejemplos de Inmunidad: Ejemplo 4"
+                },
+                {
+                    "sourceId": "wiki-es-weapon-chart-oldid-3987",
+                    "heading": "SIN CATEGORÍA: Pulso Flash"
                 }
             ],
             "review": {
@@ -15741,12 +15771,12 @@
                     "Immunity (ARM) or (BTS) treats Ammunition that uses the named Saving Roll Attribute as Normal Ammunition; Immunity (Enhanced) combines both protections.",
                     "Immunity (State) prevents the listed State from being caused by Comms Attacks or special rule effects.",
                     "Immunity (Critical) removes the additional Saving Roll normally caused by a Critical hit.",
-                    "The printed [[weapon:flash-pulse|Flash Pulse]] example confirms Immunity (BTS) treats its [[ammunition:stun|Stun Ammunition]] as [[ammunition:normal|Normal]], without preventing [[trait:non-lethal|Non-Lethal]] or [[state:stunned|Stunned State]] after a failed Saving Roll.",
+                    "The printed [[weapon:flash-pulse|Flash Pulse]] example: [[skill:immunity|Immunity (BTS)]] treats [[ammunition:stun|Stun Ammunition]] as [[ammunition:normal|Normal]], but the Saving Roll stays BTS, not ARM. The explicit exception preserves [[trait:non-lethal|Non-Lethal]] (no Wounds) and [[trait:state|State: Stunned]] ([[state:stunned|Stunned]] only on a failed BTS roll).",
                     "For the reviewed [[ammunition:ap|AP]]+[[ammunition:da|DA]] case, Immunity (AP) negates AP’s ARM modifier, but not DA’s two Saving Rolls: the attack has two rolls against full ARM, or three for a Critical. This is a rule-derived case, not a separately printed example."
                 ],
                 "restrictions": [
                     "Except for Immunity (State), Immunity does not apply against Comms Attacks.",
-                    "Immunity does not prevent the [[trait:non-lethal|Non-Lethal]] or [[trait:state|State: Stunned]] Traits, which are always applied.",
+                    "Immunity explicitly exempts the [[trait:non-lethal|Non-Lethal]] and [[trait:state|State: Stunned]] Traits from its protection; the weapon's condition for causing [[state:stunned|Stunned]] still applies.",
                     "Unless the user has Immunity (Critical), a Critical hit still causes its additional Saving Roll even when the underlying Ammunition or effect is otherwise covered by Immunity."
                 ],
                 "immunityInteraction": {
