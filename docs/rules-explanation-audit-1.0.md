@@ -584,6 +584,13 @@ instructions even though the recorded values are correct.
 retain the current differentiated typed Wound facts. **Fix:** text/links;
 presentation enhancement optional. **Dependencies:** REA-026.
 
+**Implementation follow-up (2026-10-10):** AP and E/M now state the
+round-up procedure and preserve the original weapon-defined Saving Roll
+Attribute. T2 explains which Critical die to identify before rolling and
+why the failed saves inflict different numbers of Wounds. Existing typed
+resolution facts remain unchanged. Both English and Spanish N5.3 PDFs
+are cited. Browser acceptance remains pending.
+
 ### REA-014 - Dodge and Reset lack multi-effect conditions
 
 **Classification:** correctness risk, completeness. **Severity:** High. **Priority:** P1.

@@ -17213,6 +17213,9 @@
             "name": "Armor Piercing (AP) Ammunition",
             "summary": "Armor-piercing Ammunition that reduces the target’s applicable ARM or BTS value by half for its Saving Roll.",
             "facts": {
+                "clarifications": [
+                    "Halve the ARM or BTS Attribute specified by the weapon and round up before each Saving Roll. For example, ARM 5 becomes ARM 3; a positive ARM or BTS cannot be reduced below 1 by AP."
+                ],
                 "ammunitionResolution": {
                     "criticalAdditionalSavingRolls": 1,
                     "defenseModifier": {
@@ -17238,11 +17241,21 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "heading": "Armor Piercing (AP) Ammunition",
                     "member": "Armor_Piercing_(AP)_Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 63,
+                    "heading": "Armor Piercing (AP) Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 66,
+                    "heading": "Munición Perforante (AP)"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
+                "reviewedOn": "2026-10-10"
             }
         },
         {
@@ -17333,6 +17346,9 @@
             "name": "Electromagnetic (E/M) Ammunition",
             "summary": "Electromagnetic Ammunition that forces multiple reduced-BTS Saving Rolls and can disable affected targets.",
             "facts": {
+                "clarifications": [
+                    "Both Saving Rolls from each E/M hit use half the target’s BTS, rounded up. For example, BTS 5 becomes BTS 3; a positive BTS value cannot be reduced below 1 by E/M."
+                ],
                 "ammunitionResolution": {
                     "criticalAdditionalSavingRolls": 1,
                     "defenseModifier": {
@@ -17374,11 +17390,21 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "heading": "Electromagnetic (E/M) Ammunition",
                     "member": "Electromagnetic_(E_M)_Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 64,
+                    "heading": "Electromagnetic (E/M) Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 64,
+                    "heading": "Munición Electromagnética (E/M)"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-09"
+                "reviewedOn": "2026-10-10"
             },
             "relations": [
                 {
@@ -17630,6 +17656,9 @@
             "name": "T2 Ammunition",
             "summary": "High-damage Ammunition whose failed Saving Rolls normally inflict two Wounds.",
             "facts": {
+                "clarifications": [
+                    "On a Critical, identify which die represents the hit’s Saving Roll and which represents the extra Critical Saving Roll before rolling. A failed hit roll inflicts 2 Wounds; a failed extra Critical roll inflicts only 1 Wound."
+                ],
                 "ammunitionResolution": {
                     "criticalAdditionalSavingRolls": 1,
                     "woundsPerFailedSave": {
@@ -17652,11 +17681,21 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "heading": "T2 Ammunition",
                     "member": "T2_Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 67,
+                    "heading": "T2 Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 67,
+                    "heading": "Munición T2"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-28"
+                "reviewedOn": "2026-10-10"
             }
         },
         {

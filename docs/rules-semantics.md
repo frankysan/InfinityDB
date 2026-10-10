@@ -2421,12 +2421,23 @@ Ammunition rules, not to every weapon bearing the name. The initial
 `facts.ammunitionResolution` pilot retains those operations with reviewed
 citations and typed State identities, without treating them as executable rules.
 
+For AP, the applicable ARM or BTS is halved and **rounded upward** (for
+example, ARM 5 becomes ARM 3); E/M similarly halves BTS for both Saving
+Rolls and rounds upward. Halving cannot reduce a positive defense Attribute
+below 1. The underlying Saving Roll Attribute still comes from the weapon
+profile. These instructions are published as `facts.clarifications` while
+`defenseModifier` remains the non-executable `halve` operation.
+
 The reviewed EXP rule requires three Saving Rolls per hit. PARA requires a PH-6
 Saving Roll and applies Immobilized-A on failure, but has no effect when a target
 has no PH Attribute. T2 inflicts two Wounds for a failed hit Saving Roll; a failed
 *additional Critical* Saving Roll inflicts only one Wound. Curated facts
 preserve that exception explicitly instead of treating all failed T2 rolls as
-identical. None of these operations is calculated by InfinityDB.
+identical. Before rolling a T2 Critical's Saving Rolls, identify which die
+belongs to the original hit and which to the extra Critical roll; the
+results cause different numbers of Wounds. That procedure is also exposed
+as a curated clarification, without a die-tracking engine. None of these
+operations is calculated by InfinityDB.
 
 For E/M, PARA, Shock, and Stun, the authored `causes-state` edges now point
 to the canonical State records already named by `stateEffects`. The curated
@@ -2453,7 +2464,9 @@ Sources:
   <https://infinitythewiki.com/T2> (effects and Critical exception).
 - Current N5.3 Wiki: <https://infinitythewiki.com/Combined_Ammunition>
   and <https://infinitythewiki.com/Combined_Saving_Roll>.
-- PDF: Infinity N5 V5.3, printed pages 63-67.
+- PDFs: Infinity N5 V5.3, English printed pages 63-64 and 67;
+  Spanish printed pages 64, 66 and 67 (AP/E/M rounding and T2 Critical die
+  identification).
 
 ### RS-AW-WPN-001 — Canonical Weapon identity and mode profile are separate
 

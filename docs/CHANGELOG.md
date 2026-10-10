@@ -11,6 +11,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- AP and E/M now explain how to round halved defenses up, while T2 explains how to distinguish the original Saving Roll from the extra Critical roll and why their failed rolls cause different Wounds.
 - Visibility Zone and its Low, Poor, Zero, and White Noise variants are now discoverable in global search and the Glossary, with the core effects and exceptions explained; their names in rules text now open linked explanation tooltips.
 - Smoke and Eclipse now explain when placement opposes enemy fire, why Multispectral Visors bypass ordinary Smoke but not Reflective Eclipse, and why Dodge or an unopposed placement Roll is handled separately.
 - The Immunity Skill page keeps Requirements, Effects and Restrictions in order, places rules clarifications and printed examples in their own section, and displays its five reviewed interactions afterward with conditions, Saving Roll outcomes, linked rules and evidence labels.

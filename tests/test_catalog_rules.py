@@ -885,6 +885,85 @@ def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
         assert "withImmunity" not in source_map[source_id]
 
 
+def test_ap_em_rounding_and_t2_critical_die_identification_reach_api(
+    tmp_path: Path,
+) -> None:
+    """Player instructions and pinned sources survive curated publication."""
+    rules_db = _rules_database(tmp_path)
+    app = create_app(
+        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
+        rules_database_path=rules_db.path,
+    )
+    expected = {
+        "ap": {
+            "sourcePages": (63, 66),
+            "fragments": (
+                "round up", "ARM 5 becomes ARM 3", "cannot be reduced below 1"
+            ),
+        },
+        "em": {
+            "sourcePages": (64, 64),
+            "fragments": (
+                "Both Saving Rolls", "rounded up", "BTS 5 becomes BTS 3"
+            ),
+        },
+        "t2": {
+            "sourcePages": (67, 67),
+            "fragments": (
+                "before rolling", "hit roll inflicts 2 Wounds",
+                "extra Critical roll inflicts only 1 Wound",
+            ),
+        },
+    }
+    for slug, case in expected.items():
+        record = rules_db.composed_record(f"ammunition:{slug}")
+        assert record is not None
+        assert len(record["facts"]["clarifications"]) == 1
+        text = record["facts"]["clarifications"][0]
+        for fragment in case["fragments"]:
+            assert fragment in text
+        en_page, es_page = case["sourcePages"]
+        assert {
+            (source["source_id"], source.get("page"))
+            for source in record["citations"]
+        } >= {
+            ("n5-core-v5.3-pdf", en_page),
+            ("n5-core-v5.3-es-pdf", es_page),
+        }
+
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=f"/api/ammunition/{slug}", REQUEST_METHOD="GET")
+        statuses: list[str] = []
+        response = app(
+            environ,
+            lambda status, headers, exc_info=None, _statuses=statuses: _statuses.append(
+                status
+            ),
+        )
+        assert statuses == ["200 OK"]
+        payload = json.loads(b"".join(response))
+        rule = payload["rules"][0]
+        assert rule["facts"]["clarifications"] == record["facts"]["clarifications"]
+        assert len(rule["fact_tokens"]["clarifications"]) == 1
+        assert rule["facts"]["ammunitionResolution"] == record["facts"][
+            "ammunitionResolution"
+        ]
+
+    # Keep T2's separate hit/Critical Wound outcomes and AP/E/M modifiers typed.
+    t2 = rules_db.composed_record("ammunition:t2")
+    assert t2 is not None
+    assert t2["facts"]["ammunitionResolution"]["woundsPerFailedSave"] == {
+        "hit": 2,
+        "criticalAdditionalRoll": 1,
+    }
+    for slug, attrs in (("ap", ["ARM", "BTS"]), ("em", ["BTS"])):
+        ammunition = rules_db.composed_record(f"ammunition:{slug}")
+        assert ammunition is not None
+        modifier = ammunition["facts"]["ammunitionResolution"]["defenseModifier"]
+        assert modifier == {"operation": "halve", "attributes": attrs}
+
+
 def test_smoke_eclipse_opposition_and_msv_exception_reach_api(
     tmp_path: Path,
 ) -> None:

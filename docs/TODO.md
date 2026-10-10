@@ -336,6 +336,9 @@ unimplemented until its corresponding behavior exists.
       Smoke/Eclipse (REA-012) now distinguishes ordinary rolled LoF opposition,
       MSV/Reflective exceptions, unopposed placement, Dodge, and Criticals in
       curated Clarifications and examples; verify the browser pages.
+      AP/E/M and T2 (REA-013) now clarify rounding up halved defenses and
+      marking the original-hit versus extra-Critical T2 die before rolling;
+      verify their player-facing Ammunition pages. Typed values are unchanged.
       Targeted MSV1/Sixth Sense FAQ questions (REA-019) stay separate.
       Common Supportware rules (REA-018) remain separate work.
       Separately decide source conflicts and FAQ applicability before dependent curation.
