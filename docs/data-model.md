@@ -563,8 +563,9 @@ Normal browsing/search/glossary calls retain the default unscoped composition; s
 does not become universal core help. `/api/scenarios` exposes the current collection without choosing
 a game size. `/api/scenarios/<slug>` requires one explicit `army_points` query value, rejects
 unsupported values instead of substituting another configuration, and projects maintained-text
-tokens/public references in the selected scenario context. Dedicated browser scenario pages remain
-unimplemented.
+tokens/public references in the selected scenario context. `/scenarios` and `/scenarios/<slug>`
+publish the list and selected detail with deterministic maps; browser Army Points selection defaults
+to 300 and uses the common versioned share-state contract. The API remains configuration-explicit.
 
 The resolved mission owns ordered sides, all six Army Points/SWC rows, deployment references into
 its geometry, objectives/awards, Rule inclusions, Skills, end conditions, and source issues. Every
@@ -721,7 +722,7 @@ fixture-only map corpus.
 
 ### Scenario publication model and remaining design direction
 
-Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
+Scenarios are curated rules/reference data published through the rules pipeline. Their
 maintained representation is validated structured JSON; their runtime representation is a deliberate
 hybrid in `rules.db`. High-stability/queryable facts are relational, while nested ordered structures
 whose shape legitimately varies by scenario remain validated typed payloads. Runtime code must never

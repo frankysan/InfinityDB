@@ -219,7 +219,7 @@ because the source does not attach them to a profile group.
 
 `src/infinity_db/application_domains.py` is the canonical capability registry. Published top-level
 application domains are Armies, Units, Skills, Equipment, Weapons, Ammunition, Traits, States,
-Hacking Programs, Fireteams, Labels, and General Rules. Embedded vocabularies are Attributes and
+Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Embedded vocabularies are Attributes and
 Game terms.
 
 Browser state rules:
@@ -227,7 +227,7 @@ Browser state rules:
 - JSON APIs keep explicit query parameters.
 - Canonical shareable browser state uses the common versioned, scope-bound `s=` token.
 - Current token scopes cover Unit Explorer, catalog search, Fireteams, Unit Army targeting, global
-  search, and Glossary search.
+  search, Glossary search, and Scenario Army Points selection.
 - Legacy explicit browser parameters remain accepted for compatibility and normalize to canonical
   state; do not remove them casually.
 - Post-1.0 sharing must remain self-contained and decodable offline; no server-side

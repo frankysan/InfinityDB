@@ -9,7 +9,8 @@ Original examination: `859823f8d2899405a40cf126883d2adf5763db7c`.
 Follow-up examination: `c5400ab1b950990fdacc509be91c110fe85431fb`, 2026-10-09.
 **Supplementary verification (2026-10-09):** operator-supplied Spanish N5.3 PDF
 and Spanish Wiki revision-history ZIP were inspected without changing curated data.
-The two curated collections have unchanged hashes and still contain 367 records.
+At those examined commits, the two curated collections retained their original hashes
+and contained 367 records. These are frozen audit inputs, not current-candidate counts.
 
 ## Evidence classes and portability
 

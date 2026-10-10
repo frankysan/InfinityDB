@@ -93,7 +93,8 @@ ignores superseded results (including stale errors), and displays only the lates
 configuration even when an aborted request still resolves. Responsive grid
 contracts are also checked in the web suite. Scenario browser visual review was
 user-confirmed on 2026-10-08; the separate real-browser keyboard/touch and
-loading/empty/error-state interaction checks remain open in `docs/TODO.md`.
+loading/empty/error-state interaction checks remain open in the
+[0.10.1 acceptance checklist](TODO.md#0101--interim-reference-consistency).
 
 ## Silhouette manual browser acceptance
 

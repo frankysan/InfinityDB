@@ -24,8 +24,10 @@ when all contained work shares the same owner.
 
 Version **0.10.0** is released and deployed. The immediate milestone is **0.10.1 —
 interim reference consistency**, followed by **1.0.0 — current-reference completeness**.
-The 0.10.1 work is limited to corrections of already-published player-facing
-behavior, and does not change the 1.0 acceptance definition.
+The 0.10.1 candidate includes completed core Scenarios, Ammunition and rules-reference
+improvements developed since 0.10.0, plus the verified stabilization corrections.
+Broader 1.0 development is temporarily paused until this interim release is published;
+the 1.0 acceptance definition and remaining commitments are unchanged.
 
 General performance/storage experiments, major pipeline refactors,
 persistent-user-data features, ITS season/tournament tooling, and native applications are explicitly
@@ -34,39 +36,46 @@ part of the 1.0 completeness target; their accepted architecture guides the 1.0 
 
 The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
 definition lives in `docs/releasing.md`. The sections below contain the remaining implementation
-and release work for 1.0 and later milestones. Completed substeps are retained only under an
+and release work for 0.10.1, 1.0 and later milestones. Completed substeps are retained only under an
 open parent item.
 
 ## 0.10.1 — interim reference consistency
 
 **Project domains:** Data processing, Web frontend, Project infrastructure
 
-Stabilization only: correct confirmed contradictions in existing published rules
-and labels, with regression coverage. No new general-purpose semantics engine,
-1.0 completeness claim, rework of source imports, or additional source acquisition
-is required. The 2026-10-10 snapshot review found 372/372 ordinary detail API
-responses, 257/257 Glossary links and 144/144 nested links resolving; all four
-core scenario details/maps responded for four supported point values. This is
-routing/publication evidence, **not** visual acceptance or rules-source certification.
-Normal prerelease/release checks are tracked separately in `releasing.md`.
+Implementation stabilization is complete at `7f2923a`. The six corrected areas are
+IMP-2 Discover, Stealth/Deployables, Deployable Cover, TinBot, Fireteam formation
+requirements and Kobra's CC Attribute link; their durable outcomes are recorded in
+`CHANGELOG.md`. This release also publishes the completed improvements since 0.10.0;
+it does not claim 1.0 completeness or require unfinished 1.0 features.
 
-- [x] **Data processing:** Correct IMP-2 Discover wording (REA-035): ordinary
-  Discover modifiers remain in effect; distinguish the IMP-1 penalty and the
-  Biometric Visor exception.
-- [x] **Data processing:** Explain the Deployable exception to Stealth and the
-  reviewed multi-Trooper/Marker announcement conditions (REA-016).
-- [x] **Data processing:** State Deployable Cover's Vitroferro Saving Roll cap,
-  order of operations and ordinary Cover eligibility (REA-036).
-- [x] **Data processing:** Explain TinBot owner eligibility, Fireteam sharing,
-  stacking and token behavior without assuming variant-wide benefits (REA-039).
-- [x] **Data processing + Web frontend:** Identify Fireteam Type counts as
-  formation requirements, not permanent membership counts (limited REA-020).
-- [x] **Data processing:** Correct Kobra's CC Attribute reference and source
-  note typo without resolving the still-open Anti-materiel source conflict (REA-031).
-- [ ] **Web frontend + Project infrastructure:** Inspect the corrected reference
-  cards and Fireteam summary on desktop and narrow screens; confirm that their
-  language, citations and links are readable. Keep this acceptance separate from
-  the ordinary release checklist.
+**Candidate status:** Metadata and release notes are prepared for **0.10.1** dated
+2026-10-10. Full local checks, required tracked assets, byte-identical runtime
+database rebuilds and isolated installed-wheel smoke have passed. Real-browser
+acceptance and exact-commit hosted validation remain open; it is not published or
+certified release-ready. Follow the complete
+[release checklist](releasing.md), including the project-wide documentation audit.
+
+- [ ] **Web frontend + Project infrastructure:** Complete real-browser acceptance.
+  The prior offline harness passed 52/52 focused tests and rendered seven affected
+  views at 320, 390, 768 and 1440 pixels without JavaScript exceptions or overflow;
+  that evidence does not verify real navigation or interaction. In a real browser:
+  - inspect IMP-2, Stealth, Deployable Cover, TinBot and Kobra CC reference cards on
+    desktop and narrow screens; follow their rule/Attribute links and source citations;
+  - select an Army on Fireteams, verify formation labels and ongoing-integrity help,
+    change the Wildcard setting, and check navigation back to Unit/reference pages;
+  - browse all four Scenarios, change Army Points quickly, follow scoped rules links,
+    navigate away/back, and check maps in both themes and distance units with
+    keyboard and touch; verify loading/empty/error handling where practical;
+  - open Visibility Zone tooltips and Ammunition/Immunity cross-links by pointer,
+    keyboard and touch; confirm readable sections and no horizontal clipping.
+- [ ] **Project infrastructure:** Land the candidate through the protected-main PR
+  workflow after acceptance/local validation; require successful Source checks
+  (including cross-platform determinism), Installed wheel smoke and Deployment
+  smoke test for the exact final SHA. The checksum-pinned external Full-asset
+  checks workflow is optional unless that bundle is selected as release evidence.
+  Collect hosted evidence, create an annotated `v0.10.1` tag and publish only with
+  explicit authorization. Deployment and post-release verification follow separately.
 
 **Deferred intentionally to 1.0:** the remainder of REA-016/020 and the
 broader Peripheral (REA-017), Hacking/Supportware (REA-018/019), Special Dice
@@ -79,8 +88,9 @@ regressions. The 1.0 plan below remains the owning backlog for those tasks.
 ## 1.0.0 — current-reference completeness gate
 
 1.0.0 is the final completeness release for the supported current reference data. It
-should resolve remaining material source/rules gaps, add the bounded core-scenario reference
-surface, and validate the whole application without expanding into broader ITS/tournament tooling.
+should resolve remaining material source/rules gaps, certify completeness of the published
+core-scenario reference surface, and validate the whole application without expanding into
+broader ITS/tournament tooling.
 
 ### Development sequence
 
@@ -100,7 +110,7 @@ information or browser surfaces.
 | 5. Closeout | Reconciled completeness evidence and final release acceptance | Every in-scope gap resolved; canonical release checklist |
 
 Stages may overlap where dependencies are satisfied. In particular, ordinary catalog curation can
-continue while the scenario model is implemented, and projections need only their owning facts to
+continue alongside remaining shared-semantic work, and projections need only their owning facts to
 be ready. Keep model/export, curation, backend, and browser substeps visible under each open parent;
 a populated JSON collection alone does not complete a player-facing task.
 
@@ -110,8 +120,8 @@ audit tools before introducing another coverage system. Keep generated evidence 
 `reports/` or `docs/audits/`; keep maintained semantic decisions in validated curated data or
 configuration. Use [the standard checks](testing.md) for the affected contracts, and add manual
 browser acceptance for new visual/interaction surfaces. Promote durable contracts to their
-canonical owners as implementation lands; the planned scenario model must remain labelled as
-unimplemented until its corresponding behavior exists.
+canonical owners as implementation lands; keep remaining design extensions explicitly labelled
+as unimplemented and distinguish them from the published core-scenario foundation.
 
 ### Source inventory and gap batches
 
@@ -523,186 +533,30 @@ unimplemented until its corresponding behavior exists.
     interaction review, and is navigable with citations in normal mode. Use semantic maintained-text
     tokens; preserve genuine ambiguity with `review-needed` rather than weakening plain-text review.
 
-- [ ] **Data processing + Web backend + Web frontend:** Add the current core-rules
-  scenarios as a first-class, browsable scenario domain for 1.0, using the model derived
-  from the 0.10.0 core/ITS comparison.
-  - [ ] Implement a model/export pilot from
-    [the accepted scenario model](data-model.md#planned-scenario-model-10). Start with one core
-    scenario selected from the inventory, while checking the schema against the reviewed ITS
-    variation evidence; do not require ITS content publication to validate extensibility.
-    - [ ] Define versioned validated structures for identity, publication revision, collection
-      membership, game-size configuration, sides, geometry, elements, scoring, scoped actions,
-      optional features, and end conditions. Preserve ordered prose where a universal executable
-      condition language would invent semantics.
-      - [x] Pilot typed setup/scoring/end conditions with **Annihilation**: preserve all six
-        Army Points/SWC rows and scoring columns, reference maintained deployment geometry,
-        retain ordered Killing prose, and distinguish the round limit from the Tactical Phase
-        all-Null end condition. Nested prose uses shared semantic-link validation. Publication
-        indexes were added after the remaining core scenario components were completed below.
-      - [x] Prove that the pilot payload and printed-page citations round-trip through existing
-        rules record storage without changing map rendering or the rules database format.
-      - [x] Extend the reference subset with **Domination**: geometry-referenced Quadrant/Console
-        scoring, separate per-round/whole-mission caps, literal per-size minimum Victory Points,
-        and a typed minimum-VP end condition. Preserve Console interactions and Specialist/control
-        rules as ordered linked prose; the shared definition v2 step below separates the scoped
-        Skills and shared Specialist data.
-        Round-trip the new facts and their printed-page citations through existing rules storage.
-      - [x] Extend the reference subset with **Supplies**: controlled-marker counts and more/all
-        comparisons, additive scoring bonuses, literal game-size rows, and inherited minimum-VP
-        end conditions. Preserve pickup alternatives, carrying capacity, carrier restrictions,
-        and deployment/control rules as linked prose; round-trip facts and citations through
-        existing rules storage. Geometry source issues now validate across every applicable map.
-      - [x] Extend the reference subset with **Firefight**: strict comparative combat metrics,
-        all six game-size rows, and the all-Null ending. Preserve Lieutenant disclosure/table
-        requirements and Tactical Phase replacement, the Combat Jump modifier and Airborne
-        Deployment permission, Killing, and Specialist rules as linked mission-local prose.
-        Round-trip the facts/citations and verify that canonical Skill facts remain unchanged.
-      - [x] Replace inline authoring with shared definition v2: separate scoped Rules and Skills,
-        shared setup/geometry/objective/ending references, and one Specialist Skill-array baseline
-        with explicit per-scenario additions/removals. Preserve citations, source discrepancies,
-        same-name/different-ID semantics, cycle validation, and default-core scope isolation.
-        Export resolved payloads and reuse the Skill-detail renderer for Skills and qualifier lists.
-    - [x] Export relational identities/provenance/membership/reference indexes and validated
-      component payloads to `rules.db`. Stable scenario collections/revisions, ordered membership,
-      source publication revision, and deterministic composed-content identity are separate indexes;
-      existing typed validation covers broken references/dimensions and rules schema/compatibility is
-      now 8/10. Exact historical revision selection is covered without changing scenario identity.
-  - [ ] Maintain structured, cited scenario data sufficient to understand setup, objectives,
-    scoring, deployment, special rules/elements, and end conditions without relying on an
-    unstructured PDF excerpt as the application model.
-    - [x] Curate **Annihilation, Domination, Supplies, and Firefight** in the implemented reference
-      subset, using N5 v5.3 printed pages 149–156 and the retained [scenario findings](rules-semantics.md#scenarios).
-      Review every supported game-size row, objective/cap/timing, placement rule, special rule,
-      and end condition. Link shared concepts to canonical catalog identities; retain source
-      discrepancies and reviewed resolution instead of copying the nearest chart value. Dedicated
-      scoped action/role/element identities remain separate pending work; publication indexes are now
-      implemented by the export task above.
-    - [x] Resolve the **Annihilation 350-point surviving-Victory-Points discrepancy** as a reviewed
-      source typo. N5.3 printed page 149 leaves 151–175 uncovered and overlaps 251–270; the surrounding
-      progression and corresponding enemy-kills column make the intended contiguous bands
-      **85–175, 176–270, and >270**. Use those ranges and retain a reviewed-resolution source note
-      documenting the printed values rather than silently erasing the discrepancy.
-    - [ ] Verify **Domination's 350-point SWC row** against authoritative clarification. N5.3
-      printed page 151 specifies 6 SWC, unlike Annihilation's 7 SWC at the same Army Points.
-      Keep the printed scenario-specific value of 6 and a source note explaining that the difference
-      may be intentional but breaks the otherwise expected progression; do not infer a universal
-      Points-to-SWC formula or silently borrow the value from another scenario.
-    - [x] Verify **Supplies' large-table outer-box placement**. N5.3 page 153 specifies 8 inches
-      from the edges in all cases. Re-review of page 154 confirms that the 12-inch mark in the
-      300–400-point illustration belongs to a guide ruler; the Supply Box marker itself is clearly
-      closer to the table edge and is consistent with the written 8-inch placement. Keep 8 inches
-      for every supported game size and do not retain a source issue for this illustration.
-  - [ ] Keep the model source/scope-aware and extensible to versioned ITS seasons, but do
-    not make ITS scenario content, tournament/event tooling, or a deployment-map editor a
-    1.0 requirement.
-  - [ ] **Data processing + Web frontend:** Add the first version of the scenario-map SVG
-    generator as part of the core-scenario 1.0 work. Its v1 schema only needs to represent the
-    geometry required by **Annihilation, Domination, Supplies, and Firefight**; ITS scenario
-    definitions and ITS-only geometry remain post-1.0.
-    - [x] Consume the same validated scenario geometry that backs scenario detail data. Do not
-      maintain a second map-specific definition or recover geometry from source diagrams.
-      - [x] Pilot this ownership boundary with **Domination**: its three N5.3 map configurations now
-        live in the maintained `scenario:domination` curated record, validate through the typed
-        scenario-definition layer, and can be rendered directly with `render-scenario-map` by
-        scenario identity + Army Points. Remove the duplicate Domination geometry from test fixtures.
-      - [x] Migrate **Supplies** to the same maintained-definition path. Its Supply Box placements
-        and Deployment Zones now render from `scenario:supplies`; remove duplicate Supplies geometry
-        from the acceptance fixture.
-      - [x] Migrate **Annihilation** and **Firefight** to maintained definitions. Both now own
-        their three standard table/Deployment Zone configurations and derived Deployment Zone depth
-        annotations; remove the last fixture-only core geometry.
-    - [x] Accept a versioned validated JSON geometry definition and generate deterministic SVG.
-      Treat inches as the canonical geometry unit. Support the current **24×32 in, 32×48 in,
-      and 48×48 in** table-size configurations while keeping the renderer dimension-agnostic.
-    - [x] Implement the semantic primitives required by the four core scenarios: table-relative
-      anchors, Deployment Zones and scoring/control rectangles, center/dividing lines, fixed
-      objective/scenery point markers, labels, and reusable semantic styles. Keep semantic marker
-      identity in geometry and resolve known marker types through canonical marker metadata rather
-      than duplicating a radius on every element. Console is canonically 40 mm: N5.3 Domination
-      indirectly makes that footprint rules-relevant by requiring a Console A Marker or scenery of
-      the same diameter, while the ITS token table supplies the explicit numeric value. Supply Box is
-      canonically 25 mm from the same token table. Prefer typed primitives over a general arbitrary
-      SVG-path escape hatch.
-    - [x] Keep the schema deliberately extensible using the reviewed ITS evidence: geometry v1 does
-      not require symmetric sides or one Deployment Zone per side, and semantic style/marker IDs are
-      not limited to the current renderer palette. Renderer v1 separately allowlists the presentation
-      styles and marker metadata it can faithfully project, and fails explicitly for unsupported
-      styles/markers; unsupported future region kinds such as circles likewise fail schema validation
-      instead of being approximated. Future schema versions can add repeated/mirrored placements,
-      circles/radius regions, Exclusion/Hazard areas, asymmetric roles, access lines, custom
-      markers/icons, and per-configuration overrides without redefining the core concepts.
-    - [x] Add reference-based map measurements before freezing geometry v1. Keep annotations separate
-      from semantic shapes: rectangle depth/width dimensions and area-size labels resolve their values
-      from a target geometry element instead of duplicating numbers. Domination pilots rectangle
-      dimensions and derived Quadrant sizes; Supplies adds element-to-table-edge distances derived from
-      the Supply Box physical boundaries, so its canonical 8-inch clearances are never restated in
-      annotation data. Scenario distance language such as “8 inches from” is edge-to-edge unless the
-      source explicitly defines a center/reference point.
-    - [x] Make scenario-map colors semantic and theme-aware. The standalone SVG has light-theme
-      fallbacks, while the browser inlines it and applies scenario-map roles from the current theme
-      palette without duplicating geometry or requiring a change to its API.
-    - [x] Normalize scenario-map typography with larger map labels and measurements scaled to the
-      table width across 24×32, 32×48, and 48×48 maps. Fine-tune sizes after browser acceptance.
-    - [x] Make every player-facing scenario measurement except marker size use the shared dynamic
-      distance presentation so users can switch between inches and centimeters. This includes
-      maintained-text scenario distances **and every measurement rendered inside the generated SVG
-      maps** (table dimensions, Deployment Zones, area sizes, element/edge distances, and future
-      annotations). Changing the existing in/cm preference must refresh an already-visible scenario map
-      as well as DOM text, without requiring the user to reselect the scenario/game size. Keep canonical
-      geometry in inches; canonical marker diameters remain fixed physical metadata in millimeters and
-      do not follow the distance-display preference.
-    - [x] Validate table bounds, dimensions, stable element order/IDs, and reproducible SVG bytes.
-      All four core scenarios now own deterministic maintained geometry for every distinct supported
-      table/deployment configuration; renderer acceptance tests consume those curated definitions
-      directly, with no second fixture-only geometry corpus.
-    - [x] Provide a small development CLI for JSON -> SVG rendering so schema/renderer behavior can
-      be tested independently of scenario-page presentation. A browser editor/preview remains
-      post-1.0 and must use this same schema/rendering engine when added.
-  - [ ] Provide usable scenario list/detail presentation and links to existing canonical
-    rule/catalog entities where identities overlap.
-    - [x] Register scenario capabilities through the application-domain registry and define
-      central slug/revision/collection resolution before adding API/browser consumers. Stable
-      scenario-set identity and revision resolve through dedicated `rules.db` membership/publication
-      indexes; unknown or unsupported selections have explicit not-found/invalid-input behavior and
-      never silently substitute another collection or revision.
-    - [x] Add composed backend list/detail read models with clear publication/source identity and an
-      explicit selected Army Points configuration. The detail projection exposes setup, placement,
-      objectives/scoring, special Rules/Skills, end conditions, and applicable source issues without
-      inventing a default game size or a second rules representation.
-    - [x] Expose the read models through JSON API routes. `/api/scenarios` stays configuration-neutral;
-      `/api/scenarios/<slug>` requires an explicit supported `army_points` value and returns
-      scenario-context maintained-text/public-reference projections without publishing the domain.
-    - [x] Add list/detail browser surfaces using shared browser structures. Scenarios now participate
-      in primary navigation and the landing page; global search and Glossary participation remain
-      deliberately disabled for this bounded core set. Detail pages require an explicit Army Points
-      selection and store it through the common versioned browser share-state contract.
-    - [x] Make geometry understandable through structured setup facts, derived measurements, and the
-      core-scenario SVG renderer. The browser map endpoint consumes the selected maintained scenario
-      geometry rather than a second map definition. The interactive map editor and ITS-only rendering
-      extensions remain post-1.0.
-    - [x] Default the browser Army Points selector to **300** when opening a scenario without an
-      explicit valid share-state selection. Explicit shared/legacy URL state wins, the default is
-      written through the common versioned `s=` state, and the backend API remains configuration-explicit.
-    - [x] Remove the redundant scenario applicability/scope line from Rule and Skill text cards when
-      they are embedded on a scenario page; citations remain visible and the surrounding scenario
-      supplies the missing context.
-    - [x] Match embedded scenario Rule/Skill card margins, padding, and vertical spacing to the normal
-      compact rule-card rhythm through the shared card-stack styling contract.
-    - [x] In the **Specialist Troops** card, present **Qualifying Skills** before **Restrictions**.
-    - [x] Clean up scenario map requests and unit-change listeners when leaving a detail page
-      through soft navigation; ignore late map responses so an old page cannot be updated.
-    - [x] Ensure rapid game-size changes show a loading state and never let superseded
-      responses or errors replace the current configuration, even when cancellation is ignored.
-      Keep catalog and objective-card grids usable below their preferred 280px card width.
-    - [x] Complete user-confirmed manual visual review of the scenario browser (2026-10-08).
-      Keep keyboard/touch and non-happy-path interaction acceptance separate from this visual sign-off.
-    - [ ] Complete real-browser keyboard/touch and loading/empty/error-state acceptance,
-      including direct links and soft navigation; automated lifecycle and responsive tests
-      do not replace these interaction checks.
-  - **Completion:** all four scenarios can be found and understood in normal mode for every
-    supported configuration. Review scoring and placement against citations, follow related-rule
-    links, and check keyboard/touch, narrow widths, Light/Dark themes, loading/empty/error behavior,
-    direct navigation, and soft-navigation cleanup. No session state or live scoring engine is required.
+- [ ] **Data processing + Web backend + Web frontend:** Complete source reconciliation
+  and 1.0 acceptance for the already-published core-scenario domain. All four scenarios,
+  shared definition v2, scoped Rules/Skills, relational publication indexes, list/detail
+  APIs, browser selection and deterministic theme/distance-aware maps are implemented
+  and included in 0.10.1. The current contract belongs in
+  [the data model](data-model.md#planned-scenario-model-10).
+  - [ ] Reconcile scenario facts, scoring, scoped concepts and source issues with the
+    final 1.0 source inventory for all six supported Army Points values. This is
+    source-completeness review, not a request to reimplement the published domain.
+  - [ ] Verify **Domination's 350-point SWC row** against authoritative clarification.
+    N5.3 page 151 prints 6 SWC, unlike Annihilation's 7 at the same Army Points.
+    Retain the printed value and visible uncertainty until clarified; this existing
+    source disagreement does not block 0.10.1.
+  - [ ] Confirm the current model remains source/scope-aware against the reviewed ITS
+    variation during final completeness review. ITS content, ITS-only geometry,
+    tournament tooling and an interactive scenario editor remain post-1.0.
+  - [ ] Incorporate the real-browser keyboard/touch, rapid selection, theme/distance,
+    direct/soft navigation and loading/empty/error acceptance from the
+    [0.10.1 checklist](#0101--interim-reference-consistency) into 1.0 closeout.
+    The 2026-10-08 user-confirmed visual review and automated lifecycle/responsive
+    coverage do not replace interaction acceptance.
+  - **Completion:** the final source inventory accounts for every in-scope fact and
+    scoped concept, and all four scenarios remain understandable and navigable in
+    every supported configuration. No mutable match state or live scoring engine is required.
 
 - [ ] **Data processing + Web backend + Web frontend:** Add a dated FAQ/errata layer to the
   existing rules-reference system from current material under `data/pdf/faq/`.
