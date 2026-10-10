@@ -1,0 +1,183 @@
+{
+  "formatVersion": 1,
+  "corePdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+  "candidates": [
+    {
+      "name": "Cybermine",
+      "mode": "",
+      "wikiName": "Cybermines",
+      "reviewNote": "The printed p.181 chart and p.72 Mines rule both say Comms Attack. The revised extraction covers all seven chart lines; the reviewed PDF/Army difference is notation only.",
+      "officialUpdate": {
+        "date": "2025-01-09",
+        "url": "https://infinityuniverse.com/en/news/n5-what-is-new",
+        "claim": "Cybermines cause Stunned State and, for Hackable targets, Immobilized-B."
+      },
+      "semanticReview": {
+        "classification": "source-extraction",
+        "state": "explained",
+        "finding": "The N5.3 printed chart (p.181) explicitly lists Comms Attack; the Mines prose (p.72) confirms Cybermines make Comms Attacks. The prior extraction lost the first and last lines; the revised full cell compares as notation-equivalent to Army.",
+        "remaining": "Continue preserving literal PDF and Army spelling; no missing Cybermine Trait remains in the current comparison.",
+        "pdfPages": [
+          72,
+          181
+        ]
+      }
+    },
+    {
+      "name": "Drop Bears",
+      "mode": "BS Mode",
+      "wikiName": "Drop Bears (BS Mode)",
+      "reviewNote": "The PDF and Wiki use the N5 BS Weapon (PH) classification, while Army retains Throwing Weapon; the old term is absent from the pinned N5.3 PDF.",
+      "officialUpdate": {
+        "date": "2025-10-15",
+        "url": "https://infinityuniverse.com/en/news/army-update-october-2025-part2",
+        "claim": "N5 v5.2 revises Drop Bears prose; the post does not independently settle the Throwing Weapon chart Trait."
+      },
+      "semanticReview": {
+        "classification": "legacy-terminology",
+        "state": "explained",
+        "finding": "The N5.3 printed Drop Bears BS Mode profile (p.181) uses BS Weapon (PH), not Throwing Weapon. Technical search of the supplied N5.3 PDF finds no Throwing Weapon term; Army retains that older label.",
+        "remaining": "Review source-term aliases separately; do not insert an unprinted Trait into the N5.3 chart.",
+        "pdfPages": [
+          71,
+          181
+        ]
+      }
+    },
+    {
+      "name": "PARA Mine",
+      "mode": "",
+      "wikiName": "PARA Mines",
+      "reviewNote": "The N5.3 chart legend on p.176 defines [*] as Weaponry and [**] as Ammunition. PDF/Wiki PARA Mine uses [*], but Army uses [**]; preserve both source values until Army's intended reference is checked.",
+      "semanticReview": {
+        "classification": "source-footnote",
+        "state": "partial",
+        "finding": "The N5.3 chart legend (p.176) defines [*] as a Weaponry reference and [**] as an Ammunition reference. PARA Mines (p.181) prints [*] and the Mines rule is on p.72; Army records [**].",
+        "remaining": "Review whether Army's marker follows the printed chart legend and why its category differs; retain both original source values.",
+        "pdfPages": [
+          72,
+          176,
+          181
+        ]
+      }
+    },
+    {
+      "name": "WildParrot",
+      "mode": "",
+      "wikiName": "WildParrot",
+      "reviewNote": "N5.3 pp.74,181 explicitly print Non-Lethal for the E/M WildParrot; the Army Trait list omits it. Do not silently synthesize raw properties.",
+      "semanticReview": {
+        "classification": "ammunition-and-explicit-trait",
+        "state": "explained",
+        "finding": "N5.3 pp.74 and 181 explicitly list Non-Lethal for WildParrot and identify its E/M ammunition. The rule describes its behavior as an E/M Mine; the Army Trait list omits Non-Lethal.",
+        "remaining": "Do not add an Army property by inference. Review whether the app should expose the printed Trait as separately sourced or as derived effect context.",
+        "pdfPages": [
+          64,
+          74,
+          181
+        ]
+      }
+    },
+    {
+      "name": "PT: Endgame",
+      "mode": "",
+      "wikiName": "PT: Endgame",
+      "reviewNote": "The April 2025 N5 revision replaces Technical Weapon with BS Weapon (WIP) and adds Double Shot; Army retains legacy terminology and lacks Double Shot.",
+      "officialUpdate": {
+        "date": "2025-04-03",
+        "url": "https://infinityuniverse.com/en/news/infinity-n5-rules-update",
+        "claim": "The Pheroware table replaces Technical Weapon with BS Weapon (WIP); Endgame gains Double Shot."
+      },
+      "semanticReview": {
+        "classification": "legacy-terminology-and-trait",
+        "state": "partial",
+        "finding": "The April 2025 official Pheroware change replaced Technical Weapon with BS Weapon (WIP) and added Double Shot to Endgame. The N5.3 chart reflects both; Army retains the old label and omits Double Shot.",
+        "remaining": "Reconcile Endgame Double Shot in the current rules model/presentation without rewriting the raw Army source.",
+        "pdfPages": [
+          62
+        ]
+      }
+    },
+    {
+      "name": "PT: Eraser",
+      "mode": "",
+      "wikiName": "PT: Eraser",
+      "reviewNote": "The April 2025 N5 revision replaces Technical Weapon with BS Weapon (WIP); Army retains the older term, absent from the pinned N5.3 PDF.",
+      "officialUpdate": {
+        "date": "2025-04-03",
+        "url": "https://infinityuniverse.com/en/news/infinity-n5-rules-update",
+        "claim": "The Pheroware table replaces Technical Weapon with BS Weapon (WIP); Endgame gains Double Shot."
+      },
+      "semanticReview": {
+        "classification": "legacy-terminology",
+        "state": "explained",
+        "finding": "The April 2025 official Pheroware change replaced Technical Weapon with BS Weapon (WIP); the N5.3 PDF uses the replacement, but Army retains the legacy term.",
+        "remaining": "Preserve the raw Army term; consider reviewed display/source alias rather than changing the source property.",
+        "pdfPages": [
+          62
+        ]
+      }
+    },
+    {
+      "name": "PT: Mirrorball",
+      "mode": "",
+      "wikiName": "PT: Mirrorball",
+      "reviewNote": "The April 2025 N5 revision replaces Technical Weapon with BS Weapon (WIP); Army retains the older term, absent from the pinned N5.3 PDF.",
+      "officialUpdate": {
+        "date": "2025-04-03",
+        "url": "https://infinityuniverse.com/en/news/infinity-n5-rules-update",
+        "claim": "The Pheroware table replaces Technical Weapon with BS Weapon (WIP); Endgame gains Double Shot."
+      },
+      "semanticReview": {
+        "classification": "legacy-terminology",
+        "state": "explained",
+        "finding": "The April 2025 official Pheroware change replaced Technical Weapon with BS Weapon (WIP); the N5.3 PDF uses the replacement, but Army retains the legacy term.",
+        "remaining": "Preserve the raw Army term; consider reviewed display/source alias rather than changing the source property.",
+        "pdfPages": [
+          62
+        ]
+      }
+    },
+    {
+      "name": "Kobra Pistol",
+      "mode": "CC Mode",
+      "wikiName": "Kobra Pistol (CC Mode)",
+      "reviewNote": "DA requires two Saving Rolls, supporting the current Wiki/Army number despite the PDF one-roll cell; Anti-materiel remains a separate source conflict.",
+      "officialUpdate": {
+        "date": "2026-09-01",
+        "url": "https://infinityuniverse.com/en/news/infinity-rules-update-5-3",
+        "claim": "Kobra Pistol ammunition changes to Shock (BS) and DA (CC); no explicit Anti-materiel or Saving Roll count statement."
+      },
+      "semanticReview": {
+        "classification": "saving-roll-rule-and-source-conflict",
+        "state": "partial",
+        "finding": "N5.3 Kobra Pistol CC Mode uses DA (p.68/182), and the DA rule (p.64) requires two Saving Rolls per hit. The N5.3 chart prints one; current Army and Wiki print two. Army/Wiki also list Anti-materiel, which is not shown for Kobra CC in the PDF and is not implied by DA.",
+        "remaining": "Treat two effective Saving Rolls as rules-supported; independently review whether Anti-materiel applies and retain the PDF one-roll cell as source-discrepancy evidence.",
+        "pdfPages": [
+          64,
+          68,
+          182
+        ]
+      }
+    },
+    {
+      "name": "Sepsitor Plus",
+      "mode": "",
+      "wikiName": "Sepsitor Plus",
+      "reviewNote": "PDF p.187 prints [*], referring to the Sepsitor family context (p.73), but Army omits it; a name-matching cause is not confirmed.",
+      "semanticReview": {
+        "classification": "source-footnote",
+        "state": "partial",
+        "finding": "The N5.3 legend (p.176) defines [*] as a Weaponry reference. N5.3 chart p.187 lists [*] for Sepsitor Plus; the Sepsitor Weaponry section (p.73) covers the weapon family. Army omits the marker.",
+        "remaining": "Preserve the source mismatch. Both weapons now publish their own Sepsitor rules references; why Army omits the marker remains unverified. The proposed Army name-lookup explanation is a hypothesis.",
+        "pdfPages": [
+          73,
+          176,
+          187
+        ]
+      }
+    }
+  ],
+  "wikiRevisionId": 4083,
+  "wikiMemberSha256": "a3a6230051bc3a03e61a6de917306b403bac35ddfa6dcb8962595316bb3722ed"
+}

@@ -1,5 +1,6 @@
 import json
 import re
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -95,6 +96,42 @@ def test_load_curated_document_requires_provenance(tmp_path: Path) -> None:
     path.write_text(json.dumps(valid_document()), encoding="utf-8")
 
     assert load_curated_document(path)["records"][0]["citations"][0]["page"] == 12
+
+
+@pytest.mark.parametrize("notes", [[], [""], [None], "not a list"])
+def test_curated_source_notes_reject_empty_or_invalid_entries(
+    tmp_path: Path, notes: object,
+) -> None:
+    document = valid_document()
+    document["records"][0]["facts"]["sourceNotes"] = notes
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="facts.sourceNotes"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize("clarifications", [[], [""], [None], "not a list"])
+def test_curated_clarifications_reject_empty_or_invalid_entries(
+    tmp_path: Path, clarifications: object,
+) -> None:
+    document = valid_document()
+    document["records"][0]["facts"]["clarifications"] = clarifications
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="facts.clarifications"):
+        load_curated_document(path)
+
+
+def test_curated_clarifications_accept_maintained_text(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"][0]["facts"]["clarifications"] = [
+        "An explicit [[skill:example|example]] of the rule."
+    ]
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_curated_document(path)["records"][0]["facts"]["clarifications"] == [
+        "An explicit [[skill:example|example]] of the rule."
+    ]
 
 
 def test_skill_definition_supports_multiple_categories(tmp_path: Path) -> None:
@@ -562,6 +599,17 @@ def test_checked_in_n5_collection_is_valid() -> None:
     document = load_curated_document(path)
 
     assert document["collection"]["id"] == "n5-core-v5.3"
+    assert document["scenarioCollection"] == {
+        "id": "n5-core",
+        "title": "N5 Core Scenarios",
+        "revision": "5.3",
+        "members": [
+            {"scenarioId": "scenario:annihilation"},
+            {"scenarioId": "scenario:domination"},
+            {"scenarioId": "scenario:supplies"},
+            {"scenarioId": "scenario:firefight"},
+        ],
+    }
     sources = {source["id"]: source for source in document["sources"]}
     assert sources["n5-core-v5.3-pdf"]["url"] == (
         "https://experience.corvusbelli.com/en/infinity/resources"
@@ -1560,6 +1608,19 @@ def test_checked_in_n5_collection_keeps_new_common_skill_facts_source_faithful()
     assert speedball["requirements"] == ["The player must have two Speedball Tokens."]
     assert "two 55 mm Speedball Tokens" in speedball["effects"][0]
     assert "PH 15" in speedball["effects"][0]
+    assert (
+        "[[hacking-program:controlled-jump]]"
+        in records["skill:request-speedball"]["summary"]
+    )
+    assert "FAQ restricts that Program to Troopers" in speedball["effects"][1]
+    assert "Speedballs are Tokens" in speedball["effects"][1]
+    assert {
+        (citation["sourceId"], citation.get("page"))
+        for citation in records["skill:request-speedball"]["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 84),
+        ("n5-faq-v0.1-en-pdf", 1),
+    }
 
     reload = records["skill:reload"]["facts"]
     assert "must both be in non-Null States" in reload["requirements"][0]
@@ -1830,3 +1891,427 @@ def test_checked_in_n5_collection_models_fireteam_general_reference() -> None:
     assert [item["level"] for item in levels["levels"]] == [1, 2, 3, 4, 5]
     assert levels["levels"][1]["bonuses"] == ["[[skill:bs-attack]] (+1 SD)"]
     assert levels["levels"][4]["bonuses"] == ["[[skill:sixth-sense]]"]
+
+
+def test_scenario_collection_membership_must_cover_local_definitions(tmp_path: Path) -> None:
+    source = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = json.loads(source.read_text(encoding="utf-8"))
+    document["scenarioCollection"]["members"].pop()
+    path = tmp_path / "missing-scenario-membership.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="missing definitions"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize(
+    ("variant_refs", "message"),
+    [
+        ({"unlinked-weapon": ["ammunition:ap"]}, "requires linked weapon slugs"),
+        ({"ap-mine": ["ammunition:ap", "ammunition:ap"]}, "duplicate variant"),
+        ({"ap-mine": ["invalid"]}, "invalid variant rule target"),
+    ],
+)
+def test_weapon_variant_rule_references_validate_membership_and_shape(
+    tmp_path: Path, variant_refs: dict, message: str,
+) -> None:
+    document = json.loads(
+        (Path(__file__).resolve().parents[1] / "data/curated/rules/n5-core-v5.3.json")
+        .read_text(encoding="utf-8")
+    )
+    record = next(record for record in document["records"] if record["id"] == "weapon:mines")
+    record["facts"]["variantRuleReferences"] = variant_refs
+    path = tmp_path / "invalid.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        load_curated_document(path)
+
+
+def test_source_mode_qualifier_is_weapon_only_and_excludes_source_variant(
+    tmp_path: Path,
+) -> None:
+    document = valid_document()
+    record = document["records"][0]
+    record.update(
+        id="weapon:kobra-pistol-cc-review",
+        kind="weapon",
+        armyLinks=[{"entity": "weapon", "id": 221}],
+        variantSemantics={"inheritance": "source", "sourceMode": "CC Mode"},
+    )
+    path = tmp_path / "mode.json"
+
+    def check() -> None:
+        path.write_text(json.dumps(document), encoding="utf-8")
+        load_curated_document(path)
+
+    check()
+    record["variantSemantics"]["sourceMode"] = "  "
+    with pytest.raises(ValueError, match="sourceMode.*non-empty"):
+        check()
+    record["variantSemantics"]["sourceMode"] = "CC Mode"
+    record["variantSemantics"]["sourceVariant"] = {"kind": "named", "label": "CC"}
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        check()
+    del record["variantSemantics"]["sourceVariant"]
+    record["kind"] = "skill"
+    record["id"] = "skill:kobra-pistol-cc-review"
+    record["armyLinks"] = [{"entity": "skill", "id": 221}]
+    with pytest.raises(ValueError, match="sourceMode requires source-specific Weapon"):
+        check()
+    record["kind"] = "weapon"
+    record["id"] = "weapon:kobra-pistol-cc-review"
+    record["armyLinks"] = [{"entity": "weapon", "id": 221}]
+    record["variantSemantics"]["inheritance"] = "family"
+    with pytest.raises(ValueError, match="sourceMode requires source-specific Weapon"):
+        check()
+    record["variantSemantics"]["inheritance"] = "source"
+    record["armyLinks"] = [{"entity": "weapon", "id": "kobra-pistol"}]
+    with pytest.raises(ValueError, match="numeric Army source id"):
+        check()
+
+
+def test_curated_long_rule_summaries_have_readable_paragraphs() -> None:
+    """Prevent long, unbroken rules cards across all maintained collections."""
+    root = Path(__file__).resolve().parents[1] / "data" / "curated"
+    reviewed = 0
+    for _, document in load_curated_directory(root):
+        for record in document.get("records", []):
+            summary = record.get("summary", "")
+            if len(summary) < 350:
+                continue
+            reviewed += 1
+            paragraphs = re.split(r"\n\s*\n", summary)
+            assert len(paragraphs) >= 2, record["id"]
+            assert max(map(len, paragraphs)) <= 350, record["id"]
+    assert reviewed > 0
+
+
+@pytest.mark.parametrize(
+    "invalid",
+    [
+        {"defenseModifier": {"operation": "double", "attributes": ["ARM"]}},
+        {"defenseModifier": {"operation": "halve", "attributes": ["WIP"]}},
+        {"defenseModifier": {"operation": "halve", "attributes": ["ARM", "ARM"]}},
+        {"defenseModifier": {"operation": "halve", "attributes": [{}]}},
+        {"rollsPerHit": 0},
+        {"rollsPerHit": True},
+        {"criticalAdditionalSavingRolls": 0},
+        {"criticalAdditionalSavingRolls": 2},
+        {"criticalAdditionalSavingRolls": True},
+        {"criticalAdditionalSavingRolls": "1"},
+        {"savingRoll": {"attribute": "ARM", "modifier": -6, "missingAttribute": "no-effect"}},
+        {"savingRoll": {"attribute": "PH", "modifier": True, "missingAttribute": "no-effect"}},
+        {"savingRoll": {"attribute": "PH", "modifier": -6, "missingAttribute": "roll"}},
+        {"savingRoll": {"attribute": "PH", "modifier": 0, "missingAttribute": "no-effect"}},
+        {"woundsPerFailedSave": {"hit": 2}},
+        {"woundsPerFailedSave": {"hit": 2, "criticalAdditionalRoll": True}},
+        {"woundsPerFailedSave": {"hit": 0, "criticalAdditionalRoll": 1}},
+        {"stateEffects": []},
+        {"stateEffects": [{"stateId": "skill:reset", "condition": "failed-saving-roll"}]},
+        {"stateEffects": [{"stateId": "state:isolated", "condition": "hit"}]},
+        {
+            "stateEffects": [
+                {"stateId": "state:isolated", "condition": "failed-saving-roll"},
+                {"stateId": "state:isolated", "condition": "failed-saving-roll"},
+            ]
+        },
+        {
+            "stateEffects": [
+                {
+                    "stateId": "state:immobilized-b",
+                    "condition": "failed-saving-roll",
+                    "targetTypes": ["HI", "WIP"],
+                }
+            ]
+        },
+        {"gutsEffect": {"condition": "hit", "result": "automatic-failure",
+                        "exception": "courage-or-equivalent"}},
+        {"gutsEffect": {"condition": "failed-saving-roll", "result": "no-guts-roll",
+                        "exception": "courage-or-equivalent"}},
+        {"stateEffects": [{"stateId": "state:dead", "condition": "failed-saving-roll",
+                           "targetAttribute": {"name": "VITA", "equals": 2},
+                           "application": "bypass-unconscious"}]},
+        {"stateEffects": [{"stateId": "state:stunned", "condition": "failed-saving-roll",
+                           "targetAttribute": {"name": "VITA", "equals": 1},
+                           "application": "bypass-unconscious"}]},
+        {"stateEffects": [{"stateId": "state:dead", "condition": "failed-saving-roll",
+                           "targetAttribute": {"name": "VITA", "equals": True},
+                           "application": "bypass-unconscious"}]},
+        {"unreviewedOperation": "auto-resolve"},
+    ],
+)
+def test_ammunition_resolution_rejects_invalid_typed_facts(
+    tmp_path: Path, invalid: dict,
+) -> None:
+    document = valid_document()
+    document["records"].append({
+        "id": "ammunition:pilot",
+        "kind": "ammunition",
+        "name": "Pilot ammunition",
+        "summary": "A typed fact validation fixture.",
+        "facts": {"ammunitionResolution": invalid},
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "citations": [{"sourceId": "n5-core-v5.3", "page": 64}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-10-09"},
+    })
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="ammunitionResolution"):
+        load_curated_document(path)
+
+
+def test_ammunition_resolution_is_owned_only_by_ammunition(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"][0]["facts"]["ammunitionResolution"] = {"rollsPerHit": 2}
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="only Ammunition"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize("invalid", [
+    {},
+    {"visibility": "low", "template": "circular", "height": "infinite",
+     "expires": "start-of-states-phase", "multispectralVisor": "blocked"},
+    {"visibility": "zero", "template": "circular", "height": "infinite",
+     "expires": "start-of-states-phase", "multispectralVisor": "ignores-zone"},
+    {"visibility": "zero", "template": "circular", "height": "infinite",
+     "expires": "start-of-states-phase", "multispectralVisor": []},
+    {"visibility": "zero", "template": "circular", "height": "infinite",
+     "expires": "start-of-states-phase", "multispectralVisor": "blocked",
+     "unreviewed": True},
+])
+def test_ammunition_visibility_zone_rejects_unreviewed_facts(
+    tmp_path: Path, invalid: dict,
+) -> None:
+    document = valid_document()
+    document["records"].append({
+        "id": "ammunition:pilot", "kind": "ammunition", "name": "Pilot",
+        "summary": "A visibility-zone fixture.",
+        "facts": {"visibilityZone": invalid},
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "citations": [{"sourceId": "n5-core-v5.3", "page": 64}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-10-09"},
+    })
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="visibilityZone"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize("kind", ["skill", "ammunition"])
+def test_ammunition_visibility_zone_cannot_mix_domains_or_rolls(
+    tmp_path: Path, kind: str,
+) -> None:
+    document = valid_document()
+    record = {
+        "id": f"{kind}:pilot", "kind": kind, "name": "Pilot",
+        "summary": "A visibility-zone fixture.",
+        "facts": {"visibilityZone": {
+            "visibility": "zero", "template": "circular", "height": "infinite",
+            "expires": "start-of-states-phase", "multispectralVisor": "blocked",
+        }},
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "citations": [{"sourceId": "n5-core-v5.3", "page": 64}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-10-09"},
+    }
+    if kind == "ammunition":
+        record["facts"]["ammunitionResolution"] = {"rollsPerHit": 1}
+    document["records"].append(record)
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="visibilityZone"):
+        load_curated_document(path)
+
+
+@pytest.mark.parametrize("case", ["missing", "extra", "wrong"])
+def test_ammunition_state_graph_must_match_conditional_effect_facts(
+    tmp_path: Path, case: str
+) -> None:
+    document = valid_document()
+    record = {
+        "id": "ammunition:pilot",
+        "kind": "ammunition",
+        "name": "Pilot ammunition",
+        "summary": "A typed State-effect graph fixture.",
+        "facts": {
+            "ammunitionResolution": {
+                "stateEffects": [
+                    {"stateId": "state:isolated", "condition": "failed-saving-roll"}
+                ]
+            }
+        },
+        "relations": [{"type": "causes-state", "recordId": "state:isolated"}],
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "citations": [{"sourceId": "n5-core-v5.3", "page": 64}],
+        "composition": {"role": "definition"},
+        "review": {"status": "reviewed", "reviewedOn": "2026-10-09"},
+    }
+    document["records"].append(record)
+    path = tmp_path / "state-graph.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_curated_document(path)
+    if case == "missing":
+        record["relations"] = []
+    elif case == "extra":
+        record["relations"].append(
+            {"type": "causes-state", "recordId": "state:immobilized-b"}
+        )
+    else:
+        record["relations"][0]["recordId"] = "state:stunned"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="causes-state relations must match"):
+        load_curated_document(path)
+
+
+def test_critical_roll_fact_is_single_and_only_on_saving_roll_ammunition() -> None:
+    """One Critical adds one roll; it does not multiply with DA/EXP rolls."""
+    path = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    records = {item["id"]: item for item in load_curated_document(path)["records"]}
+    per_hit = {
+        "normal": 1, "da": 2, "em": 2, "exp": 3,
+        "para": 1, "shock": 1, "stun": 1,
+    }
+    for slug in ("normal", "ap", "da", "em", "exp", "para", "shock", "stun", "t2"):
+        record = records[f"ammunition:{slug}"]
+        facts = record["facts"]["ammunitionResolution"]
+        assert facts["criticalAdditionalSavingRolls"] == 1
+        if slug in per_hit:
+            assert facts["rollsPerHit"] == per_hit[slug]
+        assert record["citations"], slug
+    for slug in ("smoke", "eclipse"):
+        assert "ammunitionResolution" not in records[f"ammunition:{slug}"]["facts"]
+    # T2's additional Critical roll inflicts 1 Wound, not its normal 2.
+    assert records["ammunition:t2"]["facts"]["ammunitionResolution"][
+        "woundsPerFailedSave"
+    ] == {"hit": 2, "criticalAdditionalRoll": 1}
+
+
+def test_current_ammunition_state_relations_preserve_conditional_effects() -> None:
+    path = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    records = {item["id"]: item for item in load_curated_document(path)["records"]}
+    expected = {
+        "ammunition:em": {"state:isolated", "state:immobilized-b"},
+        "ammunition:para": {"state:immobilized-a"},
+        "ammunition:shock": {"state:dead"},
+        "ammunition:stun": {"state:stunned"},
+    }
+    for record_id, state_ids in expected.items():
+        record = records[record_id]
+        assert {relation["recordId"] for relation in record["relations"]} == state_ids
+        fact_states = record["facts"]["ammunitionResolution"]["stateEffects"]
+        assert {effect["stateId"] for effect in fact_states} == state_ids
+    for record_id in (
+        "ammunition:normal",
+        "ammunition:ap",
+        "ammunition:da",
+        "ammunition:exp",
+        "ammunition:t2",
+        "ammunition:smoke",
+        "ammunition:eclipse",
+    ):
+        assert not any(
+            relation["type"] == "causes-state"
+            for relation in records[record_id].get("relations", [])
+        )
+    conditional = records["ammunition:em"]["facts"]["ammunitionResolution"][
+        "stateEffects"
+    ]
+    assert conditional[1]["targetTypes"] == ["HI", "TAG", "REM", "VH"]
+    shock = records["ammunition:shock"]["facts"]["ammunitionResolution"][
+        "stateEffects"
+    ]
+    assert shock[0]["targetAttribute"] == {"name": "VITA", "equals": 1}
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        (lambda f: f["coveredAmmunition"].update(treatAs="ammunition:ap"),
+         "covered Ammunition"),
+        (lambda f: f["coveredAmmunition"]["ignore"].pop(),
+         "covered Ammunition"),
+        (lambda f: f["criticalAgainstCoveredAmmunition"].update(
+            additionalSavingRolls=2), "Critical exception"),
+        (lambda f: f["criticalAgainstCoveredAmmunition"].update(
+            unless="none"), "Critical exception"),
+        (lambda f: f["exceptions"].update(commsAttacks="always-immune"),
+         "Immunity exceptions"),
+        (lambda f: f["exceptions"]["notNegatedByImmunity"].pop(),
+         "Immunity exceptions"),
+        (lambda f: f["reviewedCombinedCases"][0]["when"].update(immunity="DA"),
+         "Immunity applicability"),
+        (lambda f: f["reviewedWeaponCases"][0]["when"].update(
+            immunity="Enhanced"), "Flash Pulse Immunity example"),
+        (lambda f: f["reviewedWeaponCases"][0]["stateEffect"].update(
+            condition="any-hit"), "Flash Pulse Immunity example"),
+        (lambda f: f["reviewedWeaponCases"][0].update(
+            ammunitionTreatedAs="ammunition:stun"), "Flash Pulse Immunity example"),
+        (lambda f: f["reviewedWeaponCases"][0]["when"].update(
+            weaponId="weapon:stun-pistol"), "Flash Pulse Immunity example"),
+        (lambda f: f["reviewedVulnerabilityCases"][0]["when"].update(
+            weaponNameContains="AP"), "Vulnerability interaction example"),
+        (lambda f: f["reviewedVulnerabilityCases"][0].update(
+            evidence="rule-derived"), "Vulnerability interaction example"),
+        (lambda f: f["reviewedVulnerabilityCases"][0].update(
+            withImmunity={"hitRolls": 1}), "Vulnerability interaction example"),
+        (lambda f: f["reviewedCombinedCases"][0]["when"].update(
+            savingAttribute="BTS"), "Immunity applicability"),
+        (lambda f: f["reviewedCombinedCases"][0]["withoutImmunity"].update(
+            criticalRolls=4), "source hit/Critical Saving Roll counts"),
+        (lambda f: f["reviewedCombinedCases"][0]["withImmunity"].update(
+            hitRolls=2), "covered-attack result"),
+        (lambda f: f["reviewedCombinedCases"][2]["withImmunity"].update(
+            remainingComponents=["ammunition:normal"]), "covered-attack result"),
+        (lambda f: f["reviewedCombinedCases"][2]["when"].update(
+            immunity="Shock"), "Immunity applicability"),
+        (lambda f: f["reviewedCombinedCases"][2].update(
+            sourceAmmunitionId=13), "Immunity applicability"),
+        (lambda f: f["reviewedCombinedCases"][1].update(
+            sourceAmmunitionId=10), "duplicate source Ammunition ID"),
+        (lambda f: f["reviewedCombinedCases"][0].update(
+            evidence="automatic"), "rule-derived conclusion"),
+        (lambda f: f.update(automaticResolution=True),
+         "Immunity interaction fields"),
+    ],
+)
+def test_immunity_interaction_rejects_unreviewed_semantics(
+    tmp_path: Path, change, message: str
+) -> None:
+    """Immunity facts must not become an inferred combined-attack evaluator."""
+    root = Path(__file__).resolve().parents[1]
+    source = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    record = deepcopy(next(r for r in source["records"] if r["id"] == "skill:immunity"))
+    record["labelIds"] = ["example-label"]  # The standalone fixture uses its own Label.
+    record["citations"] = [{"sourceId": "n5-core-v5.3", "page": 1}]
+    doc = valid_document()
+    doc["records"].append(record)
+    path = tmp_path / "immunity.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    assert load_curated_document(path)
+
+    change(record["facts"]["immunityInteraction"])
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        load_curated_document(path)
+
+
+def test_immunity_interaction_is_not_accepted_on_other_skills(tmp_path: Path) -> None:
+    doc = valid_document()
+    root = Path(__file__).resolve().parents[1]
+    source = json.loads(
+        (root / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    immunity = next(r for r in source["records"] if r["id"] == "skill:immunity")
+    doc["records"][0]["facts"]["immunityInteraction"] = immunity["facts"][
+        "immunityInteraction"
+    ]
+    path = tmp_path / "invalid-owner.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(ValueError, match="only the Immunity Skill"):
+        load_curated_document(path)

@@ -172,6 +172,20 @@
   --color-logo-rim-highlight: #dff2c5;
   --color-logo-rim-default: #b0d49b;
   --color-logo-rim-shadow: #5c8866;
+  /* Scenario-map semantic colors (shared by all map configurations). */
+  --color-scenario-map-table: #17201b;
+  --color-scenario-map-outline: #dce6df;
+  --color-scenario-map-deployment-a: #233b50;
+  --color-scenario-map-deployment-a-edge: #7bb9e9;
+  --color-scenario-map-deployment-b: #492c34;
+  --color-scenario-map-deployment-b-edge: #f19595;
+  --color-scenario-map-scoring: #34433b;
+  --color-scenario-map-scoring-edge: #bdcec1;
+  --color-scenario-map-marker: #17201b;
+  --color-scenario-map-guide: #a6b3ab;
+  --color-scenario-map-measurement: #dce6df;
+  --color-scenario-map-text: #edf4ef;
+  --color-scenario-map-text-halo: #17201b;
   --color-faction-panoceania-primary: #20b5f3;
   --color-faction-panoceania-secondary: #126284;
   --color-faction-yu-jing-primary: #f49a45;

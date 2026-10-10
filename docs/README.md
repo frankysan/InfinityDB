@@ -38,6 +38,11 @@ These files intentionally retain reviewed evidence that is useful beyond one rel
 
 - `rules-semantics.md` — audited rules meaning that already has a concrete InfinityDB consumer.
 - `rules-research.md` — verified source findings retained for possible future product/model work.
+- `n5-source-history.md` — N5 official update-post index, historical Army evidence, and
+  cross-source reconciliation procedure; an index, not a verified completeness ledger.
+- [rules-explanation-audit-1.0.md](rules-explanation-audit-1.0.md) — active, documentation-only assessment of curated
+  interaction explanations, source conflicts, and proposed correction batches; its
+  linked inventory distinguishes screening from selected clause review.
 - `rules-interaction-checklist.md` — generated cross-release interaction-review ledger. Regenerate
   it with `tools/audit_rules_interactions.py`; do not edit it manually. Its release labels record the
   original review/defer decision and are evidence provenance, not the active roadmap; use `TODO.md`

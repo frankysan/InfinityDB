@@ -83,6 +83,19 @@ JavaScript build dependency. The development dependency set already provides Nod
 Representative server-rendered pages separately verify that the shared pre-paint bootstrap and
 semantic theme stylesheet are present in the correct order.
 
+## Scenario detail soft-navigation regression
+
+The scenario API tests also execute `scenario.js` in a small Node.js lifecycle harness.
+It verifies that leaving a scenario detail page aborts its pending map/catalog requests,
+removes the distance-unit listener, and rejects late map responses. A second Node.js
+harness checks that rapidly changing Army Points returns to the loading panel,
+ignores superseded results (including stale errors), and displays only the latest
+configuration even when an aborted request still resolves. Responsive grid
+contracts are also checked in the web suite. Scenario browser visual review was
+user-confirmed on 2026-10-08; the separate real-browser keyboard/touch and
+loading/empty/error-state interaction checks remain open in the
+[0.10.1 acceptance checklist](TODO.md#0101--interim-reference-consistency).
+
 ## Silhouette manual browser acceptance
 
 The scale-preserving Silhouette renderer has automated structural coverage, but the release gate
@@ -148,8 +161,13 @@ python tools\run_checks.py --stage test --test-workers 0
 Worker choice is an execution policy, not a correctness difference. Tests must remain valid under
 parallel execution unless they are explicitly serialized by their own fixture/contract.
 
-Hosted Windows CI intentionally uses serial pytest because automatic xdist scheduling was unstable
-for that runner class; this does not change the normal local default. See `docs/ci.md`.
+Hosted Windows CI uses two fixed pytest workers because automatic xdist scheduling was unstable
+for that runner class and serial execution exceeded the job budget as coverage grew. This does not
+change the normal local default. See `docs/ci.md` for the hosted execution/time-budget policy.
+
+Pytest uses its platform-default, per-session temporary directory rather than a fixed
+repository-local `.pytest-tmp` directory. This avoids reuse or cleanup collisions
+when local test runs overlap; use `--basetemp=...` explicitly only when needed.
 
 ## Graphical asset modes
 
@@ -325,8 +343,135 @@ failed migrations retain the previous committed format, non-empty unversioned st
 an older collector rejects a newer store without modifying retained history. The production rollback
 procedure separately preserves the named history volume across a release with no collector.
 
+## 1.0 source evidence baseline
+
+The offline `tools/report_reference_baseline.py` command inventories the published Army
+source snapshot identity, rules collections and source citations, and row counts by
+canonical family. Generate ignored review artifacts from the repository root:
+
+```powershell
+python tools/report_reference_baseline.py --json-output reports/1.0-baseline.json --markdown-output docs/audits/1.0-baseline.md
+```
+
+Optionally pass `--army-archive <path>` to verify the exact Army ZIP SHA-256 against
+the one embedded in `infinity.db`. Missing ignored PDFs/wiki snapshots are explicitly
+reported rather than downloaded or assumed present. The report keeps each URL-pinned
+Wiki `oldid=` revision separate from the shared local Wiki archive. If a local source
+file exists, its actual SHA-256 is included and compared to the curated hash when
+one exists. A mismatch must be reviewed because some curated hashes can describe
+logical snapshots; neither file presence nor a URL revision pin authenticates source
+content. A PDF with no declared content hash remains unverified even when available.
+Each source row retains publication and acquisition dates separately.
+
+**This report is not a completeness check.** Citation presence is not source
+correctness, and published row counts do not prove semantic, API, or browser
+coverage. Each inventory row starts with pending source/relationship/presentation
+review. Reconcile the report with the existing source-presentation, enrichment, and
+rules-interaction audits before closing the Stage 1 inventory in `TODO.md`.
+
+The separate read-only `tools/audit_1_0_reference_inputs.py` command cross-checks
+provided **source bytes** with the existing enrichment report and the exact archived
+Wiki history pages. The three inputs are explicit, local arguments; they are never
+acquired automatically or committed to the repository:
+
+```powershell
+python tools/audit_1_0_reference_inputs.py --wiki-history "WIKI-en-history.zip" --core-pdf "n5-rules-v5-3-en.pdf" --faq-pdf "n5-faqs-v0-1-en.pdf" --json-output reports/1.0-source-evidence.json --markdown-output docs/audits/1.0-source-evidence.md
+```
+
+The Wiki history ZIP must contain `_history/index.json` and the indexed
+`_history/oldid/*.html` payloads. The audit verifies page identity and embedded
+`wgRevisionId`, not merely a latest-page snapshot or a URL string. It reports the
+supplied PDF/ZIP SHA-256 hashes **without** asserting that an unpinned artifact has
+been independently authenticated. Candidate weapon-name matches in the archived
+Wiki Weapon Chart do not verify profile rows, ammunition, ranges, Traits, or browser
+presentation; the six names not seen verbatim may be alias/mode differences.
+Commlink's related Wiki page is not a substitute for the Reinforcements annex PDF.
+
 ## CI and release validation
 
 `docs/ci.md` owns the hosted workflow contract. `docs/releasing.md` owns the release gate. Do not
 copy required-check names, branch-protection settings, or release acceptance steps into this file
 unless they directly affect how local checks are invoked.
+
+## Shared scenario composition regression coverage
+
+`tests/test_scenario_components.py` covers explicit component identity, scope isolation,
+Specialist additions/removals, same-name definitions, cycle/unknown-reference failures, and
+self-contained rules-database payloads. A small Node.js harness executes the common Skill-card
+renderer with the two scenario Skills and the resolved Specialist list; it reuses the dev Node
+dependency and adds no JavaScript build step. Existing scenario tests still validate every game-size
+row, score condition, placement, source issue, and SVG output after reference expansion.
+
+## 1.0 Weapon Trait archived-Wiki cross-reference
+
+`tools/audit_weapon_trait_cross_sources.py` is an **offline, read-only**
+source-reconciliation tool, not part of normal builds or CI. It requires the
+pinned v5.3 PDF and the exact archived Wiki history ZIP in addition to the
+shipped generated databases. It fails closed if the nine maintained review
+identities or the PDF/Wiki payload hashes no longer match.
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.audit_weapon_trait_cross_sources --core-pdf "C:\path\to\n5-rules-v5-3-en.pdf" --wiki-history "C:\path\to\WIKI-en-history.zip" --json-output docs/audits/weapon-trait-cross-source.json --markdown-output docs/audits/weapon-trait-cross-source.md
+```
+
+This compares **Traits**, not all weapon-profile values or rules prose; the
+Wiki's superseded `original_border` chart rows are kept separate from current
+rows. The exact Wiki member revision and bytes are pinned in
+`config/validation/weapon-trait-wiki-review.json`; authoritative adjudication
+remains manual and source-specific.
+
+## 1.0 Weapon Chart partial evidence audit
+
+The read-only `tools/audit_weapon_chart_profiles.py` compares the printed N5 v5.3
+Weapon Chart to the shipped Army metadata. Its PDF layout reader reconstructs
+wrapped names and two-line Plasma saving cells, selects a unique explicit or
+mode-less profile, and keeps Disco Ball's auxiliary object profile separate from
+the Burst-anchored rows. It compares five profile fields plus range-band slots:
+printed MOD text supplies values while the PDF's vector rectangles supply
+breakpoint boundaries. Bare `3` is not silently rewritten to `+3`.
+
+The official core PDF is supplied locally and is **not** included in Git. This
+offline audit additionally requires PyMuPDF (`python -m pip install pymupdf`);
+normal CI and tests do not need that optional dependency. Run from the repository root:
+
+```powershell
+python tools/audit_weapon_chart_profiles.py --core-pdf "C:\path\to\n5-rules-v5-3-en.pdf" --json-output docs/audits/weapon-chart.json --markdown-output docs/audits/weapon-chart.md
+```
+
+The output includes the source PDF SHA-256, raw compared fields, range-band
+evidence, candidate discrepancies, and any unresolved chart rows. Saving Roll
+multipliers are interpreted together with the Saving Attribute: an Army
+`savingNum=1` with `saving=-` is non-operative and matches a printed `--`.
+The supplied v5.3 PDF yields 171/171 uniquely aligned rows, with 170 five-field
+matches and 170 range-band matches. Kobra Pistol CC Mode has a Saving Rolls
+source discrepancy candidate (PDF 1, Army 2); Katyusha MRL prints unsigned `3`
+where Army has `+3`. The separate Disco Ball object's attributes match.
+This remains partial evidence: other auxiliary/equipment profiles, special-weapon
+prose semantics, and API/browser projection still need review.
+
+## 1.0 Weapon Traits and special-weapon source inventory
+
+`tools/audit_weapon_traits_prose.py` uses the same optional N5 v5.3 PDF and
+generated Army database, plus `rules.db`, to compare positionally reconstructed
+Traits against raw Army `metadata_weapons.properties`. The offline check keeps
+printed wording, mode identities, source page, and Army properties in each report.
+It also indexes 12 named special-weapon prose sections on pp. 68–74 against
+named curated Weapon definitions, without treating a missing dedicated Weapon
+record as proof that no gameplay rule representation exists.
+
+```powershell
+python tools/audit_weapon_traits_prose.py --core-pdf "C:\path\to\n5-rules-v5-3-en.pdf" --json-output docs/audits/weapon-traits.json --markdown-output docs/audits/weapon-traits.md
+```
+
+The supplied N5 v5.3 PDF yields 145 literal Trait-list matches, 15 reviewed
+notation equivalents, two manually checked source-cell matches, and nine remaining
+membership/classification candidates across all 171 chart rows (zero deferrals).
+`config/validation/weapon-trait-source-review.json` maintains the narrow spelling,
+State-notation, and compound footnote equivalences separately from gameplay data.
+The two verified source cells are keyed by printed name/page and can only be reused
+with the exact pinned core PDF hash. Review policy changes are recorded in the
+reproducible evidence report. These candidates are **not confirmed source-data defects**: spelling and
+shorthand differences, omitted/extra printed Traits, and extraction limitations
+require separate review. The report does not compare prose clauses, rule
+relationships, or player-facing completeness. The PDF remains an optional
+offline dependency only; normal tests and CI require no PDF or PyMuPDF.

@@ -1,10 +1,11 @@
 import copy
+import re
 from pathlib import Path
 
 import pytest
 
 from infinity_db.curated import load_curated_directory, load_curated_document
-from infinity_db.maintained_text import parse_maintained_text
+from infinity_db.maintained_text import maintained_text_fields, parse_maintained_text
 from infinity_db.maintained_text_policy import (
     collect_review_needed_markers,
     collect_reviewed_batch_residuals,
@@ -13,6 +14,7 @@ from infinity_db.maintained_text_policy import (
     validate_reviewed_batch_coverage,
 )
 from infinity_db.rules_database import export_rules_database
+from infinity_db.scenario_components import compose_scenario_document
 
 
 def test_maintained_text_parser_preserves_text_references_distances_and_escapes() -> None:
@@ -42,6 +44,19 @@ def test_maintained_text_parser_preserves_text_references_distances_and_escapes(
         {"type": "text", "text": " within "},
         {"type": "distance", "centimeters": 5, "positive_sign": True},
         {"type": "text", "text": "; write [[literal]] for documentation."},
+    ]
+
+
+def test_maintained_text_parser_supports_glossary_game_terms() -> None:
+    assert parse_maintained_text(
+        "Through [[term:zero-visibility-zone:plural]] and "
+        "[[term:white-noise-zone|White Noise]]."
+    ) == [
+        {"type": "text", "text": "Through "},
+        {"type": "reference", "target": "term:zero-visibility-zone", "display_form": "plural"},
+        {"type": "text", "text": " and "},
+        {"type": "reference", "target": "term:white-noise-zone", "display_text": "White Noise"},
+        {"type": "text", "text": "."},
     ]
 
 
@@ -144,6 +159,20 @@ def test_rules_database_rejects_new_unlinked_semantic_reference(tmp_path: Path) 
         ValueError, match="(?:unmarked semantic references|semantic-link coverage changed)"
     ):
         export_rules_database(documents, tmp_path / "rules.db", finalize=False)
+
+
+def test_visibility_zone_phrases_in_curated_rules_are_linked() -> None:
+    documents = load_curated_directory(Path(__file__).parents[1] / "data" / "curated")
+    zone_words = re.compile(
+        r"\b(?:low|poor|zero) visibility(?: zones?)?\b"
+        r"|\bvisibility zones?\b|\bwhite noise zones?\b",
+        re.IGNORECASE,
+    )
+    for _, document in documents:
+        for context, value in maintained_text_fields(document):
+            for token in parse_maintained_text(value, context=context):
+                if token["type"] == "text":
+                    assert not zone_words.search(token["text"]), (context, token["text"])
 
 
 def test_canonical_state_names_are_semantic_links() -> None:
@@ -440,3 +469,95 @@ def test_review_needed_markers_are_explicit_and_excluded_from_unlinked_candidate
     assert review_needed["n5-core-v5.3|state:retreat"][
         ("facts.effects[]", "ambiguous-target", "HoloMask")
     ] == 1
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ("objectives", 2, "awards", 0, "condition", "text"),
+        ("rules", 0, "paragraphs", 0),
+        ("endConditions", 1, "condition", "text"),
+        ("sourceIssues", 0, "description"),
+    ],
+)
+def test_scenario_mission_prose_participates_in_shared_reference_validation(
+    tmp_path: Path,
+    path: tuple[str | int, ...],
+) -> None:
+    root = Path(__file__).parents[1]
+    documents = [
+        (path, compose_scenario_document(document))
+        for path, document in load_curated_directory(root / "data" / "curated")
+    ]
+    core = next(
+        document for _, document in documents if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    record = next(record for record in core["records"] if record["id"] == "scenario:annihilation")
+    target = record["facts"]["mission"]
+    for segment in path[:-1]:
+        target = target[segment]
+    target[path[-1]] = "Use [[skill:not-a-current-skill]]."
+    with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
+        export_rules_database(documents, tmp_path / "rules.db", finalize=False)
+
+
+def test_scenario_mission_prose_cannot_bypass_reviewed_link_coverage() -> None:
+    root = Path(__file__).parents[1]
+    documents = [
+        (path, compose_scenario_document(document))
+        for path, document in load_curated_directory(root / "data" / "curated")
+    ]
+    core = next(
+        document for _, document in documents if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    record = next(record for record in core["records"] if record["id"] == "scenario:annihilation")
+    record["facts"]["mission"]["rules"][0]["paragraphs"][0] = "Use Dodge."
+    with pytest.raises(ValueError, match="unmarked semantic references"):
+        validate_reviewed_batch_coverage(
+            documents, root / "data" / "curated" / "maintained-text-link-reviews.json"
+        )
+
+
+def test_domination_minimum_vp_end_prose_uses_shared_reference_validation(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = [
+        (path, compose_scenario_document(document))
+        for path, document in load_curated_directory(root / "data" / "curated")
+    ]
+    core = next(
+        document for _, document in documents if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    record = next(record for record in core["records"] if record["id"] == "scenario:domination")
+    record["facts"]["mission"]["endConditions"][1]["condition"]["text"] += " [[skill:not-current]]"
+    with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
+        export_rules_database(documents, tmp_path / "rules.db", finalize=False)
+
+
+def test_scenario_source_issue_uses_shared_distance_validation() -> None:
+    from infinity_db.maintained_text import validate_maintained_text_syntax
+
+    core = load_curated_document(Path("data/curated/rules/n5-core-v5.3.json"))
+    record = next(r for r in core["records"] if r["id"] == "scenario:supplies")
+    record["facts"]["mission"]["sourceIssues"].append(
+        {
+            "id": "synthetic-distance-review",
+            "armyPoints": [300],
+            "geometryElementIds": ["supply-box-left"],
+            "status": "needs-verification",
+            "description": "Place the box 8 inches away.",
+        }
+    )
+    with pytest.raises(ValueError, match="must use a .*distance"):
+        validate_maintained_text_syntax(core)
+
+
+def test_firefight_objective_titles_use_shared_reference_validation(tmp_path: Path) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    core = next(
+        document for _, document in documents if document["collection"]["id"] == "n5-core-v5.3"
+    )
+    record = next(r for r in core["records"] if r["id"] == "scenario:firefight")
+    record["facts"]["mission"]["objectives"][2]["name"] = "More [[skill:not-current]] killed"
+    with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
+        export_rules_database(documents, tmp_path / "rules.db", finalize=False)

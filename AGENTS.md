@@ -211,10 +211,23 @@ When deriving structured facts from these materials:
   when they are not members of that archive;
 - keep core rules, FAQ/errata, ITS season material, and historical sources
   distinct;
+- treat dated official Corvus Belli news/rules-update posts as supplementary
+  publication-change evidence, with their URL/date and scope recorded; do not
+  substitute a blog changelog for the versioned rules PDF, FAQ, or Army data;
+- for N5 questions, cross-check the pinned Army, rules/FAQ/annex, exact Wiki
+  revision, relevant official update posts, and available historical N5 versions;
+  use `docs/n5-source-history.md` for the source timeline and reconciliation policy;
+  keep official current authority distinct from unofficial historical backups;
 - do not bulk-extract or serve copyrighted text or artwork.
 
 Official Infinity Army data and current official publications remain
 authoritative where they supersede archived local material.
+
+When curating material player-facing rules interactions, follow the explanation standard in
+`data/curated/README.md#explaining-rules-interactions`: make conditions, baseline mechanic,
+modifying rule, explicit exceptions, outcome, and source certainty understandable to players.
+Do not mark an interaction adequately explained solely because its result or relation is correct.
+The browser presentation target is in `docs/web-design-guidelines.md`.
 
 Maintained rules prose must use the semantic maintained-text token syntax whenever it names an
 existing supported Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program,

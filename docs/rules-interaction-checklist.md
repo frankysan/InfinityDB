@@ -31,9 +31,9 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **87/98** complete, **11** pending.
-- Current authored outgoing relations: **262**.
-- Explicitly tracked future/deferred interactions: **115**.
+- Supporting semantic identities: **116/131** complete, **15** pending.
+- Current authored outgoing relations: **314**.
+- Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
 
@@ -414,8 +414,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Cube 2.0** (`equipment:cube-2`) — reviewed
   - `uses-effects-of` → Cube (`equipment:cube`)
   - `modifies-rolls-for` → Doctor (`skill:doctor`)
-  - future [post-0.7.0; planned]: `modifies-rolls-for` → `weapon:sepsitor` — Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph.
-  - future [post-0.7.0; planned]: `modifies-rolls-for` → `weapon:sepsitor-plus` — Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph.
+  - `modifies-rolls-for` → Sepsitor (`weapon:sepsitor`)
+  - `modifies-rolls-for` → Sepsitor Plus (`weapon:sepsitor-plus`)
 - [x] **Dazer** (`equipment:dazer`) — reviewed
   - outgoing: none
   - future [post-0.7.0; deferred]: `relation type TBD` → `rule:difficult-terrain` — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
@@ -882,21 +882,136 @@ review. `declaration-category` projection records are excluded.
 - [ ] **Eclipse Ammunition** (`ammunition:eclipse`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
 - [ ] **Electromagnetic (E/M) Ammunition** (`ammunition:em`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
-  - outgoing: none
+  - `causes-state` → Isolated State (`state:isolated`)
+  - `causes-state` → Immobilized-B State (`state:immobilized-b`)
 - [ ] **Explosive (EXP) Ammunition** (`ammunition:exp`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
 - [ ] **Normal (N) Ammunition** (`ammunition:normal`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
 - [ ] **Paralysis (PARA) Ammunition** (`ammunition:para`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
-  - outgoing: none
+  - `causes-state` → Immobilized-A State (`state:immobilized-a`)
 - [ ] **Shock Ammunition** (`ammunition:shock`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
-  - outgoing: none
+  - `causes-state` → Dead State (`state:dead`)
 - [ ] **Smoke Ammunition** (`ammunition:smoke`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
 - [ ] **Stun Ammunition** (`ammunition:stun`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
-  - outgoing: none
+  - `causes-state` → Stunned State (`state:stunned`)
 - [ ] **T2 Ammunition** (`ammunition:t2`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
+
+#### Rule (9/9)
+
+- [x] **Carrying Supply Boxes** (`rule:scenario:carrying-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Consoles** (`rule:scenario:consoles`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Controlling Supply Boxes** (`rule:scenario:controlling-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Designated Landing Area** (`rule:scenario:designated-landing-area`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Dominate Quadrants** (`rule:scenario:dominate-quadrants`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Killing** (`rule:scenario:killing`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Reinforced Tactical Link** (`rule:scenario:reinforced-tactical-link`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Specialist Troops** (`rule:specialist-troops:standard`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Supply Boxes** (`rule:scenario:supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+
+#### Scenario (0/4)
+
+- [ ] **Annihilation** (`scenario:annihilation`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, force-destruction objectives, and other scenario rule semantics remains 1.0 work.
+  - outgoing: none
+- [ ] **Domination** (`scenario:domination`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, objective interactions, and other scenario rule semantics remains 1.0 work.
+  - outgoing: none
+- [ ] **Firefight** (`scenario:firefight`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Classified Objective interactions, and other scenario rule semantics remains 1.0 work.
+  - outgoing: none
+- [ ] **Supplies** (`scenario:supplies`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Supply Box interactions, Specialist Troop rules, and other scenario semantics remains 1.0 work.
+  - outgoing: none
+
+#### Skill (2/2)
+
+- [x] **Hack Consoles** (`skill:hack-consoles`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
+  - outgoing: none
+- [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
+  - outgoing: none
+
+#### Term (5/5)
+
+- [x] **Low Visibility Zone** (`term:low-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
+  - outgoing: none
+- [x] **Poor Visibility Zone** (`term:poor-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
+  - outgoing: none
+- [x] **Visibility Zone** (`term:visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
+  - outgoing: none
+- [x] **White Noise Zone** (`term:white-noise-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
+  - outgoing: none
+- [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
+  - outgoing: none
+
+#### Weapon (13/13)
+
+- [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+- [x] **Cybermine** (`weapon:cybermine`) — reviewed: Uses the shared Mine mechanics but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `modifies-use-of` → Reset (`skill:reset`)
+  - `causes-state` → Stunned State (`state:stunned`)
+  - `causes-state` → Immobilized-B State (`state:immobilized-b`)
+- [x] **Drop Bears** (`weapon:drop-bears`) — reviewed: N5.3 Drop Bears BS/Deployable modes share three charges but have different placement restrictions; typed relationships connect PH throwing, Targetless, Deployable/Intuitive placement, Shock and the modified Mines behavior. Imported legacy Throwing Weapon remains source data, not an additional N5 effect.
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `uses-effects-of` → BS Weapon (PH) (`trait:bs-weapon-ph`)
+  - `uses-effects-of` → Targetless (`trait:targetless`)
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
+  - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `modifies-use-of` → Mines (`weapon:mines`)
+- [x] **Flash Pulse** (`weapon:flash-pulse`) — reviewed: Reviewed N5.3 Weapon Chart Stun/BTS/Non-Lethal/Stunned semantics and the printed Immunity (BTS) exception (Wiki Immunity oldid 3643, Example 4). No generic state or immunity resolution is inferred.
+  - `uses-effects-of` → Stun Ammunition (`ammunition:stun`)
+  - `uses-effects-of` → BS Weapon (WIP) (`trait:bs-weapon-wip`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+  - `uses-effects-of` → State (`trait:state`)
+  - `causes-state` → Stunned State (`state:stunned`)
+- [x] **Kobra Pistol** (`weapon:kobra-pistol`) — reviewed: N5.3 Mixed Weapons rules distinguish BS and CC modes and their ammunition; shared mode description does not assign mode-specific Traits or Saving Rolls.
+  - outgoing: none
+- [x] **Kobra Pistol (CC Mode)** (`weapon:kobra-pistol-cc`) — reviewed: Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values.
+  - `variant-of` → Kobra Pistol (`weapon:kobra-pistol`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+- [x] **Mines** (`weapon:mines`) — reviewed: Shared Mine mechanics: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary.
+  - `uses-effects-of` → Deployable (`trait:deployable`)
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Mimetism (`skill:mimetism`)
+  - `uses-effects-of` → Place Deployable (`skill:place-deployable`)
+- [x] **PARA Mine** (`weapon:para-mine`) — reviewed: Source-pinned PARA Mine reference connects shared Mines, PARA Ammunition and Immobilized-A; the N5.3 chart and Army marker discrepancy remains explicitly unresolved, not a gameplay change.
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Paralysis (PARA) Ammunition (`ammunition:para`)
+  - `causes-state` → Immobilized-A State (`state:immobilized-a`)
+- [x] **Pheroware Tactics (PT)** (`weapon:pt`) — reviewed: The shared PT chart classification is BS Weapon (WIP), while individual PT variant effects stay separate. Army retains legacy Technical Weapon wording.
+  - `uses-effects-of` → BS Weapon (WIP) (`trait:bs-weapon-wip`)
+- [x] **PT: Endgame** (`weapon:pt-endgame`) — reviewed: N5 v5.3 chart and the April 2025 update explicitly add Double Shot to Endgame only. Source-specific Army id 203 prevents applying it to Eraser or Mirrorball; current Army omits Double Shot.
+  - `variant-of` → Pheroware Tactics (PT) (`weapon:pt`)
+  - `uses-effects-of` → Double Shot (`trait:double-shot`)
+- [x] **Sepsitor** (`weapon:sepsitor`) — reviewed: Reviewed N5.3 p.73 Sepsitor rules and p.187 weapon profile. Individual PS and Disposable values remain source-native and are not inherited by the other variant; Cube 2.0 +2 Saving Roll applies to both.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `causes-state` → Sepsitorized State (`state:sepsitorized`)
+  - `uses-effects-of` → Cube (`equipment:cube`)
+- [x] **Sepsitor Plus** (`weapon:sepsitor-plus`) — reviewed: Reviewed N5.3 p.73 Sepsitor rules and p.187 weapon profile. Individual PS and Disposable values remain source-native and are not inherited by the other variant; Cube 2.0 +2 Saving Roll applies to both.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
+  - `causes-state` → Sepsitorized State (`state:sepsitorized`)
+  - `uses-effects-of` → Cube (`equipment:cube`)
+- [x] **WildParrot** (`weapon:wildparrot`) — reviewed: Perimeter and E/M Mine interaction with a visible Token/Model instead of CAMO; reviewed typed relationships distinguish this from Boost. N5 p. 74 Non-Lethal remains absent in Army and is presented as an explicit source discrepancy, not an imported Trait.
+  - `uses-effects-of` → Perimeter (`trait:perimeter`)
+  - `uses-effects-of` → Deployable (`trait:deployable`)
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
+  - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
+  - `modifies-use-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
 
 ## Future interaction queue
 
@@ -906,8 +1021,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] Shasvastii (`skill:shasvastii`) → Shock Ammunition (`ammunition:shock`); `relation type TBD`; **1.0.0 / planned** — Shock Ammunition cancels the Shasvastii-modified Unconscious State and sends the Trooper directly to Dead State; review the conditional transition during the 1.0 Ammunition interaction pass.
 - [ ] BioWeapon (`trait:bioweapon`) → Double Action (DA) Ammunition (`ammunition:da`); `uses-effects-of`; **1.0.0 / planned** — BioWeapon explicitly applies DA together with Shock Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
 - [ ] BioWeapon (`trait:bioweapon`) → Shock Ammunition (`ammunition:shock`); `uses-effects-of`; **1.0.0 / planned** — BioWeapon explicitly applies Shock together with DA Special Ammunition; review and materialize this reuse edge during the 1.0 Ammunition interaction pass.
-- [ ] Cube 2.0 (`equipment:cube-2`) → `weapon:sepsitor`; `modifies-rolls-for`; **post-0.7.0 / planned** — Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph.
-- [ ] Cube 2.0 (`equipment:cube-2`) → `weapon:sepsitor-plus`; `modifies-rolls-for`; **post-0.7.0 / planned** — Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph.
 - [ ] Dazer (`equipment:dazer`) → `rule:difficult-terrain`; `relation type TBD`; **post-0.7.0 / deferred** — Dazer creates a Difficult Terrain area in its Zone of Control, but the current graph has neither a canonical Difficult Terrain identity nor a precise creates-area relation.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.

@@ -39,12 +39,134 @@ rules.db
 The two runtime databases are intentionally separate because Army data and reviewed rules knowledge
 have different sources, provenance, and update cadence.
 
+For weapon families such as Mines, a shared curated rule describes only the common
+mechanics. The individual Army weapon profile identifies ammunition, PS, Saving Rolls,
+and Traits; the corresponding ammunition, State, and Trait rules determine the
+weapon-specific effects. Attaching `weapon:mines` to a weapon
+does not create a generic "ordinary Mine" weapon or make the variants interchangeable.
+Variant-specific effects require their own source-derived weapon profile and, where
+necessary, curated exceptions or relationships. A reviewed family clause is not
+evidence that every named weapon variant has complete rules coverage.
+An Army Weapon source ID can also cover multiple modes (Kobra Pistol: source `221`,
+BS Mode and CC Mode). Curated source rules may target an exact source ID *and*
+mode, but must attach to that one profile only, not to the parent Weapon/source
+variant or sibling modes. Mode qualifiers describe identity, not permission to
+resolve a disputed Trait automatically.
+Weapon Ammunition navigation is a reviewed *projection*, not executable Ammunition
+composition. `config/catalogs/weapon-ammunition-references.json` pins exact Army
+metadata Ammunition IDs and names to canonical published base Ammunition references.
+The repository preserves the source metadata ID as `ammunition_source_id` in each
+Weapon profile; the catalog API attaches ordered `ammunition_parts` only when both
+that ID and its name match the reviewed map. A base type links to one reference;
+source-defined `AP+DA`, `AP+Exp`, `AP+Shock`, and `AP+T2` link their reviewed
+components separately. Version 2 of the maintained mapping also records those
+ordered components as canonical `ammunition:*` IDs; the validator requires exact
+agreement with the linked display segments and literal `+` separators. The
+Weapon API exposes `ammunition_composition: {kind: "combined", components: [...]}`
+only for an exact Army source ID/name pair with published reference targets.
+Single Ammunition profiles do not receive a synthetic composition. Alternative
+(`/`), absent, or mismatched values remain source text; they are not guessed
+from punctuation. Saving Roll notation (`ARM/2`, `x2`, etc.) remains a distinct,
+unchanged source field and is never interpreted as Ammunition composition.
+The first reviewed Ammunition effect pilot now lives on canonical `ammunition:*`
+records, not on Army mapping entries. The validated, non-executable
+`facts.ammunitionResolution` object can describe halving the applicable ARM/BTS
+Attribute (AP), two Saving Rolls per hit (DA/E/M), and E/M State outcomes with
+failure conditions and eligible target categories. The EXP, PARA, and T2
+extensions add three rolls per EXP hit; a PH-6 Saving Roll with no effect
+against targets lacking PH and Immobilized-A on failure for PARA; and
+separate T2 Wound counts for a failed hit roll versus a failed additional
+Critical roll (2 versus 1). Normal and Shock record one Saving Roll and
+one Wound per failed roll; Shock's direct-to-Dead outcome applies only to
+failed rolls against targets with VITA 1. Stun records the Stunned State
+and automatic Guts Roll failure on a failed Saving Roll, except with Courage
+or equivalent rules. These facts flow through `rules.db` to Ammunition detail
+APIs with the records' existing citations. Smoke and Eclipse instead use a
+separate `facts.visibilityZone` shape recording the Circular Zero Visibility
+Zone, infinite height, expiration, and the distinction between Smoke's MSV
+exception and Eclipse's Reflective blocking of all MSV Levels. This is
+visibility reference data, never a synthetic Saving Roll or a guarantee
+that a Smoke Template succeeds against all attacks. The
+Weapon API separately exposes source-authored profiles and reviewed combined
+component IDs. It does **not** merge these facts into an inferred roll result:
+Feuerbach's AP+DA source combination remains distinct from its `ARM/2` and `2`
+fields, and Plasma Carbine's `ARM and BTS` / `1 and 1` remains a Combined Saving
+Roll with Normal Ammunition, never a synthetic composition.
+
+All eleven published base Ammunition identities now carry reviewed typed
+facts, but the contract is deliberately non-executable: it does not model
+critical attack resolution generally, Smoke/Eclipse Face to Face adjudication,
+all conditional immunity/target interactions, or combined-Ammunition
+precedence. This is not yet a complete curated Ammunition effect/relation model or a
+general combined-Ammunition evaluator. Conditional State outcomes are also
+published as authored `causes-state` rules-graph links for E/M, PARA, Shock,
+and Stun. The curated validator requires the set of targets on these links to
+match `facts.ammunitionResolution.stateEffects` exactly; target/attribute
+restrictions and Saving Roll failure conditions remain in the typed facts,
+not on the simple relation edge. Both directions of each link are available in
+reference pages. Nine roll-bearing base Ammunition records now also carry
+`criticalAdditionalSavingRolls: 1`. This represents the single extra Saving
+Roll from a Critical, not a multiplicative roll count per combined component.
+Smoke and Eclipse retain only visibility-zone facts and no Saving Roll facts.
+For the four reviewed Combined Ammunition forms, the component mapping still
+publishes identities only: it does not add, multiply, or adjudicate those rolls.
+The additional roll retains applicable constituent effects; T2's
+`woundsPerFailedSave.criticalAdditionalRoll` remains distinct from its regular
+hit effect. Combined Saving Rolls (including Plasma's ARM/BTS case) have a
+different extra-roll target rule and remain outside this fact pilot.
+The other Ammunition effects, complete combined Critical interactions,
+and broader semantic relationships still require source review.
+
+The separate reviewed Combined Saving Roll projection now pins the six
+Plasma Carbine, Plasma Rifle, and Plasma Sniper Rifle Hit/Blast source profiles
+(including the source spelling of each name). Only exact source ID, mode,
+Ammunition identity, and Saving Roll fields receive
+`combined_saving_roll: {kind, rolls, critical}` in the Weapon API. The pinned
+N5.3 rule specifies one additional **ARM** Saving Roll for a Critical, on top
+of the ARM and BTS Saving Rolls from the hit. This is a reviewed source-profile
+annotation, not a roll evaluator, an Ammunition effect, or an inferred
+`ammunition_composition`. Other Weapon Saving Roll notations remain untouched.
+Full cross-source Combined Saving Roll coverage and immunity interactions remain
+open.
+
+A bounded Immunity cross-reference now publishes `skill:immunity`'s validated
+`facts.immunityInteraction` (N5.3 Wiki Immunity `oldid=3643`). It describes
+covered Ammunition as Normal, the loss of special effects and Saving Roll
+modifiers, the default additional Critical Saving Roll (unless the defender has
+Immunity (Critical)), and the Comms Attack/Non-Lethal/Stunned exceptions. These
+facts belong to Immunity, **not** to the ordered Combined Ammunition mapping:
+checking whether a defender's particular Immunity covers an entire attack or
+one or more constituent effects remains unimplemented. Three `reviewedCombinedCases`
+now give **rule-derived, conditional** examples: Immunity (ARM) against source
+IDs 10 (AP+DA) and 13 (AP+Exp), plus Immunity (AP) against AP+DA only.
+The AP case records its ignored AP component and surviving DA effect, retaining
+two full-ARM rolls (three on Critical), instead of collapsing to Normal.
+Each example preserves before/after hit and Critical counts with source IDs,
+components and explicit evidence status. They are stored on Immunity rather
+than on the Ammunition navigation mapping. No roll counts, State outcomes, or
+immunities are projected into individual Weapon profiles. A separate
+`reviewedVulnerabilityCases` entry records the **explicit** Vulnerability (Viral)
+versus Immunity (Enhanced) example (Wiki Vulnerability `oldid=3156`): the rule
+matches a weapon whose *name* contains Viral, not an Ammunition component.
+This example adds no weapon-name parsing at runtime. An independent, explicit
+`reviewedWeaponCases` entry records the pinned Immunity (BTS) versus Flash Pulse
+example (Wiki Immunity `oldid=3643`, Weapon Chart `oldid=4083`): Stun becomes
+Normal, but Non-Lethal and Stunned on a failed Saving Roll remain. Flash Pulse
+has its own cited Weapon reference and semantic links; none of these cases
+executes a Weapon profile calculation. Other component Immunities, BTS
+conditions and unreviewed combinations remain unresolved.
+
+The Perimeter Trait likewise does not imply Boost. A WildParrot uses
+Perimeter deployment followed by E/M Mine behavior with a visible Token/Model;
+its specific rules are separately curated, and missing Army Trait notation is
+not manufactured from the printed rulebook.
+
 Current runtime database versions:
 
 - Army application database schema: **25**;
 - Army application compatibility revision: **34**;
-- rules database schema: **7**;
-- rules database compatibility revision: **8**.
+- rules database schema: **8**;
+- rules database compatibility revision: **10**.
 
 `data/README.md` owns source/snapshot format versions, while `data/curated/README.md` owns the
 curated-rules format version. Schema and compatibility validation is fail-closed. Incompatible
@@ -392,12 +514,215 @@ The maintained policy is documented in `data/curated/README.md`.
 
 ## Planned scenario model (1.0)
 
-**Design direction; unimplemented.** The current generic curated-record envelope can retain
-scenario-related kinds, but the structured scenario model, dedicated persistence, and browsable
-scenario domain described here are not implemented. Implementation belongs to the
+### Current scenario foundation
+
+All four N5.3 core scenarios use authoring definition v2. They compose explicit shared definitions
+by typed identity inside the rules collection; display names never select or merge definitions.
+`scenario_components.py` validates references, applicability, component kinds, override fields, and
+cycles before the normal scenario/geometry validators check the resolved payload. Inline v1 payloads
+remain readable for compatibility. Runtime export materializes the composed v1-shaped payload into
+`rules.db`; runtime queries never need the authoring library or working-tree curation.
+
+Rules and Skills are separate normal semantic records. Scenario Rules use `facts.category:
+scenario-rule`, ordered `effects`/`restrictions`, and optional `definesSkills` references. Hack
+Consoles and Pick Up Supply Boxes are scoped Skill definitions with the same `typeIds`, `labelIds`,
+Requirements, Effects, Restrictions, and citation contract used by other Skills. Including the owning
+Rule derives the scenario Skill list. `scope.scenarios` explicitly limits applicability; these
+definitions have no Army links and are excluded from default core composition. Contextual composition
+selects them with an explicit scenario slug or typed ID. Same-name functions may have distinct IDs;
+no name-based deduplication or implicit season/revision fallback occurs.
+
+The collection's versioned `scenarioComponents` library owns reusable typed `setup`, `geometry`,
+`objective`, and `end-condition` payloads with citations and explicit scenario applicability. Setup
+inclusions may override named game-size `swc`/`minimumVictoryPoints` fields by exact Army Points.
+The common deployment rows, standard Annihilation/Firefight geometry, three-round ending, all-Null
+ending, and minimum-VP ending are shared. Domination retains its explicit 350-point 6 SWC override.
+Objective definitions use the same reference mechanism; geometry titles come from the including
+scenario as presentation metadata. Unsupported fields and mismatched component kinds fail closed.
+References are collection-local; cross-collection historical/season selection remains future work.
+
+Specialist Troops uses one shared Rule, `rule:specialist-troops:standard`, with
+`facts.specialists.anyOfSkills` as a JSON array of complete Skill IDs. Scenario inclusions author
+only `addSkills` and `removeSkills` differences. Resolution rejects unknown, duplicate, conflicting,
+or non-baseline removals and produces an effective qualifier list without changing the baseline.
+Doctor/Engineer Peripheral restrictions and the Chain of Command (Non Specialist) qualification
+exception are maintained once. That exception affects qualification through Chain of Command,
+without disqualifying a Trooper that has another qualifying Skill. This is a reference list and
+exception statement; the catalog does not evaluate game state or assign permanent profile roles.
+
+`RulesDatabase.scenario_reference()` reads the composed scenario, its included Rule records, and
+its derived Skill records from `rules.db`. `ScenarioCatalog` builds the current player-facing backend
+read models on that boundary: list entries retain maintained scenario-set order and publication/source
+identity, while detail reads require one exact supported Army Points value. The selected detail projects
+only that game-size row, its referenced geometry, applicable scoring awards and source issues, and the
+composed scenario Rule/Skill records; it does not choose a default game size or evaluate match state.
+Component IDs/citations are retained in `componentSources`.
+Scoped Rule/Skill records include backend-resolved scenario names. The shared Skill-card renderer
+presents their ordinary rule-detail fields and renders Specialist qualifier references as a list.
+Normal browsing/search/glossary calls retain the default unscoped composition; scenario-only content
+does not become universal core help. `/api/scenarios` exposes the current collection without choosing
+a game size. `/api/scenarios/<slug>` requires one explicit `army_points` query value, rejects
+unsupported values instead of substituting another configuration, and projects maintained-text
+tokens/public references in the selected scenario context. `/scenarios` and `/scenarios/<slug>`
+publish the list and selected detail with deterministic maps; browser Army Points selection defaults
+to 300 and uses the common versioned share-state contract. The API remains configuration-explicit.
+
+The resolved mission owns ordered sides, all six Army Points/SWC rows, deployment references into
+its geometry, objectives/awards, Rule inclusions, Skills, end conditions, and source issues. Every
+geometry-supported Army Points value has exactly one game-size row, and every objective covers
+those values. Deployment regions resolve in the selected geometry with multiple regions per side
+supported; objective side applicability remains explicit.
+
+Scoring awards may use inclusive integer `numeric-range` conditions (an unbounded upper limit is represented
+by `maximum: null`) or `reviewed-prose` conditions with semantic maintained-text tokens. The initial
+numeric metrics are killed enemy Army Points and surviving Victory Points. Each objective declares
+its scoring timing, `exclusive` or `cumulative` aggregation, and Objective Point cap. This records
+reference semantics without evaluating match state. Exclusive numeric ranges must not overlap unless
+a `needs-verification` source issue names that objective and Army Points row. A `needs-verification`
+issue preserves unresolved uncertainty; it does not select a winning band or authorize a rules
+correction. A `reviewed-resolution` source note instead records an explicit maintained interpretation
+of a known source discrepancy and cannot excuse overlapping ranges.
+
+The Annihilation 350-point surviving-Victory-Points column on page 149 prints inconsistent boundaries:
+85–150 awards 1 Objective Point, 176–270 awards 3, and more than 250 awards 4. InfinityDB treats the
+two boundaries as typographical errors because the surrounding game-size progression and corresponding
+enemy-kills column both use contiguous bands. The maintained reviewed ranges are therefore 85–175,
+176–270, and more than 270, with a `reviewed-resolution` source note preserving the printed discrepancy
+and the reason for the correction. Its end conditions distinguish the third-Game-Round limit from the Tactical Phase all-Null check,
+which finishes at the end of that Player Turn. Printed pages 149–150 cite the full pilot.
+
+Domination adds geometry-referenced scoring conditions: `dominated-region-comparison` compares
+each player's dominated-region count with the opponent (`equal` or `greater`), with an optional
+minimum own count; `element-status-count` awards the declared points per matching marker element.
+The current marker-status vocabulary is `hacked` or `controlled`. Referenced regions/markers must exist with the right
+geometry kind in every Army Points configuration covered by the award. These conditions record
+the reference rule; they do not evaluate ownership, control, or live game state.
+
+An end-of-round objective may declare `maximumPointsPerRound` separately from its whole-mission
+`maximumPoints` cap. Domination awards 1 point for a tie with at least one dominated Quadrant, or 2
+for more Quadrants, capped at 2 per round and 6 over three rounds. It separately awards 1 point per
+Hacked Console held at game end, capped at 4. All six game-size rows own literal
+`minimumVictoryPoints` values (38, 50, 63, 75, 88, 100). The `minimum-victory-points` end condition
+requires every row to have that field and distinguishes a Tactical Phase check from completion
+at the end of that Player Turn. Its reviewed text preserves the strict below-threshold trigger
+and non-Null Trooper basis.
+
+Supplies adds `element-status-comparison`: `greater` compares the player's matching-marker count
+with the opponent, while `all` requires every referenced marker to match for that player. Its
+three end-of-game objectives remain additive: 2 points per controlled Supply Box (cap 6), 2 for
+more than the opponent, and 2 extra for all boxes. Each condition references the same three
+maintained Supply Box marker IDs. Carrying is insufficient on its own: control requires a Model
+carrier that is non-Null and not in Silhouette contact with an enemy Model. Pickup alternatives,
+one-box carrying capacity, Model-only carrying, persistent tokens, and deployment restrictions
+remain cited ordered rules; live carriers and control are not stored or evaluated. Supplies
+reuses the literal minimum-VP rows and typed end-condition contract, with 7 SWC at 350 points.
+
+Firefight adds `metric-comparison` conditions, currently supporting strict `greater` comparisons
+with the opponent for surviving Specialist Troops, killed enemy Specialist Troops, killed enemy
+Lieutenants, and killed enemy Army Points. Its four end-of-game awards are 2, 1, 3, and 4 points
+respectively; tied metrics do not satisfy a strict-greater condition. Metrics do not imply a
+match-state evaluator or derive Specialist eligibility from static Unit/Profile flags.
+
+Its Reinforced Tactical Link, Designated Landing Area, Specialist eligibility, and Killing
+procedures remain ordered, semantically linked mission rules. Lieutenant identity is Open
+Information; the first-round table requirement and Tactical Phase replacement procedure are
+mission-local overlays. The Combat Jump +3 PH modifier and Airborne Deployment permission remain
+mission-local too; neither canonical Skill definition is rewritten. Firefight retains the three-
+round limit and all-Null ending, with no minimum-VP field on its game-size rows. Printed pages
+155–156 cite the mission reference and maps.
+
+Source notes/issues target exactly one `objectiveId`, `gameSizeField` (`swc` or
+`minimumVictoryPoints`), or non-empty `geometryElementIds` list and name their applicable Army
+Points. Geometry references must resolve in every applicable configuration. `needs-verification`
+marks unresolved source uncertainty; `reviewed-resolution` records a maintained interpretation after
+review. Only an objective-scoped `needs-verification` issue may acknowledge an otherwise-invalid
+overlap, while game-size, geometry, and reviewed-resolution notes cannot excuse one. Domination
+preserves the source-specific 6 SWC at 350 points from printed page 151, with a game-size
+`needs-verification` note because the value differs from Annihilation's 7 SWC and the usual progression
+but may be intentional. Printed pages 151–152 cite the mission rules.
+
+Supplies uses the written placement consistently at every game size: printed page 153 places the
+outer boxes `8 inches` from the table edges. Re-review of the 300–400-point illustration on page 154
+shows that its `12 inches` mark belongs to a guide ruler; the Supply Box marker itself is visibly
+closer to the edge and is consistent with the written 8-inch position. The maintained geometry
+therefore keeps the outer markers 8 inches from their respective edges without a source issue.
+
+Console setup, Hack Consoles, Specialist eligibility and the Peripheral restriction, base overlap,
+and the Shasvastii exception remain ordered, semantically linked mission rules. Scenario Skills and the shared Specialist Rule now have distinct scoped identities; these rules
+do not grant permanent
+Unit/Profile capabilities.
+
+Nested mission prose participates in the same syntax, target-resolution, and reviewed-link audits
+as other maintained rules text. The existing rules record payload remains the canonical composed
+scenario structure, while rules schema/compatibility **8/10** adds relational scenario publication
+indexes. `scenario_collections` owns stable set identity, `scenario_collection_revisions` maps an
+exact set revision to its source collection, `scenario_publications` stores deterministic composed
+content identity, and `scenario_memberships` preserves ordered membership separately from scenario
+identity. Source/citation provenance continues to use the existing collection/source/citation tables.
+Rebuild `rules.db` after curation changes using the existing rules-build workflow.
+
+`RulesDatabase.resolve_scenario_publication()` is the central selection boundary. A scenario may be
+resolved by stable collection ID plus exact collection revision; omitting a revision considers only
+publications backed by `current` source collections. Historical revisions require an explicit
+collection/revision pair. Unknown selections return no match, malformed or ambiguous selections fail
+explicitly, and no other season/revision is substituted. The player-facing `/scenarios` catalog and
+detail pages consume `ScenarioCatalog` through the JSON API, require an explicit Army Points selection,
+and render the selected maintained geometry through the deterministic SVG endpoint. Browser selection
+state uses the common versioned share-state token; legacy explicit `army_points` input remains readable.
+Element/feature vocabulary extensions and source-discrepancy resolution remain unfinished work in the
 [1.0 backlog](TODO.md#rules-and-reference-completeness).
 
-Scenarios are curated rules/reference data and will be published through the rules pipeline. Their
+The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
+`InfinityDB scenario geometry` format version 1, canonical inch table dimensions, ordered unique
+element IDs, and `rectangle`, `line`, `marker`, or `label` elements. Coordinates may be absolute
+inches or table-relative edge/center anchors with offsets. Element `style` and marker `markerType`
+values are stable kebab-case semantic identities, not a closed list owned by the v1 SVG renderer.
+An optional ordered `annotations` layer
+references those semantic elements rather than restating their geometry. Geometry v1 currently supports
+derived rectangle `dimension` annotations and `area-size` annotations; both calculate their displayed
+measurement from the referenced rectangle, so a map cannot silently disagree with maintained zone
+dimensions. Rendered measurement text carries the canonical inch value in
+`data-distance-inches` or `data-distance-size-inches`, separate from the user-facing display unit.
+The map API accepts optional `distance_unit=in|cm`, using the Infinity distance convention
+of 1 inch = 2.5 cm. The browser updates inlined annotations when the existing unit preference
+changes, without altering the inch viewBox or stored geometry. Marker `data-diameter-mm`
+remains unconverted physical metadata.
+It also supports `element-edge-distance` annotations for markers and rectangles: the
+displayed distance is derived from the target element's nearest physical boundary and selected table edge,
+while an optional signed offset controls only where the dimension line is drawn. Scenario source language
+such as “X inches from” is interpreted edge-to-edge unless the source explicitly names a center/reference
+point. `marker` stores a semantic center point with a stable `markerType`; per-instance radius is not
+duplicated in geometry because known marker types resolve to canonical marker metadata. That footprint is
+used when deriving marker clearances. Physical diameter is semantic when it defines the represented game object,
+not merely SVG styling. N5.3 Domination requires each Console to be represented by a Console A Marker
+or scenery of the same diameter, indirectly making that canonical footprint part of the scenario rules.
+The ITS token-diameter table provides the explicit numeric dimensions used by the core fixtures:
+**Console 40 mm** and **Supply Box 25 mm**. Validation rejects unsupported fields, invalid anchors,
+duplicate IDs, non-finite values, unsupported element kinds, and geometry that resolves outside the
+table. Geometry itself does not require symmetric regions or one Deployment Zone per side. The SVG
+renderer owns its narrower presentation capability: it maps the current semantic style identities to
+CSS, requires canonical physical metadata for markers it renders, and raises an explicit render error
+for a valid future style or marker it cannot faithfully project instead of substituting a generic
+appearance or size. It uses the inch dimensions directly as its `viewBox`; it does not infer rules or
+geometry from diagrams.
+
+Domination exercises the rectangle annotation boundary: its Deployment Zones have derived depth
+dimensions and its four Quadrants have derived width × height labels. Supplies exercises the point
+boundary: the outer Supply Boxes are maintained at their semantic coordinates while the SVG derives
+their `8″` distance to the left/right table edges. These annotations are map presentation metadata
+referencing semantic geometry, not a second copy of scenario measurements.
+
+The initial core-map acceptance corpus covered Annihilation, Domination, Supplies, and Firefight at
+each distinct N5.3 table/deployment configuration (24×32 with 8-inch Deployment Zones, 32×48 with
+12-inch Deployment Zones, and 48×48 with 12-inch Deployment Zones). It confirmed that v1 needs only
+rectangular regions, dividing lines, semantic point markers, labels, and table-relative anchors for
+the core maps. All four scenarios now own those configurations in maintained curated definitions,
+and renderer acceptance tests consume that maintained geometry directly instead of keeping a second
+fixture-only map corpus.
+
+### Scenario publication model and remaining design direction
+
+Scenarios are curated rules/reference data published through the rules pipeline. Their
 maintained representation is validated structured JSON; their runtime representation is a deliberate
 hybrid in `rules.db`. High-stability/queryable facts are relational, while nested ordered structures
 whose shape legitimately varies by scenario remain validated typed payloads. Runtime code must never
@@ -451,10 +776,63 @@ component payload remains the canonical ordered scenario structure consumed by t
 code receives composed presentation data and must not reinterpret score conditions, geometry, or
 source-specific feature semantics.
 
-The geometry component is also the sole semantic input for later deployment-map generation. A map
-renderer may project it to SVG/other presentation formats, but map-specific coordinates must not
-become an independent maintained source. Likewise, future ITS support extends publication/collection
-and optional-feature data rather than creating an ITS-only scenario schema.
+The geometry component is also the sole semantic input for scenario-map generation. The 1.0 renderer
+and geometry-schema v1 only need to cover the four N5.3 core scenarios: Annihilation, Domination,
+Supplies, and Firefight. A renderer may project that geometry to SVG/other presentation formats, but
+map-specific coordinates must not become an independent maintained source.
+
+That v1 compatibility boundary must not be mistaken for a core-only architecture. The reviewed ITS
+variation remains design evidence: geometry identities and primitives must not assume symmetric
+roles, one Deployment Zone per side, rectangular-only regions, fixed marker vocabularies, or one
+collection's styling. ITS-only constructs may remain unsupported by schema v1 and should fail
+explicitly rather than be approximated; later versioned extensions should add those capabilities
+without redefining the core semantic concepts. Likewise, future ITS support extends
+publication/collection and optional-feature data rather than creating an ITS-only scenario schema.
+
+### Post-1.0 player-authored scenarios (design direction)
+
+A scenario creator/editor should support **new blank scenarios** and **derivatives of
+published scenarios** using the same validated, typed scenario components and
+geometry/map projection as the curated catalog. Authors may select preset
+Deployment Zone/table maps; assemble preset rule groups or individual Rules/Skills;
+add or modify scenario elements, sides/roles, setup, objectives, scoring methods,
+end conditions, and custom additions; or author their own components. Presets are
+starting points, not frozen inherited behavior. A customized official scenario is
+an explicitly labeled *player variant*, never a new official source revision.
+
+The proposed portable scenario definition has explicit identity boundaries:
+
+- A versioned, canonical serialization envelope, including required InfinityDB
+  schema/codec version and reference-data or ruleset revision for reproducible
+  interpretation. It contains the actual authored changes/content, not only a hash.
+- Stable references to official scenario/rule/skill/element identities plus
+  deterministic local overrides/additions. Missing or superseded referenced
+  content must be surfaced, not rebound silently by title or current-version guess.
+- Authored entities carry a local, scenario-scoped namespace; display text does
+  not confer official provenance, canonical rule identity, or execution semantics.
+- Composition records ordered components where order matters and uses canonical
+  ordering for sets/other unordered fields. Avoid redundant copies of reference
+  records when a stable reference and revision suffice.
+
+**Custom typed rules are the difficult boundary.** Provide a small, explicitly
+versioned and validated vocabulary for fields InfinityDB can honestly represent:
+applicability/side, action or trigger, timing, target, scope, quantities/units,
+conditions/comparisons, modifiers, scoring, and referenced States/Skills/Rules.
+Typed components and custom scenario Skills may reuse existing schema concepts,
+but a locally invented rule is not an official Skill or an executable program.
+Author-defined prose remains first-class for rules outside the supported typed
+vocabulary, marked **descriptive/not machine-evaluated** rather than mis-parsed
+or falsely validated. No arbitrary code/evaluation, external URL execution, or
+silent conversion of unsupported user clauses into executable behavior. Explicit
+schema extensions and migration are needed before claiming support for novel
+mechanics. The editor may check structural validity without adjudicating a game.
+
+The authored definition should live in transient browser state and travel via a
+self-contained share URL or user-initiated export/import file; no server storage,
+user uploads, or automatically persisted authored scenarios. Reconstructing from
+URL data and the packaged reference revision must work offline. See the
+stateless-sharing decision in `docs/architecture.md`; this is a post-1.0 goal,
+not an extension of the 1.0 publication or database completeness gate.
 
 ## SQLite storage contract
 
@@ -497,6 +875,13 @@ only the physical finalization step; they do not bypass schema/input/integrity v
 Builds publish generated database destinations only after temporary artifacts validate. The raw
 archive is replaced first and the application database last, making the application replacement the
 publication commit point. The exact interruption/recovery lifecycle is owned by `data/README.md`.
+
+Each new Army staging, raw-archive, application, and rules database creates its schema and inserts
+rows within one explicit write transaction, after deterministic connection configuration. This
+avoids a separate disk commit per schema statement while retaining integrity checks and canonical
+finalization. A SQLite connection context manager does not itself begin a transaction for schema
+DDL; the rules schema script starts its transaction internally because `executescript` commits any
+previously pending transaction.
 
 ## Snapshot provenance
 

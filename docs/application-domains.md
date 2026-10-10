@@ -67,7 +67,7 @@ glossary entries, filtering, or search, but do not warrant their own catalog/det
 `attribute:mov`, `attribute:bs`, and `attribute:wip` own reviewed definitions and can participate in
 semantic relationships without creating `/attributes` or individual Attribute pages. Scoped
 `term:*` identities cover source-native terminology such as Trooper, Marker, Token, Peripheral,
-Victory Points, Null State, and Alignment terms. Each Game term carries a reviewed semantic scope
+Victory Points, Null State, Alignment terms, and Visibility Zone variants. Each Game term carries a reviewed semantic scope
 (for example `game-element`, `alignment`, or `scoring`) so a surface name such as Marker or Hostile
 can coexist with a Label or Trait of the same name without merging identities. Neither vocabulary
 has a standalone catalog/detail hierarchy; both project through Glossary/search, while Attributes
@@ -107,11 +107,34 @@ The current published top-level domain set is:
 - **Labels** (`labels`) — rules/reference catalog plus detail.
 - **General Rules** (`rules`) — catch-all rules/reference domain for concepts without a clearer
   top-level owner.
+- **Scenarios** (`scenarios`) — core-scenario catalog plus game-size-specific detail and maps.
 
 The registry is intentionally capability-based: publication, navigation, search, Glossary, landing,
 catalog/detail, and scoped-view behavior are independent flags rather than consequences of being a
 top-level domain. Future evidence may justify another domain, but a new top-level domain requires a
 concrete player-facing browsing/use case rather than merely a new data type.
+
+### Scenario domain
+
+**Current bounded player-facing domain.** `scenarios` is a published top-level catalog/detail domain
+owning `scenario:*` records. It participates in primary navigation and the landing page; global search
+and Glossary participation are deliberately disabled for the bounded core set. Scenario slug
+normalization remains the typed `scenario:<slug>` contract used by the maintained scenario layer.
+Rules export keeps stable scenario collection identity, collection revision, ordered membership,
+source publication revision, and deterministic content identity separate. `RulesDatabase` owns central
+selection: default reads consider only `current` publications, historical revisions require an explicit
+collection/revision pair, and unsupported selections never fall back silently. `ScenarioCatalog`
+composes current publication list/detail read models in maintained collection order. Detail reads
+require an explicit supported Army Points value and project setup, geometry, scoring, special
+Rules/Skills, end conditions, source issues, and publication provenance for that selection.
+
+The JSON API exposes those models at `/api/scenarios` and
+`/api/scenarios/<slug>?army_points=...`; maintained text is resolved in the selected scenario context
+so scoped concepts do not leak into ordinary core help. The browser publishes `/scenarios` and
+`/scenarios/<slug>`, uses the shared versioned `s=` state token for Army Points selection, and requests
+the canonical SVG from `/api/scenarios/<slug>/map.svg?army_points=...`. Browser code does not derive
+scenario semantics or maintain separate geometry. Search/Glossary participation can be reconsidered
+only if a larger scenario corpus creates a concrete discovery need.
 
 ## Domain capability registry
 

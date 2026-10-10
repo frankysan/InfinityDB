@@ -32,7 +32,7 @@ from infinity_db.database.publication import (
     published_content_sha256,
 )
 from infinity_db.legacy_armies import load_legacy_armies
-from infinity_db.rules_database import export_rules_database
+from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.web import create_app
 from infinity_db.web.app import STATIC_ASSET_REVISION, STATIC_ASSET_VERSION
@@ -384,8 +384,9 @@ def test_changes_page_renders_canonical_release_history(app: Callable) -> None:
     assert b"<strong>What&#x27;s changed</strong>" in body
     assert b"Player-visible highlights are shown first" in body
     assert b'href="/changes" aria-current="page"' in body
+    assert b'id="changes-0-10-1"' in body
+    assert b"<h2>Version 0.10.1</h2>" in body
     assert b'id="changes-0-10-0"' in body
-    assert b"<h2>Version 0.10.0</h2>" in body
     assert b'<section class="changes-player-summary">' in body
     assert b"<h3>For players</h3>" not in body
     assert b"The new <strong>What&#x27;s changed</strong> page" in body
@@ -4046,13 +4047,35 @@ def test_catalog_detail_frontend_uses_backend_trait_references(
 
     assert status == 200
     assert b"profile.trait_references" in body
-    assert b"function weaponTraitLinks(traits)" in body
-    assert b"const label = trait.label || trait.name ||" in body
-    assert b"link.href = `/traits/${encodeURIComponent(trait.slug)}`;" in body
+    assert b"function weaponTraitLinks(traits, showStatePrefix = true)" in body
+    assert b"trait.source_alias ? trait.name : trait.label" in body
+    assert b"const canonicalSlugs = new Set(traits" in body
+    assert b"duplicateAliases.get(trait.slug)" in body
+    assert b"sourceAlias.className = \"developer-only weapon-trait-source-alias\"" in body
+    assert b"sourceAlias.textContent = ` (Army: ${sourceLabels.join" in body
+    assert b"ruleReferenceHref(trait.public_reference)" in body
+    assert b"trait.state_references" in body
+    assert b"function groupWeaponProperties(references)" in body
+    assert b"groups.Labels.push(reference)" in body
+    assert b"groups.States.push(reference)" in body
+    assert b"groups.Properties.push(reference)" in body
+    assert b"state.public_reference" in body
+    assert b"href = `/traits/${encodeURIComponent(trait.slug)}`;" in body
     assert b"function canonicalTraitName(" not in body
     assert b"function traitSlug(" not in body
     assert b"Continous Damage" not in body
     assert b"BioWeapon" not in body
+
+
+
+def test_weapon_trait_label_and_composite_state_rendering() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "weapon_trait_links_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "weapon trait and label navigation passed" in result.stdout
 
 
 def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None:
@@ -4125,14 +4148,17 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
     assert b'class=\\"table-column--descriptor\\" scope=\\"col\\">Ammunition</th>' in weapon_detail
     assert b'class=\\"table-column--metric\\" scope=\\"col\\">PS</th>' in weapon_detail
     assert b'["PS", profile.damage, "metric"]' in weapon_detail
+    assert b"function weaponSavingDisplay(profile) {" in weapon_detail
+    assert b"const saving = weaponSavingDisplay(profile);" in weapon_detail
     assert b"<th>DAM</th>" not in weapon_detail
     assert b'title.className = "surface-titlebar surface-titlebar--subtle";' in weapon_detail
     assert b"headingText" not in weapon_detail
     assert b"variantTitle" not in weapon_detail
     assert b'profileHeading.textContent = "Profile";' in weapon_detail
-    assert b'traitsHeading.textContent = "Traits";' in weapon_detail
-    assert b"if (traitReferences.length)" in weapon_detail
-    assert b"function weaponTraitLinks(traits)" in weapon_detail
+    assert b'propertiesHeading.textContent = heading;' in weapon_detail
+    assert b'groupWeaponProperties(traitReferences)' in weapon_detail
+    assert b'weaponTraitLinks(properties, heading !== "States")' in weapon_detail
+    assert b"function weaponTraitLinks(traits, showStatePrefix = true)" in weapon_detail
     assert b"function canonicalTraitName(" not in weapon_detail
     assert b"function traitSlug(" not in weapon_detail
     assert b"function traitUsageSectionGroup(item)" in weapon_detail
@@ -4140,7 +4166,8 @@ def test_surfaces_and_table_densities_use_shared_variants(app: Callable) -> None
         b"title.textContent = catalogName[0].toUpperCase() + catalogName.slice(1);" in weapon_detail
     )
     assert b'title.className = "trait-catalog-heading";' in weapon_detail
-    assert b"link.href = `/traits/${encodeURIComponent(trait.slug)}`;" in weapon_detail
+    assert b"ruleReferenceHref(trait.public_reference)" in weapon_detail
+    assert b"href = `/traits/${encodeURIComponent(trait.slug)}`;" in weapon_detail
     assert b".weapon-data-heading" in styles
     assert b'profileRow.className = "weapon-data-row"' in weapon_detail
     assert b'profileStats.className = "weapon-data-value"' in weapon_detail
@@ -4483,7 +4510,7 @@ def test_browser_share_state_codec_is_versioned_scoped_and_legacy_compatible(app
     assert status == 200
     assert b'const TOKEN_PARAMETER = "s";' in script
     assert b'const TOKEN_VERSION = "v1";' in script
-    for scope in (b'u', b'c', b'f', b'd', b's', b'g'):
+    for scope in (b'u', b'c', b'f', b'd', b's', b'g', b'n'):
         assert b'scope: "' + scope + b'"' in script
     assert b'base64UrlEncode(bytes)' in script
     assert b'appendVarUint(bytes, encoded.length)' in script
@@ -5251,6 +5278,133 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     } in marker_results
 
 
+
+def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
+    app: Callable, tmp_path: Path,
+) -> None:
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+
+    expected = {
+        "Visibility Zone": "term-visibility-zone",
+        "Low Visibility Zone": "term-low-visibility-zone",
+        "Poor Visibility Zone": "term-poor-visibility-zone",
+        "Zero Visibility Zone": "term-zero-visibility-zone",
+        "White Noise Zone": "term-white-noise-zone",
+    }
+    status, _, body = request(rules_app, "/api/glossary")
+    assert status == 200
+    terms = {
+        item["name"]: item
+        for item in json.loads(body)["items"]
+        if item["kind"] == "term" and item["name"] in expected
+    }
+    assert set(terms) == set(expected)
+    for name, anchor in expected.items():
+        entry = terms[name]
+        assert entry["domain"] == "Game term"
+        assert entry["href"] == f"/glossary#{anchor}"
+        assert entry["description"]
+
+    searches = {
+        "visibility zone": {
+            "Visibility Zone",
+            "Low Visibility Zone",
+            "Poor Visibility Zone",
+            "Zero Visibility Zone",
+        },
+        "visibility conditions": {"Visibility Zone"},
+        "low visibility": {"Low Visibility Zone"},
+        "poor visibility": {"Poor Visibility Zone"},
+        "zero visibility": {"Zero Visibility Zone"},
+        "white noise": {"White Noise Zone"},
+    }
+    for query, names in searches.items():
+        status, _, body = request(rules_app, "/api/search", query=urlencode({"q": query}))
+        assert status == 200
+        results = json.loads(body)["items"]
+        for name in names:
+            assert {
+                "domain": "Game term",
+                "name": name,
+                "href": f"/glossary#{expected[name]}",
+            } in results
+
+    records = {
+        record["id"]: record
+        for record in RulesDatabase(rules_path).composed_records_by_kind("term")
+    }
+    for anchor in expected.values():
+        record = records[anchor.replace("term-", "term:", 1)]
+        assert record["facts"]["scope"] == "visibility-condition"
+        assert record["citations"][0]["page"] == 144
+
+def test_visibility_zone_inline_links_have_glossary_previews(
+    app: Callable, tmp_path: Path,
+) -> None:
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+
+    expected = {
+        "/api/skills/sixth-sense": {
+            "term:zero-visibility-zone", "term:poor-visibility-zone",
+        },
+        "/api/ammunition/smoke": {"term:zero-visibility-zone"},
+    }
+
+    def references(value: object) -> list[dict[str, Any]]:
+        if isinstance(value, dict):
+            result = [value] if value.get("type") == "reference" else []
+            for key, item in value.items():
+                if key != "preview_tokens":
+                    result.extend(references(item))
+            return result
+        if isinstance(value, list):
+            return [ref for item in value for ref in references(item)]
+        return []
+
+    for route, required_ids in expected.items():
+        status, _, body = request(rules_app, route)
+        assert status == 200, route
+        payload = json.loads(body)
+        tokens = [
+            token for token in references(payload)
+            if token.get("target", "").startswith("term:")
+        ]
+        assert required_ids <= {token["target"] for token in tokens}
+        for token in tokens:
+            assert token["public_reference"] == {
+                "href": f"/glossary#{token['target'].replace(':', '-')}",
+            }
+            assert token["preview_tokens"]
+            assert any(item.get("type") == "text" for item in token["preview_tokens"])
+
+    # The lightweight Army fixture does not contain every Equipment or Program
+    # catalog item; verify their prose through the same shared token resolver.
+    from infinity_db.maintained_text_references import maintained_text_tokens
+
+    rules = RulesDatabase(rules_path)
+    for record_id, expected_term in (
+        ("equipment:multispectral-visor", "term:visibility-zone"),
+        ("hacking-program:white-noise", "term:white-noise-zone"),
+    ):
+        record = rules.composed_record(record_id)
+        assert record is not None
+        tokens = maintained_text_tokens(app.database, rules, record["summary"])
+        assert tokens is not None
+        term_tokens = [
+            token for token in tokens
+            if token["type"] == "reference" and token["target"] == expected_term
+        ]
+        assert len(term_tokens) == 1
+        assert term_tokens[0]["public_reference"] == {
+            "href": f"/glossary#{expected_term.replace(':', '-')}",
+        }
+        assert term_tokens[0]["preview_tokens"]
+
+
 def test_catalog_api_exposes_all_accepted_numeric_source_ids(app: Callable) -> None:
     with sqlite3.connect(app.database.path) as connection:
         connection.execute(
@@ -5466,6 +5620,7 @@ def test_trait_apis_compose_army_usage_with_curated_rules(app: Callable, tmp_pat
             "label": "Continous Damage",
             "name": "Continuous Damage",
             "slug": "continuous-damage",
+            "source_alias": True,
         },
         {
             "label": "Disposable (2)",
@@ -5478,10 +5633,22 @@ def test_trait_apis_compose_army_usage_with_curated_rules(app: Callable, tmp_pat
     assert status == 200
     payload = json.loads(body)
     assert payload["slug"] == "continuous-damage"
-    assert payload["description"].startswith("After a failed Saving Roll")
+    assert payload["description"].startswith("Each failed Saving Roll required by a hit")
+    assert "additional roll does not apply Continuous Damage" in payload["description"]
+    assert "\n\nA Critical" in payload["description"]
     assert payload["variants"][0]["item_id"] == 31
     assert payload["variants"][0]["item_slug"] == "combi-rifle"
     assert payload["rules"][0]["citations"][0]["source_version"] == "N5.3 / oldid 4110"
+
+    status, _, body = request(rules_app, "/api/traits/bs-weapon-wip")
+    assert status == 200
+    wip_payload = json.loads(body)
+    assert "BS Attack (Shock)" in wip_payload["description"]
+    assert "BS Attack (Guided)" in wip_payload["description"]
+    assert (
+        "not [[ammunition:shock|Shock Ammunition]] in general"
+        in wip_payload["description"]
+    )
 
 
 def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_path: Path) -> None:
@@ -5678,6 +5845,12 @@ def test_equipment_details_frontend_renders_metadata_profiles(app: Callable) -> 
     assert b'link.rel = "noopener noreferrer"' in body
 
 
+def test_rule_cards_expose_stable_in_page_reference_anchors(app: Callable) -> None:
+    status, _, body = request(app, "/static/rules-reference.js")
+    assert status == 200
+    assert b'article.id = `rule-${rule.id.replaceAll(":", "-")}`' in body
+
+
 def test_catalog_detail_frontend_renders_typed_source_variant_labels(
     app: Callable,
 ) -> None:
@@ -5871,6 +6044,55 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     assert b"var(--color-status-warning-surface)" in styles
 
 
+def test_rules_summary_rendering_preserves_links_emphasis_and_source_notes() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "rules_text_render_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "4 paragraphs; bold links; separate source note" in result.stdout
+
+
+def test_ammunition_reference_cards_render_reviewed_effects(app: Callable) -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "ammunition_facts_render_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "11 ammunition cards; source conditions and linked states" in result.stdout
+
+    status, _, renderer = request(app, "/static/rules-reference.js")
+    assert status == 200
+    assert b'from "./ammunition-facts.js"' in renderer
+    assert b"appendAmmunitionFacts(container, rule)" in renderer
+    status, _, helper = request(app, "/static/ammunition-facts.js")
+    assert status == 200
+    assert b"export function ammunitionFactRows(" in helper
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert b".ammunition-mechanics-list" in styles
+
+
+def test_immunity_skill_card_renders_only_reviewed_conditions(app: Callable) -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "immunity_cases_render_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "5 reviewed Immunity cases, conditions, evidence labels" in result.stdout
+
+    status, _, renderer = request(app, "/static/rules-reference.js")
+    assert status == 200
+    assert b'from "./immunity-cases.js"' in renderer
+    assert b"appendImmunityCases(container, rule)" in renderer
+    status, _, helper = request(app, "/static/immunity-cases.js")
+    assert status == 200
+    assert b"export function immunityCaseRows(" in helper
+
+
 def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) -> None:
     for asset in ("skill.js", "catalog-detail.js"):
         status, _, body = request(app, f"/static/{asset}")
@@ -5888,13 +6110,31 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert b"export function levelEffectsSection(rules)" in body
     assert b"fact_tokens?.levels?.[levelIndex]?.effects" in body
     assert b"level-effects-table" in body
-    assert b'["requirements", "Requirements"]' in body
-    assert b'["effects", "Effects"]' in body
-    assert b'["restrictions", "Restrictions"]' in body
-    assert body.index(b'["requirements", "Requirements"]') < body.index(b'["effects", "Effects"]')
+    assert b'appendRuleFactGroup(container, rule, "requirements", "Requirements")' in body
+    assert b'appendRuleFactGroup(container, rule, "effects", "Effects")' in body
+    assert b'appendRuleFactGroup(container, rule, "restrictions", "Restrictions")' in body
     assert body.index(
-        b"appendMaintainedText(summary, rule.summary_tokens, rule.summary)"
-    ) < body.index(b"const applicability = applicabilityText(rule)")
+        b'appendRuleFactGroup(container, rule, "requirements", "Requirements")'
+    ) < body.index(b'appendRuleFactGroup(container, rule, "effects", "Effects")')
+    assert body.index(
+        b'appendRuleFactGroup(container, rule, "effects", "Effects")'
+    ) < body.index(b'appendRuleFactGroup(container, rule, "restrictions", "Restrictions")')
+    # Scenario Specialist Troops list qualifying Skills before restrictions.
+    assert body.index(b'heading.textContent = "Qualifying Skills"') < body.index(
+        b'appendRuleFactGroup(container, rule, "restrictions", "Restrictions")'
+    )
+    assert body.index(
+        b'heading.textContent = "Qualifying Skills"'
+    ) < body.index(
+        b'appendRuleFactGroup(container, rule, "clarifications", "Clarifications and examples")'
+    )
+    assert body.index(
+        b'appendRuleFactGroup(container, rule, "clarifications", "Clarifications and examples")'
+    ) < body.rindex(b'appendImmunityCases(container, rule)')
+    assert body.index(
+        b"appendMaintainedText(paragraph, paragraphTokens)"
+    ) < body.index(b"const applicability = includeApplicability ? applicabilityText(rule)")
+    assert b"includeApplicability = true" in body
     assert b"detail-fact-heading" in body
     assert b'heading.textContent = "Related rules"' in body
     assert b"const presentation = relation.presentation;" in body
@@ -6290,3 +6530,11 @@ def test_wsgi_rejects_missing_explicit_rules_database(
 
     with pytest.raises(ValueError, match="Rules database does not exist"):
         importlib.import_module("infinity_db.web.wsgi")
+
+
+def test_catalog_detail_reveals_async_rule_fragment_after_render(app: Callable) -> None:
+    status, _, script = request(app, "/static/catalog-detail.js")
+    assert status == 200
+    assert b'requestAnimationFrame(revealHashTarget)' in script
+    assert b'window.addEventListener("hashchange", revealHashTarget' in script
+    assert b'content.contains(target)' in script

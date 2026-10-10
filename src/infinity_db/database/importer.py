@@ -356,6 +356,7 @@ def _publish_application_database(
         connection.execute("PRAGMA foreign_keys = OFF")
         connection.execute("ATTACH DATABASE ? AS staging", (str(staging_path),))
         with connection:
+            connection.execute("BEGIN")
             create_schema(
                 connection,
                 data["tables"],
@@ -439,6 +440,7 @@ def export_database(
             configure_deterministic_sqlite(connection)
             connection.execute("PRAGMA foreign_keys = ON")
             with connection:
+                connection.execute("BEGIN")
                 create_schema(connection, data["tables"], table_columns=table_columns)
                 insert_batched(
                     connection,
@@ -511,6 +513,7 @@ def export_database(
             configure_deterministic_sqlite(archive_connection)
             archive_connection.execute("PRAGMA foreign_keys = ON")
             with archive_connection:
+                archive_connection.execute("BEGIN")
                 create_raw_archive(
                     archive_connection, data, identity_config, metadata=metadata
                 )

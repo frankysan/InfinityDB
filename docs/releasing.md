@@ -22,15 +22,18 @@ form. A specialized or final-form UI is not required when a basic presentation m
 the information understandable and navigable.
 
 The current core-rules scenarios are part of the 1.0 requirement: they must have a
-maintained structured representation and a usable browsable presentation. The planned model is
-defined by the completed comparative review of the core scenarios and ITS Seasons 17 and 18 in
-`docs/architecture.md` and `docs/data-model.md`, so the 1.0 implementation must preserve that
-extensibility rather than introducing a simpler core-only representation. ITS-specific missions,
+maintained structured representation and a usable browsable presentation. The implemented bounded
+core-scenario model derives from the comparative review of the core scenarios and ITS Seasons 17
+and 18 in `docs/architecture.md` and `docs/data-model.md`; final 1.0 completeness review must preserve
+that extensibility. ITS-specific missions,
 season material, tournament/event tooling, and a complete historical ITS library remain outside the
 1.0 requirement unless they are necessary to interpret otherwise in-scope data. Scenario-specific
 Skills, Equipment, States, Traits, contextual roles, objective elements, or other named rules
 concepts remain in scope when needed by the core scenarios or the general catalog/reference
-experience; preserve their scenario/season scope. Final visual polish, every planned
+experience; preserve their scenario/season scope. Core-scenario geometry must also drive the
+versioned deterministic SVG renderer so the four supported missions do not depend on manually
+maintained diagrams. Geometry schema v1 only needs to cover those core missions; ITS-only map
+features and an interactive editor remain outside the 1.0 gate. Final visual polish, every planned
 search/filter/comparison feature, exhaustive performance work, optional themes, deployment
 conveniences, and unrelated architectural refactors likewise do not block 1.0.
 
@@ -53,6 +56,11 @@ The 1.0 release gate requires:
 - [ ] Import or curate useful explanatory rules knowledge for every referenced skill,
   equipment item, weapon trait, state, terminology entry, or other gameplay concept,
   using concise player-oriented summaries where direct reproduction is inappropriate.
+- [ ] Review material player-facing rules interactions for a concise explanation
+  of their scope, baseline rule, modifying rule, explicit exception (if any),
+  and conditional gameplay outcome, with citations and honest uncertainty.
+  A correct result or a relationship edge alone does not meet the
+  [curated interaction explanation standard](../data/curated/README.md#explaining-rules-interactions).
 - [ ] Preserve rules/source provenance so users can identify the official material
   behind summaries or interpretations; distinguish InfinityDB summaries and
   abstractions from verbatim/source-native facts.

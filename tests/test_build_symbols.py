@@ -20,6 +20,12 @@ from infinity_db.symbol_manifest import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class WindowsPermissionError(PermissionError):
+    """Expose Windows lock metadata in portable retry test doubles."""
+
+    winerror: int
+
+
 def load_module():
     module_path = ROOT / "tools" / "build_symbols.py"
     spec = importlib.util.spec_from_file_location("build_symbols", module_path)
@@ -753,3 +759,78 @@ def test_resume_retries_failed_v4_font_audit(
     assert "Resuming symbol build -> version 4" in log
     assert "Checkpoint reached -> font-audit" in log
     assert load_symbol_manifest(build_manifest)["processing"]["fontAudit"]["status"] == "passed"
+
+
+@pytest.mark.parametrize("winerror", [5, 32])
+def test_symbol_manifest_write_retries_transient_windows_replace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, winerror: int
+) -> None:
+    _, _, manifest_path = resumable_symbol_build(tmp_path)
+    document = load_symbol_manifest(manifest_path)
+    temporary = manifest_path.with_suffix(manifest_path.suffix + ".tmp")
+    original_replace = Path.replace
+    attempts = 0
+
+    def replace_with_transient_lock(self: Path, target: Path) -> Path:
+        nonlocal attempts
+        if self == temporary and target == manifest_path:
+            attempts += 1
+            if attempts == 1:
+                error = WindowsPermissionError(13, "temporary file lock")
+                error.winerror = winerror
+                raise error
+        return original_replace(self, target)
+
+    monkeypatch.setattr(Path, "replace", replace_with_transient_lock)
+    write_symbol_manifest(document, manifest_path)
+    assert attempts == 2
+    assert load_symbol_manifest(manifest_path) == document
+    assert not temporary.exists()
+
+
+def test_symbol_manifest_write_preserves_target_on_persistent_windows_lock(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _, _, manifest_path = resumable_symbol_build(tmp_path)
+    original_bytes = manifest_path.read_bytes()
+    document = load_symbol_manifest(manifest_path)
+    temporary = manifest_path.with_suffix(manifest_path.suffix + ".tmp")
+    original_replace = Path.replace
+    attempts = 0
+
+    def replace_with_persistent_lock(self: Path, target: Path) -> Path:
+        nonlocal attempts
+        if self == temporary and target == manifest_path:
+            attempts += 1
+            error = WindowsPermissionError(13, "persistent file lock")
+            error.winerror = 32
+            raise error
+        return original_replace(self, target)
+
+    monkeypatch.setattr(Path, "replace", replace_with_persistent_lock)
+    with pytest.raises(PermissionError, match="persistent file lock"):
+        write_symbol_manifest(document, manifest_path)
+    assert attempts == 3
+    assert manifest_path.read_bytes() == original_bytes
+
+
+def test_symbol_manifest_write_does_not_retry_other_permission_errors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _, _, manifest_path = resumable_symbol_build(tmp_path)
+    document = load_symbol_manifest(manifest_path)
+    temporary = manifest_path.with_suffix(manifest_path.suffix + ".tmp")
+    original_replace = Path.replace
+    attempts = 0
+
+    def replace_without_windows_lock(self: Path, target: Path) -> Path:
+        nonlocal attempts
+        if self == temporary and target == manifest_path:
+            attempts += 1
+            raise PermissionError(13, "non-Windows permission denial")
+        return original_replace(self, target)
+
+    monkeypatch.setattr(Path, "replace", replace_without_windows_lock)
+    with pytest.raises(PermissionError, match="non-Windows permission denial"):
+        write_symbol_manifest(document, manifest_path)
+    assert attempts == 1

@@ -910,6 +910,76 @@
       "reviewedOn": "2026-09-24"
     },
     {
+      "recordId": "weapon:drop-bears",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "N5.3 Drop Bears BS/Deployable modes share three charges but have different placement restrictions; typed relationships connect PH throwing, Targetless, Deployable/Intuitive placement, Shock and the modified Mines behavior. Imported legacy Throwing Weapon remains source data, not an additional N5 effect."
+    },
+    {
+      "recordId": "weapon:mines",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Shared Mine mechanics: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary."
+    },
+    {
+      "recordId": "weapon:para-mine",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Source-pinned PARA Mine reference connects shared Mines, PARA Ammunition and Immobilized-A; the N5.3 chart and Army marker discrepancy remains explicitly unresolved, not a gameplay change."
+    },
+    {
+      "recordId": "weapon:cybermine",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Uses the shared Mine mechanics but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose."
+    },
+    {
+      "recordId": "weapon:chest-mine",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation."
+    },
+    {
+      "recordId": "weapon:pt",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "The shared PT chart classification is BS Weapon (WIP), while individual PT variant effects stay separate. Army retains legacy Technical Weapon wording."
+    },
+    {
+      "recordId": "weapon:pt-endgame",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "N5 v5.3 chart and the April 2025 update explicitly add Double Shot to Endgame only. Source-specific Army id 203 prevents applying it to Eraser or Mirrorball; current Army omits Double Shot."
+    },
+    {
+      "recordId": "weapon:kobra-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "N5.3 Mixed Weapons rules distinguish BS and CC modes and their ammunition; shared mode description does not assign mode-specific Traits or Saving Rolls."
+    },
+    {
+      "recordId": "weapon:kobra-pistol-cc",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values."
+    },
+    {
+      "recordId": "weapon:wildparrot",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-08",
+      "note": "Perimeter and E/M Mine interaction with a visible Token/Model instead of CAMO; reviewed typed relationships distinguish this from Boost. N5 p. 74 Non-Lethal remains absent in Army and is presented as an explicit source discrepancy, not an imported Trait."
+    },
+    {
       "recordId": "equipment:360o-visor",
       "targetRelease": "0.7.0",
       "status": "reviewed",
@@ -1052,8 +1122,7 @@
       "targetRelease": "0.7.0",
       "status": "reviewed",
       "reviewedOn": "2026-09-24"
-    }
-  ,
+    },
     {
       "recordId": "skill:combat-jump",
       "targetRelease": "0.7.0",
@@ -1127,34 +1196,34 @@
       "reviewedOn": "2026-09-24"
     },
     {
-        "recordId": "skill:berserk",
-        "targetRelease": "0.7.0",
-        "status": "reviewed",
-        "reviewedOn": "2026-09-24"
+      "recordId": "skill:berserk",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
-        "recordId": "skill:guard",
-        "targetRelease": "0.7.0",
-        "status": "reviewed",
-        "reviewedOn": "2026-09-24"
+      "recordId": "skill:guard",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
-        "recordId": "skill:neurocinetics",
-        "targetRelease": "0.7.0",
-        "status": "reviewed",
-        "reviewedOn": "2026-09-24"
+      "recordId": "skill:neurocinetics",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
-        "recordId": "skill:total-reaction",
-        "targetRelease": "0.7.0",
-        "status": "reviewed",
-        "reviewedOn": "2026-09-24"
+      "recordId": "skill:total-reaction",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
-        "recordId": "skill:triangulated-fire",
-        "targetRelease": "0.7.0",
-        "status": "reviewed",
-        "reviewedOn": "2026-09-24"
+      "recordId": "skill:triangulated-fire",
+      "targetRelease": "0.7.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-09-24"
     },
     {
       "recordId": "skill:aerial",
@@ -1721,25 +1790,166 @@
       "targetRelease": "1.0.0",
       "status": "pending",
       "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+    },
+    {
+      "recordId": "scenario:domination",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, objective interactions, and other scenario rule semantics remains 1.0 work."
+    },
+    {
+      "recordId": "scenario:supplies",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Supply Box interactions, Specialist Troop rules, and other scenario semantics remains 1.0 work."
+    },
+    {
+      "recordId": "scenario:annihilation",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, force-destruction objectives, and other scenario rule semantics remains 1.0 work."
+    },
+    {
+      "recordId": "scenario:firefight",
+      "targetRelease": "1.0.0",
+      "status": "pending",
+      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Classified Objective interactions, and other scenario rule semantics remains 1.0 work."
+    },
+    {
+      "recordId": "rule:scenario:carrying-supply-boxes",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-07",
+      "note": "Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios."
+    },
+    {
+      "recordId": "rule:scenario:consoles",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-07",
+      "note": "Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios."
+    },
+    {
+      "recordId": "rule:scenario:controlling-supply-boxes",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-07",
+      "note": "Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios."
+    },
+    {
+      "recordId": "rule:scenario:designated-landing-area",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-07",
+      "note": "Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios."
+    },
+    {
+      "recordId": "rule:scenario:dominate-quadrants",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-07",
+      "note": "Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios."
+    },
+    {
+      "recordId": "rule:scenario:killing",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-07",
+      "note": "Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios."
+    },
+    {
+      "recordId": "rule:scenario:reinforced-tactical-link",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-07",
+      "note": "Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios."
+    },
+    {
+      "recordId": "rule:scenario:supply-boxes",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-07",
+      "note": "Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios."
+    },
+    {
+      "recordId": "rule:specialist-troops:standard",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-07",
+      "note": "Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios."
+    },
+    {
+      "recordId": "skill:hack-consoles",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-07",
+      "note": "Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred."
+    },
+    {
+      "recordId": "skill:pick-up-supply-boxes",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-07",
+      "note": "Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred."
+    },
+    {
+      "recordId": "weapon:sepsitor",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-09",
+      "note": "Reviewed N5.3 p.73 Sepsitor rules and p.187 weapon profile. Individual PS and Disposable values remain source-native and are not inherited by the other variant; Cube 2.0 +2 Saving Roll applies to both."
+    },
+    {
+      "recordId": "weapon:sepsitor-plus",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-09",
+      "note": "Reviewed N5.3 p.73 Sepsitor rules and p.187 weapon profile. Individual PS and Disposable values remain source-native and are not inherited by the other variant; Cube 2.0 +2 Saving Roll applies to both."
+    },
+    {
+      "recordId": "term:visibility-zone",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-10",
+      "note": "Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms."
+    },
+    {
+      "recordId": "term:low-visibility-zone",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-10",
+      "note": "Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms."
+    },
+    {
+      "recordId": "term:poor-visibility-zone",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-10",
+      "note": "Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms."
+    },
+    {
+      "recordId": "term:zero-visibility-zone",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-10",
+      "note": "Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms."
+    },
+    {
+      "recordId": "term:white-noise-zone",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-10",
+      "note": "Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms."
+    },
+    {
+      "recordId": "weapon:flash-pulse",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-09",
+      "note": "Reviewed N5.3 Weapon Chart Stun/BTS/Non-Lethal/Stunned semantics and the printed Immunity (BTS) exception (Wiki Immunity oldid 3643, Example 4). No generic state or immunity resolution is inferred."
     }
   ],
   "futureInteractions": [
-    {
-      "sourceRecordId": "equipment:cube-2",
-      "targetRecordId": "weapon:sepsitor",
-      "relationType": "modifies-rolls-for",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Cube 2.0 grants +2 to Saving Rolls against Sepsitor, but Sepsitor does not yet have an independently curated Weapon definition in the rules graph."
-    },
-    {
-      "sourceRecordId": "equipment:cube-2",
-      "targetRecordId": "weapon:sepsitor-plus",
-      "relationType": "modifies-rolls-for",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Cube 2.0 grants +2 to Saving Rolls against Sepsitor Plus, but Sepsitor Plus does not yet have an independently curated Weapon definition in the rules graph."
-    },
     {
       "sourceRecordId": "hacking-program:white-noise",
       "targetRecordId": "skill:marksmanship",
@@ -1804,7 +2014,7 @@
       "status": "deferred",
       "reason": "Stealth changes which enemies receive AROs for a Basic Short Skill with the Movement Label, including Move; the current relation vocabulary has no precise ARO-generation modifier edge."
     },
-        {
+    {
       "sourceRecordId": "equipment:dazer",
       "targetRecordId": "rule:difficult-terrain",
       "relationType": null,
@@ -1940,39 +2150,38 @@
       "status": "deferred",
       "reason": "Indiscriminate allows use or deployment despite Camouflage and Hiding Markers in the Area of Effect, but the current relation vocabulary has no precise bypasses-marker-restriction edge."
     },
-  {
-    "sourceRecordId": "state:stunned",
-    "targetRecordId": "rule:attack-declaration",
-    "relationType": "restricts-use-of",
-    "targetRelease": "post-0.7.0",
-    "status": "planned",
-    "reason": "Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical."
-  },
-  {
-    "sourceRecordId": "state:stunned",
-    "targetRecordId": "rule:roll",
-    "relationType": "modifies-rolls-for",
-    "targetRelease": "post-0.7.0",
-    "status": "planned",
-    "reason": "Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception."
-  },
-  {
-    "sourceRecordId": "state:isolated",
-    "targetRecordId": "state:disconnected",
-    "relationType": "causes-state",
-    "targetRelease": "post-0.7.0",
-    "status": "deferred",
-    "reason": "Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition."
-  },
-  {
-    "sourceRecordId": "rule:null-state",
-    "targetRecordId": "state:disconnected",
-    "relationType": "causes-state",
-    "targetRelease": "post-0.7.0",
-    "status": "deferred",
-    "reason": "A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role."
-  }
-  ,
+    {
+      "sourceRecordId": "state:stunned",
+      "targetRecordId": "rule:attack-declaration",
+      "relationType": "restricts-use-of",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Stunned State prevents every Attack declaration, not only currently modeled BS Attack or CC Attack; use a generic Attack-declaration target rather than incomplete Skill-specific edges once that abstraction is canonical."
+    },
+    {
+      "sourceRecordId": "state:stunned",
+      "targetRecordId": "rule:roll",
+      "relationType": "modifies-rolls-for",
+      "targetRelease": "post-0.7.0",
+      "status": "planned",
+      "reason": "Stunned State applies a -3 MOD to any Roll except Saving Rolls; model the generic Roll interaction only after a canonical Roll abstraction can preserve the Saving-Roll exception."
+    },
+    {
+      "sourceRecordId": "state:isolated",
+      "targetRecordId": "state:disconnected",
+      "relationType": "causes-state",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Isolated State can activate Disconnected State for a Peripheral or through its Controller, but the interaction is role-conditional and must not be presented as an unconditional state transition."
+    },
+    {
+      "sourceRecordId": "rule:null-state",
+      "targetRecordId": "state:disconnected",
+      "relationType": "causes-state",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "A Peripheral enters Disconnected State when its Controller is in a Null State; retain this until Null State has a canonical abstraction and the graph can express the Controller-to-Peripheral participant role."
+    },
     {
       "sourceRecordId": "skill:combat-jump",
       "targetRecordId": "rule:partial-cover",
@@ -2022,20 +2231,20 @@
       "reason": "Minelayer consumes a use of the selected Deployable Weapon or Equipment when it has Disposable, but that interaction depends on the chosen item and should not be represented as an unconditional Trait edge."
     },
     {
-        "sourceRecordId": "skill:triangulated-fire",
-        "targetRecordId": "rule:range-modifiers",
-        "relationType": "ignores-modifiers-from",
-        "targetRelease": "post-0.7.0",
-        "status": "deferred",
-        "reason": "Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity."
+      "sourceRecordId": "skill:triangulated-fire",
+      "targetRecordId": "rule:range-modifiers",
+      "relationType": "ignores-modifiers-from",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Triangulated Fire ignores Range MODs, but InfinityDB does not yet expose Range MODs as a canonical rules identity."
     },
     {
-        "sourceRecordId": "skill:triangulated-fire",
-        "targetRecordId": "rule:partial-cover",
-        "relationType": "ignores-modifiers-from",
-        "targetRelease": "post-0.7.0",
-        "status": "deferred",
-        "reason": "Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule."
+      "sourceRecordId": "skill:triangulated-fire",
+      "targetRecordId": "rule:partial-cover",
+      "relationType": "ignores-modifiers-from",
+      "targetRelease": "post-0.7.0",
+      "status": "deferred",
+      "reason": "Triangulated Fire ignores Cover MODs, but Partial Cover is not yet a canonical rules identity and the current graph should not substitute Limited Cover for the general Cover rule."
     },
     {
       "sourceRecordId": "skill:climbing-plus",
@@ -2164,8 +2373,7 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Religious Troop makes its user unaffected by Retreat and prevents Retreat State, with an additional restriction on voluntarily leaving the table; model this once Retreat has canonical identities and relation semantics."
-    }
-  ,
+    },
     {
       "sourceRecordId": "state:engaged",
       "targetRecordId": "rule:close-combat-declaration-set",

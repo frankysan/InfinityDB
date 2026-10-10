@@ -31,6 +31,73 @@ release/audit narrative belongs in the changelog and Git history.
   consumer-specific code.
 - Runtime read paths consume materialized application data. They do not reinterpret raw normalized
   tables or working-tree curation on demand.
+- Ammunition effect operations belong to reviewed canonical `ammunition:*` facts,
+  not to Army source-ID navigation mappings. The initial AP/DA/E/M typed pilot
+  is descriptive and non-executable; combined Ammunition components and
+  Combined Saving Roll notation are separate source/profile dimensions.
+- Combined Saving Roll Criticals are distinct from combined Ammunition
+  Criticals. The six reviewed Plasma Hit/Blast profiles have source-exact
+  `combined_saving_roll` annotations: one ARM and one BTS roll, plus one
+  additional ARM roll for a Critical. Do not infer this from display punctuation
+  or transfer it to base `ammunition:*` facts. See `docs/data-model.md`.
+- The N5.3 Immunity exception boundary lives on `skill:immunity` as validated,
+  non-executable `facts.immunityInteraction`; do not apply it automatically to
+  combined components, Weapon profiles, or Critical outcomes. Three conditioned
+  examples are rule-derived: AP+DA/AP+Exp versus Immunity (ARM), and AP+DA
+  versus Immunity (AP), which ignores AP while retaining DA and its two rolls.
+  These are **not** a general component-level Immunity evaluator. A printed
+  Immunity (BTS) versus Flash Pulse example preserves Non-Lethal and the
+  failed-Saving-Roll Stunned effect; it is recorded under `reviewedWeaponCases`
+  and is not generalized to other BTS weapons. A separate pinned,
+  explicit Vulnerability (Viral) example is **weapon-name-scoped** and prevents
+  Immunity (Enhanced) for that attack; it does not imply component parsing or
+  automatic target-specific outcomes. See `docs/rules-semantics.md` RS-AW-IMM-001.
+- For any material player-facing rules interaction, the curated explanation must
+  identify its applicable conditions, ordinary mechanism, modifying rule,
+  explicit exception, conditional outcome, and evidence. A correct outcome or
+  reviewed relation alone is insufficient; distinguish printed cases from
+  deductions and leave conflicts explicit. This is a curation/review standard,
+  not an executable interaction resolver. See `data/curated/README.md` and
+  `docs/web-design-guidelines.md` for the canonical contracts.
+- Scenario geometry is maintained semantic data, not diagram pixels. The 1.0 SVG renderer and
+  geometry-schema v1 target only the four N5.3 core scenarios. All four core scenario records now
+  own their geometry configurations; renderer tests consume those maintained definitions and must
+  not maintain a second map-geometry corpus. Semantic point markers retain a `markerType`, whose canonical
+  marker metadata may include a physical diameter. N5.3 Domination
+  makes the Console diameter rules-relevant by requiring a Console A Marker or same-diameter scenery;
+  the ITS token table supplies the explicit 40 mm value. Scenario placement distances are edge-to-edge
+  unless a source explicitly names a center/reference point; marker footprint therefore participates in
+  “X inches from” placement. Map measurement annotations are reference-based: the renderer derives
+  rectangle dimensions, area-size labels, and element-to-table-edge clearances from semantic geometry
+  rather than maintaining duplicate numeric measurements. The map API supports `distance_unit=in|cm`;
+  inline SVG labels carry canonical inch data attributes and follow the existing in/cm preference
+  without a geometry refetch. Table dimensions switch too, but marker diameters remain physical mm.
+  Geometry v1 permits asymmetric and multiple Deployment Zone regions and keeps semantic style/marker identities open; SVG renderer
+  v1 separately fails closed when it lacks a supported presentation style or canonical marker metadata.
+  ITS variation informs extensibility, while ITS-only geometry and the interactive editor remain post-1.0. See
+  `docs/data-model.md`.
+- Scenario authoring v2 composes shared, explicitly identified Rules/Skills and typed components.
+  Export resolves them into self-contained payloads in `rules.db`; runtime must not read curation
+  files. Same names do not select/merge definitions. `scope.scenarios` is an explicit activation
+  boundary; default core composition excludes scoped records, and scoped records cannot have Army
+  links. The shared Specialist baseline uses full Skill-ID arrays plus explicit inclusion deltas;
+  rendering consumes resolved qualifiers, not an authoring mini-language. Preserve its Non Specialist
+  qualification exception, Annihilation's reviewed-resolution note for the corrected 350-point
+  survival bands, and Domination's needs-verification 350-point SWC note. Supplies has no
+  placement source issue: its outer Supply Boxes are 8 inches from the table edges at every supported
+  game size; the 12-inch mark in the large-table illustration is a guide ruler, not the box offset.
+  Stable scenario-set
+  identity/revision and source publication revision are separate runtime concepts. Current
+  `ScenarioCatalog` detail reads require an explicit supported Army Points value; do not invent a
+  default configuration in backend composition. The browser defaults a state-less scenario detail
+  visit to 300 Army Points, immediately writes that choice through the common versioned `s=` share-state
+  codec, and lets explicit valid shared/legacy state win. Maps render through the canonical SVG endpoint backed by the selected
+  maintained geometry. The browser inlines the generated SVG to inherit semantic map colors from
+  the current theme; its standalone `<style>` must be removed on injection because of the app CSP,
+  with browser styling provided by the external page CSS. Map labels scale with table width without
+  changing canonical geometry. Do not recreate scenario geometry or scoring semantics in JavaScript.
+  See the scenario model in `docs/data-model.md`.
+
 - Network acquisition is explicit. Normal builds/tests are expected to work without upstream network
   access.
 - Persistent generated artifacts are deterministic across supported platforms for the same inputs
@@ -38,6 +105,20 @@ release/audit narrative belongs in the changelog and Git history.
 - Slugs are the preferred application-facing identifiers when a domain has a stable slug; numeric
   IDs remain compatibility/provenance forms.
 - Browser code renders backend-owned semantics rather than recreating data-model policy.
+- Weapon Ammunition navigation maps exact Army metadata identity/name pairs to
+  reviewed base reference segments, without client-side parsing or inference from
+  Saving Roll notation. The maintained map (version 2) records ordered components
+  for the four reviewed combined forms (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`);
+  their API `ammunition_composition` field is only present on exact matching
+  source profiles. Alternatives remain unlinked. Curated `ammunitionResolution`
+  remains a non-executable, source-cited fact contract: all eleven base
+  Ammunition identities are reviewed. PARA's no-PH exception, T2's reduced Wound
+  outcome for an *additional Critical roll*, Shock's VITA-1 exception, and Stun's
+  Guts/Courage exception cannot be dropped when consuming facts. Smoke/Eclipse
+  use separate `facts.visibilityZone` data with distinct MSV behavior; do not
+  interpret it as a Saving Roll.
+  This is not an effects engine.
+  See `docs/data-model.md` and `weapon-ammunition-references.json`.
 - Game/reference data is read-only at runtime. Persistent user-authored application data is not part
   of the current model.
 - Retained metrics live in a separate private collector with one bounded writable volume; the
@@ -65,7 +146,11 @@ validated set. Production must not substitute a server-side rebuild.
 
 ## Army/application identity invariants
 
-- Source IDs are provenance, not a sufficient application ontology.
+- Source IDs are provenance, not a sufficient application ontology. Kobra Pistol
+  BS/CC profiles share Weapon source ID `221`; `variantSemantics.sourceMode` enables
+  exact-mode curated rules without silently applying CC effects to BS Mode. The
+  published Kobra CC reference explains DA Saving Rolls and the unresolved
+  Anti-materiel source conflict; it must not be taken as a Trait override.
 - `application_armies` is the canonical runtime Army projection. Roles/grouping/playability are
   derived from imported relationships plus reviewed policy, not hard-coded Army ID ranges.
 - Canonical source identity `1` is mercenary source provenance; Non-Aligned application grouping is
@@ -113,6 +198,9 @@ because the source does not attach them to a profile group.
   identity instead of merging by label.
 - Maintained prose must use typed semantic links for supported reference namespaces. The migration
   is complete: reviewed batches reject newly introduced plain semantic candidates.
+- Rule-card summaries use topic/mode paragraphs and inline emphasis; source-history notes belong in
+  `facts.sourceNotes`. Cosmetic Army Trait-name differences appear only in Developer Mode, never
+  as clutter beside canonical player labels. See `docs/web-design-guidelines.md` for the design contract.
 - Gameplay distance presentation uses the Army/rules round-trip convention **2.5 cm = 1 inch**, not
   the SI physical conversion. Preserve Army metric storage, typed maintained-rule distances, and
   the `-1/-1` MOV sentinel (stationary) as distinct semantics; render it as an em dash (`—`) and
@@ -121,6 +209,9 @@ because the source does not attach them to a profile group.
   a target without evidence. Reviewed ordinary-text collisions are fingerprinted to exact passages,
   so wording changes reopen review.
 - Curated relations are authored once in their semantic direction; reverse navigation is derived.
+- Reviewed Weapon-family `facts.variantRuleReferences` link *specific Army Weapon slugs* to
+  existing reference rules without inheriting the same effect across every variant.
+  The source Weapon Chart profile remains authoritative for ammunition and Saving Rolls.
 - `docs/rules-interaction-checklist.md` is generated from the current graph and review ledger. Never
   edit it manually.
 
@@ -128,7 +219,7 @@ because the source does not attach them to a profile group.
 
 `src/infinity_db/application_domains.py` is the canonical capability registry. Published top-level
 application domains are Armies, Units, Skills, Equipment, Weapons, Ammunition, Traits, States,
-Hacking Programs, Fireteams, Labels, and General Rules. Embedded vocabularies are Attributes and
+Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Embedded vocabularies are Attributes and
 Game terms.
 
 Browser state rules:
@@ -136,9 +227,13 @@ Browser state rules:
 - JSON APIs keep explicit query parameters.
 - Canonical shareable browser state uses the common versioned, scope-bound `s=` token.
 - Current token scopes cover Unit Explorer, catalog search, Fireteams, Unit Army targeting, global
-  search, and Glossary search.
+  search, Glossary search, and Scenario Army Points selection.
 - Legacy explicit browser parameters remain accepted for compatibility and normalize to canonical
   state; do not remove them casually.
+- Post-1.0 sharing must remain self-contained and decodable offline; no server-side
+  short-link registry or authored-content persistence. A hash alone cannot recover
+  arbitrary shared content. See `docs/architecture.md` (stateless sharing) and
+  `docs/data-model.md` (player-authored scenarios). The current `s=` codec is unchanged.
 - URL-owned state wins for the current view and must not overwrite persistent local Settings.
 - `static/preferences.js` owns preference values/persistence; `static/settings.js` alone binds the
   shared Settings controls. Page modules consume state instead of initializing shell controls.
@@ -192,6 +287,9 @@ stable entry point; do not add a CSS build step or link the source parts directl
 ## Validation and release invariants
 
 - Use the project virtual environment when available.
+- Database exporters explicitly begin schema/data write transactions after deterministic connection
+  configuration. A SQLite connection context manager alone does not group schema DDL; rules-schema
+  `executescript` must begin inside its script. Preserve validation, finalization and atomic publication.
 - `tools/run_checks.py` is the canonical local orchestrator. For ordinary patch work, focused tests
   are appropriate; the full release gate is run explicitly by the maintainer/CI when required.
 - Required hosted CI covers source/build checks, cross-platform deterministic outputs, installed

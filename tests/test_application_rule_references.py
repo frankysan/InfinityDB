@@ -15,7 +15,10 @@ from infinity_db.application_domains import (
 )
 from infinity_db.curated import load_curated_directory
 from infinity_db.database import Database, export_database
-from infinity_db.domain_references import enrich_rule_relation_references
+from infinity_db.domain_references import (
+    enrich_rule_relation_references,
+    rule_record_public_reference,
+)
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
@@ -125,6 +128,7 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
         "hacking-programs",
         "fireteams",
         "labels",
+        "scenarios",
         "rules",
     }
 
@@ -153,6 +157,19 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
     assert armies.detail is False
     assert armies.published is True
     assert armies.route == "/armies"
+
+    scenarios = application_domain("scenarios")
+    assert scenarios.presentation == "catalog"
+    assert scenarios.record_kinds == ("scenario",)
+    assert scenarios.landing is True
+    assert scenarios.catalog is True
+    assert scenarios.detail is True
+    assert scenarios.navigation is True
+    assert scenarios.search is False
+    assert scenarios.glossary is False
+    assert scenarios.published is True
+    assert scenarios.route == "/scenarios"
+    assert semantic_record_domain("scenario") == scenarios
 
     fireteams = application_domain("fireteams")
     assert fireteams.presentation == "scoped"
@@ -198,6 +215,7 @@ def test_application_domain_registry_separates_identity_from_presentation() -> N
     assert public_rule_domain("term") is None
     assert semantic_record_domain("term") == terms
     assert public_rule_domain("rule") is None
+    assert public_rule_domain("scenario") == scenarios
     assert public_rule_record_domain(
         {"kind": "rule", "facts": {"category": "basic-rule"}}
     ) == general_rules
@@ -247,11 +265,13 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
         "term:enemy",
         "term:fto",
         "term:hostile",
+        "term:low-visibility-zone",
         "term:marker",
         "term:model",
         "term:neutral",
         "term:null-state",
         "term:peripheral",
+        "term:poor-visibility-zone",
         "term:scenery-element",
         "term:state-token",
         "term:target",
@@ -259,6 +279,9 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
         "term:trooper",
         "term:unit-profile",
         "term:victory-points",
+        "term:visibility-zone",
+        "term:white-noise-zone",
+        "term:zero-visibility-zone",
     }
     assert {record["facts"]["scope"] for record in terms} == {
         "alignment",
@@ -268,6 +291,7 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
         "scoring",
         "state-classification",
         "trooper-category",
+        "visibility-condition",
     }
 
 
@@ -648,3 +672,29 @@ def test_hacking_program_catalog_remains_available_without_rules_database(
     assert carbonite is not None
     assert carbonite["description"] == "DA Ammo. State: IMM-B. Non-Lethal."
     assert "rules" not in carbonite
+
+
+def test_shared_weapon_family_reference_targets_its_card() -> None:
+    family = {
+        "kind": "weapon",
+        "id": "weapon:mines",
+        "variant_semantics": {"inheritance": "family"},
+        "army_links": [
+            {"entity": "weapon", "id": "ap-mine"},
+            {"entity": "weapon", "id": "e-m-mine"},
+        ],
+    }
+    assert rule_record_public_reference(None, family) == {
+        "href": "/weapons/ap-mine#rule-weapon-mines"
+    }
+    # A weapon-specific rule still links to its Weapon page, not an absent anchor.
+    family["army_links"] = [{"entity": "weapon", "id": "cybermine"}]
+    assert rule_record_public_reference(None, family) == {
+        "catalog": "weapons", "id": "cybermine"
+    }
+    # Multi-linked source-specific records do not gain an invented rule-card anchor.
+    family["variant_semantics"] = {"inheritance": "source"}
+    family["army_links"].append({"entity": "weapon", "id": "ap-mine"})
+    assert rule_record_public_reference(None, family) == {
+        "catalog": "weapons", "id": "cybermine"
+    }

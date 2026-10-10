@@ -263,6 +263,37 @@ def test_every_explicit_theme_meets_non_text_contrast_contract() -> None:
         )
 
 
+
+def test_scenario_map_semantic_colors_meet_theme_contrast_contract() -> None:
+    for theme in _registered_explicit_themes():
+        tokens = _theme_tokens(theme)
+        text_pairs = tuple(
+            (
+                f"scenario map text on {surface}",
+                "color-scenario-map-text",
+                f"color-scenario-map-{surface}",
+            )
+            for surface in ("table", "deployment-a", "deployment-b", "scoring", "marker")
+        )
+        edge_pairs = tuple(
+            (
+                f"scenario map {edge} on {surface}",
+                f"color-scenario-map-{edge}",
+                f"color-scenario-map-{surface}",
+            )
+            for edge, surface in (
+                ("outline", "table"),
+                ("deployment-a-edge", "deployment-a"),
+                ("deployment-b-edge", "deployment-b"),
+                ("scoring-edge", "scoring"),
+                ("guide", "table"),
+                ("measurement", "table"),
+            )
+        )
+        _assert_contrast_pairs(theme, tokens, text_pairs, NORMAL_TEXT_MINIMUM)
+        _assert_contrast_pairs(theme, tokens, edge_pairs, NON_TEXT_MINIMUM)
+
+
 def test_faction_accents_remain_supplementary_in_every_explicit_theme() -> None:
     theme_sources = "".join(
         _theme_source(theme) for theme in _registered_explicit_themes()

@@ -1312,7 +1312,8 @@ h1>span {
   padding-left: 20px;
 }
 
-.rules-reference>.detail-section {
+.rules-reference>.detail-section,
+.rules-card-stack>.detail-section {
   display: grid;
   gap: 10px;
   padding: 16px;
@@ -1326,8 +1327,20 @@ h1>span {
 .rules-reference h4,
 .rules-reference h5,
 .rules-reference p,
-.rules-reference ul {
+.rules-reference ul,
+.rules-card-stack h3,
+.rules-card-stack h4,
+.rules-card-stack h5,
+.rules-card-stack p,
+.rules-card-stack ul {
   margin: 0;
+}
+
+/* Editorial source discrepancies remain readable without competing with rules. */
+.rules-source-note {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
 }
 
 .rules-card-titlebar {
@@ -1346,6 +1359,35 @@ h1>span {
 .detail-fact-group {
   display: grid;
   gap: 4px;
+}
+
+.immunity-reviewed-cases .detail-list {
+  gap: var(--space-3);
+}
+
+.immunity-reviewed-cases .detail-copy {
+  margin: var(--space-1) 0 0;
+}
+
+.immunity-reviewed-cases li > .detail-source {
+  margin: var(--space-1) 0 0;
+}
+
+.ammunition-mechanics-list {
+  display: grid;
+  grid-template-columns: minmax(7rem, max-content) minmax(0, 1fr);
+  gap: var(--space-1) var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.ammunition-mechanics-list dt {
+  font-weight: 650;
+}
+
+.ammunition-mechanics-list dd {
+  min-width: 0;
+  margin: 0;
 }
 
 .detail-fact-heading {

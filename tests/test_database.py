@@ -244,6 +244,32 @@ def canonical_database_path(
     return path
 
 
+def test_export_database_creates_schema_inside_transactions(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    schema_transactions: list[bool] = []
+    original_connect = sqlite3.connect
+
+    def traced_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
+        connection = original_connect(*args, **kwargs)
+
+        def trace(statement: str) -> None:
+            if statement.lstrip().upper().startswith("CREATE "):
+                schema_transactions.append(connection.in_transaction)
+
+        connection.set_trace_callback(trace)
+        return connection
+
+    monkeypatch.setattr(sqlite3, "connect", traced_connect)
+    path = tmp_path / "army.db"
+    export_release_database(normalized, path)
+
+    assert schema_transactions
+    assert all(schema_transactions)
+    Database(path).validate()
+    validate_database_pair(path)
+
+
 def test_export_database_finalization_is_default_and_can_be_skipped(
     tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -598,6 +624,7 @@ def test_weapon_detail_includes_metadata_profiles(tmp_path: Path, normalized: di
             "mode": "Standard",
             "type": "BS",
             "ammunition": "Normal",
+            "ammunition_source_id": 2,
             "burst": "3",
             "damage": "7",
             "saving": "ARM",
@@ -694,11 +721,13 @@ def test_trait_catalog_resolves_curated_aliases_prefixes_and_citations(
         "label": "Suppressive Fire",
         "name": "Suppressive Fire (SF)",
         "slug": "suppressive-fire",
+        "source_alias": True,
     }
     assert catalog.reference("Continous Damage") == {
         "label": "Continous Damage",
         "name": "Continuous Damage",
         "slug": "continuous-damage",
+        "source_alias": True,
     }
     assert catalog.reference("Disposable (2)") == {
         "label": "Disposable (2)",
@@ -760,26 +789,32 @@ def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
         "label": "Technical Weapon",
         "name": "BS Weapon (WIP)",
         "slug": "bs-weapon-wip",
+        "source_alias": True,
     }
     assert catalog.reference("Throwing Weapon") == {
         "label": "Throwing Weapon",
         "name": "BS Weapon (PH)",
         "slug": "bs-weapon-ph",
+        "source_alias": True,
     }
     assert catalog.reference("Comms. Attack") == {
         "label": "Comms. Attack",
         "name": "Comms Attack",
         "slug": None,
+        "public_reference": {"catalog": "labels", "id": "comms-attack"},
+        "source_alias": True,
     }
     assert catalog.reference("No LoF") == {
         "label": "No LoF",
         "name": "No LoF",
         "slug": None,
+        "public_reference": {"catalog": "labels", "id": "no-lof"},
     }
     assert catalog.reference("CC Attack (+3)") == {
         "label": "CC Attack (+3)",
         "name": "CC Attack (+3)",
         "slug": None,
+        "public_reference": {"catalog": "labels", "id": "cc-attack"},
     }
 
     traits = {item["id"]: item for item in catalog.list_traits()}
@@ -789,6 +824,24 @@ def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
     assert "comms-attack" not in traits
     assert "no-lof" not in traits
     assert "cc-attack-3" not in traits
+    assert catalog.reference("State: Stunned / Immbolized-B") == {
+        "label": "State: Stunned / Immbolized-B",
+        "name": "State: Stunned / Immobilized-B",
+        "slug": None,
+        "state_references": [
+            {"label": "Stunned", "public_reference": {"catalog": "states", "id": "stunned"}},
+            {
+                "label": "Immobilized-B",
+                "public_reference": {"catalog": "states", "id": "immobilized-b"},
+            },
+        ],
+        "source_alias": True,
+    }
+    assert catalog.reference("State: Unknown / Stunned") == {
+        "label": "State: Unknown / Stunned",
+        "name": "State: Unknown / Stunned",
+        "slug": None,
+    }
     assert traits["arm-0"]["use_count"] == 0
     assert traits["bs-weapon-ph"]["use_count"] == 1
     assert traits["bs-weapon-wip"]["use_count"] == 1
@@ -797,6 +850,38 @@ def test_trait_catalog_uses_rules_native_vocabulary_over_army_property_bucket(
     assert arm_zero is not None
     assert arm_zero["variants"] == []
     assert arm_zero["rules"][0]["id"] == "trait:arm-0"
+
+
+def test_published_weapon_properties_have_navigable_reference_destinations() -> None:
+    """Audit all distinct published source properties, not just selected weapons."""
+    root = Path(__file__).resolve().parents[1]
+    database = Database(root / "data" / "generated" / "infinity.db")
+    rules = RulesDatabase(root / "data" / "generated" / "rules.db")
+    catalog = TraitCatalog(database, rules)
+    labels = {label["id"] for label in rules.current_labels()}
+    states = {
+        record["id"].split(":", 1)[1]
+        for record in rules.composed_records_by_kind("state")
+    }
+    trait_slugs = {trait["id"] for trait in catalog.list_traits()}
+    unresolved = []
+    properties = database.list_traits()
+    for source in properties:
+        reference = catalog.reference(source["name"])
+        targets = [reference["public_reference"]] if reference.get("public_reference") else []
+        targets.extend(
+            item["public_reference"] for item in reference.get("state_references", [])
+        )
+        for target in targets:
+            assert target["catalog"] in {"labels", "states"}, reference
+            assert target["id"] in (labels if target["catalog"] == "labels" else states)
+        if reference.get("slug") is not None:
+            assert reference["slug"] in trait_slugs
+        elif not targets:
+            unresolved.append(source["name"])
+    assert len(properties) >= 42
+    assert unresolved == []
+
 
 def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
     tmp_path: Path, normalized: dict
@@ -844,6 +929,7 @@ def test_trait_public_slug_is_owned_by_curated_id_not_display_name(
         "label": "Continous Damage",
         "name": "Persistent Damage",
         "slug": "continuous-damage",
+        "source_alias": True,
     }
     detail = catalog.get_trait("continuous-damage")
     assert detail is not None

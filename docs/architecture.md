@@ -117,17 +117,35 @@ overview, explorer, scoped view, or embedded vocabulary, and capabilities such a
 search, glossary participation, detail pages, and publication are independent.
 
 Current published top-level domains are Armies, Units, Skills, Equipment, Weapons, Ammunition,
-Traits, States, Hacking Programs, Fireteams, Labels, and General Rules. Attributes and scoped Game
+Traits, States, Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Attributes and scoped Game
 terms are published embedded vocabularies. Global search and Glossary are cross-domain projections,
 not competing semantic owners.
 
 `docs/application-domains.md` owns the detailed domain/presentation contract.
 
-### Planned scenario domain
+### Scenario domain
 
-**Design direction; unimplemented.** The accepted boundary below guides the 1.0 implementation
-tracked in [the backlog](TODO.md#rules-and-reference-completeness). It does not describe current
-scenario tables, structured definitions, or browser routes.
+**Current bounded core-scenario surface.** All four core scenarios maintain typed setup, scoring,
+geometry, special rules, and end conditions. Authoring definition v2 composes
+shared Rules, separate scoped Skills, and typed setup/geometry/objective/ending components by explicit
+identity. Validation/export resolves those references and retains component provenance in the runtime
+record payload. Same display names do not imply shared semantics.
+
+The shared Specialist Rule owns its Skill-reference array and common restrictions; scenarios author
+only additions/removals. Backend composition resolves semantics and scope, while the common Skill-card
+renderer owns labels, links, list formatting, and ordinary Skill detail structure. Scoped definitions
+are excluded from default core help, and cannot grant permanent Army profile facts. Runtime reads
+consume the materialized `rules.db`, independently of curation files.
+
+[The data model](data-model.md#planned-scenario-model-10) owns the implemented contract. Dedicated
+scenario collection/publication indexes and central revision-aware selection live in `rules.db`. The
+JSON API exposes the current list plus exact Army-Points detail projections, and `/scenarios` plus
+`/scenarios/<slug>` provide the corresponding player-facing catalog/detail surface. The backend
+remains configuration-explicit; in the browser an absent selection defaults to 300 Army Points and is
+immediately written through the common versioned share-state token, while explicit valid shared state
+wins. The map is rendered from the same maintained geometry through the SVG API. Scenarios participate in primary
+navigation and the landing page, while global search and Glossary participation remain deliberately
+disabled because the bounded core set is already directly discoverable.
 
 Core-rules scenarios are a required first-class application domain for 1.0. The architecture review
 covered the four N5.3 core scenarios, the final ITS Season 17 set, and the current ITS Season 18 set.
@@ -136,16 +154,48 @@ would be too narrow for deployment geometry, scoring cadence, asymmetric sides, 
 Objectives, scenario elements, and revision/season provenance.
 
 The accepted design places scenario definitions in the rules curation pipeline and `rules.db`,
-not in Army export or mutable match state. Publication will use a hybrid model: stable identities,
+not in Army export or mutable match state. Publication uses a hybrid model: stable identities,
 provenance, collection membership, and cross-domain references are relational; ordered and nested
 scenario structures remain validated typed payloads. Scenario identity, source revision, and
 collection/season membership remain independent.
 
-Geometry and scoring are maintained semantic data. Diagrams and reference views will be generated
+Geometry and scoring are maintained semantic data. Core diagrams and reference views are generated
 from that data, with source/season overlays kept distinct from canonical Army or rules facts.
-Existing catalog entities will be referenced by typed identity rather than duplicated locally.
-Core and ITS scenarios share this boundary; tournament pairing, rankings, and mutable match state
-remain outside it.
+A **post-1.0 scenario editor** will reuse this component model and renderer for
+new player-defined scenarios and edits of existing ones. It will compose local
+copies/overlays, not mutate authoritative source publications or `rules.db`.
+Its serialization follows the stateless-sharing direction below and its custom
+rule semantics follow `docs/data-model.md`.
+InfinityDB 1.0 includes a deterministic SVG projection for the four N5.3 core scenarios; geometry
+schema v1 only needs to represent those core maps. Point markers retain semantic marker identity;
+known marker types resolve through canonical marker metadata, including physical diameter where that
+affects the represented game object. N5.3 Domination requires a Console A Marker or same-diameter
+scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
+Renderer-only styling remains separate. Standalone SVGs use a deterministic fallback palette;
+scenario detail inlines the same-origin SVG so its semantic map-color roles inherit from the active
+InfinityDB theme. The browser applies those roles through external CSS rather than SVG `<style>`
+because the application's Content Security Policy blocks injected inline styles. Renderer typography
+scales with table width in viewBox coordinates, without changing scenario geometry. The
+map endpoint accepts `distance_unit=in|cm` for deterministic standalone labels; browser-inlined
+SVG retains canonical inch measurements in `data-distance-inches` /
+`data-distance-size-inches` and updates labels immediately on the existing in/cm preference event.
+Table dimensions use the same preference, and existing maintained-text distance tokens already
+refresh through the shared maintained-text renderer. Game geometry remains inch-based, while
+physical marker diameters stay in millimeters. Structured map annotations may reference semantic
+geometry to derive displayed distances and area sizes; they must not duplicate the underlying measurements.
+Geometry v1 includes rectangle dimensions/area sizes plus element-to-table-edge distances, which covers
+the core Domination and Supplies measurement callouts without introducing arbitrary annotation geometry.
+Scenario placement distances are edge-to-edge by default: when a marker is stated to be a distance from
+an edge or another element, its canonical physical footprint participates in that distance rather than
+its center point, unless the source explicitly says otherwise.
+Semantic style and marker identities are open at the geometry boundary rather than coupled to the current
+SVG palette; renderer v1 separately validates the styles and canonical marker metadata it can faithfully
+project and fails closed for unsupported presentation. Geometry also permits asymmetric and multiple
+Deployment Zone regions without encoding a one-zone-per-side rule. Reviewed ITS variation constrains the
+extension points, but ITS-only geometry and an interactive map editor remain post-1.0. Existing catalog entities will be referenced by typed
+identity rather than duplicated locally. Core and ITS scenarios share this boundary; tournament
+pairing, rankings, and mutable match state remain outside
+it.
 
 The detailed accepted scenario model belongs to
 [the data model](data-model.md#planned-scenario-model-10). Source comparison and rationale remain in
@@ -168,6 +218,49 @@ Browser URLs and JSON API parameters are separate contracts:
   by `src/infinity_db/web/static/share-state.js`.
 - Legacy explicit browser parameters remain readable compatibility inputs and are canonicalized by
   the owning page; they are not the preferred generated link form.
+
+### Design direction — stateless sharing and user-authored content (post-1.0)
+
+**Decision (2026-10-08):** InfinityDB must not require accounts, server-side saved
+user content, a share-link registry, or a mutable server database of URL tokens.
+This supersedes the previously proposed v2 short-link/lookup service. The app's
+release databases remain immutable and replaceable. Operational aggregate metrics
+and the existing opt-in *browser preference* cookies are separate from authored
+scenario/list content; neither may become a repository for user-authored content.
+
+- Shareable state must be **self-contained and versioned**: a recipient can decode
+  it from the URL plus the same locally available app/reference release, with no
+  registration, lookup, or remote dependency. Existing v1 `s=` links and explicit
+  browser parameter compatibility are retained.
+- For potentially sensitive authored content, prefer encoding in the URL **fragment**
+  (not transmitted in normal HTTP requests), subject to testing coexistence with
+  existing fragment anchors/deep links. Browser history, clipboard, shared links,
+  client-side scripts, and extensions can still expose fragments; this is **not**
+  encryption or a confidentiality guarantee. Ordinary non-sensitive filter state
+  may continue to use the current query-based `s=` contract.
+- A deterministic content hash is useful for integrity, comparison, or canonical
+  identity, **not** as a reversible encoding. A hash alone can resolve only data
+  already available in the client's immutable reference bundle or an explicitly
+  imported local file; it must not silently require a remote hash registry.
+- Define a deterministic canonical representation before compression/encoding:
+  schema/codec version, scope, referenced ruleset or source revision, typed values,
+  defaults, ordering semantics, and normalizations are part of the contract.
+  Version migration and missing/changed reference behavior must be explicit.
+- Test realistic URL size limits and decode safety. For content too large to share
+  reliably as a URL, offer portable import/export files containing the same
+  versioned data; **never** silently upload or persist it on the server.
+- No arbitrary execution of shared content. Parsing/validation must bound payload
+  size and complexity, reject unsafe/unknown executable semantics, and escape
+  user-authored text. Importing a shared scenario must not modify canonical rules.
+- Creating, previewing, and decoding user scenarios should work against the locally
+  packaged reference data without Internet access. A local InfinityDB installation
+  can serve the existing backend; a genuinely browser-only/offline distribution
+  requires separate packaging and verification, not an assumption that a remotely
+  hosted website remains usable without connectivity.
+
+Implementation and codec choices remain post-1.0; the current browser `s=` format
+and server behavior are **unchanged** by this decision. See `docs/TODO.md` for
+benchmarks/acceptance tasks and `docs/data-model.md` for the authored-scenario model.
 
 ## Acquisition and snapshot lifecycle
 

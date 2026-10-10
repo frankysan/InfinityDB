@@ -7,7 +7,7 @@ from copy import deepcopy
 from typing import Any
 
 from infinity_db.database.repository import Database, accent_insensitive_key
-from infinity_db.domain_references import public_slug_for_reference
+from infinity_db.domain_references import public_slug_for_reference, rule_record_public_reference
 from infinity_db.domain_slugs import route_slug_from_typed_domain_id
 from infinity_db.rules_database import RulesDatabase
 
@@ -20,6 +20,15 @@ def _record_slug(record: dict[str, Any]) -> str:
         expected_domain="trait",
         context="curated trait id",
     )
+
+
+def _source_label_key(value: str) -> str:
+    """Compare source Label punctuation without changing canonical Labels."""
+    return accent_insensitive_key(value.replace(". ", " "))
+
+
+def _state_display_name(record: dict[str, Any]) -> str:
+    return str(record["name"]).removesuffix(" State")
 
 
 def _source_prefixes(record: dict[str, Any]) -> tuple[str, ...]:
@@ -46,6 +55,7 @@ class TraitCatalog:
         self._prefixes: list[tuple[str, dict[str, Any]]] | None = None
         self._labels: dict[str, dict[str, Any]] | None = None
         self._modifier_bases: set[str] | None = None
+        self._state_aliases: dict[str, dict[str, Any]] | None = None
 
     def _ensure_index(self) -> None:
         if self._records is not None:
@@ -73,7 +83,7 @@ class TraitCatalog:
         modifier_bases: set[str] = set()
         if self.rules_database is not None:
             for label in self.rules_database.current_labels():
-                key = accent_insensitive_key(label["name"])
+                key = _source_label_key(label["name"])
                 existing = labels.get(key)
                 if existing is not None and existing["id"] != label["id"]:
                     raise ValueError(
@@ -91,6 +101,17 @@ class TraitCatalog:
         self._prefixes = prefixes
         self._labels = labels
         self._modifier_bases = modifier_bases
+        state_aliases: dict[str, dict[str, Any]] = {}
+        if self.rules_database is not None:
+            for state in self.rules_database.composed_records_by_kind("state"):
+                for alias in [state["name"], *state.get("aliases", [])]:
+                    key = str(alias).strip().casefold()
+                    if key:
+                        existing = state_aliases.get(key)
+                        if existing is not None and existing["id"] != state["id"]:
+                            raise ValueError(f"State identity {alias!r} is ambiguous")
+                        state_aliases[key] = state
+        self._state_aliases = state_aliases
 
     def _record_for_label(self, label: object) -> dict[str, Any] | None:
         text = str(label or "").strip()
@@ -119,12 +140,23 @@ class TraitCatalog:
         self._ensure_index()
         assert self._labels is not None
         assert self._modifier_bases is not None
-        rules_label = self._labels.get(accent_insensitive_key(text))
+        rules_label = self._labels.get(_source_label_key(text))
         if rules_label is not None:
-            return {"kind": "label", "name": str(rules_label["name"])}
+            return {
+                "kind": "label",
+                "name": str(rules_label["name"]),
+                "label_id": str(rules_label["id"]),
+            }
         modifier = _SIGNED_MODIFIER.fullmatch(text)
         if modifier is not None:
             base_key = accent_insensitive_key(modifier.group("base"))
+            rules_label = self._labels.get(_source_label_key(modifier.group("base")))
+            if rules_label is not None:
+                return {
+                    "kind": "label",
+                    "name": text,
+                    "label_id": str(rules_label["id"]),
+                }
             if base_key in self._modifier_bases:
                 return {"kind": "modifier", "name": text}
         return None
@@ -134,15 +166,62 @@ class TraitCatalog:
         text = str(label or "").strip()
         if not text or text.startswith("["):
             return {"label": text, "name": None, "slug": None}
+        if text.casefold().startswith("state:"):
+            self._ensure_index()
+            assert self._state_aliases is not None
+            names = [part.strip() for part in text.split(":", 1)[1].split("/")]
+            states: list[dict[str, Any]] = []
+            for name in names:
+                state = self._state_aliases.get(name.casefold())
+                if not state:
+                    # Preserve the complete source text when any State is unknown.
+                    return {"label": text, "name": text, "slug": None}
+                states.append(state)
+            references = [
+                rule_record_public_reference(self.database, state) for state in states
+            ]
+            if all(references):
+                if len(states) == 1:
+                    return {
+                        "label": text,
+                        "name": states[0]["name"],
+                        "slug": None,
+                        "public_reference": references[0],
+                    }
+                canonical = "State: " + " / ".join(
+                    _state_display_name(state) for state in states
+                )
+                result: dict[str, Any] = {
+                    "label": text,
+                    "name": canonical,
+                    "slug": None,
+                    "state_references": [
+                        {"label": _state_display_name(state), "public_reference": reference}
+                        for state, reference in zip(states, references, strict=True)
+                    ],
+                }
+                if canonical != text:
+                    result["source_alias"] = True
+                return result
+            # Unknown or partially recognized State strings must not silently
+            # fall through to the generic Trait: State route.
+            return {"label": text, "name": text, "slug": None}
         record = self._record_for_label(text)
         if record is None:
             non_trait = self._non_trait_source_property(text)
             if non_trait is not None:
-                return {
+                result: dict[str, Any] = {
                     "label": text,
                     "name": non_trait["name"],
                     "slug": None,
                 }
+                if non_trait["kind"] == "label":
+                    result["public_reference"] = {
+                        "catalog": "labels", "id": non_trait["label_id"]
+                    }
+                    if text != non_trait["name"]:
+                        result["source_alias"] = True
+                return result
             source = next(
                 (item for item in self.database.list_traits() if item["name"] == text),
                 None,
@@ -152,11 +231,17 @@ class TraitCatalog:
                 "name": text,
                 "slug": None if source is None else source["slug"],
             }
-        return {
+        reference = {
             "label": text,
             "name": record["name"],
             "slug": _record_slug(record),
         }
+        # Exact curated aliases are safe display substitutions. Do not relabel
+        # parameterized source properties such as Disposable (2) as Disposable (X).
+        assert self._exact is not None
+        if text.casefold() != record["name"].casefold() and text.casefold() in self._exact:
+            reference["source_alias"] = True
+        return reference
 
     def _trait_groups(self) -> list[dict[str, Any]]:
         groups: dict[str, dict[str, Any]] = {}

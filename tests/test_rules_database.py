@@ -1,7 +1,9 @@
 import copy
+import json
 import os
 import sqlite3
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -25,6 +27,32 @@ def export_rules_database(*args, **kwargs) -> None:
     """Build semantic test fixtures without canonical SQLite finalization by default."""
     kwargs.setdefault("finalize", FINALIZE_TEST_DATABASES)
     export_release_rules_database(*args, **kwargs)
+
+
+def test_rules_export_creates_schema_inside_transaction(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    schema_transactions: list[bool] = []
+    original_connect = sqlite3.connect
+
+    def traced_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
+        connection = original_connect(*args, **kwargs)
+
+        def trace(statement: str) -> None:
+            if statement.lstrip().upper().startswith("CREATE "):
+                schema_transactions.append(connection.in_transaction)
+
+        connection.set_trace_callback(trace)
+        return connection
+
+    monkeypatch.setattr(sqlite3, "connect", traced_connect)
+    root = Path(__file__).parents[1]
+    path = tmp_path / "rules.db"
+    export_release_rules_database(load_curated_directory(root / "data/curated"), path)
+
+    assert schema_transactions
+    assert all(schema_transactions)
+    RulesDatabase(path).validate()
 
 
 @pytest.fixture(scope="module")
@@ -121,6 +149,26 @@ def test_rules_export_finalization_is_default_and_can_be_skipped(
     assert calls == []
 
 
+@pytest.mark.parametrize(
+    "record_id",
+    (
+        "weapon:drop-bears", "weapon:sepsitor-plus", "weapon:pt",
+        "weapon:pt-endgame", "weapon:kobra-pistol-cc",
+        "weapon:wildparrot", "weapon:para-mine",
+    ),
+)
+def test_weapon_source_notes_remain_distinct_from_gameplay_summary(
+    current_rules_database: RulesDatabase, record_id: str,
+) -> None:
+    record = current_rules_database.composed_record(record_id)
+    assert record is not None
+    notes = record["facts"]["sourceNotes"]
+    assert len(notes) == 1
+    assert "Army" in notes[0]
+    assert notes[0] not in record["summary"]
+    assert record["citations"]
+
+
 def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")
@@ -132,7 +180,34 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 339
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 372
+        assert connection.execute(
+            "SELECT id, title FROM scenario_collections"
+        ).fetchone() == ("n5-core", "N5 Core Scenarios")
+        assert connection.execute(
+            "SELECT collection_id, revision, source_collection_id "
+            "FROM scenario_collection_revisions"
+        ).fetchone() == ("n5-core", "5.3", "n5-core-v5.3")
+        assert connection.execute(
+            "SELECT scenario_id, position FROM scenario_memberships "
+            "ORDER BY position"
+        ).fetchall() == [
+            ("scenario:annihilation", 0),
+            ("scenario:domination", 1),
+            ("scenario:supplies", 2),
+            ("scenario:firefight", 3),
+        ]
+        publication_rows = connection.execute(
+            "SELECT scenario_id, content_sha256 FROM scenario_publications "
+            "ORDER BY scenario_id"
+        ).fetchall()
+        assert [row[0] for row in publication_rows] == [
+            "scenario:annihilation",
+            "scenario:domination",
+            "scenario:firefight",
+            "scenario:supplies",
+        ]
+        assert all(len(row[1]) == 64 for row in publication_rows)
         example_count = connection.execute(
             "SELECT COUNT(*) FROM records WHERE id LIKE '%example%'"
         ).fetchone()[0]
@@ -157,6 +232,88 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute(
             "SELECT url FROM sources WHERE id = 'n5-core-v5.3-pdf'"
         ).fetchone()[0] == "https://experience.corvusbelli.com/en/infinity/resources"
+        annihilation_row = connection.execute(
+            "SELECT kind, facts_json FROM records WHERE id = 'scenario:annihilation'"
+        ).fetchone()
+        assert annihilation_row is not None
+        assert annihilation_row[0] == "scenario"
+        annihilation_facts = json.loads(annihilation_row[1])
+        assert [
+            configuration["armyPoints"]
+            for configuration in annihilation_facts["configurations"]
+        ] == [[150], [200, 250], [300, 350, 400]]
+        assert {
+            (annotation["kind"], annotation["target"])
+            for annotation in annihilation_facts["configurations"][0]["geometry"][
+                "annotations"
+            ]
+        } == {
+            ("dimension", "deployment-a"),
+            ("dimension", "deployment-b"),
+        }
+        scenario_row = connection.execute(
+            "SELECT kind, facts_json FROM records WHERE id = 'scenario:domination'"
+        ).fetchone()
+        assert scenario_row is not None
+        assert scenario_row[0] == "scenario"
+        scenario_facts = json.loads(scenario_row[1])
+        assert scenario_facts["definitionVersion"] == 1
+        assert [
+            configuration["armyPoints"]
+            for configuration in scenario_facts["configurations"]
+        ] == [[150], [200, 250], [300, 350, 400]]
+        first_annotations = scenario_facts["configurations"][0]["geometry"][
+            "annotations"
+        ]
+        assert {annotation["target"] for annotation in first_annotations} == {
+            "deployment-a",
+            "deployment-b",
+            "quadrant-1",
+            "quadrant-2",
+            "quadrant-3",
+            "quadrant-4",
+        }
+        supplies_row = connection.execute(
+            "SELECT kind, facts_json FROM records WHERE id = 'scenario:supplies'"
+        ).fetchone()
+        assert supplies_row is not None
+        assert supplies_row[0] == "scenario"
+        supplies_facts = json.loads(supplies_row[1])
+        assert [
+            configuration["armyPoints"]
+            for configuration in supplies_facts["configurations"]
+        ] == [[150], [200, 250], [300, 350, 400]]
+        supplies_annotations = supplies_facts["configurations"][0]["geometry"][
+            "annotations"
+        ]
+        assert {
+            (annotation["kind"], annotation["target"])
+            for annotation in supplies_annotations
+        } == {
+            ("dimension", "deployment-a"),
+            ("dimension", "deployment-b"),
+            ("element-edge-distance", "supply-box-left"),
+            ("element-edge-distance", "supply-box-right"),
+        }
+        firefight_row = connection.execute(
+            "SELECT kind, facts_json FROM records WHERE id = 'scenario:firefight'"
+        ).fetchone()
+        assert firefight_row is not None
+        assert firefight_row[0] == "scenario"
+        firefight_facts = json.loads(firefight_row[1])
+        assert [
+            configuration["armyPoints"]
+            for configuration in firefight_facts["configurations"]
+        ] == [[150], [200, 250], [300, 350, 400]]
+        assert {
+            (annotation["kind"], annotation["target"])
+            for annotation in firefight_facts["configurations"][0]["geometry"][
+                "annotations"
+            ]
+        } == {
+            ("dimension", "deployment-a"),
+            ("dimension", "deployment-b"),
+        }
         assert connection.execute(
             "SELECT relation_type, related_record_id FROM record_relations "
             "WHERE record_id = 'skill:camouflage' ORDER BY position LIMIT 1"
@@ -239,6 +396,138 @@ def test_hacking_programs_reuse_canonical_current_labels(
     assert [label["name"] for label in programs["hacking-program:white-noise"]["labels"]] == [
         "Negative Feedback (NFB)"
     ]
+
+
+def test_controlled_jump_immediate_aro_and_opposing_effects_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    program = current_rules_database.composed_record("hacking-program:controlled-jump")
+    assert program is not None
+    assert "immediately" in program["summary"]
+
+    effects = " ".join(program["facts"]["effects"])
+    restrictions = " ".join(program["facts"]["restrictions"])
+    assert "as soon as it is declared" in effects
+    assert "before the Resolution step" in effects
+    assert "Supportware Token" in effects
+    assert "allied Troopers receive +3" in effects
+    assert "enemy Troopers receive -3" in effects
+    assert "even if the Troopers are not Hackable" in effects
+    assert "[[skill:combat-jump]]" in effects
+    assert "ARO" in effects and "anywhere on the table" in effects
+    assert "immediately applies to the same [[skill:combat-jump]] PH Roll" in effects
+    assert "ARO is optional" in restrictions
+    assert "their Programs' effects cancel" in restrictions
+    assert "This does not cancel independent MODs" in restrictions
+    assert "Firefight's Designated Landing Area +3" in restrictions
+    assert "one Controlled Jump Program active" in restrictions
+    assert {
+        citation["page"]
+        for citation in program["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+    } == {59, 155}
+    assert any(
+        relation["type"] == "modifies-rolls-for"
+        and relation["record_id"] == "skill:combat-jump"
+        for relation in program["relations"]
+    )
+
+
+def test_protheion_overkill_and_opponent_mod_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record("skill:protheion")
+    assert record is not None
+    assert "[[skill:cc-attack]]" in record["summary"]
+    assert "[[state:dead]]" in record["summary"]
+    assert "temporary VITA" not in record["summary"]
+
+    requirements = " ".join(record["facts"]["requirements"])
+    effects = " ".join(record["facts"]["effects"])
+    assert "reach or already be in Silhouette contact" in requirements
+    assert "Power-Up 1 or Power-Up 2 Token" in effects
+    assert "first remove the user's Wounds, then increase VITA" in effects
+    assert "finally apply Wounds received by the user" in effects
+    assert "applies to the enemy's Attribute in a Face to Face Roll" in effects
+    assert "not the user's Attribute" in effects
+    assert "additional failed Saving Rolls against it have no effect" in effects
+    assert "the second gives no benefit" in effects
+    assert "[[state:unconscious|Unconscious]]" in effects
+    assert "+2" in record["summary"]
+    assert {
+        (citation["source_id"], citation.get("page"))
+        for citation in record["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 109),
+        ("n5-faq-v0.1-en-pdf", 2),
+    }
+    assert any(
+        relation["type"] == "applies-effects-to"
+        and relation["record_id"] == "skill:cc-attack"
+        for relation in record["relations"]
+    )
+
+
+def test_speedball_faq_exclusion_is_published_on_both_rule_cards(
+    current_rules_database: RulesDatabase,
+) -> None:
+    speedball = current_rules_database.composed_record("skill:request-speedball")
+    program = current_rules_database.composed_record("hacking-program:controlled-jump")
+    assert speedball is not None and program is not None
+
+    assert "PH 15" in speedball["summary"]
+    assert "[[skill:combat-jump]]" in speedball["summary"]
+    assert "[[hacking-program:controlled-jump]]" in speedball["summary"]
+    assert "Troopers" in " ".join(speedball["facts"]["effects"])
+    assert "Speedballs are Tokens" in " ".join(speedball["facts"]["effects"])
+    assert "does not affect Speedball Tokens" in " ".join(
+        program["facts"]["restrictions"]
+    )
+    assert "[[skill:request-speedball]]" in " ".join(
+        program["facts"]["restrictions"]
+    )
+    assert "FAQ limits this Program to Troopers" in " ".join(
+        program["facts"]["restrictions"]
+    )
+    for record in (speedball, program):
+        assert any(
+            citation["source_id"] == "n5-faq-v0.1-en-pdf"
+            and citation["page"] == 1
+            for citation in record["citations"]
+        )
+    assert any(
+        relation["type"] == "uses-effects-of"
+        and relation["record_id"] == "skill:combat-jump"
+        for relation in speedball["relations"]
+    )
+
+
+def test_reviewed_trait_critical_and_wip_restrictions_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    continuous = current_rules_database.composed_record("trait:continuous-damage")
+    assert continuous is not None
+    assert "Each failed Saving Roll required by a hit" in continuous["summary"]
+    assert "inflicts a Wound" in continuous["summary"]
+    assert "additional roll does not apply Continuous Damage" in continuous["summary"]
+    assert "failing it does not start another chain" in continuous["summary"]
+    assert "[[skill:immunity]]" in continuous["summary"]
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf" and citation["page"] == 175
+        for citation in continuous["citations"]
+    )
+
+    wip = current_rules_database.composed_record("trait:bs-weapon-wip")
+    assert wip is not None
+    assert "using WIP instead of BS" in wip["summary"]
+    assert "BS Attack (Shock)" in wip["summary"]
+    assert "BS Attack (Guided)" in wip["summary"]
+    assert "not [[ammunition:shock|Shock Ammunition]] in general" in wip["summary"]
+    assert {
+        citation["page"]
+        for citation in wip["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+    } == {39, 175}
 
 
 def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
@@ -575,6 +864,7 @@ def test_army_link_records_use_current_collections_by_default(tmp_path: Path) ->
         "status": "superseded",
         "effectiveFrom": "2026-01-01",
     }
+    superseded["scenarioCollection"]["revision"] = "5.2"
     output = tmp_path / "rules.db"
     export_rules_database(
         [
@@ -613,6 +903,8 @@ def test_composed_records_attach_current_supplements_without_field_merging(
         "domain": "faq",
         "effectiveFrom": "2026-09-01",
     }
+    supplement.pop("scenarioComponents", None)
+    supplement.pop("scenarioCollection", None)
     supplement["records"] = [
         {
             "id": "skill:camouflage",
@@ -666,6 +958,7 @@ def test_export_rejects_ambiguous_current_definitions(tmp_path: Path) -> None:
         "title": "N5 Annex",
         "domain": "annex",
     }
+    duplicate.pop("scenarioCollection", None)
     duplicate["records"] = [
         next(record for record in duplicate["records"] if record["id"] == "skill:camouflage")
     ]
@@ -968,6 +1261,7 @@ def test_mimetism_modifier_interactions_are_bidirectional(
         ("imposes-modifiers-on", "outbound", "Discover"),
         ("reduces-modifiers-from", "inbound", "Multispectral Visor"),
         ("uses-effects-of", "inbound", "Foxhole State"),
+        ("uses-effects-of", "inbound", "Mines"),
         ("ignores-modifiers-from", "inbound", "Deactivator"),
         ("ignores-modifiers-from", "inbound", "Sensor"),
         ("ignores-modifiers-from", "inbound", "Speculative Attack"),
@@ -2073,6 +2367,28 @@ def test_remaining_equipment_slice_relations_are_bidirectional(
         for relation in tinbot_repeater["display_relations"]
     }
 
+def test_counterintelligence_protects_owners_first_turn_command_tokens(
+    current_rules_database: RulesDatabase,
+) -> None:
+    counterintelligence = current_rules_database.composed_record("skill:counterintelligence")
+    assert counterintelligence is not None
+    assert "opponent's Strategic Use" in counterintelligence["summary"]
+    assert "your first Turn" in counterintelligence["summary"]
+
+    order_removal, token_limit = counterintelligence["facts"]["effects"]
+    assert "opponent uses Strategic Use to remove two Regular Orders" in order_removal
+    assert "reduces the removal to one" in order_removal
+    assert "more than ten Regular, Irregular, and Tactical Orders in total" in order_removal
+    assert "opponent uses Strategic Use to limit your Command Token spending" in token_limit
+    assert "lets you spend up to two instead" in token_limit
+    assert "adversary may use" not in token_limit
+    assert ("applies-effects-to", "outbound", "Command Token: Strategic Use") in {
+        (relation["type"], relation["direction"], relation["record"]["name"])
+        for relation in counterintelligence["display_relations"]
+    }
+    assert counterintelligence["citations"]
+
+
 def test_command_order_skill_relations_are_bidirectional(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -2128,3 +2444,361 @@ def test_command_order_skill_relations_are_bidirectional(
         ("causes-state", "outbound", "Suppressive Fire State"),
         ("enables-use-of", "outbound", "Request Speedball"),
     }
+
+
+def test_annihilation_mission_round_trips_through_existing_rules_storage(
+    current_rules_database: RulesDatabase,
+) -> None:
+    from infinity_db.scenario_definition import parse_scenario_definition_record
+    from infinity_db.scenario_mission import NumericRangeCondition
+
+    record = current_rules_database.composed_record("scenario:annihilation")
+    assert record is not None
+    definition = parse_scenario_definition_record(record)
+    assert definition.mission is not None
+    assert [size.army_points for size in definition.mission.game_sizes] == [
+        150,
+        200,
+        250,
+        300,
+        350,
+        400,
+    ]
+    issue = definition.mission.source_issues[0]
+    assert (issue.army_points, issue.objective_id, issue.status) == (
+        (350,),
+        "preserve-forces",
+        "reviewed-resolution",
+    )
+    assert "85–175" in issue.description and "more than 270" in issue.description
+    survival = definition.mission.objectives[1]
+    ranges: list[tuple[int, int | None]] = []
+    for award in survival.awards:
+        if 350 not in award.army_points:
+            continue
+        condition = award.condition
+        assert isinstance(condition, NumericRangeCondition)
+        ranges.append((condition.minimum, condition.maximum))
+    assert ranges == [(85, 175), (176, 270), (271, None)]
+    assert (
+        "[[skill:lieutenant]]"
+        in record["facts"]["mission"]["objectives"][2]["awards"][0]["condition"]["text"]
+    )
+    assert {(citation["source_id"], citation["page"]) for citation in record["citations"]} == {
+        ("n5-core-v5.3-pdf", 149),
+        ("n5-core-v5.3-pdf", 150),
+    }
+
+
+def test_domination_mission_round_trips_scoring_geometry_and_minimum_vp(
+    current_rules_database: RulesDatabase,
+) -> None:
+    from infinity_db.scenario_definition import parse_scenario_definition_record
+    from infinity_db.scenario_mission import DominatedRegionComparison, ElementStatusCount
+
+    record = current_rules_database.composed_record("scenario:domination")
+    assert record is not None
+    mission = parse_scenario_definition_record(record).mission
+    assert mission is not None
+    assert [size.minimum_victory_points for size in mission.game_sizes] == [38, 50, 63, 75, 88, 100]
+    assert mission.game_sizes[4].swc == 6
+    assert isinstance(mission.objectives[0].awards[0].condition, DominatedRegionComparison)
+    assert isinstance(mission.objectives[1].awards[0].condition, ElementStatusCount)
+    assert mission.objectives[0].maximum_points_per_round == 2
+    assert mission.end_conditions[1].uses_minimum_victory_points
+    assert mission.source_issues[0].game_size_field == "swc"
+    assert {(c["source_id"], c["page"]) for c in record["citations"]} == {
+        ("n5-core-v5.3-pdf", 151),
+        ("n5-core-v5.3-pdf", 152),
+    }
+    specialist_rules = mission.rules[-1].paragraphs
+    assert "skill:chain-of-command" in mission.rules[-1].specialist_skill_ids
+    assert "[[skill:peripheral:plural]]" in specialist_rules[0]
+
+
+def test_supplies_mission_round_trips_control_conditions_and_resolved_geometry(
+    current_rules_database: RulesDatabase,
+) -> None:
+    from infinity_db.scenario_definition import parse_scenario_definition_record
+    from infinity_db.scenario_mission import ElementStatusComparison, ElementStatusCount
+
+    record = current_rules_database.composed_record("scenario:supplies")
+    assert record is not None
+    mission = parse_scenario_definition_record(record).mission
+    assert mission is not None
+    assert [s.swc for s in mission.game_sizes] == [3, 4, 5, 6, 7, 8]
+    assert isinstance(mission.objectives[0].awards[0].condition, ElementStatusCount)
+    assert isinstance(mission.objectives[1].awards[0].condition, ElementStatusComparison)
+    all_boxes = mission.objectives[2].awards[0].condition
+    assert isinstance(all_boxes, ElementStatusComparison) and all_boxes.comparison == "all"
+    assert mission.end_conditions[1].uses_minimum_victory_points
+    assert mission.source_issues == ()
+    assert {(c["source_id"], c["page"]) for c in record["citations"]} == {
+        ("n5-core-v5.3-pdf", 153), ("n5-core-v5.3-pdf", 154),
+    }
+
+
+def test_firefight_mission_round_trips_without_changing_canonical_skill_facts(
+    current_rules_database: RulesDatabase,
+) -> None:
+    from infinity_db.curated import load_curated_document
+    from infinity_db.scenario_definition import parse_scenario_definition_record
+    from infinity_db.scenario_mission import MetricComparison
+
+    record = current_rules_database.composed_record("scenario:firefight")
+    assert record is not None
+    mission = parse_scenario_definition_record(record).mission
+    assert mission is not None
+    assert [o.awards[0].objective_points for o in mission.objectives] == [2, 1, 3, 4]
+    assert all(isinstance(o.awards[0].condition, MetricComparison) for o in mission.objectives)
+    assert "[[skill:lieutenant:plural]]" in mission.objectives[2].name
+    assert not mission.end_conditions[1].uses_minimum_victory_points
+    assert {(c["source_id"], c["page"]) for c in record["citations"]} == {
+        ("n5-core-v5.3-pdf", 155), ("n5-core-v5.3-pdf", 156),
+    }
+    rules = {r.id: " ".join(r.paragraphs) for r in mission.rules}
+    assert "always Open Information" in rules["reinforced-tactical-link"]
+    assert "+3 MOD" in rules["designated-landing-area"]
+    core = load_curated_document(Path("data/curated/rules/n5-core-v5.3.json"))
+    for identifier in ("skill:lieutenant", "skill:combat-jump"):
+        source = next(r for r in core["records"] if r["id"] == identifier)
+        canonical = current_rules_database.composed_record(identifier)
+        assert canonical is not None and canonical["facts"] == source["facts"]
+
+
+def test_scenario_publication_resolution_separates_identity_collection_and_revision(
+    current_rules_database: RulesDatabase,
+) -> None:
+    publications = current_rules_database.scenario_publications("annihilation")
+    assert len(publications) == 1
+    publication = publications[0]
+    assert publication["scenario_id"] == "scenario:annihilation"
+    assert publication["name"] == "Annihilation"
+    assert publication["collection"] == "n5-core"
+    assert publication["revision"] == "5.3"
+    assert publication["publication_revision"] == "n5-core-v5.3"
+    assert len(publication["content_sha256"]) == 64
+    assert publication["status"] == "current"
+    assert publication["effective_from"] == "2026-08-10"
+    assert [source["version"] for source in publication["sources"]] == ["5.3"]
+
+    assert current_rules_database.resolve_scenario_publication("annihilation") == publication
+    assert (
+        current_rules_database.resolve_scenario_publication(
+            "scenario:annihilation", collection="n5-core"
+        )
+        == publication
+    )
+    assert (
+        current_rules_database.resolve_scenario_publication(
+            "annihilation", collection="n5-core", revision="5.3"
+        )
+        == publication
+    )
+
+
+def test_scenario_publication_resolution_never_falls_back_from_explicit_selection(
+    current_rules_database: RulesDatabase,
+) -> None:
+    assert (
+        current_rules_database.resolve_scenario_publication(
+            "annihilation", collection="missing-set"
+        )
+        is None
+    )
+    assert (
+        current_rules_database.resolve_scenario_publication(
+            "annihilation", collection="n5-core", revision="5.2"
+        )
+        is None
+    )
+    assert (
+        current_rules_database.resolve_scenario_publication(
+            "annihilation",
+            collection="missing-set",
+            revision="5.3",
+        )
+        is None
+    )
+    assert current_rules_database.resolve_scenario_publication("missing") is None
+
+    with pytest.raises(ValueError, match="scenario collection"):
+        current_rules_database.resolve_scenario_publication("annihilation", collection=" ")
+    with pytest.raises(ValueError, match="scenario revision"):
+        current_rules_database.resolve_scenario_publication(
+            "annihilation", collection="n5-core", revision=" v5.3"
+        )
+    with pytest.raises(ValueError, match="requires a scenario collection"):
+        current_rules_database.resolve_scenario_publication("annihilation", revision="5.3")
+
+
+def test_scenario_publication_resolution_can_select_exact_historical_revision(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    documents = load_curated_directory(root / "data" / "curated")
+    core_path, core = next(
+        item for item in documents if item[1]["collection"]["id"] == "n5-core-v5.3"
+    )
+    historical = copy.deepcopy(core)
+    historical["collection"].update(
+        {
+            "id": "n5-core-v5.2",
+            "title": "N5 Core Rules v5.2",
+            "status": "historical",
+            "effectiveFrom": "2026-01-01",
+        }
+    )
+    historical["scenarioCollection"]["revision"] = "5.2"
+    for source in historical["sources"]:
+        if source["id"] == "n5-core-v5.3-pdf":
+            source["version"] = "5.2"
+            source["publishedDate"] = "2026-01-01"
+
+    output = tmp_path / "rules.db"
+    export_rules_database(
+        [*documents, (core_path.with_name("n5-core-v5.2.json"), historical)],
+        output,
+    )
+    database = RulesDatabase(output)
+
+    current = database.resolve_scenario_publication("annihilation")
+    historical_publication = database.resolve_scenario_publication(
+        "annihilation", collection="n5-core", revision="5.2"
+    )
+    assert current is not None and current["revision"] == "5.3"
+    assert current["publication_revision"] == "n5-core-v5.3"
+    assert historical_publication is not None
+    assert historical_publication["revision"] == "5.2"
+    assert historical_publication["publication_revision"] == "n5-core-v5.2"
+    assert historical_publication["status"] == "historical"
+    assert historical_publication["sources"][0]["version"] == "5.2"
+    assert database.resolve_scenario_publication(
+        "annihilation", collection="n5-core", revision="5.2"
+    ) == historical_publication
+
+
+def test_ammunition_conditional_state_links_are_bidirectional(
+    current_rules_database: RulesDatabase,
+) -> None:
+    ammunition = {
+        record["id"]: record
+        for record in current_rules_database.composed_records_by_kind("ammunition")
+    }
+    states = {
+        record["id"]: record
+        for record in current_rules_database.composed_records_by_kind("state")
+    }
+    for ammunition_id, state_id in (
+        ("ammunition:em", "state:isolated"),
+        ("ammunition:em", "state:immobilized-b"),
+        ("ammunition:para", "state:immobilized-a"),
+        ("ammunition:shock", "state:dead"),
+        ("ammunition:stun", "state:stunned"),
+    ):
+        assert ("causes-state", "outbound", state_id) in {
+            (relation["type"], relation["direction"], relation["record"]["id"])
+            for relation in ammunition[ammunition_id]["display_relations"]
+        }
+        assert ("causes-state", "inbound", ammunition_id) in {
+            (relation["type"], relation["direction"], relation["record"]["id"])
+            for relation in states[state_id]["display_relations"]
+        }
+
+
+@pytest.mark.parametrize(
+    ("record_id", "required_fragments"),
+    [
+        (
+            "skill:doctor",
+            (
+                "must have VITA and be in [[state:unconscious|Unconscious State]]",
+                "A failed Roll puts the target directly into [[state:dead|Dead State]]",
+                "[[state:stunned|Stunned State]] may instead be canceled",
+                "replacement value does not apply to a subsequent Command Token reroll",
+                "Direct-use target allegiance remains under source review",
+            ),
+        ),
+        (
+            "skill:engineer",
+            (
+                "STR is required to remove Wounds by ordinary repair, but not to cancel",
+                "a failed condition-cancellation Roll has no negative consequence",
+                "[[state:stunned|Stunned State]], Engineer applies to STR",
+                "cancellation first, then the new effect",
+                "Direct-use target allegiance remains under source review",
+            ),
+        ),
+        (
+            "skill:intuitive-attack",
+            (
+                "one unmodified [[attribute:wip|WIP]] Roll",
+                "do not make a second attack Roll",
+                "reaction opposes that WIP Roll",
+                "Critical only against that Main Target",
+                "On a failed WIP Roll, do not place the weapon",
+            ),
+        ),
+        (
+            "equipment:medikit",
+            (
+                "target roll [[attribute:ph|PH]], not a Saving Roll",
+                "any one successful target PH Roll is enough to recover",
+                "only one Wound is removed in total",
+            ),
+        ),
+        (
+            "equipment:gizmokit",
+            (
+                "target roll [[attribute:ph|PH]], not a Saving Roll",
+                "any one successful target PH Roll removes only one Wound",
+                "cancel either level of [[state:unconscious|Unconscious State]]",
+            ),
+        ),
+        (
+            "trait:disposable-x",
+            (
+                "Burst increases consume additional charges",
+                "+1 SD does not spend an extra charge",
+            ),
+        ),
+        (
+            "trait:double-shot",
+            (
+                "it requires both uses to remain",
+                "spends both when applied",
+            ),
+        ),
+    ],
+)
+def test_recovery_and_intuitive_attack_explanations_survive_rules_export(
+    current_rules_database: RulesDatabase,
+    record_id: str,
+    required_fragments: tuple[str, ...],
+) -> None:
+    """N5.3 corrections must be available in published composed rules, not just JSON."""
+    record = current_rules_database.composed_record(record_id)
+    assert record is not None
+    facts = record.get("facts") or {}
+    sections = ("requirements", "effects", "restrictions")
+    text = " ".join(
+        [record["summary"]]
+        + [part for key in sections for part in facts.get(key, [])]
+    )
+    for fragment in required_fragments:
+        assert fragment in text
+    assert any(citation["source_id"] == "n5-core-v5.3-pdf" for citation in record["citations"])
+
+
+def test_recovery_and_intuitive_attack_avoid_the_old_misleading_baselines(
+    current_rules_database: RulesDatabase,
+) -> None:
+    doctor = current_rules_database.composed_record("skill:doctor")
+    engineer = current_rules_database.composed_record("skill:engineer")
+    intuitive = current_rules_database.composed_record("skill:intuitive-attack")
+    assert doctor is not None and engineer is not None and intuitive is not None
+    assert "friendly VITA-based" not in " ".join(doctor["facts"]["requirements"])
+    assert "friendly STR-based" not in " ".join(engineer["facts"]["requirements"])
+    assert "on success, the user performs a single" not in " ".join(
+        intuitive["facts"]["effects"]
+    )

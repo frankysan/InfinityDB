@@ -39,6 +39,193 @@ Record:
 Keep unresolved interpretations explicitly unresolved. Do not use this file to
 turn an inference into a source-native rule.
 
+### RR-AW-IMM-002 — Component-specific Immunity: reviewed AP+DA case
+
+**Scope:** N5.3 Immunity (AP) applied to an ARM-based AP+DA attack.
+
+The pinned [Immunity](https://infinitythewiki.com/index.php?title=Immunity&oldid=3643)
+rule treats its named Ammunition as Normal; the pinned
+[Combined Ammunition](https://infinitythewiki.com/index.php?title=Combined_Ammunition&oldid=3000)
+rule preserves the effects of each constituent type. Together, they support
+**AP+DA → N+DA, effectively DA** when Immunity (AP) negates only AP: the
+ARM-halving effect is removed, while DA still requires **two full-ARM Saving
+Rolls**, or **three** on a Critical. This interpretation was clarified during
+the 2026-10-09 project review and is **derived from the general rules**, not
+an example explicitly printed on the cited pages. It is recorded as a reviewed,
+non-executable case in `skill:immunity` and RS-AW-IMM-001.
+
+This exact example does not settle other named-component Immunities or other
+Combined Ammunition pairs, and should not be turned into a general calculation
+or generalized from weapon-name-specific Vulnerability examples. Historical
+N4/N3 interactions are not authoritative N5 precedents.
+
+### RR-AW-IMM-003 — Printed Immunity (BTS) versus Flash Pulse example
+
+**Scope:** N5.3 Wiki [Immunity Example 4](https://infinitythewiki.com/index.php?title=Immunity&oldid=3643), with the N5.3 [Weapon Chart](https://infinitythewiki.com/index.php?title=Weapon_Chart&oldid=4083) for Flash Pulse's STUN/BTS and Trait profile.
+
+**Explicit printed example:** Immunity (BTS) treats a Flash Pulse hit as Normal Ammunition; **Non-Lethal still prevents Wounds**, and **State: Stunned still applies after a failed Saving Roll**. The example confirms that neutralizing covered Ammunition does not erase these exceptional weapon Traits. Its failed-roll condition is material: the example does not apply Stunned on every hit.
+
+This is weapon-scoped, not a general Immunity (BTS) algorithm for all BTS weapons or for combined components. The curated `skill:immunity` reference records this exact example in `reviewedWeaponCases`, and `weapon:flash-pulse` links the same canonical Traits and State. Further weapon-specific interactions remain open.
+
+## Official publication-change notices
+
+See [N5 source and update history](n5-source-history.md) for the indexed official
+change posts and the reproducible cross-source review policy. Individual findings
+here must still cite the exact relevant publication and scope.
+
+### RR-SRC-N53-001 — N5.3 release changelog helps adjudicate source differences
+
+**Scope:** N5.3 core rules and Army changes; ITS Season 18 changes are separate.
+
+Corvus Belli's dated N5.3 announcement records a rules change to **Kobra Pistol**:
+Shock in BS Mode and DA in CC Mode. It also lists added weapons (Breaker Sniper
+Rifle, AP Red Fury, AP Thunderbolt), the Thunderbolt category, and a Trench-Hammer
+Disposable correction. Its Army changelog is a **separate** list, including a
+Bangbomb classification correction.
+
+This is useful as a change log and corroborating source for the ongoing Weapon
+Chart/Army comparison, not as a replacement for the printed N5.3 Weapon Chart or
+Army metadata. In particular, the announcement confirms the intended Kobra Pistol
+**ammunition by mode** but does **not** state why its printed CC-mode Saving Rolls
+cell differs from the Army value. Keep that mismatch open until the relevant rule
+and profile semantics are reconciled explicitly.
+
+Source: Corvus Belli, *ITS Season 18 + N5.3 Rules Update*, 2026-09-01,
+<https://infinityuniverse.com/en/news/infinity-rules-update-5-3>,
+sections "ARMY UPDATE CHANGELOG" and "N5.3 RULES CHANGELOG".
+The page is a URL-backed publication notice, not a locally hashed source snapshot.
+
+### RR-SRC-N53-002 — Kobra Pistol CC Mode: DA effect versus Trait attribution
+
+The N5.3 PDF (printed pp. 68, 182) assigns DA ammunition to Kobra Pistol CC Mode but prints one Saving Roll; the explicit DA ammunition rule (p. 64) requires **two** Saving Rolls per hit. The imported Army data and archived Wiki `Weapon_Chart` revision `4083` both show two; this semantic resolution does not change the printed discrepancy.
+
+The Wiki N5.3 updated `Mixed_Weapons` revision `4082` displays an explicit old/new comparison: the earlier CC Mode had Shock and CC Traits; the new version has DA and adds Anti-materiel. That records a Wiki editorial change, **not** an official explanation that the Trait should override the PDF. Current Army/Wiki show Anti-materiel, while the v5.3 PDF omits it. The September 1, 2026 official update names the ammunition change but does not mention Anti-materiel. Consequently the Trait remains disputed.
+
+A `sourceMode: "CC Mode"` curated Weapon reference now explains the confirmed DA mechanics and the conflict on the CC profile alone; BS Mode continues to show its unmodified Shock source profile. No new Anti-materiel membership, gameplay override, or cross-profile inheritance is asserted.
+
+Sources: [N5.3 release notice](https://infinityuniverse.com/en/news/infinity-rules-update-5-3); [N5.3 Wiki Mixed Weapons, oldid 4082](https://infinitythewiki.com/index.php?title=Mixed_Weapons&oldid=4082); [N5.3 Wiki Weapon Chart, oldid 4083](https://infinitythewiki.com/index.php?title=Weapon_Chart&oldid=4083). Official PDF v5.3 is locally pinned by the SHA-256 in `config/validation/weapon-trait-wiki-review.json`.
+
+### RR-SRC-N53-003 — Katyusha MRL missing plus sign in N5.3 chart
+
+**Scope:** Katyusha MRL range bands, N5 v5.3 core PDF (printed p. 187,
+SHA-256 `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`),
+September 2026 Army snapshot (`data/generated/infinity.db`, weapon source ID 49),
+and N5.3 Wiki `Weapon_Chart` (reviewed revision 4083; pinned content hash in
+`config/validation/weapon-trait-wiki-review.json`).
+
+The PDF chart extraction reports an **unsigned `3`** for the positive
+Katyusha range band, while Army encodes `+3`. The N5.3 English Wiki chart and
+its Spanish chart both show `+3` for the two 20–60 cm bands. Army's complete
+range-band sequence is `-3, +3, +3, 0, 0, -6, --` (20 cm increments).
+Under the Weapon Chart's signed-MOD notation, **only `0` may appear as an
+unsigned integer**; nonzero values must have an explicit `+` or `-`. The PDF's
+bare `3` is therefore an invalid value, and its intended correction is **`+3`**:
+Army and both language versions of the Wiki agree on this value. This is a
+**confirmed PDF sign-omission typo, not an unresolved gameplay rule**. The cause
+of the omission and whether an official erratum exists are unknown, but neither
+changes the interpretation. Preserve the literal `3` in the pinned PDF audit
+and the correct Army `+3`; do not silently normalize other chart values. The
+machine-checkable evidence is in
+`config/validation/weapon-range-source-review.json`.
+
+Sources: [N5.3 English Weapon Chart](https://infinitythewiki.com/Weapon_Chart),
+[Spanish Weapon Chart](https://infinitythewiki.com/es/Tabla_de_Armas);
+locally reviewed N5.3 PDF p. 187 and imported Army snapshot. This closes the
+**interpretation** of this specific discrepancy, not the larger Weapon Chart
+source-provenance or 1.0 completeness review.
+
+## Weaponry family prose (N5 v5.3)
+
+### RR-WPN-FAMILY-001 — Mines and Perimeter Weapons are distinct rules families
+
+**Scope:** current N5 core, Weaponry pp. 69 and 72; `rules.db` and Army snapshot
+from `InfinityDB-work-021d3921c61f.zip` (with the reviewed Boost curation).
+
+The Perimeter Weapons prose defines placement within the user's Zone of Control,
+while its separate Boost subsection specifies triggering, movement/contact,
+Dodge resolution, blocked paths, Marker exclusions and prevention of deployable
+chain reactions. The Mines subsection instead specifies camouflage placement,
+mandatory template triggering, friendly-model exclusion, a Dodge MOD, and
+special handling for Cybermines and Chest Mines. These are **not** interchangeable
+rules: Chest Mines explicitly exclude the shared Mines mechanics in both modes;
+Cybermines require Reset instead of Dodge.
+
+InfinityDB's current curated rules database now has three distinct N5 page-72
+Weapon definitions: `weapon:mines` for shared Mines placement and triggering mechanics,
+`weapon:cybermine` for the Comms Attack/Reset and Saving Roll exceptions, and
+`weapon:chest-mine` for separate BS/CC use modes that **do not inherit** the
+shared Mines mechanics. `trait:boost` continues to own Perimeter-specific
+activation, Dodge, blocked-path and Marker restrictions with its page-69
+citation; generic `trait:deployable` remains unchanged.
+
+The independently reviewed `weapon:wildparrot` reference covers N5 v5.3
+Weaponry p. 74: Perimeter/Deployable placement within ZoC followed by E/M Mine
+behavior, except that it deploys as a visible WildParrot Token/Model rather than
+a Camouflage Marker. It does **not** have Boost; sharing Perimeter with
+Crazykoala and Madtraps does not grant their movement/contact/detonation mechanic.
+Its own Army profile remains E/M, BTS/2, two Saving Rolls. The printed source's
+Non-Lethal Trait is absent from the Army source Traits, and the curated card
+explicitly identifies this unresolved source mismatch. Linked E/M, State, and
+Non-Lethal references do not modify the imported source fields. This review
+uses the pinned N5 v5.3 PDF p. 74 and the reviewed exact Wiki Trait discrepancy
+in `config/validation/weapon-trait-wiki-review.json`; the live N5 Wiki
+WildParrot page currently identifies revision 3610, but that live page is not
+a substitute for the pinned PDF or historical source evidence.
+
+The PDF-hash-pinned 21-clause inventory now classifies **all 21 selected clauses
+as explicitly represented** in the curated summaries, rather than inferring
+coverage from neighbouring generic concepts. Its scope remains bounded: the
+inventory does not establish complete Weaponry prose coverage. Seven verified
+named Mine Weapon slugs (`ap-mine`, `e-m-mine`, `monofilament-mine`,
+`para-mine`, `shock-mine`, `viral-mine`, `cybermine`) link to the shared
+Mines family;
+Cybermine additionally exposes its exception record. `chest-mine` links only
+to the Chest Mine exception record, with both Army modes sharing that
+reference; Drop Bears and Mine Dispenser deliberately do not inherit it.
+The catalog-enrichment regression checks these relationships against the
+tracked Army and rules databases. Actual browser visual navigation remains
+to be verified manually. The Weapon detail API now gives links to
+rules already rendered on the same page stable local anchors. In particular,
+Cybermine's shared Mines link leads to the adjacent Mines card, not to the
+first unrelated Army weapon sharing that definition. Chest Mine does not show
+shared Mines mechanics. Its comparison now links to the Mines card on the first
+linked Army Weapon's detail page (`/weapons/ap-mine#rule-weapon-mines`), with
+fragment navigation restored after the async API render. This is a temporary
+host for the shared definition, **not** a claim that AP Mine owns the rules;
+a dedicated canonical shared-family landing route remains an open design decision.
+
+An additional **archived Wiki** cross-check identifies the corresponding
+N5 pages `Perimeter_Weapons` (revision 3912), `Mines` (revision 4112), and
+`Chest_Mines` (revision 3525) from the 2026-09-28 English history snapshot.
+The Perimeter Weapons and general Mines sections support the same reviewed
+clauses. In the Wiki, the Mine line-of-fire notation uses a different degree
+symbol, and Chest Mine mode clauses live on their own page, rather than on the
+Mines page. Thus simple page-local string searches are not a valid semantic
+comparison for those four anchors; they are **not** confirmed rule conflicts.
+Archive SHA-256:
+`d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d`;
+page payload SHA-256 values: Perimeter Weapons
+`7510cf3a66b8147c2070426d4b2255a81061add3b87d33a710b0cb699f90271a`,
+Mines `5f1892817a145bb27a3b77f971829f745bce1757928904dbd6f16f2ad38d89d2`,
+Chest Mines `6f4abda6bc62e1be694921cb4f8b658d98781e43f72820e5c3618aa7939f90f0`.
+Wiki URLs: <https://infinitythewiki.com/Perimeter_Weapons>,
+<https://infinitythewiki.com/Mines>, and
+<https://infinitythewiki.com/Chest_Mines>. No live Wiki revisions have been
+rechecked for this audit, and no older N5 snapshot delta is inferred.
+
+The maintained read-only source anchors and concept associations are in
+`config/validation/weaponry-family-clauses.json`. Reproduce the current
+snapshot comparison using `tools/audit_weaponry_family_clauses.py`. The 21
+reviewed anchors are **not** a complete clause inventory of Weaponry pp. 68–74,
+and a represented summary is not proof of complete relations or browser coverage.
+
+Sources: N5 v5.3 PDF, printed pp. 69 (Perimeter Weapons/Boost), 72 (Mines,
+Cybermines, Chest Mines), PDF SHA-256
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`;
+`data/generated/infinity.db` and `data/generated/rules.db`, with their exact
+hashes emitted by the audit. PDF and generated databases are external audit
+inputs, not redistributed artifacts.
+
 ## Basic Rules / Broader research
 
 ### RR-BR-BASE-001 — Game Modes define finite recommended game presets
@@ -975,3 +1162,66 @@ justify static Unit eligibility or geometry fields in the catalog model.
 Source:
 
 - Wiki: <https://infinitythewiki.com/ITS_FAQ>
+
+### RR-WPN-MINE-002 — Named Mine profile and effect-owner review (N5.3)
+
+**Scope:** N5 v5.3 Weapon Chart printed p. 181 and Mines prose p. 72;
+Army catalog from `InfinityDB-work-368473cf9537.zip`; the pinned PDF SHA-256
+and per-variant review coordinates are recorded in
+`config/validation/mine-variant-effects.json`. The checked-in review reconciles
+seven named Mine profiles with Army's published Weapon detail API and with the
+curated ammunition, trait, state, and exceptional Weapon rule identities.
+This is a **profile/owner mapping**, not proof that every interaction is
+represented by a rule relation or evaluated by the browser.
+
+The profile-specific effects are **not** inherited from `weapon:mines`:
+
+- **AP Mine:** AP, ARM/2, one Saving Roll; see `ammunition:ap`.
+- **E/M Mine:** E/M, BTS/2, two Saving Rolls; the ammunition may impose
+  Isolated and (on particular target types) Immobilized-B. Non-Lethal does
+  not cancel those rolls.
+- **Monofilament Mine:** N, ARM=0, one Saving Roll and a separate State: Dead
+  Trait. This is not AP Ammunition.
+- **PARA Mine:** PARA, PH-6, one Saving Roll; applies its non-Wound
+  Immobilized-A effect. Its PS field is inapplicable.
+- **Shock Mine:** Shock, ARM, one Saving Roll; its special effect belongs
+  to `ammunition:shock`.
+- **Viral Mine:** N, BTS, one printed Saving Roll, plus BioWeapon (DA+Shock)
+  against VITA-bearing targets. Do not silently change the printed roll count
+  to two; the additional effects belong to `trait:bioweapon`.
+- **Cybermine:** no Ammunition designation, PS 5, two BTS Saving Rolls;
+  Comms Attack and the Reset / Stunned / Immobilized-B exceptions belong to
+  `weapon:cybermine`.
+
+The live N5.3 Wiki Weapon Chart and Mines rules corroborate these distinctions,
+but those pages may advance independently of the pinned local sources. The
+PARA Mine PDF/Wiki `[*]` versus Army `[**]` source-notation discrepancy remains
+**unresolved** and the original Army field is preserved. Chest Mine's two
+weapon modes remain outside this seven-variant family review.
+
+The `trait:non-lethal` summary previously implied that all non-lethal attacks
+skip Saving Rolls, contradicting the E/M, PARA, and Cybermine source profiles.
+The corrected definition prohibits Wounds without suppressing the rolls used
+to determine non-Wound effects. Citation: pinned `wiki-traits-oldid-4110`,
+Non-Lethal heading; compare the N5.3 Weapon Chart p. 181.
+
+### Sepsitor and Sepsitor Plus (N5.3; 2026-10-09)
+
+**Project domain:** Data processing
+
+The pinned N5 v5.3 Weaponry section (p. 73) governs both Sepsitor weapons.
+The N5.3 Weapon Chart (p. 187) gives Sepsitor PS 4 and Disposable (2), and
+Sepsitor Plus PS 3 without Disposable (2). Both require a BTS Saving Roll
+against a Cube-bearing target (or equivalent Equipment); a failed roll causes
+Sepsitorized State, and a Critical adds a Saving Roll. Cube 2.0's +2 MOD against
+both weapons comes from p. 121.
+
+Army weapon IDs **73** (Sepsitor) and **114** (Sepsitor Plus) preserve those
+individual values. Army omits N5.3's `[*]` Weaponry marker on Sepsitor Plus;
+the N5.3 PDF chart and Wiki include it. InfinityDB publishes distinct
+`weapon:sepsitor` and `weapon:sepsitor-plus` references, linked to the shared
+State and Cube 2.0 rules, without copying the Sepsitor Disposable Trait to
+Sepsitor Plus. This resolves navigation coverage, **not** the unexplained
+Army/PDF marker discrepancy; a proposed name-lookup explanation remains
+hypothetical. The exact older Wiki revision and source comparison are retained
+in `config/validation/weapon-trait-wiki-review.json`.

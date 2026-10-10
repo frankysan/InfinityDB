@@ -5,7 +5,10 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
+from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
+from infinity_db.weapon_ammunition_references import WeaponAmmunitionReferences
+from infinity_db.weapon_combined_saving_rolls import WeaponCombinedSavingRolls
 
 DECLARATION_KIND = "declaration-category"
 
@@ -48,6 +51,14 @@ class CatalogRules:
         self._source_variant_indexes: dict[
             str, dict[ArmyLinkRef, dict[str, Any]]
         ] = {}
+        self._rule_reference_cache: dict[str, dict[str, Any]] = {}
+        self._combined_saving_rolls = (
+            WeaponCombinedSavingRolls() if rules_database is not None else None
+        )
+        self._ammunition_references = (
+            WeaponAmmunitionReferences(rules_database)
+            if rules_database is not None else None
+        )
 
     @staticmethod
     def _application_refs(item: dict[str, Any]) -> tuple[ArmyLinkRef, ...]:
@@ -150,6 +161,7 @@ class CatalogRules:
 
         family_rules: dict[str, dict[str, Any]] = {}
         source_rules: dict[int, dict[str, dict[str, Any]]] = {}
+        mode_rules: dict[tuple[int, str], dict[str, dict[str, Any]]] = {}
 
         def collect_rules(army_ref: ArmyLinkRef, source_id: int | None) -> None:
             for record in rules_database.composed_records_for_army_link(
@@ -166,9 +178,17 @@ class CatalogRules:
                             f"Source-specific {entity} rule {record['id']!r} must be "
                             "linked by numeric source id"
                         )
-                    source_rules.setdefault(source_id, {}).setdefault(
-                        record["id"], record
+                    source_mode = (record.get("variant_semantics") or {}).get(
+                        "source_mode"
                     )
+                    if isinstance(source_mode, str):
+                        mode_rules.setdefault((source_id, source_mode), {}).setdefault(
+                            record["id"], record
+                        )
+                    else:
+                        source_rules.setdefault(source_id, {}).setdefault(
+                            record["id"], record
+                        )
                 else:
                     family_rules.setdefault(record["id"], record)
 
@@ -199,8 +219,81 @@ class CatalogRules:
             if variant_rules:
                 variant["rules"] = list(variant_rules.values())
 
+        ammunition_references = self._ammunition_references
+        if entity == "weapon" and ammunition_references is not None:
+            combined_saving_rolls = self._combined_saving_rolls
+            # Resolve source metadata, not display punctuation: AP+DA is an
+            # Ammunition composition, while Saving Roll x2 is a separate field.
+            def attach_ammunition_references(profiles: list[dict[str, Any]]) -> None:
+                for profile in profiles:
+                    segments = ammunition_references.for_profile(profile)
+                    if segments is not None:
+                        profile["ammunition_parts"] = segments
+                    composition = ammunition_references.composition_for_profile(profile)
+                    if composition is not None:
+                        profile["ammunition_composition"] = composition
+                    if combined_saving_rolls is not None:
+                        saving_roll = combined_saving_rolls.for_profile(profile)
+                        if saving_roll is not None:
+                            profile["combined_saving_roll"] = saving_roll
+
+            attach_ammunition_references(result.get("profiles", []))
+            for variant in result.get("weapon_variants", []):
+                attach_ammunition_references(variant.get("profiles", []))
+
+        if entity == "weapon" and mode_rules:
+            # Army can reuse one source ID for multiple different weapon modes.
+            # Mode-specific curated rules belong only to matching profile cards.
+            def attach_mode_rules(profiles: list[dict[str, Any]]) -> None:
+                for profile in profiles:
+                    source_id, mode = profile.get("id"), profile.get("mode")
+                    if type(source_id) is not int or not isinstance(mode, str):
+                        continue
+                    matched = mode_rules.get((source_id, mode))
+                    if matched:
+                        profile["rules"] = list(matched.values())
+
+            attach_mode_rules(result.get("profiles", []))
+            for variant in result.get("weapon_variants", []):
+                attach_mode_rules(variant.get("profiles", []))
+
         if catalog != "weapons":
             return result
+
+        # Published references are scoped by the canonical Army Weapon slug:
+        # shared placement rules do not imply identical variant effects.
+        slug = result.get("slug")
+        if isinstance(slug, str):
+            references: dict[str, dict[str, Any]] = {}
+            for record in records:
+                facts = record.get("facts") or {}
+                for record_id in facts.get("variantRuleReferences", {}).get(slug, []):
+                    if record_id in references:
+                        continue
+                    reference = self._rule_reference_cache.get(record_id)
+                    if reference is None:
+                        target = rules_database.composed_record(
+                            record_id, include_army_links=True
+                        )
+                        if target is None:
+                            raise ValueError(f"Unknown variant rule reference {record_id!r}")
+                        public_reference = rule_record_public_reference(None, target)
+                        if public_reference is None:
+                            raise ValueError(f"Unroutable variant rule reference {record_id!r}")
+                        reference = {
+                            "id": record_id,
+                            "name": target["name"],
+                            "kind": target["kind"],
+                            "public_reference": public_reference,
+                        }
+                        self._rule_reference_cache[record_id] = reference
+                    references[record_id] = reference
+            if references:
+                for profile in result.get("profiles", []):
+                    profile["rule_references"] = deepcopy(list(references.values()))
+                for variant in result.get("weapon_variants", []):
+                    for profile in variant.get("profiles", []):
+                        profile["rule_references"] = deepcopy(list(references.values()))
 
         profiles = [
             profile

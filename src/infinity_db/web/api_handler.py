@@ -6,6 +6,7 @@ import logging
 import re
 import sqlite3
 from http import HTTPStatus
+from typing import Any, Literal
 from urllib.parse import parse_qs
 
 from infinity_db import __version__
@@ -36,6 +37,9 @@ from infinity_db.maintained_text_references import (
 )
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.scenario_catalog import ScenarioCatalog
+from infinity_db.scenario_geometry import parse_scenario_geometry
+from infinity_db.scenario_map_svg import render_scenario_map_svg
 from infinity_db.search_catalog import SearchCatalog
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
@@ -59,6 +63,8 @@ from infinity_db.web.routes import (
     HACKING_PROGRAM_API_PATH,
     LABEL_API_PATH,
     RULE_API_PATH,
+    SCENARIO_API_PATH,
+    SCENARIO_MAP_API_PATH,
     SKILL_API_PATH,
     STATE_API_PATH,
     TRAIT_API_PATH,
@@ -80,6 +86,140 @@ def _public_reference_href(reference: dict[str, str] | None) -> str | None:
     if not catalog or not identifier:
         return None
     return f"/{catalog}/{identifier}"
+
+
+def _scenario_text_tokens(
+    database: Database,
+    rules_database: RulesDatabase | None,
+    value: str,
+    *,
+    scenario_id: str,
+) -> list[dict[str, Any]] | None:
+    return maintained_text_tokens(
+        database,
+        rules_database,
+        value,
+        scenario_id=scenario_id,
+    )
+
+
+def _enrich_scenario_api_item(
+    database: Database,
+    rules_database: RulesDatabase | None,
+    value: dict[str, Any],
+) -> dict[str, Any]:
+    """Attach maintained-text and public-reference projections to a scenario read model."""
+
+    result = enrich_rule_relation_references(database, value)
+    scenario_id = f"scenario:{result['slug']}"
+    result = enrich_maintained_text_references(
+        database,
+        rules_database,
+        result,
+        scenario_id=scenario_id,
+    )
+    description = result.get("description")
+    if isinstance(description, str):
+        result["description_tokens"] = _scenario_text_tokens(
+            database,
+            rules_database,
+            description,
+            scenario_id=scenario_id,
+        )
+
+    def enrich_component(component: dict[str, Any]) -> None:
+        for key in ("name", "description"):
+            text = component.get(key)
+            if isinstance(text, str):
+                component[f"{key}_tokens"] = _scenario_text_tokens(
+                    database,
+                    rules_database,
+                    text,
+                    scenario_id=scenario_id,
+                )
+        paragraphs = component.get("paragraphs")
+        if isinstance(paragraphs, list) and all(
+            isinstance(paragraph, str) for paragraph in paragraphs
+        ):
+            component["paragraph_tokens"] = [
+                _scenario_text_tokens(
+                    database,
+                    rules_database,
+                    paragraph,
+                    scenario_id=scenario_id,
+                )
+                for paragraph in paragraphs
+            ]
+        condition = component.get("condition")
+        if isinstance(condition, dict) and isinstance(condition.get("text"), str):
+            condition["text_tokens"] = _scenario_text_tokens(
+                database,
+                rules_database,
+                condition["text"],
+                scenario_id=scenario_id,
+            )
+        awards = component.get("awards")
+        if isinstance(awards, list):
+            for award in awards:
+                if not isinstance(award, dict):
+                    continue
+                award_condition = award.get("condition")
+                if isinstance(award_condition, dict) and isinstance(
+                    award_condition.get("text"), str
+                ):
+                    award_condition["text_tokens"] = _scenario_text_tokens(
+                        database,
+                        rules_database,
+                        award_condition["text"],
+                        scenario_id=scenario_id,
+                    )
+
+    setup = result.get("setup")
+    if isinstance(setup, dict):
+        sides = setup.get("sides")
+        if isinstance(sides, list):
+            for side in sides:
+                if isinstance(side, dict):
+                    enrich_component(side)
+    for key in ("objectives", "special_rules", "end_conditions", "source_issues"):
+        components = result.get(key)
+        if isinstance(components, list):
+            for component in components:
+                if isinstance(component, dict):
+                    enrich_component(component)
+    return result
+
+
+def _scenario_army_points(query_string: str) -> int:
+    params = _validated_query_params(query_string, {"army_points", "cache_bust"})
+    if "army_points" not in params:
+        raise ValueError("Provide army_points exactly once")
+    army_points = _integer(params, "army_points", None, 1, 10000)
+    if army_points is None:
+        raise ValueError("Provide army_points exactly once")
+    return army_points
+
+
+def _scenario_map_options(query_string: str) -> tuple[int, Literal["in", "cm"]]:
+    params = _validated_query_params(
+        query_string, {"army_points", "distance_unit", "cache_bust"}
+    )
+    army_points = _integer(params, "army_points", None, 1, 10000)
+    if army_points is None:
+        raise ValueError("Provide army_points exactly once")
+    distance_unit = params.get("distance_unit", ["in"])[0]
+    if distance_unit == "in":
+        return army_points, "in"
+    if distance_unit == "cm":
+        return army_points, "cm"
+    raise ValueError("distance_unit must be in or cm")
+
+
+def _scenario_summary(catalog: ScenarioCatalog, identifier: str) -> dict[str, Any] | None:
+    return next(
+        (item for item in catalog.list_scenarios() if item["slug"] == identifier),
+        None,
+    )
 
 
 def _integer(params: dict, key: str, default: int | None, low: int, high: int) -> int | None:
@@ -302,6 +442,7 @@ class ApiHandler:
         self.ammunition_catalog = RulesRecordCatalog(rules_database, "ammunition")
         self.label_catalog = LabelCatalog(rules_database)
         self.general_rules_catalog = RulesRecordCatalog(rules_database, "rules")
+        self.scenario_catalog = ScenarioCatalog(rules_database)
         self.glossary_catalog = GlossaryCatalog(database, rules_database)
         self.legacy_armies = load_legacy_armies()
         self.search_catalog = SearchCatalog(
@@ -572,12 +713,18 @@ class ApiHandler:
                     attach_public_catalog_slug(self.database, "weapons", payload)
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("weapons", payload)
+                    local_rule_ids = frozenset(
+                        rule["id"] for rule in payload.get("rules", [])
+                    )
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, local_rule_ids=local_rule_ids
+                    )
                     payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
+                        self.database, self.rules_database, payload,
+                        local_rule_ids=local_rule_ids,
                     )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read reference item")
@@ -719,6 +866,136 @@ class ApiHandler:
                 status = HTTPStatus.SERVICE_UNAVAILABLE
                 payload = {
                     "error": "The Label reference is unavailable. Please try again."
+                }
+        elif path == "/api/scenarios":
+            cache_control = API_CACHE_CONTROL
+            try:
+                _validated_query_params(query_string, {"cache_bust"})
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)},
+                    status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                items = [
+                    _enrich_scenario_api_item(
+                        self.database,
+                        self.rules_database,
+                        item,
+                    )
+                    for item in self.scenario_catalog.list_scenarios()
+                ]
+                payload = {"items": items}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read scenarios")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "Scenario information is unavailable. Please try again."
+                }
+        elif match := SCENARIO_MAP_API_PATH.fullmatch(path):
+            cache_control = API_CACHE_CONTROL
+            try:
+                army_points, distance_unit = _scenario_map_options(query_string)
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)},
+                    status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                identifier = match.group("identifier")
+                summary = _scenario_summary(self.scenario_catalog, identifier)
+                if summary is None:
+                    return WebResponse.json(
+                        {"error": "Scenario not found"},
+                        status=HTTPStatus.NOT_FOUND,
+                        cache_control=cache_control,
+                    )
+                if army_points not in summary["supported_army_points"]:
+                    supported = ", ".join(
+                        str(value) for value in summary["supported_army_points"]
+                    )
+                    return WebResponse.json(
+                        {
+                            "error": (
+                                f"This scenario does not support {army_points} Army Points. "
+                                f"Supported values: {supported}."
+                            )
+                        },
+                        status=HTTPStatus.BAD_REQUEST,
+                        cache_control=cache_control,
+                    )
+                scenario = self.scenario_catalog.get_scenario(
+                    identifier,
+                    army_points=army_points,
+                )
+                if scenario is None:
+                    return WebResponse.json(
+                        {"error": "Scenario not found"},
+                        status=HTTPStatus.NOT_FOUND,
+                        cache_control=cache_control,
+                    )
+                geometry = parse_scenario_geometry(scenario["placement"]["geometry"])
+                svg = render_scenario_map_svg(geometry, distance_unit=distance_unit)
+                return WebResponse(
+                    body=svg.encode("utf-8"),
+                    content_type="image/svg+xml; charset=utf-8",
+                    cache_control=cache_control,
+                )
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not render scenario map")
+                return WebResponse.json(
+                    {"error": "Scenario map is unavailable. Please try again."},
+                    status=HTTPStatus.SERVICE_UNAVAILABLE,
+                    cache_control=cache_control,
+                )
+        elif match := SCENARIO_API_PATH.fullmatch(path):
+            cache_control = API_CACHE_CONTROL
+            try:
+                army_points = _scenario_army_points(query_string)
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)},
+                    status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                identifier = match.group("identifier")
+                summary = _scenario_summary(self.scenario_catalog, identifier)
+                if summary is None:
+                    status = HTTPStatus.NOT_FOUND
+                    payload = {"error": "Scenario not found"}
+                elif army_points not in summary["supported_army_points"]:
+                    status = HTTPStatus.BAD_REQUEST
+                    supported = ", ".join(
+                        str(value) for value in summary["supported_army_points"]
+                    )
+                    payload = {
+                        "error": (
+                            f"This scenario does not support {army_points} Army Points. "
+                            f"Supported values: {supported}."
+                        )
+                    }
+                else:
+                    payload = self.scenario_catalog.get_scenario(
+                        identifier,
+                        army_points=army_points,
+                    )
+                    if payload is None:
+                        status = HTTPStatus.NOT_FOUND
+                        payload = {"error": "Scenario not found"}
+                    else:
+                        payload = _enrich_scenario_api_item(
+                            self.database,
+                            self.rules_database,
+                            payload,
+                        )
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read scenario")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {
+                    "error": "Scenario information is unavailable. Please try again."
                 }
         elif path == "/api/armies":
             cache_control = API_CACHE_CONTROL

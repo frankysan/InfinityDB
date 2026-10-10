@@ -1,4 +1,6 @@
 import { appendMaintainedText, maintainedTextFragment } from "./maintained-text.js";
+import { ammunitionFactRows } from "./ammunition-facts.js";
+import { immunityCaseRows } from "./immunity-cases.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 import { tableViewport } from "./view-components.js";
 
@@ -13,7 +15,7 @@ function citationLabel(citation) {
   return `${source}${version}${location ? `, ${location}` : ""}`;
 }
 
-function citationNode(citation) {
+export function rulesCitationNode(citation) {
   const label = citationLabel(citation);
   if (!citation.source_url) return document.createTextNode(label);
   const link = document.createElement("a");
@@ -32,6 +34,8 @@ function applicabilityText(rule) {
   if (seasons.length && !(seasons.length === 1 && seasons[0] === "current")) {
     parts.push(seasons.join(", "));
   }
+  const scenarios = Array.isArray(rule.applicable_scenarios) ? rule.applicable_scenarios : [];
+  if (scenarios.length) parts.push(scenarios.map((item) => item.name).join(", "));
   return parts.join(" · ");
 }
 
@@ -161,46 +165,170 @@ function ruleBadgeRow(rule) {
   return badgeRow;
 }
 
+function appendRuleFactGroup(container, rule, key, label) {
+  const facts = rule.facts || {};
+  if (!Array.isArray(facts[key]) || !facts[key].length) return;
+  const group = document.createElement("div");
+  group.className = "detail-fact-group";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
+  heading.textContent = label;
+  const list = document.createElement("ul");
+  list.className = "detail-list";
+  for (const [index, fact] of facts[key].entries()) {
+    const item = document.createElement("li");
+    appendMaintainedText(item, rule.fact_tokens?.[key]?.[index], fact);
+    list.append(item);
+  }
+  group.append(heading, list);
+  container.append(group);
+}
+
+function appendAmmunitionFacts(container, rule) {
+  if (rule.kind !== "ammunition") return;
+  const states = new Map((rule.display_relations || [])
+    .filter((relation) => relation.record?.kind === "state")
+    .map((relation) => [relation.record.id, relation.record]));
+  const stateNames = Object.fromEntries(
+    [...states].map(([id, state]) => [id, state.name])
+  );
+  const rows = ammunitionFactRows(rule.facts, stateNames);
+  if (!rows.length) return;
+  const group = document.createElement("div");
+  group.className = "detail-fact-group ammunition-mechanics";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
+  heading.textContent = "Reviewed mechanics";
+  const list = document.createElement("dl");
+  list.className = "ammunition-mechanics-list";
+  for (const [label, value, stateId] of rows) {
+    const term = document.createElement("dt");
+    const state = stateId ? states.get(stateId) : null;
+    const href = state ? relationHref(state) : null;
+    if (href) {
+      const link = document.createElement("a");
+      link.href = href;
+      link.textContent = label;
+      term.append(link);
+    } else {
+      term.textContent = label;
+    }
+    const description = document.createElement("dd");
+    description.textContent = value;
+    list.append(term, description);
+  }
+  const caveat = document.createElement("p");
+  caveat.className = "detail-source";
+  caveat.textContent = "See the rules above for all conditions and exceptions.";
+  group.append(heading, list, caveat);
+  container.append(group);
+}
+
+function appendImmunityCases(container, rule) {
+  if (rule.id !== "skill:immunity") return;
+  const rows = immunityCaseRows(rule.facts);
+  if (!rows.length) return;
+  const group = document.createElement("div");
+  group.className = "detail-fact-group immunity-reviewed-cases";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
+  heading.textContent = "Reviewed interactions";
+  const list = document.createElement("ul");
+  list.className = "detail-list";
+  for (const row of rows) {
+    const item = document.createElement("li");
+    const title = document.createElement("strong");
+    appendMaintainedText(title, row.title);
+    const explanation = document.createElement("p");
+    explanation.className = "detail-copy";
+    appendMaintainedText(explanation, row.detail);
+    const provenance = document.createElement("p");
+    provenance.className = "detail-source";
+    provenance.textContent = row.evidence;
+    item.append(title, explanation, provenance);
+    list.append(item);
+  }
+  const caveat = document.createElement("p");
+  caveat.className = "detail-source";
+  caveat.textContent = "Only these conditions are reviewed. Critical counts assume no Immunity (Critical); see the cited rules below.";
+  group.append(heading, list, caveat);
+  container.append(group);
+}
+
+// Blank lines mark semantic paragraphs in maintained summaries. Preserve inline
+// links and emphasis when a paragraph boundary falls inside a text token.
+function summaryParagraphs(tokens, fallback = "") {
+  const paragraphs = [[]];
+  const source = Array.isArray(tokens) ? tokens : [{ type: "text", text: fallback }];
+  for (const token of source) {
+    if (token?.type !== "text") {
+      paragraphs[paragraphs.length - 1].push(token);
+      continue;
+    }
+    const parts = (token.text || "").split(/\n\s*\n/);
+    for (const [index, part] of parts.entries()) {
+      if (index) paragraphs.push([]);
+      if (part) paragraphs[paragraphs.length - 1].push({ type: "text", text: part });
+    }
+  }
+  return paragraphs.filter((tokens) => tokens.some(
+    (token) => token.type !== "text" || token.text.trim(),
+  ));
+}
+
 function appendRuleDetails(
   container,
   rule,
-  { includeBadges = true, beforeRelations = [] } = {},
+  { includeBadges = true, includeApplicability = true, beforeRelations = [] } = {},
 ) {
-  const summary = document.createElement("p");
-  summary.className = "detail-copy";
-  appendMaintainedText(summary, rule.summary_tokens, rule.summary);
-  container.append(summary);
+  for (const paragraphTokens of summaryParagraphs(rule.summary_tokens, rule.summary)) {
+    const paragraph = document.createElement("p");
+    paragraph.className = "detail-copy";
+    appendMaintainedText(paragraph, paragraphTokens);
+    container.append(paragraph);
+  }
 
   const badgeRow = includeBadges ? ruleBadgeRow(rule) : null;
   if (badgeRow) container.append(badgeRow);
 
   const facts = rule.facts || {};
-  for (const [key, label] of [
-    ["requirements", "Requirements"],
-    ["effects", "Effects"],
-    ["restrictions", "Restrictions"],
-  ]) {
-    if (!Array.isArray(facts[key]) || !facts[key].length) continue;
+  appendRuleFactGroup(container, rule, "requirements", "Requirements");
+  appendRuleFactGroup(container, rule, "effects", "Effects");
+  appendAmmunitionFacts(container, rule);
+
+  const specialists = facts.specialists?.anyOfSkills;
+  if (Array.isArray(specialists) && specialists.length) {
     const group = document.createElement("div");
     group.className = "detail-fact-group";
     const heading = document.createElement("h4");
     heading.className = "detail-fact-heading";
-    heading.textContent = label;
+    heading.textContent = "Qualifying Skills";
     const list = document.createElement("ul");
     list.className = "detail-list";
-    for (const [index, fact] of facts[key].entries()) {
+    for (const [index, identifier] of specialists.entries()) {
       const item = document.createElement("li");
-      appendMaintainedText(item, rule.fact_tokens?.[key]?.[index], fact);
+      appendMaintainedText(item, rule.fact_tokens?.specialists?.[index], identifier);
       list.append(item);
     }
     group.append(heading, list);
     container.append(group);
   }
 
+  appendRuleFactGroup(container, rule, "restrictions", "Restrictions");
+  appendRuleFactGroup(container, rule, "clarifications", "Clarifications and examples");
+  appendImmunityCases(container, rule);
+
   container.append(...beforeRelations);
   appendRuleRelations(container, rule);
 
-  const applicability = applicabilityText(rule);
+  for (const [index, note] of (rule.facts?.sourceNotes || []).entries()) {
+    const paragraph = document.createElement("p");
+    paragraph.className = "rules-source-note";
+    appendMaintainedText(paragraph, rule.fact_tokens?.sourceNotes?.[index], note);
+    container.append(paragraph);
+  }
+
+  const applicability = includeApplicability ? applicabilityText(rule) : "";
   if (applicability) {
     const context = document.createElement("p");
     context.className = "detail-source";
@@ -213,7 +341,7 @@ function appendRuleDetails(
     citations.className = "detail-source";
     for (const [index, citation] of rule.citations.entries()) {
       if (index) citations.append(" · ");
-      citations.append(citationNode(citation));
+      citations.append(rulesCitationNode(citation));
     }
     container.append(citations);
   }
@@ -223,7 +351,7 @@ function appendRuleDetails(
 export function hasGameplayRuleFacts(rule) {
   return [rule, ...(rule?.supplements || [])].some((contribution) => {
     const facts = contribution?.facts || {};
-    return ["requirements", "effects", "restrictions"].some(
+    return ["requirements", "effects", "restrictions", "clarifications"].some(
       (key) => Array.isArray(facts[key]) && facts[key].length,
     );
   });
@@ -296,10 +424,16 @@ export function levelEffectsSection(rules) {
 
 export function rulesReferenceArticle(
   rule,
-  { leadingContent = [], headerContent = [], beforeRelations = [] } = {},
+  {
+    leadingContent = [],
+    headerContent = [],
+    beforeRelations = [],
+    includeApplicability = true,
+  } = {},
 ) {
   const article = document.createElement("article");
   article.className = "surface surface--subtle detail-section";
+  if (rule.id) article.id = `rule-${rule.id.replaceAll(":", "-")}`;
   const header = document.createElement("header");
   header.className = "surface-titlebar surface-titlebar--ruled rules-card-titlebar";
   const title = document.createElement("h3");
@@ -309,7 +443,11 @@ export function rulesReferenceArticle(
   if (badgeRow) header.append(badgeRow);
   header.append(...headerContent);
   article.append(header, ...leadingContent);
-  appendRuleDetails(article, rule, { includeBadges: false, beforeRelations });
+  appendRuleDetails(article, rule, {
+    includeBadges: false,
+    includeApplicability,
+    beforeRelations,
+  });
 
   for (const supplement of rule.supplements || []) {
     const supplemental = document.createElement("div");
@@ -317,7 +455,7 @@ export function rulesReferenceArticle(
     const supplementTitle = document.createElement("h4");
     supplementTitle.textContent = "Additional rules";
     supplemental.append(supplementTitle);
-    appendRuleDetails(supplemental, supplement);
+    appendRuleDetails(supplemental, supplement, { includeApplicability });
     article.append(supplemental);
   }
   return article;

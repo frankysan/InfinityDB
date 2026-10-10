@@ -99,6 +99,7 @@ class Application:
         self.hacking_program_catalog = self.api.hacking_program_catalog
         self.search_catalog = self.api.search_catalog
         self.catalog_rules = self.api.catalog_rules
+        self.scenario_catalog = self.api.scenario_catalog
         self.symbol_catalog = self.api.symbol_catalog
         self.fireteam_rules_reference = self.api.fireteam_rules_reference
         self.request_metrics = RequestMetrics()

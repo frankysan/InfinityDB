@@ -1,0 +1,459 @@
+from __future__ import annotations
+
+import re
+from pathlib import Path
+from xml.etree import ElementTree
+
+import pytest
+
+from infinity_db.curated import load_curated_document
+from infinity_db.scenario_definition import scenario_definition_from_curated_document
+from infinity_db.scenario_geometry import marker_radius_inches, parse_scenario_geometry
+from infinity_db.scenario_map_svg import ScenarioMapRenderError, render_scenario_map_svg
+
+
+def test_render_scenario_map_svg_is_deterministic_and_uses_inch_viewbox() -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Domination <test>",
+            "table": {"width": 48, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": {"anchor": "right"},
+                    "y2": 8,
+                },
+                {
+                    "id": "center-line",
+                    "kind": "line",
+                    "style": "guide",
+                    "x1": 0,
+                    "y1": {"anchor": "center"},
+                    "x2": {"anchor": "right"},
+                    "y2": {"anchor": "center"},
+                },
+                {
+                    "id": "console",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "console",
+                    "x": {"anchor": "center", "offset": -6},
+                    "y": {"anchor": "center"},
+                },
+                {
+                    "id": "console-label",
+                    "kind": "label",
+                    "style": "label",
+                    "x": {"anchor": "center", "offset": -6},
+                    "y": {"anchor": "center", "offset": -2},
+                    "text": "Console & objective",
+                    "align": "middle",
+                },
+            ],
+        }
+    )
+
+    first = render_scenario_map_svg(geometry)
+    second = render_scenario_map_svg(geometry)
+
+    assert first == second
+    assert first.startswith('<?xml version="1.0" encoding="UTF-8"?>\n')
+    assert 'viewBox="0 0 48 32"' in first
+    assert 'data-unit="in"' in first
+    assert "<title id=\"map-title\">Domination &lt;test&gt;</title>" in first
+    assert (
+        '<rect id="deployment-a" class="deployment-a" x="0" y="0" '
+        'width="48" height="8"/>'
+    ) in first
+    assert (
+        '<line id="center-line" class="guide" x1="0" y1="16" x2="48" y2="16"/>'
+    ) in first
+    assert (
+        '<circle id="console" class="objective" data-marker-type="console" '
+        'data-diameter-mm="40" cx="18" cy="16" r="0.787402"/>'
+    ) in first
+    assert "Console &amp; objective</text>" in first
+    assert first.endswith("</svg>\n")
+
+
+def test_render_scenario_map_svg_uses_canonical_size_for_supply_boxes() -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Supply Box reference size",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "supply-box",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "supply-box",
+                    "x": {"anchor": "center"},
+                    "y": {"anchor": "center"},
+                }
+            ],
+        }
+    )
+
+    svg = render_scenario_map_svg(geometry)
+
+    assert (
+        '<circle id="supply-box" class="objective" data-marker-type="supply-box" '
+        'data-diameter-mm="25" cx="12" cy="16" r="0.492126"/>'
+    ) in svg
+
+
+@pytest.mark.parametrize(
+    ("width", "height"),
+    [(24, 32), (32, 48), (48, 48)],
+)
+def test_render_scenario_map_svg_supports_core_table_size_presets(
+    width: int, height: int
+) -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Core table size",
+            "table": {"width": width, "height": height, "unit": "in"},
+            "elements": [],
+        }
+    )
+
+    svg = render_scenario_map_svg(geometry)
+
+    assert f'viewBox="0 0 {width} {height}"' in svg
+
+
+
+def test_scenario_map_theme_roles_are_defined_for_all_explicit_themes() -> None:
+    root = Path(__file__).parents[1] / "src/infinity_db/web/static"
+    page_css = (root / "page-overrides.css").read_text(encoding="utf-8")
+    standalone_css = render_scenario_map_svg(
+        parse_scenario_geometry(
+            {
+                "format": "InfinityDB scenario geometry",
+                "formatVersion": 1,
+                "title": "Theme roles",
+                "table": {"width": 24, "height": 32, "unit": "in"},
+                "elements": [],
+            }
+        )
+    )
+    roles = set(re.findall(r"--color-scenario-map-[\w-]+", standalone_css))
+    assert len(roles) >= 10
+    for role in roles:
+        assert role in page_css
+        for theme in ("light", "dark"):
+            theme_css = (root / "themes" / f"{theme}.css").read_text(encoding="utf-8")
+            assert f"{role}:" in theme_css
+
+
+@pytest.mark.parametrize(
+    ("width", "height", "label_size", "measure_size"),
+    [(24, 32, "1.4", "1.1"), (32, 48, "1.633333", "1.283333"), (48, 48, "2.1", "1.65")],
+)
+def test_scenario_map_typography_scales_with_table_width(
+    width: int, height: int, label_size: str, measure_size: str
+) -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Typography",
+            "table": {"width": width, "height": height, "unit": "in"},
+            "elements": [],
+        }
+    )
+    root = ElementTree.fromstring(render_scenario_map_svg(geometry))
+    assert root.attrib["style"] == (
+        f"--scenario-map-label-size:{label_size}px;"
+        f"--scenario-map-measure-size:{measure_size}px"
+    )
+
+
+_CORE_RULES = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+
+
+@pytest.mark.parametrize(
+    "scenario_id",
+    [
+        "scenario:annihilation",
+        "scenario:domination",
+        "scenario:supplies",
+        "scenario:firefight",
+    ],
+)
+def test_render_maintained_core_scenario_maps_are_deterministic_and_well_formed(
+    scenario_id: str,
+) -> None:
+    document = load_curated_document(_CORE_RULES)
+    definition = scenario_definition_from_curated_document(document, scenario_id)
+
+    for configuration in definition.configurations:
+        geometry = configuration.geometry
+        first = render_scenario_map_svg(geometry)
+        second = render_scenario_map_svg(geometry)
+
+        assert first == second
+        root = ElementTree.fromstring(first)
+        assert root.tag == "{http://www.w3.org/2000/svg}svg"
+        assert root.attrib["viewBox"] == (
+            f"0 0 {geometry.table.width:g} {geometry.table.height:g}"
+        )
+
+
+def test_render_scenario_map_svg_projects_derived_dimensions_and_area_size() -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Measured region",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "deployment-a",
+                    "kind": "rectangle",
+                    "style": "deployment-a",
+                    "x1": 0,
+                    "y1": 0,
+                    "x2": {"anchor": "right"},
+                    "y2": 8,
+                }
+            ],
+            "annotations": [
+                {
+                    "id": "deployment-depth",
+                    "kind": "dimension",
+                    "target": "deployment-a",
+                    "axis": "y",
+                    "side": "start",
+                },
+                {
+                    "id": "deployment-size",
+                    "kind": "area-size",
+                    "target": "deployment-a",
+                },
+            ],
+        }
+    )
+
+    svg = render_scenario_map_svg(geometry)
+
+    assert (
+        '<g id="deployment-depth" class="measurement" data-target="deployment-a" '
+        'data-axis="y">'
+    ) in svg
+    assert '>8″</text></g>' in svg
+    assert (
+        '<text id="deployment-size" class="area-size" data-target="deployment-a" '
+        'x="12" y="6.56" text-anchor="middle" data-distance-size-inches="24,8">24″ × 8″</text>'
+    ) in svg
+
+
+def test_scenario_map_measurements_change_units_without_changing_geometry() -> None:
+    radius = marker_radius_inches("supply-box")
+    assert radius is not None
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Unit-aware measurements",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "zone", "kind": "rectangle", "style": "deployment-a",
+                    "x1": 0, "y1": 0, "x2": 24, "y2": 8,
+                },
+                {
+                    "id": "box", "kind": "marker", "style": "objective",
+                    "markerType": "supply-box", "x": 8 + radius, "y": 16,
+                },
+            ],
+            "annotations": [
+                {
+                    "id": "zone-depth", "kind": "dimension", "target": "zone",
+                    "axis": "y", "side": "start",
+                },
+                {"id": "zone-size", "kind": "area-size", "target": "zone"},
+                {
+                    "id": "box-offset", "kind": "element-edge-distance",
+                    "target": "box", "edge": "left",
+                },
+            ],
+        }
+    )
+    inch_root = ElementTree.fromstring(render_scenario_map_svg(geometry))
+    cm_root = ElementTree.fromstring(render_scenario_map_svg(geometry, distance_unit="cm"))
+    namespace = "{http://www.w3.org/2000/svg}"
+    assert inch_root.attrib["viewBox"] == cm_root.attrib["viewBox"] == "0 0 24 32"
+    assert inch_root.attrib["data-unit"] == cm_root.attrib["data-unit"] == "in"
+    assert inch_root.attrib["data-distance-unit"] == "in"
+    assert cm_root.attrib["data-distance-unit"] == "cm"
+    inch_marker = inch_root.find(f".//{namespace}circle")
+    cm_marker = cm_root.find(f".//{namespace}circle")
+    assert inch_marker is not None and cm_marker is not None
+    assert inch_marker.attrib == cm_marker.attrib
+    for root, unit, zone, offset in (
+        (inch_root, "in", "24″ × 8″", "8″"),
+        (cm_root, "cm", "60 cm × 20 cm", "20 cm"),
+    ):
+        assert root.attrib["data-distance-unit"] == unit
+        labels = {node.attrib["id"]: node for node in root.iter() if "id" in node.attrib}
+        assert labels["zone-size"].text == zone
+        assert labels["zone-size"].attrib["data-distance-size-inches"] == "24,8"
+        for annotation_id in ("zone-depth", "box-offset"):
+            text = labels[annotation_id].find(f"{namespace}text")
+            assert text is not None
+            assert text.attrib["data-distance-inches"] == "8"
+            assert text.text == offset
+
+    with pytest.raises(ValueError, match="distance_unit"):
+        render_scenario_map_svg(geometry, distance_unit="mm")  # type: ignore[arg-type]
+
+
+def test_render_scenario_map_svg_projects_element_edge_distance_to_marker_boundary() -> None:
+    radius = marker_radius_inches("supply-box")
+    assert radius is not None
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Measured marker",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "supply-box-left",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "supply-box",
+                    "x": 8 + radius,
+                    "y": {"anchor": "center"},
+                }
+            ],
+            "annotations": [
+                {
+                    "id": "supply-box-left-offset",
+                    "kind": "element-edge-distance",
+                    "target": "supply-box-left",
+                    "edge": "left",
+                    "offset": -1.5,
+                }
+            ],
+        }
+    )
+
+    svg = render_scenario_map_svg(geometry)
+
+    assert (
+        '<g id="supply-box-left-offset" class="measurement" '
+        'data-target="supply-box-left" data-edge="left" data-axis="x">'
+    ) in svg
+    assert '<line x1="0" y1="14.5" x2="8" y2="14.5"/>' in svg
+    assert '>8″</text></g>' in svg
+
+
+def test_render_scenario_map_svg_projects_element_edge_distance_for_rectangle() -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Measured region",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "scoring-area",
+                    "kind": "rectangle",
+                    "style": "scoring",
+                    "x1": 6,
+                    "y1": 8,
+                    "x2": 18,
+                    "y2": 24,
+                }
+            ],
+            "annotations": [
+                {
+                    "id": "scoring-area-left-offset",
+                    "kind": "element-edge-distance",
+                    "target": "scoring-area",
+                    "edge": "left",
+                    "offset": -2,
+                }
+            ],
+        }
+    )
+
+    svg = render_scenario_map_svg(geometry)
+
+    assert '<line x1="0" y1="14" x2="6" y2="14"/>' in svg
+    assert '>6″</text></g>' in svg
+
+
+def test_render_maintained_supplies_maps_measure_eight_inches_to_marker_edges() -> None:
+    document = load_curated_document(_CORE_RULES)
+    definition = scenario_definition_from_curated_document(document, "scenario:supplies")
+    namespace = "{http://www.w3.org/2000/svg}"
+
+    for configuration in definition.configurations:
+        root = ElementTree.fromstring(render_scenario_map_svg(configuration.geometry))
+        by_id = {element.attrib.get("id"): element for element in root.iter()}
+        for annotation_id in ("supply-box-left-offset", "supply-box-right-offset"):
+            annotation = by_id[annotation_id]
+            labels = list(annotation.iter(f"{namespace}text"))
+            assert labels[-1].text == "8″"
+
+
+def test_render_scenario_map_svg_fails_closed_for_unknown_style() -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Future style",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "hazard",
+                    "kind": "rectangle",
+                    "style": "future-hazard",
+                    "x1": 4,
+                    "y1": 4,
+                    "x2": 20,
+                    "y2": 28,
+                }
+            ],
+        }
+    )
+
+    with pytest.raises(ScenarioMapRenderError, match="does not support element style"):
+        render_scenario_map_svg(geometry)
+
+
+def test_render_scenario_map_svg_fails_closed_for_unknown_marker_type() -> None:
+    geometry = parse_scenario_geometry(
+        {
+            "format": "InfinityDB scenario geometry",
+            "formatVersion": 1,
+            "title": "Future marker",
+            "table": {"width": 24, "height": 32, "unit": "in"},
+            "elements": [
+                {
+                    "id": "future-objective",
+                    "kind": "marker",
+                    "style": "objective",
+                    "markerType": "future-objective",
+                    "x": {"anchor": "center"},
+                    "y": {"anchor": "center"},
+                }
+            ],
+        }
+    )
+
+    with pytest.raises(ScenarioMapRenderError, match="no canonical marker metadata"):
+        render_scenario_map_svg(geometry)

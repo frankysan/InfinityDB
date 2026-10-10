@@ -55,6 +55,15 @@ export function getGlossary(signal) {
   return getJson("/api/glossary", signal);
 }
 
+export function getScenarios(signal) {
+  return getJson("/api/scenarios", signal);
+}
+
+export function getScenario(scenarioId, armyPoints, signal) {
+  const params = new URLSearchParams({ army_points: String(armyPoints) });
+  return getJson(`/api/scenarios/${encodeURIComponent(scenarioId)}?${params}`, signal);
+}
+
 export function getUnits({ armyId, declaredFactionId, search, skillId, equipmentId, weaponId, troopType, classification, characteristic, ava, avaMin, avaMax, points, pointsMin, pointsMax, swc, swcMin, swcMax, limit, offset, mercs, specops, teamops, reinforcement, descending, extended }, signal) {
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (armyId) params.set("army_id", armyId);

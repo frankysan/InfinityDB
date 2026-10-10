@@ -31,7 +31,7 @@ installed-package behavior, tracked release assets, and the production container
 The current matrix is:
 
 - Ubuntu / Python 3.11 — `tools/run_checks.py --all`;
-- Windows / Python 3.11 — test + Army build + rules build, with serial pytest;
+- Windows / Python 3.11 — test + Army build + rules build, with two fixed pytest workers;
 - macOS / Python 3.11 — test + Army build + rules build;
 - Ubuntu / Python 3.14 — test + Army build + rules build.
 
@@ -39,8 +39,15 @@ Every leg installs `.[dev,symbols]`, uses the controlled `tests/fixtures/deploym
 source for build validation, and requires the tracked graphical publication. The primary Ubuntu
 3.11 leg owns lint/type checks; other matrix legs focus on runtime/build portability.
 
-Windows hosted CI intentionally sets `--test-workers 0`. Local pytest still defaults to automatic
-xdist worker selection; hosted-runner scheduling policy is not a project-wide serial-test rule.
+Windows hosted CI uses `--test-workers 2` to bound process/resource use while running the complete
+suite. Automatic worker selection previously proved unstable on that runner class; serial execution
+subsequently exceeded the 15-minute job limit as coverage grew. Windows now has a bounded 30-minute
+job budget, including dependency setup and deterministic-output generation; other matrix legs retain
+15 minutes. Local pytest still defaults to automatic xdist selection. Test coverage, required assets
+and cross-platform determinism remain unchanged.
+
+Source-check logs include the twenty slowest pytest durations and skipped-test reasons so
+hosted performance problems can be traced to individual tests or fixture setup.
 
 ## Cross-platform deterministic outputs
 
@@ -158,8 +165,9 @@ The workflow downloads the pinned archive, revalidates every member against
 `--assets required`. Record the run SHA together with the result so the pre-merge gate is tied to the
 validated candidate.
 
-A successful pre-merge candidate run satisfies the manual development/release gate recorded in the
-TODO. If the final protected-`main` release commit has a different SHA because the pull request is
+A successful pre-merge candidate run satisfies the optional pre-merge full-assets step in
+[the release checklist](releasing.md#5-land-the-release-commit-verify-hosted-ci-and-tag).
+If the final protected-`main` release commit has a different SHA because the pull request is
 merged or squashed, that earlier run does not count as exact-SHA release evidence. When
 `tools/prepare_release_ci_evidence.py --include-full-assets` is used, dispatch **Full-asset checks**
 again for the final release SHA and require that exact run just like the other hosted workflows.

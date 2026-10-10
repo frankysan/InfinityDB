@@ -9,9 +9,13 @@ from typing import Any
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
 from infinity_db.maintained_text import validate_maintained_text_syntax
 from infinity_db.rule_relations import RULE_RELATION_TYPES
+from infinity_db.scenario_definition import (
+    ScenarioDefinitionError,
+    parse_scenario_definition_record,
+)
 
 CURATED_FORMAT = "InfinityDB curated reference"
-CURATED_FORMAT_VERSION = 21
+CURATED_FORMAT_VERSION = 23
 REQUIRED_COLLECTION_FIELDS = frozenset(
     {"id", "title", "domain", "status", "effectiveFrom", "authority"}
 )
@@ -49,7 +53,7 @@ def _validate_variant_semantics(
 ) -> str:
     if not isinstance(value, dict):
         raise ValueError(f"{context}: must be an object")
-    allowed = {"inheritance", "occurrenceParameters", "sourceVariant"}
+    allowed = {"inheritance", "occurrenceParameters", "sourceVariant", "sourceMode"}
     unknown = set(value) - allowed
     if unknown:
         raise ValueError(f"{context}: unsupported fields {sorted(unknown)}")
@@ -97,6 +101,18 @@ def _validate_variant_semantics(
         seen_parameters.add(key)
 
     source_variant = value.get("sourceVariant")
+    source_mode = value.get("sourceMode")
+    if source_mode is not None:
+        if (
+            inheritance != "source"
+            or len(army_links) != 1
+            or not isinstance(army_links[0], dict)
+            or army_links[0].get("entity") != "weapon"
+        ):
+            raise ValueError(f"{context}: sourceMode requires source-specific Weapon semantics")
+        _require_string(source_mode, "sourceMode", context)
+        if source_variant is not None:
+            raise ValueError(f"{context}: sourceMode and sourceVariant are mutually exclusive")
     if inheritance == "source":
         if len(army_links) != 1:
             raise ValueError(
@@ -107,6 +123,8 @@ def _validate_variant_semantics(
             raise ValueError(
                 f"{context}: source-specific semantics require an exact numeric Army source id"
             )
+        if source_mode is not None:
+            return inheritance
         if not isinstance(source_variant, dict):
             raise ValueError(
                 f"{context}: source-specific semantics require 'sourceVariant'"
@@ -186,11 +204,293 @@ def _validate_related_categories(facts: dict[str, Any], context: str) -> None:
         )
 
 
+def _validate_reviewed_immunity_combined_cases(value: object, context: str) -> None:
+    """Validate conditional reviewed examples, never a general roll evaluator."""
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"{context}: expected reviewed combined examples")
+    seen: set[tuple[int, str]] = set()
+    arm_when = {
+        "immunity": "ARM", "savingAttribute": "ARM", "attackClass": "non-comms"
+    }
+    ap_when = {
+        "immunity": "AP", "savingAttribute": "ARM", "attackClass": "non-comms"
+    }
+    for index, case in enumerate(value):
+        item = f"{context}[{index}]"
+        if not isinstance(case, dict) or set(case) != {
+            "sourceAmmunitionId", "sourceAmmunitionName", "components", "when",
+            "withoutImmunity", "withImmunity", "evidence",
+        }:
+            raise ValueError(f"{item}: invalid combined Immunity case fields")
+        source_id = case["sourceAmmunitionId"]
+        when = case["when"]
+        if when not in (arm_when, ap_when):
+            raise ValueError(f"{item}: unsupported Immunity applicability")
+        identity = (source_id, when["immunity"])
+        if type(source_id) is not int or source_id < 1 or identity in seen:
+            raise ValueError(f"{item}: invalid or duplicate source Ammunition ID")
+        seen.add(identity)
+        _require_string(case["sourceAmmunitionName"], "sourceAmmunitionName", item)
+        components = case["components"]
+        if not isinstance(components, list) or len(components) != 2:
+            raise ValueError(f"{item}: expected two reviewed component identities")
+        for component in components:
+            validate_typed_domain_id(
+                component, expected_domain="ammunition", context=f"{item}.components"
+            )
+        if len(set(components)) != 2:
+            raise ValueError(f"{item}: duplicate combined component")
+        original = case["withoutImmunity"]
+        if (
+            not isinstance(original, dict)
+            or set(original) != {"hitRolls", "criticalRolls"}
+            or type(original["hitRolls"]) is not int
+            or original["hitRolls"] < 2
+            or type(original["criticalRolls"]) is not int
+            or original["criticalRolls"] != original["hitRolls"] + 1
+        ):
+            raise ValueError(f"{item}: invalid source hit/Critical Saving Roll counts")
+        if when == arm_when:
+            expected = {
+                "hitRolls": 1, "criticalRolls": 2, "treatedAs": "ammunition:normal"
+            }
+        else:
+            # Only this specific AP+DA example has been reviewed; retaining DA
+            # is not a general component-immunity evaluation algorithm.
+            if (
+                source_id != 10
+                or case["sourceAmmunitionName"] != "AP+DA"
+                or components != ["ammunition:ap", "ammunition:da"]
+                or original != {"hitRolls": 2, "criticalRolls": 3}
+            ):
+                raise ValueError(f"{item}: unsupported Immunity applicability")
+            expected = {
+                "hitRolls": 2,
+                "criticalRolls": 3,
+                "treatedAs": "ammunition:da",
+                "ignoredComponents": ["ammunition:ap"],
+                "remainingComponents": ["ammunition:da"],
+            }
+        if case["withImmunity"] != expected:
+            raise ValueError(f"{item}: unsupported covered-attack result")
+        if case["evidence"] != "derived-from-pinned-general-rules":
+            raise ValueError(f"{item}: evidence must identify the rule-derived conclusion")
+
+
+def _validate_immunity_interaction(value: object, context: str) -> None:
+    """Validate source-reviewed Immunity boundaries without evaluating attacks."""
+    if not isinstance(value, dict) or set(value) != {
+        "coveredAmmunition", "criticalAgainstCoveredAmmunition", "exceptions",
+        "reviewedCombinedCases", "reviewedVulnerabilityCases", "reviewedWeaponCases",
+    }:
+        raise ValueError(f"{context}: invalid Immunity interaction fields")
+    covered = value["coveredAmmunition"]
+    if (
+        not isinstance(covered, dict)
+        or set(covered) != {"treatAs", "ignore"}
+        or covered["treatAs"] != "ammunition:normal"
+        or covered["ignore"] != [
+            "special-effects", "saving-roll-attribute-modifiers",
+            "saving-roll-count-modifiers",
+        ]
+    ):
+        raise ValueError(f"{context}: invalid covered Ammunition treatment")
+    critical = value["criticalAgainstCoveredAmmunition"]
+    if (
+        not isinstance(critical, dict)
+        or set(critical) != {"additionalSavingRolls", "unless", "rollEffects"}
+        or type(critical["additionalSavingRolls"]) is not int
+        or critical["additionalSavingRolls"] != 1
+        or critical["unless"] != "immunity-critical"
+        or critical["rollEffects"] != "normal-ammunition"
+    ):
+        raise ValueError(f"{context}: invalid Immunity Critical exception")
+    exceptions = value["exceptions"]
+    if (
+        not isinstance(exceptions, dict)
+        or set(exceptions) != {"commsAttacks", "notNegatedByImmunity"}
+        or exceptions["commsAttacks"] != "immunity-state-only"
+        or exceptions["notNegatedByImmunity"] != [
+            "trait:non-lethal", "state:stunned",
+        ]
+    ):
+        raise ValueError(f"{context}: invalid Immunity exceptions")
+    # This is the one printed Flash Pulse example, not a weapon/trait evaluator.
+    # In particular, the stunned condition must not be inferred for other weapons.
+    if value["reviewedWeaponCases"] != [
+        {
+            "when": {
+                "weaponId": "weapon:flash-pulse",
+                "immunity": "BTS",
+                "savingAttribute": "BTS",
+                "attackClass": "non-comms",
+            },
+            "ammunitionTreatedAs": "ammunition:normal",
+            "survivingTraits": ["trait:non-lethal", "trait:state"],
+            "stateEffect": {
+                "stateId": "state:stunned",
+                "condition": "failed-saving-roll",
+            },
+            "evidence": "explicit-pinned-wiki-example",
+        }
+    ]:
+        raise ValueError(f"{context}: unsupported Flash Pulse Immunity example")
+    # The pinned Vulnerability example names a *weapon*, not just an
+    # Ammunition component. Do not turn this into substring-based runtime logic.
+    if value["reviewedVulnerabilityCases"] != [
+        {
+            "when": {
+                "immunity": "Enhanced",
+                "vulnerability": "Viral",
+                "weaponNameContains": "Viral",
+            },
+            "result": "cannot-apply-immunity",
+            "evidence": "explicit-pinned-wiki-example",
+        }
+    ]:
+        raise ValueError(f"{context}: unsupported Vulnerability interaction example")
+    _validate_reviewed_immunity_combined_cases(
+        value["reviewedCombinedCases"], f"{context}.reviewedCombinedCases"
+    )
+
+
+def _validate_ammunition_resolution(value: object, context: str) -> None:
+    """Validate reviewed effects without treating them as executable roll logic."""
+    if (
+        not isinstance(value, dict)
+        or not value
+        or set(value) - {
+            "defenseModifier", "rollsPerHit", "stateEffects", "savingRoll",
+            "woundsPerFailedSave", "gutsEffect", "criticalAdditionalSavingRolls",
+        }
+    ):
+        raise ValueError(f"{context}: unsupported ammunition resolution facts")
+    modifier = value.get("defenseModifier")
+    if modifier is not None:
+        if (
+            not isinstance(modifier, dict)
+            or set(modifier) != {"operation", "attributes"}
+            or modifier["operation"] != "halve"
+            or not isinstance(modifier["attributes"], list)
+            or not modifier["attributes"]
+            or any(
+                not isinstance(attribute, str) or attribute not in {"ARM", "BTS"}
+                for attribute in modifier["attributes"]
+            )
+            or len(set(modifier["attributes"])) != len(modifier["attributes"])
+        ):
+            raise ValueError(f"{context}.defenseModifier: invalid defense modifier")
+    saving_roll = value.get("savingRoll")
+    if saving_roll is not None and (
+        not isinstance(saving_roll, dict)
+        or set(saving_roll) != {"attribute", "modifier", "missingAttribute"}
+        or saving_roll["attribute"] != "PH"
+        or type(saving_roll["modifier"]) is not int
+        or saving_roll["modifier"] >= 0
+        or saving_roll["missingAttribute"] != "no-effect"
+    ):
+        raise ValueError(f"{context}.savingRoll: invalid PH Saving Roll specification")
+    wounds = value.get("woundsPerFailedSave")
+    if wounds is not None and (
+        not isinstance(wounds, dict)
+        or set(wounds) != {"hit", "criticalAdditionalRoll"}
+        or any(type(wounds[key]) is not int or wounds[key] < 1 for key in wounds)
+    ):
+        raise ValueError(f"{context}.woundsPerFailedSave: invalid Wound specification")
+    guts = value.get("gutsEffect")
+    if guts is not None and (
+        not isinstance(guts, dict)
+        or guts != {
+            "condition": "failed-saving-roll",
+            "result": "automatic-failure",
+            "exception": "courage-or-equivalent",
+        }
+    ):
+        raise ValueError(f"{context}.gutsEffect: unsupported Guts effect")
+    critical = value.get("criticalAdditionalSavingRolls")
+    if critical is not None and (type(critical) is not int or critical != 1):
+        raise ValueError(
+            f"{context}.criticalAdditionalSavingRolls: must be exactly one extra roll"
+        )
+    rolls = value.get("rollsPerHit")
+    if rolls is not None and (type(rolls) is not int or rolls < 1):
+        raise ValueError(f"{context}.rollsPerHit: must be a positive integer")
+    states = value.get("stateEffects")
+    if states is not None:
+        if not isinstance(states, list) or not states:
+            raise ValueError(f"{context}.stateEffects: must be a non-empty array")
+        seen: set[str] = set()
+        for index, state in enumerate(states):
+            state_context = f"{context}.stateEffects[{index}]"
+            if not isinstance(state, dict) or set(state) not in (
+                {"stateId", "condition"},
+                {"stateId", "condition", "targetTypes"},
+                {"stateId", "condition", "targetAttribute", "application"},
+            ):
+                raise ValueError(f"{state_context}: invalid State effect fields")
+            validate_typed_domain_id(
+                state["stateId"], expected_domain="state", context=state_context
+            )
+            if state["stateId"] in seen:
+                raise ValueError(f"{state_context}: duplicate State effect")
+            seen.add(state["stateId"])
+            if state["condition"] != "failed-saving-roll":
+                raise ValueError(f"{state_context}: unsupported State effect condition")
+            target_attribute = state.get("targetAttribute")
+            application = state.get("application")
+            if (target_attribute is not None or application is not None) and (
+                not isinstance(target_attribute, dict)
+                or target_attribute != {"name": "VITA", "equals": 1}
+                or type(target_attribute["equals"]) is not int
+                or application != "bypass-unconscious"
+                or state["stateId"] != "state:dead"
+            ):
+                raise ValueError(f"{state_context}: invalid conditional State transition")
+            types = state.get("targetTypes")
+            if types is not None and (
+                not isinstance(types, list)
+                or not types
+                or any(
+                    not isinstance(kind, str) or kind not in {"HI", "TAG", "REM", "VH"}
+                    for kind in types
+                )
+                or len(set(types)) != len(types)
+            ):
+                raise ValueError(f"{state_context}.targetTypes: invalid target restriction")
+
+
+def _validate_ammunition_visibility_zone(value: object, context: str) -> None:
+    """Keep non-damaging visibility facts separate from Saving Roll resolution."""
+    if (
+        not isinstance(value, dict)
+        or set(value) != {
+            "visibility", "template", "height", "expires", "multispectralVisor"
+        }
+        or value["visibility"] != "zero"
+        or value["template"] != "circular"
+        or value["height"] != "infinite"
+        or value["expires"] != "start-of-states-phase"
+        or not isinstance(value["multispectralVisor"], str)
+        or value["multispectralVisor"] not in {"can-draw-lof", "blocked"}
+    ):
+        raise ValueError(f"{context}: unsupported Ammunition visibility zone")
+
+
 def _validate_scope(value: object, context: str) -> None:
     if not isinstance(value, dict):
         raise ValueError(f"{context}: must be an object")
-    if set(value) != {"game", "seasons"}:
-        raise ValueError(f"{context}: must contain only 'game' and 'seasons'")
+    if {"game", "seasons"} - set(value) or set(value) - {"game", "seasons", "scenarios"}:
+        raise ValueError(f"{context}: requires game/seasons and only optional scenarios")
+    if "scenarios" in value:
+        scenario_ids = value["scenarios"]
+        if not isinstance(scenario_ids, list) or not scenario_ids:
+            raise ValueError(f"{context}.scenarios must be a non-empty array")
+        for scenario_id in scenario_ids:
+            validate_typed_domain_id(
+                scenario_id, expected_domain="scenario", context=f"{context}.scenarios"
+            )
+        if len(set(scenario_ids)) != len(scenario_ids):
+            raise ValueError(f"{context}.scenarios contains duplicates")
     _require_string(value.get("game"), "game", context)
     seasons = value.get("seasons")
     if (
@@ -747,9 +1047,73 @@ def load_curated_document(path: Path) -> dict[str, Any]:
         _validate_review(record["review"], f"{context}.review")
         if "facts" in record and not isinstance(record["facts"], dict):
             raise ValueError(f"{context}: 'facts' must be an object")
+        notes = (record.get("facts") or {}).get("sourceNotes")
+        if notes is not None and (
+            not isinstance(notes, list)
+            or not notes
+            or any(not isinstance(note, str) or not note.strip() for note in notes)
+        ):
+            raise ValueError(f"{context}: 'facts.sourceNotes' must be non-empty strings")
         facts = record.get("facts")
         if isinstance(facts, dict):
+            clarifications = facts.get("clarifications")
+            if clarifications is not None and (
+                not isinstance(clarifications, list)
+                or not clarifications
+                or any(
+                    not isinstance(item, str) or not item.strip()
+                    for item in clarifications
+                )
+            ):
+                raise ValueError(
+                    f"{context}.facts.clarifications: expected non-empty maintained-text strings"
+                )
             _validate_related_categories(facts, f"{context}.facts")
+            immunity = facts.get("immunityInteraction")
+            if immunity is not None:
+                if record["id"] != "skill:immunity":
+                    raise ValueError(
+                        f"{context}.facts.immunityInteraction: only the Immunity Skill may own it"
+                    )
+                _validate_immunity_interaction(
+                    immunity, f"{context}.facts.immunityInteraction"
+                )
+            resolution = facts.get("ammunitionResolution")
+            if resolution is not None:
+                if record["kind"] != "ammunition":
+                    raise ValueError(
+                        f"{context}.facts.ammunitionResolution: only Ammunition may own effects"
+                    )
+                _validate_ammunition_resolution(
+                    resolution, f"{context}.facts.ammunitionResolution"
+                )
+            # State links are authored as relations, not inferred by clients.
+            # Keep the graph and the conditional facts synchronized so a link
+            # never invents or silently loses a State outcome.
+            if record["kind"] == "ammunition":
+                state_effects = resolution.get("stateEffects", []) if resolution else []
+                fact_states = {effect["stateId"] for effect in state_effects}
+                relation_states = {
+                    relation["recordId"]
+                    for relation in relations
+                    if relation["type"] == "causes-state"
+                }
+                if fact_states != relation_states:
+                    raise ValueError(
+                        f"{context}: Ammunition causes-state relations must match "
+                        "facts.ammunitionResolution.stateEffects exactly"
+                    )
+            zone = facts.get("visibilityZone")
+            if zone is not None:
+                if record["kind"] != "ammunition":
+                    raise ValueError(
+                        f"{context}.facts.visibilityZone: only Ammunition may own effects"
+                    )
+                if resolution is not None:
+                    raise ValueError(
+                        f"{context}.facts.visibilityZone: must not mix with Saving Roll facts"
+                    )
+                _validate_ammunition_visibility_zone(zone, f"{context}.facts.visibilityZone")
         if record["kind"] == "skill":
             facts = record.get("facts")
             if composition_role == "definition":
@@ -843,6 +1207,46 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 _validate_weapon_special_profile(
                     facts["specialProfile"], f"{context}.facts.specialProfile"
                 )
+            if isinstance(facts, dict) and "variantRuleReferences" in facts:
+                references = facts["variantRuleReferences"]
+                army_refs = {
+                    link.get("id") for link in record.get("armyLinks", [])
+                    if isinstance(link, dict) and link.get("entity") == "weapon"
+                }
+                if (
+                    composition_role != "definition"
+                    or not isinstance(references, dict)
+                    or not references
+                    or any(slug not in army_refs for slug in references)
+                ):
+                    raise ValueError(
+                        f"{context}.facts.variantRuleReferences: requires linked weapon "
+                        "slugs on a definition"
+                    )
+                for slug, targets in references.items():
+                    if not isinstance(slug, str) or not isinstance(targets, list) or not targets:
+                        raise ValueError(f"{context}: invalid variant rule references for {slug!r}")
+                    for target in targets:
+                        if not isinstance(target, str) or ":" not in target:
+                            raise ValueError(f"{context}: invalid variant rule target {target!r}")
+                        kind = target.split(":", 1)[0]
+                        if kind not in {"ammunition", "trait", "state", "skill", "weapon"}:
+                            raise ValueError(
+                                f"{context}: unsupported variant rule target {target!r}"
+                            )
+                        validate_typed_domain_id(
+                            target, expected_domain=kind,
+                            context=f"{context}.facts.variantRuleReferences[{slug!r}]",
+                        )
+                    if len(targets) != len(set(targets)):
+                        raise ValueError(
+                            f"{context}: duplicate variant rule reference for {slug!r}"
+                        )
+        if record["kind"] == "scenario" and composition_role == "definition":
+            try:
+                parse_scenario_definition_record(record, definitions=document)
+            except ScenarioDefinitionError as exc:
+                raise ValueError(f"{context}: {exc}") from exc
         if record["kind"] == "training":
             facts = record.get("facts", {})
             if composition_role == "definition":
@@ -1044,6 +1448,112 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                 f"Peripheral type {record_id!r} requires a 'has-subtype' relation "
                 "from 'skill:peripheral'"
             )
+
+    scenario_collection = document.get("scenarioCollection")
+    scenario_definition_ids = {
+        record["id"]
+        for record in records
+        if record["kind"] == "scenario" and record["composition"]["role"] == "definition"
+    }
+    if scenario_collection is None:
+        if scenario_definition_ids:
+            raise ValueError(
+                "Collections with scenario definitions require 'scenarioCollection' metadata"
+            )
+    else:
+        context = "scenarioCollection"
+        if not isinstance(scenario_collection, dict):
+            raise ValueError(f"{context}: must be an object")
+        if set(scenario_collection) != {"id", "title", "revision", "members"}:
+            raise ValueError(
+                f"{context}: must contain exactly 'id', 'title', 'revision', and 'members'"
+            )
+        require_domain_slug(scenario_collection["id"], context=f"{context}.id")
+        _require_string(scenario_collection["title"], "title", context)
+        _require_string(scenario_collection["revision"], "revision", context)
+        members = scenario_collection["members"]
+        if not isinstance(members, list) or not members:
+            raise ValueError(f"{context}.members must be a non-empty array")
+        member_ids: list[str] = []
+        for index, member in enumerate(members):
+            member_context = f"{context}.members[{index}]"
+            if not isinstance(member, dict) or set(member) != {"scenarioId"}:
+                raise ValueError(
+                    f"{member_context}: must contain exactly 'scenarioId'"
+                )
+            scenario_id = member["scenarioId"]
+            validate_typed_domain_id(
+                scenario_id, expected_domain="scenario", context=f"{member_context}.scenarioId"
+            )
+            if scenario_id in member_ids:
+                raise ValueError(
+                    f"{member_context}: duplicate scenario membership {scenario_id!r}"
+                )
+            member_ids.append(scenario_id)
+        if set(member_ids) != scenario_definition_ids:
+            missing = sorted(scenario_definition_ids - set(member_ids))
+            unknown = sorted(set(member_ids) - scenario_definition_ids)
+            details = []
+            if missing:
+                details.append(f"missing definitions {missing}")
+            if unknown:
+                details.append(f"unknown/non-definition members {unknown}")
+            raise ValueError(
+                f"{context}.members must match local scenario definitions: "
+                + "; ".join(details)
+            )
+
+    from infinity_db.scenario_components import ScenarioComponents
+
+    registry = ScenarioComponents(document)
+    for record in records:
+        scoped = record["scope"].get("scenarios")
+        if scoped is not None:
+            if record.get("armyLinks"):
+                raise ValueError("Scenario-scoped definitions cannot grant Army profile facts")
+            for scenario_id in scoped:
+                if record_kind_by_id.get(scenario_id) != "scenario":
+                    raise ValueError(f"Unknown scenario applicability {scenario_id!r}")
+        facts = record.get("facts", {})
+        if facts.get("category") == "scenario-rule":
+            if record["kind"] != "rule" or scoped is None:
+                raise ValueError(
+                    "Scenario rule definitions require Rule kind and explicit scenarios"
+                )
+            allowed = {"category", "effects", "restrictions", "definesSkills", "specialists"}
+            if set(facts) - allowed:
+                raise ValueError("Scenario Rule has unsupported facts")
+            for key in ("effects", "restrictions"):
+                if not isinstance(facts.get(key), list) or any(
+                    not isinstance(x, str) for x in facts[key]
+                ):
+                    raise ValueError(f"Scenario Rule {key} must be an array of prose")
+            for scenario_id in scoped:
+                for skill_id in facts.get("definesSkills", []):
+                    registry.record(skill_id, "skill", scenario_id)
+            if "specialists" in facts:
+                baseline = facts["specialists"]
+                if not isinstance(baseline, dict) or set(baseline) != {"anyOfSkills"}:
+                    raise ValueError("Specialist baseline requires anyOfSkills")
+                qualifiers = baseline["anyOfSkills"]
+                if (
+                    not isinstance(qualifiers, list)
+                    or not qualifiers
+                    or len(set(qualifiers)) != len(qualifiers)
+                ):
+                    raise ValueError("Specialist qualifiers must be a unique non-empty array")
+                for skill_id in qualifiers:
+                    if record_kind_by_id.get(skill_id) != "skill":
+                        raise ValueError(f"Unknown Specialist Skill {skill_id!r}")
+    if "scenarioComponents" in document:
+        for component in document["scenarioComponents"]["definitions"]:
+            for citation in component["citations"]:
+                source_id = citation.get("sourceId")
+                if source_id not in source_by_id:
+                    raise ValueError(f"Unknown component citation source {source_id!r}")
+                _validate_reference(
+                    citation, source_by_id[source_id], "scenario component citation"
+                )
 
     validate_maintained_text_syntax(document)
 

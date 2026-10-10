@@ -1,0 +1,53 @@
+{
+  "format": "InfinityDB weapon ammunition references",
+  "version": 2,
+  "sourceEntries": {
+    "2": {"name": "N", "segments": [{"text": "N", "ruleId": "ammunition:normal"}]},
+    "3": {"name": "AP", "segments": [{"text": "AP", "ruleId": "ammunition:ap"}]},
+    "6": {"name": "Exp", "segments": [{"text": "Exp", "ruleId": "ammunition:exp"}]},
+    "8": {"name": "Shock", "segments": [{"text": "Shock", "ruleId": "ammunition:shock"}]},
+    "9": {"name": "DA", "segments": [{"text": "DA", "ruleId": "ammunition:da"}]},
+    "10": {
+      "name": "AP+DA",
+      "segments": [
+        {"text": "AP", "ruleId": "ammunition:ap"},
+        {"text": "+"},
+        {"text": "DA", "ruleId": "ammunition:da"}
+      ],
+      "components": ["ammunition:ap", "ammunition:da"]
+    },
+    "13": {
+      "name": "AP+Exp",
+      "segments": [
+        {"text": "AP", "ruleId": "ammunition:ap"},
+        {"text": "+"},
+        {"text": "Exp", "ruleId": "ammunition:exp"}
+      ],
+      "components": ["ammunition:ap", "ammunition:exp"]
+    },
+    "30": {
+      "name": "AP+Shock",
+      "segments": [
+        {"text": "AP", "ruleId": "ammunition:ap"},
+        {"text": "+"},
+        {"text": "Shock", "ruleId": "ammunition:shock"}
+      ],
+      "components": ["ammunition:ap", "ammunition:shock"]
+    },
+    "40": {
+      "name": "AP+T2",
+      "segments": [
+        {"text": "AP", "ruleId": "ammunition:ap"},
+        {"text": "+"},
+        {"text": "T2", "ruleId": "ammunition:t2"}
+      ],
+      "components": ["ammunition:ap", "ammunition:t2"]
+    },
+    "14": {"name": "E/M", "segments": [{"text": "E/M", "ruleId": "ammunition:em"}]},
+    "18": {"name": "T2", "segments": [{"text": "T2", "ruleId": "ammunition:t2"}]},
+    "21": {"name": "Smoke", "segments": [{"text": "Smoke", "ruleId": "ammunition:smoke"}]},
+    "22": {"name": "Eclipse", "segments": [{"text": "Eclipse", "ruleId": "ammunition:eclipse"}]},
+    "29": {"name": "Stun", "segments": [{"text": "Stun", "ruleId": "ammunition:stun"}]},
+    "37": {"name": "PARA", "segments": [{"text": "PARA", "ruleId": "ammunition:para"}]}
+  }
+}

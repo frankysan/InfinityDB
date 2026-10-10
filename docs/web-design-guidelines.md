@@ -21,6 +21,101 @@ Recurring UI behavior should be represented by shared primitives with explicit s
 
 Page-specific CSS and markup remain appropriate for genuinely unique content, but they should not redefine common concepts such as surfaces, table geometry, badges, headers, controls, spacing, responsive behavior, or developer-only presentation.
 
+### Curated rules text hierarchy
+
+**Author for scanning, not for source-file density.** Separate setup, triggers,
+resolution, restrictions, exceptions, and distinct modes into meaningful paragraphs
+using blank lines in the curated `summary`. A long summary should not be one unbroken
+block: review summaries over roughly 350 source characters and keep individual
+paragraphs reasonably short. Shorter summaries may remain single paragraphs. Use
+inline **bold emphasis** for useful mode/topic labels, preserving typed semantic
+links and literal source notation such as `[**]` (not Markdown emphasis).
+
+For structured reference cards, preserve **Requirements → Effects → Restrictions**
+in that order. Scenario Specialist Troops cards place **Qualifying Skills** before
+Restrictions. Put explanatory examples and clarifying interpretations in a separate
+**Clarifications and examples** section after Restrictions, not in Effects.
+When reviewed, condition-scoped interaction cases are available, display
+**Reviewed interactions** after those clarifications, retaining their evidence
+labels. Do not infer new interactions from presentation markup; all these
+sections use the same shared rules-card renderer.
+
+**Separate gameplay rules from editorial provenance.** Keep rules players act on
+at normal body size. Source-history, Army/PDF mismatches, and legacy terminology
+belong in `facts.sourceNotes`, rendered in smaller secondary text; retain their
+citations and maintained-text references. Do not use a final summary paragraph as
+an implicit source note. Important unresolved *gameplay* ambiguities remain visible
+in normal mode with an intelligible explanation; developer mode is not a way to
+hide conflicting rules.
+
+**Prefer canonical player labels.** Present reviewed N5 Trait names and preserve
+source labels in the API. Pure spelling, abbreviation, and duplicate Army labels
+(`Zone of Control` versus `Zone of Control (ZoC)`) are developer-only annotations
+in weapon profiles, not extra text on the player-facing link. A substantial
+rules difference should instead have a separate readable source note in the rules
+card. Developer Mode exposes the original Army label beside its canonical name.
+
+**Link what the source actually names.** Army's weapon `properties` contain
+N5 Traits, Labels, signed modifiers, and State names; they are not all Traits.
+Resolve each through its canonical domain (`/traits`, `/labels`, `/states`),
+without inventing a Trait route for a Label. A property naming multiple States
+should link each resolved State individually. Preserve source spelling in the
+API and, when it differs from canonical wording, in Developer Mode. Unknown
+references must remain unlinked rather than opening an unrelated rule. For Weapon profiles, group the resolved properties
+under their actual rules-domain headings (**Traits**, **Labels**, and **States**)
+rather than presenting every Army property as a Trait. Keep unknown properties
+visible under **Properties** without assigning an unverified domain. Preserve
+source order within each heading and avoid duplicating a `State:` prefix under a
+States heading.
+
+**Glossary term previews.** Where curated rules prose names a reviewed Visibility Zone
+variant, use a typed `term:` link to its Game term definition. The shared inline
+reference preview provides the explanation on hover, keyboard focus, or touch,
+with navigation to the Glossary on activation. Do not match and link arbitrary
+common nouns automatically; the full Game-term vocabulary needs separate review.
+
+### Explain rules interactions, not just outcomes
+
+**Target design direction:** When showing a reviewed interaction, give the
+player the result first, then the shortest useful chain of reasoning: ordinary
+rule, applicable modifier, explicit exception, and resulting roll/State/Wound
+condition. Link each rule at its point of relevance and keep its source
+traceable. A compact answer should make it possible to explain the result to
+an opponent without reading implementation metadata; deeper citations and
+source discrepancies can remain in the normal rules card's existing detail
+and source-note areas. Do not imply the app simulates combat or resolves
+unreviewed cases.
+
+When a conflict affects the outcome, explain the uncertainty visibly rather
+than presenting a confident result with a hidden caveat. Editorial source
+history belongs in secondary notes, but a material gameplay ambiguity must
+remain readable in normal mode. This is a presentation target, **not** a claim
+that every current page already provides a structured interaction explanation.
+The curation review standard and Flash Pulse example live in
+[the curated-data contract](../data/curated/README.md#explaining-rules-interactions).
+
+### Ammunition reference navigation
+
+Weapon statline Ammunition may be a single base type, a source-defined combined
+form, or an unresolved alternative. Display the imported source name and link only
+individual component spans that the backend identifies from reviewed source
+metadata; keep operators such as `+` as literal text. Do not split names in
+JavaScript, treat a `/` as a generic composition operator, or infer Ammunition
+components from Saving Roll notation such as `ARM/2 × 2`. If the server has no
+reviewed component reference, leave the source name readable without fabricating
+a destination. The Ammunition detail page remains the canonical semantic owner.
+
+### Present reviewed Ammunition mechanics without calculating outcomes
+
+The eleven canonical Ammunition reference cards show the existing source-cited
+`ammunitionResolution` or `visibilityZone` facts as compact, labeled mechanics
+below the prose. Display roll counts, applicable Attributes, failed-roll State
+conditions, Critical exceptions, and Smoke/Eclipse visibility separately; link
+States through the existing curated relationships. Do not turn these facts into
+a combat calculator or infer component-level Immunity, combined Saving Roll
+results, or exceptions that are not in the data. Keep the source-cited summary
+and relation links visible: the compact facts are not a substitute for full rules.
+
 ### Give visual rules semantic meaning
 
 Style according to what an element is and what role it serves, not merely where it happens to appear. Prefer concepts such as primary column, metric column, technical metadata, surface header, and status badge over positional rules such as first child, third column, or last row.

@@ -62,18 +62,122 @@ function text(value) {
   return value === null || value === undefined || value === "" ? "—" : String(value);
 }
 
-function weaponTraitLinks(traits) {
+function weaponSavingDisplay(profile) {
+  const saving = profile.saving;
+  if (saving == null || ["", "-", "--"].includes(String(saving).trim())) return "--";
+  return [saving, profile.saving_num]
+    .filter((value) => value !== null && value !== undefined && value !== "")
+    .join(" × ");
+}
+
+function ruleReferenceHref(reference) {
+  if (reference?.href) return reference.href;
+  if (reference?.catalog && reference?.id) {
+    return `/${reference.catalog}/${encodeURIComponent(reference.id)}`;
+  }
+  return null;
+}
+
+function appendWeaponAmmunition(cell, profile, fallbackReference) {
+  if (Array.isArray(profile.ammunition_parts)) {
+    // All parts come from reviewed metadata IDs, never parsed from display notation.
+    for (const part of profile.ammunition_parts) {
+      const href = ruleReferenceHref(part.public_reference);
+      if (href) {
+        const link = document.createElement("a");
+        link.href = href;
+        link.textContent = part.text;
+        cell.append(link);
+      } else {
+        cell.append(part.text);
+      }
+    }
+    return;
+  }
+  const href = ruleReferenceHref(fallbackReference);
+  if (href) {
+    const link = document.createElement("a");
+    link.href = href;
+    link.textContent = text(profile.ammunition);
+    cell.append(link);
+  } else {
+    cell.textContent = text(profile.ammunition);
+  }
+}
+
+function groupWeaponProperties(references) {
+  // Army has one source property bucket, but N5 publishes separate rule domains.
+  const groups = { Traits: [], Labels: [], States: [], Properties: [] };
+  for (const reference of references) {
+    const catalogName = reference.public_reference?.catalog;
+    if (catalogName === "labels") {
+      groups.Labels.push(reference);
+    } else if (
+      catalogName === "states"
+      || reference.state_references?.length
+      || /^state:/i.test(reference.label || "")
+    ) {
+      groups.States.push(reference);
+    } else if (reference.slug) {
+      groups.Traits.push(reference);
+    } else {
+      groups.Properties.push(reference);
+    }
+  }
+  return groups;
+}
+
+function weaponTraitLinks(traits, showStatePrefix = true) {
   const fragment = document.createDocumentFragment();
-  for (const [index, trait] of traits.entries()) {
+  const canonicalSlugs = new Set(traits
+    .filter((trait) => trait.slug && !trait.source_alias)
+    .map((trait) => trait.slug));
+  const duplicateAliases = new Map();
+  for (const trait of traits) {
+    if (!trait.source_alias || !canonicalSlugs.has(trait.slug)) continue;
+    const aliases = duplicateAliases.get(trait.slug) || [];
+    aliases.push(trait.label);
+    duplicateAliases.set(trait.slug, aliases);
+  }
+  const visibleTraits = traits.filter((trait) => !(
+    trait.source_alias && canonicalSlugs.has(trait.slug)
+  ));
+  for (const [index, trait] of visibleTraits.entries()) {
     if (index) fragment.append(" · ");
-    const label = trait.label || trait.name || "";
-    if (trait.slug) {
+    const label = (trait.source_alias ? trait.name : trait.label) || trait.name || "";
+    let href = ruleReferenceHref(trait.public_reference);
+    if (!href && trait.slug && !label.startsWith("State:")) {
+      href = `/traits/${encodeURIComponent(trait.slug)}`;
+    }
+    if (Array.isArray(trait.state_references) && trait.state_references.length) {
+      if (showStatePrefix) fragment.append("State: ");
+      for (const [partIndex, state] of trait.state_references.entries()) {
+        if (partIndex) fragment.append(" / ");
+        const stateHref = ruleReferenceHref(state.public_reference);
+        if (stateHref) {
+          const link = document.createElement("a");
+          link.href = stateHref;
+          link.textContent = state.label;
+          fragment.append(link);
+        } else {
+          fragment.append(state.label);
+        }
+      }
+    } else if (href) {
       const link = document.createElement("a");
-      link.href = `/traits/${encodeURIComponent(trait.slug)}`;
-      link.textContent = label;
+      link.href = href;
+      link.textContent = showStatePrefix ? label : label.replace(/^State:\s*/i, "");
       fragment.append(link);
     } else {
-      fragment.append(label);
+      fragment.append(showStatePrefix ? label : label.replace(/^State:\s*/i, ""));
+    }
+    const sourceLabels = trait.source_alias
+      ? [trait.label] : (duplicateAliases.get(trait.slug) || []);
+    if (sourceLabels.length) {
+      const sourceAlias = document.createElement("span");
+      sourceAlias.className = "developer-only weapon-trait-source-alias";
+      sourceAlias.textContent = ` (Army: ${sourceLabels.join(", ")})`;
+      fragment.append(sourceAlias);
     }
   }
   return fragment;
@@ -186,9 +290,12 @@ function weaponVariants(variants) {
       statTable.innerHTML = "<thead><tr><th class=\"table-column--descriptor\" scope=\"col\">Ammunition</th><th class=\"table-column--metric\" scope=\"col\">B</th><th class=\"table-column--metric\" scope=\"col\">PS</th><th class=\"table-column--metric\" scope=\"col\">Saving</th></tr></thead>";
       statTable.prepend(statCaption);
       const statRow = document.createElement("tr");
-      const saving = [profile.saving, profile.saving_num]
-        .filter((value) => value !== null && value !== undefined && value !== "")
-        .join(" × ");
+      const ruleReferences = Array.isArray(profile.rule_references)
+        ? profile.rule_references : [];
+      const ammunitionRule = ruleReferences.find((reference) => (
+        reference.kind === "ammunition" && ruleReferenceHref(reference.public_reference)
+      ));
+      const saving = weaponSavingDisplay(profile);
       for (const [statLabel, value, role] of [
         ["Ammunition", profile.ammunition, "descriptor"],
         ["B", profile.burst, "metric"],
@@ -198,7 +305,11 @@ function weaponVariants(variants) {
         const cell = document.createElement("td");
         cell.className = `table-column--${role}`;
         cell.dataset.label = statLabel;
-        cell.textContent = text(value);
+        if (statLabel === "Ammunition") {
+          appendWeaponAmmunition(cell, profile, ammunitionRule?.public_reference);
+        } else {
+          cell.textContent = text(value);
+        }
         statRow.append(cell);
       }
       const statBody = document.createElement("tbody");
@@ -255,17 +366,44 @@ function weaponVariants(variants) {
       const traitReferences = Array.isArray(profile.trait_references)
         ? profile.trait_references
         : [];
-      if (traitReferences.length) {
-        const traitsRow = document.createElement("div");
-        traitsRow.className = "weapon-data-row";
-        const traitsHeading = document.createElement("h5");
-        traitsHeading.className = "weapon-data-heading";
-        traitsHeading.textContent = "Traits";
-        const traits = document.createElement("p");
-        traits.className = "weapon-data-value";
-        traits.append(weaponTraitLinks(traitReferences));
-        traitsRow.append(traitsHeading, traits);
-        card.append(traitsRow);
+      for (const [heading, properties] of Object.entries(groupWeaponProperties(traitReferences))) {
+        if (!properties.length) continue;
+        const propertiesRow = document.createElement("div");
+        propertiesRow.className = "weapon-data-row";
+        const propertiesHeading = document.createElement("h5");
+        propertiesHeading.className = "weapon-data-heading";
+        propertiesHeading.textContent = heading;
+        const propertiesText = document.createElement("p");
+        propertiesText.className = "weapon-data-value";
+        propertiesText.append(weaponTraitLinks(properties, heading !== "States"));
+        propertiesRow.append(propertiesHeading, propertiesText);
+        card.append(propertiesRow);
+      }
+      if (profile.rules?.length) {
+        card.append(rulesReferenceSection(profile.rules, "Mode rules"));
+      }
+      const sourceTraitSlugs = new Set(traitReferences.map((trait) => trait.slug));
+      const relatedRules = ruleReferences.filter((reference) => (
+        reference.kind !== "ammunition"
+        && !(reference.kind === "trait" && sourceTraitSlugs.has(reference.id.slice(6)))
+      ));
+      if (relatedRules.length) {
+        const row = document.createElement("div");
+        row.className = "weapon-data-row";
+        const heading = document.createElement("h5");
+        heading.className = "weapon-data-heading";
+        heading.textContent = "Related rules";
+        const links = document.createElement("p");
+        links.className = "weapon-data-value";
+        for (const [index, reference] of relatedRules.entries()) {
+          if (index) links.append(" · ");
+          const link = document.createElement("a");
+          link.href = ruleReferenceHref(reference.public_reference);
+          link.textContent = reference.name;
+          links.append(link);
+        }
+        row.append(heading, links);
+        card.append(row);
       }
       variantSection.append(card);
     }
@@ -397,17 +535,34 @@ function render(item) {
   status.hidden = true;
 }
 
+// Rule cards arrive after the initial document fragment navigation. Restore
+// that target once the catalog API response has rendered the card.
+function revealHashTarget() {
+  if (!window.location.hash) return;
+  let targetId;
+  try {
+    targetId = decodeURIComponent(window.location.hash.slice(1));
+  } catch {
+    return;
+  }
+  const target = document.getElementById(targetId);
+  if (!target || !content.contains(target)) return;
+  target.scrollIntoView({ block: "start" });
+}
+
 document.addEventListener(
   "infinity:beforenavigation",
   () => pageController.abort(),
   { once: true },
 );
+window.addEventListener("hashchange", revealHashTarget, { signal: pageController.signal });
 window.addEventListener("distanceunitchange", () => {
   if (currentItem && catalog === "weapons") render(currentItem);
 }, { signal: pageController.signal });
 getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
   currentItem = item;
   render(item);
+  requestAnimationFrame(revealHashTarget);
   if (catalog === "states") return null;
   return visibleUnitIds(optionalUnitFilters(), pageController.signal).then((ids) => render(withVisibleUnits(item, ids)));
 }).catch((error) => {

@@ -181,6 +181,20 @@
   --color-logo-rim-highlight: #d8efbd;
   --color-logo-rim-default: #a8cd92;
   --color-logo-rim-shadow: #527b5d;
+  /* Scenario-map semantic colors (shared by all map configurations). */
+  --color-scenario-map-table: #fffefa;
+  --color-scenario-map-outline: #203b35;
+  --color-scenario-map-deployment-a: #dbeafe;
+  --color-scenario-map-deployment-a-edge: #2563eb;
+  --color-scenario-map-deployment-b: #fee2e2;
+  --color-scenario-map-deployment-b-edge: #dc2626;
+  --color-scenario-map-scoring: #e5e7eb;
+  --color-scenario-map-scoring-edge: #6b7280;
+  --color-scenario-map-marker: #fffefa;
+  --color-scenario-map-guide: #65716b;
+  --color-scenario-map-measurement: #203b35;
+  --color-scenario-map-text: #203b35;
+  --color-scenario-map-text-halo: #fffefa;
   /* Faction colors used by Army. */
   --color-faction-panoceania-primary: #009fe4;
   --color-faction-panoceania-secondary: #004665;

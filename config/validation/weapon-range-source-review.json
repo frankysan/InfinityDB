@@ -1,0 +1,37 @@
+{
+  "formatVersion": 1,
+  "corePdfSha256": "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f",
+  "wikiRevisionId": 4083,
+  "wikiMemberSha256": "a3a6230051bc3a03e61a6de917306b403bac35ddfa6dcb8962595316bb3722ed",
+  "candidates": [
+    {
+      "weaponId": 49,
+      "name": "Katyusha MRL",
+      "mode": "",
+      "pdfPage": 187,
+      "pdfUnsignedLabel": "3",
+      "armyRangeBands": [
+        "-3",
+        "+3",
+        "+3",
+        "0",
+        "0",
+        "-6",
+        null
+      ],
+      "wikiRangeBands": [
+        "-3",
+        "+3",
+        "+3",
+        "0",
+        "0",
+        "-6",
+        null
+      ],
+      "classification": "confirmed-pdf-sign-omission",
+      "finding": "Only zero can appear as an unsigned integer range MOD; nonzero modifiers require a + or - sign. The PDF's bare 3 is therefore invalid chart notation. Army and the N5.3 English/Spanish Wiki both show +3 in these bands, confirming an omitted plus sign rather than a gameplay discrepancy.",
+      "uncertainty": "The reason the plus sign is missing from the PDF, and whether a formal erratum exists, has not been established. The intended +3 range MOD is not in doubt; preserve the raw PDF value.",
+      "resolvedRangeMod": "+3"
+    }
+  ]
+}

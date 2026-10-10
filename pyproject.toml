@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "infinity-db"
-version = "0.10.0"
+version = "0.10.1"
 description = "Infinity database, data ingestion tools, and extensible web unit browser"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -47,6 +47,8 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 "share/infinity-db/config/catalogs" = [
   "config/catalogs/weapon-categories.json",
   "config/catalogs/weapon-overrides.json",
+  "config/catalogs/weapon-ammunition-references.json",
+  "config/catalogs/weapon-combined-saving-rolls.json",
   "config/catalogs/skill-source-classifications.json",
   "config/catalogs/equipment-presentation-encodings.json",
   "config/catalogs/unit-filter-semantics.json",
@@ -91,7 +93,7 @@ license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-addopts = ["--basetemp=.pytest-tmp", "-m", "not full_assets"]
+addopts = ["-m", "not full_assets"]
 markers = [
   "full_assets: requires the complete validated local Corvus Belli graphical asset set",
   "section_model: data model, canonical rules, semantic audits, and database behavior",

@@ -39,10 +39,15 @@ The sections below document the implemented `curated/rules/` contract.
 ### Maintained rules-text semantic-link policy
 
 Maintained rules prose must use typed `[[kind:slug]]` references when it names an existing
-supported Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program, or
-Attribute. The pre-token migration is complete: `maintained-text-link-reviews.json` records explicit
-completed review coverage for every supported reference namespace, and the rules build rejects any
-new plain semantic candidate directly.
+supported Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program,
+Attribute, or reviewed Game term. `[[term:zero-visibility-zone]]` resolves to the corresponding
+Glossary definition and the existing inline preview tooltip, including on keyboard focus and touch.
+Visibility Zone variants are explicitly linked throughout current curated rules text.
+The broad Game-term vocabulary also includes common nouns (e.g. Model and Token), so a full
+term-name/plain-prose migration is not claimed; those cases must be curated deliberately.
+The pre-token migration is complete: `maintained-text-link-reviews.json` records explicit
+completed review coverage for the previously supported reference namespaces, and the rules
+build rejects any new plain semantic candidate in those fully reviewed namespaces directly.
 
 Completed scopes receive a case-insensitive scan with conservative plural matching. A residual is an
 error: link it when the meaning is clear, or replace it with `review-needed` when it is not. If a
@@ -63,12 +68,115 @@ python tools\audit_maintained_text_links.py
 The audit prints unlinked candidates, reviewed-batch residuals, and explicit `review-needed` markers.
 The first two inventories must remain zero. When a passage is ambiguous or its source meaning is not
 clear enough to choose a semantic target, use
-`[[review-needed:<reason>|<visible text>]]` rather than guessing. Reason codes are lowercase
-kebab-case; prefer reusable codes such as `ambiguous-target`, `unclear-source-meaning`,
-`source-conflict`, or `scope-unclear`. `[[review-needed:<reason>]]` is valid for a standalone marker.
+`[[review-needed:<reason>|<visible text>]]` rather than guessing.
+
+Reason codes are lowercase kebab-case; prefer reusable codes such as
+`ambiguous-target`, `unclear-source-meaning`, `source-conflict`, or
+`scope-unclear`. `[[review-needed:<reason>]]` is valid for a standalone marker.
+
+Rules summaries may separate paragraphs with blank lines (`\n\n`) and use
+`**emphasis**` around mode labels; the browser renders both without breaking
+maintained-text links. Editorial source discrepancies, legacy Army terminology,
+and other non-gameplay notes belong in an optional `facts.sourceNotes` array of
+non-empty maintained-text strings. These are shown beneath the primary rules in
+smaller type and remain subject to reference auditing.
+
+Curated rule records may add optional `facts.clarifications`, a non-empty
+array of maintained-text strings for printed examples and explanations that
+clarify rather than define core Effects. Render after Requirements, Effects,
+and Restrictions, and before any reviewed interaction cases. Unlike
+`facts.sourceNotes`, these are player-facing gameplay explanations at normal
+body size, with semantic links, review coverage, and the record's citations
+intact. Keep rule effects in `facts.effects`; do not move binding game
+conditions into example prose.
+
 The audit lists all review-needed markers separately so reviewed uncertainty remains easy to locate
 and cannot disappear into ordinary prose. Resolve each marker to a typed semantic reference, or to
 ordinary text when manual review proves it is not a reference.
+
+For `ammunition:*` records, authored `causes-state` relations must contain
+exactly the State identities in `facts.ammunitionResolution.stateEffects`.
+The condition and target restrictions belong to the typed facts; a generic
+related-rule edge is a navigational link, **not** an unconditional game effect.
+The validator rejects an omitted, extra, or mismatched State relation so the
+player-facing graph and source-cited facts cannot drift apart. Nine Saving-Roll-bearing Ammunition records additionally use the strictly
+validated `facts.ammunitionResolution.criticalAdditionalSavingRolls: 1`.
+This is one additional Saving Roll for a Critical with that Ammunition,
+not one additional roll per component in a combined profile. T2's
+`woundsPerFailedSave.criticalAdditionalRoll` separately describes the
+Wounds inflicted on failure of that extra roll. Smoke/Eclipse use
+`facts.visibilityZone` and no Saving Roll facts. Other
+Ammunition effects remain independent of these State links.
+
+The `skill:immunity` definition may also carry the closed
+`facts.immunityInteraction` object. It records the reviewed N5.3 boundary for
+covered Ammunition (treat as Normal and ignore its special effects, Saving
+Roll Attribute MODs and Saving Roll-count MODs), the remaining single Critical
+roll unless Immunity (Critical) applies, and the exceptions for Comms Attacks,
+Non-Lethal and State: Stunned. Only `skill:immunity` may own this fact family.
+The optional `reviewedCombinedCases` array records source-qualified, derived
+examples for an Immunity (ARM) defender against an ARM-based, non-Comms combined
+attack. Every case must specify the Army source Ammunition ID/name, two typed
+component IDs, applicability, original and covered hit/Critical Saving Roll
+counts, Normal treatment, and evidence class `derived-from-pinned-general-rules`.
+The validator rejects unsupported conditions, duplicate IDs, and impossible
+Critical counts. These examples cite Wiki Immunity `oldid=3643` together with
+Combined Ammunition `oldid=3000`. The closed `reviewedVulnerabilityCases`
+array records a **separate explicit Wiki example** (`Vulnerability` `oldid=3156`):
+Immunity (Enhanced) cannot be used against weapons with `Viral` in their names
+when the defender also has Vulnerability (Viral). Its predicate refers to a
+weapon name, **not** the weapon's Ammunition components. Neither fact family is
+executable or projected into Army profiles. The `reviewedWeaponCases` array
+records the **explicit** N5.3 Wiki Immunity Example 4 (`oldid=3643`): against
+Flash Pulse, Immunity (BTS) treats Stun Ammunition as Normal,
+while Non-Lethal and the failed-Saving-Roll Stunned condition survive. The Weapon
+Chart (`oldid=4083`) separately grounds Flash Pulse's printed profile. Do not
+extrapolate these reviewed, non-executable examples to unreviewed combinations.
+
+### Explaining rules interactions
+
+**Accepted authoring and review standard, not a new JSON schema or a rules engine.**
+A material interaction between rules is not adequately explained by stating the
+correct outcome alone. A concise player-facing explanation should make the
+reasoning traceable, using the existing curated `summary`, typed links, citations,
+and `facts.sourceNotes` where appropriate:
+
+1. **Scope and trigger:** identify the relevant weapon/Skill, target conditions,
+   roll Attribute, and when the interaction applies. Do not imply that a
+   conditional effect always occurs.
+2. **General rule and modification:** explain the baseline mechanic and precisely
+   what the interacting rule changes. Keep Ammunition effects, Saving Roll
+   Attributes, and Weapon Traits distinct.
+3. **Exception or precedence:** cite the *actual* clause that preserves,
+   overrides, or limits an effect. A printed example establishes its own result,
+   but does not prove an otherwise undocumented general mechanism.
+4. **Gameplay result:** say what the player rolls or does, and what happens on
+   success or failure, including Wounds and States where relevant. Make the
+   difference between a hit and a failed Saving Roll explicit.
+5. **Evidence and certainty:** cite the scoped official rule text and, when
+   available, the matching example/FAQ and Army profile. Distinguish an
+   **explicit ruling**, a **rule-derived interpretation**, and an **unresolved
+   conflict**. Compare pinned English/Spanish versions and available historical
+   editions when their wording or profiles materially differ; preserve source
+   version/revision and do not silently choose a convenient reading.
+
+Keep the explanation short enough to use during a game; link the relevant full
+rules instead of reproducing them. Put historical/editorial differences in
+`facts.sourceNotes`, but leave unresolved questions that change gameplay clearly
+visible in ordinary rules text (using `review-needed` when appropriate). Do not
+manufacture an explanation when the official material supports only an outcome;
+label its evidence and scope instead. Relation-review status or a correct
+conditional result alone does not establish explanatory completeness.
+
+**Example — Immunity (BTS) and Flash Pulse:** Flash Pulse calls for a BTS Saving
+Roll with Stun Ammunition. Immunity (BTS) treats that Ammunition as Normal but
+does not turn the roll into ARM. The explicit *IMPORTANT* exception preserves
+Non-Lethal and State: Stunned; a failed BTS Saving Roll therefore causes
+Stunned but no Wounds. The English Weapon Chart includes the State: Stunned
+Trait, whereas the Spanish N5.3 wiki chart omits it and reports a different
+roll count. That discrepancy is a source note, not grounds for inventing a
+general exception for other States or weapons. The pinned evidence and exact
+scope are recorded in [RS-AW-IMM-001](../../docs/rules-semantics.md#rs-aw-imm-001--immunity-changes-covered-effects-not-the-attack-identity).
 
 ### Rules-enrichment coverage classifications
 
@@ -86,12 +194,14 @@ reason and take precedence over catalog-level decisions. Item/relation overrides
 in the selected `infinity.db` + `rules.db` pair; stale or mistyped overrides fail the audit instead
 of silently surviving after the underlying data changes.
 
-For the 0.10 stabilization milestone, missing Weapon rule definitions are retained as
-`later-product-work` because full Weapon rules-reference completeness is part of the 1.0 gate.
-Commlink is likewise deferred explicitly to its separately scoped Reinforcements Extra work.
+The published 0.10.0 scope classified missing Weapon rule definitions as `later-product-work`
+and deferred Commlink to its separately scoped Reinforcements Extra work. These retained
+classifications describe that release's reviewed scope; they do not waive the 1.0 completeness
+gate. Reassess them against the pinned 1.0 inputs as tracked in
+[the backlog](../../docs/TODO.md#source-inventory-and-gap-batches).
 Other defects in those catalogs, including stale citations, ambiguous mappings, unresolved links,
 or unreviewed rules, retain their normal conservative classification and can still block the
-current release. The policy is release-planning metadata only; it must not be consumed as rules
+release under review. The policy is release-planning metadata only; it must not be consumed as rules
 ontology or application runtime behavior.
 
 ### Rules-interaction review policy
@@ -262,14 +372,15 @@ deployment, and mission constraints. Wiki pages are useful for discovery,
 aliases, cross-links, and concise explanations, but do not override applicable
 official rules or Army data.
 
-### Current v21 contract
+### Current v23 contract
 
 Place one collection per subject or release under `data/curated/rules/`, for
 example `rules/n5-core-v5.3.json`. Each file contains:
 
 - `format`: `InfinityDB curated reference`
-- `formatVersion`: `21`
-- `collection`: collection identity/scope/authority
+- `formatVersion`: `23`
+- `collection`: publication/source collection identity, scope, status, and authority
+- optional `scenarioCollection`: stable scenario-set identity, exact set revision, and ordered members
 - `sources`: source-specific PDF or wiki provenance
 - `vocabularySources`: source references for maintained vocabularies
 - `skillTypes`, `labels`, and typed `records`
@@ -303,6 +414,68 @@ retain their own scope, facts, citations, relations, and publication provenance 
 than being field-merged by load order. Related concepts use typed one-way `relations`;
 reverse navigation is derived by `rules.db`.
 
+Collections that contain scenario definitions also require `scenarioCollection`. Its `id` is the
+stable scenario-set identity (for example `n5-core`), `revision` is the exact revision within that
+set (for example `5.3`), and ordered `members` must match the scenario definitions in that source
+collection exactly. Rules export materializes collection/revision, membership, and publication rows
+separately; each publication carries a deterministic SHA-256 of the fully composed scenario record.
+The source `collection.id` remains the publication revision/provenance key, so a scenario identity,
+its set membership, and the source publication revision are not interchangeable.
+
+Weapon Ammunition source-identity navigation is maintained separately in
+`config/catalogs/weapon-ammunition-references.json` (format version 2).
+Each source row has an exact Army ID and name with ordered display/link segments.
+Reviewed Combined Ammunition entries additionally require `components`, an ordered
+list of typed base `ammunition:*` IDs matching the linked segments exactly, separated
+only by `+`. This source projection is not a curated effect relationship, nor is
+Saving Roll notation parsed to infer composition. See `docs/data-model.md` for the
+current runtime boundary and remaining 1.0 work.
+
+Ammunition definitions may additionally publish reviewed, **non-executable**
+`facts.ammunitionResolution` operations. This is a bounded typed-effects pilot; the
+source Ammunition map above does not own effects. Supported fields are:
+
+- `defenseModifier: {"operation": "halve", "attributes": ["ARM", "BTS"]}`:
+  halves the *applicable* Saving Roll Attribute, not necessarily both Attributes
+  for one hit. A subset such as `["BTS"]` is allowed.
+- `rollsPerHit`: a positive integer when the Ammunition itself specifies a
+  multiplicity. It does **not** replace the Army Weapon's `saving_num` field.
+- `stateEffects`: reviewed records with canonical `stateId`,
+  `condition: "failed-saving-roll"`, and optional `targetTypes` (from
+  `HI`, `TAG`, `REM`, `VH`). Shock additionally permits exactly
+  `targetAttribute: {"name": "VITA", "equals": 1}` and
+  `application: "bypass-unconscious"` together when linking to `state:dead`.
+  Conditions and target restrictions are part of the fact; the State must not
+  be presented as unconditional.
+- `savingRoll: {"attribute": "PH", "modifier": -6, "missingAttribute": "no-effect"}`:
+  a PH-based Saving Roll with an explicit negative MOD, with no roll or
+  Ammunition effect if the target lacks PH. Currently validated only for PH
+  rolls with a negative MOD and the `no-effect` missing-Attribute case.
+- `woundsPerFailedSave: {"hit": 2, "criticalAdditionalRoll": 1}`:
+  Wounds from failing a Saving Roll for a normal hit versus the *separately
+  generated* additional roll for a Critical. The latter must not inherit
+  the two-Wound result of a normal T2 hit. Normal and Shock each specify
+  `{ "hit": 1, "criticalAdditionalRoll": 1 }`.
+- `gutsEffect`: exactly a failed-Saving-Roll automatic Guts failure with a
+  `courage-or-equivalent` exception (Stun). It is not a generic Guts evaluator.
+
+`facts.visibilityZone` is a **separate** reviewed fact family for Smoke and
+Eclipse: Circular Zero Visibility Zone, infinite height, expires at the start
+of the States Phase. `multispectralVisor` distinguishes `can-draw-lof` (Smoke)
+from `blocked` (Eclipse). No Saving Roll, automatic success, or generic Face to
+Face outcome is implied. Visibility-zone data is validated only on Ammunition
+records, and it cannot coexist with `ammunitionResolution` on one record.
+
+The validator rejects unsupported operations, unknown Attributes, invalid
+PH Saving Roll specifications, invalid Wound-count exceptions, invalid
+State domains, duplicate States, invalid target restrictions, and ownership on
+non-Ammunition records. It does not execute saving rolls or derive properties
+of combined ammunition. Each record retains its existing N5/Wiki provenance;
+Army data, combination component IDs, and profile Saving Roll notation stay
+separate. All eleven published base identities have reviewed typed facts, but
+critical interactions, target exceptions, visibility Face to Face cases, and
+combined-effect precedence remain 1.0 audit work.
+
 The current closed relation vocabulary is defined by `src/infinity_db/rule_relations.py`. It
 distinguishes creation/enabling, State transitions, MOD/effect changes, cancellation/restriction,
 and structural variant relationships rather than collapsing every connection into a generic
@@ -335,7 +508,7 @@ before ingestion.
 ```json
 {
     "format": "InfinityDB curated reference",
-    "formatVersion": 21,
+    "formatVersion": 23,
     "collection": {
         "id": "n5-core-v5.3",
         "title": "N5 Core Rules v5.3",
@@ -403,9 +576,49 @@ Supported record kinds include `rule`, `skill`, `declaration-category`,
 `interaction`, `fireteam`, `faq-ruling`, `erratum`, `scenario`, `objective`, `mission`, `deployment`, and
 `unit-annotation`.
 
-Acceptance by the generic record envelope does not imply a published application domain or a
-complete typed fact model. In particular, scenario-related records do not yet implement the
-[planned scenario model](../../docs/data-model.md#planned-scenario-model-10).
+Acceptance by the generic record envelope does not imply a published application domain. Core
+scenario authoring uses `facts.definitionVersion: 2` and composes explicit references from the same
+collection. Inline v1 records remain supported; export resolves v2 into self-contained v1-shaped
+runtime records. The canonical component/data contract is documented in
+[the scenario model](../../docs/data-model.md#planned-scenario-model-10).
+
+An optional `scenarioComponents` object has `formatVersion: 1` and a `definitions` array. Each
+definition has a typed `id`, `kind` (`setup`, `geometry`, `objective`, or `end-condition`), `payload`,
+non-empty `citations`, and explicit `scenarios` IDs. Inclusions use `{ "ref": "<typed-id>" }`.
+Setups can additionally specify `gameSizeOverrides` entries containing exact `armyPoints` and only
+`swc`/`minimumVictoryPoints` changes. Shared setups can themselves reference another setup; cycles,
+unknown references, unsupported kinds/fields, duplicate IDs, and scope mismatches are errors.
+Geometry titles are projected from the including scenario without changing semantic coordinates.
+
+Semantic scenario Rules and Skills are ordinary `rule`/`skill` records with optional
+`scope.scenarios`. Scoped records cannot have Army links. Scenario Rules use
+`facts.category: scenario-rule`, `effects`, `restrictions`, `definesSkills`, and optional
+`specialists: { "anyOfSkills": ["skill:doctor", ...] }`. Rules include Skills by ID; Skill definitions
+retain the ordinary declaration-type, Label, Requirements/Effects/Restrictions, review, and citation
+contract. Same names with different behavior require distinct IDs, rather than collection load order.
+
+A v2 mission has `setup`, `rules`, `objectives`, `endConditions`, and `sourceIssues`. Rule inclusions
+have a local ordered `id` and semantic `ref`; Specialist inclusions may have `addSkills`/`removeSkills`
+arrays of complete Skill IDs. Only actual differences belong in those arrays. The baseline and its
+common restrictions are authored once, and rendering consumes the resolved qualifiers. Skill lists
+are derived from the included Rules' `definesSkills`, rather than authored again on each mission.
+
+The resolved mission uses ordered sides/game sizes, geometry-bound deployment regions, typed
+objectives/conditions, included Rules and Skills, endings, and scoped source issues. Its existing
+numeric range, per-round caps, geometry status/comparison, combat metric, and end-condition validators
+still apply after expansion. Scenario source-note status is `needs-verification` for unresolved source
+uncertainty or `reviewed-resolution` for an explicit maintained interpretation; only an objective-scoped
+`needs-verification` issue may acknowledge an otherwise-overlapping exclusive scoring row. Annihilation
+uses a reviewed resolution for its corrected 350-point surviving-VP boundaries, while Domination keeps
+its 350-point SWC difference as needs-verification. Supplies no longer carries a placement issue: page 153 explicitly uses an 8-inch
+offset, while re-review of page 154 shows the 12-inch mark as a guide ruler rather than the Supply Box
+offset. Both definition and inclusion source provenance remain available; shared reuse does not
+authorize correcting genuinely ambiguous source values.
+
+Shared prose participates in the full semantic maintained-text syntax, target, and reviewed-link
+audits, including objective/ending payloads in the component library. No plain-reference exception
+is broadened for the new model. Rebuild `rules.db` with the current rules builder after migrating
+to format v23; current rules schema/compatibility is 8/10.
 
 Embedded `term` records own source-backed Game terminology that does not warrant a standalone
 catalog/detail route. They require `facts.scope` with a stable slug such as `game-element`,
@@ -440,11 +653,26 @@ Army-linked Skill, Equipment, and Weapon definitions declare
 `variantSemantics.inheritance` as `family` or `source`. Family semantics may be
 presented for the canonical application family. Source semantics require exactly one
 numeric Army source identity, a typed `variant-of` relation to a same-kind family
-definition, and `variantSemantics.sourceVariant`. A numeric Level uses
+definition, and normally `variantSemantics.sourceVariant`. A numeric Level uses
 `{"kind": "level", "value": 2}`; a reviewed named variant uses
 `{"kind": "named", "label": "..."}`; and a reviewed numeric Attribute replacement uses
 `{"kind": "attribute-replacement", "attribute": "BS", "value": 12}`. These apply only
-to that exact source variant.
+to that exact source variant. Weapon definitions alone may instead use
+`variantSemantics.sourceMode: "CC Mode"` to target an exact mode within one numeric
+Army source identity. `sourceMode` is mutually exclusive with `sourceVariant`:
+the former adds a rule to the matching Weapon **profile card**, not to its
+source-wide variant or sibling modes. It must match the source profile's exact
+`mode` string; an unknown mode attaches no rule rather than guessing.
+An authored mode-specific definition still requires the usual numeric Army link,
+`variant-of` relation and cited rule evidence. This does not authorize inferring
+new gameplay effects from an unresolved source disagreement.
+A Weapon family definition can additionally declare `facts.variantRuleReferences`,
+a map of its linked canonical Army Weapon slugs to ordered, existing typed rules
+IDs. These are reviewed **navigation associations**, not inherited statistics or
+an executable rules engine. Only associated variants receive those links in
+their profile API; links to Ammunition, Traits, Skills and States use the normal
+published reference routes. Other source profiles and facts remain unchanged.
+
 Supplements inherit Army routing from their definition and therefore do not declare
 their own `armyLinks`.
 
@@ -511,7 +739,7 @@ Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
 reviewed.
 
-Curated-rule files older than format v21 are no longer accepted by the loader and must
+Curated-rule files older than format v23 are no longer accepted by the loader and must
 be migrated to the current source/citation, composition, variant, declaration, and
 Training contracts before ingestion.
 

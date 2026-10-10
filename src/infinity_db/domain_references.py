@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any
+from urllib.parse import quote
 
 from infinity_db.application_domains import (
     public_rule_record_domain,
@@ -69,11 +70,22 @@ def rule_record_public_reference(
 
     if kind in {"skill", "equipment", "weapon"}:
         entity = kind
-        has_army_link = False
-        for link in record.get("army_links", []):
-            if link.get("entity") != entity:
-                continue
-            has_army_link = True
+        army_links = [
+            link
+            for link in record.get("army_links", [])
+            if link.get("entity") == entity
+        ]
+        # A family shared by several Army Weapons needs a link to the rule
+        # card, not just to the first Weapon's profile table. Until there is
+        # a dedicated family route, the first linked Weapon hosts that card.
+        shared_weapon_family = (
+            kind == "weapon"
+            and (record.get("variant_semantics") or {}).get("inheritance") == "family"
+            and len({link.get("id") for link in army_links}) > 1
+            and isinstance(record.get("id"), str)
+        )
+        has_army_link = bool(army_links)
+        for link in army_links:
             raw_ref = link.get("id")
             if not isinstance(raw_ref, str) or not raw_ref:
                 continue
@@ -83,8 +95,12 @@ def rule_record_public_reference(
                 slug = public_slug_for_reference(database, catalog, int(raw_ref))
                 if slug is None:
                     continue
-                return {"catalog": catalog, "id": slug}
-            return {"catalog": catalog, "id": raw_ref}
+            else:
+                slug = raw_ref
+            if shared_weapon_family:
+                fragment = record["id"].replace(":", "-")
+                return {"href": f"/{catalog}/{quote(slug, safe='')}#rule-{fragment}"}
+            return {"catalog": catalog, "id": slug}
 
         if has_army_link or kind != "skill":
             return None
@@ -106,9 +122,21 @@ def rule_record_public_reference(
     return {"catalog": catalog, "id": route_id}
 
 
+def local_rule_public_reference(
+    record_id: object, local_rule_ids: frozenset[str]
+) -> dict[str, str] | None:
+    """Link to an existing rule card in the current detail page, when supplied."""
+
+    if isinstance(record_id, str) and record_id in local_rule_ids:
+        return {"href": f"#rule-{record_id.replace(':', '-')}"}
+    return None
+
+
 def enrich_rule_relation_references(
     database: Database,
     value: dict[str, Any],
+    *,
+    local_rule_ids: frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
     """Attach browser-routable references to structured rules relations.
 
@@ -130,7 +158,9 @@ def enrich_rule_relation_references(
                     record = relation.get("record")
                     if not isinstance(record, dict):
                         continue
-                    reference = rule_record_public_reference(database, record)
+                    reference = local_rule_public_reference(
+                        record.get("id"), local_rule_ids
+                    ) or rule_record_public_reference(database, record)
                     if reference is not None:
                         record["public_reference"] = reference
             for child in node.values():

@@ -1,12 +1,13 @@
 # InfinityDB
 
 InfinityDB is a read-only Infinity reference for exploring Units, profiles,
-Equipment, Skills, Weapons, and relationships across Armies. It combines
+Equipment, Skills, Weapons, core Scenarios, and relationships across Armies. It combines
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Release metadata: **0.10.0** (2026-10-07). Unreleased development changes display `+dev`;
-metadata alone does not mean the release has been published.
+Current release: **0.10.0** (2026-10-07), released and deployed.
+Prepared release candidate: **0.10.1** (2026-10-10), pending acceptance and hosted validation.
+Unreleased development changes display `+dev`.
 See the [release process](docs/releasing.md) and [current milestone](docs/TODO.md#current-milestone).
 
 ## Guiding principles
@@ -44,6 +45,14 @@ identifiers, or use advertising trackers, fingerprinting, or per-user analytics.
   browser history or in a link you choose to share. InfinityDB does not retain those
   query/search values in its aggregate metrics.
 
+**Post-1.0 design direction:** Scenario creation and other user-authored tools
+will not require server-side saved content, accounts, or a share-link registry.
+Sharing will use self-contained URLs where practical, with file export/import
+for larger content. Authoring should work with a local, offline InfinityDB
+installation. Shared URLs and exported files are visible to their recipients;
+this direction is not a promise of secret or encrypted links. Existing browser
+settings persistence remains a separate, opt-in preference feature.
+
 This policy describes InfinityDB's application-level collection and retention. Hosting
 and network infrastructure necessarily processes connection metadata to deliver HTTP
 traffic, and external links are governed by the destination site's own privacy policy;
@@ -71,6 +80,9 @@ its application metrics.
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Includes global search and a federated Glossary across player-facing reference domains, with
   embedded Attributes and scoped Game terms routed back to their canonical owning surfaces.
+- Includes a browsable core **Scenarios** reference with explicit Army Points selection, structured
+  setup/objectives/scoring, scenario Rules and Skills, source-verification notes, and deterministic
+  deployment maps generated from the same maintained geometry as the scenario data.
 - Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
   with an S2 reference alongside other supported Silhouettes.
 - Supports System, Light, and Dark themes from Settings; System follows the operating-system
@@ -117,6 +129,8 @@ documentation-label convention.
 
 ## Roadmap to 1.0
 
+**Project domain:** Project infrastructure
+
 The current direction is deliberately incremental:
 
 - **0.7.x — Rules & context:** enriched existing catalog/application data with concise
@@ -129,13 +143,18 @@ The current direction is deliberately incremental:
   gaps and made the result searchable, navigable, and understandable.
 - **0.10.x — Stabilize & harden:** completed the application consistency and scenario
   architecture reviews, frontend/theme work, and release/operations hardening.
-- **1.0.0 — Player data-complete:** every useful in-scope game datum collected by
-  InfinityDB has a maintained representation and a meaningful, usable place in the
+- **0.10.1 — Interim reference consistency (release preparation):** release the completed
+  core Scenarios, Ammunition and rules-reference improvements alongside the stabilization
+  fixes. Remaining acceptance and publication gates are tracked in
+  [`docs/TODO.md`](docs/TODO.md#0101--interim-reference-consistency).
+- **1.0.0 — Player data-complete (temporarily paused):** resume after this interim release;
+  ensure every useful in-scope game datum collected by InfinityDB has a maintained
+  representation and a meaningful, usable place in the
   web reference, including the current core-rules scenarios. ITS season/tournament
   content remains a later extension of the same scenario model.
 
 In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
-0.9 closed application gaps → 0.10 hardens and polishes → 1.0 completes the reference.**
+0.9 closed application gaps → 0.10 hardened and polished → 1.0 completes the reference.**
 Exact minor-release scope may move as audits discover dependencies; the durable 1.0 gate is
 defined in [release process](docs/releasing.md).
 
