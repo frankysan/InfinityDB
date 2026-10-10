@@ -5988,9 +5988,21 @@ def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) 
     assert body.index(
         b'appendRuleFactGroup(container, rule, "requirements", "Requirements")'
     ) < body.index(b'appendRuleFactGroup(container, rule, "effects", "Effects")')
+    assert body.index(
+        b'appendRuleFactGroup(container, rule, "effects", "Effects")'
+    ) < body.index(b'appendRuleFactGroup(container, rule, "restrictions", "Restrictions")')
+    # Scenario Specialist Troops list qualifying Skills before restrictions.
     assert body.index(b'heading.textContent = "Qualifying Skills"') < body.index(
         b'appendRuleFactGroup(container, rule, "restrictions", "Restrictions")'
     )
+    assert body.index(
+        b'heading.textContent = "Qualifying Skills"'
+    ) < body.index(
+        b'appendRuleFactGroup(container, rule, "clarifications", "Clarifications and examples")'
+    )
+    assert body.index(
+        b'appendRuleFactGroup(container, rule, "clarifications", "Clarifications and examples")'
+    ) < body.rindex(b'appendImmunityCases(container, rule)')
     assert body.index(
         b"appendMaintainedText(paragraph, paragraphTokens)"
     ) < body.index(b"const applicability = includeApplicability ? applicabilityText(rule)")

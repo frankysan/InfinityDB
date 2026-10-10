@@ -11,7 +11,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- The Immunity Skill page now presents its five reviewed weapon, Vulnerability and combined-Ammunition interactions with their conditions, Saving Roll outcomes, linked rules and explicit-versus-derived evidence labels.
+- The Immunity Skill page keeps Requirements, Effects and Restrictions in order, places rules clarifications and printed examples in their own section, and displays its five reviewed interactions afterward with conditions, Saving Roll outcomes, linked rules and evidence labels.
 - Protheion now explains its opponent Attribute penalty and why extra failed Saving Rolls after a target dies cannot grant more Wounds or VITA.
 - Request Speedball now explains why Controlled Jump does not modify its PH 15 Rolls, even though Speedballs use Combat Jump placement rules (N5 FAQ v0.1).
 - Controlled Jump now explains that its ARO immediately affects the current Combat Jump, how opposing Programs cancel, and why separate scenario bonuses still apply.

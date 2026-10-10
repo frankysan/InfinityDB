@@ -31,6 +31,15 @@ paragraphs reasonably short. Shorter summaries may remain single paragraphs. Use
 inline **bold emphasis** for useful mode/topic labels, preserving typed semantic
 links and literal source notation such as `[**]` (not Markdown emphasis).
 
+For structured reference cards, preserve **Requirements → Effects → Restrictions**
+in that order. Scenario Specialist Troops cards place **Qualifying Skills** before
+Restrictions. Put explanatory examples and clarifying interpretations in a separate
+**Clarifications and examples** section after Restrictions, not in Effects.
+When reviewed, condition-scoped interaction cases are available, display
+**Reviewed interactions** after those clarifications, retaining their evidence
+labels. Do not infer new interactions from presentation markup; all these
+sections use the same shared rules-card renderer.
+
 **Separate gameplay rules from editorial provenance.** Keep rules players act on
 at normal body size. Source-history, Army/PDF mismatches, and legacy terminology
 belong in `facts.sourceNotes`, rendered in smaller secondary text; retain their

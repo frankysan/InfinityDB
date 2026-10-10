@@ -101,7 +101,9 @@ def _enrich_rule_record(record: dict[str, Any], resolver: _Resolver) -> None:
     if not isinstance(facts, dict):
         return
     fact_tokens: dict[str, Any] = {}
-    for key in ("requirements", "effects", "restrictions", "rules", "sourceNotes"):
+    for key in (
+        "requirements", "effects", "restrictions", "clarifications", "rules", "sourceNotes"
+    ):
         values = facts.get(key)
         if isinstance(values, list) and all(isinstance(value, str) for value in values):
             fact_tokens[key] = [resolver.tokens(value) for value in values]

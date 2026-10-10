@@ -1056,6 +1056,18 @@ def load_curated_document(path: Path) -> dict[str, Any]:
             raise ValueError(f"{context}: 'facts.sourceNotes' must be non-empty strings")
         facts = record.get("facts")
         if isinstance(facts, dict):
+            clarifications = facts.get("clarifications")
+            if clarifications is not None and (
+                not isinstance(clarifications, list)
+                or not clarifications
+                or any(
+                    not isinstance(item, str) or not item.strip()
+                    for item in clarifications
+                )
+            ):
+                raise ValueError(
+                    f"{context}.facts.clarifications: expected non-empty maintained-text strings"
+                )
             _validate_related_categories(facts, f"{context}.facts")
             immunity = facts.get("immunityInteraction")
             if immunity is not None:

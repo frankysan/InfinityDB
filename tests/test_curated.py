@@ -110,6 +110,30 @@ def test_curated_source_notes_reject_empty_or_invalid_entries(
         load_curated_document(path)
 
 
+@pytest.mark.parametrize("clarifications", [[], [""], [None], "not a list"])
+def test_curated_clarifications_reject_empty_or_invalid_entries(
+    tmp_path: Path, clarifications: object,
+) -> None:
+    document = valid_document()
+    document["records"][0]["facts"]["clarifications"] = clarifications
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="facts.clarifications"):
+        load_curated_document(path)
+
+
+def test_curated_clarifications_accept_maintained_text(tmp_path: Path) -> None:
+    document = valid_document()
+    document["records"][0]["facts"]["clarifications"] = [
+        "An explicit [[skill:example|example]] of the rule."
+    ]
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_curated_document(path)["records"][0]["facts"]["clarifications"] == [
+        "An explicit [[skill:example|example]] of the rule."
+    ]
+
+
 def test_skill_definition_supports_multiple_categories(tmp_path: Path) -> None:
     document = valid_document()
     document["skillTypes"].append(

@@ -295,7 +295,6 @@ function appendRuleDetails(
   appendRuleFactGroup(container, rule, "requirements", "Requirements");
   appendRuleFactGroup(container, rule, "effects", "Effects");
   appendAmmunitionFacts(container, rule);
-  appendImmunityCases(container, rule);
 
   const specialists = facts.specialists?.anyOfSkills;
   if (Array.isArray(specialists) && specialists.length) {
@@ -316,6 +315,8 @@ function appendRuleDetails(
   }
 
   appendRuleFactGroup(container, rule, "restrictions", "Restrictions");
+  appendRuleFactGroup(container, rule, "clarifications", "Clarifications and examples");
+  appendImmunityCases(container, rule);
 
   container.append(...beforeRelations);
   appendRuleRelations(container, rule);
@@ -350,7 +351,7 @@ function appendRuleDetails(
 export function hasGameplayRuleFacts(rule) {
   return [rule, ...(rule?.supplements || [])].some((contribution) => {
     const facts = contribution?.facts || {};
-    return ["requirements", "effects", "restrictions"].some(
+    return ["requirements", "effects", "restrictions", "clarifications"].some(
       (key) => Array.isArray(facts[key]) && facts[key].length,
     );
   });

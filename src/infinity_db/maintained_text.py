@@ -281,7 +281,7 @@ def maintained_text_fields(document: dict[str, Any]) -> Iterator[tuple[str, str]
                                     f"{base}.awards[{award_index}].condition.text",
                                     condition["text"],
                                 )
-        for key in ("requirements", "effects", "restrictions", "rules"):
+        for key in ("requirements", "effects", "restrictions", "clarifications", "rules"):
             values = facts.get(key)
             if not isinstance(values, list):
                 continue

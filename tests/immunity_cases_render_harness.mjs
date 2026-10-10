@@ -47,6 +47,22 @@ function descendants(node, predicate) {
   ]);
 }
 const article = rulesReferenceArticle(immunity);
+const headings = descendants(article, (node) => node.className === "detail-fact-heading")
+  .map((node) => node.textContent);
+assert.deepEqual(headings.slice(0, 5), [
+  "Requirements", "Effects", "Restrictions", "Clarifications and examples", "Reviewed interactions",
+]);
+const allGroups = descendants(article, (node) => node.className === "detail-fact-group");
+const effects = allGroups.find((node) => descendants(node, (c) => c.className === "detail-fact-heading")
+  .some((heading) => heading.textContent === "Effects"));
+assert.ok(effects);
+assert.doesNotMatch(effects.textContent, /Printed Example 2|The printed Flash Pulse example/);
+const clarifications = allGroups.find((node) => descendants(node, (c) => c.className === "detail-fact-heading")
+  .some((heading) => heading.textContent === "Clarifications and examples"));
+assert.ok(clarifications);
+assert.equal(descendants(clarifications, (node) => node.tag === "li").length, 3);
+assert.match(clarifications.textContent, /Printed Example 2/);
+assert.match(clarifications.textContent, /The printed \[\[weapon:flash-pulse\|Flash Pulse\]\] example/);
 const groups = descendants(article, (node) => node.className === "detail-fact-group immunity-reviewed-cases");
 assert.equal(groups.length, 1);
 const group = groups[0];
@@ -73,4 +89,11 @@ for (const url of ["/weapons/flash-pulse", "/skills/vulnerability", "/ammunition
 const other = rulesReferenceArticle({ id: "skill:unrelated", name: "Other",
   facts: { immunityInteraction: immunity.facts.immunityInteraction } });
 assert.equal(descendants(other, (node) => node.className === "detail-fact-group immunity-reviewed-cases").length, 0);
-console.log("5 reviewed Immunity cases, conditions, evidence labels and semantic links");
+const generic = rulesReferenceArticle({ id: "skill:example", name: "Example",
+  facts: { requirements: ["A requirement"], effects: ["An effect"],
+    restrictions: ["A restriction"], clarifications: ["An illustrated case"] } });
+assert.deepEqual(descendants(generic, (node) => node.className === "detail-fact-heading")
+  .map((node) => node.textContent), [
+  "Requirements", "Effects", "Restrictions", "Clarifications and examples",
+]);
+console.log("5 reviewed Immunity cases, conditions, evidence labels and semantic links; ordered sections");

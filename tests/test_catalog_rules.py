@@ -899,14 +899,18 @@ def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
         "separate from treating Ammunition as [[ammunition:normal|Normal]]" in effects
     )
     assert "ordinary Saving Roll still happens" in effects
-    assert "Printed Example 2" in effects
-    assert "[[trait:arm-0|ARM = 0]]" in effects
-    assert "[[trait:state|State: Dead]]" in effects
-    assert "[[state:dead|Dead]]" in effects
-    assert "using full ARM" in effects
-    assert "Despite the ordinary protection against State-causing Traits" in effects
-    assert "[[trait:non-lethal|Non-Lethal]]" in effects
-    assert "[[state:stunned|Stunned]] only on a failed BTS roll" in effects
+    assert "Printed Example 2" not in effects
+    assert "The printed [[weapon:flash-pulse|Flash Pulse]] example" not in effects
+    assert "For the reviewed [[ammunition:ap|AP]]" not in effects
+    clarifications = "\n".join(immunity["facts"]["clarifications"])
+    assert "Printed Example 2" in clarifications
+    assert "[[trait:arm-0|ARM = 0]]" in clarifications
+    assert "[[trait:state|State: Dead]]" in clarifications
+    assert "[[state:dead|Dead]]" in clarifications
+    assert "using full ARM" in clarifications
+    assert "Despite the ordinary protection against State-causing Traits" in clarifications
+    assert "[[trait:non-lethal|Non-Lethal]]" in clarifications
+    assert "[[state:stunned|Stunned]] only on a failed BTS roll" in clarifications
     assert {
         citation["page"]
         for citation in immunity["citations"]
@@ -936,7 +940,14 @@ def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
         payload["rules"][0]["facts"]["effects"]
     )
     assert "Printed Example 2" in " ".join(
-        payload["rules"][0]["facts"]["effects"]
+        payload["rules"][0]["facts"]["clarifications"]
+    )
+    clarifications_tokens = payload["rules"][0]["fact_tokens"]["clarifications"]
+    assert len(clarifications_tokens) == 3
+    assert any(
+        token["target"] == "trait:arm-0"
+        for token in clarifications_tokens[0]
+        if token["type"] == "reference"
     )
 
 
@@ -979,7 +990,7 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
         flash["facts"]["sourceNotes"][0]
     )
     assert "Saving Roll stays BTS, not ARM" in " ".join(
-        immunity["facts"]["effects"]
+        immunity["facts"]["clarifications"]
     )
     assert "explicitly exempts" in immunity["facts"]["restrictions"][1]
 

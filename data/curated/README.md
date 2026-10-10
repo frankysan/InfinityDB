@@ -76,6 +76,15 @@ and other non-gameplay notes belong in an optional `facts.sourceNotes` array of
 non-empty maintained-text strings. These are shown beneath the primary rules in
 smaller type and remain subject to reference auditing.
 
+Curated rule records may add optional `facts.clarifications`, a non-empty
+array of maintained-text strings for printed examples and explanations that
+clarify rather than define core Effects. Render after Requirements, Effects,
+and Restrictions, and before any reviewed interaction cases. Unlike
+`facts.sourceNotes`, these are player-facing gameplay explanations at normal
+body size, with semantic links, review coverage, and the record's citations
+intact. Keep rule effects in `facts.effects`; do not move binding game
+conditions into example prose.
+
 The audit lists all review-needed markers separately so reviewed uncertainty remains easy to locate
 and cannot disappear into ordinary prose. Resolve each marker to a typed semantic reference, or to
 ordinary text when manual review proves it is not a reference.
