@@ -659,6 +659,18 @@ execution, and requires the actual permitted-ARO list. These extend this finding
 do not infer that every movement/CC Skill or every Impetuous Order has the same
 exception. The reconciliation records the previous/current clauses.
 
+**Implementation follow-up (2026-10-10):** All ten affected State cards now
+provide individual cancellation triggers and exceptions under Clarifications
+and examples, citing English and Spanish N5.3 rulebook pages. The explanations
+separate Hidden Deployment from subsequent Marker identity; IMP-1 versus IMP-2;
+real Holoecho bearer versus individual holographic duplicates; Controller
+recovery versus Coherency and Engineer intervention; and Prone, Retreat!, and
+Suppressive Fire termination. Camouflaged/Impersonation ARO declaration limits
+and whole-Order revelation are stated. General Movement's Berserk exception
+and Impetuous-specific Prone transitions retain their source scopes. Existing
+structured relations remain unchanged. API regression coverage added; browser
+acceptance pending. REA-017, REA-020, REA-026 and REA-035 remain separate.
+
 ### REA-016 - Stealth omits Deployables and multi-Trooper reaction reasoning
 
 **Classification:** completeness. **Severity:** High. **Priority:** P1.

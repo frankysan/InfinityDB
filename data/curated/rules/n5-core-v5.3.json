@@ -2373,6 +2373,11 @@
                     "Enemy Troopers cannot enter Silhouette contact with a Camouflaged Marker.",
                     "A Trooper in Camouflaged State cannot be part of a Fireteam.",
                     "During the Active Turn, a [[skill:camouflage]] user may regain this State only with the required Long Skill while outside the LoF of enemy Models and Markers."
+                ],
+                "clarifications": [
+                    "Cancellation: a Camouflaged Marker is revealed when it declares an Attack, [[skill:look-out|Look Out!]], or another Skill requiring a Roll; declares a Long Skill other than [[skill:cautious-movement|Cautious Movement]]; enters Silhouette contact with an enemy Model; is [[skill:discover|Discovered]]; or must make a Saving Roll.",
+                    "The condition also ends if the Trooper becomes [[skill:impetuous|Impetuous]] or enters [[state:retreat|Retreat!]]. Reveal the Model and its public information. Cancellation applies to the entire declared Order, even if the revealing Skill is declared second.",
+                    "Against an unrevealed Camouflaged Marker, the only permitted AROs are [[skill:discover|Discover]], [[skill:dodge|Dodge]], [[skill:look-out|Look Out!]], and [[skill:reset|Reset]]. A delayed reaction is lost if the Marker does not reveal itself in the second half of its Order."
                 ]
             },
             "citations": [
@@ -2395,6 +2400,21 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "heading": "Marker",
                     "member": "Labels"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 158,
+                    "section": "Camouflaged State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 162,
+                    "section": "Camouflaged State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 163,
+                    "section": "Camouflaged State"
                 }
             ],
             "review": {
@@ -9202,12 +9222,37 @@
                 ],
                 "restrictions": [
                     "Once canceled, Hidden Deployment State cannot be regained."
+                ],
+                "clarifications": [
+                    "The hidden Trooper is revealed when the Trooper declares an Order or ARO, is found by a rule that explicitly reveals a hidden Trooper (such as [[skill:sensor|Sensor]]), becomes [[skill:impetuous|Impetuous]], or enters [[state:retreat|Retreat!]]. The recorded Model or Marker is placed on the table and its Open Information disclosed.",
+                    "If the Trooper also has another Marker status, that condition can survive revealing the hidden Trooper when declaring [[skill:cautious-movement|Cautious Movement]], an eligible Basic Short Skill not requiring a Roll (except [[skill:look-out|Look Out!]]), delaying an ARO against a Marker, or preventing an enemy from regaining another Marker status. Other declarations reveal the Model as well.",
+                    "If another Model or Marker occupies the recorded position when the hidden Trooper declares an Order or ARO, place the revealed Trooper as close as possible without Silhouette contact."
                 ]
             },
             "citations": [
                 {
                     "sourceId": "wiki-hidden-deployment-state-oldid-3835",
                     "heading": "Hidden Deployment State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 161,
+                    "section": "Hidden Deployment State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 162,
+                    "section": "Hidden Deployment State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 166,
+                    "section": "Hidden Deployment State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 168,
+                    "section": "Hidden Deployment State"
                 }
             ],
             "review": {
@@ -10755,7 +10800,11 @@
                     "[[skill:engineer]] can cancel the state when it was caused directly by an Attack, scenery, or a Scenario Special Rule."
                 ],
                 "requirements": [],
-                "restrictions": []
+                "restrictions": [],
+                "clarifications": [
+                    "If the [[skill:peripheral|Peripheral]] became Disconnected because its Controller was [[state:isolated|Isolated]] or in a Null condition, the [[skill:peripheral|Peripheral]] reconnects automatically when that Controller recovers from the triggering condition.",
+                    "If the cause was a failed Coherency Check, passing a Coherency Check at the end of an Order or ARO automatically cancels Disconnected. If the cause was an Attack, scenery or scenario rule applied to the [[skill:peripheral|Peripheral]], [[skill:engineer|Engineer]] (or an equivalent Skill) can cancel it with the required contact and successful Roll. These are separate recovery routes."
+                ]
             },
             "labelIds": [
                 "null"
@@ -10764,6 +10813,16 @@
                 {
                     "sourceId": "wiki-disconnected-state-oldid-3930",
                     "heading": "Disconnected State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 160,
+                    "section": "Disconnected State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 165,
+                    "section": "Disconnected State"
                 }
             ],
             "review": {
@@ -12870,12 +12929,37 @@
                 "restrictions": [
                     "Attacks and [[skill:intuitive-attack:plural]] cannot be declared against an IMP-1 Marker under the normal [[state:impersonation-1|Impersonation-1 State]] rules.",
                     "A Trooper in Impersonation State cannot be part of a Fireteam."
+                ],
+                "clarifications": [
+                    "A successful [[skill:discover|Discover]] against [[state:impersonation-1|IMP-1]] applies a -3 WIP MOD and reduces it to [[state:impersonation-2|IMP-2]]; it does not directly expose the Model. Multiple successful [[skill:discover|Discover]] Rolls in the same Order still reduce [[state:impersonation-1|IMP-1]] only to [[state:impersonation-2|IMP-2]].",
+                    "This disguise ends when the Marker declares an Attack or another Skill requiring a Roll; declares a Long Skill other than [[skill:cautious-movement|Cautious Movement]]; enters enemy Silhouette contact; becomes [[skill:impetuous|Impetuous]]; or enters [[state:retreat|Retreat!]]. Its cancellation applies to the entire declared Order.",
+                    "Only [[skill:discover|Discover]], [[skill:dodge|Dodge]], [[skill:look-out|Look Out!]], or [[skill:reset|Reset]] can be declared as AROs against an disguised Marker. A reaction delayed against it is lost unless it reveals itself with the second half of the Order."
                 ]
             },
             "citations": [
                 {
                     "sourceId": "wiki-impersonation-state-oldid-3929",
                     "heading": "Impersonation-1"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 166,
+                    "section": "Impersonation-1 State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 167,
+                    "section": "Impersonation-1 State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 177,
+                    "section": "Impersonation-1 State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 178,
+                    "section": "Impersonation-1 State"
                 }
             ],
             "review": {
@@ -12926,12 +13010,37 @@
                 "restrictions": [
                     "Attacks and [[skill:intuitive-attack:plural]] cannot normally be declared against an IMP-2 Marker until it is Discovered.",
                     "A Trooper in Impersonation State cannot be part of a Fireteam."
+                ],
+                "clarifications": [
+                    "Unlike [[state:impersonation-1|IMP-1]], a successful [[skill:discover|Discover]] against IMP-2 removes the Marker and reveals the actual Model without the [[state:impersonation-1|IMP-1]] -3 WIP modifier.",
+                    "The Marker is also removed when it declares an Attack or another Skill requiring a Roll; declares a Long Skill other than [[skill:cautious-movement|Cautious Movement]]; enters enemy Silhouette contact; becomes [[skill:impetuous|Impetuous]]; or enters [[state:retreat|Retreat!]]. Cancellation applies to the entire Order.",
+                    "Disguised Markers count as Allied to enemies, so ordinary Attacks and [[skill:intuitive-attack|Intuitive Attacks]] are prohibited until revelation. Permitted and delayed AROs follow the same restrictions as [[state:impersonation-1|IMP-1]]."
                 ]
             },
             "citations": [
                 {
                     "sourceId": "wiki-impersonation-state-oldid-3929",
                     "heading": "Impersonation-2"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 166,
+                    "section": "Impersonation-2 State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 167,
+                    "section": "Impersonation-2 State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 177,
+                    "section": "Impersonation-2 State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 178,
+                    "section": "Impersonation-2 State"
                 }
             ],
             "review": {
@@ -13969,6 +14078,11 @@
                 ],
                 "restrictions": [
                     "Holoecho State is canceled by its listed revelation and coherency conditions, including declarations or events that reveal the bearer."
+                ],
+                "clarifications": [
+                    "The real bearer loses this Marker condition when declaring an Attack, [[skill:look-out|Look Out!]], or another Skill requiring a Roll; declaring a Long Skill other than [[skill:cautious-movement|Cautious Movement]]; entering enemy Silhouette contact; making a forced Saving Roll; being [[skill:discover|Discovered]]; becoming [[skill:impetuous|Impetuous]]; entering [[state:retreat|Retreat!]]; losing Coherency with the other holographic duplicates; or having all holographic duplicates Discovered.",
+                    "A holographic duplicate disappears separately when Discovered, entering enemy Silhouette contact, being hit by a successful Attack (no Saving Roll), or breaking Coherency. If the real bearer loses Holoecho, all remaining holographic duplicates are removed.",
+                    "Cancellation of the real bearer normally takes effect over the entire Order, with Models replaced at the end. Exception: failing Coherency at the start of an Order removes all holographic duplicates immediately, before measuring movement."
                 ]
             },
             "labelIds": [
@@ -13985,6 +14099,21 @@
                 {
                     "sourceId": "wiki-holoecho-state-oldid-4069",
                     "heading": "Holoecho State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 163,
+                    "section": "Holoecho State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 168,
+                    "section": "Holoecho State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 169,
+                    "section": "Holoecho State"
                 }
             ],
             "review": {
@@ -14022,6 +14151,10 @@
                 "restrictions": [
                     "A Trooper in [[state:holomask|HoloMask State]] cannot copy [[skill:hacker]] or Hackable status or items with the [[trait:deployable]] Trait represented by Tokens or Models.",
                     "The State is canceled by its listed revelation conditions."
+                ],
+                "clarifications": [
+                    "The disguise ends when the disguised Trooper declares an Attack, [[skill:look-out|Look Out!]], or another Skill requiring a Roll; declares a Long Skill other than [[skill:cautious-movement|Cautious Movement]]; enters enemy Silhouette contact; is forced to make a Saving Roll; or is [[skill:discover|Discovered]]. Becoming [[skill:impetuous|Impetuous]] or entering [[state:retreat|Retreat!]] also cancels it.",
+                    "Once canceled, replace the imitated Model with the real Model at the end of that Order, keeping its facing and revealing its complete Public Information. This does not grant the same timing or exceptions as [[state:holoecho|Holoecho]] or [[skill:camouflage|Camouflage]]."
                 ]
             },
             "labelIds": [
@@ -14031,6 +14164,16 @@
                 {
                     "sourceId": "wiki-holomask-state-oldid-3973",
                     "heading": "HoloMask State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 164,
+                    "section": "HoloMask State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 170,
+                    "section": "HoloMask State"
                 }
             ],
             "review": {
@@ -14108,6 +14251,11 @@
                 ],
                 "restrictions": [
                     "[[skill:jump]] cancels Prone State, and some troop types or Equipment cannot enter Prone State."
+                ],
+                "clarifications": [
+                    "A qualifying Movement-labelled Skill or ARO lets a Trooper enter or leave Prone at the start or end of its movement; a failed Guts Roll may also change it. [[skill:jump|Jump]] automatically cancels Prone. General Movement Rules additionally exclude [[skill:berserk|Berserk]] from voluntary Prone transitions.",
+                    "Entering [[state:unconscious|Unconscious]] normally also causes Prone, except for Troopers unable to enter it. When [[state:unconscious|Unconscious]] is canceled, that Trooper’s Prone condition is automatically canceled as well.",
+                    "During the [[skill:impetuous|Impetuous]] Phase, a Trooper declaring [[skill:move|Move]], [[skill:jump|Jump]], or [[skill:climb|Climb]] must leave Prone, use its full applicable MOV value, and cannot return to Prone at the end of that movement. [[skill:impetuous|Impetuous]] Troopers also cannot end the Order Prone."
                 ]
             },
             "labelIds": [],
@@ -14121,6 +14269,36 @@
                 {
                     "sourceId": "wiki-prone-state-oldid-4121",
                     "heading": "Prone State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 29,
+                    "section": "Prone State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 169,
+                    "section": "Prone State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 30,
+                    "section": "Prone State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 173,
+                    "section": "Prone State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 97,
+                    "section": "Impetuous"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 96,
+                    "section": "Impetuous"
                 }
             ],
             "review": {
@@ -14208,6 +14386,10 @@
                 ],
                 "restrictions": [
                     "Troopers protected by [[skill:courage]], [[skill:religious-troop]], [[skill:warhorse]], or another applicable rule do not enter Retreat! State."
+                ],
+                "clarifications": [
+                    "[[state:retreat|Retreat!]] ends when the army leaves the Retreat! situation at the beginning of its Player Turn. Alternatively, spending a Command Token cancels Retreat! for one Trooper; that Trooper ignores the condition for the rest of the game.",
+                    "Entering Retreat! removes Marker conditions, [[state:holoecho|Holoecho]], and [[state:holomask|HoloMask]]; this is not the same as permitting one Trooper to ignore Retreat! by spending a Command Token."
                 ]
             },
             "labelIds": [],
@@ -14245,6 +14427,16 @@
                 {
                     "sourceId": "wiki-retreat-state-oldid-3622",
                     "heading": "Retreat! State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 170,
+                    "section": "Retreat! State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 174,
+                    "section": "Retreat! State"
                 }
             ],
             "review": {
@@ -14329,6 +14521,10 @@
                 ],
                 "restrictions": [
                     "The State is canceled by the listed Order, ARO, weapon, Guts Roll, State, Loss of Lieutenant, or Fireteam conditions."
+                ],
+                "clarifications": [
+                    "This condition ends when the Trooper declares an Order; declares an ARO other than [[skill:bs-attack|BS Attack]] with its SF Mode weapon; uses a weapon without the [[trait:suppressive-fire|Suppressive Fire]] Trait; or fails a Guts Roll.",
+                    "It also ends if the Trooper enters [[state:engaged|Engaged]], [[state:isolated|Isolated]], [[state:retreat|Retreat!]], a Null or Immobilized condition, or another condition that cancels this condition; if its army enters Loss of [[skill:lieutenant|Lieutenant]]; or if the Trooper joins a Fireteam."
                 ]
             },
             "labelIds": [],
@@ -14336,6 +14532,16 @@
                 {
                     "sourceId": "wiki-suppressive-fire-state-oldid-3324",
                     "heading": "Suppressive Fire State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 171,
+                    "section": "Suppressive Fire State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 167,
+                    "section": "Suppressive Fire State"
                 }
             ],
             "review": {
@@ -16224,13 +16430,19 @@
                         {
                             "sourceAmmunitionId": 10,
                             "sourceAmmunitionName": "AP+DA",
-                            "components": ["ammunition:ap", "ammunition:da"],
+                            "components": [
+                                "ammunition:ap",
+                                "ammunition:da"
+                            ],
                             "when": {
                                 "immunity": "ARM",
                                 "savingAttribute": "ARM",
                                 "attackClass": "non-comms"
                             },
-                            "withoutImmunity": {"hitRolls": 2, "criticalRolls": 3},
+                            "withoutImmunity": {
+                                "hitRolls": 2,
+                                "criticalRolls": 3
+                            },
                             "withImmunity": {
                                 "hitRolls": 1,
                                 "criticalRolls": 2,
@@ -16241,13 +16453,19 @@
                         {
                             "sourceAmmunitionId": 13,
                             "sourceAmmunitionName": "AP+Exp",
-                            "components": ["ammunition:ap", "ammunition:exp"],
+                            "components": [
+                                "ammunition:ap",
+                                "ammunition:exp"
+                            ],
                             "when": {
                                 "immunity": "ARM",
                                 "savingAttribute": "ARM",
                                 "attackClass": "non-comms"
                             },
-                            "withoutImmunity": {"hitRolls": 3, "criticalRolls": 4},
+                            "withoutImmunity": {
+                                "hitRolls": 3,
+                                "criticalRolls": 4
+                            },
                             "withImmunity": {
                                 "hitRolls": 1,
                                 "criticalRolls": 2,

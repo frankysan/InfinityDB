@@ -763,6 +763,38 @@ arbitrating multiple attacks or cancelling States.
 Sources: English N5.3 pp. 24, 79–80, 85, 111, 120, 160, 165, 168, 171;
 Spanish N5.3 pp. 80–82, 113, 124, 164, 179.
 
+### RS-GSG-STATE-005F — State cancellation is source-specific, including Marker lifecycles
+
+**Classification:** source-native interaction; reviewed player-facing explanation (REA-015).
+
+The State reference pages now expose their individual cancellation procedures in
+`facts.clarifications`, rather than using a universal "reveal the Marker" rule:
+
+- Camouflaged and Impersonation Markers have specific permitted ARO declarations,
+  delayed-reaction outcomes, and whole-Order revelation; a successful Discover
+  against IMP-1 only changes it to IMP-2, while Discover against IMP-2 reveals
+  the Model.
+- Hidden Deployment ends on Order/ARO declaration or specified other triggers;
+  an independently available Marker State may remain under the enumerated
+  exceptions. Hidden Troopers are not automatically ordinary deployed Markers.
+- Holoecho distinguishes cancellation of the real bearer from removal of one
+  holographic duplicate; a failed starting Coherency Check removes duplicates
+  immediately, unlike the normal end-of-Order replacement. HoloMask uses its
+  own end-of-Order Model replacement procedure.
+- Disconnected recovery depends on the cause: Controller recovery, a passed
+  Coherency Check, or Engineer intervention for externally induced effects.
+- Prone, Retreat!, and Suppressive Fire have distinct automatic or declared
+  cancellation routes. Prone also has separate Impetuous restrictions, and the
+  General Movement Rules' Berserk exception must not be silently generalized
+  from the shorter Prone State paragraph.
+
+These are non-executable player explanations. Existing typed relations do not
+become unconditional state transitions; overlapping source conditions must
+still be evaluated within the applicable Order and State rules.
+
+Sources: English N5.3 pp. 29, 97, 157–171; Spanish N5.3 pp. 30,
+96, 162–178. See the detailed per-record citations and REA-015.
+
 ### RS-GSG-STATE-005D — Self-recovery rolls are both cancellation and roll interactions
 
 **Classification:** source-native interaction with an InfinityDB presentation consequence.

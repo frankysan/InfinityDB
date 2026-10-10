@@ -342,7 +342,7 @@ unimplemented until its corresponding behavior exists.
       Dodge/Reset (REA-014) now explain per-Attack evasion, movement after
       qualifying Dodge, Engaged exit position, cumulative Reset State MODs,
       and the Sixth Sense exception; verify the Dodge, Reset, Engaged and
-      Bangbomb browser cards. REA-015 and REA-026 remain separate.
+      Bangbomb browser cards. REA-015 now has source-cited State-specific cancellation explanations, pending browser review; REA-026 remains separate.
       Targeted MSV1/Sixth Sense FAQ questions (REA-019) stay separate.
       Common Supportware rules (REA-018) remain separate work.
       Separately decide source conflicts and FAQ applicability before dependent curation.

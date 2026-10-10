@@ -11,6 +11,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- State pages now explain when Camouflage, Hidden Deployment, Impersonation, holographic disguises, Prone, Disconnected, Retreat!, and Suppressive Fire end, including their different exceptions.
 - Dodge and Reset now explain why a roll can evade one attack but not another, when Dodge movement is lost, how to leave Engaged, and how cumulative State penalties and Sixth Sense affect Reset.
 - AP and E/M now explain how to round halved defenses up, while T2 explains how to distinguish the original Saving Roll from the extra Critical roll and why their failed rolls cause different Wounds.
 - Visibility Zone and its Low, Poor, Zero, and White Noise variants are now discoverable in global search and the Glossary, with the core effects and exceptions explained; their names in rules text now open linked explanation tooltips.

@@ -1316,3 +1316,68 @@ def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(
             for token in paragraph
             if token["type"] == "reference"
         )
+
+
+def test_state_cancellation_clarifications_are_scoped_and_published(
+    tmp_path: Path,
+) -> None:
+    """REA-015: each State exposes its own operative cancellation conditions."""
+    database = _rules_database(tmp_path)
+    required = {
+        "state:camouflaged": ("entire declared Order", "permitted AROs"),
+        "state:hidden-deployment": ("declares an Order or ARO", "Marker status"),
+        "state:holoecho": ("successful Attack (no Saving Roll)", "Coherency"),
+        "state:holomask": ("end of that Order", "real Model"),
+        "state:impersonation-1": ("-3 WIP", "only to"),
+        "state:impersonation-2": ("reveals the actual Model", "Permitted and delayed AROs"),
+        "state:prone": ("Unconscious", "Impetuous"),
+        "state:disconnected": ("Controller recovers", "Coherency Check"),
+        "state:retreat": ("Command Token", "rest of the game"),
+        "state:suppressive-fire": ("Guts Roll", "Fireteam"),
+    }
+    for identity, snippets in required.items():
+        rule = database.composed_record(identity)
+        assert rule is not None, identity
+        paragraphs = rule["facts"]["clarifications"]
+        assert len(paragraphs) >= 2, identity
+        assert all(snippet in " ".join(paragraphs) for snippet in snippets), identity
+        for language in ("n5-core-v5.3-pdf", "n5-core-v5.3-es-pdf"):
+            assert any(c["source_id"] == language for c in rule["citations"]), identity
+
+    camouflage = database.composed_record("state:camouflaged")
+    hidden = database.composed_record("state:hidden-deployment")
+    impersonation = database.composed_record("state:impersonation-1")
+    assert camouflage is not None and hidden is not None and impersonation is not None
+    assert "[[skill:discover|Discover]]" in " ".join(
+        camouflage["facts"]["clarifications"]
+    )
+    assert "[[skill:sensor|Sensor]]" in " ".join(
+        hidden["facts"]["clarifications"]
+    )
+    assert "[[state:impersonation-2|IMP-2]]" in " ".join(
+        impersonation["facts"]["clarifications"]
+    )
+
+    app = create_app(
+        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
+        rules_database_path=database.path,
+    )
+    environ: dict[str, Any] = {}
+    setup_testing_defaults(environ)
+    environ.update(PATH_INFO="/api/states/hidden-deployment", REQUEST_METHOD="GET")
+    statuses: list[str] = []
+    body = b"".join(
+        app(
+            environ,
+            lambda status, headers, exc_info=None, _statuses=statuses: _statuses.append(status),
+        )
+    )
+    assert statuses == ["200 OK"]
+    response = json.loads(body)
+    rule = next(item for item in response["rules"] if item["id"] == "state:hidden-deployment")
+    assert len(rule["facts"]["clarifications"]) == 3
+    assert any(
+        token["type"] == "reference" and token.get("target") == "skill:sensor"
+        for tokens in rule["fact_tokens"]["clarifications"]
+        for token in tokens
+    )
