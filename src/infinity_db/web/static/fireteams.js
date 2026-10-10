@@ -340,7 +340,7 @@ function renderReference(reference) {
   const typeBadges = document.createElement("div");
   typeBadges.className = "detail-badges fireteam-reference-types";
   for (const type of generalFacts.types || []) {
-    typeBadges.append(badge(fireteamTypeLabel(type)));
+    typeBadges.append(badge(`Formation ${fireteamTypeLabel(type)}`));
   }
   fragment.append(typeBadges);
 

@@ -1,7 +1,7 @@
 # InfinityDB backlog
 
 This is the working implementation backlog. Every unchecked item belongs to exactly
-one release bucket: **1.0.0** or **post-1.0**.
+one release bucket: **0.10.1**, **1.0.0**, or **post-1.0**.
 The buckets are planning commitments, not a promise that a minor release cannot move a
 low-risk item earlier or defer a non-gating item when evidence changes.
 
@@ -22,8 +22,10 @@ when all contained work shares the same owner.
 
 **Project domain:** Project infrastructure
 
-Version **0.10.0** is released and deployed. The current implementation milestone is
-**1.0.0 — current-reference completeness**, with implementation planning below.
+Version **0.10.0** is released and deployed. The immediate milestone is **0.10.1 —
+interim reference consistency**, followed by **1.0.0 — current-reference completeness**.
+The 0.10.1 work is limited to corrections of already-published player-facing
+behavior, and does not change the 1.0 acceptance definition.
 
 General performance/storage experiments, major pipeline refactors,
 persistent-user-data features, ITS season/tournament tooling, and native applications are explicitly
@@ -34,6 +36,45 @@ The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
 definition lives in `docs/releasing.md`. The sections below contain the remaining implementation
 and release work for 1.0 and later milestones. Completed substeps are retained only under an
 open parent item.
+
+## 0.10.1 — interim reference consistency
+
+**Project domains:** Data processing, Web frontend, Project infrastructure
+
+Stabilization only: correct confirmed contradictions in existing published rules
+and labels, with regression coverage. No new general-purpose semantics engine,
+1.0 completeness claim, rework of source imports, or additional source acquisition
+is required. The 2026-10-10 snapshot review found 372/372 ordinary detail API
+responses, 257/257 Glossary links and 144/144 nested links resolving; all four
+core scenario details/maps responded for four supported point values. This is
+routing/publication evidence, **not** visual acceptance or rules-source certification.
+Normal prerelease/release checks are tracked separately in `releasing.md`.
+
+- [x] **Data processing:** Correct IMP-2 Discover wording (REA-035): ordinary
+  Discover modifiers remain in effect; distinguish the IMP-1 penalty and the
+  Biometric Visor exception.
+- [x] **Data processing:** Explain the Deployable exception to Stealth and the
+  reviewed multi-Trooper/Marker announcement conditions (REA-016).
+- [x] **Data processing:** State Deployable Cover's Vitroferro Saving Roll cap,
+  order of operations and ordinary Cover eligibility (REA-036).
+- [x] **Data processing:** Explain TinBot owner eligibility, Fireteam sharing,
+  stacking and token behavior without assuming variant-wide benefits (REA-039).
+- [x] **Data processing + Web frontend:** Identify Fireteam Type counts as
+  formation requirements, not permanent membership counts (limited REA-020).
+- [x] **Data processing:** Correct Kobra's CC Attribute reference and source
+  note typo without resolving the still-open Anti-materiel source conflict (REA-031).
+- [ ] **Web frontend + Project infrastructure:** Inspect the corrected reference
+  cards and Fireteam summary on desktop and narrow screens; confirm that their
+  language, citations and links are readable. Keep this acceptance separate from
+  the ordinary release checklist.
+
+**Deferred intentionally to 1.0:** the remainder of REA-016/020 and the
+broader Peripheral (REA-017), Hacking/Supportware (REA-018/019), Special Dice
+(REA-021), General Rules (REA-026), weapon-composition/metadata (REA-025/044),
+Spec-Ops (REA-040), full source reconciliation and completeness inventory.
+Explicitly unresolved source disagreements (including Kobra Anti-materiel),
+source-normalization baselines and optional enhancements are not new 0.10.1
+regressions. The 1.0 plan below remains the owning backlog for those tasks.
 
 ## 1.0.0 — current-reference completeness gate
 

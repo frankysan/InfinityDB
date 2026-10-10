@@ -4159,7 +4159,7 @@
             "id": "weapon:kobra-pistol",
             "kind": "weapon",
             "name": "Kobra Pistol",
-            "summary": "Kobra Pistol is a Mixed Weapon with two separate modes.\n\n**BS Mode:** Uses [[ammunition:shock|Shock Ammunition]] and the Trooper’s BS Attribute.\n\n**[[trait:cc|CC]] Mode:** Uses [[ammunition:da|Double Action (DA) Ammunition]] and the Trooper’s [[trait:cc|CC]] Attribute.\n\nThe individual mode profiles, not this shared description, determine their Traits and Saving Rolls.",
+            "summary": "Kobra Pistol is a Mixed Weapon with two separate modes.\n\n**BS Mode:** Uses [[ammunition:shock|Shock Ammunition]] and the Trooper’s BS Attribute.\n\n**[[trait:cc|CC]] Mode:** Uses [[ammunition:da|Double Action (DA) Ammunition]] and the Trooper’s [[attribute:cc|CC]] Attribute.\n\nThe individual mode profiles, not this shared description, determine their Traits and Saving Rolls.",
             "facts": {},
             "composition": {
                 "role": "definition"
@@ -4195,10 +4195,10 @@
             "id": "weapon:kobra-pistol-cc",
             "kind": "weapon",
             "name": "Kobra Pistol (CC Mode)",
-            "summary": "[[weapon:kobra-pistol|Kobra Pistol]] has separate BS and [[trait:cc|CC]] modes. In [[trait:cc|CC]] Mode it uses [[ammunition:da|Double Action (DA) Ammunition]], which requires two ARM Saving Rolls per hit. \n\nThe BS Mode instead uses [[ammunition:shock|Shock Ammunition]] and does not inherit this [[trait:cc|CC]]-specific reference.",
+            "summary": "[[weapon:kobra-pistol|Kobra Pistol]] has separate BS and [[trait:cc|CC]] modes. In [[trait:cc|CC]] Mode it uses [[ammunition:da|Double Action (DA) Ammunition]], which requires two ARM Saving Rolls per hit. \n\nThe BS Mode instead uses [[ammunition:shock|Shock Ammunition]] and does not inherit this mode-specific reference.",
             "facts": {
                 "sourceNotes": [
-                    "The N5 v5.3 Weapon Chart printsone Saving Roll for this mode, while the DA rule, imported Army profile, and reviewed N5.3 Wiki chart support two. The current Army profile and reviewed Wiki also list [[trait:anti-materiel|Anti-materiel]] for [[trait:cc|CC]] Mode, but the printed v5.3 chart omits that Trait. Its applicability remains an unresolved source discrepancy; this reference does not add or remove that Trait from the Army profile."
+                    "The N5 v5.3 Weapon Chart prints one Saving Roll for this mode, while the DA rule, imported Army profile, and reviewed N5.3 Wiki chart support two. The current Army profile and reviewed Wiki also list [[trait:anti-materiel|Anti-materiel]] for [[trait:cc|CC]] Mode, but the printed v5.3 chart omits that Trait. Its applicability remains an unresolved source discrepancy; this reference does not add or remove that Trait from the Army profile."
                 ]
             },
             "composition": {
@@ -8452,7 +8452,7 @@
             "id": "equipment:tinbot",
             "kind": "equipment",
             "name": "TinBot",
-            "summary": "Automatic Equipment that grants its owner the MOD, Special Skill, or Equipment advantage listed for that [[equipment:tinbot]] option.",
+            "summary": "Automatic Equipment granting the advantage listed for its specific option while its owner is neither [[state:isolated|Isolated]] nor in a Null State. If the owner is in a Fireteam, every member shares that advantage.\n\nIdentical advantages apply only once per Order or reaction. Where multiple TinBots provide different MODs for the same benefit, use the most advantageous one. A TinBot is represented by a non-targetable State Token, not a blocking Model.",
             "composition": {
                 "role": "definition"
             },
@@ -9105,10 +9105,12 @@
                     "The user may declare [[skill:cautious-movement]] inside enemy Zones of Control and Hacking Areas.",
                     "[[skill:cautious-movement]], [[skill:idle]], and Basic Short Skills with the Movement Label grant AROs only to enemies that have LoF to the user.",
                     "Other declared Skills grant AROs normally.",
+                    "[[trait:deployable|Deployable]] Weapons and Equipment are not affected by Stealth. When another activated Trooper generates a reaction, an enemy may choose the Stealth user as the target, but the reaction becomes [[skill:idle|Idle]] if that user does not declare a Skill permitting it. Announce Stealth when using it in Marker form.",
                     "If the user enters Silhouette contact without entering the enemy's LoF and then declares another Skill, that enemy's available AROs are restricted to the options allowed by the Stealth rule."
                 ],
                 "restrictions": [
-                    "Stealth does not prevent AROs when an enemy has LoF to the user or when the user declares another Skill."
+                    "Stealth does not prevent AROs when an enemy has LoF to the user or when the user declares another Skill.",
+                    "Stealth does not prevent [[trait:deployable|Deployable]] Weapons or Equipment from triggering."
                 ]
             },
             "armyLinks": [
@@ -11457,7 +11459,7 @@
             "kind": "equipment",
             "name": "Deployable Cover",
             "labelIds": [],
-            "summary": "Equipment with the [[trait:deployable]] Trait that places a Scenery Element providing variant-specific Cover effects.",
+            "summary": "[[trait:deployable|Deployable]] Equipment that places a Scenery Element for Partial Cover. Cutting Foam denies enemy Cover; Vitroferro exchanges the ordinary -3 [[skill:bs-attack|BS Attack]] Cover MOD for a +6 Saving Roll bonus, subject to eligibility and a defense cap.",
             "composition": {
                 "role": "definition"
             },
@@ -11470,12 +11472,12 @@
             "facts": {
                 "effects": [
                     "[[skill:place-deployable]] places the Deployable Cover Scenery Element completely inside the user's Zone of Control.",
-                    "Deployable Cover allows Partial Cover to be applied subject to the selected variant.",
+                    "To benefit from Partial Cover, the Trooper must be in Silhouette contact with the Deployable Cover and meet the ordinary partial-obscuration conditions. Apply only the selected variant; its Cover bonus does not stack with the bonus from other scenery providing Partial Cover.",
                     "Cutting Foam prevents enemy Troopers from claiming Partial Cover from that Deployable Cover.",
-                    "Vitroferro removes the usual -3 Cover MOD from the attacker's [[skill:bs-attack]] Roll and instead improves the benefiting Trooper's Saving Roll by +6, subject to the documented cap."
+                    "For Vitroferro, do not apply the usual -3 Partial Cover MOD to the attacker's [[skill:bs-attack]] Roll. Instead add +6 to the benefiting Trooper's ARM/BTS Saving Roll modifier, capping ARM/BTS plus all applicable Saving Roll MODs at 12 before adding the attack's PS. For example, ARM 5 and Vitroferro +6 gives 11 before PS; ARM 9 plus Vitroferro +6 is capped at 12 before PS."
                 ],
                 "restrictions": [
-                    "The player must declare the available Cutting Foam or Vitroferro variant when [[skill:place-deployable]] is declared."
+                    "The player must declare a Cutting Foam or Vitroferro variant available on the Unit Profile when [[skill:place-deployable]] is declared. A Trooper cannot end movement on, or place objects on, this scenery element (N5 FAQ v0.1)."
                 ]
             },
             "armyLinks": [
@@ -12984,7 +12986,7 @@
                 "Impersonation-2",
                 "IMP-2"
             ],
-            "summary": "The second Impersonation Marker State, which still disguises the user but is removed by a successful unmodified [[skill:discover]] Roll.",
+            "summary": "The second Impersonation Marker State, which disguises the user until a successful [[skill:discover]] Roll reveals the Model. Unlike [[state:impersonation-1|IMP-1]], it imposes no additional -3 WIP penalty; ordinary [[skill:discover|Discover]] MODs still apply.",
             "composition": {
                 "role": "definition"
             },
@@ -13012,7 +13014,7 @@
                     "A Trooper in Impersonation State cannot be part of a Fireteam."
                 ],
                 "clarifications": [
-                    "Unlike [[state:impersonation-1|IMP-1]], a successful [[skill:discover|Discover]] against IMP-2 removes the Marker and reveals the actual Model without the [[state:impersonation-1|IMP-1]] -3 WIP modifier.",
+                    "Unlike [[state:impersonation-1|IMP-1]], a successful [[skill:discover|Discover]] against IMP-2 reveals the actual Model without the [[state:impersonation-1|IMP-1]] -3 WIP penalty. Apply ordinary Range, Cover, [[skill:mimetism|Mimetism]], and other applicable MODs to that Roll. An ordinary successful [[skill:discover|Discover]] against [[state:impersonation-1|IMP-1]] only changes it to IMP-2, even if several such Rolls succeed in the same Order; [[equipment:biometric-visor|Biometric Visor]] has an explicit exception.",
                     "The Marker is also removed when it declares an Attack or another Skill requiring a Roll; declares a Long Skill other than [[skill:cautious-movement|Cautious Movement]]; enters enemy Silhouette contact; becomes [[skill:impetuous|Impetuous]]; or enters [[state:retreat|Retreat!]]. Cancellation applies to the entire Order.",
                     "Disguised Markers count as Allied to enemies, so ordinary Attacks and [[skill:intuitive-attack|Intuitive Attacks]] are prohibited until revelation. Permitted and delayed AROs follow the same restrictions as [[state:impersonation-1|IMP-1]]."
                 ]
@@ -16955,7 +16957,7 @@
             "id": "rule:fireteam-general",
             "kind": "rule",
             "name": "Fireteams: General Rules",
-            "summary": "The shared N5 rules for creating and operating Fireteams; Army-specific Fireteams Charts determine permitted teams and can override these defaults.",
+            "summary": "The shared N5 rules for forming and operating Fireteams. DUO/HARIS/CORE member counts are formation requirements, not counts that must be maintained after losses; Army-specific Fireteams Charts determine eligible teams and exceptions.",
             "composition": {
                 "role": "definition"
             },
@@ -16996,7 +16998,7 @@
                     "The Army's Fireteams Chart determines how many Fireteams of each Type may exist and which Troopers or options may form them.",
                     "Members must observe Coherency with the Fireteam Leader, belong to the same Combat Group, and a Trooper cannot simultaneously belong to more than one Fireteam.",
                     "Spending a Regular Order on a Fireteam member makes that Trooper the Fireteam Leader and activates the other members of the Fireteam.",
-                    "Army-chart conditions and notes can modify or override the general Fireteam rules."
+                    "Army-chart conditions and notes can modify or override the general Fireteam rules. The Type does not change when members leave or are lost; minimum size and other composition conditions normally apply when creating the Fireteam, except where a rule such as [[skill:ft-master|FT Master]] requires otherwise."
                 ],
                 "terminology": [
                     {
@@ -17021,6 +17023,10 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 133,
                     "section": "Fireteams Chart"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 3
                 },
                 {
                     "sourceId": "wiki-fireteams-basic-rules-oldid-4115",

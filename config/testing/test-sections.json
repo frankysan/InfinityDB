@@ -38,6 +38,7 @@
         "test_hacking_program_catalog",
         "test_identities",
         "test_identity_database",
+        "test_interim_reference_consistency",
         "test_logical_unit_identity",
         "test_maintained_text",
         "test_peripheral_identities",

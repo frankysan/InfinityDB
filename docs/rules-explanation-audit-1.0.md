@@ -671,6 +671,15 @@ and Impetuous-specific Prone transitions retain their source scopes. Existing
 structured relations remain unchanged. API regression coverage added; browser
 acceptance pending. REA-017, REA-020, REA-026 and REA-035 remain separate.
 
+**Interim implementation note (2026-10-10):** The 0.10.1 correction batch addresses
+REA-016's Stealth/Deployable exception and mixed-activation text; the Fireteam
+formation-count portion of REA-020; REA-031's Kobra CC Attribute link;
+REA-035's misleading IMP-2 Discover wording; REA-036's Vitroferro cap,
+Cover eligibility and placement note; and REA-039's TinBot family baseline.
+These are implemented corrections, not closure of their wider 1.0 review
+scope. The historical findings below remain as evidence; see
+[`TODO.md`](TODO.md#0101--interim-reference-consistency) for remaining release work.
+
 ### REA-016 - Stealth omits Deployables and multi-Trooper reaction reasoning
 
 **Classification:** completeness. **Severity:** High. **Priority:** P1.

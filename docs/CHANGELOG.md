@@ -11,6 +11,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Impersonation-2 now distinguishes the absence of IMP-1's -3 State penalty from ordinary Discover modifiers; Stealth explicitly does not protect against Deployable Weapons or Equipment.
+- Deployable Cover now explains when Vitroferro applies and how its Saving Roll cap is calculated; TinBot now explains Fireteam sharing, its owner's required state and non-stacking effects.
+- Fireteam Type counts are labelled as formation requirements rather than permanent member counts, and Kobra Pistol uses the correct CC Attribute link.
 - State pages now explain when Camouflage, Hidden Deployment, Impersonation, holographic disguises, Prone, Disconnected, Retreat!, and Suppressive Fire end, including their different exceptions.
 - Dodge and Reset now explain why a roll can evade one attack but not another, when Dodge movement is lost, how to leave Engaged, and how cumulative State penalties and Sixth Sense affect Reset.
 - AP and E/M now explain how to round halved defenses up, while T2 explains how to distinguish the original Saving Roll from the extra Critical roll and why their failed rolls cause different Wounds.
@@ -110,7 +113,14 @@ are not retroactively relabeled.
   navigation and the landing page without joining global search or the Glossary. Browser configuration
   uses the shared versioned share-state contract rather than a scenario-specific URL format.
 
+### Changed
+
+- **Data processing:** Complete reviewed interim rules explanations for IMP-2, Stealth, Deployable Cover and TinBot without changing imported game profiles or adjudicating unrelated source disagreements.
+- **Data processing + Web frontend:** Clarify Fireteam formation-count presentation and post-formation type persistence, preserving the existing count data/API shape.
+
 ### Fixed
+
+- **Data processing:** Use `attribute:cc` for the Trooper's CC Attribute in Kobra Pistol, and correct the CC Mode source note spacing. Preserve the unresolved Anti-materiel discrepancy.
 
 - **Data processing + Web backend:** Clarify the additional Critical Saving Roll exception for Continuous Damage and the prohibited BS Attack (Shock)/(Guided) Skills for BS Weapon (WIP), without creating unsupported variant-specific graph edges.
 - **Data processing + Web backend:** Correct misleading Doctor and Engineer recovery eligibility and failure text; distinguish State cancellation, clarify the one-roll Intuitive Attack procedure, and explain multi-hit Kits and Disposable use. Direct target allegiance remains under source review.
