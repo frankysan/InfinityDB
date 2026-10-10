@@ -1236,3 +1236,83 @@ def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:
     assert [case["sourceAmmunitionId"] for case in rules[0]["facts"][
         "immunityInteraction"
     ]["reviewedCombinedCases"]] == [10, 13, 10]
+
+
+def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(
+    tmp_path: Path,
+) -> None:
+    """REA-014: one roll may have different outcomes; state MODs remain scoped."""
+    rules_db = _rules_database(tmp_path)
+    dodge = rules_db.composed_record("skill:dodge")
+    reset = rules_db.composed_record("skill:reset")
+    engaged = rules_db.composed_record("state:engaged")
+    bangbomb = rules_db.composed_record("equipment:bangbomb")
+    assert dodge is not None and reset is not None
+    assert engaged is not None and bangbomb is not None
+
+    dodge_text = " ".join(dodge["facts"]["clarifications"])
+    assert "only one -3 PH MOD" in dodge_text
+    assert "same Dodge die" in dodge_text
+    assert "even if it evaded other Attacks" in dodge_text
+    assert "valid position outside Silhouette contact" in dodge_text
+    assert "remains [[state:engaged|Engaged]]" in dodge_text
+    assert "valid repositioning" in dodge["summary"]
+    assert any(
+        relation["record_id"] == "state:engaged"
+        for relation in dodge["relations"]
+    )
+
+    reset_text = " ".join(reset["facts"]["clarifications"])
+    assert "-3, [[state:isolated|Isolated]] gives -9" in reset_text
+    assert "total capped at -12" in reset_text
+    assert "[[skill:sixth-sense|Sixth Sense]]" in reset_text
+    assert "does not ignore the -3" in reset_text
+    assert "other targets" in reset_text
+    assert "outside Silhouette contact with every enemy" in (
+        " ".join(engaged["facts"]["clarifications"])
+    )
+    assert "no [[skill:dodge|Dodge]] movement" in (
+        " ".join(bangbomb["facts"]["clarifications"])
+    )
+
+    for record, english_pages, spanish_pages in (
+        (dodge, {79, 80, 160}, {80, 81, 164}),
+        (reset, {24, 85, 111, 165, 168, 171}, {82, 113}),
+        (engaged, {160}, {179}),
+        (bangbomb, {120}, {124}),
+    ):
+        assert {
+            cite["page"]
+            for cite in record["citations"]
+            if cite["source_id"] == "n5-core-v5.3-pdf"
+        } >= english_pages
+        assert {
+            cite["page"]
+            for cite in record["citations"]
+            if cite["source_id"] == "n5-core-v5.3-es-pdf"
+        } >= spanish_pages
+
+    app = create_app(
+        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
+        rules_database_path=rules_db.path,
+    )
+    for slug, target in (("dodge", "state:engaged"), ("reset", "skill:sixth-sense")):
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=f"/api/skills/{slug}", REQUEST_METHOD="GET")
+        statuses: list[str] = []
+        response = app(
+            environ,
+            lambda status, headers, exc_info=None, _statuses=statuses: _statuses.append(status),
+        )
+        assert statuses == ["200 OK"]
+        payload = json.loads(b"".join(response))
+        rule = next(r for r in payload["rules"] if r["id"] == f"skill:{slug}")
+        assert len(rule["facts"]["clarifications"]) == 3
+        assert len(rule["fact_tokens"]["clarifications"]) == 3
+        assert any(
+            token["target"] == target
+            for paragraph in rule["fact_tokens"]["clarifications"]
+            for token in paragraph
+            if token["type"] == "reference"
+        )

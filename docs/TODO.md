@@ -339,6 +339,10 @@ unimplemented until its corresponding behavior exists.
       AP/E/M and T2 (REA-013) now clarify rounding up halved defenses and
       marking the original-hit versus extra-Critical T2 die before rolling;
       verify their player-facing Ammunition pages. Typed values are unchanged.
+      Dodge/Reset (REA-014) now explain per-Attack evasion, movement after
+      qualifying Dodge, Engaged exit position, cumulative Reset State MODs,
+      and the Sixth Sense exception; verify the Dodge, Reset, Engaged and
+      Bangbomb browser cards. REA-015 and REA-026 remain separate.
       Targeted MSV1/Sixth Sense FAQ questions (REA-019) stay separate.
       Common Supportware rules (REA-018) remain separate work.
       Separately decide source conflicts and FAQ applicability before dependent curation.

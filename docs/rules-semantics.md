@@ -731,6 +731,38 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Hidden_Deployment_State>
 - Wiki: <https://infinitythewiki.com/Surprise_Attack>
 
+### RS-GSG-STATE-005E — Dodge/Reset outcomes depend on each effect and State
+
+**Classification:** source-native interaction; reviewed player-facing explanation (REA-014).
+
+Dodge and Reset each roll once, but that result is evaluated against every applicable
+opposing Attack or other effect separately. The same Dodge die can beat one shot yet
+fail against a Mine or Template that uses a different Success Value. The N5.3 Dodge
+and Bangbomb examples explicitly withhold Dodge movement when a simultaneous
+Attack is not evaded, even if another Attack was. The three circumstances listed
+under Dodge's -3 PH reminder produce **one shared -3** when several occur; they do
+not stack with one another. Other, independent applicable MODs remain separate.
+
+A passed Dodge does not by itself remove Engaged. Under Engaged State cancellation,
+the Trooper must actually reach a valid position outside enemy Silhouette contact;
+otherwise it stays Engaged and does not move. IMM-A uses its own PH -6 recovery
+penalty and cancellation rule, independently of this movement requirement.
+
+Reset's State-specific WIP penalties accumulate. IMM-B (-3) plus Isolated (-9) gives
+-12; Targeted adds -3 before the standard **-12 cap**, rather than removing the
+other penalties. Sixth Sense ignores ordinary negative Reset MODs (including
+Targeted), but **not** the explicit IMM-B or Isolated exceptions. Successful Reset
+opposes only eligible Comms Attacks / BS Attacks (Guided) targeting that Trooper;
+it does not negate attacks on other targets.
+
+These are scoped, non-executable clarifications in `facts.clarifications`, linked to
+Dodge, Reset, Engaged and Bangbomb. The existing `cancels-state` and
+`modifies-rolls-for` edges are retained; they are **not** unconditional rules for
+arbitrating multiple attacks or cancelling States.
+
+Sources: English N5.3 pp. 24, 79–80, 85, 111, 120, 160, 165, 168, 171;
+Spanish N5.3 pp. 80–82, 113, 124, 164, 179.
+
 ### RS-GSG-STATE-005D — Self-recovery rolls are both cancellation and roll interactions
 
 **Classification:** source-native interaction with an InfinityDB presentation consequence.

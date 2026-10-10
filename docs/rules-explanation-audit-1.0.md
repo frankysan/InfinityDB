@@ -616,6 +616,13 @@ movement, and State cancellation. **Fix:** text/links and future scenario
 regressions. **Dependencies:** REA-015 and REA-026. No universal per-die
 success evaluator or unconditional cancellation edge is recommended.
 
+**Implementation follow-up (2026-10-10):** Dodge, Reset, Engaged and Bangbomb
+now explain the shared Dodge -3, mixed opposed/Template outcomes, movement
+requirement to leave Engaged, additive Reset State penalties capped at -12,
+and the Sixth Sense exception. They cite both N5.3 PDF languages; the existing
+typed cancellation relations remain conditional. Curated/API regression coverage
+added. Browser acceptance remains pending; REA-015/026 remain separate.
+
 ### REA-015 - Several State cards lack their operative cancellation conditions
 
 **Classification:** completeness, consistency. **Severity:** High. **Priority:** P1.

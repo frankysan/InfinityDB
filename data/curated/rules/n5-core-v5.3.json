@@ -9821,7 +9821,7 @@
             "id": "skill:dodge",
             "kind": "skill",
             "name": "Dodge",
-            "summary": "A Common Skill used to evade Attacks, reposition slightly, and cancel [[state:engaged|Engaged]] or [[state:immobilized-a]] on a successful PH Roll.",
+            "summary": "A Common Skill for evading applicable Attacks and repositioning after a successful PH Roll. It can cancel [[state:immobilized-a]], but leaving [[state:engaged|Engaged]] also requires a valid repositioning outside Silhouette contact.",
             "composition": {
                 "role": "definition"
             },
@@ -9842,10 +9842,16 @@
                 ],
                 "effects": [
                     "Dodge uses PH to evade enemy Attacks during the Order or ARO; a successful Dodge may also move the user up to [[distance:2:inch]].",
+                    "Dodge movement occurs in the Effects step, follows the General Movement Rules, and does not generate reactions or trigger [[trait:deployable|Deployable]] Weapons or Equipment.",
                     "A successful Normal or Face to Face Dodge Roll cancels the user's [[state:immobilized-a]], applying any State-specific MODs."
                 ],
                 "restrictions": [
                     "Dodge does not evade Comms Attacks; [[skill:reset]] is used for those instead."
+                ],
+                "clarifications": [
+                    "Dodge applies only one -3 PH MOD even if several conditions occur together: a reactive Dodge inside ZoC but outside LoF, a Template Weapon without LoF to its attacker, or a [[trait:deployable|Deployable]] Weapon Template. This is separate from State-specific MODs.",
+                    "Against simultaneous Attacks, compare the same Dodge die with each applicable Attack separately. A different MOD or opposed result can mean that one Attack is evaded and another hits. If the Dodge fails against an applicable Attack, the Trooper cannot perform the Dodge movement, even if it evaded other Attacks.",
+                    "To cancel [[state:engaged|Engaged]], the successful Dodge must also allow movement to a valid position outside Silhouette contact with the enemy. If no such position exists, the Trooper remains [[state:engaged|Engaged]] and does not relocate."
                 ]
             },
             "labelIds": [
@@ -9871,6 +9877,36 @@
                 {
                     "sourceId": "wiki-dodge-oldid-3842",
                     "heading": "Dodge"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 79,
+                    "heading": "Dodge"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 80,
+                    "heading": "Example of Dodge and Deployable Weapon"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 160,
+                    "heading": "Engaged State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 80,
+                    "heading": "Esquivar"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 81,
+                    "heading": "Ejemplo Esquivar y Arma Posicionable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 164,
+                    "heading": "Estado Trabado"
                 }
             ],
             "review": {
@@ -9885,7 +9921,7 @@
             "id": "skill:reset",
             "kind": "skill",
             "name": "Reset",
-            "summary": "A Common Skill used to oppose Comms Attacks and Guided attacks and to cancel [[state:targeted|Targeted]], [[state:immobilized-b|Immobilized-B]], or [[state:isolated]].",
+            "summary": "A Common Skill for opposing Comms Attacks and [[skill:bs-attack|BS Attacks]] (Guided), or attempting to cancel [[state:targeted|Targeted]], [[state:immobilized-b|Immobilized-B]], and [[state:isolated|Isolated]]. State-specific WIP penalties can accumulate.",
             "composition": {
                 "role": "definition"
             },
@@ -9910,6 +9946,11 @@
                 ],
                 "restrictions": [
                     "Reset does not evade other types of Attacks; [[skill:dodge]] is used for those instead."
+                ],
+                "clarifications": [
+                    "When several conditions affect Reset, their WIP MODs accumulate: [[state:immobilized-b|Immobilized-B]] gives -3, [[state:isolated|Isolated]] gives -9, and [[state:targeted|Targeted]] gives -3. [[state:immobilized-b|IMM-B]] and [[state:isolated|Isolated]] together give -12; adding [[state:targeted|Targeted]] still leaves the total capped at -12 under the general MOD limit.",
+                    "[[skill:sixth-sense|Sixth Sense]] ignores most negative MODs on Reset, including the [[state:targeted|Targeted]] penalty, but explicitly does not ignore the -3 from [[state:immobilized-b|Immobilized-B]] or -9 from [[state:isolated|Isolated]].",
+                    "A successful Reset opposes the applicable Comms/Guided Attacks against the resetting Trooper only; it does not cancel an Attack against other targets or let the Trooper evade ordinary non-Comms Attacks."
                 ]
             },
             "labelIds": [
@@ -9939,6 +9980,46 @@
                 {
                     "sourceId": "wiki-reset-oldid-3056",
                     "heading": "Reset"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 85,
+                    "heading": "Reset"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 24,
+                    "heading": "Modifiers"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 111,
+                    "heading": "Sixth Sense"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 165,
+                    "heading": "Immobilized-B State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 168,
+                    "heading": "Isolated State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 171,
+                    "heading": "Targeted State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 82,
+                    "heading": "Reset"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 113,
+                    "heading": "Sexto Sentido"
                 }
             ],
             "review": {
@@ -11599,6 +11680,9 @@
                 "restrictions": [
                     "The MOD only applies against attacks declared by enemy Troopers inside the user’s LoF or Zone of Control.",
                     "The MOD does not apply against Template Weapon attacks."
+                ],
+                "clarifications": [
+                    "A single [[skill:dodge|Dodge]] die can use different PH Success Values against simultaneous Attacks: for Bangbomb (+4), the +4 can apply against an eligible enemy shot but not a Template Weapon. The printed example succeeds against the Combi Rifle but fails to evade an E/Marat Template, so no [[skill:dodge|Dodge]] movement is allowed."
                 ]
             },
             "armyLinks": [
@@ -11617,6 +11701,16 @@
                 {
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "Bangbomb",
+                    "heading": "Bangbomb"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 120,
+                    "heading": "Bangbomb"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 124,
                     "heading": "Bangbomb"
                 }
             ],
@@ -13813,7 +13907,10 @@
                 "requirements": [
                     "The Trooper is in Silhouette contact with an enemy and neither Trooper is Immobilized or in a Null State, except [[state:sepsitorized|Sepsitorized]] or [[state:possessed|Possessed]]."
                 ],
-                "restrictions": []
+                "restrictions": [],
+                "clarifications": [
+                    "Passing [[skill:dodge|Dodge]] alone does not cancel Engaged. During the Effects step, the Trooper must reach a valid position outside Silhouette contact with every enemy; without such a position, it stays Engaged and does not relocate."
+                ]
             },
             "labelIds": [],
             "relations": [
@@ -13826,6 +13923,16 @@
                 {
                     "sourceId": "wiki-engaged-state-oldid-4105",
                     "heading": "Engaged State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 160,
+                    "heading": "Engaged State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 179,
+                    "heading": "Estado Trabado"
                 }
             ],
             "review": {
