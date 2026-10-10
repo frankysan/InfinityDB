@@ -406,6 +406,41 @@ def test_controlled_jump_immediate_aro_and_opposing_effects_are_published(
     )
 
 
+def test_protheion_overkill_and_opponent_mod_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record("skill:protheion")
+    assert record is not None
+    assert "[[skill:cc-attack]]" in record["summary"]
+    assert "[[state:dead]]" in record["summary"]
+    assert "temporary VITA" not in record["summary"]
+
+    requirements = " ".join(record["facts"]["requirements"])
+    effects = " ".join(record["facts"]["effects"])
+    assert "reach or already be in Silhouette contact" in requirements
+    assert "Power-Up 1 or Power-Up 2 Token" in effects
+    assert "first remove the user's Wounds, then increase VITA" in effects
+    assert "finally apply Wounds received by the user" in effects
+    assert "applies to the enemy's Attribute in a Face to Face Roll" in effects
+    assert "not the user's Attribute" in effects
+    assert "additional failed Saving Rolls against it have no effect" in effects
+    assert "the second gives no benefit" in effects
+    assert "[[state:unconscious|Unconscious]]" in effects
+    assert "+2" in record["summary"]
+    assert {
+        (citation["source_id"], citation.get("page"))
+        for citation in record["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 109),
+        ("n5-faq-v0.1-en-pdf", 2),
+    }
+    assert any(
+        relation["type"] == "applies-effects-to"
+        and relation["record_id"] == "skill:cc-attack"
+        for relation in record["relations"]
+    )
+
+
 def test_speedball_faq_exclusion_is_published_on_both_rule_cards(
     current_rules_database: RulesDatabase,
 ) -> None:

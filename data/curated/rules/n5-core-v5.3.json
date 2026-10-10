@@ -14390,7 +14390,7 @@
             "id": "skill:protheion",
             "kind": "skill",
             "name": "Protheion",
-            "summary": "An optional Automatic CC Special Skill that converts Wounds inflicted in Close Combat into recovered Wounds or temporary VITA increases.",
+            "summary": "Protheion uses Wounds inflicted through a [[skill:cc-attack]] or Coup de Grâce to heal its user, then increase VITA (maximum +2).\n\nFurther failed Saving Rolls after the target enters [[state:dead]] give no additional benefit.",
             "composition": {
                 "role": "definition"
             },
@@ -14406,12 +14406,14 @@
                     "automatic"
                 ],
                 "requirements": [
-                    "The user must be in Silhouette contact with a target that has VITA and declare a [[skill:cc-attack]]."
+                    "In the Active or Reactive Turn, the user must reach or already be in Silhouette contact with a target that has VITA, and declare a [[skill:cc-attack]]."
                 ],
                 "effects": [
                     "For each Wound inflicted on the target by the user's [[skill:cc-attack]], or each Coup de Grâce performed, remove one Wound the user has received.",
-                    "If the user has no Wounds to remove, remaining eligible Wounds increase VITA by one each, to a maximum of two points above the original value.",
-                    "When Wounds are inflicted both by and on the user in the same Order, Protheion recovery and VITA increases are resolved before Wounds inflicted on the user."
+                    "Once those Wounds are removed, each remaining eligible Wound or Coup de Grâce increases VITA by one, up to two points above its original value. Indicate the increase with a Power-Up 1 or Power-Up 2 Token.",
+                    "When Wounds are inflicted both by and on the user in the same Order, first remove the user's Wounds, then increase VITA, and finally apply Wounds received by the user in that Order.",
+                    "A negative MOD in the user's Protheion profile, such as -3 or -6, applies to the enemy's Attribute in a Face to Face Roll, not the user's Attribute.",
+                    "Once that target enters [[state:dead]], additional failed Saving Rolls against it have no effect and cannot provide further healing or VITA increases. For example, if an [[state:unconscious|Unconscious]] target fails two Saving Rolls and the first sends it to [[state:dead]], the second gives no benefit."
                 ],
                 "restrictions": [
                     "VITA can be increased by at most two points above the user's original value."
@@ -14437,6 +14439,16 @@
                 {
                     "sourceId": "wiki-protheion-oldid-3908",
                     "heading": "Protheion"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 109,
+                    "section": "Protheion"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 2,
+                    "section": "Special Skills — Protheion and excess failed Saving Rolls"
                 }
             ],
             "review": {

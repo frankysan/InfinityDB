@@ -324,7 +324,9 @@ unimplemented until its corresponding behavior exists.
       opposing-Program cancellation, and preservation of separate scenario MODs;
       verify the player-facing Program page. Request Speedball's FAQ exclusion
       (REA-007) is now explained in both curated records; verify the player-facing
-      Skill and Program cards. Common Supportware rules (REA-018) remain separate work.
+      Skill and Program cards. Protheion (REA-008) now states the FAQ overkill limit,
+      profile-listed enemy Attribute MOD, and recovery order; verify its player-facing
+      Skill card. Common Supportware rules (REA-018) remain separate work.
       Separately decide source conflicts and FAQ applicability before dependent curation.
       Use the [source manifest](rules-explanation-audit-1.0-sources.md) and
       [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).

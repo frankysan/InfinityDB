@@ -11,6 +11,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Protheion now explains its opponent Attribute penalty and why extra failed Saving Rolls after a target dies cannot grant more Wounds or VITA.
 - Request Speedball now explains why Controlled Jump does not modify its PH 15 Rolls, even though Speedballs use Combat Jump placement rules (N5 FAQ v0.1).
 - Controlled Jump now explains that its ARO immediately affects the current Combat Jump, how opposing Programs cancel, and why separate scenario bonuses still apply.
 - Continuous Damage now explains why a Critical’s extra Saving Roll does not repeat, and BS Weapon (WIP) explains its Shock/Guided Skill restrictions without banning Shock Ammunition.

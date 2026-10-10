@@ -4042,8 +4042,19 @@ Retreat calculation are deliberately not flattened into broader current edges: t
 need participant-role, event, ammunition, or army-situation semantics that the current relation
 vocabulary does not yet encode safely.
 
+Protheion's profile-listed negative MOD (for example, -3 or -6) applies to the enemy's
+Attribute in the Face to Face Roll, not to the user's own CC. The N5.3 FAQ limits its
+Wound-to-recovery conversion: failed Saving Rolls beyond those required for the
+opponent to enter Dead State have no further effect, so they cannot restore Wounds or
+raise VITA. For an Unconscious target that fails two Saving Rolls, only the failure
+that sends it to Dead can benefit Protheion. Preserve the printed recovery-before-
+received-Wounds sequence and +2 VITA cap without inventing an event resolver or
+unconditional relation to Dead State.
+
 Sources:
 
+- English and Spanish N5.3 rules PDFs, printed p. 109 (Protheion).
+- N5 FAQ v0.1, printed p. 2 (Special Skills — Protheion).
 - Wiki: <https://infinitythewiki.com/index.php?title=Dogged&oldid=3071>
 - Wiki: <https://infinitythewiki.com/index.php?title=No_Wound_Incapacitation&oldid=3813>
 - Wiki: <https://infinitythewiki.com/index.php?title=Remote_Presence&oldid=3126>
