@@ -524,6 +524,15 @@ and evidence classification. **Fix:** text/links or future browser presentation;
 not a combat calculator. **Dependencies:** REA-010, REA-025. Real-browser
 visibility was not tested in this audit.
 
+**Implementation follow-up (2026-10-10):** The shared rules-card renderer now
+shows the five stored, validated cases under *Reviewed interactions* with
+applicability, explicit/derived evidence labels and typed links. This addresses
+the structured-case visibility gap, pending real-browser acceptance. The
+original mention of an explicit Plasma/Enhanced stored case was imprecise:
+there is no such entry in these reviewed-case arrays. Plasma's independent
+ARM+BTS Saving Roll rules are documented elsewhere and must not be synthesized
+as an additional reviewed Immunity outcome.
+
 ### REA-012 - Smoke and Eclipse describe zones without sufficient resolution
 
 **Classification:** completeness, clarity. **Severity:** High. **Priority:** P1.

@@ -329,6 +329,10 @@ unimplemented until its corresponding behavior exists.
       Skill card (player-verified). The general Immunity (ARM/BTS) Trait
       protection and printed Monofilament exception (REA-010) are now explained
       alongside the existing Flash Pulse example; verify both in the browser.
+      The five structured reviewed Immunity interactions (REA-011) now have a
+      dedicated player-facing section with applicability and explicit/derived
+      labels; verify keyboard, mobile and browser layout before accepting the UI.
+      No new Plasma/Enhanced case was added to the reviewed arrays.
       Common Supportware rules (REA-018) remain separate work.
       Separately decide source conflicts and FAQ applicability before dependent curation.
       Use the [source manifest](rules-explanation-audit-1.0-sources.md) and

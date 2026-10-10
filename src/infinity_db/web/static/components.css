@@ -1361,6 +1361,18 @@ h1>span {
   gap: 4px;
 }
 
+.immunity-reviewed-cases .detail-list {
+  gap: var(--space-3);
+}
+
+.immunity-reviewed-cases .detail-copy {
+  margin: var(--space-1) 0 0;
+}
+
+.immunity-reviewed-cases li > .detail-source {
+  margin: var(--space-1) 0 0;
+}
+
 .ammunition-mechanics-list {
   display: grid;
   grid-template-columns: minmax(7rem, max-content) minmax(0, 1fr);

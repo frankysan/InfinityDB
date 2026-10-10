@@ -1,5 +1,6 @@
 import { appendMaintainedText, maintainedTextFragment } from "./maintained-text.js";
 import { ammunitionFactRows } from "./ammunition-facts.js";
+import { immunityCaseRows } from "./immunity-cases.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 import { tableViewport } from "./view-components.js";
 
@@ -223,6 +224,37 @@ function appendAmmunitionFacts(container, rule) {
   container.append(group);
 }
 
+function appendImmunityCases(container, rule) {
+  if (rule.id !== "skill:immunity") return;
+  const rows = immunityCaseRows(rule.facts);
+  if (!rows.length) return;
+  const group = document.createElement("div");
+  group.className = "detail-fact-group immunity-reviewed-cases";
+  const heading = document.createElement("h4");
+  heading.className = "detail-fact-heading";
+  heading.textContent = "Reviewed interactions";
+  const list = document.createElement("ul");
+  list.className = "detail-list";
+  for (const row of rows) {
+    const item = document.createElement("li");
+    const title = document.createElement("strong");
+    appendMaintainedText(title, row.title);
+    const explanation = document.createElement("p");
+    explanation.className = "detail-copy";
+    appendMaintainedText(explanation, row.detail);
+    const provenance = document.createElement("p");
+    provenance.className = "detail-source";
+    provenance.textContent = row.evidence;
+    item.append(title, explanation, provenance);
+    list.append(item);
+  }
+  const caveat = document.createElement("p");
+  caveat.className = "detail-source";
+  caveat.textContent = "Only these conditions are reviewed. Critical counts assume no Immunity (Critical); see the cited rules below.";
+  group.append(heading, list, caveat);
+  container.append(group);
+}
+
 // Blank lines mark semantic paragraphs in maintained summaries. Preserve inline
 // links and emphasis when a paragraph boundary falls inside a text token.
 function summaryParagraphs(tokens, fallback = "") {
@@ -263,6 +295,7 @@ function appendRuleDetails(
   appendRuleFactGroup(container, rule, "requirements", "Requirements");
   appendRuleFactGroup(container, rule, "effects", "Effects");
   appendAmmunitionFacts(container, rule);
+  appendImmunityCases(container, rule);
 
   const specialists = facts.specialists?.anyOfSkills;
   if (Array.isArray(specialists) && specialists.length) {

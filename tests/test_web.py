@@ -5947,6 +5947,24 @@ def test_ammunition_reference_cards_render_reviewed_effects(app: Callable) -> No
     assert b".ammunition-mechanics-list" in styles
 
 
+def test_immunity_skill_card_renders_only_reviewed_conditions(app: Callable) -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "immunity_cases_render_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "5 reviewed Immunity cases, conditions, evidence labels" in result.stdout
+
+    status, _, renderer = request(app, "/static/rules-reference.js")
+    assert status == 200
+    assert b'from "./immunity-cases.js"' in renderer
+    assert b"appendImmunityCases(container, rule)" in renderer
+    status, _, helper = request(app, "/static/immunity-cases.js")
+    assert status == 200
+    assert b"export function immunityCaseRows(" in helper
+
+
 def test_detail_frontends_share_curated_rules_reference_renderer(app: Callable) -> None:
     for asset in ("skill.js", "catalog-detail.js"):
         status, _, body = request(app, f"/static/{asset}")

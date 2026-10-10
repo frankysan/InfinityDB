@@ -2302,6 +2302,15 @@ between the Spanish Wiki and both PDFs, not between the published rulebooks.
 The source-scoped `reviewedWeaponCases` preserves the confirmed interaction
 without providing a general BTS attack or component evaluator.
 
+The shared Skill reference card now presents the five validated
+`reviewedWeaponCases`, `reviewedVulnerabilityCases`, and
+`reviewedCombinedCases` as **Reviewed interactions**, keeping their conditions,
+recorded Saving Roll counts, source-evidence classification (explicit versus
+derived), and linked rule identities visible. It uses the stored outcomes without
+evaluating arbitrary attacks. No Plasma/Enhanced combination is stored in these
+reviewed-case arrays; the existing Plasma discussion is not a sixth reviewed case.
+The ordinary curated explanation and the cited source links remain available.
+
 Other component-specific Immunities, BTS-based Combined Ammunition, additional
 Weapon Traits and conditional State interactions remain unresolved. Do not
 extrapolate an algorithm from these reviewed examples or project outcomes into
