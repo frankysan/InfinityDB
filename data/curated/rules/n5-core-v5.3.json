@@ -17115,7 +17115,7 @@
             "id": "ammunition:eclipse",
             "kind": "ammunition",
             "name": "Eclipse Ammunition",
-            "summary": "A Smoke variant that creates a visibility-blocking zone which also affects [[equipment:multispectral-visor:plural]].",
+            "summary": "[[ammunition:smoke|Smoke]]-like Ammunition that creates a [[trait:reflective|Reflective]] Zero Visibility Zone, blocking LoF even for [[equipment:multispectral-visor:plural]].",
             "composition": {
                 "role": "definition"
             },
@@ -17130,6 +17130,16 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "heading": "Eclipse Ammunition",
                     "member": "Eclipse_Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 64,
+                    "heading": "Eclipse Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 64,
+                    "heading": "Munición Eclipse"
                 }
             ],
             "review": {
@@ -17137,6 +17147,11 @@
                 "reviewedOn": "2026-10-09"
             },
             "facts": {
+                "clarifications": [
+                    "Like [[ammunition:smoke|Smoke]], an Eclipse placement Roll is Face to Face only against an enemy Attack requiring a Roll whose LoF crosses the generated zone. Without a qualifying opposing Attack, placement is an unopposed Roll; an enemy [[skill:dodge|Dodge]] inside the Template is also an unopposed Roll, not opposed by Eclipse.",
+                    "Unlike ordinary [[ammunition:smoke|Smoke]], Eclipse can oppose a rolled Attack by an enemy using a [[equipment:multispectral-visor|Multispectral Visor]] when its LoF crosses the [[trait:reflective|Reflective]] zone. Once established, that zone blocks LoF even for Visors, regardless of Level.",
+                    "As with Smoke, the Eclipse user must win every applicable Face to Face Roll (or pass an unopposed Roll) for the Template to remain; a failed placement Roll or lost opposition removes it at the Effects step. A Visor user facing a [[skill:bs-attack|BS Attack]] into, through, or out of this [[trait:reflective|Reflective]] zone cannot reduce the resulting Poor Visibility MOD with the Visor."
+                ],
                 "visibilityZone": {
                     "visibility": "zero",
                     "template": "circular",
@@ -17348,7 +17363,7 @@
             "id": "ammunition:smoke",
             "kind": "ammunition",
             "name": "Smoke Ammunition",
-            "summary": "Non-lethal Ammunition that creates a Zero Visibility Zone and can oppose attacks whose Line of Fire crosses it.",
+            "summary": "Non-offensive Ammunition that creates a Zero Visibility Zone; its placement Roll can oppose qualifying rolled enemy Attacks across that zone.",
             "composition": {
                 "role": "definition"
             },
@@ -17363,6 +17378,16 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "heading": "Smoke Ammunition",
                     "member": "Smoke_Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 66,
+                    "heading": "Smoke Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 65,
+                    "heading": "Munición Humo (Smoke)"
                 }
             ],
             "review": {
@@ -17370,6 +17395,11 @@
                 "reviewedOn": "2026-10-09"
             },
             "facts": {
+                "clarifications": [
+                    "An ordinary shooter whose rolled Attack has LoF crossing the Smoke Template's Zero Visibility Zone makes a Face to Face Roll against the Smoke placement Roll. An enemy whose LoF does not cross the Template makes an unopposed Roll instead. To keep the Template, the Smoke user must win every applicable Face to Face Roll.",
+                    "An enemy with a [[equipment:multispectral-visor|Multispectral Visor]] can draw LoF through ordinary Smoke, so their Attack is not opposed by the Smoke placement Roll. An enemy [[skill:dodge|Dodge]] reaction inside the Template's Area of Effect is also an unopposed Roll, not Face to Face against the Smoke user.",
+                    "Smoke needs no enemy target: placing it at an empty point is an unopposed Roll if no qualifying enemy Attack opposes it. If this Roll fails, or the user loses any applicable Face to Face Roll, remove the Template at the Effects step. A Critical has no additional effect beyond winning an applicable Face to Face Roll."
+                ],
                 "visibilityZone": {
                     "visibility": "zero",
                     "template": "circular",

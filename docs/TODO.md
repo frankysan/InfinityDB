@@ -333,6 +333,10 @@ unimplemented until its corresponding behavior exists.
       dedicated player-facing section with applicability and explicit/derived
       labels; verify keyboard, mobile and browser layout before accepting the UI.
       No new Plasma/Enhanced case was added to the reviewed arrays.
+      Smoke/Eclipse (REA-012) now distinguishes ordinary rolled LoF opposition,
+      MSV/Reflective exceptions, unopposed placement, Dodge, and Criticals in
+      curated Clarifications and examples; verify the browser pages.
+      Targeted MSV1/Sixth Sense FAQ questions (REA-019) stay separate.
       Common Supportware rules (REA-018) remain separate work.
       Separately decide source conflicts and FAQ applicability before dependent curation.
       Use the [source manifest](rules-explanation-audit-1.0-sources.md) and

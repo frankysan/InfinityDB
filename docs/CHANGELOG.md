@@ -11,6 +11,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Smoke and Eclipse now explain when placement opposes enemy fire, why Multispectral Visors bypass ordinary Smoke but not Reflective Eclipse, and why Dodge or an unopposed placement Roll is handled separately.
 - The Immunity Skill page keeps Requirements, Effects and Restrictions in order, places rules clarifications and printed examples in their own section, and displays its five reviewed interactions afterward with conditions, Saving Roll outcomes, linked rules and evidence labels.
 - Protheion now explains its opponent Attribute penalty and why extra failed Saving Rolls after a target dies cannot grant more Wounds or VITA.
 - Request Speedball now explains why Controlled Jump does not modify its PH 15 Rolls, even though Speedballs use Combat Jump placement rules (N5 FAQ v0.1).

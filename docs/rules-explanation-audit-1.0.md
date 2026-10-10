@@ -556,6 +556,15 @@ a non-opposed Template attack. Keep zone geometry/expiry facts distinct from
 resolution. **Fix:** text/links; optional future fact expansion. **Dependencies:**
 REA-019, REA-026; do not promise universal protection from attacks.
 
+**Implementation follow-up (2026-10-10):** The Smoke and Eclipse
+Ammunition records now have distinct player-facing clarifications for rolled
+LoF opposition, multi-opponent success, MSV/Reflective exceptions, unopposed
+placement, Dodge and Smoke Criticals. Existing typed visibility-zone facts
+remain unchanged and no general attack/roll evaluator was added. Primary
+English and Spanish N5.3 PDF citations are included. Source-specific Sixth
+Sense/MSV1 interactions (REA-019) and all scenery geometries remain separate.
+Browser acceptance is pending.
+
 ### REA-013 - AP rounding and T2 die identification are missing player actions
 
 **Classification:** completeness, clarity. **Severity:** Medium. **Priority:** P1.

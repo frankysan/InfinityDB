@@ -2190,6 +2190,41 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Ammunition_Summary_Chart>
 - PDF: Infinity N5 V5.3, printed pages 63-67
 
+### RS-AW-AMMO-002B — Smoke placement opposition and the Reflective exception
+
+**Classification:** explicit, source-backed N5.3 interaction guidance; non-executable.
+
+Ordinary Smoke is a non-offensive placement attack. It does not require an
+opposing Trooper as a target, and the placement Roll is unopposed when no
+qualifying enemy Attack crosses the generated Zero Visibility Zone. A rolled
+enemy Attack whose LoF crosses that zone opposes Smoke's placement Roll;
+other attacks do not oppose it merely because they occur in the same Order.
+When several such attacks oppose placement, **every** Face to Face Roll must
+be won to leave the Template. A failed unopposed Roll or lost opposition
+removes it in the Effects step. Smoke Criticals have no extra effect beyond
+winning applicable opposition. An enemy Dodge inside the Smoke Template
+also rolls without opposition from Smoke.
+
+A Multispectral Visor user can draw LoF through ordinary Smoke, so that
+user's Attack does not oppose the Smoke placement Roll. **Eclipse** otherwise
+uses Smoke's placement and visibility-zone behavior, but its **Reflective**
+exception allows qualifying enemy Multispectral Visor attacks to oppose the
+Eclipse placement Roll when their LoF crosses the zone. Once established,
+Eclipse blocks LoF even through Multispectral Visors, regardless of Level.
+An MSV user's defense against a BS Attack into, through or out of the
+Reflective zone also cannot reduce the resulting Poor Visibility MOD.
+
+These are conditions for placing and opposing the Template, not a generic
+promise that Smoke or Eclipse prevents every Attack. The structured
+`facts.visibilityZone` properties remain separate from the curated
+`facts.clarifications` explanations; neither represents a roll evaluator.
+The targeted Sixth Sense/MSV1 FAQ qualification remains within REA-019,
+not silently generalized into this interaction.
+
+Sources: English N5 v5.3, pp. 64 and 66 (including the Smoke example),
+MSV p. 125; Spanish N5 v5.3, pp. 64-65 and 130; FAQ v0.1, p. 2
+(for the separately scoped Sixth Sense/MSV1 interaction).
+
 ### RS-AW-AMMO-002A — Saving Roll facts and visibility zones are distinct
 
 **Classification:** source-native semantics with a curated-data boundary.

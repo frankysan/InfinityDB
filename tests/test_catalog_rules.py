@@ -885,6 +885,68 @@ def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
         assert "withImmunity" not in source_map[source_id]
 
 
+def test_smoke_eclipse_opposition_and_msv_exception_reach_api(
+    tmp_path: Path,
+) -> None:
+    rules_db = _rules_database(tmp_path)
+    app = create_app(
+        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
+        rules_database_path=rules_db.path,
+    )
+
+    for slug, expected_msv in (("smoke", "can-draw-lof"), ("eclipse", "blocked")):
+        record = rules_db.composed_record(f"ammunition:{slug}")
+        assert record is not None
+        clarifications = " ".join(record["facts"]["clarifications"])
+        assert "Face to Face" in clarifications
+        assert "unopposed Roll" in clarifications
+        assert "[[equipment:multispectral-visor|Multispectral Visor]]" in clarifications
+        assert "[[skill:dodge|Dodge]]" in clarifications
+        assert record["facts"]["visibilityZone"]["multispectralVisor"] == expected_msv
+        assert "ammunitionResolution" not in record["facts"]
+        assert {
+            (citation["source_id"], citation.get("page"))
+            for citation in record["citations"]
+            if citation["source_id"].endswith("-pdf")
+        } >= {
+            ("n5-core-v5.3-pdf", 66 if slug == "smoke" else 64),
+            ("n5-core-v5.3-es-pdf", 65 if slug == "smoke" else 64),
+        }
+
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=f"/api/ammunition/{slug}", REQUEST_METHOD="GET")
+        statuses: list[str] = []
+        response = app(
+            environ,
+            lambda status, headers, exc_info=None, _statuses=statuses: _statuses.append(status),
+        )
+        assert statuses == ["200 OK"]
+        payload = json.loads(b"".join(response))
+        rule = payload["rules"][0]
+        assert len(rule["facts"]["clarifications"]) == 3
+        assert len(rule["fact_tokens"]["clarifications"]) == 3
+        assert any(
+            token["target"] == "equipment:multispectral-visor"
+            for tokens in rule["fact_tokens"]["clarifications"]
+            for token in tokens
+            if token["type"] == "reference"
+        )
+
+    smoke = rules_db.composed_record("ammunition:smoke")
+    eclipse = rules_db.composed_record("ammunition:eclipse")
+    assert smoke is not None and eclipse is not None
+    smoke_text = " ".join(smoke["facts"]["clarifications"])
+    eclipse_text = " ".join(eclipse["facts"]["clarifications"])
+    assert "must win every applicable Face to Face Roll" in smoke_text
+    assert "Critical has no additional effect" in smoke_text
+    assert "not opposed by the Smoke placement Roll" in smoke_text
+    assert "Unlike ordinary [[ammunition:smoke|Smoke]]" in eclipse_text
+    assert "Once established" in eclipse_text
+    assert "Poor Visibility MOD" in eclipse_text
+    assert "[[trait:reflective|Reflective]]" in eclipse_text
+
+
 def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
     tmp_path: Path,
 ) -> None:
