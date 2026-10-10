@@ -22,8 +22,10 @@ are not retroactively relabeled.
 - The Immunity reference now explains why Immunity (AP) removes AP's modifier
   from AP+DA but leaves DA's Saving Rolls; other component combinations remain
   subject to separate review.
-- Flash Pulse now has a linked rules reference explaining Stun, Non-Lethal and
-  Stunned, including the printed Immunity (BTS) exception and its failed-roll condition.
+- The Immunity reference now explains why ARM/BTS protection stops covered
+  weapon Traits as well as Ammunition effects, and why Flash Pulse's Stunned
+  effect remains an explicit exception. The Spanish Wiki weapon-chart discrepancy
+  is distinguished from the matching English and Spanish N5.3 PDFs.
 - The Vulnerability rules explain the source-backed Viral weapon-name example
   without inferring a general component-specific Immunity rule.
 - Weapon profiles now link reviewed base Ammunition directly, including the

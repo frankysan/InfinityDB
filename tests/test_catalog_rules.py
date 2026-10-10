@@ -877,11 +877,67 @@ def test_reviewed_combined_immunity_cases_are_explicit_and_source_scoped(
     }
     assert ap_case["evidence"] == "derived-from-pinned-general-rules"
     assert {citation["source_version"] for citation in immunity["citations"]} == {
-        "N5.3 / oldid 3643", "N5.3 / oldid 3000", "N5.3 / oldid 3156"
+        "5.3", "N5.3 / oldid 3643", "N5.3 / oldid 3000",
+        "N5.3 / oldid 3156",
     }
     # The source-owned mapping remains descriptive: no target Immunity is inferred.
     for source_id in (10, 13, 30, 40):
         assert "withImmunity" not in source_map[source_id]
+
+
+def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
+    tmp_path: Path,
+) -> None:
+    rules_db = _rules_database(tmp_path)
+    immunity = rules_db.composed_record("skill:immunity")
+    assert immunity is not None
+    effects = "\n".join(immunity["facts"]["effects"])
+    assert "covered non-Comms Attack" in effects
+    assert "Immunity (ARM) or (BTS) also ignores" in effects
+    assert "cause [[trait:state|States]], inflict Wounds" in effects
+    assert (
+        "separate from treating Ammunition as [[ammunition:normal|Normal]]" in effects
+    )
+    assert "ordinary Saving Roll still happens" in effects
+    assert "Printed Example 2" in effects
+    assert "[[trait:arm-0|ARM = 0]]" in effects
+    assert "[[trait:state|State: Dead]]" in effects
+    assert "[[state:dead|Dead]]" in effects
+    assert "using full ARM" in effects
+    assert "Despite the ordinary protection against State-causing Traits" in effects
+    assert "[[trait:non-lethal|Non-Lethal]]" in effects
+    assert "[[state:stunned|Stunned]] only on a failed BTS roll" in effects
+    assert {
+        citation["page"]
+        for citation in immunity["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+    } == {95, 96}
+    assert {
+        citation["page"]
+        for citation in immunity["citations"]
+        if citation["source_id"] == "n5-core-v5.3-es-pdf"
+    } == {99}
+
+    root = Path(__file__).resolve().parents[1]
+    app = create_app(
+        root / "data/generated/infinity.db", rules_database_path=rules_db.path
+    )
+    environ: dict[str, Any] = {}
+    setup_testing_defaults(environ)
+    environ.update(PATH_INFO="/api/skills/immunity", REQUEST_METHOD="GET")
+    statuses: list[str] = []
+    response = app(
+        environ, lambda status, headers, exc_info=None: statuses.append(status)
+    )
+    payload = json.loads(b"".join(response))
+    assert statuses == ["200 OK"]
+    assert payload["rules"][0]["id"] == "skill:immunity"
+    assert "ordinary Saving Roll still happens" in " ".join(
+        payload["rules"][0]["facts"]["effects"]
+    )
+    assert "Printed Example 2" in " ".join(
+        payload["rules"][0]["facts"]["effects"]
+    )
 
 
 def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
@@ -912,14 +968,19 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
         "trait:state", "state:stunned",
     }
     assert {citation["source_version"] for citation in flash["citations"]} == {
-        "N5.3 / oldid 4083", "N5.3 / oldid 3643",
+        "5.3", "N5.3 / oldid 4083", "N5.3 / oldid 3643",
         "N5.2 / oldid 3677 (es)", "N5.3 / oldid 3987 (es)",
     }
     assert "Saving Roll remains BTS, not ARM" in flash["summary"]
     assert "explicitly exempts these two Traits" in flash["summary"]
     assert "only if the BTS Saving Roll fails" in flash["summary"]
     assert "two PB/BTS Saving Rolls" in flash["facts"]["sourceNotes"][0]
-    assert "Saving Roll stays BTS, not ARM" in immunity["facts"]["effects"][6]
+    assert "Spanish N5.3 PDF Weapon Chart (p. 196) confirms one" in (
+        flash["facts"]["sourceNotes"][0]
+    )
+    assert "Saving Roll stays BTS, not ARM" in " ".join(
+        immunity["facts"]["effects"]
+    )
     assert "explicitly exempts" in immunity["facts"]["restrictions"][1]
 
     root = Path(__file__).resolve().parents[1]
@@ -946,7 +1007,10 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
     item = json.loads(body)
     assert item["slug"] == "flash-pulse"
     assert [rule["id"] for rule in item["rules"]] == ["weapon:flash-pulse"]
-    assert item["rules"][0]["citations"][0]["source_version"] == "N5.3 / oldid 4083"
+    assert any(
+        citation["source_version"] == "N5.3 / oldid 4083"
+        for citation in item["rules"][0]["citations"]
+    )
     assert item["rules"][0]["summary_tokens"]
     assert "Saving Roll remains BTS, not ARM" in item["rules"][0]["summary"]
     assert "two PB/BTS Saving Rolls" in item["rules"][0]["facts"]["sourceNotes"][0]
@@ -1013,7 +1077,10 @@ def test_immunity_interaction_is_cited_on_skill_api(tmp_path: Path) -> None:
         "unless": "immunity-critical",
         "rollEffects": "normal-ammunition",
     }
-    assert rules[0]["citations"][0]["source_version"] == "N5.3 / oldid 3643"
+    assert any(
+        citation["source_version"] == "N5.3 / oldid 3643"
+        for citation in rules[0]["citations"]
+    )
     assert [case["sourceAmmunitionId"] for case in rules[0]["facts"][
         "immunityInteraction"
     ]["reviewedCombinedCases"]] == [10, 13, 10]

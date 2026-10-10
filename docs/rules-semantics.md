@@ -2237,9 +2237,18 @@ Wiki pages <https://infinitythewiki.com/N>,
 
 When an applicable Immunity (Ammunition), (ARM), (BTS) or (Enhanced) covers an
 attack, covered Ammunition is treated as Normal: its special effects and its
-Saving Roll Attribute/count modifiers are ignored. An otherwise covered
-Critical still requires the additional Saving Roll with Normal effects; only
-Immunity (Critical) suppresses that extra roll. General Immunity does not
+Saving Roll Attribute/count modifiers are ignored. For a covered non-Comms
+attack using ARM or BTS, Immunity (ARM)/(BTS), including Enhanced, additionally
+negates the attack's Weapon, Skill, or Equipment Traits that cause States,
+inflict Wounds, or reduce the target's Attributes. These are **two separate
+protections**: negating Ammunition effects does not itself explain why the
+weapon's State/Attribute Traits are ignored, and neither protection removes the
+ordinary Saving Roll. N5.3 printed Example 2 makes this distinction concrete:
+against a Monofilament weapon requiring ARM, Immunity (ARM) ignores ARM=0 and
+State: Dead, so the target rolls with full ARM and does not enter Dead from that
+Trait on failure. An otherwise covered Critical still requires the additional
+Saving Roll with Normal effects; only Immunity (Critical) suppresses that extra
+roll. General Immunity does not
 apply to Comms Attacks (except Immunity (State)), and does not negate the
 Non-Lethal or State: Stunned Traits. Those Traits still require their own
 normal conditions: this does **not** assert that every attack stuns a target.
@@ -2286,18 +2295,22 @@ Roll to ARM**. The rule's **IMPORTANT** exception explicitly preserves the weapo
 Non-Lethal Trait (no Wounds) and State: Stunned Trait (**Stunned only if the BTS
 Saving Roll fails**). The [Spanish Immunity rule](https://infinitythewiki.com/wiki-es/index.php?title=Inmunidad&oldid=3677)
 (N5.2, Example 4) confirms the outcome. The [Spanish N5.3 Weapon Chart](https://infinitythewiki.com/wiki-es/index.php?title=Tabla_de_Armas&oldid=3987)
-nonetheless omits State: Stunned and lists two BTS rolls, unlike the English
-N5.3 chart (one BTS roll and the State Trait); verification against the Spanish
-N5.3 PDF remains open. The source-scoped `reviewedWeaponCases` preserves the confirmed
-interaction without providing a general BTS attack or component evaluator.
+nonetheless omits State: Stunned and lists two BTS rolls. The official Spanish
+N5.3 PDF Weapon Chart (printed p. 196) agrees with the English N5.3 PDF
+(printed p. 186): one BTS/PB roll and both Traits. The remaining conflict is
+between the Spanish Wiki and both PDFs, not between the published rulebooks.
+The source-scoped `reviewedWeaponCases` preserves the confirmed interaction
+without providing a general BTS attack or component evaluator.
 
 Other component-specific Immunities, BTS-based Combined Ammunition, additional
 Weapon Traits and conditional State interactions remain unresolved. Do not
 extrapolate an algorithm from these reviewed examples or project outcomes into
 individual Weapon profiles.
 
-Sources: N5.3 Wiki [Immunity](https://infinitythewiki.com/Immunity)
-(`oldid=3643`), [Combined Ammunition](https://infinitythewiki.com/Combined_Ammunition)
+Sources: N5.3 English PDF printed pp. 95-96; Spanish PDF printed p. 99
+(Immunity) and p. 196 (Flash Pulse Weapon Chart); N5.3 Wiki
+[Immunity](https://infinitythewiki.com/Immunity) (`oldid=3643`),
+[Combined Ammunition](https://infinitythewiki.com/Combined_Ammunition)
 (`oldid=3000`), and [Vulnerability](https://infinitythewiki.com/Vulnerability)
 (`oldid=3156`). The ARM cases are reviewed deductions; the named Viral example
 is printed in the Wiki. Broader precedence remains open.
