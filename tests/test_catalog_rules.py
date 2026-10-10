@@ -68,7 +68,7 @@ def test_catalog_rules_surface_msv_mimetism_interaction(tmp_path: Path) -> None:
     levels = rule["facts"]["levels"]
     assert [level["level"] for level in levels] == [1, 2, 3]
     assert "Zero Visibility Zones" in levels[0]["effects"][2]
-    assert "Visibility Zones to 0" in levels[1]["effects"][0]
+    assert "[[term:visibility-zone|Visibility Zones]] to 0" in levels[1]["effects"][0]
     assert "automatically succeeds" in levels[2]["effects"][3]
     assert (
         "reduces-modifiers-from",
@@ -943,7 +943,7 @@ def test_smoke_eclipse_opposition_and_msv_exception_reach_api(
     assert "not opposed by the Smoke placement Roll" in smoke_text
     assert "Unlike ordinary [[ammunition:smoke|Smoke]]" in eclipse_text
     assert "Once established" in eclipse_text
-    assert "Poor Visibility MOD" in eclipse_text
+    assert "[[term:poor-visibility-zone|Poor Visibility]] MOD" in eclipse_text
     assert "[[trait:reflective|Reflective]]" in eclipse_text
 
 

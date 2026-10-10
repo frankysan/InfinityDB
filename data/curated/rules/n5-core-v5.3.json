@@ -2176,7 +2176,7 @@
                 "Visibility Condition",
                 "Visibility Conditions"
             ],
-            "summary": "An area that modifies Rolls requiring Line of Fire through it. Low Visibility gives -3, Poor Visibility gives -6, and Zero Visibility blocks Line of Fire, subject to its attack exception. The fourth category affects only specified users. Visibility Zone MODs never stack: apply only the most restrictive one.",
+            "summary": "An area that modifies Rolls requiring Line of Fire through it.\n\n[[term:low-visibility-zone|Low Visibility]] gives -3, [[term:poor-visibility-zone|Poor Visibility]] gives -6, and [[term:zero-visibility-zone|Zero Visibility]] blocks Line of Fire, subject to its attack exception. The fourth category affects only specified users.\n\n[[term:visibility-zone|Visibility Zone]] MODs never stack: apply only the most restrictive one.",
             "composition": {
                 "role": "definition"
             },
@@ -2209,7 +2209,7 @@
                 "Low Visibility",
                 "Low Visibility Zones"
             ],
-            "summary": "A Visibility Zone that imposes a -3 MOD on Rolls for Skills or Equipment requiring Line of Fire from, into, or through it, except [[skill:dodge]]. Visibility Zone MODs do not stack.",
+            "summary": "A [[term:visibility-zone|Visibility Zone]] that imposes a -3 MOD on Rolls for Skills or Equipment requiring Line of Fire from, into, or through it, except [[skill:dodge]]. [[term:visibility-zone|Visibility Zone]] MODs do not stack.",
             "composition": {
                 "role": "definition"
             },
@@ -2242,7 +2242,7 @@
                 "Poor Visibility",
                 "Poor Visibility Zones"
             ],
-            "summary": "A Visibility Zone that imposes a -6 MOD on Rolls for Skills or Equipment requiring Line of Fire from, into, or through it, except [[skill:dodge]]. Visibility Zone MODs do not stack.",
+            "summary": "A [[term:visibility-zone|Visibility Zone]] that imposes a -6 MOD on Rolls for Skills or Equipment requiring Line of Fire from, into, or through it, except [[skill:dodge]]. [[term:visibility-zone|Visibility Zone]] MODs do not stack.",
             "composition": {
                 "role": "definition"
             },
@@ -2275,7 +2275,7 @@
                 "Zero Visibility",
                 "Zero Visibility Zones"
             ],
-            "summary": "A Visibility Zone that normally blocks Line of Fire from, into, or through it. A target of a [[skill:bs-attack]] crossing the Zone instead treats it as a Poor Visibility Zone when drawing Line of Fire to the attacker.",
+            "summary": "A [[term:visibility-zone|Visibility Zone]] that normally blocks Line of Fire from, into, or through it. A target of a [[skill:bs-attack]] crossing the Zone instead treats it as a [[term:poor-visibility-zone|Poor Visibility Zone]] when drawing Line of Fire to the attacker.",
             "composition": {
                 "role": "definition"
             },
@@ -2308,7 +2308,7 @@
                 "White Noise",
                 "White Noise Zones"
             ],
-            "summary": "A Visibility Zone that acts like a Zero Visibility Zone only for Troopers with [[skill:marksmanship]], a [[equipment:multispectral-visor]], or another specified piece of Equipment. When a Visor user is attacked through the Zone, the Visor cannot reduce the resulting Poor Visibility Zone MOD.",
+            "summary": "A [[term:visibility-zone|Visibility Zone]] that acts like a [[term:zero-visibility-zone|Zero Visibility Zone]] only for Troopers with [[skill:marksmanship]], a [[equipment:multispectral-visor]], or another specified piece of Equipment.\n\nWhen a Visor user is attacked through the Zone, the Visor cannot reduce the resulting [[term:poor-visibility-zone|Poor Visibility Zone]] MOD.",
             "composition": {
                 "role": "definition"
             },
@@ -8857,7 +8857,7 @@
             "labelIds": [
                 "obligatory"
             ],
-            "summary": "Automatic Equipment whose Level reduces [[skill:mimetism]] and Visibility Zone MODs, with higher Levels improving visibility handling and Level 3 adding further camouflage-countering effects.",
+            "summary": "Automatic Equipment whose Level reduces [[skill:mimetism]] and [[term:visibility-zone|Visibility Zone]] MODs, with higher Levels improving visibility handling and Level 3 adding further camouflage-countering effects.",
             "composition": {
                 "role": "definition"
             },
@@ -8869,31 +8869,31 @@
             },
             "facts": {
                 "effects": [
-                    "The Level listed for the user supplies its defined [[skill:mimetism]], Visibility Zone, [[ammunition:smoke|Smoke Ammunition]], and camouflage-countering effects."
+                    "The Level listed for the user supplies its defined [[skill:mimetism]], [[term:visibility-zone|Visibility Zone]], [[ammunition:smoke|Smoke Ammunition]], and camouflage-countering effects."
                 ],
                 "levels": [
                     {
                         "level": 1,
                         "effects": [
-                            "Reduces [[skill:mimetism]] (-3) and Low Visibility Zone MODs to 0.",
-                            "Reduces [[skill:mimetism]] (-6) and Poor Visibility Zone MODs to -3.",
-                            "Allows the user to draw LoF through Zero Visibility Zones, applying a -6 MOD to Skills that require LoF.",
+                            "Reduces [[skill:mimetism]] (-3) and [[term:low-visibility-zone|Low Visibility Zone]] MODs to 0.",
+                            "Reduces [[skill:mimetism]] (-6) and [[term:poor-visibility-zone|Poor Visibility Zone]] MODs to -3.",
+                            "Allows the user to draw LoF through [[term:zero-visibility-zone|Zero Visibility Zones]], applying a -6 MOD to Skills that require LoF.",
                             "The user does not make Face to Face Rolls against weapons using [[ammunition:smoke|Smoke Ammunition]]."
                         ]
                     },
                     {
                         "level": 2,
                         "effects": [
-                            "Reduces MODs from [[skill:mimetism]] and Visibility Zones to 0.",
-                            "Allows the user to draw LoF through Visibility Zones without applying those Zones' MODs to Skills that require LoF.",
+                            "Reduces MODs from [[skill:mimetism]] and [[term:visibility-zone|Visibility Zones]] to 0.",
+                            "Allows the user to draw LoF through [[term:visibility-zone|Visibility Zones]] without applying those Zones' MODs to Skills that require LoF.",
                             "The user does not make Face to Face Rolls against weapons using [[ammunition:smoke|Smoke Ammunition]]."
                         ]
                     },
                     {
                         "level": 3,
                         "effects": [
-                            "Reduces MODs from [[skill:mimetism]] and Visibility Zones to 0.",
-                            "Allows the user to draw LoF through Visibility Zones without applying those Zones' MODs to Skills that require LoF.",
+                            "Reduces MODs from [[skill:mimetism]] and [[term:visibility-zone|Visibility Zones]] to 0.",
+                            "Allows the user to draw LoF through [[term:visibility-zone|Visibility Zones]] without applying those Zones' MODs to Skills that require LoF.",
                             "The user does not make Face to Face Rolls against weapons using [[ammunition:smoke|Smoke Ammunition]].",
                             "A [[skill:discover]] WIP Roll against a target in [[state:camouflaged|Camouflaged State]] automatically succeeds.",
                             "Ignores [[skill:surprise-attack]] MODs when the user has LoF to the attacker, and also ignores [[skill:surprise-attack|Surprise Attack]] MODs from [[skill:cc-attack|CC Attacks]] without LoF to the attacker.",
@@ -9013,7 +9013,7 @@
                 ],
                 "effects": [
                     "The user can respond to Attacks directed at them from outside LoF, using a 360° LoF arc for those attackers; this also allows LoF to outside attackers while [[state:engaged|Engaged]].",
-                    "When targeted by a [[skill:bs-attack]] through a Zero Visibility Zone, the user ignores the -6 MOD caused by the resulting Poor Visibility Zone.",
+                    "When targeted by a [[skill:bs-attack]] through a [[term:zero-visibility-zone|Zero Visibility Zone]], the user ignores the -6 MOD caused by the resulting [[term:poor-visibility-zone|Poor Visibility Zone]].",
                     "[[skill:dodge]] and [[skill:reset]] ignore negative MODs except the specified [[state:immobilized-a|Immobilized-A]], [[state:immobilized-b|Immobilized-B]], and [[state:isolated]] penalties.",
                     "[[skill:stealth]] is not effective against the user."
                 ],
@@ -10156,7 +10156,7 @@
                 ],
                 "requirements": [
                     "The user must employ a BS Weapon with the [[trait:intuitive-attack|Intuitive Attack]] Trait.",
-                    "The target (or Main Target for a Template) must be outside LoF because of a Zero Visibility Zone, or be in a condition normally requiring [[skill:discover]] before it can be attacked."
+                    "The target (or Main Target for a Template) must be outside LoF because of a [[term:zero-visibility-zone|Zero Visibility Zone]], or be in a condition normally requiring [[skill:discover]] before it can be attacked."
                 ],
                 "effects": [
                     "Resolve the Burst 1 [[skill:bs-attack|BS Attack]] using one unmodified [[attribute:wip|WIP]] Roll; do not make a second attack Roll on success. An eligible Attack or [[skill:dodge|Dodge]] reaction opposes that WIP Roll, when a Face to Face Roll applies.",
@@ -10525,7 +10525,7 @@
                     "The user makes a single [[skill:bs-attack]] with Burst 1 against a target outside LoF; eligible Circular Templates may use a separate impact point that still affects the Main Target."
                 ],
                 "restrictions": [
-                    "Apply the Speculative Attack -6 MOD and Range MODs; other negative MODs such as [[skill:mimetism]], Partial Cover, and Visibility Zones are not applied.",
+                    "Apply the Speculative Attack -6 MOD and Range MODs; other negative MODs such as [[skill:mimetism]], Partial Cover, and [[term:visibility-zone|Visibility Zones]] are not applied.",
                     "A Circular Template impact point cannot be placed on a vertical surface or in the air."
                 ]
             },
@@ -17281,7 +17281,7 @@
             "id": "ammunition:eclipse",
             "kind": "ammunition",
             "name": "Eclipse Ammunition",
-            "summary": "[[ammunition:smoke|Smoke]]-like Ammunition that creates a [[trait:reflective|Reflective]] Zero Visibility Zone, blocking LoF even for [[equipment:multispectral-visor:plural]].",
+            "summary": "[[ammunition:smoke|Smoke]]-like Ammunition that creates a [[trait:reflective|Reflective]] [[term:zero-visibility-zone|Zero Visibility Zone]], blocking LoF even for [[equipment:multispectral-visor:plural]].",
             "composition": {
                 "role": "definition"
             },
@@ -17316,7 +17316,7 @@
                 "clarifications": [
                     "Like [[ammunition:smoke|Smoke]], an Eclipse placement Roll is Face to Face only against an enemy Attack requiring a Roll whose LoF crosses the generated zone. Without a qualifying opposing Attack, placement is an unopposed Roll; an enemy [[skill:dodge|Dodge]] inside the Template is also an unopposed Roll, not opposed by Eclipse.",
                     "Unlike ordinary [[ammunition:smoke|Smoke]], Eclipse can oppose a rolled Attack by an enemy using a [[equipment:multispectral-visor|Multispectral Visor]] when its LoF crosses the [[trait:reflective|Reflective]] zone. Once established, that zone blocks LoF even for Visors, regardless of Level.",
-                    "As with Smoke, the Eclipse user must win every applicable Face to Face Roll (or pass an unopposed Roll) for the Template to remain; a failed placement Roll or lost opposition removes it at the Effects step. A Visor user facing a [[skill:bs-attack|BS Attack]] into, through, or out of this [[trait:reflective|Reflective]] zone cannot reduce the resulting Poor Visibility MOD with the Visor."
+                    "As with Smoke, the Eclipse user must win every applicable Face to Face Roll (or pass an unopposed Roll) for the Template to remain; a failed placement Roll or lost opposition removes it at the Effects step. A Visor user facing a [[skill:bs-attack|BS Attack]] into, through, or out of this [[trait:reflective|Reflective]] zone cannot reduce the resulting [[term:poor-visibility-zone|Poor Visibility]] MOD with the Visor."
                 ],
                 "visibilityZone": {
                     "visibility": "zero",
@@ -17529,7 +17529,7 @@
             "id": "ammunition:smoke",
             "kind": "ammunition",
             "name": "Smoke Ammunition",
-            "summary": "Non-offensive Ammunition that creates a Zero Visibility Zone; its placement Roll can oppose qualifying rolled enemy Attacks across that zone.",
+            "summary": "Non-offensive Ammunition that creates a [[term:zero-visibility-zone|Zero Visibility Zone]]; its placement Roll can oppose qualifying rolled enemy Attacks across that zone.",
             "composition": {
                 "role": "definition"
             },
@@ -17562,7 +17562,7 @@
             },
             "facts": {
                 "clarifications": [
-                    "An ordinary shooter whose rolled Attack has LoF crossing the Smoke Template's Zero Visibility Zone makes a Face to Face Roll against the Smoke placement Roll. An enemy whose LoF does not cross the Template makes an unopposed Roll instead. To keep the Template, the Smoke user must win every applicable Face to Face Roll.",
+                    "An ordinary shooter whose rolled Attack has LoF crossing the Smoke Template's [[term:zero-visibility-zone|Zero Visibility Zone]] makes a Face to Face Roll against the Smoke placement Roll. An enemy whose LoF does not cross the Template makes an unopposed Roll instead. To keep the Template, the Smoke user must win every applicable Face to Face Roll.",
                     "An enemy with a [[equipment:multispectral-visor|Multispectral Visor]] can draw LoF through ordinary Smoke, so their Attack is not opposed by the Smoke placement Roll. An enemy [[skill:dodge|Dodge]] reaction inside the Template's Area of Effect is also an unopposed Roll, not Face to Face against the Smoke user.",
                     "Smoke needs no enemy target: placing it at an empty point is an unopposed Roll if no qualifying enemy Attack opposes it. If this Roll fails, or the user loses any applicable Face to Face Roll, remove the Template at the Effects step. A Critical has no additional effect beyond winning an applicable Face to Face Roll."
                 ],

@@ -68,6 +68,12 @@ visible under **Properties** without assigning an unverified domain. Preserve
 source order within each heading and avoid duplicating a `State:` prefix under a
 States heading.
 
+**Glossary term previews.** Where curated rules prose names a reviewed Visibility Zone
+variant, use a typed `term:` link to its Game term definition. The shared inline
+reference preview provides the explanation on hover, keyboard focus, or touch,
+with navigation to the Glossary on activation. Do not match and link arbitrary
+common nouns automatically; the full Game-term vocabulary needs separate review.
+
 ### Explain rules interactions, not just outcomes
 
 **Target design direction:** When showing a reviewed interaction, give the

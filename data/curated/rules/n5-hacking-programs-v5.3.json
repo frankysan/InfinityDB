@@ -501,7 +501,7 @@
             "id": "hacking-program:white-noise",
             "kind": "hacking-program",
             "name": "White Noise",
-            "summary": "NFB Hacking Program that creates a temporary White Noise Zone inside the [[skill:hacker]]'s Hacking Area.",
+            "summary": "NFB Hacking Program that creates a temporary [[term:white-noise-zone|White Noise Zone]] inside the [[skill:hacker]]'s Hacking Area.",
             "composition": {
                 "role": "definition"
             },
@@ -516,10 +516,10 @@
                     "The [[skill:hacker]] is the Active Trooper."
                 ],
                 "effects": [
-                    "On a successful Normal WIP Roll, place a Circular Template White Noise Zone fully inside the user's Hacking Area until the start of the States Phase."
+                    "On a successful Normal WIP Roll, place a Circular Template [[term:white-noise-zone|White Noise Zone]] fully inside the user's Hacking Area until the start of the States Phase."
                 ],
                 "restrictions": [
-                    "Troopers with [[equipment:multispectral-visor]] or [[skill:marksmanship]] cannot draw Line of Fire through the White Noise Zone."
+                    "Troopers with [[equipment:multispectral-visor]] or [[skill:marksmanship]] cannot draw Line of Fire through the [[term:white-noise-zone|White Noise Zone]]."
                 ]
             },
             "citations": [

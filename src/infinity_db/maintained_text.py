@@ -19,6 +19,7 @@ MAINTAINED_REFERENCE_KINDS = frozenset(
         "state",
         "hacking-program",
         "attribute",
+        "term",
     }
 )
 DISPLAY_FORMS = frozenset({"plural"})

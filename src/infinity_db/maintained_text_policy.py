@@ -15,6 +15,12 @@ from infinity_db.maintained_text import (
     parse_maintained_text,
 )
 
+# The complete-term namespace includes common nouns (Model, Token, Trooper),
+# whose ordinary-text occurrences have not been reviewed as a full batch.
+# Explicit term: links are supported, but those words must not silently enter
+# the existing fully reviewed semantic-reference coverage gate.
+FULLY_REVIEWED_REFERENCE_KINDS = MAINTAINED_REFERENCE_KINDS - {"term"}
+
 REVIEW_POLICY_FILENAME = "maintained-text-link-reviews.json"
 REVIEW_POLICY_FORMAT_VERSION = 2
 _CONTEXT_INDEX = re.compile(
@@ -61,7 +67,7 @@ def _reference_vocabulary(
         if document["collection"]["status"] != "current":
             continue
         for record in document["records"]:
-            if record["kind"] not in MAINTAINED_REFERENCE_KINDS:
+            if record["kind"] not in FULLY_REVIEWED_REFERENCE_KINDS:
                 continue
             record_id = record["id"]
             for label in (record["name"], *(record.get("aliases") or [])):
@@ -490,7 +496,7 @@ def validate_maintained_text_link_coverage(
 
     batches = _load_review_policy(review_policy_path)
     reviewed_namespaces = {batch["namespace"] for batch in batches}
-    missing_namespaces = sorted(MAINTAINED_REFERENCE_KINDS - reviewed_namespaces)
+    missing_namespaces = sorted(FULLY_REVIEWED_REFERENCE_KINDS - reviewed_namespaces)
     if missing_namespaces:
         raise ValueError(
             "Maintained-text review policy does not cover namespaces: "

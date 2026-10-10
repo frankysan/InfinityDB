@@ -5339,6 +5339,71 @@ def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
         assert record["facts"]["scope"] == "visibility-condition"
         assert record["citations"][0]["page"] == 144
 
+def test_visibility_zone_inline_links_have_glossary_previews(
+    app: Callable, tmp_path: Path,
+) -> None:
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+
+    expected = {
+        "/api/skills/sixth-sense": {
+            "term:zero-visibility-zone", "term:poor-visibility-zone",
+        },
+        "/api/ammunition/smoke": {"term:zero-visibility-zone"},
+    }
+
+    def references(value: object) -> list[dict[str, Any]]:
+        if isinstance(value, dict):
+            result = [value] if value.get("type") == "reference" else []
+            for key, item in value.items():
+                if key != "preview_tokens":
+                    result.extend(references(item))
+            return result
+        if isinstance(value, list):
+            return [ref for item in value for ref in references(item)]
+        return []
+
+    for route, required_ids in expected.items():
+        status, _, body = request(rules_app, route)
+        assert status == 200, route
+        payload = json.loads(body)
+        tokens = [
+            token for token in references(payload)
+            if token.get("target", "").startswith("term:")
+        ]
+        assert required_ids <= {token["target"] for token in tokens}
+        for token in tokens:
+            assert token["public_reference"] == {
+                "href": f"/glossary#{token['target'].replace(':', '-')}",
+            }
+            assert token["preview_tokens"]
+            assert any(item.get("type") == "text" for item in token["preview_tokens"])
+
+    # The lightweight Army fixture does not contain every Equipment or Program
+    # catalog item; verify their prose through the same shared token resolver.
+    from infinity_db.maintained_text_references import maintained_text_tokens
+
+    rules = RulesDatabase(rules_path)
+    for record_id, expected_term in (
+        ("equipment:multispectral-visor", "term:visibility-zone"),
+        ("hacking-program:white-noise", "term:white-noise-zone"),
+    ):
+        record = rules.composed_record(record_id)
+        assert record is not None
+        tokens = maintained_text_tokens(app.database, rules, record["summary"])
+        assert tokens is not None
+        term_tokens = [
+            token for token in tokens
+            if token["type"] == "reference" and token["target"] == expected_term
+        ]
+        assert len(term_tokens) == 1
+        assert term_tokens[0]["public_reference"] == {
+            "href": f"/glossary#{expected_term.replace(':', '-')}",
+        }
+        assert term_tokens[0]["preview_tokens"]
+
+
 def test_catalog_api_exposes_all_accepted_numeric_source_ids(app: Callable) -> None:
     with sqlite3.connect(app.database.path) as connection:
         connection.execute(
