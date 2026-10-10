@@ -62,6 +62,8 @@ jobs:
         run: python -c "import cssselect2, fontTools.ttLib, PIL.Image, tinycss2"
 
       - name: Run source checks
+        env:
+          PYTEST_ADDOPTS: "--durations=20 -ra"
         run: >-
           python tools/run_checks.py ${{ matrix.check_args }}
           --test-workers ${{ matrix.test_workers }}

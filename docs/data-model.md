@@ -876,6 +876,13 @@ Builds publish generated database destinations only after temporary artifacts va
 archive is replaced first and the application database last, making the application replacement the
 publication commit point. The exact interruption/recovery lifecycle is owned by `data/README.md`.
 
+Each new Army staging, raw-archive, application, and rules database creates its schema and inserts
+rows within one explicit write transaction, after deterministic connection configuration. This
+avoids a separate disk commit per schema statement while retaining integrity checks and canonical
+finalization. A SQLite connection context manager does not itself begin a transaction for schema
+DDL; the rules schema script starts its transaction internally because `executescript` commits any
+previously pending transaction.
+
 ## Snapshot provenance
 
 Army, wiki, and symbol acquisition uses generated snapshot provenance records described in

@@ -287,6 +287,9 @@ stable entry point; do not add a CSS build step or link the source parts directl
 ## Validation and release invariants
 
 - Use the project virtual environment when available.
+- Database exporters explicitly begin schema/data write transactions after deterministic connection
+  configuration. A SQLite connection context manager alone does not group schema DDL; rules-schema
+  `executescript` must begin inside its script. Preserve validation, finalization and atomic publication.
 - `tools/run_checks.py` is the canonical local orchestrator. For ordinary patch work, focused tests
   are appropriate; the full release gate is run explicitly by the maintainer/CI when required.
 - Required hosted CI covers source/build checks, cross-platform deterministic outputs, installed

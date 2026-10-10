@@ -62,10 +62,13 @@ def _insert_many(
 
 
 def _create_schema(connection: sqlite3.Connection) -> None:
-    connection.execute(f"PRAGMA application_id = {RULES_APPLICATION_ID}")
-    connection.execute(f"PRAGMA user_version = {RULES_SCHEMA_VERSION}")
+    # executescript commits a pending transaction; begin inside the script so
+    # schema creation and the following row inserts share one transaction.
     connection.executescript(
         f"""
+        BEGIN;
+        PRAGMA application_id = {RULES_APPLICATION_ID};
+        PRAGMA user_version = {RULES_SCHEMA_VERSION};
         CREATE TABLE {RULES_METADATA_TABLE} (
             key TEXT PRIMARY KEY,
             value TEXT NOT NULL

@@ -46,6 +46,9 @@ job budget, including dependency setup and deterministic-output generation; othe
 15 minutes. Local pytest still defaults to automatic xdist selection. Test coverage, required assets
 and cross-platform determinism remain unchanged.
 
+Source-check logs include the twenty slowest pytest durations and skipped-test reasons so
+hosted performance problems can be traced to individual tests or fixture setup.
+
 ## Cross-platform deterministic outputs
 
 The three Python 3.11 operating-system legs build a representative deterministic-output manifest.

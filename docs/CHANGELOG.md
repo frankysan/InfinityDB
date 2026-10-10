@@ -47,6 +47,8 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing:** Reduce database rebuild time, especially on Windows, while preserving
+  generated contents, validation and deterministic release artifacts.
 - **Data processing + Web frontend:** Present long rules references in topic-based paragraphs
   with separate source notes. Immunity keeps Requirements, Effects and Restrictions in order,
   followed by clarifications, examples and five reviewed interactions with conditional outcomes
