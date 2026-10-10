@@ -3825,8 +3825,8 @@ Traits such as `Disposable (2)` retain their source-specific numbers rather than
 being displayed as the generic `Disposable (X)` record name.
 
 Sources: N5 v5.3 Weapon Chart p. 181; [April 2025 official rules update]
-(https://infinityuniverse.com/en/news/infinity-n5-rules-update), Pheroware Tactics
-change notice; [archived Wiki Weapon Chart](https://infinitythewiki.com/Weapons_Chart).
+(<https://infinityuniverse.com/en/news/infinity-n5-rules-update>), Pheroware Tactics
+change notice; [archived Wiki Weapon Chart](<https://infinitythewiki.com/Weapons_Chart>).
 The N5 PDF source is hash-pinned in `docs/n5-source-history.md` and
 `config/validation/weapon-trait-wiki-review.json`. This closes the scoped
 Endgame reference gap, **not** the upstream Army/PDF reconciliation.

@@ -154,7 +154,7 @@ the ZIP hash above is the verified artifact identity.
 | S14 | `es/Super-Salto` | 3964 / timestamp from S21 index below | `36ef1dac97b35e1e9ade92be99f397f321830857210aab165553c31cfbb76723` |
 | S14 | `es/Visor_Multiespectral` | 4013 / timestamp from S21 index below | `ee8c52f2cae31c0a42cd7dd325f38c37dbe494464ee01d861ccfec5b33e3ea00` |
 
-**S21 Spanish revision-history index (exact oldid provenance)**
+## S21 Spanish revision-history index (exact oldid provenance)
 
 | Oldid / subject | Timestamp (UTC) | Exact archive member / SHA-256 |
 | --- | --- | --- |

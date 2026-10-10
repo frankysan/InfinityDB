@@ -27,7 +27,7 @@ jobs:
             python: "3.11.9"
             label: "3.11"
             check_args: "--stage test --stage build --stage rules"
-            test_workers: "0"
+            test_workers: "2"
             determinism: true
           - os: macos-latest
             python: "3.11.9"
@@ -42,7 +42,8 @@ jobs:
             test_workers: "auto"
             determinism: false
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    # Keep Windows parallelism bounded; allow its filesystem-heavy suite more time.
+    timeout-minutes: ${{ matrix.os == 'windows-latest' && 30 || 15 }}
     steps:
       - name: Check out source
         uses: actions/checkout@v7
