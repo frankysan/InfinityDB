@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **111/126** complete, **15** pending.
+- Supporting semantic identities: **116/131** complete, **15** pending.
 - Current authored outgoing relations: **314**.
 - Explicitly tracked future/deferred interactions: **113**.
 
@@ -936,6 +936,19 @@ review. `declaration-category` projection records are excluded.
 - [x] **Hack Consoles** (`skill:hack-consoles`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
+  - outgoing: none
+
+#### Term (5/5)
+
+- [x] **Low Visibility Zone** (`term:low-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
+  - outgoing: none
+- [x] **Poor Visibility Zone** (`term:poor-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
+  - outgoing: none
+- [x] **Visibility Zone** (`term:visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
+  - outgoing: none
+- [x] **White Noise Zone** (`term:white-noise-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
+  - outgoing: none
+- [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
 #### Weapon (13/13)

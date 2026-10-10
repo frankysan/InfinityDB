@@ -265,11 +265,13 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
         "term:enemy",
         "term:fto",
         "term:hostile",
+        "term:low-visibility-zone",
         "term:marker",
         "term:model",
         "term:neutral",
         "term:null-state",
         "term:peripheral",
+        "term:poor-visibility-zone",
         "term:scenery-element",
         "term:state-token",
         "term:target",
@@ -277,6 +279,9 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
         "term:trooper",
         "term:unit-profile",
         "term:victory-points",
+        "term:visibility-zone",
+        "term:white-noise-zone",
+        "term:zero-visibility-zone",
     }
     assert {record["facts"]["scope"] for record in terms} == {
         "alignment",
@@ -286,6 +291,7 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
         "scoring",
         "state-classification",
         "trooper-category",
+        "visibility-condition",
     }
 
 

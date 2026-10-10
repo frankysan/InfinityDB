@@ -32,7 +32,7 @@ from infinity_db.database.publication import (
     published_content_sha256,
 )
 from infinity_db.legacy_armies import load_legacy_armies
-from infinity_db.rules_database import export_rules_database
+from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.web import create_app
 from infinity_db.web.app import STATIC_ASSET_REVISION, STATIC_ASSET_VERSION
@@ -5276,6 +5276,68 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
         "href": "/labels/marker",
     } in marker_results
 
+
+
+def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
+    app: Callable, tmp_path: Path,
+) -> None:
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+
+    expected = {
+        "Visibility Zone": "term-visibility-zone",
+        "Low Visibility Zone": "term-low-visibility-zone",
+        "Poor Visibility Zone": "term-poor-visibility-zone",
+        "Zero Visibility Zone": "term-zero-visibility-zone",
+        "White Noise Zone": "term-white-noise-zone",
+    }
+    status, _, body = request(rules_app, "/api/glossary")
+    assert status == 200
+    terms = {
+        item["name"]: item
+        for item in json.loads(body)["items"]
+        if item["kind"] == "term" and item["name"] in expected
+    }
+    assert set(terms) == set(expected)
+    for name, anchor in expected.items():
+        entry = terms[name]
+        assert entry["domain"] == "Game term"
+        assert entry["href"] == f"/glossary#{anchor}"
+        assert entry["description"]
+
+    searches = {
+        "visibility zone": {
+            "Visibility Zone",
+            "Low Visibility Zone",
+            "Poor Visibility Zone",
+            "Zero Visibility Zone",
+        },
+        "visibility conditions": {"Visibility Zone"},
+        "low visibility": {"Low Visibility Zone"},
+        "poor visibility": {"Poor Visibility Zone"},
+        "zero visibility": {"Zero Visibility Zone"},
+        "white noise": {"White Noise Zone"},
+    }
+    for query, names in searches.items():
+        status, _, body = request(rules_app, "/api/search", query=urlencode({"q": query}))
+        assert status == 200
+        results = json.loads(body)["items"]
+        for name in names:
+            assert {
+                "domain": "Game term",
+                "name": name,
+                "href": f"/glossary#{expected[name]}",
+            } in results
+
+    records = {
+        record["id"]: record
+        for record in RulesDatabase(rules_path).composed_records_by_kind("term")
+    }
+    for anchor in expected.values():
+        record = records[anchor.replace("term-", "term:", 1)]
+        assert record["facts"]["scope"] == "visibility-condition"
+        assert record["citations"][0]["page"] == 144
 
 def test_catalog_api_exposes_all_accepted_numeric_source_ids(app: Callable) -> None:
     with sqlite3.connect(app.database.path) as connection:

@@ -350,6 +350,8 @@ unimplemented until its corresponding behavior exists.
       Also track targeted current metadata-only Weapon publication
       (REA-044) without promoting optional exhaustive research into a release blocker.
       The report remains an assessment, not accepted replacement semantics.
+      Include the five new Visibility Zone Game terms in the final record acceptance
+      review; they postdate the frozen 367-record explanation-audit inventory.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not

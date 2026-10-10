@@ -2168,6 +2168,172 @@
             }
         },
         {
+            "id": "term:visibility-zone",
+            "kind": "term",
+            "name": "Visibility Zone",
+            "aliases": [
+                "Visibility Zones",
+                "Visibility Condition",
+                "Visibility Conditions"
+            ],
+            "summary": "An area that modifies Rolls requiring Line of Fire through it. Low Visibility gives -3, Poor Visibility gives -6, and Zero Visibility blocks Line of Fire, subject to its attack exception. The fourth category affects only specified users. Visibility Zone MODs never stack: apply only the most restrictive one.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "visibility-condition"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 144,
+                    "section": "Visibility Condition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-10"
+            }
+        },
+        {
+            "id": "term:low-visibility-zone",
+            "kind": "term",
+            "name": "Low Visibility Zone",
+            "aliases": [
+                "Low Visibility",
+                "Low Visibility Zones"
+            ],
+            "summary": "A Visibility Zone that imposes a -3 MOD on Rolls for Skills or Equipment requiring Line of Fire from, into, or through it, except [[skill:dodge]]. Visibility Zone MODs do not stack.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "visibility-condition"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 144,
+                    "section": "Visibility Condition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-10"
+            }
+        },
+        {
+            "id": "term:poor-visibility-zone",
+            "kind": "term",
+            "name": "Poor Visibility Zone",
+            "aliases": [
+                "Poor Visibility",
+                "Poor Visibility Zones"
+            ],
+            "summary": "A Visibility Zone that imposes a -6 MOD on Rolls for Skills or Equipment requiring Line of Fire from, into, or through it, except [[skill:dodge]]. Visibility Zone MODs do not stack.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "visibility-condition"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 144,
+                    "section": "Visibility Condition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-10"
+            }
+        },
+        {
+            "id": "term:zero-visibility-zone",
+            "kind": "term",
+            "name": "Zero Visibility Zone",
+            "aliases": [
+                "Zero Visibility",
+                "Zero Visibility Zones"
+            ],
+            "summary": "A Visibility Zone that normally blocks Line of Fire from, into, or through it. A target of a [[skill:bs-attack]] crossing the Zone instead treats it as a Poor Visibility Zone when drawing Line of Fire to the attacker.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "visibility-condition"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 144,
+                    "section": "Visibility Condition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-10"
+            }
+        },
+        {
+            "id": "term:white-noise-zone",
+            "kind": "term",
+            "name": "White Noise Zone",
+            "aliases": [
+                "White Noise",
+                "White Noise Zones"
+            ],
+            "summary": "A Visibility Zone that acts like a Zero Visibility Zone only for Troopers with [[skill:marksmanship]], a [[equipment:multispectral-visor]], or another specified piece of Equipment. When a Visor user is attacked through the Zone, the Visor cannot reduce the resulting Poor Visibility Zone MOD.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "visibility-condition"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 144,
+                    "section": "Visibility Condition"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-10"
+            }
+        },
+        {
             "id": "state:camouflaged",
             "kind": "state",
             "name": "Camouflaged State",

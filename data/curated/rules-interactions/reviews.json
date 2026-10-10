@@ -1907,6 +1907,41 @@
       "note": "Reviewed N5.3 p.73 Sepsitor rules and p.187 weapon profile. Individual PS and Disposable values remain source-native and are not inherited by the other variant; Cube 2.0 +2 Saving Roll applies to both."
     },
     {
+      "recordId": "term:visibility-zone",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-10",
+      "note": "Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms."
+    },
+    {
+      "recordId": "term:low-visibility-zone",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-10",
+      "note": "Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms."
+    },
+    {
+      "recordId": "term:poor-visibility-zone",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-10",
+      "note": "Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms."
+    },
+    {
+      "recordId": "term:zero-visibility-zone",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-10",
+      "note": "Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms."
+    },
+    {
+      "recordId": "term:white-noise-zone",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-10",
+      "note": "Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms."
+    },
+    {
       "recordId": "weapon:flash-pulse",
       "targetRelease": "1.0.0",
       "status": "reviewed",

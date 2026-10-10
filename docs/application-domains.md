@@ -67,7 +67,7 @@ glossary entries, filtering, or search, but do not warrant their own catalog/det
 `attribute:mov`, `attribute:bs`, and `attribute:wip` own reviewed definitions and can participate in
 semantic relationships without creating `/attributes` or individual Attribute pages. Scoped
 `term:*` identities cover source-native terminology such as Trooper, Marker, Token, Peripheral,
-Victory Points, Null State, and Alignment terms. Each Game term carries a reviewed semantic scope
+Victory Points, Null State, Alignment terms, and Visibility Zone variants. Each Game term carries a reviewed semantic scope
 (for example `game-element`, `alignment`, or `scoring`) so a surface name such as Marker or Hostile
 can coexist with a Label or Trait of the same name without merging identities. Neither vocabulary
 has a standalone catalog/detail hierarchy; both project through Glossary/search, while Attributes
