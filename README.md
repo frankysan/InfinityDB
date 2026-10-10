@@ -6,6 +6,7 @@ Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
 Current release: **0.10.0** (2026-10-07), released and deployed.
+Prepared release candidate: **0.10.1** (2026-10-10), pending acceptance and hosted validation.
 Unreleased development changes display `+dev`.
 See the [release process](docs/releasing.md) and [current milestone](docs/TODO.md#current-milestone).
 
@@ -128,6 +129,8 @@ documentation-label convention.
 
 ## Roadmap to 1.0
 
+**Project domain:** Project infrastructure
+
 The current direction is deliberately incremental:
 
 - **0.7.x — Rules & context:** enriched existing catalog/application data with concise
@@ -140,12 +143,13 @@ The current direction is deliberately incremental:
   gaps and made the result searchable, navigable, and understandable.
 - **0.10.x — Stabilize & harden:** completed the application consistency and scenario
   architecture reviews, frontend/theme work, and release/operations hardening.
-- **0.10.1 — Interim reference consistency (in progress):** a focused correction
-  release for already-present rules explanations and UI terminology; no 1.0
-  completeness claims. Track the small open acceptance task in
+- **0.10.1 — Interim reference consistency (release preparation):** release the completed
+  core Scenarios, Ammunition and rules-reference improvements alongside the stabilization
+  fixes. Remaining acceptance and publication gates are tracked in
   [`docs/TODO.md`](docs/TODO.md#0101--interim-reference-consistency).
-- **1.0.0 — Player data-complete (following milestone):** ensure every useful in-scope game datum
-  collected by InfinityDB has a maintained representation and a meaningful, usable place in the
+- **1.0.0 — Player data-complete (temporarily paused):** resume after this interim release;
+  ensure every useful in-scope game datum collected by InfinityDB has a maintained
+  representation and a meaningful, usable place in the
   web reference, including the current core-rules scenarios. ITS season/tournament
   content remains a later extension of the same scenario model.
 

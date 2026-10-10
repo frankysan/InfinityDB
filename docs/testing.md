@@ -93,7 +93,8 @@ ignores superseded results (including stale errors), and displays only the lates
 configuration even when an aborted request still resolves. Responsive grid
 contracts are also checked in the web suite. Scenario browser visual review was
 user-confirmed on 2026-10-08; the separate real-browser keyboard/touch and
-loading/empty/error-state interaction checks remain open in `docs/TODO.md`.
+loading/empty/error-state interaction checks remain open in the
+[0.10.1 acceptance checklist](TODO.md#0101--interim-reference-consistency).
 
 ## Silhouette manual browser acceptance
 
@@ -160,8 +161,9 @@ python tools\run_checks.py --stage test --test-workers 0
 Worker choice is an execution policy, not a correctness difference. Tests must remain valid under
 parallel execution unless they are explicitly serialized by their own fixture/contract.
 
-Hosted Windows CI intentionally uses serial pytest because automatic xdist scheduling was unstable
-for that runner class; this does not change the normal local default. See `docs/ci.md`.
+Hosted Windows CI uses two fixed pytest workers because automatic xdist scheduling was unstable
+for that runner class and serial execution exceeded the job budget as coverage grew. This does not
+change the normal local default. See `docs/ci.md` for the hosted execution/time-budget policy.
 
 Pytest uses its platform-default, per-session temporary directory rather than a fixed
 repository-local `.pytest-tmp` directory. This avoids reuse or cleanup collisions

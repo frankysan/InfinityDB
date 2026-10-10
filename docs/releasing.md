@@ -22,10 +22,10 @@ form. A specialized or final-form UI is not required when a basic presentation m
 the information understandable and navigable.
 
 The current core-rules scenarios are part of the 1.0 requirement: they must have a
-maintained structured representation and a usable browsable presentation. The planned model is
-defined by the completed comparative review of the core scenarios and ITS Seasons 17 and 18 in
-`docs/architecture.md` and `docs/data-model.md`, so the 1.0 implementation must preserve that
-extensibility rather than introducing a simpler core-only representation. ITS-specific missions,
+maintained structured representation and a usable browsable presentation. The implemented bounded
+core-scenario model derives from the comparative review of the core scenarios and ITS Seasons 17
+and 18 in `docs/architecture.md` and `docs/data-model.md`; final 1.0 completeness review must preserve
+that extensibility. ITS-specific missions,
 season material, tournament/event tooling, and a complete historical ITS library remain outside the
 1.0 requirement unless they are necessary to interpret otherwise in-scope data. Scenario-specific
 Skills, Equipment, States, Traits, contextual roles, objective elements, or other named rules

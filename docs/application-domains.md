@@ -107,6 +107,7 @@ The current published top-level domain set is:
 - **Labels** (`labels`) — rules/reference catalog plus detail.
 - **General Rules** (`rules`) — catch-all rules/reference domain for concepts without a clearer
   top-level owner.
+- **Scenarios** (`scenarios`) — core-scenario catalog plus game-size-specific detail and maps.
 
 The registry is intentionally capability-based: publication, navigation, search, Glossary, landing,
 catalog/detail, and scoped-view behavior are independent flags rather than consequences of being a

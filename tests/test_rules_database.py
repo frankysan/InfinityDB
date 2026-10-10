@@ -3,6 +3,7 @@ import json
 import os
 import sqlite3
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -26,6 +27,32 @@ def export_rules_database(*args, **kwargs) -> None:
     """Build semantic test fixtures without canonical SQLite finalization by default."""
     kwargs.setdefault("finalize", FINALIZE_TEST_DATABASES)
     export_release_rules_database(*args, **kwargs)
+
+
+def test_rules_export_creates_schema_inside_transaction(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    schema_transactions: list[bool] = []
+    original_connect = sqlite3.connect
+
+    def traced_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
+        connection = original_connect(*args, **kwargs)
+
+        def trace(statement: str) -> None:
+            if statement.lstrip().upper().startswith("CREATE "):
+                schema_transactions.append(connection.in_transaction)
+
+        connection.set_trace_callback(trace)
+        return connection
+
+    monkeypatch.setattr(sqlite3, "connect", traced_connect)
+    root = Path(__file__).parents[1]
+    path = tmp_path / "rules.db"
+    export_release_rules_database(load_curated_directory(root / "data/curated"), path)
+
+    assert schema_transactions
+    assert all(schema_transactions)
+    RulesDatabase(path).validate()
 
 
 @pytest.fixture(scope="module")

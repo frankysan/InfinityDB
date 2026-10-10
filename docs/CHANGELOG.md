@@ -7,145 +7,83 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
-## [Unreleased]
+## [0.10.1] - 2026-10-10
 
 ### Player summary
 
-- Impersonation-2 now distinguishes the absence of IMP-1's -3 State penalty from ordinary Discover modifiers; Stealth explicitly does not protect against Deployable Weapons or Equipment.
-- Deployable Cover now explains when Vitroferro applies and how its Saving Roll cap is calculated; TinBot now explains Fireteam sharing, its owner's required state and non-stacking effects.
-- Fireteam Type counts are labelled as formation requirements rather than permanent member counts, and Kobra Pistol uses the correct CC Attribute link.
-- State pages now explain when Camouflage, Hidden Deployment, Impersonation, holographic disguises, Prone, Disconnected, Retreat!, and Suppressive Fire end, including their different exceptions.
-- Dodge and Reset now explain why a roll can evade one attack but not another, when Dodge movement is lost, how to leave Engaged, and how cumulative State penalties and Sixth Sense affect Reset.
-- AP and E/M now explain how to round halved defenses up, while T2 explains how to distinguish the original Saving Roll from the extra Critical roll and why their failed rolls cause different Wounds.
-- Visibility Zone and its Low, Poor, Zero, and White Noise variants are now discoverable in global search and the Glossary, with the core effects and exceptions explained; their names in rules text now open linked explanation tooltips.
-- Smoke and Eclipse now explain when placement opposes enemy fire, why Multispectral Visors bypass ordinary Smoke but not Reflective Eclipse, and why Dodge or an unopposed placement Roll is handled separately.
-- The Immunity Skill page keeps Requirements, Effects and Restrictions in order, places rules clarifications and printed examples in their own section, and displays its five reviewed interactions afterward with conditions, Saving Roll outcomes, linked rules and evidence labels.
-- Protheion now explains its opponent Attribute penalty and why extra failed Saving Rolls after a target dies cannot grant more Wounds or VITA.
-- Request Speedball now explains why Controlled Jump does not modify its PH 15 Rolls, even though Speedballs use Combat Jump placement rules (N5 FAQ v0.1).
-- Controlled Jump now explains that its ARO immediately affects the current Combat Jump, how opposing Programs cancel, and why separate scenario bonuses still apply.
-- Continuous Damage now explains why a Critical’s extra Saving Roll does not repeat, and BS Weapon (WIP) explains its Shock/Guided Skill restrictions without banning Shock Ammunition.
-- Counterintelligence now correctly explains that it protects **your** first-turn Command Token allowance or reduces the opponent's Order removal; it does not grant the opponent extra tokens.
-- Doctor, Engineer, MediKit, GizmoKit, and Intuitive Attack now explain their distinct roll conditions, failed-roll outcomes, and key exceptions; Disposable and Double Shot clarify charge spending.
-- Ammunition reference pages now show compact, reviewed mechanics alongside the full rules,
-  including Saving Roll and State conditions, Critical exceptions, and Smoke/Eclipse visibility.
-- The Immunity reference now explains why Immunity (AP) removes AP's modifier
-  from AP+DA but leaves DA's Saving Rolls; other component combinations remain
-  subject to separate review.
-- The Immunity reference now explains why ARM/BTS protection stops covered
-  weapon Traits as well as Ammunition effects, and why Flash Pulse's Stunned
-  effect remains an explicit exception. The Spanish Wiki weapon-chart discrepancy
-  is distinguished from the matching English and Spanish N5.3 PDFs.
-- The Vulnerability rules explain the source-backed Viral weapon-name example
-  without inferring a general component-specific Immunity rule.
-- Weapon profiles now link reviewed base Ammunition directly, including the
-  component references for AP+DA, AP+Exp, AP+Shock and AP+T2, without changing Saving Rolls.
-- Weapon profile properties now appear under their correct Traits, Labels or States
-  headings, instead of all being presented as Traits; unknown properties stay visible.
-- Weapon profile Labels such as Comms Attack and No LoF now link to their rules;
-  compound State entries link to each State instead of a generic Trait page.
-- Long rules references use shorter, topic-based paragraphs, with separate smaller source
-  notes. Weapon Traits show current N5 names without redundant Army wording unless Developer Mode is on.
-- Weapon Trait links now use reviewed N5 names for legacy Army labels, including
-  Pheroware's BS Weapon (WIP); original Army labels remain available in Developer Mode.
-- Drop Bears now explains both placement modes, shared charges, and the legacy Throwing Weapon label alongside N5 BS Weapon (PH).
-- Kobra Pistol CC Mode now explains DA's two Saving Rolls and links its rules, while identifying the unresolved Anti-materiel discrepancy without changing Army data.
-- PARA Mine now has its own reference connecting Mine deployment and PARA effects,
-  with the PDF/Wiki versus Army footnote discrepancy explained without changing its profile.
-- PT: Endgame now has a source-cited Double Shot reference, without applying the rule to
-  Eraser or Mirrorball; the difference from the Army profile is shown explicitly.
-- Sepsitor and Sepsitor Plus now have separate weapon rules references covering
-  Sepsitorized State and Cube 2.0 without conflating their PS or Disposable values.
-- Mine and Cybermine Weapon pages now explain triggering, camouflage, allied safety,
-  Reset, and special effects, with links to each Mine's own ammunition and relevant State rules;
-  Chest Mine pages explain their separate BS/CC modes.
-- The Boost reference now explains blocked paths, exempt Markers, Dodge, and why Deployable
-  weapons cannot trigger one another.
-- You can now browse the four current core scenarios, starting at the common 300-point game size by
-  default, and see setup, objectives, scenario rules, source notes, and a generated deployment map together.
-- Supplies now consistently shows 8 inches of clear space between each outer Supply Box marker edge
-  and the table edge at every game size; the 12-inch mark in the large-table source illustration is a
-  guide ruler, not a box offset.
-- Scenario maps now match your Light or Dark theme, keep labels readable at different table sizes,
-  and switch measurement labels between inches and centimeters with the existing preference.
-- Annihilation's 350-point surviving-force scoring now uses the reviewed contiguous ranges
-  85–175, 176–270, and above 270; Domination continues to show the printed 6 SWC at 350 points with
-  a note that the unusual progression remains worth verifying.
+- Browse the four core scenarios: Annihilation, Domination, Supplies and Firefight,
+  with game-size-specific setup, objectives, scoring and deployment maps. Maps follow
+  your theme and distance preference.
+- Ammunition pages now show compact mechanics and linked State effects. Weapon profiles link
+  reviewed Ammunition components and separate Traits, Labels and States for easier lookup.
+- Rules references explain more of the conditions and exceptions that matter during play,
+  including Immunity, Dodge, Reset, State cancellation, Smoke/Eclipse and Critical Saving Rolls.
+- Corrected explanations cover IMP-2 Discover modifiers, Stealth against Deployables,
+  Deployable Cover, TinBot sharing and Fireteam formation requirements. Special Weapon
+  references explain their distinct modes and keep unresolved source disagreements visible.
+- Visibility Zones are easier to find through search, the Glossary and linked rules tooltips;
+  longer rules cards use clearer sections and separate source notes.
 
 ### Added
 
-- **Data processing + Web backend:** Document the additional Critical Saving Roll
-  for reviewed base Ammunition without altering Weapon Saving Rolls or treating
-  Combined Ammunition components as separate Criticals.
-- **Data processing + Web backend:** Connect reviewed E/M, PARA, Shock and Stun
-  Ammunition references to their possible State outcomes, preserving the
-  conditional restrictions in each Ammunition definition and enabling reverse
-  navigation from State reference pages.
-- **Data processing + Web backend:** Publish reviewed typed effects for the remaining
-  base Ammunition: Normal, Shock, Stun, Smoke, and Eclipse. Preserve conditional
-  VITA/State and Guts effects and keep visibility zones separate from Saving Rolls.
-  These are reference facts, not calculated combat outcomes.
-- **Data processing + Web backend:** Make reviewed EXP, PARA, and T2 Ammunition
-  effects available as source-cited, structured reference facts, retaining the
-  PARA no-PH exception and T2's different additional Critical-roll effect.
-- **Data processing + Web backend + Web frontend:** Use exact reviewed Army ammunition
-  metadata identities for Weapon statline links to the eleven published base
-  Ammunition references and four reviewed combined forms. Preserve ordered typed
-  components separately from Saving Roll data; leave unreviewed forms unlinked.
-- **Data processing + Web backend:** Add an N5.3-sourced Drop Bears reference distinguishing visible Mine placement, thrown BS Mode restrictions and shared ammunition/charge semantics without modifying Army traits.
-- **Data processing + Web backend:** Add a cited Flash Pulse Weapon reference and the
-  printed Immunity (BTS) exception: Stun becomes Normal while Non-Lethal and
-  Stunned-on-failed-save remain effective. No target-specific combat calculation is added.
-- **Data processing + Web backend:** Publish a CC Mode-only Kobra Pistol reference for DA effects and the contradictory printed Saving Roll/Trait values. Do not apply it to BS Mode or override Army profiles.
-- **Data processing + Web backend:** Add a PARA Mine-specific reference showing
-  shared Mine behavior, PARA ammunition and Immobilized-A, with the conflicting
-  source footnote markers preserved.
-- **Data processing + Web backend:** Add source-cited Mines, Cybermine, and Chest Mine
-  Weapon references. Named Mine types share placement and trigger mechanics but retain
-  their distinct ammunition, saving rolls, traits, and effects. Cybermine adds its
-  Reset and State effects; Chest Mines do not use the shared placement rules.
-  Link the definitions through reviewed Army Weapon slugs without altering Army profiles.
-  Links from Chest Mine to the shared Mines rules now land on the rule card itself.
-- **Data processing + Web backend + Web frontend:** Publish the bounded core **Scenarios** domain for
-  Annihilation, Domination, Supplies, and Firefight. Scenario detail defaults to 300 Army Points when
-  no valid shared selection exists, keeps point-dependent scoring/source issues scoped correctly, links
-  existing rules references in compact scenario-context cards, and renders deterministic SVG maps from
-  the same maintained geometry used by the scenario data. Scenarios are discoverable from primary
-  navigation and the landing page without joining global search or the Glossary. Browser configuration
-  uses the shared versioned share-state contract rather than a scenario-specific URL format.
+- **Data processing + Web backend + Web frontend:** Add the four current core scenarios,
+  with a default 300-point selection, point-dependent setup/scoring, linked scenario Rules
+  and Skills, source notes and deployment maps generated from the maintained geometry.
+  Scenario selection is shareable; maps support Light/Dark themes and inches/centimeters.
+- **Data processing + Web backend + Web frontend:** Add compact, source-cited mechanics for
+  all eleven base Ammunition references, including conditional State effects and Critical
+  exceptions. Weapon profiles link base Ammunition and the reviewed AP+DA, AP+Exp,
+  AP+Shock and AP+T2 components while retaining imported Saving Rolls.
+- **Data processing + Web backend:** Add distinct rules references for Drop Bears,
+  Flash Pulse, Kobra Pistol CC Mode, PARA Mine, Mines, Cybermine, Chest Mine, PT: Endgame,
+  Sepsitor, Sepsitor Plus and WildParrot. Explain mode-specific behavior and preserve disagreements
+  with Army or other cited sources without silently changing imported profiles.
+- **Data processing + Web backend:** Identify Combined Saving Rolls on the six Plasma
+  Hit/Blast profiles in the Weapon API, including the additional ARM Saving Roll for a
+  Critical. Keep these distinct from Combined Ammunition and retain source profile values.
+- **Web backend + Web frontend:** Make Visibility Zone and its Low, Poor, Zero and White
+  Noise variants discoverable in search and the Glossary, with linked explanation tooltips
+  in rules text.
 
 ### Changed
 
-- **Data processing:** Complete reviewed interim rules explanations for IMP-2, Stealth, Deployable Cover and TinBot without changing imported game profiles or adjudicating unrelated source disagreements.
-- **Data processing + Web frontend:** Clarify Fireteam formation-count presentation and post-formation type persistence, preserving the existing count data/API shape.
+- **Data processing:** Reduce database rebuild time, especially on Windows, while preserving
+  generated contents, validation and deterministic release artifacts.
+- **Data processing + Web frontend:** Present long rules references in topic-based paragraphs
+  with separate source notes. Immunity keeps Requirements, Effects and Restrictions in order,
+  followed by clarifications, examples and five reviewed interactions with conditional outcomes
+  and evidence labels. Explain AP+DA protection and the Flash Pulse exception without implying
+  that unreviewed combinations have been resolved.
+- **Web backend + Web frontend:** Group Weapon properties under Traits, Labels or States,
+  linking each to its owning reference. Use reviewed N5 names for legacy Army labels;
+  original wording remains available in Developer Mode and unknown properties remain visible.
 
 ### Fixed
 
-- **Data processing:** Use `attribute:cc` for the Trooper's CC Attribute in Kobra Pistol, and correct the CC Mode source note spacing. Preserve the unresolved Anti-materiel discrepancy.
-
-- **Data processing + Web backend:** Clarify the additional Critical Saving Roll exception for Continuous Damage and the prohibited BS Attack (Shock)/(Guided) Skills for BS Weapon (WIP), without creating unsupported variant-specific graph edges.
-- **Data processing + Web backend:** Correct misleading Doctor and Engineer recovery eligibility and failure text; distinguish State cancellation, clarify the one-roll Intuitive Attack procedure, and explain multi-hit Kits and Disposable use. Direct target allegiance remains under source review.
-
-- **Web backend + Web frontend:** Link Army weapon properties to the correct Label,
-  Trait or State reference; preserve signed Label modifiers and resolve compound
-  State effects individually without silently linking to the generic State Trait.
-- **Web backend + Web frontend:** Link State effects listed in Weapon Traits directly to
-  their matching State references, including Sepsitorized and Dead, without changing Army text.
-- **Data processing:** Clarify Non-Lethal rules: these attacks cannot inflict Wounds,
-  but E/M, PARA and Cybermines still require Saving Rolls to determine their effects.
-- **Data processing:** Clarify the Boost rules reference using the N5 Weaponry text, including
-  detonation, obstacle and Marker exclusions, and Deployable-chain restrictions.
-- **Web frontend:** Show no Saving Rolls for Weapon profiles without a Saving Attribute,
-  rather than displaying a non-operative Army multiplier.
-- **Data processing + Web frontend:** Correct Annihilation's 350-point surviving-Victory-Points
-  boundaries as a reviewed source typo while preserving the printed discrepancy as a source note.
-  Keep Domination's printed 350-point 6 SWC value and explain the unresolved cross-scenario
-  inconsistency without silently substituting 7 SWC.
+- **Data processing:** Correct IMP-2 Discover modifiers and Stealth's Deployable exception;
+  explain Deployable Cover's Vitroferro cap and eligibility, and TinBot owner requirements,
+  Fireteam sharing and non-stacking benefits. Kobra Pistol links the correct CC Attribute.
+- **Data processing + Web frontend:** Identify Fireteam Type counts as formation requirements,
+  distinguish ongoing integrity and type persistence, and preserve the existing count data.
+- **Data processing:** Clarify Dodge and Reset roll/movement conditions, cumulative State
+  penalties and cancellation exceptions; explain Smoke/Eclipse opposition and Visor limits,
+  AP/E/M rounding, T2 Critical Wounds and Continuous Damage's extra-roll exception.
+- **Data processing:** Correct Counterintelligence's Command Token effects, Protheion's
+  Attribute penalty and post-death limits, Controlled Jump timing/cancellation and its Speedball
+  exclusion. Clarify Doctor, Engineer, MediKit, GizmoKit, Intuitive Attack, Disposable,
+  Double Shot, Non-Lethal and Boost exceptions, and BS Weapon (WIP)'s Skill restrictions.
+- **Web frontend:** Display no Saving Rolls for Weapon profiles without a Saving Attribute.
+- **Data processing + Web frontend:** Correct Annihilation's 350-point surviving-force scoring
+  boundaries and Supplies' edge-to-edge Supply Box placement at every game size. Preserve
+  Domination's printed 350-point 6 SWC and explain the unresolved source inconsistency.
 
 ### Upgrade notes
 
-- **Data processing:** Rebuild the rules database when upgrading. Scenario reference data now
-  shares reusable definitions and separates mission Skills from special rules; older generated
-  rules databases are incompatible with the current application.
+- **Deployment:** Deploy the release-matched application and both tracked runtime databases
+  together. Older rules databases are incompatible with the new scenario references; local
+  installations maintaining their own generated data must rebuild the rules database from
+  this release's curated inputs. Tagged production deployment uses the bundled databases
+  and must not rebuild them on the server.
 
 ## [0.10.0] - 2026-10-07
 

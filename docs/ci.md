@@ -31,7 +31,7 @@ installed-package behavior, tracked release assets, and the production container
 The current matrix is:
 
 - Ubuntu / Python 3.11 — `tools/run_checks.py --all`;
-- Windows / Python 3.11 — test + Army build + rules build, with serial pytest;
+- Windows / Python 3.11 — test + Army build + rules build, with two fixed pytest workers;
 - macOS / Python 3.11 — test + Army build + rules build;
 - Ubuntu / Python 3.14 — test + Army build + rules build.
 
@@ -39,8 +39,15 @@ Every leg installs `.[dev,symbols]`, uses the controlled `tests/fixtures/deploym
 source for build validation, and requires the tracked graphical publication. The primary Ubuntu
 3.11 leg owns lint/type checks; other matrix legs focus on runtime/build portability.
 
-Windows hosted CI intentionally sets `--test-workers 0`. Local pytest still defaults to automatic
-xdist worker selection; hosted-runner scheduling policy is not a project-wide serial-test rule.
+Windows hosted CI uses `--test-workers 2` to bound process/resource use while running the complete
+suite. Automatic worker selection previously proved unstable on that runner class; serial execution
+subsequently exceeded the 15-minute job limit as coverage grew. Windows now has a bounded 30-minute
+job budget, including dependency setup and deterministic-output generation; other matrix legs retain
+15 minutes. Local pytest still defaults to automatic xdist selection. Test coverage, required assets
+and cross-platform determinism remain unchanged.
+
+Source-check logs include the twenty slowest pytest durations and skipped-test reasons so
+hosted performance problems can be traced to individual tests or fixture setup.
 
 ## Cross-platform deterministic outputs
 

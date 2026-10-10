@@ -9,6 +9,11 @@
 **Original audit commit:** `859823f8d2899405a40cf126883d2adf5763db7c`
 **Status:** Assessment for review; no rules, code, schemas, tests, databases, or runtime configuration changed.
 
+**Snapshot scope:** Findings and totals describe the examined commits above, not the
+current release candidate. Later implementation notes record selected corrections;
+the original findings remain evidence for the still-open 1.0 review. Current release
+status and remaining acceptance belong in [the backlog](TODO.md#current-milestone).
+
 ## Executive summary
 
 The existing curation does **not yet meet the 1.0 rules interaction explanation

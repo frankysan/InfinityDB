@@ -20,6 +20,12 @@ from infinity_db.symbol_manifest import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class WindowsPermissionError(PermissionError):
+    """Expose Windows lock metadata in portable retry test doubles."""
+
+    winerror: int
+
+
 def load_module():
     module_path = ROOT / "tools" / "build_symbols.py"
     spec = importlib.util.spec_from_file_location("build_symbols", module_path)
@@ -770,7 +776,7 @@ def test_symbol_manifest_write_retries_transient_windows_replace(
         if self == temporary and target == manifest_path:
             attempts += 1
             if attempts == 1:
-                error = PermissionError(13, "temporary file lock")
+                error = WindowsPermissionError(13, "temporary file lock")
                 error.winerror = winerror
                 raise error
         return original_replace(self, target)
@@ -796,7 +802,7 @@ def test_symbol_manifest_write_preserves_target_on_persistent_windows_lock(
         nonlocal attempts
         if self == temporary and target == manifest_path:
             attempts += 1
-            error = PermissionError(13, "persistent file lock")
+            error = WindowsPermissionError(13, "persistent file lock")
             error.winerror = 32
             raise error
         return original_replace(self, target)

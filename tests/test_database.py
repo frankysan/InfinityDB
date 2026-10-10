@@ -244,6 +244,32 @@ def canonical_database_path(
     return path
 
 
+def test_export_database_creates_schema_inside_transactions(
+    tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    schema_transactions: list[bool] = []
+    original_connect = sqlite3.connect
+
+    def traced_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
+        connection = original_connect(*args, **kwargs)
+
+        def trace(statement: str) -> None:
+            if statement.lstrip().upper().startswith("CREATE "):
+                schema_transactions.append(connection.in_transaction)
+
+        connection.set_trace_callback(trace)
+        return connection
+
+    monkeypatch.setattr(sqlite3, "connect", traced_connect)
+    path = tmp_path / "army.db"
+    export_release_database(normalized, path)
+
+    assert schema_transactions
+    assert all(schema_transactions)
+    Database(path).validate()
+    validate_database_pair(path)
+
+
 def test_export_database_finalization_is_default_and_can_be_skipped(
     tmp_path: Path, normalized: dict, monkeypatch: pytest.MonkeyPatch
 ) -> None:

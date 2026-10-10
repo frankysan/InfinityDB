@@ -117,7 +117,7 @@ overview, explorer, scoped view, or embedded vocabulary, and capabilities such a
 search, glossary participation, detail pages, and publication are independent.
 
 Current published top-level domains are Armies, Units, Skills, Equipment, Weapons, Ammunition,
-Traits, States, Hacking Programs, Fireteams, Labels, and General Rules. Attributes and scoped Game
+Traits, States, Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Attributes and scoped Game
 terms are published embedded vocabularies. Global search and Glossary are cross-domain projections,
 not competing semantic owners.
 
