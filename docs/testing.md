@@ -576,6 +576,17 @@ ignored `local/audits/weapon-first-batch-browser/`. This verifies the current
 rendering and link presence; individual cross-page click/touch routes and
 additional modes still require focused browser acceptance.
 
+**First Weapon batch follow-up (2026-10-13):** All six remaining
+Uncategorized Weapon references and the source-only Activate Disco Ball Skill
+rendered at 1440, 390 and 320 px (21 page/viewport cases), with expected
+source citations, rules and Army mode/profile separation, no horizontal
+overflow and no JavaScript errors. The Disco Baller inline link to
+Activate Disco Ball passed both desktop click and touch preview-then-navigation
+(two additional cases). Full-page 320 px Missile Launcher and Activate Disco
+Ball screenshots were visually inspected. Evidence remains in ignored
+`local/audits/weapon-first-batch-2-browser/`. These checks are bounded
+reference/browser acceptance, not a complete release gate.
+
 ## 1.0 Peripheral (REA-017) browser acceptance
 
 **Verified 2026-10-13, branch dev/v1.0.0, base commit 5fc94553b992,

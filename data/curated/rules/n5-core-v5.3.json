@@ -4660,6 +4660,367 @@
             }
         },
         {
+            "id": "weapon:chain-colt",
+            "kind": "weapon",
+            "name": "Chain-colt",
+            "summary": "The Chain-colt uses a Small Teardrop [[trait:direct-template|Direct Template]] to determine which Models its attack affects. Its printed profile uses [[ammunition:normal|Normal (N) Ammunition]] with one ARM Saving Roll. The Template size is a weapon Trait, not a different Ammunition effect.\n\nThe listed [[trait:intuitive-attack|Intuitive Attack]] Trait permits the corresponding [[skill:intuitive-attack|Common Skill]] when its requirements are met; it does not change the weapon's [[ammunition:normal|Normal Ammunition]].",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "chain-colt"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:direct-template"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:intuitive-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 186,
+                    "section": "Weapon Chart: Chain-colt"
+                }
+            ]
+        },
+        {
+            "id": "weapon:chain-rifle",
+            "kind": "weapon",
+            "name": "Chain Rifle",
+            "summary": "The Chain Rifle uses a Large Teardrop [[trait:direct-template|Direct Template]], rather than the [[weapon:chain-colt|Chain-colt]]'s Small Teardrop. Its printed attack has [[ammunition:normal|Normal (N) Ammunition]] and one ARM Saving Roll.\n\nIts [[trait:intuitive-attack|Intuitive Attack]] Trait permits [[skill:intuitive-attack|Intuitive Attack]] when that Common Skill's requirements are met. Template placement, not a range-band modifier, determines the affected area.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "chain-rifle"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:direct-template"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:intuitive-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 186,
+                    "section": "Weapon Chart: Chain Rifle"
+                }
+            ]
+        },
+        {
+            "id": "weapon:nanopulser",
+            "kind": "weapon",
+            "name": "Nanopulser",
+            "summary": "The Nanopulser uses a Small Teardrop [[trait:direct-template|Direct Template]] with [[ammunition:normal|Normal (N) Ammunition]]. Its printed profile requires one BTS Saving Roll, not ARM: [[ammunition:normal|Normal Ammunition]] uses the Saving Roll Attribute stated on the weapon profile.\n\nThe listed [[trait:intuitive-attack|Intuitive Attack]] Trait allows the corresponding [[skill:intuitive-attack|Common Skill]] when its requirements are satisfied. It does not change the listed BTS Saving Roll.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "nanopulser"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:direct-template"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:intuitive-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 187,
+                    "section": "Weapon Chart: Nanopulser"
+                }
+            ]
+        },
+        {
+            "id": "weapon:pulzar",
+            "kind": "weapon",
+            "name": "Pulzar",
+            "summary": "The Pulzar uses a Large Teardrop [[trait:direct-template|Direct Template]] with [[ammunition:normal|Normal (N) Ammunition]]. Although the Ammunition is [[ammunition:normal|Normal]], the printed profile requires one BTS Saving Roll rather than ARM, and the Template is Large rather than Small.\n\nIts [[trait:intuitive-attack|Intuitive Attack]] Trait permits [[skill:intuitive-attack|Intuitive Attack]] under that Skill's requirements. Use the printed profile's BTS attribute for the Saving Roll.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "pulzar"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:direct-template"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:intuitive-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 187,
+                    "section": "Weapon Chart: Pulzar"
+                }
+            ]
+        },
+        {
+            "id": "weapon:missile-launcher",
+            "kind": "weapon",
+            "name": "Missile Launcher",
+            "summary": "The Missile Launcher has two distinct printed modes. **Blast Mode** uses [[ammunition:exp|EXP Ammunition]] with a Circular [[trait:impact-template|Impact Template]] and requires three ARM Saving Rolls on a successful hit.\n\n**Hit Mode** instead uses combined [[ammunition:ap|AP]] + [[ammunition:exp|EXP]] Ammunition without the Circular Template, requiring three ARM/2 Saving Rolls. Both modes retain [[trait:anti-materiel|Anti-materiel]]; selecting one mode does not combine the two Template and Ammunition profiles.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "missile-launcher"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:exp"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:impact-template"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:anti-materiel"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 187,
+                    "section": "Weapon Chart: Missile Launcher"
+                }
+            ]
+        },
+        {
+            "id": "weapon:e-mitter",
+            "kind": "weapon",
+            "name": "E/Mitter",
+            "summary": "The E/Mitter uses [[ammunition:em|E/M Ammunition]] rather than [[ammunition:normal|Normal Ammunition]]. Its chart profile requires two BTS/2 Saving Rolls and has the [[trait:non-lethal|Non-Lethal]] Trait. E/M's disabling effects follow the Ammunition rules and depend on the affected target and failed Saving Rolls.\n\nUse the listed range modifiers and Burst from the E/Mitter profile; [[trait:non-lethal|Non-Lethal]] is a Trait and does not remove the E/M Saving Rolls or their effects.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "e-mitter"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:em"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:non-lethal"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 186,
+                    "section": "Weapon Chart: E/Mitter"
+                }
+            ]
+        },
+        {
+            "id": "skill:activate-disco-ball",
+            "kind": "skill",
+            "name": "Activate Disco Ball",
+            "summary": "Activate Disco Ball is a Short Skill (Attack) for reactivating a deployed allied Disco Ball. The user must have a [[equipment:deactivator|Deactivator]], and the allied Ball must be in LoF or [[trait:zone-of-control-zc|Zone of Control]]. Enemy Disco Balls cannot be activated.\n\nMake a WIP +3 [[rule:face-to-face-rolls|Normal Roll]], applying the [[equipment:deactivator|Deactivator]]'s Range MODs. On success, place a Circular [[ammunition:eclipse|Eclipse]] Template centered on the Ball in the Conclusion Step. The Template is removed at the start of the next States Phase, or if the Ball is destroyed.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "common-skill",
+                "typeIds": [
+                    "short-skill"
+                ],
+                "requirements": [
+                    "The user must possess a [[equipment:deactivator|Deactivator]].",
+                    "The deployed Disco Ball must be allied and in LoF or [[trait:zone-of-control-zc|Zone of Control]]."
+                ],
+                "effects": [
+                    "Make a WIP +3 [[rule:face-to-face-rolls|Normal Roll]] with [[equipment:deactivator|Deactivator]] Range MODs. Success restores the centered [[ammunition:eclipse|Eclipse]] Template in the Conclusion Step.",
+                    "At the start of the States Phase, or when the Ball is destroyed, remove its Circular Template."
+                ],
+                "restrictions": [
+                    "An enemy Disco Ball cannot be activated."
+                ]
+            },
+            "labelIds": [
+                "attack"
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:deactivator"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:eclipse"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 71,
+                    "section": "Activate Disco Ball"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Activate_Disco_Ball",
+                    "heading": "Activate Disco Ball"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
             "id": "weapon:d-charges",
             "kind": "weapon",
             "name": "D-Charges",
@@ -4727,7 +5088,7 @@
             "id": "weapon:disco-baller",
             "kind": "weapon",
             "name": "Disco Baller",
-            "summary": "Disco Baller has [[trait:targetless|Targetless]] and [[trait:speculative-attack|Speculative Attack]]. Choose a location and make a non-Face to Face [[rule:face-to-face-rolls|Normal BS Roll]]. On success, place a Disco Ball Model or Token there in the Conclusion Step, with a circular [[ammunition:eclipse|Eclipse]] Template centered on it.\n\nAt the start of the States Phase the Disco Ball deactivates and its Eclipse Template is removed; the deployed Ball remains until it is destroyed or the game ends. The source gives the Disco Ball ARM 0, BTS 0, STR 1 and S 1.\n\nA Trooper equipped with a [[equipment:deactivator|Deactivator]] may use the Activate Disco Ball Short Skill on an allied Ball in LoF or [[trait:zone-of-control-zc|Zone of Control]], never an enemy Ball.\n\nMake a WIP +3 [[rule:face-to-face-rolls|Normal Roll]] with the [[equipment:deactivator|Deactivator]]'s Range MODs. On success, restore the Eclipse Template in the Conclusion Step; remove it again at the next States Phase or when the Ball is destroyed.\n\nThe Weapon Chart lists [[trait:disposable-x|Disposable (2)]] and [[trait:double-shot|Double Shot]] for the launcher. Its use count and attack profile are separate from the deployed Disco Ball's profile.",
+            "summary": "Disco Baller has [[trait:targetless|Targetless]] and [[trait:speculative-attack|Speculative Attack]]. Choose a location and make a non-Face to Face [[rule:face-to-face-rolls|Normal BS Roll]]. On success, place a Disco Ball Model or Token there in the Conclusion Step, with a circular [[ammunition:eclipse|Eclipse]] Template centered on it.\n\nAt the start of the States Phase the Disco Ball deactivates and its Eclipse Template is removed; the deployed Ball remains until it is destroyed or the game ends. The source gives the Disco Ball ARM 0, BTS 0, STR 1 and S 1.\n\nA Trooper equipped with a [[equipment:deactivator|Deactivator]] may use the [[skill:activate-disco-ball|Activate Disco Ball]] Short Skill on an allied Ball in LoF or [[trait:zone-of-control-zc|Zone of Control]], never an enemy Ball.\n\nMake a WIP +3 [[rule:face-to-face-rolls|Normal Roll]] with the [[equipment:deactivator|Deactivator]]'s Range MODs. On success, restore the Eclipse Template in the Conclusion Step; remove it again at the next States Phase or when the Ball is destroyed.\n\nThe Weapon Chart lists [[trait:disposable-x|Disposable (2)]] and [[trait:double-shot|Double Shot]] for the launcher. Its use count and attack profile are separate from the deployed Disco Ball's profile.",
             "facts": {},
             "composition": {
                 "role": "definition"
@@ -4771,6 +5132,10 @@
                 {
                     "type": "uses-effects-of",
                     "recordId": "equipment:deactivator"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:activate-disco-ball"
                 }
             ],
             "citations": [

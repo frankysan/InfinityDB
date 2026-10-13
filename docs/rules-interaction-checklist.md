@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **128/143** complete, **15** pending.
-- Current authored outgoing relations: **325**.
+- Supporting semantic identities: **135/150** complete, **15** pending.
+- Current authored outgoing relations: **346**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -952,8 +952,11 @@ review. `declaration-category` projection records are excluded.
 - [ ] **Supplies** (`scenario:supplies`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Supply Box interactions, Specialist Troop rules, and other scenario semantics remains 1.0 work.
   - outgoing: none
 
-#### Skill (2/2)
+#### Skill (3/3)
 
+- [x] **Activate Disco Ball** (`skill:activate-disco-ball`) — reviewed: N5.3 p. 71 and matching archived Wiki page: source-only Short Skill, Deactivator and allied-ball requirements, LoF/ZoC, WIP+3 Normal Roll with range MODs, Eclipse placement/removal. No Army Skill identity synthesized.
+  - `uses-effects-of` → Deactivator (`equipment:deactivator`)
+  - `uses-effects-of` → Eclipse Ammunition (`ammunition:eclipse`)
 - [x] **Hack Consoles** (`skill:hack-consoles`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
@@ -972,8 +975,16 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (16/16)
+#### Weapon (22/22)
 
+- [x] **Chain Rifle** (`weapon:chain-rifle`) — reviewed: N5.3 p. 186: Large Teardrop Direct Template with Normal N ammunition and ARM saves; distinct from Chain-colt's small template. Retains Intuitive Attack and Army statistics.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
+- [x] **Chain-colt** (`weapon:chain-colt`) — reviewed: N5.3 p. 186: Small Teardrop Direct Template, Normal N ammunition with ARM Saving Roll; Intuitive Attack linked to its actual Common Skill. No added or inferred ammunition effect.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
 - [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
@@ -994,6 +1005,7 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
   - `uses-effects-of` → Double Shot (`trait:double-shot`)
   - `uses-effects-of` → Deactivator (`equipment:deactivator`)
+  - `uses-effects-of` → Activate Disco Ball (`skill:activate-disco-ball`)
 - [x] **Drop Bears** (`weapon:drop-bears`) — reviewed: N5.3 Drop Bears BS/Deployable modes share three charges but have different placement restrictions; typed relationships connect PH throwing, Targetless, Deployable/Intuitive placement, Shock and the modified Mines behavior. Imported legacy Throwing Weapon remains source data, not an additional N5 effect.
   - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
   - `uses-effects-of` → BS Weapon (PH) (`trait:bs-weapon-ph`)
@@ -1002,6 +1014,9 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `modifies-use-of` → Mines (`weapon:mines`)
+- [x] **E/Mitter** (`weapon:e-mitter`) — reviewed: N5.3 p. 186: printed E/M with two BTS/2 Saving Rolls and Non-Lethal; the ammunition reference controls target-specific effects. Source ranges/Burst retained.
+  - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
 - [x] **Flash Pulse** (`weapon:flash-pulse`) — reviewed: Reviewed N5.3 Weapon Chart Stun/BTS/Non-Lethal/Stunned semantics and the printed Immunity (BTS) exception (Wiki Immunity oldid 3643, Example 4). No generic state or immunity resolution is inferred.
   - `uses-effects-of` → Stun Ammunition (`ammunition:stun`)
   - `uses-effects-of` → BS Weapon (WIP) (`trait:bs-weapon-wip`)
@@ -1018,6 +1033,15 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `uses-effects-of` → Mimetism (`skill:mimetism`)
   - `uses-effects-of` → Place Deployable (`skill:place-deployable`)
+- [x] **Missile Launcher** (`weapon:missile-launcher`) — reviewed: N5.3 p. 187: Blast EXP/Impact Template three ARM saves versus Hit AP+EXP without circular template and three ARM/2 saves. Profiles stay separate and both retain Anti-materiel.
+  - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Impact Template (`trait:impact-template`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **Nanopulser** (`weapon:nanopulser`) — reviewed: N5.3 p. 187: Small Direct Template with Normal N ammo but BTS Saving Roll from the printed profile. Do not infer ARM from Normal ammo or add Bioweapon effects.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
 - [x] **PARA Mine** (`weapon:para-mine`) — reviewed: Source-pinned PARA Mine reference connects shared Mines, PARA Ammunition and Immobilized-A; the N5.3 chart and Army marker discrepancy remains explicitly unresolved, not a gameplay change.
   - `uses-effects-of` → Mines (`weapon:mines`)
   - `uses-effects-of` → Paralysis (PARA) Ammunition (`ammunition:para`)
@@ -1027,6 +1051,10 @@ review. `declaration-category` projection records are excluded.
 - [x] **PT: Endgame** (`weapon:pt-endgame`) — reviewed: N5 v5.3 chart and the April 2025 update explicitly add Double Shot to Endgame only. Source-specific Army id 203 prevents applying it to Eraser or Mirrorball; current Army omits Double Shot.
   - `variant-of` → Pheroware Tactics (PT) (`weapon:pt`)
   - `uses-effects-of` → Double Shot (`trait:double-shot`)
+- [x] **Pulzar** (`weapon:pulzar`) — reviewed: N5.3 p. 187: Large Direct Template with Normal N ammo and BTS Saving Roll; explicit template and save-attribute distinctions without invented special effects.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
 - [x] **Sepsitor** (`weapon:sepsitor`) — reviewed: Reviewed N5.3 p.73 Sepsitor rules and p.187 weapon profile. Individual PS and Disposable values remain source-native and are not inherited by the other variant; Cube 2.0 +2 Saving Roll applies to both.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)

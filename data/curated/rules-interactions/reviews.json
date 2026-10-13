@@ -938,6 +938,55 @@
       "note": "Uses the shared Mine mechanics but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose."
     },
     {
+      "recordId": "weapon:chain-colt",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 186: Small Teardrop Direct Template, Normal N ammunition with ARM Saving Roll; Intuitive Attack linked to its actual Common Skill. No added or inferred ammunition effect."
+    },
+    {
+      "recordId": "weapon:chain-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 186: Large Teardrop Direct Template with Normal N ammunition and ARM saves; distinct from Chain-colt's small template. Retains Intuitive Attack and Army statistics."
+    },
+    {
+      "recordId": "weapon:nanopulser",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 187: Small Direct Template with Normal N ammo but BTS Saving Roll from the printed profile. Do not infer ARM from Normal ammo or add Bioweapon effects."
+    },
+    {
+      "recordId": "weapon:pulzar",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 187: Large Direct Template with Normal N ammo and BTS Saving Roll; explicit template and save-attribute distinctions without invented special effects."
+    },
+    {
+      "recordId": "weapon:missile-launcher",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 187: Blast EXP/Impact Template three ARM saves versus Hit AP+EXP without circular template and three ARM/2 saves. Profiles stay separate and both retain Anti-materiel."
+    },
+    {
+      "recordId": "weapon:e-mitter",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 186: printed E/M with two BTS/2 Saving Rolls and Non-Lethal; the ammunition reference controls target-specific effects. Source ranges/Burst retained."
+    },
+    {
+      "recordId": "skill:activate-disco-ball",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 71 and matching archived Wiki page: source-only Short Skill, Deactivator and allied-ball requirements, LoF/ZoC, WIP+3 Normal Roll with range MODs, Eclipse placement/removal. No Army Skill identity synthesized."
+    },
+    {
       "recordId": "weapon:d-charges",
       "targetRelease": "1.0.0",
       "status": "reviewed",

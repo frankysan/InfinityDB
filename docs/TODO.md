@@ -113,9 +113,9 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [x] Re-run the 1.0 source-input audit using separate English and Spanish
     Wiki history archives and the September 26 curated Wiki capture. All 110
     currently published `oldid` identities verify against language-matched history
-    payloads; the refreshed capture audit now resolves 79 curated
-    citation/vocabulary references across 67 pages (including SymbioBomb,
-    D-Charges and Disco Baller) with all 79 headings and page revision IDs
+    payloads; the refreshed capture audit now resolves 80 curated
+    citation/vocabulary references across 68 pages (including Activate Disco
+    Ball) with all 80 headings and page revision IDs
     verified. The audit checks exact
     local archive hashes, but does not establish historical content equivalence,
     rules correctness or browser completeness.
@@ -342,22 +342,27 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Desktop and 320 px full-page screenshots were visually inspected. No
       independent attack profile is shown; real session assignment remains
       outside this static reference. Evidence stays under ignored local/audits/.
-    - [x] Start the highest-use Uncategorized Weapon review batch (initial eight
-      identities): publish dedicated N5.3 p. 70/186 D-Charges and p. 71/186
-      Disco Baller rules, preserving Army modes, shared charge counts, deployment
-      and activation timing, Eclipse template and deployed Ball profile. The six
-      remaining names (Nanopulser, Pulzar, Chain Rifle, Missile Launcher, E/Mitter,
-      Chain-colt) retain matching printed/chart statistics but still need
-      player-facing ammunition/trait/State navigation and exception review.
-      The source-only triage now has 113 definition-review Weapons plus one
-      accepted historical citation, with 27 bounded review batches.
+    - [x] Complete the first eight-identity Uncategorized Weapon batch.
+      D-Charges (N5.3 pp. 70/186) and Disco Baller (pp. 71/186) retain their
+      specific mode, charge, deployment, and activation rules. Nanopulser,
+      Pulzar, Chain Rifle, Chain-colt, E/Mitter and Missile Launcher now have
+      source-cited summaries and typed ammunition/trait/Skill links matching
+      their exact printed chart profiles (pp. 186–187). The template size,
+      ARM versus BTS Saving Roll, E/M disabling effects and Hit versus Blast
+      Mode are explicit; no Army statistics were rewritten. Updated source
+      triage: 107 remaining definition-review Weapons, 1 reviewed historical
+      citation, and 25 definition-review batches plus the citation-evidence batch.
     - [ ] Browser-review the new D-Charges and Disco Baller cards (both source
       modes, related reference links, mobile layout and citations); API coverage
       does not substitute for this acceptance.
-    - [ ] Review Activate Disco Ball as a separately cited Skill identity and
-      ensure its link from the Disco Baller reference can be reached, without
-      inventing a matching Army Skill entry if none exists.
-    - [ ] Work through the 26 remaining source-category/usage-prioritized
+    - [x] Create source-only `skill:activate-disco-ball` with verified N5.3
+      p. 71 and matching English Wiki evidence. Keep its Deactivator, allied
+      Ball, LoF/ZoC, WIP +3, range MOD and Eclipse timing requirements
+      explicit; add inline and related-rule navigation from Disco Baller.
+      It has no fabricated Army Skill profile. Browser acceptance passed
+      23/23 scenarios (seven reference pages × three viewport widths,
+      desktop click and touch preview-then-navigation).
+    - [ ] Work through the 25 remaining source-category/usage-prioritized
       chart-listed Weapon batches (no more than eight identities per batch).
       For each, distinguish complete Army profile facts from missing effect
       explanations, ammunition/trait/State relations, and browser navigation;

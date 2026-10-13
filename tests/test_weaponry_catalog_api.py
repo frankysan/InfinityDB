@@ -28,10 +28,12 @@ def weaponry_app() -> Callable:
     )
 
 
-def _weapon_detail(app: Callable, slug: str) -> dict[str, Any]:
+def _weapon_detail(
+    app: Callable, slug: str, *, catalog: str = "weapons"
+) -> dict[str, Any]:
     environ: dict[str, Any] = {}
     setup_testing_defaults(environ)
-    environ.update(PATH_INFO=f"/api/weapons/{slug}", REQUEST_METHOD="GET")
+    environ.update(PATH_INFO=f"/api/{catalog}/{slug}", REQUEST_METHOD="GET")
     observed: dict[str, Any] = {}
 
     def start_response(
@@ -391,6 +393,86 @@ def test_d_charges_and_disco_baller_keep_army_modes_separate(
     assert ball["profile"] == "ARM=0, BTS=0, STR=1, S=1"
     assert ball["ammunition"] == 0
     assert ball["saving_num"] == "-"
+
+
+@pytest.mark.parametrize(
+    ("slug", "page", "ammunition", "saving", "template", "linked_rules"),
+    [
+        ("chain-colt", 186, "N", "ARM", "Small Teardrop",
+         {"ammunition:normal", "trait:direct-template", "skill:intuitive-attack"}),
+        ("chain-rifle", 186, "N", "ARM", "Large Teardrop",
+         {"ammunition:normal", "trait:direct-template", "skill:intuitive-attack"}),
+        ("nanopulser", 187, "N", "BTS", "Small Teardrop",
+         {"ammunition:normal", "trait:direct-template", "skill:intuitive-attack"}),
+        ("pulzar", 187, "N", "BTS", "Large Teardrop",
+         {"ammunition:normal", "trait:direct-template", "skill:intuitive-attack"}),
+        ("e-mitter", 186, "E/M", "BTS/2", "two BTS/2 Saving Rolls",
+         {"ammunition:em", "trait:non-lethal"}),
+    ],
+)
+def test_first_weapon_batch_links_printed_profiles_and_applicable_effects(
+    weaponry_app: Callable, slug: str, page: int, ammunition: str,
+    saving: str, template: str, linked_rules: set[str],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert len(payload["profiles"]) == 1
+    assert payload["profiles"][0]["ammunition"] == ammunition
+    assert payload["profiles"][0]["saving"] == saving
+    record = _weapon_rules(payload)[f"weapon:{slug}"]
+    assert template in record["summary"]
+    assert {reference["record"]["id"] for reference in record["display_relations"]
+            if reference["direction"] == "outbound"} >= linked_rules
+    assert any(source["source_id"] == "n5-core-v5.3-pdf"
+               and source["page"] == page for source in record["citations"])
+
+
+def test_missile_launcher_preserves_distinct_hit_and_blast_mode_effects(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "missile-launcher")
+    profiles = {profile["mode"]: profile for profile in payload["profiles"]}
+    assert set(profiles) == {"Blast Mode", "Hit Mode"}
+    assert profiles["Blast Mode"]["ammunition"] == "Exp"
+    assert profiles["Blast Mode"]["saving"] == "ARM"
+    assert profiles["Blast Mode"]["saving_num"] == "3"
+    assert "Impact Template (Circular)" in profiles["Blast Mode"]["traits"]
+    assert profiles["Hit Mode"]["ammunition"] == "AP+Exp"
+    assert profiles["Hit Mode"]["saving"] == "ARM/2"
+    assert profiles["Hit Mode"]["saving_num"] == "3"
+    assert "Impact Template (Circular)" not in profiles["Hit Mode"]["traits"]
+    record = _weapon_rules(payload)["weapon:missile-launcher"]
+    assert "Blast Mode" in record["summary"] and "Hit Mode" in record["summary"]
+    assert {r["record"]["id"] for r in record["display_relations"]
+            if r["direction"] == "outbound"} >= {
+                "ammunition:exp", "ammunition:ap",
+                "trait:impact-template", "trait:anti-materiel",
+            }
+
+
+def test_activate_disco_ball_is_source_only_skill_with_working_weapon_link(
+    weaponry_app: Callable,
+) -> None:
+    skill = _weapon_detail(weaponry_app, "activate-disco-ball", catalog="skills")
+    assert skill["name"] == "Activate Disco Ball"
+    assert skill["variants"] == []
+    record = {r["id"]: r for r in skill["rules"]}["skill:activate-disco-ball"]
+    assert "WIP +3" in record["summary"]
+    assert "Enemy Disco Balls cannot be activated" in record["summary"]
+    assert "Conclusion Step" in record["summary"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 71
+               for c in record["citations"])
+    assert any(c["source_id"] == "wiki-en-20260926-200832"
+               and c["member"] == "Activate_Disco_Ball"
+               for c in record["citations"])
+    disco = _weapon_rules(_weapon_detail(weaponry_app, "disco-baller"))[
+        "weapon:disco-baller"
+    ]
+    assert any(token["type"] == "reference"
+               and token["target"] == "skill:activate-disco-ball"
+               for token in disco["summary_tokens"])
+    assert any(rel["record"]["id"] == "skill:activate-disco-ball"
+               and rel["direction"] == "outbound"
+               for rel in disco["display_relations"])
 
 
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(

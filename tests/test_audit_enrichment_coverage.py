@@ -214,16 +214,16 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         classification_path=_fixture_classification_policy(tmp_path),
     )
 
-    assert report["summary"]["exposedCount"] == 154
-    assert report["summary"]["completeCount"] == 153
+    assert report["summary"]["exposedCount"] == 155
+    assert report["summary"]["completeCount"] == 154
     assert report["summary"]["gapCount"] == 1
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
-        "unresolved_related_item_link": 8,
+        "unresolved_related_item_link": 9,
     }
-    assert report["summary"]["classifiedGapCount"] == 9
-    assert report["summary"]["classificationCounts"] == {"release-blocker": 9}
-    assert report["summary"]["releaseBlockerCount"] == 9
+    assert report["summary"]["classifiedGapCount"] == 10
+    assert report["summary"]["classificationCounts"] == {"release-blocker": 10}
+    assert report["summary"]["releaseBlockerCount"] == 10
 
     skills = {item["name"]: item for item in report["domains"]["skills"]["items"]}
     assert skills["Super-Jump"]["gapCodes"] == []
@@ -256,8 +256,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert states["Unconscious State"]["gapCodes"] == []
     assert states["Targeted State"]["gapCodes"] == []
 
-    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 8
-    assert report["summary"]["supportingRelationTargetCount"] == 10
+    assert report["summary"]["unresolvedRelatedItemLinkCount"] == 9
+    assert report["summary"]["supportingRelationTargetCount"] == 11
     assert {
         item["targetRecordId"] for item in report["relationCoverage"]["unresolved"]
     } == {
@@ -266,6 +266,7 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         "equipment:medikit",
         "equipment:multispectral-visor",
         "equipment:360o-visor",
+        "equipment:deactivator",
     }
     assert {
         item["recordId"] for item in report["relationCoverage"]["supporting"]
@@ -280,6 +281,7 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         "rule:special-lieutenant-order",
         "rule:tactical-order",
         "training:regular",
+        "ammunition:eclipse",
     }
 
 
@@ -385,9 +387,9 @@ def test_enrichment_coverage_allows_catalog_gap_classification(tmp_path: Path) -
     ]
     assert report["summary"]["classificationCounts"] == {
         "later-product-work": 1,
-        "release-blocker": 8,
+        "release-blocker": 9,
     }
-    assert report["summary"]["releaseBlockerCount"] == 8
+    assert report["summary"]["releaseBlockerCount"] == 9
 
 
 def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> None:
@@ -424,9 +426,9 @@ def test_enrichment_coverage_allows_explicit_gap_override(tmp_path: Path) -> Non
     ]
     assert report["summary"]["classificationCounts"] == {
         "later-product-work": 1,
-        "release-blocker": 8,
+        "release-blocker": 9,
     }
-    assert report["summary"]["releaseBlockerCount"] == 8
+    assert report["summary"]["releaseBlockerCount"] == 9
 
 
 def test_enrichment_coverage_rejects_stale_classification_override(tmp_path: Path) -> None:
