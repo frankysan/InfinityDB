@@ -346,7 +346,8 @@ installation to another host.
 ## Project layout
 
 ```text
-docs/                       # Tracked project docs; docs/audits/ is local audit evidence
+docs/                       # Tracked project documentation
+local/                      # Private untracked workspace, excluded from Docker builds
 src/
   infinity_army_data/       # Army merge, normalization, metadata, and validation
   infinity_db/              # SQLite storage, application services, API, and browser

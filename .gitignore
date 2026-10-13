@@ -11,6 +11,9 @@ __pycache__/
 dist/
 build/
 
+# Private local workspace
+/local/
+
 # Local check reports
 reports/
 
