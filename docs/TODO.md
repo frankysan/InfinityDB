@@ -405,16 +405,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       SD versus Burst allocations, and real-browser link navigation before
       closing the finding. Fireteam Level 4 PH/WIP modifiers remain tied to
       the attack Attribute, not Discover.
-      REA-026 now has initial linked Face to Face Roll and Saving Roll baselines
-      with API/browser routes and BS/CC cross-references; verify Critical/tie and
-      PH-based save exceptions in a real browser. A Guts Roll reference now
-      explains movement priority, the attacker-position LoF check and Skill
-      exceptions; verify its linked browser cards. The Order Expenditure
-      Sequence now covers declaration choices, two ARO checks, Requirements
-      timing and simultaneous effects; verify the linked browser references.
-      Coordinated Orders now have a source-cited linked baseline for Spearhead,
-      Burst, reactive targeting, recovery, Hacking and Special Dice; verify the
-      browser card and links before closing REA-026.
+      REA-026 is complete within its shared-reference scope: Face to Face
+      Rolls, Saving Rolls, Guts Rolls, the Order Expenditure Sequence and
+      Coordinated Orders are published, linked and source-cited. Real Chrome
+      browser acceptance on 2026-10-13 covered all five at 1440/390/320 px,
+      forward/reverse navigation, keyboard, touch previews and citations with
+      no page errors or horizontal overflow; see
+      [development checks](testing.md#10-general-rules-rea-026-browser-acceptance).
+      Full 0.10.1 release acceptance and source-specific disputes remain separate.
       Hacking Area, Firewall and Supportware (REA-018) now have linked, published
       baseline cards. Verify enemy-Repeater ARO scope and 8-inch checks, disabled
       Hacking Device Firewall, and whole-Program Fairy Dust replacement in a real

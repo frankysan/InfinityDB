@@ -943,27 +943,31 @@ content/links and future validation; no such edits made here.
 **Affected:** General Rules domain, `skill:bs-attack`, `skill:cc-attack`,
 `skill:move`, `skill:idle`, `rule:command-token-strategic-use`, recovery references.
 
-**Current:** Face to Face Rolls and Saving Rolls now have linked, published
-General Rules baselines, with BS/CC Attack cross-references and source citations.
-Guts Rolls now have a linked baseline for the N5.3 attacker-position check,
-movement priorities and key Skill exceptions. The Order Expenditure Sequence
-now covers declaration timing and simultaneous effects. Coordinated Orders
-now have a linked baseline for Spearhead, Burst, targets and key exceptions;
-real-browser acceptance and remaining source review are still open. The current published rules catalog includes other
-scoped references such as Fireteam and Order rules; source research is not itself
-an ordinary player-facing reference.
+**Status:** Complete for the scoped shared-reference baseline (2026-10-13).
+
+**Current:** Five canonical, source-cited General Rules are published and
+cross-linked: Face to Face Rolls, Saving Rolls, Guts Rolls, Order Expenditure
+Sequence and Coordinated Orders. They explain ordinary resolution, declaration
+and shared-action mechanics without implementing a universal rules engine.
+Source-specific exceptions and disputes remain in their own review findings.
 
 **Evidence/result:** S1 pp. 14-15, 24-25, 37-38, 75-76 and 129-131 establish
 these baselines. Useful examples include an unopposed save using PS plus
 protection, capped cumulative MODs, simultaneous effects, illegal declarations
 still spending Disposable uses, and Coordinated recovery's any-success rule.
-The core Roll, Guts and declaration baselines are now curated; Coordinated Orders remains a separate incomplete reference.
+All five shared references are now curated.
 
-**Action:** Complete the Coordinated Orders baseline and verify these shared
-mechanics in player-facing references. Link repeated explanations instead of
-copying entire procedures. **Fix:** curated definitions and publication
-integration; not a game engine. **Dependencies:** supports REA-009, REA-013,
-REA-014, REA-018, REA-021, REA-025. Full procedural simulation is outside scope.
+**Browser evidence:** Chrome 155 on Windows with a temporary, freshly
+built rules database verified all five rule cards at 1440, 390 and 320 pixels
+(15 cases), five outgoing and seven incoming reference links, Enter-key and
+two-tap touch navigation, citations, and zero JavaScript errors or horizontal
+overflow. The 320-pixel Guts and Coordinated Orders screenshots were visually
+reviewed; see [development checks](testing.md#10-general-rules-rea-026-browser-acceptance).
+This does not replace broader release acceptance.
+
+**Action:** REA-026's shared-reference baseline and browser scope are complete.
+Track remaining special-case interactions under REA-009/013/014/018/021/025
+and their other owning findings. Full procedural simulation remains out of scope.
 
 **Follow-up evidence:** Follow-up selects the parameter rules on S1 p. 75: Dodge (ARM+3) and
 PARA CCW (-6) need a shared modifier baseline distinguishing the user's Attribute,

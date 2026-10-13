@@ -475,3 +475,34 @@ shorthand differences, omitted/extra printed Traits, and extraction limitations
 require separate review. The report does not compare prose clauses, rule
 relationships, or player-facing completeness. The PDF remains an optional
 offline dependency only; normal tests and CI require no PDF or PyMuPDF.
+
+## 1.0 General Rules (REA-026) browser acceptance
+
+**Verified 2026-10-13:** Windows, headless Chrome 155, branch dev/v1.0.0
+at commit 2996fefb46fc. A temporary rules database was freshly rebuilt from
+curated sources beside a copy of the tracked Army database; the live Git
+working tree and tracked generated databases were not modified.
+
+The five reference pages (Face to Face Rolls, Saving Rolls, Guts Roll, Order
+Expenditure Sequence, Coordinated Orders) loaded at **1440, 390 and 320 px**
+(15 browser/viewport cases). All rendered source-cited rules and semantic links
+with zero horizontal overflow, JavaScript exceptions or browser-console errors.
+Full-page 320-pixel Guts Roll and Coordinated Orders screenshots were visually
+inspected for readable sections, links and source citations.
+
+Five rule-to-reference navigation clicks passed, along with seven reverse links
+from BS Attack, Courage, Move, Doctor, MediKit and Hacker. Enter-key navigation
+to Dodge passed. Mobile touch emulation verified two taps: the first reveals
+the linked rule preview and the second follows the link.
+
+One combined-harness run intermittently remained on the loading state when
+opening a second mobile browser context. Five subsequent fresh mobile touch
+contexts each fetched the rule API (HTTP 200) and fully rendered the same page,
+without page errors or failed requests. The isolated stall was not reproduced
+or attributed to a confirmed application defect; investigate if it recurs.
+
+This certifies **only REA-026's bounded reference/browser scope**. It does not
+certify the separate 0.10.1 real-browser release checklist, exhaustive theme
+or distance preferences, every interaction exception, or hosted deployment.
+Playwright and locally installed Chrome were used only for this optional
+acceptance exercise; normal CI does not require a browser.
