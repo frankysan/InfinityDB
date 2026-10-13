@@ -398,6 +398,44 @@ def test_hacking_programs_reuse_canonical_current_labels(
     ]
 
 
+def test_negative_feedback_has_owner_scoped_effect_and_program_lifetimes(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """NFB is per Trooper; Programs retain their distinct cancellation conditions."""
+    label = next(
+        label
+        for label in current_rules_database.current_labels()
+        if label["id"] == "negative-feedback"
+    )
+    description = label["description"]
+    assert "cancels and overrides" in description
+    assert "same Trooper" in description
+    assert "Only one NFB effect" in description
+    assert "canceled or voluntarily deactivated" in description
+    assert "other Troopers are not affected" in description
+
+    cybermask = current_rules_database.composed_record("hacking-program:cybermask")
+    assert cybermask is not None
+    assert any(item["id"] == "negative-feedback" for item in cybermask["labels"])
+    cybermask_effects = " ".join(cybermask["facts"]["effects"])
+    assert "[[state:impersonation-2]]" in cybermask_effects
+    assert "NFB Label" in cybermask_effects
+    assert "while" in cybermask_effects.lower()
+    assert "other NFB" in cybermask_effects
+    assert "not to allied Troopers" in cybermask_effects
+
+    white_noise = current_rules_database.composed_record("hacking-program:white-noise")
+    assert white_noise is not None
+    assert any(item["id"] == "negative-feedback" for item in white_noise["labels"])
+    white_noise_effects = " ".join(white_noise["facts"]["effects"])
+    assert "successful Normal WIP Roll" in white_noise_effects
+    assert "until the start of the States Phase" in white_noise_effects
+    assert "While this Template remains on the table" in white_noise_effects
+    assert "This restriction ends when the Template is removed" in white_noise_effects
+    assert "does not extend to other Troopers" in white_noise_effects
+    assert "[[term:white-noise-zone|White Noise Zone]]" in white_noise_effects
+
+
 def test_controlled_jump_immediate_aro_and_opposing_effects_are_published(
     current_rules_database: RulesDatabase,
 ) -> None:

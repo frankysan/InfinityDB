@@ -220,7 +220,8 @@
                     "The [[skill:hacker]] is outside the Line of Fire of enemy Troopers and Markers."
                 ],
                 "effects": [
-                    "The [[skill:hacker]] enters [[state:impersonation-2]] and remains in it until revealed by that State's rules."
+                    "The [[skill:hacker]] enters [[state:impersonation-2]] and remains in it until revealed by that State's rules.",
+                    "While the [[skill:hacker]] remains in [[state:impersonation-2]], Cybermask's NFB Label prevents that [[skill:hacker|Hacker]] from using or applying other NFB Skills, Equipment, or Hacking Programs. The restriction applies to that [[skill:hacker|Hacker]], not to allied Troopers."
                 ]
             },
             "relations": [
@@ -516,7 +517,8 @@
                     "The [[skill:hacker]] is the Active Trooper."
                 ],
                 "effects": [
-                    "On a successful Normal WIP Roll, place a Circular Template [[term:white-noise-zone|White Noise Zone]] fully inside the user's Hacking Area until the start of the States Phase."
+                    "On a successful Normal WIP Roll, place a Circular Template [[term:white-noise-zone|White Noise Zone]] fully inside the user's Hacking Area until the start of the States Phase.",
+                    "While this Template remains on the table, White Noise's NFB Label prevents the [[skill:hacker]] who created it from using or applying other NFB Skills, Equipment, or Hacking Programs. This restriction ends when the Template is removed, and does not extend to other Troopers."
                 ],
                 "restrictions": [
                     "Troopers with [[equipment:multispectral-visor]] or [[skill:marksmanship]] cannot draw Line of Fire through the [[term:white-noise-zone|White Noise Zone]]."

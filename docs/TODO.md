@@ -394,7 +394,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       qualifying Dodge, Engaged exit position, cumulative Reset State MODs,
       and the Sixth Sense exception; verify the Dodge, Reset, Engaged and
       Bangbomb browser cards. REA-015 now has source-cited State-specific cancellation explanations, pending browser review; REA-026 remains separate.
-      Targeted MSV1/Sixth Sense FAQ questions (REA-019) stay separate.
+      The shared Negative Feedback Label now explains Trooper-local replacement and
+      duration; Cybermask and White Noise explain when their own NFB restrictions apply
+      (REA-019). Verify all three player-facing cards and Label-to-Program navigation
+      in a real browser before closing that finding. Targeted MSV1/Sixth Sense FAQ
+      questions remain a separate source-review task (REA-030).
       Common Supportware rules (REA-018) remain separate work.
       Separately decide source conflicts and FAQ applicability before dependent curation.
       Use the [source manifest](rules-explanation-audit-1.0-sources.md) and

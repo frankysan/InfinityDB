@@ -7,6 +7,19 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
+## [Unreleased]
+
+### Player summary
+
+- Negative Feedback (NFB) now explains which effects it overrides on a Trooper and
+  how long Cybermask and White Noise restrict other NFB effects.
+
+### Changed
+
+- **Data processing:** Clarify the one-active-NFB-effect rule and the separate
+  Cybermask/White Noise lifetimes in the linked Label and Hacking Program references.
+  Other Troopers' NFB effects remain independent.
+
 ## [0.10.1] - 2026-10-10
 
 ### Player summary

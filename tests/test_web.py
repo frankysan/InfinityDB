@@ -4711,6 +4711,17 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     assert len(labels) == 24
     assert labels["hackable"]["name"] == "Hackable"
 
+    status, _, body = request(rules_app, "/api/labels/negative-feedback")
+    assert status == 200
+    nfb = json.loads(body)
+    assert "same Trooper" in nfb["description"]
+    assert "cancels and overrides" in nfb["description"]
+    assert "Only one NFB effect" in nfb["description"]
+    assert {item["href"] for item in nfb["used_by"]} >= {
+        "/hacking-programs/cybermask",
+        "/hacking-programs/white-noise",
+    }
+
     status, _, body = request(rules_app, "/api/labels/non-reloadable")
     assert status == 200
     label = json.loads(body)

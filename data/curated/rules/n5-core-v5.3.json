@@ -187,7 +187,7 @@
         {
             "id": "negative-feedback",
             "name": "Negative Feedback (NFB)",
-            "description": "The Skill or Equipment is incompatible with another element having the same Label or Trait."
+            "description": "Activating a Skill, Equipment, Hacking Program, or special rule with NFB cancels and overrides any other active NFB effects on the same Trooper. Only one NFB effect can be active on that Trooper at a time. The new restriction ends when its effect is canceled or voluntarily deactivated; other Troopers are not affected."
         },
         {
             "id": "no-lof",
