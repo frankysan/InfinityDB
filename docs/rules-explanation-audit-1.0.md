@@ -947,8 +947,9 @@ content/links and future validation; no such edits made here.
 General Rules baselines, with BS/CC Attack cross-references and source citations.
 Guts Rolls now have a linked baseline for the N5.3 attacker-position check,
 movement priorities and key Skill exceptions. The Order Expenditure Sequence
-now covers declaration timing and the simultaneous-effects rule. Coordinated
-Orders still lack a canonical player-facing baseline. The current published rules catalog includes other
+now covers declaration timing and simultaneous effects. Coordinated Orders
+now have a linked baseline for Spearhead, Burst, targets and key exceptions;
+real-browser acceptance and remaining source review are still open. The current published rules catalog includes other
 scoped references such as Fireteam and Order rules; source research is not itself
 an ordinary player-facing reference.
 

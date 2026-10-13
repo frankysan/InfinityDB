@@ -412,7 +412,9 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       exceptions; verify its linked browser cards. The Order Expenditure
       Sequence now covers declaration choices, two ARO checks, Requirements
       timing and simultaneous effects; verify the linked browser references.
-      Coordinated Orders remain open within REA-026.
+      Coordinated Orders now have a source-cited linked baseline for Spearhead,
+      Burst, reactive targeting, recovery, Hacking and Special Dice; verify the
+      browser card and links before closing REA-026.
       Hacking Area, Firewall and Supportware (REA-018) now have linked, published
       baseline cards. Verify enemy-Repeater ARO scope and 8-inch checks, disabled
       Hacking Device Firewall, and whole-Program Fairy Dust replacement in a real

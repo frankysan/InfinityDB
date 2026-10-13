@@ -310,6 +310,52 @@ def test_order_expenditure_sequence_mechanics_are_composed(
         assert "[[rule:order-expenditure-sequence|Order Expenditure Sequence]]" in json.dumps(entry)
 
 
+def test_coordinated_orders_baseline_and_cross_references(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record("rule:coordinated-orders")
+    assert record is not None
+    assert record["facts"]["category"] == "basic-rule"
+    prose = " ".join(
+        fragment
+        for section in ("requirements", "effects", "restrictions", "clarifications")
+        for fragment in record["facts"][section]
+    )
+    for expected in (
+        "one Command Token and one Regular Order",
+        "same Training (Regular or Irregular)",
+        "Spearhead uses half",
+        "Every other participating Trooper has Burst 1",
+        "different reactive Troopers may choose different targets",
+        "[[skill:idle|Idle]]",
+        "[[skill:cc-attack|CC Attack]]",
+        "[[skill:doctor|Doctor]]",
+        "[[equipment:medikit|MediKit]]",
+        "[[skill:engineer|Engineer]]",
+        "[[trait:targetless|Targetless]]",
+        "[[rule:special-dice|Special Dice (+1 SD)]]",
+        "[[state:hidden-deployment|Hidden Deployment]]",
+    ):
+        assert expected in prose
+    assert {
+        (citation["source_id"], citation.get("page"))
+        for citation in record["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 129),
+        ("n5-core-v5.3-pdf", 130),
+        ("n5-faq-v0.1-en-pdf", 3),
+    }
+    for linked in (
+        "rule:order-expenditure-sequence", "rule:special-dice",
+        "skill:bs-attack", "skill:cc-attack", "skill:doctor",
+        "skill:engineer", "equipment:medikit", "equipment:gizmokit",
+        "skill:hacker", "rule:fireteam-general",
+    ):
+        source = current_rules_database.composed_record(linked)
+        assert source is not None, linked
+        assert "[[rule:coordinated-orders|Coordinated Orders]]" in json.dumps(source), linked
+
+
 def test_escape_system_threshold_help_refers_to_the_unit_profile(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -377,7 +423,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 380
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 381
         assert connection.execute(
             "SELECT id, title FROM scenario_collections"
         ).fetchone() == ("n5-core", "N5 Core Scenarios")

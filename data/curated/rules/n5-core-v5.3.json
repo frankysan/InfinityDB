@@ -6961,6 +6961,9 @@
                     "Self-use can cancel applicable conditions only while the user is not in a Null State; [[skill:no-wound-incapacitation|No Wound Incapacitation]] and [[skill:technorganic|Technorganic]] have explicit recovery exceptions.",
                     "Direct-use target allegiance remains under source review; the Allied-only requirement for [[equipment:medikit]] is not a general Doctor rule. Ordinary [[state:engaged|Engaged]] restrictions still apply.",
                     "When the same Order removes and inflicts Wounds or conditions, resolve the positive effect first, then the negative effect (N5.3 p. 15)."
+                ],
+                "clarifications": [
+                    "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful recovery Roll is sufficient under the shared success rule."
                 ]
             },
             "labelIds": [
@@ -7033,6 +7036,9 @@
                     "Self-use is permitted to repair Wounds or cancel applicable conditions only while the user is not in a Null State.",
                     "Direct-use target allegiance remains under source review; the Allied-only requirement for [[equipment:gizmokit]] does not establish a universal Engineer restriction. Ordinary [[state:engaged|Engaged]] restrictions still apply.",
                     "If a condition is canceled and a new one inflicted in the same Order, apply cancellation first, then the new effect. For example, canceling [[state:immobilized-a|IMM-A]] does not prevent a simultaneous failed [[ammunition:para|PARA]] Saving Roll from inflicting that condition again (N5.3 p. 15)."
+                ],
+                "clarifications": [
+                    "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful Roll makes the coordinated use successful."
                 ]
             },
             "labelIds": [
@@ -8101,7 +8107,8 @@
                 ],
                 "clarifications": [
                     "When a target's action directly opposes this Attack, resolve [[rule:face-to-face-rolls|Face to Face Rolls]]; otherwise make independent, unopposed Rolls. Uncanceled hits use [[rule:saving-rolls|Saving Rolls]] as specified by the weapon.",
-                    "Declare the chosen weapon or mode, targets, firing position, and Burst allocation before Resolution. The shared [[rule:order-expenditure-sequence|Order Expenditure Sequence]] defines when Requirements are checked."
+                    "Declare the chosen weapon or mode, targets, firing position, and Burst allocation before Resolution. The shared [[rule:order-expenditure-sequence|Order Expenditure Sequence]] defines when Requirements are checked.",
+                    "During [[rule:coordinated-orders|Coordinated Orders]], participants may choose different BS Weapons but must share the required target; Burst and reactive targeting are restricted."
                 ]
             },
             "labelIds": [
@@ -8281,7 +8288,8 @@
                     "The selected item's effects and close-combat rules limit the attack."
                 ],
                 "clarifications": [
-                    "Opposing Close Combat actions use [[rule:face-to-face-rolls|Face to Face Rolls]] when they directly affect one another. An uncanceled damaging hit then uses the weapon's [[rule:saving-rolls|Saving Rolls]]."
+                    "Opposing Close Combat actions use [[rule:face-to-face-rolls|Face to Face Rolls]] when they directly affect one another. An uncanceled damaging hit then uses the weapon's [[rule:saving-rolls|Saving Rolls]].",
+                    "In [[rule:coordinated-orders|Coordinated Orders]], only the Spearhead makes the attack, gaining +1 Burst for each participating ally in Silhouette contact."
                 ]
             },
             "labelIds": [
@@ -12005,6 +12013,9 @@
                     "If several GizmoKit hits/uses succeed in the same Order, any one successful target PH Roll removes only one Wound in total, even if several PH Rolls succeed.",
                     "Self-use is possible to remove Wounds or cancel applicable conditions only outside a Null State. With [[skill:remote-presence|Remote Presence]], one successful PH Roll removes enough Wounds to cancel either level of [[state:unconscious|Unconscious State]]. A target's printed GizmoKit PH value takes precedence when specified.",
                     "When fired as a [[skill:bs-attack|BS Weapon]], an applicable Fireteam +1 SD adds a die and discards one without consuming another use; see [[rule:special-dice|Special Dice]]. It does not change the target's separate PH recovery Rolls."
+                ],
+                "clarifications": [
+                    "When coordinated users apply the same recovery to one target, [[rule:coordinated-orders|Coordinated Orders]] use any-success resolution, without adding Wound recovery per successful Roll."
                 ]
             },
             "armyLinks": [
@@ -12295,6 +12306,9 @@
                     "If several MediKit hits/uses succeed in the same Order, any one successful target PH Roll is enough to recover; even if multiple PH Rolls succeed, only one Wound is removed in total.",
                     "Self-use can cancel applicable conditions only outside a Null State; a PH value printed with MediKit on a target's Unit Profile replaces that target's PH for this Roll.",
                     "When fired as a [[skill:bs-attack|BS Weapon]], an applicable Fireteam +1 SD adds a die and discards one without consuming another use; see [[rule:special-dice|Special Dice]]. It does not change the target's separate PH recovery Rolls."
+                ],
+                "clarifications": [
+                    "During [[rule:coordinated-orders|Coordinated Orders]], multiple eligible users acting on the same target succeed if any qualifying target Roll succeeds; this does not restore an extra Wound per success."
                 ]
             },
             "armyLinks": [
@@ -16998,7 +17012,10 @@
                     "The Hacker Special Skill remains active while its owner is in a Null State.",
                     "The [[skill:hacker]]'s [[rule:hacking-area]] controls ordinary Hacking Program range and can be extended by allied [[equipment:repeater:plural]]. Using enemy [[equipment:repeater:plural]] has additional target restrictions; each Program retains its own Requirements."
                 ],
-                "restrictions": []
+                "restrictions": [],
+                "clarifications": [
+                    "Coordinated Hacking under [[rule:coordinated-orders|Coordinated Orders]] requires all participants to declare the same Hacking Program and use the same target if that Program requires one."
+                ]
             },
             "labelIds": [
                 "obligatory"
@@ -17079,7 +17096,8 @@
                     "The Army's Fireteams Chart determines how many Fireteams of each Type may exist and which Troopers or options may form them.",
                     "Members must observe Coherency with the Fireteam Leader, belong to the same Combat Group, and a Trooper cannot simultaneously belong to more than one Fireteam.",
                     "Spending a Regular Order on a Fireteam member makes that Trooper the Fireteam Leader and activates the other members of the Fireteam.",
-                    "Army-chart conditions and notes can modify or override the general Fireteam rules. The Type does not change when members leave or are lost; minimum size and other composition conditions normally apply when creating the Fireteam, except where a rule such as [[skill:ft-master|FT Master]] requires otherwise."
+                    "Army-chart conditions and notes can modify or override the general Fireteam rules. The Type does not change when members leave or are lost; minimum size and other composition conditions normally apply when creating the Fireteam, except where a rule such as [[skill:ft-master|FT Master]] requires otherwise.",
+                    "Fireteam members cannot take part in [[rule:coordinated-orders|Coordinated Orders]] while they remain members of a Fireteam."
                 ],
                 "terminology": [
                     {
@@ -20350,7 +20368,8 @@
                     "For example, a B4 [[skill:bs-attack|BS Attack]] with +1 SD rolls five dice and discards one, leaving B4 to resolve. If that B4 is split between two targets, the extra die and its discard both belong to just one target.",
                     "The Fireteam Level 2 bonus supplies +1 SD to [[skill:bs-attack]], including ranged [[equipment:medikit|MediKit]] and [[equipment:gizmokit|GizmoKit]] attacks, but not [[skill:discover]]. Level 4 separately adds +1 to the Attribute used by a [[skill:bs-attack|BS Attack]], including [[trait:bs-weapon-ph|PH]] or [[trait:bs-weapon-wip|WIP]] weapons; it also does not apply to [[skill:discover]].",
                     "[[skill:martial-arts]] Levels 3 and 5 grant +1 SD during [[skill:cc-attack|CC Attack]]; Level 5 also grants +1B. The extra SD die is still discarded, while +1B changes the actual Burst.",
-                    "The N5 v0.1 FAQ confirms that SD MODs still apply in Coordinated Orders because they do not alter Burst."
+                    "The N5 v0.1 FAQ confirms that SD MODs still apply in Coordinated Orders because they do not alter Burst.",
+                    "The N5 v0.1 FAQ confirms [[rule:coordinated-orders|Coordinated Orders]] retain +1 SD: it does not change Burst, so the Spearhead's reduced Burst and the extra die remain separate."
                 ]
             },
             "citations": [
@@ -20564,7 +20583,8 @@
                 "clarifications": [
                     "All [[trait:aro|AROs]] resolve simultaneously. For instance, Reactive Troopers cannot declare [[skill:discover|Discover]] with one and condition a later [[skill:bs-attack|BS Attack]] by another on the first Trooper's Roll succeeding.",
                     "Even if the Active Trooper shoots at the start of a [[skill:move|Move]] and an enemy shoots at the end of that movement, the Attacks are simultaneous. Opposition is determined by the shared [[rule:face-to-face-rolls|Face to Face Rolls]] rules, not declaration order.",
-                    "When a Trooper removes and receives an adverse condition in the same Order, apply the positive effect first. For example, an [[skill:engineer|Engineer]] may cancel [[state:immobilized-a|Immobilized-A]] before a simultaneous hit with [[ammunition:para|PARA Ammunition]] can inflict it again."
+                    "When a Trooper removes and receives an adverse condition in the same Order, apply the positive effect first. For example, an [[skill:engineer|Engineer]] may cancel [[state:immobilized-a|Immobilized-A]] before a simultaneous hit with [[ammunition:para|PARA Ammunition]] can inflict it again.",
+                    "When several Troopers activate together, use [[rule:coordinated-orders|Coordinated Orders]] for their shared Skill declarations, Spearhead and restricted [[trait:aro|ARO]] targets."
                 ]
             },
             "citations": [
@@ -20577,6 +20597,76 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 15,
                     "section": "Declaration Requirements and Simultaneous Effects"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "rule:coordinated-orders",
+            "kind": "rule",
+            "name": "Coordinated Orders",
+            "aliases": [
+                "Coordinated Order"
+            ],
+            "summary": "A Coordinated Order lets up to four eligible Troopers act together for one Command Token and one Regular Order from their shared Combat Group. Declare one participant as Spearhead; everyone declares the same sequence of Skills.\n\nReacting Troopers each choose only one of the activated Troopers as their target, while the coordinated Troopers must share a single target whenever their Skill requires one.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "During the Orders Phase of the Active Turn, spend one Command Token and one Regular Order from the participating Troopers' Combat Group. Select no more than four Troopers, all in that Combat Group and with the same Training (Regular or Irregular).",
+                    "Name one participating Trooper as Spearhead and place a Spearhead Token beside them. All participants must declare the same sequence of Skills. When a declared Skill requires a Trooper, Marker, or mission objective as target, select one common target."
+                ],
+                "effects": [
+                    "The Spearhead uses half the indicated Burst, including applicable bonuses, rounded up. Every other participating Trooper has Burst 1, regardless of the original weapon, Equipment, or Skill profile.",
+                    "Each reactive Trooper can target only one of the coordinated Troopers with their [[trait:aro|ARO]], but different reactive Troopers may choose different targets. A [[skill:dodge|Dodge]] or [[skill:reset|Reset]] by a target opposes each applicable Attack Roll under [[rule:face-to-face-rolls|Face to Face Rolls]].",
+                    "A participant that does not meet a declared Skill's Requirements performs [[skill:idle|Idle]] instead; eligible participants continue normally. Remove the Spearhead Token after the Order.",
+                    "For a coordinated [[skill:cc-attack|CC Attack]], only the Spearhead makes the Attack; add +1 Burst for each allied participating Trooper in Silhouette contact with the target."
+                ],
+                "restrictions": [
+                    "Members of a Fireteam, Controllers, and their [[term:peripheral|Peripherals]] cannot participate in Coordinated Orders.",
+                    "Participants may perform the same Skill using different weapons or options. [[skill:speculative-attack|Speculative Attack]] and [[skill:intuitive-attack|Intuitive Attack]] are separate Skills, so they cannot replace a coordinated [[skill:bs-attack|BS Attack]] declaration.",
+                    "When coordinating Hacking Programs, every participant uses the same Program, and the same single target if a target is required. When activating a game condition, every participant activates the same condition.",
+                    "Troopers in [[state:hidden-deployment|Hidden Deployment]] or entering from off-table using Airborne Deployment may participate, but lose their own Order for that Turn."
+                ],
+                "clarifications": [
+                    "For a coordinated [[skill:bs-attack|BS Attack]], each Trooper may choose a different eligible weapon while attacking the same required target. The reactive target opposes only the Attack from the one coordinated Trooper it chose, while other eligible participants make unopposed Rolls.",
+                    "If multiple participants apply [[skill:doctor|Doctor]], [[equipment:medikit|MediKit]], or [[skill:engineer|Engineer]] to one shared target, any successful Roll makes that Skill or Equipment use successful. Use each item's own Roll and consequences; this does not create extra recovery per successful die.",
+                    "Weapons and Equipment with [[trait:targetless|Targetless]] or [[trait:deployable|Deployable]] Traits need not choose the same point on the game table, even though participants declare the same Skill sequence.",
+                    "The September 2026 FAQ confirms that [[rule:special-dice|Special Dice (+1 SD)]] still apply during Coordinated Orders because they do not change Burst. The extra die is rolled and discarded under the standard Special Dice procedure, not counted when calculating the Spearhead's halved Burst.",
+                    "A reactive Trooper choosing a [[state:camouflaged|Camouflaged]] Marker may delay its [[trait:aro|ARO]] where allowed; the subsequent declaration determines whether that chosen Marker reveals itself and allows an actual reaction."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 129,
+                    "section": "Coordinated Order"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 130,
+                    "section": "Coordinating Skills and Exceptions"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 131,
+                    "section": "Coordinated Order Examples"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 3,
+                    "section": "Special Dice during Coordinated Orders"
                 }
             ],
             "review": {

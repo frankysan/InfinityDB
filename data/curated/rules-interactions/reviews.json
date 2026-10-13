@@ -1975,6 +1975,41 @@
       "status": "reviewed",
       "reviewedOn": "2026-10-13",
       "note": "Shared N5.3 SD resolution, Fireteam/CC applicability and Berserk exception are source-cited prose; no universal Burst or Disposable relation is inferred."
+    },
+    {
+      "recordId": "rule:face-to-face-rolls",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p.25 baseline for opposed successes, ties and Criticals; linked mechanics do not infer generic Attack resolution edges."
+    },
+    {
+      "recordId": "rule:saving-rolls",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p.37 baseline for PS, defense and Critical Saving Rolls; Profile-specific Ammunition exceptions remain separate reviewed facts."
+    },
+    {
+      "recordId": "rule:guts-roll",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p.38 baseline for Guts timing, movement hierarchy and exception-scoped linked references; no state-transition evaluator is implied."
+    },
+    {
+      "recordId": "rule:order-expenditure-sequence",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 pp.14-15 declaration, ARO checks, requirements and simultaneous effects; descriptive timing links do not implement a universal declaration evaluator."
+    },
+    {
+      "recordId": "rule:coordinated-orders",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 pp.129-131 and N5 FAQ v0.1 p.3 baseline for Command Token cost, Spearhead, Burst, targeting, recovery, Hacking and Special Dice; no unqualified simulation relations."
     }
   ],
   "futureInteractions": [

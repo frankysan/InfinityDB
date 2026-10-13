@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Coordinated Orders now have a linked reference covering Spearhead, shared
+  declarations, Burst, reactive targets, recovery and Hacking exceptions.
 - The Order Expenditure Sequence now explains declaration choices, both ARO
   checks, Resolution timing, invalid declarations and simultaneous effects.
 - A new Guts Roll reference explains when to roll, the order of withdrawal
@@ -28,6 +30,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web backend:** Publish a Coordinated Orders reference
+  explaining shared Skill choices, reactive targeting, Burst adjustments and
+  recovery and Special Dice exceptions, linked from relevant references.
 - **Data processing + Web backend:** Publish a shared Order Expenditure Sequence
   reference and link it from commonly declared Skills, Guts Rolls and Disposable
   uses, including declaration-time exceptions and simultaneous recovery timing.
