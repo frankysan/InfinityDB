@@ -134,6 +134,27 @@ def test_triage_fails_closed_on_inconsistent_evidence(
         reconcile(coverage, chart, categories, "a" * 64)
 
 
+def test_reviewed_historical_comparison_remains_visible_but_not_pending() -> None:
+    coverage, chart, categories = _reports()
+    flash = coverage["domains"]["weapons"]["items"][-1]
+    flash["gapClassifications"] = [{
+        "code": "stale_citation_source",
+        "classification": "intentional-omission",
+        "source": "override",
+        "reason": "N5.2 is historical comparison evidence; current PDFs are authoritative.",
+    }]
+    report = reconcile(coverage, chart, categories, "a" * 64)
+    assert report["summary"]["dispositions"]["reviewed-historical-citation"] == 1
+    assert "stale-rule-citation" not in report["summary"]["dispositions"]
+    reviewed = [
+        batch for batch in report["batches"]
+        if batch["disposition"] == "reviewed-historical-citation"
+    ]
+    assert len(reviewed) == 1
+    assert reviewed[0]["weaponNames"] == ["Flash Pulse"]
+    assert "separate unresolved publication conflict" in reviewed[0]["evidenceRequirement"]
+
+
 def test_triage_batches_are_deterministic_and_bounded() -> None:
     coverage, chart, categories = _reports()
     template = deepcopy(coverage["domains"]["weapons"]["items"][0])

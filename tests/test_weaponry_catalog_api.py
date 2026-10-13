@@ -308,6 +308,42 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
     assert profiles[203]["burst"] == "1"
 
 
+def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "symbiobomb")
+    assert payload["name"] == "SymbioBomb"
+    assert payload["profiles"] == []
+    assert payload["weapon_variants"] == []
+    assert set(_weapon_rules(payload)) == {"weapon:symbiobomb"}
+    rule = _weapon_rules(payload)["weapon:symbiobomb"]
+    assert "During Deployment" in rule["summary"]
+    assert "Endgame, Eraser, or Mirrorball" in rule["summary"]
+    assert "this MOD does not apply to Mirrorball" in rule["summary"]
+    assert "at the end of the Order" in rule["summary"]
+    assert "no separate attack profile" in rule["summary"]
+    assert {
+        (citation["source_id"], citation["page"])
+        for citation in rule["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+    } == {("n5-core-v5.3-pdf", 74)}
+    assert any(
+        citation["source_id"] == "wiki-en-20260926-200832"
+        and citation["member"] == "SymbioBomb"
+        for citation in rule["citations"]
+    )
+    assert any(
+        relation["record"]["id"] == "weapon:pt"
+        and relation["direction"] == "outbound"
+        for relation in rule["display_relations"]
+    )
+    assert any(
+        token.get("target") == "weapon:pt"
+        and token["type"] == "reference"
+        for token in rule["summary_tokens"]
+    )
+
+
 def test_para_mine_has_own_reference_without_rewriting_source_marker(
     weaponry_app: Callable,
 ) -> None:

@@ -938,6 +938,13 @@
       "note": "Uses the shared Mine mechanics but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose."
     },
     {
+      "recordId": "weapon:symbiobomb",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 74 and the archived English Wiki distinguish the listed owner from the Deployment-assigned user. The single use permits Endgame, Eraser or Mirrorball; the -3 target MOD applies only to Endgame/Eraser. Only the selected Pheroware Tactic supplies attack-profile facts; no stand-alone SymbioBomb chart statistics or lasting assignment relationship are inferred."
+    },
+    {
       "recordId": "weapon:chest-mine",
       "targetRelease": "1.0.0",
       "status": "reviewed",

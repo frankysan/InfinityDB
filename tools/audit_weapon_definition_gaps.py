@@ -107,7 +107,13 @@ def reconcile(
         elif codes == ["ambiguous_family_mapping"]:
             kind = "ambiguous-rule-mapping"
         elif codes == ["stale_citation_source"]:
-            kind = "stale-rule-citation"
+            accepted = any(
+                decision["code"] == "stale_citation_source"
+                and decision["classification"] == "intentional-omission"
+                and decision["source"] == "override"
+                for decision in item.get("gapClassifications", [])
+            )
+            kind = "reviewed-historical-citation" if accepted else "stale-rule-citation"
         else:
             raise WeaponGapTriageError(f"Unclassified gap codes for {weapon_id}: {codes}")
         results.append({
@@ -136,6 +142,7 @@ def reconcile(
     for disposition in (
         "ambiguous-rule-mapping",
         "stale-rule-citation",
+        "reviewed-historical-citation",
         "outside-chart-review",
         "definition-review",
     ):
@@ -162,6 +169,10 @@ def reconcile(
                     "evidenceRequirement": (
                         "Review conflicting rule mappings or citations and check visible links."
                         if disposition in {"ambiguous-rule-mapping", "stale-rule-citation"}
+                        else "Historical comparison accepted for this source revision; preserve "
+                        "the separate unresolved publication conflict and current "
+                        "primary citations."
+                        if disposition == "reviewed-historical-citation"
                         else "Find separately scoped primary source text before rule curation."
                         if disposition == "outside-chart-review"
                         else "Compare chart profiles and applicable rules; verify existing "

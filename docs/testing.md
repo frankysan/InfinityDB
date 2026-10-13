@@ -473,9 +473,17 @@ alignment, and invalid coverage or PDF report identities. It reports separate
 cases for chart-listed Weapons without a standalone curated definition, stale
 citations, ambiguous mappings, and identities not located on the PDF chart.
 Batches use the Army source category and catalog use count and contain at most
-eight Weapon identities. A chart identity does **not** verify rules prose, typed
-relationships, exact profile modes or usable browser presentation. Generated
-reports and third-party source inputs remain local and Git-ignored.
+eight Weapon identities. Explicitly reviewed historical-comparison citations
+are shown separately from unresolved stale citations; this does not decide
+any remaining cross-publication rules conflict. Shared and specific Weapon
+rules linked through a unique, acyclic `uses-effects-of` hierarchy are
+intentional layering, not ambiguous family mappings. Unrelated overlapping
+definitions and cycles still fail the mapping audit. A chart identity does
+**not** verify rules prose, typed relationships, exact profile modes or usable
+browser presentation. SymbioBomb has its own N5.3 Weaponry prose on p. 74,
+not an independent chart profile; its curated reference describes use without
+inventing one. Generated reports and third-party source inputs remain
+local and Git-ignored.
 
 ## 1.0 Weapon Traits and special-weapon source inventory
 

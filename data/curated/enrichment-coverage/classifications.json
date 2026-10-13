@@ -55,6 +55,14 @@
       "gapCode": "missing_rule_definition",
       "classification": "later-product-work",
       "reason": "Commlink is owned by the separately versioned Reinforcements Extra planned for the 1.0 completeness gate, so its missing definition is intentionally deferred from 0.10."
+    },
+    {
+      "scope": "catalog",
+      "catalog": "weapons",
+      "itemId": 72,
+      "gapCode": "stale_citation_source",
+      "classification": "intentional-omission",
+      "reason": "Flash Pulse cites Spanish Immunity oldid 3677 (N5.2) only as explicitly identified historical comparison evidence. Current N5.3 English/Spanish rules PDFs and English Weapon Chart establish the published one-BTS-roll behavior. Preserve the historical citation and the separately unresolved Spanish N5.3 Wiki Weapon Chart conflict (REA-027); do not present this older citation as current primary authority."
     }
   ]
 }

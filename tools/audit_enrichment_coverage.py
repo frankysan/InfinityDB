@@ -378,6 +378,47 @@ def _rules_index(path: Path) -> tuple[dict[str, dict[str, Any]], dict[tuple[str,
     return records, links
 
 
+def _layered_family_root(
+    candidate_ids: set[str], records: dict[str, dict[str, Any]]
+) -> str | None:
+    """Find an explicit one-to-many uses-effects-of rule hierarchy.
+
+    An unrelated overlap or a cycle must remain an ambiguous mapping.
+    """
+    if len(candidate_ids) < 2:
+        return None
+    if len({records[record_id]["kind"] for record_id in candidate_ids}) != 1:
+        return None
+    edges = {
+        record_id: {
+            relation["recordId"] for relation in records[record_id]["relations"]
+            if relation["type"] == "uses-effects-of"
+            and relation["recordId"] in candidate_ids
+        }
+        for record_id in candidate_ids
+    }
+
+    def reachable(start: str) -> set[str]:
+        found: set[str] = set()
+        pending = list(edges[start])
+        while pending:
+            target = pending.pop()
+            if target in found:
+                continue
+            found.add(target)
+            pending.extend(edges[target] - found)
+        return found
+
+    closures = {record_id: reachable(record_id) for record_id in candidate_ids}
+    if any(record_id in reach for record_id, reach in closures.items()):
+        return None
+    roots = [
+        record_id for record_id, reach in closures.items()
+        if reach == candidate_ids - {record_id}
+    ]
+    return roots[0] if len(roots) == 1 else None
+
+
 def _record_gap_codes(record: dict[str, Any]) -> list[str]:
     gaps: list[str] = []
     reviews = record.get("reviewContributions", [])
@@ -515,7 +556,8 @@ def audit_coverage(
                                 exact_candidates.setdefault(ref, []).append(record_id)
                             elif inheritance != "source":
                                 family_candidates.add(record_id)
-                    if len(family_candidates) > 1:
+                    layered_root = _layered_family_root(family_candidates, records)
+                    if len(family_candidates) > 1 and layered_root is None:
                         gap_codes.add("ambiguous_family_mapping")
                     ambiguous_sources = {
                         source_id: sorted(set(record_ids))
@@ -531,6 +573,8 @@ def audit_coverage(
                             for source_id, record_ids in sorted(exact_candidates.items())
                         },
                     }
+                    if layered_root is not None:
+                        mapping["layeredFamilyRootId"] = layered_root
                     if ambiguous_sources:
                         mapping["ambiguousSourceRecordIds"] = {
                             str(key): value for key, value in ambiguous_sources.items()

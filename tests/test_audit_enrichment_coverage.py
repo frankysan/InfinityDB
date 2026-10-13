@@ -13,10 +13,81 @@ from infinity_db.rules_database import export_rules_database
 from tools.audit_enrichment_coverage import (
     DEFAULT_CLASSIFICATION_PATH,
     EnrichmentCoverageAuditError,
+    _catalog_gap_classification,
+    _layered_family_root,
+    _load_classification_policy,
     _record_gap_codes,
+    _rules_index,
     audit_coverage,
     main,
 )
+
+
+def test_existing_mine_family_layers_are_not_ambiguous(tmp_path: Path) -> None:
+    records, _ = _rules_index(_fixture_rules(tmp_path))
+    for specific in ("weapon:cybermine", "weapon:para-mine"):
+        family = {specific, "weapon:mines"}
+        assert _layered_family_root(family, records) == specific
+        assert {
+            (link["type"], link["recordId"])
+            for link in records[specific]["relations"]
+        } >= {("uses-effects-of", "weapon:mines")}
+
+
+def test_family_layering_does_not_hide_unrelated_or_cyclic_mappings() -> None:
+    def record(*targets: str) -> dict:
+        return {
+            "kind": "weapon",
+            "relations": [
+                {"type": "uses-effects-of", "recordId": target}
+                for target in targets
+            ],
+        }
+
+    records = {
+        "weapon:shared": record(),
+        "weapon:variant-a": record("weapon:shared"),
+        "weapon:variant-b": record("weapon:shared"),
+    }
+    assert _layered_family_root(
+        {"weapon:shared", "weapon:variant-a"}, records
+    ) == "weapon:variant-a"
+    assert _layered_family_root(
+        {"weapon:shared", "weapon:variant-a", "weapon:variant-b"}, records
+    ) is None
+    assert _layered_family_root(
+        {"weapon:variant-a", "weapon:variant-b"}, records
+    ) is None
+    records["weapon:shared"] = record("weapon:variant-a")
+    assert _layered_family_root(
+        {"weapon:shared", "weapon:variant-a"}, records
+    ) is None
+
+
+def test_flash_pulse_historical_citation_is_explicitly_accepted(
+    tmp_path: Path,
+) -> None:
+    records, _ = _rules_index(_fixture_rules(tmp_path))
+    flash = records["weapon:flash-pulse"]
+    assert _record_gap_codes(flash) == ["stale_citation_source"]
+    assert any(
+        citation["source_id"] == "wiki-es-immunity-oldid-3677"
+        and citation["source_version"].startswith("N5.2")
+        for citation in flash["citations"]
+    )
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["source_version"] == "5.3"
+        for citation in flash["citations"]
+    )
+    policy = _load_classification_policy(DEFAULT_CLASSIFICATION_PATH)
+    matched: set[tuple[str, ...]] = set()
+    decision = _catalog_gap_classification(
+        policy, matched, "weapons", 72, "stale_citation_source"
+    )
+    assert decision["classification"] == "intentional-omission"
+    assert decision["source"] == "override"
+    assert "REA-027" in decision["reason"]
 
 
 def _fixture_database(tmp_path: Path) -> Path:

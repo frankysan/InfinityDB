@@ -4660,6 +4660,53 @@
             }
         },
         {
+            "id": "weapon:symbiobomb",
+            "kind": "weapon",
+            "name": "SymbioBomb",
+            "summary": "SymbioBomb is a single-use Weapon listed on its owner's Unit Profile. During Deployment, its owner assigns it to another Trooper in the same Army; that Trooper becomes the user. The assignment does not transfer the owner's Unit Profile entry.\n\nBy spending one Short Skill or [[trait:aro|ARO]], the user may use one of these [[weapon:pt|Pheroware Tactics]]: Endgame, Eraser, or Mirrorball. With Endgame or Eraser, the target receives a -3 MOD in any Face to Face Roll against this Comms Attack; this MOD does not apply to Mirrorball.\n\nRemove the SymbioBomb at the end of the Order in which it was used. The SymbioBomb has its own use and assignment rules, but no separate attack profile in the Weapon Chart: refer to the chosen Pheroware Tactic for its profile and effects.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "symbiobomb"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "weapon:pt"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 74,
+                    "section": "SymbioBomb"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "SymbioBomb",
+                    "heading": "SymbioBomb"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
             "id": "weapon:chest-mine",
             "kind": "weapon",
             "name": "Chest Mine",

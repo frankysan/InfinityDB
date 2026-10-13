@@ -113,8 +113,9 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [x] Re-run the 1.0 source-input audit using separate English and Spanish
     Wiki history archives and the September 26 curated Wiki capture. All 110
     currently published `oldid` identities verify against language-matched history
-    payloads; 76 curated citation/vocabulary references resolve to 64 pages with
-    all 76 headings and history-page revision IDs verified. The audit checks exact
+    payloads; the refreshed capture audit now resolves 77 curated
+    citation/vocabulary references across 65 pages (including SymbioBomb)
+    with all 77 headings and page revision IDs verified. The audit checks exact
     local archive hashes, but does not establish historical content equivalence,
     rules correctness or browser completeness.
   - [x] Replace the unavailable September 18 English Wiki citation snapshot with
@@ -304,7 +305,7 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       links, citation rendering, and both Chest Mine modes; then reconcile any
       resulting navigation/presentation defects. Source-backed API enrichment
       alone does not establish browser acceptance.
-    - [x] Reconcile the current 119 unresolved Army Weapon enrichment entries
+    - [x] Reconcile the initial 119 unresolved Army Weapon enrichment entries
       against the exact N5 v5.3 PDF chart evidence and retained catalog categories
       using `tools/audit_weapon_definition_gaps.py`. The pinned Army database
       and 171 compared chart rows agree on the source identity. Results:
@@ -313,13 +314,31 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       1 stale citation source (Flash Pulse), and 1 chart-absent source identity
       (SymbioBomb). This is source/profile availability evidence, **not**
       115 verified missing gameplay facts or completed browser coverage.
-      The deterministic 29 review batches are generated under ignored `local/audits/`.
-    - [ ] Review the three existing-reference issues first: classify intentional
-      family/variant layering versus ambiguous mapping for Cybermine/PARA Mine,
-      and reconcile Flash Pulse's citation with the applicable N5.3 revision.
-      Preserve verified rules and explain conflicts rather than removing links.
-    - [ ] Investigate SymbioBomb's identity and separately scoped source
-      representation before assuming it should have a normal Weapon Chart row.
+      The initial 29 review batches were generated under ignored `local/audits/`;
+      subsequent fixes reduced the current total as recorded below.
+    - [x] Reconcile the original three existing-reference flags. Cybermine and
+      PARA Mine intentionally layer specific effects over `weapon:mines` through
+      `uses-effects-of`; the coverage audit now recognizes a unique, acyclic
+      specific-to-shared chain while retaining both cards and rejecting unrelated
+      overlaps. Flash Pulse retains the reviewed Spanish N5.2 Immunity revision
+      as comparative evidence, with a narrow accepted-historical-source policy
+      override; the distinct Spanish N5.3 Wiki Weapon Chart conflict (REA-027)
+      remains open. Neither rule text nor upstream Army profiles were rewritten.
+    - [x] Publish a standalone, cited SymbioBomb Weapon reference from N5.3
+      p. 74 and the pinned English Wiki page. Differentiate Unit Profile owner
+      from Deployment-assigned user, the three permitted Pheroware Tactics,
+      Endgame/Eraser's -3 Face to Face MOD, and end-of-Order removal. The
+      catalog entry has no independent Weapon Chart attack profile, so none
+      was synthesized; the existing owner/loadout records remain unchanged.
+    - [x] Refresh the Weapon triage after these corrections: 115 chart-listed
+      definition-review items, 1 explicitly accepted historical citation,
+      no ambiguous family mappings and no chart-absent unrepresented entry.
+      Source-based batch planning now produces 26 definition-review batches
+      plus 1 retained citation-evidence batch; local reports are ignored.
+    - [ ] Manually verify the SymbioBomb browser detail card, PT navigation,
+      citations, and its intentionally absent standalone attack profile on
+      narrow and desktop layouts. API regression coverage is complete, but
+      browser acceptance and session-assignment UX are not.
     - [ ] Work through the 26 remaining source-category/usage-prioritized
       chart-listed Weapon batches (no more than eight identities per batch).
       For each, distinguish complete Army profile facts from missing effect

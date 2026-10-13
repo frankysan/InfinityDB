@@ -640,10 +640,13 @@ single-use item to another eligible same-army Trooper who becomes its user.
 During play that user can invoke one of the permitted Pheroware Tactics, after
 which the SymbioBomb is removed.
 
-This is a strong future example for a session/list relationship layer:
-catalog/loadout ownership is static source data, assignment is deployment state,
-and the selected use is action state. Those identities/scopes should not be
-collapsed into one permanent Unit relationship.
+The 1.0 curated `weapon:symbiobomb` reference now describes the
+source-backed assignment and action sequence on the Weapon detail page and
+links to Pheroware Tactics. This does **not** implement a live session/list
+assignment model: catalog/loadout ownership remains static, assignment is
+deployment state, and use is action state. They must not be collapsed into
+one permanent Unit relationship. The official rules do not give SymbioBomb
+a standalone Weapon Chart attack profile.
 
 Sources:
 

@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **125/140** complete, **15** pending.
-- Current authored outgoing relations: **314**.
+- Supporting semantic identities: **126/141** complete, **15** pending.
+- Current authored outgoing relations: **315**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -972,7 +972,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (13/13)
+#### Weapon (14/14)
 
 - [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
@@ -1026,6 +1026,8 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
   - `causes-state` → Sepsitorized State (`state:sepsitorized`)
   - `uses-effects-of` → Cube (`equipment:cube`)
+- [x] **SymbioBomb** (`weapon:symbiobomb`) — reviewed: N5.3 p. 74 and the archived English Wiki distinguish the listed owner from the Deployment-assigned user. The single use permits Endgame, Eraser or Mirrorball; the -3 target MOD applies only to Endgame/Eraser. Only the selected Pheroware Tactic supplies attack-profile facts; no stand-alone SymbioBomb chart statistics or lasting assignment relationship are inferred.
+  - `uses-effects-of` → Pheroware Tactics (PT) (`weapon:pt`)
 - [x] **WildParrot** (`weapon:wildparrot`) — reviewed: Perimeter and E/M Mine interaction with a visible Token/Model instead of CAMO; reviewed typed relationships distinguish this from Boost. N5 p. 74 Non-Lethal remains absent in Army and is presented as an explicit source discrepancy, not an imported Trait.
   - `uses-effects-of` → Perimeter (`trait:perimeter`)
   - `uses-effects-of` → Deployable (`trait:deployable`)
