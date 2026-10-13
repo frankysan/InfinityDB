@@ -1,0 +1,264 @@
+#!/usr/bin/env python3
+"""Reconcile existing Weapon enrichment gaps with pinned N5 Weapon Chart evidence.
+
+Consumes the maintained enrichment and PDF chart audits. A matched chart profile
+is *profile evidence*, not a reviewed rules definition or browser-coverage claim.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import unicodedata
+from collections import Counter
+from pathlib import Path
+from typing import Any
+
+from infinity_db.database.repository import Database
+
+FORMAT = "InfinityDB 1.0 weapon definition gap triage"
+FORMAT_VERSION = 1
+ENRICHMENT_FORMAT = "InfinityDB rules enrichment coverage audit"
+CHART_FORMAT = "InfinityDB N5 Weapon Chart profile evidence"
+MAX_BATCH_SIZE = 8
+
+
+class WeaponGapTriageError(ValueError):
+    """Incompatible or incomplete evidence prevents a reproducible comparison."""
+
+
+def _identity(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", unicodedata.normalize("NFKC", value).casefold())
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _load(path: Path) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise WeaponGapTriageError(f"Cannot read evidence {path}: {exc}") from exc
+    if not isinstance(value, dict):
+        raise WeaponGapTriageError("Evidence root must be an object")
+    return value
+
+
+def reconcile(
+    enrichment: dict[str, Any],
+    chart: dict[str, Any],
+    categories: dict[int, str],
+    army_sha256: str,
+) -> dict[str, Any]:
+    """Join unresolved Army Weapon identities to chart rows without inferring rules."""
+    if (enrichment.get("format"), enrichment.get("formatVersion")) != (
+        ENRICHMENT_FORMAT, 3
+    ):
+        raise WeaponGapTriageError("Expected enrichment coverage report v3")
+    if (chart.get("format"), chart.get("formatVersion")) != (CHART_FORMAT, 3):
+        raise WeaponGapTriageError("Expected Weapon Chart profile report v3")
+    if enrichment.get("database", {}).get("sha256") != army_sha256:
+        raise WeaponGapTriageError("Enrichment report uses a different Army database")
+    if chart.get("armyDatabaseSha256") != army_sha256:
+        raise WeaponGapTriageError("Weapon Chart report uses a different Army database")
+    pdf_sha = chart.get("corePdfSha256")
+    if not isinstance(pdf_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", pdf_sha):
+        raise WeaponGapTriageError("Weapon Chart report lacks a valid PDF SHA-256")
+
+    comparison = chart.get("comparison")
+    if not isinstance(comparison, dict):
+        raise WeaponGapTriageError("Weapon Chart report has no comparison")
+    compared = comparison.get("compared")
+    if (not isinstance(compared, list)
+            or len(compared) != comparison.get("unambiguousRowsCompared")
+            or len(compared) != comparison.get("chartRowsLocated")
+            or comparison.get("deferredRows") != 0):
+        raise WeaponGapTriageError("Weapon Chart is incomplete or has deferred rows")
+    names: dict[str, list[dict[str, Any]]] = {}
+    for row in compared:
+        key = _identity(str(row["name"]))
+        names.setdefault(key, []).append(row)
+    gaps = enrichment.get("domains", {}).get("weapons", {})
+    items = gaps.get("items")
+    if not isinstance(items, list) or len(items) != gaps.get("gapCount"):
+        raise WeaponGapTriageError(
+            "Enrichment report must include every unresolved Weapon (omit --include-complete)"
+        )
+    results: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    for item in items:
+        weapon_id = item["id"]
+        if not isinstance(weapon_id, int) or weapon_id in seen:
+            raise WeaponGapTriageError(f"Duplicate or invalid Weapon ID: {weapon_id}")
+        seen.add(weapon_id)
+        if weapon_id not in categories:
+            raise WeaponGapTriageError(f"Weapon ID absent from Army catalog: {weapon_id}")
+        row_candidates = names.get(_identity(str(item["name"])), [])
+        codes = item["gapCodes"]
+        if codes == ["missing_rule_definition"]:
+            kind = "definition-review" if row_candidates else "outside-chart-review"
+        elif codes == ["ambiguous_family_mapping"]:
+            kind = "ambiguous-rule-mapping"
+        elif codes == ["stale_citation_source"]:
+            kind = "stale-rule-citation"
+        else:
+            raise WeaponGapTriageError(f"Unclassified gap codes for {weapon_id}: {codes}")
+        results.append({
+            "id": weapon_id,
+            "name": item["name"],
+            "slug": item["slug"],
+            "sourceCategory": categories[weapon_id],
+            "catalogUseCount": item["useCount"],
+            "gapCodes": codes,
+            "disposition": kind,
+            "chart": {
+                "status": "identity-present" if row_candidates else "identity-not-in-chart",
+                "printedRows": len(row_candidates),
+                "pages": sorted({row["page"] for row in row_candidates}),
+                "modes": sorted({str(row["mode"]) for row in row_candidates}),
+                "profileCandidates": sum(bool(row["differences"]) for row in row_candidates),
+            },
+            "familyRules": item["familyRuleIds"],
+            "sourceRuleIds": item["exactSourceRuleIds"],
+        })
+    results.sort(key=lambda row: (-row["catalogUseCount"], row["name"].casefold(), row["id"]))
+
+    # Batches use the source catalog's category rather than inferring common
+    # mechanics from weapon names. The cap keeps each review independently sized.
+    batches: list[dict[str, Any]] = []
+    for disposition in (
+        "ambiguous-rule-mapping",
+        "stale-rule-citation",
+        "outside-chart-review",
+        "definition-review",
+    ):
+        candidates = [item for item in results if item["disposition"] == disposition]
+        by_category: dict[str, list[dict[str, Any]]] = {}
+        for item in candidates:
+            by_category.setdefault(item["sourceCategory"], []).append(item)
+        groups = sorted(
+            by_category.items(),
+            key=lambda group: (
+                -sum(item["catalogUseCount"] for item in group[1]),
+                group[0].casefold(),
+            ),
+        )
+        for category, group in groups:
+            for offset in range(0, len(group), MAX_BATCH_SIZE):
+                segment = group[offset:offset + MAX_BATCH_SIZE]
+                batches.append({
+                    "disposition": disposition,
+                    "sourceCategory": category,
+                    "weaponIds": [item["id"] for item in segment],
+                    "weaponNames": [item["name"] for item in segment],
+                    "catalogUseCount": sum(item["catalogUseCount"] for item in segment),
+                    "evidenceRequirement": (
+                        "Review conflicting rule mappings or citations and check visible links."
+                        if disposition in {"ambiguous-rule-mapping", "stale-rule-citation"}
+                        else "Find separately scoped primary source text before rule curation."
+                        if disposition == "outside-chart-review"
+                        else "Compare chart profiles and applicable rules; verify existing "
+                        "ammunition/trait links, then add only missing player-facing explanations."
+                    ),
+                })
+    chart_candidates = [
+        {"name": row["name"], "mode": row["mode"], "page": row["page"],
+         "differences": row["differences"]}
+        for row in compared if row["differences"]
+    ]
+    return {
+        "format": FORMAT,
+        "formatVersion": FORMAT_VERSION,
+        "status": "source-triage-only-not-rules-or-browser-completeness",
+        "armySha256": army_sha256,
+        "rulesSha256": enrichment["rulesDatabase"]["sha256"],
+        "corePdfSha256": pdf_sha,
+        "chartRowsCompared": len(compared),
+        "chartProfileDiscrepancies": chart_candidates,
+        "summary": {
+            "unresolvedWeapons": len(results),
+            "dispositions": dict(sorted(Counter(x["disposition"] for x in results).items())),
+            "matchedChartIdentity": sum(x["chart"]["printedRows"] > 0 for x in results),
+            "noChartIdentity": sum(x["chart"]["printedRows"] == 0 for x in results),
+            "reviewBatches": len(batches),
+        },
+        "batches": batches,
+        "items": results,
+    }
+
+
+def build_report(army_db: Path, enrichment_path: Path, chart_path: Path) -> dict[str, Any]:
+    if not army_db.is_file():
+        raise WeaponGapTriageError(f"Army database is unavailable: {army_db}")
+    db = Database(army_db)
+    db.validate()
+    categories = {int(item["id"]): str(item["category"])
+                  for item in db.list_catalog_items("weapons")}
+    return reconcile(_load(enrichment_path), _load(chart_path), categories, _sha256(army_db))
+
+
+def markdown_report(report: dict[str, Any]) -> str:
+    summary = report["summary"]
+    lines = [
+        "# Weapon definitions — 1.0 source-to-reference triage", "",
+        "This report joins existing audits; it does not infer Weapon rules from profiles.",
+        "The numbered batches are review scopes, not missing-fact or browser-defect verdicts.", "",
+        f"- Unresolved Weapon entries: **{summary['unresolvedWeapons']}**.",
+        f"- With a printed chart identity: **{summary['matchedChartIdentity']}**.",
+        f"- Without one: **{summary['noChartIdentity']}**.",
+        f"- Independently sized review batches: **{summary['reviewBatches']}**.",
+        f"- N5 v5.3 PDF SHA-256: `{report['corePdfSha256']}`.", "",
+        "## Reconciliation batches", "",
+    ]
+    for n, batch in enumerate(report["batches"], 1):
+        lines += [
+            f"### {n}. {batch['sourceCategory']} — {batch['disposition']}",
+            f"Summed catalog use-count: {batch['catalogUseCount']}.",
+            "Names: " + "; ".join(batch["weaponNames"]) + ".",
+            batch["evidenceRequirement"], "",
+        ]
+    lines += ["## Chart-profile source differences", ""]
+    for row in report["chartProfileDiscrepancies"]:
+        lines += [f"- {row['name']} ({row['mode']}), chart p. {row['page']}: "
+                  f"{row['differences']}"]
+    if not report["chartProfileDiscrepancies"]:
+        lines += ["- None in the input chart report."]
+    return "\n".join(lines) + "\n"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--army-db", type=Path, default=Path("data/generated/infinity.db"))
+    parser.add_argument("--enrichment", type=Path, required=True)
+    parser.add_argument("--chart", type=Path, required=True)
+    parser.add_argument("--json-output", type=Path, required=True)
+    parser.add_argument("--markdown-output", type=Path)
+    args = parser.parse_args()
+    try:
+        report = build_report(args.army_db, args.enrichment, args.chart)
+    except (WeaponGapTriageError, ValueError, OSError) as exc:
+        parser.error(str(exc))
+    args.json_output.parent.mkdir(parents=True, exist_ok=True)
+    args.json_output.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    if args.markdown_output:
+        args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
+        args.markdown_output.write_text(
+            markdown_report(report), encoding="utf-8", newline="\n"
+        )
+    print("Weapon gap triage written:", args.json_output)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

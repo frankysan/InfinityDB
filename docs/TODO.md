@@ -304,14 +304,37 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       links, citation rendering, and both Chest Mine modes; then reconcile any
       resulting navigation/presentation defects. Source-backed API enrichment
       alone does not establish browser acceptance.
+    - [x] Reconcile the current 119 unresolved Army Weapon enrichment entries
+      against the exact N5 v5.3 PDF chart evidence and retained catalog categories
+      using `tools/audit_weapon_definition_gaps.py`. The pinned Army database
+      and 171 compared chart rows agree on the source identity. Results:
+      115 chart-listed Weapons without standalone reviewed definitions,
+      2 existing family-rule mapping ambiguities (Cybermine and PARA Mine),
+      1 stale citation source (Flash Pulse), and 1 chart-absent source identity
+      (SymbioBomb). This is source/profile availability evidence, **not**
+      115 verified missing gameplay facts or completed browser coverage.
+      The deterministic 29 review batches are generated under ignored `local/audits/`.
+    - [ ] Review the three existing-reference issues first: classify intentional
+      family/variant layering versus ambiguous mapping for Cybermine/PARA Mine,
+      and reconcile Flash Pulse's citation with the applicable N5.3 revision.
+      Preserve verified rules and explain conflicts rather than removing links.
+    - [ ] Investigate SymbioBomb's identity and separately scoped source
+      representation before assuming it should have a normal Weapon Chart row.
+    - [ ] Work through the 26 remaining source-category/usage-prioritized
+      chart-listed Weapon batches (no more than eight identities per batch).
+      For each, distinguish complete Army profile facts from missing effect
+      explanations, ammunition/trait/State relations, and browser navigation;
+      preserve exact chart modes, the reviewed Kobra CC discrepancy, and
+      established family exceptions before adding curated definitions.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
-    - [ ] Review the six unmatched chart-text names as aliases, multi-mode entries,
-      or source-specific rules (including Chest Mine and SymbioBomb). Reconcile all
-      Weapon Chart rows and special-weapon text against N5 v5.3 pp. 68–74 and 176–188,
-      published Weapon identities and their API/browser profiles; classify each gap
-      as missing facts, relationships, or merely missing a standalone definition.
+    - [ ] Reconcile remaining Wiki Weapon Chart *text-name* mismatches as aliases,
+      multi-mode entries, or source-specific rules (including Chest Mine and SymbioBomb).
+      This earlier Wiki text-match audit is separate from the complete 171-row N5 PDF
+      profile alignment and its single chart-absent catalog identity. Reconcile the
+      source prose (pp. 68–74), printed profiles (pp. 176–188), and API/browser
+      coverage before classifying genuine missing facts, relationships, or definitions.
     - [ ] Register the supplied FAQ v0.1 as its own pinned source publication and
       reconcile core versus ITS-season applicability before curating rulings. Its
       content hash and the core PDF/history ZIP hashes are available in the local

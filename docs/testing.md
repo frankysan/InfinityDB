@@ -443,7 +443,7 @@ offline audit additionally requires PyMuPDF (`python -m pip install pymupdf`);
 normal CI and tests do not need that optional dependency. Run from the repository root:
 
 ```powershell
-python tools/audit_weapon_chart_profiles.py --core-pdf "C:\path\to\n5-rules-v5-3-en.pdf" --json-output docs/audits/weapon-chart.json --markdown-output docs/audits/weapon-chart.md
+.venv\Scripts\python.exe tools/audit_weapon_chart_profiles.py --core-pdf data/pdf/rules/n5-rules-v5-3-en.pdf --army-db data/generated/infinity.db --json-output local/audits/weapon-chart.json --markdown-output local/audits/weapon-chart.md
 ```
 
 The output includes the source PDF SHA-256, raw compared fields, range-band
@@ -455,7 +455,27 @@ matches and 170 range-band matches. Kobra Pistol CC Mode has a Saving Rolls
 source discrepancy candidate (PDF 1, Army 2); Katyusha MRL prints unsigned `3`
 where Army has `+3`. The separate Disco Ball object's attributes match.
 This remains partial evidence: other auxiliary/equipment profiles, special-weapon
-prose semantics, and API/browser projection still need review.
+prose semantics, and API/browser projection still need review. The chart report
+also records the exact Army database SHA-256 so it can be safely combined with
+enrichment evidence from the same snapshot.
+
+To reconcile unresolved Weapon rule enrichment without inventing definitions,
+combine the existing enrichment and chart reports in a separate deterministic
+source-to-reference triage:
+
+```powershell
+.venv\Scripts\python.exe tools/audit_enrichment_coverage.py data/generated/infinity.db --rules data/generated/rules.db --output local/audits/weapon-enrichment.json
+.venv\Scripts\python.exe tools/audit_weapon_definition_gaps.py --army-db data/generated/infinity.db --enrichment local/audits/weapon-enrichment.json --chart local/audits/weapon-chart.json --json-output local/audits/weapon-triage.json --markdown-output local/audits/weapon-triage.md
+```
+
+The triage rejects mismatched Army database hashes, incomplete/deferred chart
+alignment, and invalid coverage or PDF report identities. It reports separate
+cases for chart-listed Weapons without a standalone curated definition, stale
+citations, ambiguous mappings, and identities not located on the PDF chart.
+Batches use the Army source category and catalog use count and contain at most
+eight Weapon identities. A chart identity does **not** verify rules prose, typed
+relationships, exact profile modes or usable browser presentation. Generated
+reports and third-party source inputs remain local and Git-ignored.
 
 ## 1.0 Weapon Traits and special-weapon source inventory
 

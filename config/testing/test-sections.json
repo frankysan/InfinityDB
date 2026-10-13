@@ -22,6 +22,7 @@
         "test_audit_source_presentation",
         "test_audit_unit_semantics",
         "test_audit_weapon_chart_profiles",
+        "test_audit_weapon_definition_gaps",
         "test_audit_weapon_trait_cross_sources",
         "test_audit_weapon_traits_prose",
         "test_audit_weaponry_family_clauses",

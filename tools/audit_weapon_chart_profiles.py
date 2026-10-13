@@ -450,6 +450,7 @@ def audit_chart(pdf: Path, army_db: Path) -> dict[str, Any]:
         "formatVersion": FORMAT_VERSION,
         "status": "partial-pdf-profile-evidence-not-completeness",
         "corePdfSha256": _sha256(pdf),
+        "armyDatabaseSha256": _sha256(army_db),
         "armyMetadataProfiles": count,
         "comparison": result,
         "auxiliaryProfiles": extra,
