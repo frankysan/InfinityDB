@@ -4663,7 +4663,7 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 14
+    assert len(general_rules) == 16
     assert general_rules["regular-order"]["name"] == "Regular Order"
     assert general_rules["irregular-order"]["name"] == "Irregular Order"
     assert general_rules["loss-of-lieutenant"]["name"] == "Loss of Lieutenant"
@@ -4671,6 +4671,27 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     assert general_rules["hacking-area"]["name"] == "Hacking Area"
     assert general_rules["supportware"]["name"] == "Supportware"
     assert general_rules["special-dice"]["name"] == "Special Dice (+1 SD)"
+    assert general_rules["face-to-face-rolls"]["name"] == "Face to Face Rolls"
+    assert general_rules["saving-rolls"]["name"] == "Saving Rolls"
+
+    for slug, skill_ref in (
+        ("face-to-face-rolls", "skill:dodge"),
+        ("saving-rolls", "ammunition:para"),
+    ):
+        status, _, body = request(rules_app, f"/api/rules/{slug}")
+        assert status == 200
+        record = json.loads(body)
+        assert record["rules"][0]["id"] == f"rule:{slug}"
+        assert any(
+            token.get("target") == skill_ref and token.get("public_reference")
+            for clause in record["rules"][0]["fact_tokens"][
+                "clarifications" if slug == "face-to-face-rolls" else "restrictions"
+            ]
+            for token in clause
+        )
+        status, headers, _ = request(rules_app, f"/rules/{slug}")
+        assert status == 200
+        assert headers["content-type"].startswith("text/html")
 
     for rule_slug, expected_reference in (
         ("hacking-area", "equipment:repeater"),

@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Face to Face Rolls and Saving Rolls now have linked explanations of opposing
+  results, Criticals, ties, defense values and special Saving Roll exceptions.
 - Special Dice now have a linked reference explaining extra-die allocation and
   discard timing, Fireteam and Martial Arts bonuses, and exceptions.
 - Hacking Area, Firewall and Supportware now have their own linked references, with
@@ -21,6 +23,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web backend:** Add linked Face to Face and Saving Roll
+  references for ordinary contest outcomes, Criticals, defense calculations and
+  Attribute-based exceptions; connect BS and CC Attack cards to these shared rules.
 - **Data processing + Web backend:** Explain how Special Dice differ from Burst
   increases and Disposable charges, including Fireteam bonuses, Martial Arts,
   ranged Kits, Berserk, and the Coordinated Orders FAQ; link the published

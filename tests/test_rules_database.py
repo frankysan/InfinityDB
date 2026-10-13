@@ -206,6 +206,34 @@ def test_special_dice_reference_and_source_exceptions_are_composed(
         ), record_id
 
 
+def test_shared_face_to_face_and_saving_roll_baselines_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    face_to_face = current_rules_database.composed_record("rule:face-to-face-rolls")
+    saving = current_rules_database.composed_record("rule:saving-rolls")
+    assert face_to_face is not None
+    assert saving is not None
+    assert face_to_face["facts"]["category"] == "basic-rule"
+    assert saving["facts"]["category"] == "basic-rule"
+    assert "affect one another directly" in " ".join(face_to_face["facts"]["restrictions"])
+    assert "both players roll Criticals" in " ".join(face_to_face["facts"]["effects"])
+    assert "Order is still spent" in " ".join(face_to_face["facts"]["effects"])
+    assert "[[skill:dodge|Dodge]]" in " ".join(face_to_face["facts"]["clarifications"])
+    assert "PH-6" in " ".join(saving["facts"]["restrictions"])
+    assert "rolling 13 passes, while 14 fails" in " ".join(saving["facts"]["clarifications"])
+    assert "additional Saving Roll" in " ".join(saving["facts"]["effects"])
+    for rule in (face_to_face, saving):
+        assert {citation["source_id"] for citation in rule["citations"]} >= {
+            "n5-core-v5.3-pdf"
+        }
+    for skill_id in ("skill:bs-attack", "skill:cc-attack"):
+        skill = current_rules_database.composed_record(skill_id)
+        assert skill is not None
+        rendered = json.dumps(skill)
+        assert "[[rule:face-to-face-rolls|Face to Face Rolls]]" in rendered
+        assert "[[rule:saving-rolls|Saving Rolls]]" in rendered
+
+
 def test_escape_system_threshold_help_refers_to_the_unit_profile(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -273,7 +301,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 376
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 378
         assert connection.execute(
             "SELECT id, title FROM scenario_collections"
         ).fetchone() == ("n5-core", "N5 Core Scenarios")

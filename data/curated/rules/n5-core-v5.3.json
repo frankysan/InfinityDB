@@ -8086,6 +8086,9 @@
                 ],
                 "restrictions": [
                     "The selected item's range, Line of Fire, target, and special rules limit the attack."
+                ],
+                "clarifications": [
+                    "When a target's action directly opposes this Attack, resolve [[rule:face-to-face-rolls|Face to Face Rolls]]; otherwise make independent, unopposed Rolls. Uncanceled hits use [[rule:saving-rolls|Saving Rolls]] as specified by the weapon."
                 ]
             },
             "labelIds": [
@@ -8263,6 +8266,9 @@
                 ],
                 "restrictions": [
                     "The selected item's effects and close-combat rules limit the attack."
+                ],
+                "clarifications": [
+                    "Opposing Close Combat actions use [[rule:face-to-face-rolls|Face to Face Rolls]] when they directly affect one another. An uncanceled damaging hit then uses the weapon's [[rule:saving-rolls|Saving Rolls]]."
                 ]
             },
             "labelIds": [
@@ -20295,7 +20301,7 @@
                 "effects": [
                     "The +1 SD MOD applies in both the Active and Reactive Turns. Roll one extra die for the eligible Roll, then select and discard one die; only the retained dice count toward the result.",
                     "If Burst is divided among several targets, assign the extra die to one of those targets and discard a die from the Roll against that same target. With B1, the extra die cannot be assigned to a different target.",
-                    "During a Face to Face Roll, make the discard after both players have rolled. When both players must discard a die, the Active Player selects first."
+                    "During a [[rule:face-to-face-rolls|Face to Face Roll]], make the discard after both players have rolled. When both players must discard a die, the Active Player selects first."
                 ],
                 "restrictions": [
                     "Normally +1 SD cannot be used with Long Skills or Skills, Weapons, or Equipment that do not require a Roll, such as a [[trait:direct-template|Direct Template]] Weapon. [[skill:berserk]] is an explicit Long Skill exception for SD MODs the user has.",
@@ -20328,6 +20334,94 @@
                     "sourceId": "n5-faq-v0.1-en-pdf",
                     "page": 3,
                     "section": "Special Dice during Coordinated Orders"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "rule:face-to-face-rolls",
+            "kind": "rule",
+            "name": "Face to Face Rolls",
+            "aliases": [
+                "Face to Face Roll"
+            ],
+            "summary": "When opposing actions directly affect each other's outcome, compare their successful dice in a Face to Face Roll. Unsuccessful dice are discarded; each remaining die must be judged against the other player's successful results.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "effects": [
+                    "First determine each player's Success Value and which dice succeeded. A successful die cancels opposing successful dice with a lower result, even if that die is itself canceled by a higher opposing success.",
+                    "A Critical beats opposing non-Critical successes, regardless of their numeric results. If both players roll Criticals, all Criticals cancel, the non-Critical successes are discarded, and neither side applies effects.",
+                    "Tied opposing successful results cancel each other. If a Face to Face Roll ends in a tie, no effects are applied, but the Order is still spent."
+                ],
+                "restrictions": [
+                    "A Face to Face Roll requires both opposing actions to affect one another directly. Otherwise resolve independent, unopposed Rolls, even when both actions occur during the same Order."
+                ],
+                "clarifications": [
+                    "For example, if one Trooper fires at an opponent who shoots back, the Attacks can oppose each other. A third Trooper firing without receiving an Attack from the first rolls normally, not in that same Face to Face Roll.",
+                    "A successful [[skill:dodge|Dodge]] or [[skill:reset|Reset]] can cancel an opposing Attack only against the Trooper making that Roll; it does not cancel that Attack against other targets."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 25,
+                    "section": "Face to Face Rolls"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "rule:saving-rolls",
+            "kind": "rule",
+            "name": "Saving Rolls",
+            "aliases": [
+                "Saving Roll",
+                "Saving Roll (SR)"
+            ],
+            "summary": "A successful, uncanceled Attack usually makes its target perform a Saving Roll. For an ordinary ARM or BTS save, add the attack's Possibility of Survival (PS), applicable Partial Cover and other permitted MODs to the target's relevant protection Attribute.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "effects": [
+                    "Roll one d20 per required Saving Roll and compare it with the modified Success Value. A result equal to or below the Success Value passes; a higher result fails. A failed save inflicts the Attack's specified effect, which may be a Wound or a harmful condition.",
+                    "Ordinarily each uncanceled Attack success requires one Saving Roll. Attack, Weapon and Ammunition rules can change the number or Attribute of rolls. Unless an exception says otherwise, a Critical adds one additional Saving Roll, using the original Saving Roll Attribute and weapon Traits."
+                ],
+                "restrictions": [
+                    "Not all Saving Rolls use ARM or BTS plus PS. An attack whose profile lists an Attribute and MOD but no PS, for example PH-6 from [[ammunition:para|PARA Ammunition]], instead requires a Roll using that Attribute and MOD."
+                ],
+                "clarifications": [
+                    "For example, an ordinary ARM save with ARM 3, PS 7, and an applicable +3 Partial Cover MOD has Success Value 13: rolling 13 passes, while 14 fails. The attack's own rules still determine what failure does.",
+                    "Extra rolls or distinct saving Attributes must be resolved under their specific rules: [[ammunition:da|DA Ammunition]] normally requires two rolls per hit, while Combined Saving Rolls can use ARM and BTS separately. The Critical's extra roll is not automatically a duplicate of every roll caused by a hit."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 37,
+                    "section": "Saving Roll (SR)"
                 }
             ],
             "review": {

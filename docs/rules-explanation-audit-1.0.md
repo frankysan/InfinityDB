@@ -936,18 +936,19 @@ calculate arbitrary compositions in JavaScript. **Fix:** mapping/curated
 content/links and future validation; no such edits made here.
 **Dependencies:** REA-010, REA-011, REA-013, REA-026.
 
-### REA-026 - Useful general mechanics remain research rather than linked reference content
+### REA-026 - Complete shared General Rules mechanics
 
 **Classification:** completeness, clarity. **Severity:** Medium. **Priority:** P1.
 **Evidence:** Explicit absence from C/H; official mechanics Explicit.
 **Affected:** General Rules domain, `skill:bs-attack`, `skill:cc-attack`,
 `skill:move`, `skill:idle`, `rule:command-token-strategic-use`, recovery references.
 
-**Current:** No canonical baseline records cover Saving Roll/PS, Face to Face
-resolution, Guts, ordinary declaration timing, or Coordinated Orders. The
-34 `rule` records are peripheral types, orders, Fireteams, profile help, and
-scenario rules. Maintained research describes many mechanics, but it is not
-the normal player reference. Attribute definitions alone do not provide them.
+**Current:** Face to Face Rolls and Saving Rolls now have linked, published
+General Rules baselines, with BS/CC Attack cross-references and source citations.
+Guts, ordinary declaration timing, and Coordinated Orders still lack canonical
+player-facing baselines. The current published rules catalog includes other
+scoped references such as Fireteam and Order rules; source research is not itself
+an ordinary player-facing reference.
 
 **Evidence/result:** S1 pp. 14-15, 24-25, 37-38, 75-76 and 129-131 establish
 these baselines. Useful examples include an unopposed save using PS plus

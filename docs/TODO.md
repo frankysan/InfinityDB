@@ -405,6 +405,10 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       SD versus Burst allocations, and real-browser link navigation before
       closing the finding. Fireteam Level 4 PH/WIP modifiers remain tied to
       the attack Attribute, not Discover.
+      REA-026 now has initial linked Face to Face Roll and Saving Roll baselines
+      with API/browser routes and BS/CC cross-references; verify Critical/tie and
+      PH-based save exceptions in a real browser. Guts, declaration timing, and
+      Coordinated Orders remain open within REA-026.
       Hacking Area, Firewall and Supportware (REA-018) now have linked, published
       baseline cards. Verify enemy-Repeater ARO scope and 8-inch checks, disabled
       Hacking Device Firewall, and whole-Program Fairy Dust replacement in a real
