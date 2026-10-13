@@ -71,6 +71,34 @@ Python, for example:
 Local developer wrappers or command-launching tools may be used, but repository
 instructions must not depend on a particular user's machine configuration.
 
+## Repository access and change delivery
+
+- Check whether the agent has authorized direct access to the current local
+  checkout before relying on uploaded archives or remote repository content.
+  A connected filesystem/terminal is a normal working tree, regardless of which
+  agent uses it. Do not assume local access is unavailable based on an earlier
+  session or workflow.
+- When direct access is available, inspect the actual branch, HEAD, working-tree
+  status, relevant files, and existing local instructions first. Treat that
+  checkout as the source of truth; use remote Git services only for information
+  that cannot be established locally or for explicitly requested remote work.
+- Edit and validate directly in the authorized working tree. Preserve unrelated
+  tracked and untracked changes. Do not require a repository ZIP or produce an
+  apply-yourself patch as the primary delivery when the files are already edited.
+  Generate a Git-native patch only when requested or needed for transfer/review.
+- When direct access is unavailable, request an appropriate repository snapshot
+  or use an authorized remote-read workflow; validate any proposed patch against
+  its actual base before claiming applicability. Do not infer current local
+  state from a stale archive or a remote branch alone.
+- After local edits, inspect the actual diff and status, run relevant checks, and
+  report exact validation outcomes and whether the changes are already in the
+  checkout. Do not stage, commit, push, deploy, or publish without authorization.
+- Keep machine-specific configuration, operational diagnostics, and private
+  evidence out of tracked files. The Git-ignored `local/` workspace is the
+  preferred location for private notes; ignore rules alone are not access
+  controls. Review the public diff and generated artifacts for accidental
+  disclosures before delivery.
+
 ## Repository rules
 
 - Support Windows, Linux, and macOS. Do not introduce machine-specific absolute
