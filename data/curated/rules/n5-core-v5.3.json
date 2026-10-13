@@ -4660,6 +4660,142 @@
             }
         },
         {
+            "id": "weapon:d-charges",
+            "kind": "weapon",
+            "name": "D-Charges",
+            "summary": "D-Charges have two modes, both using the same [[trait:disposable-x|Disposable (3)]] supply. The Weapon Chart gives both modes AP+EXP Ammunition and [[trait:anti-materiel|Anti-materiel]] effects; using either mode spends one of the same three charges.\n\n**Demolition Mode:** The user must be in Silhouette contact with a Building or Scenery Structure, or an enemy Model in Immobilized or Null State (except [[state:sepsitorized|Sepsitorized]] or [[state:possessed|Possessed]]).\n\nPlace the charge with [[skill:place-deployable|Place Deployable]]. It cannot be used in [[trait:aro|ARO]], and detonates in the Resolution Step without a Roll.\n\n**[[trait:cc|CC]] Mode:** The user must be in Silhouette contact with an enemy Trooper. Follow [[skill:cc-attack|CC Combat]]; the [[trait:improvised|Improvised]] Trait applies a -6 MOD to the user's [[attribute:cc|CC]]. Detonation in either mode does not affect the user.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "d-charges"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:place-deployable"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:disposable-x"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:anti-materiel"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:improvised"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 70,
+                    "section": "D-Charges"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 186,
+                    "section": "Weapon Chart: D-Charges"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "D-Charges",
+                    "heading": "D-Charges"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "weapon:disco-baller",
+            "kind": "weapon",
+            "name": "Disco Baller",
+            "summary": "Disco Baller has [[trait:targetless|Targetless]] and [[trait:speculative-attack|Speculative Attack]]. Choose a location and make a non-Face to Face [[rule:face-to-face-rolls|Normal BS Roll]]. On success, place a Disco Ball Model or Token there in the Conclusion Step, with a circular [[ammunition:eclipse|Eclipse]] Template centered on it.\n\nAt the start of the States Phase the Disco Ball deactivates and its Eclipse Template is removed; the deployed Ball remains until it is destroyed or the game ends. The source gives the Disco Ball ARM 0, BTS 0, STR 1 and S 1.\n\nA Trooper equipped with a [[equipment:deactivator|Deactivator]] may use the Activate Disco Ball Short Skill on an allied Ball in LoF or [[trait:zone-of-control-zc|Zone of Control]], never an enemy Ball.\n\nMake a WIP +3 [[rule:face-to-face-rolls|Normal Roll]] with the [[equipment:deactivator|Deactivator]]'s Range MODs. On success, restore the Eclipse Template in the Conclusion Step; remove it again at the next States Phase or when the Ball is destroyed.\n\nThe Weapon Chart lists [[trait:disposable-x|Disposable (2)]] and [[trait:double-shot|Double Shot]] for the launcher. Its use count and attack profile are separate from the deployed Disco Ball's profile.",
+            "facts": {},
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "disco-baller"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:eclipse"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:speculative-attack"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:targetless"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:disposable-x"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:double-shot"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "equipment:deactivator"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 71,
+                    "section": "Disco Baller / Activate Disco Ball"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 186,
+                    "section": "Weapon Chart: Disco Baller"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Disco_Baller",
+                    "heading": "Disco Baller"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
             "id": "weapon:symbiobomb",
             "kind": "weapon",
             "name": "SymbioBomb",

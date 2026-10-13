@@ -308,6 +308,91 @@ def test_pt_endgame_rules_apply_only_to_the_endgame_source_variant(
     assert profiles[203]["burst"] == "1"
 
 
+@pytest.mark.parametrize(
+    ("slug", "record_id", "pages", "phrases", "relations"),
+    [
+        (
+            "d-charges",
+            "weapon:d-charges",
+            {70, 186},
+            (
+                "Demolition Mode",
+                "[[trait:cc|CC]] Mode",
+                "same three charges",
+                "cannot be used",
+                "detonates in the Resolution Step",
+                "does not affect the user",
+            ),
+            {"skill:place-deployable", "trait:disposable-x", "trait:improvised"},
+        ),
+        (
+            "disco-baller",
+            "weapon:disco-baller",
+            {71, 186},
+            (
+                "Conclusion Step",
+                "States Phase",
+                "Eclipse",
+                "Activate Disco Ball",
+                "enemy Ball",
+                "Double Shot",
+            ),
+            {"ammunition:eclipse", "equipment:deactivator", "trait:double-shot"},
+        ),
+    ],
+)
+def test_reviewed_weapon_source_prose_has_separate_modes_and_sources(
+    weaponry_app: Callable,
+    slug: str,
+    record_id: str,
+    pages: set[int],
+    phrases: tuple[str, ...],
+    relations: set[str],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    rules = _weapon_rules(payload)
+    assert record_id in rules
+    record = rules[record_id]
+    assert all(phrase in record["summary"] for phrase in phrases)
+    assert pages <= {
+        citation["page"] for citation in record["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+    }
+    assert relations <= {
+        relation["record"]["id"]
+        for relation in record["display_relations"]
+        if relation["direction"] == "outbound"
+    }
+    assert any(
+        citation["source_id"] == "wiki-en-20260926-200832"
+        for citation in record["citations"]
+    )
+
+
+def test_d_charges_and_disco_baller_keep_army_modes_separate(
+    weaponry_app: Callable,
+) -> None:
+    charges = _weapon_detail(weaponry_app, "d-charges")
+    assert {profile["mode"] for profile in charges["profiles"]} == {
+        "CC Mode", "Demolition Mode"
+    }
+    assert all(profile["ammunition"] == "AP+Exp" for profile in charges["profiles"])
+    assert all(profile["saving_num"] == "3" for profile in charges["profiles"])
+    assert all(profile["damage"] == "6" for profile in charges["profiles"])
+    assert all("Disposable (3)" in profile["traits"] for profile in charges["profiles"])
+    assert all(
+        rule["id"] == "weapon:d-charges" for rule in charges.get("rules", [])
+    )
+    disco = _weapon_detail(weaponry_app, "disco-baller")
+    launcher = next(profile for profile in disco["profiles"] if profile["mode"] is None)
+    ball = next(profile for profile in disco["profiles"] if profile["mode"] == "Disco Ball")
+    assert "Double Shot" in launcher["traits"]
+    assert "Disposable (2)" in launcher["traits"]
+    assert ball["profile"] == "ARM=0, BTS=0, STR=1, S=1"
+    assert ball["ammunition"] == 0
+    assert ball["saving_num"] == "-"
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:

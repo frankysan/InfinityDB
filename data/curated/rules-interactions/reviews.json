@@ -938,6 +938,20 @@
       "note": "Uses the shared Mine mechanics but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose."
     },
     {
+      "recordId": "weapon:d-charges",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "The N5.3 printed p. 70 rules distinguish Demolition and CC contact requirements, Demolition-only Place Deployable, the ARO restriction and no-roll resolution, and a shared three-charge pool. The CC Improvised -6 modifier is mode-specific; the user's immunity to detonation applies to both. Profile ammunition and attack rolls remain in the two Army mode profiles."
+    },
+    {
+      "recordId": "weapon:disco-baller",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 71 governs targetless BS deployment, Eclipse placement and States Phase expiry, the persistent deployed Ball, and allied-only Deactivator activation with its own WIP+3 and range conditions. Its chart profile, Double Shot, and Disposable (2) remain distinct from the deployed ARM/BTS/STR/S profile. Activate Disco Ball is still prose rather than a standalone catalog Skill."
+    },
+    {
       "recordId": "weapon:symbiobomb",
       "targetRelease": "1.0.0",
       "status": "reviewed",

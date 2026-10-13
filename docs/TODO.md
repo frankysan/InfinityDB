@@ -113,9 +113,10 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [x] Re-run the 1.0 source-input audit using separate English and Spanish
     Wiki history archives and the September 26 curated Wiki capture. All 110
     currently published `oldid` identities verify against language-matched history
-    payloads; the refreshed capture audit now resolves 77 curated
-    citation/vocabulary references across 65 pages (including SymbioBomb)
-    with all 77 headings and page revision IDs verified. The audit checks exact
+    payloads; the refreshed capture audit now resolves 79 curated
+    citation/vocabulary references across 67 pages (including SymbioBomb,
+    D-Charges and Disco Baller) with all 79 headings and page revision IDs
+    verified. The audit checks exact
     local archive hashes, but does not establish historical content equivalence,
     rules correctness or browser completeness.
   - [x] Replace the unavailable September 18 English Wiki citation snapshot with
@@ -335,10 +336,27 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       no ambiguous family mappings and no chart-absent unrepresented entry.
       Source-based batch planning now produces 26 definition-review batches
       plus 1 retained citation-evidence batch; local reports are ignored.
-    - [ ] Manually verify the SymbioBomb browser detail card, PT navigation,
-      citations, and its intentionally absent standalone attack profile on
-      narrow and desktop layouts. API regression coverage is complete, but
-      browser acceptance and session-assignment UX are not.
+    - [x] Browser-accept SymbioBomb at 1440, 390 and 320 px in headless Chrome,
+      with source citations, no horizontal overflow or JS exceptions, desktop
+      and keyboard navigation to PT, and preview-first/two-tap mobile links.
+      Desktop and 320 px full-page screenshots were visually inspected. No
+      independent attack profile is shown; real session assignment remains
+      outside this static reference. Evidence stays under ignored local/audits/.
+    - [x] Start the highest-use Uncategorized Weapon review batch (initial eight
+      identities): publish dedicated N5.3 p. 70/186 D-Charges and p. 71/186
+      Disco Baller rules, preserving Army modes, shared charge counts, deployment
+      and activation timing, Eclipse template and deployed Ball profile. The six
+      remaining names (Nanopulser, Pulzar, Chain Rifle, Missile Launcher, E/Mitter,
+      Chain-colt) retain matching printed/chart statistics but still need
+      player-facing ammunition/trait/State navigation and exception review.
+      The source-only triage now has 113 definition-review Weapons plus one
+      accepted historical citation, with 27 bounded review batches.
+    - [ ] Browser-review the new D-Charges and Disco Baller cards (both source
+      modes, related reference links, mobile layout and citations); API coverage
+      does not substitute for this acceptance.
+    - [ ] Review Activate Disco Ball as a separately cited Skill identity and
+      ensure its link from the Disco Baller reference can be reached, without
+      inventing a matching Army Skill entry if none exists.
     - [ ] Work through the 26 remaining source-category/usage-prioritized
       chart-listed Weapon batches (no more than eight identities per batch).
       For each, distinguish complete Army profile facts from missing effect

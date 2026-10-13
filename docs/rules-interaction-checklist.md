@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **126/141** complete, **15** pending.
-- Current authored outgoing relations: **315**.
+- Supporting semantic identities: **128/143** complete, **15** pending.
+- Current authored outgoing relations: **325**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -972,7 +972,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (14/14)
+#### Weapon (16/16)
 
 - [x] **Chest Mine** (`weapon:chest-mine`) — reviewed: Independent BS/CC-mode effects and shared Disposable uses, deliberately no shared Mines inheritance relation.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
@@ -982,6 +982,18 @@ review. `declaration-category` projection records are excluded.
   - `modifies-use-of` → Reset (`skill:reset`)
   - `causes-state` → Stunned State (`state:stunned`)
   - `causes-state` → Immobilized-B State (`state:immobilized-b`)
+- [x] **D-Charges** (`weapon:d-charges`) — reviewed: The N5.3 printed p. 70 rules distinguish Demolition and CC contact requirements, Demolition-only Place Deployable, the ARO restriction and no-roll resolution, and a shared three-charge pool. The CC Improvised -6 modifier is mode-specific; the user's immunity to detonation applies to both. Profile ammunition and attack rolls remain in the two Army mode profiles.
+  - `uses-effects-of` → Place Deployable (`skill:place-deployable`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Improvised (`trait:improvised`)
+- [x] **Disco Baller** (`weapon:disco-baller`) — reviewed: N5.3 p. 71 governs targetless BS deployment, Eclipse placement and States Phase expiry, the persistent deployed Ball, and allied-only Deactivator activation with its own WIP+3 and range conditions. Its chart profile, Double Shot, and Disposable (2) remain distinct from the deployed ARM/BTS/STR/S profile. Activate Disco Ball is still prose rather than a standalone catalog Skill.
+  - `uses-effects-of` → Eclipse Ammunition (`ammunition:eclipse`)
+  - `uses-effects-of` → Speculative Attack (`trait:speculative-attack`)
+  - `uses-effects-of` → Targetless (`trait:targetless`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `uses-effects-of` → Double Shot (`trait:double-shot`)
+  - `uses-effects-of` → Deactivator (`equipment:deactivator`)
 - [x] **Drop Bears** (`weapon:drop-bears`) — reviewed: N5.3 Drop Bears BS/Deployable modes share three charges but have different placement restrictions; typed relationships connect PH throwing, Targetless, Deployable/Intuitive placement, Shock and the modified Mines behavior. Imported legacy Throwing Weapon remains source data, not an additional N5 effect.
   - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
   - `uses-effects-of` → BS Weapon (PH) (`trait:bs-weapon-ph`)

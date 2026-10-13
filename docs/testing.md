@@ -544,6 +544,38 @@ or hosted deployment.
 Playwright and locally installed Chrome were used only for this optional
 acceptance exercise; normal CI does not require a browser.
 
+## 1.0 SymbioBomb bounded browser acceptance
+
+**Verified 2026-10-13, branch `dev/v1.0.0`, base commit `f9d06ef`.**
+Headless browser acceptance used an isolated local application instance with
+the current Army and rules database snapshots. It did not connect to the
+public deployment or modify tracked source data.
+
+The SymbioBomb Weapon page rendered at **1440, 390 and 320 px** with the
+source-backed explanation, Pheroware Tactics links, printed N5.3 p. 74 and
+archived English Wiki citations. No horizontal overflow or JavaScript/console
+errors were observed. Desktop and 320 px full-page screenshots were visually
+inspected for legible paragraphs and working citations. Neither the browser
+nor the API added an invented SymbioBomb attack profile.
+
+Desktop mouse click and keyboard Enter followed the Pheroware link to
+`/weapons/pt`. Mobile touch emulation retained the current two-tap behavior:
+the first tap displayed the reference preview while staying on the SymbioBomb
+page, and the second navigated to Pheroware. All evidence and screenshots are
+under ignored `local/audits/symbiobomb-browser/`.
+
+This certifies only this bounded page, layout, and navigation behavior. It
+does not simulate deployment assignment or grant 1.0-wide browser acceptance.
+
+**D-Charges / Disco Baller render smoke (2026-10-13):** The two new
+source-backed Weapon cards loaded at 1440, 390 and 320 px (six cases)
+with their N5.3 and archived Wiki citations, expected mode/profile sections
+and maintained reference links. No horizontal overflow or browser errors
+were observed. The 320 px screenshots were visually reviewed and stored in
+ignored `local/audits/weapon-first-batch-browser/`. This verifies the current
+rendering and link presence; individual cross-page click/touch routes and
+additional modes still require focused browser acceptance.
+
 ## 1.0 Peripheral (REA-017) browser acceptance
 
 **Verified 2026-10-13, branch dev/v1.0.0, base commit 5fc94553b992,
