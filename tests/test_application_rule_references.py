@@ -337,7 +337,7 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
 
     general_rules = RulesRecordCatalog(rules_database, "rules")
     general_rule_items = general_rules.list_items()
-    assert len(general_rule_items) == 13
+    assert len(general_rule_items) == 14
     assert {item["slug"] for item in general_rule_items} == {
         "command-token-strategic-use",
         "hacking-area",
@@ -350,6 +350,7 @@ def test_ammunition_and_label_catalogs_reuse_current_rules_data(tmp_path: Path) 
         "peripheral-type-synchronized",
         "regular-order",
         "special-lieutenant-order",
+        "special-dice",
         "supportware",
         "tactical-order",
     }

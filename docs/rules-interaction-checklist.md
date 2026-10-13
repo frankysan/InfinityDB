@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **119/134** complete, **15** pending.
+- Supporting semantic identities: **120/135** complete, **15** pending.
 - Current authored outgoing relations: **314**.
 - Explicitly tracked future/deferred interactions: **113**.
 
@@ -904,7 +904,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (11/11)
+#### Rule (12/12)
 
 - [x] **Carrying Supply Boxes** (`rule:scenario:carrying-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
@@ -921,6 +921,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Killing** (`rule:scenario:killing`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
 - [x] **Reinforced Tactical Link** (`rule:scenario:reinforced-tactical-link`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Special Dice (+1 SD)** (`rule:special-dice`) — reviewed: Shared N5.3 SD resolution, Fireteam/CC applicability and Berserk exception are source-cited prose; no universal Burst or Disposable relation is inferred.
   - outgoing: none
 - [x] **Specialist Troops** (`rule:specialist-troops:standard`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none

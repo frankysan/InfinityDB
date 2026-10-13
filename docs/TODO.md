@@ -399,6 +399,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       (REA-019). Verify all three player-facing cards and Label-to-Program navigation
       in a real browser before closing that finding. Targeted MSV1/Sixth Sense FAQ
       questions remain a separate source-review task (REA-030).
+      REA-021 now has a published Special Dice (+1 SD) baseline linking
+      Fireteam bonuses, Martial Arts Levels 3/5, Berserk, Disposable uses, and
+      ranged Kits; verify the browser cards, FAQ distinction from Discover,
+      SD versus Burst allocations, and real-browser link navigation before
+      closing the finding. Fireteam Level 4 PH/WIP modifiers remain tied to
+      the attack Attribute, not Discover.
       Hacking Area, Firewall and Supportware (REA-018) now have linked, published
       baseline cards. Verify enemy-Repeater ARO scope and 8-inch checks, disabled
       Hacking Device Firewall, and whole-Program Fairy Dust replacement in a real

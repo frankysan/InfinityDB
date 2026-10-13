@@ -4663,13 +4663,14 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 13
+    assert len(general_rules) == 14
     assert general_rules["regular-order"]["name"] == "Regular Order"
     assert general_rules["irregular-order"]["name"] == "Irregular Order"
     assert general_rules["loss-of-lieutenant"]["name"] == "Loss of Lieutenant"
     assert general_rules["peripheral-type-servant"]["name"] == "Peripheral (Servant)"
     assert general_rules["hacking-area"]["name"] == "Hacking Area"
     assert general_rules["supportware"]["name"] == "Supportware"
+    assert general_rules["special-dice"]["name"] == "Special Dice (+1 SD)"
 
     for rule_slug, expected_reference in (
         ("hacking-area", "equipment:repeater"),
@@ -4684,6 +4685,20 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
             and token.get("public_reference") is not None
             for token in rule["rules"][0]["summary_tokens"]
         )
+
+    status, _, body = request(rules_app, "/api/rules/special-dice")
+    assert status == 200
+    special_dice = json.loads(body)
+    assert special_dice["slug"] == "special-dice"
+    assert special_dice["rules"][0]["id"] == "rule:special-dice"
+    assert any(
+        token.get("target") == "skill:berserk" and token.get("public_reference")
+        for tokens in special_dice["rules"][0]["fact_tokens"]["restrictions"]
+        for token in tokens
+    )
+    status, headers, body = request(rules_app, "/rules/special-dice")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
 
     status, _, body = request(rules_app, "/api/equipment")
     assert status == 200

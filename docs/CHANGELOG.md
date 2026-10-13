@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Special Dice now have a linked reference explaining extra-die allocation and
+  discard timing, Fireteam and Martial Arts bonuses, and exceptions.
 - Hacking Area, Firewall and Supportware now have their own linked references, with
   enemy Repeater restrictions, Firewall Saving Roll bonuses and Supportware replacement
   explained alongside Hacking Programs.
@@ -19,6 +21,10 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web backend:** Explain how Special Dice differ from Burst
+  increases and Disposable charges, including Fireteam bonuses, Martial Arts,
+  ranged Kits, Berserk, and the Coordinated Orders FAQ; link the published
+  reference from those rules without changing Army profiles.
 - **Data processing + Web backend:** Publish linked N5.3 Hacking Area and Supportware
   General Rules and a Firewall Equipment reference, including the FAQ for disabled
   Hacking Devices. Connect existing Hacker, Repeater, TinBot and Hacking Programs to

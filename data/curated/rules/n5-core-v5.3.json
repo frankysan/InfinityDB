@@ -2523,7 +2523,7 @@
             "id": "skill:discover",
             "kind": "skill",
             "name": "Discover",
-            "summary": "A Common Skill used to reveal game elements represented by Markers.",
+            "summary": "A Common Skill used to reveal game elements represented by Markers. The Level 3 Fireteam +3 Discover MOD applies; its Level 2 +1 SD and Level 4 +1 Attribute [[skill:bs-attack|BS Attack]] bonuses do not.",
             "composition": {
                 "role": "definition"
             },
@@ -2871,7 +2871,7 @@
             "aliases": [
                 "Throwing Weapon"
             ],
-            "summary": "Makes [[skill:bs-attack:plural]] using PH instead of BS; BS rules and MODs affect PH instead.",
+            "summary": "Makes [[skill:bs-attack:plural]] using PH instead of BS; BS rules and MODs affect PH instead. The Level 4 Fireteam +1 Attribute bonus applies to this attack type, but not to [[skill:discover]].",
             "composition": {
                 "role": "definition"
             },
@@ -2905,7 +2905,7 @@
             "aliases": [
                 "Technical Weapon"
             ],
-            "summary": "Makes [[skill:bs-attack:plural]] using WIP instead of BS; BS rules and MODs affect WIP instead. Weapons with this Trait cannot use [[skill:bs-attack|BS Attack (Shock)]] or [[skill:bs-attack|BS Attack (Guided)]]. These restrictions concern the named attack Skills, not [[ammunition:shock|Shock Ammunition]] in general.",
+            "summary": "Makes [[skill:bs-attack:plural]] using WIP instead of BS; BS rules and MODs affect WIP instead. Weapons with this Trait cannot use [[skill:bs-attack|BS Attack (Shock)]] or [[skill:bs-attack|BS Attack (Guided)]]. These restrictions concern the named attack Skills, not [[ammunition:shock|Shock Ammunition]] in general.\n\nThe Level 4 Fireteam +1 Attribute bonus applies to this attack type, but not to [[skill:discover]].",
             "composition": {
                 "role": "definition"
             },
@@ -3184,7 +3184,7 @@
             "id": "trait:disposable-x",
             "kind": "trait",
             "name": "Disposable (X)",
-            "summary": "Each declared use consumes one charge, including a failed or invalid declaration. Burst increases consume additional charges, capped by remaining uses; +1 SD does not spend an extra charge. Modes share charges.",
+            "summary": "Each declared use consumes one charge, including a failed or invalid declaration. Burst increases consume additional charges, capped by remaining uses; +1 SD does not spend an extra charge. Modes share charges. See [[rule:special-dice|Special Dice]] for allocation and discard timing.",
             "composition": {
                 "role": "definition"
             },
@@ -7523,7 +7523,7 @@
             "id": "skill:martial-arts",
             "kind": "skill",
             "name": "Martial Arts",
-            "summary": "An Automatic Special Skill with discrete Levels; the exact Level listed for a Trooper determines the applicable Level effects.",
+            "summary": "An Automatic Special Skill with discrete Levels; the exact Level listed for a Trooper determines the applicable Level effects.\n\nLevel 3 adds +1 SD; Level 5 adds +1B and +1 SD. Unlike a Burst bonus, the extra [[rule:special-dice|Special Die]] is rolled and then discarded. These MODs apply in both Active and Reactive Turns; the different Levels are not cumulative.",
             "composition": {
                 "role": "definition"
             },
@@ -7542,7 +7542,8 @@
                     "The user must reach or be in Silhouette contact with the target and declare [[skill:cc-attack]]."
                 ],
                 "effects": [
-                    "The Martial Arts Level listed in the Unit Profile supplies its defined Attack, Opponent, and Burst MODs for that Close Combat."
+                    "The Martial Arts Level listed in the Unit Profile supplies its defined Attack, Opponent, and Burst MODs for that Close Combat.",
+                    "Levels 3 and 5 grant +1 SD for [[skill:cc-attack]], following the [[rule:special-dice|Special Dice]] discard timing. Level 5 also grants +1B, which increases actual Burst; an SD does not."
                 ],
                 "restrictions": [
                     "Only the exact Level listed for the user applies."
@@ -7702,7 +7703,7 @@
             "id": "skill:martial-arts-l3",
             "kind": "skill",
             "name": "Martial Arts L3",
-            "summary": "Level 3 of [[skill:martial-arts]]. Levels are discrete rather than cumulative; use the effects listed for Level 3.",
+            "summary": "Level 3 of [[skill:martial-arts]]. Levels are discrete rather than cumulative; use the effects listed for Level 3. A +1 SD extra die is rolled and discarded; it does not increase Burst. See [[rule:special-dice|Special Dice]].",
             "composition": {
                 "role": "definition"
             },
@@ -7816,7 +7817,7 @@
             "id": "skill:martial-arts-l5",
             "kind": "skill",
             "name": "Martial Arts L5",
-            "summary": "Level 5 of [[skill:martial-arts]]. Levels are discrete rather than cumulative; use the effects listed for Level 5.",
+            "summary": "Level 5 of [[skill:martial-arts]]. Levels are discrete rather than cumulative; use the effects listed for Level 5. The +1B raises Burst while +1 SD adds a die that must be discarded. See [[rule:special-dice|Special Dice]].",
             "composition": {
                 "role": "definition"
             },
@@ -8080,7 +8081,8 @@
                     "The user must select an eligible BS Weapon, Equipment item, or Skill and meet its targeting requirements."
                 ],
                 "effects": [
-                    "The user makes the attack using the selected item's profile and applicable Attributes, Burst, Ammunition, and MODs."
+                    "The user makes the attack using the selected item's profile and applicable Attributes, Burst, Ammunition, and MODs.",
+                    "Where an applicable rule grants +1 SD, resolve the additional die and discard using [[rule:special-dice|Special Dice]]; it does not increase Burst."
                 ],
                 "restrictions": [
                     "The selected item's range, Line of Fire, target, and special rules limit the attack."
@@ -11973,7 +11975,8 @@
                     "At range, a successful [[skill:bs-attack|BS Attack]] hits as a [[trait:non-lethal|Non-Lethal]] Weapon; in Silhouette contact, use a Short Skill without an attack Roll. Each successful hit/use makes the target roll [[attribute:ph|PH]], not a Saving Roll.",
                     "If the target passes PH, remove one Wound and cancel [[state:unconscious|Unconscious State]] when applicable. If PH fails, the target receives a Wound, entering [[state:unconscious|Unconscious]] or [[state:dead|Dead State]] when applicable.",
                     "If several GizmoKit hits/uses succeed in the same Order, any one successful target PH Roll removes only one Wound in total, even if several PH Rolls succeed.",
-                    "Self-use is possible to remove Wounds or cancel applicable conditions only outside a Null State. With [[skill:remote-presence|Remote Presence]], one successful PH Roll removes enough Wounds to cancel either level of [[state:unconscious|Unconscious State]]. A target's printed GizmoKit PH value takes precedence when specified."
+                    "Self-use is possible to remove Wounds or cancel applicable conditions only outside a Null State. With [[skill:remote-presence|Remote Presence]], one successful PH Roll removes enough Wounds to cancel either level of [[state:unconscious|Unconscious State]]. A target's printed GizmoKit PH value takes precedence when specified.",
+                    "When fired as a [[skill:bs-attack|BS Weapon]], an applicable Fireteam +1 SD adds a die and discards one without consuming another use; see [[rule:special-dice|Special Dice]]. It does not change the target's separate PH recovery Rolls."
                 ]
             },
             "armyLinks": [
@@ -12262,7 +12265,8 @@
                     "At range, a successful [[skill:bs-attack|BS Attack]] hits as a [[trait:non-lethal|Non-Lethal]] Weapon; in Silhouette contact, use a Short Skill without an attack Roll. Each successful hit/use makes the target roll [[attribute:ph|PH]], not a Saving Roll.",
                     "On a single successful use, passing PH removes one Wound and cancels [[state:unconscious|Unconscious State]]; failing PH puts the target in [[state:dead|Dead State]].",
                     "If several MediKit hits/uses succeed in the same Order, any one successful target PH Roll is enough to recover; even if multiple PH Rolls succeed, only one Wound is removed in total.",
-                    "Self-use can cancel applicable conditions only outside a Null State; a PH value printed with MediKit on a target's Unit Profile replaces that target's PH for this Roll."
+                    "Self-use can cancel applicable conditions only outside a Null State; a PH value printed with MediKit on a target's Unit Profile replaces that target's PH for this Roll.",
+                    "When fired as a [[skill:bs-attack|BS Weapon]], an applicable Fireteam +1 SD adds a die and discards one without consuming another use; see [[rule:special-dice|Special Dice]]. It does not change the target's separate PH recovery Rolls."
                 ]
             },
             "armyLinks": [
@@ -13167,7 +13171,8 @@
                 "effects": [
                     "The user declares [[skill:move]] and [[skill:cc-attack]] as one Long Skill and may move up to the sum of both MOV values to reach Silhouette contact with the target.",
                     "If the target cannot be reached, the declaration becomes [[skill:idle]] and neither the [[skill:move]] nor the [[skill:cc-attack]] is performed.",
-                    "A Berserk MOD shown in the Unit Profile applies to the [[skill:cc-attack]]."
+                    "A Berserk MOD shown in the Unit Profile applies to the [[skill:cc-attack]].",
+                    "Although [[skill:berserk|Berserk]] is a Long Skill, the user can apply any +1 SD MOD they have; see the [[rule:special-dice|Special Dice]] exception."
                 ],
                 "restrictions": [
                     "The user declares the movement route and [[skill:cc-attack]] target before ARO declarations."
@@ -17080,7 +17085,7 @@
             "id": "rule:fireteam-level-bonuses",
             "kind": "rule",
             "name": "Fireteam Level and Bonuses",
-            "summary": "Fireteam Level is calculated from same-Unit or chart-equivalent members and grants cumulative bonuses from Level 1 through Level 5.",
+            "summary": "Fireteam Level is calculated from same-Unit or chart-equivalent members and grants cumulative bonuses from Level 1 through Level 5.\n\nLevel 2 [[skill:bs-attack]] (+1 SD) rolls and discards an extra die, without raising Burst or spending charges. It covers ranged [[equipment:medikit|MediKit]] and [[equipment:gizmokit|GizmoKit]] attacks, not Long Skills, no-roll [[trait:direct-template|Direct Templates]], or [[skill:discover]]. See [[rule:special-dice|Special Dice]].\n\nAt Level 4, the +1 modifier raises the Attribute used for a [[skill:bs-attack|BS Attack]], including [[trait:bs-weapon-ph|PH]] and [[trait:bs-weapon-wip|WIP]] weapons; it does not apply to [[skill:discover]]. The separate Level 3 bonus gives +3 to [[skill:discover]].",
             "composition": {
                 "role": "definition"
             },
@@ -17152,6 +17157,11 @@
                 {
                     "sourceId": "wiki-fireteam-bonuses-oldid-3933",
                     "heading": "Fireteam Bonuses"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 3,
+                    "section": "Fireteam Bonuses and Discover"
                 }
             ],
             "review": {
@@ -20254,6 +20264,70 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 60,
                     "section": "Supportware use and cancellation example"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "rule:special-dice",
+            "kind": "rule",
+            "name": "Special Dice (+1 SD)",
+            "aliases": [
+                "Special Die",
+                "Special Dice",
+                "+1 SD"
+            ],
+            "summary": "A +1 Special Die (SD) lets a Trooper roll one extra die and then discard one die. Unlike +1B, it does not increase Burst or spend an additional [[trait:disposable-x|Disposable]] use.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "effects": [
+                    "The +1 SD MOD applies in both the Active and Reactive Turns. Roll one extra die for the eligible Roll, then select and discard one die; only the retained dice count toward the result.",
+                    "If Burst is divided among several targets, assign the extra die to one of those targets and discard a die from the Roll against that same target. With B1, the extra die cannot be assigned to a different target.",
+                    "During a Face to Face Roll, make the discard after both players have rolled. When both players must discard a die, the Active Player selects first."
+                ],
+                "restrictions": [
+                    "Normally +1 SD cannot be used with Long Skills or Skills, Weapons, or Equipment that do not require a Roll, such as a [[trait:direct-template|Direct Template]] Weapon. [[skill:berserk]] is an explicit Long Skill exception for SD MODs the user has.",
+                    "The maximum Attack Burst remains B6; extra SD dice do not count as Burst and do not spend [[trait:disposable-x|Disposable]] uses."
+                ],
+                "clarifications": [
+                    "For example, a B4 [[skill:bs-attack|BS Attack]] with +1 SD rolls five dice and discards one, leaving B4 to resolve. If that B4 is split between two targets, the extra die and its discard both belong to just one target.",
+                    "The Fireteam Level 2 bonus supplies +1 SD to [[skill:bs-attack]], including ranged [[equipment:medikit|MediKit]] and [[equipment:gizmokit|GizmoKit]] attacks, but not [[skill:discover]]. Level 4 separately adds +1 to the Attribute used by a [[skill:bs-attack|BS Attack]], including [[trait:bs-weapon-ph|PH]] or [[trait:bs-weapon-wip|WIP]] weapons; it also does not apply to [[skill:discover]].",
+                    "[[skill:martial-arts]] Levels 3 and 5 grant +1 SD during [[skill:cc-attack|CC Attack]]; Level 5 also grants +1B. The extra SD die is still discarded, while +1B changes the actual Burst.",
+                    "The N5 v0.1 FAQ confirms that SD MODs still apply in Coordinated Orders because they do not alter Burst."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 75,
+                    "section": "Modifiers Explained (MODs)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 100,
+                    "section": "Martial Arts"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 136,
+                    "section": "Fireteam Bonus Level 2"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 3,
+                    "section": "Special Dice during Coordinated Orders"
                 }
             ],
             "review": {

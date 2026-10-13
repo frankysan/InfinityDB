@@ -149,6 +149,63 @@ def test_shared_hacking_area_firewall_and_supportware_mechanics_are_composed(
     )
 
 
+def test_special_dice_reference_and_source_exceptions_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    special_dice = current_rules_database.composed_record("rule:special-dice")
+    assert special_dice is not None
+    assert special_dice["facts"]["category"] == "basic-rule"
+    text = " ".join(
+        clause
+        for field in ("effects", "restrictions", "clarifications")
+        for clause in special_dice["facts"][field]
+    )
+    for required in (
+        "do not spend [[trait:disposable-x|Disposable]] uses",
+        "the Active Player selects first",
+        "assigned to a different target",
+        "[[skill:berserk]]",
+        "[[equipment:medikit|MediKit]]",
+        "[[equipment:gizmokit|GizmoKit]]",
+        "[[trait:bs-weapon-ph|PH]]",
+        "[[trait:bs-weapon-wip|WIP]]",
+        "[[skill:martial-arts]]",
+        "Coordinated Orders",
+    ):
+        assert required in text
+    assert {
+        (source["source_id"], source.get("page"))
+        for source in special_dice["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 75),
+        ("n5-core-v5.3-pdf", 100),
+        ("n5-core-v5.3-pdf", 136),
+        ("n5-faq-v0.1-en-pdf", 3),
+    }
+
+    for record_id in (
+        "rule:fireteam-level-bonuses",
+        "skill:martial-arts",
+        "skill:martial-arts-l3",
+        "skill:martial-arts-l5",
+        "skill:berserk",
+        "skill:bs-attack",
+        "trait:disposable-x",
+        "equipment:medikit",
+        "equipment:gizmokit",
+    ):
+        record = current_rules_database.composed_record(record_id)
+        assert record is not None, record_id
+        authored_text = json.dumps(record)
+        assert any(
+            reference in authored_text
+            for reference in (
+                "[[rule:special-dice|Special Dice]]",
+                "[[rule:special-dice|Special Die]]",
+            )
+        ), record_id
+
+
 def test_escape_system_threshold_help_refers_to_the_unit_profile(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -216,7 +273,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 375
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 376
         assert connection.execute(
             "SELECT id, title FROM scenario_collections"
         ).fetchone() == ("n5-core", "N5 Core Scenarios")

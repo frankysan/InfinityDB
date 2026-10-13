@@ -1968,6 +1968,13 @@
       "status": "reviewed",
       "reviewedOn": "2026-10-13",
       "note": "Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed."
+    },
+    {
+      "recordId": "rule:special-dice",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "Shared N5.3 SD resolution, Fireteam/CC applicability and Berserk exception are source-cited prose; no universal Burst or Disposable relation is inferred."
     }
   ],
   "futureInteractions": [

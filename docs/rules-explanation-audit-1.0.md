@@ -828,6 +828,12 @@ Martial Arts/Berserk exceptions. **Fix:** prose/links, possibly explanatory
 table captions; retain imported tables. **Dependencies:** REA-005, REA-022,
 REA-026, REA-034.
 
+**Implementation follow-up (2026-10-13):** The shared `rule:special-dice`
+General Rule and links from Fireteam, Martial Arts, Berserk, BS Attack,
+Disposable and ranged Kit references now cover the identified allocation,
+discard, source exceptions and Coordinated Orders FAQ. API and browser
+acceptance remain required; this finding is not yet closed.
+
 ### REA-022 - Kit recovery and Disposable spending need multi-roll rules
 
 **Classification:** completeness, consistency. **Severity:** High. **Priority:** P1.
