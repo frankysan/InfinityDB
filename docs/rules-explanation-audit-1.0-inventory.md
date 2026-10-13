@@ -7,6 +7,11 @@ originally examining `859823f8d2899405a40cf126883d2adf5763db7c` and extended
 against `c5400ab1b950990fdacc509be91c110fe85431fb` on 2026-10-09.
 The inputs and record order are unchanged.
 It is not generated runtime data or a replacement interaction ledger.
+The D/S classifications and original finding titles are historical evidence,
+**not the current implementation status**. In particular, REA-008, REA-017,
+and REA-026 have subsequently been completed within their stated scopes;
+consult the [current backlog](TODO.md#rules-and-reference-completeness)
+and the main audit's follow-up notes before treating a finding as open.
 
 ## Coverage totals
 
@@ -69,7 +74,7 @@ It is not generated runtime data or a replacement interaction ledger.
 | [REA-023](rules-explanation-audit-1.0.md#rea-023---placement-cards-defer-essential-geometry-and-deployment-restrictions) | High | P1 | Placement cards defer essential geometry and deployment restrictions |
 | [REA-024](rules-explanation-audit-1.0.md#rea-024---bioweapon-needs-a-target-conditioned-explanation-alongside-the-chart) | Medium | P1 | BioWeapon needs a target-conditioned explanation alongside the chart |
 | [REA-025](rules-explanation-audit-1.0.md#rea-025---nem-is-absent-from-the-reviewed-composition-map) | High | P1 | N+E/M is absent from the reviewed composition map |
-| [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content) | Medium | P1 | Useful general mechanics remain research rather than linked reference content |
+| [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics) | Medium | P1 | Useful general mechanics remain research rather than linked reference content |
 | [REA-027](rules-explanation-audit-1.0.md#rea-027---flash-pulses-spanish-chart-disagrees-on-rolls-and-traits) | High | P1 | Flash Pulse's Spanish chart disagrees on rolls and Traits |
 | [REA-028](rules-explanation-audit-1.0.md#rea-028---kobras-two-issues-require-separate-source-decisions) | High | P1 | Kobra's two issues require separate source decisions |
 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | Medium | P1 | The collections' exact Wiki archive is unavailable locally |
@@ -329,10 +334,10 @@ being listed does not mean the individual record is factually wrong.
 | `skill:strategos` | C | D | 0 | - | S1 pp. 113 |
 | `skill:strategos-l1` | C | D | 1 | - | S1 pp. 113 |
 | `skill:strategos-l2` | C | D | 1 | - | S1 pp. 113 |
-| `skill:bs-attack` | C | D | 0 | [REA-005](rules-explanation-audit-1.0.md#rea-005---bs-weapon-wip-omits-explicit-prohibited-combinations), [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning), [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content) | S1 pp. 39-41, 75 |
+| `skill:bs-attack` | C | D | 0 | [REA-005](rules-explanation-audit-1.0.md#rea-005---bs-weapon-wip-omits-explicit-prohibited-combinations), [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning), [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics) | S1 pp. 39-41, 75 |
 | `skill:bs-12` | C | S | 1 | - | n5-core-v5.3-pdf p. 40 |
 | `skill:bs-11` | C | S | 1 | - | n5-core-v5.3-pdf p. 40 |
-| `skill:cc-attack` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content) | S1 pp. 54, 95, 100, 103 (selected modifiers) |
+| `skill:cc-attack` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics) | S1 pp. 54, 95, 100, 103 (selected modifiers) |
 | `skill:cc-21` | C | S | 1 | - | n5-core-v5.3-pdf p. 45 |
 | `equipment:cube` | C | D | 1 | [REA-002](rules-explanation-audit-1.0.md#rea-002---doctor-omits-its-ordinary-recovery-gate-and-lethal-failure), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 121 |
 | `equipment:cube-2` | C | D | 4 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 73, 121 |
@@ -365,10 +370,10 @@ being listed does not mean the individual record is factually wrong.
 | `skill:cautious-movement` | C | D | 0 | - | S1 pp. 32, 112 |
 | `skill:alert` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 77 |
 | `skill:climb` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 32-33, 88 |
-| `skill:idle` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 p. 80: activation/ARO, invalid requirements become Idle; Disposable spending and Marker revelation |
+| `skill:idle` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 p. 80: activation/ARO, invalid requirements become Idle; Disposable spending and Marker revelation |
 | `skill:intuitive-attack` | C | D | 0 | [REA-003](rules-explanation-audit-1.0.md#rea-003---intuitive-attack-appears-to-require-a-second-attack-roll), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 49 |
 | `skill:jump` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 34, 113 |
-| `skill:move` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 28-31 |
+| `skill:move` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 28-31 |
 | `skill:look-out` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 81 |
 | `skill:place-deployable` | C | D | 0 | [REA-023](rules-explanation-audit-1.0.md#rea-023---placement-cards-defer-essential-geometry-and-deployment-restrictions), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-036](rules-explanation-audit-1.0.md#rea-036---deployable-cover-names-a-cap-without-giving-its-value-or-conditions) | S1 pp. 82-83 |
 | `skill:reload` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 83, 120 |
@@ -453,7 +458,7 @@ being listed does not mean the individual record is factually wrong.
 | `rule:irregular-order` | C | D | 0 | - | S1 p. 11: own Order retained, same-group Regular Orders still usable |
 | `rule:special-lieutenant-order` | C | D | 0 | - | S1 p. 11: separate Lieutenant use and Open Information |
 | `rule:tactical-order` | C | D | 0 | - | S1 p. 11: own Order plus explicit advanced/Fireteam uses |
-| `rule:command-token-strategic-use` | C | D | 2 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content), [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | S1 p. 128: first/second-player actors, timing, >10 Order threshold, two strategic-use modes |
+| `rule:command-token-strategic-use` | C | D | 2 | [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics), [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | S1 p. 128: first/second-player actors, timing, >10 Order threshold, two strategic-use modes |
 | `skill:chain-of-command` | C | D | 2 | - | S1 p. 87: Lieutenant succession conditions and automatic priority |
 | `skill:counterintelligence` | C | D | 1 | [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | S1 p. 90 and p. 128: enemy Order reduction versus user Command Token allowance |
 | `skill:inspiring-leadership` | C | D | 3 | - | S1 pp. 99 |

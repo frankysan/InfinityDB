@@ -576,7 +576,7 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   shared definition v2, scoped Rules/Skills, relational publication indexes, list/detail
   APIs, browser selection and deterministic theme/distance-aware maps are implemented
   and included in 0.10.1. The current contract belongs in
-  [the data model](data-model.md#planned-scenario-model-10).
+  [the data model](data-model.md#scenario-model-implemented-core-and-future-extensions).
   - [ ] Reconcile scenario facts, scoring, scoped concepts and source issues with the
     final 1.0 source inventory for all six supported Army Points values. This is
     source-completeness review, not a request to reimplement the published domain.

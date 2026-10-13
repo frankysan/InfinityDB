@@ -7,7 +7,10 @@
 **Examined commit (follow-up):** `c5400ab1b950990fdacc509be91c110fe85431fb`
 
 **Original audit commit:** `859823f8d2899405a40cf126883d2adf5763db7c`
-**Status:** Assessment for review; no rules, code, schemas, tests, databases, or runtime configuration changed.
+**Original audit status:** Documentation-only assessment at the examined
+commit; no rules, code, schemas, tests, databases or runtime configuration
+were changed **by that assessment**. Follow-up entries below document
+subsequent implementation and acceptance work.
 
 **Snapshot scope:** Findings and totals describe the examined commits above, not the
 current release candidate. Later implementation notes record selected corrections;
@@ -460,9 +463,16 @@ Face to Face Attribute. S2 printed p. 2, Protheion question, says additional
 failed Saving Rolls beyond those needed for Dead have no effect or benefit.
 Do not turn an overkill failed save into a recovered Wound or VITA increase.
 
-**Action:** Preserve the existing sequence; add those two conditions and a
-short example of attacking an Unconscious target. **Fix:** text/links and FAQ
-citation. **Dependencies:** REA-009, REA-030.
+**Original action:** Preserve the existing sequence; add those two
+conditions and an Unconscious-target example, with a FAQ citation.
+**Dependencies:** REA-009, REA-030.
+
+**Status:** Complete for the reviewed Protheion explanation (2026-10-13).
+The current curated `skill:protheion` record includes the profile-listed
+opponent Attribute MOD, the Dead/overkill limitation, a two-Saving-Roll example,
+and the N5.3 and FAQ v0.1 citations. The regression test
+`test_protheion_overkill_and_opponent_mod_are_published` covers these details.
+Other recovery and FAQ scope issues remain under REA-009/030.
 
 ### REA-009 - Recovery and re-infliction in the same Order are unexplained
 
@@ -683,7 +693,7 @@ REA-035's misleading IMP-2 Discover wording; REA-036's Vitroferro cap,
 Cover eligibility and placement note; and REA-039's TinBot family baseline.
 These are implemented corrections, not closure of their wider 1.0 review
 scope. The historical findings below remain as evidence; see
-[`TODO.md`](TODO.md#0101--interim-reference-consistency) for remaining release work.
+[`TODO.md`](TODO.md#current-milestone) for remaining 1.0 work.
 
 ### REA-016 - Stealth omits Deployables and multi-Trooper reaction reasoning
 

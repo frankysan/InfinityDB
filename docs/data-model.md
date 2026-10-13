@@ -512,7 +512,7 @@ passage fingerprints so changed wording reopens review.
 
 The maintained policy is documented in `data/curated/README.md`.
 
-## Planned scenario model (1.0)
+## Scenario model (implemented core and future extensions)
 
 ### Current scenario foundation
 

@@ -581,7 +581,7 @@ Acceptance by the generic record envelope does not imply a published application
 scenario authoring uses `facts.definitionVersion: 2` and composes explicit references from the same
 collection. Inline v1 records remain supported; export resolves v2 into self-contained v1-shaped
 runtime records. The canonical component/data contract is documented in
-[the scenario model](../../docs/data-model.md#planned-scenario-model-10).
+[the scenario model](../../docs/data-model.md#scenario-model-implemented-core-and-future-extensions).
 
 An optional `scenarioComponents` object has `formatVersion: 1` and a `definitions` array. Each
 definition has a typed `id`, `kind` (`setup`, `geometry`, `objective`, or `end-condition`), `payload`,
