@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **116/131** complete, **15** pending.
+- Supporting semantic identities: **119/134** complete, **15** pending.
 - Current authored outgoing relations: **314**.
 - Explicitly tracked future/deferred interactions: **113**.
 
@@ -160,7 +160,7 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
 - [x] **Hacker** (`skill:hacker`) — reviewed
   - `enables-use-of` → Hacking Device (`equipment:hacking-device`)
-  - future [post-0.7.0; planned]: `relation type TBD` → `rule:hacking-area` — A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Hacking Area (`rule:hacking-area`) — The canonical Hacking Area reference now exists. A typed geometry/network edge still cannot express activation-time reach, enemy-Repeater eligibility, or ARO measurement conditions; keep the semantic link in Hacker prose without inventing unconditional network relations.
   - future [post-0.7.0; planned]: `relation type TBD` → `rule:upgrade-program` — Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; Hacking Programs are now first-class identities, but Upgrade Program identity and source-specific grant semantics remain unresolved.
 - [x] **Hidden Deployment** (`skill:hidden-deployment`) — reviewed
   - `enters-state` → Hidden Deployment State (`state:hidden-deployment`)
@@ -462,7 +462,7 @@ review. `declaration-category` projection records are excluded.
   - `imposes-modifiers-on` → BS Attack (`skill:bs-attack`)
 - [x] **Repeater** (`equipment:repeater`) — reviewed
   - outgoing: none
-  - future [post-0.7.0; deferred]: `relation type TBD` → `rule:hacking-area` — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
+  - future [post-0.7.0; deferred]: `relation type TBD` → Hacking Area (`rule:hacking-area`) — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
 - [x] **SymbioMate** (`equipment:symbiomate`) — reviewed
   - `uses-effects-of` → Immunity (`skill:immunity`)
 - [x] **TinBot** (`equipment:tinbot`) — reviewed: TinBot is a family container; exact source variants carry their own reviewed interaction semantics.
@@ -661,7 +661,7 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → ECM (`equipment:ecm`)
 - [x] **TinBot: Firewall** (`equipment:tinbot-firewall`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
-  - future [post-0.7.0; planned]: `uses-effects-of` → `equipment:firewall` — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
+  - future [post-0.7.0; planned]: `uses-effects-of` → Firewall (`equipment:firewall`) — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
 - [x] **TinBot: Neurocinetics** (`equipment:tinbot-neurocinetics`) — reviewed
   - `variant-of` → TinBot (`equipment:tinbot`)
   - `uses-effects-of` → Neurocinetics (`skill:neurocinetics`)
@@ -899,7 +899,12 @@ review. `declaration-category` projection records are excluded.
 - [ ] **T2 Ammunition** (`ammunition:t2`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - outgoing: none
 
-#### Rule (9/9)
+#### Equipment (1/1)
+
+- [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
+  - outgoing: none
+
+#### Rule (11/11)
 
 - [x] **Carrying Supply Boxes** (`rule:scenario:carrying-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
@@ -911,6 +916,8 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Dominate Quadrants** (`rule:scenario:dominate-quadrants`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
+- [x] **Hacking Area** (`rule:hacking-area`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
+  - outgoing: none
 - [x] **Killing** (`rule:scenario:killing`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
 - [x] **Reinforced Tactical Link** (`rule:scenario:reinforced-tactical-link`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
@@ -918,6 +925,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Specialist Troops** (`rule:specialist-troops:standard`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
 - [x] **Supply Boxes** (`rule:scenario:supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Supportware** (`rule:supportware`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
 #### Scenario (0/4)
@@ -1025,8 +1034,8 @@ review. `declaration-category` projection records are excluded.
 - [ ] Deactivator (`equipment:deactivator`) → `rule:cover`; `ignores-modifiers-from`; **post-0.7.0 / planned** — Deactivator explicitly ignores Cover MODs on its WIP Roll; materialize the edge once Cover has a canonical rules identity.
 - [ ] Deactivator (`equipment:deactivator`) → Deployable (`trait:deployable`); `relation type TBD`; **post-0.7.0 / deferred** — Deactivator targets and removes deployed enemy Weapons or Equipment with Deployable semantics; the current graph lacks a precise target-eligibility/removes-game-element relation.
 - [ ] Deployable Cover (`equipment:deployable-cover`) → `rule:partial-cover`; `uses-effects-of`; **post-0.7.0 / planned** — Deployable Cover explicitly applies Partial Cover with variant-specific changes; materialize the reuse edge once Partial Cover has a canonical rules identity.
-- [ ] Repeater (`equipment:repeater`) → `rule:hacking-area`; `relation type TBD`; **post-0.7.0 / deferred** — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
-- [ ] TinBot: Firewall (`equipment:tinbot-firewall`) → `equipment:firewall`; `uses-effects-of`; **post-0.7.0 / planned** — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
+- [ ] Repeater (`equipment:repeater`) → Hacking Area (`rule:hacking-area`); `relation type TBD`; **post-0.7.0 / deferred** — Repeater extends allied Hacking Areas and allows enemy Hackers in its Zone of Control to use that network; the current relation vocabulary has no precise Hacking-Area extension edge.
+- [ ] TinBot: Firewall (`equipment:tinbot-firewall`) → Firewall (`equipment:firewall`); `uses-effects-of`; **post-0.7.0 / planned** — TinBot: Firewall grants the Firewall advantage; materialize the edge when Firewall is modeled as a standalone supporting Equipment rule.
 - [ ] White Noise (`hacking-program:white-noise`) → Multispectral Visor (`equipment:multispectral-visor`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented counter-interaction with this identity, but the effect is mediated by a temporary White Noise Zone and Line of Fire. Keep it deferred until the relation model can preserve that zone/LoF condition instead of asserting an unconditional direct negation.
 - [ ] White Noise (`hacking-program:white-noise`) → Marksmanship (`skill:marksmanship`); `relation type TBD`; **post-0.7.0 / deferred** — White Noise is a documented counter-interaction with this identity, but the effect is mediated by a temporary White Noise Zone and Line of Fire. Keep it deferred until the relation model can preserve that zone/LoF condition instead of asserting an unconditional direct negation.
 - [ ] `rule:marker-form` → Surprise Attack (`skill:surprise-attack`); `enables-use-of`; **post-0.7.0 / planned** — Surprise Attack can begin from Marker form beyond the currently modeled Camouflaged example; add the generic prerequisite edge once Marker form is a canonical abstraction, while Hidden Deployment remains a separate enabling State.
@@ -1051,7 +1060,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] G: Jumper (`skill:g-jumper`) → Dodge (`skill:dodge`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
 - [ ] G: Jumper (`skill:g-jumper`) → Reset (`skill:reset`); `relation type TBD`; **post-0.7.0 / deferred** — Inactive G: Jumper Proxies that react in ARO are limited to Dodge or Reset. The current relation vocabulary cannot express this permission as conditional on an inactive Proxy participant role.
 - [ ] G: Jumper (`skill:g-jumper`) → Isolated State (`state:isolated`); `relation type TBD`; **post-0.7.0 / deferred** — G: Jumper prevents activation of an individual Proxy in Isolated State and may move the Active Proxy role when a Proxy becomes Isolated; the current graph cannot express that participant-specific Proxy trigger without implying that Isolated applies to the G: Jumper identity as a whole.
-- [ ] Hacker (`skill:hacker`) → `rule:hacking-area`; `relation type TBD`; **post-0.7.0 / planned** — A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity.
+- [ ] Hacker (`skill:hacker`) → Hacking Area (`rule:hacking-area`); `relation type TBD`; **post-0.7.0 / deferred** — The canonical Hacking Area reference now exists. A typed geometry/network edge still cannot express activation-time reach, enemy-Repeater eligibility, or ARO measurement conditions; keep the semantic link in Hacker prose without inventing unconditional network relations.
 - [ ] Hacker (`skill:hacker`) → `rule:upgrade-program`; `relation type TBD`; **post-0.7.0 / planned** — Hackers may receive Upgrade Programs independently of baseline Device-granted Programs; Hacking Programs are now first-class identities, but Upgrade Program identity and source-specific grant semantics remain unresolved.
 - [ ] Idle (`skill:idle`) → `rule:marker-form`; `relation type TBD`; **post-0.7.0 / deferred** — A failed declaration that resolves as Idle reveals a Trooper in Marker form; the graph needs a canonical Marker-form abstraction before this can be represented without enumerating only some Marker States.
 - [ ] Immunity (`skill:immunity`) → `rule:saving-roll`; `applies-effects-to`; **post-0.7.0 / planned** — Most Immunity categories alter the Ammunition/effects and sometimes the number or Attribute of Saving Rolls; materialize this relationship once Saving Roll is a canonical rules identity.

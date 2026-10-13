@@ -11,11 +11,18 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Hacking Area, Firewall and Supportware now have their own linked references, with
+  enemy Repeater restrictions, Firewall Saving Roll bonuses and Supportware replacement
+  explained alongside Hacking Programs.
 - Negative Feedback (NFB) now explains which effects it overrides on a Trooper and
   how long Cybermask and White Noise restrict other NFB effects.
 
 ### Changed
 
+- **Data processing + Web backend:** Publish linked N5.3 Hacking Area and Supportware
+  General Rules and a Firewall Equipment reference, including the FAQ for disabled
+  Hacking Devices. Connect existing Hacker, Repeater, TinBot and Hacking Programs to
+  the shared mechanics without changing Army source values.
 - **Data processing:** Clarify the one-active-NFB-effect rule and the separate
   Cybermask/White Noise lifetimes in the linked Label and Hacking Program references.
   Other Troopers' NFB effects remain independent.

@@ -17,9 +17,9 @@ from infinity_db.maintained_text import (
 
 # The complete-term namespace includes common nouns (Model, Token, Trooper),
 # whose ordinary-text occurrences have not been reviewed as a full batch.
-# Explicit term: links are supported, but those words must not silently enter
+# Explicit term:/rule: links are supported, but those words must not silently enter
 # the existing fully reviewed semantic-reference coverage gate.
-FULLY_REVIEWED_REFERENCE_KINDS = MAINTAINED_REFERENCE_KINDS - {"term"}
+FULLY_REVIEWED_REFERENCE_KINDS = MAINTAINED_REFERENCE_KINDS - {"term", "rule"}
 
 REVIEW_POLICY_FILENAME = "maintained-text-link-reviews.json"
 REVIEW_POLICY_FORMAT_VERSION = 2

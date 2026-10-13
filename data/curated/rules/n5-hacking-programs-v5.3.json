@@ -69,13 +69,14 @@
             },
             "facts": {
                 "requirements": [
-                    "The target is an allied REM from the same Army List and is inside the user's Hacking Area."
+                    "The target is an allied REM from the same Army List and is inside the user's [[rule:hacking-area|Hacking Area]]."
                 ],
                 "effects": [
                     "The target gains [[skill:marksmanship]]; after activation the sustained effect covers the entire game table."
                 ],
                 "restrictions": [
-                    "Normal Supportware exclusivity and cancellation rules apply."
+                    "Normal Supportware exclusivity and cancellation rules apply.",
+                    "The shared [[rule:supportware]] rule limits sustained Programs to one per [[skill:hacker]] and one per beneficiary, with cancellation when replaced or when the sustaining [[skill:hacker]] becomes [[state:isolated|Isolated]] or enters a [[term:null-state|Null State]]."
                 ]
             },
             "citations": [
@@ -83,6 +84,11 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "Assisted_Fire",
                     "heading": "Assisted Fire"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 56,
+                    "section": "Supportware"
                 }
             ],
             "review": {
@@ -161,7 +167,8 @@
                     "Declaring this Program as an ARO is optional; the [[skill:hacker]] may declare another eligible ARO instead.",
                     "If both players have this Program active, their Programs' effects cancel. This does not cancel independent MODs, such as Firefight's Designated Landing Area +3.",
                     "A player cannot have more than one Controlled Jump Program active.",
-                    "This Program does not affect Speedball Tokens placed with [[skill:request-speedball]], even though their placement uses [[skill:combat-jump]] rules. The FAQ limits this Program to Troopers."
+                    "This Program does not affect Speedball Tokens placed with [[skill:request-speedball]], even though their placement uses [[skill:combat-jump]] rules. The FAQ limits this Program to Troopers.",
+                    "The general [[rule:supportware]] limits also apply: the [[skill:hacker]] sustains only one active Supportware Program, and it ends if that [[skill:hacker]] becomes [[state:isolated|Isolated]] or enters a [[term:null-state|Null State]]."
                 ]
             },
             "relations": [
@@ -190,6 +197,11 @@
                     "sourceId": "n5-faq-v0.1-en-pdf",
                     "page": 1,
                     "section": "Quantronic Combat (Hacking) — Controlled Jump and Speedballs"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 56,
+                    "section": "Supportware"
                 }
             ],
             "review": {
@@ -262,13 +274,14 @@
             },
             "facts": {
                 "requirements": [
-                    "The target is an allied REM from the same Army List and is inside the user's Hacking Area."
+                    "The target is an allied REM from the same Army List and is inside the user's [[rule:hacking-area|Hacking Area]]."
                 ],
                 "effects": [
                     "The target REM gains Burst 2 in ARO; after activation the sustained effect covers the entire game table."
                 ],
                 "restrictions": [
-                    "Normal Supportware exclusivity and cancellation rules apply."
+                    "Normal Supportware exclusivity and cancellation rules apply.",
+                    "The shared [[rule:supportware]] rule limits sustained Programs to one per [[skill:hacker]] and one per beneficiary, with cancellation when replaced or when the sustaining [[skill:hacker]] becomes [[state:isolated|Isolated]] or enters a [[term:null-state|Null State]]."
                 ]
             },
             "citations": [
@@ -276,6 +289,11 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "Enhanced_Reaction",
                     "heading": "Enhanced Reaction"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 56,
+                    "section": "Supportware"
                 }
             ],
             "review": {
@@ -291,7 +309,7 @@
             "id": "hacking-program:fairy-dust",
             "kind": "hacking-program",
             "name": "Fairy Dust",
-            "summary": "Supportware that grants Firewall (-3) protection to one chosen Hackable Troop Type in the user's Army List.",
+            "summary": "Supportware that grants [[equipment:firewall]] (-3) protection to one chosen Hackable Troop Type in the user's Army List.",
             "composition": {
                 "role": "definition"
             },
@@ -306,10 +324,14 @@
                     "Choose HI, REM, TAG, or VH from the same Army List as the user."
                 ],
                 "effects": [
-                    "Every Trooper of the chosen type in that Army List benefits from Firewall (-3) against Comms Attacks."
+                    "Every Trooper of the chosen type in that Army List benefits from [[equipment:firewall|Firewall]] (-3) against Comms Attacks."
                 ],
                 "restrictions": [
-                    "Normal Supportware exclusivity and cancellation rules apply."
+                    "Normal Supportware exclusivity and cancellation rules apply.",
+                    "The shared [[rule:supportware]] rule applies. If any protected Trooper is chosen for new Supportware, [[hacking-program:fairy-dust]] is canceled for the entire chosen Troop Type, not merely that Trooper."
+                ],
+                "clarifications": [
+                    "For example, if [[hacking-program:enhanced-reaction]] targets one REM covered by Fairy Dust, the original Fairy Dust Program is removed and all other REMs lose its protection. See [[rule:supportware]]."
                 ]
             },
             "citations": [
@@ -317,6 +339,11 @@
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "Fairy_Dust",
                     "heading": "Fairy Dust"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 60,
+                    "section": "Supportware use and cancellation example"
                 }
             ],
             "review": {

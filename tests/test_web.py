@@ -31,6 +31,7 @@ from infinity_db.database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
 )
+from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.symbol_catalog import SymbolCatalog
@@ -4662,11 +4663,53 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 11
+    assert len(general_rules) == 13
     assert general_rules["regular-order"]["name"] == "Regular Order"
     assert general_rules["irregular-order"]["name"] == "Irregular Order"
     assert general_rules["loss-of-lieutenant"]["name"] == "Loss of Lieutenant"
     assert general_rules["peripheral-type-servant"]["name"] == "Peripheral (Servant)"
+    assert general_rules["hacking-area"]["name"] == "Hacking Area"
+    assert general_rules["supportware"]["name"] == "Supportware"
+
+    for rule_slug, expected_reference in (
+        ("hacking-area", "equipment:repeater"),
+        ("supportware", "skill:hacker"),
+    ):
+        status, _, body = request(rules_app, f"/api/rules/{rule_slug}")
+        assert status == 200
+        rule = json.loads(body)
+        assert rule["rules"][0]["id"] == f"rule:{rule_slug}"
+        assert any(
+            token.get("target") == expected_reference
+            and token.get("public_reference") is not None
+            for token in rule["rules"][0]["summary_tokens"]
+        )
+
+    status, _, body = request(rules_app, "/api/equipment")
+    assert status == 200
+    equipment_items = {item["slug"]: item for item in json.loads(body)["items"]}
+    assert equipment_items["firewall"]["name"] == "Firewall"
+    assert equipment_items["firewall"]["use_count"] == 0
+
+    status, _, body = request(rules_app, "/api/equipment/firewall")
+    assert status == 200
+    firewall = json.loads(body)
+    assert firewall["slug"] == "firewall"
+    assert firewall["rules"][0]["id"] == "equipment:firewall"
+    assert not firewall["variants"]
+    assert any("+3" in text for text in firewall["rules"][0]["facts"]["effects"])
+
+    rules_database = rules_app.rules_database
+    assert rules_database is not None
+    tinbot_variant = rules_database.composed_record("equipment:tinbot-firewall")
+    assert tinbot_variant is not None
+    assert rule_record_public_reference(rules_app.database, tinbot_variant) is None
+    assert rules_app.api.equipment_catalog.get_equipment("tinbot-firewall") is None
+
+    # Army-backed Equipment must not appear without its source catalog identity.
+    assert "repeater" not in equipment_items
+    assert rules_app.api.equipment_catalog.get_equipment("repeater") is None
+
     assert "fireteam-general" not in general_rules
     assert "profile-help-unit-profile" not in general_rules
 

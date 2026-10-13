@@ -399,7 +399,10 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       (REA-019). Verify all three player-facing cards and Label-to-Program navigation
       in a real browser before closing that finding. Targeted MSV1/Sixth Sense FAQ
       questions remain a separate source-review task (REA-030).
-      Common Supportware rules (REA-018) remain separate work.
+      Hacking Area, Firewall and Supportware (REA-018) now have linked, published
+      baseline cards. Verify enemy-Repeater ARO scope and 8-inch checks, disabled
+      Hacking Device Firewall, and whole-Program Fairy Dust replacement in a real
+      browser before closing this finding.
       Separately decide source conflicts and FAQ applicability before dependent curation.
       Use the [source manifest](rules-explanation-audit-1.0-sources.md) and
       [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).

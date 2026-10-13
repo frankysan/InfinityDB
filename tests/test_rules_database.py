@@ -113,6 +113,42 @@ def test_published_variant_descriptions_use_game_language(
         assert "discrete rather than cumulative" in record["summary"]
 
 
+def test_shared_hacking_area_firewall_and_supportware_mechanics_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    hacking_area = current_rules_database.composed_record("rule:hacking-area")
+    firewall = current_rules_database.composed_record("equipment:firewall")
+    supportware = current_rules_database.composed_record("rule:supportware")
+    assert hacking_area is not None
+    assert firewall is not None
+    assert supportware is not None
+
+    assert "[[distance:8:inch]]" in " ".join(
+        hacking_area["facts"]["clarifications"]
+    )
+    assert "non-[[skill:hacker]]" in hacking_area["summary"]
+    assert "only one [[equipment:firewall]]" in firewall["summary"]
+    assert "+3 to Saving Rolls" in " ".join(firewall["facts"]["effects"])
+    assert "[[state:isolated|Isolated]]" in " ".join(
+        firewall["facts"]["restrictions"]
+    )
+    assert "entirely canceled" in " ".join(
+        supportware["facts"]["clarifications"]
+    )
+    assert {citation["source_id"] for citation in hacking_area["citations"]} >= {
+        "wiki-hacking-area-oldid-3974", "n5-core-v5.3-pdf"
+    }
+    assert {citation["source_id"] for citation in firewall["citations"]} >= {
+        "wiki-firewall-oldid-4097", "n5-faq-v0.1-en-pdf"
+    }
+
+    fairy_dust = current_rules_database.composed_record("hacking-program:fairy-dust")
+    assert fairy_dust is not None
+    assert "entire chosen Troop Type" in " ".join(
+        fairy_dust["facts"]["restrictions"]
+    )
+
+
 def test_escape_system_threshold_help_refers_to_the_unit_profile(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -180,7 +216,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 372
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 375
         assert connection.execute(
             "SELECT id, title FROM scenario_collections"
         ).fetchone() == ("n5-core", "N5 Core Scenarios")
@@ -463,7 +499,7 @@ def test_controlled_jump_immediate_aro_and_opposing_effects_are_published(
         citation["page"]
         for citation in program["citations"]
         if citation["source_id"] == "n5-core-v5.3-pdf"
-    } == {59, 155}
+    } == {56, 59, 155}
     assert any(
         relation["type"] == "modifies-rolls-for"
         and relation["record_id"] == "skill:combat-jump"

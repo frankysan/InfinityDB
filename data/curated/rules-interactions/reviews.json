@@ -1947,6 +1947,27 @@
       "status": "reviewed",
       "reviewedOn": "2026-10-09",
       "note": "Reviewed N5.3 Weapon Chart Stun/BTS/Non-Lethal/Stunned semantics and the printed Immunity (BTS) exception (Wiki Immunity oldid 3643, Example 4). No generic state or immunity resolution is inferred."
+    },
+    {
+      "recordId": "rule:hacking-area",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed."
+    },
+    {
+      "recordId": "equipment:firewall",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed."
+    },
+    {
+      "recordId": "rule:supportware",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed."
     }
   ],
   "futureInteractions": [
@@ -2843,8 +2864,8 @@
       "targetRecordId": "rule:hacking-area",
       "relationType": null,
       "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity."
+      "status": "deferred",
+      "reason": "The canonical Hacking Area reference now exists. A typed geometry/network edge still cannot express activation-time reach, enemy-Repeater eligibility, or ARO measurement conditions; keep the semantic link in Hacker prose without inventing unconditional network relations."
     },
     {
       "sourceRecordId": "skill:hacker",

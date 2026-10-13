@@ -232,7 +232,7 @@
         {
             "id": "supportware",
             "name": "Supportware",
-            "description": "Hacking Programs that provide support to Allied Troopers or interfere with enemies."
+            "description": "Hacking Programs that provide support to Allied Troopers or interfere with enemies. See [[rule:supportware]] for sustained-Program limits and cancellation."
         },
         {
             "id": "faqs",
@@ -1249,6 +1249,24 @@
             "url": "https://infinitythewiki.com/index.php?title=Fireteam_Bonuses&oldid=3933",
             "authority": "secondary",
             "retrievedDate": "2026-09-26"
+        },
+        {
+            "id": "wiki-firewall-oldid-4097",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Firewall revision 4097",
+            "version": "N5.3 / oldid 4097",
+            "url": "https://infinitythewiki.com/index.php?title=Firewall&oldid=4097",
+            "authority": "secondary",
+            "retrievedDate": "2026-10-13"
+        },
+        {
+            "id": "wiki-hacking-area-oldid-3974",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Hacking Area revision 3974",
+            "version": "N5.2 / oldid 3974 (current N5.3 Wiki)",
+            "url": "https://infinitythewiki.com/index.php?title=Hacking_Area&oldid=3974",
+            "authority": "secondary",
+            "retrievedDate": "2026-10-13"
         }
     ],
     "records": [
@@ -8492,7 +8510,7 @@
             "id": "equipment:tinbot-firewall",
             "kind": "equipment",
             "name": "TinBot: Firewall",
-            "summary": "A [[equipment:tinbot]] that provides a Firewall. Check the Unit Profile for the listed MOD.",
+            "summary": "A [[equipment:tinbot]] that provides a [[equipment:firewall]]. Check the Unit Profile for the listed MOD.",
             "composition": {
                 "role": "definition"
             },
@@ -11515,7 +11533,7 @@
                 "comms-equipment",
                 "obligatory"
             ],
-            "summary": "Automatic Comms Equipment that extends allied Hacking Areas and can also be used by enemy [[skill:hacker:plural]] with Firewall MODs.",
+            "summary": "Automatic Comms Equipment that extends allied [[rule:hacking-area|Hacking Areas]] and can also be used by enemy [[skill:hacker:plural]] with [[equipment:firewall|Firewall]] MODs.",
             "composition": {
                 "role": "definition"
             },
@@ -11527,8 +11545,9 @@
             },
             "facts": {
                 "effects": [
-                    "The Repeater extends the Hacking Area of all [[skill:hacker:plural]] in the same Army List.",
-                    "Enemy [[skill:hacker:plural]] inside its Zone of Control may use the Repeater to apply Hacking Programs against enemy [[skill:hacker:plural]], applying the documented Firewall MODs."
+                    "The Repeater extends the [[rule:hacking-area|Hacking Area]] of all [[skill:hacker:plural]] in the same Army List.",
+                    "Enemy [[skill:hacker:plural]] inside its Zone of Control may use the Repeater to apply Hacking Programs against enemy [[skill:hacker:plural]], applying the documented [[equipment:firewall|Firewall]] MODs.",
+                    "When an enemy [[skill:hacker]] uses this [[equipment:repeater]], an enemy can react to the [[skill:hacker]] (if allowed), not to the [[equipment:repeater]] itself. The enemy [[equipment:repeater]] does not permit targeting a non-[[skill:hacker]] elsewhere on the table; that Program or reactive declaration fails its Requirements and becomes [[skill:idle]]. See [[rule:hacking-area]]."
                 ],
                 "restrictions": [
                     "The owner cannot voluntarily deactivate the Repeater; it becomes inactive when its carrier is [[state:isolated|Isolated]] or in a Null State."
@@ -11542,9 +11561,18 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 55,
+                    "section": "Repeater"
+                },
+                {
                     "sourceId": "wiki-en-20260918-130233",
                     "member": "Repeater",
                     "heading": "Repeater"
+                },
+                {
+                    "sourceId": "wiki-hacking-area-oldid-3974",
+                    "heading": "Hacking Area"
                 }
             ],
             "review": {
@@ -16920,7 +16948,8 @@
                     "A Hacker may use a [[equipment:hacking-device]] they are equipped with; the Device determines which Hacking Programs it grants.",
                     "A Hacker may instead have Hacking Programs assigned directly without requiring a [[equipment:hacking-device]].",
                     "Upgrade Programs may be assigned to the Hacker independently of the baseline Programs granted by a [[equipment:hacking-device]].",
-                    "The Hacker Special Skill remains active while its owner is in a Null State."
+                    "The Hacker Special Skill remains active while its owner is in a Null State.",
+                    "The [[skill:hacker]]'s [[rule:hacking-area]] controls ordinary Hacking Program range and can be extended by allied [[equipment:repeater:plural]]. Using enemy [[equipment:repeater:plural]] has additional target restrictions; each Program retains its own Requirements."
                 ],
                 "restrictions": []
             },
@@ -16937,6 +16966,11 @@
                 {
                     "sourceId": "wiki-hacker-oldid-3646",
                     "heading": "Hacker"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 55,
+                    "section": "Quantronic Combat (Hacking)"
                 }
             ],
             "review": {
@@ -20080,6 +20114,151 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-10-07"
+            }
+        },
+        {
+            "id": "rule:hacking-area",
+            "kind": "rule",
+            "name": "Hacking Area",
+            "summary": "A [[skill:hacker]] can use Hacking Programs within their Hacking Area: their own [[trait:zone-of-control-zc|Zone of Control]] plus the Zones of Control of allied [[equipment:repeater:plural]] and [[equipment:deployable-repeater:plural]].\n\n**Enemy [[equipment:repeater:plural]].** A [[skill:hacker]] inside the [[trait:zone-of-control-zc|Zone of Control]] of an enemy [[equipment:repeater]] or [[equipment:deployable-repeater]] can reach enemy Troopers, but Programs using either enemy device against a non-[[skill:hacker]] fail their Requirements and become [[skill:idle]].",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "Hacking Programs use the [[skill:hacker]]'s Hacking Area as their range unless that Program specifies a different scope. Line of Fire is not required unless a Program says otherwise.",
+                    "The Hacking Area includes the [[skill:hacker]]'s own [[trait:zone-of-control-zc|Zone of Control]] and that of allied [[equipment:repeater:plural]] and [[equipment:deployable-repeater:plural]].",
+                    "If the [[skill:hacker]] is within the [[trait:zone-of-control-zc|Zone of Control]] of an enemy [[equipment:repeater]] or [[equipment:deployable-repeater]], that enemy device extends the [[skill:hacker]]'s Hacking Area to all enemy Troopers on the table, subject to the enemy-[[skill:hacker]] restriction."
+                ],
+                "restrictions": [
+                    "When using an enemy [[equipment:repeater]] or [[equipment:deployable-repeater]] to reach a Trooper who lacks the [[skill:hacker]] Special Skill, a declared Hacking Program or [[trait:aro|ARO]] fails its Requirements during Resolution and the [[skill:hacker]] performs [[skill:idle]] instead.",
+                    "Only Troopers in Model form may be targets of Hacking Programs, unless a Program explicitly provides otherwise."
+                ],
+                "clarifications": [
+                    "An enemy acting inside the [[skill:hacker]]'s Hacking Area can provoke an [[trait:aro|ARO]] even without Line of Fire or proximity to the [[skill:hacker]]. During the [[trait:aro|ARO]] Checks, measure up to [[distance:8:inch]] from any point along the Active Trooper's path, and from that Trooper's [[equipment:repeater:plural]], to determine whether the Active Trooper is in the reactive [[skill:hacker]]'s Hacking Area. An [[trait:aro|ARO]] must still satisfy the declared Program's Requirements.",
+                    "A [[state:holomask|HoloMask]] appearance cannot grant real [[skill:hacker]] status or a working [[equipment:repeater]]. If an [[trait:aro|ARO]] or Program uses a fake [[skill:hacker]] or [[equipment:repeater]] that does not exist on the real Unit Profile, its Requirements fail at Resolution and the Trooper performs [[skill:idle]] instead."
+                ],
+                "category": "basic-rule"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 56,
+                    "section": "Hacking Area"
+                },
+                {
+                    "sourceId": "wiki-hacking-area-oldid-3974",
+                    "heading": "Hacking Area"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "equipment:firewall",
+            "kind": "equipment",
+            "name": "Firewall",
+            "summary": "Automatic protection against Comms Attacks: the attacker takes the listed negative [[attribute:wip]] MOD, while the protected Trooper gains a fixed +3 to Saving Rolls. A Trooper can use only one [[equipment:firewall]] at a time.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "equipment",
+                "effects": [
+                    "An enemy making a Comms Attack against a Trooper benefiting from a [[equipment:firewall]] applies the [[equipment:firewall]]'s listed negative [[attribute:wip]] MOD (for example, -3 or -6).",
+                    "The protected Trooper gains +3 to Saving Rolls against that Comms Attack, regardless of whether the [[equipment:firewall]] imposes -3 or -6 on the attacker.",
+                    "If more than one [[equipment:firewall]] is available, the protected Trooper's player chooses one [[equipment:firewall]] to apply; their MODs do not stack."
+                ],
+                "restrictions": [
+                    "A [[equipment:firewall]] provided by a [[equipment:hacking-device]] protects its Trooper against any Comms Attack only while that Device is enabled. It does not apply while the Device is disabled, including by [[state:isolated|Isolated]] or a [[term:null-state|Null State]]."
+                ],
+                "clarifications": [
+                    "For example, a [[equipment:firewall]] (-6) gives the attacker WIP -6 and the defender only +3 to Saving Rolls, not +6.",
+                    "A [[equipment:repeater]] used by an enemy [[skill:hacker]] imposes its specified [[equipment:firewall]] MODs; [[equipment:tinbot|TinBot]] and [[hacking-program:fairy-dust]] can also provide [[equipment:firewall]] protection under their own conditions."
+                ]
+            },
+            "labelIds": [
+                "obligatory"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 55,
+                    "section": "Firewall"
+                },
+                {
+                    "sourceId": "wiki-firewall-oldid-4097",
+                    "heading": "Firewall"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 1,
+                    "section": "Firewall from a disabled Hacking Device"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "rule:supportware",
+            "kind": "rule",
+            "name": "Supportware",
+            "summary": "Supportware is a sustained Hacking Program. Each [[skill:hacker]] may sustain only one such Program, and each Trooper may benefit from only one at a time. New Supportware can cancel an earlier Program across all its beneficiaries, not only the new target.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "effects": [
+                    "A Trooper can benefit from only one Supportware Program at a time, and each [[skill:hacker]] can sustain only one active Supportware Program at a time.",
+                    "A [[skill:hacker]] may cancel an active Supportware by declaring another Hacking Program and spending the corresponding Order or [[trait:aro|ARO]]."
+                ],
+                "restrictions": [
+                    "A Supportware Program ends automatically when a beneficiary is chosen for a new Supportware Program, even if the earlier Program protected a whole Troop Type.",
+                    "An active Supportware Program ends when its sustaining [[skill:hacker]] enters [[state:isolated|Isolated]] or any [[term:null-state|Null State]]."
+                ],
+                "clarifications": [
+                    "For example, [[hacking-program:fairy-dust]] protecting all REMs is entirely canceled when another [[skill:hacker]] targets one protected REM with [[hacking-program:enhanced-reaction]]. The other REMs lose [[hacking-program:fairy-dust]] too.",
+                    "[[hacking-program:assisted-fire]] and [[hacking-program:enhanced-reaction]] need a qualifying REM inside the [[skill:hacker]]'s [[rule:hacking-area]] when activated; the sustained benefits then cover the entire table. [[hacking-program:controlled-jump]] specifies its own table-wide effect and per-player limit."
+                ],
+                "category": "basic-rule"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 56,
+                    "section": "Supportware"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 60,
+                    "section": "Supportware use and cancellation example"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
             }
         }
     ],

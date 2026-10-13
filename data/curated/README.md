@@ -40,13 +40,14 @@ The sections below document the implemented `curated/rules/` contract.
 
 Maintained rules prose must use typed `[[kind:slug]]` references when it names an existing
 supported Skill, Equipment item, Weapon, Ammunition type, Trait, State, Hacking Program,
-Attribute, or reviewed Game term. `[[term:zero-visibility-zone]]` resolves to the corresponding
+General Rule (`rule:*`), Attribute, or reviewed Game term. `[[term:zero-visibility-zone]]` resolves to the corresponding
 Glossary definition and the existing inline preview tooltip, including on keyboard focus and touch.
 Visibility Zone variants are explicitly linked throughout current curated rules text.
 The broad Game-term vocabulary also includes common nouns (e.g. Model and Token), so a full
 term-name/plain-prose migration is not claimed; those cases must be curated deliberately.
 The pre-token migration is complete: `maintained-text-link-reviews.json` records explicit
-completed review coverage for the previously supported reference namespaces, and the rules
+completed review coverage for the previously supported reference namespaces; new General Rule
+references are supported, but are not claimed as a completed plain-text scan. The rules
 build rejects any new plain semantic candidate in those fully reviewed namespaces directly.
 
 Completed scopes receive a case-insensitive scan with conservative plural matching. A residual is an

@@ -60,6 +60,18 @@ def test_maintained_text_parser_supports_glossary_game_terms() -> None:
     ]
 
 
+def test_maintained_text_parser_supports_public_general_rules() -> None:
+    assert parse_maintained_text("See [[rule:hacking-area|Hacking Area]].") == [
+        {"type": "text", "text": "See "},
+        {
+            "type": "reference",
+            "target": "rule:hacking-area",
+            "display_text": "Hacking Area",
+        },
+        {"type": "text", "text": "."},
+    ]
+
+
 def test_maintained_text_parser_preserves_explicit_review_markers() -> None:
     tokens = parse_maintained_text(
         "Check [[review-needed:ambiguous-target|HoloMask]] and "
