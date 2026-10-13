@@ -94,7 +94,7 @@ configuration even when an aborted request still resolves. Responsive grid
 contracts are also checked in the web suite. Scenario browser visual review was
 user-confirmed on 2026-10-08; the separate real-browser keyboard/touch and
 loading/empty/error-state interaction checks remain open in the
-[0.10.1 acceptance checklist](TODO.md#0101--interim-reference-consistency).
+[1.0 browser acceptance](TODO.md#final-10-acceptance).
 
 ## Silhouette manual browser acceptance
 
@@ -502,8 +502,9 @@ without page errors or failed requests. The isolated stall was not reproduced
 or attributed to a confirmed application defect; investigate if it recurs.
 
 This certifies **only REA-026's bounded reference/browser scope**. It does not
-certify the separate 0.10.1 real-browser release checklist, exhaustive theme
-or distance preferences, every interaction exception, or hosted deployment.
+certify the cross-surface browser acceptance now tracked for 1.0,
+exhaustive theme or distance preferences, every interaction exception,
+or hosted deployment.
 Playwright and locally installed Chrome were used only for this optional
 acceptance exercise; normal CI does not require a browser.
 

@@ -1,7 +1,7 @@
 # InfinityDB backlog
 
 This is the working implementation backlog. Every unchecked item belongs to exactly
-one release bucket: **0.10.1**, **1.0.0**, or **post-1.0**.
+one release bucket: **1.0.0** or **post-1.0**.
 The buckets are planning commitments, not a promise that a minor release cannot move a
 low-risk item earlier or defer a non-gating item when evidence changes.
 
@@ -22,68 +22,38 @@ when all contained work shares the same owner.
 
 **Project domain:** Project infrastructure
 
-Version **0.10.0** is released and deployed. The immediate milestone is **0.10.1 —
-interim reference consistency**, followed by **1.0.0 — current-reference completeness**.
-The 0.10.1 candidate includes completed core Scenarios, Ammunition and rules-reference
-improvements developed since 0.10.0, plus the verified stabilization corrections.
-Broader 1.0 development is temporarily paused until this interim release is published;
-the 1.0 acceptance definition and remaining commitments are unchanged.
+Version **0.10.1** was released and deployed on 2026-10-10. The current
+development milestone is **1.0.0 — current-reference completeness**.
+Completed Scenarios, Ammunition, rules-reference and stabilization changes
+belong to the [0.10.1 changelog](CHANGELOG.md#0101---2026-10-10), not a
+pending release checklist.
+
+**0.10.1 release evidence:** [PR #19](https://github.com/frankysan/InfinityDB/pull/19)
+merged to main at 0b83a3b2fef7, and the
+[GitHub release](https://github.com/frankysan/InfinityDB/releases/tag/v0.10.1)
+was published on October 10. For that exact commit, GitHub shows successful
+[Source checks](https://github.com/frankysan/InfinityDB/actions/runs/38057014539)
+(including cross-platform determinism),
+[Installed wheel smoke](https://github.com/frankysan/InfinityDB/actions/runs/38057014543),
+and [Deployment smoke](https://github.com/frankysan/InfinityDB/actions/runs/38057014518).
+Production deployment is user-confirmed. The v0.10.1 tag exists but is
+**lightweight**, rather than annotated as the old checklist requested. Keep
+annotated-tag acceptance for 1.0; do not reopen a published minor release.
+
+The old offline 52/52 browser checks and seven-view responsive check did not
+establish the full real-browser interaction acceptance specified for 0.10.1.
+The later REA-017/026 browser acceptance is narrower as well. Those unverified
+cross-surface checks are now individual tasks under
+[final 1.0 acceptance](#final-10-acceptance).
 
 General performance/storage experiments, major pipeline refactors,
-persistent-user-data features, ITS season/tournament tooling, and native applications are explicitly
-post-1.0 unless they become necessary to correct a release-blocking defect. Core-rules scenarios are
-part of the 1.0 completeness target; their accepted architecture guides the 1.0 implementation.
+persistent-user-data features, ITS season/tournament tooling and native
+applications remain post-1.0 unless needed to fix release-critical defects.
+Core-rules scenarios remain within 1.0 completeness scope.
 
-The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
-definition lives in `docs/releasing.md`. The sections below contain the remaining implementation
-and release work for 0.10.1, 1.0 and later milestones. Completed substeps are retained only under an
-open parent item.
-
-## 0.10.1 — interim reference consistency
-
-**Project domains:** Data processing, Web frontend, Project infrastructure
-
-Implementation stabilization is complete at `7f2923a`. The six corrected areas are
-IMP-2 Discover, Stealth/Deployables, Deployable Cover, TinBot, Fireteam formation
-requirements and Kobra's CC Attribute link; their durable outcomes are recorded in
-`CHANGELOG.md`. This release also publishes the completed improvements since 0.10.0;
-it does not claim 1.0 completeness or require unfinished 1.0 features.
-
-**Candidate status:** Metadata and release notes are prepared for **0.10.1** dated
-2026-10-10. Full local checks, required tracked assets, byte-identical runtime
-database rebuilds and isolated installed-wheel smoke have passed. Real-browser
-acceptance and exact-commit hosted validation remain open; it is not published or
-certified release-ready. Follow the complete
-[release checklist](releasing.md), including the project-wide documentation audit.
-
-- [ ] **Web frontend + Project infrastructure:** Complete real-browser acceptance.
-  The prior offline harness passed 52/52 focused tests and rendered seven affected
-  views at 320, 390, 768 and 1440 pixels without JavaScript exceptions or overflow;
-  that evidence does not verify real navigation or interaction. In a real browser:
-  - inspect IMP-2, Stealth, Deployable Cover, TinBot and Kobra CC reference cards on
-    desktop and narrow screens; follow their rule/Attribute links and source citations;
-  - select an Army on Fireteams, verify formation labels and ongoing-integrity help,
-    change the Wildcard setting, and check navigation back to Unit/reference pages;
-  - browse all four Scenarios, change Army Points quickly, follow scoped rules links,
-    navigate away/back, and check maps in both themes and distance units with
-    keyboard and touch; verify loading/empty/error handling where practical;
-  - open Visibility Zone tooltips and Ammunition/Immunity cross-links by pointer,
-    keyboard and touch; confirm readable sections and no horizontal clipping.
-- [ ] **Project infrastructure:** Land the candidate through the protected-main PR
-  workflow after acceptance/local validation; require successful Source checks
-  (including cross-platform determinism), Installed wheel smoke and Deployment
-  smoke test for the exact final SHA. The checksum-pinned external Full-asset
-  checks workflow is optional unless that bundle is selected as release evidence.
-  Collect hosted evidence, create an annotated `v0.10.1` tag and publish only with
-  explicit authorization. Deployment and post-release verification follow separately.
-
-**Deferred intentionally to 1.0:** the remainder of REA-016/020 and the
-broader Peripheral (REA-017), Hacking/Supportware (REA-018/019), Special Dice
-(REA-021), General Rules (REA-026), weapon-composition/metadata (REA-025/044),
-Spec-Ops (REA-040), full source reconciliation and completeness inventory.
-Explicitly unresolved source disagreements (including Kobra Anti-materiel),
-source-normalization baselines and optional enhancements are not new 0.10.1
-regressions. The 1.0 plan below remains the owning backlog for those tasks.
+The public roadmap lives in README.md; the durable 1.0 release gate
+lives in docs/releasing.md. All unchecked tasks below belong to 1.0
+or post-1.0.
 
 ## 1.0.0 — current-reference completeness gate
 
@@ -434,7 +404,7 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       navigation, keyboard, touch previews, and citations without
       page errors or horizontal overflow. See
       [development checks](testing.md#10-general-rules-rea-026-browser-acceptance).
-      Full 0.10.1 release acceptance remains separate.
+      Broader source and release acceptance remains under the 1.0 gate.
     - [ ] **REA-027 — Flash Pulse source conflict:** Review the Spanish
       Wiki/PDF and chart discrepancy against the applicable source
       publications; preserve evidence rather than silently normalizing.
@@ -613,15 +583,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [ ] Verify **Domination's 350-point SWC row** against authoritative clarification.
     N5.3 page 151 prints 6 SWC, unlike Annihilation's 7 at the same Army Points.
     Retain the printed value and visible uncertainty until clarified; this existing
-    source disagreement does not block 0.10.1.
+    source disagreement did not block released 0.10.1; retain it for
+    the 1.0 source-completeness review.
   - [ ] Confirm the current model remains source/scope-aware against the reviewed ITS
     variation during final completeness review. ITS content, ITS-only geometry,
     tournament tooling and an interactive scenario editor remain post-1.0.
-  - [ ] Incorporate the real-browser keyboard/touch, rapid selection, theme/distance,
-    direct/soft navigation and loading/empty/error acceptance from the
-    [0.10.1 checklist](#0101--interim-reference-consistency) into 1.0 closeout.
-    The 2026-10-08 user-confirmed visual review and automated lifecycle/responsive
-    coverage do not replace interaction acceptance.
+  - **Browser acceptance:** The separate
+    [1.0 core-scenario browser checklist](#final-10-acceptance) owns
+    keyboard/touch, rapid selection, theme/distance, direct/soft navigation,
+    and loading/empty/error states. The 2026-10-08 user-confirmed visual
+    review and automated lifecycle/responsive tests do not replace
+    interactive browser acceptance.
   - **Completion:** the final source inventory accounts for every in-scope fact and
     scoped concept, and all four scenarios remain understandable and navigable in
     every supported configuration. No mutable match state or live scoring engine is required.
@@ -737,6 +709,29 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     while automated mapping/resolution tests remain offline.
 
 ### Final 1.0 acceptance
+
+The 0.10.1 offline checks and later REA-017/026 scoped Chrome reviews do not
+prove the four cross-surface browser interactions below. These incomplete
+acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
+
+- [ ] **Web frontend — reference-card browser acceptance:** Inspect IMP-2,
+  Stealth, Deployable Cover, TinBot and Kobra CC on desktop and narrow screens.
+  Follow rules, Attribute and source links; confirm readability and navigation.
+  The earlier offline 52/52 tests and seven-view responsive check were not
+  substitutes for these interactions.
+- [ ] **Web frontend — Fireteam browser acceptance:** Select an Army, verify
+  Fireteam formation requirements and ongoing-integrity help, change Wildcard
+  settings and navigate between Fireteams, Units and references. Test desktop
+  and narrow screens; keep remaining REA-020 mechanics separately tracked.
+- [ ] **Web frontend — core-scenario browser acceptance:** Browse all four
+  Scenarios, change Army Points rapidly, follow scoped rules links, navigate
+  away/back, and check maps in both themes and distance units. Exercise
+  keyboard and touch, including loading/empty/error states where practical.
+  Coordinate this with the existing scenario source-completeness task.
+- [ ] **Web frontend — Visibility Zone and Ammunition/Immunity acceptance:**
+  Open Visibility Zone tooltips and Ammunition/Immunity cross-links with
+  pointer, keyboard and touch. Verify readable content and no horizontal
+  clipping across desktop and narrow-screen layouts.
 
 - [ ] **Data processing + Web backend + Web frontend + Project infrastructure:**
   Execute the final 1.0 source-to-storage-to-browser completeness gate defined by

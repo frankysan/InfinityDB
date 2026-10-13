@@ -141,15 +141,14 @@ The current direction is deliberately incremental:
   gaps and made the result searchable, navigable, and understandable.
 - **0.10.x — Stabilize & harden:** completed the application consistency and scenario
   architecture reviews, frontend/theme work, and release/operations hardening.
-- **0.10.1 — Interim reference consistency (release preparation):** release the completed
-  core Scenarios, Ammunition and rules-reference improvements alongside the stabilization
-  fixes. Remaining acceptance and publication gates are tracked in
-  [`docs/TODO.md`](docs/TODO.md#0101--interim-reference-consistency).
-- **1.0.0 — Player data-complete (temporarily paused):** resume after this interim release;
-  ensure every useful in-scope game datum collected by InfinityDB has a maintained
-  representation and a meaningful, usable place in the
-  web reference, including the current core-rules scenarios. ITS season/tournament
-  content remains a later extension of the same scenario model.
+- **0.10.1 — Interim reference consistency (released 2026-10-10):**
+  published the core Scenarios, Ammunition and rules-reference improvements,
+  with stabilization fixes. See the [release notes](docs/CHANGELOG.md#0101---2026-10-10).
+- **1.0.0 — Player data-complete (current milestone):** complete remaining
+  in-scope source-to-browser coverage and final scenario acceptance.
+  Incomplete cross-surface interaction tests from 0.10.1 now belong to
+  [1.0 final acceptance](docs/TODO.md#final-10-acceptance).
+  ITS season/tournament content remains a later scenario-model extension.
 
 In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
 0.9 closed application gaps → 0.10 hardened and polished → 1.0 completes the reference.**
