@@ -360,77 +360,115 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     Verify conditions, the general rule, modifiers, explicit exceptions, the
     resulting game effect, and source certainty; do not generalize a printed
     example into an undocumented rules engine. Sample the normal browser view
-    as well as the authored text, and keep source conflicts visible.
-    - [ ] Review and implement accepted batches from the
-      [1.0 explanation audit](rules-explanation-audit-1.0.md#prioritized-remediation-plan).
-      The confirmed recovery/Intuitive Attack explanations (REA-001/002/003/009/022)
-      have been revised in curated data and need player-facing review. Adjudicate
-      direct Doctor/Engineer target allegiance (REA-038) before closing eligibility;
-      Counterintelligence's actor correction (REA-043) is implemented in curated
-      data; verify its player-facing wording in the browser. The Continuous Damage
-      Critical exception (REA-004) and BS Weapon (WIP) Skill restrictions (REA-005)
-      are now documented in curated Trait summaries; verify their player-facing
-      wording and keep deferred typed-variant edges separate. Controlled Jump
-      (REA-006) now explains immediate declaration, optional table-wide ARO,
-      opposing-Program cancellation, and preservation of separate scenario MODs;
-      verify the player-facing Program page. Request Speedball's FAQ exclusion
-      (REA-007) is now explained in both curated records; verify the player-facing
-      Skill and Program cards. Protheion (REA-008) now states the FAQ overkill limit,
-      profile-listed enemy Attribute MOD, and recovery order; verify its player-facing
-      Skill card (player-verified). The general Immunity (ARM/BTS) Trait
-      protection and printed Monofilament exception (REA-010) are now explained
-      alongside the existing Flash Pulse example; verify both in the browser.
-      The five structured reviewed Immunity interactions (REA-011) now have a
-      dedicated player-facing section with applicability and explicit/derived
-      labels; verify keyboard, mobile and browser layout before accepting the UI.
-      No new Plasma/Enhanced case was added to the reviewed arrays.
-      Smoke/Eclipse (REA-012) now distinguishes ordinary rolled LoF opposition,
-      MSV/Reflective exceptions, unopposed placement, Dodge, and Criticals in
-      curated Clarifications and examples; verify the browser pages.
-      AP/E/M and T2 (REA-013) now clarify rounding up halved defenses and
-      marking the original-hit versus extra-Critical T2 die before rolling;
-      verify their player-facing Ammunition pages. Typed values are unchanged.
-      Dodge/Reset (REA-014) now explain per-Attack evasion, movement after
-      qualifying Dodge, Engaged exit position, cumulative Reset State MODs,
-      and the Sixth Sense exception; verify the Dodge, Reset, Engaged and
-      Bangbomb browser cards. REA-015 now has source-cited State-specific cancellation explanations, pending browser review; REA-026 remains separate.
-      The shared Negative Feedback Label now explains Trooper-local replacement and
-      duration; Cybermask and White Noise explain when their own NFB restrictions apply
-      (REA-019). Verify all three player-facing cards and Label-to-Program navigation
-      in a real browser before closing that finding. Targeted MSV1/Sixth Sense FAQ
-      questions remain a separate source-review task (REA-030).
-      REA-021 now has a published Special Dice (+1 SD) baseline linking
-      Fireteam bonuses, Martial Arts Levels 3/5, Berserk, Disposable uses, and
-      ranged Kits; verify the browser cards, FAQ distinction from Discover,
-      SD versus Burst allocations, and real-browser link navigation before
-      closing the finding. Fireteam Level 4 PH/WIP modifiers remain tied to
-      the attack Attribute, not Discover.
-      REA-026 is complete within its shared-reference scope: Face to Face
-      Rolls, Saving Rolls, Guts Rolls, the Order Expenditure Sequence and
-      Coordinated Orders are published, linked and source-cited. Real Chrome
-      browser acceptance on 2026-10-13 covered all five at 1440/390/320 px,
-      forward/reverse navigation, keyboard, touch previews and citations with
-      no page errors or horizontal overflow; see
+    as well as the authored text, and keep source conflicts visible. Track
+    the [1.0 explanation audit](rules-explanation-audit-1.0.md#prioritized-remediation-plan)
+    through the individual checks below; published cards still require the
+    stated browser/source acceptance before their findings can be closed.
+    - [ ] **REA-001 — Engineer target and recovery:** Review the revised
+      Engineer recovery explanation on the player-facing Skill card.
+    - [ ] **REA-002 — Doctor recovery:** Review the revised ordinary recovery
+      requirements and lethal failure on the player-facing Doctor card.
+    - [ ] **REA-003 — Intuitive Attack:** Review the corrected attack resolution
+      explanation in the player-facing reference.
+    - [ ] **REA-004 — Continuous Damage:** Verify the documented Critical
+      exception in the Trait card; keep deferred typed-variant edges separate.
+    - [ ] **REA-005 — BS Weapon (WIP):** Verify the prohibited Skill
+      combinations on the player-facing Trait card without promoting
+      deferred typed-variant edges.
+    - [ ] **REA-006 — Controlled Jump:** Check the Program card's immediate
+      declaration, optional table-wide ARO, opposing-Program cancellation,
+      and separate scenario MODs.
+    - [ ] **REA-007 — Request Speedball:** Verify the FAQ exclusion in both
+      the Skill and Program cards.
+    - [x] **REA-008 — Protheion:** The Skill card explains the FAQ overkill
+      limit, profile-listed enemy Attribute MOD, and recovery order;
+      player-facing wording has been verified.
+    - [ ] **REA-009 — Simultaneous recovery:** Review the updated explanation
+      for recovery and re-infliction in the same Order.
+    - [ ] **REA-010 — General Immunity:** Verify the Immunity (ARM/BTS)
+      protection, printed Monofilament exception, and existing Flash Pulse
+      example in the browser.
+    - [ ] **REA-011 — Reviewed Immunity interactions:** Check the dedicated
+      player-facing presentation of five cases for applicability and
+      explicit/derived labels, including keyboard, mobile, and browser
+      layout. Do not add unreviewed Plasma/Enhanced cases to the arrays.
+    - [ ] **REA-012 — Smoke/Eclipse:** Review browser Clarifications and
+      examples for rolled LoF opposition, MSV/Reflective exceptions,
+      unopposed placement, Dodge, and Criticals.
+    - [ ] **REA-013 — AP, E/M, and T2:** Verify the Ammunition pages explain
+      rounding up halved defenses and identifying original-hit versus
+      extra-Critical T2 dice before rolling; typed values remain unchanged.
+    - [ ] **REA-014 — Dodge/Reset:** Verify the Dodge, Reset, Engaged, and
+      Bangbomb cards cover per-Attack evasion, post-Dodge movement,
+      Engaged exit position, cumulative Reset State MODs, and Sixth Sense.
+    - [ ] **REA-015 — State cancellation:** Inspect the source-cited
+      State-specific cancellation explanations in the browser; keep this
+      distinct from the completed REA-026 baseline.
+    - [ ] **REA-018 — Hacking Area, Firewall, Supportware:** Verify the
+      published cards' enemy-Repeater ARO scope, 8-inch checks, disabled
+      Hacking Device Firewall, and whole-Program Fairy Dust replacement
+      in the browser.
+    - [ ] **REA-019 — Negative Feedback:** Verify Trooper-local replacement
+      and duration in the shared Label, Cybermask, and White Noise cards,
+      including Label-to-Program navigation.
+    - [ ] **REA-021 — Special Dice:** Review the published (+1 SD) baseline
+      and links from Fireteams, Martial Arts Levels 3/5, Berserk,
+      Disposable uses, and ranged Kits. Verify the FAQ Discover distinction,
+      SD versus Burst, and browser navigation. Fireteam Level 4 PH/WIP
+      modifiers apply to the attack Attribute, not Discover.
+    - [ ] **REA-022 — Recovery Kits:** Review accepted multi-roll recovery
+      and Disposable spending explanations on the player-facing cards.
+    - [x] **REA-026 — Shared General Rules:** Face to Face Rolls, Saving
+      Rolls, Guts Rolls, Order Expenditure Sequence, and Coordinated
+      Orders are published, linked, and source-cited. Chrome acceptance
+      on 2026-10-13 covered all five at 1440/390/320 px, link
+      navigation, keyboard, touch previews, and citations without
+      page errors or horizontal overflow. See
       [development checks](testing.md#10-general-rules-rea-026-browser-acceptance).
-      Full 0.10.1 release acceptance and source-specific disputes remain separate.
-      Hacking Area, Firewall and Supportware (REA-018) now have linked, published
-      baseline cards. Verify enemy-Repeater ARO scope and 8-inch checks, disabled
-      Hacking Device Firewall, and whole-Program Fairy Dust replacement in a real
-      browser before closing this finding.
-      Separately decide source conflicts and FAQ applicability before dependent curation.
-      Use the [source manifest](rules-explanation-audit-1.0-sources.md) and
+      Full 0.10.1 release acceptance remains separate.
+    - [ ] **REA-027 — Flash Pulse source conflict:** Review the Spanish
+      Wiki/PDF and chart discrepancy against the applicable source
+      publications; preserve evidence rather than silently normalizing.
+    - [ ] **REA-030 — Targeted, MSV1, Sixth Sense FAQ:** Adjudicate
+      publication scope and applicability separately from the Negative
+      Feedback references before dependent curation.
+    - [ ] **REA-034 — Fireteam example conflict:** Resolve the Spanish
+      and official PDF source contradiction at its owning audit finding;
+      retain original publication provenance.
+    - [ ] **REA-037 — Armed Turret source conflict:** Resolve the
+      competing Silhouette values within the official PDF; do not
+      silently choose one source cell.
+    - [ ] **REA-038 — Doctor/Engineer target eligibility:** Adjudicate
+      direct-target allegiance before closing the revised recovery
+      eligibility explanations.
+    - [ ] **REA-039 — TinBot sharing:** Review operational eligibility
+      and Fireteam sharing against the source evidence.
+    - [ ] **REA-040 — SpecBall:** Review the missing procedure and its
+      Infinity Spec-Ops reference; preserve source applicability.
+    - [ ] **REA-041 — Fireteam dice contradiction:** Resolve the Spanish
+      printed example/reminder against the general Special Dice rule.
+    - [ ] **REA-042 — Dodge (ARM+3) source conflict:** Preserve and
+      resolve the differing English/Spanish and Wiki/PDF conditions,
+      including S17/S21 provenance; seek scoped errata where needed.
+    - [ ] **REA-043 — Counterintelligence:** Verify in the browser that
+      the implemented correction assigns the relaxed limit to the
+      correct player.
+    - [ ] **REA-044 — Metadata-only Weapons:** Decide targeted
+      publication of current metadata-only Weapon references; do not
+      make optional exhaustive research a 1.0 release blocker.
+    - [ ] **Cross-source applicability:** Resolve material source
+      conflicts and FAQ scope before dependent curation. Use the
+      [source manifest](rules-explanation-audit-1.0-sources.md) and
       [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).
-      Complete the [coverage gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate):
-      304 selected clause reviews and 63 screening-only records are not 367 full
-      approvals. Track TinBot sharing/SpecBall (REA-039/040), official Spanish PDF
-      source contradictions (REA-034/037/041), and Spanish Wiki-versus-PDF
-      discrepancies (REA-027/042). Preserve the S17/S21 provenance and seek
-      scoped errata rather than silently normalizing conflicting publications.
-      Also track targeted current metadata-only Weapon publication
-      (REA-044) without promoting optional exhaustive research into a release blocker.
-      The report remains an assessment, not accepted replacement semantics.
-      Include the five new Visibility Zone Game terms in the final record acceptance
-      review; they postdate the frozen 367-record explanation-audit inventory.
+      Preserve the S17/S21 provenance and seek scoped errata instead
+      of treating the audit's assessment as replacement semantics.
+    - [ ] **Clause-review coverage gate:** Complete the
+      [inventory gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate).
+      The 304 selected clause reviews and 63 screening-only records
+      do not constitute 367 full approvals.
+    - [ ] **Visibility Zone inventory additions:** Include the five
+      newer Visibility Zone Game terms in final record acceptance;
+      they postdate the frozen 367-record explanation-audit inventory.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not
