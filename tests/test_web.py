@@ -4668,6 +4668,20 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     assert general_rules["irregular-order"]["name"] == "Irregular Order"
     assert general_rules["loss-of-lieutenant"]["name"] == "Loss of Lieutenant"
     assert general_rules["peripheral-type-servant"]["name"] == "Peripheral (Servant)"
+    for subtype in ("servant", "synchronized", "control", "ancillary", "cyberplug"):
+        status, _, body = request(rules_app, f"/api/rules/peripheral-type-{subtype}")
+        assert status == 200
+        rule = json.loads(body)["rules"][0]
+        assert rule["id"] == f"rule:peripheral-type:{subtype}"
+        assert rule["facts"]["effects"]
+        assert rule["fact_tokens"]["effects"]
+        assert any(
+            token.get("public_reference")
+            for clause in rule["fact_tokens"]["effects"]
+            for token in clause
+        )
+        status, _, _ = request(rules_app, f"/rules/peripheral-type-{subtype}")
+        assert status == 200
     assert general_rules["hacking-area"]["name"] == "Hacking Area"
     assert general_rules["supportware"]["name"] == "Supportware"
     assert general_rules["special-dice"]["name"] == "Special Dice (+1 SD)"

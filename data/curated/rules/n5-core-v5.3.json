@@ -6963,7 +6963,8 @@
                     "When the same Order removes and inflicts Wounds or conditions, resolve the positive effect first, then the negative effect (N5.3 p. 15)."
                 ],
                 "clarifications": [
-                    "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful recovery Roll is sufficient under the shared success rule."
+                    "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful recovery Roll is sufficient under the shared success rule.",
+                    "A [[rule:peripheral-type:servant|Servant]] or Connected [[rule:peripheral-type:cyberplug|Cyberplug]] in Silhouette contact with an allied Model can allow the Controller to declare [[skill:doctor|Doctor]] without direct contact. The Controller makes the Roll; only one target is treated in that Order."
                 ]
             },
             "labelIds": [
@@ -6980,6 +6981,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 90,
                     "section": "Doctor"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 106,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 107,
+                    "section": "Peripheral"
                 }
             ],
             "review": {
@@ -7038,7 +7049,8 @@
                     "If a condition is canceled and a new one inflicted in the same Order, apply cancellation first, then the new effect. For example, canceling [[state:immobilized-a|IMM-A]] does not prevent a simultaneous failed [[ammunition:para|PARA]] Saving Roll from inflicting that condition again (N5.3 p. 15)."
                 ],
                 "clarifications": [
-                    "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful Roll makes the coordinated use successful."
+                    "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful Roll makes the coordinated use successful.",
+                    "A [[rule:peripheral-type:servant|Servant]] or Connected [[rule:peripheral-type:cyberplug|Cyberplug]] in Silhouette contact with an allied Model can allow the Controller to declare [[skill:engineer|Engineer]] without direct contact. The Controller makes the Roll; only one target is treated in that Order."
                 ]
             },
             "labelIds": [
@@ -7055,6 +7067,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 91,
                     "section": "Engineer"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 106,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 107,
+                    "section": "Peripheral"
                 }
             ],
             "review": {
@@ -7124,6 +7146,9 @@
                 ],
                 "restrictions": [
                     "[[skill:peripheral]] (Cyberplug) rules and the profile's listed options govern the available Troopers."
+                ],
+                "clarifications": [
+                    "The [[rule:peripheral-type:cyberplug|Cyberplug Peripheral]] reference explains Connected and Autonomous activation, the Controller's usual [[skill:idle|Idle]], the [[skill:doctor|Doctor]]/[[skill:engineer|Engineer]] exception, and why Controller isolation does not cause [[state:disconnected|Disconnected]]."
                 ]
             },
             "labelIds": [
@@ -7140,6 +7165,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 90,
                     "section": "Cyberplug"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 107,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 108,
+                    "section": "Peripheral"
                 }
             ],
             "review": {
@@ -7177,10 +7212,21 @@
                 ],
                 "requirements": [],
                 "effects": [
-                    "The rule defines the Controller and Peripheral behavior for the applicable Peripheral type."
+                    "The rule defines the Controller and Peripheral behavior for the applicable Peripheral type.",
+                    "For Army List construction and Combat Group size, the Controller and all [[skill:peripheral|Peripherals]] count as one Trooper. They normally deploy together and remain in the same Combat Group; when the Controller changes groups, its subordinates transfer with it.",
+                    "Except where a subtype explicitly allows independent activation, the Controller and its [[skill:peripheral|Peripherals]] activate with the same Order and declare the same Short Skills or Long Skill, though they may choose different targets. A participant who cannot satisfy a declared Skill's Requirements performs [[skill:idle|Idle]]; others act normally.",
+                    "In the Reactive Turn, both Controller and subordinates have separate [[trait:aro|ARO]] entitlements, but normally must declare the same reaction Skill. Each enemy reacting to their activation chooses only one of the activated Troopers as its target.",
+                    "If a [[skill:peripheral|Peripheral]] enters [[state:isolated|Isolated]] or its Controller enters [[state:isolated|Isolated]] or a Null condition, the [[skill:peripheral|Peripheral]] enters [[state:disconnected|Disconnected]] at the end of the Order, except where a subtype provides a different rule."
                 ],
                 "restrictions": [
-                    "The selected Peripheral type and its specific rules limit Controller and Peripheral actions."
+                    "The selected Peripheral type and its specific rules limit Controller and Peripheral actions.",
+                    "Controllers and their [[skill:peripheral|Peripherals]] cannot participate in [[rule:coordinated-orders|Coordinated Orders]] or Fireteams, except as explicitly permitted for undeployed or inactive [[rule:peripheral-type:ancillary|Ancillary Peripherals]]."
+                ],
+                "clarifications": [
+                    "A [[skill:peripheral|Peripheral]] normally deploys with the Controller. If a Controller deploys later using its own deployment Skill and the [[skill:peripheral|Peripheral]] lacks it, the [[skill:peripheral|Peripheral]] deploys during the Deployment Phase and remains [[state:disconnected|Disconnected]] until the Controller arrives within the subtype's operating distance.",
+                    "Each reactive Trooper chooses one target among the Controller and its [[skill:peripheral|Peripherals]]; different enemies may choose different targets. Resolve Close Combat involving multiple Troopers under the ordinary [[trait:cc|CC]] rules, not as automatic separate Rolls for every [[skill:peripheral|Peripheral]].",
+                    "An [[skill:impetuous|Impetuous]] Controller also applies [[skill:impetuous|Impetuous]] to its [[skill:peripheral|Peripherals]]. A Hacking Program granting the Controller a MOD or condition also applies it to the [[skill:peripheral|Peripherals]]. Costed [[skill:peripheral|Peripherals]] count for Victory Points and area control, with their individual points separated from the Unit total.",
+                    "The [[skill:peripheral|Peripheral]] Special Skill remains active in Null conditions. The subtype determines whether Coherency matters, who declares the attack or recovery Roll, and whether Controller isolation produces [[state:disconnected|Disconnected]] or a profile change."
                 ]
             },
             "labelIds": [
@@ -7266,17 +7312,22 @@
                     ]
                 },
                 "maxPerController": 2,
-                "operatingDistance": "unlimited"
+                "operatingDistance": "unlimited",
+                "effects": [
+                    "A [[skill:doctor|Doctor]] or [[skill:engineer|Engineer]] may use this [[skill:peripheral|Peripheral]] as their point of contact with an allied Model. If the Servant is in Silhouette contact with the target, the Controller declares the recovery Skill and the Controller—not the Servant—makes the Roll.",
+                    "The Controller may own up to two Servants, but activates only one per Order; the other is inactive. No maximum operating distance applies."
+                ],
+                "restrictions": [
+                    "A [[skill:doctor|Doctor]] or [[skill:engineer|Engineer]] recovery Skill can target only one Model per Order, even when multiple Servants are present."
+                ],
+                "clarifications": [
+                    "The Controller can stay away from the target while the Servant [[skill:move|moves]] into contact. Its proximity delegates the required contact, not the Skill or the Roll; follow the ordinary [[skill:doctor|Doctor]] or [[skill:engineer|Engineer]] requirements and outcomes."
+                ]
             },
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 106,
-                    "section": "Peripheral"
-                },
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 107,
                     "section": "Peripheral"
                 },
                 {
@@ -7308,17 +7359,20 @@
                 "category": "peripheral-type",
                 "controllerEligibility": {
                     "status": "not-stated"
-                }
+                },
+                "effects": [
+                    "Check Coherency between each Synchronized [[skill:peripheral|Peripheral]] and its Controller at the start and at the end of every Order or [[trait:aro|ARO]]. If Coherency fails, the [[skill:peripheral|Peripheral]] enters [[state:disconnected|Disconnected]] immediately, before any declared movement is measured.",
+                    "A [[state:disconnected|Disconnected]] Synchronized [[skill:peripheral|Peripheral]] immediately reconnects on passing a Coherency Check with its Controller.",
+                    "One Order activates the Controller and all of its Synchronized [[skill:peripheral|Peripherals]], even when there are several. They can attack different targets, provided the declared Skills follow the common [[skill:peripheral|Peripheral]] rules."
+                ],
+                "clarifications": [
+                    "The Coherency checks here are between each [[skill:peripheral|Peripheral]] and the Controller, unlike [[rule:peripheral-type:control|Control]] [[skill:peripheral|Peripherals]], whose checks use a designated Spearhead."
+                ]
             },
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 106,
-                    "section": "Peripheral"
-                },
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 107,
                     "section": "Peripheral"
                 },
                 {
@@ -7352,22 +7406,20 @@
                     "status": "not-stated"
                 },
                 "maxPerController": 3,
-                "operatingDistance": "unlimited"
+                "operatingDistance": "unlimited",
+                "effects": [
+                    "Up to three Control [[skill:peripheral|Peripherals]] form a Control Unit. Designate one [[skill:peripheral|Peripheral]] as Spearhead with a Spearhead Token; choose a Spearhead for each Order activating the Controller and Control Unit.",
+                    "Check each Control [[skill:peripheral|Peripheral]]'s Coherency with the Spearhead at the start and end of each Order or [[trait:aro|ARO]]. Failure immediately causes [[state:disconnected|Disconnected]] before measuring declared movement; passing a check at the end of an Order or [[trait:aro|ARO]] reconnects it.",
+                    "If the Spearhead enters any Null condition, designate a replacement immediately. When a Skill in the Active Turn requires a target, only the Controller and Spearhead perform it; the other members of the Control Unit perform [[skill:idle|Idle]]."
+                ],
+                "clarifications": [
+                    "Control [[skill:peripheral|Peripherals]] have no maximum operating distance from their Controller; their Coherency requirement is instead measured from the Spearhead. This Spearhead is a Control Unit role, not the Spearhead used for [[rule:coordinated-orders|Coordinated Orders]]."
+                ]
             },
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 106,
-                    "section": "Peripheral"
-                },
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
                     "page": 107,
-                    "section": "Peripheral"
-                },
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 108,
                     "section": "Peripheral"
                 }
             ],
@@ -7395,7 +7447,17 @@
                 "controllerEligibility": {
                     "status": "not-stated"
                 },
-                "operatingDistance": "unlimited"
+                "operatingDistance": "unlimited",
+                "effects": [
+                    "An Ancillary [[skill:peripheral|Peripheral]] does not deploy with its Controller. The Controller may place it later using [[skill:place-deployable|Place Deployable]]; after placement it activates under the ordinary [[skill:peripheral|Peripheral]] rules.",
+                    "The Controller may participate in Fireteams or [[rule:coordinated-orders|Coordinated Orders]] while the Ancillary is undeployed, [[state:disconnected|Disconnected]], or in a Null condition."
+                ],
+                "restrictions": [
+                    "Deploying the Ancillary, or removing its [[state:disconnected|Disconnected]] or Null condition, immediately ends the Controller's Fireteam membership."
+                ],
+                "clarifications": [
+                    "There is no maximum operating distance for an Ancillary after deployment. The Fireteam and Coordinated Order exceptions depend on the Ancillary's current deployment/condition, not solely on the Controller owning the [[skill:peripheral|Peripheral]] Skill."
+                ]
             },
             "relations": [
                 {
@@ -7404,11 +7466,6 @@
                 }
             ],
             "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 106,
-                    "section": "Peripheral"
-                },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 107,
@@ -7449,14 +7506,22 @@
                 "profileModes": [
                     "connected",
                     "autonomous"
+                ],
+                "effects": [
+                    "At the start of each Order or [[trait:aro|ARO]], choose Connected or Autonomous for each [[skill:cyberplug|Cyberplug]]. A Connected unit follows the Controller's Order and Skill declarations, but the Controller normally performs [[skill:idle|Idle]] instead. An Autonomous unit uses Orders from the Order Pool and declares its own [[trait:aro|AROs]].",
+                    "The Controller may have up to two of these units, but no more than one can use its Connected Profile at a time. If two deploy, one must be Connected and the other Autonomous. Mark Autonomous units with an Autonomous Token.",
+                    "During the Reactive Turn, choose whether the Controller uses a Connected unit or declares its own [[trait:aro|ARO]]. With a Connected unit, the Controller declares a reaction but performs [[skill:idle|Idle]] while the other unit is Autonomous; if the Controller performs its own reaction, both units become Autonomous and act independently.",
+                    "If the Controller enters [[state:isolated|Isolated]] or a Null condition, the units switch to Autonomous at the end of the Order rather than becoming [[state:disconnected|Disconnected]]. When the Controller recovers, one returns to Connected at the end of the recovery Order."
+                ],
+                "restrictions": [
+                    "A Controller with this subtype cannot also have [[rule:peripheral-type:servant|Servant]] units."
+                ],
+                "clarifications": [
+                    "A Connected unit is an exception to the Controller's usual [[skill:idle|Idle]] when the Controller declares [[skill:doctor|Doctor]] or [[skill:engineer|Engineer]]. The Controller then performs the recovery Skill and makes the Roll through the unit's Silhouette contact with an allied target; only one target can be treated per Order.",
+                    "For missions and scenarios, this subtype inherits restrictions applied to [[rule:peripheral-type:servant|Servant]] (including those concerning Specialist Troops). Its Autonomous fallback on Controller isolation or Null is an explicit exception to the general [[skill:peripheral|Peripheral]] [[state:disconnected|Disconnected]] rule."
                 ]
             },
             "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 106,
-                    "section": "Peripheral"
-                },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 107,
@@ -10861,7 +10926,8 @@
                 "restrictions": [],
                 "clarifications": [
                     "If the [[skill:peripheral|Peripheral]] became Disconnected because its Controller was [[state:isolated|Isolated]] or in a Null condition, the [[skill:peripheral|Peripheral]] reconnects automatically when that Controller recovers from the triggering condition.",
-                    "If the cause was a failed Coherency Check, passing a Coherency Check at the end of an Order or ARO automatically cancels Disconnected. If the cause was an Attack, scenery or scenario rule applied to the [[skill:peripheral|Peripheral]], [[skill:engineer|Engineer]] (or an equivalent Skill) can cancel it with the required contact and successful Roll. These are separate recovery routes."
+                    "If the cause was a failed Coherency Check, passing a Coherency Check at the end of an Order or ARO automatically cancels Disconnected. If the cause was an Attack, scenery or scenario rule applied to the [[skill:peripheral|Peripheral]], [[skill:engineer|Engineer]] (or an equivalent Skill) can cancel it with the required contact and successful Roll. These are separate recovery routes.",
+                    "[[rule:peripheral-type:synchronized|Synchronized]] and [[rule:peripheral-type:control|Control]] [[skill:peripheral|Peripherals]] can reconnect after their subtype's Coherency Check. A [[rule:peripheral-type:cyberplug|Cyberplug]] whose Controller enters [[state:isolated|Isolated]] or a Null condition changes to Autonomous instead of becoming [[state:disconnected|Disconnected]]."
                 ]
             },
             "labelIds": [
@@ -10881,6 +10947,16 @@
                     "sourceId": "n5-core-v5.3-es-pdf",
                     "page": 165,
                     "section": "Disconnected State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 106,
+                    "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 107,
+                    "section": "Peripheral"
                 }
             ],
             "review": {

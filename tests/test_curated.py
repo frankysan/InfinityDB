@@ -1052,6 +1052,63 @@ def test_peripheral_type_facts_validate_controller_eligibility(tmp_path: Path) -
         load_curated_document(path)
 
 
+def test_peripheral_subtype_explanation_groups_require_nonempty_text(
+    tmp_path: Path,
+) -> None:
+    document = valid_document()
+    document["records"].append(
+        {
+            "id": "skill:peripheral",
+            "kind": "skill",
+            "name": "Peripheral",
+            "summary": "The general Peripheral Skill.",
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {"typeIds": ["automatic"]},
+            "labelIds": [],
+            "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+            "composition": {"role": "definition"},
+            "review": {"status": "reviewed", "reviewedOn": "2026-10-13"},
+            "relations": [
+                {"type": "has-subtype", "recordId": "rule:peripheral-type:sample"}
+            ],
+        }
+    )
+    document["records"].append(
+        {
+            "id": "rule:peripheral-type:sample",
+            "kind": "rule",
+            "name": "Peripheral (Sample)",
+            "summary": "Example subtype for validation.",
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {
+                "category": "peripheral-type",
+                "controllerEligibility": {"status": "not-stated"},
+                "effects": ["A valid effect."],
+                "restrictions": ["A valid restriction."],
+                "clarifications": ["A valid clarification."],
+            },
+            "citations": [{"sourceId": "n5-core-v5.3", "page": 106}],
+            "composition": {"role": "definition"},
+            "review": {"status": "reviewed", "reviewedOn": "2026-10-13"},
+        }
+    )
+    path = tmp_path / "peripheral.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    assert load_curated_document(path)["records"][-1]["facts"]["effects"] == [
+        "A valid effect."
+    ]
+
+    for field in ("effects", "restrictions", "clarifications"):
+        for invalid in ([], [""], [" ", 123], "not-an-array"):
+            changed = json.loads(json.dumps(document))
+            changed["records"][-1]["facts"][field] = invalid
+            path.write_text(json.dumps(changed), encoding="utf-8")
+            with pytest.raises(
+                ValueError, match=rf"records\[2\]\.facts\.{field}"
+            ):
+                load_curated_document(path)
+
+
 def test_peripheral_type_rejects_unknown_controller_skill(tmp_path: Path) -> None:
     document = valid_document()
     document["records"].extend(

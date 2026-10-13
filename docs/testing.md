@@ -506,3 +506,29 @@ certify the separate 0.10.1 real-browser release checklist, exhaustive theme
 or distance preferences, every interaction exception, or hosted deployment.
 Playwright and locally installed Chrome were used only for this optional
 acceptance exercise; normal CI does not require a browser.
+
+## 1.0 Peripheral (REA-017) browser acceptance
+
+**Verified 2026-10-13, branch dev/v1.0.0, base commit 5fc94553b992,
+Windows, headless Chrome 155.** The browser served the application code
+from an isolated Git worktree, the existing Army database, and a temporary
+rules database rebuilt from the updated curated content; tracked runtime
+artifacts and the active Git checkout were not modified.
+
+Eight pages were exercised at **1440, 390 and 320 px** (24 cases): the
+Peripheral Skill, all five Peripheral subtype General Rules, Cyberplug and
+Disconnected State. All displayed the reference content, citations and
+semantic links without horizontal overflow or JavaScript errors. The
+320-pixel Peripheral, Control and Cyberplug screenshots were inspected;
+Cyberplug prose was simplified after the first screenshot to avoid repeated
+inline links, and the full browser grid was rerun after that revision.
+
+Six navigation paths passed between Doctor, Engineer, Disconnected, the
+Peripheral Skill and the related subtype references. Focusing a reference
+and pressing Enter opened its destination. On emulated touch, the first
+tap revealed the inline preview and the second navigated, as intended.
+
+This is **REA-017's bounded reference/browser acceptance**, not general
+release acceptance or certification of every peripheral gameplay scenario.
+The N5.3 pp. 106-108 behavior is represented as linked explanations; Army
+Peripheral relationships and execution/evaluation logic were not changed.

@@ -404,6 +404,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] **REA-015 — State cancellation:** Inspect the source-cited
       State-specific cancellation explanations in the browser; keep this
       distinct from the completed REA-026 baseline.
+    - [x] **REA-017 — Peripheral subtypes:** Shared activation, Coherency,
+      Roll ownership, Servant/Connected Cyberplug Doctor/Engineer contact,
+      Control Spearhead, Ancillary deployment/Fireteam exceptions, and
+      Cyberplug Autonomous behavior are published in linked, source-cited
+      references. Chrome acceptance on 2026-10-13 passed 24 page/viewport
+      cases (1440/390/320 px), six links, keyboard/touch navigation,
+      with no JavaScript errors or horizontal clipping; see
+      [development checks](testing.md#10-peripheral-rea-017-browser-acceptance).
+      Dependent source-specific exceptions remain separately tracked.
     - [ ] **REA-018 — Hacking Area, Firewall, Supportware:** Verify the
       published cards' enemy-Repeater ARO scope, 8-inch checks, disabled
       Hacking Device Firewall, and whole-Program Fairy Dust replacement

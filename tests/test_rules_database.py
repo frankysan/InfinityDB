@@ -1448,6 +1448,61 @@ def test_skill_roll_modifier_interactions_are_bidirectional(
         }
 
 
+def test_peripheral_subtypes_explain_shared_and_distinct_operation(
+    current_rules_database: RulesDatabase,
+) -> None:
+    database = current_rules_database
+    skill = database.composed_record("skill:peripheral")
+    assert skill is not None
+    baseline = " ".join(skill["facts"]["effects"] + skill["facts"]["restrictions"])
+    assert "count as one Trooper" in baseline
+    assert "same Short Skills or Long Skill" in baseline
+    assert "[[skill:idle|Idle]]" in baseline
+    assert "[[state:disconnected|Disconnected]]" in baseline
+    assert "[[rule:peripheral-type:ancillary|Ancillary Peripherals]]" in baseline
+
+    expected = {
+        "servant": ("Controller—not the Servant—makes the Roll", "one Model per Order"),
+        "synchronized": ("before any declared movement is measured", "Controller"),
+        "control": ("only the Controller and Spearhead perform it", "Spearhead"),
+        "ancillary": ("using [[skill:place-deployable|Place Deployable]]", "Fireteam membership"),
+        "cyberplug": ("Connected or Autonomous", "rather than becoming"),
+    }
+    for subtype, (effect, detail) in expected.items():
+        rule = database.composed_record(f"rule:peripheral-type:{subtype}")
+        assert rule is not None, subtype
+        assert rule["facts"]["category"] == "peripheral-type"
+        facts = rule["facts"]
+        assert facts["effects"], subtype
+        prose = " ".join(
+            item
+            for field in ("effects", "restrictions", "clarifications")
+            for item in facts.get(field, [])
+        )
+        assert effect in prose, subtype
+        assert detail in prose, subtype
+        assert any(
+            citation["source_id"] == "n5-core-v5.3-pdf"
+            and citation.get("page") in (106, 107, 108)
+            for citation in rule["citations"]
+        ), subtype
+
+    cyberplug = database.composed_record("rule:peripheral-type:cyberplug")
+    assert cyberplug is not None
+    cyberplug_facts = " ".join(
+        cyberplug["facts"][field][0]
+        for field in ("effects", "clarifications")
+    )
+    assert "[[skill:idle|Idle]]" in cyberplug_facts
+    assert "[[skill:doctor|Doctor]]" in cyberplug_facts
+    assert "[[skill:engineer|Engineer]]" in cyberplug_facts
+
+    for source in ("skill:doctor", "skill:engineer", "state:disconnected", "skill:cyberplug"):
+        record = database.composed_record(source)
+        assert record is not None, source
+        assert "[[rule:peripheral-type:cyberplug|Cyberplug" in str(record["facts"])
+
+
 def test_place_deployable_prerequisites_are_bidirectional(
     current_rules_database: RulesDatabase,
 ) -> None:

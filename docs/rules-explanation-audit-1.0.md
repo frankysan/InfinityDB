@@ -712,10 +712,14 @@ future regressions. **Dependencies:** REA-015, REA-017, REA-020, REA-030.
 **Evidence:** Explicit; high confidence. **Affected:** `skill:peripheral`,
 all five `rule:peripheral-type:*` records, `skill:cyberplug`, `state:disconnected`.
 
-**Current:** The family says the type defines behavior; subtype facts largely
-cover Controller eligibility, maximum count, distance, and Cyberplug profile
-names. They omit the actions, cancellations, and exceptions those identities
-need to explain. This is incomplete existing content, not absent identities.
+**Status:** Complete for the shared Peripheral-reference scope (2026-10-13).
+
+**Current:** The shared Peripheral reference and all five subtype identities
+explain source-backed activation, Coherency, disconnection, delegated contact
+and Roll ownership, Control Spearhead, Ancillary exceptions, and Cyberplug
+Connected/Autonomous profiles. No Army identities or typed simulation
+relations changed. Real-browser acceptance passed; dependent source-specific
+interactions remain owned by their individual audit findings.
 
 **Evidence/result:** S1 pp. 106-108 distinguish shared activation/Idle behavior,
 Servant contact delegation and single active Servant, Synchronized Coherency,
@@ -725,10 +729,15 @@ Doctor/Engineer is an explicit exception to the Controller's usual Idle.
 S2 p. 2 confirms one participant unable to perform a Skill Idles while others
 can perform it. Generic Disconnected propagation cannot override Cyberplug.
 
-**Action:** Add a concise common baseline plus subtype-local exceptions;
-explain Controller/Peripheral roll ownership. **Fix:** text/links; subtype
-facts/relations and browser support only where deliberately needed.
-**Dependencies:** REA-001, REA-009, REA-015, REA-020, REA-030.
+**Acceptance evidence:** Headless Chrome 155 on Windows checked the shared
+Peripheral and five subtype pages, Cyberplug, and Disconnected at 1440, 390
+and 320 pixels (24 combinations). Six cross-reference navigation paths,
+keyboard Enter and two-tap touch behavior, rendered citations and mobile
+readability passed without JavaScript errors or horizontal overflow.
+See [testing](testing.md#10-peripheral-rea-017-browser-acceptance).
+This does not resolve REA-001/009/015/020/030 or their separate conditions.
+**Fix:** reviewed maintained text with validated subtype fact groups, not a
+rules-execution engine.
 
 ### REA-018 - Firewall, Hacking Area, and Supportware have no adequate baseline owner
 

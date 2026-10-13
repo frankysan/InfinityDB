@@ -734,6 +734,9 @@ def _validate_peripheral_type_facts(facts: object, context: str) -> set[str]:
         "maxPerController",
         "operatingDistance",
         "profileModes",
+        "effects",
+        "restrictions",
+        "clarifications",
     }
     unknown = set(facts) - allowed
     if unknown:
@@ -764,6 +767,18 @@ def _validate_peripheral_type_facts(facts: object, context: str) -> set[str]:
             raise ValueError(
                 f"{context}.profileModes: must be a unique non-empty subset of "
                 "['connected', 'autonomous']"
+            )
+    for field in ("effects", "restrictions", "clarifications"):
+        clauses = facts.get(field)
+        if clauses is None:
+            continue
+        if (
+            not isinstance(clauses, list)
+            or not clauses
+            or any(not isinstance(clause, str) or not clause.strip() for clause in clauses)
+        ):
+            raise ValueError(
+                f"{context}.{field}: expected non-empty maintained-text strings"
             )
     return skill_ids
 

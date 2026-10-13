@@ -11,6 +11,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Peripheral and its five subtype references now explain activation,
+  Coherency, Doctor/Engineer delegation, Controller and Peripheral rolls,
+  and Cyberplug Connected/Autonomous exceptions.
 - Coordinated Orders now have a linked reference covering Spearhead, shared
   declarations, Burst, reactive targets, recovery and Hacking exceptions.
 - The Order Expenditure Sequence now explains declaration choices, both ARO
@@ -30,6 +33,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web backend:** Expand the shared Peripheral baseline
+  and five subtype cards with source-cited operation, disconnection,
+  recovery and exception rules, linked to Doctor, Engineer and Cyberplug.
 - **Data processing + Web backend:** Publish a Coordinated Orders reference
   explaining shared Skill choices, reactive targeting, Burst adjustments and
   recovery and Special Dice exceptions, linked from relevant references.

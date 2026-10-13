@@ -697,9 +697,14 @@ type uses `facts.category = "peripheral-type"` and a validated
 `{"anyOf": [...]}` list containing two or more `hasSkill` predicates. Optional
 structured facts currently cover positive `maxPerController`, reviewed
 `operatingDistance: "unlimited"`, and the Cyberplug `connected` / `autonomous`
-profile modes. Eligibility references must resolve to Skill records in the same
-collection. These facts describe rules semantics only; they do not map Army-local
-Peripheral definitions to canonical Peripheral entities.
+profile modes. Optional effects, restrictions, and clarifications are
+non-empty arrays of maintained-text clauses rendered by the existing General
+Rules reference cards. Keep the shared activation and Disconnected baseline
+with the Peripheral Skill; subtype-local clauses explain Coherency, delegation,
+and exceptions without adding inferred typed relations. Eligibility references
+must resolve to Skill records in the same collection. These facts describe
+rules semantics only; they do not map Army-local Peripheral definitions to
+canonical Peripheral entities.
 
 Trait records may use `facts.sourceIdentity.prefixes` for source labels whose
 parameter value is part of the Army text, for example `Disposable (2)` mapping
