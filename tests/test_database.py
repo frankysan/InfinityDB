@@ -3622,7 +3622,7 @@ def test_skill_catalog_rules_view_excludes_known_non_skills_and_adds_rules_only_
         {
             "id": "automatic",
             "name": "Automatic",
-            "source": "Infinity Wiki snapshot (English) v20260918-130233",
+            "source": "Infinity Wiki snapshot (English) v20260926-200832",
             "page": None,
         }
     ]

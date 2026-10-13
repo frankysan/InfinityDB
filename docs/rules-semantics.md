@@ -2322,8 +2322,8 @@ pages <https://infinitythewiki.com/Combined_Ammunition>,
 <https://infinitythewiki.com/Combined_Saving_Roll>, and
 <https://infinitythewiki.com/Ammunition_Summary_Chart>.
 
-Sources: N5 v5.3 Ammunition definitions, pinned Wiki snapshot
-`wiki-en-20260918-130233` (Normal, Shock, Stun, Smoke, Eclipse); current N5.3
+Sources: N5 v5.3 Ammunition definitions, curated Wiki snapshot
+`wiki-en-20260926-200832` (Normal, Shock, Stun, Smoke, Eclipse); current N5.3
 Wiki pages <https://infinitythewiki.com/N>,
 <https://infinitythewiki.com/SHOCK>,
 <https://infinitythewiki.com/Stun_Ammunition>,
@@ -2521,7 +2521,7 @@ existing profile/API pilot enforces these different ownership boundaries.
 
 Sources:
 
-- Pinned Wiki revision `wiki-en-20260918-130233`: AP, DA, E/M, EXP, PARA,
+- Curated Wiki snapshot `wiki-en-20260926-200832`: AP, DA, E/M, EXP, PARA,
   and T2 Ammunition.
 - Current N5.3 Wiki: <https://infinitythewiki.com/EXP>,
   <https://infinitythewiki.com/Paralysis_(PARA)_Ammunition>, and

@@ -506,12 +506,12 @@ def test_load_curated_document_accepts_archived_wiki_citation(tmp_path: Path) ->
     document = valid_document()
     document["sources"] = [
         {
-            "id": "wiki-en-20260918-130233",
+            "id": "wiki-en-20260926-200832",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
-            "version": "20260918-130233",
-            "acquiredAt": "2026-09-18T13:02:33+02:00",
-            "localPath": "data/wiki/WIKI-en 20260918-130233.zip",
+            "version": "20260926-200832",
+            "acquiredAt": "2026-09-26T20:08:32+02:00",
+            "localPath": "data/wiki/WIKI-en 20260926-200832.zip",
             "sha256": "a" * 64,
             "language": "en",
             "documentCount": 812,
@@ -522,7 +522,7 @@ def test_load_curated_document_accepts_archived_wiki_citation(tmp_path: Path) ->
     document["vocabularySources"] = {"skillTypes": [], "labels": []}
     document["records"][0]["citations"] = [
         {
-            "sourceId": "wiki-en-20260918-130233",
+            "sourceId": "wiki-en-20260926-200832",
             "member": "Example",
             "heading": "Example",
         }
@@ -614,10 +614,10 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert sources["n5-core-v5.3-pdf"]["url"] == (
         "https://experience.corvusbelli.com/en/infinity/resources"
     )
-    wiki_source = sources["wiki-en-20260918-130233"]
-    assert wiki_source["localPath"] == "data/wiki/WIKI-en 20260918-130233.zip"
+    wiki_source = sources["wiki-en-20260926-200832"]
+    assert wiki_source["localPath"] == "data/wiki/WIKI-en 20260926-200832.zip"
     assert wiki_source["sha256"] == (
-        "aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a"
+        "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987"
     )
     assert wiki_source["documentCount"] == 812
     assert document["vocabularySources"]["skillTypes"][0]["member"] == (

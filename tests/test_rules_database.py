@@ -463,11 +463,11 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         ).fetchone() == ("Labels", None)
         assert connection.execute(
             "SELECT local_path, sha256, acquired_at, language, document_count, url "
-            "FROM sources WHERE id = 'wiki-en-20260918-130233'"
+            "FROM sources WHERE id = 'wiki-en-20260926-200832'"
         ).fetchone() == (
-            "data/wiki/WIKI-en 20260918-130233.zip",
-            "aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a",
-            "2026-09-18T13:02:33+02:00",
+            "data/wiki/WIKI-en 20260926-200832.zip",
+            "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987",
+            "2026-09-26T20:08:32+02:00",
             "en",
             812,
             "https://infinitythewiki.com/",
@@ -849,7 +849,7 @@ def test_rules_database_returns_current_trait_records(tmp_path: Path) -> None:
     archived = next(
         citation
         for citation in camouflaged["citations"]
-        if citation["source_id"] == "wiki-en-20260918-130233"
+        if citation["source_id"] == "wiki-en-20260926-200832"
     )
     assert archived["member"] == "Camouflaged_State"
     assert archived["source_url"] == "https://infinitythewiki.com/"

@@ -4658,7 +4658,7 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     shock = json.loads(body)
     assert shock["slug"] == "shock"
     assert shock["rules"][0]["id"] == "ammunition:shock"
-    assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20260918-130233"
+    assert shock["rules"][0]["citations"][0]["source_id"] == "wiki-en-20260926-200832"
 
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
@@ -5874,7 +5874,7 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
         {
             "id": "automatic",
             "name": "Automatic",
-            "source": "Infinity Wiki snapshot (English) v20260918-130233",
+            "source": "Infinity Wiki snapshot (English) v20260926-200832",
             "page": None,
         }
     ]

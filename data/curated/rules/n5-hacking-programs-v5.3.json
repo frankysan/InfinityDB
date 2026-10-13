@@ -39,13 +39,13 @@
             "url": "https://experience.corvusbelli.com/en/infinity/resources"
         },
         {
-            "id": "wiki-en-20260918-130233",
+            "id": "wiki-en-20260926-200832",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
-            "version": "20260918-130233",
-            "acquiredAt": "2026-09-18T13:02:33+02:00",
-            "localPath": "data/wiki/WIKI-en 20260918-130233.zip",
-            "sha256": "aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a",
+            "version": "20260926-200832",
+            "acquiredAt": "2026-09-26T20:08:32+02:00",
+            "localPath": "data/wiki/WIKI-en 20260926-200832.zip",
+            "sha256": "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987",
             "language": "en",
             "documentCount": 812,
             "url": "https://infinitythewiki.com/",
@@ -81,7 +81,7 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Assisted_Fire",
                     "heading": "Assisted Fire"
                 },
@@ -130,7 +130,7 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Carbonite",
                     "heading": "Carbonite"
                 }
@@ -189,7 +189,7 @@
                     "section": "Firefight — Designated Landing Area"
                 },
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Controlled_Jump",
                     "heading": "Controlled Jump"
                 },
@@ -244,7 +244,7 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Cybermask",
                     "heading": "Cybermask"
                 }
@@ -286,7 +286,7 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Enhanced_Reaction",
                     "heading": "Enhanced Reaction"
                 },
@@ -336,7 +336,7 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Fairy_Dust",
                     "heading": "Fairy Dust"
                 },
@@ -385,7 +385,7 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Oblivion",
                     "heading": "Oblivion"
                 }
@@ -428,7 +428,7 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Spotlight",
                     "heading": "Spotlight"
                 }
@@ -475,7 +475,7 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Total_Control",
                     "heading": "Total Control"
                 }
@@ -512,7 +512,7 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Trinity",
                     "heading": "Trinity"
                 }
@@ -553,7 +553,7 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "White_Noise",
                     "heading": "White Noise"
                 }
@@ -590,7 +590,7 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260918-130233",
+                    "sourceId": "wiki-en-20260926-200832",
                     "member": "Zero_Pain",
                     "heading": "Zero Pain"
                 }

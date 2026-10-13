@@ -110,6 +110,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     `tools/audit_1_0_reference_inputs.py` checks each page title and embedded revision
     ID, including historical Protheion 3908. This establishes source **availability**,
     not curation completeness or equivalence to the pinned 2026-09-18 Wiki snapshot.
+  - [x] Replace the unavailable September 18 English Wiki citation snapshot with
+    the validated September 26 capture, correcting three changed member paths.
+    All cited headings and September 28 archived page revision IDs were verified;
+    retain the missing original as a historical evidence limitation.
+  - [ ] Review any change-sensitive curated interpretations that cannot be
+    established from the available September 26 capture; the missing original
+    cannot be used to prove earlier content equivalence.
   - [ ] Pin the intended Army snapshot, rules/FAQ/annex PDF versions, and supported wiki evidence.
     Record archive/content hashes as appropriate, publication dates separately from acquisition
     dates, and the generated database/publication identities. A later source refresh reopens the

@@ -1057,7 +1057,7 @@ The edition, mode and Trait decisions remain separate.
 **Priority:** P1. **Evidence:** Observed missing file; high confidence.
 **Affected:** C/H source `wiki-en-20260918-130233` and 72 citing records.
 
-**Current:** Both collections identify an 812-member ZIP acquired 2026-09-18
+**At the original audit:** Both collections identified an 812-member ZIP acquired 2026-09-18
 13:02:33 +02:00, expected SHA-256
 `aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a`.
 `data/wiki/WIKI-en 20260918-130233.zip` does not exist in this checkout.
@@ -1075,9 +1075,20 @@ REA-027; it is an environment/evidence gap, not proof that 72 rules are wrong.
 
 **Follow-up evidence:** Follow-up provenance: the ignored September 18 acquisition manifest was
 located and its expected ZIP hash agrees with C/H. The ZIP itself is still absent.
-No artifact mismatch or recovery was claimed; 72 records / 74 citations retain
-their original dependency. S14 is separately identified Spanish evidence and
-neither it nor S4/S5 repairs the missing English capture.
+No artifact mismatch or recovery was claimed; at that audit baseline, 72
+records / 74 citations retained their original dependency. S14 is separately
+identified Spanish evidence and neither it nor S4/S5 recovered the missing
+English capture.
+
+**Later source replacement (2026-10-13):** The curated C/H source declarations
+and their 74 citations were repinned to the available
+`WIKI-en 20260926-200832.zip` after resolving all 64 referenced page members
+and all cited headings. Three legacy member names were corrected to paths in
+that archive. The same referenced pages have matching embedded Wiki revision
+IDs in the 2026-09-28 history archive. The deleted September 18 bytes remain
+unavailable, so exact historical equivalence is not claimed. This resolves
+the missing *active* citation archive, not historical S18 recovery or the
+separate rules-interpretation review. See the updated source evidence ledger.
 
 ### REA-030 - FAQ publication and scenario applicability remain uncurated
 

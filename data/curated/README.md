@@ -728,18 +728,22 @@ example:
 
 ```json
 {
-    "sourceId": "wiki-en-20260918-130233",
+    "sourceId": "wiki-en-20260926-200832",
     "member": "Camouflaged_State",
     "heading": "Camouflaged State"
 }
 ```
 
-The checked-in N5 v5.3 collection is bound to
-`data/wiki/WIKI-en 20260918-130233.zip` with SHA-256
-`aa407f1959fbaafce98058acf507640cc94bfc2690d4a7519a547caf1492f23a`,
-acquired 2026-09-18 at 13:02:33 +02:00 with 812 members. Pinned `oldid=` wiki
-sources remain URL-backed because the current mirror intentionally does not
-preserve query-selected historical revisions as separate archive members.
+The checked-in N5 v5.3 collections are bound to
+`data/wiki/WIKI-en 20260926-200832.zip` with SHA-256
+`c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987`,
+acquired 2026-09-26 at 20:08:32 +02:00 with 812 members. This replaces the
+unavailable 2026-09-18 capture: all 74 archived citations and two vocabulary
+references were checked against the newer archive; three citation members needed
+path corrections. The original September 18 bytes are unavailable, so exact
+content equivalence cannot be established. Individually pinned `oldid=`
+revisions remain separate URL-backed source identities, even when archived
+revision payloads can be verified against the history-enabled Wiki capture.
 
 Generated acquisition provenance remains under `data/manifests/snapshots/`;
 curated rules copy only the exact source identity required to reproduce what was
