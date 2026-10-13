@@ -11,6 +11,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- The Order Expenditure Sequence now explains declaration choices, both ARO
+  checks, Resolution timing, invalid declarations and simultaneous effects.
 - A new Guts Roll reference explains when to roll, the order of withdrawal
   options, the revised Line of Fire check, and Courage, Religious Troop and
   Stun Ammunition exceptions.
@@ -26,6 +28,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web backend:** Publish a shared Order Expenditure Sequence
+  reference and link it from commonly declared Skills, Guts Rolls and Disposable
+  uses, including declaration-time exceptions and simultaneous recovery timing.
 - **Data processing + Web backend:** Link the Guts Roll reference to relevant
   Skills, States and Stun Ammunition, including the N5.3 attacker-position
   clarification and compulsory failed-roll movement priorities.

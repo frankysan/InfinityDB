@@ -273,6 +273,43 @@ def test_guts_roll_reference_and_source_exceptions_are_composed(
         assert "[[rule:guts-roll|Guts Roll]]" in json.dumps(record), entity_id
 
 
+def test_order_expenditure_sequence_mechanics_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    order = current_rules_database.composed_record("rule:order-expenditure-sequence")
+    assert order is not None
+    assert order["facts"]["category"] == "basic-rule"
+    text = " ".join(
+        clause
+        for field in ("effects", "restrictions", "clarifications")
+        for clause in order["facts"][field]
+    )
+    for fragment in (
+        "First [[trait:aro|ARO]] check",
+        "not eligible at the first check",
+        "full movement route",
+        "all Basic Short Skills",
+        "Long [[skill:jump|Jump]] or [[skill:climb|Climb]]",
+        "Declared [[trait:disposable-x|Disposable]] uses are still spent",
+        "[[skill:discover|Discover]]",
+        "[[skill:engineer|Engineer]]",
+        "[[state:immobilized-a|Immobilized-A]]",
+    ):
+        assert fragment in text
+    assert {
+        (citation["source_id"], citation.get("page"))
+        for citation in order["citations"]
+    } >= {("n5-core-v5.3-pdf", 14), ("n5-core-v5.3-pdf", 15)}
+
+    for identifier in (
+        "skill:idle", "skill:move", "skill:bs-attack", "skill:alert",
+        "rule:guts-roll", "trait:disposable-x",
+    ):
+        entry = current_rules_database.composed_record(identifier)
+        assert entry is not None, identifier
+        assert "[[rule:order-expenditure-sequence|Order Expenditure Sequence]]" in json.dumps(entry)
+
+
 def test_escape_system_threshold_help_refers_to_the_unit_profile(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -340,7 +377,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 379
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 380
         assert connection.execute(
             "SELECT id, title FROM scenario_collections"
         ).fetchone() == ("n5-core", "N5 Core Scenarios")

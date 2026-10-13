@@ -3223,7 +3223,10 @@
                     "prefixes": [
                         "Disposable ("
                     ]
-                }
+                },
+                "clarifications": [
+                    "The shared [[rule:order-expenditure-sequence|Order Expenditure Sequence]] spends declared [[trait:disposable-x|Disposable]] charges even when a Skill or item fails its Requirements."
+                ]
             },
             "relations": [
                 {
@@ -8097,7 +8100,8 @@
                     "The selected item's range, Line of Fire, target, and special rules limit the attack."
                 ],
                 "clarifications": [
-                    "When a target's action directly opposes this Attack, resolve [[rule:face-to-face-rolls|Face to Face Rolls]]; otherwise make independent, unopposed Rolls. Uncanceled hits use [[rule:saving-rolls|Saving Rolls]] as specified by the weapon."
+                    "When a target's action directly opposes this Attack, resolve [[rule:face-to-face-rolls|Face to Face Rolls]]; otherwise make independent, unopposed Rolls. Uncanceled hits use [[rule:saving-rolls|Saving Rolls]] as specified by the weapon.",
+                    "Declare the chosen weapon or mode, targets, firing position, and Burst allocation before Resolution. The shared [[rule:order-expenditure-sequence|Order Expenditure Sequence]] defines when Requirements are checked."
                 ]
             },
             "labelIds": [
@@ -10189,7 +10193,10 @@
                 "effects": [
                     "At the end of the Order, the user may turn on the spot without changing position or generating AROs."
                 ],
-                "restrictions": []
+                "restrictions": [],
+                "clarifications": [
+                    "Unlike most Skills, check the Requirements of [[skill:alert|Alert!]] when it is declared. Its effects occur at the conclusion of the [[rule:order-expenditure-sequence|Order Expenditure Sequence]]."
+                ]
             },
             "labelIds": [
                 "optional",
@@ -10281,7 +10288,10 @@
                     "The user performs no action, although the declaration still activates the Trooper and may generate AROs.",
                     "A declared Skill whose Requirements are not met is resolved as Idle instead."
                 ],
-                "restrictions": []
+                "restrictions": [],
+                "clarifications": [
+                    "The shared [[rule:order-expenditure-sequence|Order Expenditure Sequence]] replaces an invalid declaration with [[skill:idle|Idle]] at the applicable Requirements check; declared [[trait:disposable-x|Disposable]] uses are still spent."
+                ]
             },
             "labelIds": [
                 "no-roll"
@@ -10430,6 +10440,9 @@
                 ],
                 "restrictions": [
                     "Movement must follow the general movement rules."
+                ],
+                "clarifications": [
+                    "Declare the full movement path when choosing this Skill. Follow the shared [[rule:order-expenditure-sequence|Order Expenditure Sequence]] for reactive opportunities and timing."
                 ]
             },
             "labelIds": [
@@ -20492,7 +20505,8 @@
                     "A Trooper moving after a failed Guts Roll may enter or leave [[state:prone|Prone]] at the start or end of that movement; movement while [[state:prone|Prone]] has its distance halved. [[skill:climbing-plus|Climbing Plus]] can permit this movement on vertical surfaces.",
                     "[[skill:courage|Courage]] lets the owner choose to pass automatically. [[skill:religious-troop|Religious Troop]] instead passes automatically, but may make a [[attribute:wip|WIP]] Roll to apply the failed-Guts effects on success.",
                     "A failed [[ammunition:stun|Stun Ammunition]] Saving Roll automatically fails the subsequent Guts Roll, except for [[skill:courage|Courage]] or equivalent protection. The owner can spend an Operational Command Token during their Active Turn to force an automatic pass or failure, ignoring the die result and any Special Skills.",
-                    "[[skill:journalist|Journalist]] modifies eligible Guts Rolls by +3 for allied and -3 for enemy Troopers in its [[trait:zone-of-control-zc|Zone of Control]]; MODs from multiple [[skill:journalist|Journalists]] do not stack."
+                    "[[skill:journalist|Journalist]] modifies eligible Guts Rolls by +3 for allied and -3 for enemy Troopers in its [[trait:zone-of-control-zc|Zone of Control]]; MODs from multiple [[skill:journalist|Journalists]] do not stack.",
+                    "The [[rule:order-expenditure-sequence|Order Expenditure Sequence]] resolves [[rule:guts-roll|Guts Rolls]] during Conclusion, after other effects and [[rule:saving-rolls|Saving Rolls]]."
                 ]
             },
             "citations": [
@@ -20508,6 +20522,61 @@
                 {
                     "sourceId": "wiki-command-tokens-oldid-3959",
                     "heading": "Command Tokens: Operational Use"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "rule:order-expenditure-sequence",
+            "kind": "rule",
+            "name": "Order Expenditure Sequence",
+            "aliases": [
+                "Declaration Timing",
+                "Order Declaration"
+            ],
+            "summary": "An Order is spent when the Active Player activates a Trooper and declares a Skill. The Reactive Player has an opportunity to declare [[trait:aro|AROs]] after the first declaration and, for newly eligible Troopers only, after the second.\n\nAll declarations and [[trait:aro|AROs]] are treated as simultaneous, even when the declared actions use different points of the Active Trooper's movement.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "effects": [
+                    "**1. Activation and first declaration.** The Active Player names the Trooper, marks the Order spent, and declares its first Basic Short Skill or a Long Skill. For movement, measure the path and place the Trooper at the chosen end point.",
+                    "**2. First [[trait:aro|ARO]] check.** The Reactive Player checks eligibility and declares any [[trait:aro|AROs]] now available. An eligible Trooper that declines forfeits its chance to react to this Order.",
+                    "**3. Second declaration and [[trait:aro|ARO]] check.** If applicable, the Active Player declares a second Short Skill. The Reactive Player then checks and declares [[trait:aro|AROs]] only for Troopers that were not eligible at the first check.",
+                    "**4. Resolution.** Check the Requirements for the declared Skills and Equipment, measure range, determine MODs, and make the necessary Rolls. A Skill or item that fails its Requirements becomes [[skill:idle|Idle]] instead.",
+                    "**5. Effects and conclusion.** Apply successful effects, including [[rule:saving-rolls|Saving Rolls]] and [[skill:dodge|Dodge]] movement. Then resolve any [[rule:guts-roll|Guts Rolls]] and [[skill:alert|Alert!]] effects to end the Order."
+                ],
+                "restrictions": [
+                    "All choices must be fixed when a Skill is declared, including the full movement route or, for Attacks, the Weapon or Equipment, ammunition or other mode, targets, firing position, and allocation of Burst. Later declarations or results cannot retroactively change those choices.",
+                    "Check the Requirements of [[skill:alert|Alert!]], all Basic Short Skills, and Long [[skill:jump|Jump]] or [[skill:climb|Climb]] immediately on declaration. Check the Requirements of other declared Skills in Resolution instead.",
+                    "If a declared Skill, Weapon, or Equipment fails its Requirements at the applicable check, replace its effect with [[skill:idle|Idle]]. Declared [[trait:disposable-x|Disposable]] uses are still spent, including if the declaration proves invalid."
+                ],
+                "clarifications": [
+                    "All [[trait:aro|AROs]] resolve simultaneously. For instance, Reactive Troopers cannot declare [[skill:discover|Discover]] with one and condition a later [[skill:bs-attack|BS Attack]] by another on the first Trooper's Roll succeeding.",
+                    "Even if the Active Trooper shoots at the start of a [[skill:move|Move]] and an enemy shoots at the end of that movement, the Attacks are simultaneous. Opposition is determined by the shared [[rule:face-to-face-rolls|Face to Face Rolls]] rules, not declaration order.",
+                    "When a Trooper removes and receives an adverse condition in the same Order, apply the positive effect first. For example, an [[skill:engineer|Engineer]] may cancel [[state:immobilized-a|Immobilized-A]] before a simultaneous hit with [[ammunition:para|PARA Ammunition]] can inflict it again."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 14,
+                    "section": "Order Expenditure Sequence and All at Once"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 15,
+                    "section": "Declaration Requirements and Simultaneous Effects"
                 }
             ],
             "review": {

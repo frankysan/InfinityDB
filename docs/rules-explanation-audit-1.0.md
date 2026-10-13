@@ -939,15 +939,16 @@ content/links and future validation; no such edits made here.
 ### REA-026 - Complete shared General Rules mechanics
 
 **Classification:** completeness, clarity. **Severity:** Medium. **Priority:** P1.
-**Evidence:** Explicit absence from C/H; official mechanics Explicit.
+**Evidence:** Initially absent from C/H; published reference mechanics follow the official rules.
 **Affected:** General Rules domain, `skill:bs-attack`, `skill:cc-attack`,
 `skill:move`, `skill:idle`, `rule:command-token-strategic-use`, recovery references.
 
 **Current:** Face to Face Rolls and Saving Rolls now have linked, published
 General Rules baselines, with BS/CC Attack cross-references and source citations.
 Guts Rolls now have a linked baseline for the N5.3 attacker-position check,
-movement priorities and key Skill exceptions. Ordinary declaration timing and
-Coordinated Orders still lack canonical player-facing baselines. The current published rules catalog includes other
+movement priorities and key Skill exceptions. The Order Expenditure Sequence
+now covers declaration timing and the simultaneous-effects rule. Coordinated
+Orders still lack a canonical player-facing baseline. The current published rules catalog includes other
 scoped references such as Fireteam and Order rules; source research is not itself
 an ordinary player-facing reference.
 
@@ -955,11 +956,11 @@ an ordinary player-facing reference.
 these baselines. Useful examples include an unopposed save using PS plus
 protection, capped cumulative MODs, simultaneous effects, illegal declarations
 still spending Disposable uses, and Coordinated recovery's any-success rule.
-This is absent curated content, distinct from incomplete existing Skill cards.
+The core Roll, Guts and declaration baselines are now curated; Coordinated Orders remains a separate incomplete reference.
 
-**Action:** Scope concise, source-cited General Rules to the explanations
-needed by current catalogs. Link repeated baselines instead of copying whole
-procedures into each Skill. **Fix:** new curated definitions and publication
+**Action:** Complete the Coordinated Orders baseline and verify these shared
+mechanics in player-facing references. Link repeated explanations instead of
+copying entire procedures. **Fix:** curated definitions and publication
 integration; not a game engine. **Dependencies:** supports REA-009, REA-013,
 REA-014, REA-018, REA-021, REA-025. Full procedural simulation is outside scope.
 
