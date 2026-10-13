@@ -4663,7 +4663,7 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     status, _, body = request(rules_app, "/api/rules")
     assert status == 200
     general_rules = {item["slug"]: item for item in json.loads(body)["items"]}
-    assert len(general_rules) == 16
+    assert len(general_rules) == 17
     assert general_rules["regular-order"]["name"] == "Regular Order"
     assert general_rules["irregular-order"]["name"] == "Irregular Order"
     assert general_rules["loss-of-lieutenant"]["name"] == "Loss of Lieutenant"
@@ -4673,6 +4673,21 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     assert general_rules["special-dice"]["name"] == "Special Dice (+1 SD)"
     assert general_rules["face-to-face-rolls"]["name"] == "Face to Face Rolls"
     assert general_rules["saving-rolls"]["name"] == "Saving Rolls"
+    assert general_rules["guts-roll"]["name"] == "Guts Roll"
+
+    status, _, body = request(rules_app, "/api/rules/guts-roll")
+    assert status == 200
+    guts = json.loads(body)
+    assert guts["rules"][0]["id"] == "rule:guts-roll"
+    assert any(
+        token.get("target") == "skill:courage"
+        and token.get("public_reference") is not None
+        for clause in guts["rules"][0]["fact_tokens"]["clarifications"]
+        for token in clause
+    )
+    status, headers, _ = request(rules_app, "/rules/guts-roll")
+    assert status == 200
+    assert headers["content-type"].startswith("text/html")
 
     for slug, skill_ref in (
         ("face-to-face-rolls", "skill:dodge"),

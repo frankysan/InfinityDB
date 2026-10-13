@@ -1267,6 +1267,15 @@
             "url": "https://infinitythewiki.com/index.php?title=Hacking_Area&oldid=3974",
             "authority": "secondary",
             "retrievedDate": "2026-10-13"
+        },
+        {
+            "id": "wiki-guts-roll-oldid-4122",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Guts Roll revision 4122",
+            "version": "N5.3 / oldid 4122",
+            "url": "https://infinitythewiki.com/index.php?title=Guts_Roll&oldid=4122",
+            "authority": "secondary",
+            "retrievedDate": "2026-10-13"
         }
     ],
     "records": [
@@ -13563,6 +13572,9 @@
                     "[[skill:climb]] can be declared as a Basic Short Skill only once per Order; a following [[skill:move]] uses the second MOV value.",
                     "The user cannot benefit from Partial Cover MODs while on a vertical surface.",
                     "Troopers cannot deploy on vertical surfaces during the Deployment Phase or during the game."
+                ],
+                "clarifications": [
+                    "The vertical movement permission also applies during movement required by a failed [[rule:guts-roll|Guts Roll]]."
                 ]
             },
             "labelIds": [
@@ -13743,6 +13755,9 @@
                 ],
                 "restrictions": [
                     "The user is still affected by Loss of Lieutenant, including during Retreat."
+                ],
+                "clarifications": [
+                    "The automatic pass option modifies the shared [[rule:guts-roll|Guts Roll]]; the user may still choose to fail that Roll under its ordinary rule."
                 ]
             },
             "labelIds": [
@@ -13955,6 +13970,9 @@
                 "restrictions": [
                     "During Retreat, the user cannot voluntarily leave the game table unless scenario rules allow it.",
                     "The user remains affected by Loss of Lieutenant, including during Retreat."
+                ],
+                "clarifications": [
+                    "For the shared [[rule:guts-roll|Guts Roll]], this Skill's automatic pass is obligatory; the optional [[attribute:wip|WIP]] Roll allows applying the failed-Guts movement on success."
                 ]
             },
             "labelIds": [
@@ -14296,7 +14314,8 @@
                 "clarifications": [
                     "A qualifying Movement-labelled Skill or ARO lets a Trooper enter or leave Prone at the start or end of its movement; a failed Guts Roll may also change it. [[skill:jump|Jump]] automatically cancels Prone. General Movement Rules additionally exclude [[skill:berserk|Berserk]] from voluntary Prone transitions.",
                     "Entering [[state:unconscious|Unconscious]] normally also causes Prone, except for Troopers unable to enter it. When [[state:unconscious|Unconscious]] is canceled, that Trooper’s Prone condition is automatically canceled as well.",
-                    "During the [[skill:impetuous|Impetuous]] Phase, a Trooper declaring [[skill:move|Move]], [[skill:jump|Jump]], or [[skill:climb|Climb]] must leave Prone, use its full applicable MOV value, and cannot return to Prone at the end of that movement. [[skill:impetuous|Impetuous]] Troopers also cannot end the Order Prone."
+                    "During the [[skill:impetuous|Impetuous]] Phase, a Trooper declaring [[skill:move|Move]], [[skill:jump|Jump]], or [[skill:climb|Climb]] must leave Prone, use its full applicable MOV value, and cannot return to Prone at the end of that movement. [[skill:impetuous|Impetuous]] Troopers also cannot end the Order Prone.",
+                    "A failed [[rule:guts-roll|Guts Roll]] may require the Trooper to enter Prone; moving while Prone halves the movement distance."
                 ]
             },
             "labelIds": [],
@@ -14565,7 +14584,8 @@
                 ],
                 "clarifications": [
                     "This condition ends when the Trooper declares an Order; declares an ARO other than [[skill:bs-attack|BS Attack]] with its SF Mode weapon; uses a weapon without the [[trait:suppressive-fire|Suppressive Fire]] Trait; or fails a Guts Roll.",
-                    "It also ends if the Trooper enters [[state:engaged|Engaged]], [[state:isolated|Isolated]], [[state:retreat|Retreat!]], a Null or Immobilized condition, or another condition that cancels this condition; if its army enters Loss of [[skill:lieutenant|Lieutenant]]; or if the Trooper joins a Fireteam."
+                    "It also ends if the Trooper enters [[state:engaged|Engaged]], [[state:isolated|Isolated]], [[state:retreat|Retreat!]], a Null or Immobilized condition, or another condition that cancels this condition; if its army enters Loss of [[skill:lieutenant|Lieutenant]]; or if the Trooper joins a Fireteam.",
+                    "Failing a [[rule:guts-roll|Guts Roll]] cancels this condition."
                 ]
             },
             "labelIds": [],
@@ -16069,6 +16089,9 @@
                 "restrictions": [
                     "Campaign bonuses require the Journalist to remain on the game table in a non-Null State at the end of the scenario.",
                     "Multiple Journalist modifiers do not stack."
+                ],
+                "clarifications": [
+                    "These MODs apply to the shared [[rule:guts-roll|Guts Roll]]; modifiers from multiple Journalists are not cumulative."
                 ]
             },
             "labelIds": [
@@ -18022,7 +18045,10 @@
                         "result": "automatic-failure",
                         "exception": "courage-or-equivalent"
                     }
-                }
+                },
+                "clarifications": [
+                    "After a failed Saving Roll, the subsequent [[rule:guts-roll|Guts Roll]] automatically fails unless the target has [[skill:courage|Courage]] or equivalent protection."
+                ]
             },
             "relations": [
                 {
@@ -20422,6 +20448,66 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 37,
                     "section": "Saving Roll (SR)"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-13"
+            }
+        },
+        {
+            "id": "rule:guts-roll",
+            "kind": "rule",
+            "name": "Guts Roll",
+            "aliases": [
+                "Guts Rolls"
+            ],
+            "summary": "After surviving one or more successful Attacks that require [[rule:saving-rolls|Saving Rolls]] or cause a condition, an eligible Trooper makes one [[attribute:wip|WIP]] Guts Roll at the end of the Order. Passing means holding position; failing can force withdrawal or going [[state:prone|Prone]].",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "The Trooper suffered one or more successful Attacks requiring Saving Rolls or causing a condition, and is not [[state:engaged|Engaged]], in [[term:null-state|a Null State]] or affected by an Immobilized condition.",
+                    "Make the Guts Roll even if the attackers have entered [[term:null-state|a Null State]] by the end of the Order."
+                ],
+                "effects": [
+                    "Make a single unopposed [[attribute:wip|WIP]] Roll at the very end of the Order, after all [[rule:saving-rolls|Saving Rolls]]. The owner may choose to fail this Roll automatically. On success, the Trooper holds position and does nothing further.",
+                    "On failure, first relocate up to [[distance:2:inch]] to leave the Line of Fire of every attacker that attacked the Trooper, and the danger zone or Area of Effect of Attacks not requiring Line of Fire.",
+                    "If leaving those areas is impossible, relocate up to [[distance:2:inch]] to gain Total or Partial Cover against every attacker. If neither movement option is possible, the Trooper must enter [[state:prone|Prone State]], facing in any direction the player chooses."
+                ],
+                "restrictions": [
+                    "An Attack with no PS value that also causes no condition does not require a Guts Roll. Troopers in [[state:engaged|Engaged]], [[term:null-state|Null State]] or Immobilized conditions cannot make Guts Rolls.",
+                    "Movement after failing a Guts Roll follows general movement and measuring requirements. It does not generate [[trait:aro|AROs]], trigger [[trait:deployable|Deployable]] Weapons or Equipment, or allow entering Silhouette contact with enemy Troopers or Scenario Objectives."
+                ],
+                "clarifications": [
+                    "Check the enemies' Line of Fire only from the positions where they actually attacked. If the Trooper is already outside all relevant Lines of Fire and Areas of Effect when its Guts Roll fails, it goes [[state:prone|Prone]] instead of making the withdrawal movement.",
+                    "A Trooper moving after a failed Guts Roll may enter or leave [[state:prone|Prone]] at the start or end of that movement; movement while [[state:prone|Prone]] has its distance halved. [[skill:climbing-plus|Climbing Plus]] can permit this movement on vertical surfaces.",
+                    "[[skill:courage|Courage]] lets the owner choose to pass automatically. [[skill:religious-troop|Religious Troop]] instead passes automatically, but may make a [[attribute:wip|WIP]] Roll to apply the failed-Guts effects on success.",
+                    "A failed [[ammunition:stun|Stun Ammunition]] Saving Roll automatically fails the subsequent Guts Roll, except for [[skill:courage|Courage]] or equivalent protection. The owner can spend an Operational Command Token during their Active Turn to force an automatic pass or failure, ignoring the die result and any Special Skills.",
+                    "[[skill:journalist|Journalist]] modifies eligible Guts Rolls by +3 for allied and -3 for enemy Troopers in its [[trait:zone-of-control-zc|Zone of Control]]; MODs from multiple [[skill:journalist|Journalists]] do not stack."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 38,
+                    "section": "Guts Roll"
+                },
+                {
+                    "sourceId": "wiki-guts-roll-oldid-4122",
+                    "heading": "Guts Roll"
+                },
+                {
+                    "sourceId": "wiki-command-tokens-oldid-3959",
+                    "heading": "Command Tokens: Operational Use"
                 }
             ],
             "review": {

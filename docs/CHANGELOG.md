@@ -11,6 +11,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- A new Guts Roll reference explains when to roll, the order of withdrawal
+  options, the revised Line of Fire check, and Courage, Religious Troop and
+  Stun Ammunition exceptions.
 - Face to Face Rolls and Saving Rolls now have linked explanations of opposing
   results, Criticals, ties, defense values and special Saving Roll exceptions.
 - Special Dice now have a linked reference explaining extra-die allocation and
@@ -23,6 +26,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web backend:** Link the Guts Roll reference to relevant
+  Skills, States and Stun Ammunition, including the N5.3 attacker-position
+  clarification and compulsory failed-roll movement priorities.
 - **Data processing + Web backend:** Add linked Face to Face and Saving Roll
   references for ordinary contest outcomes, Criticals, defense calculations and
   Attribute-based exceptions; connect BS and CC Attack cards to these shared rules.

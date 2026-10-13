@@ -234,6 +234,45 @@ def test_shared_face_to_face_and_saving_roll_baselines_are_composed(
         assert "[[rule:saving-rolls|Saving Rolls]]" in rendered
 
 
+def test_guts_roll_reference_and_source_exceptions_are_composed(
+    current_rules_database: RulesDatabase,
+) -> None:
+    guts = current_rules_database.composed_record("rule:guts-roll")
+    assert guts is not None
+    assert guts["facts"]["category"] == "basic-rule"
+    text = " ".join(
+        clause
+        for field in ("requirements", "effects", "restrictions", "clarifications")
+        for clause in guts["facts"][field]
+    )
+    for phrase in (
+        "single unopposed [[attribute:wip|WIP]] Roll",
+        "[[distance:2:inch]]",
+        "positions where they actually attacked",
+        "[[state:prone|Prone]]",
+        "[[skill:courage|Courage]]",
+        "[[skill:religious-troop|Religious Troop]]",
+        "[[ammunition:stun|Stun Ammunition]]",
+        "Operational Command Token during their Active Turn",
+    ):
+        assert phrase in text
+    assert ("n5-core-v5.3-pdf", 38) in {
+        (citation["source_id"], citation.get("page"))
+        for citation in guts["citations"]
+    }
+    assert {citation["source_id"] for citation in guts["citations"]} >= {
+        "wiki-guts-roll-oldid-4122",
+    }
+    for entity_id in (
+        "skill:courage", "skill:religious-troop", "skill:journalist",
+        "skill:climbing-plus", "state:prone", "state:suppressive-fire",
+        "ammunition:stun",
+    ):
+        record = current_rules_database.composed_record(entity_id)
+        assert record is not None, entity_id
+        assert "[[rule:guts-roll|Guts Roll]]" in json.dumps(record), entity_id
+
+
 def test_escape_system_threshold_help_refers_to_the_unit_profile(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -301,7 +340,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 378
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 379
         assert connection.execute(
             "SELECT id, title FROM scenario_collections"
         ).fetchone() == ("n5-core", "N5 Core Scenarios")

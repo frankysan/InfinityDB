@@ -945,8 +945,9 @@ content/links and future validation; no such edits made here.
 
 **Current:** Face to Face Rolls and Saving Rolls now have linked, published
 General Rules baselines, with BS/CC Attack cross-references and source citations.
-Guts, ordinary declaration timing, and Coordinated Orders still lack canonical
-player-facing baselines. The current published rules catalog includes other
+Guts Rolls now have a linked baseline for the N5.3 attacker-position check,
+movement priorities and key Skill exceptions. Ordinary declaration timing and
+Coordinated Orders still lack canonical player-facing baselines. The current published rules catalog includes other
 scoped references such as Fireteam and Order rules; source research is not itself
 an ordinary player-facing reference.
 
