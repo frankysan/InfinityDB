@@ -369,23 +369,31 @@ coverage. Each inventory row starts with pending source/relationship/presentatio
 review. Reconcile the report with the existing source-presentation, enrichment, and
 rules-interaction audits before closing the Stage 1 inventory in `TODO.md`.
 
-The separate read-only `tools/audit_1_0_reference_inputs.py` command cross-checks
-provided **source bytes** with the existing enrichment report and the exact archived
-Wiki history pages. The three inputs are explicit, local arguments; they are never
-acquired automatically or committed to the repository:
+The separate read-only `tools/audit_1_0_reference_inputs.py` command
+cross-checks supplied **source bytes** with the existing enrichment report,
+the current curated Wiki citation archive and historical Wiki revisions. These
+inputs are explicit and never downloaded automatically. Keep evidence output in
+the ignored `local/` workspace:
 
 ```powershell
-python tools/audit_1_0_reference_inputs.py --wiki-history "WIKI-en-history.zip" --core-pdf "n5-rules-v5-3-en.pdf" --faq-pdf "n5-faqs-v0-1-en.pdf" --json-output reports/1.0-source-evidence.json --markdown-output docs/audits/1.0-source-evidence.md
+.venv\Scripts\python.exe tools/audit_1_0_reference_inputs.py --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --core-pdf "data/pdf/rules/n5-rules-v5-3-en.pdf" --faq-pdf "data/pdf/faq/n5-faqs-v0-1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
 ```
 
-The Wiki history ZIP must contain `_history/index.json` and the indexed
-`_history/oldid/*.html` payloads. The audit verifies page identity and embedded
-`wgRevisionId`, not merely a latest-page snapshot or a URL string. It reports the
-supplied PDF/ZIP SHA-256 hashes **without** asserting that an unpinned artifact has
-been independently authenticated. Candidate weapon-name matches in the archived
-Wiki Weapon Chart do not verify profile rows, ammunition, ranges, Traits, or browser
-presentation; the six names not seen verbatim may be alias/mode differences.
-Commlink's related Wiki page is not a substitute for the Reinforcements annex PDF.
+The English and Spanish history archives each need `_history/index.json`
+and their indexed `_history/oldid/*.html` payloads. Historical revisions
+are checked by their URL language, page identity and embedded `wgRevisionId`.
+The optional `--wiki-snapshot` verifies the declared curated archive filename,
+exact SHA-256, member count, every archived citation/vocabulary member, its
+rendered heading and matching revision IDs in the English history archive.
+Omitting the snapshot or Spanish history input reports that dimension as
+**not checked** rather than verified. An English history archive alone does not
+verify Spanish `oldid` pins.
+
+The report is evidence, **not** a judgment that curated interpretations or
+browser presentations are complete. PDF SHA-256 values without maintained pins
+remain unverified; a valid Wiki revision ID does not imply semantic correctness.
+Weapon-chart name occurrences do not validate complete profiles, and Commlink's
+Wiki page cannot replace the separately scoped Reinforcements annex PDF.
 
 ## CI and release validation
 

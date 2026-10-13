@@ -105,11 +105,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     baseline, separate from the shared local Wiki snapshot; report local source-file
     hash comparisons only when exact bytes are available and distinguish missing and
     unpinned artifacts from verified ones.
-  - [x] Reconcile all 103 currently published Wiki `oldid` identities with exact
-    historical page payloads in the separately supplied 2026-09-28 history archive.
-    `tools/audit_1_0_reference_inputs.py` checks each page title and embedded revision
-    ID, including historical Protheion 3908. This establishes source **availability**,
-    not curation completeness or equivalence to the pinned 2026-09-18 Wiki snapshot.
+  - [x] Reconcile the initial 103 English Wiki `oldid` identities with exact
+    historical page payloads in the 2026-09-28 history archive. The maintained
+    source audit verifies each page title and embedded revision ID, including
+    historical Protheion 3908. This establishes source **availability**,
+    not curation completeness or equivalence to the removed September 18 capture.
+  - [x] Re-run the 1.0 source-input audit using separate English and Spanish
+    Wiki history archives and the September 26 curated Wiki capture. All 110
+    currently published `oldid` identities verify against language-matched history
+    payloads; 76 curated citation/vocabulary references resolve to 64 pages with
+    all 76 headings and history-page revision IDs verified. The audit checks exact
+    local archive hashes, but does not establish historical content equivalence,
+    rules correctness or browser completeness.
   - [x] Replace the unavailable September 18 English Wiki citation snapshot with
     the validated September 26 capture, correcting three changed member paths.
     All cited headings and September 28 archived page revision IDs were verified;
