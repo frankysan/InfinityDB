@@ -3825,18 +3825,23 @@ carrier/loadout relationship separate, and cross-link the relevant rule and
 Unit uses. Deployables need not be forced into one catalog domain merely to share
 a profile table.
 
-The V5.3 sources currently conflict for Armed Turret Silhouette: its detailed
-profile on printed page 70 and the current wiki give **S2**, while the page-195
-Deployable Profiles summary gives **S1**. InfinityDB's existing curated Armed
-Turret profile follows the owning detailed rule (S2). Preserve this source
-discrepancy explicitly; do not overwrite the curated value from the summary
-chart without an official clarification/erratum or a reviewed precedence
-decision.
+The V5.3 sources conflict for Armed Turret Silhouette in **both languages**:
+English detailed p. 70 and Spanish detailed p. 74 give **S2**, while the
+English deployable summaries pp. 74/195 and Spanish p. 203 give **S1**.
+Pinned English and Spanish Wiki detailed profiles corroborate S2.
+According to the N5.3 English Silhouette chart p. 18, both share a 25 mm
+base, but S1 is 25 mm tall versus S2 at 40 mm, affecting LoF and
+clearance. InfinityDB retains S2 from the authored detailed profile
+and **now displays a source-conflict note** on the Armed Turret Weapon
+reference. This is a provisional publication baseline, not an official
+precedence or an excuse to rewrite imported data. Do not change the
+Silhouette without a scoped Corvus Belli ruling or an accepted, recorded
+source-precedence decision (REA-037).
 
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Armed_Turret>
-- PDF: Infinity N5 V5.3, printed pages 70 and 195
+- PDF: Infinity N5 V5.3 English pp. 18, 70, 74, 195; Spanish pp. 74, 203
 - Source/correction boundary: `config/catalogs/weapon-overrides.json` and
   `data/curated/rules/n5-core-v5.3.json`
 

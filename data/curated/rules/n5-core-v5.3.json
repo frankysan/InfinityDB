@@ -3976,6 +3976,9 @@
                 ]
             },
             "facts": {
+                "sourceNotes": [
+                    "**Unresolved Silhouette conflict:** The Armed Turret detailed profile specifies **S2** in English N5.3 p. 70 and Spanish N5.3 p. 74; the pinned English and Spanish Wiki detailed profiles also say S2. Yet the reference summary tables list **S1** (English pp. 74 and 195; Spanish p. 203). Both use a 25 mm base, but S1 is 25 mm high versus 40 mm for S2, affecting Line of Fire and clearance. InfinityDB retains the published detailed-profile S2 value without claiming it overrides the contradictory summary; an official correction has not been established."
+                ],
                 "specialProfile": {
                     "stats": [
                         [
@@ -4079,6 +4082,41 @@
                     "sourceId": "n5-core-v5.3-es-pdf",
                     "page": 195,
                     "section": "Tabla de Armas: E/Mitter"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 74,
+                    "section": "Deployable Profiles: Armed Turret"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 195,
+                    "section": "Deployable Profiles: Armed Turret"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 74,
+                    "section": "Torreta Artillada: Perfil"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 203,
+                    "section": "Perfiles Posicionables: Torreta Artillada"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Armed_Turret",
+                    "heading": "Armed Turret Profile"
+                },
+                {
+                    "sourceId": "wiki-es-20261009-211304",
+                    "member": "es/Torreta_Artillada",
+                    "heading": "Perfil de Torreta Artillada"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 18,
+                    "section": "Silhouette Templates: S1 and S2"
                 }
             ],
             "review": {

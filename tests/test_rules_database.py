@@ -1086,6 +1086,29 @@ def test_rules_database_returns_armed_turret_special_profile(tmp_path: Path) -> 
     assert citation["section"] == "Armed Turret Profile"
 
 
+def test_rea037_published_turret_profile_preserves_s2_and_source_conflict(
+    current_rules_database: RulesDatabase,
+) -> None:
+    turret = current_rules_database.composed_record("weapon:armed-turret")
+    assert turret is not None
+    assert turret["facts"]["specialProfile"]["stats"][-1] == ["S", "2"]
+    note, = turret["facts"]["sourceNotes"]
+    assert "**Unresolved Silhouette conflict:**" in note
+    assert "**S1**" in note and "**S2**" in note
+    assert "25 mm high versus 40 mm" in note
+    assert "official correction has not been established" in note
+    assert "Army's Armed Turret" in turret["summary"]
+    pages = {(ref["source_id"], ref.get("page")) for ref in turret["citations"]}
+    assert pages >= {
+        ("n5-core-v5.3-pdf", 18),
+        ("n5-core-v5.3-pdf", 70),
+        ("n5-core-v5.3-pdf", 74),
+        ("n5-core-v5.3-pdf", 195),
+        ("n5-core-v5.3-es-pdf", 74),
+        ("n5-core-v5.3-es-pdf", 203),
+    }
+
+
 def test_rules_database_returns_skill_parameter_semantics(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     documents = load_curated_directory(root / "data" / "curated")

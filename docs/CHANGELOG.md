@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Armed Turret now identifies its contradictory Silhouette sources:
+  detailed profiles list S2 while summary charts list S1. The visible
+  profile remains S2 pending an official clarification, and the size
+  difference is explained for Line of Fire and clearance.
 - Doctor and Engineer now distinguish direct contact from delegated
   Servant/Cyberplug treatment and the separate Allied-only Kit rules.
   Their Engaged restrictions are clearer; non-Allied direct treatment
@@ -138,6 +142,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web backend + Web frontend:** Add the bilingual
+  Armed Turret Silhouette discrepancy to the weapon's secondary source
+  notes, with PDF/Wiki citations and the different S1/S2 heights.
+  Retain the detailed S2 curated profile; do not override Army data or
+  treat either conflicting source cell as an official erratum.
 - **Data processing + Web backend:** Clarify source-scoped Doctor and
   Engineer eligibility, including Engaged and close-combat restrictions,
   while preserving the independent Allied requirements for MediKit,

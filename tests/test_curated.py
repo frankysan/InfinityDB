@@ -737,11 +737,13 @@ def test_checked_in_n5_collection_is_valid() -> None:
         {"entity": "weapon", "id": "armed-turret"}
     ]
     assert records["weapon:armed-turret"]["facts"]["specialProfile"]["skills"] == ["Total Reaction"]
-    assert records["weapon:armed-turret"]["citations"] == [
+    turret_citations = records["weapon:armed-turret"]["citations"]
+    assert turret_citations[:3] == [
         {"sourceId": "n5-core-v5.3-pdf", "page": 70, "section": "Armed Turret Profile"},
         {"sourceId": "n5-core-v5.3-pdf", "page": 186, "section": "Weapon Chart: E/Mitter"},
         {"sourceId": "n5-core-v5.3-es-pdf", "page": 195, "section": "Tabla de Armas: E/Mitter"},
     ]
+    assert len(turret_citations) == 10
     assert "Unresolved source conflict" in records["weapon:armed-turret"]["summary"]
     assert all(len(skill_type["labels"]) == 2 for skill_type in document["skillTypes"])
     assert all(
@@ -761,6 +763,33 @@ def test_checked_in_n5_collection_is_valid() -> None:
         for key in ("requirements", "effects", "restrictions"):
             editorial_text.extend(facts.get(key, []))
     assert not any(re.search(r"\btroopers?\b", text) for text in editorial_text)
+
+
+def test_rea037_armed_turret_silhouette_conflict_is_source_scoped() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    turret = next(rec for rec in document["records"] if rec["id"] == "weapon:armed-turret")
+    assert turret["facts"]["specialProfile"]["stats"][-1] == ["S", "2"]
+    note, = turret["facts"]["sourceNotes"]
+    for expected in (
+        "**Unresolved Silhouette conflict:**",
+        "**S2**", "**S1**", "English N5.3 p. 70", "Spanish N5.3 p. 74",
+        "English pp. 74 and 195", "Spanish p. 203",
+        "25 mm high versus 40 mm", "without claiming it overrides",
+    ):
+        assert expected in note
+    cited = {(ref["sourceId"], ref.get("page"), ref.get("member"))
+             for ref in turret["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 18, None),
+        ("n5-core-v5.3-pdf", 70, None),
+        ("n5-core-v5.3-pdf", 74, None),
+        ("n5-core-v5.3-pdf", 195, None),
+        ("n5-core-v5.3-es-pdf", 74, None),
+        ("n5-core-v5.3-es-pdf", 203, None),
+        ("wiki-en-20260926-200832", None, "Armed_Turret"),
+        ("wiki-es-20261009-211304", None, "es/Torreta_Artillada"),
+    }
 
 
 def test_load_curated_document_rejects_invalid_trait_source_identity(tmp_path: Path) -> None:

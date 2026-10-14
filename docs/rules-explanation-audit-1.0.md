@@ -1493,6 +1493,31 @@ rather than silently changing the stat. Seek an applicable official erratum;
 **Fix:** source research and a visible note following review.
 **Dependencies:** REA-023.
 
+**Follow-up (2026-10-14): player-facing conflict disclosure complete;
+authoritative Silhouette ruling remains open.** Both official N5.3
+translations were checked against their detailed Armed Turret/Torreta
+Artillada profiles (English p. 70; Spanish p. 74), giving **S2**.
+Both translations also list **S1** in their deployable summaries:
+English pp. 74/195; Spanish p. 203. English and Spanish pinned Wiki
+detailed profiles corroborate S2, but neither corrects the PDF
+summary tables. N5.3 English p. 18 establishes S1 = 25 mm base and
+25 mm height versus S2 = 25 mm base and 40 mm height; this is material
+to Line of Fire and clearance, not merely a display label.
+
+The published `weapon:armed-turret` special profile retains the existing
+S2 detailed value and now includes a source note that identifies the
+opposing S1 cells and explicitly avoids a precedence claim. Ten source
+citations cover the detailed/summary English and Spanish PDF pages,
+pinned Wiki detailed pages, and Silhouette dimensions; the separate
+REA-045 E/Mitter discrepancy remains independently tracked. No Army
+source metadata or variant stats were overwritten. Source/database
+regressions passed, and Chromium confirmed the statline and note at
+1440, 390 and 320 px (3/3, no JS errors or horizontal overflow).
+
+An official scoped ruling or agreed source-precedence decision is still
+necessary before replacing S2 with S1 or claiming either is definitive;
+that external dependency is tracked separately in `TODO.md`.
+
 ### REA-038 - Direct Doctor/Engineer target allegiance is not established
 
 **Classification:** correctness risk, completeness of evidence. **Severity:** High.

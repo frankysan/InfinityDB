@@ -735,9 +735,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Vitroferro's cap before PS, and S3/Disposable (2)/Indiscriminate/
       Perimeter source properties. Browser acceptance passed at all three
       widths; broader placement and FAQ scope remain separate tasks.
-    - [ ] **REA-037 — Armed Turret source conflict:** Resolve the
-      competing Silhouette values within the official PDF; do not
-      silently choose one source cell.
+    - [x] **REA-037 ? Armed Turret Silhouette source presentation:**
+      Verified detailed S2 against English/Spanish N5.3 pp. 70/74 and
+      both pinned Wiki detailed profiles; confirmed conflicting S1 in
+      English summary pp. 74/195 and Spanish p. 203. Retain the existing
+      detailed S2 stat and publish the explicit discrepancy, complete
+      source references and LoF/clearance consequences. Chromium
+      acceptance passed at desktop/390/320 px (3/3).
+    - [ ] **REA-037 ? Official Armed Turret Silhouette ruling:**
+      Seek a scoped Corvus Belli correction or approved precedence
+      decision for S2 detailed profiles versus S1 summary tables.
+      Do not change the existing S2 value solely from the summary or
+      treat its use as an authoritative resolution.
     - [x] **REA-038 ? Doctor/Engineer direct-use scope:** Reconcile
       direct Skill contact/State requirements against EN N5.3 pp. 90-91,
       close-combat restrictions pp. 51/160, locally scoped Allied gates

@@ -1287,3 +1287,23 @@ cross-links, JS errors and horizontal overflow. Verification script,
 screenshots, generated rules DB and results are private and ignored in
 `local/audits/`. A future official ruling or explicit project decision
 is required to adjudicate non-Allied direct targeting fully.
+
+
+## 1.0 Armed Turret Silhouette source conflict (REA-037)
+
+**Verified 2026-10-14, `dev/v1.0.0`.** English N5.3 detailed p. 70
+and Spanish detailed p. 74 use S2; English deployable summary pp.
+74/195 and Spanish p. 203 use S1. Pinned English/Spanish Wiki
+Armed Turret detailed pages corroborate S2. English N5.3 p. 18
+verifies the same 25 mm base with different S1/S2 heights (25/40 mm).
+This is unresolved official source conflict, not a corrected value.
+
+Focused curated and published-rules regressions require the S2 statline,
+the secondary player-facing conflict note and all underlying citations.
+A rebuilt local rules database was used for headless Chrome
+acceptance. **3/3 render checks** passed at 1440, 390, 320 px on the
+`/weapons/armed-turret` page, checking the S2 displayed value, S1/S2
+conflict note in `.rules-source-note`, absence of JS errors and
+horizontal overflow. Screenshots and private verification outputs
+remain ignored under `local/audits/`. The separate REA-045 E/Mitter
+Saving Roll issue is not altered by this acceptance.
