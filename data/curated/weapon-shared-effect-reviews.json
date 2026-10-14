@@ -90,6 +90,22 @@
       "profileSha256": "1f605ced587d2a08426055f7be1a0fbe3167b8bc74e4081869ffc041e3d4c862",
       "reviewedOn": "2026-10-14",
       "reason": "The printed single-mode PS 6/B2 profile uses T2/ARM with one Saving Roll and Anti-materiel. Canonical T2 and the linked Trait supply the effects; the printed Shotgun has no Direct Template."
+    },
+    {
+      "slug": "submachine-gun",
+      "name": "Submachine Gun",
+      "chartPage": 185,
+      "profileSha256": "f40bb984769aceb2cb2fccb5676dc578f6d894d5ff1eb2ff6a9339cca96197dc",
+      "reviewedOn": "2026-10-14",
+      "reason": "Printed N5.3 p. 185 single profile with N Ammunition, ARM, one Saving Roll, PS 7, Burst 3, Suppressive Fire, and the source range bands. Canonical Normal Ammunition and the linked Suppressive Fire Trait cover its effects; no independent profile exception or standalone rule is needed."
+    },
+    {
+      "slug": "ap-submachine-gun",
+      "name": "AP Submachine Gun",
+      "chartPage": 185,
+      "profileSha256": "57a7b11f51d4b33c1421a174d636ba7ccb63ba2b2115a17255f26ebdd1d3845b",
+      "reviewedOn": "2026-10-14",
+      "reason": "Printed N5.3 p. 185 single profile with AP Ammunition, ARM/2, one Saving Roll, PS 7, Burst 3, Suppressive Fire, and the same range bands as the standard Submachine Gun. The reviewed AP and Suppressive Fire references cover its rules; the ARM/2 Saving Roll remains a source profile fact, not a separate ammunition mechanic."
     }
   ]
 }

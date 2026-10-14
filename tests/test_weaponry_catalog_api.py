@@ -818,6 +818,53 @@ def test_vulkan_and_t2_shotgun_traits_remain_distinct_from_ammunition(
     assert "Continous Damage" not in t2["traits"]
 
 
+@pytest.mark.parametrize(
+    ("slug", "ammo", "saving", "rule_id"),
+    [
+        ("submachine-gun", "N", "ARM", "ammunition:normal"),
+        ("ap-submachine-gun", "AP", "ARM/2", "ammunition:ap"),
+    ],
+)
+def test_submachine_guns_reuse_canonical_ammunition_and_suppressive_fire(
+    weaponry_app: Callable, slug: str, ammo: str, saving: str, rule_id: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert (
+        profile["mode"], profile["ammunition"], profile["saving"],
+        profile["saving_num"], profile["damage"], profile["burst"],
+        profile["traits"],
+    ) == (None, ammo, saving, "1", "7", "3", ["Suppressive Fire"])
+    assert profile["ranges"] == {
+        "short": {"max": 20, "mod": "+3"},
+        "med": {"max": 40, "mod": "0"},
+        "long": {"max": 60, "mod": "-3"},
+        "max": {"max": 80, "mod": "-6"},
+    }
+    assert len(profile["ammunition_effects"]) == 1
+    effect = profile["ammunition_effects"][0]
+    assert effect["record_id"] == rule_id
+    assert effect["citations"] and effect["summary"]
+    assert profile["trait_references"][0]["slug"] == "suppressive-fire"
+    assert len(profile["trait_references"]) == 1
+
+
+def test_submachine_gun_profile_variants_keep_source_only_differences(
+    weaponry_app: Callable,
+) -> None:
+    basic = _weapon_detail(weaponry_app, "submachine-gun")["profiles"][0]
+    ap = _weapon_detail(weaponry_app, "ap-submachine-gun")["profiles"][0]
+    assert basic["ranges"] == ap["ranges"]
+    assert basic["damage"] == ap["damage"]
+    assert basic["burst"] == ap["burst"]
+    assert basic["saving"] == "ARM"
+    assert ap["saving"] == "ARM/2"
+    assert basic["ammunition_effects"][0]["record_id"] == "ammunition:normal"
+    assert ap["ammunition_effects"][0]["record_id"] == "ammunition:ap"
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:

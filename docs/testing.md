@@ -587,6 +587,23 @@ Ball screenshots were visually inspected. Evidence remains in ignored
 `local/audits/weapon-first-batch-2-browser/`. These checks are bounded
 reference/browser acceptance, not a complete release gate.
 
+## 1.0 Submachine Gun shared-effects acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Both N5.3 p. 185 profiles
+were tested at 1440, 390 and 320 px (six cases), preserving PS 7,
+Burst 3, identical Range MODs and Suppressive Fire while distinguishing
+Normal/ARM from AP/ARM/2. Each profile displayed its canonical
+Ammunition explanation and citations without adding a duplicate Weapon
+rule. Desktop navigation to Suppressive Fire and mobile AP Ammunition
+preview-first, second-tap navigation passed (**8/8 checks**). The 320 px
+screenshots were inspected; no horizontal overflow or JavaScript errors
+were observed. Profile-pinned decisions remain in
+`data/curated/weapon-shared-effect-reviews.json`; private browser evidence
+is Git-ignored under `local/audits/submachine-shared-review-browser/`.
+
+This is bounded source/profile and browser acceptance, not a claim of
+release-wide Weapon completeness or computed combined effects.
+
 ## 1.0 Shotgun shared-effects acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** The five N5.3 p. 184 Shotgun

@@ -426,14 +426,24 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       retains Anti-materiel. All five are pinned by source profile hash in
       `data/curated/weapon-shared-effect-reviews.json`, with no new
       standalone Weapon definition required.
-    - [ ] Continue source-specific Weapon exception and mode reviews without
-      writing a standalone explanation when source profiles and canonical
-      rules suffice. The refreshed triage has 78 actionable reviews, 11
-      reviewed shared-only Weapon identities, and 16 remaining multi-profile
-      candidates (plus Flash Pulse's reviewed historical citation). The
-      next prioritized category is Submachine Guns (standard and AP).
-      Pitcher and Mine Dispenser retain their separate missing-effect
-      source reviews. Browser acceptance remains scoped per reviewed group.
+    - [x] Review both N5.3 p. 185 Submachine Guns. The standard
+      Submachine Gun (N/ARM) and AP Submachine Gun (AP/ARM/2) share
+      PS 7, Burst 3, Range MODs and Suppressive Fire. Their existing
+      canonical ammunition and Trait references are sufficient; no
+      standalone Weapon explanation is required. Both decisions are
+      pinned to the exact Army source profiles in
+      `data/curated/weapon-shared-effect-reviews.json`.
+      Browser acceptance passed 8/8 checks across 1440/390/320 px,
+      including desktop Trait and mobile Ammunition navigation.
+    - [ ] Continue source-specific Weapon exception and mode reviews
+      without duplicating canonical Ammunition or Trait rules.
+      The refreshed audit has 76 actionable reviews, 13 accepted
+      shared-only Weapon identities, and 16 pending multi-profile
+      candidates, plus Flash Pulse's historical comparison.
+      The next prioritized batch is the Uncategorized Weapons
+      (E/Marat, Mk12, Zapper, Contender, Feuerbach, Crazykoala,
+      Madtraps and Hyper-Rapid Magnetic Cannon). Pitcher and Mine
+      Dispenser retain separate missing-effect source reviews.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
