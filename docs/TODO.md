@@ -729,9 +729,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       - [ ] **Future full FAQ collection:** The selected ruling
         references do not constitute a complete versioned FAQ/ITS
         data collection; do not mix all ITS decisions into core rules.
-    - [ ] **REA-034 — Fireteam example conflict:** Resolve the Spanish
-      and official PDF source contradiction at its owning audit finding;
-      retain original publication provenance.
+    - [x] **REA-034 ? Fireteam Level 3 printed example:** Preserve the
+      bilingual N5.3 pp. 138/142 Morat CORE Case 2 contradiction and
+      explain the correct table-derived Level 3 bonus in the public
+      Fireteams reference, without granting Level 4 +1 BS/CD. Source
+      notes and citations are distinct from REA-041's dice reminder.
+      Focused rules tests and responsive browser acceptance passed 9/9.
+    - [ ] **REA-034 ? Official example correction:** Seek an official
+      correction for the Level 3 Morat example granting Level 4's +1
+      BS/CD in both printed languages. Do not infer that the example
+      overrides the Fireteam Level table in the meantime.
     - [x] **REA-035 — Impersonation Discover:** Verified ordinary Discover
       Range/Cover/Mimetism MODs versus IMP-1's additional -3, first/second
       stage, Biometric Visor, one-Order and failed-retry limits against

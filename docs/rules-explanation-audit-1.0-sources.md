@@ -108,8 +108,14 @@ These additional sources clarify the **scope** of the five disputed findings:
   publicly served pages still matched on 2026-10-14.
   The supported **gameplay reference** is one PB/BTS roll; the discrepancy
   persists as a Spanish Wiki publication error/conflict, not a Spanish PDF one.
-- REA-034: S17 p. 142 repeats the Level 3 Fireteam example including its
-  Level 4 +1 CD bonus. Both official PDFs contain the conflicting example.
+- REA-034: S17 p. 142 and S1 p. 138 both show Morat CORE Case 2 as
+  three matching members in a five-member CORE, properly **Level 3**,
+  yet include Level 4's +1 CD/BS Attack bonus. The corresponding level
+  tables on S1 pp. 135?136 and S17 pp. 139?140 reserve that bonus for
+  four matching/equivalent members. The published Fireteam reference
+  follows the tables, gives a checked Level 3 example, and retains the
+  bilingual conflict in a separate source note; an official correction
+  has not been established.
 - REA-037: S17 p. 74 detailed Armed Turret S2 versus p. 74 deployable summary
   S1 and p. 203 summary S1. This is a **within-PDF contradiction in both
   languages**, not a version-independent resolution in favor of S2.

@@ -2100,7 +2100,34 @@ def test_rea041_curated_fireteam_and_special_dice_keep_source_conflict() -> None
             citation["page"] for citation in record["citations"]
             if citation["sourceId"] == "n5-core-v5.3-es-pdf"
         }
-        assert cited_pages == {75, 140}
+        assert cited_pages >= {75, 140}
+
+
+def test_rea034_level_three_morat_example_keeps_level_four_bonus_separate() -> None:
+    source = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    records = {record["id"]: record for record in load_curated_document(source)["records"]}
+    fireteam = records["rule:fireteam-level-bonuses"]
+    facts = fireteam["facts"]
+    assert "three Morat Vanguard" in facts["basis"]
+    assert "one Kyosot and one Zabuk" in facts["basis"]
+    assert "**Level 3**" in facts["basis"]
+    assert "[[rule:special-dice|+1 SD]]" in facts["basis"]
+    assert "Level 4 **+1 BS**" in facts["basis"]
+    assert facts["levels"][2]["requirement"] == "At least 3 Troopers belong to the same Unit."
+    assert facts["levels"][2]["bonuses"] == ["+3 [[skill:discover]]", "+1 [[skill:dodge]]"]
+    assert facts["levels"][3]["requirement"] == "At least 4 Troopers belong to the same Unit."
+    assert facts["levels"][3]["bonuses"] == ["+1 BS"]
+    assert len(facts["sourceNotes"]) == 2
+    note = facts["sourceNotes"][1]
+    for phrase in ("English N5.3 p. 138", "Spanish N5.3 p. 142", "**Level 3**",
+                   "**+1 BS/CD Attack**", "**Level 4**", "pending an official correction"):
+        assert phrase in note
+    cited = {(c["sourceId"], c.get("page")) for c in fireteam["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 135), ("n5-core-v5.3-pdf", 136),
+        ("n5-core-v5.3-pdf", 138), ("n5-core-v5.3-es-pdf", 139),
+        ("n5-core-v5.3-es-pdf", 140), ("n5-core-v5.3-es-pdf", 142),
+    }
 
 
 def test_scenario_collection_membership_must_cover_local_definitions(tmp_path: Path) -> None:

@@ -1407,6 +1407,31 @@ the conflicting examples; seek an official correction if practical.
 Fireteam Level for the example. **Dependencies:** REA-020/021. Not a confirmed
 curated-level-table defect.
 
+**Follow-up verified 2026-10-14 ? player-facing example and source
+conflict documented; authoritative correction outstanding.** The printed
+Morat CORE Case 2 contains three Morat Vanguard (Morat), one Kyosot and
+one Zabuk. Both English N5.3 p. 138 and Spanish N5.3 p. 142 explicitly
+call this a **Level 3** Fireteam, yet include **+1 BS/CD Attack** among
+its bonuses. The printed level tables on English pp. 135?136 and
+Spanish pp. 139?140 require **four matching/equivalent members** for
+Level 4 and its +1 BS/CD; a five-member CORE does not automatically
+receive Level 5 or Level 4 bonuses. No scoped FAQ correction was
+established from the reviewed English/Spanish v0.1 documents.
+
+`rule:fireteam-level-bonuses` now publishes a concrete Level 3 Morat
+example in its `facts.basis`: cumulative Level 2 +1 SD, Level 3 +3
+Discover and +1 Dodge, but not Level 4 +1 BS. A distinct secondary
+`facts.sourceNotes` entry documents the contradictory bilingual Case 2
+examples, independently of REA-041's Spanish extra-dice reminder.
+The curated Level 1?5 table and Fireteam runtime calculations are
+unchanged; the new references link to the two printed examples.
+
+The content and level table were verified by 277 focused source/database
+tests and 9/9 headless Chrome render/navigation checks at 1440, 390 and
+320 px, without JavaScript errors or horizontal overflow. Official
+example correction remains a separately tracked external task, not a
+reason to replace table-based gameplay with an unverified bonus.
+
 ### REA-035 - Impersonation-2's "unmodified" Discover wording overstates the exception
 
 **Classification:** correctness, clarity. **Severity:** High. **Priority:** P0.

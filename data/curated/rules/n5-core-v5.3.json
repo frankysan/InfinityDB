@@ -19447,10 +19447,11 @@
             ],
             "facts": {
                 "sourceNotes": [
-                    "**Unresolved Spanish Fireteam reminder:** Spanish N5.3 p. 140 counts bonus dice in a six-dice limit, but Spanish p. 75 and English pp. 75/136 explicitly exclude [[rule:special-dice|Special Dice (+1 SD)]] from the B6 Burst cap. InfinityDB follows the sourced Burst-versus-SD rule; an alternative Fireteam-specific six-dice cap remains unverified pending an official correction."
+                    "**Unresolved Spanish Fireteam reminder:** Spanish N5.3 p. 140 counts bonus dice in a six-dice limit, but Spanish p. 75 and English pp. 75/136 explicitly exclude [[rule:special-dice|Special Dice (+1 SD)]] from the B6 Burst cap. InfinityDB follows the sourced Burst-versus-SD rule; an alternative Fireteam-specific six-dice cap remains unverified pending an official correction.",
+                    "**Unresolved printed Fireteam example (English N5.3 p. 138; Spanish N5.3 p. 142):** Both Morat CORE Case 2 examples correctly identify three (Morat)-equivalent members plus Kyosot and Zabuk as **Level 3**, yet include **+1 BS/CD Attack** in the listed bonuses. Their Fireteam Level and Bonuses tables instead reserve +1 BS/CD for **Level 4**, requiring four matching or chart-equivalent members (English pp. 135?136; Spanish pp. 139?140). The example does not establish an extra Level 3 bonus. InfinityDB retains the table-based rule pending an official correction; this conflict is distinct from the Spanish Special Dice maximum reminder."
                 ],
                 "category": "fireteam-level-bonuses",
-                "basis": "Fireteam Level is based on how many members belong to the same Unit; matching bracketed or noted Fireteams Chart terms count as the same Unit for this calculation.",
+                "basis": "Fireteam Level is based on how many members belong to the same Unit; matching bracketed or noted Fireteams Chart terms count as the same Unit for this calculation.\n\nFor example, a five-member CORE of three Morat Vanguard marked (Morat), one Kyosot and one Zabuk reaches **Level 3**: its bonuses are cumulative through Level 3, including [[skill:bs-attack|BS Attack]] ([[rule:special-dice|+1 SD]]), +3 [[skill:discover|Discover]] and +1 [[skill:dodge|Dodge]]. The Level 4 **+1 BS** bonus requires four matching or equivalent members, not merely a five-member Fireteam.",
                 "cumulative": true,
                 "levels": [
                     {
@@ -19520,6 +19521,21 @@
                     "sourceId": "n5-core-v5.3-es-pdf",
                     "page": 140,
                     "section": "Bonos de Fireteam"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 138,
+                    "section": "Fireteam Example 2: Morat CORE, Case 2"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 139,
+                    "section": "Tabla de Nivel de Fireteam"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 142,
+                    "section": "Ejemplo 2: Morat CORE, Caso 2"
                 }
             ],
             "review": {

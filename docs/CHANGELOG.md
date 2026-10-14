@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- The Fireteam Level reference now gives a concrete five-member Morat
+  CORE example that earns Level 3 bonuses only. Its source note discloses
+  why both N5.3 printed examples incorrectly add Level 4's +1 BS/CD;
+  the actual Fireteam bonuses have not changed.
 - Armed Turret's disputed E/Mitter mode now explains the one-versus-two
   BTS/2 Saving Roll source conflict in a separate note with links to
   E/Mitter and E/M Ammunition. Its imported profile remains unchanged
@@ -146,6 +150,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Publish a checked Level 3 Morat
+  Fireteam example alongside the cumulative bonus table, with separate
+  bilingual source notes for the contradictory Level 4 bonus in the
+  printed examples. Preserve level requirements and the existing
+  unrelated Special Dice source discrepancy.
 - **Data processing + Web frontend:** Separate the Armed Turret E/Mitter
   Army/PDF Saving Roll discrepancy from normal weapon mechanics and its
   independent Silhouette discrepancy. Preserve the imported one-roll

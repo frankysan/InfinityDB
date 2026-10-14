@@ -2924,11 +2924,22 @@ This equivalence is scoped to Fireteam bonus calculation. A chart label such as
 logical-Unit layer or become a generic Unit alias. It is a Fireteam-context
 equivalence relationship.
 
+**Reviewed exception (REA-034):** Five CORE members do not imply
+Level 5 or Level 4. The published N5.3 Morat Case 2 (3 matching Vanguard,
+Kyosot, Zabuk) qualifies for Level 3 and cumulative bonuses through
+Level 3. Both English p. 138 and Spanish p. 142 examples incorrectly
+include Level 4's +1 BS/CD; the corresponding tables reserve it for
+four equivalent members (English pp. 135?136; Spanish pp. 139?140).
+InfinityDB publishes the table interpretation and labels the unresolved
+printed example contradiction in `facts.sourceNotes`. Do not reinterpret
+Unit identity or create a Fireteam-specific bonus override from the
+example; await a scoped official correction.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Fireteam_Bonuses>
 - Wiki: <https://infinitythewiki.com/Fireteam_Examples>
-- PDF: Infinity N5 V5.3, printed pages 135 and 138
+- PDF: Infinity N5 V5.3 English pp. 135?136/138, Spanish pp. 139?140/142
 
 ### RS-FT-NOTE-001 — Fireteam chart notes can override general Fireteam rules
 

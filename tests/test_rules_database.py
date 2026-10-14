@@ -275,10 +275,39 @@ def test_rea041_spanish_fireteam_dice_conflict_is_visible_without_changing_b6(
             (citation["source_id"], citation.get("page"))
             for citation in record["citations"]
             if citation["source_id"] == "n5-core-v5.3-es-pdf"
-        } == {
+        } >= {
             ("n5-core-v5.3-es-pdf", 75),
             ("n5-core-v5.3-es-pdf", 140),
         }
+
+
+def test_rea034_published_morat_example_and_conflict_notice(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record("rule:fireteam-level-bonuses")
+    assert record is not None
+    facts = record["facts"]
+    basis = facts["basis"]
+    assert "five-member CORE" in basis
+    assert "three Morat Vanguard" in basis
+    assert "**Level 3**" in basis
+    assert "[[rule:special-dice|+1 SD]]" in basis
+    assert "Level 4 **+1 BS**" in basis
+    assert facts["levels"][2]["bonuses"] == ["+3 [[skill:discover]]", "+1 [[skill:dodge]]"]
+    assert facts["levels"][3]["bonuses"] == ["+1 BS"]
+    assert "Unresolved Spanish Fireteam reminder" in facts["sourceNotes"][0]
+    note = facts["sourceNotes"][1]
+    assert "Unresolved printed Fireteam example" in note
+    assert "English N5.3 p. 138" in note
+    assert "Spanish N5.3 p. 142" in note
+    assert "**+1 BS/CD Attack**" in note
+    assert "table-based rule pending an official correction" in note
+    cited = {(ref["source_id"], ref.get("page")) for ref in record["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 138),
+        ("n5-core-v5.3-es-pdf", 139),
+        ("n5-core-v5.3-es-pdf", 142),
+    }
 
 
 def test_shared_face_to_face_and_saving_roll_baselines_are_composed(

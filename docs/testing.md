@@ -1334,3 +1334,25 @@ At 320 px, E/M Ammunition alone retains a 6 px overflow from the
 against the preexisting release rules DB and is already recorded
 under REA-024 TODO; not introduced by this change. Screenshots and
 diagnostics remain private in Git-ignored `local/audits/`.
+
+
+## 1.0 Fireteam Level 3 printed-example disagreement (REA-034)
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Both English N5.3 p. 138 and
+Spanish N5.3 p. 142 show a five-member Morat CORE with only three
+matching members and describe it as Level 3, but include Level 4's
++1 BS/CD Attack bonus. The level tables (English pp. 135?136,
+Spanish pp. 139?140) require four matching or equivalent members for
+that extra BS MOD. The new `facts.basis` example correctly explains
+cumulative bonuses through Level 3; a separate `facts.sourceNotes`
+entry preserves the erroneous examples. The existing REA-041 Special
+Dice notice remains separate and the Level table remains unchanged.
+
+Focused curated/published rules validation passed **277/277** tests.
+Headless Chrome against a locally rebuilt rules DB passed **9/9**
+render and navigation checks at 1440, 390 and 320 px, including the
+actual Level 3 versus Level 4 table rows, two source notes, and links
+from the example to Special Dice and Discover. No JS errors or page
+horizontal overflow. Private script, result JSON, and 320 px screenshot
+remain Git-ignored under `local/audits/`.
+The outstanding official erratum remains an external decision.
