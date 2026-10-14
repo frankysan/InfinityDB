@@ -4769,6 +4769,49 @@
             "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
         },
         {
+            "id": "weapon:exp-cc-weapon",
+            "kind": "weapon",
+            "name": "EXP CC Weapon",
+            "summary": "The EXP close-combat variant uses [[ammunition:exp|Explosive (EXP) Ammunition]], requiring three ARM Saving Rolls per successful hit; PS 8 and Burst 1 come from the printed profile. The [[trait:anti-materiel|Anti-materiel]] Trait affects eligible scenery but does not change the EXP roll count. [[trait:cc|CC]] identifies the attack type.",
+            "composition": {"role": "definition"},
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {},
+            "armyLinks": [{"entity": "weapon", "id": "exp-cc-weapon"}],
+            "variantSemantics": {"inheritance": "family"},
+            "relations": [
+                {"type": "uses-effects-of", "recordId": "ammunition:exp"},
+                {"type": "uses-effects-of", "recordId": "trait:anti-materiel"},
+                {"type": "uses-effects-of", "recordId": "trait:cc"}
+            ],
+            "citations": [
+                {"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: EXP CC Weapon"}
+            ],
+            "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
+        },
+        {
+            "id": "weapon:viral-cc-weapon",
+            "kind": "weapon",
+            "name": "Viral CC Weapon",
+            "summary": "The printed Viral close-combat profile lists [[ammunition:normal|Normal (N) Ammunition]], BTS and one Saving Roll. The separate [[trait:bioweapon|BioWeapon (DA+SHOCK)]] Trait adds conditional effects against targets with VITA; it is not a separate Viral Ammunition type.\n\nCombining the chart and Trait rules (derived): against VITA, [[ammunition:da|DA]] requires two BTS Saving Rolls, while [[ammunition:shock|Shock]] has an additional direct-Dead effect only when its own conditions are satisfied.\n\nAgainst STR, [[trait:bioweapon|BioWeapon]] adds neither DA nor Shock; use the printed one-BTS-roll baseline. Consult the linked Trait and Ammunition rules for special cases such as [[skill:immunity|Immunity]].",
+            "composition": {"role": "definition"},
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {},
+            "armyLinks": [{"entity": "weapon", "id": "viral-cc-weapon"}],
+            "variantSemantics": {"inheritance": "family"},
+            "relations": [
+                {"type": "uses-effects-of", "recordId": "ammunition:normal"},
+                {"type": "uses-effects-of", "recordId": "trait:bioweapon"},
+                {"type": "uses-effects-of", "recordId": "ammunition:da"},
+                {"type": "uses-effects-of", "recordId": "ammunition:shock"},
+                {"type": "uses-effects-of", "recordId": "trait:cc"}
+            ],
+            "citations": [
+                {"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: Viral CC Weapon"},
+                {"sourceId": "wiki-traits-oldid-4110", "heading": "BioWeapon"}
+            ],
+            "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
+        },
+        {
             "id": "weapon:chain-colt",
             "kind": "weapon",
             "name": "Chain-colt",

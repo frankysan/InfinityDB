@@ -993,6 +993,20 @@
     {"recordId":"weapon:shock-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: Shock uses the printed one ARM Saving Roll; conditional Shock effects belong to the linked Ammunition definition."},
     {"recordId":"weapon:e-m-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: preserve N+E/M printed notation and two BTS/2 rolls; E/M target-dependent states remain linked. Do not synthesize an unlisted extra ARM roll."},
     {
+      "recordId": "weapon:exp-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 177: the EXP close-combat profile keeps PS 8 and three ARM Saving Rolls per hit. EXP and Anti-materiel are separate effects; no profile changes or additional roll mechanics inferred."
+    },
+    {
+      "recordId": "weapon:viral-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 177 and archived BioWeapon Trait distinguish the printed N/BTS/one-save baseline from DA+Shock against VITA. Two BTS saves versus VITA and the STR exception are derived from the component rules, not independently printed modes. Shock applies only under its conditions. Preserve unresolved Immunity subtleties and the exact Army profile."
+    },
+    {
       "recordId": "weapon:d-charges",
       "targetRelease": "1.0.0",
       "status": "reviewed",

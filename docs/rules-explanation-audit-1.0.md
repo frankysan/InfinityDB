@@ -912,11 +912,13 @@ are positive evidence, not proof that all Deployables are complete.
 **Affected:** `trait:bioweapon`, `weapon:mines`, `ammunition:normal`,
 `ammunition:da`, `ammunition:shock`, `skill:vulnerability`.
 
-**Current:** The Trait says DA+Shock applies to VITA, with no semantic component
-links. Viral Mine's profile says N/BTS/one save; its related rules point to
-BioWeapon but do not explain how the extra effect changes the VITA case.
-This can be mistaken for one save universally or for Viral being its own
-current Ammunition identity.
+**Current:** The Trait still states that DA+Shock applies to VITA without
+component links, and Viral Mine's N/BTS/one-save profile still needs a
+target-conditioned explanation. The 2026-10-14 Viral CC Weapon reference now
+explicitly links Normal, DA, Shock and BioWeapon and explains the derived
+VITA-versus-STR outcome while preserving the printed baseline. This is
+item-specific progress, not completion of the shared Trait/Mine review or a
+general resolution of Immunity interactions.
 
 **Evidence/result:** S1 pp. 174 and 181 and S6 metadata weapon 63 distinguish
 the profile from the target-conditioned Trait. DA supplies two saves against a

@@ -476,15 +476,73 @@ def test_activate_disco_ball_is_source_only_skill_with_working_weapon_link(
 
 
 @pytest.mark.parametrize(
-    "slug",
-    ["cc-weapon", "para-cc-weapon", "da-cc-weapon",
-     "ap-cc-weapon", "shock-cc-weapon", "e-m-cc-weapon"],
+    ("slug", "ammo", "saving", "count", "ps"),
+    [
+        ("cc-weapon", "N", "ARM", "1", "8"),
+        ("para-cc-weapon", "PARA", "PH-6", "1", "-"),
+        ("da-cc-weapon", "DA", "ARM", "2", "8"),
+        ("ap-cc-weapon", "AP", "ARM/2", "1", "8"),
+        ("shock-cc-weapon", "Shock", "ARM", "1", "8"),
+        ("e-m-cc-weapon", "N+E/M", "BTS/2", "2", "8"),
+        ("exp-cc-weapon", "Exp", "ARM", "3", "8"),
+        ("viral-cc-weapon", "N", "BTS", "1", "8"),
+    ],
 )
-def test_cc_weapon_rules_have_pinned_chart_source(weaponry_app: Callable, slug: str) -> None:
+def test_cc_weapon_rules_have_pinned_chart_source(
+    weaponry_app: Callable, slug: str, ammo: str, saving: str,
+    count: str, ps: str,
+) -> None:
     payload = _weapon_detail(weaponry_app, slug)
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert (
+        profile["ammunition"], profile["saving"], profile["saving_num"],
+        profile["damage"], profile["burst"],
+    ) == (ammo, saving, count, ps, "1")
     record = _weapon_rules(payload)[f"weapon:{slug}"]
-    assert any(c["page"] == 177 for c in record["citations"])
-    assert any(c["source_id"] == "n5-core-v5.3-pdf" for c in record["citations"])
+    assert any(
+        c["page"] == 177 and c["source_id"] == "n5-core-v5.3-pdf"
+        for c in record["citations"]
+    )
+
+
+def test_exp_and_viral_cc_weapons_preserve_profile_and_conditioned_effects(
+    weaponry_app: Callable,
+) -> None:
+    exp = _weapon_detail(weaponry_app, "exp-cc-weapon")
+    exp_profile = exp["profiles"][0]
+    assert (exp_profile["ammunition"], exp_profile["saving"],
+            exp_profile["saving_num"]) == ("Exp", "ARM", "3")
+    assert "Anti-materiel" in exp_profile["traits"]
+    exp_rule = _weapon_rules(exp)["weapon:exp-cc-weapon"]
+    assert {"ammunition:exp", "trait:anti-materiel", "trait:cc"} <= {
+        relation["record"]["id"]
+        for relation in exp_rule["display_relations"]
+        if relation["direction"] == "outbound"
+    }
+    assert "three ARM Saving Rolls" in exp_rule["summary"]
+
+    viral = _weapon_detail(weaponry_app, "viral-cc-weapon")
+    viral_profile = viral["profiles"][0]
+    assert (viral_profile["ammunition"], viral_profile["saving"],
+            viral_profile["saving_num"]) == ("N", "BTS", "1")
+    assert "Bioweapon (DA+SHOCK)" in viral_profile["traits"]
+    viral_rule = _weapon_rules(viral)["weapon:viral-cc-weapon"]
+    assert {"ammunition:normal", "ammunition:da", "ammunition:shock",
+            "trait:bioweapon", "trait:cc"} <= {
+        relation["record"]["id"]
+        for relation in viral_rule["display_relations"]
+        if relation["direction"] == "outbound"
+    }
+    assert "against VITA" in viral_rule["summary"]
+    assert "Against STR" in viral_rule["summary"]
+    assert "(derived)" in viral_rule["summary"]
+    assert "one-BTS-roll baseline" in viral_rule["summary"]
+    assert any(
+        citation["source_id"] == "wiki-traits-oldid-4110"
+        and citation["heading"] == "BioWeapon"
+        for citation in viral_rule["citations"]
+    )
 
 
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(

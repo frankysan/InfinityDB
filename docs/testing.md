@@ -587,6 +587,26 @@ Ball screenshots were visually inspected. Evidence remains in ignored
 `local/audits/weapon-first-batch-2-browser/`. These checks are bounded
 reference/browser acceptance, not a complete release gate.
 
+## 1.0 CC Weapon batch browser acceptance
+
+**Verified 2026-10-14, branch `dev/v1.0.0`.** All eight common
+CC Weapon reference pages were tested at 1440, 390 and 320 px
+(24 viewport cases). The published content included the source-cited
+N5.3 p. 177 explanations and the unchanged Army chart profiles. All
+cases had no horizontal overflow or observed JavaScript/console errors.
+
+Viral CC Weapon's BioWeapon link navigated to the Trait by mouse;
+a mobile first tap of DA opened the reference preview and the second
+navigated to its Ammunition page (two additional checks, **26/26**).
+Full-page 320 px screenshots of EXP and Viral were visually inspected.
+The Viral card keeps the printed N/BTS/one-save baseline separate from
+the explicitly derived VITA/STR-dependent BioWeapon interpretation.
+No implicit immunity interactions were validated.
+
+Evidence and screenshots are stored under ignored
+`local/audits/cc-weapons-browser/`, not committed to public docs.
+This is bounded reference/browser acceptance, not a release-wide check.
+
 ## 1.0 Peripheral (REA-017) browser acceptance
 
 **Verified 2026-10-13, branch dev/v1.0.0, base commit 5fc94553b992,

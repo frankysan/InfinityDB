@@ -362,15 +362,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       It has no fabricated Army Skill profile. Browser acceptance passed
       23/23 scenarios (seven reference pages × three viewport widths,
       desktop click and touch preview-then-navigation).
-    - [ ] Continue the highest-use CC Weapon batch. Six of the initial eight
-      (CC, PARA, DA, AP, Shock and E/M) now have N5.3 p. 177 definitions,
-      printed-profile-preserving links and reviewed interaction entries.
-      EXP CC Weapon and Viral CC Weapon still require curation and acceptance;
-      preserve the N+E/M and BioWeapon (DA+SHOCK) source distinctions.
-      The general CC Weapon class mention in CC Attack remains deliberately
-      generic, not a link to the specific standard CC Weapon profile.
-    - [ ] Work through the remaining source-category/usage-prioritized
+    - [x] Complete the first eight-identity CC Weapon batch (CC, PARA, DA,
+      AP, Shock, E/M, EXP and Viral). All eight have curated N5.3 p. 177
+      definitions, unchanged Army profiles, typed effect relationships and
+      reviewed interaction entries. Viral's BioWeapon (DA+Shock) VITA-versus-STR
+      resolution is explicitly **derived** from the source Trait and printed
+      N/BTS/one-save baseline; unresolved Immunity combinations are not certified.
+      N+E/M preserves its printed two BTS/2 saves without an invented extra ARM
+      Roll. A generic CC Weapon requirement remains distinct from the named
+      Army Weapon entry. Browser acceptance passed 26/26 viewport/navigation
+      checks, with 320 px EXP/Viral screenshots reviewed; evidence is Git-ignored.
+      The refreshed triage has 99 definition-review Weapons in 24 bounded
+      batches plus Flash Pulse's accepted historical citation.
+    - [ ] Work through the 24 remaining source-category/usage-prioritized
       chart-listed Weapon batches (no more than eight identities per batch).
+      The next batch is the Pistol family, beginning with Pistol and Heavy Pistol.
       For each, distinguish complete Army profile facts from missing effect
       explanations, ammunition/trait/State relations, and browser navigation;
       preserve exact chart modes, the reviewed Kobra CC discrepancy, and

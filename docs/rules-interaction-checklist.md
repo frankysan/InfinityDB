@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **141/156** complete, **15** pending.
-- Current authored outgoing relations: **365**.
+- Supporting semantic identities: **143/158** complete, **15** pending.
+- Current authored outgoing relations: **373**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -975,7 +975,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (28/28)
+#### Weapon (30/30)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1034,6 +1034,10 @@ review. `declaration-category` projection records are excluded.
 - [x] **E/Mitter** (`weapon:e-mitter`) — reviewed: N5.3 p. 186: printed E/M with two BTS/2 Saving Rolls and Non-Lethal; the ammunition reference controls target-specific effects. Source ranges/Burst retained.
   - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
   - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+- [x] **EXP CC Weapon** (`weapon:exp-cc-weapon`) — reviewed: N5.3 Weapon Chart p. 177: the EXP close-combat profile keeps PS 8 and three ARM Saving Rolls per hit. EXP and Anti-materiel are separate effects; no profile changes or additional roll mechanics inferred.
+  - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → CC (`trait:cc`)
 - [x] **Flash Pulse** (`weapon:flash-pulse`) — reviewed: Reviewed N5.3 Weapon Chart Stun/BTS/Non-Lethal/Stunned semantics and the printed Immunity (BTS) exception (Wiki Immunity oldid 3643, Example 4). No generic state or immunity resolution is inferred.
   - `uses-effects-of` → Stun Ammunition (`ammunition:stun`)
   - `uses-effects-of` → BS Weapon (WIP) (`trait:bs-weapon-wip`)
@@ -1093,6 +1097,12 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → CC (`trait:cc`)
 - [x] **SymbioBomb** (`weapon:symbiobomb`) — reviewed: N5.3 p. 74 and the archived English Wiki distinguish the listed owner from the Deployment-assigned user. The single use permits Endgame, Eraser or Mirrorball; the -3 target MOD applies only to Endgame/Eraser. Only the selected Pheroware Tactic supplies attack-profile facts; no stand-alone SymbioBomb chart statistics or lasting assignment relationship are inferred.
   - `uses-effects-of` → Pheroware Tactics (PT) (`weapon:pt`)
+- [x] **Viral CC Weapon** (`weapon:viral-cc-weapon`) — reviewed: N5.3 p. 177 and archived BioWeapon Trait distinguish the printed N/BTS/one-save baseline from DA+Shock against VITA. Two BTS saves versus VITA and the STR exception are derived from the component rules, not independently printed modes. Shock applies only under its conditions. Preserve unresolved Immunity subtleties and the exact Army profile.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → BioWeapon (`trait:bioweapon`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → CC (`trait:cc`)
 - [x] **WildParrot** (`weapon:wildparrot`) — reviewed: Perimeter and E/M Mine interaction with a visible Token/Model instead of CAMO; reviewed typed relationships distinguish this from Boost. N5 p. 74 Non-Lethal remains absent in Army and is presented as an explicit source discrepancy, not an imported Trait.
   - `uses-effects-of` → Perimeter (`trait:perimeter`)
   - `uses-effects-of` → Deployable (`trait:deployable`)
