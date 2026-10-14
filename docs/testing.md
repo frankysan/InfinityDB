@@ -1417,3 +1417,26 @@ canonical Trait link and both printed-page citations. The browser
 acceptance script and locally rebuilt rules database are private in
 `local/audits/`; tests include desktop and 390/320 px widths and
 semantic navigation to the shared roll and placement references.
+
+
+## 1.0 Continuous Damage Critical and Immunity acceptance (REA-004)
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Compared official English N5.3
+Continuous Damage p. 175 and Immunity p. 95 with Spanish N5.3 Da?o
+Continuo p. 182 and Inmunidad p. 99. Continuous Damage repeats Saving
+Rolls after a failed ordinary hit save but explicitly does not apply to
+the additional Saving Roll from a Critical. A failed Critical-added roll
+may inflict the ordinary effect but does not itself start a chain.
+Relevant Immunity variants can suppress the Trait without canceling the
+ordinary or Critical-added Saving Roll; only Immunity (Critical) removes
+the extra Critical roll itself. No unconditional Dead transition is added.
+
+Two examples in `trait:continuous-damage` `facts.clarifications` are
+covered by curated and composed-record tests, including bilingual source
+citations, the separate ordinary/Critical outcomes and conditional
+Immunity. Focused pytest suite passed **285/285**; headless Chromium
+passed **15/15** content/navigation checks at 1440, 390 and 320 px for
+Continuous Damage, Immunity and Saving Rolls including both semantic
+links. No JS errors or page-level horizontal overflow. Verification
+script, screenshots and results remain ignored in `local/audits/`.
+This acceptance is not a complete damage or Immunity simulator.

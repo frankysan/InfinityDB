@@ -3184,6 +3184,12 @@
                     "current"
                 ]
             },
+            "facts": {
+                "clarifications": [
+                    "**Ordinary hit versus Critical example:** A Critical hit with [[trait:continuous-damage|Continuous Damage]] that normally requires one [[rule:saving-rolls|Saving Roll]] causes the ordinary hit Roll and one additional Critical Roll. If the ordinary hit Roll fails, it inflicts a Wound and starts the repeating Saving Rolls until one succeeds or the target enters [[state:dead|Dead State]]. If only the additional Critical Roll fails, it can inflict its ordinary Wound but **does not start a Continuous Damage chain**. If both initial Rolls fail, only the failed ordinary-hit branch triggers repetition.",
+                    "**Applicable [[skill:immunity|Immunity]]:** [[skill:immunity|Immunity (Trait: Continuous Damage)]] ignores that Trait?s repeating-Saving-Roll effect, not the ordinary Saving Roll or the additional Critical Saving Roll. A covered non-Comms Attack may also have its Wound-causing Traits ignored by [[skill:immunity|Immunity (ARM) or (BTS)]], when the applicable Saving Roll uses that Attribute. Only [[skill:immunity|Immunity (Critical)]] cancels the additional Critical Saving Roll itself. These effects require the matching [[skill:immunity|Immunity]] printed on the target?s Unit Profile and its conditions to apply."
+                ]
+            },
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
@@ -3198,6 +3204,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 95,
                     "section": "Immunity"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 182,
+                    "section": "Da?o Continuo"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 99,
+                    "section": "Inmunidad e Impactos Cr?ticos"
                 }
             ],
             "review": {

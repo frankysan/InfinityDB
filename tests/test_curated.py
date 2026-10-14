@@ -1910,6 +1910,38 @@ def test_rea038_direct_vs_delegated_recovery_source_scope() -> None:
         assert pdf_pages >= {51}
 
 
+def test_rea004_continuous_damage_critical_extra_roll_does_not_chain() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    records = {r["id"]: r for r in load_curated_document(path)["records"]}
+    continuous = records["trait:continuous-damage"]
+    immunity = records["skill:immunity"]
+    assert "failing it does not start another chain" in continuous["summary"]
+    examples = continuous["facts"]["clarifications"]
+    assert len(examples) == 2
+    hit, immune = examples
+    assert "ordinary hit Roll and one additional Critical Roll" in hit
+    assert "one succeeds or the target enters [[state:dead|Dead State]]" in hit
+    assert "If only the additional Critical Roll fails" in hit
+    assert "does not start a Continuous Damage chain" in hit
+    assert "only the failed ordinary-hit branch triggers repetition" in hit
+    assert "[[skill:immunity|Immunity (Trait: Continuous Damage)]]" in immune
+    assert "ordinary Saving Roll or the additional Critical Saving Roll" in immune
+    assert "covered non-Comms Attack" in immune
+    assert "[[skill:immunity|Immunity (Critical)]]" in immune
+    assert "matching [[skill:immunity|Immunity]] printed" in immune
+    effects = " ".join(immunity["facts"]["effects"])
+    assert "Immunity (Trait) ignores" in effects
+    assert "Immunity (Critical) removes the additional Saving Roll" in effects
+    cited = {(c["sourceId"], c.get("page")) for c in continuous["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 175),
+        ("n5-core-v5.3-pdf", 95),
+        ("n5-core-v5.3-es-pdf", 182),
+        ("n5-core-v5.3-es-pdf", 99),
+    }
+    assert all(c["type"] != "causes-state" for c in continuous.get("relations", []))
+
+
 def test_rea003_intuitive_attack_examples_keep_single_wip_and_deployable_branch() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     records = {r["id"]: r for r in load_curated_document(path)["records"]}

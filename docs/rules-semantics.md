@@ -1576,9 +1576,13 @@ retains them explicitly instead of creating broader current edges:
 - Indiscriminate bypasses the normal restriction created by Camouflage and Hiding Markers in
   its Area of Effect; and
 - Continuous Damage repeats Saving Rolls after a failed ordinary hit save until success or
-  Dead State, but its additional Critical Saving Roll never starts that repetition. Applicable
-  Immunity can suppress this Trait. The indirect Dead outcome is not equivalent to an
-  unconditional `causes-state` edge.
+  Dead State. Its additional Critical Saving Roll is separate: a failure can inflict an ordinary
+  Wound but does not trigger additional rolls. Applicable Immunity (Trait) or a matching
+  non-Comms Immunity (ARM)/(BTS) can suppress the repeated-roll Trait effect without
+  automatically removing the ordinary hit or Critical-added Saving Roll; only Immunity
+  (Critical) removes the extra Critical roll. Two player-facing examples now distinguish
+  these outcomes (REA-004). The indirect Dead outcome is not an unconditional
+  `causes-state` edge.
 
 This is the same fail-closed policy used elsewhere in the rules graph: keep exact behavior in
 the owning definition and preserve unresolved relationships in the future queue until both

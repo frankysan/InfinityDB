@@ -470,6 +470,34 @@ deferred indirect Dead edge does not supply this missing exception.
 **Fix:** text/links; avoid a direct unconditional Dead transition.
 **Dependencies:** REA-010 and REA-013 for shared Critical context.
 
+**Acceptance follow-up (2026-10-14): Resolved for the player-facing
+Trait; no unverified mechanics or graph edges.** The original "Current"
+paragraph describes an earlier baseline. At `69710e5` the reviewed
+`trait:continuous-damage` summary already distinguished ordinary failed
+Saving Rolls (Wound followed by more Saves until success or Dead) from
+the additional Critical Saving Roll, whose failure does **not** repeat
+Continuous Damage. The missing work was player-facing worked examples.
+
+The Trait now publishes two `facts.clarifications` examples: (1) a
+Critical hit with one ordinary hit Saving Roll plus an additional Critical
+roll, where failing the ordinary hit roll triggers repeated saves, but
+failing *only* the additional Critical roll does not; and (2) matching
+Immunity variants that remove the Trait effect for covered non-Comms
+Attacks without automatically canceling the ordinary or extra Critical
+Saving Roll. Only Immunity (Critical) removes the Critical-added roll.
+The examples link to `rule:saving-rolls`, `skill:immunity`, and
+`state:dead`, preserving the correct State transition as a conditional
+outcome rather than an unconditional `causes-state` edge.
+
+English N5.3 Continuous Damage p. 175 and Immunity p. 95 agree with
+Spanish N5.3 Da?o Continuo p. 182 and Inmunidad p. 99. All four pages
+are cited on the Trait. The existing Summary, Immunity mechanics,
+weapon profiles and interaction ledger were not changed. Focused
+curated/composed-rules regressions passed **285/285** and headless
+Chrome **15/15** render/navigation checks at 1440/390/320 px, without
+JavaScript errors or horizontal overflow. This closes REA-004 reference
+acceptance; a generic damage/Immunity simulation is out of scope.
+
 ### REA-005 - BS Weapon (WIP) omits explicit prohibited combinations
 
 **Classification:** completeness, consistency. **Severity:** High. **Priority:** P0.

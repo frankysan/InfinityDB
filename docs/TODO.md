@@ -604,8 +604,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Added three worked examples with English/Spanish N5.3 citations,
       source/database regressions and responsive browser acceptance.
       No additional BS Roll or gameplay rule was introduced.
-    - [ ] **REA-004 — Continuous Damage:** Verify the documented Critical
-      exception in the Trait card; keep deferred typed-variant edges separate.
+    - [x] **REA-004 - Continuous Damage Critical exception:** Confirmed
+      the existing rule summary already excludes Continuous Damage from the
+      additional Critical Saving Roll. Added source-linked examples of a
+      failed ordinary hit save versus failed Critical-only save, and
+      condition-specific Immunity effects. Pinned English/Spanish N5.3
+      pp. 175/182 and Immunity pp. 95/99; browser acceptance 15/15.
+      No unconditional Dead graph edge or runtime mechanic added.
     - [ ] **REA-005 — BS Weapon (WIP):** Verify the prohibited Skill
       combinations on the player-facing Trait card without promoting
       deferred typed-variant edges.

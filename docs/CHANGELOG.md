@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Continuous Damage now includes an example showing that a failed ordinary
+  hit Saving Roll repeats, while an additional Critical Saving Roll does not.
+  Applicable Immunity is explained separately without changing the rules.
 - Intuitive Attack now includes worked examples of its single unmodified
   WIP attack, opposing AROs and Main Target Critical, plus the separate
   Deployable placement condition and failed-use cost.
@@ -160,6 +163,10 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Complete REA-004 Continuous Damage
+  reference acceptance with ordinary-hit/Critical-only roll examples,
+  conditional Immunity variants, and English/Spanish N5.3 citations.
+  Preserve the underlying Trait, weapon data, and deferred graph edges.
 - **Data processing + Web frontend:** Complete REA-003 Intuitive Attack
   reference acceptance with three source-linked examples and bilingual
   N5.3 citations. Preserve B1/WIP Attack resolution and existing placement

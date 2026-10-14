@@ -925,6 +925,35 @@ def test_speedball_faq_exclusion_is_published_on_both_rule_cards(
     )
 
 
+def test_rea004_continuous_damage_critical_and_immunity_examples_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    trait = current_rules_database.composed_record("trait:continuous-damage")
+    immunity = current_rules_database.composed_record("skill:immunity")
+    saving_rolls = current_rules_database.composed_record("rule:saving-rolls")
+    assert trait is not None and immunity is not None and saving_rolls is not None
+    assert "additional roll does not apply Continuous Damage" in trait["summary"]
+    hit, immune = trait["facts"]["clarifications"]
+    assert "[[rule:saving-rolls|Saving Roll]]" in hit
+    assert "**does not start a Continuous Damage chain**" in hit
+    assert "only the failed ordinary-hit branch triggers repetition" in hit
+    assert "[[skill:immunity|Immunity (Trait: Continuous Damage)]]" in immune
+    assert "[[skill:immunity|Immunity (Critical)]]" in immune
+    assert "covered non-Comms Attack" in immune
+    assert "Immunity (Trait) ignores the special effects" in " ".join(
+        immunity["facts"]["effects"]
+    )
+    assert "a Critical adds one additional Saving Roll" in " ".join(
+        saving_rolls["facts"]["effects"]
+    )
+    assert {(c["source_id"], c.get("page")) for c in trait["citations"]} >= {
+        ("n5-core-v5.3-pdf", 175),
+        ("n5-core-v5.3-pdf", 95),
+        ("n5-core-v5.3-es-pdf", 182),
+        ("n5-core-v5.3-es-pdf", 99),
+    }
+
+
 def test_reviewed_trait_critical_and_wip_restrictions_are_published(
     current_rules_database: RulesDatabase,
 ) -> None:
