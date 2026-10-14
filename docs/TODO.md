@@ -446,13 +446,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       and Madtraps inherit Boost movement/contact only through Boost,
       never WildParrot or Mines effects. Browser checks passed 26/26
       across three viewport widths, including desktop and mobile links.
-    - [ ] Continue source-specific Weapon reviews without duplicating
+    - [x] Review the three N5.3 p. 179 Heavy Machine Guns without
+      duplicating shared rules. Standard HMG (N/ARM) and AP HMG (AP/ARM/2)
+      use source-pinned shared Ammunition/Suppressive Fire explanations
+      with PS 5, Burst 4 and identical ranges. MULTI HMG has a cited,
+      mode-specific reference: EXP/Anti-materiel B1 with three ARM Rolls
+      versus AP or Shock B4 with one Roll and Suppressive Fire. The
+      review ledger and 11/11 viewport/navigation browser checks are
+      current; 320 px screenshots were inspected.
+    - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition and Trait rules. The refreshed triage has
-      68 actionable reviews, 19 explicitly reviewed shared-only Weapon
-      identities and 14 pending multi-profile candidates, plus Flash
-      Pulse's historical citation. Next batch: Heavy Machine Guns
-      (standard, AP, MULTI), followed by Disposable Support Weapons.
-      Pitcher and Mine Dispenser retain separate missing-effect reviews.
+      65 actionable reviews, 21 accepted shared-only identities, and
+      13 pending multi-profile candidates, plus Flash Pulse's historical
+      citation. Next: Disposable Support Weapons (Panzerfaust, Blitzen,
+      Flammenspeer, Akrylat-Kanone); then Spitfires. Pitcher and Mine
+      Dispenser retain separate missing-effect source reviews.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

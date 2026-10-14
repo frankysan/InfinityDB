@@ -17,7 +17,8 @@ are not retroactively relabeled.
   effects. New Weapon references clarify CC and Pistol variants, MULTI and K1
   Rifles, D-Charges, Disco Baller, and SymbioBomb while preserving their
   different modes and Saving Rolls, including Feuerbach's Burst/Explosive
-  options and the Hyper-Rapid Magnetic Cannon's three firing modes.
+  options, the Hyper-Rapid Magnetic Cannon's three firing modes, and
+  MULTI Heavy Machine Gun's EXP, AP and Shock mode differences.
 - Peripheral and its five subtype references now explain activation,
   Coherency, Doctor/Engineer delegation, Controller and Peripheral rolls,
   and Cyberplug Connected/Autonomous exceptions.
@@ -48,8 +49,10 @@ are not retroactively relabeled.
   reuse existing Ammunition and Trait rules.
 - **Data processing + Web backend:** Explain Feuerbach's AP+DA Burst Mode
   versus EXP Explosive Mode and the Hyper-Rapid Magnetic Cannon's three
-  mode-specific Burst, Saving Roll and Trait combinations. Other reviewed
-  Weapons continue to reuse their source-backed Ammunition and Trait references.
+  mode-specific Burst, Saving Roll and Trait combinations, plus the
+  MULTI Heavy Machine Gun's EXP Anti-materiel versus AP/Shock modes.
+  Other reviewed Weapons continue to reuse source-backed Ammunition and
+  Trait references.
 
 ### Changed
 

@@ -154,6 +154,22 @@
       "profileSha256": "0d8f39f182b84426bca01ce49f89f5a39af2cacb40f8f02234682190c7889f39",
       "reviewedOn": "2026-10-14",
       "reason": "The printed ARM=0/BTS=0/STR=1/S=1 profile uses PARA, PH-6, one Saving Roll, PS dash/B1, Disposable (2), Boost, Non-Lethal, Perimeter and Deployable. Boost owns movement/contact/detonation; PARA and Non-Lethal own the target outcome. Do not inherit WildParrot or Mines rules."
+    },
+    {
+      "slug": "heavy-machine-gun",
+      "name": "Heavy Machine Gun",
+      "chartPage": 179,
+      "profileSha256": "7d48f0d1f5fd5c37f056299448083574b97d3b71121ace5ecf4ac0c4d849a827",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 179 prints Normal Ammunition, ARM, one Saving Roll, PS 5, Burst 4, Suppressive Fire and HMG range bands. The canonical Normal Ammunition and Suppressive Fire references cover its effects; no additional Weapon-specific mechanics are given."
+    },
+    {
+      "slug": "ap-heavy-machine-gun",
+      "name": "AP Heavy Machine Gun",
+      "chartPage": 179,
+      "profileSha256": "49014866f780d1e5bf698215d70972b887b90a7360dc7ebb7ecf774af9dd8fcf",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 179 prints AP Ammunition, ARM/2, one Saving Roll, PS 5, Burst 4, Suppressive Fire and identical range bands to the standard Heavy Machine Gun. AP and Suppressive Fire are explained by canonical references; the ARM/2 attribute is preserved as a profile fact."
     }
   ]
 }

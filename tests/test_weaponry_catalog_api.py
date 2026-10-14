@@ -977,6 +977,94 @@ def test_em_templates_and_perimeter_boost_keep_distinct_rules(
         )
 
 
+@pytest.mark.parametrize(
+    ("slug", "expected_modes", "effect_ids", "has_own_rule"),
+    [
+        (
+            "heavy-machine-gun",
+            [(None, "N", "ARM", "1", "5", "4", ["Suppressive Fire"])],
+            [["ammunition:normal"]], False,
+        ),
+        (
+            "ap-heavy-machine-gun",
+            [(None, "AP", "ARM/2", "1", "5", "4", ["Suppressive Fire"])],
+            [["ammunition:ap"]], False,
+        ),
+        (
+            "multi-heavy-machine-gun",
+            [
+                ("Anti-materiel Mode", "Exp", "ARM", "3", "5", "1",
+                 ["Anti-materiel"]),
+                ("AP Mode", "AP", "ARM/2", "1", "5", "4", ["Suppressive Fire"]),
+                ("Shock Mode", "Shock", "ARM", "1", "5", "4", ["Suppressive Fire"]),
+            ],
+            [["ammunition:exp"], ["ammunition:ap"], ["ammunition:shock"]], True,
+        ),
+    ],
+)
+def test_hmg_family_preserves_printed_modes_and_reuses_ammunition(
+    weaponry_app: Callable,
+    slug: str,
+    expected_modes: list[tuple],
+    effect_ids: list[list[str]],
+    has_own_rule: bool,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    profiles = payload["profiles"]
+    assert [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in profiles
+    ] == expected_modes
+    assert [
+        [effect["record_id"] for effect in p["ammunition_effects"]]
+        for p in profiles
+    ] == effect_ids
+    assert all(effect["citations"]
+               for p in profiles for effect in p["ammunition_effects"])
+    assert all(p["ranges"] == profiles[0]["ranges"] for p in profiles)
+    assert all(len(p["trait_references"]) == len(p["traits"]) for p in profiles)
+    assert bool(payload.get("rules")) == has_own_rule
+    if has_own_rule:
+        rules = _weapon_rules(payload)
+        assert set(rules) == {"weapon:multi-heavy-machine-gun"}
+        rule = rules["weapon:multi-heavy-machine-gun"]
+        assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 179
+                   for c in rule["citations"])
+        assert {
+            relation["record"]["id"]
+            for relation in rule["display_relations"]
+            if relation["direction"] == "outbound"
+        } >= {
+            "ammunition:exp", "ammunition:ap", "ammunition:shock",
+            "trait:anti-materiel", "trait:suppressive-fire",
+        }
+
+
+def test_multi_hmg_modes_do_not_transfer_burst_or_traits(
+    weaponry_app: Callable,
+) -> None:
+    multi = _weapon_detail(weaponry_app, "multi-heavy-machine-gun")
+    profiles = {p["mode"]: p for p in multi["profiles"]}
+    anti = profiles["Anti-materiel Mode"]
+    ap = profiles["AP Mode"]
+    shock = profiles["Shock Mode"]
+    assert anti["burst"] == "1" and anti["saving_num"] == "3"
+    assert anti["traits"] == ["Anti-materiel"]
+    assert "Suppressive Fire" not in anti["traits"]
+    assert ap["burst"] == shock["burst"] == "4"
+    assert ap["saving"] == "ARM/2"
+    assert shock["saving"] == "ARM"
+    assert ap["traits"] == shock["traits"] == ["Suppressive Fire"]
+    assert "Anti-materiel" not in ap["traits"]
+
+    base = _weapon_detail(weaponry_app, "heavy-machine-gun")["profiles"][0]
+    armor = _weapon_detail(weaponry_app, "ap-heavy-machine-gun")["profiles"][0]
+    assert base["ranges"] == armor["ranges"] == anti["ranges"]
+    assert base["saving"] == "ARM" and armor["saving"] == "ARM/2"
+    assert base["burst"] == armor["burst"] == "4"
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:

@@ -5434,6 +5434,64 @@
             ]
         },
         {
+            "id": "weapon:multi-heavy-machine-gun",
+            "kind": "weapon",
+            "name": "MULTI Heavy Machine Gun",
+            "summary": "The modes are alternative attacks; their Ammunition and Traits do not combine. **[[trait:anti-materiel|Anti-Materiel]] Mode** uses [[ammunition:exp|EXP]], Burst 1, three ARM Saving Rolls per hit, with that mode's linked Trait.\n\n**AP Mode** instead uses [[ammunition:ap|AP]], Burst 4, one ARM/2 Saving Roll and [[trait:suppressive-fire|Suppressive Fire]]. **Shock Mode** uses [[ammunition:shock|Shock]], Burst 4, one ARM Saving Roll and the same [[trait:suppressive-fire|Suppressive Fire]] Trait. All three profiles have PS 5 and identical printed range bands.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "multi-heavy-machine-gun"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:exp"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:shock"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:anti-materiel"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:suppressive-fire"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 179,
+                    "section": "Weapon Chart: MULTI Heavy Machine Gun"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            }
+        },
+        {
             "id": "weapon:chain-colt",
             "kind": "weapon",
             "name": "Chain-colt",

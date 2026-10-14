@@ -1018,6 +1018,7 @@
     {"recordId": "weapon:k1-combi-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 183: preserves N Ammunition with ARM=0, one Saving Roll, PS 7/B3, Anti-materiel and Suppressive Fire. K1 is no distinct Ammunition identity; Immunity must be separately evaluated."},
     {"recordId": "weapon:feuerbach", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 186: Burst Mode uses B2 AP+DA with two ARM/2 Saving Rolls, Explosive Mode uses B1 EXP with three ARM Saving Rolls. PS 6 and Anti-materiel apply to each; ammunition and roll counts never combine across modes."},
     {"recordId": "weapon:hyper-rapid-magnetic-cannon", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 187: DA Anti-Materiel Mode uses B1 and two ARM Saving Rolls; AP and Shock modes use B5 with Suppressive Fire and one ARM/2 or ARM Saving Roll respectively. PS 5 throughout, with mode-dependent Traits."},
+    {"recordId": "weapon:multi-heavy-machine-gun", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 179: EXP Anti-materiel mode has B1, 3 ARM Saving Rolls; AP and Shock modes have B4 and Suppressive Fire, with ARM/2 and ARM respectively for one Saving Roll. All are PS 5 with identical ranges. Do not combine modes or transfer Traits."},
     {
       "recordId": "weapon:d-charges",
       "targetRelease": "1.0.0",

@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **155/170** complete, **15** pending.
-- Current authored outgoing relations: **412**.
+- Supporting semantic identities: **156/171** complete, **15** pending.
+- Current authored outgoing relations: **417**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -975,7 +975,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (42/42)
+#### Weapon (43/43)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1091,6 +1091,12 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
   - `uses-effects-of` → Impact Template (`trait:impact-template`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **MULTI Heavy Machine Gun** (`weapon:multi-heavy-machine-gun`) — reviewed: N5.3 Weapon Chart p. 179: EXP Anti-materiel mode has B1, 3 ARM Saving Rolls; AP and Shock modes have B4 and Suppressive Fire, with ARM/2 and ARM respectively for one Saving Roll. All are PS 5 with identical ranges. Do not combine modes or transfer Traits.
+  - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
 - [x] **MULTI Pistol** (`weapon:multi-pistol`) — reviewed: N5.3 p. 182: AP B2 ARM/2 one roll, Shock B2 ARM one roll, Anti-Materiel DA B1 ARM two rolls with mode-specific Anti-materiel. Modes are alternatives and their effects do not stack.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)

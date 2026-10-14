@@ -216,7 +216,7 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
             encoding="utf8",
         )
     )
-    assert len(original["reviews"]) == 19
+    assert len(original["reviews"]) == 21
     catalog = {r["name"]: r for r in db.list_catalog_items("weapons")}
     items = [
         {"id": catalog[r["name"]]["id"], "name": r["name"],
@@ -227,8 +227,8 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
     policy = tmp_path / "reviewed.json"
     policy.write_text(json.dumps(original), encoding="utf8")
     approved = load_shared_reviews(db, enrichment, policy)
-    assert len(approved) == 19
-    assert {r["chartPage"] for r in approved.values()} == {183, 184, 185, 186, 187, 188}
+    assert len(approved) == 21
+    assert {r["chartPage"] for r in approved.values()} == {179, 183, 184, 185, 186, 187, 188}
     assert {
         r["name"] for r in original["reviews"] if r["chartPage"] == 184
     } == {
@@ -244,6 +244,9 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
     } == {
         "E/Marat", "Mk12", "Zapper", "Contender", "Crazykoala", "Madtraps",
     }
+    assert {
+        r["name"] for r in original["reviews"] if r["chartPage"] == 179
+    } == {"Heavy Machine Gun", "AP Heavy Machine Gun"}
     assert {r["reason"] for r in approved.values()} == {
         r["reason"] for r in original["reviews"]
     }
@@ -273,6 +276,39 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
     policy.write_text(json.dumps(original), encoding="utf8")
     with pytest.raises(WeaponGapTriageError, match="profile changed"):
         load_shared_reviews(db, enrichment, policy)
+
+
+def test_hmg_shared_only_reviews_are_profile_pinned(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[1]
+    db = Database(root / "data/generated/infinity.db")
+    policy = json.loads(
+        (root / "data/curated/weapon-shared-effect-reviews.json").read_text(
+            encoding="utf8",
+        )
+    )
+    reviewed = [
+        item for item in policy["reviews"] if item["chartPage"] == 179
+    ]
+    assert {item["name"] for item in reviewed} == {
+        "Heavy Machine Gun", "AP Heavy Machine Gun",
+    }
+    catalog = {item["name"]: item for item in db.list_catalog_items("weapons")}
+    pending = {
+        "domains": {"weapons": {"items": [
+            {"id": catalog[item["name"]]["id"], "name": item["name"],
+             "slug": item["slug"], "gapCodes": ["missing_rule_definition"]}
+            for item in reviewed
+        ]}}
+    }
+    subset = {**policy, "reviews": reviewed}
+    target = tmp_path / "hmg-reviews.json"
+    target.write_text(json.dumps(subset), encoding="utf8")
+    assert len(load_shared_reviews(db, pending, target)) == 2
+
+    subset["reviews"][1]["profileSha256"] = "0" * 64
+    target.write_text(json.dumps(subset), encoding="utf8")
+    with pytest.raises(WeaponGapTriageError, match="profile changed"):
+        load_shared_reviews(db, pending, target)
 
 
 def test_reviewed_historical_comparison_remains_visible_but_not_pending() -> None:

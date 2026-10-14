@@ -587,6 +587,25 @@ Ball screenshots were visually inspected. Evidence remains in ignored
 `local/audits/weapon-first-batch-2-browser/`. These checks are bounded
 reference/browser acceptance, not a complete release gate.
 
+## 1.0 Heavy Machine Gun shared-effects acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Heavy Machine Gun,
+AP Heavy Machine Gun and MULTI Heavy Machine Gun matched the N5.3 p. 179
+profiles at 1440, 390 and 320 px (nine cases), including source Ammo,
+Saving Roll Attributes/counts, Burst, PS, Range MODs and Traits. The first
+two displayed canonical Normal/AP explanations without standalone Weapon
+cards. MULTI HMG displayed its three separate mode-specific profiles
+and a new source-cited rules card; Anti-materiel EXP stays Burst 1,
+three ARM Rolls, while AP and Shock retain Burst 4 and Suppressive Fire.
+
+Desktop navigation to Anti-materiel and mobile EXP link first-tap preview,
+second-tap navigation passed (**11/11 browser checks**). The 320 px
+screenshots were inspected; no horizontal overflow or JavaScript errors
+were observed. Source-profile-pinned shared-only reviews remain in
+`data/curated/weapon-shared-effect-reviews.json`. Private evidence is
+Git-ignored under `local/audits/hmg-shared-review-browser/`.
+This does not claim automatic immunity resolution or 1.0-wide acceptance.
+
 ## 1.0 additional Uncategorized Weapon shared-effects acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Eight N5.3 pp. 186–188 Weapon
