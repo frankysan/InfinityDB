@@ -1166,13 +1166,14 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
     assert {citation["source_version"] for citation in flash["citations"]} == {
         "5.3", "N5.3 / oldid 4083", "N5.3 / oldid 3643",
         "N5.2 / oldid 3677 (es)", "N5.3 / oldid 3987 (es)",
+        "N5.3 / oldid 3988 (es)",
     }
     assert "Saving Roll remains BTS, not ARM" in flash["summary"]
     assert "explicitly exempts these two Traits" in flash["summary"]
     assert "only if the BTS Saving Roll fails" in flash["summary"]
     assert "two PB/BTS Saving Rolls" in flash["facts"]["sourceNotes"][0]
     assert "Spanish N5.3 PDF Weapon Chart (p. 196) confirms one" in (
-        flash["facts"]["sourceNotes"][0]
+        flash["facts"]["sourceNotes"][1]
     )
     assert "Saving Roll stays BTS, not ARM" in " ".join(
         immunity["facts"]["clarifications"]

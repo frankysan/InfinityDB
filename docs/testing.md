@@ -1055,3 +1055,45 @@ under `local/audits/rea020-browser/` and `local/audits/`.
 This is source and reference-card acceptance; the separate Fireteam
 Army selection, Wildcard and keyboard/touch workflow remains in
 the final 1.0 acceptance checklist.
+
+
+## 1.0 REA-027 Flash Pulse source-conflict acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** The current published Flash
+Pulse reference and its Immunity (BTS), Stun Ammunition, Stunned and
+Non-Lethal links were compared against the exact official English
+N5.3 PDF (pp. 95-96, 186), Spanish N5.3 PDF (pp. 99, 196) and
+the pinned Army snapshot weapon 72. All these current authoritative
+weapon profiles agree on STUN, **one BTS/PB Saving Roll** and separate
+Non-Lethal and State: Stunned Traits. Against Immunity (BTS/PB),
+STUN becomes Normal without switching to ARM, and only a failed
+Saving Roll causes Stunned; Non-Lethal prevents Wounds.
+
+Live and exact-revision Spanish Wiki requests made on 2026-10-14
+confirmed that Weapon Chart revision 3987 **and** alternative chart
+revision 3988 still list two PB rolls without State: Stunned.
+Spanish Immunity revision 3677 separately retains the failed-save
+Stunned result. The exact historical alternative chart revision
+3988 was independently verified in S21's Wiki history archive
+(timestamp 2026-08-27T14:21:00Z; SHA-256 recorded in the
+[source manifest](rules-explanation-audit-1.0-sources.md)).
+This remains an **unresolved external publication conflict**, not
+authority to modify the source Army profile.
+The weapon's source notes/citations expose the disagreement.
+
+Chromium browser acceptance passed **24/24** page and real
+link-navigation checks at 1440, 390 and 320 px with zero JavaScript
+errors. The Flash Pulse, Immunity and Stun pages were visually inspected
+at 320 px. There were **two recorded occurrences** of the already
+tracked narrow "Rules reference" breadcrumb overflow (roughly 6 px)
+on the Stun Ammunition page, one direct render and one navigation.
+These exceptions are explicit; the weapon and Immunity pages had no
+page-level horizontal overflow.
+
+Regression contracts in `tests/test_rules_database.py` and
+`tests/test_weaponry_catalog_api.py` preserve the sourced one-roll
+profile, failed-save-only Stunned result, exact Wiki citation revisions
+and Army weapon identity. Private PDF excerpts, HTTP evidence,
+browser images and results are Git-ignored under `local/audits/`
+and `local/audits/rea027-browser/`. No game mechanics, imported
+weapon profiles, or general Immunity algorithm were changed.

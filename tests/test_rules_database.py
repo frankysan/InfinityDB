@@ -3472,3 +3472,57 @@ def test_rea020_fireteam_action_ownership_and_integrity_are_distinct(
     for ref in ("skill:number-2", "skill:ft-master", "skill:nco",
                 "skill:tactical-awareness", "state:suppressive-fire"):
         assert current_rules_database.composed_record(ref) is not None
+
+
+def test_rea027_flash_pulse_bilingual_publication_conflict_preserves_outcome(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """One BTS save in Army and both N5.3 PDFs; Spanish Wiki remains conflicting."""
+    flash = current_rules_database.composed_record("weapon:flash-pulse")
+    immunity = current_rules_database.composed_record("skill:immunity")
+    stun = current_rules_database.composed_record("ammunition:stun")
+    assert flash is not None
+    assert immunity is not None
+    assert stun is not None
+    summary = flash["summary"]
+    assert "one BTS Saving Roll per hit" in summary
+    assert "[[ammunition:stun|Stun Ammunition]]" in summary
+    assert "[[trait:non-lethal|Non-Lethal]]" in summary
+    assert "[[trait:state|State: Stunned]]" in summary
+    assert "Saving Roll remains BTS, not ARM" in summary
+    assert "[[state:stunned|Stunned]] applies only if the BTS Saving Roll fails" in summary
+
+    notes = " ".join(flash["facts"]["sourceNotes"])
+    for term in (
+        "revision 3987", "revision 3988", "2026-10-14",
+        "two PB/BTS Saving Rolls", "one BTS Saving Roll",
+        "pinned Army weapon 72", "p. 196", "p. 186",
+        "revision 3677", "conflicting publication",
+        "does not establish a superseding rules change",
+    ):
+        assert term in notes
+
+    cited = {
+        (entry["source_id"], entry.get("page"))
+        for entry in flash["citations"]
+    }
+    for expected in (
+        ("n5-core-v5.3-pdf", 186),
+        ("n5-core-v5.3-pdf", 96),
+        ("n5-core-v5.3-es-pdf", 196),
+        ("n5-core-v5.3-es-pdf", 99),
+        ("wiki-es-weapon-chart-oldid-3987", None),
+        ("wiki-es-weapon-chart-alternatives-oldid-3988", None),
+        ("wiki-es-immunity-oldid-3677", None),
+        ("wiki-weapon-chart-oldid-4083", None),
+    ):
+        assert expected in cited
+    interaction = immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"]
+    case = next(item for item in interaction if
+                item["when"]["weaponId"] == "weapon:flash-pulse")
+    assert case["when"]["savingAttribute"] == "BTS"
+    assert case["ammunitionTreatedAs"] == "ammunition:normal"
+    assert set(case["survivingTraits"]) == {"trait:non-lethal", "trait:state"}
+    assert case["stateEffect"] == {
+        "stateId": "state:stunned", "condition": "failed-saving-roll"
+    }

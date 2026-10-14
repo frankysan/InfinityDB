@@ -1850,3 +1850,35 @@ def test_plasma_sniper_combined_saves_do_not_become_combined_ammunition(
                for p in plasma["profiles"])
     assert "not another BTS roll" in plasma["profiles"][0]["weapon_properties"][0]["summary"]
     assert any(c["page"] == 67 for c in rule["citations"])
+
+
+def test_flash_pulse_keeps_army_one_bts_roll_and_publishes_wiki_discrepancy(
+    weaponry_app: Callable,
+) -> None:
+    """Do not replace the pinned Army profile with conflicting Spanish Wiki numbers."""
+    payload = _weapon_detail(weaponry_app, "flash-pulse")
+    assert payload["id"] == 72
+    assert payload["name"] == "Flash Pulse"
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert profile["id"] == 72
+    assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+        "Stun", "BTS", "1"
+    )
+    assert {"Non-lethal", "State: Stunned", "BS Weapon (WIP)"} <= set(
+        profile["traits"]
+    )
+    rules = _weapon_rules(payload)
+    flash = rules["weapon:flash-pulse"]
+    assert "one BTS Saving Roll per hit" in flash["summary"]
+    assert "revision 3987" in " ".join(flash["facts"]["sourceNotes"])
+    assert "revision 3988" in " ".join(flash["facts"]["sourceNotes"])
+    assert {
+        citation["source_id"]
+        for citation in flash["citations"]
+    } >= {
+        "n5-core-v5.3-pdf",
+        "n5-core-v5.3-es-pdf",
+        "wiki-es-weapon-chart-oldid-3987",
+        "wiki-es-weapon-chart-alternatives-oldid-3988",
+    }

@@ -1131,27 +1131,47 @@ these are linked-baseline work, not a request for an execution engine.
 **Evidence:** Profile baseline confirmed in both N5.3 PDFs; Wiki conflict Explicit.
 **Affected:** `weapon:flash-pulse`, `skill:immunity`, `ammunition:stun`.
 
-**Current:** C uses the English one-BTS-save profile and records the competing
-Spanish Wiki numbers/Traits in its source notes. Its described gameplay outcome
-is supported and should be preserved.
+**Current (2026-10-14):** The application retains pinned Army weapon 72's
+one-BTS-save profile, Non-Lethal and State: Stunned, with a failed-save-only
+Stunned effect. The published weapon reference now cites both N5.3 PDFs'
+weapon rows and Immunity examples and records both conflicting Spanish Wiki
+chart revisions, without silently modifying Army data.
 
 **Evidence/result:** S1 p. 186 and **S17 p. 196** both print Flash Pulse / Pulso
 Flash with STUN/Aturdidora, **one BTS/PB Saving Roll**, and the separate
 **Non-Lethal/No Letal** and **State: Stunned/Estado: Aturdido** Traits. The
 English archived Weapon Chart 4083 and Army S6 weapon 72 agree. Spanish Wiki
 revision 3987, timestamp **2026-08-27T14:20:08Z** from S21, instead prints two
-PB rolls and omits the State Trait. S1 p. 96 and S17 p. 99 explicitly preserve
-failed-save Stunned under Immunity (BTS/PB). Thus the *PDF-language* comparison
-is resolved; the **Spanish Wiki publication discrepancy** is not. The Wiki
+PB rolls and omits the State Trait. The **Spanish alternative weapon chart,
+revision 3988**, reproduces the same row. On 2026-10-14, direct requests to
+both current Wiki pages and the exact `oldid=3987` and `oldid=3988`
+pages returned these conflicting results and matching revision markers.
+S21's history archive independently pins revision 3988 at
+**2026-08-27T14:21:00Z** with the same conflicting row (exact SHA-256 in
+the [source manifest](rules-explanation-audit-1.0-sources.md)).
+Spanish Immunity revision 3677 likewise still confirms Stunned on a failed
+roll. S1 p. 96 and S17 p. 99 independently preserve that condition under
+Immunity (BTS/PB). The pinned Army metadata (weapon 72) also retains
+STUN/BTS/one roll and both Traits.
+
+This establishes the **current bilingual PDF/Army baseline** but not a
+correction to the **Spanish Wiki publication discrepancy**. The Wiki
 revision being later than the PDF's creation metadata does not establish a
 superseding official rule or prove the reason for the difference.
 
-**Action:** Preserve the verified one-BTS-save curated explanation and cite
-both language PDFs plus the Immunity exception. Document the Spanish Wiki
-conflict as a separate source issue and seek an official Wiki correction or
-erratum where feasible. **Fix:** evidence/source-note maintenance only unless
-later authoritative evidence changes the result. **Dependencies:** REA-010,
-REA-029. Do not infer that every hit automatically Stuns.
+**Disposition (reviewed 2026-10-14):** The local adjudication is complete.
+The curated weapon's printed profile and resolved Immunity interaction have
+bilingual PDF, pinned Army and source-revision provenance. Source notes and
+regression tests retain the conflicting Spanish Wiki rows, including revision
+3988 from the separately inspected alternative chart. Browser acceptance
+verified the weapon and related rule cards. No roll-count or gameplay change
+is justified by the currently checked evidence.
+
+**Open external follow-up:** Seek an authoritative Wiki correction or explicit
+erratum for both Spanish charts. Until then, label this **publication conflict
+unresolved**; do not change the one-roll source profile, assume a later
+revision supersedes the PDFs, or infer that every hit automatically Stuns.
+**Dependencies:** REA-010 and REA-029 remain independent.
 
 ### REA-028 - Kobra's two issues require separate source decisions
 
@@ -1785,7 +1805,7 @@ unverified inference. "Unresolved" preserves the actual competing claims.
 
 | Case | Sources/values | Disposition and consequence |
 | --- | --- | --- |
-| Flash Pulse saves and State Trait | S1 p. 186 and S17 p. 196: one BTS/PB save, Non-Lethal and State: Stunned; Spanish Wiki S8/S21 3987: two PB saves without State Trait | **Current PDF baseline verified in both languages**; **Spanish Wiki publication conflict remains**, REA-027; Immunity example in both PDFs confirms failed-save Stunned |
+| Flash Pulse saves and State Trait | S1 p. 186 and S17 p. 196: one BTS/PB save, Non-Lethal and State: Stunned; Spanish Wiki S8/S21 3987 and alternative S22 3988: two PB saves without State Trait | **Gameplay baseline corroborated by both PDFs and Army weapon 72; external Spanish Wiki publication conflict unresolved**, REA-027. Both bilingual Immunity examples retain failed-save Stunned; live rows rechecked 2026-10-14 |
 | Kobra CC save count | S1 pp. 68/182: DA, one save; DA p. 64 / S4 4083 / S6: two | **Resolved interpretation**: DA requires two; preserve contradictory chart bytes. S3/S11 establish ammunition change, not an independently published chart correction |
 | Kobra Anti-materiel | S1 omits; S4/S6 include | **Unresolved**, REA-028; DA is insufficient evidence for this Trait |
 | Fireteam Level 3 example | S1 p. 138 and S17 p. 142 include Level 4 +1 BS/CD in a Level 3 example; both languages' tables place it at Level 4 | **Confirmed within-PDF contradiction in both languages; intended correction unresolved**, REA-034 |

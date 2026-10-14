@@ -685,9 +685,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       page errors or horizontal overflow. See
       [development checks](testing.md#10-general-rules-rea-026-browser-acceptance).
       Broader source and release acceptance remains under the 1.0 gate.
-    - [ ] **REA-027 — Flash Pulse source conflict:** Review the Spanish
-      Wiki/PDF and chart discrepancy against the applicable source
-      publications; preserve evidence rather than silently normalizing.
+    - [x] **REA-027 — Flash Pulse source reconciliation:** Verified the
+      pinned Army weapon 72 and English/Spanish N5.3 PDF weapon charts
+      retain STUN, one BTS/PB Saving Roll, Non-Lethal and State: Stunned.
+      The printed Immunity examples independently require a failed
+      Saving Roll to cause Stunned. Both Spanish Wiki Weapon Charts
+      (revisions 3987/3988) still show two PB rolls without the Trait,
+      confirmed by direct live/oldid retrieval on 2026-10-14.
+      The conflicting publications, revision identities, source URLs
+      and accepted one-roll profile now have regression and browser
+      acceptance coverage; no roll or gameplay data were overwritten.
+      - [ ] **External publication correction pending:** Seek an
+        authoritative Wiki correction or erratum for both Spanish
+        charts. The source conflict remains explicitly unresolved;
+        do not reinterpret the rules from revision chronology alone.
     - [ ] **REA-030 — Targeted, MSV1, Sixth Sense FAQ:** Adjudicate
       publication scope and applicability separately from the Negative
       Feedback references before dependent curation.

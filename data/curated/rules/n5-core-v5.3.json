@@ -1158,7 +1158,7 @@
             "version": "N5.2 / oldid 3677 (es)",
             "url": "https://infinitythewiki.com/wiki-es/index.php?title=Inmunidad&oldid=3677",
             "authority": "secondary",
-            "retrievedDate": "2026-10-09"
+            "retrievedDate": "2026-10-14"
         },
         {
             "id": "wiki-es-weapon-chart-oldid-3987",
@@ -1167,7 +1167,16 @@
             "version": "N5.3 / oldid 3987 (es)",
             "url": "https://infinitythewiki.com/wiki-es/index.php?title=Tabla_de_Armas&oldid=3987",
             "authority": "secondary",
-            "retrievedDate": "2026-10-09"
+            "retrievedDate": "2026-10-14"
+        },
+        {
+            "id": "wiki-es-weapon-chart-alternatives-oldid-3988",
+            "kind": "wiki",
+            "title": "Infinity Wiki (Spanish) — Tabla de Armas Alternativas revision 3988",
+            "version": "N5.3 / oldid 3988 (es)",
+            "url": "https://infinitythewiki.com/es/Tabla_de_Armas_Alternativas?oldid=3988",
+            "authority": "secondary",
+            "retrievedDate": "2026-10-14"
         },
         {
             "id": "wiki-vulnerability-oldid-3156",
@@ -3800,7 +3809,9 @@
             "summary": "Flash Pulse is a [[trait:bs-weapon-wip|BS Weapon (WIP)]] using [[ammunition:stun|Stun Ammunition]] (PS 7, Burst 1; one BTS Saving Roll per hit). It has [[trait:non-lethal|Non-Lethal]] and [[trait:state|State: Stunned]] Traits.\n\nAgainst [[skill:immunity|Immunity (BTS)]], STUN is treated as [[ammunition:normal|Normal Ammunition]], but the Saving Roll remains BTS, not ARM.\n\nAlthough [[skill:immunity|Immunity (BTS)]] ordinarily protects against State-causing weapon Traits on covered BTS attacks, the rule explicitly exempts these two Traits: [[trait:non-lethal|Non-Lethal]] prevents Wounds, and [[state:stunned|Stunned]] applies only if the BTS Saving Roll fails (Example 4).",
             "facts": {
                 "sourceNotes": [
-                    "The Spanish N5.3 Wiki Weapon Chart (Pulso Flash, oldid 3987) omits [[trait:state|State: Stunned]] and lists two PB/BTS Saving Rolls; the English N5.3 chart (oldid 4083) lists the Trait and one BTS roll. The Spanish [[skill:immunity|Immunity]] rule (oldid 3677, Example 4) still confirms [[state:stunned|Stunned]] after a failed roll. The Spanish N5.3 PDF Weapon Chart (p. 196) confirms one PB/BTS Saving Roll and both Traits, matching the English N5.3 PDF (p. 186); the Spanish Wiki chart remains a conflicting publication."
+                    "**Conflicting Spanish Wiki publication:** Pulso Flash has two PB/BTS Saving Rolls and omits [[trait:state|State: Stunned]] in both the main Weapon Chart (revision 3987) and the alternative chart (revision 3988). Both pages were rechecked directly on 2026-10-14.",
+                    "**Current source baseline:** The English N5.3 chart (revision 4083) and pinned Army weapon 72 list one BTS Saving Roll and the Trait. The Spanish N5.3 PDF Weapon Chart (p. 196) confirms one PB/BTS Saving Roll and both Traits, matching the English N5.3 PDF (p. 186). The Spanish [[skill:immunity|Immunity]] rule (revision 3677, Example 4) and both printed [[skill:immunity|Immunity]] examples preserve [[state:stunned|Stunned]] only after a failed roll.",
+                    "**Disposition:** The Spanish Wiki chart remains a conflicting publication; revision chronology alone does not establish a superseding rules change. Preserve the one-roll Army and bilingual PDF baseline pending an authoritative correction."
                 ]
             },
             "composition": {
@@ -3846,8 +3857,18 @@
                     "page": 186
                 },
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 96,
+                    "section": "Immunity Example 4"
+                },
+                {
                     "sourceId": "n5-core-v5.3-es-pdf",
                     "page": 196
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 99,
+                    "section": "Inmunidad: Ejemplo 4"
                 },
                 {
                     "sourceId": "wiki-weapon-chart-oldid-4083",
@@ -3864,6 +3885,10 @@
                 {
                     "sourceId": "wiki-es-weapon-chart-oldid-3987",
                     "heading": "SIN CATEGORÍA: Pulso Flash"
+                },
+                {
+                    "sourceId": "wiki-es-weapon-chart-alternatives-oldid-3988",
+                    "heading": "PISTOLAS: Pulso Flash"
                 }
             ],
             "review": {
