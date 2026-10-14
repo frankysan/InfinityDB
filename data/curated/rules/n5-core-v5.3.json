@@ -286,6 +286,17 @@
             "url": "https://experience.corvusbelli.com/en/infinity/resources"
         },
         {
+            "id": "its-season-18-en-pdf",
+            "kind": "pdf",
+            "title": "ITS Season 18: Overheat (English)",
+            "version": "2026.09.01",
+            "publishedDate": "2026-09-01",
+            "localPath": "data/pdf/its/Its-rules-season-18-en.pdf",
+            "pageCount": 132,
+            "authority": "primary",
+            "url": "https://experience.corvusbelli.com/en/infinity/its-rules"
+        },
+        {
             "id": "wiki-en-20260926-200832",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
@@ -18833,12 +18844,12 @@
                 "effects": [
                     "During Army List creation, the player selects one normal Skill, Weapon, or Equipment option and two different options from the Spec-Ops Chart.",
                     "The selected Spec-Ops Chart options apply to both the Initial Profile and the Enhanced Profile.",
-                    "The Trooper always deploys using its Initial Profile and may replace it with the Enhanced Profile by collecting its SpecBall through the Request SpecBall rules.",
+                    "The Trooper always deploys using its Initial Profile and may replace it with the Enhanced Profile by collecting its SpecBall under [[skill:request-specball|Request SpecBall]].",
                     "Wounds and applicable States are shared between the Initial and Enhanced Profiles."
                 ],
                 "restrictions": [
                     "An Army List cannot include more than one Trooper with Infinity Spec-Ops.",
-                    "The current ITS season does not allow the use of Spec-Ops rules in official tournaments."
+                    "ITS Season 18 prohibits ordinary Spec-Ops in official tournaments; the optional TEAM-OPS Extra does not permit this Special Skill. This season-specific restriction does not remove the core N5.3 [[skill:request-specball|Request SpecBall]] rules."
                 ]
             },
             "labelIds": [
@@ -18854,6 +18865,27 @@
                 {
                     "sourceId": "wiki-infinity-spec-ops-oldid-4120",
                     "heading": "Infinity Spec-Ops"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 98,
+                    "section": "Infinity Spec-Ops"
+                },
+                {
+                    "sourceId": "its-season-18-en-pdf",
+                    "page": 26,
+                    "section": "Spec-Ops"
+                },
+                {
+                    "sourceId": "its-season-18-en-pdf",
+                    "page": 28,
+                    "section": "Team-Ops"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:request-specball"
                 }
             ],
             "review": {
@@ -18863,6 +18895,85 @@
             "variantSemantics": {
                 "inheritance": "family"
             }
+        },
+        {
+            "id": "skill:request-specball",
+            "kind": "skill",
+            "name": "Request SpecBall",
+            "summary": "In Game Round 2 or 3, a player with an eligible [[skill:infinity-spec-ops|Infinity Spec-Ops]] Trooper may request one SpecBall during their Active Turn. Place the 55 mm Token via [[skill:combat-jump|Combat Jump]] with PH 15 outside an Order; collecting it enables the Enhanced Profile at the end of that Order.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "special-skill",
+                "typeIds": [
+                    "automatic"
+                ],
+                "requirements": [
+                    "Have a Trooper with [[skill:infinity-spec-ops|Infinity Spec-Ops]] who is not in a [[term:null-state|Null State]].",
+                    "It must be Game Round 2 or 3, during the player's Active Turn."
+                ],
+                "effects": [
+                    "Outside the [[rule:order-expenditure-sequence|Order Expenditure Sequence]], place one 55 mm SpecBall Token using [[skill:combat-jump|Combat Jump]] rules and make a PH 15 Roll for its drop.",
+                    "Before the drop Roll, choose two different items from the printed SpecBall Chart. These selected items are unique and non-transferable.",
+                    "An allied [[skill:infinity-spec-ops|Spec-Ops]] Trooper who is not in a [[term:null-state|Null State]] automatically picks up their SpecBall on entering Silhouette contact with its Token. Picking it up cancels that Trooper's Marker form.",
+                    "At the end of the collecting Order, replace the Trooper's Initial Profile and Model with their Enhanced Profile and Model. Apply the selected items, remove the SpecBall Token, and retain the Wounds received and any ongoing conditions applicable to the Enhanced Profile.",
+                    "If a SpecBot was chosen, place its Model in Silhouette contact with the collecting Trooper at the end of that Order.",
+                    "SpecBall Tokens are [[term:state-token|State Tokens]]: they do not block enemy Movement and cannot be selected as targets for [[equipment:deactivator|Deactivators]]."
+                ],
+                "restrictions": [
+                    "Each player may use Request SpecBall only once per game.",
+                    "The SpecBall Token may not be placed in Silhouette contact with any Model, Marker, Token, or scenario objective."
+                ],
+                "clarifications": [
+                    "This is a single SpecBall drop for the Spec-Ops profile change, not [[skill:request-speedball|Request Speedball]], which calls two different Tokens under its own conditions."
+                ],
+                "sourceNotes": [
+                    "**English printing discrepancy:** The English N5.3 p. 98 says 'Requesting a Speedball' in the SpecBall Effects introduction. Spanish N5.3 p. 98 instead says 'Solicitar un SpecBall.' The procedure that follows concerns one SpecBall, so the two separate Skill procedures must not be conflated.",
+                    "**ITS applicability:** ITS Season 18 p. 26 forbids ordinary Spec-Ops at official tournaments. Its optional TEAM-OPS Extra (p. 28) is separate and does not permit the Spec-Ops Skill; Request Tacball does not substitute for this core SpecBall procedure."
+                ]
+            },
+            "labelIds": [
+                "optional"
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 98,
+                    "section": "Request SpecBall"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 98,
+                    "section": "Solicitar SpecBall"
+                },
+                {
+                    "sourceId": "its-season-18-en-pdf",
+                    "page": 26,
+                    "section": "Spec-Ops"
+                },
+                {
+                    "sourceId": "its-season-18-en-pdf",
+                    "page": 28,
+                    "section": "Team-Ops"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:combat-jump"
+                }
+            ]
         },
         {
             "id": "skill:morpho-scan",

@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Infinity Spec-Ops now links to the complete Request SpecBall procedure:
+  when a drop can be requested, how the token is placed and collected,
+  and when the Enhanced Profile takes effect. The separate Request Speedball
+  and Season 18 TEAM-OPS rules remain distinct.
 - TinBot references now explain when their benefits are shared by a Fireteam, why matching bonuses do not stack, and how owner isolation, departure or death affects them.
 - Sixth Sense and Multispectral Visor now explain the FAQ's joint
   Level 1 exception for a target attacked through a Zero Visibility Zone.
@@ -85,6 +89,12 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Publish Request SpecBall
+  as its own linked N5.3 Skill, including round and eligibility restrictions,
+  PH 15 drop, token placement, two different support items, profile transfer,
+  and SpecBot handling. Preserve the English/Spanish wording discrepancy
+  and Season 18 ITS tournament restriction as source-specific notes.
+  Imported Army data and roster customization remain unchanged.
 - **Data processing + Web backend + Web frontend:** Introduce searchable,
   rules-linked Weapon Properties as a Glossary vocabulary. Reviewed weapon
   profiles link to their Property and its original Ammunition, Trait or

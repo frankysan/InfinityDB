@@ -460,7 +460,7 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         assert connection.execute("PRAGMA application_id").fetchone()[0] == RULES_APPLICATION_ID
         assert connection.execute("PRAGMA user_version").fetchone()[0] == RULES_SCHEMA_VERSION
         assert connection.execute("SELECT COUNT(*) FROM collections").fetchone()[0] == 2
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 419
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 420
         assert connection.execute(
             "SELECT id, title FROM scenario_collections"
         ).fetchone() == ("n5-core", "N5 Core Scenarios")
@@ -784,6 +784,43 @@ def test_protheion_overkill_and_opponent_mod_are_published(
         and relation["record_id"] == "skill:cc-attack"
         for relation in record["relations"]
     )
+
+
+def test_request_specball_is_published_and_linked_without_replacing_speedball(
+    current_rules_database: RulesDatabase,
+) -> None:
+    spec_ops = current_rules_database.composed_record("skill:infinity-spec-ops")
+    request = current_rules_database.composed_record("skill:request-specball")
+    speedball = current_rules_database.composed_record("skill:request-speedball")
+    assert spec_ops is not None and request is not None and speedball is not None
+    assert "[[skill:request-specball|Request SpecBall]]" in " ".join(
+        spec_ops["facts"]["effects"]
+    )
+    assert "Game Round 2 or 3" in request["summary"]
+    assert "[[skill:combat-jump|Combat Jump]]" in request["summary"]
+    assert "[[term:null-state|Null State]]" in " ".join(
+        request["facts"]["requirements"]
+    )
+    assert "[[term:state-token|State Tokens]]" in " ".join(
+        request["facts"]["effects"]
+    )
+    assert "do not block enemy Movement" in " ".join(
+        request["facts"]["effects"]
+    )
+    assert "At the end of the collecting Order" in " ".join(
+        request["facts"]["effects"]
+    )
+    assert any("TEAM-OPS" in note for note in request["facts"]["sourceNotes"])
+    assert any("Spanish N5.3" in note for note in request["facts"]["sourceNotes"])
+    assert ("uses-effects-of", "outbound", "Combat Jump") in {
+        (edge["type"], edge["direction"], edge["record"]["name"])
+        for edge in request["display_relations"]
+    }
+    assert ("enables-use-of", "outbound", "Request SpecBall") in {
+        (edge["type"], edge["direction"], edge["record"]["name"])
+        for edge in spec_ops["display_relations"]
+    }
+    assert "two Speedball Tokens" in speedball["summary"]
 
 
 def test_speedball_faq_exclusion_is_published_on_both_rule_cards(

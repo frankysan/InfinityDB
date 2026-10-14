@@ -20,9 +20,9 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 359
-    assert report["summary"]["authoredOutgoingRelationCount"] == 441
-    assert report["summary"]["futureInteractionCount"] == 113
+    assert report["summary"]["recordCount"] == 360
+    assert report["summary"]["authoredOutgoingRelationCount"] == 443
+    assert report["summary"]["futureInteractionCount"] == 111
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 209,
         "complete": 209,
@@ -64,12 +64,12 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "percentComplete": 100.0,
     }
     assert report["summary"]["releases"]["1.0.0"] == {
-        "total": 91,
-        "complete": 76,
+        "total": 92,
+        "complete": 77,
         "pending": 15,
-        "reviewed": 76,
+        "reviewed": 77,
         "inherited": 0,
-        "percentComplete": 83.5,
+        "percentComplete": 83.7,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
@@ -116,8 +116,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 178
-    assert report["summary"]["supporting"]["complete"] == 163
+    assert report["summary"]["supporting"]["total"] == 179
+    assert report["summary"]["supporting"]["complete"] == 164
     assert report["summary"]["supporting"]["pending"] == 15
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -311,6 +311,12 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert set(items["skill:request-speedball"]["relations"]) == {
         ("uses-effects-of", "skill:combat-jump")
     }
+    assert ("uses-effects-of", "skill:combat-jump") in set(
+        items["skill:request-specball"]["relations"]
+    )
+    assert ("enables-use-of", "skill:request-specball") in set(
+        items["skill:infinity-spec-ops"]["relations"]
+    )
     assert ("cancels-state", "state:impersonation-1") in set(
         items["equipment:biometric-visor"]["relations"]
     )
@@ -368,7 +374,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     assert ("skill:g-jumper", "state:isolated", None) in future_keys
     assert ("skill:g-jumper", "rule:null-state", None) in future_keys
     assert ("skill:infinity-spec-ops", "rule:spec-ops-chart", "uses-effects-of") in future_keys
-    assert ("skill:request-specball", "skill:combat-jump", "uses-effects-of") in future_keys
+    assert (
+        "skill:infinity-spec-ops", "skill:request-specball", "enables-use-of"
+    ) not in future_keys
+    assert ("skill:request-specball", "skill:combat-jump", "uses-effects-of") not in future_keys
     assert ("skill:morpho-scan", "attribute:vita", None) in future_keys
     assert ("skill:morpho-scan", "attribute:str", None) in future_keys
     assert ("skill:remdriver", "rule:troop-type:rem", "applies-effects-to") in future_keys
@@ -554,7 +563,7 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 163/178 complete, 15 pending" in output
+    assert "Supporting identities: 164/179 complete, 15 pending" in output
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:

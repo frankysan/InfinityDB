@@ -1539,6 +1539,7 @@ def test_checked_in_n5_collection_models_profile_runtime_identity_skill_slice() 
     expected_types = {
         "skill:g-jumper": ["automatic"],
         "skill:infinity-spec-ops": ["automatic"],
+        "skill:request-specball": ["automatic"],
         "skill:morpho-scan": ["short-skill"],
         "skill:remdriver": ["deployment-skill"],
         "skill:transmutation": ["automatic"],
@@ -1559,9 +1560,47 @@ def test_checked_in_n5_collection_models_profile_runtime_identity_skill_slice() 
     assert records["skill:remdriver"]["labelIds"] == ["optional"]
     assert records["skill:transmutation"]["labelIds"] == []
     assert "relations" not in records["skill:g-jumper"]
-    assert "relations" not in records["skill:infinity-spec-ops"]
+    assert records["skill:infinity-spec-ops"]["relations"] == [
+        {"type": "enables-use-of", "recordId": "skill:request-specball"}
+    ]
     assert "relations" not in records["skill:remdriver"]
     assert "relations" not in records["skill:transmutation"]
+
+
+def test_request_specball_is_a_bilingual_source_cited_separate_core_procedure() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+    specball = records["skill:request-specball"]
+    speedball = records["skill:request-speedball"]
+    assert specball["name"] == "Request SpecBall"
+    assert specball["labelIds"] == ["optional"]
+    assert specball["facts"]["typeIds"] == ["automatic"]
+    assert specball["relations"] == [
+        {"type": "uses-effects-of", "recordId": "skill:combat-jump"}
+    ]
+    assert "one 55 mm SpecBall Token" in " ".join(specball["facts"]["effects"])
+    assert "PH 15" in specball["summary"]
+    assert "Game Round 2 or 3" in specball["summary"]
+    assert "once per game" in " ".join(specball["facts"]["restrictions"])
+    assert "two different items" in " ".join(specball["facts"]["effects"])
+    assert "Enhanced Profile" in " ".join(specball["facts"]["effects"])
+    assert "Marker form" in " ".join(specball["facts"]["effects"])
+    assert "SpecBot" in " ".join(specball["facts"]["effects"])
+    assert "[[equipment:deactivator|Deactivators]]" in " ".join(
+        specball["facts"]["effects"]
+    )
+    assert "two 55 mm Speedball Tokens" in speedball["facts"]["effects"][0]
+    assert "English printing discrepancy" in specball["facts"]["sourceNotes"][0]
+    assert "TEAM-OPS" in specball["facts"]["sourceNotes"][1]
+    cited = {(ref["sourceId"], ref["page"]) for ref in specball["citations"]}
+    assert {
+        ("n5-core-v5.3-pdf", 98),
+        ("n5-core-v5.3-es-pdf", 98),
+        ("its-season-18-en-pdf", 26),
+        ("its-season-18-en-pdf", 28),
+    } == cited
+    assert any(source["id"] == "its-season-18-en-pdf" for source in document["sources"])
 
 
 def test_checked_in_n5_collection_models_final_semantic_link_cleanup() -> None:

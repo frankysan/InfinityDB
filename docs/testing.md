@@ -1192,3 +1192,26 @@ reference; they are not standalone Equipment URL routes.
 Private results, screenshots and the verification script are Git-ignored
 under `local/audits/rea039-browser/` and `local/audits/`.
 This does not imply a generic MOD combination/Fireteam evaluator.
+
+
+## 1.0 Request SpecBall REA-040 browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Compared the standalone
+Request SpecBall and Infinity Spec-Ops Skill references against N5.3
+English p. 98 and Spanish p. 98. Season 18 ITS pp. 26/28 separately
+support the official-tournament Spec-Ops restriction and the distinct
+TEAM-OPS Extra; Request Tacball does not change the core SpecBall rule.
+The printed English "Requesting a Speedball" label is retained as
+source-specific discrepancy evidence, not merged with the other Skill.
+
+A rebuilt local rules database was used for headless Chrome browser
+acceptance, not the checked-in/generated release database. The test
+passed **24/24 render/navigation checks** across 1440, 390 and 320 px
+for Request SpecBall, Infinity Spec-Ops, Request Speedball, Combat Jump
+and Deactivator, including working links from Infinity Spec-Ops to
+Request SpecBall and from the new card to its related procedures.
+No JavaScript errors or page-level horizontal overflow were observed.
+320 px screenshots and results remain Git-ignored under
+`local/audits/rea040-browser/`; the verification script and temporary
+rules DB are in `local/audits/`. This is bounded reference/browser
+acceptance, not a complete Spec-Ops Chart/list builder or a rule engine.

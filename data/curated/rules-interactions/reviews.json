@@ -2120,6 +2120,13 @@
       "status": "reviewed",
       "reviewedOn": "2026-10-13",
       "note": "N5.3 pp.129-131 and N5 FAQ v0.1 p.3 baseline for Command Token cost, Spearhead, Burst, targeting, recovery, Hacking and Special Dice; no unqualified simulation relations."
+    },
+    {
+      "recordId": "skill:request-specball",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "Standalone core N5.3 Request SpecBall procedure published with Combat Jump relation and reviewed bilingual PDF/ITS scope."
     }
   ],
   "futureInteractions": [
@@ -2906,22 +2913,6 @@
       "targetRelease": "post-0.7.0",
       "status": "planned",
       "reason": "Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts."
-    },
-    {
-      "sourceRecordId": "skill:infinity-spec-ops",
-      "targetRecordId": "skill:request-specball",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity."
-    },
-    {
-      "sourceRecordId": "skill:request-specball",
-      "targetRecordId": "skill:combat-jump",
-      "relationType": "uses-effects-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Request SpecBall explicitly deploys the SpecBall by applying Combat Jump rules; materialize this edge when Request SpecBall receives its own canonical action identity."
     },
     {
       "sourceRecordId": "skill:morpho-scan",

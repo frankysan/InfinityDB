@@ -1622,6 +1622,36 @@ and cover round, Null and once-per-game conditions.
 **1.0 relevance:** Explain the supported new core procedure; complete ITS season
 tools and all customization options are outside this focused requirement.
 
+**Disposition (verified 2026-10-14): Resolved for the core procedure.**
+The new `skill:request-specball` is a standalone published Automatic
+Skill, directly linked from `skill:infinity-spec-ops` and through the
+shared `skill:combat-jump` placement reference. It covers an eligible
+non-Null Spec-Ops in the Active Turn of Game Round 2 or 3, a single
+55 mm SpecBall Token with PH 15 placement outside Order expenditure,
+two distinct non-transferable items, contact pickup and cancellation
+of the collecting Trooper's Marker form. Profile and Model replacement
+occur at the end of the collecting Order; Wounds and applicable States
+carry over, the Token is removed, and an optional SpecBot is placed in
+contact. The one-use-per-player limit, placement contact restrictions
+and Deactivator exclusion are explicit.
+
+English N5.3 p. 98 calls the action "Requesting a Speedball" once inside
+the SpecBall Effects; Spanish N5.3 p. 98 calls it "Solicitar un SpecBall".
+The contradiction is retained as a source note and does not replace or
+merge `skill:request-speedball`. Season 18 ITS pp. 26/28 are separately
+pinned for its *official tournament* Spec-Ops prohibition and optional
+TEAM-OPS/Tacball distinction; these do not delete the core N5.3 rule.
+The SpecBall Chart remains an upstream printed selection table; full
+roster choice storage and TEAM-OPS session tooling are post-1.0 tasks.
+No immutable Unit Profile mutation, combined simulator or generic
+airdrop resolver was introduced.
+
+Review policy and generated interaction checklist now recognize the
+authored Spec-Ops-to-Request and Request-to-Combat-Jump relations.
+Focused curated/database/ledger tests passed (272/272) and Chromium
+browser checks passed 24/24 at 1440, 390 and 320 px, including
+reference cross-links, with no JS errors or horizontal overflow.
+
 ### REA-041 - Spanish Fireteam dice reminder conflicts with its general SD rule
 
 **Classification:** source discrepancy. **Severity:** High. **Priority:** P1.

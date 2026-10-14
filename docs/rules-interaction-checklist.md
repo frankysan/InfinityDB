@@ -31,9 +31,9 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **163/178** complete, **15** pending.
-- Current authored outgoing relations: **441**.
-- Explicitly tracked future/deferred interactions: **113**.
+- Supporting semantic identities: **164/179** complete, **15** pending.
+- Current authored outgoing relations: **443**.
+- Explicitly tracked future/deferred interactions: **111**.
 
 ## 0.7.0 primary catalog review
 
@@ -187,9 +187,8 @@ review. `declaration-category` projection records are excluded.
   - future [post-0.7.0; deferred]: `relation type TBD` → Camouflaged State (`state:camouflaged`) — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
   - future [post-0.7.0; deferred]: `relation type TBD` → Hidden Deployment State (`state:hidden-deployment`) — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
 - [x] **Infinity Spec-Ops** (`skill:infinity-spec-ops`) — reviewed
-  - outgoing: none
+  - `enables-use-of` → Request SpecBall (`skill:request-specball`)
   - future [post-0.7.0; planned]: `uses-effects-of` → `rule:spec-ops-chart` — Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts.
-  - future [post-0.7.0; planned]: `enables-use-of` → `skill:request-specball` — Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity.
 - [x] **Inspiring Leadership** (`skill:inspiring-leadership`) — reviewed
   - `uses-effects-of` → Regular (`training:regular`)
   - `uses-effects-of` → Courage (`skill:courage`)
@@ -952,7 +951,7 @@ review. `declaration-category` projection records are excluded.
 - [ ] **Supplies** (`scenario:supplies`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Supply Box interactions, Specialist Troop rules, and other scenario semantics remains 1.0 work.
   - outgoing: none
 
-#### Skill (3/3)
+#### Skill (4/4)
 
 - [x] **Activate Disco Ball** (`skill:activate-disco-ball`) — reviewed: N5.3 p. 71 and matching archived Wiki page: source-only Short Skill, Deactivator and allied-ball requirements, LoF/ZoC, WIP+3 Normal Roll with range MODs, Eclipse placement/removal. No Army Skill identity synthesized.
   - `uses-effects-of` → Deactivator (`equipment:deactivator`)
@@ -961,6 +960,8 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Pick Up Supply Boxes** (`skill:pick-up-supply-boxes`) — reviewed: Reviewed N5.3 scenario action declaration, Attack Label, requirements, effects and scope. Role prerequisites and contextual modifiers remain explicit in the cited definition; no Army profile grant is inferred.
   - outgoing: none
+- [x] **Request SpecBall** (`skill:request-specball`) — reviewed: Standalone core N5.3 Request SpecBall procedure published with Combat Jump relation and reviewed bilingual PDF/ITS scope.
+  - `uses-effects-of` → Combat Jump (`skill:combat-jump`)
 
 #### Term (5/5)
 
@@ -1248,7 +1249,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] Infiltration (`skill:infiltration`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to deploy in Marker form for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional state cancellation.
 - [ ] Infiltration (`skill:infiltration`) → Hidden Deployment State (`state:hidden-deployment`); `relation type TBD`; **post-0.7.0 / deferred** — A failed Infiltration Roll removes the option to use Hidden Deployment for that attempt; keep this conditional failure interaction deferred rather than presenting it as an unconditional restriction.
 - [ ] Infinity Spec-Ops (`skill:infinity-spec-ops`) → `rule:spec-ops-chart`; `uses-effects-of`; **post-0.7.0 / planned** — Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts.
-- [ ] Infinity Spec-Ops (`skill:infinity-spec-ops`) → `skill:request-specball`; `enables-use-of`; **post-0.7.0 / planned** — Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity.
 - [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:fireteam-coherency`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership grants a Fireteam Coherency Zone of Control bonus when its Regular-Training condition is met; retain this until Fireteam Coherency has a canonical rules identity and scoped modifier relation.
 - [ ] Inspiring Leadership (`skill:inspiring-leadership`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — Inspiring Leadership makes the army unaffected by Retreat! and prevents the Retreat! situation, but the army-level Retreat situation remains distinct from individual Retreat! State and has no canonical rule identity yet.
 - [ ] Intuitive Attack (`skill:intuitive-attack`) → Camouflaged State (`state:camouflaged`); `relation type TBD`; **post-0.7.0 / deferred** — Intuitive Attack can attack targets in States such as Camouflaged without first Discovering them, but the current relation vocabulary has no precise bypasses-targeting-protection edge.
@@ -1282,7 +1282,6 @@ review. `declaration-category` projection records are excluded.
 - [ ] RemDriver (`skill:remdriver`) → `rule:troop-type:rem`; `applies-effects-to`; **post-0.7.0 / deferred** — RemDriver applies occurrence-specific profile MODs to a Remote recipient in the same Army List; Troop Types are not yet canonical rules identities and the current graph cannot preserve the recipient role or parameterized MOD values.
 - [ ] Remote Presence (`skill:remote-presence`) → `rule:command-token`; `relation type TBD`; **post-0.7.0 / planned** — Remote Presence allows Command Tokens to reroll qualifying failed Engineer repairs, but Command Token expenditure is not yet a canonical interaction target.
 - [ ] Remote Presence (`skill:remote-presence`) → Dead State (`state:dead`); `relation type TBD`; **post-0.7.0 / deferred** — Remote Presence changes the Wound threshold for entering Dead State by inserting a second Unconscious level; the current graph lacks a precise state-entry-threshold relation.
-- [ ] `skill:request-specball` → Combat Jump (`skill:combat-jump`); `uses-effects-of`; **post-0.7.0 / planned** — Request SpecBall explicitly deploys the SpecBall by applying Combat Jump rules; materialize this edge when Request SpecBall receives its own canonical action identity.
 - [ ] Shasvastii (`skill:shasvastii`) → `rule:retreat-situation`; `relation type TBD`; **post-0.7.0 / planned** — A Shasvastii-Embryo Trooper still counts for Victory Point calculations during the Retreat situation while the game is in progress; distinguish this army-level situation from Retreat State.
 - [ ] Specialist Operative (`skill:specialist-operative`) → `rule:specialist-troop`; `uses-effects-of`; **post-0.7.0 / planned** — Specialist Operative makes its user count as a Specialist Troop for mission/scenario rules; materialize the edge once Specialist Troop is a canonical scenario-role identity.
 - [ ] Stealth (`skill:stealth`) → Idle (`skill:idle`); `relation type TBD`; **post-0.7.0 / deferred** — Stealth changes which enemies receive AROs when the user declares Idle, but the current relation vocabulary has no precise ARO-generation modifier edge.

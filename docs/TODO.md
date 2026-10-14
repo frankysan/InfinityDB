@@ -747,8 +747,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       are linked from the family and Fireteam references. All six named
       options retain source-specific effects. Focused source/API tests and
       responsive browser acceptance passed 12/12 checks at 1440/390/320 px.
-    - [ ] **REA-040 — SpecBall:** Review the missing procedure and its
-      Infinity Spec-Ops reference; preserve source applicability.
+    - [x] **REA-040 — Request SpecBall:** Published the core N5.3
+      Skill with Game Round/Active Turn/once-per-game eligibility, one
+      55 mm Combat Jump/PH 15 Token, different item selection, contact
+      pickup, Marker cancellation, end-of-Order Enhanced Profile and
+      SpecBot placement. Linked Infinity Spec-Ops and Combat Jump, kept
+      Request Speedball and Season 18 TEAM-OPS/Tacball separate, and
+      pinned the English printed-name discrepancy against Spanish N5.3.
+      Source/database and responsive browser acceptance passed (24/24).
+      Complete chart/list configurators remain post-1.0.
     - [ ] **REA-041 — Fireteam dice contradiction:** Resolve the Spanish
       printed example/reminder against the general Special Dice rule.
     - [ ] **REA-042 — Dodge (ARM+3) source conflict:** Preserve and
