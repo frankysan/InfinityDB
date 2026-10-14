@@ -40,7 +40,10 @@ release/audit narrative belongs in the changelog and Git history.
   origin references point back to canonical Ammunition/Traits/Rules or pinned
   source sections; the Property itself never owns new game mechanics. Do not
   confuse these with Army's existing source `properties` Trait field or
-  infer membership from prefixes. See `docs/data-model.md`.
+  infer membership from prefixes. Explicit `[[weapon-property:...]]`
+  links in curated prose resolve against the validated registry, not rules
+  record IDs; the exporter checks IDs and runtime links to Glossary.
+  See `docs/data-model.md`.
 - Combined Saving Roll Criticals are distinct from combined Ammunition
   Criticals. The six reviewed Plasma Hit/Blast profiles have source-exact
   `combined_saving_roll` annotations: one ARM and one BTS roll, plus one

@@ -30,12 +30,17 @@ def _services():
 def test_weapon_properties_have_distinct_explicit_rules_origins() -> None:
     database, rules, properties = _services()
     del database
-    assert len(properties.entries()) == 9
+    assert len(properties.entries()) == 11
     entries = {item["id"]: item for item in properties.entries()}
     viral = entries["weapon-property:viral"]
     assert any(origin["recordId"] == "trait:bioweapon" for origin in viral["origins"])
     assert any(origin["recordId"] == "ammunition:normal" for origin in viral["origins"])
     assert any(origin["role"] == "name-dependent-exception" for origin in viral["origins"])
+    mono = entries["weapon-property:monofilament"]
+    assert any(o.get("recordId") == "state:dead" for o in mono["origins"])
+    assert any(o.get("recordId") == "skill:immunity" for o in mono["origins"])
+    silent = entries["weapon-property:silenced"]
+    assert any(o.get("recordId") == "trait:silent-x" for o in silent["origins"])
     plasma = entries["weapon-property:plasma"]
     assert any("Combined Saving Roll" in origin.get("sourceSection", "")
                for origin in plasma["origins"])
@@ -78,8 +83,16 @@ def test_weapon_property_profiles_are_exact_and_mode_scoped() -> None:
     ]
     assert "weapon_properties" not in feuerbach["Explosive Mode"]
     assert [p["id"] for p in profiles("silenced-pistol")[0]["weapon_properties"]] == [
-        "weapon-property:ap-shock"
+        "weapon-property:ap-shock", "weapon-property:silenced"
     ]
+    for slug in ("monofilament-cc-weapon", "monofilament-mine"):
+        profile = profiles(slug)[0]
+        assert [p["id"] for p in profile["weapon_properties"]] == [
+            "weapon-property:monofilament"
+        ]
+        assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+            "N", "ARM=0", "1"
+        )
     source_item = database.get_catalog_item("weapons", "viral-rifle")
     assert source_item is not None
     original = source_item["profiles"][0]
@@ -165,3 +178,58 @@ def test_every_reviewed_property_source_profile_still_matches_army() -> None:
             assert profile["savingNum"] == signature["savingNum"]
             assert json.loads(profile["properties"]) == signature["traits"]
     connection.close()
+
+
+def test_curated_weapon_property_links_resolve_with_previews() -> None:
+    from infinity_db.maintained_text import parse_maintained_text
+    from infinity_db.maintained_text_references import maintained_text_tokens
+
+    database, rules, _ = _services()
+    for slug in ("monofilament", "silenced", "viral", "plasma"):
+        target = f"weapon-property:{slug}"
+        assert parse_maintained_text(f"[[{target}]]")[0]["target"] == target
+        tokens = maintained_text_tokens(database, rules, f"[[{target}]]")
+        assert tokens is not None
+        assert tokens[0]["public_reference"] == {
+            "href": f"/glossary#weapon-property-{slug}"
+        }
+        assert tokens[0]["preview_tokens"][0]["text"]
+    with pytest.raises(ValueError, match="not current"):
+        maintained_text_tokens(database, rules, "[[weapon-property:unknown]]")
+
+
+def test_published_weapon_rules_link_to_shared_properties() -> None:
+    from infinity_db.maintained_text_references import maintained_text_tokens
+
+    database, rules, _ = _services()
+    for record_id, expected in (
+        ("weapon:viral-cc-weapon", "viral"),
+        ("weapon:viral-sniper-rifle", "viral"),
+        ("weapon:plasma-sniper-rifle", "plasma"),
+        ("weapon:silenced-pistol", "silenced"),
+    ):
+        record = rules.composed_record(record_id)
+        assert record is not None
+        tokens = maintained_text_tokens(database, rules, record["summary"])
+        assert tokens is not None
+        assert any(
+            token["type"] == "reference"
+            and token["target"] == f"weapon-property:{expected}"
+            for token in tokens
+        ), record_id
+    immunity = rules.composed_record("skill:immunity")
+    assert immunity is not None
+    assert "weapon-property:monofilament" in json.dumps(immunity["facts"])
+
+
+def test_rules_build_rejects_unknown_weapon_property_reference(tmp_path: Path) -> None:
+    from infinity_db.curated import load_curated_directory
+    from infinity_db.rules_database import export_rules_database
+
+    documents = load_curated_directory(ROOT / "data/curated")
+    path, document = documents[0]
+    replacement = copy.deepcopy(document)
+    replacement["records"][0]["summary"] += " [[weapon-property:unknown]]"
+    documents[0] = path, replacement
+    with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
+        export_rules_database(documents, tmp_path / "invalid-rules.db", finalize=False)

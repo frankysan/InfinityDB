@@ -163,10 +163,14 @@ The runtime projection only attaches a Property to a profile matching that
 whole signature; weapon names and punctuation are never parsed to grant
 mechanics. Properties are displayed on matching Weapon profiles and indexed
 as embedded Glossary/global-search concepts, without a separate top-level
-catalog or a new rule evaluator. The first nine definitions cover Plasma,
-Viral, Breaker, K1, MULTI and the four reviewed AP-based combinations. Source
+catalog or a new rule evaluator. Eleven reviewed definitions currently cover
+Plasma, Viral, Breaker, K1, MULTI, Monofilament, Silenced and the four
+AP-based combinations. Curated rules prose can link explicitly to
+`[[weapon-property:...]]`: the rules exporter validates each target against
+the maintained registry, and the runtime resolves it to a Glossary entry and
+summary preview without creating a second canonical rules record. Source
 profiles, Ammunition composition, Combined Saving Roll, and Traits remain
-independent. This curated configuration is included in installed packages,
+independent. This maintained configuration is included in installed packages,
 following the existing runtime catalog-configuration pattern.
 
 A bounded Immunity cross-reference now publishes `skill:immunity`'s validated

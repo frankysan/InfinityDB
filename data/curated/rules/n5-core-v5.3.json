@@ -4792,7 +4792,7 @@
             "id": "weapon:viral-cc-weapon",
             "kind": "weapon",
             "name": "Viral CC Weapon",
-            "summary": "The printed Viral close-combat profile lists [[ammunition:normal|Normal (N) Ammunition]], BTS and one Saving Roll, with [[trait:cc|CC]]. Its separately listed [[trait:bioweapon|BioWeapon (DA+Shock)]] Trait is explained by the shared Viral Weapon Property; it is not a separate Viral Ammunition type.\n\nThe linked Property distinguishes the conditional VITA/STR results and their rule-derived Saving Rolls from [[ammunition:da|DA]] and [[ammunition:shock|Shock]]. Resolve applicable [[skill:immunity|Immunity]] and Shock exceptions through the canonical rules.",
+            "summary": "The printed Viral close-combat profile lists [[ammunition:normal|Normal (N) Ammunition]], BTS and one Saving Roll, with [[trait:cc|CC]]. Its separately listed [[trait:bioweapon|BioWeapon (DA+Shock)]] Trait is explained by the shared Viral Weapon Property; it is not a separate Viral Ammunition type.\n\nThe [[weapon-property:viral|shared Viral Weapon Property]] distinguishes the conditional VITA/STR results and their rule-derived Saving Rolls from [[ammunition:da|DA]] and [[ammunition:shock|Shock]]. Resolve applicable [[skill:immunity|Immunity]] and Shock exceptions through the canonical rules.",
             "composition": {"role": "definition"},
             "scope": {"game": "N5", "seasons": ["current"]},
             "facts": {},
@@ -5094,7 +5094,7 @@
         {
             "id": "weapon:silenced-pistol",
             "name": "Silenced Pistol",
-            "summary": "Its AP+Shock attack specifies one BTS/2 Saving Roll. See [[ammunition:ap|AP]] and [[ammunition:shock|Shock]] for their separate shared effects and conditions; the Weapon Chart supplies the combined notation.\n\nThe [[trait:silent-x|Silent (-6)]] Trait applies only to a target's Face to Face [[skill:dodge|Dodge]] Roll when the attacker is inside the target's [[trait:zone-of-control-zc|Zone of Control]] but outside their LoF. That -6 MOD is cumulative with other [[skill:dodge|Dodge]] MODs; it is not a general -6 penalty to every reaction.",
+            "summary": "Its AP+Shock attack specifies one BTS/2 Saving Roll. See [[ammunition:ap|AP]] and [[ammunition:shock|Shock]] for the shared effects and conditions; the Weapon Chart supplies the combined notation.\n\nThe [[weapon-property:silenced|Silenced Weapon Property]] explains [[trait:silent-x|Silent (-6)]]: a -6 MOD to a Face to Face [[skill:dodge|Dodge]] Roll if the attacker is inside the target's [[trait:zone-of-control-zc|ZoC]] but outside their LoF. It combines with other [[skill:dodge|Dodge]] MODs and is not a general -6 reaction penalty.",
             "kind": "weapon",
             "composition": {
                 "role": "definition"
@@ -5711,7 +5711,7 @@
             "id": "weapon:viral-sniper-rifle",
             "kind": "weapon",
             "name": "VIRAL Sniper Rifle",
-            "summary": "The printed VIRAL Sniper Rifle uses [[ammunition:normal|Normal (N) Ammunition]], PS 5, Burst 2 and one **BTS** Saving Roll. Its separately listed [[trait:bioweapon|BioWeapon (DA+Shock)]] Trait is not distinct Viral Ammunition.\n\nThe shared Viral Weapon Property explains the conditional VITA versus STR effects and the derived two-BTS-roll result against VITA from [[ammunition:da|DA]] and [[ammunition:shock|Shock]]. Resolve any [[skill:immunity|Immunity]] exception through the linked rules.",
+            "summary": "The printed VIRAL Sniper Rifle uses [[ammunition:normal|Normal (N) Ammunition]], PS 5, Burst 2 and one **BTS** Saving Roll. Its separately listed [[trait:bioweapon|BioWeapon (DA+Shock)]] Trait is not distinct Viral Ammunition.\n\nThe [[weapon-property:viral|shared Viral Weapon Property]] explains the conditional VITA versus STR effects and the derived two-BTS-roll result against VITA from [[ammunition:da|DA]] and [[ammunition:shock|Shock]]. Resolve any [[skill:immunity|Immunity]] exception through the linked rules.",
             "composition": {
                 "role": "definition"
             },
@@ -5769,7 +5769,7 @@
             "id": "weapon:plasma-sniper-rifle",
             "kind": "weapon",
             "name": "Plasma Sniper Rifle",
-            "summary": "The Plasma Sniper Rifle has two **alternative** modes, both firing [[ammunition:normal|Normal (N) Ammunition]] at Burst 2. Both use the Combined Saving Roll and Critical rules explained by the shared Plasma Weapon Property, not a combination of Ammunition types.\n\n**Blast Mode** has PS 6 and a circular [[trait:impact-template|Impact Template]]. **Hit Mode** has PS 5 and no such Template. Their range MODs are identical, but the Blast Mode Template does not carry over to Hit Mode.",
+            "summary": "The Plasma Sniper Rifle has two **alternative** modes, both firing [[ammunition:normal|Normal (N) Ammunition]] at Burst 2. Both use the Combined Saving Roll and Critical rules explained by the [[weapon-property:plasma|shared Plasma Weapon Property]], not a combination of Ammunition types.\n\n**Blast Mode** has PS 6 and a circular [[trait:impact-template|Impact Template]]. **Hit Mode** has PS 5 and no such Template. Their range MODs are identical, but the Blast Mode Template does not carry over to Hit Mode.",
             "composition": {
                 "role": "definition"
             },
@@ -18242,7 +18242,7 @@
                     "Unless the user has Immunity (Critical), a Critical hit still causes its additional Saving Roll even when the underlying Ammunition or effect is otherwise covered by Immunity."
                 ],
                 "clarifications": [
-                    "Printed Example 2: Against a Monofilament weapon that requires an ARM Saving Roll, Immunity (ARM) ignores its [[trait:arm-0|ARM = 0]] and [[trait:state|State: Dead]] Traits. The target makes the Saving Roll using full ARM and does not enter [[state:dead|Dead]] from that Trait on failure.",
+                    "Printed Example 2: Against a [[weapon-property:monofilament|Monofilament]] weapon that requires an ARM Saving Roll, Immunity (ARM) ignores its [[trait:arm-0|ARM = 0]] and [[trait:state|State: Dead]] Traits. The target makes the Saving Roll using full ARM and does not enter [[state:dead|Dead]] from that Trait on failure.",
                     "The printed [[weapon:flash-pulse|Flash Pulse]] example: [[skill:immunity|Immunity (BTS)]] treats [[ammunition:stun|Stun Ammunition]] as [[ammunition:normal|Normal]], but the Saving Roll stays BTS, not ARM. Despite the ordinary protection against State-causing Traits, the explicit exception preserves [[trait:non-lethal|Non-Lethal]] (no Wounds) and [[trait:state|State: Stunned]] ([[state:stunned|Stunned]] only on a failed BTS roll).",
                     "For the reviewed [[ammunition:ap|AP]]+[[ammunition:da|DA]] case, Immunity (AP) negates AP’s ARM modifier, but not DA’s two Saving Rolls: the attack has two rolls against full ARM, or three for a Critical. This is a rule-derived case, not a separately printed example."
                 ],

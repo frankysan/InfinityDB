@@ -900,6 +900,112 @@
           ]
         }
       ]
+    },
+    {
+      "id": "monofilament",
+      "name": "Monofilament",
+      "summary": "Monofilament weapons use Normal (N) Ammunition, but their printed Saving Roll is ARM=0. The State: Dead Trait applies when its required Saving Roll fails, subject to the target's applicable rules. The printed Immunity (ARM) example explicitly ignores both ARM=0 and State: Dead on a covered attack, leaving an ordinary Saving Roll against full ARM.",
+      "origins": [
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:normal",
+          "role": "baseline"
+        },
+        {
+          "domain": "Weapon Traits",
+          "recordId": "trait:state",
+          "role": "state-effect"
+        },
+        {
+          "domain": "States",
+          "recordId": "state:dead",
+          "role": "resulting-state"
+        },
+        {
+          "domain": "Skills",
+          "recordId": "skill:immunity",
+          "role": "explicit-exception"
+        },
+        {
+          "domain": "Weaponry",
+          "sourceSection": "N5.3 Weapon Chart: Monofilament CC Weapon and Monofilament Mine; Immunity (ARM) Example 2 pp.95-96",
+          "role": "source-profile"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 9,
+          "weaponName": "Monofilament CC Weapon",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "ARM=0",
+          "savingNum": "1",
+          "traits": [
+            "CC",
+            "State: Dead"
+          ]
+        },
+        {
+          "weaponId": 62,
+          "weaponName": "Monofilament Mine",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "ARM=0",
+          "savingNum": "1",
+          "traits": [
+            "Intuitive Attack",
+            "Concealed",
+            "Disposable (3)",
+            "Direct Template (Small Teardrop)",
+            "Deployable",
+            "State: Dead",
+            "[*]"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "silenced",
+      "name": "Silenced",
+      "summary": "The reviewed Silenced Pistol uses the Silent (-6) Trait. It applies the printed -6 MOD to the target's Face to Face Dodge Roll when the attacker is inside the target's Zone of Control but outside its LoF; it is not a general reaction penalty. That Pistol's separate AP+Shock Ammunition and BTS/2 Saving Roll remain specific to its printed profile, not automatic effects of the Silenced name.",
+      "origins": [
+        {
+          "domain": "Weapon Traits",
+          "recordId": "trait:silent-x",
+          "role": "named-effect"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:ap",
+          "role": "weapon-specific-component"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:shock",
+          "role": "weapon-specific-component"
+        },
+        {
+          "domain": "Weaponry",
+          "sourceSection": "N5.3 p.175 Silent (X); Weapon Chart p.182 Silenced Pistol",
+          "role": "source-profile"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 211,
+          "weaponName": "Silenced Pistol",
+          "mode": null,
+          "ammunitionSourceId": 30,
+          "ammunition": "AP+Shock",
+          "saving": "BTS/2",
+          "savingNum": "1",
+          "traits": [
+            "Silent (-6)"
+          ]
+        }
+      ]
     }
   ]
 }

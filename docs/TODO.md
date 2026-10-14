@@ -503,18 +503,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       navigation passed (14/14 checks). All four 320 px screenshots were
       inspected; no horizontal overflow or JavaScript errors were observed.
       Private evidence is under `local/audits/sniper-rifles-browser/`.
-    - [ ] Extend the reviewed Weapon Properties inventory beyond the first
-      Plasma, Viral, Breaker, K1, MULTI and four AP-based combinations.
-      Investigate Monofilament, Silenced and source-specific name/Traits
-      exceptions; continue consolidating shared curated descriptions without
-      losing source/mode-specific information. The first Viral CC/Sniper and
-      Plasma Sniper summaries now defer shared rules text to their linked
-      Properties; other eligible weapon families still need review. Add
-      maintained-text links for direct Property references inside curated
-      rules prose, rather than requiring navigation via the profile card.
-    - [x] Browser-review the first nine Weapon Property links and rule-origin
+    - [ ] Continue extending the reviewed Weapon Properties inventory beyond
+      Plasma, Viral, Breaker, K1, MULTI, Monofilament, Silenced and four
+      AP-based combinations. Review further name/Traits exceptions and
+      consolidate repeated weapon prose where source/mode-specific information
+      remains intact. Initial Viral CC/Sniper, Plasma Sniper, Silenced Pistol
+      and the printed Monofilament Immunity example now link their relevant
+      Properties directly in maintained-text prose; the remainder needs
+      source-by-source review.
+    - [x] Browser-review all eleven current Weapon Properties and rule-origin
       navigation at 1440, 390 and 320 px, plus global search at 1440 and
-      320 px, including touch preview/second-tap navigation, 48 passing
+      320 px, including touch preview/second-tap navigation, 67 passing
       browser checks, no overflow/JavaScript errors, and inspection of
       representative narrow-screen screenshots. Private
       evidence is in `local/audits/weapon-properties-browser/`.

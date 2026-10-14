@@ -14,6 +14,7 @@ MAINTAINED_REFERENCE_KINDS = frozenset(
         "skill",
         "equipment",
         "weapon",
+        "weapon-property",
         "ammunition",
         "trait",
         "state",

@@ -317,12 +317,20 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
                             f"{target_id!r} in {path} does not resolve"
                         )
 
+    # Weapon Properties are reviewed application vocabulary, not rules records.
+    # Validate these explicit references against their maintained registry,
+    # without silently creating additional canonical Ammunition definitions.
+    from infinity_db.weapon_properties import load_weapon_properties
+
+    current_property_ids = {
+        f"weapon-property:{entry['id']}" for entry in load_weapon_properties()
+    }
     for path, document in documents:
         if document["collection"]["status"] != "current":
             continue
         for text_context, text in maintained_text_fields(document):
             for target_id in maintained_text_targets(text, context=f"{path}:{text_context}"):
-                if target_id not in current_ids:
+                if target_id not in current_ids and target_id not in current_property_ids:
                     raise ValueError(
                         f"Maintained-text reference {target_id!r} in "
                         f"{path}:{text_context} does not resolve to a current semantic record"
