@@ -654,6 +654,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       against N5.3 pp. 75, 123–124 and 175. The reference cards now
       explain mixed PH results and the two-unspent-charge Double Shot
       prerequisite with focused regression examples.
+    - [x] **REA-023 — Deployable placement geometry:** Reviewed the
+      Place Deployable Active/Reactive contact, surface, timing and FAQ
+      occupied-location rule; Perimeter's passable path; Minelayer's
+      Trigger Area/ZoC enemy exclusions; and Deployable lifecycle and
+      item-specific placement. All nine published reference pages
+      passed browser validation at 1440, 390 and 320 px (39/39).
+      Armed Turret's printed Silhouette and E/Mitter conflicts remain
+      separate under REA-037 and REA-045.
     - [x] **REA-026 — Shared General Rules:** Face to Face Rolls, Saving
       Rolls, Guts Rolls, Order Expenditure Sequence, and Coordinated
       Orders are published, linked, and source-cited. Chrome acceptance

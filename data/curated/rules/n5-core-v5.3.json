@@ -3132,7 +3132,7 @@
             "id": "trait:deployable",
             "kind": "trait",
             "name": "Deployable",
-            "summary": "May be deployed as an independent battlefield element with its own profile and Attributes.",
+            "summary": "A [[trait:deployable|Deployable]] Weapon or Equipment is placed as an independent battlefield element with its own profile and Attributes.\n\nIf it enters [[state:unconscious|Unconscious State]], it instead enters [[state:dead|Dead State]] immediately and is removed without requiring another Wound. A Deployable cannot activate other Deployable Weapons or Equipment.",
             "composition": {
                 "role": "definition"
             },
@@ -3146,6 +3146,11 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Deployable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Deployable"
                 }
             ],
             "review": {
@@ -3330,6 +3335,11 @@
             "kind": "trait",
             "name": "Indiscriminate",
             "summary": "May be used or deployed despite Camouflage and Hiding Markers in its Area of Effect.",
+            "facts": {
+                "clarifications": [
+                    "This permission also applies when there is no otherwise valid target nearby; it is an item Trait exception, not an automatic permission to bypass the separate [[skill:minelayer|Minelayer]] enemy-presence Requirements."
+                ]
+            },
             "composition": {
                 "role": "definition"
             },
@@ -3343,6 +3353,11 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Indiscriminate"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Indiscriminate"
                 }
             ],
             "review": {
@@ -3448,6 +3463,15 @@
             "kind": "trait",
             "name": "Perimeter",
             "summary": "When placed, applies [[trait:deployable|Deployable]] and Perimeter, placing it completely inside the user's Zone of Control.",
+            "facts": {
+                "requirements": [
+                    "When using [[skill:place-deployable|Place Deployable]], a destination wholly inside the user's [[trait:zone-of-control-zc|Zone of Control]] replaces the usual Silhouette contact.",
+                    "A path from the user to that destination must be passable by the item's Silhouette, without an impassable obstacle or a gap too narrow for it."
+                ],
+                "effects": [
+                    "The placed item becomes active at the Conclusion of the Order and remains stationary."
+                ]
+            },
             "composition": {
                 "role": "definition"
             },
@@ -3461,6 +3485,11 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "Perimeter"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable: Deployable and Perimeter"
                 }
             ],
             "review": {
@@ -3840,7 +3869,7 @@
             "id": "weapon:armed-turret",
             "kind": "weapon",
             "name": "Armed Turret",
-            "summary": "A stationary [[trait:deployable|Deployable]] Weapon that reacts to enemy Orders. Its bracketed weapon name identifies the BS Weapon it uses.\n\n**Unresolved source conflict:** Army's Armed Turret ([[weapon:e-mitter|E/Mitter]]) mode lists **one BTS/2 Saving Roll** per hit. Both N5.3 Weapon Charts list **two** for [[weapon:e-mitter|E/Mitter]], consistent with [[ammunition:em|E/M Ammunition]].\n\nNeither the printed Armed Turret rule nor the reviewed FAQ establishes a turret-specific Saving Roll exception. InfinityDB retains the imported one-roll profile pending official clarification.",
+            "summary": "A stationary [[trait:deployable|Deployable]] Weapon that reacts to enemy Orders. Its bracketed weapon name identifies the BS Weapon it uses.\n\nThe Turret declares a [[skill:bs-attack|BS Attack]] or [[skill:cc-attack|CC Attack]] only against an active enemy **Model**, not a Marker, within its LoF or in Silhouette contact.\n\nIt is immobile, is removed when Wounds equal or exceed its STR, and cannot activate other [[trait:deployable|Deployable]] Weapons or Equipment. It uses [[skill:place-deployable|Place Deployable]] with [[trait:perimeter|Perimeter]] positioning.\n\n**Unresolved source conflict:** Army's Armed Turret ([[weapon:e-mitter|E/Mitter]]) mode lists **one BTS/2 Saving Roll** per hit. Both N5.3 Weapon Charts list **two** for [[weapon:e-mitter|E/Mitter]], consistent with [[ammunition:em|E/M Ammunition]].\n\nNeither the printed Armed Turret rule nor the reviewed FAQ establishes a turret-specific Saving Roll exception. InfinityDB retains the imported one-roll profile pending official clarification.",
             "composition": {
                 "role": "definition"
             },
@@ -4413,7 +4442,7 @@
             "id": "weapon:wildparrot",
             "kind": "weapon",
             "name": "WildParrot",
-            "summary": "WildParrots are placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]].\n\nThe [[trait:perimeter|Perimeter]] rule places them completely inside the user’s [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact.\n\nOnce deployed, they work like [[weapon:mines|E/M Mines]], but place a visible WildParrot Token or Model instead of a [[skill:camouflage|Camouflage]] Marker.\n\nUnlike [[trait:boost|Boost]] devices such as Crazykoalas and Madtraps, WildParrots do not have that Trait; they follow their own E/M weapon profile (BTS/2, two Saving Rolls).",
+            "summary": "WildParrots are placed using [[skill:place-deployable]] or [[skill:intuitive-attack|Intuitive Attack]].\n\nThe [[trait:perimeter|Perimeter]] rule places them completely inside the user’s [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact. A path wide enough for the WildParrot's Silhouette must remain passable; an impassable barrier or gap too small for it blocks the placement.\n\nOnce deployed, they work like [[weapon:mines|E/M Mines]], but place a visible WildParrot Token or Model instead of a [[skill:camouflage|Camouflage]] Marker.\n\nUnlike [[trait:boost|Boost]] devices such as Crazykoalas and Madtraps, WildParrots do not have that Trait; they follow their own E/M weapon profile (BTS/2, two Saving Rolls).",
             "facts": {
                 "variantRuleReferences": {
                     "wildparrot": [
@@ -12370,11 +12399,16 @@
                     "In the Reactive Turn, the user must have LoF to the Active Trooper."
                 ],
                 "effects": [
-                    "The user places one eligible Token or Model without a Roll; it becomes active at the Conclusion of the Order."
+                    "The user places one eligible Token or Model without a Roll; it becomes active at the Conclusion of the Order.",
+                    "During the Active Turn, place it in Silhouette contact with the user or, after movement, with any point along their movement path. In the Reactive Turn, Silhouette contact with the user is required.",
+                    "The Token or Model must be fully supported on its surface: placement on a vertical surface is not legal. It is placed at the Conclusion of the Order and becomes active only in subsequent Orders and [[trait:aro|AROs]]; enemies react to the placing Trooper, not to the newly placed item."
                 ],
                 "restrictions": [
                     "Placement must follow the active/reactive placement, support, and Deployment restrictions of Place Deployable.",
-                    "A Deployable Weapon cannot be placed with an enemy Camouflaged Marker inside its Trigger Area unless the documented exception applies."
+                    "Observe any scenario restrictions. Items with both [[trait:deployable|Deployable]] and [[trait:perimeter|Perimeter]] instead follow [[trait:perimeter|Perimeter]]'s [[trait:zone-of-control-zc|Zone of Control]] placement and passable-path rules.",
+                    "A Deployable Weapon cannot be placed with an enemy Camouflaged Marker inside its Trigger Area unless the documented exception applies.",
+                    "Specifically, the ordinary restriction can be bypassed if a valid non-camouflaged enemy is also inside that Trigger Area, or with [[skill:intuitive-attack|Intuitive Attack]]. An item's [[trait:indiscriminate|Indiscriminate]] Trait provides its own exception.",
+                    "If another Trooper occupies the declared placement at the Conclusion of the Order, the user may select another legal location. If no legal location remains, the [[trait:deployable|Deployable]] is lost (N5 FAQ v0.1)."
                 ]
             },
             "labelIds": [
@@ -12385,6 +12419,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Place_Deployable",
                     "heading": "Place Deployable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 3,
+                    "section": "Place Deployable: occupied intended position"
                 }
             ],
             "review": {
@@ -13483,7 +13527,7 @@
             "facts": {
                 "effects": [
                     "[[skill:place-deployable]] places a Deployable Repeater Token on the game table.",
-                    "The deployed Equipment contains a [[equipment:repeater]] and applies the [[equipment:repeater]] rule while active."
+                    "The deployed Equipment contains a [[equipment:repeater]] and applies the [[equipment:repeater]] rule while active. Without [[trait:perimeter|Perimeter]], the standard [[skill:place-deployable|Place Deployable]] Silhouette-contact placement applies."
                 ]
             },
             "armyLinks": [
@@ -13532,7 +13576,7 @@
                 "effects": [
                     "When [[skill:place-deployable]] is declared, the FastPanda may be placed completely inside the user's Zone of Control instead of in Silhouette contact.",
                     "The deployed FastPanda contains a [[equipment:repeater]] and applies the [[equipment:repeater]] rule while active.",
-                    "The deployed FastPanda remains on the table until the end of the game or until destroyed."
+                    "The deployed FastPanda remains on the table until the end of the game or until destroyed. As a [[trait:perimeter|Perimeter]] placement, the destination must be reachable along a passable path for its Silhouette; see [[trait:perimeter|Perimeter]]."
                 ]
             },
             "armyLinks": [
@@ -14561,10 +14605,11 @@
                 ],
                 "requirements": [
                     "The Weapon or Equipment with the [[trait:deployable]] Trait must satisfy the normal Deployment conditions and remain within the area where the Minelayer user may deploy.",
-                    "Its Trigger Area or the area defined by the [[trait:perimeter]] Trait must satisfy the rule's enemy-presence restrictions when placed."
+                    "When placed with Minelayer, there must be no enemy Troopers or [[skill:camouflage|Camouflage]] Markers inside the item's Trigger Area; for [[trait:perimeter|Perimeter]] items, the exclusion applies to their entire [[trait:zone-of-control-zc|Zone of Control]] instead."
                 ],
                 "effects": [
                     "When the user deploys, they may place the allowed number of carried Weapons or Equipment with the [[trait:deployable]] Trait inside their Zone of Control.",
+                    "Placement must remain within the Trooper's permitted Deployment area; Minelayer (X), when printed, determines how many items may be placed.",
                     "Placing an item with the Disposable Trait consumes the corresponding available use.",
                     "If the user's Superior Deployment Roll fails, a Minelayer item placed with that deployment is removed and any Disposable use is consumed."
                 ],
@@ -14580,6 +14625,11 @@
                 {
                     "sourceId": "wiki-minelayer-oldid-4124",
                     "heading": "Minelayer"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 102,
+                    "section": "Minelayer"
                 }
             ],
             "review": {

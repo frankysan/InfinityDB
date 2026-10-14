@@ -3291,3 +3291,85 @@ def test_rea022_same_order_kit_recovery_and_disposable_burst_examples(
             citation["source_id"] == "n5-core-v5.3-pdf" and citation["page"] == page
             for citation in record["citations"]
         )
+
+
+def test_rea023_deployable_placement_geometry_and_exception_owners(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """N5.3 pp. 70, 74, 82, 102, 175 and FAQ v0.1: scoped placement rules."""
+    def source(record: dict, source_id: str, page: int) -> bool:
+        return any(
+            cite["source_id"] == source_id and cite["page"] == page
+            for cite in record["citations"]
+        )
+
+    place = current_rules_database.composed_record("skill:place-deployable")
+    perimeter = current_rules_database.composed_record("trait:perimeter")
+    deployable = current_rules_database.composed_record("trait:deployable")
+    minelayer = current_rules_database.composed_record("skill:minelayer")
+    indiscriminate = current_rules_database.composed_record("trait:indiscriminate")
+    assert place is not None
+    assert perimeter is not None
+    assert deployable is not None
+    assert minelayer is not None
+    assert indiscriminate is not None
+    place_effects = " ".join(place["facts"]["effects"])
+    place_limits = " ".join(place["facts"]["restrictions"])
+    assert "after movement, with any point along their movement path" in place_effects
+    assert "In the Reactive Turn, Silhouette contact" in place_effects
+    assert "fully supported on its surface" in place_effects
+    assert "placement on a vertical surface is not legal" in place_effects
+    assert "active only in subsequent Orders" in place_effects
+    assert "Silhouette contact" in place_effects
+    assert "passable-path" in place_limits
+    assert "Camouflaged Marker" in place_limits
+    assert "valid non-camouflaged enemy" in place_limits
+    assert "[[trait:indiscriminate|Indiscriminate]]" in place_limits
+    assert "another Trooper occupies the declared placement" in place_limits
+    assert "If no legal location remains" in place_limits
+    assert source(place, "n5-core-v5.3-pdf", 82)
+    assert source(place, "n5-faq-v0.1-en-pdf", 3)
+
+    perim_reqs = " ".join(perimeter["facts"]["requirements"])
+    assert "wholly inside" in perim_reqs
+    assert "Silhouette" in perim_reqs
+    assert "without an impassable obstacle" in perim_reqs
+    assert "a gap too narrow" in perim_reqs
+    assert source(perimeter, "n5-core-v5.3-pdf", 82)
+
+    assert "enters [[state:dead|Dead State]] immediately" in deployable["summary"]
+    assert "cannot activate other Deployable Weapons" in deployable["summary"]
+    assert source(deployable, "n5-core-v5.3-pdf", 175)
+    assert "no otherwise valid target nearby" in (
+        " ".join(indiscriminate["facts"]["clarifications"])
+    )
+    assert source(indiscriminate, "n5-core-v5.3-pdf", 175)
+
+    minelayer_reqs = " ".join(minelayer["facts"]["requirements"])
+    minelayer_effects = " ".join(minelayer["facts"]["effects"])
+    assert "no enemy Troopers" in minelayer_reqs
+    assert "item's Trigger Area" in minelayer_reqs
+    assert "entire [[trait:zone-of-control-zc|Zone of Control]]" in minelayer_reqs
+    assert "Trooper's permitted Deployment area" in minelayer_effects
+    assert "Minelayer (X)" in minelayer_effects
+    assert "Superior Deployment Roll fails" in minelayer_effects
+    assert source(minelayer, "n5-core-v5.3-pdf", 102)
+
+    turret = current_rules_database.composed_record("weapon:armed-turret")
+    wildparrot = current_rules_database.composed_record("weapon:wildparrot")
+    panda = current_rules_database.composed_record("equipment:fastpanda")
+    repeater = current_rules_database.composed_record("equipment:deployable-repeater")
+    assert turret is not None
+    assert wildparrot is not None
+    assert panda is not None
+    assert repeater is not None
+    assert "enemy **Model**, not a Marker" in turret["summary"]
+    assert "Unresolved source conflict" in turret["summary"]
+    assert "one BTS/2 Saving Roll" in turret["summary"]
+    assert "two" in turret["summary"]
+    assert "passable" in wildparrot["summary"]
+    assert "instead of in Silhouette contact" in wildparrot["summary"]
+    assert "passable path" in " ".join(panda["facts"]["effects"])
+    assert "Silhouette-contact placement" in " ".join(repeater["facts"]["effects"])
+    assert source(turret, "n5-core-v5.3-pdf", 70)
+    assert source(wildparrot, "n5-core-v5.3-pdf", 74)

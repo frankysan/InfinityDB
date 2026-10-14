@@ -962,3 +962,29 @@ in `tests/test_rules_database.py`. Private browser images, results and
 source extracts remain in `local/audits/rea022-browser/` and other
 ignored `local/audits/` files. This is a reviewed reference baseline;
 it does not add a general dice or recovery outcome evaluator.
+
+
+## 1.0 REA-023 placement geometry browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Canonical Place Deployable,
+Perimeter, Minelayer, Deployable and Indiscriminate rules, plus
+FastPanda, Deployable Repeater, WildParrot and Armed Turret, were
+cross-checked against the official English N5.3 pp. 70, 74, 82, 102,
+175 and FAQ v0.1 pp. 2-3. Chromium accepted **39/39** page and rule-link
+checks at 1440, 390 and 320 px, with no horizontal overflow or page errors.
+The 320 px Place Deployable, Perimeter and Armed Turret screenshots
+were visually inspected.
+
+These references now distinguish normal Active/Reactive placement contact,
+Perimeter's passable path within ZoC, Minelayer's separate Trigger Area
+and ZoC enemy exclusions, the timing and displacement of placement
+at Conclusion, and direct removal/non-triggering of a Deployable.
+Armed Turret still retains its independently tracked S1/S2 and
+E/Mitter official-source conflicts: placement clarification does not
+choose their precedence. The existing Mines and Drop Bears exception
+cards remain separate source owners.
+
+Focused tests live in `tests/test_rules_database.py`. Private source
+excerpts, rendered screenshots and browser results remain ignored under
+`local/audits/` and `local/audits/rea023-browser/`.
+No runtime geometry simulation or generic rule evaluator was added.

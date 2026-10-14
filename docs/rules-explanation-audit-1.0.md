@@ -948,11 +948,10 @@ REA-001, REA-002 and REA-021 retain their independent interaction scope.
 `trait:perimeter`, `skill:minelayer`, `weapon:wildparrot`, `weapon:armed-turret`,
 `equipment:fastpanda`, `equipment:deployable-repeater`, `trait:deployable`.
 
-**Current:** Place Deployable refers to unspecified active/reactive placement
-restrictions. Perimeter supplies ZoC placement but not its required path.
-Minelayer refers to enemy-presence restrictions without naming them. Armed
-Turret says it reacts to enemy Orders, without the Model-not-Marker limit.
-Deployable's card also omits immediate removal on reaching Unconscious.
+**Original gap:** Place Deployable deferred active/reactive geometry,
+surface support, and Conclusion timing. Perimeter's path rule, Minelayer's
+two enemy-presence checks, Armed Turret's Model-only restriction and
+Deployable's Unconscious consequence were missing or implicit.
 
 **Evidence/result:** S1 p. 82 permits Active placement along the moved route,
 requires contact in Reactive placement, a supported horizontal surface, and
@@ -963,11 +962,34 @@ general exclusions. Page 70 limits Armed Turret reactions to an enemy Model.
 Page 175 sends a Deployable entering Unconscious directly to Dead and excludes
 Deployable-trigger chains. S2 p. 2 addresses an occupied intended position.
 
-**Action:** Put short baseline restrictions on their owners and item exceptions
-on their cards. Keep Mine trigger area distinct from Boost ZoC and Perimeter
-placement. **Fix:** text/links, possible conditional facts. **Dependencies:**
-REA-003, REA-017, REA-030, REA-037. The reviewed Mines/Drop Bears exceptions
-are positive evidence, not proof that all Deployables are complete.
+**Disposition (verified 2026-10-14): Resolved for scoped placement owners.**
+`skill:place-deployable` now explains contact on the Active Trooper's
+movement path versus reactive contact, full support on a horizontal surface,
+activation at Conclusion, and the FAQ's alternate location if occupied
+(otherwise the item is lost). `trait:perimeter` links its complete ZoC
+placement and passable Silhouette-wide path, distinct from Mine Trigger Area
+and Boost. `skill:minelayer` spells out no enemy Troopers or Camouflage
+Markers in the Trigger Area, or anywhere inside a Perimeter item's ZoC,
+plus Deployment-area constraints, Minelayer (X) quantity, and lost
+Disposable uses after a failed Superior Deployment Roll.
+
+`trait:deployable` now explains direct Dead State/removal on entering
+Unconscious and its prohibition on triggering other Deployables.
+Indiscriminate explicitly allows placement despite Camouflage and no
+otherwise-valid target, without automatically removing Minelayer's
+separate Deployment Requirements. Deployable Repeater, FastPanda and
+WildParrot explain their different contact or path placement. Armed
+Turret declares against an active **enemy Model, not a Marker**, within
+LoF/contact; its position, removal and non-triggering behavior are
+explained without changing its imported E/Mitter mode or its competing
+printed S1/S2 Silhouette values.
+
+Official N5.3 English pp. 70, 74, 82, 102, 175 and FAQ v0.1
+pp. 2-3 provide the cited baseline. The focused rules test and responsive
+browser checks verify the references. **Source precedence is not
+resolved** for the separate Armed Turret S1/S2 (REA-037) and E/Mitter
+(REA-045) conflicts, and other FAQ applicability work remains with REA-030.
+No generic placement geometry evaluator was introduced.
 
 ### REA-024 - BioWeapon needs a target-conditioned explanation alongside the chart
 

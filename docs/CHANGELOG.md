@@ -49,6 +49,10 @@ are not retroactively relabeled.
   Stun Ammunition exceptions.
 - Face to Face Rolls and Saving Rolls now have linked explanations of opposing
   results, Criticals, ties, defense values and special Saving Roll exceptions.
+- Deployable placement references now explain Active/Reactive contact,
+  passable Perimeter paths, Minelayer exclusions, occupied-position
+  alternatives and the timing of activation. Armed Turret identifies its
+  enemy-Model-only reaction without changing unresolved source profiles.
 - Recovery Kit references now explain why one successful target PH Roll
   is enough among multiple hits in the same Order, with only one Wound
   removed under the ordinary rule; GizmoKit retains Remote Presence's
