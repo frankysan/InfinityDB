@@ -3138,3 +3138,69 @@ def test_recovery_and_intuitive_attack_avoid_the_old_misleading_baselines(
     assert "on success, the user performs a single" not in " ".join(
         intuitive["facts"]["effects"]
     )
+
+
+def test_impersonation_discover_has_correct_mods_and_retry_limit(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """REA-035: IMP-2 has no special -3, but ordinary Discover MODs remain."""
+    discover = current_rules_database.composed_record("skill:discover")
+    imp1 = current_rules_database.composed_record("state:impersonation-1")
+    imp2 = current_rules_database.composed_record("state:impersonation-2")
+    biometric = current_rules_database.composed_record("equipment:biometric-visor")
+    assert discover is not None
+    assert imp1 is not None
+    assert imp2 is not None
+    assert biometric is not None
+
+    restrictions = " ".join(discover["facts"]["restrictions"])
+    assert "Discover's own Range bands" in restrictions
+    assert "Cover and [[skill:mimetism|Mimetism]]" in restrictions
+    assert "same Marker in one Order" in restrictions
+    assert "until the next Player Turn" in restrictions
+    assert "counts as a different Marker" in restrictions
+
+    assert "no additional -3 WIP penalty" in imp2["summary"]
+    assert "ordinary" in imp2["summary"]
+    assert any("Cover" in rule and "Mimetism" in rule
+               for rule in imp2["facts"]["clarifications"])
+    assert any("After a failed" in rule and "next Player Turn" in rule
+               for rule in imp2["facts"]["restrictions"])
+    assert any("only to" in rule and "IMP-2" in rule
+               for rule in imp1["facts"]["clarifications"])
+    assert "ignores the WIP -3 MOD" in str(biometric["facts"])
+    assert "impersonation-1" in str(biometric["facts"])
+    assert "unmodified Discover" not in imp2["summary"]
+
+
+def test_deployable_cover_has_full_placement_and_saving_cap(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """REA-036: source-listed properties and cap order are playable."""
+    cover = current_rules_database.composed_record("equipment:deployable-cover")
+    assert cover is not None
+    effects = cover["facts"]["effects"]
+    restrictions = cover["facts"]["restrictions"]
+    text = " ".join(effects)
+    for trait in (
+        "[[trait:deployable|Deployable]]",
+        "[[trait:disposable-x|Disposable (2)]]",
+        "[[trait:indiscriminate|Indiscriminate]]",
+        "[[trait:perimeter|Perimeter]]",
+    ):
+        assert trait in text
+    assert "Silhouette S3" in text
+    assert "completely inside the user's Zone of Control" in text
+    assert "Silhouette contact" in text
+    assert "ordinary partial-obscuration conditions" in text
+    assert "does not stack" in text
+    assert (
+        "capping ARM/BTS plus all applicable Saving Roll MODs "
+        "at 12 before adding the attack's PS"
+    ) in text
+    assert "ARM 9 plus Vitroferro +6 is capped at 12 before PS" in text
+    assert "Cutting Foam" in text
+    assert any("cannot end movement on" in rule for rule in restrictions)
+    assert any("available on the Unit Profile" in rule for rule in restrictions)
+    assert any(source["source_id"] == "n5-core-v5.3-pdf" and source["page"] == 122
+               for source in cover["citations"])

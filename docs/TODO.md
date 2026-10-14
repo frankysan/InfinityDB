@@ -658,6 +658,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] **REA-034 — Fireteam example conflict:** Resolve the Spanish
       and official PDF source contradiction at its owning audit finding;
       retain original publication provenance.
+    - [x] **REA-035 — Impersonation Discover:** Verified ordinary Discover
+      Range/Cover/Mimetism MODs versus IMP-1's additional -3, first/second
+      stage, Biometric Visor, one-Order and failed-retry limits against
+      the N5.3 sources. Browser acceptance passed at 1440/390/320 px.
+    - [x] **REA-036 — Deployable Cover:** Published and verified
+      contact/obscuration requirements, variant/non-stacking conditions,
+      Vitroferro's cap before PS, and S3/Disposable (2)/Indiscriminate/
+      Perimeter source properties. Browser acceptance passed at all three
+      widths; broader placement and FAQ scope remain separate tasks.
     - [ ] **REA-037 — Armed Turret source conflict:** Resolve the
       competing Silhouette values within the official PDF; do not
       silently choose one source cell.

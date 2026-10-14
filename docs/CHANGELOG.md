@@ -17,6 +17,10 @@ are not retroactively relabeled.
   N+E/M, to searchable Glossary explanations and their originating rules. Links provide the same preview
   interaction as other rules references; shared Viral and Plasma explanations
   no longer need to be repeated in individual weapon summaries.
+- Discover and Impersonation references now distinguish normal modifiers
+  from IMP-1's penalty and explain when a failed attempt may be retried.
+  Deployable Cover now identifies all of its listed properties alongside the
+  Vitroferro Saving Roll cap.
 - **What's changed** now includes upcoming-release notes alongside past releases when there are new changes to show.
 - Breaker Marksman Rifle is now directly searchable and viewable even when
   no Army Unit currently references it; its rules reference preserves the
@@ -176,9 +180,12 @@ are not retroactively relabeled.
 
 ### Fixed
 
-- **Data processing:** Correct IMP-2 Discover modifiers and Stealth's Deployable exception;
-  explain Deployable Cover's Vitroferro cap and eligibility, and TinBot owner requirements,
-  Fireteam sharing and non-stacking benefits. Kobra Pistol links the correct CC Attribute.
+- **Data processing:** Correct IMP-2 Discover modifiers and Stealth's Deployable exception.
+  Discover now explains its Range MODs and the retry limit after a failed attempt against an
+  Impersonation Marker. Deployable Cover explains Vitroferro's pre-PS cap,
+  eligibility and printed S3, Disposable (2), Indiscriminate and Perimeter properties.
+  TinBot retains owner requirements, Fireteam sharing and non-stacking benefits.
+  Kobra Pistol links the correct CC Attribute.
 - **Data processing + Web frontend:** Identify Fireteam Type counts as formation requirements,
   distinguish ongoing integrity and type persistence, and preserve the existing count data.
 - **Data processing:** Clarify Dodge and Reset roll/movement conditions, cumulative State

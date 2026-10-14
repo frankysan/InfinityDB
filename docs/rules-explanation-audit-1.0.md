@@ -693,8 +693,10 @@ REA-016's Stealth/Deployable exception and mixed-activation text; the Fireteam
 formation-count portion of REA-020; REA-031's Kobra CC Attribute link;
 REA-035's misleading IMP-2 Discover wording; REA-036's Vitroferro cap,
 Cover eligibility and placement note; and REA-039's TinBot family baseline.
-These are implemented corrections, not closure of their wider 1.0 review
-scope. The historical findings below remain as evidence; see
+REA-035 and REA-036 received additional source-owned restrictions and traits,
+and full player-facing browser verification on 2026-10-14; both findings
+are now closed. Other referenced work retains its own 1.0 review scope.
+The historical findings below remain as evidence; see
 [`TODO.md`](TODO.md#current-milestone) for remaining 1.0 work.
 
 ### REA-016 - Stealth omits Deployables and multi-Trooper reaction reasoning
@@ -1227,9 +1229,18 @@ curated-level-table defect.
 **Affected:** `state:impersonation-2`, `state:impersonation-1`, `skill:discover`,
 `equipment:biometric-visor`.
 
-**Current:** IMP-2's summary calls its successful Discover roll unmodified.
-The Discover card delegates MODs generally, without explaining its own Range
-bands or the distinction between no IMP-1 penalty and no modifiers at all.
+**Original defect:** IMP-2's summary called its successful Discover roll
+unmodified. Discover delegated MODs generally, without explaining its own
+Range bands or distinguishing the missing IMP-1 penalty from ordinary modifiers.
+
+**Current implementation (verified 2026-10-14):** IMP-2 explicitly states
+that it imposes no additional IMP-1 -3 WIP penalty, while Discover applies
+its own Range bands plus applicable Cover, Mimetism and other modifiers.
+Discover now specifies that a Marker may not be discovered twice in one
+Order; a failed attempt against an IMP Marker prevents that Trooper from
+retrying the same Marker until the next Player Turn. A revealed Trooper that
+re-enters Impersonation counts as a different Marker. The original IMP-1
+two-stage transition and Biometric Visor exception remain distinct.
 
 **Evidence/result:** S1 p. 77 applies Discover's Range/Cover/Mimetism rules.
 Page 166 supplies IMP-1's -3 and no equivalent IMP-2 State penalty; it does not
@@ -1237,10 +1248,11 @@ erase ordinary Discover MODs. Page 167's multiple-success example changes IMP-1
 only to IMP-2. Biometric Visor p. 120 explicitly bypasses that ordinary
 two-stage transition.
 
-**Action:** Say "without IMP-1's -3 State penalty" and explain ordinary MODs,
-the failed-attempt limit, two-stage discovery and Biometric's exception.
-**Fix:** text/links and future regression examples. **Dependencies:** REA-015,
-REA-026; do not label every IMP-2 Discover roll as flat WIP.
+**Disposition:** Resolved. Current N5.3 p. 77/166-167 and Biometric
+Visor p. 120 support the reviewed card text. Rules tests cover modifiers,
+first-versus-second Discover and retry timing; Chromium browser acceptance
+passed at 1440, 390 and 320 px. Other State and rules interactions remain
+independently scoped under REA-015 and REA-026.
 
 ### REA-036 - Deployable Cover names a cap without giving its value or conditions
 
@@ -1248,9 +1260,18 @@ REA-026; do not label every IMP-2 Discover roll as flat WIP.
 **Evidence:** Explicit; high confidence. **Affected:** `equipment:deployable-cover`,
 `skill:place-deployable`, Cover reference.
 
-**Current:** Vitroferro provides +6 "subject to the documented cap," but the
-record contains no cap, contact/obscuration condition, or non-stacking explanation.
-The player cannot determine the save from the curated card.
+**Original defect:** Vitroferro provided +6 "subject to the documented cap,"
+but omitted the cap value, Cover geometry and non-stacking explanation.
+
+**Current implementation (verified 2026-10-14):** Deployable Cover states
+that a benefiting Trooper must be in Silhouette contact and meet normal
+Partial Cover obscuration conditions. Vitroferro replaces the ordinary
+-3 to the attacker's BS Attack with +6 to the target's ARM/BTS Saving
+Roll modifier, with ARM/BTS plus modifiers capped at 12 **before PS**.
+Examples cover ARM 5 and 9, the choice between Vitroferro and Cutting
+Foam, variant restrictions, non-stacking and the FAQ's movement/placement
+restriction. The source-listed S3, Disposable (2), Indiscriminate and
+Perimeter properties are now explicit and linked.
 
 **Evidence/result:** S1 p. 122 requires Silhouette contact and applicable
 Partial Cover geometry. Cap ARM/BTS plus saving MODs at 12, **then** add PS.
@@ -1258,15 +1279,12 @@ The saving benefit does not stack with another scenery Partial Cover bonus.
 Profile-listed variants constrain the choice. S2 p. 2 says nothing may be
 placed on or end movement on the Cover; that restriction needs its FAQ scope.
 
-**Action:** Give the exact cap order and conditions, with a short calculation
-example, retaining ordinary Cover as a separate selectable benefit.
-**Fix:** text/links and optionally reviewed facts. **Dependencies:** REA-023,
-REA-026, REA-030; do not cap the final PS-inclusive Success Value at 12.
-
-**Follow-up evidence:** S1 p. 122 also identifies Disposable (2) and Perimeter.
-The authored Deployable Cover definition states ZoC placement but omits those
-explicit properties; review their player-visible ownership with the cap and
-placement baseline, rather than assuming a named metadata profile supplies them.
+**Disposition:** Resolved. The N5.3 p. 122 ownership and existing FAQ
+restriction were retained, now with a printed-page citation and complete
+listed properties. Browser acceptance passed at 1440, 390 and 320 px.
+Broader placement geometry and FAQ applicability remain separately
+tracked under REA-023 and REA-030; this finding no longer blocks the
+Deployable Cover card's essential Saving Roll explanation.
 
 ### REA-037 - Armed Turret has conflicting Silhouette values within the PDF
 

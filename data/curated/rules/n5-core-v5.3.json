@@ -2555,7 +2555,9 @@
                     "The user makes the required WIP Roll to reveal an eligible Marker."
                 ],
                 "restrictions": [
-                    "The Marker State and other rules determine the Roll MODs and result."
+                    "The Marker State and other rules determine the Roll MODs and result.",
+                    "The Discover WIP Roll uses Discover's own Range bands and all applicable [[skill:bs-attack|BS Attack]] MODs, including Cover and [[skill:mimetism|Mimetism]]; a Marker-specific penalty can also apply.",
+                    "Discover cannot be declared twice against the same Marker in one Order. A failed Roll against an [[state:impersonation-1|IMP-1]] or [[state:impersonation-2|IMP-2]] Marker prevents that Trooper from retrying against the same Marker until the next Player Turn. After a revealed Trooper regains an IMP Marker, it counts as a different Marker."
                 ]
             },
             "labelIds": [],
@@ -13360,6 +13362,7 @@
             },
             "facts": {
                 "effects": [
+                    "The N5.3 equipment entry lists [[trait:deployable|Deployable]], [[trait:disposable-x|Disposable (2)]], [[trait:indiscriminate|Indiscriminate]], and [[trait:perimeter|Perimeter]]. The placed Scenery Element has Silhouette S3.",
                     "[[skill:place-deployable]] places the Deployable Cover Scenery Element completely inside the user's Zone of Control.",
                     "To benefit from Partial Cover, the Trooper must be in Silhouette contact with the Deployable Cover and meet the ordinary partial-obscuration conditions. Apply only the selected variant; its Cover bonus does not stack with the bonus from other scenery providing Partial Cover.",
                     "Cutting Foam prevents enemy Troopers from claiming Partial Cover from that Deployable Cover.",
@@ -13386,6 +13389,11 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Deployable_Cover",
                     "heading": "Deployable Cover"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 122,
+                    "section": "Deployable Cover"
                 }
             ],
             "review": {
@@ -14918,6 +14926,7 @@
                 ],
                 "restrictions": [
                     "Attacks and [[skill:intuitive-attack:plural]] cannot normally be declared against an IMP-2 Marker until it is Discovered.",
+                    "After a failed [[skill:discover|Discover]] WIP Roll against this IMP-2 Marker, the same Trooper cannot try again against it until the next Player Turn. If the revealed Trooper later regains an IMP Marker, it counts as a different Marker.",
                     "A Trooper in Impersonation State cannot be part of a Fireteam."
                 ],
                 "clarifications": [
