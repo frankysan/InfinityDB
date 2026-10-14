@@ -1714,3 +1714,132 @@ def test_unreviewed_ammunition_identity_is_not_inferred_from_punctuation(
     assert profile["saving"] == "ARM/2"
     # A matching Saving Roll expression is not an additional ammunition component.
     assert len(profile["ammunition_composition"]["components"]) == 2
+
+
+
+@pytest.mark.parametrize(
+    ("slug", "modes", "links"),
+    [
+        (
+            "multi-sniper-rifle",
+            [
+                ("Anti-Materiel Mode", "DA", "ARM", "2", "5", "2", ["Anti-materiel"]),
+                ("AP Mode", "AP", "ARM/2", "1", "5", "2", []),
+                ("Shock Mode", "Shock", "ARM", "1", "5", "2", []),
+            ],
+            {"ammunition:da", "ammunition:ap", "ammunition:shock",
+             "trait:anti-materiel"},
+        ),
+        (
+            "k1-sniper-rifle",
+            [(None, "N", "ARM=0", "1", "7", "2", ["Anti-materiel"])],
+            {"ammunition:normal", "trait:anti-materiel"},
+        ),
+        (
+            "viral-sniper-rifle",
+            [(None, "N", "BTS", "1", "5", "2", ["Bioweapon (DA+SHOCK)"])],
+            {"ammunition:normal", "ammunition:da", "ammunition:shock",
+             "trait:bioweapon"},
+        ),
+        (
+            "plasma-sniper-rifle",
+            [
+                ("Blast Mode", "N", "ARM and BTS", "1 and 1", "6", "2",
+                 ["Impact Template (Circular)"]),
+                ("Hit Mode", "N", "ARM and BTS", "1 and 1", "5", "2", []),
+            ],
+            {"ammunition:normal", "trait:impact-template"},
+        ),
+    ],
+)
+def test_sniper_specific_rules_keep_exact_modes_and_source_links(
+    weaponry_app: Callable,
+    slug: str,
+    modes: list[tuple],
+    links: set[str],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    profiles = payload["profiles"]
+    assert [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in profiles
+    ] == modes
+    assert all(p["ranges"] == profiles[0]["ranges"] for p in profiles)
+    assert all(p["ammunition_effects"] for p in profiles)
+    assert all(len(p["trait_references"]) == len(p["traits"])
+               for p in profiles)
+
+    rule = _weapon_rules(payload)[f"weapon:{slug}"]
+    assert any(
+        c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 185
+        for c in rule["citations"]
+    )
+    assert {
+        relation["record"]["id"]
+        for relation in rule["display_relations"]
+        if relation["direction"] == "outbound"
+    } >= links
+    assert rule["summary_tokens"]
+    for linked in links:
+        assert any(
+            token["type"] == "reference" and token["target"] == linked
+            for token in rule["summary_tokens"]
+        ), linked
+
+
+def test_multi_k1_viral_snipers_preserve_source_specific_exceptions(
+    weaponry_app: Callable,
+) -> None:
+    multi = _weapon_detail(weaponry_app, "multi-sniper-rifle")
+    modes = {p["mode"]: p for p in multi["profiles"]}
+    assert modes["Anti-Materiel Mode"]["traits"] == ["Anti-materiel"]
+    assert modes["AP Mode"]["traits"] == modes["Shock Mode"]["traits"] == []
+    assert "Suppressive Fire" not in {
+        trait for profile in multi["profiles"] for trait in profile["traits"]
+    }
+    assert "alternative" in _weapon_rules(multi)["weapon:multi-sniper-rifle"]["summary"]
+
+    k1 = _weapon_detail(weaponry_app, "k1-sniper-rifle")
+    assert k1["profiles"][0]["ammunition_effects"][0]["record_id"] == "ammunition:normal"
+    assert k1["profiles"][0]["saving"] == "ARM=0"
+    assert "Suppressive Fire" not in k1["profiles"][0]["traits"]
+    assert "not a separate K1 Ammunition type" in (
+        _weapon_rules(k1)["weapon:k1-sniper-rifle"]["summary"]
+    )
+
+    viral = _weapon_detail(weaponry_app, "viral-sniper-rifle")
+    record = _weapon_rules(viral)["weapon:viral-sniper-rifle"]
+    assert "Against a target with VITA" in record["summary"]
+    assert "Against STR" in record["summary"]
+    assert "Derived from those rules" in record["summary"]
+    assert any(
+        c["source_id"] == "wiki-traits-oldid-4110"
+        and c["heading"] == "BioWeapon"
+        for c in record["citations"]
+    )
+
+
+def test_plasma_sniper_combined_saves_do_not_become_combined_ammunition(
+    weaponry_app: Callable,
+) -> None:
+    plasma = _weapon_detail(weaponry_app, "plasma-sniper-rifle")
+    assert len(plasma["profiles"]) == 2
+    blast, hit = plasma["profiles"]
+    assert blast["mode"] == "Blast Mode" and hit["mode"] == "Hit Mode"
+    assert blast["traits"] == ["Impact Template (Circular)"] and hit["traits"] == []
+    for profile in (blast, hit):
+        assert profile["combined_saving_roll"] == {
+            "kind": "combined-saving-roll",
+            "rolls": [
+                {"attribute": "ARM", "count": 1},
+                {"attribute": "BTS", "count": 1},
+            ],
+            "critical": {"additionalRolls": 1, "attribute": "ARM"},
+            "source": {"sourceId": "n5-core-v5.3", "page": 67},
+        }
+        assert profile["ammunition"] == "N"
+        assert "ammunition_composition" not in profile
+    rule = _weapon_rules(plasma)["weapon:plasma-sniper-rifle"]
+    assert "not an extra BTS roll" in rule["summary"]
+    assert any(c["page"] == 67 for c in rule["citations"])

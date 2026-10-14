@@ -489,15 +489,27 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       source profiles; browser acceptance passed 14/14 checks.
       Also correct reused Ammunition descriptions to render
       maintained-text links rather than raw [[reference]] syntax.
+    - [x] Review the remaining four N5.3 p. 185 Sniper Rifles. MULTI
+      retains distinct DA/ARM two-roll Anti-Materiel, AP/ARM/2 and Shock/ARM
+      modes at Burst 2; K1 has Normal Ammunition with ARM=0; Viral retains
+      conditional BioWeapon effects for VITA versus STR; Plasma Blast and Hit
+      retain one ARM plus one BTS Saving Roll, with a Critical adding only one
+      extra ARM roll. All four have source-cited references and interaction
+      reviews, without rewriting the Army profiles. API regression checks
+      preserve mode-specific Traits and linked reusable effects.
+    - [x] Browser-review the four new Sniper Rifle cards at 1440, 390 and
+      320 px, including source citations, shared-effect links and mode-specific
+      explanations. Desktop BioWeapon navigation and mobile DA preview/two-tap
+      navigation passed (14/14 checks). All four 320 px screenshots were
+      inspected; no horizontal overflow or JavaScript errors were observed.
+      Private evidence is under `local/audits/sniper-rifles-browser/`.
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. The updated triage has
-      51 actionable reviews, 33 accepted shared-only identities,
-      and 11 pending multi-profile candidates, plus Flash Pulse's
-      historical citation. Sniper Rifle, AP Sniper Rifle and T2 Sniper
-      Rifle are now source-profile-pinned shared-only reviews (N5.3 p. 185):
-      Shock/ARM, AP/ARM/2 and T2/ARM with Anti-materiel, respectively.
-      Continue with MULTI, Viral, K1 and Plasma Sniper Rifles. Pitcher and Mine
-      Dispenser still need separate missing-effect source reviews.
+      47 actionable reviews, 33 accepted shared-only identities,
+      and 9 pending multi-profile candidates, plus Flash Pulse's
+      historical citation. Pitcher and Mine Dispenser still need separate
+      missing-effect source reviews; the next shared-effects batches include
+      Flamethrowers and Marksman Rifles.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

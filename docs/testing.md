@@ -635,6 +635,25 @@ in `data/curated/weapon-shared-effect-reviews.json`; private evidence
 remains Git-ignored under `local/audits/spitfire-browser/`. These are
 bounded reference checks, not an automated attack-resolution ruling.
 
+## 1.0 Sniper Rifle source-specific browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** MULTI, K1, VIRAL and Plasma Sniper
+Rifles were checked at 1440, 390 and 320 px (12 page cases), preserving
+N5.3 p. 185 firing modes, PS/Burst, Ammunition, Saving Rolls, Traits and
+range MODs. MULTI retains three separate DA/AP/Shock modes, K1 retains N
+Ammunition with ARM=0, and Viral retains the conditional BioWeapon
+VITA/STR distinction. Plasma Blast and Hit have separate PS and Template
+conditions, one ARM plus one BTS Saving Roll, and the existing
+source-pinned additional ARM roll on a Critical (N5.3 p. 67); this is not
+combined Ammunition.
+
+Desktop BioWeapon navigation and mobile MULTI DA first-tap preview and
+second-tap navigation passed (**14/14 checks**). All four full-page
+320 px screenshots were inspected; no horizontal overflow or JavaScript
+errors were observed. Private evidence is Git-ignored under
+`local/audits/sniper-rifles-browser/`. These checks validate reference
+presentation, not automatic attack resolution.
+
 ## 1.0 Disposable Support Weapon browser acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Panzerfaust, Blitzen,

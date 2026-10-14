@@ -20,8 +20,9 @@ are not retroactively relabeled.
   options, the Hyper-Rapid Magnetic Cannon's three firing modes, and
   MULTI Heavy Machine Gun's EXP, AP and Shock modes, MULTI Spitfire's
   DA, AP and Shock modes, and Flammenspeer's Blast versus Hit effects.
-  Standard, AP and T2 Sniper Rifles also reuse canonical Ammunition and
-  Trait explanations without duplicating their effects.
+  Sniper Rifles now distinguish the MULTI's DA/AP/Shock modes, K1's ARM=0
+  Saving Roll, Viral's conditional BioWeapon and Plasma's separate ARM and
+  BTS Saving Rolls; standard, AP and T2 variants reuse canonical effects.
 - Peripheral and its five subtype references now explain activation,
   Coherency, Doctor/Engineer delegation, Controller and Peripheral rolls,
   and Cyberplug Connected/Autonomous exceptions.
@@ -59,8 +60,10 @@ are not retroactively relabeled.
   spelling without changing the imported profile. Flammenspeer's
   Normal circular Blast and AP Hit Modes retain shared Continuous
   Damage and Disposable (2) charges.
-  Other reviewed Weapons continue to reuse source-backed Ammunition
-  and Trait references.
+  MULTI, K1, Viral and Plasma Sniper Rifles now distinguish alternative
+  firing modes, conditional target effects and Combined Saving Rolls using
+  source-linked definitions. Other reviewed Weapons continue to reuse
+  source-backed Ammunition and Trait references.
 
 ### Changed
 

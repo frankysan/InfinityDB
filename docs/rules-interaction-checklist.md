@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **158/173** complete, **15** pending.
-- Current authored outgoing relations: **427**.
+- Supporting semantic identities: **162/177** complete, **15** pending.
+- Current authored outgoing relations: **439**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -975,7 +975,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (45/45)
+#### Weapon (49/49)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1082,6 +1082,9 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
   - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
+- [x] **K1 Sniper Rifle** (`weapon:k1-sniper-rifle`) — reviewed: N5.3 chart p. 185: one Saving Roll at ARM=0 and printed N Ammunition, PS 7/B2, Anti-materiel but no Suppressive Fire. Do not invent K1 Ammunition, AP halving or transfer K1 Combi Rifle Traits.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
 - [x] **Kobra Pistol** (`weapon:kobra-pistol`) — reviewed: N5.3 Mixed Weapons rules distinguish BS and CC modes and their ammunition; shared mode description does not assign mode-specific Traits or Saving Rolls.
   - outgoing: none
 - [x] **Kobra Pistol (CC Mode)** (`weapon:kobra-pistol-cc`) — reviewed: Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values.
@@ -1114,6 +1117,11 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
   - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **MULTI Sniper Rifle** (`weapon:multi-sniper-rifle`) — reviewed: N5.3 chart p. 185: all three alternative modes use PS 5/B2; Anti-Materiel uses DA, two ARM Saving Rolls and the mode-only Anti-materiel Trait, AP uses one ARM/2 roll, Shock one ARM roll. No mode combines Ammunition or inherits another mode's Trait.
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
 - [x] **MULTI Spitfire** (`weapon:multi-spitfire`) — reviewed: N5.3 Weapon Chart p. 185: Anti-Materiel Mode has DA, Burst 1, two ARM Saving Rolls and Anti-materiel. Army labels the mode Anti-Material Mode; its spelling is retained in source profiles. AP and Shock modes use Burst 4, one ARM/2 or ARM Saving Roll respectively, and Suppressive Fire. All are PS 6 with identical ranges; never combine modes or transfer their Traits.
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1138,6 +1146,9 @@ review. `declaration-category` projection records are excluded.
 - [x] **Pistol** (`weapon:pistol`) — reviewed: N5.3 p. 182: PS 9, B2, Normal ammo and one ARM Saving Roll. No special effect inferred.
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
   - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+- [x] **Plasma Sniper Rifle** (`weapon:plasma-sniper-rifle`) — reviewed: N5.3 chart p. 185 and Combined Saving Roll p. 67: Blast Mode has N, PS 6/B2, ARM and BTS one roll each, circular Impact Template; Hit Mode has N, PS 5/B2, one ARM and one BTS roll and no Template. A Critical adds one ARM roll only. This is Combined Saving Roll, not combined Ammunition.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Impact Template (`trait:impact-template`)
 - [x] **PT: Endgame** (`weapon:pt-endgame`) — reviewed: N5 v5.3 chart and the April 2025 update explicitly add Double Shot to Endgame only. Source-specific Army id 203 prevents applying it to Eraser or Mirrorball; current Army omits Double Shot.
   - `variant-of` → Pheroware Tactics (PT) (`weapon:pt`)
   - `uses-effects-of` → Double Shot (`trait:double-shot`)
@@ -1172,6 +1183,11 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `uses-effects-of` → CC (`trait:cc`)
+- [x] **VIRAL Sniper Rifle** (`weapon:viral-sniper-rifle`) — reviewed: N5.3 p. 185 prints N/BTS/one roll, PS 5/B2 and BioWeapon; archived BioWeapon Trait applies DA+Shock only to VITA. Two BTS rolls against VITA is a rule-derived consequence, not a printed second firing mode; against STR, one BTS roll remains. Shock and Immunity exceptions require their own conditions.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → BioWeapon (`trait:bioweapon`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
 - [x] **WildParrot** (`weapon:wildparrot`) — reviewed: Perimeter and E/M Mine interaction with a visible Token/Model instead of CAMO; reviewed typed relationships distinguish this from Boost. N5 p. 74 Non-Lethal remains absent in Army and is presented as an explicit source discrepancy, not an imported Trait.
   - `uses-effects-of` → Perimeter (`trait:perimeter`)
   - `uses-effects-of` → Deployable (`trait:deployable`)

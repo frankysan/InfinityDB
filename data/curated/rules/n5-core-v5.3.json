@@ -5608,6 +5608,215 @@
             }
         },
         {
+            "id": "weapon:multi-sniper-rifle",
+            "kind": "weapon",
+            "name": "MULTI Sniper Rifle",
+            "summary": "The MULTI Sniper Rifle has three **alternative** firing modes, not one attack combining their Ammunition. **[[trait:anti-materiel|Anti-Materiel]] Mode** uses [[ammunition:da|DA]] with PS 5 and Burst 2, requiring two ARM Saving Rolls per hit; only this mode carries [[trait:anti-materiel|Anti-materiel]].\n\n**AP Mode** uses [[ammunition:ap|AP]] at PS 5/Burst 2 and requires one ARM/2 Saving Roll. **Shock Mode** uses [[ammunition:shock|Shock]] at PS 5/Burst 2 and requires one ARM Saving Roll. All three share the same published range MODs; the AP and Shock modes do not inherit that Trait.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "multi-sniper-rifle"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:da"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:shock"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:anti-materiel"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 185,
+                    "section": "Weapon Chart: MULTI Sniper Rifle"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            }
+        },
+        {
+            "id": "weapon:k1-sniper-rifle",
+            "kind": "weapon",
+            "name": "K1 Sniper Rifle",
+            "summary": "The printed K1 Sniper Rifle profile uses [[ammunition:normal|Normal (N) Ammunition]] at PS 7 and Burst 2, but its one Saving Roll is against **ARM=0**. This is the weapon's printed Saving Roll Attribute, not a separate K1 Ammunition type or the ARM/2 modifier of [[ammunition:ap|AP]].\n\nThe profile also carries [[trait:anti-materiel|Anti-materiel]]. Resolve any target-specific [[skill:immunity|Immunity]] separately under its own rules; do not transfer other K1 weapons' Burst or Traits.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "k1-sniper-rifle"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:anti-materiel"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 185,
+                    "section": "Weapon Chart: K1 Sniper Rifle"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            }
+        },
+        {
+            "id": "weapon:viral-sniper-rifle",
+            "kind": "weapon",
+            "name": "VIRAL Sniper Rifle",
+            "summary": "The printed VIRAL Sniper Rifle profile uses [[ammunition:normal|Normal (N) Ammunition]], PS 5, Burst 2 and one **BTS** Saving Roll. Its separately listed [[trait:bioweapon|BioWeapon (DA+Shock)]] Trait, rather than any distinct Viral Ammunition, introduces conditional effects.\n\n**Against a target with VITA**, that Trait applies [[ammunition:da|DA]] and [[ammunition:shock|Shock]] together. Derived from those rules, a hit requires two BTS Saving Rolls; any Shock direct-Dead effect still requires Shock's own conditions.\n\n**Against STR**, the Trait adds neither effect, leaving the printed one-BTS-roll baseline. Consult the linked rules for exceptions, including [[skill:immunity|Immunity]]; the derived VITA case is not a universal resolution.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "viral-sniper-rifle"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:bioweapon"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:da"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:shock"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 185,
+                    "section": "Weapon Chart: VIRAL Sniper Rifle"
+                },
+                {
+                    "sourceId": "wiki-traits-oldid-4110",
+                    "heading": "BioWeapon"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            }
+        },
+        {
+            "id": "weapon:plasma-sniper-rifle",
+            "kind": "weapon",
+            "name": "Plasma Sniper Rifle",
+            "summary": "The Plasma Sniper Rifle has two **alternative** modes, both firing [[ammunition:normal|Normal (N) Ammunition]] at Burst 2. Both have a **Combined Saving Roll**: one ARM roll **and** one BTS roll per hit, not a combination of two Ammunition types.\n\nUnder the Combined Saving Roll Critical rule, a Critical adds one further **ARM** Saving Roll, not an extra BTS roll.\n\n**Blast Mode** has PS 6 and a circular [[trait:impact-template|Impact Template]]. **Hit Mode** has PS 5 and no such Template. The source range MODs are identical; the Blast Mode Template does not carry over to Hit Mode.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "plasma-sniper-rifle"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:impact-template"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 185,
+                    "section": "Weapon Chart: Plasma Sniper Rifle"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 67,
+                    "section": "Combined Saving Roll"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            }
+        },
+        {
             "id": "weapon:chain-colt",
             "kind": "weapon",
             "name": "Chain-colt",
