@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Kobra Pistol's CC reference now separates the two Saving Rolls required
+  by DA Ammunition from the disputed Anti-materiel Trait, preserving the
+  imported weapon profile and keeping BS Mode independent.
 - BioWeapon now links its VITA-only DA+Shock effects to the underlying
   Ammunition rules. Viral Mine explains why its printed one-BTS-roll
   profile remains the baseline while the shared Viral Property describes

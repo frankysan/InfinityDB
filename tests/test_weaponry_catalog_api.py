@@ -1462,14 +1462,35 @@ def test_kobra_cc_mode_reference_preserves_anti_materiel_conflict(
     assert record["variant_semantics"] == {
         "inheritance": "source", "source_mode": "CC Mode"
     }
-    assert "unresolved source discrepancy" in record["facts"]["sourceNotes"][0]
     assert "two ARM Saving Rolls" in record["summary"]
+    assert "three on a Critical" in record["summary"]
+    assert "Unresolved" in record["summary"]
+    assert "DA itself does not grant" in record["summary"]
+    assert len(record["facts"]["sourceNotes"]) == 2
+    assert "Saving Rolls — mechanically established" in record["facts"]["sourceNotes"][0]
+    assert "publication conflict unresolved" in record["facts"]["sourceNotes"][1]
+    assert "revision 4082 adds it" in record["facts"]["sourceNotes"][1]
     assert any(
         token["target"] == "trait:anti-materiel"
-        for token in record["fact_tokens"]["sourceNotes"][0]
+        for token in record["fact_tokens"]["sourceNotes"][1]
         if token["type"] == "reference"
     )
-    assert {64, 68, 182} == {citation["page"] for citation in record["citations"]}
+    assert {64, 68, 182} == {
+        citation["page"] for citation in record["citations"]
+        if citation["source_id"] == "n5-core-v5.3-pdf"
+    }
+    assert {68, 191} == {
+        citation["page"] for citation in record["citations"]
+        if citation["source_id"] == "n5-core-v5.3-es-pdf"
+    }
+    assert {
+        citation["source_id"] for citation in record["citations"]
+    } >= {
+        "wiki-mixed-weapons-oldid-4021",
+        "wiki-mixed-weapons-oldid-4077",
+        "wiki-mixed-weapons-oldid-4082",
+        "wiki-weapon-chart-oldid-4083",
+    }
     assert {
         (relation["type"], relation["record"]["id"])
         for relation in record["display_relations"]

@@ -1180,26 +1180,47 @@ revision supersedes the PDFs, or infer that every hit automatically Stuns.
 **Affected:** `weapon:kobra-pistol`, `weapon:kobra-pistol-cc`,
 `ammunition:da`, `trait:anti-materiel`.
 
-**Current:** The CC-specific card already explains two saves while recording
-the one-save PDF and missing Anti-materiel. Its source note correctly retains
-the disagreement, but puts both the supported roll correction and uncertain
-Trait into one secondary paragraph.
+**Current (reviewed 2026-10-14):** The CC-only reference now separates
+the supported **two ARM Saving Rolls per DA hit** (three on a Critical)
+from **unresolved Anti-materiel** applicability in both its primary summary
+and two distinct source notes. The imported Army 221 CC profile is unchanged;
+the BS Shock sibling does not inherit CC-only effects.
 
-**Evidence/result:** S1 pp. 68/182 print DA with one save; DA p. 64 requires
-two. S4 chart 4083 and S6 weapon 221 CC show two and Anti-materiel. S3 p. 68
-had Shock CC and Normal BS with one save; S11 explicitly changes ammunition
-to DA CC / Shock BS. This supports historical supersession and the DA roll
-interpretation. Neither the announcement nor DA itself establishes Anti-materiel.
+**Evidence/result:** English S1 pp. 68/182 and Spanish S17 pp. 68/191
+both print Kobra CC DA/ARM with **one** Saving Roll and omit Anti-materiel;
+both contradictions are in the published cells, not PDF text-extraction
+artifacts. S1 p. 64 specifies **two** rolls for DA (three on a Critical).
+S6 Army weapon 221, Wiki S4 Weapon Chart revision 4083, and Mixed Weapons
+revision 4082 publish two rolls and Anti-materiel. The Wiki edit history
+separates the changes:
 
-**Action:** Keep the supported two-save explanation; make Trait uncertainty
-easy to identify alongside the CC profile and investigate its source history.
-Do not change the BS sibling mode. **Fix:** source research/prose/presentation
-review, not a guessed profile repair. **Dependencies:** REA-031.
+- Revision **4021**, 2026-08-10: DA CC, one roll, no Anti-materiel.
+- Revision **4077**, 2026-08-24: DA CC, two rolls, still no Anti-materiel.
+- Revision **4082**, 2026-08-27: DA CC, two rolls, **adds Anti-materiel**.
 
-**Follow-up evidence:** Follow-up visual check: S1 p. 182 actually prints CC DA, one save and no
-Anti-materiel; extraction was not the cause. S6/S4 corroborate two DA saves;
-that stronger mechanical interpretation does not adjudicate Anti-materiel.
-The edition, mode and Trait decisions remain separate.
+Exact HTML hashes and timestamps are pinned in the
+[source manifest](rules-explanation-audit-1.0-sources.md). Historical
+S3 v5.2 pp. 68/181 instead print Shock CC/Normal BS, and official S11's
+2026-09-01 change notice explicitly identifies the move to DA CC/Shock BS.
+It does **not** announce any Anti-materiel Trait change. Neither DA
+Ammunition nor the dated Wiki revisions independently establishes the
+reason for or authority of the added Trait.
+
+**Disposition (2026-10-14):** REA-028's local source adjudication and
+player-facing explanation are complete. Two DA rolls are a supported
+rule interpretation, while Anti-materiel remains an **unresolved external
+publication discrepancy**. The displayed imported Army Trait is retained
+rather than silently removing it or treating it as newly proven.
+The CC reference links its DA source and both the English and Spanish
+printed cells, plus three exact Wiki Mixed Weapons revisions and the
+separate Weapon Chart. The BS sibling is unaffected. Browser and API
+checks enforce the distinction.
+
+**External follow-up:** Obtain an explicit Corvus Belli clarification
+about whether Kobra CC should have Anti-materiel and whether the
+English/Spanish PDF omission is an error. Do not infer it merely from DA,
+from the Wiki chronology, or from the fact that other DA CC Weapons have
+the Trait. **REA-031 remains independently scoped.**
 
 ### REA-029 - The collections' exact Wiki archive is unavailable locally
 

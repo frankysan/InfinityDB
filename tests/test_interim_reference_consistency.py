@@ -85,7 +85,9 @@ def test_kobra_cc_attribute_link_is_not_weapon_trait() -> None:
     cc = records["weapon:kobra-pistol-cc"]
     note = cc["facts"]["sourceNotes"][0]
     assert "**[[trait:cc|CC]] Mode:**" in summary
-    assert "In [[trait:cc|CC]] Mode" in cc["summary"]
+    assert "Its [[trait:cc|CC]] Mode" in cc["summary"]
     assert "[[trait:cc|CC]]" in note
-    assert "prints one Saving Roll" in note
-    assert "[[trait:anti-materiel|Anti-materiel]]" in note
+    assert "print one Saving Roll" in note
+    assert "[[trait:anti-materiel|Anti-materiel]]" in (
+        cc["facts"]["sourceNotes"][1]
+    )

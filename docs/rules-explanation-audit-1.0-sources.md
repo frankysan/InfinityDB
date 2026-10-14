@@ -155,6 +155,9 @@ the ZIP hash above is the verified artifact identity.
 | Archive | Exact member | Revision / timestamp where verified | Payload SHA-256 |
 | --- | --- | --- | --- |
 | S4 | `_history/oldid/3643.html` | Immunity 3643 / 2025-04-28T09:04:03Z | `7014821db88a6725addd6e1c354952e5a2ac017a15a6d2ddb695a5de6333dfa8` |
+| S4 | `_history/oldid/4021.html` | Mixed Weapons 4021 / 2026-08-10T14:59:26Z; Kobra CC DA/one-roll/no Anti-materiel | `5e14e368a8cf12797199fccf1ff7dd310b31b73411d99e7c43a38dd3aad4e313` |
+| S4 | `_history/oldid/4077.html` | Mixed Weapons 4077 / 2026-08-24T10:49:10Z; DA/two rolls/no Anti-materiel | `dc15b37bd0ea520e830ad5188a3ec4bfb3881c463fc2a5ce2814e7685e6fa73f` |
+| S4 | `_history/oldid/4082.html` | Mixed Weapons 4082 / 2026-08-27T14:25:59Z; DA/two rolls/**Anti-materiel added** | `d845afd55a96956e0d7fd2dd18daaceb640911048a4de02508ca7f8b1f85fef5` |
 | S4 | `_history/oldid/4083.html` | Weapon Chart 4083 / 2026-08-27T14:26:38Z | `b08f1eb349d4ed35055755fde6222f7461dbbf1a33a402cd8dc45c2cfbae7ba3` |
 | S4 | `_history/oldid/3000.html` | Combined Ammunition 3000 / 2025-03-28T15:15:11Z | `1ad611ee7d66293387922c7755aa97dbab167cd44c8f1a76ee87518dc5bd7abd` |
 | S4 | `_history/oldid/3156.html` | Vulnerability 3156 / 2025-04-08T10:35:35Z | `a92fddb42c092cb1cc67f64c613eafff01b64f7b3a0ed10e78c252bf23d3a2f7` |

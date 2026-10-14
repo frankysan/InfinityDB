@@ -1143,6 +1143,33 @@
             "retrievedDate": "2026-09-24"
         },
         {
+            "id": "wiki-mixed-weapons-oldid-4021",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Mixed Weapons revision 4021",
+            "version": "N5.3 / oldid 4021",
+            "url": "https://infinitythewiki.com/index.php?title=Mixed_Weapons&oldid=4021",
+            "authority": "secondary",
+            "retrievedDate": "2026-10-14"
+        },
+        {
+            "id": "wiki-mixed-weapons-oldid-4077",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Mixed Weapons revision 4077",
+            "version": "N5.3 / oldid 4077",
+            "url": "https://infinitythewiki.com/index.php?title=Mixed_Weapons&oldid=4077",
+            "authority": "secondary",
+            "retrievedDate": "2026-10-14"
+        },
+        {
+            "id": "wiki-mixed-weapons-oldid-4082",
+            "kind": "wiki",
+            "title": "Infinity Wiki — Mixed Weapons revision 4082",
+            "version": "N5.3 / oldid 4082",
+            "url": "https://infinitythewiki.com/index.php?title=Mixed_Weapons&oldid=4082",
+            "authority": "secondary",
+            "retrievedDate": "2026-10-14"
+        },
+        {
             "id": "wiki-weapon-chart-oldid-4083",
             "kind": "wiki",
             "title": "Infinity Wiki — Weapon Chart revision 4083",
@@ -4340,10 +4367,11 @@
             "id": "weapon:kobra-pistol-cc",
             "kind": "weapon",
             "name": "Kobra Pistol (CC Mode)",
-            "summary": "[[weapon:kobra-pistol|Kobra Pistol]] has separate BS and [[trait:cc|CC]] modes. In [[trait:cc|CC]] Mode it uses [[ammunition:da|Double Action (DA) Ammunition]], which requires two ARM Saving Rolls per hit. \n\nThe BS Mode instead uses [[ammunition:shock|Shock Ammunition]] and does not inherit this mode-specific reference.",
+            "summary": "[[weapon:kobra-pistol|Kobra Pistol]] has separate BS and [[trait:cc|CC]] modes. Its [[trait:cc|CC]] Mode uses [[ammunition:da|Double Action (DA) Ammunition]], requiring **two ARM Saving Rolls per hit** (three on a Critical), despite the one-roll value printed in both N5.3 PDFs.\n\n**Unresolved [[trait:anti-materiel|Anti-materiel]] source conflict:** The imported Army [[trait:cc|CC]] profile and revised Wiki charts include this Trait; both N5.3 PDF charts omit it. DA itself does not grant [[trait:anti-materiel|Anti-materiel]]. InfinityDB retains the imported Trait pending an official ruling.\n\nBS Mode uses [[ammunition:shock|Shock Ammunition]] instead and does not inherit these [[trait:cc|CC]]-specific effects.",
             "facts": {
                 "sourceNotes": [
-                    "The N5 v5.3 Weapon Chart prints one Saving Roll for this mode, while the DA rule, imported Army profile, and reviewed N5.3 Wiki chart support two. The current Army profile and reviewed Wiki also list [[trait:anti-materiel|Anti-materiel]] for [[trait:cc|CC]] Mode, but the printed v5.3 chart omits that Trait. Its applicability remains an unresolved source discrepancy; this reference does not add or remove that Trait from the Army profile."
+                    "**Saving Rolls — mechanically established:** Both official N5.3 PDF charts (English pp. 68/182; Spanish pp. 68/191) print one Saving Roll for Kobra [[trait:cc|CC]] Mode. The [[ammunition:da|DA]] rule explicitly requires two, with a third on a Critical. The imported Army 221 profile and Wiki revisions 4077, 4082 and 4083 independently list two. This is a source-specific chart discrepancy, not an override of the DA rule.",
+                    "**[[trait:anti-materiel|Anti-materiel]] — publication conflict unresolved:** Both official N5.3 PDFs omit the Trait for Kobra [[trait:cc|CC]] Mode. Wiki Mixed Weapons revisions 4021 and 4077 also omit it, but revision 4082 adds it; Wiki Weapon Chart 4083 and Army 221 include it. The official N5.3 update notice only confirms the change to [[ammunition:shock|Shock]] in BS Mode and [[ammunition:da|DA]] in [[trait:cc|CC]] Mode. The later Wiki edit and DA itself do not establish why or whether [[trait:anti-materiel|Anti-materiel]] is authoritative. The imported Trait is preserved without adjudication."
                 ]
             },
             "composition": {
@@ -4390,11 +4418,37 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 182,
                     "section": "Weapon Chart: Pistols"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 68,
+                    "section": "Armas Mixtas: Pistola Kobra"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 191,
+                    "section": "Tabla de Armas: Pistolas"
+                },
+                {
+                    "sourceId": "wiki-mixed-weapons-oldid-4021",
+                    "heading": "Kobra Pistol (CC Mode): earlier N5.3 profile"
+                },
+                {
+                    "sourceId": "wiki-mixed-weapons-oldid-4077",
+                    "heading": "Kobra Pistol (CC Mode): two Saving Rolls"
+                },
+                {
+                    "sourceId": "wiki-mixed-weapons-oldid-4082",
+                    "heading": "Kobra Pistol (CC Mode): Anti-materiel addition"
+                },
+                {
+                    "sourceId": "wiki-weapon-chart-oldid-4083",
+                    "heading": "Pistols: Kobra Pistol (CC Mode)"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-08"
+                "reviewedOn": "2026-10-14"
             }
         },
         {

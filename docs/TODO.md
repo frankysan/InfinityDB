@@ -699,6 +699,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         authoritative Wiki correction or erratum for both Spanish
         charts. The source conflict remains explicitly unresolved;
         do not reinterpret the rules from revision chronology alone.
+    - [x] **REA-028 — Kobra Pistol CC source decisions:** Confirmed DA's
+      two ARM Saving Rolls (three on a Critical) against both N5.3
+      PDF one-roll cells, the pinned Army profile and exact Wiki edits.
+      Mode-scoped reference now separately flags the still-disputed
+      Anti-materiel Trait. Wiki history 4021/4077/4082 records the
+      roll correction before the Trait addition; current Army data and
+      the BS Shock mode are unchanged.
+      - [ ] **External Anti-materiel ruling pending:** Seek official
+        clarification on Kobra CC's Trait in the bilingual printed
+        chart versus Army/current Wiki. Do not infer the Trait from DA
+        or infer that a later Wiki revision settles the discrepancy.
     - [ ] **REA-030 — Targeted, MSV1, Sixth Sense FAQ:** Adjudicate
       publication scope and applicability separately from the Negative
       Feedback references before dependent curation.

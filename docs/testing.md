@@ -1097,3 +1097,40 @@ and Army weapon identity. Private PDF excerpts, HTTP evidence,
 browser images and results are Git-ignored under `local/audits/`
 and `local/audits/rea027-browser/`. No game mechanics, imported
 weapon profiles, or general Immunity algorithm were changed.
+
+
+## 1.0 REA-028 Kobra Pistol source-conflict acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** The Kobra Pistol shared
+and CC-only references were checked against English N5.3 pp. 64,
+68 and 182; Spanish N5.3 pp. 68 and 191; pinned Army weapon 221;
+the official N5.3 update notice; N5.2's older Shock/N profiles;
+and archived English Wiki Mixed Weapons revisions 4021, 4077,
+4082 plus Weapon Chart 4083.
+
+Both N5.3 PDFs list DA/ARM/**one** Saving Roll in Kobra CC Mode,
+but the DA rule requires **two**, or three for a Critical. Army and
+the reviewed Wiki profile agree with the two-roll interpretation.
+Separately, both PDFs **omit Anti-materiel** while Army and the
+later Wiki include it. The exact Wiki history places the correction
+to two rolls in revision 4077 and Anti-materiel's addition in
+revision 4082; edition date or revision chronology does not establish
+the authority or reason for the latter change. The imported CC Trait
+remains untouched and visibly flagged as unresolved. BS Mode continues
+to use Shock with no inherited Anti-materiel or CC-only rule card.
+
+Focused contract tests are in `tests/test_weaponry_catalog_api.py`.
+Chrome browser acceptance passed **21/21** route and cross-link checks
+at 1440, 390 and 320 px with no JavaScript errors. The 320 px Kobra
+screen was visually inspected and the CC Mode reference renders
+without horizontal clipping. Two 320 px Ammunition pages triggered the
+**already documented approximately 6 px shared breadcrumb overflow**;
+they were explicitly allowed as known independent UI exceptions.
+
+The source audit, exact Wiki revision hashes and timestamps are
+recorded in [the rules-explanation audit](rules-explanation-audit-1.0.md)
+and [source manifest](rules-explanation-audit-1.0-sources.md).
+Private PDF/HTML extractions, 320 px screenshots and browser results
+remain in `local/audits/` and `local/audits/rea028-browser/`.
+No raw source archives, new universal rule evaluator, or guessed
+profile correction were added.

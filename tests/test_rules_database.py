@@ -442,9 +442,10 @@ def test_weapon_source_notes_remain_distinct_from_gameplay_summary(
     record = current_rules_database.composed_record(record_id)
     assert record is not None
     notes = record["facts"]["sourceNotes"]
-    assert len(notes) == 1
-    assert "Army" in notes[0]
-    assert notes[0] not in record["summary"]
+    assert len(notes) == (2 if record_id == "weapon:kobra-pistol-cc" else 1)
+    for note in notes:
+        assert "Army" in note
+        assert note not in record["summary"]
     assert record["citations"]
 
 
