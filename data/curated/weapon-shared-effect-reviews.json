@@ -242,6 +242,30 @@
       "profileSha256": "c4c86e1c342568df0cd0132ca042f5bb908c412ea550f052550c0ea3657c53d9",
       "reviewedOn": "2026-10-14",
       "reason": "N5.3 p. 178: Eclipse Ammunition, no PS or Saving Roll, B1, short-range MOD 0; Speculative Attack, BS Weapon (PH), circular Impact Template, Non-lethal, Reflective, Targetless and [**] Ammunition footnote. Canonical Eclipse visibility-zone rules explicitly handle Reflective blocking of MSV, separate from Smoke; the source Traits and ranges are preserved without a new grenade-specific rule."
+    },
+    {
+      "slug": "sniper-rifle",
+      "name": "Sniper Rifle",
+      "chartPage": 185,
+      "profileSha256": "12753c8b51a86e21957c0f05c8695fa45095633ca3390238622da70b8401631b",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 185: Shock Ammunition, PS 5, Burst 2 and one ARM Saving Roll, with no additional Traits. The published long-range MODs and the canonical Shock Ammunition rule already describe this single-mode profile; do not substitute Normal Ammunition."
+    },
+    {
+      "slug": "ap-sniper-rifle",
+      "name": "AP Sniper Rifle",
+      "chartPage": 185,
+      "profileSha256": "9172b24ecd77006ac9068dc6a3071b86585753d0168d1f0ea7c4fd6da8bce75e",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 185: AP Ammunition, PS 5, Burst 2 and one ARM/2 Saving Roll without additional Traits. Shared AP covers the halving effect and the distinct Sniper Rifle ranges remain in the original profile."
+    },
+    {
+      "slug": "t2-sniper-rifle",
+      "name": "T2 Sniper Rifle",
+      "chartPage": 185,
+      "profileSha256": "3c8ef707ac029b1debad4ac007d3d4311e2db0a1e5e06370fb282fd37cac2f6d",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 185: T2 Ammunition, PS 5, Burst 2, one ARM Saving Roll and Anti-materiel. The canonical T2 and Anti-materiel definitions cover those effects; no additional firing mode or Sniper Rifle-specific exception is printed."
     }
   ]
 }

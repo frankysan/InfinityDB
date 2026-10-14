@@ -20,6 +20,8 @@ are not retroactively relabeled.
   options, the Hyper-Rapid Magnetic Cannon's three firing modes, and
   MULTI Heavy Machine Gun's EXP, AP and Shock modes, MULTI Spitfire's
   DA, AP and Shock modes, and Flammenspeer's Blast versus Hit effects.
+  Standard, AP and T2 Sniper Rifles also reuse canonical Ammunition and
+  Trait explanations without duplicating their effects.
 - Peripheral and its five subtype references now explain activation,
   Coherency, Doctor/Engineer delegation, Controller and Peripheral rolls,
   and Cyberplug Connected/Autonomous exceptions.

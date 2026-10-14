@@ -491,10 +491,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       maintained-text links rather than raw [[reference]] syntax.
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. The updated triage has
-      54 actionable reviews, 30 accepted shared-only identities,
+      51 actionable reviews, 33 accepted shared-only identities,
       and 11 pending multi-profile candidates, plus Flash Pulse's
-      historical citation. Next: Sniper Rifles (MULTI, AP,
-      standard, Viral, T2, K1 and Plasma). Pitcher and Mine
+      historical citation. Sniper Rifle, AP Sniper Rifle and T2 Sniper
+      Rifle are now source-profile-pinned shared-only reviews (N5.3 p. 185):
+      Shock/ARM, AP/ARM/2 and T2/ARM with Anti-materiel, respectively.
+      Continue with MULTI, Viral, K1 and Plasma Sniper Rifles. Pitcher and Mine
       Dispenser still need separate missing-effect source reviews.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
