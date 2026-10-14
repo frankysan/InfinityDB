@@ -194,6 +194,22 @@
       "profileSha256": "3ee5fd4e07f5ddc138393701341c59ad0ea80365cd30e754af8e9af44ea54ce1",
       "reviewedOn": "2026-10-14",
       "reason": "N5.3 chart p. 178 specifies PARA, PH-6, one Saving Roll, PS dash/B1, Disposable (2), State: Immobilized-A and Non-Lethal. The canonical PARA effect links Immobilized-A and the conditional no-PH exception, while the printed State marker and Disposable/Non-Lethal Trait references are preserved. No additional Weapon-specific outcome is printed."
+    },
+    {
+      "slug": "spitfire",
+      "name": "Spitfire",
+      "chartPage": 185,
+      "profileSha256": "b2c26ed0177457a33603877920fb46a5f2f0f1817fd3ab8caec6fe23a9f8eb20",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 185 prints Normal Ammunition, ARM with one Saving Roll, PS 6, Burst 4, Suppressive Fire and Spitfire range bands. The source-listed traits and canonical Normal ammunition cover its effects; it requires no independent Weapon summary."
+    },
+    {
+      "slug": "ap-spitfire",
+      "name": "AP Spitfire",
+      "chartPage": 185,
+      "profileSha256": "ee89d7a04e8ca5b09325d3951373e9ebd52a852c793e11f5c5e99c6dc5cb82d1",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 185 prints AP Ammunition, ARM/2 with one Saving Roll, PS 6, Burst 4, Suppressive Fire and ranges identical to the standard Spitfire. Shared AP and Suppressive Fire definitions supply the mechanics; no other Weapon-specific exception is printed."
     }
   ]
 }

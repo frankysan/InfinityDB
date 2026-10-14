@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **157/172** complete, **15** pending.
-- Current authored outgoing relations: **422**.
+- Supporting semantic identities: **158/173** complete, **15** pending.
+- Current authored outgoing relations: **427**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -975,7 +975,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (44/44)
+#### Weapon (45/45)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1114,6 +1114,12 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
   - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **MULTI Spitfire** (`weapon:multi-spitfire`) — reviewed: N5.3 Weapon Chart p. 185: Anti-Materiel Mode has DA, Burst 1, two ARM Saving Rolls and Anti-materiel. Army labels the mode Anti-Material Mode; its spelling is retained in source profiles. AP and Shock modes use Burst 4, one ARM/2 or ARM Saving Roll respectively, and Suppressive Fire. All are PS 6 with identical ranges; never combine modes or transfer their Traits.
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
 - [x] **Nanopulser** (`weapon:nanopulser`) — reviewed: N5.3 p. 187: Small Direct Template with Normal N ammo but BTS Saving Roll from the printed profile. Do not infer ARM from Normal ammo or add Bioweapon effects.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)

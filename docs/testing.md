@@ -587,6 +587,27 @@ Ball screenshots were visually inspected. Evidence remains in ignored
 `local/audits/weapon-first-batch-2-browser/`. These checks are bounded
 reference/browser acceptance, not a complete release gate.
 
+## 1.0 Spitfire shared-effects browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Spitfire, AP Spitfire
+and MULTI Spitfire were checked at 1440, 390 and 320 px (nine page
+cases), preserving the N5.3 p. 185 PS, Burst, Ammunition, Saving Roll
+Attributes/counts, ranges and Traits. The first two rely on their
+canonical Normal/AP ammunition and Suppressive Fire references,
+without duplicate Weapon-specific rules text. MULTI Spitfire retains
+the Army's `Anti-Material Mode` label and the different DA B1/two
+ARM Saving Rolls, AP B4/ARM/2, and Shock B4/ARM modes. Its source-cited
+card explicitly reconciles the chart's `Anti-Materiel Mode` spelling
+without rewriting Army profile data.
+
+Desktop navigation to Anti-materiel and mobile DA first-tap preview,
+second-tap navigation passed (**11/11 checks**). All three full-page
+320 px screenshots were inspected; there was no horizontal overflow
+or JavaScript error. Source-profile-pinned shared-only reviews remain
+in `data/curated/weapon-shared-effect-reviews.json`; private evidence
+remains Git-ignored under `local/audits/spitfire-browser/`. These are
+bounded reference checks, not an automated attack-resolution ruling.
+
 ## 1.0 Disposable Support Weapon browser acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Panzerfaust, Blitzen,

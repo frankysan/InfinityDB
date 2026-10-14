@@ -1171,6 +1171,107 @@ def test_disposable_support_footnotes_and_states_remain_source_notation(
     assert any(ref["slug"] == "disposable-x" for ref in akrylat["trait_references"])
 
 
+@pytest.mark.parametrize(
+    ("slug", "expected_modes", "effects", "has_rule"),
+    [
+        (
+            "spitfire",
+            [(None, "N", "ARM", "1", "6", "4", ["Suppressive Fire"])],
+            [["ammunition:normal"]], False,
+        ),
+        (
+            "ap-spitfire",
+            [(None, "AP", "ARM/2", "1", "6", "4", ["Suppressive Fire"])],
+            [["ammunition:ap"]], False,
+        ),
+        (
+            "multi-spitfire",
+            [
+                ("Anti-Material Mode", "DA", "ARM", "2", "6", "1",
+                 ["Anti-materiel"]),
+                ("AP Mode", "AP", "ARM/2", "1", "6", "4",
+                 ["Suppressive Fire"]),
+                ("Shock Mode", "Shock", "ARM", "1", "6", "4",
+                 ["Suppressive Fire"]),
+            ],
+            [["ammunition:da"], ["ammunition:ap"], ["ammunition:shock"]],
+            True,
+        ),
+    ],
+)
+def test_spitfire_family_preserves_source_modes_and_reuses_ammunition(
+    weaponry_app: Callable,
+    slug: str,
+    expected_modes: list[tuple],
+    effects: list[list[str]],
+    has_rule: bool,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    profiles = payload["profiles"]
+    assert [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in profiles
+    ] == expected_modes
+    assert [
+        [effect["record_id"] for effect in p["ammunition_effects"]]
+        for p in profiles
+    ] == effects
+    assert all(effect["citations"]
+               for p in profiles for effect in p["ammunition_effects"])
+    expected_ranges = {
+        "short": {"max": 20, "mod": "0"},
+        "med": {"max": 60, "mod": "+3"},
+        "long": {"max": 80, "mod": "-3"},
+        "max": {"max": 120, "mod": "-6"},
+    }
+    assert all(p["ranges"] == expected_ranges for p in profiles)
+    assert all(len(p["trait_references"]) == len(p["traits"]) for p in profiles)
+    assert bool(payload.get("rules")) == has_rule
+    if has_rule:
+        rule = _weapon_rules(payload)["weapon:multi-spitfire"]
+        assert any(
+            c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 185
+            for c in rule["citations"]
+        )
+        assert {
+            relation["record"]["id"]
+            for relation in rule["display_relations"]
+            if relation["direction"] == "outbound"
+        } >= {
+            "ammunition:da", "ammunition:ap", "ammunition:shock",
+            "trait:anti-materiel", "trait:suppressive-fire",
+        }
+
+
+def test_multi_spitfire_mode_specific_traits_and_source_label(
+    weaponry_app: Callable,
+) -> None:
+    multi = _weapon_detail(weaponry_app, "multi-spitfire")
+    profiles = {p["mode"]: p for p in multi["profiles"]}
+    anti = profiles["Anti-Material Mode"]
+    ap = profiles["AP Mode"]
+    shock = profiles["Shock Mode"]
+    assert anti["burst"] == "1" and anti["saving_num"] == "2"
+    assert anti["traits"] == ["Anti-materiel"]
+    assert "Suppressive Fire" not in anti["traits"]
+    assert ap["burst"] == shock["burst"] == "4"
+    assert ap["saving"] == "ARM/2" and shock["saving"] == "ARM"
+    assert ap["traits"] == shock["traits"] == ["Suppressive Fire"]
+    assert "Anti-materiel" not in ap["traits"]
+
+    rules = _weapon_rules(multi)["weapon:multi-spitfire"]
+    assert "Anti-Materiel" in rules["summary"]
+    assert "Anti-Material Mode" in rules["summary"]
+    assert "alternative firing modes" in rules["summary"]
+
+    normal = _weapon_detail(weaponry_app, "spitfire")["profiles"][0]
+    armor = _weapon_detail(weaponry_app, "ap-spitfire")["profiles"][0]
+    assert normal["ranges"] == armor["ranges"] == anti["ranges"]
+    assert normal["burst"] == armor["burst"] == "4"
+    assert normal["saving"] == "ARM" and armor["saving"] == "ARM/2"
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:

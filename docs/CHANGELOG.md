@@ -18,8 +18,8 @@ are not retroactively relabeled.
   Rifles, D-Charges, Disco Baller, and SymbioBomb while preserving their
   different modes and Saving Rolls, including Feuerbach's Burst/Explosive
   options, the Hyper-Rapid Magnetic Cannon's three firing modes, and
-  MULTI Heavy Machine Gun's EXP, AP and Shock mode differences,
-  and Flammenspeer's Blast versus Hit Mode effects.
+  MULTI Heavy Machine Gun's EXP, AP and Shock modes, MULTI Spitfire's
+  DA, AP and Shock modes, and Flammenspeer's Blast versus Hit effects.
 - Peripheral and its five subtype references now explain activation,
   Coherency, Doctor/Engineer delegation, Controller and Peripheral rolls,
   and Cyberplug Connected/Autonomous exceptions.
@@ -52,8 +52,11 @@ are not retroactively relabeled.
   versus EXP Explosive Mode and the Hyper-Rapid Magnetic Cannon's three
   mode-specific Burst, Saving Roll and Trait combinations, plus the
   MULTI Heavy Machine Gun's EXP Anti-materiel versus AP/Shock modes,
-  and Flammenspeer's Normal circular Blast Mode versus AP Hit Mode
-  with shared Continuous Damage and Disposable (2) charges.
+  and MULTI Spitfire's DA Anti-materiel versus AP/Shock modes. The
+  official Spitfire mode label is distinguished from Army's source
+  spelling without changing the imported profile. Flammenspeer's
+  Normal circular Blast and AP Hit Modes retain shared Continuous
+  Damage and Disposable (2) charges.
   Other reviewed Weapons continue to reuse source-backed Ammunition
   and Trait references.
 

@@ -216,7 +216,7 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
             encoding="utf8",
         )
     )
-    assert len(original["reviews"]) == 24
+    assert len(original["reviews"]) == 26
     catalog = {r["name"]: r for r in db.list_catalog_items("weapons")}
     items = [
         {"id": catalog[r["name"]]["id"], "name": r["name"],
@@ -227,7 +227,7 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
     policy = tmp_path / "reviewed.json"
     policy.write_text(json.dumps(original), encoding="utf8")
     approved = load_shared_reviews(db, enrichment, policy)
-    assert len(approved) == 24
+    assert len(approved) == 26
     assert {r["chartPage"] for r in approved.values()} == {178, 179, 183, 184, 185, 186, 187, 188}
     assert {
         r["name"] for r in original["reviews"] if r["chartPage"] == 184
@@ -235,9 +235,6 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
         "Boarding Shotgun", "Light Shotgun", "Vulkan Shotgun",
         "Heavy Shotgun", "T2 Boarding Shotgun",
     }
-    assert {
-        r["name"] for r in original["reviews"] if r["chartPage"] == 185
-    } == {"Submachine Gun", "AP Submachine Gun"}
     assert {
         r["name"] for r in original["reviews"]
         if r["chartPage"] in (186, 187, 188)
@@ -250,6 +247,12 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
     assert {
         r["name"] for r in original["reviews"] if r["chartPage"] == 178
     } == {"Panzerfaust", "Blitzen", "Akrylat-Kanone"}
+    assert {
+        r["name"] for r in original["reviews"]
+        if r["chartPage"] == 185
+    } == {
+        "Submachine Gun", "AP Submachine Gun", "Spitfire", "AP Spitfire",
+    }
     assert {r["reason"] for r in approved.values()} == {
         r["reason"] for r in original["reviews"]
     }
@@ -312,6 +315,39 @@ def test_hmg_shared_only_reviews_are_profile_pinned(tmp_path: Path) -> None:
     target.write_text(json.dumps(subset), encoding="utf8")
     with pytest.raises(WeaponGapTriageError, match="profile changed"):
         load_shared_reviews(db, pending, target)
+
+
+def test_spitfire_shared_reviews_are_profile_pinned(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[1]
+    db = Database(root / "data/generated/infinity.db")
+    policy = json.loads(
+        (root / "data/curated/weapon-shared-effect-reviews.json").read_text(
+            encoding="utf8",
+        )
+    )
+    rows = [
+        review for review in policy["reviews"]
+        if review["name"] in ("Spitfire", "AP Spitfire")
+    ]
+    assert len(rows) == 2
+    assert all(review["chartPage"] == 185 for review in rows)
+    catalog = {row["name"]: row for row in db.list_catalog_items("weapons")}
+    enrichment = {
+        "domains": {"weapons": {"items": [
+            {"id": catalog[row["name"]]["id"], "name": row["name"],
+             "slug": row["slug"], "gapCodes": ["missing_rule_definition"]}
+            for row in rows
+        ]}},
+    }
+    policy_path = tmp_path / "spitfires.json"
+    subset = {**policy, "reviews": rows}
+    policy_path.write_text(json.dumps(subset), encoding="utf8")
+    assert len(load_shared_reviews(db, enrichment, policy_path)) == 2
+
+    rows[1]["profileSha256"] = "0" * 64
+    policy_path.write_text(json.dumps(subset), encoding="utf8")
+    with pytest.raises(WeaponGapTriageError, match="profile changed"):
+        load_shared_reviews(db, enrichment, policy_path)
 
 
 def test_reviewed_historical_comparison_remains_visible_but_not_pending() -> None:

@@ -466,13 +466,24 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Continuous Damage and Disposable (2) apply to both modes.
       Browser acceptance passed 14/14 checks with narrow screenshots
       and desktop/touch navigation reviewed.
+    - [x] Review N5.3 p. 185 Spitfires. Standard (N/ARM) and AP
+      (AP/ARM/2) Spitfires reuse Normal/AP Ammunition and Suppressive
+      Fire with PS 6, Burst 4 and identical ranges. Their shared-only
+      source profiles are fingerprinted in
+      `data/curated/weapon-shared-effect-reviews.json`. MULTI Spitfire
+      now has its own cited explanation: DA Anti-Materiel B1/two ARM
+      Saving Rolls versus AP/ARM/2 and Shock/ARM B4/one Saving Roll
+      with Suppressive Fire. Army's source mode spelling
+      `Anti-Material Mode` is preserved; the official chart uses
+      `Anti-Materiel Mode`. Browser checks passed 11/11,
+      including desktop Trait and mobile DA preview/navigation.
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. The refreshed triage has
-      61 actionable reviews, 24 accepted shared-only identities, and
-      12 pending multi-profile candidates, plus Flash Pulse's
-      historical citation. Next: Spitfires (standard, AP, MULTI).
-      Pitcher and Mine Dispenser still need separate missing-effect
-      source reviews.
+      58 actionable reviews, 26 accepted shared-only identities and
+      11 pending multi-profile candidates, plus Flash Pulse's
+      historical citation. Next: Grenades (Smoke, standard, E/M,
+      Eclipse). Pitcher and Mine Dispenser still need separate
+      missing-effect source reviews.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
