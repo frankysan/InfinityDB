@@ -1572,6 +1572,25 @@ owner Isolation, membership loss, shared Firewall, identical buffs and different
 **1.0 relevance:** TinBot is supported Equipment; its shared/disabled conditions
 are material to gameplay, independently of optional exhaustive variant research.
 
+**Disposition (verified 2026-10-14): Resolved for supported TinBot family.**
+English N5.3 p. 127 confirms that the owner must not be Isolated or in
+any Null State; the equipment grants only the option listed in its Unit
+Profile. The existing shared family baseline already covered Fireteam
+benefits and non-stacking. The published reference now also states that
+TinBot Models/Tokens do not obstruct Movement or LoF, cannot be chosen
+as targets for Skills, and are removed when the owner enters Dead State.
+A reviewed example distinguishes Firewall (-3) from (-6), the most
+advantageous applicable WIP MOD, and Firewall's fixed +3 Saving Roll
+bonus. A Fireteam cross-link explains benefit sharing and departure;
+all six named TinBot options retain their own sourced effects.
+
+Curated rules/database tests passed and Chromium checks verified the
+TinBot, Firewall and Fireteam references and Fireteam-to-TinBot
+navigation at 1440, 390 and 320 px (12/12, no JavaScript errors or
+horizontal overflow). No universal MOD stacking engine or source
+profile rewrite was added. Owner eligibility, Fireteam membership and
+single-advantage selection remain scoped to the cited TinBot rules.
+
 ### REA-040 - Infinity Spec-Ops links an absent SpecBall procedure
 
 **Classification:** completeness, scope/provenance. **Severity:** High. **Priority:** P1.

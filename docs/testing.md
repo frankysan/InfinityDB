@@ -1172,3 +1172,23 @@ scenario-element/Ancillary answers apply to core missions remain open
 for authoritative clarification. Private extracts, screenshots and
 results are retained under Git-ignored `local/audits/` and
 `local/audits/rea030-browser/`.
+
+
+## 1.0 TinBot REA-039 browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** N5.3 p. 127 and the six
+published TinBot options were reviewed against the curated Equipment
+family, Firewall and Fireteam rule references. Source/API regression
+coverage includes owner eligibility, shared Fireteam benefits, non-stacking,
+State Token removal and the source-specific option links. A temporary,
+locally rebuilt rules database was used for browser checks rather than
+assuming the existing generated release database was current.
+
+Headless Chrome completed **12/12 render/navigation checks** across 1440,
+390 and 320 px (TinBot, Firewall and Fireteam), including direct
+Fireteam-to-TinBot navigation, with no JavaScript errors or page-level
+horizontal overflow. The TinBot option definitions share their family
+reference; they are not standalone Equipment URL routes.
+Private results, screenshots and the verification script are Git-ignored
+under `local/audits/rea039-browser/` and `local/audits/`.
+This does not imply a generic MOD combination/Fireteam evaluator.

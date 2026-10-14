@@ -741,8 +741,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] **REA-038 — Doctor/Engineer target eligibility:** Adjudicate
       direct-target allegiance before closing the revised recovery
       eligibility explanations.
-    - [ ] **REA-039 — TinBot sharing:** Review operational eligibility
-      and Fireteam sharing against the source evidence.
+    - [x] **REA-039 — TinBot sharing:** N5.3 p. 127 operational eligibility,
+      Fireteam-wide benefits, same-advantage MOD selection, owner departure,
+      nonblocking/untargetable State Token status and Dead State removal
+      are linked from the family and Fireteam references. All six named
+      options retain source-specific effects. Focused source/API tests and
+      responsive browser acceptance passed 12/12 checks at 1440/390/320 px.
     - [ ] **REA-040 — SpecBall:** Review the missing procedure and its
       Infinity Spec-Ops reference; preserve source applicability.
     - [ ] **REA-041 — Fireteam dice contradiction:** Resolve the Spanish

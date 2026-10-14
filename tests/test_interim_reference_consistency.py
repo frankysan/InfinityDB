@@ -1,4 +1,4 @@
-"""Regression coverage for confirmed 0.10.1 player-reference corrections."""
+﻿"""Regression coverage for confirmed 0.10.1 player-reference corrections."""
 
 from __future__ import annotations
 
@@ -64,6 +64,40 @@ def test_tinbot_names_shared_eligibility_and_non_stacking() -> None:
     ):
         assert concept in text
     assert "\n\n" in text
+
+
+def test_tinbot_shared_options_and_inactive_owner_are_explained() -> None:
+    records = _records()
+    family = records["equipment:tinbot"]
+    text = " ".join([family["summary"], *family["facts"]["clarifications"]])
+    for phrase in (
+        "Null State",
+        "Fireteam",
+        "do not block Movement or LoF",
+        "cannot be selected as targets for any Skill",
+        "[[state:dead|Dead State]]",
+        "[[equipment:tinbot-firewall|TinBot: Firewall]]",
+        "stronger -6 WIP MOD",
+        "+3 [[equipment:firewall|Firewall]] Saving Roll",
+        "enters [[state:isolated|Isolated]] or leaves the Fireteam",
+    ):
+        assert phrase in text
+    source_pages = {
+        citation["page"] for citation in family["citations"]
+        if citation["sourceId"] == "n5-core-v5.3-pdf"
+    }
+    assert source_pages == {127}
+    for variant in (
+        "firewall", "neurocinetics", "albedo", "discover", "ecm-guided", "repeater"
+    ):
+        record = records[f"equipment:tinbot-{variant}"]
+        assert "[[equipment:tinbot]]" in record["summary"]
+        assert {"type": "variant-of", "recordId": "equipment:tinbot"} in record["relations"]
+    fireteam = records["rule:fireteam-general"]
+    shared = " ".join(fireteam["facts"]["rules"])
+    assert "**Shared [[equipment:tinbot|TinBot]]:**" in shared
+    assert "[[equipment:tinbot|TinBot]]" in shared
+    assert "Sharing stops if the owner leaves the Fireteam" in shared
 
 
 def test_fireteam_type_counts_are_creation_only() -> None:

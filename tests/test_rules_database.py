@@ -3437,7 +3437,7 @@ def test_rea020_fireteam_action_ownership_and_integrity_are_distinct(
     record = current_rules_database.composed_record("rule:fireteam-general")
     assert record is not None
     rules = record["facts"]["rules"]
-    assert len(rules) == 12
+    assert len(rules) == 13
     joined = " ".join(rules)
     assert "formation requirements" in record["summary"]
     assert "Type does not change" in joined

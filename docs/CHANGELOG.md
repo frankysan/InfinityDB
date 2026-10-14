@@ -12,6 +12,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- TinBot references now explain when their benefits are shared by a Fireteam, why matching bonuses do not stack, and how owner isolation, departure or death affects them.
 - Sixth Sense and Multispectral Visor now explain the FAQ's joint
   Level 1 exception for a target attacked through a Zero Visibility Zone.
   ITS Spotlight and Ancillary scoring clarifications remain explicitly
