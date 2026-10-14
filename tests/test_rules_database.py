@@ -3325,6 +3325,29 @@ def test_recovery_and_intuitive_attack_explanations_survive_rules_export(
     assert any(citation["source_id"] == "n5-core-v5.3-pdf" for citation in record["citations"])
 
 
+def test_rea001_engineer_examples_are_published_as_player_clarifications(
+    current_rules_database: RulesDatabase,
+) -> None:
+    engineer = current_rules_database.composed_record("skill:engineer")
+    targeted = current_rules_database.composed_record("state:targeted")
+    stunned = current_rules_database.composed_record("state:stunned")
+    assert engineer is not None and targeted is not None and stunned is not None
+    clarifications = " ".join(engineer["facts"]["clarifications"])
+    assert "allied VITA Trooper" in clarifications
+    assert "[[state:targeted|Targeted State]]" in clarifications
+    assert "failure does not inflict a Wound" in clarifications
+    assert "[[skill:doctor|Doctor]]" in clarifications
+    assert "This condition-specific rule" in clarifications
+    assert "[[skill:engineer]] WIP Roll" in " ".join(targeted["facts"]["effects"])
+    assert "[[skill:doctor]] can cancel" in " ".join(stunned["facts"]["effects"])
+    assert "[[skill:engineer]] can cancel" in " ".join(stunned["facts"]["effects"])
+    pages = {
+        c["page"] for c in engineer["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    assert pages >= {91, 170, 171}
+
+
 @pytest.mark.parametrize(
     ("skill_id", "kit_id", "source_page"),
     [("skill:doctor", "equipment:medikit", 90),

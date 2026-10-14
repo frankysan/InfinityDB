@@ -1867,8 +1867,12 @@ Unconscious; failure causes Dead. Other State/Skill rules, such as Stunned,
 No Wound Incapacitation and Technorganic, provide specific exceptions.
 Engineer instead has separate effects: repair an STR target (a failed WIP Roll
 inflicts a Wound), or cancel eligible non-Unconscious States (failure has no
-negative consequence). The Stunned cancellation rule distinguishes VITA
-(Doctor) from STR (Engineer). The direct Doctor/Engineer requirements contain no universal Allied-only
+negative consequence). Thus an allied **VITA Trooper in Targeted** can
+receive Engineer condition cancellation without STR or Wound repair; a
+failed cancellation WIP Roll is harmless, unlike failed STR repair.
+The Stunned cancellation rule distinguishes VITA (Doctor) from STR
+(Engineer). These checked examples are published in the Engineer card.
+The direct Doctor/Engineer requirements contain no universal Allied-only
 clause; the explicit Allied target gates of MediKit/GizmoKit and the
 Servant/Connected Cyberplug contact exception do not generalize to the
 underlying Skills. Engaged State and Interacting with a Close Combat

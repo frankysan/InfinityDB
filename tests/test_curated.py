@@ -1910,6 +1910,35 @@ def test_rea038_direct_vs_delegated_recovery_source_scope() -> None:
         assert pdf_pages >= {51}
 
 
+def test_rea001_engineer_target_eligibility_and_repair_vs_cancel_examples() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    records = {r["id"]: r for r in load_curated_document(path)["records"]}
+    engineer = records["skill:engineer"]
+    facts = engineer["facts"]
+    assert "STR is required to remove Wounds" in " ".join(facts["requirements"])
+    assert "not to cancel conditions" in " ".join(facts["requirements"])
+    assert "failed condition-cancellation Roll has no negative consequence" in (
+        " ".join(facts["effects"])
+    )
+    assert "On failure, the target receives a Wound" in " ".join(facts["effects"])
+    example = next(part for part in facts["clarifications"] if "VITA and STR example" in part)
+    assert "allied VITA Trooper" in example
+    assert "[[state:targeted|Targeted State]]" in example
+    assert "no STR to repair" in example
+    assert "failure does not inflict a Wound" in example
+    exception = next(part for part in facts["clarifications"] if "Stunned]] exception" in part)
+    assert "[[skill:doctor|Doctor]]" in exception
+    assert "for a VITA target" in exception
+    assert "Engineer for a STR target" in exception
+    assert "[[state:immobilized-a|IMM-A]]" in exception
+    assert all("Allied" not in item for item in facts["requirements"])
+    pages = {
+        c["page"] for c in engineer["citations"]
+        if c["sourceId"] == "n5-core-v5.3-pdf"
+    }
+    assert pages >= {91, 170, 171}
+
+
 def test_checked_in_n5_collection_models_silent_dodge_modifier() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

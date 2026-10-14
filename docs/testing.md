@@ -1356,3 +1356,24 @@ from the example to Special Dice and Discover. No JS errors or page
 horizontal overflow. Private script, result JSON, and 320 px screenshot
 remain Git-ignored under `local/audits/`.
 The outstanding official erratum remains an external decision.
+
+
+## 1.0 Engineer recovery and target eligibility (REA-001)
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Compared English N5.3 Engineer
+p. 91 and cancellation conditions for Stunned p. 170 and Targeted
+p. 171 with existing direct/delegated scope review REA-038. The
+published Engineer record preserves STR Wound repair versus
+State-cancellation as different WIP outcomes, self-use restrictions,
+Remote Presence and ReRoll WIP/Command Token exceptions. Clarifications
+now give a VITA Targeted example and a VITA/STR Stunned counterexample.
+An allied example deliberately avoids inventing non-Allied eligibility.
+
+Curated and composed-rules regressions passed **279/279** tests. Headless
+Chrome against a newly rebuilt local rules database passed **18/18**
+content/navigation checks at 1440, 390 and 320 px on Engineer,
+Targeted and Stunned, including Engineer-to-Targeted/Stunned/Doctor
+semantic links. No JavaScript errors or horizontal overflow. Private
+acceptance script, screenshots and result JSON are Git-ignored under
+`local/audits/`. General recovery simulation and an official ruling
+on non-Allied direct treatment are outside this acceptance scope.

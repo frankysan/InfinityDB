@@ -584,8 +584,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     the [1.0 explanation audit](rules-explanation-audit-1.0.md#prioritized-remediation-plan)
     through the individual checks below; published cards still require the
     stated browser/source acceptance before their findings can be closed.
-    - [ ] **REA-001 — Engineer target and recovery:** Review the revised
-      Engineer recovery explanation on the player-facing Skill card.
+    - [x] **REA-001 ? Engineer target and recovery:** Reviewed the
+      separate STR repair and eligible State-cancellation branches, success
+      versus failed WIP outcomes, self-use and Stunned exceptions. Added
+      an allied VITA Targeted example that does not require STR, and checked
+      the published Engineer/Targeted/Stunned/Doctor references and links.
+      Responsive browser acceptance passed 18/18; non-Allied eligibility
+      remains independently open under REA-038.
     - [ ] **REA-002 — Doctor recovery:** Review the revised ordinary recovery
       requirements and lethal failure on the player-facing Doctor card.
     - [ ] **REA-003 — Intuitive Attack:** Review the corrected attack resolution

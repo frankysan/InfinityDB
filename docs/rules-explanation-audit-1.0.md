@@ -320,6 +320,32 @@ the STR-only State-cancellation error without making a universal claim about
 enemy treatment. Allied examples remain supported, but do not prove an Allied-only
 restriction. Full closure of eligibility requires the recorded allegiance decision.
 
+**Acceptance follow-up (2026-10-14): Locally resolved as a player-facing
+Engineer reference; REA-038 remains an independent external rule question.**
+The original "Current" paragraph above describes an early draft and no
+longer matches the curated requirements. The existing `skill:engineer`
+reference already separates STR Wound repair (failure inflicts a Wound)
+from successful cancellation of eligible conditions regardless of the
+target's STR (failure has no negative consequence). Remote Presence,
+Engineer ReRoll WIP=X, Command Token use, self-use, Engaged restrictions,
+and the distinction between direct and delegated contact remain present.
+
+The player-facing Clarifications now explicitly work through an **allied
+VITA Trooper in Targeted State**, legally cancelable via an Engineer WIP
+Roll without STR or Wound repair, and contrast the **Stunned exception**:
+VITA uses Doctor; STR uses Engineer. English N5.3 pp. 91, 170 and 171
+are cited in the Engineer record, along with its earlier sources. The
+IMM-A, IMM-B, Isolated and Targeted graph edges and underlying rules
+were not altered. No broad permission for non-Allied direct targets was
+inferred; that unresolved applicability is separately tracked as REA-038.
+
+Focused curated/published rules checks passed 279 tests; Chromium browser
+acceptance passed 18/18 at 1440, 390, and 320 px, including the Engineer,
+Targeted and Stunned cards and links to Targeted, Stunned and Doctor.
+No JavaScript errors or page-level horizontal overflow were observed.
+This completes the remaining REA-001 **reference acceptance** requirement;
+it does not assert a complete recovery game-state evaluator.
+
 ### REA-002 - Doctor omits its ordinary recovery gate and lethal failure
 
 **Classification:** correctness, completeness. **Severity:** High. **Priority:** P0.

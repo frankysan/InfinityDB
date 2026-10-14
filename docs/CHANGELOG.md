@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Engineer now includes practical examples distinguishing STR Wound
+  repair from canceling Targeted on a VITA Trooper, including why a failed
+  cancellation does not cause a Wound and why Stunned uses Doctor for VITA.
 - The Fireteam Level reference now gives a concrete five-member Morat
   CORE example that earns Level 3 bonuses only. Its source note discloses
   why both N5.3 printed examples incorrectly add Level 4's +1 BS/CD;
@@ -150,6 +153,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Complete REA-001 Engineer
+  reference acceptance with source-backed VITA Targeted and
+  VITA/STR Stunned examples, plus linked N5.3 source citations. Preserve
+  existing recovery, failure, self-use and delegated target rules;
+  non-Allied direct use remains separately unresolved under REA-038.
 - **Data processing + Web frontend:** Publish a checked Level 3 Morat
   Fireteam example alongside the cumulative bonus table, with separate
   bilingual source notes for the contradictory Level 4 bonus in the

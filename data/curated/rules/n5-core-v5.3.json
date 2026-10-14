@@ -9019,7 +9019,9 @@
                 "clarifications": [
                     "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful Roll makes the coordinated use successful.",
                     "A [[rule:peripheral-type:servant|Servant]] or Connected [[rule:peripheral-type:cyberplug|Cyberplug]] in Silhouette contact with an allied Model can allow the Controller to declare [[skill:engineer|Engineer]] without direct contact. The Controller makes the Roll; only one target is treated in that Order.",
-                    "**Direct versus delegated contact:** The direct Engineer Skill lists its own target/contact conditions for STR repair or eligible condition cancellation but does not print a universal Allied-only prerequisite. [[equipment:gizmokit|GizmoKit]] separately requires an Allied target, as do the remote contact permissions of [[rule:peripheral-type:servant|Servant]] and Connected [[rule:peripheral-type:cyberplug|Cyberplug]]. Those local Allied restrictions must not be assumed to amend this direct Skill."
+                    "**Direct versus delegated contact:** The direct Engineer Skill lists its own target/contact conditions for STR repair or eligible condition cancellation but does not print a universal Allied-only prerequisite. [[equipment:gizmokit|GizmoKit]] separately requires an Allied target, as do the remote contact permissions of [[rule:peripheral-type:servant|Servant]] and Connected [[rule:peripheral-type:cyberplug|Cyberplug]]. Those local Allied restrictions must not be assumed to amend this direct Skill.",
+                    "**VITA and STR example:** An allied VITA Trooper in [[state:targeted|Targeted State]] may have that condition canceled by Engineer in Silhouette contact, even though the Trooper has no STR to repair. The successful WIP Roll cancels eligible conditions, not a Wound; failure does not inflict a Wound. By contrast, a failed WIP Roll while repairing a STR Trooper inflicts a Wound instead of removing one (N5.3 pp. 91, 171).",
+                    "**[[state:stunned|Stunned]] exception:** The [[state:stunned|Stunned]] condition is canceled by [[skill:doctor|Doctor]] for a VITA target and by Engineer for a STR target (N5.3 p. 170). This condition-specific rule does not impose an STR requirement on Engineer cancellation of [[state:targeted|Targeted]], [[state:immobilized-a|IMM-A]], [[state:immobilized-b|IMM-B]], or [[state:isolated|Isolated]]."
                 ]
             },
             "labelIds": [
@@ -9051,6 +9053,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 51,
                     "section": "Interacting with a Close Combat"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 170,
+                    "section": "Stunned State Cancellation"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 171,
+                    "section": "Targeted State Cancellation"
                 }
             ],
             "review": {
