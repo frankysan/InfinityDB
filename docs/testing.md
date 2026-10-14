@@ -1025,3 +1025,33 @@ VITA/STR condition, the DA/Shock components, and Viral Mine's exact
 N/BTS/one-roll property mapping. No general ammunition-combination
 or Immunity evaluator was added. Private source extracts and browser
 results stay under `local/audits/`.
+
+
+## 1.0 REA-020 Fireteam ownership and integrity acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** The shared Fireteam quick
+reference and related FT Master, Number 2, NCO, Tactical Awareness and
+Suppressive Fire cards were compared against official English N5.3
+pp. 93, 104-105, 107 and 132-136, including the already published
+Ancillary subtype and relevant FAQ evidence.
+
+Chromium accepted **33/33** route and link-navigation checks at 1440,
+390 and 320 px, with no JavaScript errors or page-level horizontal
+overflow. The 320 px Fireteam quick-reference screenshot was inspected;
+its formation badges, action ownership, cancellation/departure distinctions,
+rejoining timing and linked exceptions render without clipping.
+
+The rules regression in `tests/test_rules_database.py` distinguishes
+Leader-only attacks from Movement/Reset, independent reactive Rolls
+versus the team ARO, per-member departure versus full cancellation,
+two-or-more-member survival, States Phase rejoining, and NCO/Tactical
+Awareness/FT Master/Number 2 exceptions. The canonical rules database
+build includes a passage-specific reviewed-plain fingerprint for
+**States Phase**: that turn-phase term must not link to the unrelated
+weapon Trait named `State`.
+
+Private source extracts, screenshots and browser report are retained
+under `local/audits/rea020-browser/` and `local/audits/`.
+This is source and reference-card acceptance; the separate Fireteam
+Army selection, Wildcard and keyboard/touch workflow remains in
+the final 1.0 acceptance checklist.

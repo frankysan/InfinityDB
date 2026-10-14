@@ -3427,3 +3427,48 @@ def test_rea024_bioweapon_condition_and_viral_mine_baseline(
     assert "weapon with Viral in its name" in " ".join(
         vulnerability["facts"]["effects"]
     )
+
+
+def test_rea020_fireteam_action_ownership_and_integrity_are_distinct(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """N5.3 pp. 132-136: activation, dissent, cancellation and departure."""
+    record = current_rules_database.composed_record("rule:fireteam-general")
+    assert record is not None
+    rules = record["facts"]["rules"]
+    assert len(rules) == 12
+    joined = " ".join(rules)
+    assert "formation requirements" in record["summary"]
+    assert "Type does not change" in joined
+    for phrase in (
+        "only the designated Team Leader performs it",
+        "other members declare [[skill:idle|Idle]]",
+        "[[skill:reset|Reset]]",
+        "A Reactive Trooper chooses only one member",
+        "more than half of the members who actually declare",
+        "otherwise the player chooses",
+        "Dissenting members leave the Fireteam",
+        "dissenting Team Leader cancels the Fireteam",
+        "one remaining member",
+        "voluntarily cancel before an Order is spent",
+        "**Individual departure:**",
+        "Departure occurs when the Order or [[trait:aro|ARO]] is declared",
+        "Recalculate bonuses and cancellation immediately",
+        "end of the next States Phase",
+        "[[skill:number-2|Number 2]]",
+        "[[skill:ft-master|FT Master]]",
+        "[[skill:nco|NCO]]",
+        "[[skill:tactical-awareness|Tactical Awareness]]",
+        "[[state:suppressive-fire|Suppressive Fire]]",
+        "[[skill:peripheral|Peripheral]]",
+    ):
+        assert phrase in joined
+    pages = {
+        c["page"]
+        for c in record["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf" and "page" in c
+    }
+    assert {132, 133, 134, 135, 136} <= pages
+    for ref in ("skill:number-2", "skill:ft-master", "skill:nco",
+                "skill:tactical-awareness", "state:suppressive-fire"):
+        assert current_rules_database.composed_record(ref) is not None

@@ -640,6 +640,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       covered three cards and Label-to-Program links at 1440/390/320 px
       (15/15 passed); no JavaScript errors or horizontal overflow.
       Other NFB interactions remain scoped to their owning rules.
+    - [x] **REA-020 — Fireteam ownership and integrity:** The published
+      shared baseline now distinguishes Active Leader-only actions, common
+      Movement/Reset, individual reactive rolls and ARO majority selection,
+      ordinary departure versus cancellation, rejoining at the next States
+      Phase and formation-only Type minimums. FT Master, Number 2, NCO,
+      Tactical Awareness and Peripheral conditions link to their owners.
+      Source and browser acceptance passed 33/33 checks at 1440/390/320 px;
+      final chart selection/Wildcard/keyboard/touch workflow remains separate.
     - [x] **REA-021 — Special Dice:** Verified +1 SD versus Burst,
       allocation/discard, Disposable charges, ranged Kits, Martial Arts
       Levels 3/5, Berserk's Long Skill exception, Fireteam Levels 2/4,

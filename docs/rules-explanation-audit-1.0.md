@@ -842,11 +842,12 @@ separately scoped to REA-015 and related findings.
 `skill:ft-master`, `skill:number-2`, `skill:nco`, `skill:tactical-awareness`,
 `state:suppressive-fire`, Peripheral types.
 
-**Current:** General facts cover chart authority, Coherency, group membership,
-and activation, but not who performs an attack, differing AROs, leaving/rejoining,
-or cancellation. Type badges show Haris 3 and Core 3-5 without creation-only
-qualification. FT Master/Number 2 and Peripheral exceptions are not connected
-to a readable common integrity baseline.
+**Original gap:** The General Rules covered chart authority, Coherency and
+activation, but omitted which member performs a declared Skill, distinct ARO
+choices, ordinary departure versus whole-team cancellation and automatic
+rejoining. Type counts appeared without adequate creation-only context, and
+FT Master, Number 2, Peripheral and NCO/Tactical Awareness exceptions were
+not connected to a readable common integrity baseline.
 
 **Evidence/result:** S1 pp. 132-136 distinguish leader-only attacks from shared
 Movement/Reset, majority ARO, member departure, whole-team cancellation, and
@@ -855,10 +856,30 @@ chart minimums apply to creation, with FT Master's exception. Ancillary
 eligibility has its own conditions (p. 107); Number 2 can replace a disabled
 leader (p. 105). The two forms of removal must not be conflated.
 
-**Action:** Add a concise creation/activation/integrity reference and link the
-exceptions. Qualify type counts as formation requirements. **Fix:** curated
-text/facts/links; renderer changes if new fact groups are adopted.
-**Dependencies:** REA-017, REA-021, REA-030, REA-034.
+**Disposition (verified 2026-10-14): Resolved for the shared Fireteam baseline.**
+The published General Rules now distinguish creation-eligible Troopers;
+Movement/Reset versus Leader-only Active Turn actions; individual ARO rolls,
+targets and team-wide ARO selection; dissenting member departure versus
+Leader-caused cancellation; automatic cancellation conditions; the timing
+and consequences of member departure; automatic rejoining at the end of
+the next States Phase; and Type remaining unchanged after losses.
+DUO/HARIS/CORE badges explicitly indicate **formation** limits, not an
+ongoing member minimum, except rules that expressly require otherwise.
+
+The shared reference links the owning FT Master, Number 2, NCO, Tactical
+Awareness, Peripheral, Suppressive Fire, Isolated and Retreat! rules
+without reproducing their full mechanics. N5.3 pp. 132-136 and the linked
+source-specific references support these distinctions. The maintained-text
+gate retains exactly one reviewed literal `States Phase` occurrence:
+it is a turn phase, not the unrelated weapon Trait called State.
+The existing responsive renderer publishes all reviewed rules with typed
+cross-links; no new schema or evaluator was required.
+
+Broader Fireteam chart-specific eligibility and source conflicts remain
+separately owned (REA-030/034), as do Peripheral subtype interactions
+(REA-017). The final Army selection/Wildcard/keyboard/touch Fireteam
+browser workflow remains an independent release acceptance item; this
+finding closes only the shared reference's completeness.
 
 ### REA-021 - Fireteam and Martial Arts bonuses need Special Dice reasoning
 

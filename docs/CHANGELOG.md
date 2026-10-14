@@ -21,6 +21,10 @@ are not retroactively relabeled.
   N+E/M, to searchable Glossary explanations and their originating rules. Links provide the same preview
   interaction as other rules references; shared Viral and Plasma explanations
   no longer need to be repeated in individual weapon summaries.
+- Fireteam help now distinguishes actions performed only by the Team
+  Leader from shared movement and reactive AROs. It explains when members
+  leave, when the entire team cancels, how rejoining works and why the
+  DUO/HARIS/CORE counts apply to formation rather than ongoing membership.
 - Discover and Impersonation references now distinguish normal modifiers
   from IMP-1's penalty and explain when a failed attempt may be retried.
   Deployable Cover now identifies all of its listed properties alongside the
