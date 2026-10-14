@@ -1910,6 +1910,44 @@ def test_rea038_direct_vs_delegated_recovery_source_scope() -> None:
         assert pdf_pages >= {51}
 
 
+def test_rea002_doctor_ordinary_gate_and_scoped_exceptions() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+    doctor = records["skill:doctor"]
+    facts = doctor["facts"]
+    requirements = " ".join(facts["requirements"])
+    effects = " ".join(facts["effects"])
+    assert "Silhouette contact" in requirements
+    assert "must have VITA" in requirements
+    assert "[[state:unconscious|Unconscious State]]" in requirements
+    assert "[[state:dead|Dead State]]" in effects
+    assert "Doctor (2W)" in effects
+    assert "Doctor (ReRoll WIP=X)" in effects
+    assert "Command Token reroll" in effects
+    assert "Null State" in " ".join(facts["restrictions"])
+    assert len(facts["clarifications"]) >= 7
+    examples = facts["clarifications"][-4:]
+    assert "not in [[state:unconscious|Unconscious]] cannot" in examples[0]
+    assert "failure puts the target in [[state:dead|Dead State]]" in examples[0]
+    assert "in Silhouette contact" in examples[1]
+    assert "[[state:stunned|Stunned]]" in examples[1]
+    assert "[[skill:engineer|Engineer]]" in examples[1]
+    assert "with both NWI and Doctor" in examples[2]
+    assert "self" in examples[2]
+    assert "removes one Wound and the NWI Token" in examples[2]
+    assert "STR Trooper" in examples[3]
+    assert "despite lacking VITA" in examples[3]
+    assert "remaining STR Wounds" in examples[3]
+    cited = {c["page"] for c in doctor["citations"] if c["sourceId"] == "n5-core-v5.3-pdf"}
+    assert cited >= {90, 104, 116, 170}
+    assert "blanket permission" in facts["sourceNotes"][0]
+    assert "[[skill:doctor]]" in " ".join(
+        records["skill:no-wound-incapacitation"]["facts"]["effects"]
+    )
+    assert "[[skill:doctor]]" in " ".join(records["skill:technorganic"]["facts"]["effects"])
+
+
 def test_rea001_engineer_target_eligibility_and_repair_vs_cancel_examples() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     records = {r["id"]: r for r in load_curated_document(path)["records"]}

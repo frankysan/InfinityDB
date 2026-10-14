@@ -3325,6 +3325,34 @@ def test_recovery_and_intuitive_attack_explanations_survive_rules_export(
     assert any(citation["source_id"] == "n5-core-v5.3-pdf" for citation in record["citations"])
 
 
+def test_rea002_published_doctor_recovery_and_exception_boundaries(
+    current_rules_database: RulesDatabase,
+) -> None:
+    doctor = current_rules_database.composed_record("skill:doctor")
+    nwi = current_rules_database.composed_record("skill:no-wound-incapacitation")
+    technorganic = current_rules_database.composed_record("skill:technorganic")
+    stunned = current_rules_database.composed_record("state:stunned")
+    assert doctor is not None and nwi is not None
+    assert technorganic is not None and stunned is not None
+    facts = doctor["facts"]
+    requirements = " ".join(facts["requirements"])
+    assert "VITA" in requirements and "[[state:unconscious|Unconscious State]]" in requirements
+    assert "A failed Roll puts the target directly" in " ".join(facts["effects"])
+    examples = facts["clarifications"][-4:]
+    assert "**Ordinary recovery example:**" in examples[0]
+    assert "**[[state:stunned|Stunned]] exception:**" in examples[1]
+    assert "No Wound Incapacitation" in examples[2]
+    assert "[[skill:technorganic|Technorganic]]" in examples[3]
+    assert "Once that Trooper is no longer" in examples[3]
+    assert "[[skill:doctor]] or [[skill:engineer]]" not in " ".join(examples)
+    assert "[[skill:doctor]]" in " ".join(nwi["facts"]["effects"])
+    assert "[[skill:doctor]]" in " ".join(technorganic["facts"]["effects"])
+    assert "[[skill:doctor]] can cancel" in " ".join(stunned["facts"]["effects"])
+    assert {citation["page"] for citation in doctor["citations"] if (
+        citation["source_id"] == "n5-core-v5.3-pdf" and "page" in citation
+    )} >= {90, 104, 116, 170}
+
+
 def test_rea001_engineer_examples_are_published_as_player_clarifications(
     current_rules_database: RulesDatabase,
 ) -> None:

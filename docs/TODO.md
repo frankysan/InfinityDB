@@ -591,8 +591,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       the published Engineer/Targeted/Stunned/Doctor references and links.
       Responsive browser acceptance passed 18/18; non-Allied eligibility
       remains independently open under REA-038.
-    - [ ] **REA-002 — Doctor recovery:** Review the revised ordinary recovery
-      requirements and lethal failure on the player-facing Doctor card.
+    - [x] **REA-002 ? Doctor recovery:** Reviewed ordinary Unconscious
+      VITA/contact recovery, lethal failure, 2W and ReRoll WIP variants,
+      and the Command Token reroll distinction. Published source-linked
+      examples for conscious wounded targets, Stunned VITA versus STR,
+      No Wound Incapacitation self-treatment, and Technorganic STR recovery
+      only while Unconscious. Browser acceptance passed 21/21 at 1440,
+      390 and 320 px; non-Allied target eligibility remains REA-038.
     - [ ] **REA-003 — Intuitive Attack:** Review the corrected attack resolution
       explanation in the player-facing reference.
     - [ ] **REA-004 — Continuous Damage:** Verify the documented Critical

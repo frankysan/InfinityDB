@@ -378,6 +378,34 @@ ordinary recovery requirements but do not establish the universal friendly quali
 REA-038 separates direct treatment, delegated Allied use, self-use and Engaged
 prohibitions; the neutral recovery proposal above deliberately leaves it open.
 
+**Acceptance follow-up (2026-10-14): Locally resolved for the player-facing
+Doctor reference; REA-038 remains an independent external rule question.**
+The original "Current" text above describes an older draft. The curated
+Doctor card already restricts ordinary recovery to a target with VITA in
+Unconscious State and Silhouette contact (English N5.3 p. 90), with a
+successful WIP Roll removing one Wound and canceling Unconscious, while
+failure directly causes Dead State. Its existing Doctor (2W), ReRoll
+WIP=X, separate Command Token reroll, non-Null self-use, and Engaged
+restrictions were preserved unchanged.
+
+The card now explains four scoped interactions in Clarifications:
+(1) an operational wounded VITA Trooper is not ordinarily eligible;
+(2) Stunned can be canceled by Doctor for VITA or Engineer for STR;
+(3) a Trooper with NWI and Doctor can treat itself under NWI's special
+Null-effect exception, with lethal failure; and (4) a Technorganic
+Unconscious STR target can receive Doctor recovery despite lacking VITA,
+but cannot continue STR Wound healing by Doctor after leaving
+Unconscious. These are not universal exceptions for every recovery case.
+English N5.3 pp. 104, 116 and 170 are now cited alongside p. 90.
+
+Curated/composed rules acceptance tests passed **281/281** and Chromium
+browser acceptance passed **21/21** content/navigation checks at 1440,
+390 and 320 px on Doctor, NWI, Technorganic and Stunned, including the
+three direct exception links; no JS errors or horizontal overflow.
+No recovery simulation, Army profile rewrite or new non-Allied target
+eligibility rule was introduced. This resolves REA-002's local reference
+acceptance, not the unresolved REA-038 source-decision dependency.
+
 ### REA-003 - Intuitive Attack appears to require a second attack roll
 
 **Classification:** correctness, clarity, completeness. **Severity:** High.

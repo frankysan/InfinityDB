@@ -1863,8 +1863,15 @@ Sources:
 
 Doctor's ordinary recovery requires Silhouette contact, a VITA target and
 Unconscious State. A successful WIP Roll removes one Wound and cancels
-Unconscious; failure causes Dead. Other State/Skill rules, such as Stunned,
-No Wound Incapacitation and Technorganic, provide specific exceptions.
+Unconscious; failure causes Dead. Other State/Skill rules provide explicit, separately scoped exceptions:
+Stunned cancellation accepts Doctor on VITA or Engineer on STR;
+No Wound Incapacitation allows a Trooper with Doctor to treat itself
+while ignoring the Unconscious Null restrictions; and Technorganic
+allows Doctor to recover an Unconscious STR Trooper, but does not grant
+continued ordinary Doctor Wound healing after Unconscious ends.
+A merely wounded operational VITA Trooper does not satisfy the ordinary
+Unconscious requirement. These cases are explained on the Doctor card
+(REA-002); they are not generic extensions of ordinary healing.
 Engineer instead has separate effects: repair an STR target (a failed WIP Roll
 inflicts a Wound), or cancel eligible non-Unconscious States (failure has no
 negative consequence). Thus an allied **VITA Trooper in Targeted** can

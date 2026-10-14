@@ -8924,7 +8924,11 @@
                 "clarifications": [
                     "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful recovery Roll is sufficient under the shared success rule.",
                     "A [[rule:peripheral-type:servant|Servant]] or Connected [[rule:peripheral-type:cyberplug|Cyberplug]] in Silhouette contact with an allied Model can allow the Controller to declare [[skill:doctor|Doctor]] without direct contact. The Controller makes the Roll; only one target is treated in that Order.",
-                    "**Direct versus delegated contact:** The direct Doctor Skill lists its own target/contact conditions for [[state:unconscious|Unconscious]] VITA recovery but does not print a universal Allied-only prerequisite. [[equipment:medikit|MediKit]] separately requires an Allied target, as do the remote contact permissions of [[rule:peripheral-type:servant|Servant]] and Connected [[rule:peripheral-type:cyberplug|Cyberplug]]. Those local Allied restrictions must not be assumed to amend this direct Skill."
+                    "**Direct versus delegated contact:** The direct Doctor Skill lists its own target/contact conditions for [[state:unconscious|Unconscious]] VITA recovery but does not print a universal Allied-only prerequisite. [[equipment:medikit|MediKit]] separately requires an Allied target, as do the remote contact permissions of [[rule:peripheral-type:servant|Servant]] and Connected [[rule:peripheral-type:cyberplug|Cyberplug]]. Those local Allied restrictions must not be assumed to amend this direct Skill.",
+                    "**Ordinary recovery example:** An allied VITA Trooper who has lost a Wound but is not in [[state:unconscious|Unconscious]] cannot receive ordinary Doctor recovery merely to restore that Wound. Once the VITA Trooper is [[state:unconscious|Unconscious]], Doctor may attempt the WIP Roll in Silhouette contact: success removes one Wound and cancels [[state:unconscious|Unconscious]]; failure puts the target in [[state:dead|Dead State]] (N5.3 p. 90).",
+                    "**[[state:stunned|Stunned]] exception:** A VITA Trooper in [[state:stunned|Stunned]] may have that condition canceled by Doctor after a successful WIP Roll in Silhouette contact, even if not [[state:unconscious|Unconscious]]. A STR Trooper instead needs [[skill:engineer|Engineer]] to cancel [[state:stunned|Stunned]]. This permission comes from the condition-specific cancellation rule, not a general allowance to heal conscious Troopers (N5.3 p. 170).",
+                    "**[[skill:no-wound-incapacitation|No Wound Incapacitation]] self-treatment:** A Trooper with both NWI and Doctor may use Doctor on itself while NWI lets it ignore the [[state:unconscious|Unconscious]] Null restrictions. A successful recovery removes one Wound and the NWI Token, returning the Trooper to [[state:normal|Normal State]]; a failed healing Roll puts it in [[state:dead|Dead State]] (N5.3 p. 104). Without that exception, Doctor self-use is prohibited in a [[term:null-state|Null State]].",
+                    "**[[skill:technorganic|Technorganic]] exception:** An [[state:unconscious|Unconscious]] STR Trooper with [[skill:technorganic|Technorganic]] can be recovered using Doctor in Silhouette contact despite lacking VITA. A successful WIP Roll removes one Wound and cancels [[state:unconscious|Unconscious]]. Once that Trooper is no longer [[state:unconscious|Unconscious]], [[skill:technorganic|Technorganic]] does not permit ordinary Doctor healing of remaining STR Wounds (N5.3 p. 116)."
                 ]
             },
             "labelIds": [
@@ -8956,6 +8960,21 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 51,
                     "section": "Interacting with a Close Combat"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 104,
+                    "section": "No Wound Incapacitation: Doctor/Engineer and Healing"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 116,
+                    "section": "Technorganic Example"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 170,
+                    "section": "Stunned State Cancellation"
                 }
             ],
             "review": {

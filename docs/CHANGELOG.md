@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Doctor now includes concrete explanations of ordinary Unconscious
+  recovery and its lethal failure, Stunned, NWI self-treatment and
+  Technorganic STR exceptions without granting routine healing to
+  conscious wounded Troopers.
 - Engineer now includes practical examples distinguishing STR Wound
   repair from canceling Targeted on a VITA Trooper, including why a failed
   cancellation does not cause a Wound and why Stunned uses Doctor for VITA.
@@ -153,6 +157,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Complete REA-002 Doctor
+  reference acceptance with N5.3-cited examples for ordinary VITA
+  recovery, Stunned, No Wound Incapacitation, and Technorganic.
+  Preserve Doctor variant mechanics and pending non-Allied eligibility
+  review; no recovery engine or imported Army profiles changed.
 - **Data processing + Web frontend:** Complete REA-001 Engineer
   reference acceptance with source-backed VITA Targeted and
   VITA/STR Stunned examples, plus linked N5.3 source citations. Preserve

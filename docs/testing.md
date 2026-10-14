@@ -1377,3 +1377,26 @@ semantic links. No JavaScript errors or horizontal overflow. Private
 acceptance script, screenshots and result JSON are Git-ignored under
 `local/audits/`. General recovery simulation and an official ruling
 on non-Allied direct treatment are outside this acceptance scope.
+
+
+## 1.0 Doctor recovery and scoped exceptions (REA-002)
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Compared N5.3 English Doctor
+p. 90, No Wound Incapacitation p. 104, Technorganic and its STR
+recovery example p. 116, and Stunned State cancellation p. 170. The
+published Doctor reference retains Unconscious VITA/contact eligibility,
+lethal ordinary failure, Doctor (2W), ReRoll WIP=X, and the independent
+Command Token reroll. Added four source-linked clarifications covering
+ordinary healing versus a conscious wounded target, Stunned treatment,
+NWI self-treatment, and Technorganic's Unconscious-only exception.
+The pending REA-038 non-Allied direct-target interpretation was not
+resolved or changed.
+
+Focused curated/composed rules regressions passed **281/281**. Headless
+Chrome against a newly rebuilt local rules DB passed **21/21**
+content/navigation checks at 1440, 390 and 320 px for Doctor, NWI,
+Technorganic and Stunned, including Doctor-to-exception links, with
+no JavaScript page errors or horizontal overflow. Private script,
+320 px screenshots and result JSON remain in Git-ignored
+`local/audits/`. This is reference acceptance, not a general healing
+simulation or complete non-Allied eligibility adjudication.
