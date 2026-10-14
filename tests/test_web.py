@@ -4859,8 +4859,12 @@ def test_reference_catalog_pages_and_rules_backed_apis_are_served(
     assert "cancels and overrides" in nfb["description"]
     assert "Only one NFB effect" in nfb["description"]
     assert {item["href"] for item in nfb["used_by"]} >= {
+        "/equipment/albedo",
+        "/equipment/holoprojector",
         "/hacking-programs/cybermask",
         "/hacking-programs/white-noise",
+        "/skills/impersonation",
+        "/skills/mimetism",
     }
 
     status, _, body = request(rules_app, "/api/labels/non-reloadable")

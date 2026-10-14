@@ -884,3 +884,30 @@ The source-based API regression assertions remain in
 `tests/test_rules_database.py`; ignored local browser evidence is
 stored under `local/audits/rea018-browser/`. Related cross-source
 scope and Program-specific cases remain independent 1.0 audit work.
+
+
+## 1.0 Negative Feedback REA-019 browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** The shared Negative Feedback
+Label, Cybermask and White Noise references were checked against official
+English N5.3 pp. 59, 61, 76 and 174 for same-Trooper NFB cancellation
+and each Program's separate duration. Chromium acceptance passed **15/15
+render/navigation checks** at 1440, 390 and 320 px; there were no
+JavaScript errors or page-level horizontal overflow.
+
+The Label states that a newly activated NFB effect overrides other active
+NFB effects on **the same Trooper** until cancellation/deactivation,
+without affecting allies. Cybermask restricts its Hacker while that
+Hacker remains in IMP-2; White Noise restricts its creating Hacker
+while its Template persists until the start of the States Phase.
+The Label's actual Used by links navigate to both Hacking Program pages
+at all three tested widths. All three 320 px screenshots were inspected.
+
+Source/curated data and runtime gameplay behavior were unchanged:
+REA-019 was already implemented and has now passed browser acceptance.
+The existing rules regression plus the extended API Used by contract
+are under `tests/test_rules_database.py` and `tests/test_web.py`.
+Private screenshots, source extracts and browser results are Git-ignored
+under `local/audits/rea019-browser/` and `local/audits/`.
+This is bounded reference acceptance, not generalized NFB interaction
+simulation.

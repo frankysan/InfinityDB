@@ -634,9 +634,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       replacement. Browser acceptance passed 18/18 cases at 1440/390/320 px,
       with no errors or overflow. Related program-specific exceptions remain
       under their owning audit findings.
-    - [ ] **REA-019 — Negative Feedback:** Verify Trooper-local replacement
-      and duration in the shared Label, Cybermask, and White Noise cards,
-      including Label-to-Program navigation.
+    - [x] **REA-019 — Negative Feedback:** Verified the shared Label's
+      same-Trooper cancellation and the distinct Cybermask/White Noise
+      lifetimes against N5.3 pp. 59, 61, 76 and 174. Chromium acceptance
+      covered three cards and Label-to-Program links at 1440/390/320 px
+      (15/15 passed); no JavaScript errors or horizontal overflow.
+      Other NFB interactions remain scoped to their owning rules.
     - [ ] **REA-021 — Special Dice:** Review the published (+1 SD) baseline
       and links from Fireteams, Martial Arts Levels 3/5, Berserk,
       Disposable uses, and ranged Kits. Verify the FAQ Discover distinction,

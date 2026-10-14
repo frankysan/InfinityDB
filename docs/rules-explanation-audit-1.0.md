@@ -803,19 +803,37 @@ REA-019, REA-026 and REA-030.
 `negative-feedback`, `skill:mimetism`, `equipment:albedo`, `equipment:holoprojector`;
 H `hacking-program:cybermask`, `hacking-program:white-noise`.
 
-**Current:** The Label says only that another NFB element is incompatible.
-Program facts do not explain which effects stop or when their restriction ends.
-The player must reconstruct this from external rules.
+**Original gap:** The shared Label stated incompatibility but did not
+explain which active effects were overridden, their owner or lifetime.
+Program cards did not describe the specific duration of the NFB restriction.
+
+**Current implementation (verified 2026-10-14):** The shared Negative
+Feedback Label explains that activating a new NFB Skill, Equipment,
+Program or rule overrides active NFB effects **on the same Trooper**,
+allowing one active effect at a time until cancellation or voluntary
+deactivation. The Cybermask card identifies its Hacker as the owner:
+other NFB effects remain unavailable while that Hacker is in IMP-2,
+ending when the State is canceled. The White Noise card separately
+applies NFB to the Hacker who placed its Template until the Template
+is removed at the start of the States Phase. Neither program suppresses
+NFB Equipment held by unrelated allies. The Label's Used by section
+links to both Programs as well as Mimetism, Impersonation, Albedo and
+Holoprojector.
 
 **Evidence/result:** S1 pp. 59, 61, 76 and 174 make the new NFB effect override
 other NFB effects for its duration. Cybermask's restriction persists while in
 IMP-2; White Noise's applies to its Hacker while the Template is present.
 That does not cancel every allied Trooper's Equipment or the whole army's effects.
 
-**Action:** Expand the shared definition with duration/owner scope and link it
-from affected Program prose. Separate Label definition from Program-specific
-lifetimes. **Fix:** Label/curated text and links. **Dependencies:** REA-015,
-REA-018; no pairwise universal negation edges.
+**Disposition:** Resolved. Official N5.3 pp. 59, 61, 76 and 174
+support the existing owner/lifetime split. Existing rules and API
+contract tests cover the baseline, Cybermask and White Noise; Chromium
+acceptance passed 15/15 card/viewport and Label-to-Program navigation
+checks at 1440, 390 and 320 px. All three 320 px screenshots were
+visually inspected with no page-level clipping or JavaScript errors.
+No new cross-Trooper cancellation relationships, gameplay logic, or
+curated-data changes are warranted. Further interaction cases remain
+separately scoped to REA-015 and related findings.
 
 ### REA-020 - Fireteam basics omit action ownership and integrity exceptions
 
