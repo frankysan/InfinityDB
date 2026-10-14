@@ -130,14 +130,14 @@ function weaponAmmunitionEffects(profile) {
         target: effect.record_id,
         label: effect.name,
         public_reference: effect.public_reference,
-        preview_tokens: [{ type: "text", text: effect.summary }],
+        preview_tokens: effect.summary_tokens || [{ type: "text", text: effect.summary }],
       }]);
     } else {
       title.textContent = effect.name;
     }
     const description = document.createElement("p");
     description.className = "detail-copy";
-    description.textContent = effect.summary;
+    appendMaintainedText(description, effect.summary_tokens, effect.summary);
     item.append(title, description);
     if (effect.citations?.length) {
       const citations = document.createElement("p");

@@ -210,6 +210,38 @@
       "profileSha256": "ee89d7a04e8ca5b09325d3951373e9ebd52a852c793e11f5c5e99c6dc5cb82d1",
       "reviewedOn": "2026-10-14",
       "reason": "N5.3 Weapon Chart p. 185 prints AP Ammunition, ARM/2 with one Saving Roll, PS 6, Burst 4, Suppressive Fire and ranges identical to the standard Spitfire. Shared AP and Suppressive Fire definitions supply the mechanics; no other Weapon-specific exception is printed."
+    },
+    {
+      "slug": "smoke-grenades",
+      "name": "Smoke Grenades",
+      "chartPage": 178,
+      "profileSha256": "fae2678a787bfbe1b94447f221a4244ea74384a64625c888a67247fd32975dcd",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 p. 178: Smoke Ammunition, no PS or Saving Roll, B1, short range MOD 0 and -3 at medium range; Speculative Attack, BS Weapon (PH), circular Impact Template, Non-lethal, Targetless, and [**] Ammunition footnote. The canonical Smoke visibility-zone rule, not an ARM/BTS attack, owns the zero-visibility placement and opposed-roll conditions. The Trait links own PH-based attacks, Speculative Attack, Targetless and Template placement."
+    },
+    {
+      "slug": "grenades",
+      "name": "Grenades",
+      "chartPage": 178,
+      "profileSha256": "1fcf0947de69269028595ee368416ff91720b9fc946be2bb3d89c011d7165bf0",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 p. 178: Normal Ammunition, PS 7/B1, one ARM Saving Roll, +3 short-range MOD; Speculative Attack, BS Weapon (PH), circular Impact Template, without Non-lethal or Targetless. The canonical Normal Ammunition and individually linked Traits supply all published mechanics."
+    },
+    {
+      "slug": "e-m-grenades",
+      "name": "E/M Grenades",
+      "chartPage": 178,
+      "profileSha256": "648913a03be192dae48df92d7070d96c750ecc57f37f1d7348a494ed52cf5374",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 p. 178: E/M Ammunition, PS 7/B1, two BTS/2 Saving Rolls, +3 short-range MOD; Speculative Attack, BS Weapon (PH), circular Impact Template, Non-lethal and [**] Ammunition footnote. E/M target effects and non-Wound State outcomes are covered by canonical E/M and Non-lethal references; [**] does not create an extra attack effect."
+    },
+    {
+      "slug": "eclipse-grenades",
+      "name": "Eclipse Grenades",
+      "chartPage": 178,
+      "profileSha256": "c4c86e1c342568df0cd0132ca042f5bb908c412ea550f052550c0ea3657c53d9",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 p. 178: Eclipse Ammunition, no PS or Saving Roll, B1, short-range MOD 0; Speculative Attack, BS Weapon (PH), circular Impact Template, Non-lethal, Reflective, Targetless and [**] Ammunition footnote. Canonical Eclipse visibility-zone rules explicitly handle Reflective blocking of MSV, separate from Smoke; the source Traits and ranges are preserved without a new grenade-specific rule."
     }
   ]
 }

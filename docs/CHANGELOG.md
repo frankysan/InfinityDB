@@ -64,6 +64,8 @@ are not retroactively relabeled.
 
 - **Data processing + Web backend + Web frontend:** Show canonical Ammunition
   effects and source citations in an expandable section on Weapon profiles.
+  Shared descriptions now also render inline rules links correctly (including
+  Smoke and Eclipse visibility-zone references) instead of raw link notation.
   Shared effects use the normal reference links and touch previews, while each
   Weapon retains its own Saving Rolls, Traits and modes.
 - **Data processing + Web backend:** Expand the shared Peripheral baseline

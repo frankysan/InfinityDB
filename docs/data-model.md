@@ -71,6 +71,9 @@ unchanged source field and is never interpreted as Ammunition composition.
 For exact reviewed source ID/name pairs, Weapon profiles additionally expose
 `ammunition_effects`: ordered canonical `ammunition:*` IDs, names, current
 summaries, citations and routes, copied from `rules.db` at response time.
+The API resolves maintained inline references in these summaries to
+`summary_tokens` with navigable public references; the browser renders
+those tokens rather than exposing raw `[[...]]` source notation.
 The Weapon profile displays these in a collapsible **Ammunition effects
 (shared rules)** section, while its original PS, Burst, Saving Roll,
 Traits and modes remain untouched. The `ammunition_effects` projection

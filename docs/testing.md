@@ -587,6 +587,33 @@ Ball screenshots were visually inspected. Evidence remains in ignored
 `local/audits/weapon-first-batch-2-browser/`. These checks are bounded
 reference/browser acceptance, not a complete release gate.
 
+## 1.0 Grenade shared-effects browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Smoke Grenades,
+standard Grenades, E/M Grenades and Eclipse Grenades matched the
+N5.3 p. 178 chart at 1440, 390 and 320 px (12 page/viewport
+checks), preserving their individual range MODs, PS, Burst,
+Saving Rolls and published Traits. Smoke/Eclipse use distinct
+visibility-zone Ammunition records with no Saving Rolls;
+E/M retains two BTS/2 Saving Rolls and standard Grenades one
+ARM Saving Roll. All four use the shared BS Weapon (PH),
+Speculative Attack and circular Impact Template rules without
+duplicating mechanics in new Weapon records. Source footnotes
+`[**]` remain visible as original source notation.
+
+The shared Ammunition renderer was also verified to display
+canonical inline references (including Smoke's Zero Visibility
+Zone and Eclipse's Reflective/MSV relationships) as real links
+rather than raw `[[...]]` tokens. Desktop Eclipse-to-Reflective
+navigation and mobile Smoke Ammunition preview-first, second-tap
+navigation passed (**14/14 checks**). All four 320 px screenshots
+were inspected; no horizontal overflow or JavaScript errors
+were observed. Source-profile-pinned reviews remain in
+`data/curated/weapon-shared-effect-reviews.json`; private evidence
+remains Git-ignored under
+`local/audits/grenades-shared-review-browser/`. These checks
+validate references and rendering, not simulated attack outcomes.
+
 ## 1.0 Spitfire shared-effects browser acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Spitfire, AP Spitfire

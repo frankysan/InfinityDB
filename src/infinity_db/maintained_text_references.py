@@ -183,6 +183,14 @@ def enrich_maintained_text_references(
         if isinstance(node, dict):
             if isinstance(node.get("id"), str) and isinstance(node.get("summary"), str):
                 _enrich_rule_record(node, resolver)
+            elif (
+                isinstance(node.get("record_id"), str)
+                and node["record_id"].startswith("ammunition:")
+                and isinstance(node.get("summary"), str)
+            ):
+                # Weapon profiles reuse canonical Ammunition text but publish
+                # its identity as record_id, not as an embedded rules record.
+                node["summary_tokens"] = resolver.tokens(node["summary"])
             for child in list(node.values()):
                 walk(child)
         elif isinstance(node, list):

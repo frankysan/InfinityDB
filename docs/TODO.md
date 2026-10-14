@@ -477,13 +477,25 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       `Anti-Material Mode` is preserved; the official chart uses
       `Anti-Materiel Mode`. Browser checks passed 11/11,
       including desktop Trait and mobile DA preview/navigation.
+    - [x] Reconcile the four N5.3 p. 178 Grenades (Smoke,
+      standard, E/M and Eclipse). The original single-mode profiles
+      retain Speculative Attack, BS Weapon (PH), circular Impact
+      Template, their distinct range MODs and Saving Rolls, and
+      optional Non-lethal/Targetless/Reflective/[**] Traits.
+      Smoke and Eclipse reuse their separately reviewed visibility-
+      zone rules; E/M uses two BTS/2 Saving Rolls and standard
+      Grenades one ARM Saving Roll. No standalone Weapon text
+      is necessary. All four decisions are pinned to exact Army
+      source profiles; browser acceptance passed 14/14 checks.
+      Also correct reused Ammunition descriptions to render
+      maintained-text links rather than raw [[reference]] syntax.
     - [ ] Continue source-specific Weapon review without duplicating
-      canonical Ammunition or Trait rules. The refreshed triage has
-      58 actionable reviews, 26 accepted shared-only identities and
-      11 pending multi-profile candidates, plus Flash Pulse's
-      historical citation. Next: Grenades (Smoke, standard, E/M,
-      Eclipse). Pitcher and Mine Dispenser still need separate
-      missing-effect source reviews.
+      canonical Ammunition or Trait rules. The updated triage has
+      54 actionable reviews, 30 accepted shared-only identities,
+      and 11 pending multi-profile candidates, plus Flash Pulse's
+      historical citation. Next: Sniper Rifles (MULTI, AP,
+      standard, Viral, T2, K1 and Plasma). Pitcher and Mine
+      Dispenser still need separate missing-effect source reviews.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

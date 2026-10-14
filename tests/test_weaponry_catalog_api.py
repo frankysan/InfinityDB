@@ -1272,6 +1272,105 @@ def test_multi_spitfire_mode_specific_traits_and_source_label(
     assert normal["saving"] == "ARM" and armor["saving"] == "ARM/2"
 
 
+@pytest.mark.parametrize(
+    ("slug", "ammunition", "saving", "rolls", "ps", "short_mod",
+     "traits", "effect_id"),
+    [
+        ("smoke-grenades", "Smoke", "-", "-", "-", "0", [
+            "Speculative Attack", "BS Weapon (PH)", "Impact Template (Circular)",
+            "Non-lethal", "Targetless", "[**]",
+        ], "ammunition:smoke"),
+        ("grenades", "N", "ARM", "1", "7", "+3", [
+            "Speculative Attack", "BS Weapon (PH)", "Impact Template (Circular)",
+        ], "ammunition:normal"),
+        ("e-m-grenades", "E/M", "BTS/2", "2", "7", "+3", [
+            "Speculative Attack", "BS Weapon (PH)", "Impact Template (Circular)",
+            "Non-lethal", "[**]",
+        ], "ammunition:em"),
+        ("eclipse-grenades", "Eclipse", "-", "-", "-", "0", [
+            "Speculative Attack", "BS Weapon (PH)", "Impact Template (Circular)",
+            "Non-lethal", "Reflective", "Targetless", "[**]",
+        ], "ammunition:eclipse"),
+    ],
+)
+def test_grenades_reuse_exact_source_ammunition_and_traits(
+    weaponry_app: Callable,
+    slug: str, ammunition: str, saving: str, rolls: str, ps: str,
+    short_mod: str, traits: list[str], effect_id: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert (
+        profile["mode"], profile["ammunition"], profile["saving"],
+        profile["saving_num"], profile["damage"], profile["burst"],
+        profile["traits"],
+    ) == (None, ammunition, saving, rolls, ps, "1", traits)
+    assert profile["ranges"] == {
+        "short": {"max": 20, "mod": short_mod},
+        "med": {"max": 40, "mod": "-3"},
+    }
+    assert len(profile["ammunition_effects"]) == 1
+    assert profile["ammunition_effects"][0]["record_id"] == effect_id
+    assert profile["ammunition_effects"][0]["citations"]
+    assert len(profile["trait_references"]) == len(traits)
+    links = {
+        r["slug"] for r in profile["trait_references"] if r["slug"]
+    }
+    assert {"speculative-attack", "bs-weapon-ph", "impact-template"} <= links
+    assert ("reflective" in links) == (slug == "eclipse-grenades")
+    assert ("targetless" in links) == (slug in {
+        "smoke-grenades", "eclipse-grenades",
+    })
+    assert ("non-lethal" in links) == (slug != "grenades")
+    assert ("[**]" in traits) == (slug != "grenades")
+
+
+def test_smoke_eclipse_visibility_is_not_em_damage_or_saving_roll(
+    weaponry_app: Callable,
+) -> None:
+    smoke = _weapon_detail(weaponry_app, "smoke-grenades")["profiles"][0]
+    eclipse = _weapon_detail(weaponry_app, "eclipse-grenades")["profiles"][0]
+    em = _weapon_detail(weaponry_app, "e-m-grenades")["profiles"][0]
+    grenades = _weapon_detail(weaponry_app, "grenades")["profiles"][0]
+
+    assert smoke["saving"] == eclipse["saving"] == "-"
+    assert smoke["saving_num"] == eclipse["saving_num"] == "-"
+    assert smoke["damage"] == eclipse["damage"] == "-"
+    assert smoke["ranges"] == eclipse["ranges"]
+    assert smoke["ammunition_effects"][0]["record_id"] == "ammunition:smoke"
+    assert eclipse["ammunition_effects"][0]["record_id"] == "ammunition:eclipse"
+    assert "Reflective" not in smoke["traits"]
+    assert "Reflective" in eclipse["traits"]
+    assert em["saving"] == "BTS/2" and em["saving_num"] == "2"
+    assert em["ammunition_effects"][0]["record_id"] == "ammunition:em"
+    assert grenades["saving"] == "ARM" and grenades["saving_num"] == "1"
+    assert grenades["ammunition_effects"][0]["record_id"] == "ammunition:normal"
+    assert "[**]" not in grenades["traits"]
+
+    # Shared ammunition prose must use resolved maintained-text tokens,
+    # not display raw [[...]] references on the Weapon details page.
+    assert [
+        t["target"] for t in smoke["ammunition_effects"][0]["summary_tokens"]
+        if t["type"] == "reference"
+    ] == ["term:zero-visibility-zone"]
+    assert [
+        t["target"] for t in eclipse["ammunition_effects"][0]["summary_tokens"]
+        if t["type"] == "reference"
+    ] == [
+        "ammunition:smoke", "trait:reflective", "term:zero-visibility-zone",
+        "equipment:multispectral-visor",
+    ]
+    for profile in (smoke, eclipse, em, grenades):
+        effect = profile["ammunition_effects"][0]
+        assert effect["summary_tokens"]
+        assert all(
+            token["public_reference"] for token in effect["summary_tokens"]
+            if token["type"] == "reference"
+        )
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:
