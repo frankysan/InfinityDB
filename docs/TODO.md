@@ -640,11 +640,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       covered three cards and Label-to-Program links at 1440/390/320 px
       (15/15 passed); no JavaScript errors or horizontal overflow.
       Other NFB interactions remain scoped to their owning rules.
-    - [ ] **REA-021 — Special Dice:** Review the published (+1 SD) baseline
-      and links from Fireteams, Martial Arts Levels 3/5, Berserk,
-      Disposable uses, and ranged Kits. Verify the FAQ Discover distinction,
-      SD versus Burst, and browser navigation. Fireteam Level 4 PH/WIP
-      modifiers apply to the attack Attribute, not Discover.
+    - [x] **REA-021 — Special Dice:** Verified +1 SD versus Burst,
+      allocation/discard, Disposable charges, ranged Kits, Martial Arts
+      Levels 3/5, Berserk's Long Skill exception, Fireteam Levels 2/4,
+      and the Discover distinction against N5.3 and FAQ v0.1. The
+      Fireteam Level 2 table now links the shared Special Dice rule.
+      Browser acceptance passed 39/39 route/navigation checks at
+      1440/390/320 px. The separate official Spanish reminder conflict
+      remains unresolved under REA-041.
     - [ ] **REA-022 — Recovery Kits:** Review accepted multi-roll recovery
       and Disposable spending explanations on the player-facing cards.
     - [x] **REA-026 — Shared General Rules:** Face to Face Rolls, Saving

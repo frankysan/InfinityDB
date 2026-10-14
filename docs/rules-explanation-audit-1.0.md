@@ -867,10 +867,11 @@ text/facts/links; renderer changes if new fact groups are adopted.
 `skill:martial-arts` and L1-L5, `skill:bs-attack`, `trait:disposable-x`,
 `equipment:medikit`, `equipment:gizmokit`, `trait:bs-weapon-ph`, `trait:bs-weapon-wip`.
 
-**Current:** Fireteam bonuses list +1 SD and +1 BS but do not explain allocation,
-discard timing, Disposable uses, or no-roll/Long Skill limits. Martial Arts
-numeric values already exist in the Army table and browser; the explanation is
-missing, not the chart. The label +1 BS can obscure its WIP/PH weapon applicability.
+**Original gap:** Fireteam bonuses listed +1 SD and +1 BS without the
+allocation, discard timing, Disposable spending, Long Skill or no-roll
+restrictions. Martial Arts numeric modifiers existed in the source table,
+but lacked a shared player-readable procedure. Fireteam Level 4's
+Attribute modifier could be mistaken for BS only, omitting PH/WIP weapons.
 
 **Evidence/result:** S1 pp. 75, 100 and 136 say SD adds a die to roll/discard
 without increasing Burst or consuming uses, in both turns. Fireteam SD does not
@@ -885,11 +886,21 @@ Martial Arts/Berserk exceptions. **Fix:** prose/links, possibly explanatory
 table captions; retain imported tables. **Dependencies:** REA-005, REA-022,
 REA-026, REA-034.
 
-**Implementation follow-up (2026-10-13):** The shared `rule:special-dice`
-General Rule and links from Fireteam, Martial Arts, Berserk, BS Attack,
-Disposable and ranged Kit references now cover the identified allocation,
-discard, source exceptions and Coordinated Orders FAQ. API and browser
-acceptance remain required; this finding is not yet closed.
+**Disposition (verified 2026-10-14): Resolved.** The shared
+`rule:special-dice` General Rule now explains SD as an extra rolled
+then discarded die, without increasing Burst or spending charges; its
+examples distinguish divided Burst, reactive timing, Face to Face
+selection and the Active Player's first discard. Martial Arts L3/L5,
+Berserk, ranged Kits, Disposable and BS Attack link the same baseline.
+The Fireteam Level 2 table now links its +1 SD bonus directly to that
+rule. Level 4 modifies the Attribute of the BS Attack (including PH/WIP
+weapons), while Discover receives Level 3's +3 but not Levels 2/4.
+N5.3 pp. 75, 86, 100 and 136 and FAQ v0.1 p. 3 support these
+distinctions; browser acceptance passed 39/39 cases, including
+Fireteam-to-Special-Dice navigation at 1440, 390 and 320 px.
+The duplicated Coordinated Orders FAQ clarification was consolidated.
+The Spanish N5.3 Fireteam dice-cap wording contradiction remains
+separately open under REA-041; this acceptance does not adjudicate it.
 
 ### REA-022 - Kit recovery and Disposable spending need multi-roll rules
 

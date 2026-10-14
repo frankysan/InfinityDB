@@ -50,7 +50,8 @@ are not retroactively relabeled.
 - Face to Face Rolls and Saving Rolls now have linked explanations of opposing
   results, Criticals, ties, defense values and special Saving Roll exceptions.
 - Special Dice now have a linked reference explaining extra-die allocation and
-  discard timing, Fireteam and Martial Arts bonuses, and exceptions.
+  discard timing, Fireteam and Martial Arts bonuses, and exceptions. Fireteam
+  Level 2's +1 SD bonus now links directly to that explanation.
 - Hacking Area, Firewall and Supportware now have their own linked references, with
   enemy Repeater restrictions, Firewall Saving Roll bonuses and Supportware replacement
   explained alongside Hacking Programs.

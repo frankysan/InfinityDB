@@ -19018,7 +19018,7 @@
                         "level": 2,
                         "requirement": "At least 2 Troopers belong to the same Unit.",
                         "bonuses": [
-                            "[[skill:bs-attack]] (+1 SD)"
+                            "[[skill:bs-attack]] ([[rule:special-dice|+1 SD]])"
                         ]
                     },
                     {
@@ -22210,7 +22210,6 @@
                     "For example, a B4 [[skill:bs-attack|BS Attack]] with +1 SD rolls five dice and discards one, leaving B4 to resolve. If that B4 is split between two targets, the extra die and its discard both belong to just one target.",
                     "The Fireteam Level 2 bonus supplies +1 SD to [[skill:bs-attack]], including ranged [[equipment:medikit|MediKit]] and [[equipment:gizmokit|GizmoKit]] attacks, but not [[skill:discover]]. Level 4 separately adds +1 to the Attribute used by a [[skill:bs-attack|BS Attack]], including [[trait:bs-weapon-ph|PH]] or [[trait:bs-weapon-wip|WIP]] weapons; it also does not apply to [[skill:discover]].",
                     "[[skill:martial-arts]] Levels 3 and 5 grant +1 SD during [[skill:cc-attack|CC Attack]]; Level 5 also grants +1B. The extra SD die is still discarded, while +1B changes the actual Burst.",
-                    "The N5 v0.1 FAQ confirms that SD MODs still apply in Coordinated Orders because they do not alter Burst.",
                     "The N5 v0.1 FAQ confirms [[rule:coordinated-orders|Coordinated Orders]] retain +1 SD: it does not change Burst, so the Spearhead's reduced Burst and the extra die remain separate."
                 ]
             },

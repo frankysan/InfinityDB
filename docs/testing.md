@@ -911,3 +911,27 @@ Private screenshots, source extracts and browser results are Git-ignored
 under `local/audits/rea019-browser/` and `local/audits/`.
 This is bounded reference acceptance, not generalized NFB interaction
 simulation.
+
+
+## 1.0 Special Dice REA-021 browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** The public Special Dice General
+Rule, Fireteam Level bonus table, Martial Arts, Berserk, BS Attack,
+Disposable, MediKit, GizmoKit and Discover references were checked
+against English N5.3 pp. 75, 86, 100 and 136 plus FAQ v0.1 p. 3.
+Chromium acceptance passed **39/39 route and navigation checks** at
+1440, 390 and 320 px, with no JavaScript errors or page-level overflow.
+
+Special Dice add a rolled-and-discarded die, not Burst or a Disposable
+charge. The Fireteam Level 2 bonus table directly links its +1 SD
+notation to the shared explanation. The examples preserve dice
+allocation to one target, Active Player first discard, +1 SD during
+both turns, Martial Arts Levels 3/5, Berserk's explicit Long Skill
+exception, and Fireteam Level 4's PH/WIP attribute distinction from
+Discover. Screenshots of the 320 px Fireteams and Special Dice pages
+were inspected.
+
+Private evidence is under `local/audits/rea021-browser/` and
+`local/audits/rea021-source-scan-2026-10-14.txt`. The unresolved
+Spanish Fireteam maximum-dice wording conflict remains independently
+tracked under REA-041. No general dice or Burst evaluator was added.

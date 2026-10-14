@@ -214,6 +214,11 @@ def test_special_dice_reference_and_source_exceptions_are_composed(
         ("n5-faq-v0.1-en-pdf", 3),
     }
 
+    assert sum(
+        "N5 v0.1 FAQ confirms" in clause
+        for clause in special_dice["facts"]["clarifications"]
+    ) == 1
+
     for record_id in (
         "rule:fireteam-level-bonuses",
         "skill:martial-arts",
