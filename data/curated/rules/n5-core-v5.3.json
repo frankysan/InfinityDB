@@ -4718,7 +4718,7 @@
             "id": "weapon:ap-cc-weapon",
             "kind": "weapon",
             "name": "AP CC Weapon",
-            "summary": "The AP CC Weapon uses [[ammunition:ap|Armor Piercing (AP) Ammunition]]. Its single Saving Roll uses half the target\u2019s ARM, rounded up, shown as ARM/2 on the printed profile. It has PS 8, Burst 1 and the [[trait:cc|CC]] Trait. AP lowers the defense used for that Saving Roll; it does not add a second roll.",
+            "summary": "The printed close-combat profile has PS 8, Burst 1 and one ARM/2 Saving Roll, with [[trait:cc|CC]]. See [[ammunition:ap|AP Ammunition]] for the shared defense-reduction rule.",
             "composition": {"role": "definition"},
             "scope": {"game": "N5", "seasons": ["current"]},
             "facts": {},
@@ -4964,7 +4964,7 @@
         {
             "id": "weapon:breaker-pistol",
             "name": "Breaker Pistol",
-            "summary": "This weapon's [[ammunition:ap|AP Ammunition]] requires a Saving Roll using half the target's BTS (rounded up), printed as BTS/2. Its PS is 8 and its Burst is 2.\n\nAP reduces the applicable defense; it does not add an extra Saving Roll. Use the BTS attribute specified in this profile instead of assuming AP always applies to ARM.",
+            "summary": "This sidearm has PS 8, Burst 2 and one BTS/2 Saving Roll. The printed BTS defense distinguishes it from ARM-based AP Weapons; [[ammunition:ap|AP Ammunition]] supplies the shared effect.",
             "kind": "weapon",
             "composition": {
                 "role": "definition"
@@ -5052,7 +5052,7 @@
         {
             "id": "weapon:ap-heavy-pistol",
             "name": "AP Heavy Pistol",
-            "summary": "This heavy sidearm uses [[ammunition:ap|AP Ammunition]], with PS 6, Burst 2, and one ARM/2 Saving Roll per successful hit. AP halves the target's ARM (rounding up) for the Saving Roll.\n\nIts profile uses ARM/2, unlike a BTS/2 AP weapon; retain the Saving Roll Attribute printed for the selected weapon.",
+            "summary": "This sidearm has PS 6, Burst 2 and one ARM/2 Saving Roll. [[ammunition:ap|AP Ammunition]] supplies the shared effect; the applicable ARM defense and the Weapon profile remain specific to this attack.",
             "kind": "weapon",
             "composition": {
                 "role": "definition"
@@ -5094,7 +5094,7 @@
         {
             "id": "weapon:silenced-pistol",
             "name": "Silenced Pistol",
-            "summary": "This weapon uses combined [[ammunition:ap|AP]] + [[ammunition:shock|Shock]] Ammunition. One successful hit calls for one BTS/2 Saving Roll, as printed: AP halves the listed BTS defense, while [[ammunition:shock|Shock]] may add its conditional effect. Combining them does not add a second Saving Roll.\n\nThe [[trait:silent-x|Silent (-6)]] Trait applies only to a target's Face to Face [[skill:dodge|Dodge]] Roll when the attacker is inside the target's [[trait:zone-of-control-zc|Zone of Control]] but outside their LoF. That -6 MOD is cumulative with other [[skill:dodge|Dodge]] MODs; it is not a general -6 penalty to every reaction.",
+            "summary": "Its AP+Shock attack specifies one BTS/2 Saving Roll. See [[ammunition:ap|AP]] and [[ammunition:shock|Shock]] for their separate shared effects and conditions; the Weapon Chart supplies the combined notation.\n\nThe [[trait:silent-x|Silent (-6)]] Trait applies only to a target's Face to Face [[skill:dodge|Dodge]] Roll when the attacker is inside the target's [[trait:zone-of-control-zc|Zone of Control]] but outside their LoF. That -6 MOD is cumulative with other [[skill:dodge|Dodge]] MODs; it is not a general -6 penalty to every reaction.",
             "kind": "weapon",
             "composition": {
                 "role": "definition"

@@ -630,6 +630,42 @@ def test_boarding_multi_and_silenced_pistol_mode_exceptions(
     } == {67, 175, 182}
 
 
+def test_shared_ammunition_effects_are_canonical_across_weapon_categories(
+    weaponry_app: Callable,
+) -> None:
+    canonical_ap = _weapon_detail(weaponry_app, "ap", catalog="ammunition")[
+        "rules"
+    ][0]
+    profiles = {}
+    for slug in ("ap-cc-weapon", "ap-heavy-pistol", "breaker-pistol", "ap-rifle"):
+        payload = _weapon_detail(weaponry_app, slug)
+        profile = payload["profiles"][0]
+        profiles[slug] = profile
+        effects = profile["ammunition_effects"]
+        assert len(effects) == 1
+        assert effects[0]["record_id"] == "ammunition:ap"
+        assert effects[0]["summary"] == canonical_ap["summary"]
+        assert effects[0]["citations"] == canonical_ap["citations"]
+    assert profiles["ap-cc-weapon"]["saving"] == "ARM/2"
+    assert profiles["ap-heavy-pistol"]["saving"] == "ARM/2"
+    assert profiles["breaker-pistol"]["saving"] == "BTS/2"
+    assert profiles["ap-rifle"]["saving"] == "ARM/2"
+    assert "rules" not in _weapon_detail(weaponry_app, "ap-rifle")
+
+    silenced = _weapon_detail(weaponry_app, "silenced-pistol")
+    profile = silenced["profiles"][0]
+    assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+        "AP+Shock", "BTS/2", "1",
+    )
+    assert [
+        effect["record_id"] for effect in profile["ammunition_effects"]
+    ] == ["ammunition:ap", "ammunition:shock"]
+    assert all("saving_num" not in e for e in profile["ammunition_effects"])
+
+    pitcher = _weapon_detail(weaponry_app, "pitcher")
+    assert all("ammunition_effects" not in p for p in pitcher["profiles"])
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:

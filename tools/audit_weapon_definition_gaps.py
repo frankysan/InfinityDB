@@ -17,9 +17,11 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.database.repository import Database
+from infinity_db.rules_database import RulesDatabase
+from infinity_db.weapon_ammunition_references import WeaponAmmunitionReferences
 
 FORMAT = "InfinityDB 1.0 weapon definition gap triage"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
 ENRICHMENT_FORMAT = "InfinityDB rules enrichment coverage audit"
 CHART_FORMAT = "InfinityDB N5 Weapon Chart profile evidence"
 MAX_BATCH_SIZE = 8
@@ -56,6 +58,8 @@ def reconcile(
     chart: dict[str, Any],
     categories: dict[int, str],
     army_sha256: str,
+    *,
+    shared_effect_coverage: dict[int, dict[str, int]] | None = None,
 ) -> dict[str, Any]:
     """Join unresolved Army Weapon identities to chart rows without inferring rules."""
     if (enrichment.get("format"), enrichment.get("formatVersion")) != (
@@ -103,7 +107,21 @@ def reconcile(
         row_candidates = names.get(_identity(str(item["name"])), [])
         codes = item["gapCodes"]
         if codes == ["missing_rule_definition"]:
-            kind = "definition-review" if row_candidates else "outside-chart-review"
+            if not row_candidates:
+                kind = "outside-chart-review"
+            elif shared_effect_coverage is None:
+                kind = "definition-review"
+            else:
+                coverage = shared_effect_coverage.get(weapon_id)
+                if coverage is None or coverage["total"] <= 0:
+                    raise WeaponGapTriageError(
+                        f"Missing Weapon profile coverage for {weapon_id}"
+                    )
+                kind = (
+                    "shared-effects-review"
+                    if coverage["linked"] == coverage["total"]
+                    else "missing-effect-links-review"
+                )
         elif codes == ["ambiguous_family_mapping"]:
             kind = "ambiguous-rule-mapping"
         elif codes == ["stale_citation_source"]:
@@ -133,6 +151,13 @@ def reconcile(
             },
             "familyRules": item["familyRuleIds"],
             "sourceRuleIds": item["exactSourceRuleIds"],
+            **(
+                {"sharedEffectCoverage": shared_effect_coverage[weapon_id],
+                 "requiresModeReview": shared_effect_coverage[weapon_id]["total"] > 1}
+                if shared_effect_coverage is not None
+                and weapon_id in shared_effect_coverage
+                else {}
+            ),
         })
     results.sort(key=lambda row: (-row["catalogUseCount"], row["name"].casefold(), row["id"]))
 
@@ -144,6 +169,8 @@ def reconcile(
         "stale-rule-citation",
         "reviewed-historical-citation",
         "outside-chart-review",
+        "missing-effect-links-review",
+        "shared-effects-review",
         "definition-review",
     ):
         candidates = [item for item in results if item["disposition"] == disposition]
@@ -175,6 +202,13 @@ def reconcile(
                         if disposition == "reviewed-historical-citation"
                         else "Find separately scoped primary source text before rule curation."
                         if disposition == "outside-chart-review"
+                        else "Review missing or non-ammunition profile links and special rules; "
+                        "do not manufacture Ammunition effects from notation."
+                        if disposition == "missing-effect-links-review"
+                        else "Canonical Ammunition effects are linked; review mode-specific "
+                        "Traits, target conditions, exceptions and source coverage without "
+                        "duplicating shared Ammunition prose."
+                        if disposition == "shared-effects-review"
                         else "Compare chart profiles and applicable rules; verify existing "
                         "ammunition/trait links, then add only missing player-facing explanations."
                     ),
@@ -199,6 +233,21 @@ def reconcile(
             "matchedChartIdentity": sum(x["chart"]["printedRows"] > 0 for x in results),
             "noChartIdentity": sum(x["chart"]["printedRows"] == 0 for x in results),
             "reviewBatches": len(batches),
+            **(
+                {
+                    "sharedEffectCandidates": sum(
+                        r["disposition"] == "shared-effects-review" for r in results
+                    ),
+                    "missingEffectLinkCandidates": sum(
+                        r["disposition"] == "missing-effect-links-review" for r in results
+                    ),
+                    "modeReviewCandidates": sum(
+                        r.get("requiresModeReview", False) for r in results
+                    ),
+                }
+                if shared_effect_coverage is not None
+                else {}
+            ),
         },
         "batches": batches,
         "items": results,
@@ -212,7 +261,40 @@ def build_report(army_db: Path, enrichment_path: Path, chart_path: Path) -> dict
     db.validate()
     categories = {int(item["id"]): str(item["category"])
                   for item in db.list_catalog_items("weapons")}
-    return reconcile(_load(enrichment_path), _load(chart_path), categories, _sha256(army_db))
+    enrichment = _load(enrichment_path)
+    rules_info = enrichment.get("rulesDatabase")
+    if not isinstance(rules_info, dict):
+        raise WeaponGapTriageError("Enrichment report lacks rules database metadata")
+    rules_path_text = rules_info.get("path")
+    if not isinstance(rules_path_text, str) or not rules_path_text:
+        raise WeaponGapTriageError("Enrichment report lacks a rules database path")
+    rules_path = Path(rules_path_text)
+    if not rules_path.is_file() or _sha256(rules_path) != rules_info.get("sha256"):
+        raise WeaponGapTriageError("Enrichment report rules database fingerprint differs")
+    references = WeaponAmmunitionReferences(RulesDatabase(rules_path))
+    coverage: dict[int, dict[str, int]] = {}
+    for item in enrichment.get("domains", {}).get("weapons", {}).get("items", []):
+        details = db.get_catalog_item("weapons", item["id"])
+        if details is None:
+            raise WeaponGapTriageError(f"Weapon is absent from catalog: {item['id']}")
+        profiles = details.get("profiles", [])
+        if not profiles:
+            profiles = [
+                profile
+                for variant in details.get("weapon_variants", [])
+                for profile in variant.get("profiles", [])
+            ]
+        coverage[item["id"]] = {
+            "total": len(profiles),
+            "linked": sum(
+                references.effects_for_profile(profile) is not None
+                for profile in profiles
+            ),
+        }
+    return reconcile(
+        enrichment, _load(chart_path), categories, _sha256(army_db),
+        shared_effect_coverage=coverage,
+    )
 
 
 def markdown_report(report: dict[str, Any]) -> str:
@@ -225,6 +307,16 @@ def markdown_report(report: dict[str, Any]) -> str:
         f"- With a printed chart identity: **{summary['matchedChartIdentity']}**.",
         f"- Without one: **{summary['noChartIdentity']}**.",
         f"- Independently sized review batches: **{summary['reviewBatches']}**.",
+        *(
+            [
+                "- Weapons with linked reusable Ammunition effects (review still pending): "
+                f"**{summary['sharedEffectCandidates']}**.",
+                "- Weapons needing other/source-specific effect links: "
+                f"**{summary['missingEffectLinkCandidates']}**.",
+                f"- Multi-profile review candidates: **{summary['modeReviewCandidates']}**.",
+            ]
+            if "sharedEffectCandidates" in summary else []
+        ),
         f"- N5 v5.3 PDF SHA-256: `{report['corePdfSha256']}`.", "",
         "## Reconciliation batches", "",
     ]

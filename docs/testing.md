@@ -587,6 +587,25 @@ Ball screenshots were visually inspected. Evidence remains in ignored
 `local/audits/weapon-first-batch-2-browser/`. These checks are bounded
 reference/browser acceptance, not a complete release gate.
 
+## 1.0 reusable Ammunition effects pilot
+
+**Verified 2026-10-14.** Five Weapon references (AP CC Weapon,
+AP Heavy Pistol, Breaker Pistol, AP Rifle, and Silenced Pistol) were checked
+at 1440 and 320 px, plus AP Rifle navigation to the canonical AP reference
+(**11/11 browser checks**). The new expandable profile area reused the same
+canonical AP summary/citations in four different Weapon identities, displayed
+AP and Shock separately for the combined Silenced Pistol profile, and
+preserved distinct ARM/2 and BTS/2 Saving Rolls. The AP Rifle required no
+standalone curated Weapon rule. No horizontal overflow or JavaScript errors
+were observed. Screenshots, API results and local audit work remain in
+ignored `local/audits/shared-ammunition-pilot/`.
+
+This verifies display-only component reuse, not automatic Combined
+Ammunition adjudication, immunity handling, or completion of Weapon-specific
+mode/exception audits. The v2 Weapon gap report retains all source-review
+candidates pending and distinguishes reusable links from special source
+relationships.
+
 ## 1.0 Pistol Weapon batch browser acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Eight Pistol-family Weapon pages

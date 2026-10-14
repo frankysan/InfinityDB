@@ -385,15 +385,32 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       320 px Boarding/Silenced/MULTI screenshots were inspected.
       The refreshed triage shows 91 definition-review Weapons in 23 batches,
       plus Flash Pulse's accepted historical citation.
-    - [ ] Work through the 23 remaining source-category/usage-prioritized
-      chart-listed Weapon batches (no more than eight identities per batch).
-      The next batch is Rifles: Combi Rifle, MULTI Rifle, Rifle,
-      Adhesive Launcher Rifle, Breaker Combi Rifle, AP Rifle, T2 Rifle,
-      and K1 Combi Rifle.
-      For each, distinguish complete Army profile facts from missing effect
-      explanations, ammunition/trait/State relations, and browser navigation;
-      preserve exact chart modes, the reviewed Kobra CC discrepancy, and
-      established family exceptions before adding curated definitions.
+    - [x] Introduce canonical ammunition-summary reuse on Weapon profiles:
+      exact source ID/name matches project each published component's summary,
+      citations and route as display-only `ammunition_effects`. The UI offers
+      expandable shared explanations, without deriving combined Saving Rolls,
+      Immunity outcomes or mode effects. AP CC Weapon, AP Heavy Pistol,
+      Breaker Pistol and Silenced Pistol now keep only profile-specific prose;
+      AP Rifle demonstrates reuse without a standalone curated Weapon rule.
+      The initial UI/API pilot passed focused regression and browser checks.
+    - [x] Split the Weapon gap triage into **pending review categories** rather
+      than implying every absent Weapon paragraph is a missing rule.
+      The refreshed source-bound audit (v2) has 92 unresolved entries:
+      89 with all canonical ammunition components linked, 2 special objects
+      requiring separate effect/source review (Pitcher, Mine Dispenser), and
+      Flash Pulse's accepted historical citation. 17 multi-profile Weapons
+      require explicit mode-by-mode review. Batching: 22 shared-effects-review
+      batches, 2 missing-effect-links batches, and 1 historical-citation batch.
+      The previous 91-item report was stale; both the committed and current
+      rules databases independently report 92 entries.
+    - [ ] Review source-specific Weapon exceptions, Traits and mode semantics
+      across the 22 shared-effects batches; **do not** create a standalone
+      definition when verified Army profile facts and shared rules suffice.
+      Resume with Rifles (Combi Rifle, MULTI Rifle, Rifle, Adhesive Launcher
+      Rifle, Breaker Combi Rifle, AP Rifle, T2 Rifle and K1 Combi Rifle).
+      Pay special attention to MULTI modes, PARA states, Breaker BTS/2,
+      and other conditional effects. This is review work, not an automatic
+      need for eight new prose records.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

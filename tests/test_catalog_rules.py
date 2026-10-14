@@ -435,6 +435,49 @@ def test_reviewed_ammunition_references_preserve_exact_army_identity(tmp_path: P
         load_ammunition_reference_map(invalid)
 
 
+def test_canonical_ammunition_explanations_reuse_validated_source_records(
+    tmp_path: Path,
+) -> None:
+    rules = _rules_database(tmp_path)
+    refs = WeaponAmmunitionReferences(rules)
+    ap = rules.composed_record("ammunition:ap")
+    shock = rules.composed_record("ammunition:shock")
+    assert ap is not None and shock is not None
+
+    for saving in ("ARM/2", "BTS/2"):
+        result = refs.effects_for_profile({
+            "ammunition_source_id": 3, "ammunition": "AP", "saving": saving,
+        })
+        assert result is not None and len(result) == 1
+        assert result[0]["summary"] == ap["summary"]
+        assert result[0]["citations"] == ap["citations"]
+
+    combined = refs.effects_for_profile({
+        "ammunition_source_id": 30, "ammunition": "AP+Shock",
+        "saving": "BTS/2", "saving_num": "1",
+    })
+    assert combined is not None
+    assert [item["record_id"] for item in combined] == [
+        "ammunition:ap", "ammunition:shock",
+    ]
+    assert [item["summary"] for item in combined] == [
+        ap["summary"], shock["summary"],
+    ]
+    assert "saving_num" not in combined[0]
+    combined[0]["summary"] = "mutated"
+    again = refs.effects_for_profile({
+        "ammunition_source_id": 30, "ammunition": "AP+Shock",
+    })
+    assert again is not None and again[0]["summary"] == ap["summary"]
+
+    assert refs.effects_for_profile({
+        "ammunition_source_id": 3, "ammunition": "AP+Shock",
+    }) is None
+    assert refs.effects_for_profile({
+        "ammunition_source_id": 0, "ammunition": 0,
+    }) is None
+
+
 @pytest.mark.parametrize(
     ("source_name", "components"),
     [

@@ -432,6 +432,17 @@ only by `+`. This source projection is not a curated effect relationship, nor is
 Saving Roll notation parsed to infer composition. See `docs/data-model.md` for the
 current runtime boundary and remaining 1.0 work.
 
+Authoring policy for Weapons: reuse canonical `ammunition:*` summaries
+and their citations via exact profile mappings, rather than repeating
+AP/DA/Shock/other generic mechanics in every Weapon summary. Keep curated
+Weapon text for source-specific attack modes, applicable Saving Roll fields,
+Traits, requirements, and genuinely conditional exceptions. The runtime
+projects shared component summaries as `ammunition_effects`, but does not
+adjudicate combinations or allow the lack of an individual Weapon definition
+to certify complete behavior. The 1.0 Weapon triage keeps such cases pending
+under shared-effects and exception review instead of treating every absent
+Weapon paragraph as a confirmed gameplay fact gap.
+
 Ammunition definitions may additionally publish reviewed, **non-executable**
 `facts.ammunitionResolution` operations. This is a bounded typed-effects pilot; the
 source Ammunition map above does not own effects. Supported fields are:

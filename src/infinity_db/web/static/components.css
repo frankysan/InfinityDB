@@ -1373,6 +1373,39 @@ h1>span {
   margin: var(--space-1) 0 0;
 }
 
+.weapon-ammunition-effects {
+  display: block;
+  min-width: 0;
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--space-2);
+}
+
+.weapon-ammunition-effects > summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.weapon-ammunition-effect-list {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+}
+
+.weapon-ammunition-effect {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.weapon-ammunition-effect h5,
+.weapon-ammunition-effect p {
+  margin: 0;
+}
+
+.weapon-ammunition-effects > .detail-source {
+  margin-top: var(--space-2);
+}
+
 .ammunition-mechanics-list {
   display: grid;
   grid-template-columns: minmax(7rem, max-content) minmax(0, 1fr);

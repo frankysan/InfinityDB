@@ -6,6 +6,7 @@ import { tableViewport } from "./view-components.js";
 import {
   gameplayVariantRules,
   levelEffectsSection,
+  rulesCitationNode,
   rulesReferenceSection,
 } from "./rules-reference.js";
 
@@ -103,6 +104,52 @@ function appendWeaponAmmunition(cell, profile, fallbackReference) {
   } else {
     cell.textContent = text(profile.ammunition);
   }
+}
+
+function weaponAmmunitionEffects(profile) {
+  const effects = profile.ammunition_effects;
+  if (!Array.isArray(effects) || !effects.length) return null;
+  // These descriptions and citations are copied from canonical Ammunition
+  // records by the API. Do not interpret combined rolls or target effects here.
+  const details = document.createElement("details");
+  details.className = "detail-fact-group weapon-ammunition-effects";
+  const heading = document.createElement("summary");
+  heading.textContent = "Ammunition effects (shared rules)";
+  const list = document.createElement("div");
+  list.className = "weapon-ammunition-effect-list";
+  for (const effect of effects) {
+    const item = document.createElement("div");
+    item.className = "weapon-ammunition-effect";
+    const title = document.createElement("h5");
+    const href = ruleReferenceHref(effect.public_reference);
+    if (href) {
+      const link = document.createElement("a");
+      link.href = href;
+      link.textContent = effect.name;
+      title.append(link);
+    } else {
+      title.textContent = effect.name;
+    }
+    const description = document.createElement("p");
+    description.className = "detail-copy";
+    description.textContent = effect.summary;
+    item.append(title, description);
+    if (effect.citations?.length) {
+      const citations = document.createElement("p");
+      citations.className = "detail-source";
+      for (const [index, citation] of effect.citations.entries()) {
+        if (index) citations.append(" · ");
+        citations.append(rulesCitationNode(citation));
+      }
+      item.append(citations);
+    }
+    list.append(item);
+  }
+  const caveat = document.createElement("p");
+  caveat.className = "detail-source";
+  caveat.textContent = "Shared components only. Follow the printed Weapon profile and any specific rules for modes, Saving Rolls, target conditions, and exceptions.";
+  details.append(heading, list, caveat);
+  return details;
 }
 
 function groupWeaponProperties(references) {
@@ -316,6 +363,10 @@ function weaponVariants(variants) {
       statBody.append(statRow);
       statTable.append(statBody);
       card.append(tableViewport(statTable));
+      if (catalog === "weapons") {
+        const sharedEffects = weaponAmmunitionEffects(profile);
+        if (sharedEffects) card.append(sharedEffects);
+      }
 
       const modifiers = rangeBands.map((maximum) => rangeModifier(profile.ranges, maximum));
       if (modifiers.some(Boolean)) {

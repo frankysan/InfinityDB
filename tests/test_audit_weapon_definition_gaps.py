@@ -134,6 +134,44 @@ def test_triage_fails_closed_on_inconsistent_evidence(
         reconcile(coverage, chart, categories, "a" * 64)
 
 
+def test_reusable_ammunition_coverage_reclassifies_review_not_completion() -> None:
+    enrichment, chart, categories = _reports()
+    chart["comparison"]["compared"].append({
+        "name": "SymbioBomb", "mode": "", "page": 179, "differences": [],
+    })
+    chart["comparison"]["chartRowsLocated"] += 1
+    chart["comparison"]["unambiguousRowsCompared"] += 1
+    report = reconcile(
+        enrichment, chart, categories, "a" * 64,
+        shared_effect_coverage={
+            1: {"total": 2, "linked": 2},
+            2: {"total": 1, "linked": 0},
+        },
+    )
+    assert report["formatVersion"] == 2
+    assert report["summary"]["unresolvedWeapons"] == 4
+    assert report["summary"]["sharedEffectCandidates"] == 1
+    assert report["summary"]["missingEffectLinkCandidates"] == 1
+    assert report["summary"]["modeReviewCandidates"] == 1
+    rows = {row["id"]: row for row in report["items"]}
+    assert rows[1]["disposition"] == "shared-effects-review"
+    assert rows[1]["sharedEffectCoverage"] == {"total": 2, "linked": 2}
+    assert rows[1]["requiresModeReview"] is True
+    assert rows[2]["disposition"] == "missing-effect-links-review"
+    assert rows[2]["requiresModeReview"] is False
+    assert "review still pending" in markdown_report(report)
+    assert "Canonical Ammunition effects are linked" in next(
+        b["evidenceRequirement"] for b in report["batches"]
+        if b["disposition"] == "shared-effects-review"
+    )
+
+    with pytest.raises(WeaponGapTriageError, match="Missing Weapon profile coverage"):
+        reconcile(
+            enrichment, chart, categories, "a" * 64,
+            shared_effect_coverage={1: {"total": 2, "linked": 2}},
+        )
+
+
 def test_reviewed_historical_comparison_remains_visible_but_not_pending() -> None:
     coverage, chart, categories = _reports()
     flash = coverage["domains"]["weapons"]["items"][-1]

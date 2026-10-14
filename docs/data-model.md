@@ -68,6 +68,17 @@ Single Ammunition profiles do not receive a synthetic composition. Alternative
 (`/`), absent, or mismatched values remain source text; they are not guessed
 from punctuation. Saving Roll notation (`ARM/2`, `x2`, etc.) remains a distinct,
 unchanged source field and is never interpreted as Ammunition composition.
+For exact reviewed source ID/name pairs, Weapon profiles additionally expose
+`ammunition_effects`: ordered canonical `ammunition:*` IDs, names, current
+summaries, citations and routes, copied from `rules.db` at response time.
+The Weapon profile displays these in a collapsible **Ammunition effects
+(shared rules)** section, while its original PS, Burst, Saving Roll,
+Traits and modes remain untouched. The `ammunition_effects` projection
+is omitted for unreviewed/mismatched source ammunition; its existence
+establishes only reusable component coverage, **not** exception/interaction
+completeness. Component texts and citations are never authored in the mapping
+or inferred from notation. Combined components remain distinct, not
+a resolved attack result.
 The first reviewed Ammunition effect pilot now lives on canonical `ammunition:*`
 records, not on Army mapping entries. The validated, non-executable
 `facts.ammunitionResolution` object can describe halving the applicable ARM/BTS
