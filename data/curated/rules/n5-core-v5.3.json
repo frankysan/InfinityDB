@@ -3962,6 +3962,45 @@
             }
         },
         {
+            "id": "weapon:breaker-marksman-rifle",
+            "kind": "weapon",
+            "name": "Breaker Marksman Rifle",
+            "summary": "The N5.3 Marksman Rifle chart lists this [[weapon-property:breaker|Breaker]] variant with PS 7, Burst 3, [[ammunition:ap|AP Ammunition]], one BTS/2 Saving Roll and [[trait:suppressive-fire|Suppressive Fire]]. Its AP Ammunition modifies BTS rather than ARM because the weapon's printed Saving Roll uses BTS.\n\nThe shared Breaker Weapon Property links the underlying rules; the weapon's own Burst, range MODs and listed Trait still come from its printed profile.",
+            "facts": {
+                "sourceNotes": [
+                    "The English September 2026 rules-update notice says Breaker Sniper Rifle, but the current N5.3 Weapon Chart and official Army metadata identify a Breaker Marksman Rifle. The notice wording is not evidence for a second, separate Sniper Rifle profile."
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": ["current"]
+            },
+            "armyLinks": [
+                {"entity": "weapon", "id": "breaker-marksman-rifle"}
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {"type": "uses-effects-of", "recordId": "ammunition:ap"},
+                {"type": "uses-effects-of", "recordId": "trait:suppressive-fire"}
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 180,
+                    "section": "Weapon Chart: Marksman Rifles"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            }
+        },
+        {
             "id": "weapon:sepsitor",
             "kind": "weapon",
             "name": "Sepsitor",

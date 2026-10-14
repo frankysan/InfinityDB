@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **162/177** complete, **15** pending.
-- Current authored outgoing relations: **439**.
+- Supporting semantic identities: **163/178** complete, **15** pending.
+- Current authored outgoing relations: **441**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -975,7 +975,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (49/49)
+#### Weapon (50/50)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -991,6 +991,9 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Intuitive Attack (`trait:intuitive-attack`)
   - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
   - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+- [x] **Breaker Marksman Rifle** (`weapon:breaker-marksman-rifle`) — reviewed: N5.3 p. 180 and pinned Army metadata source 225: AP applies against BTS/2 (not ARM/2), PS 7, B3, one Saving Roll, Suppressive Fire. The English update's Sniper label does not establish another source profile. Shared AP and Suppressive Fire links cover effects; do not invent unit usage or a new ammunition type.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
 - [x] **Breaker Pistol** (`weapon:breaker-pistol`) — reviewed: N5.3 p. 182: AP applies to BTS/2 rather than ARM/2, B2 with one Saving Roll; do not infer a second roll.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
 - [x] **CC Weapon** (`weapon:cc-weapon`) — reviewed: N5.3 p.177: PS 8, Burst 1, Normal N, one ARM Saving Roll and CC; generic CC Weapon requirements elsewhere do not mean this specific catalog identity.

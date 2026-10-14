@@ -676,9 +676,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] **REA-043 — Counterintelligence:** Verify in the browser that
       the implemented correction assigns the relaxed limit to the
       correct player.
-    - [ ] **REA-044 — Metadata-only Weapons:** Decide targeted
-      publication of current metadata-only Weapon references; do not
-      make optional exhaustive research a 1.0 release blocker.
+    - [x] **REA-044 — Metadata-only Weapons:** Publish the reviewed
+      Breaker Marksman Rifle from Army source 225 with exact source-profile
+      validation, numeric/slug lookup, standalone weapon rule reference
+      and zero Unit usage. Other unused historical metadata remains unpublished;
+      a comprehensive metadata inventory is not a 1.0 blocker.
     - [ ] **Cross-source applicability:** Resolve material source
       conflicts and FAQ scope before dependent curation. Use the
       [source manifest](rules-explanation-audit-1.0-sources.md) and

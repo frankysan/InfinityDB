@@ -350,3 +350,105 @@ def test_armed_turret_emitter_source_discrepancy_remains_visible() -> None:
         ("n5-core-v5.3-es-pdf", 195),
     ]
     assert record["facts"]["specialProfile"]["stats"][-1] == ["S", "2"]
+
+
+def test_breaker_marksman_metadata_only_weapon_is_public_without_unit_usage() -> None:
+    """REA-044: Army source 225 has no usage row but has a reviewed public identity."""
+    import sqlite3
+
+    database, rules, properties = _services()
+    with sqlite3.connect(ARMY_PATH) as source:
+        assert source.execute("SELECT COUNT(*) FROM weapons WHERE id=225").fetchone()[0] == 0
+        assert source.execute(
+            "SELECT name FROM metadata_weapons WHERE id=225"
+        ).fetchone()[0] == "Breaker Marksman Rifle"
+
+    assert database.application_catalog_id("weapons", 225) == 225
+    assert database.application_catalog_id("weapons", "breaker-marksman-rifle") == 225
+    assert database.application_slug("weapons", 225) == "breaker-marksman-rifle"
+    entries = [entry for entry in database.list_catalog_items("weapons")
+               if entry["id"] == 225]
+    assert len(entries) == 1
+    assert (entries[0]["name"], entries[0]["category"],
+            entries[0]["source_ids"], entries[0]["use_count"]) == (
+        "Breaker Marksman Rifle", "Marksman Rifles", [225], 0
+    )
+    item = database.get_catalog_item("weapons", "breaker-marksman-rifle")
+    assert item is not None
+    assert item == database.get_catalog_item("weapons", 225)
+    assert item["variants"] == []
+    assert len(item["profiles"]) == 1
+    profile = item["profiles"][0]
+    assert (profile["id"], profile["name"], profile["ammunition"],
+            profile["ammunition_source_id"], profile["burst"], profile["damage"],
+            profile["saving"], profile["saving_num"], profile["traits"]) == (
+        225, "Breaker Marksman Rifle", "AP", 3, "3", "7",
+        "BTS/2", "1", ["Suppressive Fire"]
+    )
+    assert profile["ranges"]["short"] == {"max": 20, "mod": "-3"}
+    assert profile["ranges"]["med"] == {"max": 60, "mod": "+3"}
+    assert profile["ranges"]["long"] == {"max": 100, "mod": "-3"}
+    assert profile["ranges"]["max"] == {"max": 120, "mod": "-6"}
+    assert [prop["id"] for prop in properties.for_profile(profile)] == [
+        "weapon-property:breaker"
+    ]
+    enriched = CatalogRules(rules).enrich_catalog_item("weapons", item)
+    assert enriched["profiles"][0]["ammunition_effects"][0]["record_id"] == "ammunition:ap"
+    assert "weapon-property:breaker" in [
+        prop["id"] for prop in enriched["profiles"][0]["weapon_properties"]
+    ]
+    curated = rules.composed_record("weapon:breaker-marksman-rifle")
+    assert curated is not None
+    assert "weapon-property:breaker" in curated["summary"]
+    assert "Sniper Rifle" in str(curated["facts"]["sourceNotes"])
+    assert any(citation["page"] == 180 for citation in curated["citations"])
+    assert database.get_catalog_item("weapons", "breaker-sniper-rifle") is None
+
+
+def test_reviewed_metadata_only_weapon_publication_requires_source_signature() -> None:
+    """A changed source or missing record cannot silently become a new Weapon."""
+    import sqlite3
+
+    from infinity_db.database.application_catalogs import (
+        _reviewed_metadata_only_weapons,
+    )
+
+    with sqlite3.connect(":memory:") as connection:
+        connection.execute("ATTACH DATABASE ? AS army", (str(ARMY_PATH),))
+        connection.execute(
+            "CREATE TABLE metadata_weapons AS "
+            "SELECT * FROM army.metadata_weapons WHERE id=225"
+        )
+        connection.execute("CREATE TABLE weapons (id INTEGER)")
+        entries = _reviewed_metadata_only_weapons(connection)
+        assert [(entry["id"], entry["category"]) for entry in entries] == [
+            (225, "Marksman Rifles")
+        ]
+        connection.execute("UPDATE metadata_weapons SET savingNum='2' WHERE id=225")
+        with pytest.raises(ValueError, match="source profile drift"):
+            _reviewed_metadata_only_weapons(connection)
+        connection.execute("UPDATE metadata_weapons SET savingNum='1' WHERE id=225")
+        connection.execute("INSERT INTO weapons (id) VALUES (225)")
+        assert _reviewed_metadata_only_weapons(connection) == []
+        connection.execute("DELETE FROM weapons")
+        connection.execute("DELETE FROM metadata_weapons")
+        assert _reviewed_metadata_only_weapons(connection) == []
+
+
+def test_reviewed_metadata_only_weapon_config_rejects_unexpected_fields(
+    tmp_path: Path,
+) -> None:
+    from infinity_db.database.application_catalogs import (
+        DEFAULT_METADATA_ONLY_WEAPONS,
+        _reviewed_metadata_only_weapons,
+    )
+
+    document = json.loads(DEFAULT_METADATA_ONLY_WEAPONS.read_text(encoding="utf-8"))
+    document["weapons"][0]["unreviewed"] = True
+    invalid = tmp_path / "invalid.json"
+    invalid.write_text(json.dumps(document), encoding="utf-8")
+    import sqlite3
+
+    with sqlite3.connect(":memory:") as connection:
+        with pytest.raises(ValueError, match="metadata-only Weapon publication"):
+            _reviewed_metadata_only_weapons(connection, invalid)

@@ -74,7 +74,8 @@ its application metrics.
   legacy Army references, and direct links into pre-filtered Unit Explorer rosters.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
   Ammunition, Traits, Labels, States, Hacking Programs, and General Rules reference
-  catalogs, with reverse Unit usage links where that relationship applies. Search and filter state
+  catalogs, including reviewed current weapons not yet used by an Army Unit,
+  with reverse Unit usage links where that relationship applies. Search and filter state
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Includes global search and a federated Glossary across player-facing reference domains, with
   embedded Attributes, scoped Game terms and searchable Weapon Properties (such as Viral,

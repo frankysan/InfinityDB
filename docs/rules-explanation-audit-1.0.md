@@ -1488,10 +1488,10 @@ publication absence Observed; notice terminology reconciliation Derived.
 **Confidence:** High about the examined runtime baseline. **Affected:** Army
 Weapon source 225, public Weapons domain; no corresponding C definition.
 
-**Current:** S6 preserves Breaker Marksman Rifle (AP, BTS/2, PS 7, B3, one save,
-Suppressive Fire), but the application identity graph/getter does not publish
-it. Numeric 225 and slug lookups return None. This is preserved-but-inaccessible
-content, not a missing source profile.
+**Original gap:** S6 preserved Breaker Marksman Rifle (AP, BTS/2, PS 7,
+B3, one save, Suppressive Fire), but the application identity graph/getter
+did not publish it. Numeric 225 and slug lookups originally returned None.
+This was preserved-but-inaccessible content, not a missing source profile.
 
 **Evidence/result:** Rendered S1 p. 180 shows the new blue Marksman row; p. 185
 has no distinct Breaker Sniper row. S14's matching profile is under FUSILES DE
@@ -1501,14 +1501,19 @@ translation interpretation, not inventing a second Sniper or aliasing by name
 alone. S20's embedded metadata pins S6. Read-only central resolver, list and
 getter confirm the publication gap; no browser was launched.
 
-**Action:** Review a current metadata-only Weapon publication slice with explicit
-profile/provenance and without requiring a referencing Army Unit. Keep unused
-historical metadata separately scoped, instead of publishing every legacy row.
-**Fix:** future processing/backend/reference publication and validation.
-**Dependencies:** source completeness and REA-026. Do not fabricate raw Army
-fields or an unsupported Sniper statline.
-**1.0 relevance:** The current supported Weapon reference needs this preserved
-official profile to be reachable; publishing every unused historical row is not required.
+**Resolved (2026-10-14):** The generated application catalog now publishes
+source ID 225 directly from reviewed metadata using a validated, exact-profile
+manifest. The public numeric `225` and slug `breaker-marksman-rifle`
+both resolve, even without a Unit use or `weapons` source-table entry.
+The reference preserves its original PS, Burst, Saving Roll, ranges, Trait,
+category and source identity, links the shared Breaker rules and cites the
+current chart. Its source note distinguishes the English update notice's
+Sniper wording from the authoritative Marksman profile; no fabricated
+Sniper weapon or Unit use was introduced. Historical unused metadata stays
+unpublished. Full database rebuild required for existing deployments.
+
+**Follow-up:** Broader optional metadata inventory remains separate;
+REA-044's current-profile publication gap is closed.
 
 ### REA-045 - Armed Turret E/Mitter disagrees with standard E/M Saving Rolls
 

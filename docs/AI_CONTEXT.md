@@ -114,6 +114,13 @@ release/audit narrative belongs in the changelog and Git history.
 - Slugs are the preferred application-facing identifiers when a domain has a stable slug; numeric
   IDs remain compatibility/provenance forms.
 - Browser code renders backend-owned semantics rather than recreating data-model policy.
+- The Weapons catalog normally derives identities from the upstream usage
+  table, but explicitly reviewed metadata-only source profiles may be
+  published through `config/catalogs/metadata-only-weapons.json`, with
+  exact ID, name, ammo, Saving, Trait and range matching at build time.
+  Current pinned exception: Breaker Marksman Rifle source 225, even with
+  no Unit usage. Do not publish all unused metadata or fabricate a
+  Breaker Sniper profile from a conflicting English update label.
 - Weapon Ammunition navigation maps exact Army metadata identity/name pairs to
   reviewed base reference segments, without client-side parsing or inference from
   Saving Roll notation. The maintained map (version 2) records ordered components

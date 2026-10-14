@@ -385,6 +385,24 @@ Where a domain has a stable slug:
 Rules/reference semantic IDs (`skill:...`, `equipment:...`, etc.) remain distinct from public route
 slugs even when they correspond one-to-one.
 
+**Reviewed metadata-only Weapon publication:** The upstream `weapons` table
+describes usage-derived source catalog entries; `metadata_weapons` also contains
+official profiles with no current Unit use. Those unreferenced profiles are
+**not** published wholesale. Build-time policy in
+`config/catalogs/metadata-only-weapons.json` explicitly identifies approved
+source IDs, names, categories and complete profile signatures (Ammunition,
+modes, ranges, Traits, Saving Rolls). When present, a matching metadata-only
+profile receives an ordinary `application_catalog_items` identity and
+`application_catalog_sources` provenance, without creating a synthetic
+upstream `weapons` row or Unit use. A changed profile fails the build instead
+of silently adopting new rules. Absent profiles in older snapshots are skipped;
+source entries already present in the upstream `weapons` table are not
+duplicated. The first reviewed case is Breaker Marksman Rifle (source 225);
+its numeric and slug routes share one application identity, with zero Unit
+usage until an actual source relationship exists. A curated weapon rule records
+the printed profile's provenance and the different English update-notice label.
+Do not infer a Breaker Sniper Rifle from that notice.
+
 ## Availability and membership
 
 InfinityDB distinguishes several relationships that source data often places near each other:

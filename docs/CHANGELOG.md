@@ -18,6 +18,9 @@ are not retroactively relabeled.
   interaction as other rules references; shared Viral and Plasma explanations
   no longer need to be repeated in individual weapon summaries.
 - **What's changed** now includes upcoming-release notes alongside past releases when there are new changes to show.
+- Breaker Marksman Rifle is now directly searchable and viewable even when
+  no Army Unit currently references it; its rules reference preserves the
+  official profile and distinguishes the conflicting update-notice name.
 - Weapon profiles now offer expandable, linked explanations of shared Ammunition
   effects. New Weapon references clarify CC and Pistol variants, MULTI and K1
   Rifles, D-Charges, Disco Baller, and SymbioBomb while preserving their
