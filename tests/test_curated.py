@@ -1910,6 +1910,35 @@ def test_rea038_direct_vs_delegated_recovery_source_scope() -> None:
         assert pdf_pages >= {51}
 
 
+def test_rea005_bs_weapon_wip_named_attack_skill_exclusions() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    records = {r["id"]: r for r in load_curated_document(path)["records"]}
+    record = records["trait:bs-weapon-wip"]
+    assert "BS Attack (Shock)" in record["summary"]
+    assert "BS Attack (Guided)" in record["summary"]
+    assert "not [[ammunition:shock|Shock Ammunition]] in general" in record["summary"]
+    ordinary, shock, guided = record["facts"]["clarifications"]
+    assert "[[weapon:flash-pulse|Flash Pulse]]" in ordinary
+    assert "rolling the attacker's WIP instead of BS" in ordinary
+    assert "[[skill:discover|Discover]]" in ordinary
+    assert "[[skill:bs-attack|BS Attack (Shock)]]" in shock
+    assert "**not** prohibit" in shock
+    assert "[[ammunition:shock|Shock Ammunition]]" in shock
+    assert "[[state:targeted|Targeted]]" in guided
+    assert "[[skill:bs-attack|BS Attack (Guided)]]" in guided
+    assert "without Line of Fire" in guided
+    assert "standard [[skill:bs-attack|BS Attack]]" in guided
+    assert record["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:bs-attack"}
+    ]
+    cited = {(c["sourceId"], c.get("page")) for c in record["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 175),
+        ("n5-core-v5.3-pdf", 39),
+        ("n5-core-v5.3-es-pdf", 39),
+    }
+
+
 def test_rea004_continuous_damage_critical_extra_roll_does_not_chain() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     records = {r["id"]: r for r in load_curated_document(path)["records"]}

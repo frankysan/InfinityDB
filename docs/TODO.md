@@ -611,9 +611,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       condition-specific Immunity effects. Pinned English/Spanish N5.3
       pp. 175/182 and Immunity pp. 95/99; browser acceptance 15/15.
       No unconditional Dead graph edge or runtime mechanic added.
-    - [ ] **REA-005 — BS Weapon (WIP):** Verify the prohibited Skill
-      combinations on the player-facing Trait card without promoting
-      deferred typed-variant edges.
+    - [x] **REA-005 - BS Weapon (WIP) prohibited variants:** Verified
+      that BS Attack (Shock) and BS Attack (Guided) cannot use WIP weapons.
+      Added examples separating these named Skills from ordinary WIP-based
+      BS Attack and from Shock Ammunition in a weapon profile. Retained
+      the existing modifier and Fireteam semantics, source weapon data,
+      and deferred exact-variant edges; cited EN N5.3 pp. 39/175 and
+      ES N5.3 p. 39. Responsive browser acceptance passed 21/21.
     - [ ] **REA-006 — Controlled Jump:** Check the Program card's immediate
       declaration, optional table-wide ARO, opposing-Program cancellation,
       and separate scenario MODs.

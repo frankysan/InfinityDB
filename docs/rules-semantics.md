@@ -1527,18 +1527,22 @@ PH or WIP for the corresponding weapon. InfinityDB therefore authors
 `modifies-rolls-for` from each Trait to the canonical BS Attack Skill; the exact replacement
 Attribute remains part of the Trait definition rather than being encoded in the edge.
 
-The BS Weapon (WIP) curated summary explicitly states that BS Attack (Shock) and BS Attack
-(Guided) cannot use weapons with this Trait. This restriction applies to the named attack
-Skills, not automatically to Shock Ammunition. The exact attack forms still lack separate
-canonical rule identities, so their typed restriction edges remain in the future-interaction
-ledger. Neither is flattened into a restriction on ordinary BS Attack.
+The BS Weapon (WIP) summary excludes the named BS Attack (Shock) and BS Attack
+(Guided) Skills, not ordinary BS Attack or a profile's Shock Ammunition.
+The player-facing Clarifications distinguish: Flash Pulse as an ordinary BS
+Attack with WIP substituted for BS; the named Shock Skill versus a weapon's
+ammunition; and Guided's prohibition even when the enemy is Targeted and
+Guided would otherwise waive LoF. Exact attack variants still lack separate
+canonical record identities, so typed restriction edges remain in the future
+interaction ledger. Do not flatten these into restrictions on ordinary BS Attack.
+(REA-005 reference acceptance, 2026-10-14.)
 
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Traits#BS_Weapon_.28PH.29>
 - Wiki: <https://infinitythewiki.com/Traits#BS_Weapon_.28WIP.29>
 - Wiki: <https://infinitythewiki.com/BS_Attack#Guided_Mode>
-- PDF: Infinity N5 V5.3, printed pages 33 and 174
+- PDF: Infinity N5 V5.3 English pp. 39/175; Spanish p. 39
 
 ### RS-GSG-TRAIT-008 — CC and Non-Reloadable expose direct Skill relationships
 

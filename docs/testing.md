@@ -1440,3 +1440,23 @@ Continuous Damage, Immunity and Saving Rolls including both semantic
 links. No JS errors or page-level horizontal overflow. Verification
 script, screenshots and results remain ignored in `local/audits/`.
 This acceptance is not a complete damage or Immunity simulator.
+
+
+## 1.0 BS Weapon (WIP) named Skill restrictions (REA-005)
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Compared English N5.3 BS Weapon
+(WIP) p. 175 and BS Attack (Guided) p. 39 with Spanish N5.3 Guided
+p. 39. The original summary already excluded the **BS Attack (Shock)**
+and **BS Attack (Guided)** Skills with WIP weapons but not Shock Ammunition
+in general. Three linked clarifications now show Flash Pulse as an
+ordinary WIP-based BS Attack, the separate Shock Skill-versus-ammunition
+scope, and Guided's incompatibility even against a Targeted enemy.
+
+Curated and composed-record tests assert all three cases, source
+citations, unchanged `modifies-rolls-for` relation and Flash Pulse
+source behavior. Chromium acceptance passed **21/21** render/navigation
+checks at 1440, 390 and 320 px for the Trait, Flash Pulse, BS Attack,
+Shock Ammunition and Targeted links. No JS errors or horizontal overflow.
+Private script, screenshots and result JSON are kept under ignored
+`local/audits/`. No exact attack variants, new restriction edges or
+gameplay changes were introduced.

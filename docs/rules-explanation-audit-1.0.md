@@ -518,6 +518,34 @@ graph endpoint need not defer an intelligible warning on the owning card.
 **Fix:** text/links; structured variant/edge work separately. **Dependencies:**
 REA-033; no general ban on Shock Ammunition is inferred.
 
+**Reference acceptance (2026-10-14): Locally resolved; exact-variant
+relation modeling remains deferred.** The initial "Current" finding is
+historical: `trait:bs-weapon-wip` already stated both restrictions in
+its reviewed summary at `e619ff3`. English N5.3 p. 175 explicitly
+prohibits **BS Attack (Shock)** with BS Weapon (WIP); its p. 39 Guided
+rule excludes WIP/PH weapons. Spanish N5.3 p. 39 independently confirms
+the Guided prohibition. These do **not** prohibit the ordinary BS Attack
+Skill or automatically exclude **Shock Ammunition** from all WIP weapons.
+
+The Trait now carries three structured clarifications: normal WIP
+attribute substitution illustrated by Flash Pulse (still a BS Attack,
+not Discover), the named Shock Skill versus ammunition distinction,
+and the Guided exclusion even for a Targeted enemy without LoF.
+All are linked to existing Skill, State, Trait and Ammunition identities.
+The summary, `modifies-rolls-for` BS Attack relation, Army profiles,
+and Fireteam Attribute modifier behavior were not changed. Exact
+`BS Attack (Shock)`/`BS Attack (Guided)` variant identities and their
+`restricts-use-of` edges stay in the deferred interaction ledger; no
+blanket ban on ordinary BS Attack was added.
+
+Curated/composed-record regression tests exercise the prohibitions,
+exception boundaries, source pages, and unchanged relation. Browser
+acceptance passed **21/21** content/navigation checks at 1440/390/320 px
+for BS Weapon (WIP), Flash Pulse and BS Attack, including links to Shock
+Ammunition and Targeted; no JS errors or horizontal overflow. This
+resolves the REA-005 player-facing explanation, not full typed
+attack-variant eligibility evaluation.
+
 ### REA-006 - Controlled Jump lacks declaration timing and opposing cancellation
 
 **Classification:** completeness. **Severity:** High. **Priority:** P0.

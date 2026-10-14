@@ -925,6 +925,32 @@ def test_speedball_faq_exclusion_is_published_on_both_rule_cards(
     )
 
 
+def test_rea005_wip_attack_prohibitions_are_visible_without_new_variant_edges(
+    current_rules_database: RulesDatabase,
+) -> None:
+    trait = current_rules_database.composed_record("trait:bs-weapon-wip")
+    flash_pulse = current_rules_database.composed_record("weapon:flash-pulse")
+    assert trait is not None and flash_pulse is not None
+    ordinary, shock, guided = trait["facts"]["clarifications"]
+    assert "[[weapon:flash-pulse|Flash Pulse]]" in ordinary
+    assert "[[skill:bs-attack|BS Attack]] MODs to WIP" in ordinary
+    assert "cannot use the named [[skill:bs-attack|BS Attack (Shock)]]" in shock
+    assert "[[ammunition:shock|Shock Ammunition]] in general" in shock
+    assert "[[state:targeted|Targeted]]" in guided
+    assert "Guided's permission" in guided
+    assert "cannot be used" in guided
+    assert "[[trait:bs-weapon-wip|BS Weapon (WIP)]]" in flash_pulse["summary"]
+    assert [(r["type"], r["record_id"]) for r in trait["relations"]] == [
+        ("modifies-rolls-for", "skill:bs-attack")
+    ]
+    cited = {(c["source_id"], c.get("page")) for c in trait["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 175),
+        ("n5-core-v5.3-pdf", 39),
+        ("n5-core-v5.3-es-pdf", 39),
+    }
+
+
 def test_rea004_continuous_damage_critical_and_immunity_examples_are_published(
     current_rules_database: RulesDatabase,
 ) -> None:

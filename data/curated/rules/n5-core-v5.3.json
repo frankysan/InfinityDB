@@ -3006,6 +3006,13 @@
                     "current"
                 ]
             },
+            "facts": {
+                "clarifications": [
+                    "**Ordinary WIP-based [[skill:bs-attack|BS Attack]]:** [[weapon:flash-pulse|Flash Pulse]] is a [[trait:bs-weapon-wip|BS Weapon (WIP)]]. It still performs an ordinary [[skill:bs-attack|BS Attack]], rolling the attacker's WIP instead of BS and applying [[skill:bs-attack|BS Attack]] MODs to WIP. The Trait replaces the attack Attribute; it does not turn the attack into a WIP Common Skill such as [[skill:discover|Discover]].",
+                    "**Shock Skill versus ammunition:** A weapon with [[trait:bs-weapon-wip|BS Weapon (WIP)]] cannot use the named [[skill:bs-attack|BS Attack (Shock)]] Skill (N5.3 p. 175). This does **not** prohibit a weapon profile from having [[ammunition:shock|Shock Ammunition]] in general. The Skill restriction and the weapon's actual ammunition must be checked separately; do not invent an ammunition restriction.",
+                    "**Guided cannot substitute WIP:** Even when the target is [[state:targeted|Targeted]], the [[skill:bs-attack|BS Attack (Guided)]] Skill cannot be used with a [[trait:bs-weapon-wip|BS Weapon (WIP)]] (N5.3 p. 39). Guided's permission to attack a [[state:targeted|Targeted]] enemy without Line of Fire does not override its restriction on WIP/PH weapons. An otherwise eligible standard [[skill:bs-attack|BS Attack]] with the same weapon remains governed by its own profile and targeting requirements."
+                ]
+            },
             "citations": [
                 {
                     "sourceId": "wiki-traits-oldid-4110",
@@ -3020,6 +3027,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 39,
                     "section": "BS Attack (Guided)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 39,
+                    "section": "Ataque CD (Guiado)"
                 }
             ],
             "review": {

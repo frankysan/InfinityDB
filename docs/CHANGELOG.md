@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- BS Weapon (WIP) now explains why normal WIP-based attacks work,
+  while BS Attack (Shock) and Guided are prohibited; Shock Ammunition
+  itself is not universally prohibited.
 - Continuous Damage now includes an example showing that a failed ordinary
   hit Saving Roll repeats, while an additional Critical Saving Roll does not.
   Applicable Immunity is explained separately without changing the rules.
@@ -163,6 +166,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Complete REA-005 BS Weapon (WIP)
+  reference acceptance with source-linked ordinary attack, Shock Skill
+  versus Ammunition, and Guided examples, including Spanish N5.3 p. 39.
+  Preserve source profiles, canonical attack relationships, and deferred
+  exact-variant restriction edges.
 - **Data processing + Web frontend:** Complete REA-004 Continuous Damage
   reference acceptance with ordinary-hit/Critical-only roll examples,
   conditional Immunity variants, and English/Spanish N5.3 citations.
