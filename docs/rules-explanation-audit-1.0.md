@@ -998,13 +998,11 @@ No generic placement geometry evaluator was introduced.
 **Affected:** `trait:bioweapon`, `weapon:mines`, `ammunition:normal`,
 `ammunition:da`, `ammunition:shock`, `skill:vulnerability`.
 
-**Current:** The Trait still states that DA+Shock applies to VITA without
-component links, and Viral Mine's N/BTS/one-save profile still needs a
-target-conditioned explanation. The 2026-10-14 Viral CC Weapon reference now
-explicitly links Normal, DA, Shock and BioWeapon and explains the derived
-VITA-versus-STR outcome while preserving the printed baseline. This is
-item-specific progress, not completion of the shared Trait/Mine review or a
-general resolution of Immunity interactions.
+**Original gap:** BioWeapon described DA+Shock against VITA without links
+to the two Ammunition rules. Viral Mine's N/BTS/one-save source fields did
+not explain that BioWeapon is target-conditioned. A previously reviewed
+Viral CC Weapon definition and shared Viral Weapon Property had already
+captured the derived VITA-versus-STR comparison.
 
 **Evidence/result:** S1 pp. 174 and 181 and S6 metadata weapon 63 distinguish
 the profile from the target-conditioned Trait. DA supplies two saves against a
@@ -1013,11 +1011,31 @@ save. Against STR, BioWeapon does not supply DA+Shock. The one-save chart field
 is not automatically a typo: it is the baseline before applying that Trait.
 Vulnerability (Viral) is separately weapon-name-scoped (S1 p. 118).
 
-**Action:** Add a short VITA/STR comparison and component links, explicitly
-marking the combined reasoning Derived. Keep source profile values.
-**Fix:** prose/links and the already deferred reuse edges if appropriate.
-**Dependencies:** REA-010, REA-013, REA-025. Broader partial Immunity cases
-remain research, not a certified general algorithm.
+**Disposition (verified 2026-10-14): Resolved for the published baseline.**
+The canonical BioWeapon Trait links [[ammunition:da|DA]] and
+[[ammunition:shock|Shock]], limiting their combined effect to VITA targets.
+The Trait distinguishes the source-stated condition from its **derived**
+Saving Roll implications: DA supplies two rolls per hit; Shock's direct-Dead
+effect additionally requires VITA 1 and a failed Saving Roll. Against STR,
+the conditional Trait does not apply and the weapon's printed Ammunition
+and Saving Roll fields remain the baseline.
+
+The shared Mines reference now specifically identifies Viral Mine's printed
+N/BTS/one-roll baseline and points to the existing
+`weapon-property:viral` for the detailed VITA-versus-STR comparison.
+The exact Army Viral Mine (weapon 63) profile and the Property's reviewed
+source identity are unchanged. The published trait, mine and shared
+Property remain navigable alongside the relevant Ammunition references.
+Vulnerability (Viral) still checks the weapon's **name**, not an invented
+Viral Ammunition type. N5.3 pp. 63-65, 118, 174 and 181 support these
+distinct conditions; the combination is explicitly Derived.
+
+No unconditional DA/Shock composition edges, universal two-save profile
+change or general partial-Immunity evaluator were introduced. Unresolved
+Immunity and other conditional interactions remain under REA-010/013.
+The separate 320 px Ammunition-page header badge overflow discovered
+during browser acceptance is tracked in the final UI gate, not silently
+folded into this rules finding.
 
 ### REA-025 - N+E/M is absent from the reviewed composition map
 

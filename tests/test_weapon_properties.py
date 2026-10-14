@@ -69,6 +69,17 @@ def test_weapon_property_profiles_are_exact_and_mode_scoped() -> None:
     assert [p["id"] for p in properties.for_profile(profiles("viral-rifle")[0])] == [
         "weapon-property:viral"
     ]
+    viral_mine = profiles("viral-mine")[0]
+    assert (
+        viral_mine["ammunition"], viral_mine["saving"], viral_mine["saving_num"]
+    ) == ("N", "BTS", "1")
+    assert [p["id"] for p in viral_mine["weapon_properties"]] == [
+        "weapon-property:viral"
+    ]
+    assert "ammunition_composition" not in viral_mine
+    assert [p["id"] for p in properties.for_profile(viral_mine)] == [
+        "weapon-property:viral"
+    ]
     assert [p["id"] for p in properties.for_profile(profiles("breaker-pistol")[0])] == [
         "weapon-property:breaker"
     ]

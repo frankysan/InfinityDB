@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- BioWeapon now links its VITA-only DA+Shock effects to the underlying
+  Ammunition rules. Viral Mine explains why its printed one-BTS-roll
+  profile remains the baseline while the shared Viral Property describes
+  target-dependent Saving Rolls and Shock exceptions.
 - Weapon profiles now link named **Weapon Properties** such as Plasma, Viral,
   Breaker, K1, MULTI, Monofilament, Silenced and combined Ammunition, including
   N+E/M, to searchable Glossary explanations and their originating rules. Links provide the same preview

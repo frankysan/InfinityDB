@@ -662,6 +662,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       passed browser validation at 1440, 390 and 320 px (39/39).
       Armed Turret's printed Silhouette and E/Mitter conflicts remain
       separate under REA-037 and REA-045.
+    - [x] **REA-024 — BioWeapon and Viral Mine:** Linked the VITA-only
+      DA+Shock effect and its derived Saving Roll conditions to canonical
+      Ammunition, Shock and Immunity references. Viral Mine retains the
+      pinned N/BTS/one-roll source profile and reuses the reviewed Viral
+      Weapon Property. No new universal Immunity interpretation was made.
+      Source/API and browser acceptance verified; a separate pre-existing
+      320 px Ammunition header overflow remains in final UI acceptance.
     - [x] **REA-026 — Shared General Rules:** Face to Face Rolls, Saving
       Rolls, Guts Rolls, Order Expenditure Sequence, and Coordinated
       Orders are published, linked, and source-cited. Chrome acceptance
@@ -1011,6 +1018,10 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
   Open Visibility Zone tooltips and Ammunition/Immunity cross-links with
   pointer, keyboard and touch. Verify readable content and no horizontal
   clipping across desktop and narrow-screen layouts.
+  - [ ] Correct the shared "Rules reference" tag in the narrow breadcrumb:
+    at 320 px it overflows by about 6 px on Normal, DA and Shock Ammunition
+    detail pages. This predates the BioWeapon curation and belongs to the
+    shared reference layout rather than Ammunition semantics.
 
 - [ ] **Data processing + Web backend + Web frontend + Project infrastructure:**
   Execute the final 1.0 source-to-storage-to-browser completeness gate defined by

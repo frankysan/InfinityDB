@@ -2813,7 +2813,19 @@
             "id": "trait:bioweapon",
             "kind": "trait",
             "name": "BioWeapon",
-            "summary": "Applies DA+Shock Special Ammunition against targets with VITA.",
+            "summary": "Applies [[ammunition:da|DA]] and [[ammunition:shock|Shock]] Special Ammunition only against targets with [[attribute:vita|VITA]], not [[attribute:str|STR]].",
+            "facts": {
+                "clarifications": [
+                    "**Derived interaction:** [[ammunition:da|DA]] makes a hit against a VITA target require two Saving Rolls. [[ammunition:shock|Shock]] additionally sends a VITA 1 target directly to [[state:dead|Dead State]] if a Saving Roll fails, subject to applicable [[skill:immunity|Immunity]] and other exceptions.",
+                    "Against STR, BioWeapon adds neither DA nor Shock. The weapon's printed Ammunition and Saving Roll profile remains the baseline; it is not automatically a chart error. The [[weapon-property:viral|Viral Weapon Property]] applies these conditions to the reviewed Viral weapon profiles."
+                ],
+                "sourceIdentity": {
+                    "prefixes": [
+                        "BioWeapon (",
+                        "Bioweapon ("
+                    ]
+                }
+            },
             "composition": {
                 "role": "definition"
             },
@@ -2827,6 +2839,11 @@
                 {
                     "sourceId": "wiki-traits-oldid-4110",
                     "heading": "BioWeapon"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 174,
+                    "section": "BioWeapon"
                 }
             ],
             "review": {
@@ -2835,15 +2852,7 @@
             },
             "aliases": [
                 "Bioweapon"
-            ],
-            "facts": {
-                "sourceIdentity": {
-                    "prefixes": [
-                        "BioWeapon (",
-                        "Bioweapon ("
-                    ]
-                }
-            }
+            ]
         },
         {
             "id": "trait:boost",
@@ -4516,7 +4525,7 @@
             "id": "weapon:mines",
             "kind": "weapon",
             "name": "Mines",
-            "summary": "Mine types governed by these shared rules use [[skill:place-deployable]] to put down a [[skill:camouflage|CAMO]] (-3) Marker, which becomes a MINE (-3) Token when Discovered; both receive [[skill:mimetism]] (-3).\n\nMines have 360º LoF. Their Trigger Area is the Small Teardrop Template projected from the base, excluding Total Cover.\n\nWhen an enemy Model or Marker declares or executes a Skill or [[trait:aro|ARO]] within it, a Mine must trigger if its Small Teardrop Template reaches that enemy without affecting any ally, including [[state:unconscious|Unconscious]] allies. If the target is outside the Trigger Area, the Mine remains hidden and does not detonate.\n\nEach named Mine has its own Weapon Chart ammunition, PS, Saving Rolls, and Traits; a triggered Mine applies its own profile and is then removed. Mines that can be Dodged impose -3 PH on [[skill:dodge]] attempts.\n\nA Mine cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid non-camouflaged enemy is also inside it or a [[trait:intuitive-attack|Intuitive Attack]] was declared.\n\n[[weapon:cybermine|Cybermines]] replace the [[skill:dodge|Dodge]] response with [[skill:reset]]; [[weapon:chest-mine|Chest Mines]] do not use these shared Mine rules.",
+            "summary": "Mine types governed by these shared rules use [[skill:place-deployable]] to put down a [[skill:camouflage|CAMO]] (-3) Marker, which becomes a MINE (-3) Token when Discovered; both receive [[skill:mimetism]] (-3).\n\nMines have 360º LoF. Their Trigger Area is the Small Teardrop Template projected from the base, excluding Total Cover.\n\nWhen an enemy Model or Marker declares or executes a Skill or [[trait:aro|ARO]] within it, a Mine must trigger if its Small Teardrop Template reaches that enemy without affecting any ally, including [[state:unconscious|Unconscious]] allies. If the target is outside the Trigger Area, the Mine remains hidden and does not detonate.\n\nEach named Mine has its own Weapon Chart ammunition, PS, Saving Rolls, and Traits; a triggered Mine applies its own profile and is then removed. Mines that can be Dodged impose -3 PH on [[skill:dodge]] attempts.\n\nA Mine cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid non-camouflaged enemy is also inside it or a [[trait:intuitive-attack|Intuitive Attack]] was declared.\n\n[[weapon:cybermine|Cybermines]] replace the [[skill:dodge|Dodge]] response with [[skill:reset]]; [[weapon:chest-mine|Chest Mines]] do not use these shared Mine rules.\n\n**Viral Mine:** Its printed [[ammunition:normal|N]] / BTS / one-Saving-Roll profile is the baseline. Its [[trait:bioweapon|BioWeapon]] has target-dependent effects; the [[weapon-property:viral|shared Viral Weapon Property]] explains the derived VITA-versus-STR outcome without changing the source profile.",
             "facts": {
                 "variantRuleReferences": {
                     "ap-mine": [
@@ -4615,6 +4624,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 72,
                     "section": "Mines"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 181,
+                    "section": "Weapon Chart: Viral Mines"
                 }
             ],
             "review": {

@@ -988,3 +988,40 @@ Focused tests live in `tests/test_rules_database.py`. Private source
 excerpts, rendered screenshots and browser results remain ignored under
 `local/audits/` and `local/audits/rea023-browser/`.
 No runtime geometry simulation or generic rule evaluator was added.
+
+
+## 1.0 REA-024 BioWeapon and Viral Mine acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** The BioWeapon Trait, shared
+Viral Weapon Property, Mines reference, Viral Mine, Viral CC Weapon and
+VIRAL Sniper Rifle were checked against English N5.3 pp. 63-65, 118,
+174, 181 and 185, plus the pinned Army weapon profiles. The published
+Viral Mine source remains N/BTS/one Saving Roll; the Trait conditionally
+adds DA+Shock only against VITA, with the combined two-roll result
+clearly identified as derived rather than a rewritten source field.
+Shock still needs VITA 1 and a failed Saving Roll to bypass Unconscious.
+The independent Vulnerability (Viral) rule remains name-scoped, and
+other Immunity combinations are not certified by these examples.
+
+Chromium browser acceptance passed **33/33** render/navigation checks
+across eight rule/weapon pages at 1440, 390 and 320 px, including actual
+BioWeapon-to-DA/Shock/Viral Property links and no JavaScript errors.
+The BioWeapon, Viral Mine and Normal Ammunition 320 px screenshots were
+visually inspected.
+
+**Independent existing UI issue:** At exactly 320 px, the shared
+"Rules reference" breadcrumb badge extends about 6 px beyond the
+viewport on Normal, DA and Shock Ammunition detail pages. Five render
+or navigation occurrences were recorded in this acceptance run; it
+is not introduced by BioWeapon and is tracked under the final UI
+acceptance checklist. Those cases were explicitly allowed only as
+known layout exceptions, not asserted to be free of horizontal overflow.
+At 390 px the affected page had no overflow. The screenshot and DOM
+diagnostic remain under `local/audits/rea024-browser/`.
+
+The regression contracts in `tests/test_rules_database.py` and
+`tests/test_weapon_properties.py` protect source page citations, the
+VITA/STR condition, the DA/Shock components, and Viral Mine's exact
+N/BTS/one-roll property mapping. No general ammunition-combination
+or Immunity evaluator was added. Private source extracts and browser
+results stay under `local/audits/`.

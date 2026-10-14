@@ -3373,3 +3373,57 @@ def test_rea023_deployable_placement_geometry_and_exception_owners(
     assert "Silhouette-contact placement" in " ".join(repeater["facts"]["effects"])
     assert source(turret, "n5-core-v5.3-pdf", 70)
     assert source(wildparrot, "n5-core-v5.3-pdf", 74)
+
+
+def test_rea024_bioweapon_condition_and_viral_mine_baseline(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """Official N5.3 pp. 63-65, 174, 181: source values vs conditional effects."""
+    trait = current_rules_database.composed_record("trait:bioweapon")
+    mines = current_rules_database.composed_record("weapon:mines")
+    normal = current_rules_database.composed_record("ammunition:normal")
+    da = current_rules_database.composed_record("ammunition:da")
+    shock = current_rules_database.composed_record("ammunition:shock")
+    vulnerability = current_rules_database.composed_record("skill:vulnerability")
+    assert trait is not None
+    assert mines is not None
+    assert normal is not None
+    assert da is not None
+    assert shock is not None
+    assert vulnerability is not None
+
+    assert "[[ammunition:da|DA]]" in trait["summary"]
+    assert "[[ammunition:shock|Shock]]" in trait["summary"]
+    assert "[[attribute:vita|VITA]]" in trait["summary"]
+    assert "[[attribute:str|STR]]" in trait["summary"]
+    notes = " ".join(trait["facts"]["clarifications"])
+    assert "**Derived interaction:**" in notes
+    assert "two Saving Rolls" in notes
+    assert "VITA 1" in notes and "if a Saving Roll fails" in notes
+    assert "[[skill:immunity|Immunity]]" in notes
+    assert "Against STR, BioWeapon adds neither DA nor Shock" in notes
+    assert "[[weapon-property:viral|Viral Weapon Property]]" in notes
+    assert trait["facts"]["sourceIdentity"]["prefixes"] == [
+        "BioWeapon (", "Bioweapon (",
+    ]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 174
+               for c in trait["citations"])
+
+    # The family profile must not turn a source N/BTS/1 into DA by default.
+    assert mines["facts"]["variantRuleReferences"]["viral-mine"] == [
+        "ammunition:normal", "trait:bioweapon",
+    ]
+    assert "**Viral Mine:**" in mines["summary"]
+    assert "[[weapon-property:viral|shared Viral Weapon Property]]" in mines["summary"]
+    assert "VITA-versus-STR" in mines["summary"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 181
+               for c in mines["citations"])
+
+    assert normal["facts"]["ammunitionResolution"]["rollsPerHit"] == 1
+    assert da["facts"]["ammunitionResolution"]["rollsPerHit"] == 2
+    assert shock["facts"]["ammunitionResolution"]["stateEffects"][0][
+        "targetAttribute"
+    ] == {"name": "VITA", "equals": 1}
+    assert "weapon with Viral in its name" in " ".join(
+        vulnerability["facts"]["effects"]
+    )
