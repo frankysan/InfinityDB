@@ -1,8 +1,9 @@
 # Changelog
 
 All notable user- or operator-relevant changes to InfinityDB are documented here.
-Each release begins with a concise **Player summary** containing only changes visible or useful to
-players; the remaining sections preserve fuller user/operator release detail. Entries describe
+Each release with entries begins with a concise **Player summary** containing only changes visible
+or useful to players; an empty `Unreleased` heading is omitted from the browser page. The remaining
+sections preserve fuller user/operator release detail. Entries describe
 meaningful release outcomes rather than detailed implementation history. New or materially revised
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
@@ -11,6 +12,11 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- **What's changed** now includes upcoming-release notes alongside past releases when there are new changes to show.
+- Weapon profiles now offer expandable, linked explanations of shared Ammunition
+  effects. New Weapon references clarify CC and Pistol variants, MULTI and K1
+  Rifles, D-Charges, Disco Baller, and SymbioBomb while preserving their
+  different modes and Saving Rolls.
 - Peripheral and its five subtype references now explain activation,
   Coherency, Doctor/Engineer delegation, Controller and Peripheral rolls,
   and Cyberplug Connected/Autonomous exceptions.
@@ -31,8 +37,21 @@ are not retroactively relabeled.
 - Negative Feedback (NFB) now explains which effects it overrides on a Trooper and
   how long Cybermask and White Noise restrict other NFB effects.
 
+### Added
+
+- **Data processing + Web backend:** Add source-cited Weapon explanations for
+  common CC Weapons and Pistols, D-Charges, Disco Baller and SymbioBomb,
+  distinguishing mode-specific requirements and exceptions without changing
+  published Army profiles. Explain MULTI Rifle's alternative firing modes and
+  K1 Combi Rifle's printed Normal Ammunition with ARM=0; other reviewed Rifles
+  reuse existing Ammunition and Trait rules.
+
 ### Changed
 
+- **Data processing + Web backend + Web frontend:** Show canonical Ammunition
+  effects and source citations in an expandable section on Weapon profiles.
+  Shared effects use the normal reference links and touch previews, while each
+  Weapon retains its own Saving Rolls, Traits and modes.
 - **Data processing + Web backend:** Expand the shared Peripheral baseline
   and five subtype cards with source-cited operation, disconnection,
   recovery and exception rules, linked to Doctor, Engineer and Cyberplug.
@@ -59,6 +78,10 @@ are not retroactively relabeled.
 - **Data processing:** Clarify the one-active-NFB-effect rule and the separate
   Cybermask/White Noise lifetimes in the linked Label and Hacking Program references.
   Other Troopers' NFB effects remain independent.
+
+### Fixed
+
+- **Web backend:** Show upcoming-release notes on **What's changed** when the changelog uses its bracketed `Unreleased` heading, but omit that section when it contains no actual changes.
 
 ## [0.10.1] - 2026-10-10
 

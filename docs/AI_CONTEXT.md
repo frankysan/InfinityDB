@@ -110,9 +110,14 @@ release/audit narrative belongs in the changelog and Git history.
   Saving Roll notation. The maintained map (version 2) records ordered components
   for the four reviewed combined forms (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`);
   their API `ammunition_composition` field is only present on exact matching
-  source profiles. Alternatives remain unlinked. Curated `ammunitionResolution`
-  remains a non-executable, source-cited fact contract: all eleven base
-  Ammunition identities are reviewed. PARA's no-PH exception, T2's reduced Wound
+  source profiles. Alternatives remain unlinked. Those same exact source matches
+  project canonical summaries/citations as `ammunition_effects` for Weapon pages,
+  not resolved combined effects or automatic completeness. Omitting a standalone
+  Weapon definition requires an explicit source-profile-pinned review recorded
+  in `data/curated/weapon-shared-effect-reviews.json`, not just linked ammunition.
+  Curated `ammunitionResolution` remains a non-executable, source-cited fact
+  contract: all eleven base Ammunition identities are reviewed. PARA's no-PH
+  exception, T2's reduced Wound
   outcome for an *additional Critical roll*, Shock's VITA-1 exception, and Stun's
   Guts/Courage exception cannot be dropped when consuming facts. Smoke/Eclipse
   use separate `facts.visibilityZone` data with distinct MSV behavior; do not
@@ -311,8 +316,10 @@ When a change alters a durable contract:
 - update the canonical owner, not every document that happens to mention the topic;
 - keep `AI_CONTEXT.md` to non-obvious invariants and links;
 - add unfinished work only to `docs/TODO.md`;
-- add meaningful user/operator outcomes to `docs/CHANGELOG.md` under `Unreleased` during normal
-  development;
+- record meaningful user/operator outcomes in `docs/CHANGELOG.md` under `Unreleased`
+  when the corresponding work is completed, not only at release time; verify
+  documentation impact against the actual diff before handing off (see
+  `AGENTS.md` for the canonical workflow);
 - update README only for public capabilities/setup/major workflow changes; and
 - prefer a small explicit compatibility layer to silently breaking old identifiers, URLs, or source
   artifacts.

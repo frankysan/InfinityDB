@@ -152,6 +152,10 @@ will actively guide later work.
 
 ## 3. Prepare release notes and metadata
 
+- [ ] Cross-check `Unreleased` against substantive player/operator changes in Git
+  history since the previous release and the last changelog update. Restore
+  missing outcomes, but do not turn commits, tests or internal refactors into
+  individual release-note entries.
 - [ ] Review the complete `Unreleased` section of `docs/CHANGELOG.md` as one release:
   make its `Player summary` concise and player-visible only, merge overlapping detailed entries,
   remove implementation-only detail, and make upgrade consequences explicit.

@@ -161,7 +161,7 @@ When adding or consolidating changelog entries:
 - Write from the perspective of a user or operator of InfinityDB.
 - Describe the resulting capability, behavior, correctness improvement, or upgrade consequence rather than the implementation steps that produced it.
 - Consolidate related engineering changes into a single outcome-oriented entry where they form one coherent improvement.
-- Begin every release, including `Unreleased`, with a `Player summary` section. Keep it concise and include only changes that are visible or directly useful to players; use `No player-facing changes.` when a release has none. The browser publishes this section openly and keeps the fuller release detail collapsed by default.
+- Begin every nonempty release with a `Player summary` section. Keep it concise and include only changes that are visible or directly useful to players; use `No player-facing changes.` when a release has operator-only changes. The browser publishes this section openly and keeps the fuller release detail collapsed by default. A completely empty `Unreleased` section may be left as a bare heading (or an empty Player summary) and must not appear on **What's changed**. A lone `No player-facing changes.` placeholder without detailed entries also counts as empty; released versions must still contain notes.
 - Keep `Added`, `Changed`, and `Fixed` as the normal detailed categories. Use an `Upgrade notes` section when a release requires an explicit action such as rebuilding generated databases.
 - Keep wording understandable without requiring knowledge of InfinityDB's internal architecture, build pipeline, CI setup, or implementation tools.
 - Retain technical terminology only when it identifies a meaningful user-visible concept or is necessary for an operator to act on the change.
@@ -193,6 +193,13 @@ Before finalizing **any release**, follow the canonical checklist in `docs/relea
   invariant or development constraint.
 - Add identified future work to `docs/TODO.md`.
 - Record meaningful changes under `Unreleased` in `docs/CHANGELOG.md`.
+  Do this as part of the work that delivers the outcome, not as a deferred
+  release-preparation task. Before reporting a substantive task complete,
+  review its actual diff for documentation impact: update the canonical
+  behavior/design owner, `Unreleased` if users or operators experience a
+  meaningful change, and `docs/TODO.md` only for remaining work. If a change
+  is internal-only and warrants no changelog entry, explicitly state that
+  decision in the handoff instead of adding implementation noise.
 - Label new or materially revised change/feature/design/backlog documentation with
   its canonical project domain. Use the exact labels and multi-domain rules from
   `docs/project-domains.md`; do not invent near-synonyms.
