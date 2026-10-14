@@ -35,6 +35,12 @@ release/audit narrative belongs in the changelog and Git history.
   not to Army source-ID navigation mappings. The initial AP/DA/E/M typed pilot
   is descriptive and non-executable; combined Ammunition components and
   Combined Saving Roll notation are separate source/profile dimensions.
+- Weapon Properties (`weapon-property:*`) are a reviewed, searchable embedded
+  vocabulary projected from exact Army profile signatures. Their explicit
+  origin references point back to canonical Ammunition/Traits/Rules or pinned
+  source sections; the Property itself never owns new game mechanics. Do not
+  confuse these with Army's existing source `properties` Trait field or
+  infer membership from prefixes. See `docs/data-model.md`.
 - Combined Saving Roll Criticals are distinct from combined Ammunition
   Criticals. The six reviewed Plasma Hit/Blast profiles have source-exact
   `combined_saving_roll` annotations: one ARM and one BTS roll, plus one

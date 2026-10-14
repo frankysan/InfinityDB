@@ -107,6 +107,31 @@ function appendWeaponAmmunition(cell, profile, fallbackReference) {
   }
 }
 
+function weaponPropertyLinks(profile) {
+  if (!profile.weapon_properties?.length) return null;
+  const row = document.createElement("div");
+  row.className = "weapon-data-row";
+  const heading = document.createElement("h5");
+  heading.className = "weapon-data-heading";
+  heading.textContent = "Weapon Properties";
+  const value = document.createElement("p");
+  value.className = "weapon-data-value";
+  for (const [index, property] of profile.weapon_properties.entries()) {
+    if (index) value.append(" · ");
+    const href = ruleReferenceHref(property.public_reference);
+    if (href) {
+      const link = document.createElement("a");
+      link.href = href;
+      link.textContent = property.name;
+      value.append(link);
+    } else {
+      value.append(property.name);
+    }
+  }
+  row.append(heading, value);
+  return row;
+}
+
 function weaponAmmunitionEffects(profile) {
   const effects = profile.ammunition_effects;
   if (!Array.isArray(effects) || !effects.length) return null;
@@ -369,6 +394,8 @@ function weaponVariants(variants) {
       statTable.append(statBody);
       card.append(tableViewport(statTable));
       if (catalog === "weapons") {
+        const properties = weaponPropertyLinks(profile);
+        if (properties) card.append(properties);
         const sharedEffects = weaponAmmunitionEffects(profile);
         if (sharedEffects) card.append(sharedEffects);
       }

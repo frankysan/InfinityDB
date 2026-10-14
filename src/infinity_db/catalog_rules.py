@@ -9,6 +9,7 @@ from infinity_db.domain_references import rule_record_public_reference
 from infinity_db.rules_database import ArmyLinkRef, RulesDatabase
 from infinity_db.weapon_ammunition_references import WeaponAmmunitionReferences
 from infinity_db.weapon_combined_saving_rolls import WeaponCombinedSavingRolls
+from infinity_db.weapon_properties import WeaponProperties
 
 DECLARATION_KIND = "declaration-category"
 
@@ -54,6 +55,9 @@ class CatalogRules:
         self._rule_reference_cache: dict[str, dict[str, Any]] = {}
         self._combined_saving_rolls = (
             WeaponCombinedSavingRolls() if rules_database is not None else None
+        )
+        self._weapon_properties = (
+            WeaponProperties(rules_database) if rules_database is not None else None
         )
         self._ammunition_references = (
             WeaponAmmunitionReferences(rules_database)
@@ -226,6 +230,10 @@ class CatalogRules:
             # Ammunition composition, while Saving Roll x2 is a separate field.
             def attach_ammunition_references(profiles: list[dict[str, Any]]) -> None:
                 for profile in profiles:
+                    if self._weapon_properties is not None:
+                        properties = self._weapon_properties.for_profile(profile)
+                        if properties:
+                            profile["weapon_properties"] = properties
                     segments = ammunition_references.for_profile(profile)
                     if segments is not None:
                         profile["ammunition_parts"] = segments

@@ -1,0 +1,905 @@
+{
+  "format": "InfinityDB reviewed weapon properties",
+  "version": 1,
+  "source": "n5-core-v5.3",
+  "properties": [
+    {
+      "id": "plasma",
+      "name": "Plasma",
+      "summary": "Plasma weapons use Normal Ammunition but require a Combined Saving Roll: one ARM and one BTS Saving Roll for each hit. A Critical adds one ARM roll, not another BTS roll. The weapon's mode determines whether an Impact Template applies.",
+      "origins": [
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:normal",
+          "role": "baseline"
+        },
+        {
+          "domain": "General Rules",
+          "recordId": "rule:saving-rolls",
+          "role": "saving-roll-resolution"
+        },
+        {
+          "domain": "Weaponry",
+          "sourceSection": "N5.3 p. 67: Combined Saving Roll",
+          "role": "specific-rule"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 40,
+          "weaponName": "Plasma Rifle",
+          "mode": "Blast Mode",
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "ARM and BTS",
+          "savingNum": "1 and 1",
+          "traits": [
+            "Suppressive Fire",
+            "Impact Template (Circular)"
+          ]
+        },
+        {
+          "weaponId": 40,
+          "weaponName": "Plasma Rifle",
+          "mode": "Hit Mode",
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "ARM and BTS",
+          "savingNum": "1 and 1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 111,
+          "weaponName": "Plasma Carbine",
+          "mode": "Blast Mode",
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "ARM and BTS",
+          "savingNum": "1 and 1",
+          "traits": [
+            "Impact Template (Circular)"
+          ]
+        },
+        {
+          "weaponId": 111,
+          "weaponName": "Plasma Carbine",
+          "mode": "Hit Mode",
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "ARM and BTS",
+          "savingNum": "1 and 1",
+          "traits": []
+        },
+        {
+          "weaponId": 113,
+          "weaponName": "Plasma Sniper Rifle",
+          "mode": "Blast Mode",
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "ARM and BTS",
+          "savingNum": "1 and 1",
+          "traits": [
+            "Impact Template (Circular)"
+          ]
+        },
+        {
+          "weaponId": 113,
+          "weaponName": "Plasma Sniper Rifle",
+          "mode": "Hit Mode",
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "ARM and BTS",
+          "savingNum": "1 and 1",
+          "traits": []
+        }
+      ]
+    },
+    {
+      "id": "viral",
+      "name": "Viral",
+      "summary": "Viral weapons use Normal Ammunition and make BTS Saving Rolls. Their BioWeapon Trait applies DA and Shock against targets with VITA; against STR it does not grant those effects. Vulnerability (Viral) separately refers to Viral in a weapon's name.",
+      "origins": [
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:normal",
+          "role": "baseline"
+        },
+        {
+          "domain": "Weapon Traits",
+          "recordId": "trait:bioweapon",
+          "role": "conditional-effect"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:da",
+          "role": "conditional-component"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:shock",
+          "role": "conditional-component"
+        },
+        {
+          "domain": "Skills",
+          "recordId": "skill:vulnerability",
+          "role": "name-dependent-exception"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 13,
+          "weaponName": "Viral CC Weapon",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "BTS",
+          "savingNum": "1",
+          "traits": [
+            "CC",
+            "Bioweapon (DA+SHOCK)"
+          ]
+        },
+        {
+          "weaponId": 39,
+          "weaponName": "VIRAL Sniper Rifle",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "BTS",
+          "savingNum": "1",
+          "traits": [
+            "Bioweapon (DA+SHOCK)"
+          ]
+        },
+        {
+          "weaponId": 43,
+          "weaponName": "Viral Rifle",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "BTS",
+          "savingNum": "1",
+          "traits": [
+            "Bioweapon (DA+SHOCK)",
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 63,
+          "weaponName": "Viral Mine",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "BTS",
+          "savingNum": "1",
+          "traits": [
+            "Intuitive Attack",
+            "Bioweapon (DA+SHOCK)",
+            "Concealed",
+            "Disposable (3)",
+            "Direct Template (Small Teardrop)",
+            "Deployable",
+            "[*]"
+          ]
+        },
+        {
+          "weaponId": 83,
+          "weaponName": "Viral Combi Rifle",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "BTS",
+          "savingNum": "1",
+          "traits": [
+            "Bioweapon (DA+SHOCK)",
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 156,
+          "weaponName": "Viral Pistol",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "BTS",
+          "savingNum": "1",
+          "traits": [
+            "Bioweapon (DA+SHOCK)"
+          ]
+        },
+        {
+          "weaponId": 179,
+          "weaponName": "Viral Tactical Bow",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "BTS",
+          "savingNum": "1",
+          "traits": [
+            "Bioweapon (DA+SHOCK)",
+            "Silent (-6)"
+          ]
+        },
+        {
+          "weaponId": 206,
+          "weaponName": "Viral Marksman Rifle",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "BTS",
+          "savingNum": "1",
+          "traits": [
+            "Bioweapon (DA+SHOCK)",
+            "Suppressive Fire"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "breaker",
+      "name": "Breaker",
+      "summary": "Breaker weapons use AP Ammunition against BTS rather than ARM. Their weapon profiles specify the BTS/2 Saving Roll; Breaker is not a separate current base Ammunition rule.",
+      "origins": [
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:ap",
+          "role": "ammunition-effect"
+        },
+        {
+          "domain": "Weapon Chart",
+          "sourceSection": "N5.3 Weapon Chart: Breaker weapons",
+          "role": "saving-attribute"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 98,
+          "weaponName": "Breaker Pistol",
+          "mode": null,
+          "ammunitionSourceId": 3,
+          "ammunition": "AP",
+          "saving": "BTS/2",
+          "savingNum": "1",
+          "traits": []
+        },
+        {
+          "weaponId": 103,
+          "weaponName": "Breaker Combi Rifle",
+          "mode": null,
+          "ammunitionSourceId": 3,
+          "ammunition": "AP",
+          "saving": "BTS/2",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 109,
+          "weaponName": "Breaker Rifle",
+          "mode": null,
+          "ammunitionSourceId": 3,
+          "ammunition": "AP",
+          "saving": "BTS/2",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 225,
+          "weaponName": "Breaker Marksman Rifle",
+          "mode": null,
+          "ammunitionSourceId": 3,
+          "ammunition": "AP",
+          "saving": "BTS/2",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "k1",
+      "name": "K1",
+      "summary": "K1 weapons use Normal Ammunition and specify ARM=0 for their Saving Roll, rather than the ARM/2 modifier from AP. Each weapon retains its own listed Traits.",
+      "origins": [
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:normal",
+          "role": "baseline"
+        },
+        {
+          "domain": "Weapon Traits",
+          "recordId": "trait:arm-0",
+          "role": "saving-attribute"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 95,
+          "weaponName": "K1 Combi Rifle",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "ARM=0",
+          "savingNum": "1",
+          "traits": [
+            "Anti-materiel",
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 110,
+          "weaponName": "K1 Sniper Rifle",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "ARM=0",
+          "savingNum": "1",
+          "traits": [
+            "Anti-materiel"
+          ]
+        },
+        {
+          "weaponId": 181,
+          "weaponName": "K1 Marksman Rifle",
+          "mode": null,
+          "ammunitionSourceId": 2,
+          "ammunition": "N",
+          "saving": "ARM=0",
+          "savingNum": "1",
+          "traits": [
+            "Anti-materiel",
+            "Suppressive Fire"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "multi",
+      "name": "MULTI",
+      "summary": "MULTI weapons provide alternative firing modes. The selected mode, not the MULTI name alone, determines Ammunition, Burst, Saving Rolls and Traits. Different MULTI weapons can have different Anti-materiel ammunition.",
+      "origins": [
+        {
+          "domain": "Weapon Chart",
+          "sourceSection": "N5.3 Weapon Chart: MULTI firing modes",
+          "role": "firing-mode"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:ap",
+          "role": "mode-option"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:shock",
+          "role": "mode-option"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:da",
+          "role": "mode-option"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:exp",
+          "role": "mode-option"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 4,
+          "weaponName": "MULTI Heavy Machine Gun",
+          "mode": "AP Mode",
+          "ammunitionSourceId": 3,
+          "ammunition": "AP",
+          "saving": "ARM/2",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 4,
+          "weaponName": "MULTI Heavy Machine Gun",
+          "mode": "Anti-materiel Mode",
+          "ammunitionSourceId": 6,
+          "ammunition": "Exp",
+          "saving": "ARM",
+          "savingNum": "3",
+          "traits": [
+            "Anti-materiel"
+          ]
+        },
+        {
+          "weaponId": 4,
+          "weaponName": "MULTI Heavy Machine Gun",
+          "mode": "Shock Mode",
+          "ammunitionSourceId": 8,
+          "ammunition": "Shock",
+          "saving": "ARM",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 36,
+          "weaponName": "MULTI Sniper Rifle",
+          "mode": "AP Mode",
+          "ammunitionSourceId": 3,
+          "ammunition": "AP",
+          "saving": "ARM/2",
+          "savingNum": "1",
+          "traits": []
+        },
+        {
+          "weaponId": 36,
+          "weaponName": "MULTI Sniper Rifle",
+          "mode": "Anti-Materiel Mode",
+          "ammunitionSourceId": 9,
+          "ammunition": "DA",
+          "saving": "ARM",
+          "savingNum": "2",
+          "traits": [
+            "Anti-materiel"
+          ]
+        },
+        {
+          "weaponId": 36,
+          "weaponName": "MULTI Sniper Rifle",
+          "mode": "Shock Mode",
+          "ammunitionSourceId": 8,
+          "ammunition": "Shock",
+          "saving": "ARM",
+          "savingNum": "1",
+          "traits": []
+        },
+        {
+          "weaponId": 41,
+          "weaponName": "MULTI Rifle",
+          "mode": "AP Mode",
+          "ammunitionSourceId": 3,
+          "ammunition": "AP",
+          "saving": "ARM/2",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 41,
+          "weaponName": "MULTI Rifle",
+          "mode": "Anti-Materiel Mode",
+          "ammunitionSourceId": 9,
+          "ammunition": "DA",
+          "saving": "ARM",
+          "savingNum": "2",
+          "traits": [
+            "Anti-materiel"
+          ]
+        },
+        {
+          "weaponId": 41,
+          "weaponName": "MULTI Rifle",
+          "mode": "Shock Mode",
+          "ammunitionSourceId": 8,
+          "ammunition": "Shock",
+          "saving": "ARM",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 169,
+          "weaponName": "MULTI Marksman Rifle",
+          "mode": "AP Mode",
+          "ammunitionSourceId": 3,
+          "ammunition": "AP",
+          "saving": "ARM/2",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 169,
+          "weaponName": "MULTI Marksman Rifle",
+          "mode": "Anti-Material Mode",
+          "ammunitionSourceId": 9,
+          "ammunition": "DA",
+          "saving": "ARM",
+          "savingNum": "2",
+          "traits": [
+            "Anti-materiel"
+          ]
+        },
+        {
+          "weaponId": 169,
+          "weaponName": "MULTI Marksman Rifle",
+          "mode": "Shock Mode",
+          "ammunitionSourceId": 8,
+          "ammunition": "Shock",
+          "saving": "ARM",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 189,
+          "weaponName": "MULTI Pistol",
+          "mode": "AP Mode",
+          "ammunitionSourceId": 3,
+          "ammunition": "AP",
+          "saving": "ARM/2",
+          "savingNum": "1",
+          "traits": []
+        },
+        {
+          "weaponId": 189,
+          "weaponName": "MULTI Pistol",
+          "mode": "Anti-Material Mode",
+          "ammunitionSourceId": 9,
+          "ammunition": "DA",
+          "saving": "ARM",
+          "savingNum": "2",
+          "traits": [
+            "Anti-materiel"
+          ]
+        },
+        {
+          "weaponId": 189,
+          "weaponName": "MULTI Pistol",
+          "mode": "Shock Mode",
+          "ammunitionSourceId": 8,
+          "ammunition": "Shock",
+          "saving": "ARM",
+          "savingNum": "1",
+          "traits": []
+        },
+        {
+          "weaponId": 210,
+          "weaponName": "MULTI Red Fury",
+          "mode": "AP Mode",
+          "ammunitionSourceId": 3,
+          "ammunition": "AP",
+          "saving": "ARM/2",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 210,
+          "weaponName": "MULTI Red Fury",
+          "mode": "Antimaterial Mode",
+          "ammunitionSourceId": 9,
+          "ammunition": "DA",
+          "saving": "ARM",
+          "savingNum": "2",
+          "traits": [
+            "Anti-materiel"
+          ]
+        },
+        {
+          "weaponId": 210,
+          "weaponName": "MULTI Red Fury",
+          "mode": "Shock Mode",
+          "ammunitionSourceId": 8,
+          "ammunition": "Shock",
+          "saving": "ARM",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 217,
+          "weaponName": "MULTI Spitfire",
+          "mode": "AP Mode",
+          "ammunitionSourceId": 3,
+          "ammunition": "AP",
+          "saving": "ARM/2",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        },
+        {
+          "weaponId": 217,
+          "weaponName": "MULTI Spitfire",
+          "mode": "Anti-Material Mode",
+          "ammunitionSourceId": 9,
+          "ammunition": "DA",
+          "saving": "ARM",
+          "savingNum": "2",
+          "traits": [
+            "Anti-materiel"
+          ]
+        },
+        {
+          "weaponId": 217,
+          "weaponName": "MULTI Spitfire",
+          "mode": "Shock Mode",
+          "ammunitionSourceId": 8,
+          "ammunition": "Shock",
+          "saving": "ARM",
+          "savingNum": "1",
+          "traits": [
+            "Suppressive Fire"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ap-da",
+      "name": "AP+DA",
+      "summary": "Combined Ammunition using AP and DA together. AP modifies the applicable Saving Roll Attribute; DA changes the number of Saving Rolls. The individual weapon profile specifies the target Attribute and rolls; interactions and Immunity must be resolved under their rules.",
+      "origins": [
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:ap",
+          "role": "component"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:da",
+          "role": "component"
+        },
+        {
+          "domain": "Ammunition",
+          "sourceSection": "N5.3 Combined Ammunition; Wiki oldid=3000",
+          "role": "combination-rule"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 30,
+          "weaponName": "Feuerbach",
+          "mode": "Burst Mode",
+          "ammunitionSourceId": 10,
+          "ammunition": "AP+DA",
+          "saving": "ARM/2",
+          "savingNum": "2",
+          "traits": [
+            "Anti-materiel"
+          ]
+        },
+        {
+          "weaponId": 78,
+          "weaponName": "AP + DA CC Weapon",
+          "mode": null,
+          "ammunitionSourceId": 10,
+          "ammunition": "AP+DA",
+          "saving": "ARM/2",
+          "savingNum": "2",
+          "traits": [
+            "Anti-materiel",
+            "CC"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ap-exp",
+      "name": "AP+EXP",
+      "summary": "Combined Ammunition using AP and EXP. The effects of both components apply according to the Combined Ammunition rule; preserve the printed weapon Saving Rolls and any interactions or exceptions.",
+      "origins": [
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:ap",
+          "role": "component"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:exp",
+          "role": "component"
+        },
+        {
+          "domain": "Ammunition",
+          "sourceSection": "N5.3 Combined Ammunition; Wiki oldid=3000",
+          "role": "combination-rule"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 16,
+          "weaponName": "Portable Autocannon",
+          "mode": null,
+          "ammunitionSourceId": 13,
+          "ammunition": "AP+Exp",
+          "saving": "ARM/2",
+          "savingNum": "3",
+          "traits": [
+            "Anti-materiel"
+          ]
+        },
+        {
+          "weaponId": 17,
+          "weaponName": "D-Charges",
+          "mode": "CC Mode",
+          "ammunitionSourceId": 13,
+          "ammunition": "AP+Exp",
+          "saving": "ARM/2",
+          "savingNum": "3",
+          "traits": [
+            "Anti-materiel",
+            "CC",
+            "Disposable (3)",
+            "Improvised",
+            "[*]"
+          ]
+        },
+        {
+          "weaponId": 17,
+          "weaponName": "D-Charges",
+          "mode": "Demolition Mode",
+          "ammunitionSourceId": 13,
+          "ammunition": "AP+Exp",
+          "saving": "ARM/2",
+          "savingNum": "3",
+          "traits": [
+            "Anti-materiel",
+            "Disposable (3)",
+            "[*]"
+          ]
+        },
+        {
+          "weaponId": 58,
+          "weaponName": "Missile Launcher",
+          "mode": "Hit Mode",
+          "ammunitionSourceId": 13,
+          "ammunition": "AP+Exp",
+          "saving": "ARM/2",
+          "savingNum": "3",
+          "traits": [
+            "Anti-materiel"
+          ]
+        },
+        {
+          "weaponId": 68,
+          "weaponName": "Panzerfaust",
+          "mode": null,
+          "ammunitionSourceId": 13,
+          "ammunition": "AP+Exp",
+          "saving": "ARM/2",
+          "savingNum": "3",
+          "traits": [
+            "Anti-materiel",
+            "Disposable (2)"
+          ]
+        },
+        {
+          "weaponId": 227,
+          "weaponName": "AP + EXP CC Weapon",
+          "mode": null,
+          "ammunitionSourceId": 13,
+          "ammunition": "AP+Exp",
+          "saving": "ARM/2",
+          "savingNum": "3",
+          "traits": [
+            "Anti-materiel",
+            "CC"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ap-shock",
+      "name": "AP+Shock",
+      "summary": "Combined Ammunition using AP and Shock. AP modifies the applicable Saving Roll Attribute while Shock's effect retains its target and failure conditions; this is not an unconditional State effect.",
+      "origins": [
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:ap",
+          "role": "component"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:shock",
+          "role": "component"
+        },
+        {
+          "domain": "Ammunition",
+          "sourceSection": "N5.3 Combined Ammunition; Wiki oldid=3000",
+          "role": "combination-rule"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 75,
+          "weaponName": "Uragan MRL",
+          "mode": "Blast Mode",
+          "ammunitionSourceId": 30,
+          "ammunition": "AP+Shock",
+          "saving": "ARM/2",
+          "savingNum": "1",
+          "traits": [
+            "Speculative Attack",
+            "Impact Template (Circular)",
+            "Burst: Single Target"
+          ]
+        },
+        {
+          "weaponId": 75,
+          "weaponName": "Uragan MRL",
+          "mode": "Hit Mode",
+          "ammunitionSourceId": 30,
+          "ammunition": "AP+Shock",
+          "saving": "ARM/2",
+          "savingNum": "1",
+          "traits": [
+            "Burst: Single Target"
+          ]
+        },
+        {
+          "weaponId": 172,
+          "weaponName": "AP + Shock CC Weapon",
+          "mode": null,
+          "ammunitionSourceId": 30,
+          "ammunition": "AP+Shock",
+          "saving": "ARM/2",
+          "savingNum": "1",
+          "traits": [
+            "CC"
+          ]
+        },
+        {
+          "weaponId": 211,
+          "weaponName": "Silenced Pistol",
+          "mode": null,
+          "ammunitionSourceId": 30,
+          "ammunition": "AP+Shock",
+          "saving": "BTS/2",
+          "savingNum": "1",
+          "traits": [
+            "Silent (-6)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ap-t2",
+      "name": "AP+T2",
+      "summary": "Combined Ammunition using AP and T2. AP modifies the applicable Saving Roll Attribute and T2 retains its distinct Wound and Critical effects; consult the individual weapon profile and combined rules.",
+      "origins": [
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:ap",
+          "role": "component"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:t2",
+          "role": "component"
+        },
+        {
+          "domain": "Ammunition",
+          "sourceSection": "N5.3 Combined Ammunition; Wiki oldid=3000",
+          "role": "combination-rule"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 224,
+          "weaponName": "AP + T2 CC Weapon",
+          "mode": null,
+          "ammunitionSourceId": 40,
+          "ammunition": "AP+T2",
+          "saving": "ARM/2",
+          "savingNum": "1",
+          "traits": [
+            "Anti-materiel",
+            "CC"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -77,7 +77,9 @@ its application metrics.
   catalogs, with reverse Unit usage links where that relationship applies. Search and filter state
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Includes global search and a federated Glossary across player-facing reference domains, with
-  embedded Attributes and scoped Game terms routed back to their canonical owning surfaces.
+  embedded Attributes, scoped Game terms and searchable Weapon Properties (such as Viral,
+  Plasma and combined Ammunition). Weapon Properties link to their underlying canonical
+  rules instead of redefining the effects.
 - Includes a browsable core **Scenarios** reference with explicit Army Points selection, structured
   setup/objectives/scoring, scenario Rules and Skills, source-verification notes, and deterministic
   deployment maps generated from the same maintained geometry as the scenario data.

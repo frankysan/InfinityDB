@@ -1,0 +1,167 @@
+"""Weapon Properties retain source-profile identity and canonical rules ownership."""
+
+from __future__ import annotations
+
+import copy
+import json
+from pathlib import Path
+from wsgiref.util import setup_testing_defaults
+
+import pytest
+
+from infinity_db.catalog_rules import CatalogRules
+from infinity_db.database.repository import Database
+from infinity_db.glossary_catalog import GlossaryCatalog
+from infinity_db.rules_database import RulesDatabase
+from infinity_db.weapon_properties import WeaponProperties, load_weapon_properties
+from infinity_db.web.app import create_app
+
+ROOT = Path(__file__).resolve().parents[1]
+ARMY_PATH = ROOT / "data/generated/infinity.db"
+RULES_PATH = ROOT / "data/generated/rules.db"
+
+
+def _services():
+    database = Database(ARMY_PATH)
+    rules = RulesDatabase(RULES_PATH)
+    return database, rules, WeaponProperties(rules)
+
+
+def test_weapon_properties_have_distinct_explicit_rules_origins() -> None:
+    database, rules, properties = _services()
+    del database
+    assert len(properties.entries()) == 9
+    entries = {item["id"]: item for item in properties.entries()}
+    viral = entries["weapon-property:viral"]
+    assert any(origin["recordId"] == "trait:bioweapon" for origin in viral["origins"])
+    assert any(origin["recordId"] == "ammunition:normal" for origin in viral["origins"])
+    assert any(origin["role"] == "name-dependent-exception" for origin in viral["origins"])
+    plasma = entries["weapon-property:plasma"]
+    assert any("Combined Saving Roll" in origin.get("sourceSection", "")
+               for origin in plasma["origins"])
+    assert any(origin.get("recordId") == "rule:saving-rolls" for origin in plasma["origins"])
+    for entry in entries.values():
+        for origin in entry["origins"]:
+            if "recordId" in origin:
+                assert rules.composed_record(origin["recordId"]) is not None
+    glossary = GlossaryCatalog(Database(ARMY_PATH), rules).embedded_entries()
+    assert {entry["id"] for entry in glossary if entry["kind"] == "weapon-property"} == set(entries)
+
+
+def test_weapon_property_profiles_are_exact_and_mode_scoped() -> None:
+    database, rules, properties = _services()
+    catalog = CatalogRules(rules)
+
+    def profiles(slug):
+        item = database.get_catalog_item("weapons", slug)
+        assert item is not None
+        return catalog.enrich_catalog_item("weapons", item)["profiles"]
+
+    assert all(
+        [p["id"] for p in properties.for_profile(profile)] == ["weapon-property:plasma"]
+        for profile in profiles("plasma-carbine")
+    )
+    assert [p["id"] for p in properties.for_profile(profiles("viral-rifle")[0])] == [
+        "weapon-property:viral"
+    ]
+    assert [p["id"] for p in properties.for_profile(profiles("breaker-pistol")[0])] == [
+        "weapon-property:breaker"
+    ]
+    assert [p["id"] for p in properties.for_profile(profiles("k1-sniper-rifle")[0])] == [
+        "weapon-property:k1"
+    ]
+    for profile in profiles("multi-rifle"):
+        assert [p["id"] for p in profile["weapon_properties"]] == ["weapon-property:multi"]
+    feuerbach = {p["mode"]: p for p in profiles("feuerbach")}
+    assert [p["id"] for p in feuerbach["Burst Mode"]["weapon_properties"]] == [
+        "weapon-property:ap-da"
+    ]
+    assert "weapon_properties" not in feuerbach["Explosive Mode"]
+    assert [p["id"] for p in profiles("silenced-pistol")[0]["weapon_properties"]] == [
+        "weapon-property:ap-shock"
+    ]
+    source_item = database.get_catalog_item("weapons", "viral-rifle")
+    assert source_item is not None
+    original = source_item["profiles"][0]
+    for field, value in (("id", 999), ("mode", "CC Mode"),
+                         ("saving", "ARM"), ("traits", [])):
+        modified = copy.deepcopy(original)
+        modified[field] = value
+        assert properties.for_profile(modified) == []
+
+
+@pytest.mark.parametrize("mutate", (
+    lambda d: d["properties"][0].update({"unexpected": 1}),
+    lambda d: d["properties"][0]["origins"][0].update({"role": ""}),
+    lambda d: d["properties"][0]["origins"][0].update({"domain": "Weapon Traits"}),
+    lambda d: d["properties"][1]["profiles"][0].update({"weaponId": True}),
+    lambda d: d["properties"][0]["profiles"].append(
+        copy.deepcopy(d["properties"][0]["profiles"][0])
+    ),
+    lambda d: d["properties"].append(copy.deepcopy(d["properties"][0])),
+))
+def test_weapon_properties_reject_invalid_curated_contract(tmp_path: Path, mutate) -> None:
+    path = ROOT / "config/catalogs/weapon-properties.json"
+    document = json.loads(path.read_text(encoding="utf-8"))
+    mutate(document)
+    candidate = tmp_path / "weapon-properties.json"
+    candidate.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="Weapon Propert"):
+        load_weapon_properties(candidate)
+
+
+def test_weapon_properties_are_searchable_and_linked_from_weapon_api() -> None:
+    app = create_app(ARMY_PATH, rules_database_path=RULES_PATH)
+
+    def request(path: str, query: str = ""):
+        environ = {}
+        setup_testing_defaults(environ)
+        environ["REQUEST_METHOD"] = "GET"
+        environ["PATH_INFO"] = path
+        environ["QUERY_STRING"] = query
+        statuses = []
+        body = b"".join(
+            app(environ, lambda status, headers, exc_info=None: statuses.append(status))
+        )
+        assert statuses == ["200 OK"]
+        return json.loads(body)
+
+    glossary = request("/api/glossary")["items"]
+    plasma = next(item for item in glossary if item["id"] == "weapon-property:plasma")
+    assert plasma["href"] == "/glossary#weapon-property-plasma"
+    assert any(origin["domain"] == "Ammunition" for origin in plasma["origins"])
+    matches = request("/api/search", "q=Plasma")["items"]
+    assert any(item["domain"] == "Weapon Property" and
+               item["href"] == "/glossary#weapon-property-plasma" for item in matches)
+    viral = request("/api/weapons/viral-rifle")
+    assert viral["profiles"][0]["weapon_properties"][0]["id"] == "weapon-property:viral"
+    assert viral["profiles"][0]["ammunition"] == "N"
+    assert "ammunition_composition" not in viral["profiles"][0]
+    plasma_weapon = request("/api/weapons/plasma-carbine")
+    assert all("ammunition_composition" not in p for p in plasma_weapon["profiles"])
+    assert all(p["weapon_properties"][0]["id"] == "weapon-property:plasma"
+               for p in plasma_weapon["profiles"])
+
+
+def test_every_reviewed_property_source_profile_still_matches_army() -> None:
+    """Review must reopen when pinned Weapon identity, mode or Traits drift."""
+    import sqlite3
+
+    source = load_weapon_properties()
+    connection = sqlite3.connect(ARMY_PATH)
+    connection.row_factory = sqlite3.Row
+    profiles = {
+        (r["id"], r["mode"]): r
+        for r in connection.execute("SELECT * FROM metadata_weapons")
+    }
+    for entry in source:
+        for signature in entry["profiles"]:
+            key = signature["weaponId"], signature["mode"]
+            assert key in profiles, (entry["id"], key)
+            profile = profiles[key]
+            assert profile["name"] == signature["weaponName"]
+            assert profile["ammunition"] == signature["ammunitionSourceId"]
+            assert profile["saving"] == signature["saving"]
+            assert profile["savingNum"] == signature["savingNum"]
+            assert json.loads(profile["properties"]) == signature["traits"]
+    connection.close()

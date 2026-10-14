@@ -34,6 +34,13 @@ identities.
   application-domain slug, with slugs preferred in maintained rules data. Numeric references
   remain valid for compatibility, provenance, and explicit disambiguation.
 
+Weapon Properties are a distinct, reviewed player-facing vocabulary maintained in
+`config/catalogs/weapon-properties.json`, not additional Ammunition records or
+source Army `properties` (Traits). Each explicitly associated source Weapon
+profile is signature-matched, and its Property names their canonical rule
+owners/source sections; see `docs/data-model.md` for the current projection
+contract. Do not duplicate those source rules as new Property mechanics.
+
 The sections below document the implemented `curated/rules/` contract.
 
 ### Maintained rules-text semantic-link policy

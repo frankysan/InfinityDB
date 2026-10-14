@@ -503,6 +503,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       navigation passed (14/14 checks). All four 320 px screenshots were
       inspected; no horizontal overflow or JavaScript errors were observed.
       Private evidence is under `local/audits/sniper-rifles-browser/`.
+    - [ ] Extend the new reviewed Weapon Properties inventory beyond the first
+      Plasma, Viral, Breaker, K1, MULTI and four AP-based combinations.
+      Investigate Monofilament, Silenced and source-specific name/Traits
+      exceptions; migrate repeated curated weapon explanations into shared
+      Properties only when authoritative conditions and individual weapon
+      distinctions remain explicit. Include exact source/mode drift checks
+      and player-facing search/Glossary links.
+    - [ ] Browser-review Weapon Property links and rule-origin navigation
+      in Weapon detail, Glossary and global search on desktop, narrow
+      screens and touch; API tests do not replace visual/interaction acceptance.
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. The updated triage has
       47 actionable reviews, 33 accepted shared-only identities,

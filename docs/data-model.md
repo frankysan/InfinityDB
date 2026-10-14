@@ -151,6 +151,24 @@ annotation, not a roll evaluator, an Ammunition effect, or an inferred
 Full cross-source Combined Saving Roll coverage and immunity interactions remain
 open.
 
+**Weapon Properties (current):** InfinityDB maintains a separate, descriptive
+`weapon-property:*` vocabulary in `config/catalogs/weapon-properties.json`.
+It does not redefine Ammunition, Traits, source Army `properties` (Traits), or
+weapon-specific rules. Each entry has a player-readable explanation and an
+explicit list of canonical rule-record origins (with their role and domain),
+or an exact official source section when there is no standalone canonical
+rules record. Reviewed memberships pin Weapon source ID, exact source name,
+mode, Ammunition source ID/name, Saving Roll fields, and source Traits.
+The runtime projection only attaches a Property to a profile matching that
+whole signature; weapon names and punctuation are never parsed to grant
+mechanics. Properties are displayed on matching Weapon profiles and indexed
+as embedded Glossary/global-search concepts, without a separate top-level
+catalog or a new rule evaluator. The first nine definitions cover Plasma,
+Viral, Breaker, K1, MULTI and the four reviewed AP-based combinations. Source
+profiles, Ammunition composition, Combined Saving Roll, and Traits remain
+independent. This curated configuration is included in installed packages,
+following the existing runtime catalog-configuration pattern.
+
 A bounded Immunity cross-reference now publishes `skill:immunity`'s validated
 `facts.immunityInteraction` (N5.3 Wiki Immunity `oldid=3643`). It describes
 covered Ammunition as Normal, the loss of special effects and Saving Roll
