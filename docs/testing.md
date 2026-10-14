@@ -1238,3 +1238,28 @@ unchanged Fireteam Level 2 bonus. Private browser verifier, 320 px
 screenshots, result JSON and temporary rules DB remain under ignored
 `local/audits/`. Official erratum remains unresolved; the browser does
 not silently apply a new Fireteam rolled-dice cap.
+
+
+## 1.0 Dodge (ARM+3) source reconciliation (REA-042)
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Official English N5.3 p. 75
+and Spanish N5.3 p. 75 grant the profile-listed +3 ARM/BLI modifier on
+relevant Saving Rolls after Dodge declaration. The English Wiki snapshot
+`20260926-200832` and Spanish Wiki snapshot `20261009-211304` instead
+restrict it to a failed PH/FIS Roll. Spanish revision 4012 establishes
+historical provenance for the latter. The official September 1, 2026
+N5.3 articles describe a Dodge clarification but do not resolve these
+different conditions. Both interpretations remain labeled by source;
+the current curated card uses the matching two-PDF rule.
+
+Focused curated and published-rules tests verify the non-universal
+(ARM+3) bonus, the lack of a PH or BTS modifier, application when a
+separate simultaneous Attack requires a Saving Roll, and all four
+bilingual PDF/Wiki source citations. A locally rebuilt rules DB and
+headless Chrome passed **12/12** render/navigation checks at 1440, 390
+and 320 px for Dodge, Saving Rolls, Face to Face Rolls, and the inline
+Dodge-to-Saving-Rolls link. No JavaScript page errors or horizontal
+overflow were observed. Screenshots, results, private script and
+local temporary DB remain under Git-ignored `local/audits/`.
+This does not imply a full simultaneous combat resolver or an
+unverified official erratum.

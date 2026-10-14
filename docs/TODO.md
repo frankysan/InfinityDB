@@ -768,9 +768,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       versus p. 75 and English pp. 75/136. Keep the contradiction
       explicit meanwhile; this external dependency does not block the
       locally reviewed 1.0 reference explanation.
-    - [ ] **REA-042 — Dodge (ARM+3) source conflict:** Preserve and
-      resolve the differing English/Spanish and Wiki/PDF conditions,
-      including S17/S21 provenance; seek scoped errata where needed.
+    - [x] **REA-042 — Dodge (ARM+3) player reference:** Explain the
+      profile-listed +3 ARM Saving Roll modifier from English and Spanish
+      N5.3 p. 75, never +3 PH or a universal Dodge bonus. Pin the
+      contrasting failed-PH condition in both English and Spanish Wiki
+      snapshots, including Spanish history revision 4012. Add bilingual
+      PDF/Wiki source notes, tests, and responsive browser acceptance
+      (12/12); preserve the printed profile without a mechanics rewrite.
+    - [ ] **REA-042 — Official Dodge modifier clarification:** Seek an
+      authoritative correction for the PDF-versus-Wiki failed-PH
+      condition. The unresolved external source disagreement is visible
+      to players and is not a remaining 1.0 implementation blocker.
     - [x] **REA-043 — Counterintelligence:** Verified against N5.3
       pp. 90/128 and in the rendered Skill reference at 1440, 390 and
       320 px. Both Strategic Use branches retain their first-Turn

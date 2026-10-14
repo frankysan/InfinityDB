@@ -1155,7 +1155,7 @@ Immunity (BTS/PB). The pinned Army metadata (weapon 72) also retains
 STUN/BTS/one roll and both Traits.
 
 This establishes the **current bilingual PDF/Army baseline** but not a
-correction to the **Spanish Wiki publication discrepancy**. The Wiki
+correction to the **English and Spanish Wiki publication discrepancy**. The Wiki
 revision being later than the PDF's creation metadata does not establish a
 superseding official rule or prove the reason for the difference.
 
@@ -1705,33 +1705,50 @@ as a new local gameplay rule or a 1.0 implementation blocker.
 
 ### REA-042 - Dodge (ARM+3) has incompatible English/Spanish conditions
 
-**Classification:** source discrepancy, completeness. **Severity:** High.
-**Priority:** P1. **Evidence:** PDF/Wiki conflict Explicit; cause Unresolved.
-**Confidence:** High about compared clauses. **Affected:** `skill:dodge`,
-modifier baseline REA-026 and profile-listed Dodge (ARM+3).
+**Classification:** source discrepancy, player-reference completeness.
+**Severity:** High. **Priority:** P1 for source clarity; authoritative ruling
+remains external. **Evidence:** explicit PDF/Wiki conflict in both languages.
+**Affected:** `skill:dodge`, profile-listed Dodge (ARM+3), modifier
+baseline REA-026 and simultaneous Dodge resolution REA-014.
 
-**Current:** No complete curated explanation defines this parameter's effect.
-A generic +3-to-Dodge-PH explanation or an undocumented conditional rule would
-be misleading.
+**Original gap:** The curated Dodge card described its PH Roll but did not
+explain what the optional Unit Profile (ARM+3) modifier affects. Treating
+it as +3 PH or as a universal benefit of ordinary Dodge would be wrong.
 
-**Evidence/result:** **Both N5.3 PDFs agree:** English S1 p. 75 says Dodge
-(ARM+3) always provides +3 ARM when Dodge is declared and the relevant Saving
-Roll occurs; Spanish S17 p. 75 says Esquivar (BLI+3) *siempre* gives +3 BLI
-when Esquivar is declared. Spanish Wiki revision 4012 (timestamp
-2026-09-08T10:04:10Z in S21) instead uses a condition involving a failed PH
-roll in a May-update paragraph. Thus this is no longer an unverified bilingual
-PDF alignment; it is a **Spanish Wiki-versus-two-PDF** conflict. That Wiki
-revision postdates the PDFs' creation metadata, but no explicit supersession
-or erratum was verified.
+**Verified source comparison (2026-10-14):** English PDF N5.3 S1 p. 75
+says Dodge (ARM+3) always grants +3 ARM for relevant Saving Rolls after
+Dodge is declared. Spanish PDF N5.3 S17 p. 75 likewise uses *siempre*
+for Esquivar (BLI+3). English Wiki snapshot 2026-09-26 (Template:
+Modifiers-explained) and Spanish Wiki snapshot 2026-10-09 (Plantilla:
+Modifiers-explained) instead require that the PH/FIS Roll fail. Spanish
+Wiki revision 4012, dated 2026-09-08T10:04:10Z, confirms this already
+appeared under a May 2026 Mazebreaker update. This is a *two-PDF versus
+two-Wiki-language* contradiction, not a disagreement between the two
+N5.3 PDF translations. The September 1, 2026 official N5.3 English and
+Spanish update articles explicitly list a Dodge (ARM+3)/(BLI+3)
+clarification but do not adjudicate the two wordings or identify an
+intentional failed-roll restriction. No scoped erratum was established.
 
-**Action:** Preserve the common PDF-based interpretation as supported while
-recording the Wiki conflict; seek a scoped correction/erratum. Future prose
-must distinguish Dodge PH, ARM/BLI protection, failed rolls and simultaneous
-Order resolution. **Fix:** evidence, then modifier text/links and focused
-regressions. **Dependencies:** REA-014/026. Do not infer a universal ordinary
-Dodge ARM bonus.
-**1.0 relevance:** A sourced player-facing conditional explanation remains
-necessary; the upstream discrepancy should be visible rather than hidden.
+**Implemented player-facing disposition (2026-10-14):** `skill:dodge`
+now explains that only a Unit Profile listing Dodge (ARM+3) receives
++3 ARM on an ARM Saving Roll required after declaring Dodge, under the
+consistent PDF text. The modifier does not add +3 PH or affect BTS;
+ordinary Dodge does not gain armor. The explanation covers a successful
+PH Dodge Roll that still fails to evade another simultaneous Attack,
+requiring an ARM Saving Roll. The card displays separate source notes
+and citations for both PDFs (p. 75) and the two archived Wiki templates,
+without pretending the discrepancy has been resolved. No underlying
+rules engine, imported Unit Profile or other Dodge effects were changed.
+
+The English Wiki ZIP `WIKI-en 20260926-200832.zip` and Spanish
+`WIKI-es 20261009-211304.zip` are pinned source snapshots; the latter
+has SHA-256 `8e4d40f0ad60d9a42c276f90a07253d8bcdbb61ed7839506cf9f91b7c8270be4`
+(786 members). The historical Spanish oldid 4012 remains indexed in S21.
+Curated and composed-record tests passed; local Chromium checks passed
+12/12 at 1440, 390, and 320 px without page errors/overflow, including
+Dodge-to-Saving-Rolls navigation. **Outstanding:** seek Corvus Belli's
+scoped correction for the failed-PH Wiki condition. Treat as external
+source reconciliation rather than a 1.0 local feature blocker.
 
 ### REA-043 - Counterintelligence gives the relaxed limit to the wrong player
 
@@ -1927,7 +1944,7 @@ unverified inference. "Unresolved" preserves the actual competing claims.
 | Armed Turret Silhouette | S1 detailed p. 70 / S17 detailed p. 74: S2; S1 summaries pp. 74/195 / S17 summaries pp. 74/203: S1 | **Confirmed within-PDF conflict in both languages; precedence unresolved**, REA-037; affects silhouette height |
 | Direct Doctor/Engineer allegiance | S1/S4/S14 direct requirements lack a universal Allied gate; Kits/delegation explicitly impose it | **Unresolved universal interpretation**, REA-038; no general rule supplying the gate found, no universal enemy permission inferred |
 | Spanish Fireteam dice reminder | S17 p. 75 excludes Special Dice from Burst-6; S17 p. 140 Fireteam reminder includes extra dice in six total; S14 Wiki mirrors split | **Confirmed internal contradiction in official Spanish PDF; ruling precedence unresolved**, REA-041; do not invent a separate Fireteam cap |
-| Dodge (ARM+3) condition | S1 and S17 p. 75 agree on always +3 ARM/BLI for applicable Saving Rolls when declared; S14/S21 4012 conditions on failed PH | **PDF-language alignment verified; Spanish Wiki publication discrepancy remains**, REA-042; not +3 PH |
+| Dodge (ARM+3) condition | S1 and S17 p. 75 agree on always +3 ARM/BLI for applicable Saving Rolls when declared; S14/S21 4012 conditions on failed PH | **PDF-language alignment verified; English and Spanish Wiki publication discrepancy remains**, REA-042; not +3 PH |
 | Breaker notice weapon label | English S11 says Sniper; rendered S1 p. 180/S6 225/S14 Spanish section match Marksman | **Derived terminology reconciliation**, REA-044; profile-backed match, no separate Sniper invented; public reference still absent |
 | Prone/Berserk | S1 general movement p. 29 excludes Berserk; Prone p. 169 repeats only Jump | **Resolved current exception** by p. 29 and S2 p. 1; record-level Prone prose still needs it in the lifecycle batch |
 | Old Kobra ammunition | S3 p. 68: Normal BS / Shock CC; S1/S11: Shock BS / DA CC | **Resolved historical supersession**; do not use the old one-save CC row as current authority |
@@ -1997,7 +2014,7 @@ documentation-only audit.
 | C. Hacking, NFB, visibility | REA-006, REA-007, REA-012, REA-018, REA-019 | Shared baseline content then Program-local timing; FAQ scope from F | Immediate Controlled Jump ARO; opposing Programs cancel each other's effects while Firefight +3 remains; Speedball no benefit; one Supportware/Hacker and beneficiary; replacement Fairy Dust example; one chosen Firewall; active versus disabled Device; MSV ordinary Smoke/Eclipse difference; White Noise owner NFB duration |
 | D. States, declarations and general baselines | REA-008, REA-014, REA-015, REA-016, REA-026, REA-035 | Reusable baseline references before broad cross-links; preserve per-State differences | IMM-B+Isolated and Targeted/capped MODs; Sixth Sense retained penalties; valid/blocked Engaged exit; simultaneous Mine and gun Dodge; Prone/Berserk and recovery cancellation; Hidden Deployment Order/ARO; Marker full-Order revelation; Stealth mixed activation; IMP-2 Range MOD and IMP-1 multiple successes; Protheion overkill |
 | E. Fireteams, Peripherals and placement | REA-017, REA-020, REA-021, REA-023, REA-032, REA-036, REA-039, REA-040 | Common action/placement baselines then subtype/variant exceptions; depends on D for lifecycle context | Controller/Peripheral mixed Idle; Servant and Cyberplug Doctor roll ownership; Ancillary eligibility/recovery; leader versus member departure and Number 2; Haris remains Haris at two members; original profile Training versus FT Master conversion; SD/BS bonuses versus Discover and WIP/PH; Perimeter blocked path; occupied placement fallback; Vitroferro cap before PS; AI remount contact; after-Guts Transmutation; TinBot owner disabled/sharing/identical versus different-strength benefits; SpecBall round/once/Null/Enhanced Profile and Marker conditions; TEAM-OPS scoped separately |
-| F. Sources and scoped FAQ | REA-027, REA-028, REA-029, REA-030, REA-034, REA-037, REA-041, REA-042 | Recover S18; integrate verified Spanish PDF/oldid provenance, classify FAQ by scope; adjudicate remaining publication contradictions individually | Exact archive hash/member; verified PDF one-save Flash Pulse versus conflicting Spanish Wiki; Kobra DA separate from Anti-materiel; FAQ Ancillary applicability; bilingual Fireteam Level 3 example; bilingual Armed Turret S2/S1; Spanish PDF internal B6 versus B6+SD reminder; bilingual PDF Dodge modifier versus Spanish Wiki; document any official correction without overriding evidence |
+| F. Sources and scoped FAQ | REA-027, REA-028, REA-029, REA-030, REA-034, REA-037, REA-041, REA-042 | Recover S18; integrate verified Spanish PDF/oldid provenance, classify FAQ by scope; adjudicate remaining publication contradictions individually | Exact archive hash/member; verified PDF one-save Flash Pulse versus conflicting Spanish Wiki; Kobra DA separate from Anti-materiel; FAQ Ancillary applicability; bilingual Fireteam Level 3 example; bilingual Armed Turret S2/S1; Spanish PDF internal B6 versus B6+SD reminder; bilingual PDF Dodge modifier versus both language Wikis; document any official correction without overriding evidence |
 | G. Presentation, links and acceptance evidence | REA-011, REA-031, REA-033 | Follow content decisions; current prose rendering first; optional structured display later | AP+DA before/after conditions visible; Derived versus Explicit labels; correct CC Attribute target; material uncertainty visible in normal mode; keyboard/narrow-screen links and citations; actual explanation review cannot pass solely on graph count |
 | H. Command Token actor | REA-043 | Small independent P0 correction; share Strategic Use baseline from D | Opponent imposes limit on user's first turn; Counterintelligence allows user two; separate enemy Order-removal branch and >10 threshold |
 | I. Current Weapon publication | REA-044 | Target current metadata-only profiles; source 225 does not require a referencing Unit; no blanket publication of historical rows | Numeric/slug public lookup, matched Marksman profile/ranges, name/source-note visibility; no fabricated Sniper or raw data mutation |

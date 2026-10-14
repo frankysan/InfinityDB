@@ -123,10 +123,15 @@ These additional sources clarify the **scope** of the five disputed findings:
   No direct official erratum addressing the Spanish Fireteam reminder
   was established from the September 2026 N5.3 release notices; a
   scoped ruling remains an external open item.
-- REA-042: S17 p. 75 says Esquivar (BLI+3) **always** adds +3 BLI on the
-  Saving Roll when Dodge is declared, matching S1 p. 75. S14/S21 revision
-  4012 (2026-09-08) retains a different condition. A source conflict remains,
-  but is now **Wiki versus both current N5.3 PDFs**.
+- REA-042: Both current N5.3 PDFs use unconditional wording after Dodge
+  declaration: S1 p. 75 Dodge (ARM+3) *always* applies to ARM Saving Rolls,
+  and S17 p. 75 Esquivar (BLI+3) uses *siempre*. The pinned **English Wiki
+  2026-09-26** `Template_Modifiers-explained` and **Spanish Wiki
+  2026-10-09** `es/Plantilla_Modifiers-explained` both instead require a
+  failed PH/FIS Roll. S14/S21 oldid 4012 (2026-09-08) preserves that
+  Spanish May-2026 wording. Both PDFs conflict with both Wiki languages;
+  official intent/erratum remains unresolved. Reviewed Dodge text follows
+  the PDFs while publishing the source discrepancy.
 
 ## Checksums and selected members
 
@@ -259,9 +264,12 @@ The final protected-input check pins S20's unchanged bytes separately from sourc
   deployable summary; a source decision remains necessary.
 - **REA-041:** S17 **itself** contradicts its general SD/Burst explanation
   (p. 75) in a Fireteam reminder (p. 140). Keep both printed clauses.
-- **REA-042:** both official v5.3 PDFs grant the Dodge ARM/BLI +3 when
-  declared; the captured Spanish Wiki 4012 uses a different condition. The
-  missing-PDF rationale is superseded, but an upstream Wiki discrepancy remains.
+- **REA-042:** both official v5.3 PDFs grant the Dodge ARM/BLI +3 for
+  applicable Saving Rolls after declaration, while archived English and
+  Spanish Wiki modifier templates require a failed PH/FIS Roll. Spanish
+  revision 4012 independently pins the conflicting historical wording.
+  The player card publishes the PDF interpretation with visible provenance;
+  an official erratum remains external.
 
 Eleven locally supplied/available primary source artifacts are accounted for:
 S1-S6, S14-S17, and S21. S1/S2/S4/S5/S6/S14/S17/S21 are now directly

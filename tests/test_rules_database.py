@@ -1804,6 +1804,37 @@ def test_morale_behavior_interactions_are_bidirectional(
     }
 
 
+def test_rea042_published_dodge_arm_modifier_is_not_dodge_ph_bonus(
+    current_rules_database: RulesDatabase,
+) -> None:
+    dodge = current_rules_database.composed_record("skill:dodge")
+    assert dodge is not None
+    effects = " ".join(dodge["facts"]["effects"])
+    clarifications = " ".join(dodge["facts"]["clarifications"])
+    notes = dodge["facts"]["sourceNotes"]
+    assert "Dodge (ARM+3)" in effects
+    assert "Unit Profile lists this modifier" in effects
+    assert "[[attribute:arm|ARM]]" in effects
+    assert "[[rule:saving-rolls|ARM Saving Roll]]" in effects
+    assert "not conditional on failing" in effects
+    assert "does not add +3 to Dodge PH" in clarifications
+    assert "without the printed modifier" in clarifications
+    assert "still fail to evade one" in clarifications
+    assert "failed Dodge PH Roll" in notes[1]
+    assert "English p. 75" in notes[0]
+    assert "Spanish p. 75" in notes[0]
+    assert "PDF-based wording pending official clarification" in notes[1]
+    sources = {
+        (ref["source_id"], ref.get("page"), ref.get("member"))
+        for ref in dodge["citations"]
+    }
+    assert ("n5-core-v5.3-pdf", 75, None) in sources
+    assert ("n5-core-v5.3-es-pdf", 75, None) in sources
+    assert ("wiki-en-20260926-200832", None, "Template_Modifiers-explained") in sources
+    assert ("wiki-es-20261009-211304", None, "es/Plantilla_Modifiers-explained") in sources
+    assert "[[state:immobilized-a]]" in effects or "[[state:immobilized-a]]" in clarifications
+
+
 def test_silent_dodge_modifier_interaction_is_bidirectional(
     current_rules_database: RulesDatabase,
 ) -> None:

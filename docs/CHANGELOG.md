@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Dodge (ARM+3) now explains when its profile-listed ARM protection
+  applies, without changing the Dodge PH Roll. The reference also
+  distinguishes the two N5.3 PDF descriptions from both language Wiki
+  versions that require a failed PH Roll.
 - Special Dice and Fireteam reference pages now disclose the Spanish
   N5.3 contradiction over six dice versus B6 plus extra Special Dice.
   The sourced B6/SD distinction remains unchanged; an official correction
@@ -130,6 +134,12 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web backend + Web frontend:** Expand the Dodge
+  Skill reference with source-cited (ARM+3) conditions, relevant Saving
+  Roll links, and simultaneous-Attack interactions. Preserve the
+  conflicting English/Spanish Wiki failed-PH prerequisite as reviewed
+  secondary notes, not an unannounced override of the N5.3 PDF wording.
+  No imported Army profiles or Dodge mechanics were changed.
 - **Data processing + Web frontend:** Show the bilingual N5.3 Fireteam
   six-dice contradiction as source notes on the Special Dice reference and
   Fireteam quick reference. Explain B6 plus one SD without introducing an

@@ -310,6 +310,19 @@
             "authority": "secondary"
         },
         {
+            "id": "wiki-es-20261009-211304",
+            "kind": "wiki",
+            "title": "Infinity Wiki snapshot (Spanish)",
+            "version": "20261009-211304",
+            "acquiredAt": "2026-10-09T21:13:04+02:00",
+            "localPath": "data/wiki/WIKI-es 20261009-211304.zip",
+            "sha256": "8e4d40f0ad60d9a42c276f90a07253d8bcdbb61ed7839506cf9f91b7c8270be4",
+            "language": "es",
+            "documentCount": 786,
+            "url": "https://infinitythewiki.com/es/",
+            "authority": "secondary"
+        },
+        {
             "id": "wiki-traits-oldid-4110",
             "kind": "wiki",
             "title": "Infinity Wiki — Traits revision 4110",
@@ -11938,6 +11951,10 @@
                 ]
             },
             "facts": {
+                "sourceNotes": [
+                    "**Official N5.3 PDF reading:** English p. 75 explicitly says that Dodge (ARM+3) *always* adds +3 ARM to Saving Rolls when Dodge is declared; Spanish p. 75 likewise uses *siempre* for Esquivar (BLI+3). This changes only the listed Trooper's ARM, not the Dodge PH Roll.",
+                    "**Unresolved bilingual Wiki discrepancy:** The archived English Wiki (2026-09-26) and Spanish Wiki (2026-10-09; Modificadores revision 4012, dated 2026-09-08) instead limit +3 ARM/BLI to a failed Dodge PH Roll in their May 2026 Mazebreaker update notes. Both official N5.3 PDFs agree against that condition. InfinityDB adopts the PDF-based wording pending official clarification; the Wiki evidence remains visible."
+                ],
                 "category": "common-skill",
                 "typeIds": [
                     "short-skill",
@@ -11949,7 +11966,8 @@
                 "effects": [
                     "Dodge uses PH to evade enemy Attacks during the Order or ARO; a successful Dodge may also move the user up to [[distance:2:inch]].",
                     "Dodge movement occurs in the Effects step, follows the General Movement Rules, and does not generate reactions or trigger [[trait:deployable|Deployable]] Weapons or Equipment.",
-                    "A successful Normal or Face to Face Dodge Roll cancels the user's [[state:immobilized-a]], applying any State-specific MODs."
+                    "A successful Normal or Face to Face Dodge Roll cancels the user's [[state:immobilized-a]], applying any State-specific MODs.",
+                    "**Dodge (ARM+3):** Only Troopers whose Unit Profile lists this modifier gain +3 [[attribute:arm|ARM]] on any [[rule:saving-rolls|ARM Saving Roll]] they must make after declaring Dodge. Under the English and Spanish N5.3 PDF wording, the bonus is not conditional on failing the Dodge PH Roll."
                 ],
                 "restrictions": [
                     "Dodge does not evade Comms Attacks; [[skill:reset]] is used for those instead."
@@ -11957,7 +11975,8 @@
                 "clarifications": [
                     "Dodge applies only one -3 PH MOD even if several conditions occur together: a reactive Dodge inside ZoC but outside LoF, a Template Weapon without LoF to its attacker, or a [[trait:deployable|Deployable]] Weapon Template. This is separate from State-specific MODs.",
                     "Against simultaneous Attacks, compare the same Dodge die with each applicable Attack separately. A different MOD or opposed result can mean that one Attack is evaded and another hits. If the Dodge fails against an applicable Attack, the Trooper cannot perform the Dodge movement, even if it evaded other Attacks.",
-                    "To cancel [[state:engaged|Engaged]], the successful Dodge must also allow movement to a valid position outside Silhouette contact with the enemy. If no such position exists, the Trooper remains [[state:engaged|Engaged]] and does not relocate."
+                    "To cancel [[state:engaged|Engaged]], the successful Dodge must also allow movement to a valid position outside Silhouette contact with the enemy. If no such position exists, the Trooper remains [[state:engaged|Engaged]] and does not relocate.",
+                    "Dodge (ARM+3) modifies only the ARM used for Saving Rolls; it does not add +3 to Dodge PH, improve BTS, or benefit ordinary Dodge without the printed modifier. A successful PH Dodge Roll can still fail to evade one of several simultaneous Attacks; when that Attack requires an ARM Saving Roll, the profile-listed bonus still applies under N5.3 PDF wording."
                 ]
             },
             "labelIds": [
@@ -12013,6 +12032,26 @@
                     "sourceId": "n5-core-v5.3-es-pdf",
                     "page": 164,
                     "heading": "Estado Trabado"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 75,
+                    "section": "Modifiers Explained: Dodge (ARM+3)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 75,
+                    "section": "Modificadores (MOD) Detallados: Esquivar (BLI+3)"
+                },
+                {
+                    "sourceId": "wiki-en-20260926-200832",
+                    "member": "Template_Modifiers-explained",
+                    "heading": "Dodge (ARM+3): May 2026"
+                },
+                {
+                    "sourceId": "wiki-es-20261009-211304",
+                    "member": "es/Plantilla_Modifiers-explained",
+                    "heading": "Esquivar (BLI+3): mayo 2026"
                 }
             ],
             "review": {

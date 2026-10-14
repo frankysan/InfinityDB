@@ -1818,6 +1818,39 @@ def test_checked_in_n5_collection_models_multispectral_visor_levels() -> None:
     assert "[[state:camouflaged|Camouflage Marker]]" in levels[2]["effects"][5]
 
 
+def test_rea042_dodge_arm_modifier_preserves_pdf_and_wiki_disagreement() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    doc = load_curated_document(path)
+    dodge = next(r for r in doc["records"] if r["id"] == "skill:dodge")
+    effects = " ".join(dodge["facts"]["effects"])
+    clarifications = " ".join(dodge["facts"]["clarifications"])
+    notes = dodge["facts"]["sourceNotes"]
+    assert "Only Troopers whose Unit Profile lists this modifier" in effects
+    assert "+3 [[attribute:arm|ARM]]" in effects
+    assert "[[rule:saving-rolls|ARM Saving Roll]]" in effects
+    assert "not conditional on failing the Dodge PH Roll" in effects
+    assert "does not add +3 to Dodge PH" in clarifications
+    assert "improve BTS" in clarifications
+    assert "simultaneous Attacks" in clarifications
+    assert len(notes) == 2
+    assert "English p. 75" in notes[0] and "Spanish p. 75" in notes[0]
+    assert "*siempre*" in notes[0]
+    assert "archived English Wiki" in notes[1]
+    assert "revision 4012" in notes[1]
+    assert "failed Dodge PH Roll" in notes[1]
+    assert "pending official clarification" in notes[1]
+    references = {(c["sourceId"], c.get("page"), c.get("member")) for c in dodge["citations"]}
+    assert ("n5-core-v5.3-pdf", 75, None) in references
+    assert ("n5-core-v5.3-es-pdf", 75, None) in references
+    assert ("wiki-en-20260926-200832", None, "Template_Modifiers-explained") in references
+    assert (
+        "wiki-es-20261009-211304", None, "es/Plantilla_Modifiers-explained"
+    ) in references
+    spanish = next(s for s in doc["sources"] if s["id"] == "wiki-es-20261009-211304")
+    assert spanish["documentCount"] == 786
+    assert len(spanish["sha256"]) == 64
+
+
 def test_checked_in_n5_collection_models_silent_dodge_modifier() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
