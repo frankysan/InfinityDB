@@ -170,6 +170,30 @@
       "profileSha256": "49014866f780d1e5bf698215d70972b887b90a7360dc7ebb7ecf774af9dd8fcf",
       "reviewedOn": "2026-10-14",
       "reason": "N5.3 Weapon Chart p. 179 prints AP Ammunition, ARM/2, one Saving Roll, PS 5, Burst 4, Suppressive Fire and identical range bands to the standard Heavy Machine Gun. AP and Suppressive Fire are explained by canonical references; the ARM/2 attribute is preserved as a profile fact."
+    },
+    {
+      "slug": "panzerfaust",
+      "name": "Panzerfaust",
+      "chartPage": 178,
+      "profileSha256": "70be7ba9e6bad2f7b0b9600af61c1ca1d032e5bffd27f158cdb6d8352ce48baa",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 chart p. 178 specifies PS 6/B1 with AP+EXP and three ARM/2 Saving Rolls per hit, Anti-materiel and Disposable (2). The two exact canonical ammunition components, Anti-materiel and shared Disposable (X) usage/charge rules already cover the profile. Do not add a separate Normal ARM roll or multiply total rolls across components."
+    },
+    {
+      "slug": "blitzen",
+      "name": "Blitzen",
+      "chartPage": 178,
+      "profileSha256": "993479b8c5ff79cc728be8b02b5c1f7d67bf71e81490585492ecc4ee615d236b",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 chart p. 178 specifies E/M, two BTS/2 Saving Rolls, PS 6/B1, Disposable (2), Non-Lethal and [**]. The [**] footnote directs to Ammunition, already linked to canonical E/M; it is not an additional Weapon mechanic. The Disposable and Non-Lethal Traits remain separately linked."
+    },
+    {
+      "slug": "akrylat-kanone",
+      "name": "Akrylat-Kanone",
+      "chartPage": 178,
+      "profileSha256": "3ee5fd4e07f5ddc138393701341c59ad0ea80365cd30e754af8e9af44ea54ce1",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 chart p. 178 specifies PARA, PH-6, one Saving Roll, PS dash/B1, Disposable (2), State: Immobilized-A and Non-Lethal. The canonical PARA effect links Immobilized-A and the conditional no-PH exception, while the printed State marker and Disposable/Non-Lethal Trait references are preserved. No additional Weapon-specific outcome is printed."
     }
   ]
 }

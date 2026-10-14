@@ -587,6 +587,29 @@ Ball screenshots were visually inspected. Evidence remains in ignored
 `local/audits/weapon-first-batch-2-browser/`. These checks are bounded
 reference/browser acceptance, not a complete release gate.
 
+## 1.0 Disposable Support Weapon browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Panzerfaust, Blitzen,
+Flammenspeer and Akrylat-Kanone matched the N5.3 p. 178 chart at
+1440, 390 and 320 px (12 viewport cases). Panzerfaust retains
+AP+EXP/ARM/2 with three Saving Rolls; Blitzen E/M and its [**]
+Ammunition footnote, Akrylat-Kanone PARA/PH-6 and IMM-A source
+notation. These three use canonical Ammunition and Trait rules
+without additional Weapon cards. Flammenspeer has separate Blast
+(N, ARM, circular Impact Template) and Hit (AP, ARM/2, no Template)
+modes, each with Continuous Damage and Disposable (2).
+
+Desktop Flammenspeer navigation to Impact Template and mobile
+Panzerfaust EXP first-tap preview/second-tap navigation passed
+(**14/14 browser checks**). The 320 px Flammenspeer and Panzerfaust
+screenshots were inspected; no horizontal overflow or JavaScript
+errors were observed. Reviewed source-profile fingerprints remain
+in `data/curated/weapon-shared-effect-reviews.json`; evidence and
+screenshots remain Git-ignored under
+`local/audits/disposable-support-browser/`. This is bounded browser
+and source-profile acceptance, not automatic combination or
+Immunity resolution.
+
 ## 1.0 Heavy Machine Gun shared-effects acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Heavy Machine Gun,

@@ -5492,6 +5492,64 @@
             }
         },
         {
+            "id": "weapon:flammenspeer",
+            "kind": "weapon",
+            "name": "Flammenspeer",
+            "summary": "The two modes are alternative attacks, and both consume the same [[trait:disposable-x|Disposable (2)]] charges. **Blast Mode** uses [[ammunition:normal|Normal (N) Ammunition]] and one ARM Saving Roll. Only this mode places a circular [[trait:impact-template|Impact Template]] at the point of impact.\n\n**Hit Mode** uses [[ammunition:ap|AP Ammunition]] and one ARM/2 Saving Roll without that Template. Both modes have PS 6, Burst 1 and [[trait:continuous-damage|Continuous Damage]], which requires subsequent Saving Rolls after failed rolls according to its own rules.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "flammenspeer"
+                }
+            ],
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:impact-template"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:continuous-damage"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:disposable-x"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 178,
+                    "section": "Weapon Chart: Flammenspeer"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            }
+        },
+        {
             "id": "weapon:chain-colt",
             "kind": "weapon",
             "name": "Chain-colt",

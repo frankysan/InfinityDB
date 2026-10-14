@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **156/171** complete, **15** pending.
-- Current authored outgoing relations: **417**.
+- Supporting semantic identities: **157/172** complete, **15** pending.
+- Current authored outgoing relations: **422**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -975,7 +975,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (43/43)
+#### Weapon (44/44)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1056,6 +1056,12 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
   - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **Flammenspeer** (`weapon:flammenspeer`) — reviewed: N5.3 chart p. 178: Blast Mode N/ARM, one Saving Roll, circular Impact Template; Hit Mode AP/ARM/2, one Saving Roll, no Template. Both have PS 6, Burst 1, Continuous Damage, shared Disposable (2) charges. Modes are alternatives; template does not transfer.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Impact Template (`trait:impact-template`)
+  - `uses-effects-of` → Continuous Damage (`trait:continuous-damage`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
 - [x] **Flash Pulse** (`weapon:flash-pulse`) — reviewed: Reviewed N5.3 Weapon Chart Stun/BTS/Non-Lethal/Stunned semantics and the printed Immunity (BTS) exception (Wiki Immunity oldid 3643, Example 4). No generic state or immunity resolution is inferred.
   - `uses-effects-of` → Stun Ammunition (`ammunition:stun`)
   - `uses-effects-of` → BS Weapon (WIP) (`trait:bs-weapon-wip`)

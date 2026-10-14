@@ -1065,6 +1065,112 @@ def test_multi_hmg_modes_do_not_transfer_burst_or_traits(
     assert base["burst"] == armor["burst"] == "4"
 
 
+@pytest.mark.parametrize(
+    ("slug", "modes", "effect_ids", "own_rule"),
+    [
+        ("panzerfaust", [
+            (None, "AP+Exp", "ARM/2", "3", "6", "1",
+             ["Anti-materiel", "Disposable (2)"]),
+        ], [["ammunition:ap", "ammunition:exp"]], False),
+        ("blitzen", [
+            (None, "E/M", "BTS/2", "2", "6", "1",
+             ["Disposable (2)", "Non-lethal", "[**]"]),
+        ], [["ammunition:em"]], False),
+        ("flammenspeer", [
+            ("Blast Mode", "N", "ARM", "1", "6", "1",
+             ["Continous Damage", "Disposable (2)",
+              "Impact Template (Circular)"]),
+            ("Hit Mode", "AP", "ARM/2", "1", "6", "1",
+             ["Continous Damage", "Disposable (2)"]),
+        ], [["ammunition:normal"], ["ammunition:ap"]], True),
+        ("akrylat-kanone", [
+            (None, "PARA", "PH-6", "1", "-", "1",
+             ["Disposable (2)", "State: IMM-A", "Non-lethal"]),
+        ], [["ammunition:para"]], False),
+    ],
+)
+def test_disposable_support_weapon_profiles_reuse_canonical_effects(
+    weaponry_app: Callable,
+    slug: str, modes: list[tuple], effect_ids: list[list[str]],
+    own_rule: bool,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    profiles = payload["profiles"]
+    assert [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in profiles
+    ] == modes
+    assert [
+        [effect["record_id"] for effect in p["ammunition_effects"]]
+        for p in profiles
+    ] == effect_ids
+    assert all(effect["citations"]
+               for p in profiles for effect in p["ammunition_effects"])
+    assert all(p["ranges"] == profiles[0]["ranges"] for p in profiles)
+    assert all(p["ranges"] == {
+        "short": {"max": 20, "mod": "-3"},
+        "med": {"max": 40, "mod": "0"},
+        "long": {"max": 80, "mod": "+3"},
+        "max": {"max": 120, "mod": "-3"},
+    } for p in profiles)
+    assert bool(payload.get("rules")) == own_rule
+    if own_rule:
+        rule = _weapon_rules(payload)["weapon:flammenspeer"]
+        assert any(
+            c["page"] == 178 and c["source_id"] == "n5-core-v5.3-pdf"
+            for c in rule["citations"]
+        )
+        assert {
+            relation["record"]["id"]
+            for relation in rule["display_relations"]
+            if relation["direction"] == "outbound"
+        } >= {
+            "ammunition:normal", "ammunition:ap", "trait:impact-template",
+            "trait:continuous-damage", "trait:disposable-x",
+        }
+
+
+def test_flammenspeer_modes_keep_template_ap_and_shared_charge_rules(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "flammenspeer")
+    blast, hit = payload["profiles"]
+    assert blast["mode"] == "Blast Mode" and hit["mode"] == "Hit Mode"
+    assert blast["saving"] == "ARM" and hit["saving"] == "ARM/2"
+    assert "Impact Template (Circular)" in blast["traits"]
+    assert "Impact Template (Circular)" not in hit["traits"]
+    assert {"Continous Damage", "Disposable (2)"} <= set(blast["traits"])
+    assert {"Continous Damage", "Disposable (2)"} <= set(hit["traits"])
+    assert {
+        ref["slug"] for ref in blast["trait_references"] if ref.get("slug")
+    } >= {"continuous-damage", "disposable-x", "impact-template"}
+    assert {
+        ref["slug"] for ref in hit["trait_references"] if ref.get("slug")
+    } >= {"continuous-damage", "disposable-x"}
+    summary = _weapon_rules(payload)["weapon:flammenspeer"]["summary"]
+    assert "alternative attacks" in summary
+    assert "same" in summary and "Disposable (2)" in summary
+
+
+def test_disposable_support_footnotes_and_states_remain_source_notation(
+    weaponry_app: Callable,
+) -> None:
+    panzerfaust = _weapon_detail(weaponry_app, "panzerfaust")["profiles"][0]
+    assert (panzerfaust["ammunition"], panzerfaust["saving"],
+            panzerfaust["saving_num"]) == ("AP+Exp", "ARM/2", "3")
+    assert [e["record_id"] for e in panzerfaust["ammunition_effects"]] == [
+        "ammunition:ap", "ammunition:exp",
+    ]
+    blitzen = _weapon_detail(weaponry_app, "blitzen")["profiles"][0]
+    assert "[**]" in blitzen["traits"]
+    assert blitzen["ammunition_effects"][0]["record_id"] == "ammunition:em"
+    akrylat = _weapon_detail(weaponry_app, "akrylat-kanone")["profiles"][0]
+    assert "State: IMM-A" in akrylat["traits"]
+    assert akrylat["ammunition_effects"][0]["record_id"] == "ammunition:para"
+    assert any(ref["slug"] == "disposable-x" for ref in akrylat["trait_references"])
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:

@@ -454,13 +454,25 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       versus AP or Shock B4 with one Roll and Suppressive Fire. The
       review ledger and 11/11 viewport/navigation browser checks are
       current; 320 px screenshots were inspected.
+    - [x] Review the four N5.3 p. 178 Disposable Support Weapons.
+      Panzerfaust, Blitzen and Akrylat-Kanone reuse source-linked
+      Ammunition, Disposable and other Traits; each shared-only decision
+      is pinned to its exact Army profile hash. Panzerfaust's AP+EXP
+      profile retains three ARM/2 Rolls, Blitzen's [**] source footnote
+      refers to E/M effects, and Akrylat-Kanone retains PARA/PH-6
+      with the IMM-A source notation. Flammenspeer has a dedicated
+      source-cited rules card: its Blast Mode uses N/ARM with an
+      Impact Template; Hit Mode uses AP/ARM/2 without a Template.
+      Continuous Damage and Disposable (2) apply to both modes.
+      Browser acceptance passed 14/14 checks with narrow screenshots
+      and desktop/touch navigation reviewed.
     - [ ] Continue source-specific Weapon review without duplicating
-      canonical Ammunition and Trait rules. The refreshed triage has
-      65 actionable reviews, 21 accepted shared-only identities, and
-      13 pending multi-profile candidates, plus Flash Pulse's historical
-      citation. Next: Disposable Support Weapons (Panzerfaust, Blitzen,
-      Flammenspeer, Akrylat-Kanone); then Spitfires. Pitcher and Mine
-      Dispenser retain separate missing-effect source reviews.
+      canonical Ammunition or Trait rules. The refreshed triage has
+      61 actionable reviews, 24 accepted shared-only identities, and
+      12 pending multi-profile candidates, plus Flash Pulse's
+      historical citation. Next: Spitfires (standard, AP, MULTI).
+      Pitcher and Mine Dispenser still need separate missing-effect
+      source reviews.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
