@@ -1918,6 +1918,16 @@ Area uses this Skill unless a valid non-camouflaged enemy Model is also there;
 failed placement does not put the weapon on the table and spends one
 Disposable use when applicable.
 
+The published Skill card also provides three source-reviewed examples:
+a CAMO Marker that declines its ARO (successful WIP is the actual Attack
+Roll, followed by its ordinary Saving Roll), a valid reacting Marker and
+other Template-affected Trooper (eligible opposition uses the same WIP
+Roll; only the Main Target suffers Critical), and a Deployable placed in
+a Trigger Area with a CAMO Marker (failed WIP prevents placement and
+consumes a Disposable use; a valid non-CAMO enemy Model exempts that
+specific placement condition). These examples document the rule, not
+new independent game mechanics.
+
 **Current consumer:** `skill:intuitive-attack` curated reference. Do not
 extrapolate placement requirements to unrelated Deployables.
 

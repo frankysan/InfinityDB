@@ -1400,3 +1400,20 @@ no JavaScript page errors or horizontal overflow. Private script,
 320 px screenshots and result JSON remain in Git-ignored
 `local/audits/`. This is reference acceptance, not a general healing
 simulation or complete non-Allied eligibility adjudication.
+
+
+## 1.0 Intuitive Attack source and browser acceptance (REA-003)
+
+**Reviewed 2026-10-14, `dev/v1.0.0`.** Compared English N5.3 p. 49,
+Spanish N5.3 p. 48, and the pinned Wiki Intuitive Attack source. The
+existing Skill effects specify the one unmodified WIP Roll for the B1
+Attack, eligible Face to Face reactions, Main Target-only Critical and
+specific Deployable Trigger Area/Disposable conditions. Three published
+examples make the unreacting CAMO, opposing ARO/multiple targets and
+Deployable placement cases explicit without changing those mechanics.
+
+Curated source and composed-rules regression tests protect the examples,
+canonical Trait link and both printed-page citations. The browser
+acceptance script and locally rebuilt rules database are private in
+`local/audits/`; tests include desktop and 390/320 px widths and
+semantic navigation to the shared roll and placement references.

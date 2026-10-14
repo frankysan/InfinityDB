@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Intuitive Attack now includes worked examples of its single unmodified
+  WIP attack, opposing AROs and Main Target Critical, plus the separate
+  Deployable placement condition and failed-use cost.
 - Doctor now includes concrete explanations of ordinary Unconscious
   recovery and its lethal failure, Stunned, NWI self-treatment and
   Technorganic STR exceptions without granting routine healing to
@@ -157,6 +160,10 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Complete REA-003 Intuitive Attack
+  reference acceptance with three source-linked examples and bilingual
+  N5.3 citations. Preserve B1/WIP Attack resolution and existing placement
+  mechanics without adding a second BS Roll or changing imported data.
 - **Data processing + Web frontend:** Complete REA-002 Doctor
   reference acceptance with N5.3-cited examples for ordinary VITA
   recovery, Stunned, No Wound Incapacitation, and Technorganic.

@@ -598,8 +598,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       No Wound Incapacitation self-treatment, and Technorganic STR recovery
       only while Unconscious. Browser acceptance passed 21/21 at 1440,
       390 and 320 px; non-Allied target eligibility remains REA-038.
-    - [ ] **REA-003 — Intuitive Attack:** Review the corrected attack resolution
-      explanation in the player-facing reference.
+    - [x] **REA-003 ? Intuitive Attack:** Verified the single unmodified
+      WIP Roll as the B1 Attack resolution, eligible Face to Face AROs,
+      Main Target-only Critical effect, and special Deployable placement.
+      Added three worked examples with English/Spanish N5.3 citations,
+      source/database regressions and responsive browser acceptance.
+      No additional BS Roll or gameplay rule was introduced.
     - [ ] **REA-004 — Continuous Damage:** Verify the documented Critical
       exception in the Trait card; keep deferred typed-variant edges separate.
     - [ ] **REA-005 — BS Weapon (WIP):** Verify the prohibited Skill

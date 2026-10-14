@@ -427,6 +427,29 @@ eligible Attack or Dodge ARO opposes that roll; do not make another BS roll.
 A Critical affects only the Main Target as a Critical." Explain placement as a
 separate use. **Fix:** text, links, future regression. **Dependencies:** REA-023.
 
+**Reference acceptance (2026-10-14): Completed locally; no mechanics change.**
+The original "Current" paragraph describes an earlier text baseline:
+`skill:intuitive-attack` already resolves the Burst 1 BS Attack with
+**one unmodified WIP Roll** (not another BS Roll after a WIP gate).
+Eligible Attack or Dodge AROs oppose that Roll when Face to Face applies;
+critical effects attach only to the selected Main Target. A Deployable
+whose Trigger Area includes an enemy CAMO Marker requires Intuitive Attack
+unless there is also a valid non-camouflaged enemy Model in that area;
+failed WIP prevents placement and consumes a Disposable use when applicable.
+
+The Skill's new Clarifications show (1) an unreacting CAMO Marker and the
+one-Roll hit/Saving Roll resolution, (2) eligible opposing reactions to
+that WIP Roll including a second Template-affected Trooper and Main
+Target-only Critical, and (3) the separate Deployable placement branch
+with the non-CAMO exception and loss of Disposable use. The source
+record now cites both English N5.3 p. 49 and Spanish N5.3 p. 48 alongside
+the pinned Wiki. Source text and composed-record regressions protect
+all three cases; target eligibility, Burst, and the underlying Trait,
+Weapon and placement rules remain unchanged.
+
+This closes the **player-facing REA-003 acceptance**, not a generic
+multi-target Face to Face Roll or Deployable-placement simulation.
+
 ### REA-004 - Continuous Damage omits the extra Critical roll exception
 
 **Classification:** completeness, correctness risk. **Severity:** High.

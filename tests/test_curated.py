@@ -1910,6 +1910,35 @@ def test_rea038_direct_vs_delegated_recovery_source_scope() -> None:
         assert pdf_pages >= {51}
 
 
+def test_rea003_intuitive_attack_examples_keep_single_wip_and_deployable_branch() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    records = {r["id"]: r for r in load_curated_document(path)["records"]}
+    record = records["skill:intuitive-attack"]
+    facts = record["facts"]
+    assert "one unmodified [[attribute:wip|WIP]] Roll" in " ".join(facts["effects"])
+    assert "Burst for this Skill is always 1" in " ".join(facts["restrictions"])
+    examples = facts["clarifications"]
+    assert len(examples) == 3
+    assert "not a preliminary check followed by a second" in examples[0]
+    assert "[[rule:saving-rolls|Saving Roll]]" in examples[0]
+    assert "next Active Turn" in examples[0]
+    assert "[[rule:face-to-face-rolls|Face to Face Roll]]" in examples[1]
+    assert "Another Trooper affected by the same Template" in examples[1]
+    assert "Critical only against the declared Main Target" in examples[1]
+    assert "non-Critical successful Roll" in examples[1]
+    assert "[[skill:place-deployable|Place Deployable]]" in examples[2]
+    assert "[[trait:disposable-x|Disposable]] loses one use" in examples[2]
+    assert "specific [[skill:intuitive-attack|Intuitive Attack]] requirement" in examples[2]
+    assert "other [[trait:deployable|Deployable]] placement restrictions" in examples[2]
+    assert records["trait:intuitive-attack"]["relations"] == [
+        {"type": "enables-use-of", "recordId": "skill:intuitive-attack"}
+    ]
+    assert {(c["sourceId"], c.get("page")) for c in record["citations"]} >= {
+        ("n5-core-v5.3-pdf", 49),
+        ("n5-core-v5.3-es-pdf", 48),
+    }
+
+
 def test_rea002_doctor_ordinary_gate_and_scoped_exceptions() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

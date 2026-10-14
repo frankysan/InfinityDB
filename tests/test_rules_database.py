@@ -3325,6 +3325,30 @@ def test_recovery_and_intuitive_attack_explanations_survive_rules_export(
     assert any(citation["source_id"] == "n5-core-v5.3-pdf" for citation in record["citations"])
 
 
+def test_rea003_published_intuitive_attack_three_resolution_examples(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record("skill:intuitive-attack")
+    trait = current_rules_database.composed_record("trait:intuitive-attack")
+    assert record is not None and trait is not None
+    effects = " ".join(record["facts"]["effects"])
+    assert "do not make a second attack Roll" in effects
+    assert "Critical only against that Main Target" in effects
+    examples = record["facts"]["clarifications"]
+    assert len(examples) == 3
+    assert "**[[state:camouflaged|CAMO]] Marker does not react:**" in examples[0]
+    assert "[[rule:saving-rolls|Saving Roll]]" in examples[0]
+    assert "**Opposing reactions and Criticals:**" in examples[1]
+    assert "its own eligible reaction" in examples[1]
+    assert "non-Critical successful Roll" in examples[1]
+    assert "**[[trait:deployable|Deployable]] placement:**" in examples[2]
+    assert "On failure" in examples[2] and "loses one use" in examples[2]
+    assert "this specific [[skill:intuitive-attack|Intuitive Attack]] requirement" in examples[2]
+    cited = {(c["source_id"], c.get("page")) for c in record["citations"]}
+    assert cited >= {("n5-core-v5.3-pdf", 49), ("n5-core-v5.3-es-pdf", 48)}
+    assert "[[skill:intuitive-attack:plural]]" in trait["summary"]
+
+
 def test_rea002_published_doctor_recovery_and_exception_boundaries(
     current_rules_database: RulesDatabase,
 ) -> None:

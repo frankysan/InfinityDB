@@ -12486,6 +12486,11 @@
                 "restrictions": [
                     "The Burst for this Skill is always 1, regardless of weapon Burst or Burst MODs; Partial Cover, Special Skills, Equipment and all other MODs do not modify its WIP Roll.",
                     "After a failed WIP Roll, the user cannot attempt this Skill again against the same target until the next Active Turn."
+                ],
+                "clarifications": [
+                    "**[[state:camouflaged|CAMO]] Marker does not react:** A Trooper declares [[skill:intuitive-attack|Intuitive Attack]] against a [[state:camouflaged|Camouflaged]] Marker. The single unmodified [[attribute:wip|WIP]] Roll is the Attack Roll itself, not a preliminary check followed by a second [[skill:bs-attack|BS Attack]] Roll. If it succeeds and the Marker is affected, the target makes the weapon's applicable [[rule:saving-rolls|Saving Roll]]; if it fails, the attacker cannot retry against that target until their next Active Turn.",
+                    "**Opposing reactions and Criticals:** If the Main Target declares a valid [[skill:dodge|Dodge]] or Attack [[trait:aro|ARO]], resolve its eligible [[rule:face-to-face-rolls|Face to Face Roll]] against the attacker's one WIP Roll. Another Trooper affected by the same Template can oppose that WIP Roll with its own eligible reaction. A Critical WIP Roll counts as Critical only against the declared Main Target; for the other affected Trooper it is a non-Critical successful Roll, not a second Critical.",
+                    "**[[trait:deployable|Deployable]] placement:** To use [[skill:place-deployable|Place Deployable]] when an enemy [[state:camouflaged|Camouflaged]] Marker is in the weapon's Trigger Area and no valid non-camouflaged enemy Model is there, declare [[skill:intuitive-attack|Intuitive Attack]] and use its unmodified WIP Roll. On failure the [[trait:deployable|Deployable]] is not placed, and a weapon with [[trait:disposable-x|Disposable]] loses one use. If a valid non-camouflaged enemy Model is also in the Trigger Area, this specific [[skill:intuitive-attack|Intuitive Attack]] requirement does not apply; other [[trait:deployable|Deployable]] placement restrictions still do."
                 ]
             },
             "labelIds": [
@@ -12501,6 +12506,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 49,
                     "section": "Intuitive Attack"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 48,
+                    "section": "Ataque Intuitivo"
                 }
             ],
             "review": {
