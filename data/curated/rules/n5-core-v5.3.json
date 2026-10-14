@@ -19350,6 +19350,9 @@
                 "Fireteam Level Chart"
             ],
             "facts": {
+                "sourceNotes": [
+                    "**Unresolved Spanish Fireteam reminder:** Spanish N5.3 p. 140 counts bonus dice in a six-dice limit, but Spanish p. 75 and English pp. 75/136 explicitly exclude [[rule:special-dice|Special Dice (+1 SD)]] from the B6 Burst cap. InfinityDB follows the sourced Burst-versus-SD rule; an alternative Fireteam-specific six-dice cap remains unverified pending an official correction."
+                ],
                 "category": "fireteam-level-bonuses",
                 "basis": "Fireteam Level is based on how many members belong to the same Unit; matching bracketed or noted Fireteams Chart terms count as the same Unit for this calculation.",
                 "cumulative": true,
@@ -19411,6 +19414,16 @@
                     "sourceId": "n5-faq-v0.1-en-pdf",
                     "page": 3,
                     "section": "Fireteam Bonuses and Discover"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 75,
+                    "section": "Modificadores (MOD) Detallados"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 140,
+                    "section": "Bonos de Fireteam"
                 }
             ],
             "review": {
@@ -22543,6 +22556,10 @@
                 ]
             },
             "facts": {
+                "sourceNotes": [
+                    "**Reviewed B6 and SD baseline:** English N5.3 pp. 75/136 and Spanish N5.3 p. 75 cap Attack Burst at B6 while explicitly excluding extra +1 SD dice because these do not raise Burst. A B6 Attack with one +1 SD can therefore roll seven dice, discard one, and resolve the six retained dice. B6 is not a cap of six dice initially rolled.",
+                    "**Unresolved Spanish Fireteam discrepancy:** Spanish N5.3 p. 140 instead says no more than six dice may be rolled, including bonuses from Skills and MODs. That conflicts with its own p. 75 and English pp. 75/136. The September 2026 N5.3 update notice does not resolve the wording. InfinityDB retains the Burst-versus-SD baseline pending a scoped official ruling; this is not evidence of a separate Fireteam dice cap."
+                ],
                 "category": "basic-rule",
                 "effects": [
                     "The +1 SD MOD applies in both the Active and Reactive Turns. Roll one extra die for the eligible Roll, then select and discard one die; only the retained dice count toward the result.",
@@ -22580,6 +22597,16 @@
                     "sourceId": "n5-faq-v0.1-en-pdf",
                     "page": 3,
                     "section": "Special Dice during Coordinated Orders"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 75,
+                    "section": "Modifiers Explained (MODs)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 140,
+                    "section": "Bonos de Fireteam"
                 }
             ],
             "review": {

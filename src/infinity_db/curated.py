@@ -866,10 +866,12 @@ def _validate_fireteam_general_facts(facts: object, context: str) -> None:
 def _validate_fireteam_level_facts(facts: object, context: str) -> None:
     if not isinstance(facts, dict):
         raise ValueError(f"{context}: Fireteam Level facts must be an object")
-    expected = {"category", "basis", "cumulative", "levels"}
-    if set(facts) != expected:
+    required = {"category", "basis", "cumulative", "levels"}
+    allowed = required | {"sourceNotes"}
+    if not required.issubset(facts) or set(facts) - allowed:
         raise ValueError(
-            f"{context}: Fireteam Level facts must contain exactly {sorted(expected)}"
+            f"{context}: Fireteam Level facts require {sorted(required)}; "
+            "only optional 'sourceNotes' is supported"
         )
     if facts["category"] != "fireteam-level-bonuses":
         raise ValueError(f"{context}.category: must be 'fireteam-level-bonuses'")

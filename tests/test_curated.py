@@ -1994,6 +1994,23 @@ def test_checked_in_n5_collection_models_fireteam_general_reference() -> None:
     assert levels["levels"][4]["bonuses"] == ["[[skill:sixth-sense]]"]
 
 
+def test_rea041_curated_fireteam_and_special_dice_keep_source_conflict() -> None:
+    source = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    records = {record["id"]: record for record in load_curated_document(source)["records"]}
+    special_dice = records["rule:special-dice"]
+    fireteam = records["rule:fireteam-level-bonuses"]
+    assert "English N5.3 pp. 75/136" in special_dice["facts"]["sourceNotes"][0]
+    assert "Spanish N5.3 p. 140" in special_dice["facts"]["sourceNotes"][1]
+    assert "Unresolved Spanish Fireteam reminder" in fireteam["facts"]["sourceNotes"][0]
+    assert "pending an official correction" in fireteam["facts"]["sourceNotes"][0]
+    for record in (special_dice, fireteam):
+        cited_pages = {
+            citation["page"] for citation in record["citations"]
+            if citation["sourceId"] == "n5-core-v5.3-es-pdf"
+        }
+        assert cited_pages == {75, 140}
+
+
 def test_scenario_collection_membership_must_cover_local_definitions(tmp_path: Path) -> None:
     source = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = json.loads(source.read_text(encoding="utf-8"))

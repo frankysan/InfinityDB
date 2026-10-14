@@ -1681,6 +1681,28 @@ reviewed source note after adjudication. **Dependencies:** REA-021/029/034.
 **1.0 relevance:** Player explanations should be clear about the adopted
 sourced interpretation and outstanding source contradiction.
 
+**Follow-up verified 2026-10-14 ? local player-facing handling complete;
+upstream ruling still unresolved.** Independently compared S1 pp. 75/136
+with S17 pp. 75/140. Both PDFs agree on B6 excluding +1 SD at their
+general Modifiers section; English Fireteam p. 136 repeats the exclusion.
+Spanish Fireteam p. 140 uniquely asserts an inclusive six-dice ceiling.
+The Sep 1, 2026 official N5.3 English/Spanish update notices reviewed in
+the source audit do not supply a scoped correction or any stated reason
+for retaining this language. This is not resolved by assigning priority
+to a later Wiki revision without an official interpretation.
+
+`rule:special-dice` now carries the adopted B6/SD rule, a B6+1 SD example
+(seven rolled, one discarded, six retained), and explicit bilingual source
+notes and citations. `rule:fireteam-level-bonuses` carries a linked
+secondary source note, shown on the Fireteams quick reference using the
+shared note styling. The level bonuses, Burst cap, Army source profiles,
+and computation behavior are unchanged. Focused curated/rules tests and
+responsive headless browser checks passed 15/15 at 1440, 390 and 320 px,
+including navigation from Fireteams to Special Dice, with no JavaScript
+errors or horizontal overflow. A formal CB erratum remains the only open
+part of REA-041, now tracked separately in the TODO; it is not represented
+as a new local gameplay rule or a 1.0 implementation blocker.
+
 ### REA-042 - Dodge (ARM+3) has incompatible English/Spanish conditions
 
 **Classification:** source discrepancy, completeness. **Severity:** High.

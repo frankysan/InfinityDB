@@ -756,8 +756,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       pinned the English printed-name discrepancy against Spanish N5.3.
       Source/database and responsive browser acceptance passed (24/24).
       Complete chart/list configurators remain post-1.0.
-    - [ ] **REA-041 — Fireteam dice contradiction:** Resolve the Spanish
-      printed example/reminder against the general Special Dice rule.
+    - [x] **REA-041 ? Fireteam dice source review:** English N5.3
+      pp. 75/136 and Spanish p. 75 agree that B6 caps Burst, not the
+      extra Special Dice rolled and discarded. Spanish p. 140 contradicts
+      that rule by imposing a six-dice inclusive reminder; English/Spanish
+      evidence and the unsolved discrepancy are now visible as linked
+      source notes on Special Dice and Fireteams. Responsive browser
+      acceptance passed (15/15). No gameplay cap was changed.
+    - [ ] **REA-041 ? Official Fireteam dice clarification:** Obtain an
+      authoritative erratum or scoped ruling for Spanish N5.3 p. 140
+      versus p. 75 and English pp. 75/136. Keep the contradiction
+      explicit meanwhile; this external dependency does not block the
+      locally reviewed 1.0 reference explanation.
     - [ ] **REA-042 — Dodge (ARM+3) source conflict:** Preserve and
       resolve the differing English/Spanish and Wiki/PDF conditions,
       including S17/S21 provenance; seek scoped errata where needed.

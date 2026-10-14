@@ -1215,3 +1215,26 @@ No JavaScript errors or page-level horizontal overflow were observed.
 `local/audits/rea040-browser/`; the verification script and temporary
 rules DB are in `local/audits/`. This is bounded reference/browser
 acceptance, not a complete Spec-Ops Chart/list builder or a rule engine.
+
+
+## 1.0 Fireteam Special Dice discrepancy (REA-041)
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Compared official English N5.3
+pp. 75/136 and Spanish N5.3 pp. 75/140. The English text and Spanish
+general Modifiers text exclude +1 SD from the maximum B6; the Spanish
+Fireteam reminder alone counts extra dice toward a six-dice ceiling.
+The September 2026 update notice does not supply a sourced adjudication.
+
+Curated Fireteam Level facts accept optional `sourceNotes`, validated
+through the shared maintained-text/source rules. The Fireteams quick
+reference displays those secondary notes with the same styling and
+semantic links as other rules pages; the shared Special Dice reference
+contains the detailed conflict notes and a B6+1 SD example. A rebuilt
+local rules database backed a headless Chrome run with **15/15 passed**
+render/navigation checks at 1440, 390, and 320 px; pages remained free
+of JavaScript errors and horizontal overflow. Curated and composed-rules
+regression tests cover both records, four bilingual citations and the
+unchanged Fireteam Level 2 bonus. Private browser verifier, 320 px
+screenshots, result JSON and temporary rules DB remain under ignored
+`local/audits/`. Official erratum remains unresolved; the browser does
+not silently apply a new Fireteam rolled-dice cap.

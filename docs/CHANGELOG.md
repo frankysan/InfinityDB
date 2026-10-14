@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Special Dice and Fireteam reference pages now disclose the Spanish
+  N5.3 contradiction over six dice versus B6 plus extra Special Dice.
+  The sourced B6/SD distinction remains unchanged; an official correction
+  is still outstanding.
 - Infinity Spec-Ops now links to the complete Request SpecBall procedure:
   when a drop can be requested, how the token is placed and collected,
   and when the Enhanced Profile takes effect. The separate Request Speedball
@@ -126,6 +130,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Show the bilingual N5.3 Fireteam
+  six-dice contradiction as source notes on the Special Dice reference and
+  Fireteam quick reference. Explain B6 plus one SD without introducing an
+  inferred Fireteam cap. Fireteam Level facts now permit optional curated
+  source notes, rendered with the existing secondary-source styling.
 - **Data processing + Web backend + Web frontend:** Show canonical Ammunition
   effects and source citations in an expandable section on Weapon profiles.
   Shared descriptions now also render inline rules links correctly (including

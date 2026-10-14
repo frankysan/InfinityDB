@@ -242,6 +242,45 @@ def test_special_dice_reference_and_source_exceptions_are_composed(
         ), record_id
 
 
+def test_rea041_spanish_fireteam_dice_conflict_is_visible_without_changing_b6(
+    current_rules_database: RulesDatabase,
+) -> None:
+    special_dice = current_rules_database.composed_record("rule:special-dice")
+    fireteam = current_rules_database.composed_record("rule:fireteam-level-bonuses")
+    assert special_dice is not None and fireteam is not None
+
+    notes = special_dice["facts"]["sourceNotes"]
+    assert len(notes) == 2
+    assert "English N5.3 pp. 75/136" in notes[0]
+    assert "Spanish N5.3 p. 75" in notes[0]
+    assert "B6 Attack with one +1 SD" in notes[0]
+    assert "roll seven dice, discard one" in notes[0]
+    assert "Spanish N5.3 p. 140" in notes[1]
+    assert "conflicts with its own p. 75" in notes[1]
+    assert "pending a scoped official ruling" in notes[1]
+    assert "a separate Fireteam dice cap" in notes[1]
+
+    restrictions = " ".join(special_dice["facts"]["restrictions"])
+    assert "maximum Attack Burst remains B6" in restrictions
+    assert "extra SD dice do not count as Burst" in restrictions
+    source_note = fireteam["facts"]["sourceNotes"][0]
+    assert "**Unresolved Spanish Fireteam reminder:**" in source_note
+    assert "[[rule:special-dice|Special Dice (+1 SD)]]" in source_note
+    assert "unverified pending an official correction" in source_note
+    assert fireteam["facts"]["levels"][1]["bonuses"] == [
+        "[[skill:bs-attack]] ([[rule:special-dice|+1 SD]])"
+    ]
+    for record in (special_dice, fireteam):
+        assert {
+            (citation["source_id"], citation.get("page"))
+            for citation in record["citations"]
+            if citation["source_id"] == "n5-core-v5.3-es-pdf"
+        } == {
+            ("n5-core-v5.3-es-pdf", 75),
+            ("n5-core-v5.3-es-pdf", 140),
+        }
+
+
 def test_shared_face_to_face_and_saving_roll_baselines_are_composed(
     current_rules_database: RulesDatabase,
 ) -> None:

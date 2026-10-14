@@ -415,6 +415,13 @@ function renderReference(reference) {
     cumulative,
   );
 
+  for (const [index, note] of (levelFacts.sourceNotes || []).entries()) {
+    const paragraph = document.createElement("p");
+    paragraph.className = "rules-source-note";
+    appendMaintainedText(paragraph, levels.fact_tokens?.sourceNotes?.[index], note);
+    fragment.append(paragraph);
+  }
+
   const terminology = generalFacts.terminology || [];
   if (terminology.length) {
     const terminologyHeading = document.createElement("h4");

@@ -505,6 +505,9 @@ application chart per supported Army/source context while preserving:
 Reinforcement parent limits remain separate through the application Army graph rather than being
 silently merged into a child chart. General Fireteam rules/Level bonuses live in curated rules data
 and are composed by the Fireteams application surface; they are not source Army chart rows.
+Fireteam Level curated facts allow an optional `sourceNotes` list for
+provenance and rules-publication conflicts. These notes are displayed as
+secondary text without affecting Level requirements or bonuses.
 
 ## Relationship model
 

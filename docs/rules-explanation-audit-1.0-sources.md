@@ -116,6 +116,13 @@ These additional sources clarify the **scope** of the five disputed findings:
 - REA-041: S17 p. 75 says +1DE does not count toward maximum Burst 6, but
   p. 140 Fireteam reminder includes extra dice in a total-six limit; the
   contradiction occurs inside the Spanish PDF, not just S14 Wiki pages.
+- REA-041 local acceptance (2026-10-14): Both `rule:special-dice`
+  and `rule:fireteam-level-bonuses` now cite Spanish N5.3 pp. 75/140
+  alongside English pp. 75/136; the player-visible note preserves their
+  contradictory wording. A B6+1 SD example follows the general rule.
+  No direct official erratum addressing the Spanish Fireteam reminder
+  was established from the September 2026 N5.3 release notices; a
+  scoped ruling remains an external open item.
 - REA-042: S17 p. 75 says Esquivar (BLI+3) **always** adds +3 BLI on the
   Saving Roll when Dodge is declared, matching S1 p. 75. S14/S21 revision
   4012 (2026-09-08) retains a different condition. A source conflict remains,
