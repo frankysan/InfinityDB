@@ -819,6 +819,32 @@ def test_controlled_jump_immediate_aro_and_opposing_effects_are_published(
     )
 
 
+def test_rea006_controlled_jump_worked_examples_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    program = current_rules_database.composed_record("hacking-program:controlled-jump")
+    speedball = current_rules_database.composed_record("skill:request-speedball")
+    assert program is not None and speedball is not None
+    aro, opposing, tokens = program["facts"]["clarifications"]
+    assert "same PH landing Roll" in aro
+    assert "before Resolution" in aro
+    assert "another eligible [[trait:aro|ARO]]" in aro
+    assert "neither Program gives +3 or -3" in opposing
+    assert "not a general rule that opposite MODs always cancel" in opposing
+    assert "Designated Landing Area" in opposing
+    assert "that scenario MOD is not canceled" in opposing
+    assert "[[skill:request-speedball|Speedball]]" in tokens
+    assert "FAQ expressly excludes these Tokens" in tokens
+    assert "[[hacking-program:controlled-jump]] does not affect Speedballs" in speedball["summary"]
+    cited = {(c["source_id"], c.get("page")) for c in program["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 59),
+        ("n5-core-v5.3-pdf", 155),
+        ("n5-core-v5.3-es-pdf", 61),
+        ("n5-faq-v0.1-en-pdf", 1),
+    }
+
+
 def test_protheion_overkill_and_opponent_mod_are_published(
     current_rules_database: RulesDatabase,
 ) -> None:

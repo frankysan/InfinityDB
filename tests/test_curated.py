@@ -1910,6 +1910,51 @@ def test_rea038_direct_vs_delegated_recovery_source_scope() -> None:
         assert pdf_pages >= {51}
 
 
+def test_rea006_controlled_jump_sourced_timing_cancellation_and_tokens() -> None:
+    root = Path(__file__).parents[1] / "data" / "curated" / "rules"
+    doc = load_curated_document(root / "n5-hacking-programs-v5.3.json")
+    program = next(r for r in doc["records"] if r["id"] == "hacking-program:controlled-jump")
+    effects = " ".join(program["facts"]["effects"])
+    restrictions = " ".join(program["facts"]["restrictions"])
+    assert "as soon as it is declared" in effects
+    assert "before the Resolution step" in effects
+    assert "same [[skill:combat-jump]] PH Roll" in effects
+    assert "ARO is optional" in restrictions
+    assert "their Programs' effects cancel" in restrictions
+    assert "independent MODs" in restrictions
+    assert "Speedball Tokens" in restrictions
+    assert "one Controlled Jump Program active" in restrictions
+    aro, opposing, tokens = program["facts"]["clarifications"]
+    assert "**Reactive landing example:**" in aro
+    assert "**same PH landing Roll**" in aro
+    assert "before Resolution" in aro
+    assert "[[trait:aro|ARO]]" in aro
+    assert "[[rule:hacking-area|Hacking Area]]" in aro
+    assert "**Both Programs active in Firefight:**" in opposing
+    assert "**neither Program gives +3 or -3**" in opposing
+    assert "not a general rule" in opposing
+    assert "**Designated Landing Area**" in opposing
+    assert "that scenario MOD is not canceled" in opposing
+    assert "**Troopers versus Speedball Tokens:**" in tokens
+    assert "Troopers without the Hackable Characteristic" in tokens
+    assert "[[skill:request-speedball|Speedball]]" in tokens
+    assert "expressly excludes these Tokens" in tokens
+    cited = {(c["sourceId"], c.get("page")) for c in program["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 59),
+        ("n5-core-v5.3-pdf", 155),
+        ("n5-core-v5.3-es-pdf", 61),
+        ("n5-faq-v0.1-en-pdf", 1),
+    }
+    assert any(s["id"] == "n5-core-v5.3-es-pdf" for s in doc["sources"])
+    assert program["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:combat-jump"}
+    ]
+    core = load_curated_document(root / "n5-core-v5.3.json")
+    landing = next(r for r in core["records"] if r["id"] == "rule:scenario:designated-landing-area")
+    assert "cumulative with MODs provided by other rules" in " ".join(landing["facts"]["effects"])
+
+
 def test_rea005_bs_weapon_wip_named_attack_skill_exclusions() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     records = {r["id"]: r for r in load_curated_document(path)["records"]}

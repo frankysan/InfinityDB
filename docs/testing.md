@@ -1460,3 +1460,28 @@ Shock Ammunition and Targeted links. No JS errors or horizontal overflow.
 Private script, screenshots and result JSON are kept under ignored
 `local/audits/`. No exact attack variants, new restriction edges or
 gameplay changes were introduced.
+
+
+## 1.0 Controlled Jump declaration and cancellation (REA-006)
+
+**Verified 2026-10-14, `dev/v1.0.0`.** English N5.3 p. 59 and Spanish
+N5.3 p. 61 confirm immediate activation of Controlled Jump upon
+its declaration, including an optional table-wide ARO imposing -3 on
+the same enemy Combat Jump landing PH Roll. The modifier can affect
+non-Hackable Troopers. If both players have Controlled Jump active,
+the two Programs cancel only their own effects; Firefight Designated
+Landing Area +3 (English p. 155) remains independently applicable.
+FAQ v0.1 p. 1 excludes Speedball Tokens from this Trooper-only Program.
+
+The existing effects/restrictions and single `modifies-rolls-for` Combat
+Jump relation were retained. Added three `facts.clarifications` and a
+Spanish source record in the hacking-programs collection; no new
+runtime or timing representation. Curated/published regression checks
+cover the same-roll ARO, opposing-program cancellation, independent
+scenario bonus and Token exclusion, with cited EN/ES and FAQ sources.
+Chromium passed **18/18** render/navigation checks at 1440, 390 and
+320 px on Controlled Jump, Combat Jump and Request Speedball, including
+links to Combat Jump, Hacker and Request Speedball. No JS errors or
+horizontal overflow. Private verifier, screenshots and results remain
+under Git-ignored `local/audits/`. REA-007 keeps its separate
+Speedball-specific reference acceptance task.

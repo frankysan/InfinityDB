@@ -618,9 +618,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       the existing modifier and Fireteam semantics, source weapon data,
       and deferred exact-variant edges; cited EN N5.3 pp. 39/175 and
       ES N5.3 p. 39. Responsive browser acceptance passed 21/21.
-    - [ ] **REA-006 — Controlled Jump:** Check the Program card's immediate
-      declaration, optional table-wide ARO, opposing-Program cancellation,
-      and separate scenario MODs.
+    - [x] **REA-006 ? Controlled Jump:** Verified immediate declaration
+      before Resolution, the optional table-wide ARO affecting the same
+      Combat Jump PH Roll (including non-Hackable Troopers), opposing
+      Programs canceling only their own effects, and Firefight's separate
+      +3 Designated Landing Area MOD. Published three practical examples,
+      including the FAQ's Speedball Token exclusion, with EN N5.3 p. 59,
+      ES N5.3 p. 61 and FAQ v0.1 sources. Chromium acceptance 18/18;
+      no runtime or source mechanics changed.
     - [ ] **REA-007 — Request Speedball:** Verify the FAQ exclusion in both
       the Skill and Program cards.
     - [x] **REA-008 — Protheion:** The Skill card explains the FAQ overkill

@@ -567,6 +567,36 @@ scope, and the exact opposing-program exception. **Fix:** H text and links;
 timing facts only after a deliberate schema decision. **Dependencies:** REA-007,
 REA-018; do not invent a general "opposing MODs cancel" rule.
 
+**Reference acceptance (2026-10-14): Locally resolved; no timing
+schema or mechanics change.** The original "Current" description was an
+older baseline. At `ba20557`, the Controlled Jump Hacking Program
+already explains immediate activation before Resolution, optional ARO
+against any table-wide enemy Combat Jump, the same-landing-roll -3,
+non-Hackable targets, per-player exclusivity, cancellation when both
+Programs are active, and Firefight's independent cumulative +3.
+The existing FAQ v0.1 citation already restricts Controlled Jump to
+Troopers and excludes Speedball Tokens.
+
+The public Program card now includes three separately structured
+examples: a Hacker reacting to the *current* Combat Jump (not a later
+Order), both Programs canceling their *own* effects while leaving
+Designated Landing Area +3 intact, and the distinction between
+non-Hackable Troopers and Speedball Tokens using Combat Jump placement.
+English N5.3 p. 59 and Spanish N5.3 p. 61 agree on declaration timing,
+optional ARO, table-wide scope and opposing cancellation. The Spanish
+source is now registered directly on the Hacking Programs collection;
+Firefight p. 155 and FAQ v0.1 p. 1 remain cited. No general
+opposing-MOD cancellation rule was created, and no Supportware,
+Combat Jump, scenario bonus or Speedball mechanics were rewritten.
+
+Curated/composed-program tests cover the full branch and source IDs.
+Responsive Chromium acceptance passed **18/18** render/navigation
+checks at 1440, 390 and 320 px on the Program, Combat Jump and
+Request Speedball, with working links to Combat Jump, Hacker and
+Speedball, no JavaScript errors and no horizontal overflow. The exact
+Speedball FAQ exception is also tracked separately for REA-007's
+player-facing acceptance; REA-006 itself is complete.
+
 ### REA-007 - Speedball's reuse of Combat Jump needs the FAQ exclusion
 
 **Classification:** completeness, clarity. **Severity:** Medium. **Priority:** P1.

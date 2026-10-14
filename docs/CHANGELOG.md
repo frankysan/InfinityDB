@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Controlled Jump now illustrates how its optional ARO affects the
+  current Combat Jump immediately, why two active Programs cancel
+  each other without removing Firefight's +3 landing bonus, and why
+  non-Hackable Troopers but not Speedball Tokens are affected.
 - BS Weapon (WIP) now explains why normal WIP-based attacks work,
   while BS Attack (Shock) and Guided are prohibited; Shock Ammunition
   itself is not universally prohibited.
@@ -166,6 +170,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Complete REA-006 Controlled Jump
+  reference acceptance with three worked timing, opposing-Program and
+  Token-scope examples, bilingual N5.3 source citations, and linked
+  Combat Jump/Speedball references. Retain all existing Supportware,
+  scenario modifier and FAQ mechanics.
 - **Data processing + Web frontend:** Complete REA-005 BS Weapon (WIP)
   reference acceptance with source-linked ordinary attack, Shock Skill
   versus Ammunition, and Guided examples, including Spanish N5.3 p. 39.

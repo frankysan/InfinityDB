@@ -2250,6 +2250,14 @@ that opposing MODs cancel. Independent rules remain effective; Firefight's
 Designated Landing Area +3 is explicitly cumulative with other MODs. A
 player can have only one Controlled Jump Program active.
 
+**Accepted examples (REA-006):** The Program card now shows the
+reactive Hacker declaration affecting that same Combat Jump PH Roll,
+two opposing Programs canceling one another's effects while Firefight's
++3 remains applicable, and the full-table Trooper scope versus
+Speedball Tokens excluded by FAQ. This complements, rather than changes,
+the existing Supportware effects and their timing. Both English N5.3
+p. 59 and Spanish p. 61 explicitly support the same interpretation.
+
 The maintained text links Combat Jump and Hacker where canonical identities
 exist. Scenario-rule identities are not currently valid maintained-text link
 targets, so the Firefight example remains plain text with a PDF citation.
