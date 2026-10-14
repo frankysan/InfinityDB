@@ -761,6 +761,63 @@ def test_rifle_special_mode_and_k1_explanations_are_source_specific(
     assert rifle["ranges"]["short"]["mod"] == "0"
 
 
+@pytest.mark.parametrize(
+    ("slug", "ammo", "saving", "ps", "traits", "expected_ammo"),
+    [
+        ("boarding-shotgun", "AP", "ARM/2", "6", [], "ammunition:ap"),
+        ("light-shotgun", "N", "ARM", "7", [], "ammunition:normal"),
+        ("vulkan-shotgun", "AP", "ARM/2", "6",
+         ["Continous Damage"], "ammunition:ap"),
+        ("heavy-shotgun", "AP", "ARM/2", "5", [], "ammunition:ap"),
+        ("t2-boarding-shotgun", "T2", "ARM", "6",
+         ["Anti-materiel"], "ammunition:t2"),
+    ],
+)
+def test_shotguns_reuse_source_ammunition_without_invented_templates(
+    weaponry_app: Callable,
+    slug: str, ammo: str, saving: str, ps: str,
+    traits: list[str], expected_ammo: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload["profiles"] and len(payload["profiles"]) == 1
+    assert payload.get("rules", []) == []
+    profile = payload["profiles"][0]
+    assert (
+        profile["mode"], profile["ammunition"], profile["saving"],
+        profile["saving_num"], profile["damage"], profile["burst"],
+        profile["traits"],
+    ) == (None, ammo, saving, "1", ps, "2", traits)
+    assert profile["ranges"]["short"] == {"max": 20, "mod": "+6"}
+    assert profile["ranges"]["med"] == {"max": 40, "mod": "0"}
+    assert profile["ranges"]["long"] == {"max": 60, "mod": "-3"}
+    effect = profile["ammunition_effects"]
+    assert len(effect) == 1
+    assert effect[0]["record_id"] == expected_ammo
+    assert effect[0]["citations"]
+    assert len(profile["trait_references"]) == len(traits)
+    assert all(ref["slug"] for ref in profile["trait_references"])
+    assert all("Template" not in trait for trait in profile["traits"])
+
+
+def test_vulkan_and_t2_shotgun_traits_remain_distinct_from_ammunition(
+    weaponry_app: Callable,
+) -> None:
+    vulkan = _weapon_detail(weaponry_app, "vulkan-shotgun")["profiles"][0]
+    t2 = _weapon_detail(weaponry_app, "t2-boarding-shotgun")["profiles"][0]
+    assert vulkan["traits"] == ["Continous Damage"]
+    assert vulkan["trait_references"] == [{
+        "label": "Continous Damage",
+        "name": "Continuous Damage",
+        "slug": "continuous-damage",
+        "source_alias": True,
+    }]
+    assert vulkan["ammunition_effects"][0]["record_id"] == "ammunition:ap"
+    assert t2["trait_references"][0]["slug"] == "anti-materiel"
+    assert t2["ammunition_effects"][0]["record_id"] == "ammunition:t2"
+    assert "Anti-materiel" not in vulkan["traits"]
+    assert "Continous Damage" not in t2["traits"]
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:

@@ -587,6 +587,27 @@ Ball screenshots were visually inspected. Evidence remains in ignored
 `local/audits/weapon-first-batch-2-browser/`. These checks are bounded
 reference/browser acceptance, not a complete release gate.
 
+## 1.0 Shotgun shared-effects acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** The five N5.3 p. 184 Shotgun
+profiles (Boarding, Light, Vulkan, Heavy, T2 Boarding) were checked at 1440,
+390, and 320 px (15 viewport cases), preserving the printed ammunition,
+Saving Roll Attributes, PS, Burst, range bands, and Traits. Each profile
+displayed linked canonical ammunition text and citations; no standalone
+Weapon rule or Direct Template was invented. The Vulkan source spelling
+`Continous Damage` resolved to the visible canonical Continuous Damage
+Trait, while T2 Boarding kept its separate Anti-materiel link.
+
+Desktop navigation from Vulkan to Continuous Damage passed; mobile Boarding
+Shotgun's AP link showed the preview on the first tap and navigated on the
+second (**17/17 checks**). Full-page Vulkan and T2 Boarding screenshots at
+320 px were inspected; no horizontal overflow or JavaScript errors were
+observed. Source-profile-pinned reviews are maintained in
+`data/curated/weapon-shared-effect-reviews.json`; browser evidence and
+screenshots remain Git-ignored under `local/audits/shotgun-shared-review-browser/`.
+This is bounded reference acceptance, not a claim that all Weapon behavior
+or 1.0 release gates are complete.
+
 ## 1.0 Rifle shared-effects acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Eight N5.3 p. 183 Rifle profiles

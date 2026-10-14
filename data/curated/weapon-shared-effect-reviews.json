@@ -50,6 +50,46 @@
       "profileSha256": "bac04e06bfbec4edc6942829483297e4ee8381a8aab802fce2baf2d85ef4d18a",
       "reviewedOn": "2026-10-14",
       "reason": "T2 Wound and Critical distinctions use the existing canonical T2 rule; Anti-materiel, Suppressive Fire and source range remain independently linked."
+    },
+    {
+      "slug": "boarding-shotgun",
+      "name": "Boarding Shotgun",
+      "chartPage": 184,
+      "profileSha256": "eef991899b20fb2671719fbe8771380b6fd6c18514d984a51763dd0b252d5c53",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed single-mode PS 6/B2 profile uses AP/ARM/2 with one Saving Roll. Canonical AP supplies the halving effect; no Direct Template or other Shotgun-specific Trait is listed in the N5.3 chart."
+    },
+    {
+      "slug": "light-shotgun",
+      "name": "Light Shotgun",
+      "chartPage": 184,
+      "profileSha256": "95a8d262016c865e60499217a53330d0c596e90b166269ac877286ef31dc23a2",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed single-mode PS 7/B2 profile uses Normal Ammunition, ARM and one Saving Roll. The source lists no Traits or Direct Template; range bands and damage remain in the Army profile."
+    },
+    {
+      "slug": "vulkan-shotgun",
+      "name": "Vulkan Shotgun",
+      "chartPage": 184,
+      "profileSha256": "ca8caecd0e6e05c7cc8cbe7a097ea4315f03f3d28c3d959a75fae05a890aba2d",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed single-mode PS 6/B2 profile uses AP/ARM/2 with one Saving Roll and Continuous Damage. The Army source spells the Trait Continous Damage, but its exact reviewed alias resolves to the canonical Continuous Damage reference. This does not imply a Direct Template."
+    },
+    {
+      "slug": "heavy-shotgun",
+      "name": "Heavy Shotgun",
+      "chartPage": 184,
+      "profileSha256": "5e40e5a8c7f70a7efa18e737a9a83c99822d556301964a65c0043d92b927424f",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed single-mode PS 5/B2 profile uses AP/ARM/2 with one Saving Roll. Compared with Boarding Shotgun, its PS differs; no Direct Template or extra Trait is printed."
+    },
+    {
+      "slug": "t2-boarding-shotgun",
+      "name": "T2 Boarding Shotgun",
+      "chartPage": 184,
+      "profileSha256": "1f605ced587d2a08426055f7be1a0fbe3167b8bc74e4081869ffc041e3d4c862",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed single-mode PS 6/B2 profile uses T2/ARM with one Saving Roll and Anti-materiel. Canonical T2 and the linked Trait supply the effects; the printed Shotgun has no Direct Template."
     }
   ]
 }

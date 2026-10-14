@@ -418,13 +418,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       navigation checks, with mobile first-tap preview and three 320 px
       screenshots reviewed. Private evidence is under ignored `local/audits/`.
       The remaining batch order begins with Shotguns.
+    - [x] Complete source-specific review of the five N5.3 p. 184 Shotguns
+      (Boarding, Light, Vulkan, Heavy, T2 Boarding) without duplicating
+      canonical Ammunition explanations. The source lists no Direct Template
+      for these profiles. Vulkan's Army spelling `Continous Damage` resolves
+      through its reviewed alias to the Continuous Damage Trait; T2 Boarding
+      retains Anti-materiel. All five are pinned by source profile hash in
+      `data/curated/weapon-shared-effect-reviews.json`, with no new
+      standalone Weapon definition required.
     - [ ] Continue source-specific Weapon exception and mode reviews without
-      writing a standalone explanation when the source profile and canonical
-      rules suffice. Review the remaining 83 actionable entries (including
-      Pitcher/Mine Dispenser separately), starting with Boarding, Light,
-      Vulkan, Heavy and T2 Boarding Shotguns. Browser acceptance is scoped
-      per reviewed group; source completeness is not inferred from ammunition
-      link coverage alone.
+      writing a standalone explanation when source profiles and canonical
+      rules suffice. The refreshed triage has 78 actionable reviews, 11
+      reviewed shared-only Weapon identities, and 16 remaining multi-profile
+      candidates (plus Flash Pulse's reviewed historical citation). The
+      next prioritized category is Submachine Guns (standard and AP).
+      Pitcher and Mine Dispenser retain their separate missing-effect
+      source reviews. Browser acceptance remains scoped per reviewed group.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
