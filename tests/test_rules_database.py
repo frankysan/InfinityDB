@@ -148,6 +148,37 @@ def test_shared_hacking_area_firewall_and_supportware_mechanics_are_composed(
         fairy_dust["facts"]["restrictions"]
     )
 
+    hacking_restrictions = " ".join(hacking_area["facts"]["restrictions"])
+    hacking_clarifications = " ".join(hacking_area["facts"]["clarifications"])
+    assert "fails its Requirements" in hacking_restrictions
+    assert "[[skill:idle]]" in hacking_restrictions
+    assert "along the Active Trooper's path" in hacking_clarifications
+    assert "from that Trooper's [[equipment:repeater:plural]]" in (
+        hacking_clarifications
+    )
+    assert "must still satisfy" in hacking_clarifications
+
+    firewall_effects = " ".join(firewall["facts"]["effects"])
+    firewall_restrictions = " ".join(firewall["facts"]["restrictions"])
+    assert "-3 or -6" in firewall_effects
+    assert "regardless of whether" in firewall_effects
+    assert "MODs do not stack" in firewall_effects
+    assert "Device is disabled" in firewall_restrictions
+    assert "[[term:null-state|Null State]]" in firewall_restrictions
+
+    supportware_effects = " ".join(supportware["facts"]["effects"])
+    supportware_restrictions = " ".join(supportware["facts"]["restrictions"])
+    supportware_examples = " ".join(supportware["facts"]["clarifications"])
+    assert "only one Supportware Program" in supportware_effects
+    assert "only one active Supportware Program" in supportware_effects
+    assert "earlier Program protected a whole Troop Type" in (
+        supportware_restrictions
+    )
+    assert "[[state:isolated|Isolated]]" in supportware_restrictions
+    assert "[[term:null-state|Null State]]" in supportware_restrictions
+    assert "other REMs lose" in supportware_examples
+    assert "[[hacking-program:enhanced-reaction]]" in supportware_examples
+
 
 def test_special_dice_reference_and_source_exceptions_are_composed(
     current_rules_database: RulesDatabase,

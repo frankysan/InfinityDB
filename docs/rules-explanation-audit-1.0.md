@@ -761,11 +761,22 @@ rules-execution engine.
 H `hacking-program:assisted-fire`, `hacking-program:enhanced-reaction`,
 `hacking-program:fairy-dust`, `hacking-program:controlled-jump`.
 
-**Current:** Several Programs say "normal Supportware exclusivity and
-cancellation rules apply," but no curated Supportware baseline supplies them.
-Firewall cards refer to a Firewall without a corresponding definition.
-Repeater describes enemy use but not the complete targeting/ARO distinction.
-No authored `equipment:firewall` or `rule:hacking-area` exists in C/H.
+**Original gap:** Several Programs referred to Supportware exclusivity,
+cancellation and Firewall without owned baseline definitions. The Repeater
+description omitted parts of enemy use and ARO scope.
+
+**Current implementation (verified 2026-10-14):** Canonical
+`rule:hacking-area`, `equipment:firewall` and `rule:supportware` are
+published alongside their related Repeater, Fairy Dust and Enhanced Reaction
+references. The Hacking Area card covers enemy-Repeater Hacker-only
+targeting, failed Requirements becoming Idle, 8-inch ARO checks along
+movement paths and Repeater measurements, and fake HoloMask Repeaters.
+Firewall explains the listed attacker WIP penalty, fixed +3 Saving Roll
+bonus, one chosen non-stacking protection source, and the FAQ's disabled
+Hacking Device exception. Supportware explains one sustained Program per
+Hacker, one beneficiary Program per Trooper, cancel-on-replacement and
+Isolated/Null termination, including the printed Fairy Dust versus Enhanced
+Reaction example in which all other REMs lose the prior protection.
 
 **Evidence/result:** S1 pp. 55-56 specify one Supportware per benefitting Trooper
 and one sustained Program per Hacker, replacement/cancellation, and loss on
@@ -775,10 +786,15 @@ arbitrary enemy non-Hackers; invalid requirements become Idle. Page 60's
 example replaces the entire Fairy Dust Program on targeting one covered REM
 with Enhanced Reaction. S2 p. 1 explains disabled Device Firewalls.
 
-**Action:** Supply cited baseline reference prose and linked, Program-specific
-exceptions. Preserve Army's Program tables and Device associations; no numeric
-duplication is needed. **Fix:** new curated content/links, potential publication
-work for new owners. **Dependencies:** REA-006, REA-019, REA-026, REA-030.
+**Disposition:** Resolved. Current English N5.3 pp. 55–56 and 60, and
+N5 FAQ v0.1 p. 1 agree with the published baselines. Focused rules-contract
+assertions passed; Chromium acceptance checked six reference pages at
+1440, 390 and 320 px (18/18 checks; no JavaScript errors or horizontal
+overflow). The 320 px Hacking Area and Supportware pages were visually
+inspected. No gameplay interpretation, source data, or generated DB change
+was required for this acceptance pass. Source/FAQ conflicts, NFB, and
+Program-local interactions remain independently tracked by REA-006,
+REA-019, REA-026 and REA-030.
 
 ### REA-019 - NFB's label does not explain suppression and duration
 

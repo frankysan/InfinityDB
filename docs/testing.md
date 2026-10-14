@@ -860,3 +860,27 @@ This is **REA-017's bounded reference/browser acceptance**, not general
 release acceptance or certification of every peripheral gameplay scenario.
 The N5.3 pp. 106-108 behavior is represented as linked explanations; Army
 Peripheral relationships and execution/evaluation logic were not changed.
+
+
+## 1.0 Hacking baseline REA-018 browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** The six published Hacking Area,
+Firewall, Supportware, Repeater, Fairy Dust and Enhanced Reaction
+references were reviewed against the English N5.3 rules (pp. 55–56, 60)
+and FAQ v0.1 (Firewall from a disabled Hacking Device). Chromium
+acceptance passed **18/18 route/viewport checks** at 1440, 390 and
+320 px, with no horizontal overflow or JavaScript errors.
+
+The rendered cards preserve enemy-Repeater Hacker-only targeting and
+Idle on failed Requirements, 8-inch reactive Hacking Area measurements,
+a single chosen Firewall with fixed +3 Saving Roll protection, the FAQ's
+disabled-Device exception, and complete Fairy Dust cancellation when
+Enhanced Reaction is assigned to one protected REM. The 320 px Hacking
+Area, Firewall and Supportware screenshots were visually inspected.
+
+Source values and program mechanics were unchanged: this closed an
+outdated audit verification task, not an additional rules implementation.
+The source-based API regression assertions remain in
+`tests/test_rules_database.py`; ignored local browser evidence is
+stored under `local/audits/rea018-browser/`. Related cross-source
+scope and Program-specific cases remain independent 1.0 audit work.

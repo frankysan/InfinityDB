@@ -627,10 +627,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       with no JavaScript errors or horizontal clipping; see
       [development checks](testing.md#10-peripheral-rea-017-browser-acceptance).
       Dependent source-specific exceptions remain separately tracked.
-    - [ ] **REA-018 — Hacking Area, Firewall, Supportware:** Verify the
-      published cards' enemy-Repeater ARO scope, 8-inch checks, disabled
-      Hacking Device Firewall, and whole-Program Fairy Dust replacement
-      in the browser.
+    - [x] **REA-018 — Hacking Area, Firewall, Supportware:** The existing
+      source-linked cards match N5.3 pp. 55–56 and 60 and FAQ v0.1 p. 1:
+      enemy Repeater Hacker-only targeting and Idle, 8-inch ARO measurements,
+      a disabled Hacking Device's Firewall, and whole-Program Fairy Dust
+      replacement. Browser acceptance passed 18/18 cases at 1440/390/320 px,
+      with no errors or overflow. Related program-specific exceptions remain
+      under their owning audit findings.
     - [ ] **REA-019 — Negative Feedback:** Verify Trooper-local replacement
       and duration in the shared Label, Cybermask, and White Noise cards,
       including Label-to-Program navigation.
