@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Request Speedball now explicitly shows why its PH 15 Token Rolls
+  cannot receive Controlled Jump +3/-3, even when either player's
+  Program is active. The FAQ exemption does not remove other modifiers.
 - Controlled Jump now illustrates how its optional ARO affects the
   current Combat Jump immediately, why two active Programs cancel
   each other without removing Firefight's +3 landing bonus, and why
@@ -170,6 +173,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Complete REA-007 Request
+  Speedball reference acceptance with a source-backed PH 15 worked
+  example and regression coverage for the reciprocal Controlled Jump
+  FAQ exception. Preserve the original PH values, placement rules,
+  Combat Jump relation, and versioned provenance.
 - **Data processing + Web frontend:** Complete REA-006 Controlled Jump
   reference acceptance with three worked timing, opposing-Program and
   Token-scope examples, bilingual N5.3 source citations, and linked

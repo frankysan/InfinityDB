@@ -12841,6 +12841,9 @@
                 ],
                 "restrictions": [
                     "Request Speedball cannot be performed partway through the Order Expenditure Sequence."
+                ],
+                "clarifications": [
+                    "**Speedball PH 15 versus [[hacking-program:controlled-jump|Controlled Jump]]:** A player calls two Speedball Tokens using [[skill:combat-jump|Combat Jump]] placement while either player has [[hacking-program:controlled-jump|Controlled Jump]] active. Each Token still uses its own PH 15 Roll: do not increase it to PH 18 for an allied [[hacking-program:controlled-jump|Controlled Jump]] or reduce it to PH 12 for an enemy [[hacking-program:controlled-jump|Controlled Jump]]. The N5 FAQ v0.1 excludes these **Tokens**, not allied or enemy Troopers using [[skill:combat-jump|Combat Jump]]. This exception concerns only [[hacking-program:controlled-jump|Controlled Jump]]?s +3/-3, not every other possible modifier to placement."
                 ]
             },
             "labelIds": [

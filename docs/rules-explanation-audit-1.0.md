@@ -613,6 +613,31 @@ Controlled Jump does not affect Speedballs and only applies to Troopers.
 **Fix:** text/links and versioned FAQ evidence. **Dependencies:** REA-006,
 REA-030. This is missing explanation, not a confirmed existing numerical error.
 
+**Acceptance follow-up (2026-10-14): Locally resolved; no rules or
+modifier engine change.** The original "Current" finding was superseded:
+`skill:request-speedball` already cites the official N5 FAQ v0.1 p. 1,
+links Controlled Jump and Combat Jump, and explicitly states that its
+two 55 mm Tokens use PH 15 placement Rolls without Controlled Jump
++3/-3. The reciprocal `hacking-program:controlled-jump` restriction
+and its REA-006 example also explicitly distinguish Troopers from
+Speedball Tokens; both cards cite the same versioned FAQ ruling.
+
+One player-facing example was added to the Speedball Skill's
+`facts.clarifications`: **PH 15 remains the base Roll**, not PH 18 or
+PH 12 because of an allied/enemy Controlled Jump. The note is scoped
+to *those Program MODs*; it does not imply that all other scenario,
+placement, or external modifiers are inapplicable. Neither the two-token
+placement/usage rule, shared Combat Jump relation, nor original
+Controlled Jump effect was altered. The authoritative source is FAQ
+v0.1, printed p. 1: Controlled Jump only applies to Troopers.
+
+Regression tests now verify the displayed example, FAQ identity and
+page on both records, reciprocal semantic links, and unchanged Combat
+Jump relation. Headless Chromium passed **18/18** content/navigation
+checks across 1440/390/320 px, with no JavaScript errors or horizontal
+overflow. REA-007 is complete as player reference
+acceptance, not a general MOD calculation engine.
+
 ### REA-008 - Protheion needs the overkill limit and profile MOD
 
 **Classification:** completeness. **Severity:** High. **Priority:** P1.

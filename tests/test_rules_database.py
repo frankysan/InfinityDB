@@ -951,6 +951,30 @@ def test_speedball_faq_exclusion_is_published_on_both_rule_cards(
     )
 
 
+def test_rea007_speedball_ph15_worked_example_is_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    speedball = current_rules_database.composed_record("skill:request-speedball")
+    program = current_rules_database.composed_record("hacking-program:controlled-jump")
+    assert speedball is not None and program is not None
+    assert len(speedball["facts"]["clarifications"]) == 1
+    example = speedball["facts"]["clarifications"][0]
+    assert "Each Token still uses its own PH 15 Roll" in example
+    assert "PH 18" in example and "PH 12" in example
+    assert "not every other possible modifier to placement" in example
+    assert "[[skill:combat-jump|Combat Jump]]" in example
+    assert "[[hacking-program:controlled-jump|Controlled Jump]]" in example
+    assert "**Troopers versus Speedball Tokens:**" in " ".join(
+        program["facts"]["clarifications"]
+    )
+    assert "does not affect Speedball Tokens" in " ".join(program["facts"]["restrictions"])
+    for record in (speedball, program):
+        assert any(
+            c["source_id"] == "n5-faq-v0.1-en-pdf" and c["page"] == 1
+            for c in record["citations"]
+        )
+
+
 def test_rea005_wip_attack_prohibitions_are_visible_without_new_variant_edges(
     current_rules_database: RulesDatabase,
 ) -> None:

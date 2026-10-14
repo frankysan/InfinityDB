@@ -1485,3 +1485,24 @@ links to Combat Jump, Hacker and Request Speedball. No JS errors or
 horizontal overflow. Private verifier, screenshots and results remain
 under Git-ignored `local/audits/`. REA-007 keeps its separate
 Speedball-specific reference acceptance task.
+
+
+## 1.0 Speedball FAQ exclusion and PH 15 example (REA-007)
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Official English N5.3 Request
+Speedball p. 84 calls for two 55 mm Tokens with PH 15 Rolls using Combat
+Jump placement. N5 FAQ v0.1, printed p. 1, explicitly excludes
+Speedballs from Controlled Jump because that Program affects Troopers
+only. Both references already cited this FAQ and linked to the other.
+The added Speedball clarification gives the concrete PH 15 versus PH
+18/12 example while limiting the exclusion to Controlled Jump +3/-3,
+without settling other scenario modifier rules.
+
+Curated and composed rules regressions cover the versioned FAQ citation
+on both cards, the PH 15/18/12 example, the Trooper-versus-Token scope,
+and unchanged Combat Jump reuse relation. Responsive Chromium acceptance
+covers both cards, Combat Jump, reciprocal navigation, JavaScript errors
+and 1440/390/320 px overflow. **18/18 Chromium checks passed** with
+no JavaScript errors or page-level horizontal overflow. Private verifier,
+screenshots, result JSON and rebuilt rules DB stay Git-ignored in
+`local/audits/`.

@@ -2268,7 +2268,12 @@ expressly limits Controlled Jump to Troopers, so neither its +3 nor its -3
 modifies Speedball rolls. The `uses-effects-of` link from Request Speedball to
 Combat Jump is not a claim that every Trooper-only modifier applies to it.
 This is an explicit FAQ exception (v0.1, printed p. 1), not a general rule
-about every other Combat Jump modifier (REA-007).
+about every other Combat Jump modifier. **REA-007 acceptance:** The Speedball
+Skill now includes a PH 15 example showing that allied/enemy Controlled Jump
+cannot turn that Roll into PH 18/12; the Program and Skill cards both retain
+their reciprocal links and FAQ provenance. Other possible scenario modifiers
+are outside the scope of this exclusion. No `uses-effects-of` relation or
+Program mechanics were changed.
 The FAQ source is cited as `n5-faq-v0.1-en-pdf` on both cards. Its
 `publishedDate` uses the official 2026-09-01 N5.3/FAQ announcement as a
 release-era source anchor; the FAQ PDF's exact separate publication date is

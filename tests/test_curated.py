@@ -1910,6 +1910,36 @@ def test_rea038_direct_vs_delegated_recovery_source_scope() -> None:
         assert pdf_pages >= {51}
 
 
+def test_rea007_speedball_ph15_excludes_only_controlled_jump_mods() -> None:
+    root = Path(__file__).parents[1] / "data" / "curated" / "rules"
+    core = load_curated_document(root / "n5-core-v5.3.json")
+    hacking = load_curated_document(root / "n5-hacking-programs-v5.3.json")
+    speedball = next(r for r in core["records"] if r["id"] == "skill:request-speedball")
+    program = next(r for r in hacking["records"] if r["id"] == "hacking-program:controlled-jump")
+    effects = " ".join(speedball["facts"]["effects"])
+    assert "two 55 mm Speedball Tokens" in effects
+    assert "PH 15 Roll for each token" in effects
+    assert "FAQ restricts that Program to Troopers" in effects
+    assert "Speedballs are Tokens" in effects
+    assert len(speedball["facts"]["clarifications"]) == 1
+    example = speedball["facts"]["clarifications"][0]
+    assert "**Speedball PH 15 versus" in example
+    assert "[[hacking-program:controlled-jump|Controlled Jump]]" in example
+    assert "Each Token still uses its own PH 15 Roll" in example
+    assert "PH 18" in example and "PH 12" in example
+    assert "not allied or enemy Troopers" in example
+    assert "not every other possible modifier to placement" in example
+    assert speedball["relations"] == [
+        {"type": "uses-effects-of", "recordId": "skill:combat-jump"}
+    ]
+    assert any("does not affect Speedball Tokens" in x for x in program["facts"]["restrictions"])
+    for record in (speedball, program):
+        assert any(
+            c["sourceId"] == "n5-faq-v0.1-en-pdf" and c["page"] == 1
+            for c in record["citations"]
+        )
+
+
 def test_rea006_controlled_jump_sourced_timing_cancellation_and_tokens() -> None:
     root = Path(__file__).parents[1] / "data" / "curated" / "rules"
     doc = load_curated_document(root / "n5-hacking-programs-v5.3.json")

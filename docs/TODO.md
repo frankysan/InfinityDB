@@ -626,8 +626,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       including the FAQ's Speedball Token exclusion, with EN N5.3 p. 59,
       ES N5.3 p. 61 and FAQ v0.1 sources. Chromium acceptance 18/18;
       no runtime or source mechanics changed.
-    - [ ] **REA-007 — Request Speedball:** Verify the FAQ exclusion in both
-      the Skill and Program cards.
+    - [x] **REA-007 ? Request Speedball FAQ exclusion:** Verified both
+      player-facing references already link to each other and cite the
+      N5 FAQ v0.1 ruling that Controlled Jump affects Troopers, not
+      Speedball Tokens. Added a focused PH 15 example rejecting
+      Controlled Jump +3/-3 (PH 18/12), without claiming immunity to
+      unrelated scenario MODs. Existing placement, PH 15, FAQ citations
+      and Combat Jump relation remain unchanged. Browser acceptance
+      passed 18/18 at 1440/390/320 px.
     - [x] **REA-008 — Protheion:** The Skill card explains the FAQ overkill
       limit, profile-listed enemy Attribute MOD, and recovery order;
       player-facing wording has been verified.
