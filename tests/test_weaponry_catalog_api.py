@@ -865,6 +865,118 @@ def test_submachine_gun_profile_variants_keep_source_only_differences(
     assert ap["ammunition_effects"][0]["record_id"] == "ammunition:ap"
 
 
+@pytest.mark.parametrize(
+    ("slug", "page", "modes", "effects"),
+    [
+        ("e-marat", 186, [
+            (None, "E/M", "BTS/2", "2", "7", "1"),
+        ], [["ammunition:em"]]),
+        ("mk12", 187, [
+            (None, "N", "ARM", "1", "5", "3"),
+        ], [["ammunition:normal"]]),
+        ("zapper", 188, [
+            (None, "E/M", "BTS/2", "2", "7", "1"),
+        ], [["ammunition:em"]]),
+        ("contender", 186, [
+            (None, "T2", "ARM", "1", "7", "2"),
+        ], [["ammunition:t2"]]),
+        ("feuerbach", 186, [
+            ("Burst Mode", "AP+DA", "ARM/2", "2", "6", "2"),
+            ("Explosive Mode", "Exp", "ARM", "3", "6", "1"),
+        ], [["ammunition:ap", "ammunition:da"], ["ammunition:exp"]]),
+        ("crazykoala", 186, [
+            (None, "Shock", "ARM", "1", "5", "1"),
+        ], [["ammunition:shock"]]),
+        ("madtraps", 187, [
+            (None, "PARA", "PH-6", "1", "-", "1"),
+        ], [["ammunition:para"]]),
+        ("hyper-rapid-magnetic-cannon", 187, [
+            ("Anti-Materiel Mode", "DA", "ARM", "2", "5", "1"),
+            ("AP Mode", "AP", "ARM/2", "1", "5", "5"),
+            ("Shock Mode", "Shock", "ARM", "1", "5", "5"),
+        ], [["ammunition:da"], ["ammunition:ap"], ["ammunition:shock"]]),
+    ],
+)
+def test_uncategorized_weapon_source_profiles_and_reusable_ammunition(
+    weaponry_app: Callable, slug: str, page: int,
+    modes: list[tuple], effects: list[list[str]],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert [
+        (p["mode"], p["ammunition"], p["saving"],
+         p["saving_num"], p["damage"], p["burst"])
+        for p in payload["profiles"]
+    ] == modes
+    assert [
+        [effect["record_id"] for effect in p["ammunition_effects"]]
+        for p in payload["profiles"]
+    ] == effects
+    for p in payload["profiles"]:
+        assert all(effect["citations"] for effect in p["ammunition_effects"])
+    specific = slug in {"feuerbach", "hyper-rapid-magnetic-cannon"}
+    assert bool(payload.get("rules")) == specific
+    if specific:
+        record = _weapon_rules(payload)[f"weapon:{slug}"]
+        assert any(
+            citation["page"] == page and citation["source_id"] == "n5-core-v5.3-pdf"
+            for citation in record["citations"]
+        )
+        assert "modes" in record["summary"] and "Saving Rolls" in record["summary"]
+
+
+def test_feuerbach_and_hrmc_preserve_mode_specific_traits(
+    weaponry_app: Callable,
+) -> None:
+    feuerbach = _weapon_detail(weaponry_app, "feuerbach")
+    assert len(feuerbach["profiles"]) == 2
+    assert all(p["traits"] == ["Anti-materiel"] for p in feuerbach["profiles"])
+    assert feuerbach["profiles"][0]["ranges"] == feuerbach["profiles"][1]["ranges"]
+    assert feuerbach["profiles"][0]["ammunition"] == "AP+DA"
+    assert feuerbach["profiles"][1]["ammunition"] == "Exp"
+
+    cannon = _weapon_detail(weaponry_app, "hyper-rapid-magnetic-cannon")
+    assert [p["traits"] for p in cannon["profiles"]] == [
+        ["Anti-materiel"], ["Suppressive Fire"], ["Suppressive Fire"],
+    ]
+    assert cannon["profiles"][0]["burst"] == "1"
+    assert cannon["profiles"][1]["burst"] == cannon["profiles"][2]["burst"] == "5"
+    assert all(
+        p["ranges"] == cannon["profiles"][0]["ranges"]
+        for p in cannon["profiles"][1:]
+    )
+
+
+def test_em_templates_and_perimeter_boost_keep_distinct_rules(
+    weaponry_app: Callable,
+) -> None:
+    e_marat = _weapon_detail(weaponry_app, "e-marat")["profiles"][0]
+    zapper = _weapon_detail(weaponry_app, "zapper")["profiles"][0]
+    assert "Direct Template (Large Teardrop)" in e_marat["traits"]
+    assert "Direct Template (Small Teardrop)" in zapper["traits"]
+    assert {"Intuitive Attack", "Non-lethal"} <= set(e_marat["traits"])
+    assert {"Intuitive Attack", "Non-lethal"} <= set(zapper["traits"])
+    assert "trait:direct-template" not in [
+        e["record_id"] for e in e_marat["ammunition_effects"]
+    ]
+
+    for slug, ammunition, saving in (
+        ("crazykoala", "Shock", "ARM"),
+        ("madtraps", "PARA", "PH-6"),
+    ):
+        payload = _weapon_detail(weaponry_app, slug)
+        profile = payload["profiles"][0]
+        assert profile["profile"] == "ARM=0, BTS=0, STR=1, S=1"
+        assert profile["ammunition"] == ammunition
+        assert profile["saving"] == saving
+        assert {"Boost", "Perimeter", "Deployable"} <= set(profile["traits"])
+        assert {"boost", "perimeter", "deployable"} <= {
+            ref["slug"] for ref in profile["trait_references"] if ref["slug"]
+        }
+        assert {"weapon:wildparrot", "weapon:mines"}.isdisjoint(
+            _weapon_rules(payload)
+        )
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:

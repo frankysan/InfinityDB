@@ -216,7 +216,7 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
             encoding="utf8",
         )
     )
-    assert len(original["reviews"]) == 13
+    assert len(original["reviews"]) == 19
     catalog = {r["name"]: r for r in db.list_catalog_items("weapons")}
     items = [
         {"id": catalog[r["name"]]["id"], "name": r["name"],
@@ -227,8 +227,8 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
     policy = tmp_path / "reviewed.json"
     policy.write_text(json.dumps(original), encoding="utf8")
     approved = load_shared_reviews(db, enrichment, policy)
-    assert len(approved) == 13
-    assert {r["chartPage"] for r in approved.values()} == {183, 184, 185}
+    assert len(approved) == 19
+    assert {r["chartPage"] for r in approved.values()} == {183, 184, 185, 186, 187, 188}
     assert {
         r["name"] for r in original["reviews"] if r["chartPage"] == 184
     } == {
@@ -238,6 +238,12 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
     assert {
         r["name"] for r in original["reviews"] if r["chartPage"] == 185
     } == {"Submachine Gun", "AP Submachine Gun"}
+    assert {
+        r["name"] for r in original["reviews"]
+        if r["chartPage"] in (186, 187, 188)
+    } == {
+        "E/Marat", "Mk12", "Zapper", "Contender", "Crazykoala", "Madtraps",
+    }
     assert {r["reason"] for r in approved.values()} == {
         r["reason"] for r in original["reviews"]
     }

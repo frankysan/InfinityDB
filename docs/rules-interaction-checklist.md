@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **153/168** complete, **15** pending.
-- Current authored outgoing relations: **403**.
+- Supporting semantic identities: **155/170** complete, **15** pending.
+- Current authored outgoing relations: **412**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -975,7 +975,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (40/40)
+#### Weapon (42/42)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1051,6 +1051,11 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
   - `uses-effects-of` → CC (`trait:cc`)
+- [x] **Feuerbach** (`weapon:feuerbach`) — reviewed: N5.3 Weapon Chart p. 186: Burst Mode uses B2 AP+DA with two ARM/2 Saving Rolls, Explosive Mode uses B1 EXP with three ARM Saving Rolls. PS 6 and Anti-materiel apply to each; ammunition and roll counts never combine across modes.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
 - [x] **Flash Pulse** (`weapon:flash-pulse`) — reviewed: Reviewed N5.3 Weapon Chart Stun/BTS/Non-Lethal/Stunned semantics and the printed Immunity (BTS) exception (Wiki Immunity oldid 3643, Example 4). No generic state or immunity resolution is inferred.
   - `uses-effects-of` → Stun Ammunition (`ammunition:stun`)
   - `uses-effects-of` → BS Weapon (WIP) (`trait:bs-weapon-wip`)
@@ -1060,6 +1065,12 @@ review. `declaration-category` projection records are excluded.
 - [x] **Heavy Pistol** (`weapon:heavy-pistol`) — reviewed: N5.3 p. 182: PS 6 and B2 with Shock ammo and one ARM Saving Roll. Source distinguishes Shock effects from PS.
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+- [x] **Hyper-Rapid Magnetic Cannon** (`weapon:hyper-rapid-magnetic-cannon`) — reviewed: N5.3 Weapon Chart p. 187: DA Anti-Materiel Mode uses B1 and two ARM Saving Rolls; AP and Shock modes use B5 with Suppressive Fire and one ARM/2 or ARM Saving Roll respectively. PS 5 throughout, with mode-dependent Traits.
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
 - [x] **K1 Combi Rifle** (`weapon:k1-combi-rifle`) — reviewed: N5.3 Weapon Chart p. 183: preserves N Ammunition with ARM=0, one Saving Roll, PS 7/B3, Anti-materiel and Suppressive Fire. K1 is no distinct Ammunition identity; Immunity must be separately evaluated.
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)

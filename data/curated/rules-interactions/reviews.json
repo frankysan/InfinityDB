@@ -1016,6 +1016,8 @@
     {"recordId": "weapon:multi-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: AP B2 ARM/2 one roll, Shock B2 ARM one roll, Anti-Materiel DA B1 ARM two rolls with mode-specific Anti-materiel. Modes are alternatives and their effects do not stack."},
     {"recordId": "weapon:multi-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 183: AP and Shock modes B3 with Suppressive Fire, Anti-Materiel DA mode B1 with two ARM Saving Rolls and no Suppressive Fire; all PS 7. Source mode traits do not transfer."},
     {"recordId": "weapon:k1-combi-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 183: preserves N Ammunition with ARM=0, one Saving Roll, PS 7/B3, Anti-materiel and Suppressive Fire. K1 is no distinct Ammunition identity; Immunity must be separately evaluated."},
+    {"recordId": "weapon:feuerbach", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 186: Burst Mode uses B2 AP+DA with two ARM/2 Saving Rolls, Explosive Mode uses B1 EXP with three ARM Saving Rolls. PS 6 and Anti-materiel apply to each; ammunition and roll counts never combine across modes."},
+    {"recordId": "weapon:hyper-rapid-magnetic-cannon", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 187: DA Anti-Materiel Mode uses B1 and two ARM Saving Rolls; AP and Shock modes use B5 with Suppressive Fire and one ARM/2 or ARM Saving Roll respectively. PS 5 throughout, with mode-dependent Traits."},
     {
       "recordId": "weapon:d-charges",
       "targetRelease": "1.0.0",

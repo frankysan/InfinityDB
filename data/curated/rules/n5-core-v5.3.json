@@ -5322,6 +5322,118 @@
             }
         },
         {
+            "id": "weapon:feuerbach",
+            "name": "Feuerbach",
+            "summary": "The Feuerbach has two **alternative** firing modes, not one attack combining their effects. **Burst Mode** fires Burst 2 with [[ammunition:ap|AP]]+[[ammunition:da|DA]] and requires two ARM/2 Saving Rolls per hit.\n\n**Explosive Mode** fires Burst 1 with [[ammunition:exp|EXP]] and requires three ARM Saving Rolls per hit. Both modes have PS 6 and [[trait:anti-materiel|Anti-materiel]], but use their own printed Saving Roll requirements.",
+            "kind": "weapon",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "feuerbach"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:da"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:exp"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:anti-materiel"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 186,
+                    "section": "Weapon Chart: Feuerbach"
+                }
+            ]
+        },
+        {
+            "id": "weapon:hyper-rapid-magnetic-cannon",
+            "name": "Hyper-Rapid Magnetic Cannon",
+            "summary": "These firing modes are alternatives; their Ammunition and Traits do **not** combine. **[[trait:anti-materiel|Anti-Materiel]] Mode** fires Burst 1 with [[ammunition:da|DA]], two ARM Saving Rolls per hit, and [[trait:anti-materiel|Anti-materiel]].\n\n**AP Mode** fires Burst 5 with [[ammunition:ap|AP]], one ARM/2 Saving Roll, and [[trait:suppressive-fire|Suppressive Fire]]. **Shock Mode** fires Burst 5 with [[ammunition:shock|Shock]], one ARM Saving Roll, and [[trait:suppressive-fire|Suppressive Fire]]. All three modes have PS 5 and the printed range bands.",
+            "kind": "weapon",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "hyper-rapid-magnetic-cannon"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:da"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:shock"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:anti-materiel"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:suppressive-fire"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 187,
+                    "section": "Weapon Chart: Hyper-Rapid Magnetic Cannon"
+                }
+            ]
+        },
+        {
             "id": "weapon:chain-colt",
             "kind": "weapon",
             "name": "Chain-colt",

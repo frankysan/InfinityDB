@@ -106,6 +106,54 @@
       "profileSha256": "57a7b11f51d4b33c1421a174d636ba7ccb63ba2b2115a17255f26ebdd1d3845b",
       "reviewedOn": "2026-10-14",
       "reason": "Printed N5.3 p. 185 single profile with AP Ammunition, ARM/2, one Saving Roll, PS 7, Burst 3, Suppressive Fire, and the same range bands as the standard Submachine Gun. The reviewed AP and Suppressive Fire references cover its rules; the ARM/2 Saving Roll remains a source profile fact, not a separate ammunition mechanic."
+    },
+    {
+      "slug": "e-marat",
+      "name": "E/Marat",
+      "chartPage": 186,
+      "profileSha256": "1228ce588fc71e330f33f57ff1a5bc871a37d265e94496284d9d8c96c06507c4",
+      "reviewedOn": "2026-10-14",
+      "reason": "The source chart lists E/M with two BTS/2 Saving Rolls, B1, PS 7, a Large Teardrop Direct Template, Intuitive Attack, and Non-Lethal. Its exact E/M and Trait references cover applicable States and the template without a unique effect or a separate firing mode."
+    },
+    {
+      "slug": "mk12",
+      "name": "Mk12",
+      "chartPage": 187,
+      "profileSha256": "f1d20ed3452b0d90bd9ab166520a21941c12113598e42fc2b648648631f65c51",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed PS 5/B3 Normal Ammunition and ARM/one-Saving-Roll profile has Suppressive Fire and distinct range bands. Canonical Normal Ammunition and the linked Trait suffice; no special weapon effect is listed."
+    },
+    {
+      "slug": "zapper",
+      "name": "Zapper",
+      "chartPage": 188,
+      "profileSha256": "8d2bf487fdcf83b9b99a2922e0bd892ac8977e112861396edba38e1d2e7b327a",
+      "reviewedOn": "2026-10-14",
+      "reason": "The source lists E/M with two BTS/2 Saving Rolls, B1, PS 7, a Small Teardrop Direct Template, Intuitive Attack, and Non-Lethal. It shares E/Marat rules but uses a different template size, already preserved in its source Traits."
+    },
+    {
+      "slug": "contender",
+      "name": "Contender",
+      "chartPage": 186,
+      "profileSha256": "e5c24208755c40c731a16a9a58b40561b250e317cd5d439a0cc2de35dabf6c36",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed PS 7/B2 T2 Ammunition, ARM/one-Saving-Roll profile includes Anti-materiel and its own range bands. Canonical T2 and the separate Trait already explain their effects."
+    },
+    {
+      "slug": "crazykoala",
+      "name": "Crazykoala",
+      "chartPage": 186,
+      "profileSha256": "c5a45f10f81614f43ab38de81af145f850ca677b114b33a4180c6c1c3e2f2d0a",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed profile gives ARM=0/BTS=0/STR=1/S=1, Shock, PS 5/B1 and one ARM Saving Roll, Disposable (2), Boost, Perimeter and Deployable. Boost owns triggering and movement/contact/detonation; Perimeter owns placement and Shock owns damage. Do not inherit WildParrot or Mines rules."
+    },
+    {
+      "slug": "madtraps",
+      "name": "Madtraps",
+      "chartPage": 187,
+      "profileSha256": "0d8f39f182b84426bca01ce49f89f5a39af2cacb40f8f02234682190c7889f39",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed ARM=0/BTS=0/STR=1/S=1 profile uses PARA, PH-6, one Saving Roll, PS dash/B1, Disposable (2), Boost, Non-Lethal, Perimeter and Deployable. Boost owns movement/contact/detonation; PARA and Non-Lethal own the target outcome. Do not inherit WildParrot or Mines rules."
     }
   ]
 }

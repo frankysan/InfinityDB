@@ -435,15 +435,24 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       `data/curated/weapon-shared-effect-reviews.json`.
       Browser acceptance passed 8/8 checks across 1440/390/320 px,
       including desktop Trait and mobile Ammunition navigation.
-    - [ ] Continue source-specific Weapon exception and mode reviews
-      without duplicating canonical Ammunition or Trait rules.
-      The refreshed audit has 76 actionable reviews, 13 accepted
-      shared-only Weapon identities, and 16 pending multi-profile
-      candidates, plus Flash Pulse's historical comparison.
-      The next prioritized batch is the Uncategorized Weapons
-      (E/Marat, Mk12, Zapper, Contender, Feuerbach, Crazykoala,
-      Madtraps and Hyper-Rapid Magnetic Cannon). Pitcher and Mine
-      Dispenser retain separate missing-effect source reviews.
+    - [x] Review the next eight Uncategorized Weapons against N5.3
+      chart pp. 186–188. Feuerbach and Hyper-Rapid Magnetic Cannon
+      now have distinct, source-cited explanations for mutually exclusive
+      modes and their different Burst, Saving Rolls and Traits. E/Marat,
+      Mk12, Zapper, Contender, Crazykoala and Madtraps reuse canonical
+      Ammunition/Traits without duplicating prose; those six decisions
+      are pinned to exact Army profile hashes in the shared-review policy.
+      E/Marat/Zapper retain distinct template sizes, while Crazykoala
+      and Madtraps inherit Boost movement/contact only through Boost,
+      never WildParrot or Mines effects. Browser checks passed 26/26
+      across three viewport widths, including desktop and mobile links.
+    - [ ] Continue source-specific Weapon reviews without duplicating
+      canonical Ammunition and Trait rules. The refreshed triage has
+      68 actionable reviews, 19 explicitly reviewed shared-only Weapon
+      identities and 14 pending multi-profile candidates, plus Flash
+      Pulse's historical citation. Next batch: Heavy Machine Guns
+      (standard, AP, MULTI), followed by Disposable Support Weapons.
+      Pitcher and Mine Dispenser retain separate missing-effect reviews.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

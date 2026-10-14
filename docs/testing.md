@@ -587,6 +587,28 @@ Ball screenshots were visually inspected. Evidence remains in ignored
 `local/audits/weapon-first-batch-2-browser/`. These checks are bounded
 reference/browser acceptance, not a complete release gate.
 
+## 1.0 additional Uncategorized Weapon shared-effects acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Eight N5.3 pp. 186–188 Weapon
+references (E/Marat, Mk12, Zapper, Contender, Feuerbach, Crazykoala,
+Madtraps, Hyper-Rapid Magnetic Cannon) were checked at 1440, 390 and
+320 px (24 page/viewport cases). All source profiles retained their
+published modes, ammunition, Saving Rolls and Traits. Feuerbach and
+Hyper-Rapid Magnetic Cannon include new, mode-specific curated cards;
+the six other identities reuse shared ammunition and Trait definitions.
+Crazykoala and Madtraps link to Boost/Perimeter without inheriting
+WildParrot or Mines behavior.
+
+Desktop navigation from Crazykoala to Boost and mobile Feuerbach AP+DA
+Ammunition preview-first/second-tap navigation both passed (**26/26**).
+The 320 px Feuerbach, cannon, Crazykoala and Madtraps screenshots were
+inspected; no horizontal overflow or JavaScript errors were observed.
+Source-pinned shared-only reviews remain in
+`data/curated/weapon-shared-effect-reviews.json`, and private browser
+evidence is under ignored `local/audits/uncategorized3-browser/`.
+The checks are bounded reference acceptance, not an effects engine
+or a claim of release-wide Weapon completeness.
+
 ## 1.0 Submachine Gun shared-effects acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Both N5.3 p. 185 profiles
