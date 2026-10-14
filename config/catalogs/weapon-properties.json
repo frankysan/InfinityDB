@@ -99,7 +99,7 @@
     {
       "id": "viral",
       "name": "Viral",
-      "summary": "Viral weapons use Normal Ammunition and make BTS Saving Rolls. Their BioWeapon Trait applies DA and Shock against targets with VITA; against STR it does not grant those effects. Vulnerability (Viral) separately refers to Viral in a weapon's name.",
+      "summary": "Viral weapons use Normal (N) Ammunition and have one BTS Saving Roll in their printed profiles. The BioWeapon (DA+Shock) Trait applies only against targets with VITA: derived from DA, a hit then requires two BTS Saving Rolls, while Shock's direct-Dead effect retains its own target and failed-roll conditions. Against STR, BioWeapon adds neither DA nor Shock, and the one-BTS-roll baseline remains. The separate Vulnerability (Viral) example explicitly checks for Viral in the weapon name, not in its Ammunition.",
       "origins": [
         {
           "domain": "Ammunition",

@@ -4792,7 +4792,7 @@
             "id": "weapon:viral-cc-weapon",
             "kind": "weapon",
             "name": "Viral CC Weapon",
-            "summary": "The printed Viral close-combat profile lists [[ammunition:normal|Normal (N) Ammunition]], BTS and one Saving Roll. The separate [[trait:bioweapon|BioWeapon (DA+SHOCK)]] Trait adds conditional effects against targets with VITA; it is not a separate Viral Ammunition type.\n\nCombining the chart and Trait rules (derived): against VITA, [[ammunition:da|DA]] requires two BTS Saving Rolls, while [[ammunition:shock|Shock]] has an additional direct-Dead effect only when its own conditions are satisfied.\n\nAgainst STR, [[trait:bioweapon|BioWeapon]] adds neither DA nor Shock; use the printed one-BTS-roll baseline. Consult the linked Trait and Ammunition rules for special cases such as [[skill:immunity|Immunity]].",
+            "summary": "The printed Viral close-combat profile lists [[ammunition:normal|Normal (N) Ammunition]], BTS and one Saving Roll, with [[trait:cc|CC]]. Its separately listed [[trait:bioweapon|BioWeapon (DA+Shock)]] Trait is explained by the shared Viral Weapon Property; it is not a separate Viral Ammunition type.\n\nThe linked Property distinguishes the conditional VITA/STR results and their rule-derived Saving Rolls from [[ammunition:da|DA]] and [[ammunition:shock|Shock]]. Resolve applicable [[skill:immunity|Immunity]] and Shock exceptions through the canonical rules.",
             "composition": {"role": "definition"},
             "scope": {"game": "N5", "seasons": ["current"]},
             "facts": {},
@@ -5711,7 +5711,7 @@
             "id": "weapon:viral-sniper-rifle",
             "kind": "weapon",
             "name": "VIRAL Sniper Rifle",
-            "summary": "The printed VIRAL Sniper Rifle profile uses [[ammunition:normal|Normal (N) Ammunition]], PS 5, Burst 2 and one **BTS** Saving Roll. Its separately listed [[trait:bioweapon|BioWeapon (DA+Shock)]] Trait, rather than any distinct Viral Ammunition, introduces conditional effects.\n\n**Against a target with VITA**, that Trait applies [[ammunition:da|DA]] and [[ammunition:shock|Shock]] together. Derived from those rules, a hit requires two BTS Saving Rolls; any Shock direct-Dead effect still requires Shock's own conditions.\n\n**Against STR**, the Trait adds neither effect, leaving the printed one-BTS-roll baseline. Consult the linked rules for exceptions, including [[skill:immunity|Immunity]]; the derived VITA case is not a universal resolution.",
+            "summary": "The printed VIRAL Sniper Rifle uses [[ammunition:normal|Normal (N) Ammunition]], PS 5, Burst 2 and one **BTS** Saving Roll. Its separately listed [[trait:bioweapon|BioWeapon (DA+Shock)]] Trait is not distinct Viral Ammunition.\n\nThe shared Viral Weapon Property explains the conditional VITA versus STR effects and the derived two-BTS-roll result against VITA from [[ammunition:da|DA]] and [[ammunition:shock|Shock]]. Resolve any [[skill:immunity|Immunity]] exception through the linked rules.",
             "composition": {
                 "role": "definition"
             },
@@ -5769,7 +5769,7 @@
             "id": "weapon:plasma-sniper-rifle",
             "kind": "weapon",
             "name": "Plasma Sniper Rifle",
-            "summary": "The Plasma Sniper Rifle has two **alternative** modes, both firing [[ammunition:normal|Normal (N) Ammunition]] at Burst 2. Both have a **Combined Saving Roll**: one ARM roll **and** one BTS roll per hit, not a combination of two Ammunition types.\n\nUnder the Combined Saving Roll Critical rule, a Critical adds one further **ARM** Saving Roll, not an extra BTS roll.\n\n**Blast Mode** has PS 6 and a circular [[trait:impact-template|Impact Template]]. **Hit Mode** has PS 5 and no such Template. The source range MODs are identical; the Blast Mode Template does not carry over to Hit Mode.",
+            "summary": "The Plasma Sniper Rifle has two **alternative** modes, both firing [[ammunition:normal|Normal (N) Ammunition]] at Burst 2. Both use the Combined Saving Roll and Critical rules explained by the shared Plasma Weapon Property, not a combination of Ammunition types.\n\n**Blast Mode** has PS 6 and a circular [[trait:impact-template|Impact Template]]. **Hit Mode** has PS 5 and no such Template. Their range MODs are identical, but the Blast Mode Template does not carry over to Hit Mode.",
             "composition": {
                 "role": "definition"
             },

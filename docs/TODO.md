@@ -503,16 +503,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       navigation passed (14/14 checks). All four 320 px screenshots were
       inspected; no horizontal overflow or JavaScript errors were observed.
       Private evidence is under `local/audits/sniper-rifles-browser/`.
-    - [ ] Extend the new reviewed Weapon Properties inventory beyond the first
+    - [ ] Extend the reviewed Weapon Properties inventory beyond the first
       Plasma, Viral, Breaker, K1, MULTI and four AP-based combinations.
       Investigate Monofilament, Silenced and source-specific name/Traits
-      exceptions; migrate repeated curated weapon explanations into shared
-      Properties only when authoritative conditions and individual weapon
-      distinctions remain explicit. Include exact source/mode drift checks
-      and player-facing search/Glossary links.
-    - [ ] Browser-review Weapon Property links and rule-origin navigation
-      in Weapon detail, Glossary and global search on desktop, narrow
-      screens and touch; API tests do not replace visual/interaction acceptance.
+      exceptions; continue consolidating shared curated descriptions without
+      losing source/mode-specific information. The first Viral CC/Sniper and
+      Plasma Sniper summaries now defer shared rules text to their linked
+      Properties; other eligible weapon families still need review. Add
+      maintained-text links for direct Property references inside curated
+      rules prose, rather than requiring navigation via the profile card.
+    - [x] Browser-review the first nine Weapon Property links and rule-origin
+      navigation at 1440, 390 and 320 px, plus global search at 1440 and
+      320 px, including touch preview/second-tap navigation, 48 passing
+      browser checks, no overflow/JavaScript errors, and inspection of
+      representative narrow-screen screenshots. Private
+      evidence is in `local/audits/weapon-properties-browser/`.
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. The updated triage has
       47 actionable reviews, 33 accepted shared-only identities,

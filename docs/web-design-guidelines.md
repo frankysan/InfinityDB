@@ -108,7 +108,8 @@ a destination. The Ammunition detail page remains the canonical semantic owner.
 ### Weapon Properties and their rules origins
 
 On reviewed Weapon profiles, show linked **Weapon Properties** separately from
-the source-provided Traits, Labels and States. Link to the embedded Glossary
+the source-provided Traits, Labels and States. Use the same inline rule-preview
+interaction (including touch) as other canonical references. Link to the embedded Glossary
 entry rather than duplicating a new rules detail page. Each Property entry
 must expose the actual rules-domain and source-section origins, with links
 to canonical rules wherever available; role labels distinguish baselines,

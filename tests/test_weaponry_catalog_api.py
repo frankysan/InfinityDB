@@ -534,10 +534,12 @@ def test_exp_and_viral_cc_weapons_preserve_profile_and_conditioned_effects(
         for relation in viral_rule["display_relations"]
         if relation["direction"] == "outbound"
     }
-    assert "against VITA" in viral_rule["summary"]
-    assert "Against STR" in viral_rule["summary"]
-    assert "(derived)" in viral_rule["summary"]
-    assert "one-BTS-roll baseline" in viral_rule["summary"]
+    assert "shared Viral Weapon Property" in viral_rule["summary"]
+    assert "VITA/STR" in viral_rule["summary"]
+    shared = viral_profile["weapon_properties"][0]
+    assert shared["id"] == "weapon-property:viral"
+    assert "two BTS Saving Rolls" in shared["summary"]
+    assert "Against STR" in shared["summary"]
     assert any(
         citation["source_id"] == "wiki-traits-oldid-4110"
         and citation["heading"] == "BioWeapon"
@@ -1810,9 +1812,11 @@ def test_multi_k1_viral_snipers_preserve_source_specific_exceptions(
 
     viral = _weapon_detail(weaponry_app, "viral-sniper-rifle")
     record = _weapon_rules(viral)["weapon:viral-sniper-rifle"]
-    assert "Against a target with VITA" in record["summary"]
-    assert "Against STR" in record["summary"]
-    assert "Derived from those rules" in record["summary"]
+    assert "shared Viral Weapon Property" in record["summary"]
+    shared = viral["profiles"][0]["weapon_properties"][0]
+    assert shared["id"] == "weapon-property:viral"
+    assert "two BTS Saving Rolls" in shared["summary"]
+    assert "Against STR" in shared["summary"]
     assert any(
         c["source_id"] == "wiki-traits-oldid-4110"
         and c["heading"] == "BioWeapon"
@@ -1841,5 +1845,8 @@ def test_plasma_sniper_combined_saves_do_not_become_combined_ammunition(
         assert profile["ammunition"] == "N"
         assert "ammunition_composition" not in profile
     rule = _weapon_rules(plasma)["weapon:plasma-sniper-rifle"]
-    assert "not an extra BTS roll" in rule["summary"]
+    assert "shared Plasma Weapon Property" in rule["summary"]
+    assert all(p["weapon_properties"][0]["id"] == "weapon-property:plasma"
+               for p in plasma["profiles"])
+    assert "not another BTS roll" in plasma["profiles"][0]["weapon_properties"][0]["summary"]
     assert any(c["page"] == 67 for c in rule["citations"])

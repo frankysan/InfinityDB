@@ -13,8 +13,10 @@ are not retroactively relabeled.
 ### Player summary
 
 - Weapon profiles now link named **Weapon Properties** such as Plasma, Viral,
-  Breaker, K1, MULTI and combined AP Ammunition to standalone searchable
-  Glossary explanations identifying their originating rules.
+  Breaker, K1, MULTI and combined AP Ammunition to searchable Glossary
+  explanations and their originating rules. Links provide the same preview
+  interaction as other rules references; shared Viral and Plasma explanations
+  no longer need to be repeated in individual weapon summaries.
 - **What's changed** now includes upcoming-release notes alongside past releases when there are new changes to show.
 - Weapon profiles now offer expandable, linked explanations of shared Ammunition
   effects. New Weapon references clarify CC and Pistol variants, MULTI and K1
@@ -51,7 +53,9 @@ are not retroactively relabeled.
 - **Data processing + Web backend + Web frontend:** Introduce searchable,
   rules-linked Weapon Properties as a Glossary vocabulary. Reviewed weapon
   profiles link to their Property and its original Ammunition, Trait or
-  other rules sections without changing imported weapon data or resolving
+  other rules sections, with hover, keyboard and touch previews. Shared
+  Viral and Plasma rules explanations now support shorter individual
+  weapon summaries without changing imported profiles or calculating
   conditional gameplay effects automatically.
 - **Data processing + Web backend:** Add source-cited Weapon explanations for
   common CC Weapons and Pistols, D-Charges, Disco Baller and SymbioBomb,

@@ -120,10 +120,13 @@ function weaponPropertyLinks(profile) {
     if (index) value.append(" · ");
     const href = ruleReferenceHref(property.public_reference);
     if (href) {
-      const link = document.createElement("a");
-      link.href = href;
-      link.textContent = property.name;
-      value.append(link);
+      appendMaintainedText(value, [{
+        type: "reference",
+        target: property.id,
+        label: property.name,
+        public_reference: property.public_reference,
+        preview_tokens: [{ type: "text", text: property.summary }],
+      }]);
     } else {
       value.append(property.name);
     }
