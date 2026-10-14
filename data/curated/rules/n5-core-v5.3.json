@@ -3837,7 +3837,7 @@
             "id": "weapon:armed-turret",
             "kind": "weapon",
             "name": "Armed Turret",
-            "summary": "A stationary [[trait:deployable]] Weapon that reacts to enemy Orders.",
+            "summary": "A stationary [[trait:deployable|Deployable]] Weapon that reacts to enemy Orders. Its bracketed weapon name identifies the BS Weapon it uses.\n\n**Unresolved source conflict:** Army's Armed Turret ([[weapon:e-mitter|E/Mitter]]) mode lists **one BTS/2 Saving Roll** per hit. Both N5.3 Weapon Charts list **two** for [[weapon:e-mitter|E/Mitter]], consistent with [[ammunition:em|E/M Ammunition]].\n\nNeither the printed Armed Turret rule nor the reviewed FAQ establishes a turret-specific Saving Roll exception. InfinityDB retains the imported one-roll profile pending official clarification.",
             "composition": {
                 "role": "definition"
             },
@@ -3941,11 +3941,21 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 70,
                     "section": "Armed Turret Profile"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 186,
+                    "section": "Weapon Chart: E/Mitter"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 195,
+                    "section": "Tabla de Armas: E/Mitter"
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-10-04"
+                "reviewedOn": "2026-10-14"
             },
             "variantSemantics": {
                 "inheritance": "family"

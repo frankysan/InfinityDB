@@ -28,6 +28,8 @@ are not retroactively relabeled.
   Sniper Rifles now distinguish the MULTI's DA/AP/Shock modes, K1's ARM=0
   Saving Roll, Viral's conditional BioWeapon and Plasma's separate ARM and
   BTS Saving Rolls; standard, AP and T2 variants reuse canonical effects.
+  Armed Turret now warns where Army's E/Mitter mode disagrees with the
+  N5.3 weapon charts about the number of Saving Rolls.
 - Peripheral and its five subtype references now explain activation,
   Coherency, Doctor/Engineer delegation, Controller and Peripheral rolls,
   and Cyberplug Connected/Autonomous exceptions.

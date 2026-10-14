@@ -139,7 +139,10 @@ Rolls per hit and no additional ARM Saving Roll; its standalone Property
 explains Normal's potential Wounds alongside E/M's conditional State effects.
 The imported Armed Turret E/Mitter mode remains a separate source profile
 listing one BTS/2 Saving Roll, and is not rewritten to match the generic E/M
-Ammunition facts.
+Ammunition facts. Both English and Spanish N5.3 charts give the standard
+E/Mitter two Saving Rolls; the conflict is confirmed and visibly noted in the
+curated Armed Turret reference (REA-045), not reclassified as an authorized
+special rule.
 The additional roll retains applicable constituent effects; T2's
 `woundsPerFailedSave.criticalAdditionalRoll` remains distinct from its regular
 hit effect. Combined Saving Rolls (including Plasma's ARM/BTS case) have a

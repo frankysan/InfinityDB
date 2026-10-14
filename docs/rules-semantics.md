@@ -1632,6 +1632,34 @@ Source:
 
 - Wiki: <https://infinitythewiki.com/Armed_Turret>
 
+### RS-GSG-WEAPON-002 — Armed Turret E/Mitter Saving Roll disagreement
+
+**Classification:** confirmed cross-source discrepancy, unresolved precedence;
+not a new Ammunition rule.
+
+The imported Army `Armed Turret` source weapon 226, mode `E/Mitter`,
+lists E/M, BTS/2 and **one** Saving Roll. All six locally preserved Army
+snapshots dated 2026-09-10 through 2026-09-29 agree. The separate Army
+`E/Mitter` source weapon 25 lists **two** BTS/2 Saving Rolls. The English
+N5.3 Weapon Chart (p. 186), Spanish N5.3 chart (p. 195), corresponding
+captured Wiki charts, and canonical E/M Ammunition all specify two.
+The Armed Turret rule (N5.3 p. 70) identifies the BS Weapon by name but
+does not give a special Saving Roll count. Reviewed English/Spanish N5
+FAQ v0.1 texts contain no turret/E/Mitter exception.
+
+InfinityDB retains the Army mode's **one** roll without inferring either a
+turret-specific E/M exception or a correction to two. The curated Armed Turret
+reference visibly identifies the conflict and links to both E/Mitter and
+E/M Ammunition; an official clarification is still needed. This is separate
+from the Armed Turret **Silhouette S1/S2** discrepancy in REA-037.
+See REA-045 in `docs/rules-explanation-audit-1.0.md`.
+
+Sources: N5.3 English pp. 70, 186; Spanish p. 195; captured official Army
+metadata from 2026-09-10 through 2026-09-29; English Wiki capture
+`WIKI-en 20260926-200832` (Weapon Chart, Armed Turret, E/M Ammunition);
+Spanish Wiki capture `WIKI-es 20261009-211304` (Tabla de Armas);
+English/Spanish N5 FAQ v0.1.
+
 ### RS-SE-ROLL-001 — Skill-to-Skill roll effects use `modifies-rolls-for`
 
 **Classification:** source-native cross-rule gameplay relationship semantics.

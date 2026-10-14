@@ -738,8 +738,11 @@ def test_checked_in_n5_collection_is_valid() -> None:
     ]
     assert records["weapon:armed-turret"]["facts"]["specialProfile"]["skills"] == ["Total Reaction"]
     assert records["weapon:armed-turret"]["citations"] == [
-        {"sourceId": "n5-core-v5.3-pdf", "page": 70, "section": "Armed Turret Profile"}
+        {"sourceId": "n5-core-v5.3-pdf", "page": 70, "section": "Armed Turret Profile"},
+        {"sourceId": "n5-core-v5.3-pdf", "page": 186, "section": "Weapon Chart: E/Mitter"},
+        {"sourceId": "n5-core-v5.3-es-pdf", "page": 195, "section": "Tabla de Armas: E/Mitter"},
     ]
+    assert "Unresolved source conflict" in records["weapon:armed-turret"]["summary"]
     assert all(len(skill_type["labels"]) == 2 for skill_type in document["skillTypes"])
     assert all(
         set(skill_type["descriptions"]) == {"singular", "plural"}

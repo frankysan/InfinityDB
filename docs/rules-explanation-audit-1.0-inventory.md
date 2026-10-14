@@ -93,6 +93,7 @@ and the main audit's follow-up notes before treating a finding as open.
 | [REA-042](rules-explanation-audit-1.0.md#rea-042---dodge-arm3-has-incompatible-englishspanish-conditions) | High | P1 | Dodge (ARM+3) has incompatible English/Spanish conditions |
 | [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | High | P0 | Counterintelligence gives the relaxed limit to the wrong player |
 | [REA-044](rules-explanation-audit-1.0.md#rea-044---breaker-marksman-is-metadata-only-despite-its-current-official-profile) | High | P1 | Breaker Marksman is metadata-only despite its current official profile |
+| [REA-045](rules-explanation-audit-1.0.md#rea-045---armed-turret-emitter-disagrees-with-standard-em-saving-rolls) | Medium | P1 | Armed Turret's imported E/Mitter mode has one BTS/2 save while both N5.3 charts and canonical E/M require two; conflict displayed, ruling unresolved |
 
 ## Audit-completion gate
 

@@ -1510,6 +1510,35 @@ fields or an unsupported Sniper statline.
 **1.0 relevance:** The current supported Weapon reference needs this preserved
 official profile to be reachable; publishing every unused historical row is not required.
 
+### REA-045 - Armed Turret E/Mitter disagrees with standard E/M Saving Rolls
+
+**Classification:** cross-source profile discrepancy. **Severity:** Medium.
+**Priority:** P1. **Evidence:** Explicit profile fields; precedence Unresolved.
+**Affected:** Army weapon 226 (mode E/Mitter), weapon 25 (E/Mitter),
+`weapon:armed-turret`, `weapon:e-mitter`, `ammunition:em`.
+
+**Verified sources:** All six preserved official Army metadata captures
+(2026-09-10, 09-18 twice, 09-25 twice and 09-29) list Armed Turret's
+E/Mitter mode with source Ammunition 14 E/M, BTS/2 and **one** Saving Roll.
+Those same captures list standalone E/Mitter source weapon 25 with BTS/2
+and **two** Saving Rolls. English N5.3 Weapon Chart p. 186, Spanish N5.3
+p. 195, and both captured Wiki weapon charts agree on two for standalone
+E/Mitter. Canonical E/M Ammunition requires two rolls per hit. English
+N5.3 p. 70 identifies the turret's parenthesized BS Weapon but gives
+no overriding Saving Roll rule. The examined English/Spanish FAQ v0.1
+texts contain no Armed Turret/E/Mitter ruling.
+
+**Decision (2026-10-14):** The discrepancy is confirmed, but an intentional
+turret exception or an Army data error is **not established**. InfinityDB
+keeps the imported source mode's one Saving Roll and adds a visible
+cross-linked, bilingual-source-cited warning to `weapon:armed-turret`.
+It does not change E/M Ammunition, overwrite the source profile or infer
+a special immunity/combined-Ammunition rule.
+
+**Next action:** Seek applicable official correction/FAQ or Corvus Belli
+clarification before adjudicating which roll count governs the turret.
+This is independent of REA-037's S1/S2 Silhouette disagreement.
+
 ## Flash Pulse benchmark and positive findings
 
 The benchmark is source-verified, with a remaining profile discrepancy:

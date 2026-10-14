@@ -513,10 +513,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Properties directly in maintained-text prose; the E/M CC Weapon
       now links its printed N+E/M combination. Other candidates still
       need source-by-source review.
-    - [ ] Cross-check the Armed Turret's source E/Mitter mode (one
-      BTS/2 Saving Roll) against its current official printed profile
-      and the generic E/M Ammunition rule (two), preserving the source
-      mode unchanged until the difference is resolved.
+    - [ ] **REA-045 — Armed Turret E/Mitter Saving Roll conflict:**
+      The source review confirmed one BTS/2 roll in all six captured Army
+      Turret E/Mitter profiles versus two in standalone E/Mitter, both
+      N5.3 PDFs and both Wiki charts. A source-cited warning is now
+      player-visible; retain the Army mode unchanged. Obtain an applicable
+      official clarification before declaring a turret-specific exception
+      or correcting the imported count.
     - [x] Browser-review all twelve current Weapon Properties and rule-origin
       navigation at 1440, 390 and 320 px, plus global search at 1440 and
       320 px, including touch preview/second-tap navigation, 76 passing

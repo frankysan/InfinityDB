@@ -124,7 +124,11 @@ release/audit narrative belongs in the changelog and Git history.
   Combined Ammunition example (p. 67); its two BTS/2 Saving Rolls, Normal
   Wounds and E/M States remain separately source-cited, not calculated.
   E/M-only source profiles, including the Armed Turret E/Mitter mode with
-  one listed roll, are not mapped to `N+E/M`. Alternatives remain unlinked.
+  one listed roll, are not mapped to `N+E/M`. That imported mode's one
+  BTS/2 roll conflicts with the standard E/Mitter's two in both N5.3
+  charts and six historical Army snapshots; the visible warning is
+  source-cited and **not** a confirmed gameplay exception (REA-045).
+  Alternatives remain unlinked.
   Those same exact source matches
   project canonical summaries/citations as `ammunition_effects` for Weapon pages,
   not resolved combined effects or automatic completeness. Omitting a standalone

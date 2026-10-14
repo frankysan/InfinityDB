@@ -318,3 +318,35 @@ def test_e_m_source_exceptions_are_not_implicitly_composed() -> None:
     assert not any(
         item["id"] == "weapon-property:em" for item in registry.entries()
     )
+
+
+def test_armed_turret_emitter_source_discrepancy_remains_visible() -> None:
+    """Do not turn an Army/PDF disagreement into an E/M ammunition exception."""
+    import sqlite3
+
+    with sqlite3.connect(ARMY_PATH) as db:
+        turret = db.execute(
+            "SELECT ammunition, saving, savingNum FROM metadata_weapons "
+            "WHERE id = 226 AND mode = 'E/Mitter'"
+        ).fetchone()
+        emitter = db.execute(
+            "SELECT ammunition, saving, savingNum FROM metadata_weapons "
+            "WHERE id = 25 AND mode IS NULL"
+        ).fetchone()
+    assert turret == (14, "BTS/2", "1")
+    assert emitter == (14, "BTS/2", "2")
+
+    rules = RulesDatabase(RULES_PATH)
+    record = rules.composed_record("weapon:armed-turret")
+    assert record is not None
+    assert "Unresolved source conflict" in record["summary"]
+    assert "one BTS/2 Saving Roll" in record["summary"]
+    assert "two" in record["summary"]
+    assert "[[weapon:e-mitter|E/Mitter]]" in record["summary"]
+    assert "[[ammunition:em|E/M Ammunition]]" in record["summary"]
+    assert [(citation["source_id"], citation["page"]) for citation in record["citations"]] == [
+        ("n5-core-v5.3-pdf", 70),
+        ("n5-core-v5.3-pdf", 186),
+        ("n5-core-v5.3-es-pdf", 195),
+    ]
+    assert record["facts"]["specialProfile"]["stats"][-1] == ["S", "2"]
