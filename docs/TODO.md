@@ -504,16 +504,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       inspected; no horizontal overflow or JavaScript errors were observed.
       Private evidence is under `local/audits/sniper-rifles-browser/`.
     - [ ] Continue extending the reviewed Weapon Properties inventory beyond
-      Plasma, Viral, Breaker, K1, MULTI, Monofilament, Silenced and four
-      AP-based combinations. Review further name/Traits exceptions and
+      Plasma, Viral, Breaker, K1, MULTI, Monofilament, Silenced, four
+      AP-based combinations and the reviewed N+E/M form. Review further
+      name/Traits exceptions and
       consolidate repeated weapon prose where source/mode-specific information
       remains intact. Initial Viral CC/Sniper, Plasma Sniper, Silenced Pistol
       and the printed Monofilament Immunity example now link their relevant
-      Properties directly in maintained-text prose; the remainder needs
-      source-by-source review.
-    - [x] Browser-review all eleven current Weapon Properties and rule-origin
+      Properties directly in maintained-text prose; the E/M CC Weapon
+      now links its printed N+E/M combination. Other candidates still
+      need source-by-source review.
+    - [ ] Cross-check the Armed Turret's source E/Mitter mode (one
+      BTS/2 Saving Roll) against its current official printed profile
+      and the generic E/M Ammunition rule (two), preserving the source
+      mode unchanged until the difference is resolved.
+    - [x] Browser-review all twelve current Weapon Properties and rule-origin
       navigation at 1440, 390 and 320 px, plus global search at 1440 and
-      320 px, including touch preview/second-tap navigation, 67 passing
+      320 px, including touch preview/second-tap navigation, 76 passing
       browser checks, no overflow/JavaScript errors, and inspection of
       representative narrow-screen screenshots. Private
       evidence is in `local/audits/weapon-properties-browser/`.
@@ -710,8 +716,9 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       references and source-defined `AP+DA`, using exact Army metadata IDs and names.
       Keep unreviewed forms unlinked and Saving Roll notation independent; this does
       not complete typed Ammunition effects or the quick-reference view.
-    - [x] Represent the four reviewed combined Army Ammunition source forms
-      (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`) with exact, ordered canonical
+    - [x] Represent the five reviewed combined Army Ammunition source forms
+      (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`, `N+E/M`) with exact,
+      ordered canonical
       component identities and project those identities into Weapon API profiles.
       Validate against source ID/name and source display notation; keep alternate
       ammunition choices and Saving Roll expressions out of composition semantics.
@@ -734,7 +741,7 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [x] Record the single additional Critical Saving Roll on all nine
       roll-bearing base Ammunition facts, preserving T2's one-Wound Critical
       exception and excluding Smoke/Eclipse. Do not sum the Critical extra roll
-      per component or infer totals from the four combined source mappings.
+      per component or infer totals from the five combined source mappings.
     - [x] Publish a bounded, exact-source Combined Saving Roll Critical reference
       for the six Plasma Weapon Hit/Blast profiles: one ARM plus one BTS Saving
       Roll, with one additional ARM roll on a Critical. Keep the reviewed source

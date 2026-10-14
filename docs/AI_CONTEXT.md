@@ -117,9 +117,15 @@ release/audit narrative belongs in the changelog and Git history.
 - Weapon Ammunition navigation maps exact Army metadata identity/name pairs to
   reviewed base reference segments, without client-side parsing or inference from
   Saving Roll notation. The maintained map (version 2) records ordered components
-  for the four reviewed combined forms (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`);
+  for five reviewed combined forms (`AP+DA`, `AP+Exp`, `AP+Shock`,
+  `AP+T2`, `N+E/M`);
   their API `ammunition_composition` field is only present on exact matching
-  source profiles. Alternatives remain unlinked. Those same exact source matches
+  source profiles. `N+E/M` source ID 5 is supported by the printed N5.3
+  Combined Ammunition example (p. 67); its two BTS/2 Saving Rolls, Normal
+  Wounds and E/M States remain separately source-cited, not calculated.
+  E/M-only source profiles, including the Armed Turret E/Mitter mode with
+  one listed roll, are not mapped to `N+E/M`. Alternatives remain unlinked.
+  Those same exact source matches
   project canonical summaries/citations as `ammunition_effects` for Weapon pages,
   not resolved combined effects or automatic completeness. Omitting a standalone
   Weapon definition requires an explicit source-profile-pinned review recorded

@@ -13,8 +13,8 @@ are not retroactively relabeled.
 ### Player summary
 
 - Weapon profiles now link named **Weapon Properties** such as Plasma, Viral,
-  Breaker, K1, MULTI, Monofilament, Silenced and combined AP Ammunition to
-  searchable Glossary explanations and their originating rules. Links provide the same preview
+  Breaker, K1, MULTI, Monofilament, Silenced and combined Ammunition, including
+  N+E/M, to searchable Glossary explanations and their originating rules. Links provide the same preview
   interaction as other rules references; shared Viral and Plasma explanations
   no longer need to be repeated in individual weapon summaries.
 - **What's changed** now includes upcoming-release notes alongside past releases when there are new changes to show.
@@ -56,7 +56,9 @@ are not retroactively relabeled.
   other rules sections, with hover, keyboard and touch previews. Shared
   Viral and Plasma rules explanations now support shorter individual
   weapon summaries; relevant reference prose also links directly to shared
-  Properties. Imported profiles and conditional gameplay behavior are unchanged.
+  Properties. E/M CC Weapon now explains how its N+E/M Ammunition can cause
+  Wounds and conditional disabling States without implying extra Saving Rolls.
+  Imported profiles and conditional gameplay behavior are unchanged.
 - **Data processing + Web backend:** Add source-cited Weapon explanations for
   common CC Weapons and Pistols, D-Charges, Disco Baller and SymbioBomb,
   distinguishing mode-specific requirements and exceptions without changing

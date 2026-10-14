@@ -2519,6 +2519,16 @@ Plasma Carbine uses Normal Ammunition and a combined `ARM and BTS` Saving Roll;
 there must be no `ammunition_composition` inferred from that notation. The
 existing profile/API pilot enforces these different ownership boundaries.
 
+The N5.3 Combined Ammunition example (p. 67) also explicitly combines
+Normal (N) and E/M for E/M CC Weapon, source Ammunition ID 5. The reviewed
+map links the ordered canonical components; `weapon-property:n-em` explains
+potential Normal Wounds and E/M's conditional State effects. The Weapon
+Chart still specifies **two BTS/2 Saving Rolls per hit** without an
+additional ARM roll. A Critical adds one Saving Roll for the combination,
+not one per component. No generic composition engine is introduced.
+The separately imported Armed Turret E/Mitter mode lists only one BTS/2
+Saving Roll and must not be rewritten based on generic E/M facts.
+
 Sources:
 
 - Curated Wiki snapshot `wiki-en-20260926-200832`: AP, DA, E/M, EXP, PARA,

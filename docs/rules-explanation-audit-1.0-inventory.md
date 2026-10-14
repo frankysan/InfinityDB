@@ -73,7 +73,7 @@ and the main audit's follow-up notes before treating a finding as open.
 | [REA-022](rules-explanation-audit-1.0.md#rea-022---kit-recovery-and-disposable-spending-need-multi-roll-rules) | High | P1 | Kit recovery and Disposable spending need multi-roll rules |
 | [REA-023](rules-explanation-audit-1.0.md#rea-023---placement-cards-defer-essential-geometry-and-deployment-restrictions) | High | P1 | Placement cards defer essential geometry and deployment restrictions |
 | [REA-024](rules-explanation-audit-1.0.md#rea-024---bioweapon-needs-a-target-conditioned-explanation-alongside-the-chart) | Medium | P1 | BioWeapon needs a target-conditioned explanation alongside the chart |
-| [REA-025](rules-explanation-audit-1.0.md#rea-025---nem-is-absent-from-the-reviewed-composition-map) | High | P1 | N+E/M is absent from the reviewed composition map |
+| [REA-025](rules-explanation-audit-1.0.md#rea-025---nem-is-absent-from-the-reviewed-composition-map) | High | P1 | Resolved (2026-10-14): N+E/M has an exact-source component mapping and reviewed Property; general combination/Immunity evaluation still excluded |
 | [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics) | Medium | P1 | Useful general mechanics remain research rather than linked reference content |
 | [REA-027](rules-explanation-audit-1.0.md#rea-027---flash-pulses-spanish-chart-disagrees-on-rolls-and-traits) | High | P1 | Flash Pulse's Spanish chart disagrees on rolls and Traits |
 | [REA-028](rules-explanation-audit-1.0.md#rea-028---kobras-two-issues-require-separate-source-decisions) | High | P1 | Kobra's two issues require separate source decisions |

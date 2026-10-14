@@ -4752,7 +4752,7 @@
             "id": "weapon:e-m-cc-weapon",
             "kind": "weapon",
             "name": "E/M CC Weapon",
-            "summary": "The N5.3 Weapon Chart prints N+E/M Ammunition for the E/M close-combat variant, and specifies two BTS/2 Saving Rolls per successful hit. Preserve both pieces of source notation; the chart does not print an additional ARM Saving Roll. The [**] note points to the Ammunition section.\n\n[[ammunition:em|E/M Ammunition]] halves BTS (rounded up) and can cause [[state:isolated|Isolated]] and, for eligible targets, [[state:immobilized-b|Immobilized-B]]. The [[trait:cc|CC]] Trait identifies the attack type.",
+            "summary": "The N5.3 Weapon Chart prints N+E/M Ammunition for this close-combat variant (PS 8, [[trait:cc|CC]]), with two BTS/2 Saving Rolls per hit and no separate ARM Saving Roll. The [**] note points to the Ammunition section.\n\nThe [[weapon-property:n-em|N+E/M Weapon Property]] explains the printed Combined Ammunition example: [[ammunition:normal|Normal Ammunition]] can cause Wounds, while [[ammunition:em|E/M Ammunition]] can cause [[state:isolated|Isolated]] and, for eligible Troopers, [[state:immobilized-b|Immobilized-B]] after failed rolls.\n\nResolve [[skill:immunity|Immunity]] and other applicable exceptions under their own rules, not from punctuation in the name.",
             "composition": {"role": "definition"},
             "scope": {"game": "N5", "seasons": ["current"]},
             "facts": {},
@@ -4765,7 +4765,10 @@
                 {"type": "causes-state", "recordId": "state:isolated"},
                 {"type": "causes-state", "recordId": "state:immobilized-b"}
             ],
-            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: E/M CC Weapon"}],
+            "citations": [
+                {"sourceId": "n5-core-v5.3-pdf", "page": 67, "section": "Combined Ammunition: N+E/M example"},
+                {"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: E/M CC Weapon"}
+            ],
             "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
         },
         {

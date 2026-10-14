@@ -1006,6 +1006,48 @@
           ]
         }
       ]
+    },
+    {
+      "id": "n-em",
+      "name": "N+E/M",
+      "summary": "The N5.3 Combined Ammunition example uses Normal (N) and Electromagnetic (E/M) together. The printed E/M CC Weapon makes two Saving Rolls against half BTS per hit (rounded up), not an additional ARM Saving Roll. The Normal component can inflict Wounds on failed rolls; E/M can also cause Isolated, and Immobilized-B against HI, TAG, REM or VH targets, under the E/M rules. A Critical adds one Saving Roll, not an extra pair. Non-Lethal and Immunity apply only under their own conditions; neither is implied by the name N+E/M. Use the printed weapon's Saving fields.",
+      "origins": [
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:normal",
+          "role": "wounds-component"
+        },
+        {
+          "domain": "Ammunition",
+          "recordId": "ammunition:em",
+          "role": "reduced-bts-and-states-component"
+        },
+        {
+          "domain": "General Rules",
+          "recordId": "rule:saving-rolls",
+          "role": "saving-roll-resolution"
+        },
+        {
+          "domain": "Weaponry",
+          "sourceSection": "N5.3 p. 67: Combined Ammunition N+E/M example; p. 177: E/M CC Weapon chart",
+          "role": "printed-example"
+        }
+      ],
+      "profiles": [
+        {
+          "weaponId": 7,
+          "weaponName": "E/M CC Weapon",
+          "mode": null,
+          "ammunitionSourceId": 5,
+          "ammunition": "N+E/M",
+          "saving": "BTS/2",
+          "savingNum": "2",
+          "traits": [
+            "CC",
+            "[**]"
+          ]
+        }
+      ]
     }
   ]
 }

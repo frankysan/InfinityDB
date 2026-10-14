@@ -130,8 +130,16 @@ reference pages. Nine roll-bearing base Ammunition records now also carry
 `criticalAdditionalSavingRolls: 1`. This represents the single extra Saving
 Roll from a Critical, not a multiplicative roll count per combined component.
 Smoke and Eclipse retain only visibility-zone facts and no Saving Roll facts.
-For the four reviewed Combined Ammunition forms, the component mapping still
-publishes identities only: it does not add, multiply, or adjudicate those rolls.
+For the five reviewed Combined Ammunition forms (four AP-based plus
+`N+E/M`), the component mapping still publishes identities only: it does not
+add, multiply, or adjudicate those rolls. `N+E/M` is explicitly printed in the
+N5.3 Combined Ammunition example (p. 67) and mapped from exact Army source ID 5,
+not inferred from the `+` in its name. E/M CC Weapon retains two BTS/2 Saving
+Rolls per hit and no additional ARM Saving Roll; its standalone Property
+explains Normal's potential Wounds alongside E/M's conditional State effects.
+The imported Armed Turret E/Mitter mode remains a separate source profile
+listing one BTS/2 Saving Roll, and is not rewritten to match the generic E/M
+Ammunition facts.
 The additional roll retains applicable constituent effects; T2's
 `woundsPerFailedSave.criticalAdditionalRoll` remains distinct from its regular
 hit effect. Combined Saving Rolls (including Plasma's ARM/BTS case) have a
@@ -163,9 +171,11 @@ The runtime projection only attaches a Property to a profile matching that
 whole signature; weapon names and punctuation are never parsed to grant
 mechanics. Properties are displayed on matching Weapon profiles and indexed
 as embedded Glossary/global-search concepts, without a separate top-level
-catalog or a new rule evaluator. Eleven reviewed definitions currently cover
-Plasma, Viral, Breaker, K1, MULTI, Monofilament, Silenced and the four
-AP-based combinations. Curated rules prose can link explicitly to
+catalog or a new rule evaluator. Twelve reviewed definitions currently cover
+Plasma, Viral, Breaker, K1, MULTI, Monofilament, Silenced, the four
+AP-based combinations and the distinct `N+E/M` source combination.
+Standalone E/M remains canonical Ammunition, not a duplicate Weapon Property.
+Curated rules prose can link explicitly to
 `[[weapon-property:...]]`: the rules exporter validates each target against
 the maintained registry, and the runtime resolves it to a Glossary entry and
 summary preview without creating a second canonical rules record. Source

@@ -357,6 +357,7 @@ def test_reviewed_combined_ammunition_critical_is_not_per_component(
     }
     refs = WeaponAmmunitionReferences(_rules_database(tmp_path))
     expected = {
+        (5, "N+E/M"): ("normal", "em", 2),
         (10, "AP+DA"): ("ap", "da", 2),
         (13, "AP+Exp"): ("ap", "exp", 3),
         (30, "AP+Shock"): ("ap", "shock", 1),
@@ -389,7 +390,7 @@ def test_reviewed_combined_ammunition_critical_is_not_per_component(
 
 def test_reviewed_ammunition_references_preserve_exact_army_identity(tmp_path: Path) -> None:
     mapping = load_ammunition_reference_map()
-    assert len(mapping) == 15
+    assert len(mapping) == 16
     refs = WeaponAmmunitionReferences(_rules_database(tmp_path))
     assert refs.for_profile({"ammunition_source_id": 10, "ammunition": "AP+DA"}) == [
         {"text": "AP", "public_reference": {"catalog": "ammunition", "id": "ap"}},

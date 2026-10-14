@@ -940,10 +940,10 @@ remain research, not a certified general algorithm.
 `ammunition:em`, `skill:immunity`; Army E/M CC Weapon, source weapon 7,
 Ammunition source 5 `N+E/M`.
 
-**Current:** The map covers AP+DA, AP+Exp, AP+Shock and AP+T2, not N+E/M.
-The Army source is preserved, but its components and joint Wound/State result
-are not explained by a reviewed shared example. E/M's standalone State-only
-card cannot explain the Normal component's Wounds.
+**Initial gap (before resolution):** The map covered AP+DA, AP+Exp, AP+Shock
+and AP+T2, but not N+E/M. The Army source was preserved, but its components
+and joint Wound/State result had no reviewed shared explanation. E/M's
+standalone State-only card did not explain the Normal component's Wounds.
 
 **Evidence/result:** S1 p. 67 explicitly gives two halved-BTS saves, Wounds
 from the Normal component, and Isolated plus conditional IMM-B from E/M;
@@ -951,11 +951,14 @@ a Critical adds one save. S6 confirms source IDs and fields. This is an
 explicit printed combined example, unlike the derived partial-Immunity case.
 Non-Lethal, when actually present, has its own overriding rule (p. 175).
 
-**Action:** Review source 5 and its actual profiles, link both components, and
-provide the printed reasoning. Preserve the original Saving fields and do not
-calculate arbitrary compositions in JavaScript. **Fix:** mapping/curated
-content/links and future validation; no such edits made here.
-**Dependencies:** REA-010, REA-011, REA-013, REA-026.
+**Status (2026-10-14): resolved for the printed source-profile case.** Exact
+Army Ammunition source 5 now maps ordered Normal and E/M components. A reviewed
+`weapon-property:n-em` links both canonical rules and the printed p. 67
+example; the E/M CC Weapon reference links to that explanation. The original
+BTS/2 × 2 source fields remain authoritative, and no general combined outcome
+or partial-Immunity evaluator has been introduced. E/M-only weapons retain
+their distinct source profiles. Broader combination and Immunity resolution
+remain dependencies of REA-010, REA-011, REA-013 and REA-026.
 
 ### REA-026 - Complete shared General Rules mechanics
 

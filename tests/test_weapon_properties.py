@@ -30,7 +30,7 @@ def _services():
 def test_weapon_properties_have_distinct_explicit_rules_origins() -> None:
     database, rules, properties = _services()
     del database
-    assert len(properties.entries()) == 11
+    assert len(properties.entries()) == 12
     entries = {item["id"]: item for item in properties.entries()}
     viral = entries["weapon-property:viral"]
     assert any(origin["recordId"] == "trait:bioweapon" for origin in viral["origins"])
@@ -233,3 +233,88 @@ def test_rules_build_rejects_unknown_weapon_property_reference(tmp_path: Path) -
     documents[0] = path, replacement
     with pytest.raises(ValueError, match="does not resolve to a current semantic record"):
         export_rules_database(documents, tmp_path / "invalid-rules.db", finalize=False)
+
+
+def test_n_em_property_reuses_both_rules_without_inferred_rolls() -> None:
+    """The N5.3 printed combination is not a separate E/M Ammunition type."""
+    from infinity_db.weapon_ammunition_references import load_ammunition_reference_map
+
+    mapping = load_ammunition_reference_map()
+    assert mapping[5] == {
+        "name": "N+E/M",
+        "segments": [
+            {"text": "N", "ruleId": "ammunition:normal"},
+            {"text": "+"},
+            {"text": "E/M", "ruleId": "ammunition:em"},
+        ],
+        "components": ["ammunition:normal", "ammunition:em"],
+    }
+    database, rules, registry = _services()
+    property_entry = next(
+        entry for entry in registry.entries() if entry["id"] == "weapon-property:n-em"
+    )
+    assert [origin["recordId"] for origin in property_entry["origins"]
+            if "recordId" in origin] == [
+        "ammunition:normal", "ammunition:em", "rule:saving-rolls"
+    ]
+    assert any("p. 67" in origin.get("sourceSection", "")
+               for origin in property_entry["origins"])
+    assert "Wounds" in property_entry["summary"]
+    assert "Critical adds one" in property_entry["summary"]
+
+    weapon = database.get_catalog_item("weapons", "e-m-cc-weapon")
+    assert weapon is not None
+    profile = CatalogRules(rules).enrich_catalog_item("weapons", weapon)["profiles"][0]
+    assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+        "N+E/M", "BTS/2", "2"
+    )
+    assert profile["traits"] == ["CC", "[**]"]
+    assert [part["record_id"] for part in profile["ammunition_composition"]["components"]] == [
+        "ammunition:normal", "ammunition:em"
+    ]
+    assert [part["record_id"] for part in profile["ammunition_effects"]] == [
+        "ammunition:normal", "ammunition:em"
+    ]
+    assert [entry["id"] for entry in profile["weapon_properties"]] == [
+        "weapon-property:n-em"
+    ]
+    assert "ammunitionResolution" not in profile
+    assert "combined_saving_roll" not in profile
+    for field, alternate in (("ammunition", "E/M"), ("ammunition_source_id", 14),
+                             ("saving_num", "1"), ("mode", "E/Mitter")):
+        changed = profile.copy()
+        changed[field] = alternate
+        assert registry.for_profile(changed) == []
+
+    curated = rules.composed_record("weapon:e-m-cc-weapon")
+    assert curated is not None
+    assert "weapon-property:n-em" in curated["summary"]
+    assert {citation["page"] for citation in curated["citations"]} >= {67, 177}
+    assert all(citation["source_id"] == "n5-core-v5.3-pdf"
+               for citation in curated["citations"])
+
+
+def test_e_m_source_exceptions_are_not_implicitly_composed() -> None:
+    import sqlite3
+
+    database, rules, registry = _services()
+    emitter = database.get_catalog_item("weapons", "e-mitter")
+    assert emitter is not None
+    profile = CatalogRules(rules).enrich_catalog_item("weapons", emitter)["profiles"][0]
+    assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+        "E/M", "BTS/2", "2"
+    )
+    assert all(item["id"] != "weapon-property:n-em"
+               for item in profile.get("weapon_properties", []))
+    assert "ammunition_composition" not in profile
+
+    with sqlite3.connect(ARMY_PATH) as source:
+        special = source.execute(
+            "SELECT name, mode, ammunition, saving, savingNum FROM metadata_weapons "
+            "WHERE id = 226 AND mode = 'E/Mitter'"
+        ).fetchone()
+    # Imported Army mode differs from the usual E/M ammunition roll count.
+    assert special == ("Armed Turret", "E/Mitter", 14, "BTS/2", "1")
+    assert not any(
+        item["id"] == "weapon-property:em" for item in registry.entries()
+    )
