@@ -4660,6 +4660,115 @@
             }
         },
         {
+            "id": "weapon:cc-weapon",
+            "kind": "weapon",
+            "name": "CC Weapon",
+            "summary": "This standard close-combat weapon uses [[ammunition:normal|Normal (N) Ammunition]], with PS 8 and one ARM Saving Roll per successful hit. It has no additional Special Ammunition effect. Use [[skill:cc-attack|CC Attack]] and the [[trait:cc|CC]] Trait rules to resolve the attack.",
+            "composition": {"role": "definition"},
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {},
+            "armyLinks": [{"entity": "weapon", "id": "cc-weapon"}],
+            "variantSemantics": {"inheritance": "family"},
+            "relations": [
+                {"type": "uses-effects-of", "recordId": "ammunition:normal"},
+                {"type": "uses-effects-of", "recordId": "trait:cc"},
+                {"type": "uses-effects-of", "recordId": "skill:cc-attack"}
+            ],
+            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: CC Weapon"}],
+            "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
+        },
+        {
+            "id": "weapon:para-cc-weapon",
+            "kind": "weapon",
+            "name": "PARA CC Weapon",
+            "summary": "The PARA variant uses [[ammunition:para|Paralysis (PARA) Ammunition]]. A successful hit requires one PH-6 Saving Roll, rather than ARM or BTS, and its PS is printed as a dash. Failure causes [[state:immobilized-a|Immobilized-A]], not Wounds. The [[trait:non-lethal|Non-Lethal]] and [[trait:cc|CC]] Traits apply.",
+            "composition": {"role": "definition"},
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {},
+            "armyLinks": [{"entity": "weapon", "id": "para-cc-weapon"}],
+            "variantSemantics": {"inheritance": "family"},
+            "relations": [
+                {"type": "uses-effects-of", "recordId": "ammunition:para"},
+                {"type": "causes-state", "recordId": "state:immobilized-a"},
+                {"type": "uses-effects-of", "recordId": "trait:non-lethal"},
+                {"type": "uses-effects-of", "recordId": "trait:cc"}
+            ],
+            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: PARA CC Weapon"}],
+            "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
+        },
+        {
+            "id": "weapon:da-cc-weapon",
+            "kind": "weapon",
+            "name": "DA CC Weapon",
+            "summary": "The DA variant uses [[ammunition:da|Double Action (DA) Ammunition]], requiring two ARM Saving Rolls per successful hit rather than one. Its printed PS 8 and Burst 1 remain unchanged. [[trait:anti-materiel|Anti-materiel]] affects eligible scenery and structures but does not replace the DA Saving Rolls; [[trait:cc|CC]] identifies the attack type.",
+            "composition": {"role": "definition"},
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {},
+            "armyLinks": [{"entity": "weapon", "id": "da-cc-weapon"}],
+            "variantSemantics": {"inheritance": "family"},
+            "relations": [
+                {"type": "uses-effects-of", "recordId": "ammunition:da"},
+                {"type": "uses-effects-of", "recordId": "trait:anti-materiel"},
+                {"type": "uses-effects-of", "recordId": "trait:cc"}
+            ],
+            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: DA CC Weapon"}],
+            "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
+        },
+        {
+            "id": "weapon:ap-cc-weapon",
+            "kind": "weapon",
+            "name": "AP CC Weapon",
+            "summary": "The AP CC Weapon uses [[ammunition:ap|Armor Piercing (AP) Ammunition]]. Its single Saving Roll uses half the target\u2019s ARM, rounded up, shown as ARM/2 on the printed profile. It has PS 8, Burst 1 and the [[trait:cc|CC]] Trait. AP lowers the defense used for that Saving Roll; it does not add a second roll.",
+            "composition": {"role": "definition"},
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {},
+            "armyLinks": [{"entity": "weapon", "id": "ap-cc-weapon"}],
+            "variantSemantics": {"inheritance": "family"},
+            "relations": [
+                {"type": "uses-effects-of", "recordId": "ammunition:ap"},
+                {"type": "uses-effects-of", "recordId": "trait:cc"}
+            ],
+            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: AP CC Weapon"}],
+            "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
+        },
+        {
+            "id": "weapon:shock-cc-weapon",
+            "kind": "weapon",
+            "name": "Shock CC Weapon",
+            "summary": "The Shock variant uses [[ammunition:shock|Shock Ammunition]] with one ARM Saving Roll from its printed PS 8 profile. Shock has additional effects under its Ammunition rules, particularly against vulnerable targets. The [[trait:cc|CC]] Trait identifies the attack type and is not an additional Ammunition effect.",
+            "composition": {"role": "definition"},
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {},
+            "armyLinks": [{"entity": "weapon", "id": "shock-cc-weapon"}],
+            "variantSemantics": {"inheritance": "family"},
+            "relations": [
+                {"type": "uses-effects-of", "recordId": "ammunition:shock"},
+                {"type": "uses-effects-of", "recordId": "trait:cc"}
+            ],
+            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: Shock CC Weapon"}],
+            "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
+        },
+        {
+            "id": "weapon:e-m-cc-weapon",
+            "kind": "weapon",
+            "name": "E/M CC Weapon",
+            "summary": "The N5.3 Weapon Chart prints N+E/M Ammunition for the E/M close-combat variant, and specifies two BTS/2 Saving Rolls per successful hit. Preserve both pieces of source notation; the chart does not print an additional ARM Saving Roll. The [**] note points to the Ammunition section.\n\n[[ammunition:em|E/M Ammunition]] halves BTS (rounded up) and can cause [[state:isolated|Isolated]] and, for eligible targets, [[state:immobilized-b|Immobilized-B]]. The [[trait:cc|CC]] Trait identifies the attack type.",
+            "composition": {"role": "definition"},
+            "scope": {"game": "N5", "seasons": ["current"]},
+            "facts": {},
+            "armyLinks": [{"entity": "weapon", "id": "e-m-cc-weapon"}],
+            "variantSemantics": {"inheritance": "family"},
+            "relations": [
+                {"type": "uses-effects-of", "recordId": "ammunition:normal"},
+                {"type": "uses-effects-of", "recordId": "ammunition:em"},
+                {"type": "uses-effects-of", "recordId": "trait:cc"},
+                {"type": "causes-state", "recordId": "state:isolated"},
+                {"type": "causes-state", "recordId": "state:immobilized-b"}
+            ],
+            "citations": [{"sourceId": "n5-core-v5.3-pdf", "page": 177, "section": "Weapon Chart: E/M CC Weapon"}],
+            "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
+        },
+        {
             "id": "weapon:chain-colt",
             "kind": "weapon",
             "name": "Chain-colt",

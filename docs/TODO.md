@@ -362,7 +362,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       It has no fabricated Army Skill profile. Browser acceptance passed
       23/23 scenarios (seven reference pages × three viewport widths,
       desktop click and touch preview-then-navigation).
-    - [ ] Work through the 25 remaining source-category/usage-prioritized
+    - [ ] Continue the highest-use CC Weapon batch. Six of the initial eight
+      (CC, PARA, DA, AP, Shock and E/M) now have N5.3 p. 177 definitions,
+      printed-profile-preserving links and reviewed interaction entries.
+      EXP CC Weapon and Viral CC Weapon still require curation and acceptance;
+      preserve the N+E/M and BioWeapon (DA+SHOCK) source distinctions.
+      The general CC Weapon class mention in CC Attack remains deliberately
+      generic, not a link to the specific standard CC Weapon profile.
+    - [ ] Work through the remaining source-category/usage-prioritized
       chart-listed Weapon batches (no more than eight identities per batch).
       For each, distinguish complete Army profile facts from missing effect
       explanations, ammunition/trait/State relations, and browser navigation;

@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **135/150** complete, **15** pending.
-- Current authored outgoing relations: **346**.
+- Supporting semantic identities: **141/156** complete, **15** pending.
+- Current authored outgoing relations: **365**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -975,8 +975,15 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (22/22)
+#### Weapon (28/28)
 
+- [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → CC (`trait:cc`)
+- [x] **CC Weapon** (`weapon:cc-weapon`) — reviewed: N5.3 p.177: PS 8, Burst 1, Normal N, one ARM Saving Roll and CC; generic CC Weapon requirements elsewhere do not mean this specific catalog identity.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → CC (`trait:cc`)
+  - `uses-effects-of` → CC Attack (`skill:cc-attack`)
 - [x] **Chain Rifle** (`weapon:chain-rifle`) — reviewed: N5.3 p. 186: Large Teardrop Direct Template with Normal N ammunition and ARM saves; distinct from Chain-colt's small template. Retains Intuitive Attack and Army statistics.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
@@ -998,6 +1005,10 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
   - `uses-effects-of` → Improvised (`trait:improvised`)
+- [x] **DA CC Weapon** (`weapon:da-cc-weapon`) — reviewed: N5.3 p.177: DA requires two ARM Saving Rolls; PS 8 and Anti-materiel/CC Traits remain distinct from the roll count.
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → CC (`trait:cc`)
 - [x] **Disco Baller** (`weapon:disco-baller`) — reviewed: N5.3 p. 71 governs targetless BS deployment, Eclipse placement and States Phase expiry, the persistent deployed Ball, and allied-only Deactivator activation with its own WIP+3 and range conditions. Its chart profile, Double Shot, and Disposable (2) remain distinct from the deployed ARM/BTS/STR/S profile. Activate Disco Ball is still prose rather than a standalone catalog Skill.
   - `uses-effects-of` → Eclipse Ammunition (`ammunition:eclipse`)
   - `uses-effects-of` → Speculative Attack (`trait:speculative-attack`)
@@ -1014,6 +1025,12 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `modifies-use-of` → Mines (`weapon:mines`)
+- [x] **E/M CC Weapon** (`weapon:e-m-cc-weapon`) — reviewed: N5.3 p.177: preserve N+E/M printed notation and two BTS/2 rolls; E/M target-dependent states remain linked. Do not synthesize an unlisted extra ARM roll.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
+  - `uses-effects-of` → CC (`trait:cc`)
+  - `causes-state` → Isolated State (`state:isolated`)
+  - `causes-state` → Immobilized-B State (`state:immobilized-b`)
 - [x] **E/Mitter** (`weapon:e-mitter`) — reviewed: N5.3 p. 186: printed E/M with two BTS/2 Saving Rolls and Non-Lethal; the ammunition reference controls target-specific effects. Source ranges/Burst retained.
   - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
   - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
@@ -1042,6 +1059,11 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
   - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
+- [x] **PARA CC Weapon** (`weapon:para-cc-weapon`) — reviewed: N5.3 p.177: PARA uses a PH-6 Saving Roll and Immobilized-A rather than Wounds; printed PS is a dash, with Non-Lethal and CC retained.
+  - `uses-effects-of` → Paralysis (PARA) Ammunition (`ammunition:para`)
+  - `causes-state` → Immobilized-A State (`state:immobilized-a`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+  - `uses-effects-of` → CC (`trait:cc`)
 - [x] **PARA Mine** (`weapon:para-mine`) — reviewed: Source-pinned PARA Mine reference connects shared Mines, PARA Ammunition and Immobilized-A; the N5.3 chart and Army marker discrepancy remains explicitly unresolved, not a gameplay change.
   - `uses-effects-of` → Mines (`weapon:mines`)
   - `uses-effects-of` → Paralysis (PARA) Ammunition (`ammunition:para`)
@@ -1066,6 +1088,9 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
   - `causes-state` → Sepsitorized State (`state:sepsitorized`)
   - `uses-effects-of` → Cube (`equipment:cube`)
+- [x] **Shock CC Weapon** (`weapon:shock-cc-weapon`) — reviewed: N5.3 p.177: Shock uses the printed one ARM Saving Roll; conditional Shock effects belong to the linked Ammunition definition.
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → CC (`trait:cc`)
 - [x] **SymbioBomb** (`weapon:symbiobomb`) — reviewed: N5.3 p. 74 and the archived English Wiki distinguish the listed owner from the Deployment-assigned user. The single use permits Endgame, Eraser or Mirrorball; the -3 target MOD applies only to Endgame/Eraser. Only the selected Pheroware Tactic supplies attack-profile facts; no stand-alone SymbioBomb chart statistics or lasting assignment relationship are inferred.
   - `uses-effects-of` → Pheroware Tactics (PT) (`weapon:pt`)
 - [x] **WildParrot** (`weapon:wildparrot`) — reviewed: Perimeter and E/M Mine interaction with a visible Token/Model instead of CAMO; reviewed typed relationships distinguish this from Boost. N5 p. 74 Non-Lethal remains absent in Army and is presented as an explicit source discrepancy, not an imported Trait.

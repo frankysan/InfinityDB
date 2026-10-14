@@ -986,6 +986,12 @@
       "reviewedOn": "2026-10-13",
       "note": "N5.3 p. 71 and matching archived Wiki page: source-only Short Skill, Deactivator and allied-ball requirements, LoF/ZoC, WIP+3 Normal Roll with range MODs, Eclipse placement/removal. No Army Skill identity synthesized."
     },
+    {"recordId":"weapon:cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: PS 8, Burst 1, Normal N, one ARM Saving Roll and CC; generic CC Weapon requirements elsewhere do not mean this specific catalog identity."},
+    {"recordId":"weapon:para-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: PARA uses a PH-6 Saving Roll and Immobilized-A rather than Wounds; printed PS is a dash, with Non-Lethal and CC retained."},
+    {"recordId":"weapon:da-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: DA requires two ARM Saving Rolls; PS 8 and Anti-materiel/CC Traits remain distinct from the roll count."},
+    {"recordId":"weapon:ap-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP."},
+    {"recordId":"weapon:shock-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: Shock uses the printed one ARM Saving Roll; conditional Shock effects belong to the linked Ammunition definition."},
+    {"recordId":"weapon:e-m-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: preserve N+E/M printed notation and two BTS/2 rolls; E/M target-dependent states remain linked. Do not synthesize an unlisted extra ARM roll."},
     {
       "recordId": "weapon:d-charges",
       "targetRelease": "1.0.0",

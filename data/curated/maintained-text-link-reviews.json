@@ -114,6 +114,7 @@
           "reason": "combat-term-not-trait",
           "occurrenceSha256s": [
             "0688c585ec0e7e986eb227ddf64fcb8cfb8aa652fd27262dcf945f2785249b5b",
+            "141254326601d1c9241b8d8c61bb7cce7b1331e58c976b376116221515956281",
             "25035fe58b40e7ee7521c844dfbae15446b27bf0b763ff6322b11585519c9dc5",
             "30e4e84a1a6906d11bd2616cb223fd05eec240bb5f9b22d7e72caadcdadfdab3",
             "342022f9a0c83944a9d9d9ad30a951969a9aa99549a5cbe0e418649f3a17edeb",
@@ -673,7 +674,16 @@
       "includeSimplePlurals": true,
       "caseInsensitive": true,
       "reviewedOn": "2026-09-29",
-      "note": "Completeness audit: current Weapon names/aliases and conservative plurals have no remaining plain references."
+      "note": "Reviewed current Weapon names/aliases and conservative plurals; a generic CC Weapon class mention is not the specific Army CC Weapon profile.",
+      "reviewedPlainSurfaces": [
+        {
+          "text": "CC Weapon",
+          "reason": "generic-weapon-class-not-specific-profile",
+          "occurrenceSha256s": [
+            "817a1749d2b162b4edfce5355b22e536e2774acc76d3b6ed65970e0999b2c907"
+          ]
+        }
+      ]
     },
     {
       "id": "batch-8-ammunition-names",

@@ -475,6 +475,18 @@ def test_activate_disco_ball_is_source_only_skill_with_working_weapon_link(
                for rel in disco["display_relations"])
 
 
+@pytest.mark.parametrize(
+    "slug",
+    ["cc-weapon", "para-cc-weapon", "da-cc-weapon",
+     "ap-cc-weapon", "shock-cc-weapon", "e-m-cc-weapon"],
+)
+def test_cc_weapon_rules_have_pinned_chart_source(weaponry_app: Callable, slug: str) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    record = _weapon_rules(payload)[f"weapon:{slug}"]
+    assert any(c["page"] == 177 for c in record["citations"])
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" for c in record["citations"])
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:
