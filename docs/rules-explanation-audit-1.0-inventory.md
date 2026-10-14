@@ -91,7 +91,7 @@ and the main audit's follow-up notes before treating a finding as open.
 | [REA-040](rules-explanation-audit-1.0.md#rea-040---infinity-spec-ops-links-an-absent-specball-procedure) | High | P1 | Infinity Spec-Ops links an absent SpecBall procedure |
 | [REA-041](rules-explanation-audit-1.0.md#rea-041---spanish-fireteam-dice-reminder-conflicts-with-its-general-sd-rule) | High | P1 | Spanish Fireteam dice reminder conflicts with its general SD rule |
 | [REA-042](rules-explanation-audit-1.0.md#rea-042---dodge-arm3-has-incompatible-englishspanish-conditions) | High | P1 | Dodge (ARM+3) has incompatible English/Spanish conditions |
-| [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | High | P0 | Counterintelligence gives the relaxed limit to the wrong player |
+| [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | High | P0 resolved | Resolved (2026-10-14): Counterintelligence protects the owning player from the opponent's first-Turn Strategic Use effects; corrected text and browser presentation verified at three widths |
 | [REA-044](rules-explanation-audit-1.0.md#rea-044---breaker-marksman-is-metadata-only-despite-its-current-official-profile) | High | P1 | Resolved (2026-10-14): Breaker Marksman published from reviewed metadata with numeric/slug lookup and source-cited profile, without widening the catalog to unused historical weapons |
 | [REA-045](rules-explanation-audit-1.0.md#rea-045---armed-turret-emitter-disagrees-with-standard-em-saving-rolls) | Medium | P1 | Armed Turret's imported E/Mitter mode has one BTS/2 save while both N5.3 charts and canonical E/M require two; conflict displayed, ruling unresolved |
 

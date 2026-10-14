@@ -673,9 +673,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] **REA-042 — Dodge (ARM+3) source conflict:** Preserve and
       resolve the differing English/Spanish and Wiki/PDF conditions,
       including S17/S21 provenance; seek scoped errata where needed.
-    - [ ] **REA-043 — Counterintelligence:** Verify in the browser that
-      the implemented correction assigns the relaxed limit to the
-      correct player.
+    - [x] **REA-043 — Counterintelligence:** Verified against N5.3
+      pp. 90/128 and in the rendered Skill reference at 1440, 390 and
+      320 px. Both Strategic Use branches retain their first-Turn
+      conditions; the relaxed Command Token limit benefits the Skill
+      owner, not the opposing player. Browser acceptance passed 6/6.
     - [x] **REA-044 — Metadata-only Weapons:** Publish the reviewed
       Breaker Marksman Rifle from Army source 225 with exact source-profile
       validation, numeric/slug lookup, standalone weapon rule reference

@@ -91,10 +91,12 @@ remediation plan is a proposal, not accepted replacement semantics.
 target qualifier. No universal Allied-only restriction was established, but
 absence of a prohibition is not treated as explicit permission for every
 enemy/neutral case. Do not widen target allegiance while fixing independently
-verified recovery mechanics. Counterintelligence's reversed Command Token actor
-(REA-043) is a new confirmed P0 correction. TinBot sharing (REA-039), missing
-SpecBall procedure (REA-040), Spanish PDF/Wiki conflicts (REA-041/042), and
-the metadata-only Breaker Marksman reference (REA-044) add focused follow-ups.
+verified recovery mechanics. The Counterintelligence Command Token actor
+(REA-043) was corrected in curated rules and its player-facing presentation
+verified on 2026-10-14; it is no longer an open P0 correction. TinBot sharing
+(REA-039), missing SpecBall procedure (REA-040), and Spanish PDF/Wiki
+conflicts (REA-041/042) remain focused follow-ups. The metadata-only
+Breaker Marksman publication gap (REA-044) is also resolved.
 
 Use the [source manifest](rules-explanation-audit-1.0-sources.md) for portable
 provenance and the [complete notice reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md)
@@ -1463,8 +1465,18 @@ necessary; the upstream discrepancy should be visible rather than hidden.
 **Evidence:** Explicit clauses combined; high confidence. **Affected:** C
 `skill:counterintelligence`, `rule:command-token-strategic-use`.
 
-**Current:** Its alternative effect increases the Command Tokens the **adversary**
-may use to two, reversing who benefits.
+**Original defect:** Its alternative effect increased the Command Tokens
+the **adversary** could use to two, reversing who benefits.
+
+**Current implementation (verified 2026-10-14):** The checked-in curated
+Skill description correctly states that the opponent imposes Strategic Use
+and Counterintelligence lets **the Skill owner** spend up to two Command
+Tokens in their first Turn. The separate Order-removal effect reduces two
+removed Regular Orders to one, subject to the more-than-ten-Orders threshold.
+A focused regression test covers both actors, timing, and their source
+relation. Real Chromium browser acceptance confirmed the same explanations
+on the Skill page and search visibility at 1440, 390 and 320 px (6/6
+checks, no JavaScript errors or horizontal overflow).
 
 **Evidence/result:** S1 p. 128 lets the second-turn player limit the opponent's
 first-turn Command Tokens to one. Counterintelligence p. 90 counteracts the
@@ -1472,13 +1484,11 @@ limit imposed by the adversary, allowing the affected player's allowance of two.
 The other option separately reduces the adversary's Order removal from two to
 one. Neither grants that adversary an extra allowance.
 
-**Action:** Explain both options from the correct perspectives. Proposed text:
-when your opponent limits your first-turn Command Tokens, Counterintelligence
-lets you use two instead of one. Preserve timing and the separate Order-removal
-option. **Fix:** text/links and a future actor/timing regression. **Dependencies:**
-REA-026 for the shared Strategic Use baseline; no unresolved source conflict is needed.
-**1.0 relevance:** Confirmed wrong beneficiary is a P0 gameplay correction and
-can be the smallest independent first implementation slice.
+**Disposition:** Resolved. N5.3 pp. 90 and 128 support the existing corrected
+rules text; no further gameplay or UI change was needed for this browser
+acceptance task. The original P0 issue is closed. General completion of the
+Strategic Use rule coverage remains independently tracked under REA-026,
+not a blocker for the now-correct actor attribution.
 
 ### REA-044 - Breaker Marksman is metadata-only despite its current official profile
 
