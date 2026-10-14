@@ -1307,3 +1307,30 @@ conflict note in `.rules-source-note`, absence of JS errors and
 horizontal overflow. Screenshots and private verification outputs
 remain ignored under `local/audits/`. The separate REA-045 E/Mitter
 Saving Roll issue is not altered by this acceptance.
+
+
+## 1.0 Armed Turret E/Mitter Saving Roll discrepancy (REA-045)
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Six archived Army metadata
+captures list weapon 226 / E/Mitter mode as E/M, BTS/2, one Saving
+Roll; standalone weapon 25, English N5.3 p. 186, Spanish p. 195 and
+the canonical E/M rules list two. Neither the official Turret rule
+nor N5 FAQ v0.1 authorizes a scoped exception. The two values are
+reported as unresolved provenance, not adjudicated game mechanics.
+
+The Turret summary remains gameplay-focused; a second `facts.sourceNotes`
+entry owns the discrepancy (the first is REA-037 Silhouette). Source
+and composed-rules regression tests assert the unchanged imported Army
+metadata, the standalone E/Mitter, visible secondary note and typed
+links. The source test exports a fresh local rules DB to avoid stale
+release database assumptions.
+
+Headless Chrome against a rebuilt local rules DB passed **15/15
+content/navigation checks** at 1440, 390 and 320 px across Armed Turret,
+E/Mitter and E/M Ammunition, including both linked destinations.
+The Turret and E/Mitter pages had no horizontal overflow or JS errors.
+At 320 px, E/M Ammunition alone retains a 6 px overflow from the
+`Rules reference` catalog tag. The exact same overflow reproduces
+against the preexisting release rules DB and is already recorded
+under REA-024 TODO; not introduced by this change. Screenshots and
+diagnostics remain private in Git-ignored `local/audits/`.

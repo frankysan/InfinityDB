@@ -1647,11 +1647,14 @@ The Armed Turret rule (N5.3 p. 70) identifies the BS Weapon by name but
 does not give a special Saving Roll count. Reviewed English/Spanish N5
 FAQ v0.1 texts contain no turret/E/Mitter exception.
 
-InfinityDB retains the Army mode's **one** roll without inferring either a
-turret-specific E/M exception or a correction to two. The curated Armed Turret
-reference visibly identifies the conflict and links to both E/Mitter and
-E/M Ammunition; an official clarification is still needed. This is separate
-from the Armed Turret **Silhouette S1/S2** discrepancy in REA-037.
+InfinityDB retains the imported Army mode's **one** roll without
+inferring a turret-specific E/M exception or a correction to two.
+The Armed Turret reference preserves the underlying gameplay summary,
+with the conflicting values and cross-links to E/Mitter and E/M
+Ammunition in `facts.sourceNotes`, next to but independent of REA-037's
+S1/S2 Silhouette note. This is *source disclosure*, not a judgement
+that the imported one-roll count is official or intentional. A scoped
+Corvus Belli clarification remains the only way to settle the conflict.
 See REA-045 in `docs/rules-explanation-audit-1.0.md`.
 
 Sources: N5.3 English pp. 70, 186; Spanish p. 195; captured official Army

@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Armed Turret's disputed E/Mitter mode now explains the one-versus-two
+  BTS/2 Saving Roll source conflict in a separate note with links to
+  E/Mitter and E/M Ammunition. Its imported profile remains unchanged
+  pending an official ruling.
 - Armed Turret now identifies its contradictory Silhouette sources:
   detailed profiles list S2 while summary charts list S1. The visible
   profile remains S2 pending an official clarification, and the size
@@ -142,6 +146,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Separate the Armed Turret E/Mitter
+  Army/PDF Saving Roll discrepancy from normal weapon mechanics and its
+  independent Silhouette discrepancy. Preserve the imported one-roll
+  Turret mode, standalone two-roll E/Mitter, and cited bilingual sources;
+  no new E/M ammunition exception is introduced.
 - **Data processing + Web backend + Web frontend:** Add the bilingual
   Armed Turret Silhouette discrepancy to the weapon's secondary source
   notes, with PDF/Wiki citations and the different S1/S2 heights.

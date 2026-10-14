@@ -10,9 +10,10 @@ from wsgiref.util import setup_testing_defaults
 import pytest
 
 from infinity_db.catalog_rules import CatalogRules
+from infinity_db.curated import load_curated_directory
 from infinity_db.database.repository import Database
 from infinity_db.glossary_catalog import GlossaryCatalog
-from infinity_db.rules_database import RulesDatabase
+from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.weapon_properties import WeaponProperties, load_weapon_properties
 from infinity_db.web.app import create_app
 
@@ -331,7 +332,7 @@ def test_e_m_source_exceptions_are_not_implicitly_composed() -> None:
     )
 
 
-def test_armed_turret_emitter_source_discrepancy_remains_visible() -> None:
+def test_armed_turret_emitter_source_discrepancy_remains_visible(tmp_path: Path) -> None:
     """Do not turn an Army/PDF disagreement into an E/M ammunition exception."""
     import sqlite3
 
@@ -347,19 +348,29 @@ def test_armed_turret_emitter_source_discrepancy_remains_visible() -> None:
     assert turret == (14, "BTS/2", "1")
     assert emitter == (14, "BTS/2", "2")
 
-    rules = RulesDatabase(RULES_PATH)
-    record = rules.composed_record("weapon:armed-turret")
+    # Use the edited curated source, not a stale generated release database.
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(ROOT / "data/curated"), rules_path)
+    record = RulesDatabase(rules_path).composed_record("weapon:armed-turret")
     assert record is not None
-    assert "Unresolved source conflict" in record["summary"]
-    assert "one BTS/2 Saving Roll" in record["summary"]
-    assert "two" in record["summary"]
-    assert "[[weapon:e-mitter|E/Mitter]]" in record["summary"]
-    assert "[[ammunition:em|E/M Ammunition]]" in record["summary"]
-    assert [(citation["source_id"], citation["page"]) for citation in record["citations"]] == [
+    assert "one BTS/2 Saving Roll" not in record["summary"]
+    assert "Unresolved source conflict" not in record["summary"]
+    silhouette, discrepancy = record["facts"]["sourceNotes"]
+    assert "Unresolved Silhouette conflict" in silhouette
+    assert "Unresolved Armed Turret" in discrepancy
+    assert "one Saving Roll" in discrepancy
+    assert "two BTS/2 Saving Rolls" in discrepancy
+    assert "all six reviewed Infinity Army metadata captures" in discrepancy
+    assert "[[weapon:e-mitter|E/Mitter]]" in discrepancy
+    assert "[[ammunition:em|E/M Ammunition]]" in discrepancy
+    assert "N5 FAQ v0.1 does not resolve" in discrepancy
+    assert "remains unresolved pending official clarification" in discrepancy
+    citations = {(citation["source_id"], citation.get("page")) for citation in record["citations"]}
+    assert citations >= {
         ("n5-core-v5.3-pdf", 70),
         ("n5-core-v5.3-pdf", 186),
         ("n5-core-v5.3-es-pdf", 195),
-    ]
+    }
     assert record["facts"]["specialProfile"]["stats"][-1] == ["S", "2"]
 
 

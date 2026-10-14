@@ -744,7 +744,13 @@ def test_checked_in_n5_collection_is_valid() -> None:
         {"sourceId": "n5-core-v5.3-es-pdf", "page": 195, "section": "Tabla de Armas: E/Mitter"},
     ]
     assert len(turret_citations) == 10
-    assert "Unresolved source conflict" in records["weapon:armed-turret"]["summary"]
+    assert "Unresolved source conflict" not in records["weapon:armed-turret"]["summary"]
+    assert "Unresolved Silhouette conflict" in (
+        records["weapon:armed-turret"]["facts"]["sourceNotes"][0]
+    )
+    assert "one Saving Roll" in (
+        records["weapon:armed-turret"]["facts"]["sourceNotes"][1]
+    )
     assert all(len(skill_type["labels"]) == 2 for skill_type in document["skillTypes"])
     assert all(
         set(skill_type["descriptions"]) == {"singular", "plural"}
@@ -770,7 +776,7 @@ def test_rea037_armed_turret_silhouette_conflict_is_source_scoped() -> None:
     document = load_curated_document(path)
     turret = next(rec for rec in document["records"] if rec["id"] == "weapon:armed-turret")
     assert turret["facts"]["specialProfile"]["stats"][-1] == ["S", "2"]
-    note, = turret["facts"]["sourceNotes"]
+    note = turret["facts"]["sourceNotes"][0]
     for expected in (
         "**Unresolved Silhouette conflict:**",
         "**S2**", "**S1**", "English N5.3 p. 70", "Spanish N5.3 p. 74",

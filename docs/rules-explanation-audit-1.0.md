@@ -1899,6 +1899,30 @@ a special immunity/combined-Ammunition rule.
 clarification before adjudicating which roll count governs the turret.
 This is independent of REA-037's S1/S2 Silhouette disagreement.
 
+**Follow-up (2026-10-14): local publication and validation complete;
+source adjudication remains open.** The existing two-paragraph
+Army-versus-Weapon-Chart warning was embedded in the normal weapon
+summary. It is now a dedicated `facts.sourceNotes` entry on
+`weapon:armed-turret` alongside, but separate from, REA-037's
+Silhouette note, following the curated prose hierarchy. The note
+identifies the six Army captures, source weapon 226/25, E/M 14,
+the differing one versus two BTS/2 Saving Rolls, English/Spanish
+N5.3 pp. 186/195, the canonical E/M rule, and the absence of an
+applicable turret-specific FAQ ruling. Its E/Mitter and E/M Ammunition
+links are navigable. Neither the imported Turret profile nor
+standalone E/Mitter's ordinary two-roll definition was modified.
+
+Focused tests now use a freshly exported rules DB to prevent stale
+release-db assumptions and assert both modes independently.
+Browser acceptance passed **15/15 content/navigation checks** at
+1440/390/320 px for Turret, E/Mitter, E/M Ammunition and cross-links.
+No JS errors; Turret and E/Mitter had no overflow. The E/M Ammunition
+page reproduces an existing **6 px 320-width overflow** in both the
+baseline release DB and rebuilt DB, traced to the Rules reference
+catalog tag; already noted in TODO under REA-024 and unrelated to
+REA-045. Only an official scoped answer can settle whether one or two
+saves should apply for the deployed Turret mode.
+
 ## Flash Pulse benchmark and positive findings
 
 The benchmark is source-verified, with a remaining profile discrepancy:

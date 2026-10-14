@@ -1092,12 +1092,14 @@ def test_rea037_published_turret_profile_preserves_s2_and_source_conflict(
     turret = current_rules_database.composed_record("weapon:armed-turret")
     assert turret is not None
     assert turret["facts"]["specialProfile"]["stats"][-1] == ["S", "2"]
-    note, = turret["facts"]["sourceNotes"]
+    note = turret["facts"]["sourceNotes"][0]
     assert "**Unresolved Silhouette conflict:**" in note
     assert "**S1**" in note and "**S2**" in note
     assert "25 mm high versus 40 mm" in note
     assert "official correction has not been established" in note
-    assert "Army's Armed Turret" in turret["summary"]
+    assert "[[trait:deployable|Deployable]] Weapon" in turret["summary"]
+    assert "one-roll Turret mode" in turret["facts"]["sourceNotes"][1]
+    assert "Unresolved Silhouette conflict" in turret["facts"]["sourceNotes"][0]
     pages = {(ref["source_id"], ref.get("page")) for ref in turret["citations"]}
     assert pages >= {
         ("n5-core-v5.3-pdf", 18),
@@ -3543,9 +3545,10 @@ def test_rea023_deployable_placement_geometry_and_exception_owners(
     assert panda is not None
     assert repeater is not None
     assert "enemy **Model**, not a Marker" in turret["summary"]
-    assert "Unresolved source conflict" in turret["summary"]
-    assert "one BTS/2 Saving Roll" in turret["summary"]
-    assert "two" in turret["summary"]
+    assert "Unresolved source conflict" not in turret["summary"]
+    assert "one BTS/2 Saving Roll" not in turret["summary"]
+    assert "one Saving Roll" in turret["facts"]["sourceNotes"][1]
+    assert "two BTS/2 Saving Rolls" in turret["facts"]["sourceNotes"][1]
     assert "passable" in wildparrot["summary"]
     assert "instead of in Silhouette contact" in wildparrot["summary"]
     assert "passable path" in " ".join(panda["facts"]["effects"])
