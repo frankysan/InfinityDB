@@ -648,8 +648,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Browser acceptance passed 39/39 route/navigation checks at
       1440/390/320 px. The separate official Spanish reminder conflict
       remains unresolved under REA-041.
-    - [ ] **REA-022 — Recovery Kits:** Review accepted multi-roll recovery
-      and Disposable spending explanations on the player-facing cards.
+    - [x] **REA-022 — Recovery Kits and Disposable:** Verified same-Order
+      multiple MediKit/GizmoKit hits, one-success PH recovery, Remote
+      Presence's Unconscious exception, and B versus SD charge use
+      against N5.3 pp. 75, 123–124 and 175. The reference cards now
+      explain mixed PH results and the two-unspent-charge Double Shot
+      prerequisite with focused regression examples.
     - [x] **REA-026 — Shared General Rules:** Face to Face Rolls, Saving
       Rolls, Guts Rolls, Order Expenditure Sequence, and Coordinated
       Orders are published, linked, and source-cited. Chrome acceptance

@@ -3137,8 +3137,9 @@ def test_ammunition_conditional_state_links_are_bidirectional(
         (
             "trait:double-shot",
             (
-                "it requires both uses to remain",
-                "spends both when applied",
+                "both charges must remain unspent",
+                "using it expends both",
+                "a legal B1 use can still consume the remaining charge",
             ),
         ),
     ],
@@ -3240,3 +3241,53 @@ def test_deployable_cover_has_full_placement_and_saving_cap(
     assert any("available on the Unit Profile" in rule for rule in restrictions)
     assert any(source["source_id"] == "n5-core-v5.3-pdf" and source["page"] == 122
                for source in cover["citations"])
+
+
+def test_rea022_same_order_kit_recovery_and_disposable_burst_examples(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """N5.3 pp. 75, 123-124 and 175: distinguish hit, PH, recovery and charges."""
+    for kit, page in (("medikit", 124), ("gizmokit", 123)):
+        record = current_rules_database.composed_record(f"equipment:{kit}")
+        assert record is not None
+        effects = " ".join(record["facts"]["effects"])
+        clarifications = " ".join(record["facts"]["clarifications"])
+        assert "Each successful hit/use makes the target roll [[attribute:ph|PH]]" in effects
+        assert "PH Rolls succeed" in effects
+        assert "two target PH Rolls" in clarifications
+        assert "If one succeeds and the other fails" in clarifications
+        assert "only one Wound" in clarifications or "one Wound in total" in clarifications
+        assert (
+            "one Wound per hit" in clarifications
+            or "one Wound for each hit" in clarifications
+        )
+        assert any(
+            citation["source_id"] == "n5-core-v5.3-pdf" and citation["page"] == page
+            for citation in record["citations"]
+        )
+    remote = current_rules_database.composed_record("skill:remote-presence")
+    gizmokit = current_rules_database.composed_record("equipment:gizmokit")
+    assert remote is not None and gizmokit is not None
+    assert "cancel either level of [[state:unconscious|Unconscious]]" in (
+        " ".join(gizmokit["facts"]["clarifications"])
+    )
+
+    disposable = current_rules_database.composed_record("trait:disposable-x")
+    double_shot = current_rules_database.composed_record("trait:double-shot")
+    special_dice = current_rules_database.composed_record("rule:special-dice")
+    assert disposable is not None and double_shot is not None and special_dice is not None
+    explanation = " ".join(disposable["facts"]["clarifications"])
+    assert "B1" in explanation and "B2" in explanation
+    assert "spends both charges" in explanation
+    assert "With only one charge left" in explanation
+    assert "With +1 SD instead" in explanation
+    assert "spending only the original B1 charge" in explanation
+    assert "both charges must remain unspent" in double_shot["summary"]
+    assert "Unloaded State" in double_shot["summary"]
+    assert "the bonus is unavailable" in double_shot["summary"]
+    assert "do not spend" in " ".join(special_dice["facts"]["restrictions"])
+    for record, page in ((disposable, 175), (double_shot, 175)):
+        assert any(
+            citation["source_id"] == "n5-core-v5.3-pdf" and citation["page"] == page
+            for citation in record["citations"]
+        )

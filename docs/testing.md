@@ -935,3 +935,30 @@ Private evidence is under `local/audits/rea021-browser/` and
 `local/audits/rea021-source-scan-2026-10-14.txt`. The unresolved
 Spanish Fireteam maximum-dice wording conflict remains independently
 tracked under REA-041. No general dice or Burst evaluator was added.
+
+
+## 1.0 Recovery Kits and Disposable REA-022 browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Source facts and player-facing
+reference cards were checked against official N5.3 pp. 75, 123-124,
+175 and 182. The browser suite covers MediKit, GizmoKit, Disposable (X),
+Double Shot, Special Dice and Remote Presence at 1440, 390 and 320 px,
+including actual links to their shared rule owners. Chromium acceptance
+passed **30/30 checks**, with no JavaScript errors or horizontal overflow.
+The 320 px MediKit, Disposable and Double Shot screenshots were inspected.
+
+Both recovery Kits use the target's own PH Roll after a successful remote
+BS Attack hit (or contact use). In one Order, any successful target PH
+Roll among multiple hits gives one ordinary Wound recovery, even if
+another PH Roll fails; multiple successes do not restore additional
+Wounds. Remote Presence's GizmoKit exception removes enough Wounds to
+cancel either level of Unconscious. Disposable B1 with a +1B modifier
+spends two charges to fire B2 if available, while +1 SD adds a die to
+roll and discard without spending another charge. Double Shot requires
+both remaining Disposable (2) uses for its +1B benefit.
+
+The rules regression covers these examples with source page citations
+in `tests/test_rules_database.py`. Private browser images, results and
+source extracts remain in `local/audits/rea022-browser/` and other
+ignored `local/audits/` files. This is a reviewed reference baseline;
+it does not add a general dice or recovery outcome evaluator.

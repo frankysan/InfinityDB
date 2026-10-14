@@ -909,11 +909,10 @@ separately open under REA-041; this acceptance does not adjudicate it.
 `equipment:gizmokit`, `trait:disposable-x`, `trait:double-shot`, `weapon:pt-endgame`,
 `skill:remote-presence`, `skill:technorganic`, `skill:no-wound-incapacitation`.
 
-**Current:** Kits describe success and failure per PH roll, but omit the
-same-Order multi-hit aggregation. Disposable describes each use, not how Burst
-spends uses or is capped by remaining uses. Double Shot omits the requirement
-that both Disposable (2) charges remain. These omissions become misleading
-when bonuses produce several hits/rolls.
+**Original gap:** Kits described success and failure per PH Roll but omitted
+same-Order multiple-hit aggregation. Disposable described charges without
+connecting Burst increases, remaining uses, and Special Dice; Double Shot
+omitted the two-unspent-charge condition.
 
 **Evidence/result:** S1 pp. 123-124 say any successful Kit PH roll means recovery
 and still only one Wound is removed under the ordinary multi-hit rule; Remote
@@ -921,10 +920,26 @@ Presence separately removes enough to leave either Unconscious level (p. 110).
 Pages 175 and 75 distinguish Burst spending from SD. Double Shot's +1B is
 available with Disposable (2) only while both uses remain.
 
-**Action:** Separate remote hit, target PH, same-Order aggregation, and special
-recovery exceptions. Add remaining-use conditions and an SD-versus-B example.
-**Fix:** text/links and future regression cases. **Dependencies:** REA-001,
-REA-002, REA-021; do not infer success/failure aggregation for unrelated attacks.
+**Disposition (verified 2026-10-14): Resolved.** The curated MediKit and
+GizmoKit references already separate remote BS Attack hits from the target's
+PH Roll and contain the official any-success, one-Wound-per-Order rule.
+The cards now include concrete two-hit examples showing that one successful
+PH Roll and one failed PH Roll recover one Wound in total, not one per hit.
+GizmoKit retains its `Remote Presence` exception: a single
+success cancels either level of Unconscious, removing the necessary Wounds.
+
+Disposable now has a source-grounded B1/Disposable (2) example contrasting
++1B (two shots and two uses) against +1 SD (one retained shot and one use).
+Double Shot explicitly requires both unspent uses for its +1B bonus and
+enters Unloaded after consuming both; with one remaining use that bonus
+cannot apply. The printed PT: Endgame exception remains tied only to its
+own source profile; no Army data were rewritten. These explanations use
+N5.3 pp. 75, 123-124, 175 and 182 and reuse canonical Special Dice,
+Disposable, Unconscious and Remote Presence links.
+
+The correction is scoped to **Kits and Disposable**; no universal
+multiple-hit aggregation or dice-resolution engine has been inferred.
+REA-001, REA-002 and REA-021 retain their independent interaction scope.
 
 ### REA-023 - Placement cards defer essential geometry and deployment restrictions
 

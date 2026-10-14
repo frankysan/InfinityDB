@@ -49,6 +49,11 @@ are not retroactively relabeled.
   Stun Ammunition exceptions.
 - Face to Face Rolls and Saving Rolls now have linked explanations of opposing
   results, Criticals, ties, defense values and special Saving Roll exceptions.
+- Recovery Kit references now explain why one successful target PH Roll
+  is enough among multiple hits in the same Order, with only one Wound
+  removed under the ordinary rule; GizmoKit retains Remote Presence's
+  exception. Disposable and Double Shot now distinguish additional Burst
+  charges from Special Dice with concrete remaining-use examples.
 - Special Dice now have a linked reference explaining extra-die allocation and
   discard timing, Fireteam and Martial Arts bonuses, and exceptions. Fireteam
   Level 2's +1 SD bonus now links directly to that explanation.

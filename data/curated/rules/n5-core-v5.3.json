@@ -3227,7 +3227,8 @@
                     ]
                 },
                 "clarifications": [
-                    "The shared [[rule:order-expenditure-sequence|Order Expenditure Sequence]] spends declared [[trait:disposable-x|Disposable]] charges even when a Skill or item fails its Requirements."
+                    "The shared [[rule:order-expenditure-sequence|Order Expenditure Sequence]] spends declared [[trait:disposable-x|Disposable]] charges even when a Skill or item fails its Requirements.",
+                    "Example: a B1 [[trait:disposable-x|Disposable (2)]] weapon used with +1B fires at B2 and spends both charges in that Order. With only one charge left, that Burst increase is unavailable. With +1 SD instead, roll an extra die and discard one while spending only the original B1 charge; see [[rule:special-dice|Special Dice]]."
                 ]
             },
             "relations": [
@@ -3241,7 +3242,7 @@
             "id": "trait:double-shot",
             "kind": "trait",
             "name": "Double Shot",
-            "summary": "During the Active Turn may apply +1 Burst. On a [[trait:disposable-x|Disposable (2)]] weapon or item, it requires both uses to remain and spends both when applied.",
+            "summary": "During the Active Turn, Double Shot may add +1 Burst.\n\nOn a [[trait:disposable-x|Disposable (2)]] weapon or item, both charges must remain unspent to apply the bonus; using it expends both and puts the item in [[state:unloaded|Unloaded State]]. With only one charge left, the bonus is unavailable; a legal B1 use can still consume the remaining charge.",
             "composition": {
                 "role": "definition"
             },
@@ -13856,7 +13857,8 @@
                     "When fired as a [[skill:bs-attack|BS Weapon]], an applicable Fireteam +1 SD adds a die and discards one without consuming another use; see [[rule:special-dice|Special Dice]]. It does not change the target's separate PH recovery Rolls."
                 ],
                 "clarifications": [
-                    "When coordinated users apply the same recovery to one target, [[rule:coordinated-orders|Coordinated Orders]] use any-success resolution, without adding Wound recovery per successful Roll."
+                    "When coordinated users apply the same recovery to one target, [[rule:coordinated-orders|Coordinated Orders]] use any-success resolution, without adding Wound recovery per successful Roll.",
+                    "Example: two GizmoKit hits in one Order trigger two target PH Rolls. If one succeeds and the other fails, the any-success rule still removes one Wound in total, not one Wound per hit. With [[skill:remote-presence|Remote Presence]], that single success instead removes enough Wounds to cancel either level of [[state:unconscious|Unconscious]]."
                 ]
             },
             "armyLinks": [
@@ -14149,7 +14151,8 @@
                     "When fired as a [[skill:bs-attack|BS Weapon]], an applicable Fireteam +1 SD adds a die and discards one without consuming another use; see [[rule:special-dice|Special Dice]]. It does not change the target's separate PH recovery Rolls."
                 ],
                 "clarifications": [
-                    "During [[rule:coordinated-orders|Coordinated Orders]], multiple eligible users acting on the same target succeed if any qualifying target Roll succeeds; this does not restore an extra Wound per success."
+                    "During [[rule:coordinated-orders|Coordinated Orders]], multiple eligible users acting on the same target succeed if any qualifying target Roll succeeds; this does not restore an extra Wound per success.",
+                    "Example: two MediKit hits in one Order trigger two target PH Rolls. If one succeeds and the other fails, the any-success rule still cancels [[state:unconscious|Unconscious State]] and removes only one Wound in total; it does not restore one Wound for each hit."
                 ]
             },
             "armyLinks": [
