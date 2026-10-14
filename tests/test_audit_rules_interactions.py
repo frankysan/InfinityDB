@@ -20,8 +20,8 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 339
-    assert report["summary"]["authoredOutgoingRelationCount"] == 373
+    assert report["summary"]["recordCount"] == 347
+    assert report["summary"]["authoredOutgoingRelationCount"] == 394
     assert report["summary"]["futureInteractionCount"] == 113
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 209,
@@ -64,12 +64,12 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "percentComplete": 100.0,
     }
     assert report["summary"]["releases"]["1.0.0"] == {
-        "total": 71,
-        "complete": 56,
+        "total": 79,
+        "complete": 64,
         "pending": 15,
-        "reviewed": 56,
+        "reviewed": 64,
         "inherited": 0,
-        "percentComplete": 78.9,
+        "percentComplete": 81.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
@@ -116,8 +116,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 158
-    assert report["summary"]["supporting"]["complete"] == 143
+    assert report["summary"]["supporting"]["total"] == 166
+    assert report["summary"]["supporting"]["complete"] == 151
     assert report["summary"]["supporting"]["pending"] == 15
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -554,7 +554,7 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 143/158 complete, 15 pending" in output
+    assert "Supporting identities: 151/166 complete, 15 pending" in output
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:

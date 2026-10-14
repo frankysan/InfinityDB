@@ -545,6 +545,91 @@ def test_exp_and_viral_cc_weapons_preserve_profile_and_conditioned_effects(
     )
 
 
+@pytest.mark.parametrize(
+    ("slug", "modes", "linked_rules"),
+    [
+        ("pistol", [(None, "N", "ARM", "1", "9", "2", [])],
+         {"ammunition:normal", "skill:bs-attack"}),
+        ("heavy-pistol", [(None, "Shock", "ARM", "1", "6", "2", [])],
+         {"ammunition:shock", "skill:bs-attack"}),
+        ("boarding-pistol", [
+            ("Blast Mode", "N", "ARM", "1", "7", "1",
+             ["Intuitive Attack", "Direct Template (Small Teardrop)"]),
+            ("Hit Mode", "N", "ARM", "1", "7", "2", []),
+        ], {"ammunition:normal", "trait:direct-template",
+            "skill:intuitive-attack", "skill:bs-attack"}),
+        ("breaker-pistol", [(None, "AP", "BTS/2", "1", "8", "2", [])],
+         {"ammunition:ap"}),
+        ("assault-pistol", [(None, "N", "ARM", "1", "7", "4", [])],
+         {"ammunition:normal", "skill:bs-attack"}),
+        ("ap-heavy-pistol", [(None, "AP", "ARM/2", "1", "6", "2", [])],
+         {"ammunition:ap"}),
+        ("silenced-pistol", [
+            (None, "AP+Shock", "BTS/2", "1", "8", "2", ["Silent (-6)"]),
+        ], {"ammunition:ap", "ammunition:shock", "trait:silent-x",
+            "skill:dodge"}),
+        ("multi-pistol", [
+            ("Anti-Material Mode", "DA", "ARM", "2", "7", "1",
+             ["Anti-materiel"]),
+            ("AP Mode", "AP", "ARM/2", "1", "7", "2", []),
+            ("Shock Mode", "Shock", "ARM", "1", "7", "2", []),
+        ], {"ammunition:ap", "ammunition:da", "ammunition:shock",
+            "trait:anti-materiel"}),
+    ],
+)
+def test_pistol_rules_match_exact_army_mode_profiles(
+    weaponry_app: Callable,
+    slug: str,
+    modes: list[tuple],
+    linked_rules: set[str],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    actual_modes = [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in payload["profiles"]
+    ]
+    assert actual_modes == modes
+    record = _weapon_rules(payload)[f"weapon:{slug}"]
+    assert linked_rules <= {
+        relation["record"]["id"]
+        for relation in record["display_relations"]
+        if relation["direction"] == "outbound"
+    }
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf" and citation["page"] == 182
+        for citation in record["citations"]
+    )
+
+
+def test_boarding_multi_and_silenced_pistol_mode_exceptions(
+    weaponry_app: Callable,
+) -> None:
+    boarding = _weapon_detail(weaponry_app, "boarding-pistol")
+    assert boarding["profiles"][0]["ranges"] == {}
+    assert boarding["profiles"][1]["ranges"]
+    summary = _weapon_rules(boarding)["weapon:boarding-pistol"]["summary"]
+    assert "Blast Mode" in summary and "Hit Mode" in summary
+    assert "not Hit Mode" in summary
+
+    multi = _weapon_detail(weaponry_app, "multi-pistol")
+    summary = _weapon_rules(multi)["weapon:multi-pistol"]["summary"]
+    assert "effects are not combined" in summary
+    assert "Anti-Materiel" in summary
+    assert "two ARM Saving Rolls" in summary
+
+    silenced = _weapon_detail(weaponry_app, "silenced-pistol")
+    summary = _weapon_rules(silenced)["weapon:silenced-pistol"]["summary"]
+    assert "one BTS/2 Saving Roll" in summary
+    assert "outside their LoF" in summary
+    assert "Face to Face" in summary
+    assert "not a general -6" in summary
+    assert {c["page"] for c in _weapon_rules(silenced)[
+        "weapon:silenced-pistol"]["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    } == {67, 175, 182}
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:

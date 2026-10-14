@@ -1006,6 +1006,14 @@
       "reviewedOn": "2026-10-14",
       "note": "N5.3 p. 177 and archived BioWeapon Trait distinguish the printed N/BTS/one-save baseline from DA+Shock against VITA. Two BTS saves versus VITA and the STR exception are derived from the component rules, not independently printed modes. Shock applies only under its conditions. Preserve unresolved Immunity subtleties and the exact Army profile."
     },
+    {"recordId": "weapon:pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: PS 9, B2, Normal ammo and one ARM Saving Roll. No special effect inferred."},
+    {"recordId": "weapon:heavy-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: PS 6 and B2 with Shock ammo and one ARM Saving Roll. Source distinguishes Shock effects from PS."},
+    {"recordId": "weapon:boarding-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: Blast Mode has small Direct Template, Intuitive Attack and B1; Hit Mode has range bands, B2 and no Blast-only Traits. Both use N/ARM/one roll."},
+    {"recordId": "weapon:breaker-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: AP applies to BTS/2 rather than ARM/2, B2 with one Saving Roll; do not infer a second roll."},
+    {"recordId": "weapon:assault-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: N/ARM, PS 7 and B4. Burst is not additional Saving Rolls on one hit."},
+    {"recordId": "weapon:ap-heavy-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: AP/ARM/2 with PS 6, B2, and one Saving Roll. Contrast Breaker Pistol BTS/2 without transferring defense attributes."},
+    {"recordId": "weapon:silenced-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 pp. 67, 175, 182: combined AP+Shock yields one BTS/2 Saving Roll with conditional Shock effect; Silent (-6) affects enemy Face to Face Dodge only while user is in ZoC and outside LoF."},
+    {"recordId": "weapon:multi-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: AP B2 ARM/2 one roll, Shock B2 ARM one roll, Anti-Materiel DA B1 ARM two rolls with mode-specific Anti-materiel. Modes are alternatives and their effects do not stack."},
     {
       "recordId": "weapon:d-charges",
       "targetRelease": "1.0.0",

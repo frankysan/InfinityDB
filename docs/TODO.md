@@ -374,9 +374,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       checks, with 320 px EXP/Viral screenshots reviewed; evidence is Git-ignored.
       The refreshed triage has 99 definition-review Weapons in 24 bounded
       batches plus Flash Pulse's accepted historical citation.
-    - [ ] Work through the 24 remaining source-category/usage-prioritized
+    - [x] Complete the eight-identity Pistol batch (Pistol, Heavy, Boarding,
+      Breaker, Assault, AP Heavy, Silenced and MULTI). The N5.3 p. 182 profiles
+      remain unmodified; the player-facing rules now distinguish Boarding
+      Blast/Hit traits, AP against ARM versus BTS, Shock, the conditional
+      Silent (-6) Dodge modifier (p. 175), combined AP+Shock (p. 67), and
+      MULTI's three non-stacking modes. Related ammunition/trait/Skill links
+      and interaction reviews are current. Browser acceptance passed 26/26
+      scenarios across three viewport widths and two navigation behaviors;
+      320 px Boarding/Silenced/MULTI screenshots were inspected.
+      The refreshed triage shows 91 definition-review Weapons in 23 batches,
+      plus Flash Pulse's accepted historical citation.
+    - [ ] Work through the 23 remaining source-category/usage-prioritized
       chart-listed Weapon batches (no more than eight identities per batch).
-      The next batch is the Pistol family, beginning with Pistol and Heavy Pistol.
+      The next batch is Rifles: Combi Rifle, MULTI Rifle, Rifle,
+      Adhesive Launcher Rifle, Breaker Combi Rifle, AP Rifle, T2 Rifle,
+      and K1 Combi Rifle.
       For each, distinguish complete Army profile facts from missing effect
       explanations, ammunition/trait/State relations, and browser navigation;
       preserve exact chart modes, the reviewed Kobra CC discrepancy, and

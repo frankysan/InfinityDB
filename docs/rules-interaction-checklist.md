@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **143/158** complete, **15** pending.
-- Current authored outgoing relations: **373**.
+- Supporting semantic identities: **151/166** complete, **15** pending.
+- Current authored outgoing relations: **394**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -975,11 +975,24 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (30/30)
+#### Weapon (38/38)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
   - `uses-effects-of` → CC (`trait:cc`)
+- [x] **AP Heavy Pistol** (`weapon:ap-heavy-pistol`) — reviewed: N5.3 p. 182: AP/ARM/2 with PS 6, B2, and one Saving Roll. Contrast Breaker Pistol BTS/2 without transferring defense attributes.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+- [x] **Assault Pistol** (`weapon:assault-pistol`) — reviewed: N5.3 p. 182: N/ARM, PS 7 and B4. Burst is not additional Saving Rolls on one hit.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+- [x] **Boarding Pistol** (`weapon:boarding-pistol`) — reviewed: N5.3 p. 182: Blast Mode has small Direct Template, Intuitive Attack and B1; Hit Mode has range bands, B2 and no Blast-only Traits. Both use N/ARM/one roll.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Intuitive Attack (`trait:intuitive-attack`)
+  - `uses-effects-of` → Intuitive Attack (`skill:intuitive-attack`)
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+- [x] **Breaker Pistol** (`weapon:breaker-pistol`) — reviewed: N5.3 p. 182: AP applies to BTS/2 rather than ARM/2, B2 with one Saving Roll; do not infer a second roll.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
 - [x] **CC Weapon** (`weapon:cc-weapon`) — reviewed: N5.3 p.177: PS 8, Burst 1, Normal N, one ARM Saving Roll and CC; generic CC Weapon requirements elsewhere do not mean this specific catalog identity.
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
   - `uses-effects-of` → CC (`trait:cc`)
@@ -1044,6 +1057,9 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
   - `uses-effects-of` → State (`trait:state`)
   - `causes-state` → Stunned State (`state:stunned`)
+- [x] **Heavy Pistol** (`weapon:heavy-pistol`) — reviewed: N5.3 p. 182: PS 6 and B2 with Shock ammo and one ARM Saving Roll. Source distinguishes Shock effects from PS.
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
 - [x] **Kobra Pistol** (`weapon:kobra-pistol`) — reviewed: N5.3 Mixed Weapons rules distinguish BS and CC modes and their ammunition; shared mode description does not assign mode-specific Traits or Saving Rolls.
   - outgoing: none
 - [x] **Kobra Pistol (CC Mode)** (`weapon:kobra-pistol-cc`) — reviewed: Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values.
@@ -1058,6 +1074,11 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
   - `uses-effects-of` → Impact Template (`trait:impact-template`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **MULTI Pistol** (`weapon:multi-pistol`) — reviewed: N5.3 p. 182: AP B2 ARM/2 one roll, Shock B2 ARM one roll, Anti-Materiel DA B1 ARM two rolls with mode-specific Anti-materiel. Modes are alternatives and their effects do not stack.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
 - [x] **Nanopulser** (`weapon:nanopulser`) — reviewed: N5.3 p. 187: Small Direct Template with Normal N ammo but BTS Saving Roll from the printed profile. Do not infer ARM from Normal ammo or add Bioweapon effects.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
@@ -1074,6 +1095,9 @@ review. `declaration-category` projection records are excluded.
   - `causes-state` → Immobilized-A State (`state:immobilized-a`)
 - [x] **Pheroware Tactics (PT)** (`weapon:pt`) — reviewed: The shared PT chart classification is BS Weapon (WIP), while individual PT variant effects stay separate. Army retains legacy Technical Weapon wording.
   - `uses-effects-of` → BS Weapon (WIP) (`trait:bs-weapon-wip`)
+- [x] **Pistol** (`weapon:pistol`) — reviewed: N5.3 p. 182: PS 9, B2, Normal ammo and one ARM Saving Roll. No special effect inferred.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
 - [x] **PT: Endgame** (`weapon:pt-endgame`) — reviewed: N5 v5.3 chart and the April 2025 update explicitly add Double Shot to Endgame only. Source-specific Army id 203 prevents applying it to Eraser or Mirrorball; current Army omits Double Shot.
   - `variant-of` → Pheroware Tactics (PT) (`weapon:pt`)
   - `uses-effects-of` → Double Shot (`trait:double-shot`)
@@ -1095,6 +1119,11 @@ review. `declaration-category` projection records are excluded.
 - [x] **Shock CC Weapon** (`weapon:shock-cc-weapon`) — reviewed: N5.3 p.177: Shock uses the printed one ARM Saving Roll; conditional Shock effects belong to the linked Ammunition definition.
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `uses-effects-of` → CC (`trait:cc`)
+- [x] **Silenced Pistol** (`weapon:silenced-pistol`) — reviewed: N5.3 pp. 67, 175, 182: combined AP+Shock yields one BTS/2 Saving Roll with conditional Shock effect; Silent (-6) affects enemy Face to Face Dodge only while user is in ZoC and outside LoF.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Silent (X) (`trait:silent-x`)
+  - `uses-effects-of` → Dodge (`skill:dodge`)
 - [x] **SymbioBomb** (`weapon:symbiobomb`) — reviewed: N5.3 p. 74 and the archived English Wiki distinguish the listed owner from the Deployment-assigned user. The single use permits Endgame, Eraser or Mirrorball; the -3 target MOD applies only to Endgame/Eraser. Only the selected Pheroware Tactic supplies attack-profile facts; no stand-alone SymbioBomb chart statistics or lasting assignment relationship are inferred.
   - `uses-effects-of` → Pheroware Tactics (PT) (`weapon:pt`)
 - [x] **Viral CC Weapon** (`weapon:viral-cc-weapon`) — reviewed: N5.3 p. 177 and archived BioWeapon Trait distinguish the printed N/BTS/one-save baseline from DA+Shock against VITA. Two BTS saves versus VITA and the STR exception are derived from the component rules, not independently printed modes. Shock applies only under its conditions. Preserve unresolved Immunity subtleties and the exact Army profile.

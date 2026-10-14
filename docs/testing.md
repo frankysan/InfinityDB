@@ -587,6 +587,24 @@ Ball screenshots were visually inspected. Evidence remains in ignored
 `local/audits/weapon-first-batch-2-browser/`. These checks are bounded
 reference/browser acceptance, not a complete release gate.
 
+## 1.0 Pistol Weapon batch browser acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Eight Pistol-family Weapon pages
+rendered at 1440, 390 and 320 px (24 cases), with source-cited N5.3
+p. 182 profiles, linked rules and no horizontal overflow or JavaScript/
+console errors. Boarding Blast/Hit and MULTI's three modes stayed
+distinct; Silenced displayed the printed AP+Shock/BTS/2 profile and the
+conditional Silent (-6) Trait.
+
+Desktop navigation from Silenced Pistol to Silent (X) passed. Touch
+navigation from MULTI Pistol to DA passed with reference preview on the
+first tap and navigation on the second (two more cases: **26/26**).
+Full-page 320 px screenshots of Boarding, Silenced and MULTI were
+visually inspected. The evidence remains Git-ignored under
+`local/audits/pistol-browser/`. No Army statistics or modes were
+rewritten. This certifies only these reference pages and interactions,
+not the full 1.0 release.
+
 ## 1.0 CC Weapon batch browser acceptance
 
 **Verified 2026-10-14, branch `dev/v1.0.0`.** All eight common

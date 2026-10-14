@@ -4812,6 +4812,404 @@
             "review": {"status": "reviewed", "reviewedOn": "2026-10-14"}
         },
         {
+            "id": "weapon:pistol",
+            "name": "Pistol",
+            "summary": "This standard sidearm uses [[ammunition:normal|Normal (N) Ammunition]], with PS 9, Burst 2, and one ARM Saving Roll for each successful hit. It has no additional Special Ammunition effect.\n\nThe printed range bands, not this reference, determine the [[skill:bs-attack|BS Attack]] modifiers.",
+            "kind": "weapon",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "pistol"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:bs-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 182,
+                    "section": "Weapon Chart: Pistol"
+                }
+            ]
+        },
+        {
+            "id": "weapon:heavy-pistol",
+            "name": "Heavy Pistol",
+            "summary": "This sidearm uses [[ammunition:shock|Shock Ammunition]], PS 6, and Burst 2. Each successful hit normally requires one ARM Saving Roll, with the conditional Shock effects governed by its Ammunition rules.\n\nThe higher or lower PS of a different weapon does not determine the Saving Roll count or automatically transfer its ammunition effects.",
+            "kind": "weapon",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "heavy-pistol"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:shock"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:bs-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 182,
+                    "section": "Weapon Chart: Heavy Pistol"
+                }
+            ]
+        },
+        {
+            "id": "weapon:boarding-pistol",
+            "name": "Boarding Pistol",
+            "summary": "**Blast Mode** uses a Small Teardrop [[trait:direct-template|Direct Template]], Burst 1, and [[ammunition:normal|Normal (N) Ammunition]] with one ARM Saving Roll. It also lists [[trait:intuitive-attack|Intuitive Attack]], which allows the corresponding [[skill:intuitive-attack|Common Skill]] when its requirements are met.\n\n**Hit Mode** instead uses a ranged [[skill:bs-attack|BS Attack]] with the printed Range MODs, Burst 2, and [[ammunition:normal|Normal Ammunition]] with one ARM Saving Roll. The Template and [[trait:intuitive-attack|Intuitive Attack]] Traits belong to Blast Mode, not Hit Mode.",
+            "kind": "weapon",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "boarding-pistol"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:direct-template"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:intuitive-attack"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:intuitive-attack"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:bs-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 182,
+                    "section": "Weapon Chart: Boarding Pistol"
+                }
+            ]
+        },
+        {
+            "id": "weapon:breaker-pistol",
+            "name": "Breaker Pistol",
+            "summary": "This weapon's [[ammunition:ap|AP Ammunition]] requires a Saving Roll using half the target's BTS (rounded up), printed as BTS/2. Its PS is 8 and its Burst is 2.\n\nAP reduces the applicable defense; it does not add an extra Saving Roll. Use the BTS attribute specified in this profile instead of assuming AP always applies to ARM.",
+            "kind": "weapon",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "breaker-pistol"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 182,
+                    "section": "Weapon Chart: Breaker Pistol"
+                }
+            ]
+        },
+        {
+            "id": "weapon:assault-pistol",
+            "name": "Assault Pistol",
+            "summary": "This weapon uses [[ammunition:normal|Normal (N) Ammunition]], with PS 7, Burst 4, and one ARM Saving Roll for each successful hit. The higher Burst describes the available [[skill:bs-attack|BS Attack]] dice, not extra Saving Rolls from an individual hit.\n\nApply the printed Range MODs and standard [[skill:bs-attack|BS Attack]] rules.",
+            "kind": "weapon",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "assault-pistol"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:normal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:bs-attack"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 182,
+                    "section": "Weapon Chart: Assault Pistol"
+                }
+            ]
+        },
+        {
+            "id": "weapon:ap-heavy-pistol",
+            "name": "AP Heavy Pistol",
+            "summary": "This heavy sidearm uses [[ammunition:ap|AP Ammunition]], with PS 6, Burst 2, and one ARM/2 Saving Roll per successful hit. AP halves the target's ARM (rounding up) for the Saving Roll.\n\nIts profile uses ARM/2, unlike a BTS/2 AP weapon; retain the Saving Roll Attribute printed for the selected weapon.",
+            "kind": "weapon",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "ap-heavy-pistol"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 182,
+                    "section": "Weapon Chart: AP Heavy Pistol"
+                }
+            ]
+        },
+        {
+            "id": "weapon:silenced-pistol",
+            "name": "Silenced Pistol",
+            "summary": "This weapon uses combined [[ammunition:ap|AP]] + [[ammunition:shock|Shock]] Ammunition. One successful hit calls for one BTS/2 Saving Roll, as printed: AP halves the listed BTS defense, while [[ammunition:shock|Shock]] may add its conditional effect. Combining them does not add a second Saving Roll.\n\nThe [[trait:silent-x|Silent (-6)]] Trait applies only to a target's Face to Face [[skill:dodge|Dodge]] Roll when the attacker is inside the target's [[trait:zone-of-control-zc|Zone of Control]] but outside their LoF. That -6 MOD is cumulative with other [[skill:dodge|Dodge]] MODs; it is not a general -6 penalty to every reaction.",
+            "kind": "weapon",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "silenced-pistol"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:shock"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:silent-x"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:dodge"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 67,
+                    "section": "Combined Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Silent (X)"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 182,
+                    "section": "Weapon Chart: Silenced Pistol"
+                }
+            ]
+        },
+        {
+            "id": "weapon:multi-pistol",
+            "name": "MULTI Pistol",
+            "summary": "Choose the mode used for the attack; their effects are not combined. **AP Mode** has Burst 2, [[ammunition:ap|AP Ammunition]], and one ARM/2 Saving Roll. **Shock Mode** has Burst 2, [[ammunition:shock|Shock Ammunition]], and one ARM Saving Roll.\n\n**[[trait:anti-materiel|Anti-Materiel]] Mode** instead has Burst 1, [[ammunition:da|DA Ammunition]], and two ARM Saving Rolls. Its [[trait:anti-materiel|Anti-materiel]] Trait applies in that mode only. All modes retain their own printed PS 7 and Range MODs.",
+            "kind": "weapon",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-14"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "multi-pistol"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:shock"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:da"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:anti-materiel"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 182,
+                    "section": "Weapon Chart: MULTI Pistol"
+                }
+            ]
+        },
+        {
             "id": "weapon:chain-colt",
             "kind": "weapon",
             "name": "Chain-colt",
