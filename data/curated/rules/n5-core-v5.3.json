@@ -8861,6 +8861,9 @@
                 ]
             },
             "facts": {
+                "sourceNotes": [
+                    "**Target allegiance review (REA-038):** The English N5.3 p. 90 and both captured English/Spanish Wiki Skill requirements omit a general Allied-only gate for direct use. That absence does not itself verify a blanket permission to treat enemy, Neutral, Hostile or scenario targets. Enemy contact normally brings [[state:engaged|Engaged State]] if neither Trooper is Immobilized or Null; contact with a [[state:unconscious|Unconscious]] or Immobilized enemy does not necessarily trigger that condition, but legality of non-Allied treatment still depends on applicable target/scenario rules. No scoped current N5 ruling has established universal eligibility."
+                ],
                 "category": "special-skill",
                 "typeIds": [
                     "short-skill"
@@ -8876,12 +8879,13 @@
                 ],
                 "restrictions": [
                     "Self-use can cancel applicable conditions only while the user is not in a Null State; [[skill:no-wound-incapacitation|No Wound Incapacitation]] and [[skill:technorganic|Technorganic]] have explicit recovery exceptions.",
-                    "Direct-use target allegiance remains under source review; the Allied-only requirement for [[equipment:medikit]] is not a general Doctor rule. Ordinary [[state:engaged|Engaged]] restrictions still apply.",
+                    "A user in [[state:engaged|Engaged State]] cannot declare this Skill. The Close Combat interaction rule also prevents treating an allied target that is already [[state:engaged|Engaged]] while the user is in Silhouette contact (N5.3 p. 51). Neither restriction is a general Allied-only requirement.",
                     "When the same Order removes and inflicts Wounds or conditions, resolve the positive effect first, then the negative effect (N5.3 p. 15)."
                 ],
                 "clarifications": [
                     "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful recovery Roll is sufficient under the shared success rule.",
-                    "A [[rule:peripheral-type:servant|Servant]] or Connected [[rule:peripheral-type:cyberplug|Cyberplug]] in Silhouette contact with an allied Model can allow the Controller to declare [[skill:doctor|Doctor]] without direct contact. The Controller makes the Roll; only one target is treated in that Order."
+                    "A [[rule:peripheral-type:servant|Servant]] or Connected [[rule:peripheral-type:cyberplug|Cyberplug]] in Silhouette contact with an allied Model can allow the Controller to declare [[skill:doctor|Doctor]] without direct contact. The Controller makes the Roll; only one target is treated in that Order.",
+                    "**Direct versus delegated contact:** The direct Doctor Skill lists its own target/contact conditions for [[state:unconscious|Unconscious]] VITA recovery but does not print a universal Allied-only prerequisite. [[equipment:medikit|MediKit]] separately requires an Allied target, as do the remote contact permissions of [[rule:peripheral-type:servant|Servant]] and Connected [[rule:peripheral-type:cyberplug|Cyberplug]]. Those local Allied restrictions must not be assumed to amend this direct Skill."
                 ]
             },
             "labelIds": [
@@ -8908,6 +8912,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 107,
                     "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 51,
+                    "section": "Interacting with a Close Combat"
                 }
             ],
             "review": {
@@ -8947,6 +8956,9 @@
                 ]
             },
             "facts": {
+                "sourceNotes": [
+                    "**Target allegiance review (REA-038):** The English N5.3 p. 91 and both captured English/Spanish Wiki Skill requirements omit a general Allied-only gate for direct use. That absence does not itself verify a blanket permission to treat enemy, Neutral, Hostile or scenario targets. Enemy contact normally brings [[state:engaged|Engaged State]] if neither Trooper is Immobilized or Null; contact with a [[state:unconscious|Unconscious]] or Immobilized enemy does not necessarily trigger that condition, but legality of non-Allied treatment still depends on applicable target/scenario rules. No scoped current N5 ruling has established universal eligibility."
+                ],
                 "category": "special-skill",
                 "typeIds": [
                     "short-skill"
@@ -8962,12 +8974,13 @@
                 ],
                 "restrictions": [
                     "Self-use is permitted to repair Wounds or cancel applicable conditions only while the user is not in a Null State.",
-                    "Direct-use target allegiance remains under source review; the Allied-only requirement for [[equipment:gizmokit]] does not establish a universal Engineer restriction. Ordinary [[state:engaged|Engaged]] restrictions still apply.",
+                    "A user in [[state:engaged|Engaged State]] cannot declare this Skill. The Close Combat interaction rule also prevents treating an allied target that is already [[state:engaged|Engaged]] while the user is in Silhouette contact (N5.3 p. 51). Neither restriction is a general Allied-only requirement.",
                     "If a condition is canceled and a new one inflicted in the same Order, apply cancellation first, then the new effect. For example, canceling [[state:immobilized-a|IMM-A]] does not prevent a simultaneous failed [[ammunition:para|PARA]] Saving Roll from inflicting that condition again (N5.3 p. 15)."
                 ],
                 "clarifications": [
                     "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful Roll makes the coordinated use successful.",
-                    "A [[rule:peripheral-type:servant|Servant]] or Connected [[rule:peripheral-type:cyberplug|Cyberplug]] in Silhouette contact with an allied Model can allow the Controller to declare [[skill:engineer|Engineer]] without direct contact. The Controller makes the Roll; only one target is treated in that Order."
+                    "A [[rule:peripheral-type:servant|Servant]] or Connected [[rule:peripheral-type:cyberplug|Cyberplug]] in Silhouette contact with an allied Model can allow the Controller to declare [[skill:engineer|Engineer]] without direct contact. The Controller makes the Roll; only one target is treated in that Order.",
+                    "**Direct versus delegated contact:** The direct Engineer Skill lists its own target/contact conditions for STR repair or eligible condition cancellation but does not print a universal Allied-only prerequisite. [[equipment:gizmokit|GizmoKit]] separately requires an Allied target, as do the remote contact permissions of [[rule:peripheral-type:servant|Servant]] and Connected [[rule:peripheral-type:cyberplug|Cyberplug]]. Those local Allied restrictions must not be assumed to amend this direct Skill."
                 ]
             },
             "labelIds": [
@@ -8994,6 +9007,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 107,
                     "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 51,
+                    "section": "Interacting with a Close Combat"
                 }
             ],
             "review": {

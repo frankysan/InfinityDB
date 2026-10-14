@@ -738,9 +738,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] **REA-037 — Armed Turret source conflict:** Resolve the
       competing Silhouette values within the official PDF; do not
       silently choose one source cell.
-    - [ ] **REA-038 — Doctor/Engineer target eligibility:** Adjudicate
-      direct-target allegiance before closing the revised recovery
-      eligibility explanations.
+    - [x] **REA-038 ? Doctor/Engineer direct-use scope:** Reconcile
+      direct Skill contact/State requirements against EN N5.3 pp. 90-91,
+      close-combat restrictions pp. 51/160, locally scoped Allied gates
+      for Kits pp. 123-124 and Servant/Cyberplug pp. 106-107, plus
+      English/Spanish captured Wiki Skills. Publish clear source-cited
+      direct-versus-delegated eligibility and Engaged conditions without
+      introducing an unsupported universal target-allegiance rule.
+    - [ ] **REA-038 ? Non-Allied direct-target ruling:** Obtain a scoped
+      current N5 ruling or explicit project decision on the *derived*
+      interpretation for non-Allied Unconscious/Immobilized, Neutral,
+      Hostile, and scenario-specific targets. Absence of an Allied gate
+      in direct Skill text alone is not a verified universal permission.
+      Do not change gameplay eligibility beyond confirmed clauses until
+      this source decision is made.
     - [x] **REA-039 — TinBot sharing:** N5.3 p. 127 operational eligibility,
       Fireteam-wide benefits, same-advantage MOD selection, owner departure,
       nonblocking/untargetable State Token status and Dead State removal

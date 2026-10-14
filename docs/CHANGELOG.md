@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Doctor and Engineer now distinguish direct contact from delegated
+  Servant/Cyberplug treatment and the separate Allied-only Kit rules.
+  Their Engaged restrictions are clearer; non-Allied direct treatment
+  remains an unresolved rules interpretation rather than an assumed right.
 - Dodge (ARM+3) now explains when its profile-listed ARM protection
   applies, without changing the Dodge PH Roll. The reference also
   distinguishes the two N5.3 PDF descriptions from both language Wiki
@@ -134,6 +138,12 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web backend:** Clarify source-scoped Doctor and
+  Engineer eligibility, including Engaged and close-combat restrictions,
+  while preserving the independent Allied requirements for MediKit,
+  GizmoKit and Peripheral delegation. The direct Skills do not gain a
+  new allegiance gate or universal permission for non-Allied targets;
+  source uncertainty remains explicit and tracked.
 - **Data processing + Web backend + Web frontend:** Expand the Dodge
   Skill reference with source-cited (ARM+3) conditions, relevant Saving
   Roll links, and simultaneous-Attack interactions. Preserve the

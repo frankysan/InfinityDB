@@ -3196,7 +3196,7 @@ def test_ammunition_conditional_state_links_are_bidirectional(
                 "A failed Roll puts the target directly into [[state:dead|Dead State]]",
                 "[[state:stunned|Stunned State]] may instead be canceled",
                 "replacement value does not apply to a subsequent Command Token reroll",
-                "Direct-use target allegiance remains under source review",
+                "Neither restriction is a general Allied-only requirement",
             ),
         ),
         (
@@ -3206,7 +3206,7 @@ def test_ammunition_conditional_state_links_are_bidirectional(
                 "a failed condition-cancellation Roll has no negative consequence",
                 "[[state:stunned|Stunned State]], Engineer applies to STR",
                 "cancellation first, then the new effect",
-                "Direct-use target allegiance remains under source review",
+                "Neither restriction is a general Allied-only requirement",
             ),
         ),
         (
@@ -3269,6 +3269,54 @@ def test_recovery_and_intuitive_attack_explanations_survive_rules_export(
     for fragment in required_fragments:
         assert fragment in text
     assert any(citation["source_id"] == "n5-core-v5.3-pdf" for citation in record["citations"])
+
+
+@pytest.mark.parametrize(
+    ("skill_id", "kit_id", "source_page"),
+    [("skill:doctor", "equipment:medikit", 90),
+     ("skill:engineer", "equipment:gizmokit", 91)],
+)
+def test_rea038_direct_recovery_contact_does_not_inherit_allied_gate(
+    current_rules_database: RulesDatabase,
+    skill_id: str,
+    kit_id: str,
+    source_page: int,
+) -> None:
+    direct = current_rules_database.composed_record(skill_id)
+    kit = current_rules_database.composed_record(kit_id)
+    servant = current_rules_database.composed_record("rule:peripheral-type:servant")
+    cyberplug = current_rules_database.composed_record("rule:peripheral-type:cyberplug")
+    assert direct is not None and kit is not None
+    assert servant is not None and cyberplug is not None
+
+    requirements = " ".join(direct["facts"]["requirements"])
+    restrictions = " ".join(direct["facts"]["restrictions"])
+    clarifications = " ".join(direct["facts"]["clarifications"])
+    notes = direct["facts"]["sourceNotes"]
+    assert "Silhouette contact with the target" in requirements
+    assert "Allied" not in requirements
+    assert "[[state:engaged|Engaged State]] cannot declare this Skill" in restrictions
+    assert "already [[state:engaged|Engaged]]" in restrictions
+    assert "(N5.3 p. 51)" in restrictions
+    assert "direct " + direct["name"] + " Skill" in clarifications
+    assert "does not print a universal Allied-only prerequisite" in clarifications
+    assert f"[[{kit_id}|" in clarifications
+    assert "[[rule:peripheral-type:servant|Servant]]" in clarifications
+    assert "[[rule:peripheral-type:cyberplug|Cyberplug]]" in clarifications
+    assert "Allied" in " ".join(kit["facts"]["requirements"])
+    assert "allied Model" in " ".join(servant["facts"]["effects"])
+    assert "allied target" in " ".join(cyberplug["facts"]["clarifications"])
+    assert len(notes) == 1
+    assert "does not itself verify a blanket permission" in notes[0]
+    assert "[[state:unconscious|Unconscious]]" in notes[0]
+    assert "No scoped current N5 ruling" in notes[0]
+    assert {
+        (ref["source_id"], ref.get("page"))
+        for ref in direct["citations"]
+    } >= {
+        ("n5-core-v5.3-pdf", 51),
+        ("n5-core-v5.3-pdf", source_page),
+    }
 
 
 def test_recovery_and_intuitive_attack_avoid_the_old_misleading_baselines(

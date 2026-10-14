@@ -1865,9 +1865,15 @@ No Wound Incapacitation and Technorganic, provide specific exceptions.
 Engineer instead has separate effects: repair an STR target (a failed WIP Roll
 inflicts a Wound), or cancel eligible non-Unconscious States (failure has no
 negative consequence). The Stunned cancellation rule distinguishes VITA
-(Doctor) from STR (Engineer). Direct target **allegiance** remains under
-investigation (REA-038); the explicit Allied restrictions on MediKit/GizmoKit
-cannot be silently generalized to the Skills.
+(Doctor) from STR (Engineer). The direct Doctor/Engineer requirements contain no universal Allied-only
+clause; the explicit Allied target gates of MediKit/GizmoKit and the
+Servant/Connected Cyberplug contact exception do not generalize to the
+underlying Skills. Engaged State and Interacting with a Close Combat
+separately prohibit their declarations/target treatment in the applicable
+close-combat situations. This is now explained in the player references;
+whether non-Allied Unconscious/Immobilized, Neutral, Hostile or scenario
+targets qualify for direct Skill use remains an unconfirmed source decision
+(REA-038), not an inferred blanket permission.
 
 MediKit and GizmoKit resolve target PH Rolls, not Saving Rolls. If multiple
 successful hits/uses occur in one Order, any successful target PH Roll gives

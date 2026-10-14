@@ -1263,3 +1263,27 @@ overflow were observed. Screenshots, results, private script and
 local temporary DB remain under Git-ignored `local/audits/`.
 This does not imply a full simultaneous combat resolver or an
 unverified official erratum.
+
+
+## 1.0 Doctor/Engineer direct versus delegated target scope (REA-038)
+
+**Reviewed 2026-10-14, `dev/v1.0.0`.** Checked the N5.3 English
+Doctor/Engineer pages 90-91, Engaged and Close Combat pp. 51/160,
+Kit-specific Allied requirements pp. 123-124, Peripheral delegations
+pp. 106-107, and pinned English/Spanish Wiki Doctor/Engineer pages.
+Direct Skill requirements specify contact and applicable State/Attribute
+conditions, but not a generic Allied-only gate. The explicit Allied
+conditions for Kits and delegated Peripheral use remain local, and
+Engaged restrictions remain independently mandatory. Non-Allied direct
+use beyond such confirmed conditions has **not** been adopted as a
+universal gameplay permission.
+
+Focused source/database regression checks assert the unchanged direct
+requirements, Kit/Peripheral Allied boundaries, published clarification,
+close-combat source citations and unresolved non-Allied note. Responsive
+headless Chrome acceptance against a locally rebuilt rules DB checks
+Doctor, Engineer, MediKit and GizmoKit at 1440, 390 and 320 px, plus
+cross-links, JS errors and horizontal overflow. Verification script,
+screenshots, generated rules DB and results are private and ignored in
+`local/audits/`. A future official ruling or explicit project decision
+is required to adjudicate non-Allied direct targeting fully.

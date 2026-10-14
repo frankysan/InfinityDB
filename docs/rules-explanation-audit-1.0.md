@@ -1548,6 +1548,35 @@ and not every enemy is declared a legal treatment target.
 **1.0 relevance:** Adjudicate this qualifier before accepting the complete
 target-eligibility explanation; confirmed recovery clauses can proceed separately.
 
+**Follow-up (2026-10-14): Direct/delegated source scope clarified;
+universal non-Allied applicability remains unresolved.** The current
+curated Doctor and Engineer requirements *already* omit the alleged
+friendly-only direct gate: Doctor specifies Silhouette contact and
+Unconscious VITA recovery, while Engineer specifies contact plus STR
+for Wound removal or condition-specific cancellation. The audit's
+initial "Current: Both direct Skill requirements add a friendly target
+gate" describes an earlier draft, not the checkout at `c626cba`.
+
+English N5.3 pp. 90-91 and archived English/Spanish Wiki Skill pages do
+not add a direct Allied-only condition; pp. 123-124 explicitly restrict
+MediKit/GizmoKit targets to Allied Models and pp. 106-107 restrict
+Servant/Connected Cyberplug contact delegation to allied Models. In
+Close Combat, p. 51 forbids Doctor/Engineer treatment in contact with an
+allied Engaged Model; p. 160 prevents a Trooper in Engaged State from
+declaring these Skills. Ordinary enemy contact often activates Engaged,
+but its Null/Immobilized exceptions do not independently establish
+permission to treat enemy or Neutral targets. The captured historical
+N3 forum discussion is not a binding current N5 ruling.
+
+The player-facing `skill:doctor` and `skill:engineer` cards now state
+these separate conditions, retain their own Skill requirements, link
+Kit and Peripheral-specific Allied provisions, and show source notes
+explicitly rejecting a blanket permission inferred from missing text.
+Both include a Close Combat p. 51 citation. No rule implementation or
+Army profile changed; no enemy eligibility engine was introduced.
+The missing official direct-target ruling remains open in `TODO.md`
+rather than being falsely closed by the improved reference copy.
+
 ### REA-039 - TinBot omits operational eligibility and Fireteam sharing
 
 **Classification:** completeness, consistency. **Severity:** High. **Priority:** P1.

@@ -1851,6 +1851,30 @@ def test_rea042_dodge_arm_modifier_preserves_pdf_and_wiki_disagreement() -> None
     assert len(spanish["sha256"]) == 64
 
 
+def test_rea038_direct_vs_delegated_recovery_source_scope() -> None:
+    source = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    document = load_curated_document(source)
+    records = {record["id"]: record for record in document["records"]}
+    for skill_id, kit_id in (
+        ("skill:doctor", "equipment:medikit"),
+        ("skill:engineer", "equipment:gizmokit"),
+    ):
+        direct = records[skill_id]
+        kit = records[kit_id]
+        assert all("Allied" not in req for req in direct["facts"]["requirements"])
+        assert any("Allied" in req for req in kit["facts"]["requirements"])
+        assert "[[state:engaged|Engaged State]]" in " ".join(direct["facts"]["restrictions"])
+        assert "one target" in " ".join(direct["facts"]["clarifications"])
+        note = direct["facts"]["sourceNotes"][0]
+        assert "blanket permission" in note
+        assert "Engaged State" in note
+        pdf_pages = {
+            c["page"] for c in direct["citations"]
+            if c["sourceId"] == "n5-core-v5.3-pdf"
+        }
+        assert pdf_pages >= {51}
+
+
 def test_checked_in_n5_collection_models_silent_dodge_modifier() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
