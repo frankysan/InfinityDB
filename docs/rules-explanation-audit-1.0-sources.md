@@ -87,6 +87,7 @@ used as publication evidence. Original source IDs S1-S12 remain stable.
 | S19 | Wiki Doctor, English, revision 3979; Médico, Spanish, revision 3822 | English: S4 index 2025-10-31T11:38:00Z; Spanish: S21 index 2025-11-26T15:03:51Z | Follow-up exact English bytes in S4 and Spanish bytes in S14 inspected; live URLs also read | [Doctor](https://infinitythewiki.com/Doctor), [Médico](https://infinitythewiki.com/es/M%C3%A9dico); `_history/oldid/3979.html` and `es/Medico` | Requirement/allegiance comparison, REA-002/038. Both distinguish older collapsed wording; no universal Allied target restriction located |
 | S21 | Infinity Wiki Spanish revision-history archive; 2503 revisions, 3290 ZIP members | Each oldid has its own revision timestamp; no single effective rules date | Operator supplied 2026-10-09; archive filename includes `20261009-215316`, independently supplied download metadata not verified | `WIKI-es-history 20261009-215316.zip`; revision acquisition via `https://infinitythewiki.com/wiki-es/api.php`, `_history/index.json` plus `_history/oldid/*.html` | **Exact revision timestamps and payload hashes inspected**, with selected revisions below; historical content not automatically identical to S14 rendered current page bytes; corroborates REA-027/034/037/041/042. Not a replacement for missing S18 English archive |
 | S22 | Wiki Tabla de Armas Alternativas, Spanish, revision 3988 | **S21 revision timestamp 2026-08-27T14:21:00Z** | Direct public-page and exact-oldid responses fetched 2026-10-14; **S21 historical member independently SHA-256 checked** | [exact revision](https://infinitythewiki.com/es/Tabla_de_Armas_Alternativas?oldid=3988); S21 `_history/oldid/3988.html` | Pulso Flash repeats S8's two PB Saving Rolls and omission of State: Stunned. Pinned historical and URL-backed corroboration, **not** a PDF change or official correction; REA-027 |
+| S23 | N5 FAQs, Spanish, cover v0.1; 5 file pages, 4 printed content pages | Exact release date unverified; PDF creation metadata 2026-08-25T13:41:43Z; S13 September 1 update notice is separate | Available locally and independently SHA-256 checked 2026-10-14; acquisition date unavailable | `data/pdf/faq/esp-faqs-n5-v0-1.pdf`; official resources portal, Spanish FAQ category | Printed p. 2 jointly confirms Sixth Sense/MSV1 target-only -6 exception. ITS printed p. 3 confirms Spotlight Classified scoring and carried scenario-element Marker restriction; p. 4 confirms undeployed Ancillary not Killed for ITS. Also includes a different Fireteam example wording, left to REA-034 |
 
 ## Supplementary Spanish PDF and revision-history checks
 
@@ -130,6 +131,7 @@ S18 remains an **expected** hash only, without verified ZIP bytes.
 ```text
 S1  53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f
 S2  7bf26b7d039db7826ef5500b1a2159fe54855b4e632133cab416becee65b85aa
+S23 7c40a9ba25b8f61c4e3f40e43b4b15884dfcf27b623baebfc14b003bbeafbf8a
 S3  643ab0b6d7c3e9e5ffbf668543723161f252367e7788af09ec008be19c17851b
 S4  d49db0515420af297a7349201e8bb7750ecb422048d32bb494273ee1cea78a5d
 S5  c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987

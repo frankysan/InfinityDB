@@ -710,9 +710,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         clarification on Kobra CC's Trait in the bilingual printed
         chart versus Army/current Wiki. Do not infer the Trait from DA
         or infer that a later Wiki revision settles the discrepancy.
-    - [ ] **REA-030 — Targeted, MSV1, Sixth Sense FAQ:** Adjudicate
-      publication scope and applicability separately from the Negative
-      Feedback references before dependent curation.
+    - [x] **REA-030 — General versus ITS FAQ applicability:** Reviewed
+      English and Spanish N5 FAQ v0.1. Source registration already
+      existed in English; Spanish v0.1 is now pinned. Sixth Sense/MSV1
+      explains the conditional -6 LoF exception when targeted through
+      a Zero Visibility Zone. ITS Spotlight Classified scoring and
+      undeployed Ancillary scoring are annotated with their exact scope.
+      Core Supplies, Annihilation and Firefight mechanics remain unchanged.
+      - [ ] **External scope ruling:** Determine whether the ITS
+        scenario-element Marker-State answer and undeployed Ancillary
+        Killed exception also apply to the four core N5.3 scenarios.
+      - [ ] **Future full FAQ collection:** The selected ruling
+        references do not constitute a complete versioned FAQ/ITS
+        data collection; do not mix all ITS decisions into core rules.
     - [ ] **REA-034 — Fireteam example conflict:** Resolve the Spanish
       and official PDF source contradiction at its owning audit finding;
       retain original publication provenance.

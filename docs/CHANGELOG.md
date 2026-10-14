@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Sixth Sense and Multispectral Visor now explain the FAQ's joint
+  Level 1 exception for a target attacked through a Zero Visibility Zone.
+  ITS Spotlight and Ancillary scoring clarifications remain explicitly
+  mission-scoped rather than changing core scenario rules.
 - Kobra Pistol's CC reference now separates the two Saving Rolls required
   by DA Ammunition from the disputed Anti-materiel Trait, preserving the
   imported weapon profile and keeping BS Mode independent.

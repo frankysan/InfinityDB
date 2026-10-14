@@ -275,6 +275,17 @@
             "url": "https://experience.corvusbelli.com/en/infinity/resources"
         },
         {
+            "id": "n5-faq-v0.1-es-pdf",
+            "kind": "pdf",
+            "title": "N5 FAQs — Spanish",
+            "version": "0.1",
+            "publishedDate": "2026-09-01",
+            "localPath": "data/pdf/faq/esp-faqs-n5-v0-1.pdf",
+            "pageCount": 5,
+            "authority": "primary",
+            "url": "https://experience.corvusbelli.com/en/infinity/resources"
+        },
+        {
             "id": "wiki-en-20260926-200832",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
@@ -9338,7 +9349,8 @@
                     "Deploying the Ancillary, or removing its [[state:disconnected|Disconnected]] or Null condition, immediately ends the Controller's Fireteam membership."
                 ],
                 "clarifications": [
-                    "There is no maximum operating distance for an Ancillary after deployment. The Fireteam and Coordinated Order exceptions depend on the Ancillary's current deployment/condition, not solely on the Controller owning the [[skill:peripheral|Peripheral]] Skill."
+                    "There is no maximum operating distance for an Ancillary after deployment. The Fireteam and Coordinated Order exceptions depend on the Ancillary's current deployment/condition, not solely on the Controller owning the [[skill:peripheral|Peripheral]] Skill.",
+                    "ITS FAQ v0.1, page 4: an undeployed Ancillary is not counted as Killed for those scenario objectives; a deployed one counts only if it enters [[state:dead|Dead State]] or remains in a [[term:null-state|Null State]] at game end. This answer appears under the ITS heading. Its application to core Annihilation/Firefight is not independently established and their Killing rules are not changed here."
                 ]
             },
             "relations": [
@@ -9357,6 +9369,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 108,
                     "section": "Peripheral"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 4,
+                    "section": "ITS: Undeployed Peripheral (Ancillary) Killed"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-es-pdf",
+                    "page": 4,
+                    "section": "ITS: Periferico Auxiliar no desplegado"
                 }
             ],
             "review": {
@@ -10882,6 +10904,9 @@
                 ]
             },
             "facts": {
+                "clarifications": [
+                    "The FAQ's joint [[skill:sixth-sense|Sixth Sense]] / Level 1 exception applies specifically when the Trooper is the target of a [[skill:bs-attack|BS Attack]] through a [[term:zero-visibility-zone|Zero Visibility Zone]]. See the [[skill:sixth-sense|Sixth Sense]] rule for that condition; Level 1 alone still uses the listed -6 LoF MOD."
+                ],
                 "effects": [
                     "The Level listed for the user supplies its defined [[skill:mimetism]], [[term:visibility-zone|Visibility Zone]], [[ammunition:smoke|Smoke Ammunition]], and camouflage-countering effects."
                 ],
@@ -10926,6 +10951,16 @@
                 {
                     "sourceId": "wiki-multispectral-visor-oldid-4111",
                     "heading": "Multispectral Visor"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 2,
+                    "section": "Special Skills: Sixth Sense with MSV Level 1"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-es-pdf",
+                    "page": 2,
+                    "section": "Habilidades Especiales: Sexto Sentido con Visor Multiespectral Nivel 1"
                 }
             ],
             "review": {
@@ -11034,6 +11069,9 @@
                 "requirements": [],
                 "restrictions": [
                     "The Skill's response and MOD exceptions apply only in the situations it specifies."
+                ],
+                "clarifications": [
+                    "**Official FAQ v0.1 (general Special Skills ruling):** When the Trooper has both [[equipment:multispectral-visor|Multispectral Visor Level 1]] and Sixth Sense, and is the target of a [[skill:bs-attack|BS Attack]] through a [[term:zero-visibility-zone|Zero Visibility Zone]], the -6 MOD for drawing LoF through the Zone is ignored. MSV1 by itself still has its printed -6 LoF requirement; this FAQ does not cancel other MODs or grant an unconditional LoF exception."
                 ]
             },
             "armyLinks": [
@@ -11046,6 +11084,16 @@
                 {
                     "sourceId": "wiki-sixth-sense-oldid-3901",
                     "heading": "Sixth Sense"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 2,
+                    "section": "Special Skills: Sixth Sense and Multispectral Visor Level 1"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-es-pdf",
+                    "page": 2,
+                    "section": "Habilidades Especiales: Sexto Sentido y Visor Multiespectral Nivel 1"
                 }
             ],
             "review": {
@@ -13078,6 +13126,9 @@
                 ]
             },
             "facts": {
+                "sourceNotes": [
+                    "ITS FAQ v0.1, page 3: the Telemetry and HVT: Designation Classified Objectives require their specified successful [[hacking-program:spotlight|Spotlight]] Rolls, not necessarily entry into [[state:targeted|Targeted State]]. This is an ITS Classified Objective scoring condition, not a change to how [[state:targeted|Targeted State]] is entered or what it does in ordinary play."
+                ],
                 "category": "state",
                 "effects": [
                     "[[skill:bs-attack]], Comms Attack, and [[skill:discover]] against the Trooper gain a +3 MOD to the Attribute used.",
@@ -13094,6 +13145,16 @@
                 {
                     "sourceId": "wiki-targeted-state-oldid-3670",
                     "heading": "Targeted State"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-en-pdf",
+                    "page": 3,
+                    "section": "ITS: Telemetry and HVT Designation"
+                },
+                {
+                    "sourceId": "n5-faq-v0.1-es-pdf",
+                    "page": 3,
+                    "section": "ITS: Telemetria y HVT Designacion"
                 }
             ],
             "review": {

@@ -1134,3 +1134,41 @@ Private PDF/HTML extractions, 320 px screenshots and browser results
 remain in `local/audits/` and `local/audits/rea028-browser/`.
 No raw source archives, new universal rule evaluator, or guessed
 profile correction were added.
+
+
+## 1.0 REA-030 FAQ scope and selected applicability acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** English and Spanish FAQ
+v0.1 (printed pp. 2–4; file pages 3–5) were independently compared
+with the original v0.0 English FAQ and the N5.3 core scenario rules.
+English FAQ provenance was already registered in the core and Hacking
+collections; the verified Spanish PDF source is now registered in the
+core curated collection. Its exact SHA-256 and the differing
+publication-versus-PDF-creation dates are in the source audit manifest.
+
+The published **Sixth Sense / Multispectral Visor Level 1** clarification
+is strictly conditioned on the defender being targeted by a BS Attack
+through a Zero Visibility Zone. The FAQ cancels the specified -6 LoF
+MOD in that joint case, not all visibility penalties. The FAQ's
+Spotlight Classified Objective scoring rule and undeployed Ancillary
+Killed exception remain **ITS-scoped**. The core N5.3 Annihilation,
+Firefight and Supplies scenario records retain their original
+effects/citations, and no undocumented change to Marker-state
+transitions or end-game scoring was introduced.
+
+Chromium browser acceptance passed **24/24** page and actual link
+navigation checks at 1440, 390 and 320 px across Sixth Sense,
+Multispectral Visor, Targeted State, and three core scenario pages,
+with no JavaScript errors or horizontal overflow. The 320 px skill,
+equipment and state screenshots were visually reviewed. Regression
+coverage is in `tests/test_rules_database.py` and explicitly asserts
+that the ITS FAQ does not alter the core scenario rules or override
+MSV Level 1 in isolation.
+
+This is selected FAQ source-and-scope acceptance, **not** certification
+of the entire 37-question FAQ corpus or a standalone versioned FAQ
+collection. Wider ITS season integration and whether these ITS
+scenario-element/Ancillary answers apply to core missions remain open
+for authoritative clarification. Private extracts, screenshots and
+results are retained under Git-ignored `local/audits/` and
+`local/audits/rea030-browser/`.

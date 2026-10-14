@@ -3527,3 +3527,76 @@ def test_rea027_flash_pulse_bilingual_publication_conflict_preserves_outcome(
     assert case["stateEffect"] == {
         "stateId": "state:stunned", "condition": "failed-saving-roll"
     }
+
+
+def test_rea030_general_faq_and_its_only_scope_stay_separate(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """FAQ v0.1: general SS/MSV1 versus ITS-only objectives (pp. 2-4)."""
+    sixth = current_rules_database.composed_record("skill:sixth-sense")
+    visor = current_rules_database.composed_record("equipment:multispectral-visor")
+    targeted = current_rules_database.composed_record("state:targeted")
+    ancillary = current_rules_database.composed_record("rule:peripheral-type:ancillary")
+    curated = json.loads(
+        (Path(__file__).resolve().parents[1]
+         / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
+    )
+    scoped_records = {record["id"]: record for record in curated["records"]}
+    supplies = scoped_records["rule:scenario:carrying-supply-boxes"]
+    killing = scoped_records["rule:scenario:killing"]
+    assert sixth is not None
+    assert visor is not None
+    assert targeted is not None
+    assert ancillary is not None
+    assert supplies is not None
+    assert killing is not None
+
+    faq_sources = {"n5-faq-v0.1-en-pdf", "n5-faq-v0.1-es-pdf"}
+    for record, page in ((sixth, 2), (visor, 2), (targeted, 3), (ancillary, 4)):
+        assert {
+            citation["source_id"]
+            for citation in record["citations"]
+            if citation.get("page") == page
+        } >= faq_sources
+
+    ss_note = " ".join(sixth["facts"]["clarifications"])
+    assert (
+        "both [[equipment:multispectral-visor|Multispectral Visor Level 1]]"
+        " and Sixth Sense"
+    ) in ss_note
+    assert "target of a [[skill:bs-attack|BS Attack]]" in ss_note
+    assert "does not cancel other MODs" in ss_note
+    msv_note = " ".join(visor["facts"]["clarifications"])
+    assert "[[skill:sixth-sense|Sixth Sense]]" in msv_note
+    assert "Level 1 alone still uses the listed -6 LoF MOD" in msv_note
+    assert "applying a -6 MOD to Skills that require LoF" in " ".join(
+        visor["facts"]["levels"][0]["effects"]
+    )
+
+    targeted_note = " ".join(targeted["facts"]["sourceNotes"])
+    assert "ITS Classified Objective scoring condition" in targeted_note
+    assert "not necessarily entry into [[state:targeted|Targeted State]]" in targeted_note
+    assert "successful [[hacking-program:spotlight|Spotlight]] Rolls" in targeted_note
+    ancillary_note = " ".join(ancillary["facts"]["clarifications"])
+    assert "ITS FAQ v0.1, page 4" in ancillary_note
+    assert "undeployed Ancillary is not counted as Killed" in ancillary_note
+    assert "core Annihilation/Firefight is not independently established" in ancillary_note
+
+    # The ITS FAQ does not silently change the published core missions.
+    assert supplies["scope"]["scenarios"] == ["scenario:supplies"]
+    assert supplies["facts"]["effects"] == [
+        "Each Specialist Troop may carry at most one Supply Box.",
+        "Only Models can carry Supply Boxes; Markers cannot carry them.",
+        "Keep the Supply Box Token on the table even if its carrier becomes classified as Null.",
+    ]
+    assert killing["scope"]["scenarios"] == [
+        "scenario:annihilation", "scenario:firefight",
+    ]
+    assert "never deployed on the table as a Model or Marker" in " ".join(
+        killing["facts"]["effects"]
+    )
+    for record in (supplies, killing):
+        assert not (faq_sources & {
+            citation["sourceId"] for citation in record["citations"]
+        })
+        assert "sourceNotes" not in record["facts"]

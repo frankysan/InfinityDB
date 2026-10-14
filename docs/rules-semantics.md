@@ -2310,8 +2310,11 @@ These are conditions for placing and opposing the Template, not a generic
 promise that Smoke or Eclipse prevents every Attack. The structured
 `facts.visibilityZone` properties remain separate from the curated
 `facts.clarifications` explanations; neither represents a roll evaluator.
-The targeted Sixth Sense/MSV1 FAQ qualification remains within REA-019,
-not silently generalized into this interaction.
+The REA-030 review now publishes the FAQ's narrow Sixth Sense/MSV1
+exception on their owning reference cards: both are present and the user
+is the target of a BS Attack through a Zero Visibility Zone. This does
+not change the standalone MSV1 LoF -6 MOD or imply a general Smoke,
+Eclipse, Visibility Zone or MOD-cancellation evaluator.
 
 Sources: English N5 v5.3, pp. 64 and 66 (including the Smoke example),
 MSV p. 125; Spanish N5 v5.3, pp. 64-65 and 130; FAQ v0.1, p. 2

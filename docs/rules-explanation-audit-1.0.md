@@ -1264,36 +1264,59 @@ separate rules-interpretation review. See the updated source evidence ledger.
 ### REA-030 - FAQ publication and scenario applicability remain uncurated
 
 **Classification:** completeness, source discrepancy. **Severity:** Medium.
-**Priority:** P1. **Evidence:** Publication absence Observed; FAQ outcomes
-Explicit within their scope; core applicability of ITS-only answers Unresolved.
+**Priority:** P1. **Evidence:** Earlier publication registration finding
+superseded; FAQ outcomes Explicit within their scope; core applicability
+of ITS-only answers Unresolved.
 **Affected:** C/H sources; `rule:scenario:killing`, `rule:scenario:carrying-supply-boxes`,
 `rule:peripheral-type:ancillary`, `scenario:annihilation`, `scenario:firefight`.
 
-**Current:** Neither collection registers S2 or FAQ-ruling records. Core Killing
-counts undeployed Troopers as killed; Ancillary does not state an exception.
-The core Supply Box rule says only Models carry boxes, without spelling out
-the attempted Marker-State transition.
+**Current (verified 2026-10-14):** The English FAQ v0.1 source was
+already registered in both the core and Hacking collections; the earlier
+"not registered" finding is obsolete. The official Spanish FAQ v0.1
+is now separately registered in the core collection and pinned to its exact
+local PDF. This work does **not** create a standalone FAQ-ruling collection
+or silently merge ITS scenario rules into the core scenario set.
 
-**Evidence/result:** S2 printed p. 4 exempts an undeployed Ancillary from Killed
-objectives. Page 3 says a scenario-element carrier cannot enter Marker State.
-Both are under the **ITS** heading. They are not automatically core amendments.
-S1 pp. 150/155 establish core Killing; p. 153 forbids Marker carriers. The core
-restriction is a useful baseline, but the FAQ's publication and applicable
-mission/season need review before asserting its full scope.
+**General ruling — published:** N5 FAQ v0.1 printed p. 2 (both languages)
+states that a target of a BS Attack through a Zero Visibility Zone who has
+**both** Sixth Sense and MSV Level 1 ignores the -6 LoF MOD for that Zone.
+This condition now appears on the canonical Sixth Sense card and is linked
+from Multispectral Visor. MSV1 alone retains its printed -6; no universal
+visibility or MOD cancellation is inferred.
 
-**Action:** Register/pin the FAQ publication in a future batch, classify each
-ruling, and decide applicability explicitly. Present the Ancillary question
-as unresolved for core until that decision. **Fix:** source/collection/scoped
-content and links. **Dependencies:** REA-007, REA-008, REA-016, REA-017,
-REA-020, REA-023. No ITS-only wording was applied to core data here.
+**ITS-specific answers — scoped, not generalized:**
+- FAQ printed p. 3: Telemetry and HVT: Designation Classified Objectives
+  use the required successful Spotlight Rolls, without needing Targeted State
+  to be entered. Targeted State retains its general rules; its source note
+  identifies the ITS scoring condition.
+- FAQ printed p. 3: a carrier of an ITS scenario element cannot enter
+  Marker State. Core Supplies separately allows only Models to carry a
+  Supply Box (S1 p. 153). Whether an attempted transition is prohibited
+  rather than causing the box to be dropped is not established for core
+  Supplies solely by the ITS FAQ.
+- FAQ printed p. 4: an Ancillary that never deployed does not count as
+  Killed for the stated ITS objectives. After deployment, Dead or
+  end-game Null condition qualifies. The Ancillary card explicitly marks
+  this **ITS-only FAQ context**, without modifying core Annihilation or
+  Firefight Killing (S1 pp. 150, 155).
 
-**Follow-up evidence:** Follow-up compared all English FAQ v0.0/v0.1 pages: 28 common Q&A blocks
-and nine additions account for 37 current blocks (eight outside ITS, one ITS).
-No material answer change in the common blocks was observed. The new Ancillary
-scoring answer is under ITS; core-scenario applicability remains unresolved.
-S16 Season 18 pp. 26/28 confirms the scoped ordinary Spec-Ops ban versus TEAM-OPS;
-this does not establish all historical/core ITS applicability. Publication date
-remains unverified despite PDF creation metadata and the notice's release context.
+**FAQ provenance and disposition:** English v0.0/v0.1 review found
+28 common Q&A blocks and nine additions, 37 in v0.1, with one ITS addition.
+The English and Spanish v0.1 PDFs corroborate all four selected answers
+above. The PDFs' 2026-08-25 creation metadata does not establish their
+publication date; the N5.3 update notice has its own September date.
+Exact PDF hashes and printed-page mapping are in the
+[source manifest](rules-explanation-audit-1.0-sources.md).
+
+**Local adjudication complete, with open boundaries:** Selected general
+rules and explicitly scoped ITS evidence are now source-cited and tested.
+Core mission effects and scoring remain unchanged. A fully indexed,
+versioned FAQ/ITS collection is separate future curation, not implied by
+these owning-card references. Whether ITS Ancillary or scenario-element
+answers apply verbatim to core missions still requires an authoritative
+decision; no cross-season inheritance is certified.
+**Dependencies:** REA-007/008/016/017/020/023 remain independently scoped.
+The Spanish Fireteam example disagreement stays under REA-034.
 
 ### REA-031 - Kobra's CC Attribute link points to the Weapon Trait
 
