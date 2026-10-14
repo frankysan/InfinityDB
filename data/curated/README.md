@@ -443,6 +443,16 @@ to certify complete behavior. The 1.0 Weapon triage keeps such cases pending
 under shared-effects and exception review instead of treating every absent
 Weapon paragraph as a confirmed gameplay fact gap.
 
+`weapon-shared-effect-reviews.json` records explicit source-reviewed cases that
+require **no separate Weapon-specific text**. Each decision identifies the
+published Weapon, N5 Core Rules chart page, rationale, and a SHA-256 of its
+complete Army source profiles. The v3 Weapon audit checks that the source
+identity, chart page, profile fingerprint, absence of source discrepancies,
+and full reviewed ammunition-link coverage still match. Any drift reopens
+review rather than silently preserving acceptance. These approvals concern
+Weapon-specific explanation needs, **not** gameplay resolution or release-wide
+browser acceptance.
+
 Ammunition definitions may additionally publish reviewed, **non-executable**
 `facts.ammunitionResolution` operations. This is a bounded typed-effects pilot; the
 source Ammunition map above does not own effects. Supported fields are:

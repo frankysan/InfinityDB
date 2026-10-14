@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import json
 from copy import deepcopy
+from pathlib import Path
 
 import pytest
 
+from infinity_db.database.repository import Database
 from tools.audit_weapon_definition_gaps import (
     WeaponGapTriageError,
+    load_shared_reviews,
     markdown_report,
     reconcile,
 )
@@ -148,7 +152,7 @@ def test_reusable_ammunition_coverage_reclassifies_review_not_completion() -> No
             2: {"total": 1, "linked": 0},
         },
     )
-    assert report["formatVersion"] == 2
+    assert report["formatVersion"] == 3
     assert report["summary"]["unresolvedWeapons"] == 4
     assert report["summary"]["sharedEffectCandidates"] == 1
     assert report["summary"]["missingEffectLinkCandidates"] == 1
@@ -170,6 +174,67 @@ def test_reusable_ammunition_coverage_reclassifies_review_not_completion() -> No
             enrichment, chart, categories, "a" * 64,
             shared_effect_coverage={1: {"total": 2, "linked": 2}},
         )
+
+
+def test_source_review_acceptance_requires_explicit_matching_chart_and_links() -> None:
+    enrichment, chart, categories = _reports()
+    accepted = {1: {"sourceId": "n5-core-v5.3-pdf", "chartPage": 182,
+                    "reason": "Shared components suffice"}}
+    coverage = {1: {"total": 2, "linked": 2}}
+    report = reconcile(enrichment, chart, categories, "a" * 64,
+                       shared_effect_coverage=coverage, reviewed_shared=accepted)
+    items = {r["id"]: r for r in report["items"]}
+    assert items[1]["disposition"] == "reviewed-shared-effects"
+    assert items[1]["sharedReview"] == accepted[1]
+    assert report["summary"]["reviewedSharedEffects"] == 1
+    assert report["summary"]["remainingSourceReviews"] == 3
+    assert report["summary"]["reviewBatches"] == 3
+    assert all(1 not in batch["weaponIds"] for batch in report["batches"])
+    assert "Explicitly reviewed without a standalone Weapon definition" in (
+        markdown_report(report)
+    )
+
+    with pytest.raises(WeaponGapTriageError, match="source conditions changed"):
+        reconcile(
+            enrichment, chart, categories, "a" * 64,
+            shared_effect_coverage=coverage,
+            reviewed_shared={1: {**accepted[1], "chartPage": 999}},
+        )
+    with pytest.raises(WeaponGapTriageError, match="source conditions changed"):
+        reconcile(
+            enrichment, chart, categories, "a" * 64,
+            shared_effect_coverage={1: {"total": 2, "linked": 1}},
+            reviewed_shared=accepted,
+        )
+
+
+def test_checked_in_rifle_shared_reviews_are_profile_pinned(tmp_path: Path) -> None:
+    root = Path(__file__).resolve().parents[1]
+    db = Database(root / "data/generated/infinity.db")
+    original = json.loads(
+        (root / "data/curated/weapon-shared-effect-reviews.json").read_text(
+            encoding="utf8",
+        )
+    )
+    assert len(original["reviews"]) == 6
+    catalog = {r["name"]: r for r in db.list_catalog_items("weapons")}
+    items = [
+        {"id": catalog[r["name"]]["id"], "name": r["name"],
+         "slug": r["slug"], "gapCodes": ["missing_rule_definition"]}
+        for r in original["reviews"]
+    ]
+    enrichment = {"domains": {"weapons": {"items": items}}}
+    policy = tmp_path / "reviewed.json"
+    policy.write_text(json.dumps(original), encoding="utf8")
+    approved = load_shared_reviews(db, enrichment, policy)
+    assert len(approved) == 6
+    assert {r["reason"] for r in approved.values()} == {
+        r["reason"] for r in original["reviews"]
+    }
+    original["reviews"][0]["profileSha256"] = "0" * 64
+    policy.write_text(json.dumps(original), encoding="utf8")
+    with pytest.raises(WeaponGapTriageError, match="profile changed"):
+        load_shared_reviews(db, enrichment, policy)
 
 
 def test_reviewed_historical_comparison_remains_visible_but_not_pending() -> None:

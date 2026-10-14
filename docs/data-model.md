@@ -79,6 +79,14 @@ establishes only reusable component coverage, **not** exception/interaction
 completeness. Component texts and citations are never authored in the mapping
 or inferred from notation. Combined components remain distinct, not
 a resolved attack result.
+The Weapon source-review audit has a separate maintained decision file,
+`data/curated/weapon-shared-effect-reviews.json`, for individually verified
+Weapon profiles whose shared components and published Traits already suffice.
+Those approvals are pinned to full Army profile SHA-256 fingerprints and the
+official chart page. They are not inferred from the mere presence of an
+ammunition link, and a changed profile reopens review. Unreviewed and
+mode-specific Weapon behavior remains in the triage; explicitly reviewed
+shared-only identities do not require fabricated standalone rule records.
 The first reviewed Ammunition effect pilot now lives on canonical `ammunition:*`
 records, not on Army mapping entries. The validated, non-executable
 `facts.ammunitionResolution` object can describe halving the applicable ARM/BTS

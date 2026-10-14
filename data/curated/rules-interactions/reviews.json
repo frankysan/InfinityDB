@@ -1014,6 +1014,8 @@
     {"recordId": "weapon:ap-heavy-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: AP/ARM/2 with PS 6, B2, and one Saving Roll. Contrast Breaker Pistol BTS/2 without transferring defense attributes."},
     {"recordId": "weapon:silenced-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 pp. 67, 175, 182: combined AP+Shock yields one BTS/2 Saving Roll with conditional Shock effect; Silent (-6) affects enemy Face to Face Dodge only while user is in ZoC and outside LoF."},
     {"recordId": "weapon:multi-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: AP B2 ARM/2 one roll, Shock B2 ARM one roll, Anti-Materiel DA B1 ARM two rolls with mode-specific Anti-materiel. Modes are alternatives and their effects do not stack."},
+    {"recordId": "weapon:multi-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 183: AP and Shock modes B3 with Suppressive Fire, Anti-Materiel DA mode B1 with two ARM Saving Rolls and no Suppressive Fire; all PS 7. Source mode traits do not transfer."},
+    {"recordId": "weapon:k1-combi-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 183: preserves N Ammunition with ARM=0, one Saving Roll, PS 7/B3, Anti-materiel and Suppressive Fire. K1 is no distinct Ammunition identity; Immunity must be separately evaluated."},
     {
       "recordId": "weapon:d-charges",
       "targetRelease": "1.0.0",

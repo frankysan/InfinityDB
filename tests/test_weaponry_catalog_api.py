@@ -666,6 +666,101 @@ def test_shared_ammunition_effects_are_canonical_across_weapon_categories(
     assert all("ammunition_effects" not in p for p in pitcher["profiles"])
 
 
+@pytest.mark.parametrize(
+    ("slug", "expected_modes", "expected_rules"),
+    [
+        ("combi-rifle", [
+            (None, "N", "ARM", "1", "7", "3", ["Suppressive Fire"]),
+        ], set()),
+        ("multi-rifle", [
+            ("Anti-Materiel Mode", "DA", "ARM", "2", "7", "1", ["Anti-materiel"]),
+            ("AP Mode", "AP", "ARM/2", "1", "7", "3", ["Suppressive Fire"]),
+            ("Shock Mode", "Shock", "ARM", "1", "7", "3", ["Suppressive Fire"]),
+        ], {"weapon:multi-rifle"}),
+        ("rifle", [
+            (None, "N", "ARM", "1", "7", "3", ["Suppressive Fire"]),
+        ], set()),
+        ("adhesive-launcher-rifle", [
+            (None, "PARA", "PH-6", "1", "-", "2", ["Non-lethal"]),
+        ], set()),
+        ("breaker-combi-rifle", [
+            (None, "AP", "BTS/2", "1", "7", "3", ["Suppressive Fire"]),
+        ], set()),
+        ("ap-rifle", [
+            (None, "AP", "ARM/2", "1", "7", "3", ["Suppressive Fire"]),
+        ], set()),
+        ("t2-rifle", [
+            (None, "T2", "ARM", "1", "7", "3",
+             ["Anti-materiel", "Suppressive Fire"]),
+        ], set()),
+        ("k1-combi-rifle", [
+            (None, "N", "ARM=0", "1", "7", "3",
+             ["Anti-materiel", "Suppressive Fire"]),
+        ], {"weapon:k1-combi-rifle"}),
+    ],
+)
+def test_rifle_batch_preserves_published_profiles_and_reuses_ammunition(
+    weaponry_app: Callable,
+    slug: str,
+    expected_modes: list[tuple],
+    expected_rules: set[str],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert len(payload["profiles"]) == len(expected_modes)
+    assert [
+        (p["mode"], p["ammunition"], p["saving"], p["saving_num"],
+         p["damage"], p["burst"], p["traits"])
+        for p in payload["profiles"]
+    ] == expected_modes
+    assert set(_weapon_rules(payload)) == expected_rules
+    for profile in payload["profiles"]:
+        assert len(profile["ammunition_effects"]) == 1
+        assert profile["ammunition_effects"][0]["record_id"].startswith("ammunition:")
+        assert profile["ammunition_effects"][0]["citations"]
+        assert len(profile["trait_references"]) == len(profile["traits"])
+        assert all(trait["slug"] for trait in profile["trait_references"])
+
+
+def test_rifle_special_mode_and_k1_explanations_are_source_specific(
+    weaponry_app: Callable,
+) -> None:
+    multi = _weapon_detail(weaponry_app, "multi-rifle")
+    profiles = {p["mode"]: p for p in multi["profiles"]}
+    assert profiles["AP Mode"]["saving"] == "ARM/2"
+    assert profiles["Shock Mode"]["saving"] == "ARM"
+    assert profiles["Anti-Materiel Mode"]["saving_num"] == "2"
+    assert "Suppressive Fire" not in profiles["Anti-Materiel Mode"]["traits"]
+    assert "Anti-materiel" not in profiles["AP Mode"]["traits"]
+    rule = _weapon_rules(multi)["weapon:multi-rifle"]
+    assert "not combined" in rule["summary"]
+    assert "Anti-Materiel" in rule["summary"]
+    assert {link["record"]["id"] for link in rule["display_relations"]
+            if link["direction"] == "outbound"} >= {
+        "ammunition:da", "ammunition:ap", "ammunition:shock",
+        "trait:suppressive-fire", "trait:anti-materiel",
+    }
+    assert any(c["page"] == 183 and c["source_id"] == "n5-core-v5.3-pdf"
+               for c in rule["citations"])
+
+    k1 = _weapon_detail(weaponry_app, "k1-combi-rifle")
+    k1rule = _weapon_rules(k1)["weapon:k1-combi-rifle"]
+    assert k1["profiles"][0]["ammunition"] == "N"
+    assert k1["profiles"][0]["saving"] == "ARM=0"
+    assert "not a separate K1 Ammunition identity" in k1rule["summary"]
+    assert {link["record"]["id"] for link in k1rule["display_relations"]
+            if link["direction"] == "outbound"} >= {
+        "ammunition:normal", "trait:anti-materiel", "trait:suppressive-fire",
+    }
+    assert any(c["page"] == 183 and c["source_id"] == "n5-core-v5.3-pdf"
+               for c in k1rule["citations"])
+
+    combi = _weapon_detail(weaponry_app, "combi-rifle")["profiles"][0]
+    rifle = _weapon_detail(weaponry_app, "rifle")["profiles"][0]
+    assert combi["ranges"] != rifle["ranges"]
+    assert combi["ranges"]["short"]["mod"] == "+3"
+    assert rifle["ranges"]["short"]["mod"] == "0"
+
+
 def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
     weaponry_app: Callable,
 ) -> None:

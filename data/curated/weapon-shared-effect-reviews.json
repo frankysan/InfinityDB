@@ -1,0 +1,55 @@
+{
+  "format": "InfinityDB Weapon shared-effects source reviews",
+  "version": 1,
+  "sourceId": "n5-core-v5.3-pdf",
+  "reviews": [
+    {
+      "slug": "combi-rifle",
+      "name": "Combi Rifle",
+      "chartPage": 183,
+      "profileSha256": "dd38d8a0f0d0b6224dba5323a5632c551530b91329a7299467d887e040702b16",
+      "reviewedOn": "2026-10-14",
+      "reason": "Normal Ammunition, one ARM Saving Roll and Suppressive Fire have canonical links; the source range and Burst are already published."
+    },
+    {
+      "slug": "rifle",
+      "name": "Rifle",
+      "chartPage": 183,
+      "profileSha256": "8f2bec059734ea434c273232bb94fcbab3237c7cabb8d29cc3551578f3b05be2",
+      "reviewedOn": "2026-10-14",
+      "reason": "Normal Ammunition, one ARM Saving Roll and Suppressive Fire have canonical links. Its range bands differ from Combi Rifle and remain in the Army profile."
+    },
+    {
+      "slug": "adhesive-launcher-rifle",
+      "name": "Adhesive Launcher Rifle",
+      "chartPage": 183,
+      "profileSha256": "88c27523b7b7c54597263c100142d7ec4a2418a5126125226200a1f1ede8e7eb",
+      "reviewedOn": "2026-10-14",
+      "reason": "PARA Ammunition, PH-6, Non-Lethal and Immobilized-A mechanics are canonical; the printed PS dash, B2 and range bands remain source data."
+    },
+    {
+      "slug": "breaker-combi-rifle",
+      "name": "Breaker Combi Rifle",
+      "chartPage": 183,
+      "profileSha256": "f7ae10a1966d4bcc869295b4fbf99c02f0f87368afd52ab3c8a9ef154339fef0",
+      "reviewedOn": "2026-10-14",
+      "reason": "AP against BTS/2 is defined by shared AP plus the printed Saving Roll Attribute; Suppressive Fire and Combi range are linked."
+    },
+    {
+      "slug": "ap-rifle",
+      "name": "AP Rifle",
+      "chartPage": 183,
+      "profileSha256": "b1273e8df4ddb69659ccf115491bcfe6cf8874661de1202ad921b58082d199e1",
+      "reviewedOn": "2026-10-14",
+      "reason": "AP against ARM/2 uses the same canonical AP effect as other AP Weapons; Rifle range and Suppressive Fire are source profile details."
+    },
+    {
+      "slug": "t2-rifle",
+      "name": "T2 Rifle",
+      "chartPage": 183,
+      "profileSha256": "bac04e06bfbec4edc6942829483297e4ee8381a8aab802fce2baf2d85ef4d18a",
+      "reviewedOn": "2026-10-14",
+      "reason": "T2 Wound and Critical distinctions use the existing canonical T2 rule; Anti-materiel, Suppressive Fire and source range remain independently linked."
+    }
+  ]
+}

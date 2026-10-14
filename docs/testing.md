@@ -587,6 +587,28 @@ Ball screenshots were visually inspected. Evidence remains in ignored
 `local/audits/weapon-first-batch-2-browser/`. These checks are bounded
 reference/browser acceptance, not a complete release gate.
 
+## 1.0 Rifle shared-effects acceptance
+
+**Verified 2026-10-14, `dev/v1.0.0`.** Eight N5.3 p. 183 Rifle profiles
+were checked at 1440, 390 and 320 px (24 cases). Combi Rifle, Rifle,
+Adhesive Launcher Rifle, Breaker Combi Rifle, AP Rifle and T2 Rifle
+rendered only the source profile, reviewed shared ammunition text, and
+linked Traits; no standalone Weapon rule was invented. MULTI Rifle
+retained three separate modes with their different Burst, ammunition,
+Saving Rolls and Traits. K1 Combi Rifle retained N with ARM=0 and its
+dedicated source-backed explanation. No horizontal overflow or JavaScript
+errors were observed.
+
+Desktop navigation from K1 to Anti-materiel passed. Mobile MULTI Rifle
+shared DA followed the standard preview-first, second-tap navigation
+contract after the shared-effects renderer was changed to use maintained
+reference links (**26/26 accepted**). The 320 px MULTI, K1 and Adhesive
+Launcher full-page screenshots were inspected. Private evidence is under
+ignored `local/audits/rifle-shared-review-browser/`.
+
+This covers these reference profiles and link behaviors, not derived
+Immunity rulings, future weapon changes, or 1.0 release-wide acceptance.
+
 ## 1.0 reusable Ammunition effects pilot
 
 **Verified 2026-10-14.** Five Weapon references (AP CC Weapon,

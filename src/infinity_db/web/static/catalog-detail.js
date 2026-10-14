@@ -1,6 +1,7 @@
 import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
+import { appendMaintainedText } from "./maintained-text.js";
 import { renderUnitRows } from "./unit-list.js";
 import { tableViewport } from "./view-components.js";
 import {
@@ -123,10 +124,14 @@ function weaponAmmunitionEffects(profile) {
     const title = document.createElement("h5");
     const href = ruleReferenceHref(effect.public_reference);
     if (href) {
-      const link = document.createElement("a");
-      link.href = href;
-      link.textContent = effect.name;
-      title.append(link);
+      // Use the standard reference preview/touch navigation contract.
+      appendMaintainedText(title, [{
+        type: "reference",
+        target: effect.record_id,
+        label: effect.name,
+        public_reference: effect.public_reference,
+        preview_tokens: [{ type: "text", text: effect.summary }],
+      }]);
     } else {
       title.textContent = effect.name;
     }

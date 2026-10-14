@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **151/166** complete, **15** pending.
-- Current authored outgoing relations: **394**.
+- Supporting semantic identities: **153/168** complete, **15** pending.
+- Current authored outgoing relations: **403**.
 - Explicitly tracked future/deferred interactions: **113**.
 
 ## 0.7.0 primary catalog review
@@ -975,7 +975,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (38/38)
+#### Weapon (40/40)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1060,6 +1060,11 @@ review. `declaration-category` projection records are excluded.
 - [x] **Heavy Pistol** (`weapon:heavy-pistol`) — reviewed: N5.3 p. 182: PS 6 and B2 with Shock ammo and one ARM Saving Roll. Source distinguishes Shock effects from PS.
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+- [x] **K1 Combi Rifle** (`weapon:k1-combi-rifle`) — reviewed: N5.3 Weapon Chart p. 183: preserves N Ammunition with ARM=0, one Saving Roll, PS 7/B3, Anti-materiel and Suppressive Fire. K1 is no distinct Ammunition identity; Immunity must be separately evaluated.
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
 - [x] **Kobra Pistol** (`weapon:kobra-pistol`) — reviewed: N5.3 Mixed Weapons rules distinguish BS and CC modes and their ammunition; shared mode description does not assign mode-specific Traits or Saving Rolls.
   - outgoing: none
 - [x] **Kobra Pistol (CC Mode)** (`weapon:kobra-pistol-cc`) — reviewed: Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values.
@@ -1079,6 +1084,12 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **MULTI Rifle** (`weapon:multi-rifle`) — reviewed: N5.3 Weapon Chart p. 183: AP and Shock modes B3 with Suppressive Fire, Anti-Materiel DA mode B1 with two ARM Saving Rolls and no Suppressive Fire; all PS 7. Source mode traits do not transfer.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
 - [x] **Nanopulser** (`weapon:nanopulser`) — reviewed: N5.3 p. 187: Small Direct Template with Normal N ammo but BTS Saving Roll from the printed profile. Do not infer ARM from Normal ammo or add Bioweapon effects.
   - `uses-effects-of` → Direct Template (`trait:direct-template`)

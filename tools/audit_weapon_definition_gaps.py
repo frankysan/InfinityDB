@@ -21,7 +21,8 @@ from infinity_db.rules_database import RulesDatabase
 from infinity_db.weapon_ammunition_references import WeaponAmmunitionReferences
 
 FORMAT = "InfinityDB 1.0 weapon definition gap triage"
-FORMAT_VERSION = 2
+FORMAT_VERSION = 3
+SHARED_REVIEWS_PATH = Path("data/curated/weapon-shared-effect-reviews.json")
 ENRICHMENT_FORMAT = "InfinityDB rules enrichment coverage audit"
 CHART_FORMAT = "InfinityDB N5 Weapon Chart profile evidence"
 MAX_BATCH_SIZE = 8
@@ -60,6 +61,7 @@ def reconcile(
     army_sha256: str,
     *,
     shared_effect_coverage: dict[int, dict[str, int]] | None = None,
+    reviewed_shared: dict[int, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Join unresolved Army Weapon identities to chart rows without inferring rules."""
     if (enrichment.get("format"), enrichment.get("formatVersion")) != (
@@ -122,6 +124,19 @@ def reconcile(
                     if coverage["linked"] == coverage["total"]
                     else "missing-effect-links-review"
                 )
+            if reviewed_shared is not None and weapon_id in reviewed_shared:
+                evidence = reviewed_shared[weapon_id]
+                coverage = (shared_effect_coverage or {}).get(weapon_id)
+                if (
+                    kind != "shared-effects-review"
+                    or coverage is None
+                    or evidence["chartPage"] not in {r["page"] for r in row_candidates}
+                    or any(r["differences"] for r in row_candidates)
+                ):
+                    raise WeaponGapTriageError(
+                        f"Reviewed shared Weapon source conditions changed: {weapon_id}"
+                    )
+                kind = "reviewed-shared-effects"
         elif codes == ["ambiguous_family_mapping"]:
             kind = "ambiguous-rule-mapping"
         elif codes == ["stale_citation_source"]:
@@ -151,6 +166,11 @@ def reconcile(
             },
             "familyRules": item["familyRuleIds"],
             "sourceRuleIds": item["exactSourceRuleIds"],
+            **(
+                {"sharedReview": reviewed_shared[weapon_id]}
+                if reviewed_shared is not None and weapon_id in reviewed_shared
+                else {}
+            ),
             **(
                 {"sharedEffectCoverage": shared_effect_coverage[weapon_id],
                  "requiresModeReview": shared_effect_coverage[weapon_id]["total"] > 1}
@@ -242,7 +262,18 @@ def reconcile(
                         r["disposition"] == "missing-effect-links-review" for r in results
                     ),
                     "modeReviewCandidates": sum(
-                        r.get("requiresModeReview", False) for r in results
+                        r.get("requiresModeReview", False)
+                        and r["disposition"] != "reviewed-shared-effects"
+                        for r in results
+                    ),
+                    "reviewedSharedEffects": sum(
+                        r["disposition"] == "reviewed-shared-effects" for r in results
+                    ),
+                    "remainingSourceReviews": sum(
+                        r["disposition"] not in {
+                            "reviewed-shared-effects", "reviewed-historical-citation",
+                        }
+                        for r in results
                     ),
                 }
                 if shared_effect_coverage is not None
@@ -252,6 +283,72 @@ def reconcile(
         "batches": batches,
         "items": results,
     }
+
+
+def load_shared_reviews(
+    db: Database, enrichment: dict[str, Any], policy_path: Path,
+) -> dict[int, dict[str, Any]]:
+    """Pin explicit no-standalone-rule decisions to exact source Weapon profiles."""
+    policy = _load(policy_path)
+    if (
+        policy.get("format") != "InfinityDB Weapon shared-effects source reviews"
+        or policy.get("version") != 1
+        or policy.get("sourceId") != "n5-core-v5.3-pdf"
+    ):
+        raise WeaponGapTriageError("Unsupported reviewed Weapon source policy")
+    reviews = policy.get("reviews")
+    if not isinstance(reviews, list):
+        raise WeaponGapTriageError("Reviewed Weapon source policy lacks reviews")
+    unresolved = {
+        row["name"]: row
+        for row in enrichment.get("domains", {}).get("weapons", {}).get("items", [])
+    }
+    catalogue = {row["name"]: row for row in db.list_catalog_items("weapons")}
+    accepted: dict[int, dict[str, Any]] = {}
+    for review in reviews:
+        if not isinstance(review, dict):
+            raise WeaponGapTriageError("Reviewed Weapon entry must be an object")
+        slug = review.get("slug")
+        name = review.get("name")
+        digest = review.get("profileSha256")
+        note = review.get("reason")
+        page = review.get("chartPage")
+        if (
+            not isinstance(slug, str) or not slug
+            or not isinstance(name, str) or not name
+            or not isinstance(digest, str)
+            or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+            or not isinstance(page, int) or page <= 0
+            or not isinstance(note, str) or not note.strip()
+        ):
+            raise WeaponGapTriageError(f"Incomplete reviewed Weapon entry: {name!r}")
+        entry = catalogue.get(name)
+        pending = unresolved.get(name)
+        if entry is None or pending is None or pending["slug"] != slug:
+            raise WeaponGapTriageError(f"Reviewed Weapon is not an unresolved identity: {name}")
+        weapon_id = int(entry["id"])
+        if pending["id"] != weapon_id or pending["gapCodes"] != ["missing_rule_definition"]:
+            raise WeaponGapTriageError(f"Reviewed Weapon gap classification changed: {name}")
+        if weapon_id in accepted:
+            raise WeaponGapTriageError(f"Duplicate reviewed Weapon: {name}")
+        details = db.get_catalog_item("weapons", weapon_id)
+        if details is None:
+            raise WeaponGapTriageError(f"Reviewed Weapon cannot be resolved: {name}")
+        profiles = details["profiles"]
+        actual = hashlib.sha256(
+            json.dumps(
+                profiles, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+            ).encode("utf-8")
+        ).hexdigest()
+        if actual != digest:
+            raise WeaponGapTriageError(f"Reviewed Weapon profile changed: {name}")
+        accepted[weapon_id] = {
+            "sourceId": policy["sourceId"],
+            "chartPage": page,
+            "reviewedOn": review.get("reviewedOn"),
+            "reason": note,
+        }
+    return accepted
 
 
 def build_report(army_db: Path, enrichment_path: Path, chart_path: Path) -> dict[str, Any]:
@@ -291,9 +388,10 @@ def build_report(army_db: Path, enrichment_path: Path, chart_path: Path) -> dict
                 for profile in profiles
             ),
         }
+    reviews = load_shared_reviews(db, enrichment, SHARED_REVIEWS_PATH)
     return reconcile(
         enrichment, _load(chart_path), categories, _sha256(army_db),
-        shared_effect_coverage=coverage,
+        shared_effect_coverage=coverage, reviewed_shared=reviews,
     )
 
 
@@ -307,6 +405,15 @@ def markdown_report(report: dict[str, Any]) -> str:
         f"- With a printed chart identity: **{summary['matchedChartIdentity']}**.",
         f"- Without one: **{summary['noChartIdentity']}**.",
         f"- Independently sized review batches: **{summary['reviewBatches']}**.",
+        *(
+            [
+                f"- Explicitly reviewed without a standalone Weapon definition: "
+                f"**{summary['reviewedSharedEffects']}**.",
+                f"- Still requiring source/effect/mode review: "
+                f"**{summary['remainingSourceReviews']}**.",
+            ]
+            if "reviewedSharedEffects" in summary else []
+        ),
         *(
             [
                 "- Weapons with linked reusable Ammunition effects (review still pending): "

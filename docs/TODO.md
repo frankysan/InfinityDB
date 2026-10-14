@@ -403,14 +403,28 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       batches, 2 missing-effect-links batches, and 1 historical-citation batch.
       The previous 91-item report was stale; both the committed and current
       rules databases independently report 92 entries.
-    - [ ] Review source-specific Weapon exceptions, Traits and mode semantics
-      across the 22 shared-effects batches; **do not** create a standalone
-      definition when verified Army profile facts and shared rules suffice.
-      Resume with Rifles (Combi Rifle, MULTI Rifle, Rifle, Adhesive Launcher
-      Rifle, Breaker Combi Rifle, AP Rifle, T2 Rifle and K1 Combi Rifle).
-      Pay special attention to MULTI modes, PARA states, Breaker BTS/2,
-      and other conditional effects. This is review work, not an automatic
-      need for eight new prose records.
+    - [x] Review the initial eight Rifle identities against the N5.3 p. 183
+      chart. MULTI Rifle and K1 Combi Rifle require dedicated source-cited
+      explanations for mode-specific Traits/Saving Rolls and the printed
+      N with ARM=0 respectively. Combi Rifle, Rifle, Adhesive Launcher Rifle,
+      Breaker Combi Rifle, AP Rifle and T2 Rifle reuse canonical ammunition
+      and source Trait links without six duplicated Weapon descriptions.
+      Those six decisions are pinned to exact Army profile hashes in
+      `data/curated/weapon-shared-effect-reviews.json` and invalidated if a
+      source profile changes; the triage keeps reviewed decisions visible.
+      The source audit now reports 83 remaining actionable Weapon reviews,
+      6 explicitly accepted shared-only identities, and 16 pending
+      multi-profile candidates. Browser acceptance passed 26/26 viewport and
+      navigation checks, with mobile first-tap preview and three 320 px
+      screenshots reviewed. Private evidence is under ignored `local/audits/`.
+      The remaining batch order begins with Shotguns.
+    - [ ] Continue source-specific Weapon exception and mode reviews without
+      writing a standalone explanation when the source profile and canonical
+      rules suffice. Review the remaining 83 actionable entries (including
+      Pitcher/Mine Dispenser separately), starting with Boarding, Light,
+      Vulkan, Heavy and T2 Boarding Shotguns. Browser acceptance is scoped
+      per reviewed group; source completeness is not inferred from ammunition
+      link coverage alone.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
