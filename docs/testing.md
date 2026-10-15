@@ -1995,6 +1995,36 @@ checking selected FAQ version, historical source note, relevant
 question/answer, JavaScript errors and horizontal overflow. Canonical
 rules and Army profile source data remain unchanged.
 
+## 1.0 Deployment Phase owner and ITS applicability audit
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** A new official N5.3
+General Rules identity `rule:deployment-phase` uses core PDF
+printed p. 15 for the phase sequence. The v0.0-origin FAQ
+repositioning clarification (v0.0 EN p. 1; selected v0.1
+EN/ES p. 1) attaches to that general rule, not an arbitrary
+deployment Skill. FAQ inventory is **27** (19 v0.0 origins
+and 8 v0.1 origins). The independent rule review gate is
+**180/180** supporting identities complete.
+
+`tests/test_faq_ruling_references.py` verifies N5.3
+source identity, original and current FAQ citations, precise
+phase versus Minelayer topic selection and negative date/
+revision cases. The normal rules export confirms current
+target integrity. The private responsive browser verifier
+`local/audits/verify_deployment_phase_faq_browser.py` checks
+the new `/rules/deployment-phase` card at 1440/390/320 px
+and confirms that the general repositioning ruling does not
+appear on `/skills/minelayer`.
+
+A separate pinned English FAQ v0.0/v0.1 and ITS Season 18
+source audit verified Area of Interest, Crossing Lines and
+Akial Interference mission references, but did **not**
+publish their ITS-only FAQ answers into the current N5 Core
+catalog. The missing season/missions publication is a
+real dependency, not grounds for dropping applicability
+restrictions. Private evidence is in
+`local/audits/faq-its-season18-source-scope-20261015.md`.
+
 ## 1.0 Visibility Zone and Ammunition/Immunity browser acceptance
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** Headless Chromium used a freshly

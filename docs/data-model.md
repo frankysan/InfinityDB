@@ -598,9 +598,9 @@ that projection. The API requires `topic_id`, `rules_revision`, and
 `as_of`, with optional paired `season_id`/`season_revision` and
 `scenario_id`; it never defaults to the newest publication.
 
-Twenty-six reviewed FAQ entries are now published from
+Twenty-seven reviewed FAQ entries are now published from
 `data/curated/rules/n5-faq-v0.1.json`: eight first recorded in v0.1 and
-eighteen **carried forward from v0.0**. Each carried ruling retains original
+nineteen **carried forward from v0.0**. Each carried ruling retains original
 English v0.0 source/version/page separately from the currently selected
 English v0.1 page, and a corroborating Spanish v0.1 citation. The
 v0.0 record date 2025-10-15 is the associated official update anchor;
@@ -613,8 +613,11 @@ with Fireteam FAQs appearing on the Fireteams page rather than a
 competing rule route. A single topic may have multiple applicable
 clarifications, and the same ruling may be discoverable from
 several referenced topics without cloning its identity.
-This is an explanatory overlay: canonical rule definitions and
-underlying Skill/Army data are unchanged.
+The N5.3 Basic Rules `rule:deployment-phase` is now a canonical
+General Rules identity, cited to N5.3 printed p. 15. The v0.0-origin
+FAQ about repositioning before Roll/measurement is attached to that
+general rule, not to a specific Deployment Skill, and remains a
+separate dated explanatory overlay. Existing Skill/Army data are unchanged.
 
 The Annihilation-only Ancillary ruling is intentionally a subset of the
 FAQ's general scenario-objective wording. The source label

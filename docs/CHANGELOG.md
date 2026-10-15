@@ -23,7 +23,10 @@ are not retroactively relabeled.
   cover Deployment private checks, Prone distance, BS MODs, Controlled
   Jump, automatic Marker State declarations, Aerial/Boost, Stealth
   AROs, Deployable Cover, inactive States and Discover bonuses.
-  All show their earlier source version beside the selected v0.1 citation.
+  The final general Deployment Phase repositioning clarification now
+  lives on its own General Rules page, separate from particular
+  deployment Skills. All show their earlier source version beside
+  the selected v0.1 citation.
 - Domination's 350-point SWC displays the English-source 6, with an explicit
   discrepancy: official Spanish N5.3 says 7. The Annihilation 350-point
   survival bands are now corroborated by official Spanish N5.3 rather than
@@ -224,12 +227,13 @@ are not retroactively relabeled.
   missing topic/scenario/predecessor targets, cycles, non-overlapping
   supersession and inconsistent carried-forward origins. Add an
   applicability-aware read model and explicit-context FAQ API, retaining
-  reviewed source provenance and conditional supersession. Twenty-six
+  reviewed source provenance and conditional supersession. Twenty-seven
   reviewed FAQ entries now reach their owning Equipment, Scenario, Skill,
   Trait, State, General Rule, Hacking Program and Fireteam browser surfaces
-  through shared dated clarification cards. Eighteen entries retain v0.0
+  through shared dated clarification cards. Nineteen entries retain v0.0
   original source citations and current EN/ES v0.1 evidence, without
-  duplicating rulings.
+  duplicating rulings. The newly modeled Deployment Phase uses its
+  official N5.3 source; its FAQ remains a separate dated overlay.
   The Fireteam detail stays on the Fireteams page rather than inventing
   a rule route. Base rules remain unchanged.
 - **Data processing + Web backend:** Confirm ITS-inspired split Deployment

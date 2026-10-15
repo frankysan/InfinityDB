@@ -460,6 +460,7 @@ def test_published_faq_pilot_retains_selected_and_spanish_source_evidence(
         "faq-ruling:deployable-cover-no-placement",
         "faq-ruling:null-state-marker-and-cautious-movement",
         "faq-ruling:discover-fireteam-sd-bonuses",
+        "faq-ruling:deployment-phase-reposition-after-measurement",
     }
     for record in records:
         assert record["review"]["status"] == "reviewed"
@@ -679,11 +680,11 @@ def test_earlier_faq_identity_is_not_inferred_from_current_publication(
     published_pilot: RulesDatabase,
 ) -> None:
     records = published_pilot.records_by_kind("faq-ruling")
-    assert len(records) == 26
+    assert len(records) == 27
     assert sum(
         record["facts"]["originalPublication"]["version"] == "0.0"
         for record in records
-    ) == 18
+    ) == 19
     assert sum(
         record["facts"]["originalPublication"]["version"] == "0.1"
         for record in records
@@ -787,3 +788,50 @@ def test_remaining_general_v00_cross_topic_identity_is_shared(
     assert "faq-ruling:null-state-marker-and-cautious-movement" in ids(
         "state:unconscious"
     )
+
+
+def test_deployment_phase_faq_has_canonical_basic_rule_and_historical_sources(
+    published_pilot: RulesDatabase,
+) -> None:
+    base = published_pilot.composed_record("rule:deployment-phase")
+    assert base is not None
+    assert base["name"] == "Deployment Phase"
+    assert base["citations"] and any(
+        c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 15
+        for c in base["citations"]
+    )
+    assert "reposition" not in base["summary"].lower()
+
+    items = published_pilot.faq_rulings_for_topic(
+        "rule:deployment-phase", rules_revision="5.3", as_of="2026-09-01",
+    )
+    assert [item["id"] for item in items] == [
+        "faq-ruling:deployment-phase-reposition-after-measurement",
+    ]
+    answer = items[0]
+    assert "Roll or measurement" in answer["answer"]
+    assert "Fireteam Coherency Check" in answer["answer"]
+    assert answer["original_publication"] == {
+        "collectionId": "n5-faq-v0.0",
+        "sourceId": "n5-faq-v0.0-en-pdf",
+        "version": "0.0",
+        "publishedDate": "2025-10-15",
+        "page": 1,
+    }
+    assert answer["selected_citation"] == {
+        "sourceId": "n5-faq-v0.1-en-pdf", "page": 1,
+    }
+    assert {(c["source_id"], c["page"]) for c in answer["citations"]} == {
+        ("n5-faq-v0.0-en-pdf", 1),
+        ("n5-faq-v0.1-en-pdf", 1),
+        ("n5-faq-v0.1-es-pdf", 1),
+    }
+    assert published_pilot.faq_rulings_for_topic(
+        "rule:deployment-phase", rules_revision="5.2", as_of="2026-09-01",
+    ) == []
+    assert published_pilot.faq_rulings_for_topic(
+        "rule:deployment-phase", rules_revision="5.3", as_of="2026-08-31",
+    ) == []
+    assert published_pilot.faq_rulings_for_topic(
+        "skill:minelayer", rules_revision="5.3", as_of="2026-09-01",
+    )[0]["id"] == "faq-ruling:deployment-private-zoc-coherency"

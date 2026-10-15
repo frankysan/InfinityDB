@@ -23206,6 +23206,45 @@
                 "status": "reviewed",
                 "reviewedOn": "2026-10-13"
             }
+        },
+        {
+            "id": "rule:deployment-phase",
+            "kind": "rule",
+            "name": "Deployment Phase",
+            "summary": "After the Initiative Roll, the players deploy their Troopers before the game begins, in the order determined by the player who kept Deployment. Each player deploys their main force and then the Trooper or Troopers kept back under applicable reserve rules.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "category": "basic-rule",
+                "requirements": [
+                    "Complete the Initiative Roll and resolve the Initiative and Deployment choices before starting Deployment."
+                ],
+                "effects": [
+                    "The first player places their Troopers in their Deployment Zone, holding back the reserve permitted by baseline and applicable exceptional rules. The second player then deploys their main force.",
+                    "The first player deploys their held-back Trooper or Troopers, followed by the second player deploying their held-back Trooper or Troopers."
+                ],
+                "restrictions": [
+                    "Rules such as [[skill:forward-deployment|Forward Deployment]], [[skill:combat-jump|Combat Jump]], [[skill:strategos|Strategos]], Command Tokens, and scenario conditions can modify placement and reserve allowances. Apply each relevant rule in its own scope."
+                ]
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 15,
+                    "section": "Deployment Phase"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-15"
+            }
         }
     ],
     "scenarioComponents": {

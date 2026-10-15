@@ -470,6 +470,66 @@
       }
     },
     {
+      "id": "faq-ruling:deployment-phase-reposition-after-measurement",
+      "kind": "faq-ruling",
+      "name": "Repositioning during the main Deployment Phase",
+      "summary": "Official FAQ clarification of Deployment Phase repositioning before Roll or measurement fixes a game element in place.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Can players reposition Troopers, Deployables, or other game elements during their main Deployment Phase step?",
+        "answer": "Yes. A player may reposition those game elements during their main Deployment Phase step until a Roll or measurement is made for them. Once that occurs, the affected element?s position is fixed for the remainder of the Deployment Phase. For example, once a Fireteam Coherency Check is measured and its members are adjusted, those members can no longer be repositioned.",
+        "topicIds": [
+          "rule:deployment-phase"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "Original English N5 FAQ v0.0 wording agrees with English and Spanish FAQ v0.1 p. 1. The historical date is an associated update anchor, not a verified PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
       "id": "faq-ruling:deployment-private-zoc-coherency",
       "kind": "faq-ruling",
       "name": "Private deployment checks for Minelayer, Decoys and Holoechoes",

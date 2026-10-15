@@ -506,14 +506,14 @@ The default read model does not replay superseded historical collections;
 historical publication selection and verification of ITS season revisions
 not yet present in the corpus remain future work.
 
-Twenty-six source-reviewed rulings now live in `rules/n5-faq-v0.1.json`.
+Twenty-seven source-reviewed rulings now live in `rules/n5-faq-v0.1.json`.
 Eight were introduced in FAQ v0.1: Hacking Device Firewall, undeployed
 Peripherals (Ancillary) counted as Killed (initially Annihilation only),
 Skill declaration details, fired Deployables on vertical surfaces,
 Peripheral declarations, Camouflaged Markers in Total Cover, Special Dice
 in Coordinated Orders, and Fireteam minimums after creation.
 
-Eighteen more were **first recorded in official English FAQ v0.0**
+Nineteen more were **first recorded in official English FAQ v0.0**
 and carried into v0.1. The first eight cover: Prone entry restrictions; vaulting while Climbing or
 Jumping; Direct Template line-of-fire limits; occupied Place Deployable
 locations; multiple Surprise Attack MODs; Sixth Sense with MSV1 in Zero
@@ -523,8 +523,11 @@ Prone movement distance, BS Attack MODs and Long Skill Special Dice,
 Controlled Jump/Speedballs, Automatic Skills in Marker State,
 Aerial/Boost restrictions, Stealth and simultaneous AROs,
 Deployable Cover, Disconnected/Unconscious and Cautious Movement,
-and Discover versus Fireteam bonuses. All eighteen v0.0 carry-forwards
-retain three citations **per ruling**: original v0.0 English at its
+and Discover versus Fireteam bonuses. The nineteenth explains the
+main Deployment Phase repositioning restriction and belongs to
+`rule:deployment-phase`, a canonical N5.3 Basic Rules identity.
+All nineteen v0.0 carry-forwards retain three citations **per ruling**:
+original v0.0 English at its
 own printed page, and current v0.1 English/Spanish at their
 respective actual printed pages. `originalPublication` names v0.0,
 while `selectedCitation` names reviewed current v0.1; no new identity
@@ -546,10 +549,14 @@ verified PDF publication day.
 after member loss* examples do not align (the Spanish Haris example
 contains inconsistent member counts). Do not publish a consolidated
 answer for that example without resolving/documenting the discrepancy.
-The broad main Deployment Phase repositioning question still needs
-an appropriate canonical player-facing owner; it must not be linked
-misleadingly to a specialized Skill. ITS-scoped FAQ entries still need
-source-by-source review, historical identity and applicability checks.
+The main Deployment Phase question belongs to `rule:deployment-phase`,
+not a specialized Skill. The ITS FAQ source audit confirms Area of
+Interest, Crossing Lines and Akial Interference as Season 18 source
+missions; these mission identities are not yet published in the
+current N5 Core scenario catalog. Do not bypass the exporter's
+current-scenario target validation or omit explicit ITS season context
+to force those rulings into the browser. See the private audit in
+`local/audits/faq-its-season18-source-scope-20261015.md`.
 No general-rule cards are created from ITS-only answers without a
 verified season context. Synthetic test rulings are never published.
 FAQ records remain distinct from base definitions.

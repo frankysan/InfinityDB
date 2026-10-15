@@ -4737,15 +4737,63 @@ can be linked from multiple appropriate canonical topics and therefore
 several pages. Dates remain version-associated source anchors, not
 independently established PDF upload days.
 
-**Excluded from this review:** The general main Deployment Phase rule
-for repositioning after measurements/rolls still needs a suitable general
-rules owner rather than a misleading Special Skill link.
+**Later follow-up:** The broader Deployment Phase repositioning ruling
+now belongs to `rule:deployment-phase`, not a misleading Special Skill.
 Season-scoped ITS rulings and the disputed Fireteam-type examples remain
 separate unresolved inventories.
 
 Sources: the three pinned N5 FAQ PDFs identified in
 RS-FAQ-V00-003 and the private dated reconciliation in
 `local/audits/`.
+
+### RS-FAQ-V00-005 — General Deployment Phase timing has its own canonical owner
+
+**Classification:** official N5.3 Basic Rules plus a separately cited
+carried-forward FAQ clarification, reviewed 2026-10-15.
+
+The canonical `rule:deployment-phase` summarizes the Deployment
+order/sequence and applicable reserve-rule exceptions from N5.3,
+English printed p. 15. It is a General Rules detail and can be
+found independently of Minelayer, Strategos, Forward Deployment,
+or any other individual deployment Skill.
+
+Official English FAQ v0.0 p. 1 establishes that game elements may be
+repositioned within the player's main Deployment Phase step *until*
+a Roll or measurement is made for the affected element. Affected
+elements then retain their positions for the remainder of Deployment.
+Checking a Fireteam's Coherency and adjusting its members illustrates
+the boundary. English and Spanish FAQ v0.1 p. 1 corroborate that
+answer, with original publication and selected source recorded
+separately on `faq-ruling:deployment-phase-reposition-after-measurement`.
+
+This timing clarification applies to the general phase, not only
+to the placement of Minelayer items or any particular scenario.
+It is separate from the canonical N5.3 sequence and does not
+rewrite any deployment Skill, scoped scenario configuration, or
+Army Unit deployment fact.
+
+### RS-FAQ-ITS-001 — Season 18 names confirmed, publication deliberately deferred
+
+**Classification:** verified source applicability with an open
+publication dependency, reviewed 2026-10-15.
+
+The official Season 18 PDF (version 2026.09.01) confirms
+Crossing Lines (p. 61), Akial Interference (pp. 86–89), and
+Area of Interest (pp. 113–115) as active ITS mission contexts
+referenced in the N5 FAQ. Nine ITS-specific FAQ rulings appear
+in the English v0.0 and are carried forward into v0.1; the
+separate Ancillary exception first appears in v0.1.
+
+**No new ITS FAQ entry is published by this review.** The
+current scenario catalog publishes N5 Core scenario identities
+but not those three Season 18 missions. The exporter correctly
+rejects unresolvable scenario targets, and the default browser
+read model does not implicitly choose ITS season/revision.
+Such rulings must retain exact season, mission, Classified
+Objective/card and source context, rather than overriding the
+base N5 rule for all games. The detailed source crosswalk and
+dependency ordering are private under
+`local/audits/faq-its-season18-source-scope-20261015.md`.
 
 ## ITS FAQ
 

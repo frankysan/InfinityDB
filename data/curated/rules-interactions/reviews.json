@@ -2142,6 +2142,13 @@
       "status": "reviewed",
       "reviewedOn": "2026-10-14",
       "note": "Standalone core N5.3 Request SpecBall procedure published with Combat Jump relation and reviewed bilingual PDF/ITS scope."
+    },
+    {
+      "recordId": "rule:deployment-phase",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "General N5.3 Deployment Phase sequence authored from official printed page 15. The dated FAQ repositioning/measurement boundary has its own FAQ ruling and never changes the core rule or any particular Deployment Skill. Scenario-specific deployment rules remain scoped separately."
     }
   ],
   "futureInteractions": [

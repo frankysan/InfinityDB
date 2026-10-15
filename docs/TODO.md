@@ -1167,13 +1167,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     the three exact source pages and one ruling ID per item. Expose
     Controlled Jump on its Hacking Program page and the bonus ruling
     on both Discover and Fireteams.
-  - [ ] Find a correct player-facing owner for the v0.0 main
-    Deployment Phase *repositioning* FAQ without associating this
-    general timing rule with one arbitrary Special Skill.
-  - [ ] Continue ITS-specific FAQ rulings only after verifying current
-    season/scenario publication and scope. Do not promote them to
-    universal N5 clarifications or backfill historical publication dates
-    from current FAQ reprints.
+  - [x] Add the source-backed `rule:deployment-phase` General Rules
+    identity from N5.3 printed p. 15, with a distinct v0.0-origin
+    FAQ clarification about repositioning before Roll/measurement
+    fixes an element in place (EN v0.0/v0.1 and ES v0.1 p. 1).
+    Do not attach the general timing ruling to an arbitrary Skill.
+  - [x] Audit ITS FAQ v0.0/v0.1 source scope against pinned ITS
+    Season 18. Confirm Area of Interest, Crossing Lines and Akial
+    Interference source missions and why scenario-specific answers
+    cannot yet be published in the N5 Core catalog. Retain private
+    crosswalk under `local/audits/`.
+  - [ ] Add season-aware ITS scenario publication/selection before
+    authoring mission-specific FAQs. Verify exact scenario IDs,
+    source revisions, per-language FAQ pages, and negative applicability
+    to N5 Core and other seasons; do not promote an ITS outcome
+    to a universal rule merely because a core topic exists.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.
