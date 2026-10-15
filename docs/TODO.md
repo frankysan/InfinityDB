@@ -565,12 +565,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Mine Dispenser non-operative savingNum=1 value. The N5.3 PDF, pinned
       Wiki, Army and applicable FAQ support the descriptions; missing
       Weapon definitions decrease from 72 to 70 with no new blocker.
+    - [x] Reconcile the current post-support-weapon gap triage against
+      a freshly built rules database, not the stale generated rules.db.
+      Of the remaining 70 classified Weapon gaps, 33 existing reviewed
+      shared-effects decisions and one accepted historical citation were
+      already non-actionable. Review Breaker Rifle, Viral Combi Rifle,
+      Viral Rifle, Viral Pistol and Viral Tactical Bow against N5.3 chart,
+      pinned Army profiles and canonical Weapon Properties. Their linked
+      AP/Normal Ammunition, BioWeapon, Silent and Suppressive Fire rules
+      suffice; record five profile-hash-pinned shared-only decisions
+      without duplicating rules or altering imported Weapon profiles.
     - [ ] Continue source-specific Weapon review without duplicating
-      canonical Ammunition or Trait rules. Earlier triage found
-      47 actionable reviews, 33 accepted shared-only identities,
-      and 9 multi-profile candidates; reconcile those classifications
-      with the now-published Flamethrower, Marksman and support-weapon
-      batches.
+      canonical Ammunition or Trait rules. Current source-bound triage:
+      70 classified gaps = 38 accepted shared-effects, 1 accepted
+      historical citation, and 31 pending source reviews (including
+      8 multi-profile candidates). These audit gap codes are not
+      automatically 1.0 gameplay defects. Reconcile remaining candidates
+      by source and browser behavior before adding standalone rules.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

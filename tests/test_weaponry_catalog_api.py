@@ -821,6 +821,72 @@ def test_vulkan_and_t2_shotgun_traits_remain_distinct_from_ammunition(
 
 
 @pytest.mark.parametrize(
+    ("slug", "ammo", "saving", "ps", "burst", "traits", "property_id", "range_set"),
+    [
+        ("breaker-rifle", "AP", "BTS/2", "7", "3", ["Suppressive Fire"],
+         "weapon-property:breaker", "rifle"),
+        ("viral-combi-rifle", "N", "BTS", "7", "3",
+         ["Bioweapon (DA+SHOCK)", "Suppressive Fire"],
+         "weapon-property:viral", "combi"),
+        ("viral-rifle", "N", "BTS", "7", "3",
+         ["Bioweapon (DA+SHOCK)", "Suppressive Fire"],
+         "weapon-property:viral", "rifle"),
+        ("viral-pistol", "N", "BTS", "8", "2",
+         ["Bioweapon (DA+SHOCK)"], "weapon-property:viral", "short"),
+        ("viral-tactical-bow", "N", "BTS", "8", "1",
+         ["Bioweapon (DA+SHOCK)", "Silent (-6)"],
+         "weapon-property:viral", "short"),
+    ],
+)
+def test_reviewed_breaker_and_viral_source_profiles_use_shared_rules(
+    weaponry_app: Callable, slug: str, ammo: str, saving: str, ps: str,
+    burst: str, traits: list[str], property_id: str, range_set: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []  # No duplicated Weapon rule card.
+    (profile,) = payload["profiles"]
+    assert (profile["mode"], profile["damage"], profile["burst"]) == (
+        None, ps, burst,
+    )
+    assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+        ammo, saving, "1",
+    )
+    assert profile["traits"] == traits
+    assert [ref["label"] for ref in profile["trait_references"]] == traits
+    assert [prop["id"] for prop in profile["weapon_properties"]] == [property_id]
+    assert [effect["record_id"] for effect in profile["ammunition_effects"]] == [
+        "ammunition:ap" if ammo == "AP" else "ammunition:normal"
+    ]
+    assert all(
+        effect["summary"] and effect["citations"]
+        for effect in profile["ammunition_effects"]
+    )
+    ranges = {
+        "rifle": {
+            "short": {"max": 20, "mod": "0"},
+            "med": {"max": 40, "mod": "+3"},
+            "long": {"max": 80, "mod": "-3"},
+            "max": {"max": 120, "mod": "-6"},
+        },
+        "combi": {
+            "short": {"max": 40, "mod": "+3"},
+            "med": {"max": 80, "mod": "-3"},
+            "long": {"max": 120, "mod": "-6"},
+            "max": None,
+        },
+        "short": {
+            "short": {"max": 20, "mod": "+3"},
+            "med": {"max": 40, "mod": "0"},
+            "long": {"max": 60, "mod": "-6"},
+        },
+    }
+    assert profile["ranges"] == ranges[range_set]
+    if property_id == "weapon-property:viral":
+        assert profile["ammunition"] == "N" and profile["saving"] == "BTS"
+        assert ("Suppressive Fire" in traits) == slug.endswith("rifle")
+
+
+@pytest.mark.parametrize(
     ("slug", "ammo", "saving", "rule_id"),
     [
         ("submachine-gun", "N", "ARM", "ammunition:normal"),

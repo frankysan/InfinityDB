@@ -254,6 +254,13 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing:** Reconcile Weapon definition gaps against a freshly built
+  rules database and N5.3 source-chart evidence. Explicitly accept Breaker Rifle,
+  Viral Combi Rifle, Viral Rifle, Viral Pistol and Viral Tactical Bow as
+  hash-pinned, shared-effects-only references: current AP/Normal Ammunition,
+  BioWeapon, Silent, Suppressive Fire and Weapon Properties already cover their
+  mechanics. Remaining source reviews decrease to 31; Weapon profiles and
+  player-facing behavior are unchanged.
 - **Data processing:** Introduce validated dated FAQ ruling authoring fields
   for exact applicability, original provenance, reviewed source selection,
   conflicts and explicit supersession references. Rules export now rejects

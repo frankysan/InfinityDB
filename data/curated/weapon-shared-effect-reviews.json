@@ -266,6 +266,46 @@
       "profileSha256": "3c8ef707ac029b1debad4ac007d3d4311e2db0a1e5e06370fb282fd37cac2f6d",
       "reviewedOn": "2026-10-14",
       "reason": "N5.3 Weapon Chart p. 185: T2 Ammunition, PS 5, Burst 2, one ARM Saving Roll and Anti-materiel. The canonical T2 and Anti-materiel definitions cover those effects; no additional firing mode or Sniper Rifle-specific exception is printed."
+    },
+    {
+      "slug": "breaker-rifle",
+      "name": "Breaker Rifle",
+      "chartPage": 183,
+      "profileSha256": "c98aeaf25ba52dfd3ee50a90fdd8f6a37647a005a87a2da0dad76eb19458ce81",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 183: PS 7/B3 AP, one BTS/2 Saving Roll, Suppressive Fire and Rifle range bands. The Breaker Weapon Property and canonical AP and Suppressive Fire rules fully describe BTS halving and the source Traits. Do not substitute ARM or duplicate the rules."
+    },
+    {
+      "slug": "viral-combi-rifle",
+      "name": "Viral Combi Rifle",
+      "chartPage": 183,
+      "profileSha256": "0fbbe7f104457855b5fc4e55d7917383dc9f5fa102c9e1f292e2c275bcaf247a",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 183: PS 7/B3, printed N/BTS/one roll, BioWeapon (DA+Shock), Suppressive Fire and Combi ranges. Canonical Normal, BioWeapon and the Viral Weapon Property cover target-dependent VITA/STR results. Do not introduce separate Viral Ammunition or overwrite the printed one-roll profile."
+    },
+    {
+      "slug": "viral-rifle",
+      "name": "Viral Rifle",
+      "chartPage": 183,
+      "profileSha256": "8f5ed77d42e826fb24ba0133486f4b8e2db1d2dfed6ef52f4840eec4838e80a6",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 183: PS 7/B3, printed N/BTS/one roll, BioWeapon (DA+Shock), Suppressive Fire and distinct Rifle ranges. Canonical Normal, BioWeapon and Viral Weapon Property explain VITA/STR interaction, without another standalone Rifle mechanic or source-profile correction."
+    },
+    {
+      "slug": "viral-pistol",
+      "name": "Viral Pistol",
+      "chartPage": 182,
+      "profileSha256": "c559a30e01e9564affb9731f0aa0948e0b7d6919911dccb60d150da0b290a2ec",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 182: PS 8/B2, printed N/BTS/one roll, BioWeapon (DA+Shock) and Pistol range bands; no Suppressive Fire. The published Viral Weapon Property and BioWeapon already explain conditional effects and derived rolls while retaining source Saving Rolls."
+    },
+    {
+      "slug": "viral-tactical-bow",
+      "name": "Viral Tactical Bow",
+      "chartPage": 176,
+      "profileSha256": "c2d2dd1292652939238a63ce236eba66dae5e3b4cac308cdf56ee70077dad66f",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 176: PS 8/B1, printed N/BTS/one roll, BioWeapon (DA+Shock), Silent (-6) and Bow range bands; no Suppressive Fire. Published Viral, BioWeapon and Silent references suffice without a new standalone rule."
     }
   ]
 }
