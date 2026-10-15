@@ -506,25 +506,34 @@ The default read model does not replay superseded historical collections;
 historical publication selection and verification of ITS season revisions
 not yet present in the corpus remain future work.
 
-Two source-verified pilot rulings now live in
-`rules/n5-faq-v0.1.json`. The general Hacking Device Firewall clarification
-applies to `equipment:hacking-device`; a separate FAQ exception excludes
-undeployed Peripherals (Ancillary) from Killed scoring and is conservatively
-published on `scenario:annihilation` only. The latter is a reviewed *subset*
-of the FAQ's broader scenario-element scope, not a claim that the FAQ is
-inapplicable to other missions. Each ruling cites matching English and
-Spanish official FAQ v0.1 printed pages, with English as the explicit
-selected source; no differing wording affects their reviewed outcomes.
+Eight source-reviewed rulings now live in `rules/n5-faq-v0.1.json`.
+Two initial examples concern Hacking Device Firewall and undeployed
+Peripherals (Ancillary) counted as Killed; the latter is conservatively
+shown only on Annihilation, a *subset* of its broader FAQ wording.
+The additional six clarify Skill declaration details and target position,
+fired Deployables on vertical surfaces, Peripheral declarations when a
+Controller cannot act, Camouflaged Markers in Total Cover, Special Dice in
+Coordinated Orders, and Fireteam minimums after creation. Each ruling
+retains its English and Spanish FAQ v0.1 printed-page evidence and an
+explicitly selected English citation. The differing pagination of the
+translations is preserved; source text is not duplicated in base rules.
 
-The browser renders these as **FAQ clarifications** after their underlying
-Equipment or Scenario rules, with version, date and source link. The
-browser's explicit N5.3/v0.1 source snapshot currently uses
-`as_of=2026-09-01` rather than the viewer's clock. Broader coverage,
-archived-edition replay, season-specific publication verification and
-dynamic user-selected FAQ context remain future work. Other topics
-currently return an empty `items` list. Synthetic test rulings are not
-published. FAQ entries remain separate from base-rule definitions.
-these fields must not be treated as an automatically published answer.
+The shared **FAQ clarifications** cards appear beside affected Equipment,
+Scenario, Skill, Trait, State, General Rule, and Fireteam references.
+The Fireteam quick-reference page owns Fireteam FAQs; there is no
+parallel General Rules route for `rule:fireteam-general`.
+The browser's explicit N5.3/v0.1 source snapshot uses
+`as_of=2026-09-01`, not the viewer's clock. Source `publishedDate`
+uses the documented official announcement-era date, not a separately
+verified PDF publication day.
+
+**Pending source review:** The English and Spanish v0.1 Fireteam *type
+after member loss* examples do not align (the Spanish Haris example
+contains inconsistent member counts). Do not publish a consolidated
+answer for that example without resolving/documenting the discrepancy.
+Further v0.0-origin and ITS rulings need exact historical provenance,
+season-context review and wider topic coverage. Synthetic test rulings
+are never published. FAQ records remain distinct from base definitions.
 
 Collections that contain scenario definitions also require `scenarioCollection`. Its `id` is the
 stable scenario-set identity (for example `n5-core`), `revision` is the exact revision within that

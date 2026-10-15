@@ -4582,6 +4582,56 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Baggage>, reviewed 2026-09-23
 - Wiki: <https://infinitythewiki.com/Reload>, reviewed 2026-09-23
 
+## N5 FAQ v0.1 general clarification curation
+
+### RS-FAQ-V01-002 — Dated general FAQ rulings remain separate from base mechanics
+
+**Classification:** source-backed supplemental interpretation,
+reviewed 2026-10-15.
+
+Six newly curated general-gameplay rulings supplement the earlier
+Firewall/Ancillary pilots. Their canonical references and printed
+FAQ page positions are:
+
+- Skill declaration / target position: `skill:bs-attack` (EN/ES p. 1).
+  Choose the target position in Resolution before measuring Range;
+  declare the other Skill details, and let the active player choose
+  declaration order where necessary.
+- Fired Deployables on vertical surfaces: `trait:deployable`
+  (EN p. 1, ES p. 2). The Token must have full supporting surface;
+  this is not a global alteration of placing other Deployables.
+- Controller unable to declare: `skill:peripheral` (EN/ES p. 2).
+  Controller and Peripherals declare the same Skill; any participant
+  who cannot declare it substitutes Idle.
+- Camouflaged Marker in Total Cover: `state:camouflaged`
+  (EN/ES p. 3). A BS Attack that forces a Saving Roll reveals
+  the Marker, but does not hit the covered element.
+- Special Dice in Coordinated Orders: `rule:coordinated-orders`
+  and `rule:special-dice` (EN p. 2, ES p. 3). Special Dice do
+  not alter Burst values and therefore still apply.
+- Fireteam required member lost: `rule:fireteam-general`
+  (EN/ES p. 3). Chart minimum membership applies at creation;
+  the FT Master Special Skill can add its own requirements.
+
+These entries are absent from the pinned English FAQ v0.0 and
+first appear in the available English v0.1 publication. They
+use the official 2026-09-01 announcement as the project's
+existing date anchor; this does not establish the exact PDF
+upload date. The source-specific English/Spanish printed-page
+differences are preserved as separate citations.
+
+**Deferred:** The separate FAQ question about Fireteam type after
+losing a member has a contradictory Spanish example: a Haris is
+described as having two members before and after losing one.
+The English example uses three followed by two. Do not infer
+the Spanish example was intended to match English silently;
+retain this discrepancy for further source review.
+
+Sources: N5 FAQ v0.1 English and Spanish,
+`data/pdf/faq/n5-faqs-v0-1-en.pdf` and
+`data/pdf/faq/esp-faqs-n5-v0-1.pdf`; comparison to the
+pinned English v0.0 PDF under `data/pdf/faq/`.
+
 ## ITS FAQ
 
 ### RS-FAQ-SCOPE-001 — Ruling publication identity and ITS applicability are separate axes

@@ -1128,8 +1128,9 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       season contexts, and preserve selected source provenance. Verification
       of season revisions not in the published rules corpus, replay of
       archived ruling editions, and broader FAQ coverage remain requirements.
-      The two source-verified pilot rulings and initial browser publication
-      were delivered without replacing canonical rule definitions.
+      The first two source-verified pilot rulings and six additional
+      general-gameplay rulings are now delivered through the same
+      publication path, without replacing canonical rule definitions.
   - [x] Deliver a general Hacking Device Firewall clarification and a
     scenario-scoped Annihilation Peripheral (Ancillary) kill-scoring exception
     through validation, export, API, and browser. Both are verified against
@@ -1139,6 +1140,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     scenario objectives; wider application is a follow-up curation decision.
     Discoverable cards live on existing Equipment and Scenario pages without
     introducing a new top-level FAQ area.
+  - [x] Publish six more FAQ v0.1 general-gameplay clarifications
+    on Skill declaration, fired Deployables, Controller/Peripheral actions,
+    Camouflaged Markers in Total Cover, Special Dice in Coordinated Orders,
+    and Fireteam creation minimums. Link them to their owned Skill/Trait/
+    State/General Rule/Fireteams pages, with exact EN/ES source pages.
+  - [ ] Review the **Fireteam type after member loss** FAQ answer against
+    English and Spanish v0.1 source examples before authoring: the Spanish
+    Haris example has inconsistent member counts. Then continue the
+    remaining v0.0-origin, carried-forward, and ITS-scoped FAQ inventory.
+    Do not infer original publication version from current PDF occurrence.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.

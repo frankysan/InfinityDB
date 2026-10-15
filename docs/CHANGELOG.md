@@ -12,10 +12,12 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Dated FAQ v0.1 clarifications now appear alongside Hacking Device and
-  Annihilation rules: a disabled Hacking Device loses its Firewall MODs,
-  and an undeployed Peripheral (Ancillary) does not count as Killed for
-  scenario scoring. Each card identifies its FAQ source/version/date.
+- Dated FAQ v0.1 clarifications appear alongside Hacking Device,
+  Annihilation, Skill, Trait, State, General Rule and Fireteam references.
+  New entries explain Skill declaration, fired Deployables, Peripheral
+  restrictions, Camouflaged Markers in Total Cover, Special Dice in
+  Coordinated Orders, and Fireteam creation minimums. Each card
+  identifies its FAQ source/version/date.
 - Domination's 350-point SWC displays the English-source 6, with an explicit
   discrepancy: official Spanish N5.3 says 7. The Annihilation 350-point
   survival bands are now corroborated by official Spanish N5.3 rather than
@@ -217,9 +219,11 @@ are not retroactively relabeled.
   supersession and inconsistent carried-forward origins. Add an
   applicability-aware read model and explicit-context FAQ API, retaining
   reviewed source provenance and conditional supersession. The first two
-  reviewed FAQ v0.1 entries now reach existing Equipment and Scenario
-  browser pages through a shared dated clarification card; their base
-  rules remain unchanged.
+  eight reviewed FAQ v0.1 entries now reach their owning Equipment,
+  Scenario, Skill, Trait, State, General Rule and Fireteam browser
+  surfaces through a shared dated clarification card. The Fireteam
+  detail is shown on the Fireteams page instead of inventing a rule
+  route. Base rules remain unchanged.
 - **Data processing + Web backend:** Confirm ITS-inspired split Deployment
   Zones and asymmetric scoring applicability survive typed validation and
   catalog projection; preserve the core N5.3 scope and leave ITS-specific

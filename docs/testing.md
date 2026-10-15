@@ -1905,6 +1905,40 @@ user's clock. This confirms two published examples, not the
 complete FAQ inventory, ITS season-specific verification or historical
 edition selection.
 
+## 1.0 FAQ v0.1 general clarification expansion
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** Six additional
+source-reviewed records expand the existing FAQ pilot to eight:
+Skill declaration / target position (EN/ES p. 1);
+fired Deployables on vertical surfaces (EN p. 1 / ES p. 2);
+Peripheral actions with a restricted Controller (EN/ES p. 2);
+Camouflaged Marker in Total Cover (EN/ES p. 3);
+Special Dice and Coordinated Orders (EN p. 2 / ES p. 3);
+Fireteam creation minimums after member loss (EN/ES p. 3).
+These entries were not present in the available pinned English
+FAQ v0.0 PDF. All retain original v0.1 identity, dated source
+citations, explicit N5.3 applicability and an independently reviewed
+Spanish page even where pagination differs.
+
+Added an API/database parametrized regression for the seven
+affected canonical topic IDs, including `rule:special-dice`
+as a second route to the same Special Dice ruling. The shared FAQ
+presentation is reused by Skill, Trait, State and General Rules
+details. The Fireteam ruling belongs to the Fireteams quick
+reference/Army chart surface, not a fabricated General Rules URL.
+
+Private headless-browser verifier
+`local/audits/verify_faq_expanded_browser.py` tested six real
+reference pages across desktop 1440 px and narrow 390/320 px.
+**18/18 checks passed:** the expected question, answer, source
+version/date/link and one FAQ card per page, with no JavaScript
+exceptions or page-level horizontal overflow.
+
+The Fireteam type-after-loss FAQ example remains intentionally
+unpublished pending English/Spanish example reconciliation. This
+batch does not assert complete FAQ v0.0, ITS, or historical
+cross-post inventory coverage.
+
 ## 1.0 Visibility Zone and Ammunition/Immunity browser acceptance
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** Headless Chromium used a freshly

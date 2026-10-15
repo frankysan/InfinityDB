@@ -653,8 +653,11 @@ window.addEventListener("distanceunitchange", () => {
 getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
   currentItem = item;
   render(item);
-  if (catalog === "equipment") {
-    fetchReviewedFaqRulings(`equipment:${itemId}`, { signal: pageController.signal })
+  if (["equipment", "traits", "states"].includes(catalog)) {
+    const prefix = { equipment: "equipment", traits: "trait", states: "state" }[catalog];
+    const topicId = item.rules?.find((rule) => rule.id?.startsWith(`${prefix}:`))?.id
+      || `${prefix}:${itemId}`;
+    fetchReviewedFaqRulings(topicId, { signal: pageController.signal })
       .then((payload) => {
         if (pageController.signal.aborted) return;
         faqItems = payload.items || [];

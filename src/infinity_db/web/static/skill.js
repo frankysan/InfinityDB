@@ -1,6 +1,7 @@
 import { formatSkillDistanceExtra } from "./distance.js";
 import { optionalUnitFilters } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
@@ -13,6 +14,8 @@ const meta = document.getElementById("skill-meta");
 const status = document.getElementById("skill-status");
 const content = document.getElementById("skill-content");
 let currentSkill;
+let displayedSkill;
+let faqItems = [];
 const pageController = new AbortController();
 
 function displayWikiUrl(url) {
@@ -212,6 +215,7 @@ function variantSection(variant, parameterSemantics) {
 }
 
 function render(skill) {
+  displayedSkill = skill;
   document.title = `${skill.name} · InfinityDB`;
   name.firstChild.textContent = skill.name;
   const categories = (skill.categories || []).map((category) => category.name).join(", ");
@@ -241,6 +245,7 @@ function render(skill) {
   if (variantRules.length) children.push(rulesReferenceSection(variantRules, "Variant rules"));
   const structuredReference = structuredReferenceSection(skill.structured_reference);
   if (structuredReference) children.push(structuredReference);
+  if (faqItems.length) children.push(faqRulingsSection(faqItems));
   children.push(sections);
   sections.append(...variants.map((variant) => variantSection(variant, skill.parameter_semantics)));
   content.replaceChildren(...children);
@@ -263,6 +268,17 @@ if (!skillId) {
   getCatalogItem("skills", skillId, pageController.signal).then((skill) => {
     currentSkill = skill;
     render(skill);
+    const topicId = skill.rules?.find((rule) => rule.id?.startsWith("skill:"))?.id
+      || `skill:${skillId}`;
+    fetchReviewedFaqRulings(topicId, { signal: pageController.signal })
+      .then((payload) => {
+        if (pageController.signal.aborted) return;
+        faqItems = payload.items || [];
+        if (faqItems.length && displayedSkill) render(displayedSkill);
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+      });
     return visibleUnitIds(optionalUnitFilters(), pageController.signal)
       .then((ids) => render(withVisibleUnits(skill, ids)));
   }).catch((error) => {

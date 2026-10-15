@@ -596,20 +596,22 @@ and matched applicability, separate from the unmodified base Rule/Skill.
 `RulesDatabase.faq_rulings_for_topic` and `GET /api/faq-rulings` provide
 that projection. The API requires `topic_id`, `rules_revision`, and
 `as_of`, with optional paired `season_id`/`season_revision` and
-`scenario_id`; it never defaults to the newest publication. Queries
-currently return source-verified rulings only for the published pilot topics.
-Two reviewed FAQ v0.1 entries are now published from
-`data/curated/rules/n5-faq-v0.1.json`: the Hacking Device Firewall
-clarification (general) and the exception for undeployed Peripherals
-(Ancillary) counted as Killed, shown conservatively on Annihilation.
-The read model exposes their selected English FAQ v0.1 PDF citation and
-corroborating Spanish citation without changing the existing Hacking
-Device or Killing definitions. The shared browser card appears alongside
-base Equipment and Scenario rules, explicitly labeled as a later FAQ,
-using pinned N5.3/as-of-2026-09-01 context rather than today's date.
-The scenario restriction on the pilot is an intentionally narrow
-presentation scope; the FAQ itself discusses scenario kill objectives
-more generally.
+`scenario_id`; it never defaults to the newest publication. Eight reviewed FAQ v0.1 entries are now published from
+`data/curated/rules/n5-faq-v0.1.json`. They retain the selected English
+FAQ PDF citation, matching Spanish evidence at its actual printed page,
+an explicit N5.3 effective date and their own independent identities.
+The shared browser presentation now covers affected Equipment,
+Scenario, Skills, Traits, States, and General Rules, with Fireteam
+FAQs appearing on the Fireteams page rather than a competing rule route.
+This is an explanatory overlay: canonical rule definitions and
+underlying Skill/Army data are unchanged.
+
+The Annihilation-only Ancillary ruling is intentionally a subset of the
+FAQ's general scenario-objective wording. The source label
+`2026-09-01` is the project-documented announcement-era anchor, not
+a separately established document publication date. The divergent
+Fireteam-type-after-member-loss examples in English and Spanish FAQ
+v0.1 remain pending rather than being silently reconciled.
 
 Historical collection replay, full ITS season-revision publication
 verification, remaining FAQ inventory coverage, and dynamic date/season

@@ -436,6 +436,12 @@ def test_published_faq_pilot_retains_selected_and_spanish_source_evidence(
     assert {record["id"] for record in records} == {
         "faq-ruling:hacking-device-firewall-disabled",
         "faq-ruling:undeployed-ancillary-not-killed",
+        "faq-ruling:skill-declaration-target-position",
+        "faq-ruling:fired-deployable-vertical-surface",
+        "faq-ruling:peripheral-controller-unable-to-declare",
+        "faq-ruling:camouflaged-marker-total-cover",
+        "faq-ruling:coordinated-order-special-dice",
+        "faq-ruling:fireteam-required-member-lost",
     }
     for record in records:
         assert record["review"]["status"] == "reviewed"
@@ -530,3 +536,48 @@ def test_published_faq_pilot_reaches_api_with_unmodified_base_reference(
         "scenario:annihilation", scenario_id="scenario:domination",
     )
     assert status == 200 and response["items"] == []
+
+
+@pytest.mark.parametrize(
+    ("topic_id", "ruling_id", "en_page", "es_page", "answer_term"),
+    [
+        ("skill:bs-attack", "skill-declaration-target-position", 1, 1, "Resolution"),
+        ("trait:deployable", "fired-deployable-vertical-surface", 1, 2, "vertical"),
+        ("skill:peripheral", "peripheral-controller-unable-to-declare", 2, 2, "Idle"),
+        ("state:camouflaged", "camouflaged-marker-total-cover", 3, 3, "Total Cover"),
+        ("rule:coordinated-orders", "coordinated-order-special-dice", 2, 3, "Burst"),
+        ("rule:special-dice", "coordinated-order-special-dice", 2, 3, "Burst"),
+        ("rule:fireteam-general", "fireteam-required-member-lost", 3, 3, "FT Master"),
+    ],
+)
+def test_expanded_faq_v01_topic_page_and_applicability(
+    published_pilot: RulesDatabase,
+    topic_id: str,
+    ruling_id: str,
+    en_page: int,
+    es_page: int,
+    answer_term: str,
+) -> None:
+    items = published_pilot.faq_rulings_for_topic(
+        topic_id, rules_revision="5.3", as_of="2026-09-01",
+    )
+    assert [item["id"] for item in items] == [f"faq-ruling:{ruling_id}"]
+    item = items[0]
+    assert answer_term in item["answer"]
+    assert item["selected_citation"] == {
+        "sourceId": "n5-faq-v0.1-en-pdf", "page": en_page,
+    }
+    assert {(citation["source_id"], citation["page"]) for citation in item["citations"]} == {
+        ("n5-faq-v0.1-en-pdf", en_page),
+        ("n5-faq-v0.1-es-pdf", es_page),
+    }
+    assert item["matched_applicability"] == [{
+        "rulesRevision": "5.3", "effectiveFrom": "2026-09-01",
+    }]
+    assert "cross-checked" in item["selection_reason"]
+    assert published_pilot.faq_rulings_for_topic(
+        topic_id, rules_revision="5.3", as_of="2026-08-31",
+    ) == []
+    assert published_pilot.faq_rulings_for_topic(
+        topic_id, rules_revision="5.2", as_of="2026-10-15",
+    ) == []

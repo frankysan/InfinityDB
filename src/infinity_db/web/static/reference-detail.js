@@ -1,4 +1,5 @@
 import { getCatalogItem } from "./api.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { rulesReferenceSection } from "./rules-reference.js";
 
@@ -9,6 +10,8 @@ const meta = document.getElementById("item-meta");
 const status = document.getElementById("item-status");
 const content = document.getElementById("item-content");
 const pageController = new AbortController();
+let displayedItem;
+let faqItems = [];
 
 function definitionSection(item) {
   const section = document.createElement("section");
@@ -127,6 +130,7 @@ function relatedCategorySection(items) {
 }
 
 function render(item) {
+  displayedItem = item;
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
   if (meta) meta.textContent = `${singular} · ${item.id}`;
@@ -139,6 +143,7 @@ function render(item) {
   if (relatedCategory) sections.push(relatedCategory);
   const usedBy = usedBySection(item.used_by);
   if (usedBy) sections.push(usedBy);
+  if (faqItems.length) sections.push(faqRulingsSection(faqItems));
   content.replaceChildren(...sections);
   content.hidden = false;
   status.hidden = true;
@@ -149,7 +154,22 @@ document.addEventListener(
   () => pageController.abort(),
   { once: true },
 );
-getCatalogItem(catalog, itemId, pageController.signal).then(render).catch((error) => {
+getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
+  render(item);
+  if (catalog !== "rules" && catalog !== "ammunition") return;
+  const prefix = catalog === "rules" ? "rule" : "ammunition";
+  const topicId = item.rules?.find((rule) => rule.id?.startsWith(`${prefix}:`))?.id
+    || `${prefix}:${itemId}`;
+  fetchReviewedFaqRulings(topicId, { signal: pageController.signal })
+    .then((payload) => {
+      if (pageController.signal.aborted) return;
+      faqItems = payload.items || [];
+      if (faqItems.length && displayedItem) render(displayedItem);
+    })
+    .catch((error) => {
+      if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+    });
+}).catch((error) => {
   if (error.name === "AbortError") return;
   name.firstChild.textContent = `${singular} unavailable`;
   status.textContent = error.message || "Could not load this reference item.";

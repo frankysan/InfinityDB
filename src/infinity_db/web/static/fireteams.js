@@ -1,4 +1,5 @@
 import { getFireteamArmies, getFireteamChart } from "./api.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { fireteamsIncludeWildcards } from "./preferences.js";
 import { readShareState, writeShareState } from "./share-state.js";
@@ -18,6 +19,7 @@ const elements = {
   content: byId("fireteam-content"),
   reference: byId("fireteam-reference"),
   referenceContent: byId("fireteam-reference-content"),
+  faq: byId("fireteam-faq"),
   chartName: byId("fireteam-chart-name"),
   description: byId("fireteam-chart-description"),
   limits: byId("fireteam-chart-limits"),
@@ -502,6 +504,15 @@ async function loadChart(value) {
 
 async function initialize() {
   show(elements.loading);
+  fetchReviewedFaqRulings("rule:fireteam-general", { signal: pageController.signal })
+    .then((payload) => {
+      if (pageController.signal.aborted) return;
+      const section = faqRulingsSection(payload.items);
+      if (section) elements.faq.replaceChildren(section);
+    })
+    .catch((error) => {
+      if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+    });
   try {
     const payload = await getFireteamArmies(pageController.signal);
     populateArmies(payload.items || []);
