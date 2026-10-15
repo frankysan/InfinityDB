@@ -442,6 +442,7 @@ def test_published_faq_pilot_retains_selected_and_spanish_source_evidence(
         "faq-ruling:camouflaged-marker-total-cover",
         "faq-ruling:coordinated-order-special-dice",
         "faq-ruling:fireteam-required-member-lost",
+        "faq-ruling:fireteam-type-after-member-loss",
         "faq-ruling:prone-movement-label",
         "faq-ruling:vault-during-climb-and-jump",
         "faq-ruling:direct-template-secondary-target-los",
@@ -477,7 +478,12 @@ def test_published_faq_pilot_retains_selected_and_spanish_source_evidence(
             assert origin["version"] == "0.1"
             assert origin["publishedDate"] == "2026-09-01"
             assert sources == {"n5-faq-v0.1-en-pdf", "n5-faq-v0.1-es-pdf"}
-        assert record["facts"]["conflictingCitations"] == []
+        if record["id"] == "faq-ruling:fireteam-type-after-member-loss":
+            assert record["facts"]["conflictingCitations"] == [
+                {"sourceId": "n5-faq-v0.1-es-pdf", "page": 3},
+            ]
+        else:
+            assert record["facts"]["conflictingCitations"] == []
         assert record["facts"]["supersedes"] == []
 
     general = published_pilot.faq_rulings_for_topic(
@@ -564,6 +570,21 @@ def test_published_faq_pilot_reaches_api_with_unmodified_base_reference(
     )
     assert status == 200 and response["items"] == []
 
+    status, response = request("rule:fireteam-general")
+    assert status == 200
+    type_ruling = next(
+        item for item in response["items"]
+        if item["id"] == "faq-ruling:fireteam-type-after-member-loss"
+    )
+    assert "three-member HARIS" in type_ruling["answer"]
+    assert "two-member HARIS" in type_ruling["answer"]
+    assert type_ruling["selected_citation"] == {
+        "sourceId": "n5-faq-v0.1-en-pdf", "page": 3,
+    }
+    assert type_ruling["conflicting_citations"] == [
+        {"sourceId": "n5-faq-v0.1-es-pdf", "page": 3},
+    ]
+
 
 @pytest.mark.parametrize(
     ("topic_id", "ruling_id", "en_page", "es_page", "answer_term"),
@@ -575,6 +596,7 @@ def test_published_faq_pilot_reaches_api_with_unmodified_base_reference(
         ("rule:coordinated-orders", "coordinated-order-special-dice", 2, 3, "Burst"),
         ("rule:special-dice", "coordinated-order-special-dice", 2, 3, "Burst"),
         ("rule:fireteam-general", "fireteam-required-member-lost", 3, 3, "FT Master"),
+        ("rule:fireteam-general", "fireteam-type-after-member-loss", 3, 3, "HARIS"),
     ],
 )
 def test_expanded_faq_v01_topic_page_and_applicability(
@@ -601,7 +623,10 @@ def test_expanded_faq_v01_topic_page_and_applicability(
     assert item["matched_applicability"] == [{
         "rulesRevision": "5.3", "effectiveFrom": "2026-09-01",
     }]
-    assert "cross-checked" in item["selection_reason"]
+    assert (
+        "cross-checked" in item["selection_reason"]
+        or "source discrepancy" in item["selection_reason"]
+    )
     assert published_pilot.faq_rulings_for_topic(
         topic_id, rules_revision="5.3", as_of="2026-08-31",
     ) == []
@@ -680,7 +705,7 @@ def test_earlier_faq_identity_is_not_inferred_from_current_publication(
     published_pilot: RulesDatabase,
 ) -> None:
     records = published_pilot.records_by_kind("faq-ruling")
-    assert len(records) == 27
+    assert len(records) == 28
     assert sum(
         record["facts"]["originalPublication"]["version"] == "0.0"
         for record in records
@@ -688,7 +713,7 @@ def test_earlier_faq_identity_is_not_inferred_from_current_publication(
     assert sum(
         record["facts"]["originalPublication"]["version"] == "0.1"
         for record in records
-    ) == 8
+    ) == 9
     assert published_pilot.composed_record("skill:climb") is not None
 
 

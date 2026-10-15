@@ -16,6 +16,9 @@ are not retroactively relabeled.
   published ITS missions. Season 18 starts with Battleground, including
   its end-of-game Sectors, size-dependent map, 2/3/5-point scoring and
   special rules. Shared scenario links retain the exact season and game size.
+- Fireteam Type now has a separate FAQ clarification: a surviving HARIS
+  does not become a DUO when it loses a member. The Spanish FAQ's
+  inconsistent example count remains visible as a source discrepancy.
 - Dated FAQ v0.1 clarifications appear alongside Hacking Device,
   Annihilation, Skill, Trait, State, General Rule and Fireteam references.
   New entries explain Skill declaration, fired Deployables, Peripheral
@@ -231,7 +234,7 @@ are not retroactively relabeled.
   missing topic/scenario/predecessor targets, cycles, non-overlapping
   supersession and inconsistent carried-forward origins. Add an
   applicability-aware read model and explicit-context FAQ API, retaining
-  reviewed source provenance and conditional supersession. Twenty-seven
+  reviewed source provenance and conditional supersession. Twenty-eight
   reviewed FAQ entries now reach their owning Equipment, Scenario, Skill,
   Trait, State, General Rule, Hacking Program and Fireteam browser surfaces
   through shared dated clarification cards. Nineteen entries retain v0.0
@@ -239,7 +242,9 @@ are not retroactively relabeled.
   duplicating rulings. The newly modeled Deployment Phase uses its
   official N5.3 source; its FAQ remains a separate dated overlay.
   The Fireteam detail stays on the Fireteams page rather than inventing
-  a rule route. Base rules remain unchanged.
+  a rule route. A separate Fireteam Type ruling preserves the English
+  three-to-two-member HARIS example; a disclosure links the Spanish FAQ's
+  contradictory count without overriding the shared rule. Base rules remain unchanged.
 - **Data processing + Web backend + Web frontend:** Add strict current
   scenario collection/revision selection to catalog and list/detail/map
   APIs and a browser collection picker generated from published missions.

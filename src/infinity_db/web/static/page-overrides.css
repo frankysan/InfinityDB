@@ -581,6 +581,21 @@ html:not([data-developer-mode="true"])
   }
 }
 
+/* Reviewed FAQ source discrepancies */
+.faq-source-discrepancy {
+  margin-top: 12px;
+  font-size: var(--font-size-sm);
+}
+
+.faq-source-discrepancy summary {
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.faq-source-discrepancy .detail-source {
+  margin: 8px 0 0;
+}
+
 /* Scenario browser */
 .scenario-catalog {
   width: min(1040px, 100%);

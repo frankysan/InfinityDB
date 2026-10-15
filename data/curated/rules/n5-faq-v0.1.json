@@ -769,6 +769,67 @@
       }
     },
     {
+      "id": "faq-ruling:fireteam-type-after-member-loss",
+      "kind": "faq-ruling",
+      "name": "Fireteam Type remains unchanged when members are lost",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1; the Spanish example has an inconsistent member count.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 3
+        }
+      ],
+      "facts": {
+        "question": "Does a Fireteam change Type when it loses members?",
+        "answer": "No. A Fireteam keeps its original Type as members are lost. For example, a three-member HARIS that loses one Trooper remains a two-member HARIS, not a DUO. This does not override separate rules that cancel the Fireteam.",
+        "topicIds": [
+          "rule:fireteam-general"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 3
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 3
+        },
+        "selectionReason": "Official English FAQ v0.1 gives a three-to-two-member HARIS example. Spanish FAQ v0.1 agrees that Type does not change, but its example says a two-member HARIS loses one Trooper and remains a two-member HARIS. Preserve this numerical source discrepancy without inventing a different Type rule. This answer is not present in the reviewed English v0.0 FAQ.",
+        "conflictingCitations": [
+          {
+            "sourceId": "n5-faq-v0.1-es-pdf",
+            "page": 3
+          }
+        ],
+        "supersedes": []
+      }
+    },
+    {
       "id": "faq-ruling:fireteam-required-member-lost",
       "kind": "faq-ruling",
       "name": "Fireteam minimum requirements apply at creation",

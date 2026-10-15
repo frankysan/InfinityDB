@@ -62,6 +62,23 @@ export function faqRulingsSection(items) {
       source.append(` · first documented v${publication.version} (date anchor ${publication.publishedDate})`);
     }
     card.append(source);
+    if (ruling.conflicting_citations?.length) {
+      const discrepancy = document.createElement("details");
+      discrepancy.className = "faq-source-discrepancy";
+      const label = document.createElement("summary");
+      label.textContent = "Source discrepancy";
+      const explanation = document.createElement("p");
+      explanation.className = "detail-source";
+      explanation.textContent = ruling.selection_reason || "The cited sources differ.";
+      for (const alternative of ruling.conflicting_citations) {
+        const match = (ruling.citations || []).find((item) =>
+          item.source_id === alternative.sourceId && item.page === alternative.page
+        );
+        if (match) explanation.append(" · ", rulesCitationNode(match));
+      }
+      discrepancy.append(label, explanation);
+      card.append(discrepancy);
+    }
     group.append(card);
   }
   return group;

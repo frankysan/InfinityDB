@@ -47,9 +47,10 @@ cross-surface checks are now individual tasks under
 [final 1.0 acceptance](#final-10-acceptance).
 
 General performance/storage experiments, major pipeline refactors,
-persistent-user-data features, ITS season/tournament tooling and native
+persistent-user-data features, ITS content/season/tournament tooling and native
 applications remain post-1.0 unless needed to fix release-critical defects.
-Core-rules scenarios remain within 1.0 completeness scope.
+Previously implemented ITS content is retained but is not a 1.0 requirement or
+release blocker. The four N5 core-rules scenarios remain in 1.0 scope.
 
 The public roadmap lives in README.md; the durable 1.0 release gate
 lives in docs/releasing.md. All unchecked tasks below belong to 1.0
@@ -1015,18 +1016,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] Validate every published base identity and reviewed combined form against the pinned
       source; prove that weapon links, Ammunition detail, and later comparison views consume the
       same facts without conflating composition with roll notation.
-  - [ ] Include scenario-defined catalog concepts needed for the general rules
-    reference, including scenario-only Skills, Equipment when present, contextual
-    roles such as Specialist Troop, and the scenario elements those concepts act
-    on. Preserve scenario/season scope and keep temporary effects out of static
-    Unit/Profile facts. Include the scoped action identities surfaced by the
-    current ITS FAQ where their owning scenarios classify them as Skills/AROs,
-    including `Activate Communication Antenna`, `Oppose Activation`, and `Emit
-    Akial Interference`. Keep semantic identity, source publication provenance, and
-    applicability separate so the same canonical concept can be cited or overlaid
-    by core, scenario, FAQ, or season material without duplication or collection-
-    load-order semantics. This catalog coverage is in scope for 1.0 and should share
-    identities/scope with the core-scenario model rather than becoming a parallel representation.
+  - [ ] Include scenario-defined catalog concepts needed for the core-rules
+    scenario reference, including core-scenario Skills, contextual roles such as
+    Specialist Troop, and the scenario elements those concepts act on. Preserve
+    scenario scope and keep temporary effects out of static Unit/Profile facts.
+    Keep semantic identity, source publication provenance, and applicability
+    separate so one canonical concept can be cited or overlaid by core scenarios
+    and FAQ material without duplication or collection-load-order semantics.
+    ITS-only actions and season-specific rules remain post-1.0.
     - [ ] Reuse current scoped definitions/supplements, then identify any missing applicability
       validation or presentation contract using one concept shared by core and scenario material.
       Prove that scope is visible and unrelated scenario/season overlays do not leak into core help.
@@ -1109,9 +1106,9 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [ ] Prioritize links to features already represented by the app: deployment
     and private-information handling; BS Attack/MOD and template behavior;
     hacking Firewall; Marker, Camouflage, Peripheral, and State interactions;
-    Coordinated Orders; and Fireteam creation/bonuses/integrity. The FAQ also
-    contains scenario-specific rulings, so scope them to the relevant ITS
-    season and mission rather than presenting them as universal core rules.
+    Coordinated Orders; and Fireteam creation/bonuses/integrity. Defer
+    ITS-only FAQ rulings and season-specific scenarios to post-1.0; do not
+    present their outcomes as universal core rules.
   - [ ] Define an explicit source-precedence and effective-date policy. An on-screen
     answer must show its source date/version and never silently blend conflicting
     documents.
@@ -1146,11 +1143,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     Camouflaged Markers in Total Cover, Special Dice in Coordinated Orders,
     and Fireteam creation minimums. Link them to their owned Skill/Trait/
     State/General Rule/Fireteams pages, with exact EN/ES source pages.
-  - [ ] Review the **Fireteam type after member loss** FAQ answer against
-    English and Spanish v0.1 source examples before authoring: the Spanish
-    Haris example has inconsistent member counts. Then continue the
-    remaining v0.0-origin, carried-forward, and ITS-scoped FAQ inventory.
-    Do not infer original publication version from current PDF occurrence.
+  - [x] Publish the N5.3 Fireteam Type persistence FAQ after reviewing both
+    v0.1 language editions. English gives the consistent HARIS 3-to-2-member
+    example; the Spanish example contradicts its own member count but agrees
+    on the rule. Retain the Spanish citation as conflicting illustration
+    evidence, without changing the conclusion or inferring an earlier v0.0
+    origin. Continue remaining core/general FAQ reconciliation separately.
   - [x] Reconcile eight general-gameplay **FAQ v0.0 carry-forwards** against
     English v0.0 and English/Spanish v0.1: Prone, vaulting, Direct Template
     targeting, occupied Deployable placement, Surprise Attack MODs,
@@ -1172,33 +1170,6 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     FAQ clarification about repositioning before Roll/measurement
     fixes an element in place (EN v0.0/v0.1 and ES v0.1 p. 1).
     Do not attach the general timing ruling to an arbitrary Skill.
-  - [x] Audit ITS FAQ v0.0/v0.1 source scope against pinned ITS
-    Season 18. Confirm Area of Interest, Crossing Lines and Akial
-    Interference source missions and why scenario-specific answers
-    cannot yet be published in the N5 Core catalog. Retain private
-    crosswalk under `local/audits/`.
-  - [x] Add strict current scenario-set selection to catalog and API:
-    `collection` and exact `revision` must appear together for
-    list/detail/map requests; missing/invalid selections never silently
-    select N5 Core. Existing unfiltered URLs remain compatible.
-    Synthetic season-metadata fixtures prove disjoint selection without
-    publishing a fabricated ITS mission.
-  - [x] Publish the first source-backed ITS Season 18 mission, Battleground,
-    under `its-18@2026.09.01` with exact 150-400-point geometry, end-game
-    Sector scoring, special rules and official source provenance. Core
-    remains the unfiltered default; other seasons never substitute.
-  - [x] Expose available current scenario collections in the browser,
-    with an exact season/revision selector, matching detail/map URLs and
-    self-contained share-state restoration. Verify mobile and desktop
-    selection, map rendering and shared URL reloads.
-  - [ ] Curate the remaining **real** Season 18 mission identities and
-    complete definitions in the same versioned scenario collection.
-    Extend typed geometry, objective/card choices or scoring only when
-    supported by each source mission; fail closed for absent missions.
-  - [ ] Publish ITS-specific FAQ applicability only after verifying
-    scenario identities, EN/ES citations and negative applicability to
-    Core and other seasons. Do not promote ITS-only outcomes to universal
-    N5 rules.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.
@@ -1588,9 +1559,20 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
   - [ ] Treat the official Army app/site as the authority for army-list legality.
     InfinityDB may provide read-only explanation and planning support, but must
     label its snapshot/date and avoid claiming tournament validation.
+  - [ ] Publish ITS-only FAQ clarifications after verifying each exact
+    season/scenario identity, version and bilingual source citation. Model
+    seasonal action identities such as `Activate Communication Antenna`,
+    `Oppose Activation`, and `Emit Akial Interference` only in their reviewed
+    mission context. Confirm none leak into core or other seasons; avoid
+    universalizing tournament-specific outcomes.
 
-- [ ] Extend the 1.0 scenario domain with ITS scenario list/detail coverage backed by
-  curated seasonal data, rather than creating a separate ITS-only model or using PDF excerpts.
+- [ ] Extend the existing core-scenario foundation with remaining ITS scenario
+  list/detail coverage backed by versioned seasonal data; retain the already
+  published Season 18 Battleground pilot without treating it as a 1.0 gate.
+  - [ ] Curate the remaining Season 18 mission identities and complete
+    source-backed definitions under `its-18@2026.09.01`; extend typed
+    geometry, scoring and card/classified choices only where the mission
+    needs them. Unpublished missions must fail closed.
   - [ ] Capture structured, cited scenario facts: objectives and scoring, game
     rounds/end conditions, force/point/SWC/table/deployment configuration,
     deployment map or geometry, exclusion zones, token types/diameters,
