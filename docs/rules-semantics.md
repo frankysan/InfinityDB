@@ -3732,16 +3732,29 @@ The Domination Forces and Deployment chart in N5 Core Rules v5.3 (2026-08-10), p
 gives 3, 4, 5, 6, 6, and 8 SWC for 150, 200, 250, 300, 350, and 400 Army Points. The 350-point
 6 SWC row differs from the 7 SWC in Annihilation on printed page 150. Neither another mission's
 chart nor an inferred Points-to-SWC formula authorizes rewriting Domination's value. The maintained
-record retains 6 SWC and a source issue scoped to the 350-point `swc` field. The difference is
-not treated as an obvious error: it may be intentional, but it is noteworthy because the otherwise
-expected progression would suggest 7 SWC. Verification therefore remains open without rewriting the
-scenario-specific printed value.
+record retains 6 SWC and a source issue scoped to the 350-point `swc` field.
+The English N5.2 chart (printed p. 150) and pinned English Wiki Domination
+revision 3264 also print 6 SWC. The published number is corroborated across
+those versions; the still-unverified point is whether the deviation from the
+usual progression was intentional. Verification of that intent remains open,
+without replacing the scenario-specific printed value.
 
 The same chart gives minimum Victory Points of 38, 50, 63, 75, 88, and 100 respectively. Printed
 page 152 ends the mission at the end of the active Player Turn if the Tactical Phase count of
 non-Null Troopers' Victory Points is below that row's minimum. This is distinct from both the
 three-Game-Round limit and Annihilation's all-Null condition. The maintained definition keeps literal
 thresholds and separate check/finish timings rather than deriving a threshold from Army Points.
+
+Domination's interaction review confirms the two mutually exclusive
+round-end Quadrant awards: 1 Objective Point only when both players dominate
+the same number and the scoring player dominates at least one; 2 for dominating
+more, capped at 6 across three rounds. More than half a Trooper's base must
+occupy the Quadrant, and only eligible non-Null Trooper Models/Markers count,
+except Shasvastii-Embryo. Equipment markers cannot score. Four Consoles
+score at game end for the **last successful** player's Hack, not every
+historical success. Hack Consoles is restricted to qualifying Specialists in
+Silhouette contact, with repeatable Normal WIP rolls (+3 for Hackers), and
+Doctors/Engineers cannot delegate Specialist tasks to Peripherals.
 
 Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed pages 150–152. Domination's
 objectives, control rules, Consoles, and Hack Consoles are on page 151; Specialist eligibility

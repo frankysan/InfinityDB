@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Domination's 350-point SWC explanation now notes that both N5.2 and N5.3
+  and the pinned Wiki use 6 SWC, while the reason for the exception remains
+  unverified.
 - PARA clarifies its missing-PH exception and re-infliction after recovery.
   Shock explains when its VITA 1 effect bypasses Unconscious protections;
   Stun explains Guts Rolls and the specific Flash Pulse Immunity exception.
@@ -326,6 +329,10 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing:** Verify Domination's round-end Quadrant scoring,
+  Shasvastii exception, last-hacked Console ownership, Specialist eligibility,
+  and Tactical Phase minimum-VP ending with regression tests. Retain the
+  scenario-specific 6 SWC at 350 points with corroborating versioned sources.
 - **Data processing:** Add Annihilation mission acceptance checks covering
   six scored game sizes, source-identified 350-point survival-band correction,
   shared Killing criteria, Lieutenant scoring and both mission-ending triggers.

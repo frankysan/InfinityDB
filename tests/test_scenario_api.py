@@ -135,6 +135,61 @@ def test_scenario_detail_api_requires_and_projects_exact_army_points(
     }
 
 
+def test_domination_review_scoring_specialists_and_console_skill_reach_api(
+    scenario_app: Application,
+) -> None:
+    """N5.3 pp. 151-152: publish scoring and conditional Console ownership."""
+    status, _, body = request(
+        scenario_app, "/api/scenarios/domination", query="army_points=350"
+    )
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["selected_army_points"] == 350
+    assert payload["setup"]["game_size"]["swc"] == 6
+    assert payload["setup"]["game_size"]["minimumVictoryPoints"] == 88
+    assert len(payload["objectives"]) == 2
+    quadrants, consoles = payload["objectives"]
+    assert (quadrants["timing"], quadrants["aggregation"]) == (
+        "end-of-round", "exclusive",
+    )
+    assert (quadrants["maximumPoints"], quadrants["maximumPointsPerRound"]) == (6, 2)
+    assert [
+        (award["objectivePoints"], award["condition"]["comparison"])
+        for award in quadrants["awards"]
+    ] == [(1, "equal"), (2, "greater")]
+    assert quadrants["awards"][0]["condition"]["minimum"] == 1
+    assert (consoles["timing"], consoles["aggregation"], consoles["maximumPoints"]) == (
+        "end-of-game", "cumulative", 4,
+    )
+    assert len(consoles["awards"]) == 1
+    assert consoles["awards"][0]["condition"]["status"] == "hacked"
+    assert len(consoles["awards"][0]["condition"]["elementIds"]) == 4
+    assert [rule["definitionId"] for rule in payload["special_rules"]] == [
+        "rule:scenario:dominate-quadrants",
+        "rule:scenario:consoles",
+        "rule:specialist-troops:standard",
+    ]
+    paragraphs = " ".join(payload["special_rules"][0]["paragraphs"])
+    assert "Shasvastii-Embryo" in paragraphs
+    assert "more than half" in paragraphs
+    assert len(payload["skills"]) == 1
+    skill = payload["skills"][0]
+    assert skill["id"] == "skill:hack-consoles"
+    assert "Silhouette contact" in " ".join(skill["facts"]["requirements"])
+    skill_effects = " ".join(skill["facts"]["effects"])
+    assert "Only the most recent player" in skill_effects
+    assert "+3 MOD" in skill_effects
+    assert "failed attempt may be repeated" in skill_effects
+    assert payload["end_conditions"][0]["condition"]["rounds"] == 3
+    assert payload["end_conditions"][1]["checkAt"] == "tactical-phase"
+    assert payload["end_conditions"][1]["finishAt"] == "end-of-player-turn"
+    assert len(payload["source_issues"]) == 1
+    issue = payload["source_issues"][0]
+    assert issue["status"] == "needs-verification"
+    assert "Wiki Domination revision 3264" in issue["description"]
+    assert "authorial intent is unverified" in issue["description"]
+
+
 def test_scenario_detail_api_projects_objective_and_source_issue_tokens(
     scenario_app: Application,
 ) -> None:

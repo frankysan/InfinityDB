@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **176/179** complete, **3** pending.
+- Supporting semantic identities: **177/179** complete, **2** pending.
 - Current authored outgoing relations: **444**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -940,11 +940,11 @@ review. `declaration-category` projection records are excluded.
 - [x] **Supportware** (`rule:supportware`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Scenario (1/4)
+#### Scenario (2/4)
 
 - [x] **Annihilation** (`scenario:annihilation`) — reviewed: English N5.3 pp. 149-150 verify all six Army Points configurations (150/200/250/300/350/400), SWC and deployment references, three exclusive end-of-game bands for killed enemy Army Points (maximum 4 OP), three for surviving Victory Points (maximum 4 OP), and 2 OP for the enemy Lieutenant killed. Shared Killing correctly includes entering Dead, remaining Null at game end and never-deployed enemy Troopers. The three-round limit and tactical-phase all-Null early ending remain separate shared conditions. The printed 350-point survival chart has a gap at 151-175 and an overlap at 251-270; the maintained source issue explicitly labels its 85-175/176-270/271+ continuity correction a reviewed interpretation, not literal PDF text. No new graph edges are implied by typed mission component references; scoring requires game-state context.
   - outgoing: none
-- [ ] **Domination** (`scenario:domination`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, objective interactions, and other scenario rule semantics remains 1.0 work.
+- [x] **Domination** (`scenario:domination`) — reviewed: N5.3 pp. 151-152 and pinned Wiki Domination revision 3264 confirm the six Army Points sizes and all Quadrant, Console, Specialist and mission-ending conditions. Quadrants use round-end Victory Points: equal with at least one held scores 1 OP, greater scores 2, maximum 6 across three rounds. Consoles score 1 OP each at game end and ownership goes to the last successful Hacker or other Specialist using Hack Consoles; the Skill needs Silhouette contact, Normal WIP, repeatable attempts and gives Hackers +3. Shasvastii Embryo is counted despite the ordinary Null exclusion; equipment does not count. The seven qualifying Specialist Skills and Peripheral restriction are shared references. Historical N5.2 p. 150, N5.3 p. 151 and Wiki all specify 6 SWC at 350 points; the separate source issue remains unresolved concerning authorial intent despite matching printed values. No unconditional global graph edges are implied by scoped mission components.
   - outgoing: none
 - [ ] **Firefight** (`scenario:firefight`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Classified Objective interactions, and other scenario rule semantics remains 1.0 work.
   - outgoing: none

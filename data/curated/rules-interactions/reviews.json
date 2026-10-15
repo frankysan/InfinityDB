@@ -1915,8 +1915,9 @@
     {
       "recordId": "scenario:domination",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, objective interactions, and other scenario rule semantics remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 pp. 151-152 and pinned Wiki Domination revision 3264 confirm the six Army Points sizes and all Quadrant, Console, Specialist and mission-ending conditions. Quadrants use round-end Victory Points: equal with at least one held scores 1 OP, greater scores 2, maximum 6 across three rounds. Consoles score 1 OP each at game end and ownership goes to the last successful Hacker or other Specialist using Hack Consoles; the Skill needs Silhouette contact, Normal WIP, repeatable attempts and gives Hackers +3. Shasvastii Embryo is counted despite the ordinary Null exclusion; equipment does not count. The seven qualifying Specialist Skills and Peripheral restriction are shared references. Historical N5.2 p. 150, N5.3 p. 151 and Wiki all specify 6 SWC at 350 points; the separate source issue remains unresolved concerning authorial intent despite matching printed values. No unconditional global graph edges are implied by scoped mission components."
     },
     {
       "recordId": "scenario:supplies",

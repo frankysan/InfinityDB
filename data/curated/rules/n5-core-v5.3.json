@@ -20716,7 +20716,7 @@
                             ],
                             "gameSizeField": "swc",
                             "status": "needs-verification",
-                            "description": "The Domination Forces and Deployment chart on N5.3 printed page 151 assigns 6 SWC to a 350-point game, while Annihilation assigns 7 SWC at the same Army Points. InfinityDB retains the scenario-specific printed value of 6 SWC. The difference may be intentional, but is noteworthy because the surrounding standard game-size progression would otherwise suggest 7."
+                            "description": "The Domination Forces and Deployment chart on N5.3 printed page 151 assigns 6 SWC to a 350-point game, while Annihilation assigns 7 SWC at the same Army Points. The English N5.2 chart (printed page 150) and pinned English Wiki Domination revision 3264 also print 6 SWC, so this value is stable in the checked sources. InfinityDB retains the scenario-specific published value of 6 SWC; the difference may be intentional, but authorial intent is unverified and the standard game-size progression otherwise suggests 7."
                         }
                     ]
                 },

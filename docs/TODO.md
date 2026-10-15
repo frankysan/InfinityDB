@@ -1279,15 +1279,15 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     this resolves the presentation defect, not the broader 1.0 browser gate.
   - [ ] Close the 1.0 interaction-review target in the maintained ledger, regenerate the checklist,
     and require the following check to pass. Never edit the generated checklist manually.
-    The current gate reports three pending supporting identities: Domination,
-    Firefight and Supplies. All eleven Ammunition identities and Annihilation
-    have completed source-backed outgoing-interaction review. Annihilation's
-    six scoring configurations, Killing classification, Lieutenant objective
-    and distinct round/Tactical Phase ending conditions now have explicit
-    regression coverage. Its 350-point survival bands remain a documented
-    reviewed interpretation of contradictory printed table boundaries.
-    The failure output lists exact remaining IDs; close them only after
-    source/interaction review, not merely browser coverage:
+    The current gate reports two pending supporting identities: Firefight and
+    Supplies. All eleven Ammunition identities, Annihilation and Domination
+    have completed source-backed interaction review. Domination regression
+    coverage now fixes Quadrant scoring timing/comparisons and Shasvastii
+    eligibility, Console ownership/Hacker requirements, Specialist restrictions
+    and the separate minimum-VP early ending. Its 350-point 6 SWC value
+    matches N5.2/N5.3 and pinned Wiki sources, while authorial intent remains
+    explicitly unverified. The failure output lists exact remaining IDs;
+    close them only after source/interaction review, not browser coverage:
 
     ```text
     python tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md --require-release 1.0.0

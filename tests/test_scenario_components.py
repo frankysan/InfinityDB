@@ -89,6 +89,99 @@ def test_annihilation_review_preserves_all_source_scoring_and_end_conditions(
     assert {c["page"] for c in raw["citations"]} == {149, 150}
 
 
+def test_domination_review_preserves_scoring_and_specialist_boundaries(
+    document: dict,
+) -> None:
+    """N5.3 pp. 151-152: Quadrants, Consoles, Specialists and termination."""
+    from infinity_db.scenario_mission import DominatedRegionComparison, ElementStatusCount
+
+    source = scenario(document, "domination")
+    mission = parse_scenario_definition_record(
+        ScenarioComponents(document).compose(source)
+    ).mission
+    assert mission is not None
+    assert [size.army_points for size in mission.game_sizes] == [
+        150, 200, 250, 300, 350, 400,
+    ]
+    assert [size.swc for size in mission.game_sizes] == [3, 4, 5, 6, 6, 8]
+    assert [size.minimum_victory_points for size in mission.game_sizes] == [
+        38, 50, 63, 75, 88, 100,
+    ]
+    assert {c["page"] for c in source["citations"]} == {151, 152}
+    assert len(mission.source_issues) == 1
+    issue = mission.source_issues[0]
+    assert (issue.id, issue.army_points, issue.game_size_field, issue.status) == (
+        "350-point-swc", (350,), "swc", "needs-verification",
+    )
+    assert "Wiki Domination revision 3264" in issue.description
+    assert "authorial intent is unverified" in issue.description
+
+    quadrants, consoles = mission.objectives
+    assert (quadrants.timing, quadrants.aggregation, quadrants.maximum_points) == (
+        "end-of-round", "exclusive", 6,
+    )
+    assert quadrants.maximum_points_per_round == 2
+    assert [award.objective_points for award in quadrants.awards] == [1, 2]
+    equal, greater = (award.condition for award in quadrants.awards)
+    assert isinstance(equal, DominatedRegionComparison)
+    assert isinstance(greater, DominatedRegionComparison)
+    assert equal.element_ids == greater.element_ids == (
+        "quadrant-1", "quadrant-2", "quadrant-3", "quadrant-4",
+    )
+    assert (equal.comparison, equal.minimum) == ("equal", 1)
+    assert (greater.comparison, greater.minimum) == ("greater", None)
+    assert (consoles.timing, consoles.aggregation, consoles.maximum_points) == (
+        "end-of-game", "cumulative", 4,
+    )
+    assert len(consoles.awards) == 1 and consoles.awards[0].objective_points == 1
+    hacked = consoles.awards[0].condition
+    assert isinstance(hacked, ElementStatusCount)
+    assert hacked.element_ids == ("console-q1", "console-q2", "console-q3", "console-q4")
+    assert hacked.status == "hacked"
+
+    domination, console_rule, specialists = mission.rules
+    assert [rule.definition_id for rule in mission.rules] == [
+        "rule:scenario:dominate-quadrants",
+        "rule:scenario:consoles",
+        "rule:specialist-troops:standard",
+    ]
+    quadrant_text = " ".join(domination.paragraphs)
+    for phrase in ("end of each Game Round", "more Victory Points",
+                   "more than half of its base", "classified as Null",
+                   "anything other than a Trooper", "Shasvastii-Embryo"):
+        assert phrase in quadrant_text
+    assert "[[skill:shasvastii]]" in quadrant_text
+    assert "[[state:normal|Normal]]" in quadrant_text
+    assert "center of each of the four" in " ".join(console_rule.paragraphs)
+    assert console_rule.skill_ids == ("skill:hack-consoles",)
+    assert mission.skill_ids == ("skill:hack-consoles",)
+    assert set(specialists.specialist_skill_ids) == {
+        "skill:doctor", "skill:engineer", "skill:forward-observer",
+        "skill:hacker", "skill:paramedic", "skill:specialist-operative",
+        "skill:chain-of-command",
+    }
+    specialist_text = " ".join(specialists.paragraphs)
+    assert "[[skill:peripheral:plural]]" in specialist_text
+    assert "Non Specialist variant" in specialist_text
+    assert [(
+        end.id, end.check_at, end.finish_at, end.uses_minimum_victory_points
+    ) for end in mission.end_conditions] == [
+        ("round-limit", "end-of-round", "end-of-round", False),
+        ("minimum-victory-points", "tactical-phase", "end-of-player-turn", True),
+    ]
+    assert mission.end_conditions[0].rounds == 3
+    assert "not classified as Null" in (mission.end_conditions[1].description or "")
+
+    skill = next(record for record in document["records"]
+                 if record["id"] == "skill:hack-consoles")
+    assert skill["scope"]["scenarios"] == ["scenario:domination"]
+    assert "Silhouette contact" in " ".join(skill["facts"]["requirements"])
+    skill_effects = " ".join(skill["facts"]["effects"])
+    for phrase in ("failed attempt may be repeated", "Only the most recent player",
+                   "+3 MOD", "[[attribute:wip]]"):
+        assert phrase in skill_effects
+
+
 def test_shared_sources_replace_repeated_authoring_and_keep_overrides_explicit(
     document: dict,
 ) -> None:
