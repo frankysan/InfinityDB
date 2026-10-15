@@ -566,6 +566,20 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     assert "Supporting identities: 164/179 complete, 15 pending" in output
 
 
+def test_rules_interaction_1_0_gate_lists_pending_identities(capsys) -> None:
+    assert main(["--require-release", "1.0.0"]) == 1
+    output = capsys.readouterr().out
+    assert "15 supporting identities pending" in output
+    pending_line = next(
+        line for line in output.splitlines() if line.startswith("Pending identities:")
+    )
+    identities = pending_line.removeprefix("Pending identities: ").split(", ")
+    assert len(identities) == 15
+    assert identities == sorted(identities)
+    assert identities[0] == "ammunition:ap"
+    assert "scenario:firefight" in identities
+
+
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:
     document = json.loads(DEFAULT_CATALOG_SCOPE_PATH.read_text(encoding="utf-8"))
     assert document["formatVersion"] == 2

@@ -1278,7 +1278,11 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     views checks row/cell geometry and overflow at 320, 390, 400, 600 and 768 px;
     this resolves the presentation defect, not the broader 1.0 browser gate.
   - [ ] Close the 1.0 interaction-review target in the maintained ledger, regenerate the checklist,
-    and require the following check to pass. Never edit the generated checklist manually:
+    and require the following check to pass. Never edit the generated checklist manually.
+    The current gate reports 15 pending supporting identities: 11 canonical Ammunition
+    records and the four core Scenarios. Its failure output now lists exact pending IDs;
+    review their rules and scoped interactions rather than marking them complete from
+    existing browser/API coverage alone:
 
     ```text
     python tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md --require-release 1.0.0

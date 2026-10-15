@@ -891,6 +891,12 @@ def main(argv: list[str] | None = None) -> int:
         f"future interactions: {report['summary']['futureInteractionCount']}"
     )
     if args.require_release is not None:
+        pending_ids = sorted(
+            item["id"]
+            for item in report["items"]
+            if item["targetRelease"] == args.require_release
+            and item["status"] == "pending"
+        )
         if args.require_release != primary["targetRelease"]:
             releases = report["summary"]["supporting"]["releases"]
             release = releases.get(args.require_release)
@@ -902,6 +908,7 @@ def main(argv: list[str] | None = None) -> int:
                     f"Release {args.require_release} is not interaction-review complete: "
                     f"{release['pending']} supporting identities pending"
                 )
+                print("Pending identities: " + ", ".join(pending_ids))
                 return 1
         else:
             support_release = report["summary"]["supporting"]["releases"].get(
@@ -915,6 +922,7 @@ def main(argv: list[str] | None = None) -> int:
                     f"{primary_pending} primary catalog items and "
                     f"{supporting_pending} supporting identities pending"
                 )
+                print("Pending identities: " + ", ".join(pending_ids))
                 return 1
     return 0
 
