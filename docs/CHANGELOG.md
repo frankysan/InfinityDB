@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Narrow rules-reference pages no longer clip the breadcrumb's
+  "Rules reference" tag on 320 px screens.
 - Shared Weapon rules such as Mines are now discoverable in the Glossary,
   with links that open the existing rule card on an actual Army Weapon page.
 - Stealth now gives concrete examples of how Deployables still trigger,
@@ -184,6 +186,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web frontend:** Wrap narrow shared detail breadcrumbs without hiding
+  the reference tag; verified Visibility Zone and Ammunition/Immunity
+  cross-reference navigation with pointer, keyboard and touch.
 - **Project infrastructure:** Add a lockfile-pinned Markdownlint documentation stage to the
   project check runner and required `--all` CI workflows. Documentation validation runs without
   automatic dependency downloads; Node.js tooling remains development-only.

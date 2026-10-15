@@ -1226,14 +1226,18 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
   This closes browser acceptance only. The separate six-size scenario
   source-inventory review, scoped concepts and unresolved Domination
   350-point SWC discrepancy remain explicitly open.
-- [ ] **Web frontend — Visibility Zone and Ammunition/Immunity acceptance:**
-  Open Visibility Zone tooltips and Ammunition/Immunity cross-links with
-  pointer, keyboard and touch. Verify readable content and no horizontal
-  clipping across desktop and narrow-screen layouts.
-  - [ ] Correct the shared "Rules reference" tag in the narrow breadcrumb:
-    at 320 px it overflows by about 6 px on Normal, DA and Shock Ammunition
-    detail pages. This predates the BioWeapon curation and belongs to the
-    shared reference layout rather than Ammunition semantics.
+- [x] **Web frontend - Visibility Zone and Ammunition/Immunity acceptance:**
+  Chromium verified Visibility Zone previews, canonical Glossary anchors,
+  Ammunition/Immunity rule cross-links and their destinations with pointer,
+  keyboard and touch. **469/469** content, preview, focus, navigation and
+  layout checks passed at 1440, 390 and 320 px. First touch previews and
+  second touch follows; tooltip text and horizontal bounds remained readable.
+  Reviewed selected narrow layouts and confirmed no JavaScript errors.
+  - [x] Corrected the shared 320 px breadcrumb overflow, previously 6 px on
+    Normal, DA, Shock, Smoke and Eclipse Ammunition. Shared small-screen
+    breadcrumb wrapping/gap now keeps the "Rules reference" tag visible,
+    rather than clipping it or hiding it. Other reference pages were checked.
+    A focused served-CSS regression guards the layout contract.
 
 - [ ] **Data processing + Web backend + Web frontend + Project infrastructure:**
   Execute the final 1.0 source-to-storage-to-browser completeness gate defined by

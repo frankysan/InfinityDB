@@ -1831,3 +1831,37 @@ the separate source-completeness review of every scenario fact and
 scenario-specific rule at every supported size, nor resolve the
 Domination 350-point SWC conflict or perform the complete 1.0 release
 gate. No application code or curated scenario mechanics were changed.
+
+## 1.0 Visibility Zone and Ammunition/Immunity browser acceptance
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** Headless Chromium used a freshly
+rebuilt rules database from current curated sources and the current Army
+snapshot. **469/469 browser checks passed** across 1440, 390 and 320 px,
+including Normal, DA, Shock, Smoke, Eclipse, AP, E/M and T2 Ammunition;
+Immunity, Sixth Sense, Multispectral Visor and Reflective reference cards.
+The test activated Visibility Zone/Zero Visibility Zone/Poor Visibility
+references, cross-links from Smoke and Eclipse, and the Immunity links
+to Normal, AP and DA. It verified actual Glossary hash targets after
+asynchronous loading and canonical rule-page destinations, not only
+that anchors existed in response data.
+
+For representative references at each viewport, hovering opened a readable
+preview, keyboard focus exposed the same preview and Enter followed the
+link. A real touch-enabled 390 px context confirmed first-tap preview,
+second-tap navigation on Visibility Zone, Smoke/Eclipse and Immunity
+examples. Preview text and on-screen horizontal bounds were checked;
+no page-level overflow or JavaScript exceptions occurred.
+
+The existing **6 px overflow** at 320 px was reproduced independently
+on Normal, DA, Shock, Smoke and Eclipse Ammunition before the fix;
+`.catalog-tag` extended beyond the right edge. The shared narrow
+breadcrumb now wraps with reduced spacing while the existing reference
+tag remains visible. Post-change checks found zero horizontal overflow
+at all tested widths on these pages and other rule-reference surfaces.
+A served-CSS regression test protects the narrow layout contract.
+The 320 px Smoke screenshot was reviewed for readability.
+
+Private browser scripts, screenshots and check results remain ignored in
+`local/audits/visibility-ammunition-browser/`. This closes the specific
+browser interaction/layout gate; it does not close the final 1.0 source
+completeness gate or change any curated rules interpretations.

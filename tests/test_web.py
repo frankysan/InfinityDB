@@ -3630,6 +3630,19 @@ def test_stylesheet_entrypoint_composes_owned_sources_in_order(app: Callable) ->
     assert body == bytes(expected)
 
 
+def test_narrow_reference_breadcrumb_retains_tag_without_overflow(
+    app: Callable,
+) -> None:
+    """The 320px reference header must shrink its breadcrumb, not clip the tag."""
+    status, _, body = request(app, "/static/components.css")
+    assert status == 200
+    css = body.decode("utf-8").replace("\r\n", "\n")
+    small_screen = css.split("@media (max-width: 400px) {")[-1]
+    small_screen = small_screen.split("@media (max-width: 600px) {", 1)[0]
+    assert ".breadcrumb {\n    min-width: 0;\n    flex-wrap: wrap;\n    gap: 8px;" in small_screen
+    assert ".catalog-tag {\n    flex-shrink: 0;" in small_screen
+
+
 def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> None:
     status, headers, body = request(app, "/api/armies")
 

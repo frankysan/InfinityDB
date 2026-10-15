@@ -4429,6 +4429,17 @@ html[data-distance-unit="in"] .unit-extended-statline {
 }
 
 @media (max-width: 400px) {
+  /* Preserve both breadcrumbs and the reference tag on narrow detail pages. */
+  .breadcrumb {
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .catalog-tag {
+    flex-shrink: 0;
+  }
+
   h1 {
     overflow-wrap: break-word;
   }
