@@ -216,7 +216,7 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
             encoding="utf8",
         )
     )
-    assert len(original["reviews"]) == 56
+    assert len(original["reviews"]) == 58
     catalog = {r["name"]: r for r in db.list_catalog_items("weapons")}
     items = [
         {"id": catalog[r["name"]]["id"], "name": r["name"],
@@ -227,7 +227,7 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
     policy = tmp_path / "reviewed.json"
     policy.write_text(json.dumps(original), encoding="utf8")
     approved = load_shared_reviews(db, enrichment, policy)
-    assert len(approved) == 56
+    assert len(approved) == 58
     assert {r["chartPage"] for r in approved.values()} == {
         176, 177, 178, 179, 182, 183, 184, 185, 186, 187, 188,
     }
@@ -244,6 +244,7 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
     } == {
         "E/Marat", "Mk12", "Zapper", "Contender", "Crazykoala",
         "Madtraps", "Thunderbolt", "Ohotnik", "Portable Autocannon",
+        "Jammer", "Katyusha MRL",
     }
     assert {
         r["name"] for r in original["reviews"] if r["chartPage"] == 179

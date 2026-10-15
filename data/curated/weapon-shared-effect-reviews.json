@@ -450,6 +450,22 @@
       "profileSha256": "69b9e2377b90793cb62e01fe3e74c503d6ef9ccdb095409a4aead239cb582924",
       "reviewedOn": "2026-10-15",
       "reason": "Official N5.3 p. 187, Army and archived English Wiki agree: PS 5, B2, AP+EXP, three ARM/2 Saving Rolls, Anti-materiel and the printed Autocannon range bands. The canonical AP and EXP rules and existing AP+EXP Weapon Property describe these combined effects, not separate firing modes. No unique standalone Autocannon mechanics were found."
+    },
+    {
+      "slug": "jammer",
+      "name": "Jammer",
+      "chartPage": 187,
+      "profileSha256": "2563e6e1c4a4375ef235fd84962ac4e93ca16f3a4eb2dc51cd9af16246dfb9ed",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 187, imported Army, and captured English and Spanish Wiki chart rows agree on WIP-based PS 7/B1, Normal Ammunition, one BTS Saving Roll, BS Weapon (WIP), Comms Attack, Intuitive Attack, Disposable (2), Isolated, Non-Lethal, No LoF and Zone of Control. The canonical BS Weapon (WIP), Intuitive Attack, Disposable and Non-Lethal Traits, Comms Attack and No LoF Labels, and Isolated State are public linked references. Comms Attack is countered with Reset rather than Dodge; no Jammer-only effect or targeting mode is printed. Null Trait slugs on Labels and State are intentional; public_reference resolves them."
+    },
+    {
+      "slug": "katyusha-mrl",
+      "name": "Katyusha MRL",
+      "chartPage": 187,
+      "profileSha256": "66d06a2d26e836947712cfe8fa4b7fca1e87f4efa8585f1cdb4a0c73c4a573ff",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 Weapon Chart p. 187 and imported Army agree: PS 6, B1, DA Ammunition, two ARM Saving Rolls, Anti-materiel, Speculative Attack and Circular Impact Template. Army and captured English/Spanish Wiki charts agree on range modifiers -3/+3/+3/0/0/-6. The PDF's unsigned 3 is a confirmed missing plus sign per pinned RR-SRC-N53-003 and config/validation/weapon-range-source-review.json; preserve the raw printed source anomaly. Canonical DA and linked Traits cover all effects; no unique Katyusha-only mechanic."
     }
   ]
 }

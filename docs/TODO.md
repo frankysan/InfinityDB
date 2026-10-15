@@ -610,15 +610,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       savingNum=1 field but treat it as non-operative with no
       Saving Roll Attribute, as in the printed source chart.
       Record five full-profile-hash-pinned shared-only decisions.
+    - [x] Source-review Katyusha MRL and Jammer as hash-pinned
+      shared-effects-only Weapons. The existing RR-SRC-N53-003
+      review establishes Katyusha's PDF unsigned `3` as an omitted
+      plus sign; Army and both Wiki languages show `+3`.
+      Jammer's Comms Attack/No LoF Labels and Isolated State
+      resolve through `public_reference` rather than Trait slugs;
+      canonical WIP, Intuitive Attack, Disposable and Non-Lethal
+      rules provide the remaining linked behavior.
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. Current source-bound triage:
-      70 classified gaps = 56 accepted shared-effects, 1 accepted
-      historical citation, and 13 pending source reviews (including
-      8 multi-profile candidates and the AP Thunderbolt, AP+EXP CC
-      Weapon and Stun Pistol source discrepancies). Jammer and
-      Katyusha still need source-specific semantic/chart review.
-      These audit gap codes are not automatically 1.0 gameplay
-      defects. Reconcile remaining candidates before adding rules.
+      70 classified gaps = 58 accepted shared-effects, 1 accepted
+      historical citation, and 11 pending source reviews. All 11
+      comprise 8 multi-profile candidates and three source conflicts:
+      AP Thunderbolt, AP+EXP CC Weapon, and Stun Pistol. The raw
+      gap code is not necessarily a missing mechanic. Review
+      alternate modes and conflicting publications before adding
+      new definitions.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

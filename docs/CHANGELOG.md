@@ -254,6 +254,12 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing:** Verify Katyusha MRL and Jammer as shared-effects-only
+  Weapon references. Katyusha's `+3` range modifier is already established
+  by RR-SRC-N53-003; preserve the PDF omission. Jammer's Comms Attack,
+  No LoF and Isolated references resolve as Labels/State rather than
+  Trait slugs. Pending source reviews decrease to 11 without changing
+  Army profiles or adding duplicate mechanics.
 - **Data processing:** Review four Grenade Launchers and Portable
   Autocannon as hash-pinned shared-effects-only cases. Canonical
   Ammunition, Impact Template, Speculative Attack and AP+EXP rules

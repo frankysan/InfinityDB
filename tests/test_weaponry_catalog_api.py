@@ -886,6 +886,73 @@ def test_reviewed_breaker_and_viral_source_profiles_use_shared_rules(
         assert ("Suppressive Fire" in traits) == slug.endswith("rifle")
 
 
+def test_reviewed_katyusha_range_notation_uses_verified_plus_three(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "katyusha-mrl")
+    assert payload.get("rules", []) == []
+    (profile,) = payload["profiles"]
+    assert (profile["damage"], profile["burst"], profile["ammunition"]) == (
+        "6", "1", "DA",
+    )
+    assert (profile["saving"], profile["saving_num"]) == ("ARM", "2")
+    assert profile["traits"] == [
+        "Anti-materiel", "Speculative Attack", "Impact Template (Circular)",
+    ]
+    assert profile["ranges"] == {
+        "short": {"max": 20, "mod": "-3"},
+        "med": {"max": 60, "mod": "+3"},
+        "long": {"max": 100, "mod": "0"},
+        "max": {"max": 120, "mod": "-6"},
+    }
+    assert [effect["record_id"] for effect in profile["ammunition_effects"]] == [
+        "ammunition:da",
+    ]
+    assert all(
+        ref.get("slug") or ref.get("public_reference")
+        for ref in profile["trait_references"]
+    )
+
+
+def test_reviewed_jammer_uses_label_and_state_links_not_trait_slugs(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "jammer")
+    assert payload.get("rules", []) == []
+    (profile,) = payload["profiles"]
+    assert (profile["damage"], profile["burst"], profile["ammunition"]) == (
+        "7", "1", "N",
+    )
+    assert (profile["saving"], profile["saving_num"]) == ("BTS", "1")
+    assert profile["ranges"] == {}
+    assert profile["traits"] == [
+        "BS Weapon (WIP)", "Comms. Attack", "Intuitive Attack",
+        "Disposable (2)", "State: Isolated", "Non-lethal",
+        "No LoF", "Zone of Control",
+    ]
+    refs = {ref["label"]: ref for ref in profile["trait_references"]}
+    assert refs["Comms. Attack"]["public_reference"] == {
+        "catalog": "labels", "id": "comms-attack",
+    }
+    assert refs["No LoF"]["public_reference"] == {
+        "catalog": "labels", "id": "no-lof",
+    }
+    assert refs["State: Isolated"]["public_reference"] == {
+        "catalog": "states", "id": "isolated",
+    }
+    assert all(refs[label]["slug"] is None for label in (
+        "Comms. Attack", "No LoF", "State: Isolated",
+    ))
+    for label in (
+        "BS Weapon (WIP)", "Intuitive Attack", "Disposable (2)",
+        "Non-lethal", "Zone of Control",
+    ):
+        assert refs[label]["slug"]
+    assert [effect["record_id"] for effect in profile["ammunition_effects"]] == [
+        "ammunition:normal",
+    ]
+
+
 @pytest.mark.parametrize(
     ("slug", "ps", "burst", "ammo", "save", "rolls",
      "traits", "effects", "property_id", "ranges"),
