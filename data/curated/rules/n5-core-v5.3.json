@@ -15265,7 +15265,7 @@
                 "clarifications": [
                     "A successful [[skill:discover|Discover]] against [[state:impersonation-1|IMP-1]] applies a -3 WIP MOD and reduces it to [[state:impersonation-2|IMP-2]]; it does not directly expose the Model. Multiple successful [[skill:discover|Discover]] Rolls in the same Order still reduce [[state:impersonation-1|IMP-1]] only to [[state:impersonation-2|IMP-2]].",
                     "This disguise ends when the Marker declares an Attack or another Skill requiring a Roll; declares a Long Skill other than [[skill:cautious-movement|Cautious Movement]]; enters enemy Silhouette contact; becomes [[skill:impetuous|Impetuous]]; or enters [[state:retreat|Retreat!]]. Its cancellation applies to the entire declared Order.",
-                    "Only [[skill:discover|Discover]], [[skill:dodge|Dodge]], [[skill:look-out|Look Out!]], or [[skill:reset|Reset]] can be declared as AROs against an disguised Marker. A reaction delayed against it is lost unless it reveals itself with the second half of the Order."
+                    "Only [[skill:discover|Discover]], [[skill:dodge|Dodge]], [[skill:look-out|Look Out!]], or [[skill:reset|Reset]] can be declared as AROs against a disguised Marker. A reaction delayed against it is lost unless it reveals itself with the second half of the Order."
                 ]
             },
             "citations": [

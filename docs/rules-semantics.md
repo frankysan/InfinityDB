@@ -799,6 +799,12 @@ These are non-executable player explanations. Existing typed relations do not
 become unconditional state transitions; overlapping source conditions must
 still be evaluated within the applicable Order and State rules.
 
+REA-015 browser acceptance (2026-10-15) verified all ten State cards
+and twelve cross-reference routes at 1440/390/320 px (66/66 checks).
+The IMP-1 ARO sentence also received a grammar-only correction with
+its exact reviewed-plain occurrence fingerprint refreshed; the existing
+non-Trait classification remains unchanged. REA-026 is separately scoped.
+
 Sources: English N5.3 pp. 29, 97, 157–171; Spanish N5.3 pp. 30,
 96, 162–178. See the detailed per-record citations and REA-015.
 

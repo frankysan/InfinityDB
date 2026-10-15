@@ -1083,6 +1083,24 @@ and Impetuous-specific Prone transitions retain their source scopes. Existing
 structured relations remain unchanged. API regression coverage added; browser
 acceptance pending. REA-017, REA-020, REA-026 and REA-035 remain separate.
 
+**Reference acceptance (2026-10-15): Complete.** The October 10
+implementation already provides State-specific cancellation triggers,
+exception conditions, links and bilingual citations on all ten cards.
+Chrome checked Camouflaged, Hidden Deployment, Holoecho, HoloMask,
+IMP-1, IMP-2, Prone, Disconnected, Retreat! and Suppressive Fire at
+1440/390/320 px, including twelve navigation routes per viewport:
+**66/66 checks passed**, without JS errors or horizontal overflow.
+The published/API regression now guards Marker ARO lists and whole-Order
+revelation, IMP-1 versus IMP-2, real Holoecho bearer versus decoy,
+Hidden Deployment's independent Marker condition, Prone cancellation,
+Disconnected's Controller/Coherency/Engineer routes, Retreat!, and
+Suppressive Fire termination. An IMP-1 grammar correction changed
+"an disguised Marker" to "a disguised Marker"; the single reviewed-plain
+`AROs` occurrence fingerprint was refreshed, preserving its existing
+`game-action-not-trait` classification. The rules DB builds without
+altering any typed State transition or N5.3 citation. REA-026 remains
+separate, as do REA-017/020/035.
+
 **Interim implementation note (2026-10-10):** The 0.10.1 correction batch addresses
 REA-016's Stealth/Deployable exception and mixed-activation text; the Fireteam
 formation-count portion of REA-020; REA-031's Kobra CC Attribute link;

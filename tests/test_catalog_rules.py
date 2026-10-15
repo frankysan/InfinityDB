@@ -1475,6 +1475,29 @@ def test_state_cancellation_clarifications_are_scoped_and_published(
         impersonation["facts"]["clarifications"]
     )
 
+    # Keep distinct revelation, cancellation and recovery routes visible.
+    cases = {
+        "state:camouflaged": ("only permitted AROs", "entire declared Order"),
+        "state:hidden-deployment": ("another Marker status", "recorded position"),
+        "state:holoecho": ("holographic duplicate disappears separately",
+                            "before measuring movement"),
+        "state:holomask": ("imitated Model with the real Model", "end of that Order"),
+        "state:impersonation-1": ("only to [[state:impersonation-2|IMP-2]]",
+                                   "against a disguised Marker"),
+        "state:impersonation-2": ("reveals the actual Model", "ordinary Range, Cover"),
+        "state:prone": ("[[skill:berserk|Berserk]]", "automatically canceled"),
+        "state:disconnected": ("Controller recovers", "passing a Coherency Check",
+                               "Autonomous instead"),
+        "state:retreat": ("army leaves the Retreat! situation", "Command Token"),
+        "state:suppressive-fire": ("[[rule:guts-roll|Guts Roll]]",
+                                     "joins a Fireteam"),
+    }
+    for identity, expected in cases.items():
+        rule = database.composed_record(identity)
+        assert rule is not None
+        details = " ".join(rule["facts"]["clarifications"])
+        assert all(fragment in details for fragment in expected), identity
+
     app = create_app(
         Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
         rules_database_path=database.path,

@@ -690,9 +690,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       passed 48/48 render/navigation checks at 1440/390/320 px with no
       JavaScript errors or horizontal overflow. No mechanics changed;
       separate REA-015 and REA-026 State tasks remain independent.
-    - [ ] **REA-015 — State cancellation:** Inspect the source-cited
-      State-specific cancellation explanations in the browser; keep this
-      distinct from the completed REA-026 baseline.
+    - [x] **REA-015 - State cancellation:** Accepted all ten N5.3-cited
+      State-specific cancellation and revelation references. Chromium
+      passed 66/66 content/navigation checks at 1440/390/320 px;
+      published/API tests cover distinct Marker, Holoecho, Prone,
+      Disconnected, Retreat! and Suppressive Fire conditions. Corrected
+      an IMP-1 ARO sentence and updated its reviewed-text fingerprint.
+      No unconditional State transitions or REA-026 baseline changes.
     - [x] **REA-017 — Peripheral subtypes:** Shared activation, Coherency,
       Roll ownership, Servant/Connected Cyberplug Doctor/Engineer contact,
       Control Spearhead, Ancillary deployment/Fireteam exceptions, and

@@ -1639,3 +1639,23 @@ cross-links, without JavaScript errors or horizontal overflow.
 Screenshot, script, results JSON and generated DB remain in ignored
 `local/audits/`. This is rules-reference acceptance, not an executable
 multi-target roll evaluator. REA-015/REA-026 are separate tasks.
+
+## 1.0 State-specific cancellation acceptance (REA-015)
+
+**Verified 2026-10-15, `dev/v1.0.0`.** Ten N5.3-cited State cards
+retain distinct cancellation conditions: Camouflaged AROs, Hidden
+Deployment and independent Marker identity, Holoecho bearer versus
+holographic decoy, HoloMask end-of-Order replacement, IMP-1 versus IMP-2
+revelation, Prone/Unconscious and Impetuous, Controller/Coherency/Engineer
+routes for Disconnected, Retreat! Command Token recovery, and Suppressive
+Fire termination. The published/API regression now guards these
+conditions in addition to bilingual source citations.
+
+A minor IMP-1 correction changes "an disguised Marker" to "a disguised
+Marker". Its reviewed plain `AROs` fingerprint was updated while keeping
+the previously reviewed non-Trait meaning. The maintained-text gate
+and rules database validate the change. Headless Chromium passed
+**66/66** content/navigation checks at 1440, 390 and 320 px, covering
+ten State pages and twelve links per viewport, with no JavaScript errors
+or horizontal overflow. Scripts, screenshots and result JSON are
+Git-ignored under `local/audits/`. REA-026 remains a separate contract.
