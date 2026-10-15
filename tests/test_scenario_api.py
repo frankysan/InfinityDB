@@ -69,7 +69,15 @@ def test_scenario_list_api_exposes_current_publications_without_selecting_game_s
 
     assert status == 200
     assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
-    items = json.loads(body)["items"]
+    payload = json.loads(body)
+    assert payload["collections"] == [
+        {"id": "n5-core", "revision": "5.3", "title": "N5 Core Scenarios", "scenario_count": 4},
+        {
+            "id": "its-18", "revision": "2026.09.01",
+            "title": "ITS Season 18: Overheat", "scenario_count": 1,
+        },
+    ]
+    items = payload["items"]
     assert [item["slug"] for item in items] == [
         "annihilation",
         "domination",
@@ -596,10 +604,15 @@ def test_browser_api_module_owns_scenario_endpoint_shapes(
     status, _, script = request(scenario_app, "/static/api.js")
 
     assert status == 200
-    assert b"export function getScenarios(signal)" in script
-    assert b'return getJson("/api/scenarios", signal);' in script
-    assert b"export function getScenario(scenarioId, armyPoints, signal)" in script
+    assert (
+        b"export function getScenarios(signal, { collection = \"\", revision = \"\" } = {})"
+        in script
+    )
+    assert b'getJson(`/api/scenarios${query ? `?${query}` : ""}`, signal)' in script
+    assert b"export function getScenario(scenarioId, armyPoints, signal, " in script
     assert b'new URLSearchParams({ army_points: String(armyPoints) })' in script
+    assert b'if (collection) params.set("collection", collection);' in script
+    assert b'if (revision) params.set("revision", revision);' in script
     assert (
         b'getJson(`/api/scenarios/${encodeURIComponent(scenarioId)}?${params}`, signal)'
         in script
@@ -805,8 +818,17 @@ def test_scenario_api_accepts_explicit_collection_revision_without_implicit_its_
     assert [r["slug"] for r in json.loads(body)["items"]] == [
         "annihilation", "domination", "supplies", "firefight",
     ]
+    status, _, body = request(
+        scenario_app, "/api/scenarios",
+        query="collection=its-18&revision=2026.09.01",
+    )
+    assert status == 200
+    season_payload = json.loads(body)
+    assert [item["slug"] for item in season_payload["items"]] == ["battleground"]
+    assert [(row["id"], row["revision"]) for row in season_payload["collections"]] == [
+        ("n5-core", "5.3"), ("its-18", "2026.09.01"),
+    ]
     for query in (
-        "collection=its-18&revision=2026.09.01",
         "collection=its-17&revision=2025.09.01",
         "collection=n5-core&revision=5.2",
     ):
@@ -882,37 +904,39 @@ def test_synthetic_season_publication_is_selected_exactly_at_public_api(
 
     catalog = scenario_app.api.scenario_catalog
     records = catalog._records()
-    record, publication = records[0]
+    record, publication = next(
+        item for item in records if item[0]["id"] == "scenario:annihilation"
+    )
     synthetic_publication = {
         **publication,
-        "collection": "its-18",
+        "collection": "its-demo",
         "collection_title": "Synthetic source-version selection test",
-        "revision": "2026.09.01",
+        "revision": "2099.01.01",
     }
     # Deliberately bypass curated export in this API-only test; the official
-    # Season 18 mission content has NOT been authored or declared playable.
+    # This synthetic selector does not create another real ITS mission.
     monkeypatch.setattr(
         catalog, "_records_cache",
         [*records, (deepcopy(record), synthetic_publication)],
     )
     status, _, body = request(
-        scenario_app, "/api/scenarios?collection=its-18&revision=2026.09.01",
+        scenario_app, "/api/scenarios?collection=its-demo&revision=2099.01.01",
     )
     assert status == 200
     items = json.loads(body)["items"]
     assert [item["slug"] for item in items] == ["annihilation"]
-    assert items[0]["publication"]["collection_id"] == "its-18"
-    assert items[0]["publication"]["revision"] == "2026.09.01"
+    assert items[0]["publication"]["collection_id"] == "its-demo"
+    assert items[0]["publication"]["revision"] == "2099.01.01"
 
     status, _, body = request(
         scenario_app, "/api/scenarios/annihilation",
-        query="army_points=300&collection=its-18&revision=2026.09.01",
+        query="army_points=300&collection=its-demo&revision=2099.01.01",
     )
     assert status == 200
-    assert json.loads(body)["publication"]["collection_id"] == "its-18"
+    assert json.loads(body)["publication"]["collection_id"] == "its-demo"
     status, _, _ = request(
         scenario_app, "/api/scenarios/annihilation/map.svg",
-        query="army_points=300&collection=its-18&revision=2026.09.01",
+        query="army_points=300&collection=its-demo&revision=2099.01.01",
     )
     assert status == 200
 
@@ -926,3 +950,68 @@ def test_synthetic_season_publication_is_selected_exactly_at_public_api(
         query="army_points=300&collection=its-17&revision=2025.09.01",
     )
     assert status == 404
+
+
+@pytest.mark.parametrize(
+    ("points", "config", "dimensions"),
+    [
+        (150, "150-points", (24, 32)),
+        (200, "200-250-points", (32, 48)),
+        (250, "200-250-points", (32, 48)),
+        (300, "300-400-points", (48, 48)),
+        (350, "300-400-points", (48, 48)),
+        (400, "300-400-points", (48, 48)),
+    ],
+)
+def test_battleground_its18_exact_public_scenario_detail_and_map(
+    scenario_app: Application,
+    points: int,
+    config: str,
+    dimensions: tuple[int, int],
+) -> None:
+    query=f"army_points={points}&collection=its-18&revision=2026.09.01"
+    status, _, body = request(scenario_app, "/api/scenarios/battleground", query=query)
+    assert status == 200
+    item=json.loads(body)
+    assert item["publication"]["collection_id"] == "its-18"
+    assert item["publication"]["revision"] == "2026.09.01"
+    assert item["selected_army_points"] == points
+    assert item["placement"]["configuration_id"] == config
+    assert item["placement"]["geometry"]["table"]["width"] == dimensions[0]
+    assert item["placement"]["geometry"]["table"]["height"] == dimensions[1]
+    status, headers, body = request(
+        scenario_app, "/api/scenarios/battleground/map.svg",
+        query=query,
+    )
+    assert status == 200
+    assert headers["content-type"].startswith("image/svg+xml")
+    assert b'<rect id="sector-center"' in body
+    assert b'<rect id="sector-near-a"' in body
+    assert b'<rect id="sector-near-b"' in body
+    assert b'<rect id="deployment-a"' in body
+    assert b'<rect id="deployment-b"' in body
+
+
+def test_battleground_its18_is_never_returned_from_core_or_another_season(
+    scenario_app: Application,
+) -> None:
+    for query in (
+        "",
+        "collection=n5-core&revision=5.3",
+        "collection=its-17&revision=2025.09.01",
+        "collection=its-18&revision=2026.08.01",
+    ):
+        for path in (
+            "/api/scenarios/battleground",
+            "/api/scenarios/battleground/map.svg",
+        ):
+            status, _, _ = request(
+                scenario_app, path, query=("army_points=300&" + query).rstrip("&"),
+            )
+            assert status == 404
+    for query in ("", "collection=n5-core&revision=5.3"):
+        status, _, body = request(scenario_app, "/api/scenarios", query=query)
+        assert status == 200
+        assert [item["slug"] for item in json.loads(body)["items"]] == [
+            "annihilation", "domination", "supplies", "firefight",
+        ]

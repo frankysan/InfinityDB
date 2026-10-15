@@ -8,10 +8,14 @@ const PILOT_CONTEXT = Object.freeze({
   as_of: "2026-09-01",
 });
 
-export function fetchReviewedFaqRulings(topicId, { scenarioId, signal } = {}) {
+export function fetchReviewedFaqRulings(
+  topicId, { scenarioId, seasonId, seasonRevision, signal } = {},
+) {
   return getFaqRulings(topicId, {
     ...PILOT_CONTEXT,
     ...(scenarioId ? { scenario_id: scenarioId } : {}),
+    ...(seasonId ? { season_id: seasonId } : {}),
+    ...(seasonRevision ? { season_revision: seasonRevision } : {}),
   }, signal);
 }
 

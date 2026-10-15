@@ -19,6 +19,19 @@ def scenario_catalog(tmp_path_factory: pytest.TempPathFactory) -> ScenarioCatalo
     return ScenarioCatalog(RulesDatabase(output))
 
 
+def test_current_scenario_collections_are_derived_from_readable_publications(
+    scenario_catalog: ScenarioCatalog,
+) -> None:
+    assert scenario_catalog.list_collections() == [
+        {"id": "n5-core", "revision": "5.3", "title": "N5 Core Scenarios", "scenario_count": 4},
+        {
+            "id": "its-18", "revision": "2026.09.01",
+            "title": "ITS Season 18: Overheat", "scenario_count": 1,
+        },
+    ]
+    assert ScenarioCatalog(None).list_collections() == []
+
+
 def test_scenario_catalog_lists_current_publications_in_collection_order(
     scenario_catalog: ScenarioCatalog,
 ) -> None:
@@ -319,51 +332,36 @@ def test_scenario_catalog_is_empty_without_rules_database() -> None:
 def test_explicit_scenario_collection_revision_selection_isolated_from_core(
     scenario_catalog: ScenarioCatalog,
 ) -> None:
-    """Synthetic Season 18 metadata proves selection; no ITS mission is published."""
+    """Real Battleground publication is isolated from the Core scenario set."""
     core = scenario_catalog.list_scenarios(collection="n5-core", revision="5.3")
     assert [item["slug"] for item in core] == [
         "annihilation", "domination", "supplies", "firefight",
     ]
-    assert scenario_catalog.list_scenarios(collection="its-18", revision="2026.09.01") == []
-    assert scenario_catalog.get_scenario(
-        "annihilation", army_points=300, collection="its-18", revision="2026.09.01",
-    ) is None
-
-    synthetic = ScenarioCatalog(scenario_catalog.rules_database)
-    records = deepcopy(scenario_catalog._records())
-    assert records
-    cloned_record, original_publication = records[0]
-    season_publication = {
-        **original_publication,
-        "collection": "its-18",
-        "collection_title": "Synthetic ITS Season 18 selection fixture",
-        "revision": "2026.09.01",
-    }
-    synthetic._records_cache = [
-        *records,
-        (deepcopy(cloned_record), season_publication),
-    ]
-    # This bypasses exporter validation solely to exercise collection filtering.
-    # It does NOT demonstrate support for duplicate published canonical IDs,
-    # nor publish an ITS scenario or duplicate any rules in rules.db.
-    assert [item["slug"] for item in synthetic.list_scenarios(
+    current_its = scenario_catalog.list_scenarios(
         collection="its-18", revision="2026.09.01",
-    )] == ["annihilation"]
-    assert [item["slug"] for item in synthetic.list_scenarios(
+    )
+    assert [item["slug"] for item in current_its] == ["battleground"]
+    assert current_its[0]["publication"]["source_collection_id"] == (
+        "its-season-18-2026.09.01"
+    )
+    battleground = scenario_catalog.get_scenario(
+        "battleground", army_points=300,
+        collection="its-18", revision="2026.09.01",
+    )
+    assert battleground is not None
+    assert battleground["publication"]["collection_id"] == "its-18"
+    assert battleground["selected_army_points"] == 300
+    assert scenario_catalog.get_scenario(
+        "battleground", army_points=300,
         collection="n5-core", revision="5.3",
-    )] == ["annihilation", "domination", "supplies", "firefight"]
-    season_item = synthetic.get_scenario(
-        "annihilation", army_points=300, collection="its-18", revision="2026.09.01",
-    )
-    core_item = synthetic.get_scenario(
-        "annihilation", army_points=300, collection="n5-core", revision="5.3",
-    )
-    assert season_item is not None and season_item["publication"]["collection_id"] == "its-18"
-    assert core_item is not None and core_item["publication"]["collection_id"] == "n5-core"
-    assert synthetic.list_scenarios(collection="its-17", revision="2025.09.01") == []
-    assert synthetic.get_scenario(
-        "annihilation", army_points=300, collection="its-17", revision="2025.09.01",
     ) is None
+    assert scenario_catalog.get_scenario(
+        "annihilation", army_points=300,
+        collection="its-18", revision="2026.09.01",
+    ) is None
+    assert scenario_catalog.list_scenarios(
+        collection="its-17", revision="2025.09.01",
+    ) == []
 
 
 @pytest.mark.parametrize(
@@ -388,3 +386,100 @@ def test_scenario_catalog_rejects_partial_or_malformed_season_selection(
             "annihilation", army_points=300,
             collection=collection, revision=revision,
         )
+
+
+# Official ITS Season 18: Overheat, English printed pp. 121-123.
+# Battleground has no Classified Deck or HVT and uses exactly three
+# source-defined end-of-game Sectors. This intentionally does not
+# publish other Season 18 missions or extrapolate their geometry.
+@pytest.mark.parametrize(
+    ("points", "swc", "configuration", "width", "height", "depth",
+     "sector_depth", "center"),
+    [
+        (150, 3, "150-points", 24, 32, 8, 4, 16),
+        (200, 4, "200-250-points", 32, 48, 12, 8, 24),
+        (250, 5, "200-250-points", 32, 48, 12, 8, 24),
+        (300, 6, "300-400-points", 48, 48, 12, 8, 24),
+        (350, 7, "300-400-points", 48, 48, 12, 8, 24),
+        (400, 8, "300-400-points", 48, 48, 12, 8, 24),
+    ],
+)
+def test_battleground_exact_its18_source_sizes_scoring_and_zone_geometry(
+    scenario_catalog: ScenarioCatalog,
+    points: int,
+    swc: int,
+    configuration: str,
+    width: int,
+    height: int,
+    depth: int,
+    sector_depth: int,
+    center: int,
+) -> None:
+    item = scenario_catalog.get_scenario(
+        "battleground", army_points=points, collection="its-18", revision="2026.09.01",
+    )
+    assert item is not None
+    assert item["name"] == "Battleground"
+    assert item["publication"]["collection_id"] == "its-18"
+    assert item["publication"]["revision"] == "2026.09.01"
+    assert item["publication"]["source_collection_id"] == "its-season-18-2026.09.01"
+    assert {citation["page"] for citation in item["citations"]} == {121, 122, 123}
+    assert {citation["source_id"] for citation in item["citations"]} == {
+        "its-season-18-en-pdf",
+    }
+    assert item["supported_army_points"] == [150, 200, 250, 300, 350, 400]
+    assert item["setup"]["game_size"]["swc"] == swc
+    assert item["placement"]["configuration_id"] == configuration
+    geometry = item["placement"]["geometry"]
+    assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+    rectangles = {region["id"]: region for region in geometry["elements"]}
+    assert {
+        key: (rectangles[key]["x1"], rectangles[key]["y1"],
+              rectangles[key]["x2"], rectangles[key]["y2"])
+        for key in ("sector-near-a", "sector-center", "sector-near-b")
+    } == {
+        "sector-near-a": (0, center - 1.5 * sector_depth, width,
+                          center - 0.5 * sector_depth),
+        "sector-center": (0, center - 0.5 * sector_depth, width,
+                           center + 0.5 * sector_depth),
+        "sector-near-b": (0, center + 0.5 * sector_depth, width,
+                          center + 1.5 * sector_depth),
+    }
+    assert (rectangles["deployment-a"]["y1"], rectangles["deployment-a"]["y2"]) == (
+        0, depth,
+    )
+    assert (rectangles["deployment-b"]["y1"], rectangles["deployment-b"]["y2"]) == (
+        height - depth, height,
+    )
+    assert item["setup"]["game_size"]["deployments"] == [
+        {"sideId": "side-a", "elementIds": ["deployment-a"]},
+        {"sideId": "side-b", "elementIds": ["deployment-b"]},
+    ]
+
+    objectives = {o["id"]: o for o in item["objectives"]}
+    assert {
+        obj: (o["maximumPoints"], o["sideIds"],
+              o["awards"][0]["condition"]["elementIds"])
+        for obj, o in objectives.items()
+    } == {
+        "near-sector-a": (2, ["side-a"], ["sector-near-a"]),
+        "near-sector-b": (2, ["side-b"], ["sector-near-b"]),
+        "central-sector": (3, ["side-a", "side-b"], ["sector-center"]),
+        "far-sector-a": (5, ["side-a"], ["sector-near-b"]),
+        "far-sector-b": (5, ["side-b"], ["sector-near-a"]),
+    }
+    assert all(o["timing"] == "end-of-game" for o in objectives.values())
+    assert sum(
+        o["maximumPoints"] for o in objectives.values() if "side-a" in o["sideIds"]
+    ) == 10
+    assert sum(
+        o["maximumPoints"] for o in objectives.values() if "side-b" in o["sideIds"]
+    ) == 10
+    assert len(item["special_rules"]) == 6
+    assert "not before" in " ".join(item["special_rules"][0]["paragraphs"])
+    assert "20 Victory Points" in " ".join(item["special_rules"][3]["paragraphs"])
+    assert item["end_conditions"] == [{
+        "id": "round-limit", "checkAt": "end-of-round", "finishAt": "end-of-round",
+        "condition": {"kind": "round-limit", "rounds": 3},
+    }]
+    assert item["source_issues"] == []

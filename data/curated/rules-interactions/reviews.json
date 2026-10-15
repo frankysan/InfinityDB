@@ -2150,6 +2150,14 @@
       "reviewedOn": "2026-10-15",
       "note": "General N5.3 Deployment Phase sequence authored from official printed page 15. The dated FAQ repositioning/measurement boundary has its own FAQ ruling and never changes the core rule or any particular Deployment Skill. Scenario-specific deployment rules remain scoped separately."
     }
+,
+{
+    "recordId": "scenario:battleground",
+    "targetRelease": "1.0.0",
+    "status": "reviewed",
+    "reviewedOn": "2026-10-15",
+    "note": "Official ITS Season 18: Overheat English version 2026.09.01, printed pp. 121-123. Battleground is a distinct Direct Action mission: three end-of-game Zones of Operations with 2 OP near, 3 OP central and 5 OP far from the player's own Deployment Zone; the opposite side's near/far semantics are explicitly separated in the read model. The Sectors are identified only at the end of the game. At 150 Army Points each is 4 inches deep, with two outer Sectors 2 inches from the central line; at 200-400 each is 8 inches deep, with two outer Sectors 4 inches from the central line. Source diagram shows the three 24x32, 32x48 and 48x48 table sizes; rear Deployment Zones follow normal 8/12-inch sizes. Scoring relies on correct Zone Domination (Models/Markers, Proxies, Peripherals, Null exclusion except Shasvastii) plus Baggage +20 VP; Killing, HVT/Classified exclusion, and end-of-third-Round remain scenario-local prose. Current revision/source identity remains distinct from Core; no claimed historical replay or ITS FAQ publication."
+  }
   ],
   "futureInteractions": [
     {

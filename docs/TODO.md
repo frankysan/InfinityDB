@@ -1183,17 +1183,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     select N5 Core. Existing unfiltered URLs remain compatible.
     Synthetic season-metadata fixtures prove disjoint selection without
     publishing a fabricated ITS mission.
-  - [ ] Curate and publish **real** Season 18 scenario identities and
-    complete source-backed definitions in a dedicated versioned scenario
-    collection, using the same mission/geometry model. Preserve
-    `its-18@2026.09.01` source provenance and fail closed where geometry,
-    objective/card choice, or scoring is not yet representable. The
-    current ITS selector intentionally returns no missions until then.
-  - [ ] Wire explicit season/revision selection through the browser's
-    scenario list/detail/map/share URLs, then author mission-specific
-    FAQs only after verifying exact scenario IDs, EN/ES citations,
-    and negative applicability to Core and other seasons.
-    Do not promote ITS-only outcomes to universal N5 rules.
+  - [x] Publish the first source-backed ITS Season 18 mission, Battleground,
+    under `its-18@2026.09.01` with exact 150-400-point geometry, end-game
+    Sector scoring, special rules and official source provenance. Core
+    remains the unfiltered default; other seasons never substitute.
+  - [x] Expose available current scenario collections in the browser,
+    with an exact season/revision selector, matching detail/map URLs and
+    self-contained share-state restoration. Verify mobile and desktop
+    selection, map rendering and shared URL reloads.
+  - [ ] Curate the remaining **real** Season 18 mission identities and
+    complete definitions in the same versioned scenario collection.
+    Extend typed geometry, objective/card choices or scoring only when
+    supported by each source mission; fail closed for absent missions.
+  - [ ] Publish ITS-specific FAQ applicability only after verifying
+    scenario identities, EN/ES citations and negative applicability to
+    Core and other seasons. Do not promote ITS-only outcomes to universal
+    N5 rules.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.

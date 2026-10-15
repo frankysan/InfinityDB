@@ -118,9 +118,33 @@ class ScenarioCatalog:
         return [
             (record, publication)
             for record, publication in self._records()
-            if collection is None
-            or (publication["collection"] == collection and publication["revision"] == revision)
+            if (
+                publication["collection"] == "n5-core"
+                if collection is None
+                else (
+                    publication["collection"] == collection
+                    and publication["revision"] == revision
+                )
+            )
         ]
+
+    def list_collections(self) -> list[dict[str, Any]]:
+        """Return only current scenario sets with readable published missions."""
+        collections: dict[tuple[str, str], dict[str, Any]] = {}
+        for _record, publication in self._records():
+            key = (publication["collection"], publication["revision"])
+            if key not in collections:
+                collections[key] = {
+                    "id": key[0],
+                    "revision": key[1],
+                    "title": publication["collection_title"],
+                    "scenario_count": 0,
+                }
+            collections[key]["scenario_count"] += 1
+        return sorted(
+            collections.values(),
+            key=lambda item: (item["id"] != "n5-core", item["title"], item["revision"]),
+        )
 
     def list_scenarios(
         self, *, collection: str | None = None, revision: str | None = None

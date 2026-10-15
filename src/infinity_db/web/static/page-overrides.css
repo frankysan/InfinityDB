@@ -586,6 +586,14 @@ html:not([data-developer-mode="true"])
   width: min(1040px, 100%);
 }
 
+.scenario-collection-controls {
+  padding: 20px 24px 0;
+}
+
+.scenario-collection-field {
+  width: min(100%, 400px);
+}
+
 .scenario-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));

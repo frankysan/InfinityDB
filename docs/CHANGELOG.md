@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- The Scenario browser now offers a collection selector for N5 Core and
+  published ITS missions. Season 18 starts with Battleground, including
+  its end-of-game Sectors, size-dependent map, 2/3/5-point scoring and
+  special rules. Shared scenario links retain the exact season and game size.
 - Dated FAQ v0.1 clarifications appear alongside Hacking Device,
   Annihilation, Skill, Trait, State, General Rule and Fireteam references.
   New entries explain Skill declaration, fired Deployables, Peripheral
@@ -236,14 +240,14 @@ are not retroactively relabeled.
   official N5.3 source; its FAQ remains a separate dated overlay.
   The Fireteam detail stays on the Fireteams page rather than inventing
   a rule route. Base rules remain unchanged.
-- **Data processing + Web backend:** Confirm ITS-inspired split Deployment
-  Zones and asymmetric scoring applicability survive typed validation and
-  catalog projection. Add exact current scenario collection/revision
-  selection to the shared catalog and list/detail/map APIs; invalid
-  or unpublished ITS requests now fail closed rather than falling
-  back to N5 Core. Preserve the core N5.3 scope and leave
-  ITS-specific geometry, Classifieds, real seasonal definitions and
-  player-facing season choice deferred.
+- **Data processing + Web backend + Web frontend:** Add strict current
+  scenario collection/revision selection to catalog and list/detail/map
+  APIs and a browser collection picker generated from published missions.
+  Preserve the default N5.3 Core catalog and reject unknown revisions
+  without substituting another season. Publish the first real ITS Season 18
+  scenario, Battleground, with sourced scoring, geometry and special rules;
+  season-aware share URLs survive changes of Army Points and reloads.
+  Other ITS missions and scenario-specific FAQ applicability remain open.
 - **Data processing + Web backend:** Verify all 24 core-scenario Army Points
   selections against the N5.3 source charts, composed database and public API.
   The Spanish N5.3 Annihilation table confirms the corrected 350-point survival

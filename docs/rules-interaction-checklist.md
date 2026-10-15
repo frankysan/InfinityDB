@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **180/180** complete, **0** pending.
+- Supporting semantic identities: **181/181** complete, **0** pending.
 - Current authored outgoing relations: **444**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -942,9 +942,11 @@ review. `declaration-category` projection records are excluded.
 - [x] **Supportware** (`rule:supportware`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Scenario (4/4)
+#### Scenario (5/5)
 
 - [x] **Annihilation** (`scenario:annihilation`) — reviewed: English N5.3 pp. 149-150 verify all six Army Points configurations (150/200/250/300/350/400), SWC and deployment references, three exclusive end-of-game bands for killed enemy Army Points (maximum 4 OP), three for surviving Victory Points (maximum 4 OP), and 2 OP for the enemy Lieutenant killed. Shared Killing correctly includes entering Dead, remaining Null at game end and never-deployed enemy Troopers. The three-round limit and tactical-phase all-Null early ending remain separate shared conditions. The English 350-point survival table has a gap at 151-175 and overlap at 251-270; official Spanish N5.3 Aniquilación (printed p. 153) explicitly prints 85-175/176-270/more-than-270. The maintained reviewed-resolution is thus corroborated by the other N5.3 language edition, not solely inferred from continuity. No new graph edges are implied by typed mission component references; scoring requires game-state context.
+  - outgoing: none
+- [x] **Battleground** (`scenario:battleground`) — reviewed: Official ITS Season 18: Overheat English version 2026.09.01, printed pp. 121-123. Battleground is a distinct Direct Action mission: three end-of-game Zones of Operations with 2 OP near, 3 OP central and 5 OP far from the player's own Deployment Zone; the opposite side's near/far semantics are explicitly separated in the read model. The Sectors are identified only at the end of the game. At 150 Army Points each is 4 inches deep, with two outer Sectors 2 inches from the central line; at 200-400 each is 8 inches deep, with two outer Sectors 4 inches from the central line. Source diagram shows the three 24x32, 32x48 and 48x48 table sizes; rear Deployment Zones follow normal 8/12-inch sizes. Scoring relies on correct Zone Domination (Models/Markers, Proxies, Peripherals, Null exclusion except Shasvastii) plus Baggage +20 VP; Killing, HVT/Classified exclusion, and end-of-third-Round remain scenario-local prose. Current revision/source identity remains distinct from Core; no claimed historical replay or ITS FAQ publication.
   - outgoing: none
 - [x] **Domination** (`scenario:domination`) — reviewed: N5.3 pp. 151-152 and pinned Wiki Domination revision 3264 confirm the six Army Points sizes and all Quadrant, Console, Specialist and mission-ending conditions. Quadrants use round-end Victory Points: equal with at least one held scores 1 OP, greater scores 2, maximum 6 across three rounds. Consoles score 1 OP each at game end and ownership goes to the last successful Hacker or other Specialist using Hack Consoles; the Skill needs Silhouette contact, Normal WIP, repeatable attempts and gives Hackers +3. Shasvastii Embryo is counted despite the ordinary Null exclusion; equipment does not count. The seven qualifying Specialist Skills and Peripheral restriction are shared references. English N5.2 p. 150, English N5.3 p. 151 and the pinned Wiki print 6 SWC at 350 points, but official Spanish N5.3 Domination p. 155 prints 7. The explicit cross-language source conflict remains unresolved; the maintained game-size value remains the English 6 pending authoritative clarification. No unconditional global graph edges are implied by scoped mission components.
   - outgoing: none

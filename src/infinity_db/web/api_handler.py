@@ -966,7 +966,10 @@ class ApiHandler:
                         collection=collection, revision=revision
                     )
                 ]
-                payload = {"items": items}
+                payload = {
+                    "items": items,
+                    "collections": self.scenario_catalog.list_collections(),
+                }
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read scenarios")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

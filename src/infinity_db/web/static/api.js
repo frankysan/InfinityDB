@@ -60,12 +60,18 @@ export function getGlossary(signal) {
   return getJson("/api/glossary", signal);
 }
 
-export function getScenarios(signal) {
-  return getJson("/api/scenarios", signal);
+export function getScenarios(signal, { collection = "", revision = "" } = {}) {
+  const params = new URLSearchParams();
+  if (collection) params.set("collection", collection);
+  if (revision) params.set("revision", revision);
+  const query = params.toString();
+  return getJson(`/api/scenarios${query ? `?${query}` : ""}`, signal);
 }
 
-export function getScenario(scenarioId, armyPoints, signal) {
+export function getScenario(scenarioId, armyPoints, signal, { collection = "", revision = "" } = {}) {
   const params = new URLSearchParams({ army_points: String(armyPoints) });
+  if (collection) params.set("collection", collection);
+  if (revision) params.set("revision", revision);
   return getJson(`/api/scenarios/${encodeURIComponent(scenarioId)}?${params}`, signal);
 }
 
