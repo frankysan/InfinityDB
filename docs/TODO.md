@@ -681,9 +681,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Chromium passed 18/18 render/API checks at 1440/390/320 px.
       The independently reproduced 6 px catalog-tag overflow at 320 px
       belongs to the already tracked shared reference layout issue.
-    - [ ] **REA-014 — Dodge/Reset:** Verify the Dodge, Reset, Engaged, and
-      Bangbomb cards cover per-Attack evasion, post-Dodge movement,
-      Engaged exit position, cumulative Reset State MODs, and Sixth Sense.
+    - [x] **REA-014 ? Dodge/Reset:** Accepted eight existing player-facing
+      references (Dodge, Reset, Engaged, IMM-B, Isolated, Targeted,
+      Sixth Sense, Bangbomb) for per-Attack evasion and different Success
+      Values, shared Dodge -3, movement after successful evasion,
+      Engaged cancellation by valid exit position, additive Reset WIP
+      penalties capped at -12, and Sixth Sense exceptions. Chromium
+      passed 48/48 render/navigation checks at 1440/390/320 px with no
+      JavaScript errors or horizontal overflow. No mechanics changed;
+      separate REA-015 and REA-026 State tasks remain independent.
     - [ ] **REA-015 — State cancellation:** Inspect the source-cited
       State-specific cancellation explanations in the browser; keep this
       distinct from the completed REA-026 baseline.

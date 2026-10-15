@@ -763,6 +763,13 @@ arbitrating multiple attacks or cancelling States.
 Sources: English N5.3 pp. 24, 79–80, 85, 111, 120, 160, 165, 168, 171;
 Spanish N5.3 pp. 80–82, 113, 124, 164, 179.
 
+REA-014 reference acceptance (2026-10-15) verified all eight connected
+Dodge, Reset, Engaged, Isolated, IMM-B, Targeted, Sixth Sense and
+Bangbomb cards in Chromium at 1440/390/320 px (48/48 render/navigation
+checks). The authored restrictions, cumulative MOD rules, per-attack
+outcomes and State relationships were unchanged; no new cancellation
+engine was introduced. REA-015/026 remain separately scoped.
+
 ### RS-GSG-STATE-005F — State cancellation is source-specific, including Marker lifecycles
 
 **Classification:** source-native interaction; reviewed player-facing explanation (REA-015).

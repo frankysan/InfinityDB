@@ -1613,3 +1613,29 @@ against the release and rebuilt rules DBs, and remains tracked under
 the separate final shared-layout acceptance task. The private browser
 verifier, screenshots and result JSON remain in Git-ignored
 `local/audits/`. No source data, gameplay mechanics or renderer changed.
+
+## 1.0 Dodge/Reset conditional outcomes and State links (REA-014)
+
+**Verified 2026-10-15, `dev/v1.0.0`.** Reviewed the existing N5.3-cited
+Dodge, Reset, Engaged, Isolated, IMM-B, Targeted, Sixth Sense and
+Bangbomb references. One Dodge die is evaluated independently for
+several Attacks; failure to evade any applicable Attack prevents Dodge
+movement, even when another is evaded. Only one -3 PH MOD applies to
+the listed special Dodge circumstances. Cancellation of Engaged also
+requires a valid new position outside contact with every enemy.
+
+IMM-B (-3), Isolated (-9) and Targeted (-3) Reset WIP penalties combine
+up to the general -12 cap. Sixth Sense ignores ordinary penalties
+including Targeted but preserves the explicit IMM-B/Isolated exceptions.
+The Bangbomb (+4) example distinguishes the eligible Combi Rifle
+attack from an E/Marat Template with a different PH Success Value.
+
+Extended the published/API regression to cover the State records,
+Sixth Sense exceptions and Bangbomb's conditional outcome; preserved
+original State/Skill relationships and citations. Headless Chromium
+against a fresh local rules DB passed **48/48** content/navigation
+checks at 1440, 390 and 320 px, covering eight reference pages and
+cross-links, without JavaScript errors or horizontal overflow.
+Screenshot, script, results JSON and generated DB remain in ignored
+`local/audits/`. This is rules-reference acceptance, not an executable
+multi-target roll evaluator. REA-015/REA-026 are separate tasks.

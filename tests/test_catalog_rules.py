@@ -1335,8 +1335,14 @@ def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(
     reset = rules_db.composed_record("skill:reset")
     engaged = rules_db.composed_record("state:engaged")
     bangbomb = rules_db.composed_record("equipment:bangbomb")
+    isolated = rules_db.composed_record("state:isolated")
+    imm_b = rules_db.composed_record("state:immobilized-b")
+    targeted = rules_db.composed_record("state:targeted")
+    sixth_sense = rules_db.composed_record("skill:sixth-sense")
     assert dodge is not None and reset is not None
     assert engaged is not None and bangbomb is not None
+    assert isolated is not None and imm_b is not None
+    assert targeted is not None and sixth_sense is not None
 
     dodge_text = " ".join(dodge["facts"]["clarifications"])
     assert "only one -3 PH MOD" in dodge_text
@@ -1360,6 +1366,26 @@ def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(
         " ".join(engaged["facts"]["clarifications"])
     )
     assert "no [[skill:dodge|Dodge]] movement" in (
+        " ".join(bangbomb["facts"]["clarifications"])
+    )
+    # Each State keeps its own WIP penalty; only qualifying Reset/Engineer
+    # cancels it. Sixth Sense retains the explicit IMM-B/Isolated exceptions.
+    assert "WIP -9" in " ".join(isolated["facts"]["effects"])
+    assert "-3 WIP MOD" in " ".join(imm_b["facts"]["effects"])
+    assert "-3 WIP MOD" in " ".join(targeted["facts"]["effects"])
+    for state in (isolated, imm_b, targeted):
+        assert "[[skill:reset]]" in " ".join(state["facts"]["effects"])
+        assert "[[skill:engineer]]" in " ".join(state["facts"]["effects"])
+    sixth_text = " ".join(sixth_sense["facts"]["effects"])
+    assert "[[skill:dodge]] and [[skill:reset]] ignore negative MODs except" in sixth_text
+    for ref in (
+        "[[state:immobilized-a|Immobilized-A]]",
+        "[[state:immobilized-b|Immobilized-B]]",
+        "[[state:isolated]]",
+    ):
+        assert ref in sixth_text
+    assert "different PH Success Values" in " ".join(bangbomb["facts"]["clarifications"])
+    assert "against the Combi Rifle but fails to evade an E/Marat Template" in (
         " ".join(bangbomb["facts"]["clarifications"])
     )
 

@@ -1000,6 +1000,41 @@ and the Sixth Sense exception. They cite both N5.3 PDF languages; the existing
 typed cancellation relations remain conditional. Curated/API regression coverage
 added. Browser acceptance remains pending; REA-015/026 remain separate.
 
+**Browser acceptance (2026-10-15): Complete; existing behavior
+preserved.** The 2026-10-10 implementation follow-up superseded the
+original "Current" finding. Dodge, Reset, Engaged and Bangbomb already
+explain their conditional multi-attack resolution, while IMM-B, Isolated,
+Targeted and Sixth Sense publish the corresponding State and Skill
+conditions. The reviewed source boundaries are:
+
+- A single Dodge die is compared separately against simultaneous attacks
+  and may evade a shot while failing to evade a Template attack. A
+  non-evaded applicable Attack prevents the Dodge move. The three listed
+  Dodge -3 situations give **one -3**, not a stacking -9; other independent
+  State MODs still apply.
+- Passing Dodge alone does not cancel Engaged: a valid move outside
+  Silhouette contact with **every** enemy is also required; with no valid
+  final position the Trooper remains Engaged and does not relocate.
+- Reset's IMM-B -3, Isolated -9 and Targeted -3 WIP penalties add together
+  subject to the normal -12 MOD limit. Sixth Sense can ignore Targeted's
+  penalty but expressly retains IMM-B/Isolated (and IMM-A where relevant).
+- Bangbomb's printed +4 can modify an eligible Dodge against the Combi
+  Rifle while not applying to the E/Marat Template in the same Order;
+  the example's unavoided Template prevents Dodge movement.
+
+Official English/Spanish N5.3 source pages remain attached to the
+respective maintained cards and unchanged (English Dodge pp. 79-80,
+Engaged p. 160, Reset/State pp. 24, 85, 111, 165, 168, 171,
+Bangbomb p. 120; the curated Spanish citations are preserved).
+A published/API regression was extended to protect all eight records,
+State-specific penalties, Sixth Sense exceptions and the Bangbomb
+mixed-attack example. Headless Chromium passed **48/48** render and
+semantic navigation checks at 1440, 390 and 320 px across all eight
+pages, with no JavaScript exceptions or page overflow. No State
+transition engine, unconditional `cancels-state` inference or source
+text rewrite was introduced. This completes REA-014 **reference
+acceptance**; REA-015 and REA-026 retain their separate boundaries.
+
 ### REA-015 - Several State cards lack their operative cancellation conditions
 
 **Classification:** completeness, consistency. **Severity:** High. **Priority:** P1.
