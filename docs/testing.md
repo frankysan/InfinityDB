@@ -394,18 +394,34 @@ inputs are explicit and never downloaded automatically. Keep evidence output in
 the ignored `local/` workspace:
 
 ```powershell
-.venv\Scripts\python.exe tools/audit_1_0_reference_inputs.py --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --core-pdf "data/pdf/rules/n5-rules-v5-3-en.pdf" --faq-pdf "data/pdf/faq/n5-faqs-v0-1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
+.venv\Scripts\python.exe -m infinity_db build-rules --output local/audits/1.0-rules-current.db
+.venv\Scripts\python.exe tools/audit_1_0_reference_inputs.py --rules-db local/audits/1.0-rules-current.db --wiki-history "data/wiki/WIKI-en-history 20260928-165727.zip" --wiki-history-es "data/wiki/WIKI-es-history 20261009-215316.zip" --wiki-snapshot "data/wiki/WIKI-en 20260926-200832.zip" --wiki-snapshot-es "data/wiki/WIKI-es 20261009-211304.zip" --core-pdf "data/pdf/rules/n5-rules-v5-3-en.pdf" --faq-pdf "data/pdf/faq/n5-faqs-v0-1-en.pdf" --json-output local/audits/1.0-source-evidence.json --markdown-output local/audits/1.0-source-evidence.md
 ```
 
 The English and Spanish history archives each need `_history/index.json`
 and their indexed `_history/oldid/*.html` payloads. Historical revisions
 are checked by their URL language, page identity and embedded `wgRevisionId`.
-The optional `--wiki-snapshot` verifies the declared curated archive filename,
-exact SHA-256, member count, every archived citation/vocabulary member, its
-rendered heading and matching revision IDs in the English history archive.
-Omitting the snapshot or Spanish history input reports that dimension as
-**not checked** rather than verified. An English history archive alone does not
-verify Spanish `oldid` pins.
+With the current rebuilt rules database, `--wiki-snapshot` and
+`--wiki-snapshot-es` verify the separately pinned English and Spanish
+archive filenames, exact SHA-256 hashes, document counts, cited members,
+rendered headings, dated Wiki errata labels, and matching page revisions
+against the correct language's history archive. Repeated pins shared across
+curated collections must agree. If snapshot verification is requested,
+**every locally pinned Wiki language must be supplied**; an absent Spanish
+snapshot or its language-matched history fails rather than silently verifying
+English alone. Historical `oldid` URLs are verified independently, and an
+omitted history archive leaves those revisions unverified.
+
+The 2026-10-15 source-evidence rerun found **113/113** exact
+historical Wiki revisions, **82/82** English snapshot references across 70
+pages, and **2/2** Spanish snapshot references across two pages. The
+shipped Army database's source archive hash was also matched with the
+pinned locally available Army ZIP by `tools/report_reference_baseline.py`.
+Detailed hashes and inventories remain under ignored `local/audits/`.
+The rules-enrichment audit still finds 83 gap records, including the
+outdated Repeater source citation and two unresolved Sepsitor-to-Cube
+relation targets; interaction review still has 15 pending supporting
+identities. Those findings are **not** cleared by valid citation bytes.
 
 The report is evidence, **not** a judgment that curated interpretations or
 browser presentations are complete. PDF SHA-256 values without maintained pins

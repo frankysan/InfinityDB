@@ -11,8 +11,10 @@ from tools.audit_1_0_reference_inputs import (
     SourceEvidenceError,
     _oldid_pin,
     _wiki_history_language,
+    _WikiErrataLabels,
     chart_name_evidence,
     verify_curated_wiki_snapshot,
+    verify_curated_wiki_snapshots,
     verify_wiki_revisions,
 )
 
@@ -232,3 +234,99 @@ def test_spanish_revision_is_verified_from_language_matched_history(tmp_path: Pa
     with zipfile.ZipFile(path) as archive:
         result = verify_wiki_revisions(archive, [{"id": "spanish", "url": url}])
     assert result[0]["status"] == "exact-revision-payload"
+
+
+def test_dated_errata_label_needs_bold_rule_and_date_in_one_block() -> None:
+    english = _WikiErrataLabels()
+    english.feed(
+        '<div class="errata_border"><span class="errata_title">'
+        '<b>Update</b><i>Mazebreaker, May 2026</i></span>'
+        '<div class="errata_highlightblock"><b>Dodge (ARM+3)</b>'
+        ' only applies under its conditions.</div></div>'
+    )
+    assert "dodge (arm+3): may 2026" in english.labels
+    assert "dodge (arm+3): june 2026" not in english.labels
+
+    spanish = _WikiErrataLabels()
+    spanish.feed(
+        '<div class="errata_border"><span class="errata_title">'
+        '<b>Actualizaci?n</b><i>Mazebreaker, mayo 2026</i></span>'
+        '<div class="errata_highlightblock"><b>Esquivar (BLI+3)</b>'
+        ' y su MOD.</div></div>'
+    )
+    assert "esquivar (bli+3): mayo 2026" in spanish.labels
+
+    # A date and rule label from different errata blocks must not combine.
+    separate = _WikiErrataLabels()
+    separate.feed(
+        '<div class="errata_border"><span class="errata_title">'
+        'May 2026</span><div class="errata_highlightblock">'
+        '<b>Different Skill</b></div></div>'
+        '<div class="errata_border"><span class="errata_title">'
+        'June 2026</span><div class="errata_highlightblock">'
+        '<b>Dodge (ARM+3)</b></div></div>'
+    )
+    assert "dodge (arm+3): may 2026" not in separate.labels
+
+
+def test_bilingual_snapshots_require_exact_pins_and_matched_histories(
+    tmp_path: Path,
+) -> None:
+    english, history_en, source_en, refs_en = _curated_snapshot_fixture(tmp_path)
+    source_en["language"] = "en"
+    spanish = tmp_path / "WIKI-es 20261009-211304.zip"
+    history_es = tmp_path / "history-es.zip"
+    payload = (
+        '<html><script>RLCONF={"wgRevisionId":4012}</script>'
+        '<h2>Esquivar (BLI+3)</h2></html>'
+    )
+    with zipfile.ZipFile(spanish, "w") as archive:
+        archive.writestr("es/Esquivar", payload)
+    with zipfile.ZipFile(history_es, "w") as archive:
+        archive.writestr("es/Esquivar", payload)
+    source_es = {
+        "id": "wiki-es-20261009-211304",
+        "language": "es",
+        "localPath": "data/wiki/WIKI-es 20261009-211304.zip",
+        "sha256": hashlib.sha256(spanish.read_bytes()).hexdigest(),
+        "documentCount": 1,
+    }
+    refs = refs_en + [
+        {"sourceId": source_es["id"], "member": "es/Esquivar", "heading": "Esquivar (BLI+3)"}
+    ]
+    sources = [source_en, source_en.copy(), source_es]
+    with zipfile.ZipFile(history_en) as en, zipfile.ZipFile(history_es) as es:
+        paths = {"en": english, "es": spanish}
+        result = verify_curated_wiki_snapshots(
+            sources, refs, paths, {"en": en, "es": es}
+        )
+        assert result["en"]["sourceDeclarations"] == 2
+        assert result["en"]["references"] == 2
+        assert result["es"]["sourceDeclarations"] == 1
+        assert result["es"]["references"] == 1
+        with pytest.raises(SourceEvidenceError, match="pinned languages"):
+            verify_curated_wiki_snapshots(
+                sources, refs, {"en": english}, {"en": en}
+            )
+        with pytest.raises(SourceEvidenceError, match="matching-language history"):
+            verify_curated_wiki_snapshots(sources, refs, paths, {"en": en})
+        with pytest.raises(SourceEvidenceError, match="matching page"):
+            verify_curated_wiki_snapshots(
+                sources, refs, paths, {"en": en, "es": en}
+            )
+        mismatched = tmp_path / "wrong-revision-history.zip"
+        with zipfile.ZipFile(mismatched, "w") as archive:
+            archive.writestr(
+                "es/Esquivar", payload.replace('"wgRevisionId":4012', '"wgRevisionId":4011')
+            )
+        with zipfile.ZipFile(mismatched) as wrong:
+            with pytest.raises(SourceEvidenceError, match="revision mismatch"):
+                verify_curated_wiki_snapshots(
+                    sources, refs, paths, {"en": en, "es": wrong}
+                )
+        incorrect_source = source_es.copy()
+        incorrect_source["language"] = "en"
+        with pytest.raises(SourceEvidenceError, match="spans languages"):
+            verify_curated_wiki_snapshots(
+                sources + [incorrect_source], refs, paths, {"en": en, "es": es}
+            )

@@ -178,6 +178,66 @@ class _WikiHeadings(HTMLParser):
             self._inside = False
 
 
+class _WikiErrataLabels(HTMLParser):
+    """Recognize dated, bold-labelled Wiki errata, not arbitrary body text."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self._border_depth = 0
+        self._title = False
+        self._highlight = False
+        self._bold = False
+        self._title_text: list[str] = []
+        self._bold_text: list[str] = []
+        self._first_label = ""
+        self.labels: set[str] = set()
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        classes = set((dict(attrs).get("class") or "").split())
+        if tag == "div" and "errata_border" in classes:
+            self._border_depth = 1
+            self._title = False
+            self._highlight = False
+            self._bold = False
+            self._title_text = []
+            self._bold_text = []
+            self._first_label = ""
+            return
+        if not self._border_depth:
+            return
+        if tag == "div":
+            self._border_depth += 1
+            if "errata_highlightblock" in classes:
+                self._highlight = True
+        elif tag == "span" and "errata_title" in classes:
+            self._title = True
+        elif tag == "b" and self._highlight and not self._first_label:
+            self._bold = True
+            self._bold_text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._title:
+            self._title_text.append(data)
+        if self._bold:
+            self._bold_text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "b" and self._bold:
+            self._first_label = _normalized("".join(self._bold_text))
+            self._bold = False
+        if tag == "span" and self._title:
+            self._title = False
+        if tag == "div" and self._border_depth:
+            if self._highlight and self._border_depth == 2:
+                self._highlight = False
+            self._border_depth -= 1
+            if not self._border_depth:
+                title = _normalized("".join(self._title_text))
+                dated = re.search(r"(\w+\s+20\d{2})$", title)
+                if self._first_label and dated:
+                    self.labels.add(f"{self._first_label}: {dated.group(1)}")
+
+
 def verify_curated_wiki_snapshot(
     snapshot: Path,
     history: zipfile.ZipFile,
@@ -228,9 +288,12 @@ def verify_curated_wiki_snapshot(
                     raise SourceEvidenceError(f"Unresolvable Wiki citation member: {member!r}")
                 if member not in heading_cache:
                     page = archive.read(member)
+                    html = page.decode("utf-8", "replace")
                     headings = _WikiHeadings()
-                    headings.feed(page.decode("utf-8", "replace"))
-                    heading_cache[member] = headings.headings
+                    headings.feed(html)
+                    errata = _WikiErrataLabels()
+                    errata.feed(html)
+                    heading_cache[member] = headings.headings | errata.labels
                     if member not in history.namelist():
                         raise SourceEvidenceError(f"Wiki history has no matching page: {member}")
                     historical_page = history.read(member)
@@ -271,6 +334,49 @@ def verify_curated_wiki_snapshot(
     }
 
 
+def verify_curated_wiki_snapshots(
+    sources: list[dict[str, Any]],
+    references: list[dict[str, str | None]],
+    snapshots: dict[str, Path],
+    histories: dict[str, zipfile.ZipFile],
+) -> dict[str, dict[str, Any]]:
+    """Verify every pinned language independently, with its own history evidence."""
+    by_language: dict[str, list[dict[str, Any]]] = {}
+    source_language: dict[str, str] = {}
+    for source in sources:
+        language = source.get("language")
+        source_id = source.get("id")
+        if language not in {"en", "es"} or not isinstance(source_id, str):
+            raise SourceEvidenceError("Wiki snapshot requires explicit en/es language and ID")
+        if source_id in source_language and source_language[source_id] != language:
+            raise SourceEvidenceError(f"Wiki snapshot source ID spans languages: {source_id}")
+        source_language[source_id] = language
+        by_language.setdefault(language, []).append(source)
+    if set(by_language) != set(snapshots):
+        raise SourceEvidenceError(
+            "Supplied Wiki snapshots must match pinned languages: "
+            f"pinned {sorted(by_language)}, supplied {sorted(snapshots)}"
+        )
+    if set(snapshots) - set(histories):
+        raise SourceEvidenceError("Each Wiki snapshot needs matching-language history")
+    by_reference: dict[str, list[dict[str, str | None]]] = {
+        language: [] for language in snapshots
+    }
+    for reference in references:
+        language = source_language.get(str(reference["sourceId"]))
+        if language is None:
+            raise SourceEvidenceError(
+                f"Wiki citation references unpinned source: {reference['sourceId']!r}"
+            )
+        by_reference[language].append(reference)
+    return {
+        language: verify_curated_wiki_snapshot(
+            snapshot, histories[language], by_language[language], by_reference[language]
+        )
+        for language, snapshot in snapshots.items()
+    }
+
+
 def chart_name_evidence(chart_html: str, names: list[str]) -> list[dict[str, str]]:
     """Candidate textual name evidence only; *not* verified weapon-profile coverage."""
     parser = _TableCells()
@@ -292,6 +398,7 @@ def build_report(
     faq_pdf: Path,
     wiki_snapshot: Path | None = None,
     wiki_history_es: Path | None = None,
+    wiki_snapshot_es: Path | None = None,
 ) -> dict[str, Any]:
     for path in (army_database, rules_database, wiki_history, core_pdf, faq_pdf):
         if not path.is_file():
@@ -315,17 +422,18 @@ def build_report(
         ]
         local_sources: list[dict[str, Any]] = []
         archived_references: list[dict[str, str | None]] = []
-        if wiki_snapshot is not None:
+        if wiki_snapshot is not None or wiki_snapshot_es is not None:
             local_sources = [
                 {
                     "id": row[0],
                     "localPath": row[1],
                     "sha256": row[2],
                     "documentCount": row[3],
+                    "language": row[4],
                 }
                 for row in connection.execute(
-                    "SELECT id, local_path, sha256, document_count FROM sources "
-                    "WHERE kind = 'wiki' AND local_path IS NOT NULL"
+                    "SELECT id, local_path, sha256, document_count, language "
+                    "FROM sources WHERE kind = 'wiki' AND local_path IS NOT NULL"
                 )
             ]
             for table in ("record_citations", "vocabulary_sources"):
@@ -341,15 +449,16 @@ def build_report(
     enrichment = audit_coverage(army_database, rules_database)
     weapon_items = enrichment["domains"]["weapons"]["items"]
     weapon_names = [entry["name"] for entry in weapon_items]
+    snapshots = {
+        language: path for language, path in (
+            ("en", wiki_snapshot), ("es", wiki_snapshot_es)
+        ) if path is not None
+    }
+    if wiki_snapshot_es is not None and wiki_history_es is None:
+        raise SourceEvidenceError("Spanish Wiki snapshot requires Spanish history archive")
     try:
         with zipfile.ZipFile(wiki_history) as archive:
             revisions = verify_wiki_revisions(archive, english_records)
-            snapshot_evidence = (
-                verify_curated_wiki_snapshot(
-                    wiki_snapshot, archive, local_sources, archived_references
-                )
-                if wiki_snapshot is not None else None
-            )
             try:
                 chart = archive.read("Weapon_Chart").decode("utf-8")
                 commlink = archive.read("Commlink").decode("utf-8")
@@ -377,6 +486,25 @@ def build_report(
                 "archiveMember": None,
                 "status": "spanish-history-not-supplied",
             })
+    snapshot_evidence_by_language: dict[str, dict[str, Any]] = {}
+    if snapshots:
+        try:
+            with zipfile.ZipFile(wiki_history) as english_archive:
+                if wiki_history_es is not None:
+                    with zipfile.ZipFile(wiki_history_es) as spanish_archive:
+                        snapshot_evidence_by_language = verify_curated_wiki_snapshots(
+                            local_sources, archived_references, snapshots,
+                            {"en": english_archive, "es": spanish_archive},
+                        )
+                else:
+                    snapshot_evidence_by_language = verify_curated_wiki_snapshots(
+                        local_sources, archived_references, snapshots,
+                        {"en": english_archive},
+                    )
+        except (zipfile.BadZipFile, OSError) as exc:
+            raise SourceEvidenceError(f"Invalid Wiki history archive: {exc}") from exc
+    snapshot_evidence = snapshot_evidence_by_language.get("en")
+    spanish_snapshot_evidence = snapshot_evidence_by_language.get("es")
     weapons = chart_name_evidence(chart, weapon_names)
     core_hash = _sha256(core_pdf)
     faq_hash = _sha256(faq_pdf)
@@ -410,10 +538,11 @@ def build_report(
             "faqPdfPinStatus": faq_status,
             "wikiHistoryPinStatus": "separate-historical-revision-evidence",
             "wikiSnapshotPinStatus": (
-                "verified" if snapshot_evidence is not None else "not-checked"
+                "verified" if snapshot_evidence_by_language else "not-checked"
             ),
         },
         "wikiSnapshotEvidence": snapshot_evidence,
+        "wikiSpanishSnapshotEvidence": spanish_snapshot_evidence,
         "wikiRevisionEvidence": {
             "exact": exact,
             "total": len(revisions),
@@ -440,6 +569,7 @@ def report_markdown(report: dict[str, Any]) -> str:
     artifacts = report["suppliedArtifacts"]
     wiki = report["wikiRevisionEvidence"]
     snapshot = report["wikiSnapshotEvidence"]
+    spanish_snapshot = report.get("wikiSpanishSnapshotEvidence")
     gaps = report["enrichmentGapEvidence"]
     snapshot_lines = (
         [
@@ -454,6 +584,15 @@ def report_markdown(report: dict[str, Any]) -> str:
             "  and all cited page members/headings against the source declarations.",
         ]
     )
+    if spanish_snapshot is not None:
+        snapshot_lines.extend([
+            f"- Verified Spanish archive: `{spanish_snapshot['archiveName']}`",
+            f"  (SHA-256: `{spanish_snapshot['archiveSha256']}`).",
+            f"- Checked {spanish_snapshot['references']} Spanish citation/vocabulary references",
+            f"  across {spanish_snapshot['uniquePages']} pages,",
+            f"  {spanish_snapshot['headingsVerified']} headings and",
+            f"  {spanish_snapshot['matchingHistoryPageRevisions']} matching historical revisions.",
+        ])
     lines = [
         "# 1.0 source evidence — input reconciliation",
         "",
@@ -477,7 +616,10 @@ def report_markdown(report: dict[str, Any]) -> str:
         "",
         f"- Core N5 v5.3 PDF: `{artifacts['coreRulesPdfSha256']}`",
         "  (no declared SHA in current catalog).",
-        f"- FAQ v0.1 PDF: `{artifacts['faqPdfSha256']}` (not yet independently cataloged).",
+        f"- FAQ v0.1 PDF: `{artifacts['faqPdfSha256']}` "
+        + ("(cataloged; publication scope/revision still requires review)."
+           if artifacts["faqPdfPinStatus"] == "cataloged-needs-revision-review"
+           else "(not yet independently cataloged)."),
         f"- English Wiki history ZIP: `{artifacts['wikiHistorySha256']}`",
         "  (separate historical-revision evidence; not interchangeable with the curated snapshot).",
         f"- Spanish Wiki history ZIP: `{artifacts['wikiSpanishHistorySha256']}`"
@@ -521,6 +663,7 @@ def main() -> int:
     parser.add_argument("--wiki-history", type=Path, required=True)
     parser.add_argument("--wiki-history-es", type=Path)
     parser.add_argument("--wiki-snapshot", type=Path)
+    parser.add_argument("--wiki-snapshot-es", type=Path)
     parser.add_argument("--core-pdf", type=Path, required=True)
     parser.add_argument("--faq-pdf", type=Path, required=True)
     parser.add_argument("--json-output", type=Path)
@@ -529,7 +672,7 @@ def main() -> int:
     try:
         result = build_report(
             args.army_db, args.rules_db, args.wiki_history, args.core_pdf, args.faq_pdf,
-            args.wiki_snapshot, args.wiki_history_es,
+            args.wiki_snapshot, args.wiki_history_es, args.wiki_snapshot_es,
         )
     except (SourceEvidenceError, sqlite3.DatabaseError) as exc:
         parser.error(str(exc))

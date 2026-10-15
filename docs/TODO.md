@@ -123,6 +123,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     the validated September 26 capture, correcting three changed member paths.
     All cited headings and September 28 archived page revision IDs were verified;
     retain the missing original as a historical evidence limitation.
+  - [x] Revalidate the current bilingual source-input baseline with the 1.0
+    audit against newly built rules storage: all **113/113** pinned historical
+    Wiki revisions, **82/82** English snapshot references across 70 pages and
+    **2/2** Spanish references across two pages verify with their own archive
+    hashes, member/headings (including dated errata), and language-matched
+    histories. The shipped Army archive hash also matches its publication
+    pin. Evidence is ignored under `local/audits/`; correctness, FAQ scope,
+    relationships and normal browser completeness still require review.
   - [ ] Review any change-sensitive curated interpretations that cannot be
     established from the available September 26 capture; the missing original
     cannot be used to prove earlier content equivalence.
@@ -1249,6 +1257,18 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     category from source citation through maintained representation and generated storage to a
     usable normal browser surface; schema coverage, passing validators, and an API route alone
     are insufficient evidence. Re-review exclusions against the canonical completeness definition.
+  - [ ] Adjudicate the current enrichment audit's release-blocker findings:
+    `equipment:repeater` still cites the N5.2 Hacking Area Wiki revision;
+    `weapon:sepsitor` and `weapon:sepsitor-plus` reference `equipment:cube`
+    without a resolved public catalog target. Confirm current authoritative
+    mechanics and browser presentation before changing the citation or link
+    classification. The 81 remaining missing Weapon family definitions and
+    annex-scoped Commlink have separate source-scope dispositions.
+  - [ ] Review the source-presentation audit's 39 fields marked
+    `unrepresented_player_information`, especially option Skill/Weapon/Equipment
+    relationships and profile notes, against actual source occupancy and normal
+    Unit pages. The existing audit reports zero *confirmed* gap families; that
+    classification alone is not sufficient 1.0 browser-completeness evidence.
   - [ ] Close the 1.0 interaction-review target in the maintained ledger, regenerate the checklist,
     and require the following check to pass. Never edit the generated checklist manually:
 
