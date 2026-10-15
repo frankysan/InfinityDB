@@ -541,13 +541,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       browser checks, no overflow/JavaScript errors, and inspection of
       representative narrow-screen screenshots. Private
       evidence is in `local/audits/weapon-properties-browser/`.
+    - [x] Curate the N5.3 Light/Heavy Flamethrowers as one shared Weapon family,
+      preserving PS 7/Small Teardrop and PS 6/Large Teardrop profiles. Linked
+      Direct Template, Intuitive Attack, Continuous Damage and Normal Ammunition
+      rules are reused rather than duplicated. Official N5.3 p. 178, the
+      September 26 Wiki Weapon Chart, and Army metadata agree. The missing
+      Weapon-definition audit decreases from 81 to 79; API and responsive
+      browser checks cover both versions without affecting Flammenspeer.
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. The updated triage has
       47 actionable reviews, 33 accepted shared-only identities,
       and 9 pending multi-profile candidates, plus Flash Pulse's
       historical citation. Pitcher and Mine Dispenser still need separate
-      missing-effect source reviews; the next shared-effects batches include
-      Flamethrowers and Marksman Rifles.
+      missing-effect source reviews; the next shared-effects batch includes
+      Marksman Rifles.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
@@ -1344,8 +1351,9 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     views checks row/cell geometry and overflow at 320, 390, 400, 600 and 768 px;
     this resolves the presentation defect, not the broader 1.0 browser gate.
   - [x] Complete the maintained 1.0 interaction-review target, regenerate the
-    checklist, and verify the release-scoped audit gate passes. All 179 supporting
-    identities are now reviewed, including all eleven Ammunition records and
+    checklist, and verify the release-scoped audit gate passes. All 182 supporting
+    identities are now reviewed, including the shared Flamethrower family, all
+    eleven Ammunition records and
     the four N5.3 core Scenarios. The final Supplies review confirms pickup,
     transfer, carrier and scoring restrictions, edge-based marker placement,
     shared Specialist eligibility, and the minimum-VP early ending against

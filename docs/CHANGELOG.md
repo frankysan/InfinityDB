@@ -16,6 +16,9 @@ are not retroactively relabeled.
   published ITS missions. Season 18 starts with Battleground, including
   its end-of-game Sectors, size-dependent map, 2/3/5-point scoring and
   special rules. Shared scenario links retain the exact season and game size.
+- Light and Heavy Flamethrowers now share linked Direct Template,
+  Intuitive Attack and Continuous Damage help, while clearly distinguishing
+  their Small/Large Teardrop areas and PS values.
 - Fireteam Type now has a separate FAQ clarification: a surviving HARIS
   does not become a DUO when it loses a member. The Spanish FAQ's
   inconsistent example count remains visible as a source discrepancy.
@@ -191,6 +194,11 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Add one source-reviewed
+  rules reference shared by Light and Heavy Flamethrowers, linking their
+  Direct Template, Intuitive Attack, Continuous Damage and Normal Ammunition
+  rules. Each keeps its original Army Weapon profile; no attack or Saving Roll
+  semantics are duplicated or changed.
 - **Data processing + Web backend + Web frontend:** Publish Request SpecBall
   as its own linked N5.3 Skill, including round and eligibility restrictions,
   PH 15 drop, token placement, two different support items, profile transfer,

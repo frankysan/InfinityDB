@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **181/181** complete, **0** pending.
-- Current authored outgoing relations: **444**.
+- Supporting semantic identities: **182/182** complete, **0** pending.
+- Current authored outgoing relations: **449**.
 - Explicitly tracked future/deferred interactions: **111**.
 
 ## 0.7.0 primary catalog review
@@ -980,7 +980,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (50/50)
+#### Weapon (51/51)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1064,6 +1064,12 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
   - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **Flamethrowers** (`weapon:flamethrowers`) — reviewed: N5.3 Flamethrowers chart p. 178 and pinned English Wiki Weapon Chart agree with Army profiles: Heavy is PS 6 / Large Teardrop, Light is PS 7 / Small Teardrop; both use N, B1, one ARM Saving Roll, Intuitive Attack and Continuous Damage. Shared canonical links own the underlying template, activation and repeat-roll mechanics. No additional variant effects or Army source corrections are inferred.
+  - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Intuitive Attack (`trait:intuitive-attack`)
+  - `uses-effects-of` → Continuous Damage (`trait:continuous-damage`)
+  - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
+  - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
 - [x] **Flammenspeer** (`weapon:flammenspeer`) — reviewed: N5.3 chart p. 178: Blast Mode N/ARM, one Saving Roll, circular Impact Template; Hit Mode AP/ARM/2, one Saving Roll, no Template. Both have PS 6, Burst 1, Continuous Damage, shared Disposable (2) charges. Modes are alternatives; template does not transfer.
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)

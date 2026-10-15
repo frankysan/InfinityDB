@@ -20,9 +20,9 @@ from tools.audit_rules_interactions import (
 def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
-    assert report["summary"]["recordCount"] == 362
+    assert report["summary"]["recordCount"] == 363
     assert not any(item["id"].startswith("faq-ruling:") for item in report["items"])
-    assert report["summary"]["authoredOutgoingRelationCount"] == 444
+    assert report["summary"]["authoredOutgoingRelationCount"] == 449
     assert report["summary"]["futureInteractionCount"] == 111
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 209,
@@ -65,10 +65,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         "percentComplete": 100.0,
     }
     assert report["summary"]["releases"]["1.0.0"] == {
-        "total": 94,
-        "complete": 94,
+        "total": 95,
+        "complete": 95,
         "pending": 0,
-        "reviewed": 94,
+        "reviewed": 95,
         "inherited": 0,
         "percentComplete": 100.0,
     }
@@ -117,8 +117,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
             },
         },
     }
-    assert report["summary"]["supporting"]["total"] == 181
-    assert report["summary"]["supporting"]["complete"] == 181
+    assert report["summary"]["supporting"]["total"] == 182
+    assert report["summary"]["supporting"]["complete"] == 182
     assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
@@ -571,7 +571,7 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 181/181 complete, 0 pending" in output
+    assert "Supporting identities: 182/182 complete, 0 pending" in output
 
 
 def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> None:
@@ -580,7 +580,7 @@ def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> 
         "--require-release", "1.0.0",
     ]) == 0
     output = capsys.readouterr().out
-    assert "Supporting identities: 181/181 complete, 0 pending" in output
+    assert "Supporting identities: 182/182 complete, 0 pending" in output
     assert "Pending identities:" not in output
 
 
