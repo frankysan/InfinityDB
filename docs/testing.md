@@ -1811,6 +1811,22 @@ mechanics/source review, scenario interaction acceptance or final
 source-to-storage-to-browser completeness gate. No frontend or curated
 mechanics were changed in this acceptance pass.
 
+## 1.0 scenario-model ITS compatibility acceptance
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** A source comparison of the
+locally pinned Season 18 PDF (2026.09.01) with the existing core scenario
+model confirms that optional multiple Deployment Zones per Side
+(`Crossing Lines`) and asymmetric objective `sideIds` (`Critical
+Intervention`) are preserved through validation and scenario-catalog
+projection. A synthetic in-memory catalog regression exercises those
+boundaries without publishing an ITS mission or adding rules data.
+
+Radius-based Safe Areas (`Provisioning`), selected objective sets
+(`Double Bind`), Classified systems and cross-season revision selection
+remain out of 1.0 scope and are **not** claimed as implemented. The
+private evidence is under `local/audits/its-scenario-model-compatibility-20261015.md`.
+Normal rules and scenario tests cover current N5.3 publication behavior.
+
 ## 1.0 four-core-scenario browser acceptance
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** Headless Chromium used the

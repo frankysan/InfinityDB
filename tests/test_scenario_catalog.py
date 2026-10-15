@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -7,6 +8,7 @@ import pytest
 from infinity_db.curated import load_curated_directory
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.scenario_catalog import ScenarioCatalog
+from infinity_db.scenario_definition import parse_scenario_definition_record
 
 
 @pytest.fixture(scope="module")
@@ -176,6 +178,67 @@ def test_core_scenario_source_inventory_matches_all_24_published_sizes(
         assert "Spanish N5.3" in item["source_issues"][0]["description"]
     else:
         assert item["source_issues"] == []
+
+
+def test_its_inspired_asymmetric_objectives_and_split_deployments_project_without_loss(
+    scenario_catalog: ScenarioCatalog,
+) -> None:
+    """A synthetic Crossing Lines/Critical Intervention shape survives catalog projection.
+
+    This tests existing core model boundaries; it does not publish ITS missions or
+    claim support for ITS-only circular geometry, Classifieds, or season overlays.
+    """
+    source, publication = next(
+        (record, metadata)
+        for record, metadata in scenario_catalog._records()
+        if record["id"] == "scenario:annihilation"
+    )
+    synthetic = deepcopy(source)
+    mission = synthetic["facts"]["mission"]
+    mission["objectives"][0]["sideIds"] = ["side-a"]
+    mission["objectives"][1]["sideIds"] = ["side-b"]
+    for configuration in synthetic["facts"]["configurations"]:
+        deployment = deepcopy(configuration["geometry"]["elements"][0])
+        deployment["id"] = "deployment-a-second"
+        # A second, separate region for the same side, with valid table geometry.
+        depth = deployment["y2"]
+        deployment["y1"] = depth + 2
+        deployment["y2"] = depth + 4
+        configuration["geometry"]["elements"].append(deployment)
+    for size in mission["gameSizes"]:
+        size["deployments"][0]["elementIds"].append("deployment-a-second")
+    parsed = parse_scenario_definition_record(synthetic)
+    assert parsed.mission is not None
+    assert parsed.mission.objectives[0].side_ids == ("side-a",)
+    assert parsed.mission.objectives[1].side_ids == ("side-b",)
+    assert all(
+        len(size.deployments[0].element_ids) == 2
+        for size in parsed.mission.game_sizes
+    )
+
+    catalog = ScenarioCatalog(scenario_catalog.rules_database)
+    catalog._records_cache = [(synthetic, deepcopy(publication))]
+    item = catalog.get_scenario("annihilation", army_points=300)
+    assert item is not None
+    assert item["setup"]["game_size"]["deployments"] == [
+        {
+            "sideId": "side-a",
+            "elementIds": ["deployment-a", "deployment-a-second"],
+        },
+        {"sideId": "side-b", "elementIds": ["deployment-b"]},
+    ]
+    assert item["objectives"][0]["sideIds"] == ["side-a"]
+    assert item["objectives"][1]["sideIds"] == ["side-b"]
+    assert "deployment-a-second" in {
+        element["id"] for element in item["placement"]["geometry"]["elements"]
+    }
+    # A synthetic geometry projection must not revise official collection/season metadata.
+    assert item["publication"]["collection_id"] == "n5-core"
+    assert item["publication"]["revision"] == "5.3"
+    assert item["skills"] == []
+    assert [rule["rule"]["id"] for rule in item["special_rules"]] == [
+        "rule:scenario:killing",
+    ]
 
 
 def test_scenario_detail_projects_exact_domination_game_size(

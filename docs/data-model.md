@@ -626,6 +626,14 @@ ending, and minimum-VP ending are shared. Domination retains its explicit 350-po
 Objective definitions use the same reference mechanism; geometry titles come from the including
 scenario as presentation metadata. Unsupported fields and mismatched component kinds fail closed.
 References are collection-local; cross-collection historical/season selection remains future work.
+The validated foundation accepts a Side with multiple Deployment Zone
+element references and different objective `sideIds` (needed by
+`Crossing Lines` and `Critical Intervention` respectively); both survive
+normal catalog detail projection. This does **not** mean current geometry
+v1 can render ITS-only radius/Safe Areas, or that the system models
+Classified Objective choices, `Double Bind`'s selectable objective sets, or
+multiple active season revisions. Those remain future opt-in features and
+cannot be inferred from core scenario records.
 
 Specialist Troops uses one shared Rule, `rule:specialist-troops:standard`, with
 `facts.specialists.anyOfSkills` as a JSON array of complete Skill IDs. Scenario inclusions author

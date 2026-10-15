@@ -1074,9 +1074,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     issue until clarification; do not silently override one official edition.
     This specific discrepancy does not itself require changing the scenario
     model or reopening the completed 1.0 interaction-review ledger.
-  - [ ] Confirm the current model remains source/scope-aware against the reviewed ITS
-    variation during final completeness review. ITS content, ITS-only geometry,
-    tournament tooling and an interactive scenario editor remain post-1.0.
+  - [x] Verify the current model remains source/scope-aware against
+    representative ITS Season 18 variations. Source-backed synthetic regression
+    coverage confirms that split Deployment Zones and asymmetric Attacker/
+    Defender objectives survive typed validation and scenario-catalog
+    projection without polluting the N5.3 core publication. ITS-only
+    radius-based geometry, Classified/Objectives choice systems, historical
+    season selection, tournament tooling and an editor remain post-1.0.
+    Detailed source evidence is private under `local/audits/`; this closes
+    the compatibility check, not the separate Domination source conflict
+    or project-wide 1.0 release gate.
   - **Browser acceptance:** The separate
     [1.0 core-scenario browser checklist](#final-10-acceptance) owns
     keyboard/touch, rapid selection, theme/distance, direct/soft navigation,
