@@ -187,7 +187,8 @@ def test_domination_review_scoring_specialists_and_console_skill_reach_api(
     issue = payload["source_issues"][0]
     assert issue["status"] == "needs-verification"
     assert "Wiki Domination revision 3264" in issue["description"]
-    assert "authorial intent is unverified" in issue["description"]
+    assert "Spanish N5.3 Domination chart" in issue["description"]
+    assert "official language editions" in issue["description"]
 
 
 def test_firefight_review_scoring_and_overlays_reach_api(
@@ -303,6 +304,88 @@ def test_supplies_review_scoring_and_pickup_reach_api(
     assert payload["end_conditions"][1]["checkAt"] == "tactical-phase"
     assert payload["end_conditions"][1]["finishAt"] == "end-of-player-turn"
     assert payload["source_issues"] == []
+
+
+@pytest.mark.parametrize(
+    ("slug", "source_chart_page", "swc_at_350", "minimum_vp"),
+    [
+        ("annihilation", 150, 7, False),
+        ("domination", 151, 6, True),
+        ("supplies", 153, 7, True),
+        ("firefight", 155, 7, False),
+    ],
+)
+@pytest.mark.parametrize(
+    ("points", "standard_swc", "minimum_victory_points",
+     "width", "height", "depth", "configuration_id"),
+    [
+        (150, 3, 38, 24, 32, 8, "150-points"),
+        (200, 4, 50, 32, 48, 12, "200-250-points"),
+        (250, 5, 63, 32, 48, 12, "200-250-points"),
+        (300, 6, 75, 48, 48, 12, "300-400-points"),
+        (350, 7, 88, 48, 48, 12, "300-400-points"),
+        (400, 8, 100, 48, 48, 12, "300-400-points"),
+    ],
+)
+def test_core_scenario_source_chart_rows_reach_public_api_at_every_size(
+    scenario_app: Application,
+    slug: str,
+    source_chart_page: int,
+    swc_at_350: int,
+    minimum_vp: bool,
+    points: int,
+    standard_swc: int,
+    minimum_victory_points: int,
+    width: int,
+    height: int,
+    depth: int,
+    configuration_id: str,
+) -> None:
+    """The 24 N5.3 chart selections survive curated DB, API and map projection."""
+    status, _, body = request(
+        scenario_app, f"/api/scenarios/{slug}", query=f"army_points={points}"
+    )
+    assert status == 200
+    item = json.loads(body)
+    assert item["slug"] == slug
+    assert item["selected_army_points"] == points
+    assert item["publication"]["revision"] == "5.3"
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["page"] == source_chart_page
+        for citation in item["citations"]
+    )
+    size = item["setup"]["game_size"]
+    assert size["armyPoints"] == points
+    assert size["swc"] == (swc_at_350 if points == 350 else standard_swc)
+    assert size["configurationId"] == configuration_id
+    if minimum_vp:
+        assert size["minimumVictoryPoints"] == minimum_victory_points
+    else:
+        assert "minimumVictoryPoints" not in size
+    assert item["placement"]["configuration_id"] == configuration_id
+    geometry = item["placement"]["geometry"]
+    assert geometry["table"] == {"width": width, "height": height, "unit": "in"}
+    deployment = next(
+        element for element in geometry["elements"]
+        if element["id"] == "deployment-a"
+    )
+    assert deployment["y2"] == depth
+    assert all(
+        award["armyPoints"] == [points]
+        for objective in item["objectives"]
+        for award in objective["awards"]
+    )
+    if slug == "domination" and points == 350:
+        assert {issue["id"] for issue in item["source_issues"]} == {
+            "350-point-swc",
+        }
+    elif slug == "annihilation" and points == 350:
+        assert {issue["id"] for issue in item["source_issues"]} == {
+            "350-point-survival-bands",
+        }
+    else:
+        assert not item["source_issues"]
 
 
 def test_scenario_detail_api_projects_objective_and_source_issue_tokens(

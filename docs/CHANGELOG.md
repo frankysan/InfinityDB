@@ -12,9 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Domination's 350-point SWC explanation now notes that both N5.2 and N5.3
-  and the pinned Wiki use 6 SWC, while the reason for the exception remains
-  unverified.
+- Domination's 350-point SWC displays the English-source 6, with an explicit
+  discrepancy: official Spanish N5.3 says 7. The Annihilation 350-point
+  survival bands are now corroborated by official Spanish N5.3 rather than
+  inferred solely from English table continuity.
 - PARA clarifies its missing-PH exception and re-infliction after recovery.
   Shock explains when its VITA 1 effect bypasses Unconscious protections;
   Stun explains Guts Rolls and the specific Flash Pulse Immunity exception.
@@ -205,6 +206,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web backend:** Verify all 24 core-scenario Army Points
+  selections against the N5.3 source charts, composed database and public API.
+  The Spanish N5.3 Annihilation table confirms the corrected 350-point survival
+  bands; Domination's Spanish/English 350-point SWC conflict remains visible,
+  without overriding the existing English-source value.
 - **Web frontend:** Wrap narrow shared detail breadcrumbs without hiding
   the reference tag; verified Visibility Zone and Ammunition/Immunity
   cross-reference navigation with pointer, keyboard and touch.

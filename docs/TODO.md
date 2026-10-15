@@ -1055,14 +1055,25 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   APIs, browser selection and deterministic theme/distance-aware maps are implemented
   and included in 0.10.1. The current contract belongs in
   [the data model](data-model.md#scenario-model-implemented-core-and-future-extensions).
-  - [ ] Reconcile scenario facts, scoring, scoped concepts and source issues with the
-    final 1.0 source inventory for all six supported Army Points values. This is
-    source-completeness review, not a request to reimplement the published domain.
-  - [ ] Verify **Domination's 350-point SWC row** against authoritative clarification.
-    N5.3 page 151 prints 6 SWC, unlike Annihilation's 7 at the same Army Points.
-    Retain the printed value and visible uncertainty until clarified; this existing
-    source disagreement did not block released 0.10.1; retain it for
-    the 1.0 source-completeness review.
+  - [x] Reconcile the pinned core-scenario source inventory across all six
+    supported Army Points values (24 mission selections). Compared the N5.3
+    English charts, Spanish scenario tables, maintained mission components,
+    generated Rules database, and public API; all 24 published size/deployment
+    rows are covered by source-anchored regression tests. Earlier four-scenario
+    browser acceptance exercised all 24 selections at three viewport widths.
+    Verified the Spanish N5.3 Annihilation 350-point survival bands corroborate
+    the maintained correction. A separate official Spanish/English conflict
+    remains for Domination 350-point SWC. Re-run with changed release inputs
+    before final sign-off; this is a bounded scenario-domain finding, not the
+    project-wide final source inventory.
+  - [ ] Resolve **Domination's 350-point SWC cross-language source conflict**
+    with authoritative clarification. English N5.3 p. 151, English N5.2 p. 150
+    and pinned English Wiki revision 3264 print 6 SWC; official Spanish N5.3
+    p. 155 prints **7 CAP/SWC** for the same scenario and Army Points.
+    Retain the published English-source 6 with a visible `needs-verification`
+    issue until clarification; do not silently override one official edition.
+    This specific discrepancy does not itself require changing the scenario
+    model or reopening the completed 1.0 interaction-review ledger.
   - [ ] Confirm the current model remains source/scope-aware against the reviewed ITS
     variation during final completeness review. ITS content, ITS-only geometry,
     tournament tooling and an interactive scenario editor remain post-1.0.

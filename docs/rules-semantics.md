@@ -3724,14 +3724,19 @@ more than 250 gives 4. This leaves 151–175 uncovered and gives two awards for 
 column for killed enemy Army Points uses 85–175, 176–270, and more than 270, and the surrounding
 game-size rows consistently form contiguous increasing bands.
 
-Reviewed interpretation: the two inconsistent boundaries are typographical errors. InfinityDB uses
-85–175 for 1 Objective Point, 176–270 for 3, and more than 270 for 4. A `reviewed-resolution` source
-note retains the printed values and the basis for the correction so the discrepancy is not silently
-erased. This reviewed note does not act as an overlap waiver: maintained exclusive score ranges must
-remain unambiguous.
+The Spanish N5.3 Aniquilación table (printed page 153) explicitly gives
+85–175 for 1 Objective Point, 176–270 for 3, and more than 270 for 4.
+This independently corroborates InfinityDB's existing resolution; it is not
+just an inference from the English table's surrounding progression.
+The `reviewed-resolution` note retains both published variants so the English
+discrepancy is not silently erased. It is not an overlap waiver: maintained
+exclusive score ranges must remain unambiguous.
 
-Source: N5 Core Rules v5.3 (2026-08-10), `data/pdf/rules/n5-rules-v5-3-en.pdf`, printed page 149.
-The pilot's setup, Killing definition, and end conditions are cited to printed page 150.
+Sources: English N5 Core Rules v5.3 (2026-08-10), printed page 149
+(`data/pdf/rules/n5-rules-v5-3-en.pdf`); official Spanish N5.3,
+`data/pdf/rules/esp-n5-update-5-3.pdf`, printed page 153 (Anexos /
+Aniquilación). The pilot's setup, Killing definition, and end conditions
+are cited to English printed page 150.
 The 1.0 review verifies all six source scoring bands (killed enemy Army Points
 and surviving Victory Points as **separate** end-of-game measures), the two
 Objective Points for killing the enemy Lieutenant, and their exclusively
@@ -3741,8 +3746,8 @@ as Models or Markers. The mission normally ends after Game Round three, but
 the separate early-ending condition is checked during the active player's
 Tactical Phase and finishes at the **end of that Player Turn**. Do not confuse
 this all-Null check with the minimum-Victory-Points rule in other scenarios.
-The 350-point band correction remains a source-identified interpretation,
-not a claim that the printed page contains the corrected numbers.
+The corrected 350-point bands are **not** printed in the English N5.3 table;
+they are printed in the official Spanish N5.3 table (p. 153).
 
 ### RS-SCN-DOM-001 — Domination keeps scenario-specific SWC and minimum-VP values
 
@@ -3754,10 +3759,13 @@ gives 3, 4, 5, 6, 6, and 8 SWC for 150, 200, 250, 300, 350, and 400 Army Points.
 chart nor an inferred Points-to-SWC formula authorizes rewriting Domination's value. The maintained
 record retains 6 SWC and a source issue scoped to the 350-point `swc` field.
 The English N5.2 chart (printed p. 150) and pinned English Wiki Domination
-revision 3264 also print 6 SWC. The published number is corroborated across
-those versions; the still-unverified point is whether the deviation from the
-usual progression was intentional. Verification of that intent remains open,
-without replacing the scenario-specific printed value.
+revision 3264 also print 6 SWC. **The official Spanish N5.3 Domination
+chart (printed p. 155) instead prints 7 CAP/SWC at 350 Army Points.**
+This is a genuine conflict between current official editions, not simply
+a question of why an otherwise consistent chart deviates from a progression.
+InfinityDB retains the English-source value of 6 for now, explicitly flags
+the conflicting Spanish value, and awaits authoritative clarification rather
+than silently treating one language as a universal correction.
 
 The same chart gives minimum Victory Points of 38, 50, 63, 75, 88, and 100 respectively. Printed
 page 152 ends the mission at the end of the active Player Turn if the Tactical Phase count of

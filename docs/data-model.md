@@ -723,9 +723,11 @@ Points. Geometry references must resolve in every applicable configuration. `nee
 marks unresolved source uncertainty; `reviewed-resolution` records a maintained interpretation after
 review. Only an objective-scoped `needs-verification` issue may acknowledge an otherwise-invalid
 overlap, while game-size, geometry, and reviewed-resolution notes cannot excuse one. Domination
-preserves the source-specific 6 SWC at 350 points from printed page 151, with a game-size
-`needs-verification` note because the value differs from Annihilation's 7 SWC and the usual progression
-but may be intentional. Printed pages 151–152 cite the mission rules.
+preserves the English N5.3 value of 6 SWC at 350 points from printed page 151,
+with a game-size `needs-verification` note because Spanish N5.3 printed page 155
+instead has 7 CAP/SWC for that same Domination row. This is an unresolved
+official cross-language conflict, not merely a possible progression exception.
+Printed English pages 151–152 cite the mission rules.
 
 Supplies uses the written placement consistently at every game size: printed page 153 places the
 outer boxes `8 inches` from the table edges. Re-review of the 300–400-point illustration on page 154

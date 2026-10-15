@@ -85,7 +85,8 @@ def test_annihilation_review_preserves_all_source_scoring_and_end_conditions(
     assert "all Troopers" in (mission.end_conditions[1].description or "")
     assert mission.source_issues[0].id == "350-point-survival-bands"
     assert mission.source_issues[0].status == "reviewed-resolution"
-    assert "85" in mission.source_issues[0].description
+    assert "Spanish N5.3 Aniquilación" in mission.source_issues[0].description
+    assert "explicitly prints contiguous" in mission.source_issues[0].description
     assert {c["page"] for c in raw["citations"]} == {149, 150}
 
 
@@ -114,7 +115,9 @@ def test_domination_review_preserves_scoring_and_specialist_boundaries(
         "350-point-swc", (350,), "swc", "needs-verification",
     )
     assert "Wiki Domination revision 3264" in issue.description
-    assert "authorial intent is unverified" in issue.description
+    assert "Spanish N5.3 Domination chart" in issue.description
+    assert "official language editions" in issue.description
+    assert "intended authoritative value remains unverified" in issue.description
 
     quadrants, consoles = mission.objectives
     assert (quadrants.timing, quadrants.aggregation, quadrants.maximum_points) == (

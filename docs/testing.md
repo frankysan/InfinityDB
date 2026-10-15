@@ -1848,6 +1848,18 @@ scenario-specific rule at every supported size, nor resolve the
 Domination 350-point SWC conflict or perform the complete 1.0 release
 gate. No application code or curated scenario mechanics were changed.
 
+**Follow-up source review, 2026-10-15:** All 24 configurations
+(four core scenarios × six Army sizes) have a reviewed English N5.3
+Forces/Deployment chart baseline and corresponding composed-database
+and API regression checks. Spanish N5.3 confirms Annihilation's existing
+reviewed 350-point survival-band correction, but contradicts English
+N5.3/N5.2 and the pinned English Wiki on Domination 350-point SWC
+(Spanish **7**, English **6**). The public read model retains 6
+and an explicit `needs-verification` source issue until authoritative
+clarification. Previous browser acceptance covers all 24 selections;
+this source-review milestone does not close the project-wide 1.0
+source inventory or normal release checklist.
+
 ## 1.0 Visibility Zone and Ammunition/Immunity browser acceptance
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** Headless Chromium used a freshly

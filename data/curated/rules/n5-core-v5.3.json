@@ -20716,7 +20716,7 @@
                             ],
                             "gameSizeField": "swc",
                             "status": "needs-verification",
-                            "description": "The Domination Forces and Deployment chart on N5.3 printed page 151 assigns 6 SWC to a 350-point game, while Annihilation assigns 7 SWC at the same Army Points. The English N5.2 chart (printed page 150) and pinned English Wiki Domination revision 3264 also print 6 SWC, so this value is stable in the checked sources. InfinityDB retains the scenario-specific published value of 6 SWC; the difference may be intentional, but authorial intent is unverified and the standard game-size progression otherwise suggests 7."
+                            "description": "The English Domination N5.3 chart (printed p. 151), English N5.2 chart (p. 150), and pinned English Wiki Domination revision 3264 all print 6 SWC at 350 Army Points. However, the official Spanish N5.3 Domination chart (printed p. 155) prints 7 SWC (CAP) for the same size, matching the usual progression and other core scenarios. This is an unresolved discrepancy between current official language editions, not merely an unexplained progression exception. InfinityDB retains 6 SWC from its English primary source for now; the intended authoritative value remains unverified and should not be silently inferred from either edition."
                         }
                     ]
                 },
@@ -22043,7 +22043,7 @@
                             ],
                             "objectiveId": "preserve-forces",
                             "status": "reviewed-resolution",
-                            "description": "The 350-point surviving-Victory-Points column on printed page 149 appears to contain two typographical boundary errors: it prints 85–150 for 1 Objective Point and more than 250 for 4, while the surrounding progression and the corresponding enemy-kills column use contiguous bands. InfinityDB therefore uses the reviewed intended ranges 85–175, 176–270, and more than 270 for 1, 3, and 4 Objective Points respectively."
+                            "description": "The English N5.3 Annihilation table (printed p. 149) has contradictory 350-point surviving-Victory-Points bands: 85–150 for 1 Objective Point, 176–270 for 3, and more than 250 for 4. The official Spanish N5.3 Aniquilación table (printed p. 153) instead explicitly prints contiguous 85–175, 176–270, and more than 270 bands, matching the English enemy-kills bands. InfinityDB's reviewed 85–175/176–270/more-than-270 resolution is therefore supported by the Spanish source, not solely inferred from table continuity."
                         }
                     ]
                 },
