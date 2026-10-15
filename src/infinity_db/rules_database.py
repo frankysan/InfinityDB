@@ -1641,6 +1641,43 @@ class RulesDatabase:
             for item in self.declaration_categories("skill")
         ]
 
+    def faq_rulings_for_topic(
+        self,
+        topic_id: str,
+        *,
+        rules_revision: str,
+        as_of: str,
+        season_id: str | None = None,
+        season_revision: str | None = None,
+        scenario_id: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Return reviewed FAQ clarifications scoped to the explicit game context."""
+        from infinity_db.faq_rulings import select_applicable_faq_rulings
+
+        records = self.records_by_kind("faq-ruling")
+        with self._connect() as connection:
+            for record in records:
+                selected = record["facts"]["selectedCitation"]
+                source = connection.execute(
+                    "SELECT id, title, version, published_date, url, language "
+                    "FROM sources WHERE collection_id = ? AND id = ?",
+                    (record["collection"]["id"], selected["sourceId"]),
+                ).fetchone()
+                if source is None:
+                    raise ValueError(
+                        f"FAQ ruling {record['id']!r} has no selected source"
+                    )
+                record["selected_source"] = dict(source)
+        return select_applicable_faq_rulings(
+            records,
+            topic_id=topic_id,
+            rules_revision=rules_revision,
+            as_of=as_of,
+            season_id=season_id,
+            season_revision=season_revision,
+            scenario_id=scenario_id,
+        )
+
     def records_by_kind(self, kind: str, *, current_only: bool = True) -> list[dict[str, Any]]:
         """Return curated records of one kind, preferring current collections."""
         with self._connect() as connection:

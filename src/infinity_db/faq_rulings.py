@@ -1,8 +1,8 @@
 """Validation of authored, source-selected FAQ/errata facts.
 
-This module validates the curation contract only. It does not choose a ruling
-from multiple publications, rewrite canonical definitions, or perform runtime
-applicability/supersession resolution.
+This module validates the curation contract and selects reviewed, explicitly
+applicable FAQ records at query time. It never rewrites canonical definitions,
+invents season applicability, or chooses a source by publication recency.
 """
 
 from __future__ import annotations
@@ -289,3 +289,101 @@ def validate_faq_ruling_references(
 
     for ruling_id in sorted(edges):
         visit(ruling_id)
+
+
+def select_applicable_faq_rulings(
+    records: list[dict[str, Any]],
+    *,
+    topic_id: str,
+    rules_revision: str,
+    as_of: str,
+    season_id: str | None = None,
+    season_revision: str | None = None,
+    scenario_id: str | None = None,
+) -> list[dict[str, Any]]:
+    """Select only reviewed, currently applicable rulings for an explicit context.
+
+    Candidates must include selected_source with the verified source's
+    publication date. Do not infer context from the newest source or today.
+    Historical editions are not part of the default current read model.
+    """
+    topic = _ids([topic_id], "topic_id")[0]
+    revision = _text(rules_revision, "rules_revision")
+    date_str = _date(as_of, "as_of")
+    if (season_id is None) != (season_revision is None):
+        raise ValueError("season_id and season_revision must be provided together")
+    if season_id is not None:
+        _text(season_id, "season_id")
+        _text(season_revision, "season_revision")
+    if scenario_id is not None:
+        _ids([scenario_id], "scenario_id", domain="scenario")
+
+    applicable: list[tuple[dict[str, Any], list[dict[str, Any]]]] = []
+    for record in records:
+        if record["kind"] != "faq-ruling" or record["composition"]["role"] != "definition":
+            continue
+        if (record.get("review") or {}).get("status") != "reviewed":
+            continue
+        facts = record["facts"]
+        # The selected source is an explicit reviewed choice. If its date
+        # is unknown or later than the requested date, it is not eligible.
+        selected = record.get("selected_source")
+        if not isinstance(selected, dict) or not selected.get("published_date"):
+            continue
+        if selected["published_date"] > date_str:
+            continue
+        if facts["originalPublication"]["publishedDate"] > date_str:
+            continue
+        # Do not serve a carried-forward current collection as if its
+        # publication had existed before its effective date.
+        if record.get("collection", {}).get("effective_from", "9999-12-31") > date_str:
+            continue
+
+        matches = []
+        for scope in facts["applicability"]:
+            if scope["rulesRevision"] != revision:
+                continue
+            if not (scope["effectiveFrom"] <= date_str <= scope.get(
+                "effectiveUntil", "9999-12-31"
+            )):
+                continue
+            season = scope.get("season")
+            if season is not None and (
+                season_id != season["id"] or season_revision != season["revision"]
+            ):
+                continue
+            scenarios = scope.get("scenarioIds", [])
+            if scenarios and scenario_id not in scenarios:
+                continue
+            matches.append(scope)
+        if matches:
+            applicable.append((record, matches))
+
+    # Supersession is explicit, never inferred from publication recency.
+    # Only another active, reviewed ruling for this same topic can conceal
+    # a predecessor, preserving visibility when the replacement is out of scope.
+    relevant = [(record, matches) for record, matches in applicable
+                if topic in record["facts"]["topicIds"]]
+    hidden = {
+        predecessor
+        for record, _ in relevant
+        for predecessor in record["facts"]["supersedes"]
+    }
+    return [
+        {
+            "id": record["id"],
+            "question": record["facts"]["question"],
+            "answer": record["facts"]["answer"],
+            "topic_ids": record["facts"]["topicIds"],
+            "matched_applicability": matches,
+            "original_publication": record["facts"]["originalPublication"],
+            "selected_citation": record["facts"]["selectedCitation"],
+            "selected_source": record["selected_source"],
+            "selection_reason": record["facts"]["selectionReason"],
+            "conflicting_citations": record["facts"]["conflictingCitations"],
+            "supersedes": record["facts"]["supersedes"],
+            "citations": record["citations"],
+        }
+        for record, matches in sorted(relevant, key=lambda item: item[0]["id"])
+        if record["id"] not in hidden
+    ]

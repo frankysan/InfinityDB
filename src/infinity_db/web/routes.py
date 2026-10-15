@@ -82,6 +82,7 @@ _METRIC_FIXED_PATHS = frozenset(
         "/search",
         "/glossary",
         "/api/version",
+        "/api/faq-rulings",
         "/api/armies",
         "/api/units",
         "/api/visible-unit-ids",

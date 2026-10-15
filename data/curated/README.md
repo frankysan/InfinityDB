@@ -475,11 +475,37 @@ that predecessor IDs exist in retained current/historical definitions,
 that original publication metadata does not drift across editions of one
 ruling, and that supersession is acyclic and has an overlapping
 rules-revision/season/scenario/date scope. Missing ITS scenarios are rejected
-rather than silently accepted as published targets. These validations do
-**not** determine which ruling applies to a runtime game context: effective
-date/season publication selection, cross-posting presentation, database
-read APIs and topic/scenario browser presentation are **not yet implemented**.
-No FAQ records are authored in the shipped collection yet.
+rather than silently accepted as published targets.
+
+**Applicability-aware read model:** `RulesDatabase.faq_rulings_for_topic`
+selects reviewed current FAQ definitions for an explicit typed `topic_id`,
+exact `rules_revision`, and ISO `as_of` date. Optional season ID/revision
+must be provided as a pair; optional scenario identity restricts
+mission-specific rulings. A rule applies only when at least one authored
+scope matches the supplied context, the selected official PDF source is
+published, the original ruling has been published, and its current collection
+is effective by the requested date. A season- or scenario-scoped ruling never
+appears in an unspecified context. Only an applicable reviewed successor
+for the same topic suppresses an applicable predecessor, never a newer
+publication merely by date. Current selections retain question/answer,
+matched scope, original publication, selected source version/date/page,
+selection reason, conflicts, citations and `supersedes` references.
+They do not rewrite a canonical Skill or Rule summary.
+
+`GET /api/faq-rulings?topic_id=skill:camouflage&rules_revision=5.3&as_of=2026-10-15`
+exposes that exact read model; optional `season_id`, `season_revision`,
+`scenario_id`, and `cache_bust` are accepted. Unknown, repeated, missing
+or invalid parameters receive HTTP 400. The API requires explicit context
+and never assumes the newest rules, current season or today's date.
+The default read model does not replay superseded historical collections;
+historical publication selection and verification of ITS season revisions
+not yet present in the corpus remain future work.
+
+No FAQ records are authored in the shipped collection yet, so valid
+queries currently return an empty `items` list. The synthetic tests are
+not source rulings. Topic/scenario browser presentation is **not yet
+implemented**. Until the source-verified pilot is complete, this endpoint
+is a developer/API foundation, not a completed player-facing FAQ domain.
 The synthetic tests are not source rulings. Until the pilot is complete,
 these fields must not be treated as an automatically published answer.
 

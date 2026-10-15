@@ -1122,8 +1122,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       The export pipeline now also checks cross-collection topic/scenario
       target existence, historical predecessor references, consistent
       original publication identities, scope overlap and supersession cycles.
-      The dated runtime selector, unsupported season-revision verification
-      and browser publication remain pilot requirements.
+      The dated runtime selector and `/api/faq-rulings` read model are
+      now implemented and tested with synthetic reviewed records. They
+      require explicit version/date context, reject unknown or partial
+      season contexts, and preserve selected source provenance. Verification
+      of season revisions not in the published rules corpus, replay of
+      archived ruling editions, curated pilot examples and browser
+      publication remain requirements.
   - [ ] Deliver one core clarification and one scenario/season-scoped ruling through validation,
     export, repository/API composition, and browser presentation before curating the remaining
     inventory. Show linked questions/answers with dates and affected concepts alongside the base

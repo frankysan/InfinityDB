@@ -584,10 +584,23 @@ acyclic supersession and overlapping revision/date/season/scenario scopes.
 Supersession is explicit and limited to potentially overlapping contexts;
 a later document date by itself still grants no precedence.
 
-An applicability-aware **runtime selection** mechanism, checks for which
-unpublished ITS season revisions exist outside the rules corpus,
-date-scoped database/API selection and player-facing FAQ presentation
-remain future 1.0 work; no FAQ records are yet shipped.
+The **read-model and explicit-context API foundation** now selects only
+reviewed, current FAQ identities matching topic ID, exact rules revision,
+date, optional season ID/revision and optional scenario. It requires that
+the chosen source, original publication and current collection already
+exist on the requested date. An active scoped successor suppresses an
+applicable predecessor only for the same topic; recency alone does not.
+The result retains independently cited answer/provenance/conflict evidence
+and matched applicability, separate from the unmodified base Rule/Skill.
+
+`RulesDatabase.faq_rulings_for_topic` and `GET /api/faq-rulings` provide
+that projection. The API requires `topic_id`, `rules_revision`, and
+`as_of`, with optional paired `season_id`/`season_revision` and
+`scenario_id`; it never defaults to the newest publication. Queries
+currently return no rulings because no verified FAQ records are authored.
+Historical collection replay, full ITS season-revision publication
+verification, and player-facing topic/scenario FAQ presentation remain
+future 1.0 work.
 The generic supplement mechanism must not auto-attach a ruling to
 a core topic by name or by a newer collection date.
 

@@ -483,7 +483,56 @@ class ApiHandler:
         status = HTTPStatus.OK
         cache_control = "no-cache"
         payload = None
-        if path == "/api/version":
+        if path == "/api/faq-rulings":
+            cache_control = API_CACHE_CONTROL
+            try:
+                params = _validated_query_params(
+                    query_string,
+                    {"topic_id", "rules_revision", "as_of",
+                     "season_id", "season_revision", "scenario_id", "cache_bust"},
+                )
+                required = ("topic_id", "rules_revision", "as_of")
+                for key in required:
+                    if key not in params or not params[key][0]:
+                        raise ValueError(f"Provide {key} exactly once")
+                context = {key: values[0] for key, values in params.items()
+                           if key != "cache_bust"}
+                # Validate against the same date/revision/identity contract
+                # even when the installed rules DB contains no FAQ entries.
+                from infinity_db.faq_rulings import select_applicable_faq_rulings
+
+                select_applicable_faq_rulings(
+                    [],
+                    topic_id=context["topic_id"],
+                    rules_revision=context["rules_revision"],
+                    as_of=context["as_of"],
+                    season_id=context.get("season_id"),
+                    season_revision=context.get("season_revision"),
+                    scenario_id=context.get("scenario_id"),
+                )
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
+                items = (
+                    self.rules_database.faq_rulings_for_topic(
+                        context["topic_id"],
+                        rules_revision=context["rules_revision"],
+                        as_of=context["as_of"],
+                        season_id=context.get("season_id"),
+                        season_revision=context.get("season_revision"),
+                        scenario_id=context.get("scenario_id"),
+                    )
+                    if self.rules_database is not None else []
+                )
+                payload = {"context": context, "items": items}
+            except (OSError, ValueError, sqlite3.Error):
+                LOGGER.exception("Could not read FAQ rulings")
+                status = HTTPStatus.SERVICE_UNAVAILABLE
+                payload = {"error": "FAQ rulings are unavailable. Please try again."}
+        elif path == "/api/version":
             payload = {
                 "version": __version__,
                 "static_revision": self.static_revision,

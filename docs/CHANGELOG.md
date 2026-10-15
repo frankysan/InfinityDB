@@ -210,7 +210,9 @@ are not retroactively relabeled.
   for exact applicability, original provenance, reviewed source selection,
   conflicts and explicit supersession references. Rules export now rejects
   missing topic/scenario/predecessor targets, cycles, non-overlapping
-  supersession and inconsistent carried-forward origins. No FAQ rulings
+  supersession and inconsistent carried-forward origins. Add an
+  applicability-aware read model and explicit-context FAQ API, retaining
+  reviewed source provenance and conditional supersession. No FAQ rulings
   are published yet, and existing base rules are unchanged.
 - **Data processing + Web backend:** Confirm ITS-inspired split Deployment
   Zones and asymmetric scoring applicability survive typed validation and
