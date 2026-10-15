@@ -887,6 +887,77 @@ def test_reviewed_breaker_and_viral_source_profiles_use_shared_rules(
 
 
 @pytest.mark.parametrize(
+    ("slug", "ps", "burst", "ammo", "saving", "rolls",
+     "traits", "effect", "property_id", "ranges"),
+    [
+        ("e-m-carbine", "7", "2", "E/M", "BTS/2", "2",
+         ["Non-lethal", "[**]"], "ammunition:em", None,
+         {"short": {"max": 40, "mod": "+3"},
+          "med": {"max": 80, "mod": "-3"},
+          "long": {"max": 100, "mod": "-6"}}),
+        ("ap-t2-cc-weapon", "8", "1", "AP+T2", "ARM/2", "1",
+         ["Anti-materiel", "CC"], ["ammunition:ap", "ammunition:t2"],
+         "weapon-property:ap-t2", {}),
+        ("monofilament-cc-weapon", "8", "1", "N", "ARM=0", "1",
+         ["CC", "State: Dead"], "ammunition:normal",
+         "weapon-property:monofilament", {}),
+        ("light-riotstopper", "-", "1", "PARA", "PH-6", "1",
+         ["State: IMM-A", "Non-lethal",
+          "Direct Template (Small Teardrop)", "Intuitive Attack"],
+         "ammunition:para", None, {}),
+        ("heavy-riotstopper", "-", "1", "PARA", "PH-6", "1",
+         ["State: IMM-A", "Non-lethal",
+          "Direct Template (Large Teardrop)", "Intuitive Attack"],
+         "ammunition:para", None, {}),
+    ],
+)
+def test_reviewed_em_cc_and_riotstopper_profiles_reuse_effects(
+    weaponry_app: Callable, slug: str, ps: str, burst: str,
+    ammo: str, saving: str, rolls: str, traits: list[str],
+    effect: str | list[str], property_id: str | None,
+    ranges: dict[str, dict[str, int | str]],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []
+    (profile,) = payload["profiles"]
+    assert (profile["mode"], profile["damage"], profile["burst"]) == (
+        None, ps, burst,
+    )
+    assert (
+        profile["ammunition"], profile["saving"], profile["saving_num"],
+    ) == (ammo, saving, rolls)
+    assert profile["traits"] == traits
+    assert profile["ranges"] == ranges
+    assert [ref["label"] for ref in profile["trait_references"]] == traits
+    expected_effects = effect if isinstance(effect, list) else [effect]
+    assert [ref["record_id"] for ref in profile["ammunition_effects"]] == (
+        expected_effects
+    )
+    assert all(ref["summary"] for ref in profile["ammunition_effects"])
+    assert [prop["id"] for prop in profile.get("weapon_properties", [])] == (
+        [property_id] if property_id else []
+    )
+
+
+def test_spanish_conflicts_do_not_change_stun_or_ap_exp_profiles(
+    weaponry_app: Callable,
+) -> None:
+    # English official N5.3 and Army agree; the archived Spanish Wiki
+    # reports two rather than three rolls for AP+EXP and two rather
+    # than one for Stun Pistol, omitting Stunned from the latter.
+    for slug, expected in (
+        ("ap-exp-cc-weapon", ("AP+Exp", "ARM/2", "3")),
+        ("stun-pistol", ("Stun", "BTS", "1")),
+    ):
+        weapon = _weapon_detail(weaponry_app, slug)
+        (profile,) = weapon["profiles"]
+        assert (
+            profile["ammunition"], profile["saving"], profile["saving_num"],
+        ) == expected
+        assert weapon.get("rules", []) == []
+
+
+@pytest.mark.parametrize(
     ("slug", "ps", "burst", "ammo", "save", "rolls", "traits",
      "effects", "property_id", "ranges"),
     [

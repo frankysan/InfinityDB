@@ -370,6 +370,46 @@
       "profileSha256": "5ab2b45f50448190ad9e1ff2de8e44a776274c7bcacc6286049ecce0b15aa967",
       "reviewedOn": "2026-10-15",
       "reason": "N5.3 p. 177 and EN/ES Wiki agree with Army: PS 8/B1, AP+Shock, ARM/2, one Saving Roll and CC, without Anti-materiel. Canonical AP and Shock Ammunition and the AP+Shock Weapon Property cover the combined effect, with no DA-style second save."
+    },
+    {
+      "slug": "e-m-carbine",
+      "name": "E/M Carbine",
+      "chartPage": 176,
+      "profileSha256": "eea2b19d24fbdc7479c442e465b278c3375fe514bdb39c5314caf7ff9e2802d5",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 176 and captured English/Spanish Wiki charts agree with the Army source: PS 7, B2, E/M Ammunition, two BTS/2 Saving Rolls, Non-Lethal, and the bracketed Ammunition note [**]. Canonical E/M Ammunition and Non-Lethal Trait already describe its effects; the note is source notation rather than a second attack mode."
+    },
+    {
+      "slug": "ap-t2-cc-weapon",
+      "name": "AP + T2 CC Weapon",
+      "chartPage": 177,
+      "profileSha256": "ba533c7378242b0c7006679ebcfee4ce89c2f819ff6bba9c91dc10bc4f1aa123",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 chart p. 177, Army and English/Spanish Wiki agree: PS 8, B1, AP+T2, one printed ARM/2 Saving Roll, Anti-materiel and CC. The existing AP+T2 Weapon Property and canonical AP/T2 Ammunition explain halving and the T2 Wound result; do not invent additional printed rolls or an independent mode."
+    },
+    {
+      "slug": "monofilament-cc-weapon",
+      "name": "Monofilament CC Weapon",
+      "chartPage": 177,
+      "profileSha256": "acba00383b1ff1f458583986dc1628b21187274abf353f4b5e97308050eb827c",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 chart p. 177, Army and both Wiki languages agree: PS 8, B1, Normal Ammunition, ARM=0, one printed Saving Roll, CC and State: Dead. The existing Monofilament Weapon Property and Normal Ammunition explain ARM=0 and the state outcome, without changing the source ammunition to a fabricated Monofilament ammo type."
+    },
+    {
+      "slug": "light-riotstopper",
+      "name": "Light Riotstopper",
+      "chartPage": 184,
+      "profileSha256": "1fa381551d1e0393740172c00c867e2707f9f0bfcbbdf02d018a70c715e64a2d",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 chart p. 184, Army and English/Spanish Wiki agree: B1, PARA Ammunition, one PH-6 Saving Roll, no PS or range bands, Non-Lethal, Intuitive Attack, State: IMM-A and Small Teardrop Direct Template. Canonical PARA, Direct Template and Intuitive Attack cover the rules; do not inherit a damaging attack or the Heavy variant's Large Template."
+    },
+    {
+      "slug": "heavy-riotstopper",
+      "name": "Heavy Riotstopper",
+      "chartPage": 184,
+      "profileSha256": "d05aea006681a3b31f01c588bc6efcd008841b70596c0244d5c36dffd24418f7",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 chart p. 184, Army and English/Spanish Wiki agree: B1, PARA Ammunition, one PH-6 Saving Roll, no PS or range bands, Non-Lethal, Intuitive Attack, State: IMM-A and Large Teardrop Direct Template. Canonical PARA, Direct Template and Intuitive Attack cover the rules; do not inherit the Light variant's Small Template or a damaging PS."
     }
   ]
 }

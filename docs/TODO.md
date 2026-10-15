@@ -591,11 +591,22 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       for DA but only one for T2 and AP+Shock. Record five full-profile-
       hash-pinned shared-only decisions; no new rule cards or profile
       rewrites are necessary.
+    - [x] Source-review E/M Carbine, AP+T2 CC Weapon, Monofilament
+      CC Weapon, and Light/Heavy Riotstoppers against the N5.3 PDF,
+      imported Army and archived English/Spanish Wiki charts. Reuse
+      canonical E/M, AP+T2, Monofilament and PARA descriptions;
+      keep the two Riotstopper template sizes distinct. Add five
+      profile-hash-pinned shared-only decisions without duplicating
+      rule cards or changing gameplay.
+      Keep AP+EXP CC Weapon and Stun Pistol pending: their Spanish
+      Wiki Saving Roll counts conflict with official N5.3 and Army
+      (and the Spanish Stun Pistol row omits the Stunned Trait).
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. Current source-bound triage:
-      70 classified gaps = 46 accepted shared-effects, 1 accepted
-      historical citation, and 23 pending source reviews (including
-      8 multi-profile candidates and AP Thunderbolt). These audit gap
+      70 classified gaps = 51 accepted shared-effects, 1 accepted
+      historical citation, and 18 pending source reviews (including
+      8 multi-profile candidates and the AP Thunderbolt, AP+EXP CC
+      Weapon and Stun Pistol source discrepancies). These audit gap
       codes are not automatically 1.0 gameplay defects. Reconcile
       remaining candidates by source and browser behavior before
       adding standalone rules.

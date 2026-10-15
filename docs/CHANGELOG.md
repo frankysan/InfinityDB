@@ -254,6 +254,14 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing:** Review E/M Carbine, AP+T2 CC Weapon,
+  Monofilament CC Weapon, and Light/Heavy Riotstoppers as
+  profile-hash-pinned shared-effects-only references. Existing
+  Ammunition, Trait and Weapon Property rules describe their effects,
+  without introducing duplicate Weapon cards. Retain source
+  discrepancies for AP+EXP CC Weapon and Stun Pistol: archived
+  Spanish Wiki Saving Roll counts differ from official N5.3/Army.
+  Remaining source reviews decrease to 18.
 - **Data processing:** Accept five additional source-verified,
   profile-hash-pinned shared-only Weapons: Tactical Bow, Ohotnik,
   T2 CC Weapon, AP+DA CC Weapon and AP+Shock CC Weapon. Reuse
