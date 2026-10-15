@@ -657,10 +657,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       No stored interaction cases or combat mechanics changed.
       Chromium browser acceptance passed 30/30 checks at 1440/390/320 px
       without JavaScript errors or horizontal overflow.
-    - [ ] **REA-011 — Reviewed Immunity interactions:** Check the dedicated
-      player-facing presentation of five cases for applicability and
-      explicit/derived labels, including keyboard, mobile, and browser
-      layout. Do not add unreviewed Plasma/Enhanced cases to the arrays.
+    - [x] **REA-011 ? Reviewed Immunity interactions:** Accepted the
+      five existing player-facing cases (Flash Pulse, Viral Vulnerability,
+      ARM/AP+DA, ARM/AP+EXP and AP/AP+DA). Verified the conditions,
+      exact hit/Critical Saving Roll counts, two explicit-source versus
+      three rule-derived evidence labels, semantic links, responsive
+      layout and Tab/Enter keyboard navigation with visible focus.
+      Kept all source cases unchanged; no unsupported Plasma/Enhanced
+      case or attack evaluator was added.
     - [ ] **REA-012 — Smoke/Eclipse:** Review browser Clarifications and
       examples for rolled LoF opposition, MSV/Reflective exceptions,
       unopposed placement, Dodge, and Criticals.

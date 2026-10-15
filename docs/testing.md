@@ -1562,3 +1562,29 @@ semantic navigation at 1440, 390 and 320 px against a freshly rebuilt
 local rules DB. **30/30 Chromium content/navigation checks passed** with
 no JavaScript errors or page horizontal overflow. The private verifier,
 screenshots and results remain in ignored `local/audits/`.
+
+
+## 1.0 reviewed Immunity interactions browser acceptance (REA-011)
+
+**Verified 2026-10-15, `dev/v1.0.0`.** The shared Immunity-case renderer
+already publishes five structured, provenance-qualified interactions:
+Flash Pulse/BTS and Enhanced+Viral Vulnerability (two explicit source
+cases); ARM/AP+DA, ARM/AP+EXP and AP/AP+DA (three derived general-rule
+cases). Conditions include non-Comms scope, Viral in the weapon **name**,
+individual before/after hit and Critical Saving Roll counts, AP-only
+negation retaining DA, and the Immunity (Critical) caveat. A Plasma /
+Enhanced result is not stored and must not be invented.
+
+Chromium acceptance uses a fresh local rules DB and the actual
+`/skills/immunity` card at 1440, 390 and 320 px, asserting five
+visible cases, all conditions, individual evidence labels, link routes,
+no JS errors and no horizontal overflow. Keyboard-only Tab advances
+between native case links with the shared focus-visible ring, and
+Enter follows the focused reference. Screenshots and diagnostic JSON
+remain in ignored `local/audits/`. The tracked Node render harness
+now also guards one semantic title/body/evidence block per item,
+two explicit and three derived labels, the reviewed non-Comms scope,
+and no synthesized Plasma example. Two existing API test assertions were
+brought back into sync with prior changes: the REA-010 Immunity
+ordinary-roll wording and the fourth Dodge clarification added earlier.
+No renderer, source facts or rule mechanics needed changing.

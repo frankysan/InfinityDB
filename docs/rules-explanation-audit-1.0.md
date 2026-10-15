@@ -800,6 +800,44 @@ there is no such entry in these reviewed-case arrays. Plasma's independent
 ARM+BTS Saving Roll rules are documented elsewhere and must not be synthesized
 as an additional reviewed Immunity outcome.
 
+**Browser acceptance (2026-10-15): Resolved without a runtime or
+curated rules change.** The implementation follow-up above already
+superseded the original finding: the shared `rules-reference.js`
+renderer calls `immunityCaseRows` for `skill:immunity`, yielding exactly
+five source-reviewed cases with individual applicability, normal and
+Critical counts, evidence labels and semantic links. The full group
+appears after Clarifications and examples. No Plasma/Enhanced case is
+stored or displayed: its ordinary ARM+BTS profile remains separate.
+
+Headless Chromium against a freshly rebuilt local rules DB accepted
+all five cases at desktop (1440 px) and narrow widths (390/320 px):
+- Flash Pulse/BTS, including the failed BTS save, Stunned, Non-Lethal
+  exception, and **explicit source** evidence label;
+- Enhanced plus Vulnerability (Viral), scoped to Viral in the **weapon
+  name**, not merely an Ammunition component (**explicit source**);
+- ARM versus AP+DA (1 hit/2 Critical instead of 2/3), and ARM versus
+  AP+EXP (1/2 instead of 3/4), both **derived** from general rules;
+- AP versus AP+DA (2 hit/3 Critical both before and after), with only
+  AP ignored and DA retained (**derived**).
+
+The cases display a shared caveat that Critical counts assume no
+Immunity (Critical), and the three combined cases remain restricted to
+their reviewed non-Comms attack conditions. All case titles, evidence
+labels and destinations are visible in normal player mode. Links are
+native anchors: Tab reaches them, the standard visible keyboard focus
+ring is applied, and Enter navigates successfully. No JavaScript errors
+or horizontal overflow occurred at any checked width. The existing
+Node renderer harness was strengthened to assert semantic card
+structure, per-case evidence counts, applicability and the absence of a
+synthesized Plasma case. The quoted Viral weapon-name text contains
+valid curly quotation marks in the actual UTF-8 JavaScript source;
+PowerShell output encoding alone can render them incorrectly.
+
+This closes **REA-011 acceptance**. No change to source semantics,
+Immunity computation, stored interaction arrays or the shared frontend
+renderer was warranted. Evidence and private screenshots are retained
+in ignored `local/audits/`.
+
 ### REA-012 - Smoke and Eclipse describe zones without sufficient resolution
 
 **Classification:** completeness, clarity. **Severity:** High. **Priority:** P1.

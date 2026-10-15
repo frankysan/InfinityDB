@@ -2500,6 +2500,10 @@ derived), and linked rule identities visible. It uses the stored outcomes withou
 evaluating arbitrary attacks. No Plasma/Enhanced combination is stored in these
 reviewed-case arrays; the existing Plasma discussion is not a sixth reviewed case.
 The ordinary curated explanation and the cited source links remain available.
+REA-011 browser acceptance verified all five cards at 1440/390/320 px,
+including each explicit/derived evidence label, per-case applicability,
+roll counts, semantic link navigation, Tab/Enter operation, visible focus
+and mobile width. No unreviewed Plasma/Enhanced result was added.
 
 Other component-specific Immunities, BTS-based Combined Ammunition, additional
 Weapon Traits and conditional State interactions remain unresolved. Do not

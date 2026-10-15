@@ -1083,7 +1083,7 @@ def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
     assert (
         "separate from treating Ammunition as [[ammunition:normal|Normal]]" in effects
     )
-    assert "ordinary Saving Roll still happens" in effects
+    assert "neither protection removes the ordinary Saving Roll" in effects
     assert "Printed Example 2" not in effects
     assert "The printed [[weapon:flash-pulse|Flash Pulse]] example" not in effects
     assert "For the reviewed [[ammunition:ap|AP]]" not in effects
@@ -1121,7 +1121,7 @@ def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
     payload = json.loads(b"".join(response))
     assert statuses == ["200 OK"]
     assert payload["rules"][0]["id"] == "skill:immunity"
-    assert "ordinary Saving Roll still happens" in " ".join(
+    assert "neither protection removes the ordinary Saving Roll" in " ".join(
         payload["rules"][0]["facts"]["effects"]
     )
     assert "Printed Example 2" in " ".join(
@@ -1341,7 +1341,10 @@ def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(
         Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
         rules_database_path=rules_db.path,
     )
-    for slug, target in (("dodge", "state:engaged"), ("reset", "skill:sixth-sense")):
+    for slug, target, count in (
+        ("dodge", "state:engaged", 4),
+        ("reset", "skill:sixth-sense", 3),
+    ):
         environ: dict[str, Any] = {}
         setup_testing_defaults(environ)
         environ.update(PATH_INFO=f"/api/skills/{slug}", REQUEST_METHOD="GET")
@@ -1353,8 +1356,8 @@ def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(
         assert statuses == ["200 OK"]
         payload = json.loads(b"".join(response))
         rule = next(r for r in payload["rules"] if r["id"] == f"skill:{slug}")
-        assert len(rule["facts"]["clarifications"]) == 3
-        assert len(rule["fact_tokens"]["clarifications"]) == 3
+        assert len(rule["facts"]["clarifications"]) == count
+        assert len(rule["fact_tokens"]["clarifications"]) == count
         assert any(
             token["target"] == target
             for paragraph in rule["fact_tokens"]["clarifications"]
