@@ -2124,6 +2124,51 @@ def test_disposable_causes_item_specific_unloaded_state(
     }
 
 
+def test_rea016_stealth_examples_and_citations_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    stealth = current_rules_database.composed_record("skill:stealth")
+    mines = current_rules_database.composed_record("weapon:mines")
+    boost = current_rules_database.composed_record("trait:boost")
+    sixth_sense = current_rules_database.composed_record("skill:sixth-sense")
+    combat_instinct = current_rules_database.composed_record("skill:combat-instinct")
+    peripheral = current_rules_database.composed_record("skill:peripheral")
+    assert all(x is not None for x in (
+        stealth, mines, boost, sixth_sense, combat_instinct, peripheral,
+    ))
+    assert stealth is not None and mines is not None and boost is not None
+    assert sixth_sense is not None and combat_instinct is not None
+    assert peripheral is not None
+    mine_case, mixed, marker = stealth["facts"]["clarifications"]
+    assert "Mine" in mine_case
+    assert "does **not** switch off [[trait:deployable|Deployable]]" in mine_case
+    assert "Trigger Area" in mines["summary"]
+    assert "cannot activate other [[trait:deployable|Deployable]]" in boost["summary"]
+    assert "[[skill:peripheral|Peripheral]]" in mixed
+    assert "other activated Trooper independently generates" in mixed
+    assert "reaction becomes [[skill:idle|Idle]]" in mixed
+    assert "An ARO generated" not in mixed
+    assert "must announce" in marker
+    assert "Marker form" in marker
+    assert "[[skill:stealth]] is not effective against the user." in " ".join(
+        sixth_sense["facts"]["effects"]
+    )
+    assert "[[skill:stealth]] is not effective against the user." in " ".join(
+        combat_instinct["facts"]["effects"]
+    )
+    assert "same Order" in " ".join(peripheral["facts"]["effects"])
+    citations = {(c["source_id"], c.get("page")) for c in stealth["citations"]}
+    assert citations >= {
+        ("n5-core-v5.3-pdf", 112),
+        ("n5-core-v5.3-es-pdf", 114),
+        ("n5-faq-v0.1-en-pdf", 2),
+        ("n5-faq-v0.1-es-pdf", 2),
+    }
+    assert [(r["type"], r["record_id"]) for r in stealth["relations"]] == [
+        ("enables-use-of", "skill:cautious-movement")
+    ]
+
+
 def test_stealth_counter_interactions_are_bidirectional(
     current_rules_database: RulesDatabase,
 ) -> None:

@@ -697,6 +697,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Disconnected, Retreat! and Suppressive Fire conditions. Corrected
       an IMP-1 ARO sentence and updated its reviewed-text fingerprint.
       No unconditional State transitions or REA-026 baseline changes.
+    - [x] **REA-016 - Stealth and Deployables:** Source-backed examples
+      now distinguish independent Mine triggering from ARO entitlement,
+      a Controller/Peripheral mixed-activation reaction becoming Idle,
+      and announcing optional Stealth while represented by a Marker.
+      Confirmed official N5.3 EN p. 112 / ES p. 114 and FAQ v0.1 p. 2.
+      Chromium passed 39/39 content/navigation checks at 1440/390/320 px
+      with no JavaScript errors or horizontal overflow. Sixth Sense and
+      Combat Instinct remain explicit counter-Skills; no ARO engine added.
+      The separate generic `weapon:mines` navigation bug is tracked below.
     - [x] **REA-017 — Peripheral subtypes:** Shared activation, Coherency,
       Roll ownership, Servant/Connected Cyberplug Doctor/Engineer contact,
       Control Spearhead, Ancillary deployment/Fireteam exceptions, and
@@ -1180,6 +1189,15 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
   Follow rules, Attribute and source links; confirm readability and navigation.
   The earlier offline 52/52 tests and seven-view responsive check were not
   substitutes for these interactions.
+  - [ ] **Web backend + Web frontend - shared weapon-family navigation:**
+    Curated `weapon:mines` is a valid semantic rules record, but its existing
+    maintained links open `/weapons/mines`; that shell requests
+    `/api/weapons/mines` and receives HTTP 404 because Mines is not a
+    source catalog item. Inspect all similar canonical weapon-family links,
+    choose a browsable rules-owned destination or explicit safe fallback,
+    preserve existing Army weapon profiles, and test the actual browser
+    destination. The REA-016 example deliberately avoids introducing
+    another invalid family link while this issue remains open.
 - [ ] **Web frontend — Fireteam browser acceptance:** Select an Army, verify
   Fireteam formation requirements and ongoing-integrity help, change Wildcard
   settings and navigate between Fireteams, Units and references. Test desktop

@@ -1133,6 +1133,31 @@ when used in Marker State. Mine triggering and ARO entitlement are independent.
 example, retaining Sixth Sense/Combat Instinct links. **Fix:** text/links,
 future regressions. **Dependencies:** REA-015, REA-017, REA-020, REA-030.
 
+**Reference acceptance (2026-10-15): Resolved for REA-016's Stealth
+presentation.** The 0.10.1 effects and restrictions already state the
+underlying exception and FAQ conditions. New Stealth clarifications
+explain why an enemy Mine can trigger despite the absence of a normal
+Stealth-generated ARO, why another activated Trooper can create an ARO
+that targets the Stealth Controller yet becomes Idle if that Controller
+only uses Stealth-protected declarations, and why optional Stealth must
+be announced when used in Marker form. The Mine example explicitly
+qualifies Sixth Sense and Combat Instinct counters and retains the
+Mine-specific triggering/ally-safety rules. English N5.3 p. 112 and
+Spanish N5.3 p. 114 agree on the Deployable exception; English and
+Spanish FAQ v0.1 printed p. 2 support mixed activation and Marker
+announcements. The authored Skill gained these exact citations.
+
+No new typed relation or automatic ARO evaluator was added; the
+pre-existing Stealth/Cautious Movement and counter-Skill semantics
+remain unchanged. Source and published-rules regressions assert these
+conditions and citations. Chromium passed **39/39** content/navigation
+checks on Stealth, Deployable, Boost, Sixth Sense, Combat Instinct,
+Peripheral and Cautious Movement at 1440, 390 and 320 px; no JS errors
+or horizontal overflow. Existing `weapon:mines` semantic links still
+open an Army Weapon page whose API returns 404: this *independent*
+weapon-family navigation problem is tracked under final 1.0 browser
+acceptance. No new broken weapon-family link was added here.
+
 ### REA-017 - Peripheral subtype identities do not explain their operation
 
 **Classification:** completeness, consistency. **Severity:** High. **Priority:** P1.

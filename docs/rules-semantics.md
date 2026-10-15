@@ -1474,6 +1474,18 @@ leaving geometry, LoF, Active-Turn, Hackable, and other conditions in the owning
 `rules.db` derives the reverse navigation so Cautious Movement can identify Stealth as a
 rule that expands where it may be used.
 
+**REA-016 acceptance:** Stealth does not suppress valid Deployable
+triggering (for example, a Mine whose own Trigger Area and Template
+requirements are met). In a mixed activation, another Trooper can
+generate an ARO aimed at the Stealth user, but it becomes Idle unless
+that user declares a Skill permitting the reaction. Optional Stealth
+must be announced even when used by a Marker. These are distinct
+procedures, not universal ARO-generation or Marker-reveal edges.
+The maintained examples cite N5.3 EN p. 112 / ES p. 114 and FAQ v0.1
+EN/ES p. 2; 39/39 desktop/mobile browser checks passed on 2026-10-15.
+The broken generic `weapon:mines` catalog route is separately tracked
+for the 1.0 cross-surface reference gate.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Stealth>

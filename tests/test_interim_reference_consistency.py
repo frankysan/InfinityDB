@@ -35,6 +35,33 @@ def test_stealth_qualifies_deployables_and_mixed_activation() -> None:
         "Marker form",
     ):
         assert concept in text
+    # The original mechanics remain in Effects/Restrictions; published
+    # examples explain the distinct automatic weapon, ARO and Marker cases.
+    assert len(record["facts"]["clarifications"]) == 3
+    mines, mixed, marker = record["facts"]["clarifications"]
+    assert "**[[trait:deployable|Deployables]] still trigger:**" in mines
+    assert "Mine" in mines
+    assert "[[trait:zone-of-control-zc|Zone of Control]]" in mines
+    assert "[[skill:sixth-sense|Sixth Sense]]" in mines
+    assert "[[skill:combat-instinct|Combat Instinct]]" in mines
+    assert "**Mixed-activation example:**" in mixed
+    assert "[[skill:peripheral|Peripheral]]" in mixed
+    assert "other activated Trooper independently generates" in mixed
+    assert "reaction becomes [[skill:idle|Idle]]" in mixed
+    assert "does grant a [[trait:aro|ARO]]" in mixed
+    assert "**Stealth in Marker form:**" in marker
+    assert "optional Automatic Skill" in marker
+    assert "must announce" in marker
+    citations = {(c["sourceId"], c.get("page")) for c in record["citations"]}
+    assert citations >= {
+        ("n5-core-v5.3-pdf", 112),
+        ("n5-core-v5.3-es-pdf", 114),
+        ("n5-faq-v0.1-en-pdf", 2),
+        ("n5-faq-v0.1-es-pdf", 2),
+    }
+    assert record["relations"] == [
+        {"type": "enables-use-of", "recordId": "skill:cautious-movement"}
+    ]
 
 
 def test_deployable_cover_explains_saving_cap_and_eligibility() -> None:

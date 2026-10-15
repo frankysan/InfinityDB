@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Stealth now gives concrete examples of how Deployables still trigger,
+  when a mixed-activation ARO targeting a Stealth user becomes Idle, and
+  why Stealth must be announced when used in Marker form.
 - Immunity (ARM/BTS) now highlights its separate protection against
   applicable weapon Traits, with linked examples; the printed Monofilament
   Critical case and Flash Pulse's Non-Lethal/Stunned exceptions are clearer.
@@ -179,6 +182,10 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Add source-backed Stealth
+  examples and English/Spanish N5.3/FAQ citations for independent
+  Deployable triggers, mixed Controller/Peripheral activation, and
+  Marker announcements. Keep existing ARO and counter-Skill mechanics.
 - **Data processing + Web frontend:** Complete REA-010 Immunity reference
   acceptance with linked Trait-protection examples, Monofilament
   one-/two-roll wording, and bilingual N5.3 source verification.
