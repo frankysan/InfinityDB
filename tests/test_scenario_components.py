@@ -24,6 +24,71 @@ def scenario(document: dict, identifier: str) -> dict:
     return next(r for r in document["records"] if r["id"] == "scenario:" + identifier)
 
 
+def test_annihilation_review_preserves_all_source_scoring_and_end_conditions(
+    document: dict,
+) -> None:
+    """N5.3 pp. 149-150: scoring, Killing, setup and mission end conditions."""
+    from infinity_db.scenario_mission import NumericRangeCondition, ProseCondition
+
+    raw = scenario(document, "annihilation")
+    mission = parse_scenario_definition_record(ScenarioComponents(document).compose(raw)).mission
+    assert mission is not None
+    assert [size.army_points for size in mission.game_sizes] == [150, 200, 250, 300, 350, 400]
+    assert [size.swc for size in mission.game_sizes] == [3, 4, 5, 6, 7, 8]
+    assert all(size.minimum_victory_points is None for size in mission.game_sizes)
+    assert [objective.id for objective in mission.objectives] == [
+        "destroy-forces", "preserve-forces", "eliminate-command",
+    ]
+    expected = {
+        150: ((40, 75), (76, 125), (126, None)),
+        200: ((50, 100), (101, 150), (151, None)),
+        250: ((65, 125), (126, 200), (201, None)),
+        300: ((75, 150), (151, 250), (251, None)),
+        350: ((85, 175), (176, 270), (271, None)),
+        400: ((100, 200), (201, 300), (301, None)),
+    }
+    for index, metric in enumerate(("enemy-army-points-killed", "surviving-victory-points")):
+        objective = mission.objectives[index]
+        assert (objective.timing, objective.aggregation, objective.maximum_points) == (
+            "end-of-game", "exclusive", 4,
+        )
+        for size, bounds in expected.items():
+            awards = [award for award in objective.awards if size in award.army_points]
+            assert [award.objective_points for award in awards] == [1, 3, 4]
+            for award, (low, high) in zip(awards, bounds, strict=True):
+                condition = award.condition
+                assert isinstance(condition, NumericRangeCondition)
+                assert (condition.metric, condition.minimum, condition.maximum) == (
+                    metric, low, high,
+                )
+
+    commander = mission.objectives[2]
+    assert commander.maximum_points == 2
+    assert commander.timing == "end-of-game"
+    assert len(commander.awards) == 1
+    assert commander.awards[0].army_points == tuple(expected)
+    assert commander.awards[0].objective_points == 2
+    assert isinstance(commander.awards[0].condition, ProseCondition)
+    assert "[[skill:lieutenant]]" in commander.awards[0].condition.text
+
+    assert len(mission.rules) == 1
+    assert mission.rules[0].definition_id == "rule:scenario:killing"
+    killing = " ".join(mission.rules[0].paragraphs)
+    assert "entering [[state:dead]]" in killing
+    assert "Null when the game ends" in killing
+    assert "never deployed" in killing or "never" in killing.lower()
+    assert [(end.id, end.check_at, end.finish_at) for end in mission.end_conditions] == [
+        ("round-limit", "end-of-round", "end-of-round"),
+        ("all-troopers-null", "tactical-phase", "end-of-player-turn"),
+    ]
+    assert mission.end_conditions[0].rounds == 3
+    assert "all Troopers" in (mission.end_conditions[1].description or "")
+    assert mission.source_issues[0].id == "350-point-survival-bands"
+    assert mission.source_issues[0].status == "reviewed-resolution"
+    assert "85" in mission.source_issues[0].description
+    assert {c["page"] for c in raw["citations"]} == {149, 150}
+
+
 def test_shared_sources_replace_repeated_authoring_and_keep_overrides_explicit(
     document: dict,
 ) -> None:

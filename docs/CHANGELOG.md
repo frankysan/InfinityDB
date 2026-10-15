@@ -326,6 +326,9 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing:** Add Annihilation mission acceptance checks covering
+  six scored game sizes, source-identified 350-point survival-band correction,
+  shared Killing criteria, Lieutenant scoring and both mission-ending triggers.
 - **Data processing + Web frontend:** Clarify PARA's PH-6/no-PH and
   conditional IMM-A outcomes, Shock's VITA 1 Dead transition and related
   Special Skills, and Stun's Courage/Guts effect and the narrow Flash Pulse

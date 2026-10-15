@@ -1927,8 +1927,9 @@
     {
       "recordId": "scenario:annihilation",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, force-destruction objectives, and other scenario rule semantics remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 pp. 149-150 verify all six Army Points configurations (150/200/250/300/350/400), SWC and deployment references, three exclusive end-of-game bands for killed enemy Army Points (maximum 4 OP), three for surviving Victory Points (maximum 4 OP), and 2 OP for the enemy Lieutenant killed. Shared Killing correctly includes entering Dead, remaining Null at game end and never-deployed enemy Troopers. The three-round limit and tactical-phase all-Null early ending remain separate shared conditions. The printed 350-point survival chart has a gap at 151-175 and an overlap at 251-270; the maintained source issue explicitly labels its 85-175/176-270/271+ continuity correction a reviewed interpretation, not literal PDF text. No new graph edges are implied by typed mission component references; scoring requires game-state context."
     },
     {
       "recordId": "scenario:firefight",

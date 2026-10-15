@@ -1279,12 +1279,13 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     this resolves the presentation defect, not the broader 1.0 browser gate.
   - [ ] Close the 1.0 interaction-review target in the maintained ledger, regenerate the checklist,
     and require the following check to pass. Never edit the generated checklist manually.
-    The current gate reports four pending supporting identities: the core
-    Annihilation, Domination, Firefight, and Supplies Scenarios. All eleven
-    canonical Ammunition identities are reviewed against pinned N5.3 and Wiki
-    sources. The latest batch documents PARA's missing-PH exception and
-    recovery/re-infliction, Shock's VITA 1/Unconscious/Explode conditions,
-    and Stun's Guts Roll and weapon-scoped Flash Pulse Immunity example.
+    The current gate reports three pending supporting identities: Domination,
+    Firefight and Supplies. All eleven Ammunition identities and Annihilation
+    have completed source-backed outgoing-interaction review. Annihilation's
+    six scoring configurations, Killing classification, Lieutenant objective
+    and distinct round/Tactical Phase ending conditions now have explicit
+    regression coverage. Its 350-point survival bands remain a documented
+    reviewed interpretation of contradictory printed table boundaries.
     The failure output lists exact remaining IDs; close them only after
     source/interaction review, not merely browser coverage:
 

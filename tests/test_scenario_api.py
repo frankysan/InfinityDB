@@ -180,6 +180,52 @@ def test_scenario_detail_api_projects_objective_and_source_issue_tokens(
     assert "85–175" in issue["description"] and "more than 270" in issue["description"]
 
 
+def test_annihilation_350_point_review_reaches_public_api(scenario_app: Application) -> None:
+    """N5.3 pp. 149-150: verified source interpretation remains visible to players."""
+    status, _, body = request(
+        scenario_app, "/api/scenarios/annihilation", query="army_points=350"
+    )
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["selected_army_points"] == 350
+    assert payload["setup"]["game_size"]["swc"] == 7
+    assert len(payload["objectives"]) == 3
+    for index, metric in enumerate(("enemy-army-points-killed", "surviving-victory-points")):
+        objective = payload["objectives"][index]
+        assert objective["timing"] == "end-of-game"
+        assert objective["aggregation"] == "exclusive"
+        assert objective["maximumPoints"] == 4
+        assert [
+            (award["objectivePoints"], award["condition"]["minimum"],
+             award["condition"]["maximum"])
+            for award in objective["awards"]
+        ] == [(1, 85, 175), (3, 176, 270), (4, 271, None)]
+        assert all(award["condition"]["metric"] == metric for award in objective["awards"])
+    lieutenant = payload["objectives"][2]["awards"][0]
+    assert lieutenant["objectivePoints"] == 2
+    assert lieutenant["condition"]["kind"] == "reviewed-prose"
+    assert any(
+        token["target"] == "skill:lieutenant"
+        for token in lieutenant["condition"]["text_tokens"]
+        if token["type"] == "reference"
+    )
+    assert payload["special_rules"][0]["definitionId"] == "rule:scenario:killing"
+    assert any(
+        "never deployed" in paragraph
+        for paragraph in payload["special_rules"][0]["paragraphs"]
+    )
+    assert [
+        (end["id"], end["checkAt"], end["finishAt"])
+        for end in payload["end_conditions"]
+    ] == [
+        ("round-limit", "end-of-round", "end-of-round"),
+        ("all-troopers-null", "tactical-phase", "end-of-player-turn"),
+    ]
+    assert len(payload["source_issues"]) == 1
+    assert payload["source_issues"][0]["id"] == "350-point-survival-bands"
+    assert payload["source_issues"][0]["status"] == "reviewed-resolution"
+
+
 @pytest.mark.parametrize(
     ("path", "query", "status", "message"),
     [

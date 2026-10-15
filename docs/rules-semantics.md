@@ -3712,6 +3712,17 @@ remain unambiguous.
 
 Source: N5 Core Rules v5.3 (2026-08-10), `data/pdf/rules/n5-rules-v5-3-en.pdf`, printed page 149.
 The pilot's setup, Killing definition, and end conditions are cited to printed page 150.
+The 1.0 review verifies all six source scoring bands (killed enemy Army Points
+and surviving Victory Points as **separate** end-of-game measures), the two
+Objective Points for killing the enemy Lieutenant, and their exclusively
+selected thresholds. The shared Killing definition counts enemy Troopers
+entering Dead or remaining Null at game end, and enemy Troopers never deployed
+as Models or Markers. The mission normally ends after Game Round three, but
+the separate early-ending condition is checked during the active player's
+Tactical Phase and finishes at the **end of that Player Turn**. Do not confuse
+this all-Null check with the minimum-Victory-Points rule in other scenarios.
+The 350-point band correction remains a source-identified interpretation,
+not a claim that the printed page contains the corrected numbers.
 
 ### RS-SCN-DOM-001 — Domination keeps scenario-specific SWC and minimum-VP values
 
