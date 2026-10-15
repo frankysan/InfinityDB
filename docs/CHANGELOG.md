@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- AP Thunderbolt, AP+EXP CC Weapon and Stun Pistol now disclose conflicting
+  Wiki chart values beside the current N5.3/Army weapon rules; the imported
+  profiles and gameplay effects remain unchanged.
 - The Scenario browser now offers a collection selector for N5 Core and
   published ITS missions. Season 18 starts with Battleground, including
   its end-of-game Sectors, size-dependent map, 2/3/5-point scoring and

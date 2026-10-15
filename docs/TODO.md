@@ -598,9 +598,9 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       keep the two Riotstopper template sizes distinct. Add five
       profile-hash-pinned shared-only decisions without duplicating
       rule cards or changing gameplay.
-      Keep AP+EXP CC Weapon and Stun Pistol pending: their Spanish
-      Wiki Saving Roll counts conflict with official N5.3 and Army
-      (and the Spanish Stun Pistol row omits the Stunned Trait).
+      The AP+EXP CC Weapon and Stun Pistol Spanish Wiki Saving Roll
+      conflicts (and missing Stunned Trait) are now published with
+      official N5.3 and Army baseline; official correction is pending.
     - [x] Source-review Smoke, standard, E/M and Eclipse Grenade
       Launchers plus Portable Autocannon against N5.3, pinned Army
       and archived English/Spanish Wiki where available. The four
@@ -634,13 +634,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Trench-Hammer is not Disposable (3) in N5.3; older alternative Wiki
       entries retain that historical Trait. Uragan's Spanish 'MTL' Hit
       Mode name is a source typo, not an additional Weapon.
-    - [ ] Resolve the remaining three material Weapon source conflicts:
-      AP Thunderbolt, AP+EXP CC Weapon, and Stun Pistol. Current source-bound
-      triage: 70 classified gaps = 66 accepted shared-effects, 1 accepted
-      historical citation, and 3 pending conflicts; no multi-profile
-      reviews or missing canonical Ammunition links remain. The raw gap
-      code is not necessarily a missing mechanic. Preserve source
-      differences until resolved; avoid duplicated rules or invented modes.
+    - [x] Publish source-cited Weapon references for AP Thunderbolt,
+      AP+EXP CC Weapon and Stun Pistol, showing the bilingual N5.3 PDF
+      and Army baseline alongside conflicting archived Wiki chart rows.
+      Keep AP versus N, three versus two EXP Saving Rolls, and Stun's
+      one versus two rolls/missing Stunned Trait distinct and explicit.
+      No Army fields or canonical Ammunition mechanics were changed.
+      The rebuilt source-bound triage now reports 67 classified Weapon
+      entries: 66 accepted shared-effects, 1 accepted historical citation,
+      0 pending source/effect/mode reviews, and 0 missing effect links.
+    - [ ] Seek authoritative publication corrections for AP Thunderbolt
+      (both Wiki languages), AP+EXP CC Weapon (Spanish Wiki) and Stun Pistol
+      (Spanish Wiki). Their current player-facing source notes retain
+      the discrepancies; closing source-coverage review does not imply
+      that Corvus Belli has resolved the underlying publication conflicts.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

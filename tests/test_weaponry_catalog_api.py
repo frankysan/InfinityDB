@@ -15,7 +15,8 @@ from wsgiref.util import setup_testing_defaults
 
 import pytest
 
-from infinity_db.rules_database import RulesDatabase
+from infinity_db.curated import load_curated_directory
+from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.web import create_app
 
 
@@ -1091,7 +1092,7 @@ def test_spanish_conflicts_do_not_change_stun_or_ap_exp_profiles(
         assert (
             profile["ammunition"], profile["saving"], profile["saving_num"],
         ) == expected
-        assert weapon.get("rules", []) == []
+        assert weapon["profiles"][0]["ammunition_effects"]
 
 
 @pytest.mark.parametrize(
@@ -1184,7 +1185,7 @@ def test_reviewed_red_fury_and_thunderbolt_preserve_source_only_profiles(
     assert not profile.get("weapon_properties")
 
 
-def test_ap_thunderbolt_remains_unreviewed_due_to_wiki_source_conflict(
+def test_ap_thunderbolt_keeps_official_source_profile_despite_wiki_conflict(
     weaponry_app: Callable,
 ) -> None:
     payload = _weapon_detail(weaponry_app, "ap-thunderbolt")
@@ -1195,7 +1196,6 @@ def test_ap_thunderbolt_remains_unreviewed_due_to_wiki_source_conflict(
         "AP", "ARM/2", "1",
     )
     assert profile["ammunition_effects"][0]["record_id"] == "ammunition:ap"
-    assert payload.get("rules", []) == []
 
 
 @pytest.mark.parametrize(
@@ -2429,3 +2429,70 @@ def test_remaining_multimode_shared_reviews_preserve_exact_profiles(
         assert [r["slug"] for r in profiles[1]["trait_references"]] == [
             "burst-single-target",
         ]
+
+@pytest.fixture(scope="module")
+def source_discrepancy_app(tmp_path_factory: pytest.TempPathFactory) -> Callable:
+    """Exercise the current curated corpus, not an older generated rules.db."""
+    root = Path(__file__).resolve().parents[1]
+    output = tmp_path_factory.mktemp("weapon-discrepancy-rules") / "rules.db"
+    export_rules_database(
+        load_curated_directory(root / "data/curated"), output, finalize=False,
+    )
+    RulesDatabase(output).validate()
+    return create_app(
+        root / "data/generated/infinity.db", rules_database_path=output,
+    )
+
+
+@pytest.mark.parametrize(
+    ("slug", "pages", "effects", "discrepancy"),
+    [
+        ("ap-thunderbolt", (186, 193), {"ammunition:ap"}, "N Ammunition"),
+        ("ap-exp-cc-weapon", (177, 184),
+         {"ammunition:ap", "ammunition:exp", "trait:cc", "trait:anti-materiel"},
+         "two BLI/2"),
+        ("stun-pistol", (182, 191),
+         {"ammunition:stun", "trait:non-lethal", "trait:state"},
+         "two PB/BTS"),
+    ],
+)
+def test_published_weapon_source_conflicts_preserve_official_profiles(
+    source_discrepancy_app: Callable, slug: str, pages: tuple[int, int],
+    effects: set[str], discrepancy: str,
+) -> None:
+    payload = _weapon_detail(source_discrepancy_app, slug)
+    rule = _weapon_rules(payload)[f"weapon:{slug}"]
+    assert rule["facts"]["sourceNotes"]
+    assert len(rule["facts"]["sourceNotes"]) == 3
+    assert discrepancy in rule["facts"]["sourceNotes"][0]
+    assert "Unresolved" in rule["facts"]["sourceNotes"][-1]
+    assert {("n5-core-v5.3-pdf", pages[0]),
+            ("n5-core-v5.3-es-pdf", pages[1])} <= {
+        (c["source_id"], c["page"]) for c in rule["citations"]
+    }
+    assert {
+        "wiki-weapon-chart-oldid-4083", "wiki-es-weapon-chart-oldid-3987",
+    } <= {c["source_id"] for c in rule["citations"]}
+    assert effects <= {
+        r["record"]["id"] for r in rule["display_relations"]
+        if r["direction"] == "outbound"
+    }
+    assert all(
+        t["public_reference"] for t in rule["summary_tokens"]
+        if t["type"] == "reference"
+    )
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    if slug == "ap-thunderbolt":
+        assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+            "AP", "ARM/2", "1",
+        )
+    elif slug == "ap-exp-cc-weapon":
+        assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+            "AP+Exp", "ARM/2", "3",
+        )
+    else:
+        assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+            "Stun", "BTS", "1",
+        )
+        assert {"Non-lethal", "State: Stunned"} <= set(profile["traits"])

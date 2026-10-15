@@ -3893,6 +3893,211 @@
             ]
         },
         {
+            "id": "weapon:ap-thunderbolt",
+            "kind": "weapon",
+            "name": "AP Thunderbolt",
+            "summary": "The AP Thunderbolt fires [[ammunition:ap|AP Ammunition]] (PS 6, Burst 2) and requires one ARM/2 Saving Roll per hit. The standard Thunderbolt instead uses [[ammunition:normal|Normal Ammunition]] and one ARM Saving Roll. Both have their own published Weapon profiles.",
+            "facts": {
+                "sourceNotes": [
+                    "**Publication difference:** The archived English Weapon Chart (revision 4083) and Spanish Tabla de Armas (revision 3987), including their alternative charts, give N Ammunition for AP Thunderbolt while retaining ARM/2. The N notation conflicts with the current Army AP profile and both official N5.3 Weapon Charts.",
+                    "**Current source baseline:** The English N5.3 PDF p. 186, Spanish N5.3 PDF p. 193 and pinned Army Weapon 230 all specify AP Ammunition, PS 6, Burst 2 and one ARM/2 Saving Roll. Preserve the Army AP identity without treating the Wiki discrepancy as an independently defined Ammunition effect.",
+                    "**Disposition:** Unresolved publication inconsistency; a formal correction explaining the Wiki N/ARM/2 notation has not been established."
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "ap-thunderbolt"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 186
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 193
+                },
+                {
+                    "sourceId": "wiki-weapon-chart-oldid-4083",
+                    "heading": "Thunderbolts: AP Thunderbolt"
+                },
+                {
+                    "sourceId": "wiki-es-weapon-chart-oldid-3987",
+                    "heading": "Thunderbolts: Thunderbolt AP"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-15"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "weapon:ap-exp-cc-weapon",
+            "kind": "weapon",
+            "name": "AP + EXP CC Weapon",
+            "summary": "This weapon uses [[ammunition:ap|AP]] and [[ammunition:exp|EXP]] together in a [[trait:cc|CC]] attack (PS 8, Burst 1). Its profile requires three ARM/2 Saving Rolls per hit and has the [[trait:anti-materiel|Anti-materiel]] Trait. The linked Ammunition rules explain the combined effects; these are not separate firing modes.",
+            "facts": {
+                "sourceNotes": [
+                    "**Publication difference:** The archived Spanish Tabla de Armas (revision 3987) and its alternative chart (revision 3988) list only two BLI/2 Saving Rolls for the AP+EXP close-combat profile. The archived English chart (revision 4083) lists three ARM/2 rolls.",
+                    "**Current source baseline:** The English N5.3 PDF p. 177, Spanish N5.3 PDF p. 184 and pinned Army Weapon 227 agree on three ARM/2 Saving Rolls for AP+EXP; the [[ammunition:exp|EXP Ammunition]] reference likewise requires three Saving Rolls. Do not infer a reduced two-roll variant from the Spanish Wiki row.",
+                    "**Disposition:** Unresolved Spanish Wiki chart conflict; retain the bilingual N5.3 PDF and Army profile pending authoritative correction."
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "ap-exp-cc-weapon"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:ap"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:exp"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:cc"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:anti-materiel"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 177
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 184
+                },
+                {
+                    "sourceId": "wiki-weapon-chart-oldid-4083",
+                    "heading": "CC Weapons: AP+EXP CC Weapon"
+                },
+                {
+                    "sourceId": "wiki-es-weapon-chart-oldid-3987",
+                    "heading": "Armas cuerpo a cuerpo: Arma CC AP+EXP"
+                },
+                {
+                    "sourceId": "wiki-es-weapon-chart-alternatives-oldid-3988",
+                    "heading": "Arma CC AP+EXP"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-15"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
+            "id": "weapon:stun-pistol",
+            "kind": "weapon",
+            "name": "Stun Pistol",
+            "summary": "Stun Pistol uses [[ammunition:stun|Stun Ammunition]] (PS 8, Burst 2) and requires one BTS Saving Roll per hit. Its [[trait:non-lethal|Non-Lethal]] Trait prevents Wounds, while the [[trait:state|State: Stunned]] Trait inflicts [[state:stunned|Stunned]] if the Saving Roll fails.",
+            "facts": {
+                "sourceNotes": [
+                    "**Publication difference:** Both the main Spanish Tabla de Armas (revision 3987) and its alternative chart (revision 3988) list two PB/BTS Saving Rolls and omit [[trait:state|State: Stunned]] from the Spanish chart row. The English Wiki chart (revision 4083) lists one BTS Saving Roll and both Traits.",
+                    "**Current source baseline:** English N5.3 PDF p. 182, Spanish N5.3 PDF p. 191 and pinned Army Weapon 92 agree on one BTS/PB Saving Roll, [[trait:non-lethal|Non-Lethal]] and [[trait:state|State: Stunned]]. Canonical [[ammunition:stun|Stun Ammunition]] and [[state:stunned|Stunned]] rules remain unchanged.",
+                    "**Disposition:** Unresolved Spanish Wiki chart conflict; retain the bilingual N5.3 PDF and Army profile pending authoritative correction."
+                ]
+            },
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "stun-pistol"
+                }
+            ],
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:stun"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:non-lethal"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:state"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 182
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 191
+                },
+                {
+                    "sourceId": "wiki-weapon-chart-oldid-4083",
+                    "heading": "Pistols: Stun Pistol"
+                },
+                {
+                    "sourceId": "wiki-es-weapon-chart-oldid-3987",
+                    "heading": "Pistolas: Pistola Aturdidora"
+                },
+                {
+                    "sourceId": "wiki-es-weapon-chart-alternatives-oldid-3988",
+                    "heading": "Pistola Aturdidora"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-15"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            }
+        },
+        {
             "id": "weapon:flash-pulse",
             "kind": "weapon",
             "name": "Flash Pulse",
