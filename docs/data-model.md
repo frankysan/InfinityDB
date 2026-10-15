@@ -843,7 +843,29 @@ publications backed by `current` source collections. Historical revisions requir
 collection/revision pair. Unknown selections return no match, malformed or ambiguous selections fail
 explicitly, and no other season/revision is substituted. The player-facing `/scenarios` catalog and
 detail pages consume `ScenarioCatalog` through the JSON API, require an explicit Army Points selection,
-and render the selected maintained geometry through the deterministic SVG endpoint. Browser selection
+and render the selected maintained geometry through the deterministic SVG endpoint.
+
+**Explicit published-set selection:** `ScenarioCatalog.list_scenarios(collection=...,
+revision=...)` and `get_scenario(..., collection=..., revision=...)` filter current
+composed scenario publications by the exact stable scenario-set ID and revision. The public
+`GET /api/scenarios`, `GET /api/scenarios/:slug?army_points=...`, and
+`GET /api/scenarios/:slug/map.svg?army_points=...` endpoints accept the same optional
+`collection` and `revision` parameters **only as a pair**. Unknown pairs give an
+empty list or HTTP 404 for detail/map; malformed/partial/repeated selectors give HTTP
+400. Omitted selectors keep the legacy current-catalog behavior. This prevents an
+explicit ITS season request from silently returning N5 Core information. The API
+currently exposes only modeled **current** publications; the existing
+`RulesDatabase.resolve_scenario_publication` historical membership lookup is not
+yet a historical compositional detail/map API.
+
+**Current publication boundary:** The only shipped current scenario set remains
+`n5-core@5.3` (four fully curated scenarios). Source-confirmed Season 18 mission
+names, including Crossing Lines, Akial Interference and Area of Interest, are
+**not** yet published as selectable/renderable scenario definitions. For example
+`GET /api/scenarios?collection=its-18&revision=2026.09.01` currently returns
+`items: []` rather than substituting a Core mission. The selection API is
+the prerequisite for season-specific curation and user-visible season choices,
+not a claim that a Season 18 mission catalog or historical-season UI exists. Browser selection
 state uses the common versioned share-state token; legacy explicit `army_points` input remains readable.
 Element/feature vocabulary extensions and source-discrepancy resolution remain unfinished work in the
 [1.0 backlog](TODO.md#rules-and-reference-completeness).

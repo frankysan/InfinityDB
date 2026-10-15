@@ -1177,11 +1177,23 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     Interference source missions and why scenario-specific answers
     cannot yet be published in the N5 Core catalog. Retain private
     crosswalk under `local/audits/`.
-  - [ ] Add season-aware ITS scenario publication/selection before
-    authoring mission-specific FAQs. Verify exact scenario IDs,
-    source revisions, per-language FAQ pages, and negative applicability
-    to N5 Core and other seasons; do not promote an ITS outcome
-    to a universal rule merely because a core topic exists.
+  - [x] Add strict current scenario-set selection to catalog and API:
+    `collection` and exact `revision` must appear together for
+    list/detail/map requests; missing/invalid selections never silently
+    select N5 Core. Existing unfiltered URLs remain compatible.
+    Synthetic season-metadata fixtures prove disjoint selection without
+    publishing a fabricated ITS mission.
+  - [ ] Curate and publish **real** Season 18 scenario identities and
+    complete source-backed definitions in a dedicated versioned scenario
+    collection, using the same mission/geometry model. Preserve
+    `its-18@2026.09.01` source provenance and fail closed where geometry,
+    objective/card choice, or scoring is not yet representable. The
+    current ITS selector intentionally returns no missions until then.
+  - [ ] Wire explicit season/revision selection through the browser's
+    scenario list/detail/map/share URLs, then author mission-specific
+    FAQs only after verifying exact scenario IDs, EN/ES citations,
+    and negative applicability to Core and other seasons.
+    Do not promote ITS-only outcomes to universal N5 rules.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.

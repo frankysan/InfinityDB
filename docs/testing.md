@@ -1995,6 +1995,28 @@ checking selected FAQ version, historical source note, relevant
 question/answer, JavaScript errors and horizontal overflow. Canonical
 rules and Army profile source data remain unchanged.
 
+## 1.0 exact current scenario publication selection
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** The shared scenario catalog
+and list/detail/SVG-map endpoints now support paired exact
+`collection` and `revision` selectors. Current N5 Core
+`n5-core@5.3` still exposes its four published scenarios, while
+`its-18@2026.09.01`, `its-17@2025.09.01`, and uninstalled
+`n5-core@5.2` selections produce empty lists or HTTP 404,
+never substituted Core data. Missing, malformed, repeated and
+unknown selector parameters return HTTP 400. Legacy requests
+without selectors remain supported.
+
+`tests/test_scenario_catalog.py` includes an explicitly synthetic
+Season 18 publication-metadata fixture, testing exact filtering
+without authoring false scenario rules. `tests/test_scenario_api.py`
+checks corresponding list/detail/map behavior, provenance and
+negative API cases, including a correctly scoped N5.3 map.
+No actual ITS mission, FAQ ruling, extra geometry or
+historical edition is published by this API milestone.
+Browser season choice and season-aware share URLs await the
+first source-complete ITS scenario definition.
+
 ## 1.0 Deployment Phase owner and ITS applicability audit
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** A new official N5.3

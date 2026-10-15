@@ -238,8 +238,12 @@ are not retroactively relabeled.
   a rule route. Base rules remain unchanged.
 - **Data processing + Web backend:** Confirm ITS-inspired split Deployment
   Zones and asymmetric scoring applicability survive typed validation and
-  catalog projection; preserve the core N5.3 scope and leave ITS-specific
-  geometry, Classifieds and seasonal options deferred.
+  catalog projection. Add exact current scenario collection/revision
+  selection to the shared catalog and list/detail/map APIs; invalid
+  or unpublished ITS requests now fail closed rather than falling
+  back to N5 Core. Preserve the core N5.3 scope and leave
+  ITS-specific geometry, Classifieds, real seasonal definitions and
+  player-facing season choice deferred.
 - **Data processing + Web backend:** Verify all 24 core-scenario Army Points
   selections against the N5.3 source charts, composed database and public API.
   The Spanish N5.3 Annihilation table confirms the corrected 350-point survival

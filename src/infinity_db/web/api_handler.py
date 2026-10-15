@@ -190,34 +190,60 @@ def _enrich_scenario_api_item(
     return result
 
 
-def _scenario_army_points(query_string: str) -> int:
-    params = _validated_query_params(query_string, {"army_points", "cache_bust"})
-    if "army_points" not in params:
-        raise ValueError("Provide army_points exactly once")
+def _scenario_selection(params: dict[str, list[str]]) -> tuple[str | None, str | None]:
+    """Require an exact collection/revision pair; never infer the current ITS season."""
+    collection = params.get("collection", [None])[0]
+    revision = params.get("revision", [None])[0]
+    if (collection is None) != (revision is None):
+        raise ValueError("Provide collection and revision together")
+    if collection is not None:
+        require_domain_slug(collection, context="scenario collection")
+        if not revision or revision.strip() != revision:
+            raise ValueError("scenario revision must be a non-empty trimmed string")
+    return collection, revision
+
+
+def _scenario_army_points(
+    query_string: str,
+) -> tuple[int, str | None, str | None]:
+    params = _validated_query_params(
+        query_string, {"army_points", "collection", "revision", "cache_bust"}
+    )
     army_points = _integer(params, "army_points", None, 1, 10000)
     if army_points is None:
         raise ValueError("Provide army_points exactly once")
-    return army_points
+    return army_points, *_scenario_selection(params)
 
 
-def _scenario_map_options(query_string: str) -> tuple[int, Literal["in", "cm"]]:
+def _scenario_map_options(
+    query_string: str,
+) -> tuple[int, Literal["in", "cm"], str | None, str | None]:
     params = _validated_query_params(
-        query_string, {"army_points", "distance_unit", "cache_bust"}
+        query_string, {"army_points", "distance_unit", "collection", "revision", "cache_bust"}
     )
     army_points = _integer(params, "army_points", None, 1, 10000)
     if army_points is None:
         raise ValueError("Provide army_points exactly once")
     distance_unit = params.get("distance_unit", ["in"])[0]
     if distance_unit == "in":
-        return army_points, "in"
-    if distance_unit == "cm":
-        return army_points, "cm"
-    raise ValueError("distance_unit must be in or cm")
+        unit: Literal["in", "cm"] = "in"
+    elif distance_unit == "cm":
+        unit = "cm"
+    else:
+        raise ValueError("distance_unit must be in or cm")
+    return army_points, unit, *_scenario_selection(params)
 
 
-def _scenario_summary(catalog: ScenarioCatalog, identifier: str) -> dict[str, Any] | None:
+def _scenario_summary(
+    catalog: ScenarioCatalog, identifier: str,
+    *, collection: str | None = None, revision: str | None = None,
+) -> dict[str, Any] | None:
     return next(
-        (item for item in catalog.list_scenarios() if item["slug"] == identifier),
+        (
+            item
+            for item in catalog.list_scenarios(collection=collection, revision=revision)
+            if item["slug"] == identifier
+        ),
         None,
     )
 
@@ -919,7 +945,10 @@ class ApiHandler:
         elif path == "/api/scenarios":
             cache_control = API_CACHE_CONTROL
             try:
-                _validated_query_params(query_string, {"cache_bust"})
+                params = _validated_query_params(
+                    query_string, {"collection", "revision", "cache_bust"}
+                )
+                collection, revision = _scenario_selection(params)
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)},
@@ -933,7 +962,9 @@ class ApiHandler:
                         self.rules_database,
                         item,
                     )
-                    for item in self.scenario_catalog.list_scenarios()
+                    for item in self.scenario_catalog.list_scenarios(
+                        collection=collection, revision=revision
+                    )
                 ]
                 payload = {"items": items}
             except (OSError, ValueError, sqlite3.Error):
@@ -945,7 +976,9 @@ class ApiHandler:
         elif match := SCENARIO_MAP_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
-                army_points, distance_unit = _scenario_map_options(query_string)
+                army_points, distance_unit, collection, revision = _scenario_map_options(
+                    query_string
+                )
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)},
@@ -954,7 +987,10 @@ class ApiHandler:
                 )
             try:
                 identifier = match.group("identifier")
-                summary = _scenario_summary(self.scenario_catalog, identifier)
+                summary = _scenario_summary(
+                    self.scenario_catalog, identifier,
+                    collection=collection, revision=revision,
+                )
                 if summary is None:
                     return WebResponse.json(
                         {"error": "Scenario not found"},
@@ -978,6 +1014,8 @@ class ApiHandler:
                 scenario = self.scenario_catalog.get_scenario(
                     identifier,
                     army_points=army_points,
+                    collection=collection,
+                    revision=revision,
                 )
                 if scenario is None:
                     return WebResponse.json(
@@ -1002,7 +1040,7 @@ class ApiHandler:
         elif match := SCENARIO_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
-                army_points = _scenario_army_points(query_string)
+                army_points, collection, revision = _scenario_army_points(query_string)
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)},
@@ -1011,7 +1049,10 @@ class ApiHandler:
                 )
             try:
                 identifier = match.group("identifier")
-                summary = _scenario_summary(self.scenario_catalog, identifier)
+                summary = _scenario_summary(
+                    self.scenario_catalog, identifier,
+                    collection=collection, revision=revision,
+                )
                 if summary is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Scenario not found"}
@@ -1030,6 +1071,8 @@ class ApiHandler:
                     payload = self.scenario_catalog.get_scenario(
                         identifier,
                         army_points=army_points,
+                        collection=collection,
+                        revision=revision,
                     )
                     if payload is None:
                         status = HTTPStatus.NOT_FOUND

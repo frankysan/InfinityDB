@@ -538,7 +538,10 @@ def test_scenario_api_failures_use_player_language(
     scenario_app: Application,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def fail() -> list[dict[str, Any]]:
+    def fail(
+        *, collection: str | None = None, revision: str | None = None
+    ) -> list[dict[str, Any]]:
+        del collection, revision
         raise sqlite3.DatabaseError("private database failure detail")
 
     monkeypatch.setattr(scenario_app.api.scenario_catalog, "list_scenarios", fail)
@@ -789,3 +792,137 @@ def test_scenario_map_api_renders_selected_maintained_geometry(
     )
     assert status == 400
     assert json.loads(body)["error"].startswith("This scenario does not support 175 Army Points")
+
+
+def test_scenario_api_accepts_explicit_collection_revision_without_implicit_its_fallback(
+    scenario_app: Application,
+) -> None:
+    status, _, body = request(
+        scenario_app,
+        "/api/scenarios?collection=n5-core&revision=5.3",
+    )
+    assert status == 200
+    assert [r["slug"] for r in json.loads(body)["items"]] == [
+        "annihilation", "domination", "supplies", "firefight",
+    ]
+    for query in (
+        "collection=its-18&revision=2026.09.01",
+        "collection=its-17&revision=2025.09.01",
+        "collection=n5-core&revision=5.2",
+    ):
+        status, _, body = request(scenario_app, "/api/scenarios", query=query)
+        assert status == 200
+        assert json.loads(body)["items"] == []
+
+    for path in (
+        "/api/scenarios/annihilation",
+        "/api/scenarios/annihilation/map.svg",
+    ):
+        status, _, _ = request(
+            scenario_app, path,
+            query="army_points=300&collection=its-18&revision=2026.09.01",
+        )
+        assert status == 404
+        status, _, _ = request(
+            scenario_app, path,
+            query="army_points=300&collection=n5-core&revision=5.3",
+        )
+        assert status == 200
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        "collection=its-18",
+        "revision=2026.09.01",
+        "collection=its-18&revision=",
+        "collection=ITS+18&revision=2026.09.01",
+        "collection=its-18&revision=%202026.09.01",
+        "collection=its-18&revision=2026.09.01&revision=2026.09.01",
+        "collection=its-18&revision=2026.09.01&unsupported=1",
+    ],
+)
+def test_scenario_api_rejects_invalid_or_partial_publication_context(
+    scenario_app: Application, query: str,
+) -> None:
+    for path, args in (
+        ("/api/scenarios", ""),
+        ("/api/scenarios/annihilation", "army_points=300&"),
+        ("/api/scenarios/annihilation/map.svg", "army_points=300&"),
+    ):
+        status, _, payload = request(scenario_app, path, query=args + query)
+        assert status == 400, (path, query, payload)
+        assert "error" in json.loads(payload)
+
+
+def test_scenario_detail_and_map_respect_exact_current_publication(
+    scenario_app: Application,
+) -> None:
+    detail_status, _, body = request(
+        scenario_app, "/api/scenarios/annihilation",
+        query="army_points=300&collection=n5-core&revision=5.3",
+    )
+    assert detail_status == 200
+    assert json.loads(body)["publication"]["collection_id"] == "n5-core"
+    assert json.loads(body)["publication"]["revision"] == "5.3"
+    svg_status, headers, body = request(
+        scenario_app, "/api/scenarios/annihilation/map.svg",
+        query="army_points=300&collection=n5-core&revision=5.3&distance_unit=in",
+    )
+    assert svg_status == 200
+    assert headers["content-type"].startswith("image/svg+xml")
+    assert b"<svg" in body
+
+
+def test_synthetic_season_publication_is_selected_exactly_at_public_api(
+    scenario_app: Application, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """API contract fixture only: intentionally does not publish ITS gameplay facts."""
+    from copy import deepcopy
+
+    catalog = scenario_app.api.scenario_catalog
+    records = catalog._records()
+    record, publication = records[0]
+    synthetic_publication = {
+        **publication,
+        "collection": "its-18",
+        "collection_title": "Synthetic source-version selection test",
+        "revision": "2026.09.01",
+    }
+    # Deliberately bypass curated export in this API-only test; the official
+    # Season 18 mission content has NOT been authored or declared playable.
+    monkeypatch.setattr(
+        catalog, "_records_cache",
+        [*records, (deepcopy(record), synthetic_publication)],
+    )
+    status, _, body = request(
+        scenario_app, "/api/scenarios?collection=its-18&revision=2026.09.01",
+    )
+    assert status == 200
+    items = json.loads(body)["items"]
+    assert [item["slug"] for item in items] == ["annihilation"]
+    assert items[0]["publication"]["collection_id"] == "its-18"
+    assert items[0]["publication"]["revision"] == "2026.09.01"
+
+    status, _, body = request(
+        scenario_app, "/api/scenarios/annihilation",
+        query="army_points=300&collection=its-18&revision=2026.09.01",
+    )
+    assert status == 200
+    assert json.loads(body)["publication"]["collection_id"] == "its-18"
+    status, _, _ = request(
+        scenario_app, "/api/scenarios/annihilation/map.svg",
+        query="army_points=300&collection=its-18&revision=2026.09.01",
+    )
+    assert status == 200
+
+    status, _, body = request(
+        scenario_app, "/api/scenarios?collection=n5-core&revision=5.3",
+    )
+    assert status == 200
+    assert len(json.loads(body)["items"]) == 4
+    status, _, _ = request(
+        scenario_app, "/api/scenarios/annihilation",
+        query="army_points=300&collection=its-17&revision=2025.09.01",
+    )
+    assert status == 404

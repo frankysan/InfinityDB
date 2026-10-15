@@ -314,3 +314,77 @@ def test_scenario_catalog_is_empty_without_rules_database() -> None:
 
     assert catalog.list_scenarios() == []
     assert catalog.get_scenario("annihilation", army_points=300) is None
+
+
+def test_explicit_scenario_collection_revision_selection_isolated_from_core(
+    scenario_catalog: ScenarioCatalog,
+) -> None:
+    """Synthetic Season 18 metadata proves selection; no ITS mission is published."""
+    core = scenario_catalog.list_scenarios(collection="n5-core", revision="5.3")
+    assert [item["slug"] for item in core] == [
+        "annihilation", "domination", "supplies", "firefight",
+    ]
+    assert scenario_catalog.list_scenarios(collection="its-18", revision="2026.09.01") == []
+    assert scenario_catalog.get_scenario(
+        "annihilation", army_points=300, collection="its-18", revision="2026.09.01",
+    ) is None
+
+    synthetic = ScenarioCatalog(scenario_catalog.rules_database)
+    records = deepcopy(scenario_catalog._records())
+    assert records
+    cloned_record, original_publication = records[0]
+    season_publication = {
+        **original_publication,
+        "collection": "its-18",
+        "collection_title": "Synthetic ITS Season 18 selection fixture",
+        "revision": "2026.09.01",
+    }
+    synthetic._records_cache = [
+        *records,
+        (deepcopy(cloned_record), season_publication),
+    ]
+    # This bypasses exporter validation solely to exercise collection filtering.
+    # It does NOT demonstrate support for duplicate published canonical IDs,
+    # nor publish an ITS scenario or duplicate any rules in rules.db.
+    assert [item["slug"] for item in synthetic.list_scenarios(
+        collection="its-18", revision="2026.09.01",
+    )] == ["annihilation"]
+    assert [item["slug"] for item in synthetic.list_scenarios(
+        collection="n5-core", revision="5.3",
+    )] == ["annihilation", "domination", "supplies", "firefight"]
+    season_item = synthetic.get_scenario(
+        "annihilation", army_points=300, collection="its-18", revision="2026.09.01",
+    )
+    core_item = synthetic.get_scenario(
+        "annihilation", army_points=300, collection="n5-core", revision="5.3",
+    )
+    assert season_item is not None and season_item["publication"]["collection_id"] == "its-18"
+    assert core_item is not None and core_item["publication"]["collection_id"] == "n5-core"
+    assert synthetic.list_scenarios(collection="its-17", revision="2025.09.01") == []
+    assert synthetic.get_scenario(
+        "annihilation", army_points=300, collection="its-17", revision="2025.09.01",
+    ) is None
+
+
+@pytest.mark.parametrize(
+    ("collection", "revision"),
+    [
+        ("its-18", None),
+        (None, "2026.09.01"),
+        ("ITS 18", "2026.09.01"),
+        ("its-18", ""),
+        ("its-18", " 2026.09.01"),
+    ],
+)
+def test_scenario_catalog_rejects_partial_or_malformed_season_selection(
+    scenario_catalog: ScenarioCatalog,
+    collection: str | None,
+    revision: str | None,
+) -> None:
+    with pytest.raises(ValueError):
+        scenario_catalog.list_scenarios(collection=collection, revision=revision)
+    with pytest.raises(ValueError):
+        scenario_catalog.get_scenario(
+            "annihilation", army_points=300,
+            collection=collection, revision=revision,
+        )
