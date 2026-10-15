@@ -1794,3 +1794,40 @@ acceptance item in `docs/TODO.md`, not the separate REA-020 Fireteam
 mechanics/source review, scenario interaction acceptance or final
 source-to-storage-to-browser completeness gate. No frontend or curated
 mechanics were changed in this acceptance pass.
+
+## 1.0 four-core-scenario browser acceptance
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** Headless Chromium used the
+current Army database and a privately rebuilt current curated rules
+database. Annihilation, Domination, Supplies and Firefight were browsed
+from `/scenarios` on 1440/390/320 px layouts. Each scenario opened at
+the published 300-point default. The page was switched through all six
+supported sizes (150, 200, 250, 300, 350, 400), and rapid successive
+changes were checked to ensure the final selected setup, map identity,
+objectives and table facts won rather than stale asynchronous results.
+
+**792/792 main-flow checks passed.** Every game-size map rendered as an
+inline canonical SVG and remained within the viewport. Light and dark
+themes and inch/centimeter display were switched on each scenario at
+all three viewport sizes, checking the live SVG labels, table size,
+selection and absence of JavaScript errors or page-level overflow.
+Keyboard activation of scoped rules links, browser back to the scenario,
+then back to the four-card catalog worked. Screenshots of the 320 px
+light/dark inch/cm configurations were visually reviewed for readability.
+
+**13/13 additional controlled checks passed.** The catalog loading,
+empty-list and API-error states were verified by intercepting its
+requests. Detail API failure displayed an error and recovered after a
+subsequent valid Army Points choice; unsupported direct game size
+produced an explicit error. A touch-enabled 390 px context verified
+catalog navigation, Settings/distance switching, the first-tap
+maintained-reference preview, second-tap navigation, browser back and
+restoration of the selected size. External requests were not used for
+this acceptance. The private verifiers, screenshots and results remain
+ignored under `local/audits/final-scenario-browser/`.
+
+**Scope:** Browser acceptance only (805/805 total). This does not close
+the separate source-completeness review of every scenario fact and
+scenario-specific rule at every supported size, nor resolve the
+Domination 350-point SWC conflict or perform the complete 1.0 release
+gate. No application code or curated scenario mechanics were changed.

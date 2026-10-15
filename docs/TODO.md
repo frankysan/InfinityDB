@@ -1215,11 +1215,17 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
   contained member tables horizontally at 320 px. No JavaScript errors
   or page-level overflow. This is browser acceptance, not a Fireteam
   list builder or a resolution of separately tracked REA-020 mechanics.
-- [ ] **Web frontend — core-scenario browser acceptance:** Browse all four
-  Scenarios, change Army Points rapidly, follow scoped rules links, navigate
-  away/back, and check maps in both themes and distance units. Exercise
-  keyboard and touch, including loading/empty/error states where practical.
-  Coordinate this with the existing scenario source-completeness task.
+- [x] **Web frontend - core-scenario browser acceptance:** All four core
+  Scenarios were exercised against current curated rules at 1440, 390 and
+  320 px. **805/805** browser checks passed across the six supported Army
+  Points values, rapid selection, scoped rules links, history navigation,
+  light/dark themes, inch/cm SVG labels and table measurements, keyboard
+  and touch interaction (including first-tap preview/second-tap follow),
+  and controlled loading/empty/API error/recovery states. No JavaScript
+  errors or page-level overflow; narrow maps were visually reviewed.
+  This closes browser acceptance only. The separate six-size scenario
+  source-inventory review, scoped concepts and unresolved Domination
+  350-point SWC discrepancy remain explicitly open.
 - [ ] **Web frontend — Visibility Zone and Ammunition/Immunity acceptance:**
   Open Visibility Zone tooltips and Ammunition/Immunity cross-links with
   pointer, keyboard and touch. Verify readable content and no horizontal
