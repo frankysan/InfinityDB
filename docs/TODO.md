@@ -1279,14 +1279,14 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     this resolves the presentation defect, not the broader 1.0 browser gate.
   - [ ] Close the 1.0 interaction-review target in the maintained ledger, regenerate the checklist,
     and require the following check to pass. Never edit the generated checklist manually.
-    The current gate reports seven pending supporting identities: PARA, Shock
-    and Stun Ammunition, plus the four core Scenarios. Normal, DA, Smoke, Eclipse,
-    AP, E/M, EXP and T2 have been reviewed against pinned N5.3 and Wiki sources.
-    EXP's mandatory rolls, combined AP+EXP and covered Immunity effects are
-    explicit. T2's separate hit/Critical damage and the English PDF's ARM Roll
-    versus Spanish/Wiki's unspecified Saving Roll are retained without imposing
-    a universal Saving Attribute. The failure output lists exact remaining IDs;
-    close them only after source/interaction review, not browser coverage:
+    The current gate reports four pending supporting identities: the core
+    Annihilation, Domination, Firefight, and Supplies Scenarios. All eleven
+    canonical Ammunition identities are reviewed against pinned N5.3 and Wiki
+    sources. The latest batch documents PARA's missing-PH exception and
+    recovery/re-infliction, Shock's VITA 1/Unconscious/Explode conditions,
+    and Stun's Guts Roll and weapon-scoped Flash Pulse Immunity example.
+    The failure output lists exact remaining IDs; close them only after
+    source/interaction review, not merely browser coverage:
 
     ```text
     python tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md --require-release 1.0.0

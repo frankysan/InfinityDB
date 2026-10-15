@@ -20359,6 +20359,10 @@
             "name": "Paralysis (PARA) Ammunition",
             "summary": "Non-lethal Ammunition that uses a modified PH Saving Roll and can immobilize affected targets.",
             "facts": {
+                "clarifications": [
+                    "PARA requires a PH-6 Saving Roll per hit. If the target has no PH Attribute, there is no roll or effect; if it has PH, a failed roll causes [[state:immobilized-a|Immobilized-A]] without inflicting a Wound and a Critical adds one more PH-6 roll. For example, PH 12 becomes PH 6 against PARA: a result of 6 or less succeeds. This is the printed Heavy Riotstopper example, not an automatic condition imposed on every target hit.",
+                    "A successful [[skill:engineer|Engineer]] or [[skill:dodge|Dodge]] cancellation does not prevent a new PARA hit from causing [[state:immobilized-a|Immobilized-A]] later in the same Order. Check the [[rule:order-expenditure-sequence|Order Expenditure Sequence]] and the existing recovery/re-infliction example under the [[state:immobilized-a|Immobilized-A]] reference."
+                ],
                 "ammunitionResolution": {
                     "criticalAdditionalSavingRolls": 1,
                     "savingRoll": {
@@ -20389,6 +20393,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "heading": "Paralysis (PARA) Ammunition",
                     "member": "Paralysis_(PARA)_Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 65,
+                    "heading": "Paralysis (PARA) Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 66,
+                    "heading": "Munición Paralizante (PARA)"
                 }
             ],
             "review": {
@@ -20406,7 +20420,7 @@
             "id": "ammunition:shock",
             "kind": "ammunition",
             "name": "Shock Ammunition",
-            "summary": "Lethal Ammunition that can bypass incapacitation for vulnerable one-Vitality targets.",
+            "summary": "Shock causes one Wound per failed Saving Roll, plus one additional Saving Roll on a Critical. For targets with [[attribute:vita|VITA]] 1, any failed Shock Saving Roll bypasses [[state:unconscious|Unconscious]] and sends the target directly to [[state:dead|Dead State]].",
             "composition": {
                 "role": "definition"
             },
@@ -20421,6 +20435,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "heading": "Shock Ammunition",
                     "member": "Shock_Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 65,
+                    "heading": "Shock Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 67,
+                    "heading": "Munición Shock"
                 }
             ],
             "review": {
@@ -20428,6 +20452,11 @@
                 "reviewedOn": "2026-10-09"
             },
             "facts": {
+                "clarifications": [
+                    "The direct-to-[[state:dead|Dead]] exception requires [[attribute:vita|VITA]] 1 and a failed Shock Saving Roll. It cancels any [[state:unconscious|Unconscious]] form the target is in or entered this Order, including [[skill:shasvastii|Shasvastii-Embryo]], and bypasses [[skill:dogged|Dogged]] and [[skill:no-wound-incapacitation|No Wound Incapacitation]]. For other target Attributes or VITA values, resolve Shock's ordinary one Wound per failed Saving Roll instead.",
+                    "The pinned Shock Wiki notes that [[skill:explode|Explode]] does not trigger when the target goes directly to [[state:dead|Dead]] instead of entering [[state:unconscious|Unconscious]]. This follows the same VITA 1 failed-roll condition, not every Shock hit.",
+                    "For a covered non-Comms Attack, applicable [[skill:immunity|Immunity (Shock)]] treats this as [[ammunition:normal|Normal]], preserving the ordinary Wound per failed Saving Roll but ignoring Shock's direct-to-Dead effect. The extra Critical Saving Roll remains unless [[skill:immunity|Immunity (Critical)]] applies."
+                ],
                 "ammunitionResolution": {
                     "criticalAdditionalSavingRolls": 1,
                     "rollsPerHit": 1,
@@ -20525,6 +20554,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "heading": "Stun Ammunition",
                     "member": "Stun_Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 67,
+                    "heading": "Stun Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 63,
+                    "heading": "Munición Aturdidora (Stun)"
                 }
             ],
             "review": {
@@ -20548,7 +20587,8 @@
                     }
                 },
                 "clarifications": [
-                    "After a failed Saving Roll, the subsequent [[rule:guts-roll|Guts Roll]] automatically fails unless the target has [[skill:courage|Courage]] or equivalent protection."
+                    "Stun requires one Saving Roll per hit and one extra roll on a Critical; failing causes [[state:stunned|Stunned]]. After a failed Saving Roll, the subsequent eligible [[rule:guts-roll|Guts Roll]] automatically fails unless the target has [[skill:courage|Courage]] or equivalent protection. An ineligible Trooper does not gain a Guts Roll merely because it was hit by Stun.",
+                    "The printed [[weapon:flash-pulse|Flash Pulse]] versus [[skill:immunity|Immunity (BTS)]] example is specific to that weapon: its [[trait:non-lethal|Non-Lethal]] Trait prevents Wounds and [[trait:state|State: Stunned]] still causes [[state:stunned|Stunned]] on a failed BTS Saving Roll, even when [[skill:immunity|Immunity]] treats [[ammunition:stun|Stun]] as [[ammunition:normal|Normal]]. The Saving Roll remains BTS. Do not generalize this exact Trait exception to every Stun weapon."
                 ]
             },
             "relations": [

@@ -1111,6 +1111,104 @@ def test_exp_t2_reviewed_rolls_and_source_discrepancy_reach_api(tmp_path: Path) 
             assert published["facts"]["sourceNotes"] == record["facts"]["sourceNotes"]
 
 
+def test_reviewed_para_shock_stun_conditions_reach_rules_and_api(
+    tmp_path: Path,
+) -> None:
+    """N5.3 source conditions stay distinct from unconditional graph relations."""
+    rules_db = _rules_database(tmp_path)
+    app = create_app(
+        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
+        rules_database_path=rules_db.path,
+    )
+    pages = {
+        "para": (65, 66),
+        "shock": (65, 67),
+        "stun": (67, 63),
+    }
+    for slug, (en_page, es_page) in pages.items():
+        record = rules_db.composed_record(f"ammunition:{slug}")
+        assert record is not None
+        assert {
+            (c["source_id"], c.get("page")) for c in record["citations"]
+        } >= {
+            ("n5-core-v5.3-pdf", en_page),
+            ("n5-core-v5.3-es-pdf", es_page),
+        }
+        facts = record["facts"]
+        assert facts["ammunitionResolution"]["criticalAdditionalSavingRolls"] == 1
+        clarifications = " ".join(facts["clarifications"])
+        if slug == "para":
+            assert facts["ammunitionResolution"]["savingRoll"] == {
+                "attribute": "PH", "modifier": -6, "missingAttribute": "no-effect",
+            }
+            assert facts["ammunitionResolution"]["stateEffects"] == [{
+                "stateId": "state:immobilized-a", "condition": "failed-saving-roll",
+            }]
+            assert "no PH Attribute" in clarifications
+            assert "without inflicting a Wound" in clarifications
+            assert "PH 12 becomes PH 6" in clarifications
+            assert "[[skill:engineer|Engineer]]" in clarifications
+            expected_state = "state:immobilized-a"
+        elif slug == "shock":
+            assert facts["ammunitionResolution"]["stateEffects"] == [{
+                "stateId": "state:dead",
+                "condition": "failed-saving-roll",
+                "targetAttribute": {"name": "VITA", "equals": 1},
+                "application": "bypass-unconscious",
+            }]
+            assert "[[skill:dogged|Dogged]]" in clarifications
+            assert "[[skill:no-wound-incapacitation|No Wound Incapacitation]]" in clarifications
+            assert "[[skill:explode|Explode]] does not trigger" in clarifications
+            assert "Immunity (Shock)" in clarifications
+            expected_state = "state:dead"
+        else:
+            assert facts["ammunitionResolution"]["stateEffects"] == [{
+                "stateId": "state:stunned", "condition": "failed-saving-roll",
+            }]
+            assert facts["ammunitionResolution"]["gutsEffect"] == {
+                "condition": "failed-saving-roll",
+                "result": "automatic-failure",
+                "exception": "courage-or-equivalent",
+            }
+            assert "[[weapon:flash-pulse|Flash Pulse]]" in clarifications
+            assert "[[trait:non-lethal|Non-Lethal]]" in clarifications
+            assert "[[trait:state|State: Stunned]]" in clarifications
+            assert "The Saving Roll remains BTS" in clarifications
+            assert "Do not generalize" in clarifications
+            expected_state = "state:stunned"
+
+        assert ("causes-state", "outbound", expected_state) in {
+            (r["type"], r["direction"], r["record"]["id"])
+            for r in record["display_relations"]
+        }
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=f"/api/ammunition/{slug}", REQUEST_METHOD="GET")
+        statuses: list[str] = []
+        response = app(
+            environ,
+            lambda status, headers, exc_info=None, _statuses=statuses: _statuses.append(
+                status
+            ),
+        )
+        assert statuses == ["200 OK"]
+        published = json.loads(b"".join(response))["rules"][0]
+        assert published["summary"] == record["summary"]
+        assert published["facts"] == facts
+        assert len(published["fact_tokens"]["clarifications"]) == len(
+            facts["clarifications"]
+        )
+        linked = {
+            token["target"]
+            for tokens in published["fact_tokens"]["clarifications"]
+            for token in tokens
+            if token["type"] == "reference"
+        }
+        assert expected_state in linked
+        if slug == "stun":
+            assert {"weapon:flash-pulse", "trait:non-lethal", "skill:immunity"} <= linked
+
+
 def test_smoke_eclipse_opposition_and_msv_exception_reach_api(
     tmp_path: Path,
 ) -> None:

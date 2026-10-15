@@ -65,11 +65,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     }
     assert report["summary"]["releases"]["1.0.0"] == {
         "total": 92,
-        "complete": 85,
-        "pending": 7,
-        "reviewed": 85,
+        "complete": 88,
+        "pending": 4,
+        "reviewed": 88,
         "inherited": 0,
-        "percentComplete": 92.4,
+        "percentComplete": 95.7,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
@@ -117,8 +117,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         },
     }
     assert report["summary"]["supporting"]["total"] == 179
-    assert report["summary"]["supporting"]["complete"] == 172
-    assert report["summary"]["supporting"]["pending"] == 7
+    assert report["summary"]["supporting"]["complete"] == 175
+    assert report["summary"]["supporting"]["pending"] == 4
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
     equipment_items = [
@@ -274,14 +274,18 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         ("modifies-use-of", "skill:place-deployable")
     ]
     for record_id in {
-        "ammunition:para",
-        "ammunition:shock",
-        "ammunition:stun",
+        "scenario:annihilation",
+        "scenario:domination",
+        "scenario:firefight",
+        "scenario:supplies",
     }:
         assert items[record_id]["status"] == "pending"
         assert items[record_id]["targetRelease"] == "1.0.0"
 
     for record_id in {
+        "ammunition:para",
+        "ammunition:shock",
+        "ammunition:stun",
         "ammunition:exp",
         "ammunition:t2",
         "ammunition:ap",
@@ -571,20 +575,25 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 172/179 complete, 7 pending" in output
+    assert "Supporting identities: 175/179 complete, 4 pending" in output
 
 
 def test_rules_interaction_1_0_gate_lists_pending_identities(capsys) -> None:
     assert main(["--require-release", "1.0.0"]) == 1
     output = capsys.readouterr().out
-    assert "7 supporting identities pending" in output
+    assert "4 supporting identities pending" in output
     pending_line = next(
         line for line in output.splitlines() if line.startswith("Pending identities:")
     )
     identities = pending_line.removeprefix("Pending identities: ").split(", ")
-    assert len(identities) == 7
+    assert len(identities) == 4
     assert identities == sorted(identities)
-    assert identities[0] == "ammunition:para"
+    assert identities == [
+        "scenario:annihilation",
+        "scenario:domination",
+        "scenario:firefight",
+        "scenario:supplies",
+    ]
     assert "scenario:firefight" in identities
 
 

@@ -2811,6 +2811,24 @@ If InfinityDB exposes these interactions, they should be represented as cited
 target/effect predicates tied to rules identities. They must not be promoted to
 unconditional static properties of every Weapon occurrence.
 
+The 1.0 Ammunition review confirms that PARA has no Saving Roll or effect for
+targets without PH; a failed PH-6 roll causes IMM-A only if the target can make
+that roll. Successful Engineer/Dodge recovery does not protect against
+re-infliction by a new failed PARA roll during the same Order. Shock causes
+one Wound per failed Saving Roll, but the direct-to-Dead exception and
+cancellation of Unconscious forms (including Dogged, NWI and Shasvastii-Embryo)
+require **VITA 1** and a failed save. The pinned Shock Wiki also excludes
+Explode when the target goes straight to Dead without entering Unconscious.
+Stun imposes Stunned only after a failed Saving Roll; it automatically fails
+an otherwise eligible subsequent Guts Roll unless Courage or equivalent
+protection applies. The printed Flash Pulse versus Immunity (BTS) case retains
+Non-Lethal and State: Stunned, but does not establish a generic immunity rule
+for every Stun weapon. See RS-AW-IMM-001 for that exact exception boundary.
+
+Evidence: English N5.3 pp. 65, 67; Spanish N5.3 pp. 63, 66–67; pinned
+English Wiki PARA revision 3419, Shock revision 3074, Stun revision 3420,
+and Immunity revision 3643.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Electromagnetic_(E/M)_Ammunition>

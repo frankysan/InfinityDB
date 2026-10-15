@@ -1880,14 +1880,16 @@
     {
       "recordId": "ammunition:para",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 p. 65, Spanish p. 66 and pinned English Wiki PARA revision 3419 confirm one PH-6 Saving Roll per hit and one additional roll for a Critical, IMM-A only after failure, and no roll/effect where PH does not exist. The Heavy Riotstopper PH 12 example and the order-sequencing Engineer/Dodge re-infliction case remain conditional. The existing causes-state relation to Immobilized-A is intentionally qualified by the typed condition and missing-PH rule, not unconditional; PARA does not inflict a Wound."
     },
     {
       "recordId": "ammunition:shock",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 p. 65, Spanish p. 67 and pinned English Wiki Shock revision 3074 confirm one Saving Roll per hit, one Wound per failure, and one extra roll for a Critical. Direct-to-Dead via bypassing Unconscious forms, Dogged and NWI applies only when a target with VITA 1 fails a Shock save; it is not a blanket outcome for STR or other VITA values. Pinned Wiki also says Explode does not activate on direct Dead. Conditional Immunity (Shock) can treat this as Normal on eligible non-Comms Attacks while a Critical bonus persists unless Immunity (Critical) applies. The outgoing causes-state edge remains conditioned, with no unconditional relation to those Skills."
     },
     {
       "recordId": "ammunition:smoke",
@@ -1899,8 +1901,9 @@
     {
       "recordId": "ammunition:stun",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 p. 67, Spanish p. 63 and pinned English Wiki Stun revision 3420 confirm one Saving Roll per hit, an extra roll for a Critical, Stunned on failure, and automatically failed subsequent eligible Guts Roll absent Courage/equivalent. Stun alone does not grant a Guts Roll to ineligible targets. The printed pinned Immunity (BTS) versus Flash Pulse case is weapon-specific: a BTS roll still occurs; Non-Lethal prevents Wounds and State: Stunned survives the normal Immunity trait protection. Do not generalize that printed weapon case to all Stun attacks; the outgoing causes-state relation remains conditional."
     },
     {
       "recordId": "ammunition:t2",

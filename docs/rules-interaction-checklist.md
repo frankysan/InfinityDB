@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **172/179** complete, **7** pending.
+- Supporting semantic identities: **175/179** complete, **4** pending.
 - Current authored outgoing relations: **444**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -872,7 +872,7 @@ review. `declaration-category` projection records are excluded.
 
 ### 1.0.0
 
-#### Ammunition (8/11)
+#### Ammunition (11/11)
 
 - [x] **Armor Piercing (AP) Ammunition** (`ammunition:ap`) — reviewed: English N5.3 p. 63, Spanish N5.3 p. 66 and pinned English Wiki AP revision 2990 confirm one ARM/2 or BTS/2 Saving Roll per hit, upward rounding with positive minimum 1, one Wound per failed roll and an additional modified roll for a Critical. The owning Immunity rule conditionally covers AP for applicable non-Comms attacks: Immunity (AP) leaves DA rolls intact on AP+DA, whereas Immunity (ARM/BTS) may treat covered Ammunition as Normal. No unconditional outgoing relation from AP to Immunity or combined components is warranted.
   - outgoing: none
@@ -887,13 +887,13 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Normal (N) Ammunition** (`ammunition:normal`) — reviewed: N5.3 English p. 63 and pinned English Wiki Normal revision 2989 confirm one Saving Roll per hit, one Wound per failed roll and one extra Saving Roll for a Critical. The weapon specifies ARM/BTS/other Saving Attribute; Normal adds no further condition or outgoing rules relation. Combined Saving Rolls and Immunity exceptions belong to their owning rules, not this base Ammunition.
   - outgoing: none
-- [ ] **Paralysis (PARA) Ammunition** (`ammunition:para`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Paralysis (PARA) Ammunition** (`ammunition:para`) — reviewed: English N5.3 p. 65, Spanish p. 66 and pinned English Wiki PARA revision 3419 confirm one PH-6 Saving Roll per hit and one additional roll for a Critical, IMM-A only after failure, and no roll/effect where PH does not exist. The Heavy Riotstopper PH 12 example and the order-sequencing Engineer/Dodge re-infliction case remain conditional. The existing causes-state relation to Immobilized-A is intentionally qualified by the typed condition and missing-PH rule, not unconditional; PARA does not inflict a Wound.
   - `causes-state` → Immobilized-A State (`state:immobilized-a`)
-- [ ] **Shock Ammunition** (`ammunition:shock`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Shock Ammunition** (`ammunition:shock`) — reviewed: English N5.3 p. 65, Spanish p. 67 and pinned English Wiki Shock revision 3074 confirm one Saving Roll per hit, one Wound per failure, and one extra roll for a Critical. Direct-to-Dead via bypassing Unconscious forms, Dogged and NWI applies only when a target with VITA 1 fails a Shock save; it is not a blanket outcome for STR or other VITA values. Pinned Wiki also says Explode does not activate on direct Dead. Conditional Immunity (Shock) can treat this as Normal on eligible non-Comms Attacks while a Critical bonus persists unless Immunity (Critical) applies. The outgoing causes-state edge remains conditioned, with no unconditional relation to those Skills.
   - `causes-state` → Dead State (`state:dead`)
 - [x] **Smoke Ammunition** (`ammunition:smoke`) — reviewed: N5.3 English p. 66, Spanish p. 65 and pinned English Wiki Smoke revision 3642 confirm the unopposed/Face-to-Face conditions, MSV exclusion, Dodge exception, Critical, removal, infinite-height volume and horizontal/vertical scenery clipping. Conditional LoF interactions are described with linked references; no blanket outgoing effect edge is justified. Eclipse's distinct MSV exception is reviewed separately.
   - outgoing: none
-- [ ] **Stun Ammunition** (`ammunition:stun`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Stun Ammunition** (`ammunition:stun`) — reviewed: English N5.3 p. 67, Spanish p. 63 and pinned English Wiki Stun revision 3420 confirm one Saving Roll per hit, an extra roll for a Critical, Stunned on failure, and automatically failed subsequent eligible Guts Roll absent Courage/equivalent. Stun alone does not grant a Guts Roll to ineligible targets. The printed pinned Immunity (BTS) versus Flash Pulse case is weapon-specific: a BTS roll still occurs; Non-Lethal prevents Wounds and State: Stunned survives the normal Immunity trait protection. Do not generalize that printed weapon case to all Stun attacks; the outgoing causes-state relation remains conditional.
   - `causes-state` → Stunned State (`state:stunned`)
 - [x] **T2 Ammunition** (`ammunition:t2`) — reviewed: English N5.3 p. 67, Spanish p. 67 and pinned Wiki T2 revision 2999 confirm two Wounds on a failed hit Saving Roll and only one on failure of the additional Critical roll; players must identify dice before rolling. Cross-source wording differs: English PDF specifies ARM Roll, Spanish PDF and English Wiki say Saving Roll without an Attribute. Retain the weapon's authoritative printed Saving Roll Attribute and expose the discrepancy in sourceNotes. Applicable Immunity (T2) reduces covered failed-hit effects to Normal, without automatically removing a Critical roll; this is derived, not printed specifically for T2. No unconditional outgoing relation is justified.
   - outgoing: none

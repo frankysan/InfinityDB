@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- PARA clarifies its missing-PH exception and re-infliction after recovery.
+  Shock explains when its VITA 1 effect bypasses Unconscious protections;
+  Stun explains Guts Rolls and the specific Flash Pulse Immunity exception.
 - EXP now explains its mandatory three Saving Rolls and fourth Critical roll,
   including AP+EXP. T2 distinguishes its two-Wound hit from its one-Wound
   additional Critical roll and retains a source-language discrepancy.
@@ -323,6 +326,10 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing + Web frontend:** Clarify PARA's PH-6/no-PH and
+  conditional IMM-A outcomes, Shock's VITA 1 Dead transition and related
+  Special Skills, and Stun's Courage/Guts effect and the narrow Flash Pulse
+  Immunity (BTS) exception. Preserve canonical conditional State facts.
 - **Data processing + Web frontend:** Clarify EXP's mandatory Saving Rolls
   and combined AP+EXP example; record T2's distinct Critical roll and explicit
   English/Spanish/Wiki Saving Attribute discrepancy without overriding Weapon data.
