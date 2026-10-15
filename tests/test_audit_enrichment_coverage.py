@@ -214,8 +214,8 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
         classification_path=_fixture_classification_policy(tmp_path),
     )
 
-    assert report["summary"]["exposedCount"] == 155
-    assert report["summary"]["completeCount"] == 154
+    assert report["summary"]["exposedCount"] == 156
+    assert report["summary"]["completeCount"] == 155
     assert report["summary"]["gapCount"] == 1
     assert report["summary"]["gapCounts"] == {
         "missing_rule_definition": 1,
@@ -231,6 +231,9 @@ def test_enrichment_coverage_reports_review_mapping_and_source_freshness(tmp_pat
     assert skills["CC Attack"]["gapCodes"] == []
     assert skills["Missing Skill"]["gapCodes"] == ["missing_rule_definition"]
     assert skills["Request Speedball"]["gapCodes"] == []
+    # Request SpecBall became a published Skill after the original fixture
+    # counts were recorded; retain explicit coverage instead of relaxing totals.
+    assert skills["Request SpecBall"]["gapCodes"] == []
     assert skills["Missing Skill"]["gapClassifications"][0]["classification"] == (
         "release-blocker"
     )
