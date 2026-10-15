@@ -410,6 +410,46 @@
       "profileSha256": "d05aea006681a3b31f01c588bc6efcd008841b70596c0244d5c36dffd24418f7",
       "reviewedOn": "2026-10-15",
       "reason": "N5.3 chart p. 184, Army and English/Spanish Wiki agree: B1, PARA Ammunition, one PH-6 Saving Roll, no PS or range bands, Non-Lethal, Intuitive Attack, State: IMM-A and Large Teardrop Direct Template. Canonical PARA, Direct Template and Intuitive Attack cover the rules; do not inherit the Light variant's Small Template or a damaging PS."
+    },
+    {
+      "slug": "smoke-grenade-launcher",
+      "name": "Smoke Grenade Launcher",
+      "chartPage": 179,
+      "profileSha256": "ab971d9bfc64ba9e9413b0b6a14ba92c5cb9be6524de0d5f9bd11de6df068359",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 179, Army and captured English/Spanish Wiki agree: PS --, B1, Smoke Ammunition, no Saving Roll, Circular Impact Template, Speculative Attack, Targetless, Non-Lethal and [**] notation. The canonical Smoke Ammunition and target/impact/template rules cover this placement effect; do not infer a damaging hit or ARM/BTS Saving Roll."
+    },
+    {
+      "slug": "grenade-launcher",
+      "name": "Grenade Launcher",
+      "chartPage": 179,
+      "profileSha256": "e59dab06860050c13739391e456f3e22c4827ec64260faafdbf11bab40a2bde5",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 179, Army and captured English/Spanish Wiki agree: PS 7, B1, Normal Ammunition, one ARM Saving Roll, Speculative Attack and Circular Impact Template, without Targetless. Canonical Normal Ammunition, Speculative Attack and Impact Template supply all printed mechanics; no separate Launcher-specific effect is required."
+    },
+    {
+      "slug": "e-m-grenade-launcher",
+      "name": "E/M Grenade Launcher",
+      "chartPage": 179,
+      "profileSha256": "d7256c6d598ba39f3ffe3912883249c615002108959c0134ff9a37baf850d3b0",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 179, Army and captured English/Spanish Wiki agree: PS 7, B1, E/M Ammunition, two BTS/2 Saving Rolls, Non-Lethal, Speculative Attack, Circular Impact Template and [**] notation. The existing E/M and Trait references explain the effects. This version is not Targetless and does not inherit the Smoke launcher properties."
+    },
+    {
+      "slug": "eclipse-grenade-launcher",
+      "name": "Eclipse Grenade Launcher",
+      "chartPage": 179,
+      "profileSha256": "a49b73bb251965f5a8b63d7997c974946690d2ec45f6e0aa74413be9eed165cc",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 179, Army and captured English/Spanish Wiki agree: PS --, B1, Eclipse Ammunition, no Saving Roll, Reflective, Non-Lethal, Speculative Attack, Targetless and Circular Impact Template. Army retains savingNum=1 but saving Attribute is blank; official PDF and Wikis print no Saving Roll, so the number is non-operative. Canonical Eclipse and linked Traits cover its effects without duplicating rules."
+    },
+    {
+      "slug": "portable-autocannon",
+      "name": "Portable Autocannon",
+      "chartPage": 187,
+      "profileSha256": "69b9e2377b90793cb62e01fe3e74c503d6ef9ccdb095409a4aead239cb582924",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 p. 187, Army and archived English Wiki agree: PS 5, B2, AP+EXP, three ARM/2 Saving Rolls, Anti-materiel and the printed Autocannon range bands. The canonical AP and EXP rules and existing AP+EXP Weapon Property describe these combined effects, not separate firing modes. No unique standalone Autocannon mechanics were found."
     }
   ]
 }

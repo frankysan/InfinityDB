@@ -254,6 +254,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing:** Review four Grenade Launchers and Portable
+  Autocannon as hash-pinned shared-effects-only cases. Canonical
+  Ammunition, Impact Template, Speculative Attack and AP+EXP rules
+  already explain their effects. Preserve Eclipse's non-operative
+  imported Saving Roll number. Pending Weapon reviews fall to 13.
 - **Data processing:** Review E/M Carbine, AP+T2 CC Weapon,
   Monofilament CC Weapon, and Light/Heavy Riotstoppers as
   profile-hash-pinned shared-effects-only references. Existing

@@ -887,6 +887,76 @@ def test_reviewed_breaker_and_viral_source_profiles_use_shared_rules(
 
 
 @pytest.mark.parametrize(
+    ("slug", "ps", "burst", "ammo", "save", "rolls",
+     "traits", "effects", "property_id", "ranges"),
+    [
+        ("smoke-grenade-launcher", "-", "1", "Smoke", "-", "-",
+         ["Speculative Attack", "Non-lethal", "Impact Template (Circular)",
+          "Targetless", "[**]"],
+         ["ammunition:smoke"], None,
+         {"med": {"max": 60, "mod": "0"},
+          "long": {"max": 80, "mod": "-3"},
+          "max": {"max": 120, "mod": "-6"}}),
+        ("grenade-launcher", "7", "1", "N", "ARM", "1",
+         ["Speculative Attack", "Impact Template (Circular)"],
+         ["ammunition:normal"], None,
+         {"med": {"max": 60, "mod": "0"},
+          "long": {"max": 80, "mod": "-3"},
+          "max": {"max": 120, "mod": "-6"}}),
+        ("e-m-grenade-launcher", "7", "1", "E/M", "BTS/2", "2",
+         ["Speculative Attack", "Non-lethal", "Impact Template (Circular)",
+          "[**]"], ["ammunition:em"], None,
+         {"med": {"max": 60, "mod": "0"},
+          "long": {"max": 80, "mod": "-3"},
+          "max": {"max": 120, "mod": "-6"}}),
+        ("eclipse-grenade-launcher", "-", "1", "Eclipse", "-", "1",
+         ["Speculative Attack", "Non-lethal", "Impact Template (Circular)",
+          "Reflective", "Targetless", "[**]"],
+         ["ammunition:eclipse"], None,
+         {"med": {"max": 60, "mod": "0"},
+          "long": {"max": 80, "mod": "-3"},
+          "max": {"max": 120, "mod": "-6"}}),
+        ("portable-autocannon", "5", "2", "AP+Exp", "ARM/2", "3",
+         ["Anti-materiel"], ["ammunition:ap", "ammunition:exp"],
+         "weapon-property:ap-exp",
+         {"short": {"max": 20, "mod": "-3"},
+          "med": {"max": 40, "mod": "0"},
+          "long": {"max": 80, "mod": "+3"},
+          "max": {"max": 120, "mod": "-3"}}),
+    ],
+)
+def test_reviewed_grenade_launchers_and_portable_autocannon_reuse_rules(
+    weaponry_app: Callable, slug: str, ps: str, burst: str,
+    ammo: str, save: str, rolls: str, traits: list[str],
+    effects: list[str], property_id: str | None,
+    ranges: dict[str, dict[str, int | str]],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []  # Canonical rules own effects.
+    (profile,) = payload["profiles"]
+    assert (profile["mode"], profile["damage"], profile["burst"]) == (
+        None, ps, burst,
+    )
+    assert (
+        profile["ammunition"], profile["saving"], profile["saving_num"],
+    ) == (ammo, save, rolls)
+    assert profile["traits"] == traits
+    assert profile["ranges"] == ranges
+    assert [ref["label"] for ref in profile["trait_references"]] == traits
+    assert [ref["record_id"] for ref in profile["ammunition_effects"]] == effects
+    assert all(ref["summary"] and ref["citations"]
+               for ref in profile["ammunition_effects"])
+    assert [ref["id"] for ref in profile.get("weapon_properties", [])] == (
+        [property_id] if property_id else []
+    )
+    if slug in ("smoke-grenade-launcher", "eclipse-grenade-launcher"):
+        # Source has no Saving Roll, despite Army's non-operative
+        # savingNum=1 field on Eclipse.
+        assert profile["damage"] == "-" and profile["saving"] == "-"
+        assert "Targetless" in profile["traits"]
+
+
+@pytest.mark.parametrize(
     ("slug", "ps", "burst", "ammo", "saving", "rolls",
      "traits", "effect", "property_id", "ranges"),
     [

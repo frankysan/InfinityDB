@@ -601,15 +601,24 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Keep AP+EXP CC Weapon and Stun Pistol pending: their Spanish
       Wiki Saving Roll counts conflict with official N5.3 and Army
       (and the Spanish Stun Pistol row omits the Stunned Trait).
+    - [x] Source-review Smoke, standard, E/M and Eclipse Grenade
+      Launchers plus Portable Autocannon against N5.3, pinned Army
+      and archived English/Spanish Wiki where available. The four
+      launchers reuse their exact canonical Ammunition, Speculative
+      Attack and Impact Template rules; the Autocannon reuses
+      AP+EXP with Anti-materiel. Preserve the Army Eclipse
+      savingNum=1 field but treat it as non-operative with no
+      Saving Roll Attribute, as in the printed source chart.
+      Record five full-profile-hash-pinned shared-only decisions.
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. Current source-bound triage:
-      70 classified gaps = 51 accepted shared-effects, 1 accepted
-      historical citation, and 18 pending source reviews (including
+      70 classified gaps = 56 accepted shared-effects, 1 accepted
+      historical citation, and 13 pending source reviews (including
       8 multi-profile candidates and the AP Thunderbolt, AP+EXP CC
-      Weapon and Stun Pistol source discrepancies). These audit gap
-      codes are not automatically 1.0 gameplay defects. Reconcile
-      remaining candidates by source and browser behavior before
-      adding standalone rules.
+      Weapon and Stun Pistol source discrepancies). Jammer and
+      Katyusha still need source-specific semantic/chart review.
+      These audit gap codes are not automatically 1.0 gameplay
+      defects. Reconcile remaining candidates before adding rules.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
