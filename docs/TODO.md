@@ -626,15 +626,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Combined Saving Rolls and only the Rifle has Suppressive Fire.
       Record four profile-hash-pinned shared-only reviews and preserve
       imported Army 'Continous Damage' as a source alias.
-    - [ ] Continue source-specific Weapon review without duplicating
-      canonical Ammunition or Trait rules. Current source-bound triage:
-      70 classified gaps = 62 accepted shared-effects, 1 accepted
-      historical citation, and 7 pending source reviews. The seven
-      comprise 4 multi-profile candidates and three source conflicts:
-      AP Thunderbolt, AP+EXP CC Weapon, and Stun Pistol. The raw
-      gap code is not necessarily a missing mechanic. Review
-      alternate modes and conflicting publications before adding
-      new definitions.
+    - [x] Source-review Trench-Hammer, Vorpal CC Weapon, MULTI Red Fury
+      and Uragan MRL against N5.3 pp. 68, 177, 183 and 188, imported Army,
+      archived EN/ES Wiki and the dated official N5.3 change notice.
+      Preserve BS/CC and mode-specific effects, remove no source fields,
+      and record four profile-hash-pinned shared-only decisions.
+      Trench-Hammer is not Disposable (3) in N5.3; older alternative Wiki
+      entries retain that historical Trait. Uragan's Spanish 'MTL' Hit
+      Mode name is a source typo, not an additional Weapon.
+    - [ ] Resolve the remaining three material Weapon source conflicts:
+      AP Thunderbolt, AP+EXP CC Weapon, and Stun Pistol. Current source-bound
+      triage: 70 classified gaps = 66 accepted shared-effects, 1 accepted
+      historical citation, and 3 pending conflicts; no multi-profile
+      reviews or missing canonical Ammunition links remain. The raw gap
+      code is not necessarily a missing mechanic. Preserve source
+      differences until resolved; avoid duplicated rules or invented modes.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

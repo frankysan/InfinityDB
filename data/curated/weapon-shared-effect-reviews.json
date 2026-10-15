@@ -498,6 +498,38 @@
       "profileSha256": "e395f6a6bebff51d9c6512c4bc4964ab4dc5b6a20f018001792ca96e9dc77f61",
       "reviewedOn": "2026-10-15",
       "reason": "Official N5.3 pp. 67/176, imported Army and archived English/Spanish Wiki agree: Blast PS 7 and Hit PS 6, both B2 with Normal Ammunition and one ARM plus one BTS Saving Roll; only Blast has a Circular Impact Template. Neither mode has Suppressive Fire. A Critical adds one ARM roll only. Existing Plasma Weapon Property, Combined Saving Roll and Impact Template references suffice; do not inherit Plasma Rifle's Suppressive Fire."
+    },
+    {
+      "slug": "trench-hammer",
+      "name": "Trench-Hammer",
+      "chartPage": 177,
+      "profileSha256": "d2d9716e3368971c3a32a97de7fac787d3fd84c5df4a46e795954b6ee6e18409",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 pp. 68 and 177, Army and the current EN/ES Wiki Weapon Charts agree: the BS mode uses the BS Weapon (PH) Trait and a zero short-range MOD, while the CC mode uses CC; both have PS 6, B1, DA Ammunition, two ARM Saving Rolls, Anti-materiel, and source [*] notation. The official N5.3 update expressly removed Disposable (3) from both uses; older Wiki alternative entries retain that historical trait and must not be applied as current. The existing DA, Anti-materiel, BS Weapon (PH), CC and Mixed Weapons rules cover the mechanics."
+    },
+    {
+      "slug": "vorpal-cc-weapon",
+      "name": "Vorpal CC Weapon",
+      "chartPage": 177,
+      "profileSha256": "a945831f0a43d919d91efdb31d061b032e4b02668f461876da89ce16d2c6939f",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 p. 177, Army and EN/ES Wiki Weapon Charts agree: BS and CC modes both have PS 8, B1, Normal Ammunition, ARM=0 and one Saving Roll, with State: Dead and [*] source notation. BS mode uses BS Weapon (PH) and +3 at 8 inches; CC mode uses CC without a ranged profile. Canonical Normal Ammunition, Dead State, BS Weapon (PH), CC and Mixed Weapons describe the mechanics. Do not rename the printed N Ammunition as a newly invented Vorpal or Monofilament ammunition."
+    },
+    {
+      "slug": "multi-red-fury",
+      "name": "MULTI Red Fury",
+      "chartPage": 183,
+      "profileSha256": "db437d61e41212e044d1ecb73646c5c00eddad1f0d7e101d737e36dc6414a833",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 p. 183, Army and EN/ES Wiki Weapon Charts agree: Anti-materiel mode PS 7, B1, DA, two ARM Saving Rolls and Anti-materiel; AP mode PS 7, B4, AP/ARM/2 with one roll; Shock mode PS 7, B4, Shock/ARM with one roll. Suppressive Fire appears only in AP and Shock modes. All three share 0/+3/-3/-6 range bands. The existing MULTI Weapon Property and linked DA/AP/Shock Ammunition and Traits describe each alternative firing mode; do not transfer Suppressive Fire to the DA mode."
+    },
+    {
+      "slug": "uragan-mrl",
+      "name": "Uragan MRL",
+      "chartPage": 188,
+      "profileSha256": "c8ea44a1290cf5ac4f036ec8c717050fba5e62c741b6ba9bc4e5bed6be08e03b",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 p. 188, Army and EN/ES Wiki Weapon Charts agree on Blast PS 6 and Hit PS 5, both B3 with combined AP+Shock Ammunition, one ARM/2 Saving Roll, and Burst: Single Target. Blast adds Speculative Attack and Circular Impact Template; Hit does not. Canonical AP+Shock Weapon Property and linked Traits cover the separate modes. The Spanish Wiki names Hit Mode 'Uragan MTL' instead of MRL; preserve this as a source text-name discrepancy, not evidence of a new weapon identity. Burst: Single Target restricts all B3 shots to one target, not B1."
     }
   ]
 }

@@ -2341,3 +2341,91 @@ def test_reviewed_rocket_and_plasma_modes(
     assert all(blast["ranges"][key] == hit["ranges"][key] for key in blast["ranges"])
     assert set(band["mod"] for band in blast["ranges"].values()) == set(ranges)
     assert not _weapon_rules(payload)
+
+@pytest.mark.parametrize(
+    ("slug", "expected"),
+    [
+        ("trench-hammer", [
+            ("BS Mode", "6", "1", "DA", "ARM", "2",
+             ["Anti-materiel", "BS Weapon (PH)", "[*]"],
+             ["ammunition:da"]),
+            ("CC Mode", "6", "1", "DA", "ARM", "2",
+             ["Anti-materiel", "CC", "[*]"], ["ammunition:da"]),
+        ]),
+        ("vorpal-cc-weapon", [
+            ("BS Mode", "8", "1", "N", "ARM=0", "1",
+             ["BS Weapon (PH)", "State: Dead", "[*]"], ["ammunition:normal"]),
+            ("CC Mode", "8", "1", "N", "ARM=0", "1",
+             ["CC", "State: Dead", "[*]"], ["ammunition:normal"]),
+        ]),
+        ("multi-red-fury", [
+            ("Antimaterial Mode", "7", "1", "DA", "ARM", "2",
+             ["Anti-materiel"], ["ammunition:da"]),
+            ("AP Mode", "7", "4", "AP", "ARM/2", "1",
+             ["Suppressive Fire"], ["ammunition:ap"]),
+            ("Shock Mode", "7", "4", "Shock", "ARM", "1",
+             ["Suppressive Fire"], ["ammunition:shock"]),
+        ]),
+        ("uragan-mrl", [
+            ("Blast Mode", "6", "3", "AP+Shock", "ARM/2", "1",
+             ["Speculative Attack", "Impact Template (Circular)",
+              "Burst: Single Target"], ["ammunition:ap", "ammunition:shock"]),
+            ("Hit Mode", "5", "3", "AP+Shock", "ARM/2", "1",
+             ["Burst: Single Target"], ["ammunition:ap", "ammunition:shock"]),
+        ]),
+    ],
+)
+def test_remaining_multimode_shared_reviews_preserve_exact_profiles(
+    weaponry_app: Callable, slug: str, expected: list[tuple],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    profiles = payload["profiles"]
+    assert [
+        (p["mode"], p["damage"], p["burst"], p["ammunition"],
+         p["saving"], p["saving_num"], p["traits"],
+         [a["record_id"] for a in p["ammunition_effects"]])
+        for p in profiles
+    ] == expected
+    assert all(a["citations"] for p in profiles for a in p["ammunition_effects"])
+    assert not _weapon_rules(payload)
+    if slug == "trench-hammer":
+        assert all("Disposable (3)" not in p["traits"] for p in profiles)
+        assert profiles[0]["ranges"]["short"]["mod"] == "0"
+        assert profiles[1]["ranges"] == {}
+        assert [
+            [r["slug"] for r in p["trait_references"]]
+            for p in profiles
+        ] == [
+            ["anti-materiel", "bs-weapon-ph", None],
+            ["anti-materiel", "cc", None],
+        ]
+    elif slug == "vorpal-cc-weapon":
+        assert profiles[0]["ranges"]["short"]["mod"] == "+3"
+        assert profiles[1]["ranges"] == {}
+        assert all(
+            any(r.get("public_reference") == {"catalog": "states", "id": "dead"}
+                for r in p["trait_references"])
+            for p in profiles
+        )
+    elif slug == "multi-red-fury":
+        assert all(p["ranges"] == profiles[0]["ranges"] for p in profiles)
+        assert all(p["weapon_properties"][0]["id"] == "weapon-property:multi"
+                   for p in profiles)
+        assert "Suppressive Fire" not in profiles[0]["traits"]
+    else:
+        assert all(p["ranges"] == profiles[0]["ranges"] for p in profiles)
+        assert all(p["burst"] == "3" and
+                   p["weapon_properties"][0]["id"] == "weapon-property:ap-shock"
+                   for p in profiles)
+        assert all(
+            p["ammunition_composition"]["components"] == [
+                {"record_id": "ammunition:ap",
+                 "public_reference": {"catalog": "ammunition", "id": "ap"}},
+                {"record_id": "ammunition:shock",
+                 "public_reference": {"catalog": "ammunition", "id": "shock"}},
+            ]
+            for p in profiles
+        )
+        assert [r["slug"] for r in profiles[1]["trait_references"]] == [
+            "burst-single-target",
+        ]
