@@ -1,3 +1,6 @@
+# Local Node.js documentation linter dependencies
+node_modules/
+
 # Python
 __pycache__/
 *.py[cod]

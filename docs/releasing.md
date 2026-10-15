@@ -179,7 +179,9 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
 - [ ] Run `python tools/verify_deployment_assets.py` and require the tracked Army database,
   rules database, processed SVG publication, and publication snapshot provenance to pass as one
   release set.
-- [ ] Run the complete local validation suite with `python tools/run_checks.py --all`.
+- [ ] Install the pinned Markdownlint dependency with
+  `npm ci --ignore-scripts --no-audit --no-fund` (Node.js 22+), then run the complete local
+  validation suite with `python tools/run_checks.py --all`, including the `docs` stage.
 - [ ] When the release is intended for a local/full-asset deployment, validate the
   complete published asset set with the `required` asset mode as documented in
   `docs/testing.md`.

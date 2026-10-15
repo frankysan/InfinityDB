@@ -184,6 +184,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Project infrastructure:** Add a lockfile-pinned Markdownlint documentation stage to the
+  project check runner and required `--all` CI workflows. Documentation validation runs without
+  automatic dependency downloads; Node.js tooling remains development-only.
 - **Web backend + Web frontend:** Include curated Weapon definitions in
   Glossary using opt-in Army links for canonical family/variant destinations.
   Preserve standalone Army Weapon routes and omit source-mode-specific

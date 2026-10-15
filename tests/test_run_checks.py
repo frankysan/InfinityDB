@@ -33,7 +33,14 @@ def test_stage_selection_uses_canonical_order() -> None:
 def test_all_profile_includes_code_and_data_stages() -> None:
     args = run_checks.build_parser().parse_args(["--profile", "all"])
 
-    assert run_checks.selected_stage_names(args) == ("test", "lint", "type", "build", "rules")
+    assert run_checks.selected_stage_names(args) == (
+        "test", "lint", "docs", "type", "build", "rules"
+    )
+
+
+def test_code_profile_remains_python_only() -> None:
+    args = run_checks.build_parser().parse_args(["--profile", "code"])
+    assert run_checks.selected_stage_names(args) == ("test", "lint", "type")
 
 
 def test_data_profile_builds_army_and_rules_databases() -> None:
@@ -44,7 +51,7 @@ def test_data_profile_builds_army_and_rules_databases() -> None:
 
 def test_stage_commands_use_current_python_and_forward_targets() -> None:
     stages = run_checks.stage_definitions(
-        ("test", "lint", "type", "build", "rules"),
+        ("test", "lint", "docs", "type", "build", "rules"),
         ["tests/test_cli.py"],
         build_source=Path("data/raw/example.zip"),
     )
@@ -69,33 +76,45 @@ def test_stage_commands_use_current_python_and_forward_targets() -> None:
         "check",
         "tests/test_cli.py",
     )
-    assert stages[2].command == (
+    assert Path(stages[2].command[0]).name.lower().startswith("npm")
+    assert stages[2].command[1:] == ("run", "lint:docs")
+    assert stages[3].command == (
         sys.executable,
         "-m",
         "pyright",
         "--pythonpath",
         sys.executable,
     )
-    assert stages[3].command == (
+    assert stages[4].command == (
         sys.executable,
         "-m",
         "infinity_db",
         "build",
         str(Path("data/raw/example.zip")),
         "--output-dir",
-        stages[3].command[6],
+        stages[4].command[6],
         "--compact",
     )
-    assert Path(stages[3].command[6]).parent != Path("data/generated")
-    assert stages[4].command == (
+    assert Path(stages[4].command[6]).parent != Path("data/generated")
+    assert stages[5].command == (
         sys.executable,
         "-m",
         "infinity_db",
         "build-rules",
         "--output",
-        stages[4].command[5],
+        stages[5].command[5],
     )
-    assert Path(stages[4].command[5]).parent != Path("data/generated")
+    assert Path(stages[5].command[5]).parent != Path("data/generated")
+
+
+def test_docs_stage_uses_locked_local_cli_and_ignores_pytest_targets() -> None:
+    [stage] = run_checks.stage_definitions(
+        ("docs",), ["tests/test_run_checks.py"], build_source=None
+    )
+    assert stage.name == "docs"
+    assert Path(stage.command[0]).name.lower().startswith("npm")
+    assert stage.command[1:] == ("run", "lint:docs")
+    assert "npx" not in stage.command
 
 
 def test_test_stage_can_include_full_asset_tests() -> None:

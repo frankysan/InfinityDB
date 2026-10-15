@@ -3,8 +3,8 @@
 **Project domain:** Project infrastructure
 
 `tools/run_checks.py` is the canonical local validation entry point. It keeps pytest, Ruff,
-Pyright, Army database-build validation, rules-database validation, asset policy, worker selection,
-and optional reporting under one command contract.
+Markdownlint, Pyright, Army database-build validation, rules-database validation, asset policy,
+worker selection, and optional reporting under one command contract.
 
 The type-check stage explicitly passes the runner's interpreter to Pyright for dependency
 resolution, so invoking the virtual-environment Python works without first activating that
@@ -20,10 +20,11 @@ On Linux/macOS use `.venv/bin/python` instead.
 
 ## Profiles and stages
 
-The runner exposes five stages:
+The runner exposes six stages:
 
 - `test` — pytest;
 - `lint` — Ruff;
+- `docs` — Markdownlint (Markdown);
 - `type` — Pyright;
 - `build` — Army data/database build validation;
 - `rules` — curated rules validation/database build.
@@ -41,7 +42,23 @@ python tools\run_checks.py --profile data
 python tools\run_checks.py --all
 ```
 
-`--profile all` is equivalent to `--all`.
+`--profile all` is equivalent to `--all` and includes `docs`. The `code` and `data`
+profiles retain their existing Python/data-only stage sets.
+
+The documentation stage uses the exact, lockfile-pinned `markdownlint-cli2` development dependency
+with the project's `.markdownlint.json` rules. It scans repository Markdown while excluding ignored
+local material, dependencies and reports. Install it **explicitly** before running `docs` or `--all`:
+
+```powershell
+npm ci --ignore-scripts --no-audit --no-fund
+.\.venv\Scripts\python.exe tools/run_checks.py --stage docs
+```
+
+Node.js 22 or newer is required (CI uses Node.js 24). `npm run lint:docs` is an equivalent
+direct command. The stage invokes the installed command via `npm run`, not `npx`; checks neither
+install dependencies nor fetch packages automatically. Bootstrap downloads happen only with the
+separate `npm ci` step. Missing npm or dependencies cause an explicit check failure. No Node.js
+build step is part of the application's runtime or packaging.
 
 Requested stages continue after a failure by default so one run can report the complete failure set.
 Use `--fail-fast` when the first failure is sufficient.
@@ -58,8 +75,9 @@ python tools\run_checks.py --stage lint src/infinity_db/web tests/test_web.py
 python tools\run_checks.py --stage type
 ```
 
-Positional targets are passed to pytest/Ruff for their respective stages. Build/rules stages ignore
-those targets. The runner accepts its documented options and test paths/node IDs, not arbitrary
+Positional targets are passed to pytest/Ruff for their respective stages. The `docs` stage
+always checks the configured Markdown set; `docs`, `type`, `build`, and `rules` ignore positional
+targets. The runner accepts its documented options and test paths/node IDs, not arbitrary
 pytest flags. For keyword selection or other pytest-specific options, invoke pytest directly.
 
 Direct tool commands remain appropriate when debugging the tool itself:

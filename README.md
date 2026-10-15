@@ -382,7 +382,13 @@ python tools/run_checks.py --profile code
 # Data/build validation
 python tools/run_checks.py --profile data
 
-# All stages
+# Markdownlint dependencies (one-time/when package-lock.json changes)
+npm ci --ignore-scripts --no-audit --no-fund
+
+# Markdown documentation checks
+python tools/run_checks.py --stage docs
+
+# All stages (including Markdownlint)
 python tools/run_checks.py --all
 
 # Targeted checks

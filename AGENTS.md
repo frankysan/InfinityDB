@@ -37,14 +37,16 @@ Virtual-environment interpreters are normally:
 
 Use `tools/run_checks.py` as the standard entry point for repository checks. It
 invokes pytest, Ruff, Pyright type checking, Army data-build validation, and
-curated rules-database validation through the same Python
-interpreter that launched the runner and keeps stage selection/reporting
-consistent across local development and agent handoffs. Examples:
+curated rules-database validation through the same Python interpreter that launched
+it. The separate `docs` stage invokes Markdownlint through a lockfile-pinned local
+npm dependency. All stages share check selection/reporting across local development
+and agent handoffs. Examples:
 
 ```text
 <venv-python> tools/run_checks.py --profile code
 <venv-python> tools/run_checks.py --profile data
 <venv-python> tools/run_checks.py --all
+<venv-python> tools/run_checks.py --stage docs
 <venv-python> tools/run_checks.py --stage test tests/test_availability.py
 <venv-python> tools/run_checks.py --profile code --report
 <venv-python> tools/run_checks.py --stage test --assets off
@@ -55,7 +57,10 @@ With `--report` and no path, the runner writes an ignored repository-local
 `reports/CHECKS YYYYMMDD-HHMMSS.txt` file using the same run-start timestamp as
 the report header. An explicit report path overrides that convention. Requested
 stages continue after failures by default; use `--fail-fast` when appropriate.
-See `docs/testing.md` for the complete contract.
+For `--stage docs` or `--all`, bootstrap the lockfile-pinned Node.js Markdownlint
+dependency with `npm ci --ignore-scripts --no-audit --no-fund` first (Node.js 22+).
+The check stage itself works offline and does not install packages. The `code`
+profile remains Python-only. See `docs/testing.md` for the complete contract.
 
 Direct pytest/Ruff/Pyright commands remain appropriate when debugging those
 tools in isolation, and package installation still runs through the virtual-environment
