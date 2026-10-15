@@ -46,7 +46,9 @@ class GlossaryCatalog:
             if not domain.published or not domain.glossary:
                 continue
             for kind in domain.record_kinds:
-                for record in self.rules_database.composed_records_by_kind(kind):
+                for record in self.rules_database.composed_records_by_kind(
+                    kind, include_army_links=(kind == "weapon")
+                ):
                     if not record_matches_domain(domain, record):
                         continue
                     if (record.get("variant_semantics") or {}).get("inheritance") == "source":

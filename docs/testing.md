@@ -1689,3 +1689,32 @@ because this curated family has no corresponding Army catalog item.
 An explicit 1.0 navigation acceptance task owns the resolution. The
 new Stealth example deliberately uses unlinked ordinary Mine prose
 and linked Deployable mechanics instead of adding another broken URL.
+
+## 1.0 curated Weapon-family and Glossary routing acceptance
+
+**Verified 2026-10-15, `dev/v1.0.0`.** The canonical link for the
+curated `weapon:mines` family was already
+`/weapons/ap-mine#rule-weapon-mines` (the AP Mine catalog page embeds
+the reviewed Mines rule card). `/weapons/mines` is not a published Army
+Weapon slug and properly returns 404 if guessed directly; it was not
+the generated link. All 51 current curated Weapon definitions were
+audited against the pinned Army database: each resolves to a real
+catalog page hosting its rule (including exact source-mode variants).
+
+The actual defect was Glossary discoverability. Its bulk rules query
+excluded Army links, causing weapon identities to be silently skipped
+when calculating destinations. Army links remain opt-in by default;
+the Glossary requests them only for Weapon records. The resulting
+Glossary publishes 49 non-source-specific Weapon definitions, including
+Mines, PARA Mine and WildParrot, without creating duplicate catalog
+items or publishing source-mode subrecords independently.
+
+Two regression tests verify the opt-in bulk-query contract and the
+published `/api/glossary` weapon destinations. Headless Chromium
+passed **42/42** checks at 1440/390/320 px: searching for Mines in
+Glossary, clicking through to the exact rule-card anchor hosted on
+AP Mine, verifying PARA Mine's local anchor and following WildParrot's
+cross-page Mines reference. No JavaScript exceptions or new horizontal
+clipping of the Mines card were found. Private browser scripts/results
+are ignored under `local/audits/`. Other final cross-surface reference
+acceptance items remain open.

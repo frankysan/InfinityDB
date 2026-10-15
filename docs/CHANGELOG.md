@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Shared Weapon rules such as Mines are now discoverable in the Glossary,
+  with links that open the existing rule card on an actual Army Weapon page.
 - Stealth now gives concrete examples of how Deployables still trigger,
   when a mixed-activation ARO targeting a Stealth user becomes Idle, and
   why Stealth must be announced when used in Marker form.
@@ -182,6 +184,10 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Web backend + Web frontend:** Include curated Weapon definitions in
+  Glossary using opt-in Army links for canonical family/variant destinations.
+  Preserve standalone Army Weapon routes and omit source-mode-specific
+  subrecords from independent Glossary identities.
 - **Data processing + Web frontend:** Add source-backed Stealth
   examples and English/Spanish N5.3/FAQ citations for independent
   Deployable triggers, mixed Controller/Peripheral activation, and

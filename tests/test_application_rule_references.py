@@ -19,6 +19,7 @@ from infinity_db.domain_references import (
     enrich_rule_relation_references,
     rule_record_public_reference,
 )
+from infinity_db.glossary_catalog import GlossaryCatalog
 from infinity_db.hacking_program_catalog import HackingProgramCatalog
 from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.rules_database import RulesDatabase, export_rules_database
@@ -680,6 +681,43 @@ def test_hacking_program_catalog_remains_available_without_rules_database(
     assert carbonite is not None
     assert carbonite["description"] == "DA Ammo. State: IMM-B. Non-Lethal."
     assert "rules" not in carbonite
+
+
+def test_weapon_glossary_uses_opt_in_army_links_for_routable_definitions(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    output = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), output)
+    rules = RulesDatabase(output)
+    database = _reference_database(tmp_path)
+
+    # The bulk query remains lightweight by default. The Glossary opts in
+    # only for weapon entries so their canonical Army host can be resolved.
+    original = rules.composed_records_by_kind("weapon")
+    assert not any(record.get("army_links") for record in original)
+    routed = rules.composed_records_by_kind("weapon", include_army_links=True)
+    mines = next(record for record in routed if record["id"] == "weapon:mines")
+    assert len(mines["army_links"]) == 7
+    assert rule_record_public_reference(database, mines) == {
+        "href": "/weapons/ap-mine#rule-weapon-mines"
+    }
+
+    glossary = GlossaryCatalog(database, rules)
+    entries = [entry for entry in glossary.entries() if entry["kind"] == "weapon"]
+    # Source-mode-specific definitions are not separate search identities.
+    assert len(entries) == sum(
+        (record.get("variant_semantics") or {}).get("inheritance") != "source"
+        for record in routed
+    )
+    assert len(entries) == len({entry["id"] for entry in entries})
+    by_id = {entry["id"]: entry for entry in entries}
+    assert by_id["weapon:mines"]["href"] == "/weapons/ap-mine#rule-weapon-mines"
+    assert by_id["weapon:para-mine"]["href"] == "/weapons/para-mine"
+    assert by_id["weapon:wildparrot"]["href"] == "/weapons/wildparrot"
+    assert "weapon:pt-endgame" not in by_id
+    assert all(entry["href"].startswith("/weapons/") for entry in entries)
+    assert all(not entry["embedded"] for entry in entries)
 
 
 def test_shared_weapon_family_reference_targets_its_card() -> None:

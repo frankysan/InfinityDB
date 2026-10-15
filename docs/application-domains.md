@@ -92,6 +92,12 @@ domains of their own.
 - Glossary provides a terminology-oriented view across both top-level domains and embedded
   vocabularies.
 - A glossary entry backed by a browsable concept links to that concept's normal detail surface.
+- Curated Weapon definitions participate using their existing Army Weapon pages.
+  Shared families have an in-page rules-card destination: for example, `weapon:mines`
+  opens `/weapons/ap-mine#rule-weapon-mines`, rather than inventing a generic
+  `/weapons/mines` Army catalog item. Source-specific mode rules remain on their
+  Weapon cards, not separate Glossary identities; resolving the links requires
+  the opt-in Army associations from the current rules database.
 - An embedded concept can present its definition/context directly in Glossary or a tooltip without
   inventing an otherwise-useless detail route.
 

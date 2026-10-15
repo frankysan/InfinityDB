@@ -1189,15 +1189,18 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
   Follow rules, Attribute and source links; confirm readability and navigation.
   The earlier offline 52/52 tests and seven-view responsive check were not
   substitutes for these interactions.
-  - [ ] **Web backend + Web frontend - shared weapon-family navigation:**
-    Curated `weapon:mines` is a valid semantic rules record, but its existing
-    maintained links open `/weapons/mines`; that shell requests
-    `/api/weapons/mines` and receives HTTP 404 because Mines is not a
-    source catalog item. Inspect all similar canonical weapon-family links,
-    choose a browsable rules-owned destination or explicit safe fallback,
-    preserve existing Army weapon profiles, and test the actual browser
-    destination. The REA-016 example deliberately avoids introducing
-    another invalid family link while this issue remains open.
+  - [x] **Web backend + Web frontend - shared weapon-family navigation:**
+    Verified the canonical `weapon:mines` destination is already
+    `/weapons/ap-mine#rule-weapon-mines`; `/weapons/mines` is an unsupported
+    *Army catalog* slug, not the generated link. Audited all 51 current
+    curated Weapon definitions: 51/51 resolve to existing Army Weapon
+    pages containing their corresponding rules cards. Fixed the actual
+    discovery gap: the Glossary bulk query lacked opt-in Army links and
+    silently omitted those definitions. The Glossary now includes 49
+    routable non-source-variant Weapon concepts; source-specific mode
+    definitions remain scoped to their Weapon. Chromium passed 42/42
+    Glossary-to-family, local-card and cross-page navigation checks at
+    1440/390/320 px. No synthetic Mines product or duplicate rules route.
 - [ ] **Web frontend — Fireteam browser acceptance:** Select an Army, verify
   Fireteam formation requirements and ongoing-integrity help, change Wildcard
   settings and navigate between Fireteams, Units and references. Test desktop

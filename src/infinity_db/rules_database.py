@@ -1116,9 +1116,10 @@ class RulesDatabase:
             return records[0]
 
     def composed_records_by_kind(
-        self, kind: str, *, scenario_id: str | None = None
+        self, kind: str, *, scenario_id: str | None = None,
+        include_army_links: bool = False,
     ) -> list[dict[str, Any]]:
-        """Return current semantic records of one kind with supplements attached."""
+        """Return current records of a kind, optionally including Army route links."""
         with self._connect() as connection:
             rows = connection.execute(
                 "SELECT r.* FROM records AS r JOIN collections AS c "
@@ -1129,6 +1130,8 @@ class RulesDatabase:
             ).fetchall()
             records = self._compose_records(self._records_from_rows(connection, rows))
             self._attach_reverse_relations(connection, records)
+            if include_army_links:
+                self._attach_current_army_links(connection, records)
             return records
 
     def scenario_publications(self, reference: str) -> list[dict[str, Any]]:

@@ -5443,6 +5443,26 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
 
 
 
+def test_curated_weapon_families_are_discoverable_in_glossary(
+    app: Callable, tmp_path: Path,
+) -> None:
+    root = Path(__file__).parents[1]
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(root / "data" / "curated"), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    status, _, body = request(rules_app, "/api/glossary")
+    assert status == 200
+    entries = {
+        entry["id"]: entry for entry in json.loads(body)["items"]
+        if entry["kind"] == "weapon"
+    }
+    assert entries["weapon:mines"]["href"] == "/weapons/ap-mine#rule-weapon-mines"
+    assert entries["weapon:para-mine"]["href"] == "/weapons/para-mine"
+    assert entries["weapon:wildparrot"]["href"] == "/weapons/wildparrot"
+    assert "weapon:pt-endgame" not in entries
+    assert all(entry["domain_slug"] == "weapons" for entry in entries.values())
+
+
 def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
     app: Callable, tmp_path: Path,
 ) -> None:
