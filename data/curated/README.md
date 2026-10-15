@@ -506,20 +506,26 @@ The default read model does not replay superseded historical collections;
 historical publication selection and verification of ITS season revisions
 not yet present in the corpus remain future work.
 
-Sixteen source-reviewed rulings now live in `rules/n5-faq-v0.1.json`.
+Twenty-six source-reviewed rulings now live in `rules/n5-faq-v0.1.json`.
 Eight were introduced in FAQ v0.1: Hacking Device Firewall, undeployed
 Peripherals (Ancillary) counted as Killed (initially Annihilation only),
 Skill declaration details, fired Deployables on vertical surfaces,
 Peripheral declarations, Camouflaged Markers in Total Cover, Special Dice
 in Coordinated Orders, and Fireteam minimums after creation.
 
-Eight more were **first recorded in official English FAQ v0.0** and
-carried into v0.1: Prone entry restrictions; vaulting while Climbing or
+Eighteen more were **first recorded in official English FAQ v0.0**
+and carried into v0.1. The first eight cover: Prone entry restrictions; vaulting while Climbing or
 Jumping; Direct Template line-of-fire limits; occupied Place Deployable
 locations; multiple Surprise Attack MODs; Sixth Sense with MSV1 in Zero
 Visibility; Protheion overkill; and Camouflage (1 Use) after Infiltration.
-These eight retain three citations **per ruling**: original v0.0 English
-at its own printed page, and current v0.1 English/Spanish at their
+The additional ten cover private ZoC/Coherency deployment checks,
+Prone movement distance, BS Attack MODs and Long Skill Special Dice,
+Controlled Jump/Speedballs, Automatic Skills in Marker State,
+Aerial/Boost restrictions, Stealth and simultaneous AROs,
+Deployable Cover, Disconnected/Unconscious and Cautious Movement,
+and Discover versus Fireteam bonuses. All eighteen v0.0 carry-forwards
+retain three citations **per ruling**: original v0.0 English at its
+own printed page, and current v0.1 English/Spanish at their
 respective actual printed pages. `originalPublication` names v0.0,
 while `selectedCitation` names reviewed current v0.1; no new identity
 is created merely because a publication repeats a ruling. The v0.0
@@ -527,7 +533,8 @@ source date uses the 2025-10-15 version-associated official update
 anchor, not an independently verified PDF upload/publication day.
 
 The shared **FAQ clarifications** cards appear beside affected Equipment,
-Scenario, Skill, Trait, State, General Rule, and Fireteam references.
+Scenario, Skill, Trait, State, General Rule, Hacking Program, and
+Fireteam references.
 The Fireteam quick-reference page owns Fireteam FAQs; there is no
 parallel General Rules route for `rule:fireteam-general`.
 The browser's explicit N5.3/v0.1 source snapshot uses
@@ -539,7 +546,9 @@ verified PDF publication day.
 after member loss* examples do not align (the Spanish Haris example
 contains inconsistent member counts). Do not publish a consolidated
 answer for that example without resolving/documenting the discrepancy.
-The remaining v0.0-origin and ITS-scoped FAQ entries still need
+The broad main Deployment Phase repositioning question still needs
+an appropriate canonical player-facing owner; it must not be linked
+misleadingly to a specialized Skill. ITS-scoped FAQ entries still need
 source-by-source review, historical identity and applicability checks.
 No general-rule cards are created from ITS-only answers without a
 verified season context. Synthetic test rulings are never published.

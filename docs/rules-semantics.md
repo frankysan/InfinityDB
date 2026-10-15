@@ -4690,6 +4690,63 @@ Sources: pinned FAQ PDFs
 `data/pdf/faq/esp-faqs-n5-v0-1.pdf`;
 source chronology in `docs/n5-source-history.md`.
 
+### RS-FAQ-V00-004 — Further general FAQ carry-forwards and scope boundaries
+
+**Classification:** source-native current clarification with retained
+original-publication evidence, reviewed 2026-10-15.
+
+Ten further gameplay Q&A entries in English FAQ v0.0 recur in English
+and Spanish FAQ v0.1 without a verified material answer change:
+
+- Minelayer/Decoy/Holoecho private deployment checks: `skill:minelayer`,
+  `skill:decoy`, `state:holoecho` (v0.0 EN p. 1, v0.1 EN/ES p. 1).
+  ZoC/Coherency is checked while the opponent looks away; this does not
+  make the check or hidden placement public.
+- Prone at the end of movement: `state:prone` (v0.0 EN p. 1,
+  v0.1 EN/ES p. 1). Entering Prone at the end does not shorten the move.
+- BS Attack Rolls/Label MODs: `skill:bs-attack`,
+  `skill:intuitive-attack`, `skill:speculative-attack` (v0.0 EN p. 1,
+  v0.1 EN/ES p. 1). They count as BS Attacks for relevant MODs;
+  +1 SD does not apply to Long Skills.
+- Controlled Jump versus Speedballs: `hacking-program:controlled-jump`,
+  `skill:request-speedball` (v0.0 EN p. 1, v0.1 EN/ES p. 1).
+  Controlled Jump affects Troopers, not Speedballs.
+- Automatic Skill/Equipment declarations in Marker State:
+  `state:camouflaged`, `skill:stealth` (v0.0 EN p. 2, v0.1 EN/ES p. 2).
+  Declare only those which change activation or restrict AROs.
+- Aerial Troopers and Boost: `skill:aerial`, `trait:boost`
+  (v0.0 EN p. 2, v0.1 EN/ES p. 2).
+  Lack of Silhouette contact prevents activation of Boost.
+- Stealth and grouped AROs: `skill:stealth` (v0.0 EN p. 2,
+  v0.1 EN/ES p. 2). ARO targeting a Stealth user is permitted
+  initially, but becomes Idle if the declared Skill does not permit AROs.
+- Deployable Cover: `equipment:deployable-cover` (v0.0 EN p. 2,
+  v0.1 EN p. 2, ES p. 3). Nothing may be placed or end movement on it.
+- Disconnected/Unconscious: `state:disconnected`,
+  `state:unconscious`, `skill:cautious-movement`
+  (v0.0 EN p. 2, v0.1 EN p. 2, ES p. 3).
+  These Troopers do not block Marker re-entry or cancel Cautious Movement.
+- Discover bonuses: `skill:discover`,
+  `rule:fireteam-level-bonuses` (v0.0 EN p. 2, v0.1 EN/ES p. 3).
+  Neither BS Attack (+1 SD) nor a Fireteam +1 BS bonus applies to Discover.
+
+The initial owner of each dated FAQ is a canonical Skill, State,
+Equipment, Trait, Hacking Program or the existing Fireteams surface;
+there is no new mechanics category or source rewrite. The same FAQ ID
+can be linked from multiple appropriate canonical topics and therefore
+several pages. Dates remain version-associated source anchors, not
+independently established PDF upload days.
+
+**Excluded from this review:** The general main Deployment Phase rule
+for repositioning after measurements/rolls still needs a suitable general
+rules owner rather than a misleading Special Skill link.
+Season-scoped ITS rulings and the disputed Fireteam-type examples remain
+separate unresolved inventories.
+
+Sources: the three pinned N5 FAQ PDFs identified in
+RS-FAQ-V00-003 and the private dated reconciliation in
+`local/audits/`.
+
 ## ITS FAQ
 
 ### RS-FAQ-SCOPE-001 — Ruling publication identity and ITS applicability are separate axes

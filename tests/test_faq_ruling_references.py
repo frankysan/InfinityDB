@@ -450,6 +450,16 @@ def test_published_faq_pilot_retains_selected_and_spanish_source_evidence(
         "faq-ruling:sixth-sense-msv1-zero-visibility",
         "faq-ruling:protheion-excess-saving-rolls",
         "faq-ruling:camouflage-one-use-infiltration-failure",
+        "faq-ruling:deployment-private-zoc-coherency",
+        "faq-ruling:prone-at-end-of-move-distance",
+        "faq-ruling:bs-attack-roll-label-mods",
+        "faq-ruling:controlled-jump-speedball",
+        "faq-ruling:marker-automatic-skill-declarations",
+        "faq-ruling:aerial-boost-no-silhouette-contact",
+        "faq-ruling:stealth-aro-multiple-activations",
+        "faq-ruling:deployable-cover-no-placement",
+        "faq-ruling:null-state-marker-and-cautious-movement",
+        "faq-ruling:discover-fireteam-sd-bonuses",
     }
     for record in records:
         assert record["review"]["status"] == "reviewed"
@@ -577,8 +587,8 @@ def test_expanded_faq_v01_topic_page_and_applicability(
     items = published_pilot.faq_rulings_for_topic(
         topic_id, rules_revision="5.3", as_of="2026-09-01",
     )
-    assert [item["id"] for item in items] == [f"faq-ruling:{ruling_id}"]
-    item = items[0]
+    item = next((row for row in items if row["id"] == f"faq-ruling:{ruling_id}"), None)
+    assert item is not None
     assert answer_term in item["answer"]
     assert item["selected_citation"] == {
         "sourceId": "n5-faq-v0.1-en-pdf", "page": en_page,
@@ -630,9 +640,8 @@ def test_v00_carried_forward_rulings_preserve_original_and_current_sources(
     result = published_pilot.faq_rulings_for_topic(
         topic_id, rules_revision="5.3", as_of="2026-09-01",
     )
-    assert len(result) == 1
-    item = result[0]
-    assert item["id"] == f"faq-ruling:{ruling}"
+    item = next((row for row in result if row["id"] == f"faq-ruling:{ruling}"), None)
+    assert item is not None
     assert key_phrase in item["answer"]
     assert item["selected_source"]["id"] == "n5-faq-v0.1-en-pdf"
     assert item["selected_source"]["version"] == "0.1"
@@ -670,11 +679,11 @@ def test_earlier_faq_identity_is_not_inferred_from_current_publication(
     published_pilot: RulesDatabase,
 ) -> None:
     records = published_pilot.records_by_kind("faq-ruling")
-    assert len(records) == 16
+    assert len(records) == 26
     assert sum(
         record["facts"]["originalPublication"]["version"] == "0.0"
         for record in records
-    ) == 8
+    ) == 18
     assert sum(
         record["facts"]["originalPublication"]["version"] == "0.1"
         for record in records
@@ -698,3 +707,83 @@ def test_carried_forward_ruling_identity_reused_for_multiple_topics(
     }
     assert ids("equipment:multispectral-visor") == ids("skill:sixth-sense")
     assert ids("skill:infiltration") == ids("skill:camouflage")
+
+
+@pytest.mark.parametrize(
+    ("topic", "slug", "origin_page", "selected_page", "es_page", "term"),
+    [
+        ("skill:minelayer", "deployment-private-zoc-coherency", 1, 1, 1, "looking away"),
+        ("state:prone", "prone-at-end-of-move-distance", 1, 1, 1, "moves normally"),
+        ("skill:intuitive-attack", "bs-attack-roll-label-mods", 1, 1, 1, "Long Skills"),
+        ("hacking-program:controlled-jump", "controlled-jump-speedball", 1, 1, 1, "Speedballs"),
+        ("skill:stealth", "marker-automatic-skill-declarations", 2, 2, 2, "restricts AROs"),
+        ("skill:aerial", "aerial-boost-no-silhouette-contact", 2, 2, 2, "Silhouette"),
+        ("skill:stealth", "stealth-aro-multiple-activations", 2, 2, 2, "becomes Idle"),
+        ("equipment:deployable-cover", "deployable-cover-no-placement", 2, 2, 3, "cannot end"),
+        (
+            "state:disconnected", "null-state-marker-and-cautious-movement",
+            2, 2, 3, "Cautious Movement",
+        ),
+        ("skill:discover", "discover-fireteam-sd-bonuses", 2, 3, 3, "bonus"),
+    ],
+)
+def test_remaining_general_v00_carry_forwards_retain_three_source_pages(
+    published_pilot: RulesDatabase,
+    topic: str,
+    slug: str,
+    origin_page: int,
+    selected_page: int,
+    es_page: int,
+    term: str,
+) -> None:
+    results = published_pilot.faq_rulings_for_topic(
+        topic, rules_revision="5.3", as_of="2026-09-01",
+    )
+    item = next((r for r in results if r["id"] == f"faq-ruling:{slug}"), None)
+    assert item is not None
+    assert term in item["answer"]
+    assert item["original_publication"] == {
+        "collectionId": "n5-faq-v0.0",
+        "sourceId": "n5-faq-v0.0-en-pdf",
+        "version": "0.0",
+        "publishedDate": "2025-10-15",
+        "page": origin_page,
+    }
+    assert item["selected_citation"] == {
+        "sourceId": "n5-faq-v0.1-en-pdf", "page": selected_page,
+    }
+    assert item["selected_source"]["version"] == "0.1"
+    assert {(c["source_id"], c["page"]) for c in item["citations"]} == {
+        ("n5-faq-v0.0-en-pdf", origin_page),
+        ("n5-faq-v0.1-en-pdf", selected_page),
+        ("n5-faq-v0.1-es-pdf", es_page),
+    }
+    assert published_pilot.faq_rulings_for_topic(
+        topic, rules_revision="5.2", as_of="2026-10-15",
+    ) == []
+    assert published_pilot.faq_rulings_for_topic(
+        topic, rules_revision="5.3", as_of="2026-08-31",
+    ) == []
+
+
+def test_remaining_general_v00_cross_topic_identity_is_shared(
+    published_pilot: RulesDatabase,
+) -> None:
+    def ids(topic: str) -> set[str]:
+        return {
+            r["id"]
+            for r in published_pilot.faq_rulings_for_topic(
+                topic, rules_revision="5.3", as_of="2026-09-01",
+            )
+        }
+
+    assert "faq-ruling:deployment-private-zoc-coherency" in ids("skill:decoy")
+    assert "faq-ruling:deployment-private-zoc-coherency" in ids("state:holoecho")
+    assert "faq-ruling:controlled-jump-speedball" in ids("skill:request-speedball")
+    assert "faq-ruling:aerial-boost-no-silhouette-contact" in ids("trait:boost")
+    assert "faq-ruling:discover-fireteam-sd-bonuses" in ids(
+        "rule:fireteam-level-bonuses"
+    )
+    assert "faq-ruling:null-state-marker-and-cautious-movement" in ids(
+        "state:unconscious"
+    )

@@ -504,10 +504,17 @@ async function loadChart(value) {
 
 async function initialize() {
   show(elements.loading);
-  fetchReviewedFaqRulings("rule:fireteam-general", { signal: pageController.signal })
-    .then((payload) => {
+  Promise.all([
+    fetchReviewedFaqRulings("rule:fireteam-general", { signal: pageController.signal }),
+    fetchReviewedFaqRulings("rule:fireteam-level-bonuses", { signal: pageController.signal }),
+  ])
+    .then((payloads) => {
       if (pageController.signal.aborted) return;
-      const section = faqRulingsSection(payload.items);
+      const rulings = new Map();
+      for (const payload of payloads) {
+        for (const ruling of payload.items || []) rulings.set(ruling.id, ruling);
+      }
+      const section = faqRulingsSection([...rulings.values()]);
       if (section) elements.faq.replaceChildren(section);
     })
     .catch((error) => {

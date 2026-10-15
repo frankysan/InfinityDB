@@ -19,8 +19,11 @@ are not retroactively relabeled.
   Coordinated Orders, and Fireteam creation minimums. Eight additional
   carried-forward v0.0 clarifications cover Prone, Climb/Jump, template
   LoF, Deployables, Surprise Attack, Sixth Sense/MSV1, Protheion and
-  Camouflage (1 Use), displaying their earlier source version alongside
-  the selected current FAQ v0.1 citation.
+  Camouflage (1 Use). Another ten carried-forward clarifications
+  cover Deployment private checks, Prone distance, BS MODs, Controlled
+  Jump, automatic Marker State declarations, Aerial/Boost, Stealth
+  AROs, Deployable Cover, inactive States and Discover bonuses.
+  All show their earlier source version beside the selected v0.1 citation.
 - Domination's 350-point SWC displays the English-source 6, with an explicit
   discrepancy: official Spanish N5.3 says 7. The Annihilation 350-point
   survival bands are now corroborated by official Spanish N5.3 rather than
@@ -221,11 +224,12 @@ are not retroactively relabeled.
   missing topic/scenario/predecessor targets, cycles, non-overlapping
   supersession and inconsistent carried-forward origins. Add an
   applicability-aware read model and explicit-context FAQ API, retaining
-  reviewed source provenance and conditional supersession. Sixteen
+  reviewed source provenance and conditional supersession. Twenty-six
   reviewed FAQ entries now reach their owning Equipment, Scenario, Skill,
-  Trait, State, General Rule and Fireteam browser surfaces through shared
-  dated clarification cards. Eight entries retain v0.0 original source
-  citations and current EN/ES v0.1 evidence, without duplicating rulings.
+  Trait, State, General Rule, Hacking Program and Fireteam browser surfaces
+  through shared dated clarification cards. Eighteen entries retain v0.0
+  original source citations and current EN/ES v0.1 evidence, without
+  duplicating rulings.
   The Fireteam detail stays on the Fireteams page rather than inventing
   a rule route. Base rules remain unchanged.
 - **Data processing + Web backend:** Confirm ITS-inspired split Deployment

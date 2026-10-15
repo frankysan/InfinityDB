@@ -1159,10 +1159,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     preserve distinct printed pages and the historically associated
     (not independently confirmed) v0.0 source date. Confirm typed
     provenance/API and responsive browser presentation.
-  - [ ] Continue the remaining original v0.0 gameplay/ITS rulings.
-    Source-native ITS entries require a verified season/scenario publication
-    context; do not promote them to universal N5 clarifications or
-    backfill source dates from current FAQ reprints.
+  - [x] Reconcile ten more general-gameplay FAQ v0.0 carry-forwards:
+    private deployment checks; Prone distance; BS Attack MODs;
+    Controlled Jump/Speedballs; Marker State automatic declarations;
+    Aerial/Boost; Stealth AROs; Deployable Cover; Disconnected/
+    Unconscious interactions; and Discover/Fireteam bonuses. Preserve
+    the three exact source pages and one ruling ID per item. Expose
+    Controlled Jump on its Hacking Program page and the bonus ruling
+    on both Discover and Fireteams.
+  - [ ] Find a correct player-facing owner for the v0.0 main
+    Deployment Phase *repositioning* FAQ without associating this
+    general timing rule with one arbitrary Special Skill.
+  - [ ] Continue ITS-specific FAQ rulings only after verifying current
+    season/scenario publication and scope. Do not promote them to
+    universal N5 clarifications or backfill historical publication dates
+    from current FAQ reprints.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.

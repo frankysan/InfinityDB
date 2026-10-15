@@ -1971,6 +1971,30 @@ no JavaScript errors or horizontal overflow.
 inventory, season-scoped ITS rulings, historical FAQ edition
 replay, or the unresolved bilingual Fireteam-type example.
 
+## 1.0 remaining general FAQ v0.0 carry-forward acceptance
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** Ten further source-reviewed
+general FAQ v0.0 rulings are carried into v0.1 with three citations
+per record: English v0.0 origin, selected English v0.1, and Spanish
+v0.1 at their own printed pages. Published FAQ count: **26**,
+including 18 carried and 8 introduced in v0.1. All new entries
+retain explicit N5.3/date applicability; ITS-only material and
+general Deployment Phase repositioning remain out of this batch.
+
+Added 10 source/applicability regression cases and cross-topic
+identity checks for Minelayer/Decoy/Holoecho, Controlled Jump/
+Speedballs, Aerial/Boost, Discover/Fireteam, and
+Disconnected/Unconscious. Browser integration now displays the
+same dated FAQ component on the Controlled Jump Hacking Program
+page and composes Fireteam general/bonus-related rulings without
+duplicating their IDs.
+
+Private browser checker `local/audits/verify_faq_remaining_general_browser.py`
+passed **36/36** views across 12 reference paths at 1440/390/320 px,
+checking selected FAQ version, historical source note, relevant
+question/answer, JavaScript errors and horizontal overflow. Canonical
+rules and Army profile source data remain unchanged.
+
 ## 1.0 Visibility Zone and Ammunition/Immunity browser acceptance
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** Headless Chromium used a freshly
