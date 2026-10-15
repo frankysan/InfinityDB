@@ -16,6 +16,9 @@ are not retroactively relabeled.
   published ITS missions. Season 18 starts with Battleground, including
   its end-of-game Sectors, size-dependent map, 2/3/5-point scoring and
   special rules. Shared scenario links retain the exact season and game size.
+- Marksman Rifle profiles now explain their shared range/PS baseline, with
+  direct links to each variant's Ammunition and Traits. MULTI modes stay
+  separate, and Breaker keeps its own BTS-based AP explanation.
 - Light and Heavy Flamethrowers now share linked Direct Template,
   Intuitive Attack and Continuous Damage help, while clearly distinguishing
   their Small/Large Teardrop areas and PS values.
@@ -194,6 +197,12 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Publish shared N5.3
+  Marksman Rifle guidance for six single-mode source identities and one
+  separate MULTI three-mode reference. Use exact source profiles and
+  mode-specific canonical Ammunition/Trait links; retain the existing
+  Breaker definition, source spelling of MULTI Anti-Material Mode, and
+  explicit non-stacking/anti-materiel exceptions.
 - **Data processing + Web backend + Web frontend:** Add one source-reviewed
   rules reference shared by Light and Heavy Flamethrowers, linking their
   Direct Template, Intuitive Attack, Continuous Damage and Normal Ammunition

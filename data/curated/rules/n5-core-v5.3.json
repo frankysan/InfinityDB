@@ -4157,6 +4157,164 @@
             }
         },
         {
+          "id": "weapon:marksman-rifles",
+          "kind": "weapon",
+          "name": "Marksman Rifles",
+          "summary": "All Marksman Rifles in the N5.3 chart have PS 7 and identical range bands. All single-mode versions have Burst 3. The MULTI version's [[trait:anti-materiel|Anti-Materiel]] Mode instead has Burst 1. Use each printed profile for Ammunition, Saving Rolls and Traits; they are not shared family effects.\n\n[[trait:suppressive-fire|Suppressive Fire]] is listed on every single-mode Marksman Rifle and the MULTI AP/Shock modes, but **not** on the MULTI [[trait:anti-materiel|Anti-Materiel]] Mode. The latter's [[trait:anti-materiel|Anti-materiel]] Trait does not transfer to its other modes.\n\n**Standard, AP, Shock and [[weapon-property:breaker|Breaker]]:** All require one printed Saving Roll, respectively N/ARM, AP/ARM/2, Shock/ARM and AP/BTS/2. The originating [[ammunition:normal|Normal]], [[ammunition:ap|AP]] and [[ammunition:shock|Shock]] rules explain their effects.\n\n**[[weapon-property:k1|K1]]:** Printed N/ARM=0, not a separate K1 Ammunition. **[[ammunition:t2|T2]]:** Printed T2/ARM, one roll per hit; its special Wound effect belongs to [[ammunition:t2|T2 Ammunition]]. Both list [[trait:anti-materiel|Anti-materiel]] and [[trait:suppressive-fire|Suppressive Fire]].\n\n**[[weapon-property:viral|Viral]]:** Printed N/BTS/one roll, with [[trait:bioweapon|BioWeapon (DA+Shock)]]. The shared Viral Weapon Property explains VITA-versus-STR effects; it does not rewrite the source profile.\n\n**MULTI:** See the [[weapon:multi-marksman-rifle|mode-specific reference]] for its three mutually exclusive attack modes.",
+          "facts": {
+            "variantRuleReferences": {
+              "ap-marksman-rifle": [
+                "ammunition:ap",
+                "trait:suppressive-fire"
+              ],
+              "k1-marksman-rifle": [
+                "ammunition:normal",
+                "trait:anti-materiel",
+                "trait:suppressive-fire"
+              ],
+              "marksman-rifle": [
+                "ammunition:normal",
+                "trait:suppressive-fire"
+              ],
+              "shock-marksman-rifle": [
+                "ammunition:shock",
+                "trait:suppressive-fire"
+              ],
+              "t2-marksman-rifle": [
+                "ammunition:t2",
+                "trait:anti-materiel",
+                "trait:suppressive-fire"
+              ],
+              "viral-marksman-rifle": [
+                "ammunition:normal",
+                "trait:bioweapon",
+                "trait:suppressive-fire"
+              ]
+            }
+          },
+          "composition": {
+            "role": "definition"
+          },
+          "scope": {
+            "game": "N5",
+            "seasons": [
+              "current"
+            ]
+          },
+          "armyLinks": [
+            {
+              "entity": "weapon",
+              "id": "ap-marksman-rifle"
+            },
+            {
+              "entity": "weapon",
+              "id": "k1-marksman-rifle"
+            },
+            {
+              "entity": "weapon",
+              "id": "marksman-rifle"
+            },
+            {
+              "entity": "weapon",
+              "id": "shock-marksman-rifle"
+            },
+            {
+              "entity": "weapon",
+              "id": "t2-marksman-rifle"
+            },
+            {
+              "entity": "weapon",
+              "id": "viral-marksman-rifle"
+            }
+          ],
+          "variantSemantics": {
+            "inheritance": "family"
+          },
+          "citations": [
+            {
+              "sourceId": "n5-core-v5.3-pdf",
+              "page": 180,
+              "section": "Weapon Chart: Marksman Rifles"
+            },
+            {
+              "sourceId": "wiki-en-20260926-200832",
+              "member": "Weapon_Chart",
+              "heading": "MARKSMAN RIFLES"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-10-15"
+          }
+        },
+        {
+          "id": "weapon:multi-marksman-rifle",
+          "kind": "weapon",
+          "name": "MULTI Marksman Rifle",
+          "summary": "The [[weapon-property:multi|MULTI]] Marksman Rifle has three alternative attack modes. Each uses PS 7 and the same range bands, but their Ammunition, Burst and Traits do not combine.\n\n**[[trait:anti-materiel|Anti-Materiel]] Mode:** [[ammunition:da|DA]] Ammunition, Burst 1, two ARM Saving Rolls per hit and [[trait:anti-materiel|Anti-materiel]]. This mode does **not** list [[trait:suppressive-fire|Suppressive Fire]].\n\n**AP Mode:** [[ammunition:ap|AP]] Ammunition, Burst 3, one ARM/2 Saving Roll and [[trait:suppressive-fire|Suppressive Fire]]. **Shock Mode:** [[ammunition:shock|Shock]] Ammunition, Burst 3, one ARM Saving Roll and [[trait:suppressive-fire|Suppressive Fire]]. Neither mode inherits [[trait:anti-materiel|Anti-materiel]].",
+          "facts": {
+            "sourceNotes": [
+              "The printed N5.3 chart calls the first mode [[trait:anti-materiel|Anti-Materiel]] Mode. Army retains the source spelling Anti-Material Mode; these identify the same reviewed mode, not separate profiles."
+            ]
+          },
+          "composition": {
+            "role": "definition"
+          },
+          "scope": {
+            "game": "N5",
+            "seasons": [
+              "current"
+            ]
+          },
+          "armyLinks": [
+            {
+              "entity": "weapon",
+              "id": "multi-marksman-rifle"
+            }
+          ],
+          "variantSemantics": {
+            "inheritance": "family"
+          },
+          "relations": [
+            {
+              "type": "uses-effects-of",
+              "recordId": "ammunition:da"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "ammunition:ap"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "ammunition:shock"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "trait:anti-materiel"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "trait:suppressive-fire"
+            }
+          ],
+          "citations": [
+            {
+              "sourceId": "n5-core-v5.3-pdf",
+              "page": 180,
+              "section": "Weapon Chart: MULTI Marksman Rifle"
+            },
+            {
+              "sourceId": "wiki-en-20260926-200832",
+              "member": "Weapon_Chart",
+              "heading": "MARKSMAN RIFLES"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-10-15"
+          }
+        },
+        {
             "id": "weapon:breaker-marksman-rifle",
             "kind": "weapon",
             "name": "Breaker Marksman Rifle",

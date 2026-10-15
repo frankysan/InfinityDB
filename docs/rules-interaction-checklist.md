@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **182/182** complete, **0** pending.
-- Current authored outgoing relations: **449**.
+- Supporting semantic identities: **184/184** complete, **0** pending.
+- Current authored outgoing relations: **454**.
 - Explicitly tracked future/deferred interactions: **111**.
 
 ## 0.7.0 primary catalog review
@@ -980,7 +980,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (51/51)
+#### Weapon (53/53)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1104,6 +1104,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Kobra Pistol (CC Mode)** (`weapon:kobra-pistol-cc`) — reviewed: Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values.
   - `variant-of` → Kobra Pistol (`weapon:kobra-pistol`)
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
+- [x] **Marksman Rifles** (`weapon:marksman-rifles`) — reviewed: N5.3 chart p. 180, September 26 archived English Weapon Chart and pinned Army: all eight Marksman types have PS 7 and identical range bands; six previously undefined single-mode variants now link to this shared family. Each of those six retains its own Ammunition, Saving Roll Attribute, Trait and scoped navigation associations. Breaker and MULTI retain separate authoritative Weapon definitions to avoid ambiguous family mappings. No ammunition or Trait is inherited universally, especially not by MULTI Anti-Material Mode.
+  - outgoing: none
 - [x] **Mines** (`weapon:mines`) — reviewed: Shared Mine mechanics: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary.
   - `uses-effects-of` → Deployable (`trait:deployable`)
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
@@ -1116,6 +1118,12 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
 - [x] **MULTI Heavy Machine Gun** (`weapon:multi-heavy-machine-gun`) — reviewed: N5.3 Weapon Chart p. 179: EXP Anti-materiel mode has B1, 3 ARM Saving Rolls; AP and Shock modes have B4 and Suppressive Fire, with ARM/2 and ARM respectively for one Saving Roll. All are PS 5 with identical ranges. Do not combine modes or transfer Traits.
   - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+  - `uses-effects-of` → Suppressive Fire (SF) (`trait:suppressive-fire`)
+- [x] **MULTI Marksman Rifle** (`weapon:multi-marksman-rifle`) — reviewed: N5.3 Weapon Chart p. 180: Anti-Materiel (Army spells Anti-Material) Mode uses B1 DA, two ARM Saving Rolls, Anti-materiel and no Suppressive Fire; AP/Shock alternatives use B3, one ARM/2 or ARM roll and Suppressive Fire. All PS 7, same range breaks; profiles do not stack modes or receive generic family variant-link inheritance.
+  - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)

@@ -548,13 +548,21 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       September 26 Wiki Weapon Chart, and Army metadata agree. The missing
       Weapon-definition audit decreases from 81 to 79; API and responsive
       browser checks cover both versions without affecting Flammenspeer.
+    - [x] Complete the N5.3 Marksman Rifle batch: six previously undefined
+      single-mode variants share one source-backed family and per-variant
+      rule navigation, while Breaker retains its independent definition and
+      MULTI receives a distinct three-mode definition. The official N5.3
+      Weapon Chart, pinned Wiki and imported Army profiles agree; the
+      general family does not override mode-specific Ammunition or Traits.
+      Missing Weapon definitions decrease from 79 to 72 with no ambiguous
+      family mappings. API and responsive browser regression evidence is
+      recorded privately under `local/audits/`.
     - [ ] Continue source-specific Weapon review without duplicating
-      canonical Ammunition or Trait rules. The updated triage has
+      canonical Ammunition or Trait rules. Earlier triage found
       47 actionable reviews, 33 accepted shared-only identities,
-      and 9 pending multi-profile candidates, plus Flash Pulse's
-      historical citation. Pitcher and Mine Dispenser still need separate
-      missing-effect source reviews; the next shared-effects batch includes
-      Marksman Rifles.
+      and 9 multi-profile candidates; reconcile those classifications
+      with the now-published Flamethrower and Marksman batches. Pitcher
+      and Mine Dispenser still require missing-effect source reviews.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
@@ -1351,10 +1359,10 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     views checks row/cell geometry and overflow at 320, 390, 400, 600 and 768 px;
     this resolves the presentation defect, not the broader 1.0 browser gate.
   - [x] Complete the maintained 1.0 interaction-review target, regenerate the
-    checklist, and verify the release-scoped audit gate passes. All 182 supporting
-    identities are now reviewed, including the shared Flamethrower family, all
-    eleven Ammunition records and
-    the four N5.3 core Scenarios. The final Supplies review confirms pickup,
+    checklist, and verify the release-scoped audit gate passes. All 184 supporting
+    identities are now reviewed, including the shared Flamethrower and
+    Marksman Rifle families, the MULTI Marksman mode reference, all eleven
+    Ammunition records, and the four N5.3 core Scenarios. The final Supplies review confirms pickup,
     transfer, carrier and scoring restrictions, edge-based marker placement,
     shared Specialist eligibility, and the minimum-VP early ending against
     N5.3/N5.2 and pinned Wiki sources. This closes the interaction-review
