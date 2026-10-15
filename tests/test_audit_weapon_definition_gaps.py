@@ -216,7 +216,7 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
             encoding="utf8",
         )
     )
-    assert len(original["reviews"]) == 58
+    assert len(original["reviews"]) == 62
     catalog = {r["name"]: r for r in db.list_catalog_items("weapons")}
     items = [
         {"id": catalog[r["name"]]["id"], "name": r["name"],
@@ -227,7 +227,7 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
     policy = tmp_path / "reviewed.json"
     policy.write_text(json.dumps(original), encoding="utf8")
     approved = load_shared_reviews(db, enrichment, policy)
-    assert len(approved) == 58
+    assert len(approved) == 62
     assert {r["chartPage"] for r in approved.values()} == {
         176, 177, 178, 179, 182, 183, 184, 185, 186, 187, 188,
     }
@@ -237,6 +237,7 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
         "Boarding Shotgun", "Light Shotgun", "Vulkan Shotgun",
         "Heavy Shotgun", "T2 Boarding Shotgun",
         "Light Riotstopper", "Heavy Riotstopper",
+        "Heavy Rocket Launcher", "Light Rocket Launcher",
     }
     assert {
         r["name"] for r in original["reviews"]
@@ -246,6 +247,12 @@ def test_checked_in_weapon_shared_reviews_are_profile_pinned(tmp_path: Path) -> 
         "Madtraps", "Thunderbolt", "Ohotnik", "Portable Autocannon",
         "Jammer", "Katyusha MRL",
     }
+    assert {
+        r["name"] for r in original["reviews"]
+        if r["name"] in {"Heavy Rocket Launcher", "Light Rocket Launcher",
+                         "Plasma Rifle", "Plasma Carbine"}
+    } == {"Heavy Rocket Launcher", "Light Rocket Launcher",
+          "Plasma Rifle", "Plasma Carbine"}
     assert {
         r["name"] for r in original["reviews"] if r["chartPage"] == 179
     } == {

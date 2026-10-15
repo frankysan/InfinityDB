@@ -2281,3 +2281,63 @@ def test_flash_pulse_keeps_army_one_bts_roll_and_publishes_wiki_discrepancy(
         "wiki-es-weapon-chart-oldid-3987",
         "wiki-es-weapon-chart-alternatives-oldid-3988",
     }
+
+@pytest.mark.parametrize(
+    ("slug", "ps", "burst", "saves", "traits", "ranges"),
+    [
+        ("heavy-rocket-launcher", ("6", "5"), "2", ("ARM", "1"),
+         (["Continous Damage", "Impact Template (Circular)"],
+          ["Continous Damage"]),
+         ("-3", "0", "+3", "-3")),
+        ("light-rocket-launcher", ("7", "6"), "2", ("ARM", "1"),
+         (["Continous Damage", "Impact Template (Circular)"],
+          ["Continous Damage"]),
+         ("0", "+3", "-3", "-6")),
+        ("plasma-rifle", ("7", "6"), "3", ("ARM and BTS", "1 and 1"),
+         (["Suppressive Fire", "Impact Template (Circular)"],
+          ["Suppressive Fire"]),
+         ("+3", "-3", "-6")),
+        ("plasma-carbine", ("7", "6"), "2", ("ARM and BTS", "1 and 1"),
+         (["Impact Template (Circular)"], []),
+         ("+3", "-3", "-6")),
+    ],
+)
+def test_reviewed_rocket_and_plasma_modes(
+    weaponry_app: Callable, slug: str, ps: tuple[str, str],
+    burst: str, saves: tuple[str, str], traits: tuple[list[str], list[str]],
+    ranges: tuple[str, ...],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert len(payload["profiles"]) == 2
+    blast, hit = payload["profiles"]
+    for index, profile in enumerate((blast, hit)):
+        assert profile["mode"] == ("Blast Mode", "Hit Mode")[index]
+        assert profile["damage"] == ps[index]
+        assert profile["burst"] == burst
+        assert (profile["saving"], profile["saving_num"]) == saves
+        assert profile["ammunition"] == "N"
+        assert profile["traits"] == traits[index]
+        assert [e["record_id"] for e in profile["ammunition_effects"]] == [
+            "ammunition:normal",
+        ]
+        assert len(profile["trait_references"]) == len(profile["traits"])
+        assert tuple(band["mod"] for band in profile["ranges"].values()) != ()
+        if slug.startswith("plasma-"):
+            assert profile["weapon_properties"][0]["id"] == "weapon-property:plasma"
+            assert profile["combined_saving_roll"]["rolls"] == [
+                {"attribute": "ARM", "count": 1},
+                {"attribute": "BTS", "count": 1},
+            ]
+            assert profile["combined_saving_roll"]["critical"] == {
+                "additionalRolls": 1, "attribute": "ARM",
+            }
+        else:
+            assert [
+                r["slug"] for r in profile["trait_references"]
+            ] == (
+                ["continuous-damage", "impact-template"]
+                if index == 0 else ["continuous-damage"]
+            )
+    assert all(blast["ranges"][key] == hit["ranges"][key] for key in blast["ranges"])
+    assert set(band["mod"] for band in blast["ranges"].values()) == set(ranges)
+    assert not _weapon_rules(payload)

@@ -618,11 +618,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       resolve through `public_reference` rather than Trait slugs;
       canonical WIP, Intuitive Attack, Disposable and Non-Lethal
       rules provide the remaining linked behavior.
+    - [x] Source-review Heavy/Light Rocket Launchers and Plasma
+      Rifle/Carbine against N5.3 pp. 67, 176, 183 and 184, pinned Army,
+      and captured English/Spanish Wiki. All four have paired Blast/Hit
+      modes with distinct PS and Blast-only Circular Impact Template;
+      Rockets retain Continuous Damage, while Plasma uses shared
+      Combined Saving Rolls and only the Rifle has Suppressive Fire.
+      Record four profile-hash-pinned shared-only reviews and preserve
+      imported Army 'Continous Damage' as a source alias.
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. Current source-bound triage:
-      70 classified gaps = 58 accepted shared-effects, 1 accepted
-      historical citation, and 11 pending source reviews. All 11
-      comprise 8 multi-profile candidates and three source conflicts:
+      70 classified gaps = 62 accepted shared-effects, 1 accepted
+      historical citation, and 7 pending source reviews. The seven
+      comprise 4 multi-profile candidates and three source conflicts:
       AP Thunderbolt, AP+EXP CC Weapon, and Stun Pistol. The raw
       gap code is not necessarily a missing mechanic. Review
       alternate modes and conflicting publications before adding

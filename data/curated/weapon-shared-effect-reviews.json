@@ -466,6 +466,38 @@
       "profileSha256": "66d06a2d26e836947712cfe8fa4b7fca1e87f4efa8585f1cdb4a0c73c4a573ff",
       "reviewedOn": "2026-10-15",
       "reason": "Official N5.3 Weapon Chart p. 187 and imported Army agree: PS 6, B1, DA Ammunition, two ARM Saving Rolls, Anti-materiel, Speculative Attack and Circular Impact Template. Army and captured English/Spanish Wiki charts agree on range modifiers -3/+3/+3/0/0/-6. The PDF's unsigned 3 is a confirmed missing plus sign per pinned RR-SRC-N53-003 and config/validation/weapon-range-source-review.json; preserve the raw printed source anomaly. Canonical DA and linked Traits cover all effects; no unique Katyusha-only mechanic."
+    },
+    {
+      "slug": "heavy-rocket-launcher",
+      "name": "Heavy Rocket Launcher",
+      "chartPage": 184,
+      "profileSha256": "09aee6331657e1824cdd1d228afa7ed9e2a5f0ddcee2a6a8a0d054a6a2fe6efd",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 p. 184, imported Army and archived English/Spanish Wiki agree: Blast PS 6 and Hit PS 5, both B2/N/ARM/one Saving Roll with Continuous Damage; only Blast has a Circular Impact Template. The Heavy Rocket Launcher uses -3/0/+3/-3 range bands. Existing Normal Ammunition, Continuous Damage and Impact Template references cover the modes without a new rule card. Preserve the Army 'Continous Damage' source spelling and its correct canonical Trait alias."
+    },
+    {
+      "slug": "light-rocket-launcher",
+      "name": "Light Rocket Launcher",
+      "chartPage": 184,
+      "profileSha256": "88cb92121160de0739c95a256902308c75339927ff8b896160f183a559334cb5",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 p. 184, imported Army and archived English/Spanish Wiki agree: Blast PS 7 and Hit PS 6, both B2/N/ARM/one Saving Roll with Continuous Damage; only Blast has a Circular Impact Template. Light range bands are 0/+3/-3/-6, distinct from Heavy. Existing Normal Ammunition, Continuous Damage and Impact Template references cover the modes; preserve the Army Trait spelling as source evidence."
+    },
+    {
+      "slug": "plasma-rifle",
+      "name": "Plasma Rifle",
+      "chartPage": 183,
+      "profileSha256": "beed558091e475d05f3867d2599ced357ab79019442548371131a9c47ae4b974",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 pp. 67/183, imported Army and archived English/Spanish Wiki agree: Blast PS 7 and Hit PS 6, both B3 with Normal Ammunition, one ARM plus one BTS Saving Roll, and Suppressive Fire; only Blast has a Circular Impact Template. A Critical adds one ARM roll, not BTS. Both modes already resolve the shared Plasma Weapon Property and typed Combined Saving Roll; no duplicated Plasma Rifle-specific mechanics are needed."
+    },
+    {
+      "slug": "plasma-carbine",
+      "name": "Plasma Carbine",
+      "chartPage": 176,
+      "profileSha256": "e395f6a6bebff51d9c6512c4bc4964ab4dc5b6a20f018001792ca96e9dc77f61",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 pp. 67/176, imported Army and archived English/Spanish Wiki agree: Blast PS 7 and Hit PS 6, both B2 with Normal Ammunition and one ARM plus one BTS Saving Roll; only Blast has a Circular Impact Template. Neither mode has Suppressive Fire. A Critical adds one ARM roll only. Existing Plasma Weapon Property, Combined Saving Roll and Impact Template references suffice; do not inherit Plasma Rifle's Suppressive Fire."
     }
   ]
 }
