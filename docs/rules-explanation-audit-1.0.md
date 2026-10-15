@@ -934,6 +934,40 @@ why the failed saves inflict different numbers of Wounds. Existing typed
 resolution facts remain unchanged. Both English and Spanish N5.3 PDFs
 are cited. Browser acceptance remains pending.
 
+**Browser acceptance (2026-10-15): Complete; no new curated text or
+calculation.** The 2026-10-10 implementation follow-up already
+superseded the original "Current" finding. AP's maintained
+clarification tells the player to select the ARM or BTS Attribute
+specified by the weapon, halve it and **round up** (5/2 to 3), never
+reducing a positive defense below 1. E/M explicitly halves BTS,
+rounding up, for **both** hit Saving Rolls; the Critical adds one
+additional roll and State effects still require a failed save.
+
+T2's existing player-facing clarification requires **identifying the
+original-hit die and additional Critical die before rolling**: a
+failed original-hit Saving Roll causes 2 Wounds, whereas failure on
+the extra Critical Saving Roll causes 1 Wound. The typed
+`facts.ammunitionResolution` already expresses those two effects
+separately. No general damage calculator, extra Critical effects or
+weapon-profile override was introduced.
+
+English N5.3 pp. 63-64, 67 and Spanish N5.3 pp. 64, 66-67 agree on
+these rules; the existing curated citations retain those printed
+pages. The AP, E/M and T2 pages passed **18/18 Chromium render/API
+checks** across 1440/390/320 px, including the published
+clarifications, fetched rules facts, and absence of JavaScript errors.
+At 320 px, all three share a **pre-existing 6 px breadcrumb
+`catalog-tag` overflow**, reproduced identically against the release
+and newly generated rules databases. The issue is already tracked in
+the final shared-layout acceptance task in `docs/TODO.md` and was
+not introduced or fixed here.
+
+Existing published/API regression coverage was extended to assert
+E/M's two hit rolls, conditional State effects, the single extra
+Critical roll, and AP/E/M defense modifiers. The maintained data,
+weapon rules and renderer are unchanged. This closes **REA-013
+rules-reference acceptance**, not final narrow-screen UI acceptance.
+
 ### REA-014 - Dodge and Reset lack multi-effect conditions
 
 **Classification:** correctness risk, completeness. **Severity:** High. **Priority:** P1.

@@ -673,9 +673,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       1440/390/320 px. At 320 px Smoke and Eclipse retain an independently
       verified, pre-existing 6 px breadcrumb overflow tracked by the final
       shared-layout acceptance item.
-    - [ ] **REA-013 — AP, E/M, and T2:** Verify the Ammunition pages explain
-      rounding up halved defenses and identifying original-hit versus
-      extra-Critical T2 dice before rolling; typed values remain unchanged.
+    - [x] **REA-013 ? AP/E/M and T2:** Accepted the published rounding
+      examples (ARM/BTS 5 becomes 3), matching Attribute selection and
+      the pre-roll original-hit versus extra-Critical T2 die labels (2
+      versus 1 Wound on failure). Validated unchanged typed facts and
+      bilingual N5.3 provenance: EN pp. 63-64/67, ES pp. 64/66-67.
+      Chromium passed 18/18 render/API checks at 1440/390/320 px.
+      The independently reproduced 6 px catalog-tag overflow at 320 px
+      belongs to the already tracked shared reference layout issue.
     - [ ] **REA-014 — Dodge/Reset:** Verify the Dodge, Reset, Engaged, and
       Bangbomb cards cover per-Attack evasion, post-Dodge movement,
       Engaged exit position, cumulative Reset State MODs, and Sixth Sense.

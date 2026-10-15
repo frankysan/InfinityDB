@@ -1006,6 +1006,19 @@ def test_ap_em_rounding_and_t2_critical_die_identification_reach_api(
         assert ammunition is not None
         modifier = ammunition["facts"]["ammunitionResolution"]["defenseModifier"]
         assert modifier == {"operation": "halve", "attributes": attrs}
+        # The attacker?s weapon still selects which Attribute is saved; AP
+        # never changes BTS to ARM, and E/M uses BTS for both hit saves.
+        resolution = ammunition["facts"]["ammunitionResolution"]
+        assert resolution["criticalAdditionalSavingRolls"] == 1
+        if slug == "em":
+            assert resolution["rollsPerHit"] == 2
+            assert {
+                (state["stateId"], state["condition"])
+                for state in resolution["stateEffects"]
+            } == {
+                ("state:isolated", "failed-saving-roll"),
+                ("state:immobilized-b", "failed-saving-roll"),
+            }
 
 
 def test_smoke_eclipse_opposition_and_msv_exception_reach_api(

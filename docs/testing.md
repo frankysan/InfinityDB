@@ -1586,3 +1586,30 @@ DBs. This is already tracked for the shared reference layout, not
 claimed to be resolved by REA-012. Private acceptance script,
 screenshots and result JSON remain ignored under `local/audits/`.
 No game mechanics, source data or frontend renderer were modified.
+
+## 1.0 AP/E/M rounding and T2 Critical die acceptance (REA-013)
+
+**Verified 2026-10-15, `dev/v1.0.0`.** The English N5.3 rules
+(pp. 63-64, 67) and Spanish N5.3 rules (pp. 64, 66-67) confirm that
+halving ARM/BTS always rounds up: 5 becomes 3 and any positive value
+remains at least 1. AP uses the ARM or BTS Saving Roll Attribute set
+by its weapon. E/M uses BTS/2 for both required hit Saving Rolls; a
+Critical adds one more roll. Each affected State remains conditional
+on a failed roll. T2 requires distinguishing its original-hit die
+(2 Wounds on failure) from the extra Critical die (1 Wound on failure)
+**before** rolling the Saving Rolls.
+
+The pre-existing curated clarifications and typed resolution facts were
+already correct and source cited. A published/API regression test was
+extended to protect AP/E/M Attribute modifiers, E/M's two hit rolls,
+conditional States, and the single additional Critical roll; existing
+assertions protect T2's differentiated Wound counts and citations.
+
+Headless Chromium with a freshly built rules DB passed **18/18**
+render/API checks on AP, E/M and T2 at 1440, 390 and 320 px; no
+JavaScript errors were observed. A **pre-existing 6 px catalog-tag
+breadcrumb overflow** occurs on all three pages at 320 px, identically
+against the release and rebuilt rules DBs, and remains tracked under
+the separate final shared-layout acceptance task. The private browser
+verifier, screenshots and result JSON remain in Git-ignored
+`local/audits/`. No source data, gameplay mechanics or renderer changed.

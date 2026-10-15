@@ -2593,6 +2593,15 @@ below 1. The underlying Saving Roll Attribute still comes from the weapon
 profile. These instructions are published as `facts.clarifications` while
 `defenseModifier` remains the non-executable `halve` operation.
 
+REA-013 browser acceptance (2026-10-15) verified the existing AP/E/M
+round-up examples (5 becomes 3), their weapon-defined Saving Roll
+Attributes, and the T2 instruction to distinguish its 2-Wound hit die
+from its 1-Wound extra Critical die **before** rolling. The maintained
+`facts.ammunitionResolution` continues to preserve all of these
+operations independently. At 320 px, the three pages share the
+previously tracked 6 px `catalog-tag` layout overflow; this is not a
+rules/curation defect.
+
 The reviewed EXP rule requires three Saving Rolls per hit. PARA requires a PH-6
 Saving Roll and applies Immobilized-A on failure, but has no effect when a target
 has no PH Attribute. T2 inflicts two Wounds for a failed hit Saving Roll; a failed
