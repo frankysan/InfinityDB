@@ -190,6 +190,51 @@ def test_domination_review_scoring_specialists_and_console_skill_reach_api(
     assert "authorial intent is unverified" in issue["description"]
 
 
+def test_firefight_review_scoring_and_overlays_reach_api(
+    scenario_app: Application,
+) -> None:
+    """Firefight mission rules remain scoped, linked and correctly projected."""
+    status, _, body = request(
+        scenario_app, "/api/scenarios/firefight", query="army_points=350"
+    )
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["setup"]["game_size"]["swc"] == 7
+    assert payload["selected_army_points"] == 350
+    assert [
+        (obj["id"], obj["maximumPoints"], obj["awards"][0]["condition"]["metric"])
+        for obj in payload["objectives"]
+    ] == [
+        ("surviving-specialists", 2, "surviving-specialist-troops"),
+        ("killed-specialists", 1, "enemy-specialist-troops-killed"),
+        ("killed-lieutenants", 3, "enemy-lieutenants-killed"),
+        ("killed-army-points", 4, "enemy-army-points-killed"),
+    ]
+    assert all(
+        obj["timing"] == "end-of-game"
+        and obj["aggregation"] == "exclusive"
+        and obj["awards"][0]["condition"]["comparison"] == "greater"
+        for obj in payload["objectives"]
+    )
+    assert [rule["definitionId"] for rule in payload["special_rules"]] == [
+        "rule:scenario:killing",
+        "rule:scenario:reinforced-tactical-link",
+        "rule:scenario:designated-landing-area",
+        "rule:specialist-troops:standard",
+    ]
+    tactical = " ".join(payload["special_rules"][1]["paragraphs"])
+    landing = " ".join(payload["special_rules"][2]["paragraphs"])
+    assert "always Open Information" in tactical
+    assert "without spending an Order" in tactical
+    assert "+3 MOD" in landing
+    assert "cumulative" in landing
+    assert "enemy Deployment Zone" in landing
+    assert payload["end_conditions"][0]["condition"]["rounds"] == 3
+    assert payload["end_conditions"][1]["checkAt"] == "tactical-phase"
+    assert payload["end_conditions"][1]["finishAt"] == "end-of-player-turn"
+    assert payload["source_issues"] == []
+
+
 def test_scenario_detail_api_projects_objective_and_source_issue_tokens(
     scenario_app: Application,
 ) -> None:

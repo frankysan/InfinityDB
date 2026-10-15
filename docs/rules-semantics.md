@@ -3689,6 +3689,26 @@ where applicable, season) scope and link to the general concepts they modify.
 InfinityDB must not rewrite static Unit/Profile data or the base-rule record to
 make a mission-local exception appear universal.
 
+The 1.0 Firefight review compared N5.3 printed pp. 155–156 with English
+N5.2 printed p. 154 and pinned English Wiki Firefight revision 3267. Its
+four end-of-game comparisons award **2** Objective Points for more surviving
+Specialists, **1** for more enemy Specialists killed, **3** for more enemy
+Lieutenants killed, and **4** for more enemy Army Points killed. Ties do not
+earn these awards. The sources do **not** define a Classified Objective for
+Firefight; no inferred Classified Objective interaction is added.
+
+Shared Killing includes Troopers in Dead, those remaining Null at game end,
+and enemy Troopers never deployed as Models or Markers. Reinforced Tactical
+Link makes the Lieutenant identity Open, requires deployment before the first
+round and permits an on-table replacement without Order expenditure at the
+start of the active Tactical Phase when no valid Lieutenant remains.
+Designated Landing Area applies table-wide, adds a cumulative +3 Combat
+Jump PH modifier and removes the enemy Deployment Zone restriction for
+Airborne Deployment-labeled Skills. These exceptions are mission-scoped,
+not overrides to the canonical Lieutenant or Combat Jump definitions.
+The three-round ending and separate all-Null early ending retain their
+distinct Tactical Phase and end-of-Player-Turn timings.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Firefight>

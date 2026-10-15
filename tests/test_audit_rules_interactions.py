@@ -65,11 +65,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     }
     assert report["summary"]["releases"]["1.0.0"] == {
         "total": 92,
-        "complete": 90,
-        "pending": 2,
-        "reviewed": 90,
+        "complete": 91,
+        "pending": 1,
+        "reviewed": 91,
         "inherited": 0,
-        "percentComplete": 97.8,
+        "percentComplete": 98.9,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
@@ -117,8 +117,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         },
     }
     assert report["summary"]["supporting"]["total"] == 179
-    assert report["summary"]["supporting"]["complete"] == 177
-    assert report["summary"]["supporting"]["pending"] == 2
+    assert report["summary"]["supporting"]["complete"] == 178
+    assert report["summary"]["supporting"]["pending"] == 1
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
     equipment_items = [
@@ -274,7 +274,6 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         ("modifies-use-of", "skill:place-deployable")
     ]
     for record_id in {
-        "scenario:firefight",
         "scenario:supplies",
     }:
         assert items[record_id]["status"] == "pending"
@@ -283,6 +282,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     for record_id in {
         "scenario:annihilation",
         "scenario:domination",
+        "scenario:firefight",
         "ammunition:para",
         "ammunition:shock",
         "ammunition:stun",
@@ -575,24 +575,20 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 177/179 complete, 2 pending" in output
+    assert "Supporting identities: 178/179 complete, 1 pending" in output
 
 
 def test_rules_interaction_1_0_gate_lists_pending_identities(capsys) -> None:
     assert main(["--require-release", "1.0.0"]) == 1
     output = capsys.readouterr().out
-    assert "2 supporting identities pending" in output
+    assert "1 supporting identities pending" in output
     pending_line = next(
         line for line in output.splitlines() if line.startswith("Pending identities:")
     )
     identities = pending_line.removeprefix("Pending identities: ").split(", ")
-    assert len(identities) == 2
+    assert len(identities) == 1
     assert identities == sorted(identities)
-    assert identities == [
-        "scenario:firefight",
-        "scenario:supplies",
-    ]
-    assert "scenario:firefight" in identities
+    assert identities == ["scenario:supplies"]
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:

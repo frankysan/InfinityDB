@@ -182,6 +182,92 @@ def test_domination_review_preserves_scoring_and_specialist_boundaries(
         assert phrase in skill_effects
 
 
+def test_firefight_review_scoring_and_mission_only_overlays(document: dict) -> None:
+    """N5.3 pp. 155-156: comparative objectives and scenario-local exceptions."""
+    from infinity_db.scenario_mission import MetricComparison
+
+    source = scenario(document, "firefight")
+    mission = parse_scenario_definition_record(
+        ScenarioComponents(document).compose(source)
+    ).mission
+    assert mission is not None
+    assert [size.army_points for size in mission.game_sizes] == [
+        150, 200, 250, 300, 350, 400,
+    ]
+    assert [size.swc for size in mission.game_sizes] == [3, 4, 5, 6, 7, 8]
+    assert all(size.minimum_victory_points is None for size in mission.game_sizes)
+    assert [obj.id for obj in mission.objectives] == [
+        "surviving-specialists", "killed-specialists",
+        "killed-lieutenants", "killed-army-points",
+    ]
+    assert [obj.maximum_points for obj in mission.objectives] == [2, 1, 3, 4]
+    assert [obj.awards[0].objective_points for obj in mission.objectives] == [
+        2, 1, 3, 4,
+    ]
+    assert all(
+        obj.timing == "end-of-game" and obj.aggregation == "exclusive"
+        and len(obj.awards) == 1
+        and obj.awards[0].army_points == (150, 200, 250, 300, 350, 400)
+        for obj in mission.objectives
+    )
+    for objective, metric in zip(mission.objectives, (
+        "surviving-specialist-troops",
+        "enemy-specialist-troops-killed",
+        "enemy-lieutenants-killed",
+        "enemy-army-points-killed",
+    ), strict=True):
+        condition = objective.awards[0].condition
+        assert isinstance(condition, MetricComparison)
+        assert (condition.metric, condition.comparison) == (metric, "greater")
+    assert "[[skill:lieutenant:plural]]" in mission.objectives[2].name
+    assert not mission.source_issues
+
+    killing, tactical_link, landing, specialists = mission.rules
+    assert [rule.definition_id for rule in mission.rules] == [
+        "rule:scenario:killing",
+        "rule:scenario:reinforced-tactical-link",
+        "rule:scenario:designated-landing-area",
+        "rule:specialist-troops:standard",
+    ]
+    killing_text = " ".join(killing.paragraphs)
+    for phrase in ("entering [[state:dead]]", "Null when the game ends",
+                   "never deployed"):
+        assert phrase in killing_text
+    link_text = " ".join(tactical_link.paragraphs)
+    for phrase in ("always Open Information", "Marker", "first Game Round",
+                   "start of the Tactical Phase", "without spending an Order",
+                   "on the table"):
+        assert phrase in link_text
+    assert "[[skill:lieutenant]]" in link_text
+    landing_text = " ".join(landing.paragraphs)
+    for phrase in ("whole game table", "[[skill:combat-jump]]",
+                   "+3 MOD", "[[attribute:ph]]", "cumulative",
+                   "Airborne Deployment (AD)", "enemy Deployment Zone"):
+        assert phrase in landing_text
+    assert set(specialists.specialist_skill_ids) == {
+        "skill:doctor", "skill:engineer", "skill:forward-observer",
+        "skill:hacker", "skill:paramedic", "skill:specialist-operative",
+        "skill:chain-of-command",
+    }
+    specialist_text = " ".join(specialists.paragraphs)
+    assert "[[skill:peripheral:plural]]" in specialist_text
+    assert "Non Specialist variant" in specialist_text
+    assert [(end.id, end.check_at, end.finish_at) for end in mission.end_conditions] == [
+        ("round-limit", "end-of-round", "end-of-round"),
+        ("all-troopers-null", "tactical-phase", "end-of-player-turn"),
+    ]
+    assert mission.end_conditions[0].rounds == 3
+    assert not mission.end_conditions[1].uses_minimum_victory_points
+    assert {citation["page"] for citation in source["citations"]} == {155, 156}
+
+    for rule_id in (
+        "rule:scenario:reinforced-tactical-link",
+        "rule:scenario:designated-landing-area",
+    ):
+        definition = next(rec for rec in document["records"] if rec["id"] == rule_id)
+        assert definition["scope"]["scenarios"] == ["scenario:firefight"]
+
+
 def test_shared_sources_replace_repeated_authoring_and_keep_overrides_explicit(
     document: dict,
 ) -> None:

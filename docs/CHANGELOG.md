@@ -329,6 +329,10 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing:** Verify Firefight's four comparative end-game objectives,
+  Lieutenant replacement/Open Information, cumulative Combat Jump landing MOD,
+  Airborne Deployment zone exception, Specialist criteria, and early-ending
+  conditions in source-backed mission and API regression tests.
 - **Data processing:** Verify Domination's round-end Quadrant scoring,
   Shasvastii exception, last-hacked Console ownership, Specialist eligibility,
   and Tactical Phase minimum-VP ending with regression tests. Retain the

@@ -1935,8 +1935,9 @@
     {
       "recordId": "scenario:firefight",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Classified Objective interactions, and other scenario rule semantics remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 pp. 155-156, N5.2 p. 154 and pinned English Wiki Firefight revision 3267 agree on all six deployment configurations and four end-game comparative objectives: more surviving Specialists (2 OP), more enemy Specialists killed (1 OP), more enemy Lieutenants killed (3 OP), and more enemy Army Points killed (4 OP). All comparisons require strictly greater values, not ties. There is no Classified Objective in these sources. Shared Killing counts Dead, remaining Null at end of game and never-deployed enemy Troopers. Reinforced Tactical Link is Firefight-only: Lieutenant identity always Open, must deploy at first Round start, replacement at the start of the active Tactical Phase if absent or Null costs no Order, and the replacement must be on-table. Designated Landing Area applies to the whole table, grants cumulative +3 on Combat Jump PH, and removes enemy Deployment Zone restrictions for Airborne Deployment-labeled Skills. The seven Specialist qualifiers, Non Specialist Chain of Command exclusion and Doctor/Engineer Peripheral restriction remain shared. Three-round and all-Null Tactical Phase/end-of-turn ending conditions remain distinct. The scenario-only overlays do not modify the canonical Lieutenant or Combat Jump rules and require no unconditional outgoing graph edges."
     },
     {
       "recordId": "rule:scenario:carrying-supply-boxes",
