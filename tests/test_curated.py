@@ -1910,6 +1910,50 @@ def test_rea038_direct_vs_delegated_recovery_source_scope() -> None:
         assert pdf_pages >= {51}
 
 
+def test_rea009_positive_before_negative_recovery_is_canonical_and_crosslinked() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    records = {r["id"]: r for r in load_curated_document(path)["records"]}
+    sequence = records["rule:order-expenditure-sequence"]
+    engineer = records["skill:engineer"]
+    doctor = records["skill:doctor"]
+    imm_a = records["state:immobilized-a"]
+    para = records["ammunition:para"]
+    clauses = " ".join(sequence["facts"]["clarifications"])
+    assert "**Positive-before-negative resolution:**" in clauses
+    assert "first resolve the beneficial removal/cancellation" in clauses
+    assert "not which action was declared earlier" in clauses
+    example = next(x for x in sequence["facts"]["clarifications"] if "Riotstopper" in x)
+    for phrase in (
+        "**[[skill:engineer|Engineer]] versus [[ammunition:para|PARA]] example:**",
+        "Resolve the [[skill:engineer|Engineer]]'s [[attribute:wip|WIP]] Roll first",
+        "original [[state:immobilized-a|IMM-A]] is canceled",
+        "Riotstopper's PH-6 [[rule:saving-rolls|Saving Roll]]",
+        "A failed Saving Roll inflicts a **new** [[state:immobilized-a|IMM-A]]",
+        "passed Saving Roll leaves the Trooper free of [[state:immobilized-a|IMM-A]]",
+        "WIP Roll fails, the original [[state:immobilized-a|IMM-A]] is not removed",
+        "does **not** grant protection from a new hit",
+    ):
+        assert phrase in example
+    for rec in (engineer, doctor, imm_a):
+        assert "[[rule:order-expenditure-sequence|Order Expenditure Sequence]]" in " ".join(
+            rec["facts"].get("restrictions", []) + rec["facts"].get("clarifications", [])
+        )
+    assert "[[skill:engineer|Engineer]]" in imm_a["facts"]["clarifications"][0]
+    assert "[[ammunition:para|PARA Ammunition]]" in imm_a["facts"]["clarifications"][0]
+    assert para["facts"]["ammunitionResolution"]["stateEffects"] == [
+        {"stateId": "state:immobilized-a", "condition": "failed-saving-roll"}
+    ]
+    for rid in ("rule:order-expenditure-sequence", "state:immobilized-a"):
+        citations = {(c["sourceId"], c.get("page")) for c in records[rid]["citations"]}
+        assert citations >= {
+            ("n5-core-v5.3-pdf", 15),
+            ("n5-core-v5.3-es-pdf", 15),
+        }
+    assert not any(
+        rel["type"] == "causes-state" for rel in sequence.get("relations", [])
+    )
+
+
 def test_rea007_speedball_ph15_excludes_only_controlled_jump_mods() -> None:
     root = Path(__file__).parents[1] / "data" / "curated" / "rules"
     core = load_curated_document(root / "n5-core-v5.3.json")

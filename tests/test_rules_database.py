@@ -377,6 +377,49 @@ def test_guts_roll_reference_and_source_exceptions_are_composed(
         assert "[[rule:guts-roll|Guts Roll]]" in json.dumps(record), entity_id
 
 
+def test_rea009_shared_timing_example_and_recovery_links_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    ids = (
+        "rule:order-expenditure-sequence", "skill:engineer", "skill:doctor",
+        "state:immobilized-a", "ammunition:para",
+    )
+    records = {rid: current_rules_database.composed_record(rid) for rid in ids}
+    assert all(record is not None for record in records.values())
+    order = records["rule:order-expenditure-sequence"]
+    assert order is not None
+    snippets = " ".join(order["facts"]["clarifications"])
+    assert "**Positive-before-negative resolution:**" in snippets
+    assert "**new** [[state:immobilized-a|IMM-A]]" in snippets
+    assert "original [[state:immobilized-a|IMM-A]] is not removed" in snippets
+    assert "passed Saving Roll leaves the Trooper free" in snippets
+    for rid in ids[1:4]:
+        rec = records[rid]
+        assert rec is not None
+        text = " ".join(
+            rec["facts"].get("restrictions", []) + rec["facts"].get("clarifications", [])
+        )
+        assert "[[rule:order-expenditure-sequence|Order Expenditure Sequence]]" in text
+    engineer = records["skill:engineer"]
+    doctor = records["skill:doctor"]
+    imm_a = records["state:immobilized-a"]
+    assert engineer and doctor and imm_a
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c.get("page") == 15
+               for c in engineer["citations"])
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c.get("page") == 15
+               for c in doctor["citations"])
+    for rid in ("rule:order-expenditure-sequence", "state:immobilized-a"):
+        rec = records[rid]
+        assert rec is not None
+        cited = {(c["source_id"], c.get("page")) for c in rec["citations"]}
+        assert cited >= {("n5-core-v5.3-pdf", 15), ("n5-core-v5.3-es-pdf", 15)}
+    para = records["ammunition:para"]
+    assert para is not None
+    assert para["facts"]["ammunitionResolution"]["stateEffects"] == [
+        {"stateId": "state:immobilized-a", "condition": "failed-saving-roll"}
+    ]
+
+
 def test_order_expenditure_sequence_mechanics_are_composed(
     current_rules_database: RulesDatabase,
 ) -> None:
@@ -397,7 +440,7 @@ def test_order_expenditure_sequence_mechanics_are_composed(
         "Declared [[trait:disposable-x|Disposable]] uses are still spent",
         "[[skill:discover|Discover]]",
         "[[skill:engineer|Engineer]]",
-        "[[state:immobilized-a|Immobilized-A]]",
+        "[[state:immobilized-a|IMM-A]]",
     ):
         assert fragment in text
     assert {

@@ -1900,8 +1900,15 @@ targets qualify for direct Skill use remains an unconfirmed source decision
 MediKit and GizmoKit resolve target PH Rolls, not Saving Rolls. If multiple
 successful hits/uses occur in one Order, any successful target PH Roll gives
 at most one ordinary recovered Wound; Remote Presence and other explicit
-exceptions can alter that outcome. For simultaneous positive and negative
-State/Wound changes, apply recovery first, then the new detrimental effect.
+exceptions can alter that outcome. The canonical
+`rule:order-expenditure-sequence` now owns the complete simultaneous
+recovery example (REA-009): a WIP Roll first cancels existing IMM-A,
+then a Riotstopper PARA PH-6 Saving Roll can inflict a new IMM-A.
+Successful saving leaves the old IMM-A canceled; failed Engineer WIP
+leaves the old IMM-A in place. The sequence is source-native English
+and Spanish N5.3 p. 15, and is cross-linked from Engineer, Doctor and
+IMM-A. It describes outcome ordering, not action/declaration timing
+or a new general state-machine resolver.
 A Disposable Burst increase spends more charges; a Special Die does not.
 Double Shot with Disposable (2) needs both charges unspent.
 

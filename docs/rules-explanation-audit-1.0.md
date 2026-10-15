@@ -683,6 +683,39 @@ repeats that example. This is sequencing, not mutual cancellation.
 links. **Fix:** prose/links; an optional canonical timing record is future work.
 **Dependencies:** REA-001, REA-002, REA-026; preserve Protheion's already correct sequence.
 
+**Reference acceptance (2026-10-15): Local explanation reconciled;
+no executable timing changes.** The original "Current" passage above
+reflects a prior data state: by commit `cf8a00e`, the Order Expenditure
+Sequence, Engineer and Doctor cards already mentioned positive effects
+preceding simultaneous negative effects. The missing player-facing
+piece was the complete sequence and end states, reusable from each
+relevant reference.
+
+The shared `rule:order-expenditure-sequence` now explains that
+simultaneously declared effects stay simultaneous, but beneficial
+cancellation/recovery is resolved before harmful effects. It works
+through the bilingual English/Spanish N5.3 p. 15 Engineer/Riotstopper
+example: first the Engineer WIP Roll, then the hit's PH-6 PARA Saving
+Roll. If Engineer fails, the original IMM-A remains; if Engineer
+succeeds and the PARA Saving Roll succeeds, IMM-A stays canceled; if
+Engineer succeeds but the PARA Saving Roll fails, a **new IMM-A** is
+inflicted. Successful cancellation therefore provides no temporary
+immunity to re-infliction.
+
+Both `skill:doctor` and `skill:engineer` retain their already correct
+recovery mechanics and now link to the canonical timing rule. The
+`state:immobilized-a` card also links to it and to Engineer/PARA;
+versioned English and Spanish PDF p. 15 citations are attached to the
+shared Order rule and IMM-A, with English p. 15 on both Skills.
+`ammunition:para` retains its existing `failed-saving-roll` IMM-A
+condition, and no `causes-state` timing edge, runtime resolver or
+mandatory generic immunity behavior was introduced. Chromium passed
+**33/33** content/navigation checks at 1440/390/320 px, with no JS
+errors or new horizontal overflow. PARA at 320 px retains an unrelated
+6 px catalog-tag overflow, reproduced identically against the checked-in
+release and rebuilt rules databases. This completes REA-009's
+player-facing acceptance, not state-machine simulation.
+
 ### REA-010 - Immunity omits the ordinary Trait protection behind its exceptions
 
 **Classification:** completeness, clarity. **Severity:** High. **Priority:** P1.

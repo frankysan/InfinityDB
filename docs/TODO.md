@@ -637,8 +637,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [x] **REA-008 — Protheion:** The Skill card explains the FAQ overkill
       limit, profile-listed enemy Attribute MOD, and recovery order;
       player-facing wording has been verified.
-    - [ ] **REA-009 — Simultaneous recovery:** Review the updated explanation
-      for recovery and re-infliction in the same Order.
+    - [x] **REA-009 ? Simultaneous recovery:** Confirmed English and
+      Spanish N5.3 p. 15 require positive-before-negative resolution.
+      Expanded the shared Order Expenditure Sequence reference with
+      all Engineer/Riotstopper outcomes: original IMM-A stays if Engineer
+      fails, cancellation persists if PARA succeeds, or IMM-A is newly
+      inflicted if PARA fails. Linked Engineer, Doctor and IMM-A to that
+      rule, preserving source mechanics and State graph semantics.
+      Chromium acceptance passed 33/33 content/navigation checks at
+      1440/390/320 px; preexisting 6 px PARA overflow at 320 px was
+      verified against the release database.
     - [ ] **REA-010 — General Immunity:** Verify the Immunity (ARM/BTS)
       protection, printed Monofilament exception, and existing Flash Pulse
       example in the browser.

@@ -8947,7 +8947,7 @@
                 "restrictions": [
                     "Self-use can cancel applicable conditions only while the user is not in a Null State; [[skill:no-wound-incapacitation|No Wound Incapacitation]] and [[skill:technorganic|Technorganic]] have explicit recovery exceptions.",
                     "A user in [[state:engaged|Engaged State]] cannot declare this Skill. The Close Combat interaction rule also prevents treating an allied target that is already [[state:engaged|Engaged]] while the user is in Silhouette contact (N5.3 p. 51). Neither restriction is a general Allied-only requirement.",
-                    "When the same Order removes and inflicts Wounds or conditions, resolve the positive effect first, then the negative effect (N5.3 p. 15)."
+                    "When the same Order removes and inflicts Wounds or conditions, follow [[rule:order-expenditure-sequence|Order Expenditure Sequence]]: resolve the positive recovery first, then the negative effect (N5.3 p. 15)."
                 ],
                 "clarifications": [
                     "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful recovery Roll is sufficient under the shared success rule.",
@@ -9003,6 +9003,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 170,
                     "section": "Stunned State Cancellation"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 15,
+                    "section": "Positive-before-negative Effects"
                 }
             ],
             "review": {
@@ -9061,7 +9066,7 @@
                 "restrictions": [
                     "Self-use is permitted to repair Wounds or cancel applicable conditions only while the user is not in a Null State.",
                     "A user in [[state:engaged|Engaged State]] cannot declare this Skill. The Close Combat interaction rule also prevents treating an allied target that is already [[state:engaged|Engaged]] while the user is in Silhouette contact (N5.3 p. 51). Neither restriction is a general Allied-only requirement.",
-                    "If a condition is canceled and a new one inflicted in the same Order, apply cancellation first, then the new effect. For example, canceling [[state:immobilized-a|IMM-A]] does not prevent a simultaneous failed [[ammunition:para|PARA]] Saving Roll from inflicting that condition again (N5.3 p. 15)."
+                    "If a condition is canceled and another is inflicted in the same Order, follow [[rule:order-expenditure-sequence|Order Expenditure Sequence]] positive-before-negative resolution: apply cancellation first, then the new effect. Canceling [[state:immobilized-a|IMM-A]] does not prevent a later failed [[ammunition:para|PARA]] Saving Roll in that Order from inflicting [[state:immobilized-a|IMM-A]] again (N5.3 p. 15)."
                 ],
                 "clarifications": [
                     "When using [[rule:coordinated-orders|Coordinated Orders]] on one shared target, any successful Roll makes the coordinated use successful.",
@@ -9110,6 +9115,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 171,
                     "section": "Targeted State Cancellation"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 15,
+                    "section": "Simultaneous Effects: Engineer and Riotstopper"
                 }
             ],
             "review": {
@@ -13125,13 +13135,26 @@
                     "A successful qualifying [[skill:dodge]] or an [[skill:engineer]] WIP Roll can cancel the state."
                 ],
                 "requirements": [],
-                "restrictions": []
+                "restrictions": [],
+                "clarifications": [
+                    "**Recovery and re-infliction in one Order:** A successful [[skill:engineer|Engineer]] WIP Roll can remove this condition before a simultaneous [[ammunition:para|PARA Ammunition]] Saving Roll. If that PH-6 Saving Roll fails, the Trooper enters [[state:immobilized-a|IMM-A]] again; if it succeeds, the original cancellation remains effective. This is the positive-before-negative sequence in the [[rule:order-expenditure-sequence|Order Expenditure Sequence]], not protection granted by recovery (N5.3 p. 15)."
+                ]
             },
             "labelIds": [],
             "citations": [
                 {
                     "sourceId": "wiki-immobilized-a-state-oldid-4104",
                     "heading": "Immobilized-A State"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 15,
+                    "section": "Simultaneous Recovery and Re-infliction"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 15,
+                    "section": "Efectos simult?neos: Ingeniero y Riotstopper"
                 }
             ],
             "review": {
@@ -22982,7 +23005,8 @@
                 "clarifications": [
                     "All [[trait:aro|AROs]] resolve simultaneously. For instance, Reactive Troopers cannot declare [[skill:discover|Discover]] with one and condition a later [[skill:bs-attack|BS Attack]] by another on the first Trooper's Roll succeeding.",
                     "Even if the Active Trooper shoots at the start of a [[skill:move|Move]] and an enemy shoots at the end of that movement, the Attacks are simultaneous. Opposition is determined by the shared [[rule:face-to-face-rolls|Face to Face Rolls]] rules, not declaration order.",
-                    "When a Trooper removes and receives an adverse condition in the same Order, apply the positive effect first. For example, an [[skill:engineer|Engineer]] may cancel [[state:immobilized-a|Immobilized-A]] before a simultaneous hit with [[ammunition:para|PARA Ammunition]] can inflict it again.",
+                    "**Positive-before-negative resolution:** When the same Trooper both removes and receives Wounds or conditions in one Order, first resolve the beneficial removal/cancellation, then resolve the detrimental Wound or condition. The actions are still simultaneous; this ordering determines their final effects, not which action was declared earlier (N5.3 p. 15).",
+                    "**[[skill:engineer|Engineer]] versus [[ammunition:para|PARA]] example:** An [[skill:engineer|Engineer]] attempts to cancel [[state:immobilized-a|IMM-A]] on a Trooper who is also hit by a Riotstopper using [[ammunition:para|PARA Ammunition]]. Resolve the [[skill:engineer|Engineer]]'s [[attribute:wip|WIP]] Roll first. If it succeeds, the original [[state:immobilized-a|IMM-A]] is canceled; the Trooper then makes the Riotstopper's PH-6 [[rule:saving-rolls|Saving Roll]]. A failed Saving Roll inflicts a **new** [[state:immobilized-a|IMM-A]]; a passed Saving Roll leaves the Trooper free of [[state:immobilized-a|IMM-A]]. If the [[skill:engineer|Engineer]]'s WIP Roll fails, the original [[state:immobilized-a|IMM-A]] is not removed. Successful recovery does **not** grant protection from a new hit in that Order (N5.3 p. 15).",
                     "When several Troopers activate together, use [[rule:coordinated-orders|Coordinated Orders]] for their shared Skill declarations, Spearhead and restricted [[trait:aro|ARO]] targets."
                 ]
             },
@@ -22996,6 +23020,11 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 15,
                     "section": "Declaration Requirements and Simultaneous Effects"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 15,
+                    "section": "Efectos simult?neos: primero positivos"
                 }
             ],
             "review": {

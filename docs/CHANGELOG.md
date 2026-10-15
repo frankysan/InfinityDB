@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Recovery and re-infliction in the same Order are now explained with
+  the Engineer/Riotstopper example: cancel IMM-A first, then resolve a
+  new PARA Saving Roll, which can inflict IMM-A again.
 - Request Speedball now explicitly shows why its PH 15 Token Rolls
   cannot receive Controlled Jump +3/-3, even when either player's
   Program is active. The FAQ exemption does not remove other modifiers.
@@ -173,6 +176,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Complete REA-009 State/recovery
+  timing reference acceptance with bilingual N5.3 p. 15 sources,
+  an explicit positive-before-negative resolution example, and links
+  from Doctor, Engineer and IMM-A to the shared Order rules. Preserve
+  existing State transitions, source data and game mechanics.
 - **Data processing + Web frontend:** Complete REA-007 Request
   Speedball reference acceptance with a source-backed PH 15 worked
   example and regression coverage for the reciprocal Controlled Jump

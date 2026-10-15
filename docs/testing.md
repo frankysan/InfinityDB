@@ -1506,3 +1506,30 @@ and 1440/390/320 px overflow. **18/18 Chromium checks passed** with
 no JavaScript errors or page-level horizontal overflow. Private verifier,
 screenshots, result JSON and rebuilt rules DB stay Git-ignored in
 `local/audits/`.
+
+
+## 1.0 simultaneous recovery and re-infliction (REA-009)
+
+**Reviewed 2026-10-15, `dev/v1.0.0`.** The official English and Spanish
+N5.3 PDFs, both p. 15, explicitly place positive effects before
+negative effects when a Trooper receives and removes Wounds or States
+within one Order. The printed Engineer/Riotstopper example uses Engineer
+WIP to cancel the original IMM-A, then a PH-6 PARA Saving Roll. WIP
+failure leaves original IMM-A; WIP success plus successful PARA Save
+leaves IMM-A canceled; WIP success plus failed PARA Save inflicts new
+IMM-A. The newly linked shared Order Expenditure Sequence owns this
+worked example; Engineer, Doctor and IMM-A link to it. The PARA
+`failed-saving-roll` State effect remains unchanged.
+
+Source and composed-rules regressions cover the three outcomes,
+versioned EN/ES p. 15 provenance and semantic links, and unchanged
+PARA behavior. Browser acceptance uses a freshly rebuilt local rules
+DB at 1440/390/320 px with the Order, Engineer, Doctor, IMM-A and
+PARA cards, plus linked navigation, JavaScript errors and overflow.
+**33/33 Chromium content/navigation checks passed** with no JavaScript
+errors or new overflow. At 320 px, PARA alone has an existing 6 px
+`catalog-tag` overflow; it reproduced identically with the preexisting
+release rules DB and locally rebuilt rules DB. The Order, Engineer,
+Doctor and IMM-A pages had no overflow at any checked width. The
+private verifier, screenshots and diagnostics live under ignored
+`local/audits/`. No game-state timing engine was introduced.
