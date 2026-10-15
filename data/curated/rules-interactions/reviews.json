@@ -1844,14 +1844,16 @@
     {
       "recordId": "ammunition:da",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 English p. 64 and pinned English Wiki DA revision 2991 confirm two mandatory Saving Rolls per hit even after a failed first roll or Unconscious, one Wound per failed roll and a third roll for a Critical. Related BioWeapon/Immunity/combined-Ammunition behavior remains owned and conditioned by those rules; DA itself has no additional outgoing graph edge."
     },
     {
       "recordId": "ammunition:eclipse",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 English p. 64, Spanish p. 64 and pinned English Wiki Eclipse revision 3789 confirm Smoke inheritance, Reflective zero-visibility/MSV exception and BS Attack visibility-MOD exception. The outgoing uses-effects-of relation targets Smoke while the explicit clarifications and typed visibility facts preserve Eclipse's visor exception; no unconditional visor-negation edge is implied."
     },
     {
       "recordId": "ammunition:em",
@@ -1868,8 +1870,9 @@
     {
       "recordId": "ammunition:normal",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 English p. 63 and pinned English Wiki Normal revision 2989 confirm one Saving Roll per hit, one Wound per failed roll and one extra Saving Roll for a Critical. The weapon specifies ARM/BTS/other Saving Attribute; Normal adds no further condition or outgoing rules relation. Combined Saving Rolls and Immunity exceptions belong to their owning rules, not this base Ammunition."
     },
     {
       "recordId": "ammunition:para",
@@ -1886,8 +1889,9 @@
     {
       "recordId": "ammunition:smoke",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 English p. 66, Spanish p. 65 and pinned English Wiki Smoke revision 3642 confirm the unopposed/Face-to-Face conditions, MSV exclusion, Dodge exception, Critical, removal, infinite-height volume and horizontal/vertical scenery clipping. Conditional LoF interactions are described with linked references; no blanket outgoing effect edge is justified. Eclipse's distinct MSV exception is reviewed separately."
     },
     {
       "recordId": "ammunition:stun",

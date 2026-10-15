@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- DA Ammunition now explains why its second Saving Roll is still required after
+  the first fails or causes Unconscious. Smoke now explains how scenery blocks
+  portions of its otherwise infinite-height Template; Eclipse links to the
+  shared Smoke rules while retaining its visor exceptions.
 - Dense Unit profiles and loadouts remain readable on narrow screens: Attributes,
   Skills, Equipment and Includes no longer crowd adjacent content, and long
   loadout names can wrap without losing Points or SWC.
@@ -313,6 +317,10 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing + Web frontend:** Clarify DA's mandatory second Saving Roll
+  and Smoke's scenery-blocked volume in the player-facing reference. Eclipse
+  now links to its inherited Smoke mechanics without losing its distinct
+  Multispectral Visor behavior.
 - **Web frontend:** Give narrow Unit profile attributes and loadout details
   full-width rows; preserve wrapping names and the Points/SWC labels in
   320–400 px cards, with less cramped mobile labels up to 600 px.

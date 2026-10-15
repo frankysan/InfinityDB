@@ -1060,8 +1060,16 @@ def test_smoke_eclipse_opposition_and_msv_exception_reach_api(
         assert statuses == ["200 OK"]
         payload = json.loads(b"".join(response))
         rule = payload["rules"][0]
-        assert len(rule["facts"]["clarifications"]) == 3
-        assert len(rule["fact_tokens"]["clarifications"]) == 3
+        expected_clarifications = 4 if slug == "smoke" else 3
+        assert len(rule["facts"]["clarifications"]) == expected_clarifications
+        assert len(rule["fact_tokens"]["clarifications"]) == expected_clarifications
+        if slug == "smoke":
+            assert any(
+                token["target"] == "term:scenery-element"
+                for tokens in rule["fact_tokens"]["clarifications"]
+                for token in tokens
+                if token["type"] == "reference"
+            )
         assert any(
             token["target"] == "equipment:multispectral-visor"
             for tokens in rule["fact_tokens"]["clarifications"]

@@ -3889,6 +3889,44 @@ def test_rea023_deployable_placement_geometry_and_exception_owners(
     assert source(wildparrot, "n5-core-v5.3-pdf", 74)
 
 
+def test_reviewed_normal_da_smoke_eclipse_interactions_publish(
+    current_rules_database: RulesDatabase,
+) -> None:
+    """N5.3 pp. 63-64, 66: canonical saves, Smoke geometry and Eclipse inheritance."""
+    normal = current_rules_database.composed_record("ammunition:normal")
+    da = current_rules_database.composed_record("ammunition:da")
+    smoke = current_rules_database.composed_record("ammunition:smoke")
+    eclipse = current_rules_database.composed_record("ammunition:eclipse")
+    assert normal is not None and da is not None
+    assert smoke is not None and eclipse is not None
+
+    assert normal["facts"]["ammunitionResolution"]["rollsPerHit"] == 1
+    assert normal["facts"]["ammunitionResolution"]["criticalAdditionalSavingRolls"] == 1
+    assert da["facts"]["ammunitionResolution"]["rollsPerHit"] == 2
+    assert da["facts"]["ammunitionResolution"]["criticalAdditionalSavingRolls"] == 1
+    assert "second roll is mandatory" in da["summary"]
+    assert "[[state:unconscious|Unconscious]]" in da["summary"]
+    assert "three total per Critical hit" in da["summary"]
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 63
+               for c in normal["citations"])
+    assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 64
+               for c in da["citations"])
+
+    smoke_notes = " ".join(smoke["facts"]["clarifications"])
+    assert "[[term:scenery-element:plural|Scenery Elements]]" in smoke_notes
+    assert "horizontally and vertically" in smoke_notes
+    assert smoke["facts"]["visibilityZone"]["multispectralVisor"] == "can-draw-lof"
+    assert eclipse["facts"]["visibilityZone"]["multispectralVisor"] == "blocked"
+    assert ("uses-effects-of", "outbound", "ammunition:smoke") in {
+        (r["type"], r["direction"], r["record"]["id"])
+        for r in eclipse["display_relations"]
+    }
+    assert ("uses-effects-of", "inbound", "ammunition:eclipse") in {
+        (r["type"], r["direction"], r["record"]["id"])
+        for r in smoke["display_relations"]
+    }
+
+
 def test_rea024_bioweapon_condition_and_viral_mine_baseline(
     current_rules_database: RulesDatabase,
 ) -> None:

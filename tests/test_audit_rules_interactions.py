@@ -21,7 +21,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
     assert report["summary"]["recordCount"] == 360
-    assert report["summary"]["authoredOutgoingRelationCount"] == 443
+    assert report["summary"]["authoredOutgoingRelationCount"] == 444
     assert report["summary"]["futureInteractionCount"] == 111
     assert report["summary"]["releases"]["0.7.0"] == {
         "total": 209,
@@ -65,11 +65,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     }
     assert report["summary"]["releases"]["1.0.0"] == {
         "total": 92,
-        "complete": 77,
-        "pending": 15,
-        "reviewed": 77,
+        "complete": 81,
+        "pending": 11,
+        "reviewed": 81,
         "inherited": 0,
-        "percentComplete": 83.7,
+        "percentComplete": 88.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
@@ -117,8 +117,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         },
     }
     assert report["summary"]["supporting"]["total"] == 179
-    assert report["summary"]["supporting"]["complete"] == 164
-    assert report["summary"]["supporting"]["pending"] == 15
+    assert report["summary"]["supporting"]["complete"] == 168
+    assert report["summary"]["supporting"]["pending"] == 11
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
     equipment_items = [
@@ -275,19 +275,27 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     ]
     for record_id in {
         "ammunition:ap",
-        "ammunition:da",
-        "ammunition:eclipse",
         "ammunition:em",
         "ammunition:exp",
-        "ammunition:normal",
         "ammunition:para",
         "ammunition:shock",
-        "ammunition:smoke",
         "ammunition:stun",
         "ammunition:t2",
     }:
         assert items[record_id]["status"] == "pending"
         assert items[record_id]["targetRelease"] == "1.0.0"
+
+    for record_id in {
+        "ammunition:normal",
+        "ammunition:da",
+        "ammunition:smoke",
+        "ammunition:eclipse",
+    }:
+        assert items[record_id]["status"] == "reviewed"
+        assert items[record_id]["targetRelease"] == "1.0.0"
+    assert items["ammunition:eclipse"]["relations"] == [
+        ("uses-effects-of", "ammunition:smoke")
+    ]
 
     for record_id in {
         "rule:peripheral-type:control",
@@ -563,18 +571,18 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 164/179 complete, 15 pending" in output
+    assert "Supporting identities: 168/179 complete, 11 pending" in output
 
 
 def test_rules_interaction_1_0_gate_lists_pending_identities(capsys) -> None:
     assert main(["--require-release", "1.0.0"]) == 1
     output = capsys.readouterr().out
-    assert "15 supporting identities pending" in output
+    assert "11 supporting identities pending" in output
     pending_line = next(
         line for line in output.splitlines() if line.startswith("Pending identities:")
     )
     identities = pending_line.removeprefix("Pending identities: ").split(", ")
-    assert len(identities) == 15
+    assert len(identities) == 11
     assert identities == sorted(identities)
     assert identities[0] == "ammunition:ap"
     assert "scenario:firefight" in identities

@@ -20060,6 +20060,11 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "heading": "Normal (N) Ammunition",
                     "member": "Normal_(N)_Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 63,
+                    "heading": "Normal (N) Ammunition"
                 }
             ],
             "review": {
@@ -20132,7 +20137,7 @@
             "id": "ammunition:da",
             "kind": "ammunition",
             "name": "Double Action (DA) Ammunition",
-            "summary": "High-impact Ammunition that requires two Saving Rolls for each successful hit.",
+            "summary": "High-impact Ammunition requiring two Saving Rolls per successful hit. Each failed roll inflicts one Wound, and the second roll is mandatory even if the first fails or leaves the target [[state:unconscious|Unconscious]]. A Critical adds one further Saving Roll (three total per Critical hit).",
             "facts": {
                 "ammunitionResolution": {
                     "criticalAdditionalSavingRolls": 1,
@@ -20153,6 +20158,11 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "heading": "Double Action (DA) Ammunition",
                     "member": "Double_Action_(DA)_Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 64,
+                    "heading": "Double Action (DA) Ammunition"
                 }
             ],
             "review": {
@@ -20208,7 +20218,13 @@
                     "expires": "start-of-states-phase",
                     "multispectralVisor": "blocked"
                 }
-            }
+            },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "ammunition:smoke"
+                }
+            ]
         },
         {
             "id": "ammunition:em",
@@ -20460,7 +20476,8 @@
                 "clarifications": [
                     "An ordinary shooter whose rolled Attack has LoF crossing the Smoke Template's [[term:zero-visibility-zone|Zero Visibility Zone]] makes a Face to Face Roll against the Smoke placement Roll. An enemy whose LoF does not cross the Template makes an unopposed Roll instead. To keep the Template, the Smoke user must win every applicable Face to Face Roll.",
                     "An enemy with a [[equipment:multispectral-visor|Multispectral Visor]] can draw LoF through ordinary Smoke, so their Attack is not opposed by the Smoke placement Roll. An enemy [[skill:dodge|Dodge]] reaction inside the Template's Area of Effect is also an unopposed Roll, not Face to Face against the Smoke user.",
-                    "Smoke needs no enemy target: placing it at an empty point is an unopposed Roll if no qualifying enemy Attack opposes it. If this Roll fails, or the user loses any applicable Face to Face Roll, remove the Template at the Effects step. A Critical has no additional effect beyond winning an applicable Face to Face Roll."
+                    "Smoke needs no enemy target: placing it at an empty point is an unopposed Roll if no qualifying enemy Attack opposes it. If this Roll fails, or the user loses any applicable Face to Face Roll, remove the Template at the Effects step. A Critical has no additional effect beyond winning an applicable Face to Face Roll.",
+                    "The Smoke Template has infinite height above its circular footprint, but [[term:scenery-element:plural|Scenery Elements]] cut its Area of Effect horizontally and vertically. Being directly above the footprint does not automatically mean a Trooper is inside Smoke when scenery interrupts the volume."
                 ],
                 "visibilityZone": {
                     "visibility": "zero",
