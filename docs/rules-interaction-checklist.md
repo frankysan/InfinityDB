@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **178/179** complete, **1** pending.
+- Supporting semantic identities: **179/179** complete, **0** pending.
 - Current authored outgoing relations: **444**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -940,7 +940,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Supportware** (`rule:supportware`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Scenario (3/4)
+#### Scenario (4/4)
 
 - [x] **Annihilation** (`scenario:annihilation`) — reviewed: English N5.3 pp. 149-150 verify all six Army Points configurations (150/200/250/300/350/400), SWC and deployment references, three exclusive end-of-game bands for killed enemy Army Points (maximum 4 OP), three for surviving Victory Points (maximum 4 OP), and 2 OP for the enemy Lieutenant killed. Shared Killing correctly includes entering Dead, remaining Null at game end and never-deployed enemy Troopers. The three-round limit and tactical-phase all-Null early ending remain separate shared conditions. The printed 350-point survival chart has a gap at 151-175 and an overlap at 251-270; the maintained source issue explicitly labels its 85-175/176-270/271+ continuity correction a reviewed interpretation, not literal PDF text. No new graph edges are implied by typed mission component references; scoring requires game-state context.
   - outgoing: none
@@ -948,7 +948,7 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [x] **Firefight** (`scenario:firefight`) — reviewed: English N5.3 pp. 155-156, N5.2 p. 154 and pinned English Wiki Firefight revision 3267 agree on all six deployment configurations and four end-game comparative objectives: more surviving Specialists (2 OP), more enemy Specialists killed (1 OP), more enemy Lieutenants killed (3 OP), and more enemy Army Points killed (4 OP). All comparisons require strictly greater values, not ties. There is no Classified Objective in these sources. Shared Killing counts Dead, remaining Null at end of game and never-deployed enemy Troopers. Reinforced Tactical Link is Firefight-only: Lieutenant identity always Open, must deploy at first Round start, replacement at the start of the active Tactical Phase if absent or Null costs no Order, and the replacement must be on-table. Designated Landing Area applies to the whole table, grants cumulative +3 on Combat Jump PH, and removes enemy Deployment Zone restrictions for Airborne Deployment-labeled Skills. The seven Specialist qualifiers, Non Specialist Chain of Command exclusion and Doctor/Engineer Peripheral restriction remain shared. Three-round and all-Null Tactical Phase/end-of-turn ending conditions remain distinct. The scenario-only overlays do not modify the canonical Lieutenant or Combat Jump rules and require no unconditional outgoing graph edges.
   - outgoing: none
-- [ ] **Supplies** (`scenario:supplies`) — pending: The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Supply Box interactions, Specialist Troop rules, and other scenario semantics remains 1.0 work.
+- [x] **Supplies** (`scenario:supplies`) — reviewed: English N5.3 pp. 153-154, N5.2 p. 152 and pinned English Wiki Supplies revision 3266 agree on the three additive end-game objectives: 2 OP per controlled box (maximum 6), 2 for controlling strictly more than the opponent, and 2 extra for controlling all three. Placement is three 25 mm Supply Box Markers on the center line, the outer two 8 inches measured from table edge to marker edge; the diagram's 12-inch label is not a competing box-placement rule. Deployment in Silhouette contact is forbidden. The scenario-only Pick Up Supply Boxes Attack Short Skill is restricted to Specialists in contact with an uncarried Token, any Null Model carrying one, or an allied Normal Model carrying one; it costs a Short Skill without a Roll. Only Models can carry boxes (one per Specialist), and Tokens persist when their carriers become Null. At game end control requires a non-Null Model carrier not in Silhouette contact with an enemy Model; merely picking up, carrying while Null, or representing the carrier by a Marker does not score. The seven Specialist qualifiers, Non Specialist Chain of Command exception and Doctor/Engineer Peripheral restriction are shared. Three-round expiration and the game-size minimum-VP Tactical Phase/end-of-Player-Turn early ending are distinct. All six Army Points, SWC and minimum-VP rows are supported. Interactions are scoped through typed mission components and do not require unconditional graph relations or game-state persistence.
   - outgoing: none
 
 #### Skill (4/4)

@@ -1277,16 +1277,15 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     wrapping up to 600 px. Served-browser inspection of Scylla's expanded Army
     views checks row/cell geometry and overflow at 320, 390, 400, 600 and 768 px;
     this resolves the presentation defect, not the broader 1.0 browser gate.
-  - [ ] Close the 1.0 interaction-review target in the maintained ledger, regenerate the checklist,
-    and require the following check to pass. Never edit the generated checklist manually.
-    The current gate reports one pending supporting identity: Supplies.
-    All eleven Ammunition identities and Annihilation, Domination, and Firefight
-    have completed source-backed interaction review. Firefight's four comparative
-    end-game objectives (2/1/3/4 OP), scenario-only Lieutenant and deployment
-    exceptions, shared Specialist eligibility, and distinct all-Null mission
-    ending now have regression coverage. There is no Classified Objective in
-    the reviewed N5.3 Firefight sources. The failure output lists exact pending
-    IDs; close Supplies only after its source/interaction review:
+  - [x] Complete the maintained 1.0 interaction-review target, regenerate the
+    checklist, and verify the release-scoped audit gate passes. All 179 supporting
+    identities are now reviewed, including all eleven Ammunition records and
+    the four N5.3 core Scenarios. The final Supplies review confirms pickup,
+    transfer, carrier and scoring restrictions, edge-based marker placement,
+    shared Specialist eligibility, and the minimum-VP early ending against
+    N5.3/N5.2 and pinned Wiki sources. This closes the interaction-review
+    ledger only; it does not replace the wider 1.0 data and release acceptance
+    gates. Never edit the generated checklist manually:
 
     ```text
     python tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md --require-release 1.0.0

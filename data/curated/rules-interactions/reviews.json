@@ -1922,8 +1922,9 @@
     {
       "recordId": "scenario:supplies",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Supply Box interactions, Specialist Troop rules, and other scenario semantics remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 pp. 153-154, N5.2 p. 152 and pinned English Wiki Supplies revision 3266 agree on the three additive end-game objectives: 2 OP per controlled box (maximum 6), 2 for controlling strictly more than the opponent, and 2 extra for controlling all three. Placement is three 25 mm Supply Box Markers on the center line, the outer two 8 inches measured from table edge to marker edge; the diagram's 12-inch label is not a competing box-placement rule. Deployment in Silhouette contact is forbidden. The scenario-only Pick Up Supply Boxes Attack Short Skill is restricted to Specialists in contact with an uncarried Token, any Null Model carrying one, or an allied Normal Model carrying one; it costs a Short Skill without a Roll. Only Models can carry boxes (one per Specialist), and Tokens persist when their carriers become Null. At game end control requires a non-Null Model carrier not in Silhouette contact with an enemy Model; merely picking up, carrying while Null, or representing the carrier by a Marker does not score. The seven Specialist qualifiers, Non Specialist Chain of Command exception and Doctor/Engineer Peripheral restriction are shared. Three-round expiration and the game-size minimum-VP Tactical Phase/end-of-Player-Turn early ending are distinct. All six Army Points, SWC and minimum-VP rows are supported. Interactions are scoped through typed mission components and do not require unconditional graph relations or game-state persistence."
     },
     {
       "recordId": "scenario:annihilation",

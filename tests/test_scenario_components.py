@@ -268,6 +268,89 @@ def test_firefight_review_scoring_and_mission_only_overlays(document: dict) -> N
         assert definition["scope"]["scenarios"] == ["scenario:firefight"]
 
 
+def test_supplies_review_retains_scoped_pickup_control_and_ending(
+    document: dict,
+) -> None:
+    """N5.3 pp. 153-154: compose Supply Box interactions without globalizing them."""
+    from infinity_db.scenario_mission import ElementStatusComparison, ElementStatusCount
+
+    record = scenario(document, "supplies")
+    mission = parse_scenario_definition_record(
+        ScenarioComponents(document).compose(record)
+    ).mission
+    assert mission is not None
+    assert [size.army_points for size in mission.game_sizes] == [
+        150, 200, 250, 300, 350, 400,
+    ]
+    assert [size.swc for size in mission.game_sizes] == [3, 4, 5, 6, 7, 8]
+    assert [size.minimum_victory_points for size in mission.game_sizes] == [
+        38, 50, 63, 75, 88, 100,
+    ]
+    assert not mission.source_issues
+    assert {c["page"] for c in record["citations"]} == {153, 154}
+    assert [obj.maximum_points for obj in mission.objectives] == [6, 2, 2]
+    assert [obj.aggregation for obj in mission.objectives] == [
+        "cumulative", "exclusive", "exclusive",
+    ]
+    assert all(obj.timing == "end-of-game" for obj in mission.objectives)
+    boxes = ("supply-box-left", "supply-box-center", "supply-box-right")
+    assert [obj.awards[0].condition for obj in mission.objectives] == [
+        ElementStatusCount(boxes, "controlled"),
+        ElementStatusComparison(boxes, "controlled", "greater"),
+        ElementStatusComparison(boxes, "controlled", "all"),
+    ]
+    assert [obj.awards[0].objective_points for obj in mission.objectives] == [
+        2, 2, 2,
+    ]
+
+    assert [rule.definition_id for rule in mission.rules] == [
+        "rule:scenario:supply-boxes",
+        "rule:scenario:carrying-supply-boxes",
+        "rule:scenario:controlling-supply-boxes",
+        "rule:specialist-troops:standard",
+    ]
+    placement, carrying, control, specialist = (
+        " ".join(rule.paragraphs) for rule in mission.rules
+    )
+    assert "Deployment in Silhouette contact" in placement
+    assert "at most one Supply Box" in carrying
+    assert "Markers cannot carry" in carrying
+    assert "carrier becomes classified as Null" in carrying
+    assert "at game end" in control.lower()
+    assert "Marker cannot control" in control
+    assert "not be classified as Null" in control
+    assert "any enemy Model" in control
+    assert "[[skill:peripheral:plural]]" in specialist
+    assert len(mission.rules[-1].specialist_skill_ids) == 7
+    assert mission.skill_ids == ("skill:pick-up-supply-boxes",)
+    pickup = next(r for r in document["records"] if r["id"] == mission.skill_ids[0])
+    assert pickup["scope"]["scenarios"] == ["scenario:supplies"]
+    assert pickup["facts"]["typeIds"] == ["short-skill"]
+    assert pickup["labelIds"] == ["attack"]
+    pickup_text = " ".join(
+        pickup["facts"]["requirements"] + pickup["facts"]["effects"]
+    )
+    for phrase in (
+        "not being carried by a Model",
+        "any Model classified as Null",
+        "an allied Model in [[state:normal|Normal]]",
+        "without making a Roll",
+    ):
+        assert phrase in pickup_text
+
+    assert [(
+        ending.id, ending.check_at, ending.finish_at,
+        ending.uses_minimum_victory_points,
+    ) for ending in mission.end_conditions] == [
+        ("round-limit", "end-of-round", "end-of-round", False),
+        ("minimum-victory-points", "tactical-phase", "end-of-player-turn", True),
+    ]
+    assert mission.end_conditions[0].rounds == 3
+    assert "not classified as Null" in (
+        mission.end_conditions[1].description or ""
+    )
+
+
 def test_shared_sources_replace_repeated_authoring_and_keep_overrides_explicit(
     document: dict,
 ) -> None:

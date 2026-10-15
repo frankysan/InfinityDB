@@ -3803,6 +3803,20 @@ excludes Null carriers and enemy Model contact, and is distinct from the pickup/
 These are scenario-local reference facts, not permanent Unit/Profile capabilities or stored match
 state.
 
+The final 1.0 interaction review corroborates the maintained text with English
+N5.2 p. 152 and pinned English Wiki Supplies revision 3266. A qualifying
+Specialist may use Pick Up Supply Boxes as an Attack Short Skill without a Roll
+when touching an uncarried Token, any Null Model with a box, or an allied
+Normal Model with a box. Only Models carry boxes, at most one per Specialist;
+the Token stays on the table when its carrier becomes Null. At game end,
+control requires a non-Null Model carrier not touching an enemy Model.
+The three scoring awards are additive but are all checked at game end,
+not when a box is picked up. Shared Specialist qualification excludes
+delegating the task to Doctor/Engineer Peripherals. The three-round end
+condition and the Tactical Phase minimum-VP check (ending at the Player
+Turn's end) stay distinct. No game-state tracker or unconditional effect
+relationship is implied by these mission-local rules.
+
 Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed pages 153–154. Page 153 owns
 objectives, placement prose, pickup, carrying, control, and the deployment-contact restriction;
 page 154 owns Specialist eligibility, the Peripheral restriction, and end conditions.

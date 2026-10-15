@@ -235,6 +235,76 @@ def test_firefight_review_scoring_and_overlays_reach_api(
     assert payload["source_issues"] == []
 
 
+@pytest.mark.parametrize(
+    ("army_points", "swc", "minimum_vp", "configuration_id"),
+    [
+        (150, 3, 38, "150-points"),
+        (200, 4, 50, "200-250-points"),
+        (250, 5, 63, "200-250-points"),
+        (300, 6, 75, "300-400-points"),
+        (350, 7, 88, "300-400-points"),
+        (400, 8, 100, "300-400-points"),
+    ],
+)
+def test_supplies_review_scoring_and_pickup_reach_api(
+    scenario_app: Application,
+    army_points: int,
+    swc: int,
+    minimum_vp: int,
+    configuration_id: str,
+) -> None:
+    """N5.3 pp. 153-154: all six public mission configurations and effects."""
+    status, _, body = request(
+        scenario_app, "/api/scenarios/supplies", query=f"army_points={army_points}"
+    )
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["selected_army_points"] == army_points
+    assert payload["setup"]["game_size"]["swc"] == swc
+    assert payload["setup"]["game_size"]["minimumVictoryPoints"] == minimum_vp
+    assert payload["placement"]["configuration_id"] == configuration_id
+    assert [
+        (obj["id"], obj["maximumPoints"], obj["aggregation"])
+        for obj in payload["objectives"]
+    ] == [
+        ("controlled-boxes", 6, "cumulative"),
+        ("more-boxes", 2, "exclusive"),
+        ("all-boxes", 2, "exclusive"),
+    ]
+    conditions = [obj["awards"][0]["condition"] for obj in payload["objectives"]]
+    assert all(obj["timing"] == "end-of-game" for obj in payload["objectives"])
+    assert all(obj["awards"][0]["objectivePoints"] == 2 for obj in payload["objectives"])
+    assert [condition["status"] for condition in conditions] == ["controlled"] * 3
+    assert [condition["elementIds"] for condition in conditions] == [
+        ["supply-box-left", "supply-box-center", "supply-box-right"],
+    ] * 3
+    assert (conditions[1]["comparison"], conditions[2]["comparison"]) == (
+        "greater", "all",
+    )
+    assert [rule["definitionId"] for rule in payload["special_rules"]] == [
+        "rule:scenario:supply-boxes",
+        "rule:scenario:carrying-supply-boxes",
+        "rule:scenario:controlling-supply-boxes",
+        "rule:specialist-troops:standard",
+    ]
+    assert len(payload["skills"]) == 1
+    pickup = payload["skills"][0]
+    assert pickup["id"] == "skill:pick-up-supply-boxes"
+    pickup_requirements = " ".join(pickup["facts"]["requirements"])
+    assert "not being carried by a Model" in pickup_requirements
+    assert "any Model classified as Null" in pickup_requirements
+    assert "an allied Model in [[state:normal|Normal]]" in pickup_requirements
+    assert "without making a Roll" in " ".join(pickup["facts"]["effects"])
+    control = " ".join(payload["special_rules"][2]["paragraphs"])
+    assert "A Marker cannot control" in control
+    assert "not be classified as Null" in control
+    assert "any enemy Model" in control
+    assert payload["end_conditions"][0]["condition"]["rounds"] == 3
+    assert payload["end_conditions"][1]["checkAt"] == "tactical-phase"
+    assert payload["end_conditions"][1]["finishAt"] == "end-of-player-turn"
+    assert payload["source_issues"] == []
+
+
 def test_scenario_detail_api_projects_objective_and_source_issue_tokens(
     scenario_app: Application,
 ) -> None:

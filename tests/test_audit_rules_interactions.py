@@ -65,11 +65,11 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     }
     assert report["summary"]["releases"]["1.0.0"] == {
         "total": 92,
-        "complete": 91,
-        "pending": 1,
-        "reviewed": 91,
+        "complete": 92,
+        "pending": 0,
+        "reviewed": 92,
         "inherited": 0,
-        "percentComplete": 98.9,
+        "percentComplete": 100.0,
     }
     assert report["summary"]["primaryCatalog"] == {
         "targetRelease": "0.7.0",
@@ -117,8 +117,8 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         },
     }
     assert report["summary"]["supporting"]["total"] == 179
-    assert report["summary"]["supporting"]["complete"] == 178
-    assert report["summary"]["supporting"]["pending"] == 1
+    assert report["summary"]["supporting"]["complete"] == 179
+    assert report["summary"]["supporting"]["pending"] == 0
 
     primary = {item["id"]: item for item in report["primaryCatalogItems"]}
     equipment_items = [
@@ -274,15 +274,10 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
         ("modifies-use-of", "skill:place-deployable")
     ]
     for record_id in {
-        "scenario:supplies",
-    }:
-        assert items[record_id]["status"] == "pending"
-        assert items[record_id]["targetRelease"] == "1.0.0"
-
-    for record_id in {
         "scenario:annihilation",
         "scenario:domination",
         "scenario:firefight",
+        "scenario:supplies",
         "ammunition:para",
         "ammunition:shock",
         "ammunition:stun",
@@ -575,20 +570,37 @@ def test_rules_interaction_release_gate_passes_with_reviewed_scope_exception(cap
     output = capsys.readouterr().out
     assert "0.7.0 primary catalog: 182/182 complete" in output
     assert "0 pending" in output
-    assert "Supporting identities: 178/179 complete, 1 pending" in output
+    assert "Supporting identities: 179/179 complete, 0 pending" in output
 
 
-def test_rules_interaction_1_0_gate_lists_pending_identities(capsys) -> None:
+def test_rules_interaction_1_0_gate_passes_when_all_reviews_complete(capsys) -> None:
+    assert main([
+        "--check-output", str(DEFAULT_CHECKLIST_PATH),
+        "--require-release", "1.0.0",
+    ]) == 0
+    output = capsys.readouterr().out
+    assert "Supporting identities: 179/179 complete, 0 pending" in output
+    assert "Pending identities:" not in output
+
+
+def test_rules_interaction_1_0_gate_reports_regressed_pending_item(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys,
+) -> None:
+    report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
+    pending = next(
+        item for item in report["items"] if item["id"] == "scenario:supplies"
+    )
+    pending["status"] = "pending"
+    report["summary"]["supporting"]["releases"]["1.0.0"]["pending"] = 1
+    monkeypatch.setattr(
+        "tools.audit_rules_interactions.audit_rules_interactions",
+        lambda *_args: report,
+    )
     assert main(["--require-release", "1.0.0"]) == 1
     output = capsys.readouterr().out
     assert "1 supporting identities pending" in output
-    pending_line = next(
-        line for line in output.splitlines() if line.startswith("Pending identities:")
-    )
-    identities = pending_line.removeprefix("Pending identities: ").split(", ")
-    assert len(identities) == 1
-    assert identities == sorted(identities)
-    assert identities == ["scenario:supplies"]
+    assert "Pending identities: scenario:supplies" in output
 
 
 def test_rules_interaction_catalog_scope_tracks_public_catalogs() -> None:

@@ -329,6 +329,11 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing:** Complete the 1.0 maintained rules-interaction review
+  ledger, including Supplies' box placement, pickup/transfer, control scoring,
+  Specialist restrictions, and mission endings. The source-backed checklist
+  now has no pending supporting identities; the separate 1.0 release gate
+  remains open.
 - **Data processing:** Verify Firefight's four comparative end-game objectives,
   Lieutenant replacement/Open Information, cumulative Combat Jump landing MOD,
   Airborne Deployment zone exception, Specialist criteria, and early-ending
