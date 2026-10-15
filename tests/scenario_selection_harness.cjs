@@ -44,6 +44,9 @@ const context = vm.createContext({
   getScenario: (_slug, points, signal) => new Promise((resolve, reject) => {
     requests.push({ points, signal, resolve, reject });
   }),
+  // The FAQ overlay is independent and immediately available in this race
+  // harness. Only stale scenario responses may replace the active game size.
+  fetchReviewedFaqRulings: async () => ({ items: [] }),
   readShareState: () => ({ params: new URLSearchParams(), source: "none" }),
   writeShareState: (_kind, params) => shares.push(params.army_points),
   appendMaintainedText() {},

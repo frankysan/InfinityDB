@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Dated FAQ v0.1 clarifications now appear alongside Hacking Device and
+  Annihilation rules: a disabled Hacking Device loses its Firewall MODs,
+  and an undeployed Peripheral (Ancillary) does not count as Killed for
+  scenario scoring. Each card identifies its FAQ source/version/date.
 - Domination's 350-point SWC displays the English-source 6, with an explicit
   discrepancy: official Spanish N5.3 says 7. The Annihilation 350-point
   survival bands are now corroborated by official Spanish N5.3 rather than
@@ -212,8 +216,10 @@ are not retroactively relabeled.
   missing topic/scenario/predecessor targets, cycles, non-overlapping
   supersession and inconsistent carried-forward origins. Add an
   applicability-aware read model and explicit-context FAQ API, retaining
-  reviewed source provenance and conditional supersession. No FAQ rulings
-  are published yet, and existing base rules are unchanged.
+  reviewed source provenance and conditional supersession. The first two
+  reviewed FAQ v0.1 entries now reach existing Equipment and Scenario
+  browser pages through a shared dated clarification card; their base
+  rules remain unchanged.
 - **Data processing + Web backend:** Confirm ITS-inspired split Deployment
   Zones and asymmetric scoring applicability survive typed validation and
   catalog projection; preserve the core N5.3 scope and leave ITS-specific

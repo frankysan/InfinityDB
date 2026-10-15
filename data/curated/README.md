@@ -9,7 +9,9 @@ provenance under `data/manifests/`.
 
 ## Current curated data
 
-- `rules/` contains validated rules-reference collections consumed by `infinity-db build-rules`.
+- `rules/` contains validated rules-reference collections, including the
+  source-verified `n5-faq-v0.1.json` FAQ pilot, consumed by
+  `infinity-db build-rules`.
 - `identities/` contains reviewed source-derived presentation and historical identity
   relationships consumed by the Army build/runtime surfaces that own them.
   `army-overview.json` contains short editorial gameplay summaries keyed by public Army slug;
@@ -218,7 +220,10 @@ ontology or application runtime behavior.
 the interaction review. It lists every public Skill, Equipment item, and Trait targeted by
 the release named in that scope file, including catalog identities that do not yet have a
 curated rules definition. `rules-interactions/reviews.json` separately tracks every semantic
-rules identity other than `declaration-category` projection records. Entries record the target
+rules identity other than `declaration-category` projection records and
+`faq-ruling` dated clarification overlays. FAQ records have separate source,
+target, applicability and supersession validation and cannot introduce new
+canonical outgoing rule mechanics through this ledger. Entries record the target
 release whose outgoing interactions are being reviewed, whether that review is
 pending/reviewed/inherited, and known future interactions that should survive beyond that
 release. The top-level
@@ -501,12 +506,24 @@ The default read model does not replay superseded historical collections;
 historical publication selection and verification of ITS season revisions
 not yet present in the corpus remain future work.
 
-No FAQ records are authored in the shipped collection yet, so valid
-queries currently return an empty `items` list. The synthetic tests are
-not source rulings. Topic/scenario browser presentation is **not yet
-implemented**. Until the source-verified pilot is complete, this endpoint
-is a developer/API foundation, not a completed player-facing FAQ domain.
-The synthetic tests are not source rulings. Until the pilot is complete,
+Two source-verified pilot rulings now live in
+`rules/n5-faq-v0.1.json`. The general Hacking Device Firewall clarification
+applies to `equipment:hacking-device`; a separate FAQ exception excludes
+undeployed Peripherals (Ancillary) from Killed scoring and is conservatively
+published on `scenario:annihilation` only. The latter is a reviewed *subset*
+of the FAQ's broader scenario-element scope, not a claim that the FAQ is
+inapplicable to other missions. Each ruling cites matching English and
+Spanish official FAQ v0.1 printed pages, with English as the explicit
+selected source; no differing wording affects their reviewed outcomes.
+
+The browser renders these as **FAQ clarifications** after their underlying
+Equipment or Scenario rules, with version, date and source link. The
+browser's explicit N5.3/v0.1 source snapshot currently uses
+`as_of=2026-09-01` rather than the viewer's clock. Broader coverage,
+archived-edition replay, season-specific publication verification and
+dynamic user-selected FAQ context remain future work. Other topics
+currently return an empty `items` list. Synthetic test rulings are not
+published. FAQ entries remain separate from base-rule definitions.
 these fields must not be treated as an automatically published answer.
 
 Collections that contain scenario definitions also require `scenarioCollection`. Its `id` is the

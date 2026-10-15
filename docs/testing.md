@@ -1876,6 +1876,35 @@ clarification. Previous browser acceptance covers all 24 selections;
 this source-review milestone does not close the project-wide 1.0
 source inventory or normal release checklist.
 
+## 1.0 FAQ v0.1 pilot acceptance
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** The
+`data/curated/rules/n5-faq-v0.1.json` source collection retains a
+general Hacking Device Firewall ruling (English and Spanish FAQ p. 1)
+and a scenario-scoped undeployed Peripheral (Ancillary) Killed ruling
+(English and Spanish FAQ p. 4), both selected from English FAQ v0.1,
+with a separate Spanish source citation. The pinned `publishedDate`
+is the project's official 2026-09-01 N5.3/FAQ announcement-era
+source anchor; it is not evidence of an independently dated FAQ
+document publication. The scope is deliberately restricted to the
+published Annihilation scenario for the second pilot.
+
+Tests verify all three curated collections export to the current Rules
+database, both FAQ identities and provenance survive the public API,
+date/revision/scenario restrictions hide nonmatching rulings, and base
+rules remain unchanged. Browser acceptance with a fresh WSGI instance
+passes **6/6** source cards on Hacking Device and Annihilation at
+1440, 390, and 320 px, with no page-level horizontal overflow or
+JavaScript errors. Domination does not show the Annihilation-only
+pilot. Private checker:
+`local/audits/verify_faq_pilot_browser.py`.
+
+The browser deliberately uses explicit FAQ v0.1/N5.3
+`as_of=2026-09-01` publication context rather than guessing from the
+user's clock. This confirms two published examples, not the
+complete FAQ inventory, ITS season-specific verification or historical
+edition selection.
+
 ## 1.0 Visibility Zone and Ammunition/Immunity browser acceptance
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** Headless Chromium used a freshly

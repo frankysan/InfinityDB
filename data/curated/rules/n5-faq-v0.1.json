@@ -1,0 +1,161 @@
+{
+  "format": "InfinityDB curated reference",
+  "formatVersion": 23,
+  "collection": {
+    "id": "n5-faq-v0.1",
+    "title": "N5 FAQ v0.1",
+    "domain": "faq",
+    "status": "current",
+    "effectiveFrom": "2026-09-01",
+    "authority": "primary"
+  },
+  "vocabularySources": {
+    "skillTypes": [],
+    "labels": []
+  },
+  "skillTypes": [],
+  "labels": [],
+  "sources": [
+    {
+      "id": "n5-faq-v0.1-en-pdf",
+      "kind": "pdf",
+      "title": "N5 FAQs — English",
+      "version": "0.1",
+      "publishedDate": "2026-09-01",
+      "localPath": "data/pdf/faq/n5-faqs-v0-1-en.pdf",
+      "pageCount": 5,
+      "authority": "primary",
+      "url": "https://experience.corvusbelli.com/en/infinity/resources"
+    },
+    {
+      "id": "n5-faq-v0.1-es-pdf",
+      "kind": "pdf",
+      "title": "N5 FAQs — Spanish",
+      "version": "0.1",
+      "publishedDate": "2026-09-01",
+      "localPath": "data/pdf/faq/esp-faqs-n5-v0-1.pdf",
+      "pageCount": 5,
+      "authority": "primary",
+      "url": "https://experience.corvusbelli.com/en/infinity/resources"
+    }
+  ],
+  "records": [
+    {
+      "id": "faq-ruling:hacking-device-firewall-disabled",
+      "kind": "faq-ruling",
+      "name": "Firewall while the Hacking Device is disabled",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1, distinct from the base rule.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "When does a Hacking Device Firewall apply to incoming Comms Attacks?",
+        "answer": "The Firewall MODs apply to Comms Attacks against the Trooper while the Hacking Device is operational. They do not apply while that Device is disabled, including when the Trooper is Isolated or in any Null State.",
+        "topicIds": [
+          "equipment:hacking-device",
+          "state:isolated"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "English FAQ v0.1 primary text cross-checked against Spanish FAQ v0.1 at the same printed page; no contradictory interpretation identified.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:undeployed-ancillary-not-killed",
+      "kind": "faq-ruling",
+      "name": "Undeployed Ancillary and scenario kill scoring",
+      "summary": "Source-reviewed clarification from N5 FAQ v0.1, distinct from the base rule.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 4
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 4
+        }
+      ],
+      "facts": {
+        "question": "Does an undeployed Peripheral (Ancillary) count as Killed for scenario objectives?",
+        "answer": "No. An Ancillary only counts as Killed if it was deployed during the game and either entered Dead State or remains in a Null State at the end of the game. This is a specific exception when counting Killed units in scenario objectives.",
+        "topicIds": [
+          "scenario:annihilation",
+          "rule:scenario:killing"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01",
+            "scenarioIds": [
+              "scenario:annihilation"
+            ]
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.1",
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "version": "0.1",
+          "publishedDate": "2026-09-01",
+          "page": 4
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 4
+        },
+        "selectionReason": "English FAQ v0.1 primary text cross-checked against Spanish FAQ v0.1 at the same printed page; no contradictory interpretation identified.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    }
+  ]
+}

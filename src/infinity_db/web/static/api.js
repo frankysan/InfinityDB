@@ -23,6 +23,11 @@ export function getFireteamChart(armyId, signal) {
   return getJson(`/api/fireteams?${params}`, signal);
 }
 
+export function getFaqRulings(topicId, context, signal) {
+  const params = new URLSearchParams({ topic_id: topicId, ...context });
+  return getJson(`/api/faq-rulings?${params}`, signal);
+}
+
 export function getCatalogItems(catalog, signal) {
   return getJson(`/api/${encodeURIComponent(catalog)}`, signal);
 }

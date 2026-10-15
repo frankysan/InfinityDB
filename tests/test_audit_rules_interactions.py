@@ -21,6 +21,7 @@ def test_checked_in_rules_interaction_review_is_complete_and_current() -> None:
     report = audit_rules_interactions(DEFAULT_RULES_DIRECTORY, DEFAULT_POLICY_PATH)
 
     assert report["summary"]["recordCount"] == 360
+    assert not any(item["id"].startswith("faq-ruling:") for item in report["items"])
     assert report["summary"]["authoredOutgoingRelationCount"] == 444
     assert report["summary"]["futureInteractionCount"] == 111
     assert report["summary"]["releases"]["0.7.0"] == {

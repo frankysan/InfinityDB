@@ -2,6 +2,7 @@ import { getScenario, getScenarios } from "./api.js";
 import { distanceUnit } from "./preferences.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { rulesCitationNode, rulesReferenceArticle } from "./rules-reference.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { readShareState, writeShareState } from "./share-state.js";
 import { createPanelSwitcher } from "./view-components.js";
 
@@ -355,7 +356,7 @@ function provenanceSection(item) {
   return wrapper;
 }
 
-function render(item) {
+function render(item, faqItems = []) {
   updateDocumentIdentity(item);
   const placement = document.createElement("div");
   placement.className = "scenario-setup-grid";
@@ -364,6 +365,7 @@ function render(item) {
     section("Setup", placement),
     objectivesSection(item),
     rulesSection(item),
+    faqRulingsSection(faqItems),
     endSection(item),
     issuesSection(item),
     sourcesSection(item),
@@ -381,9 +383,17 @@ async function loadDetail(points) {
   elements.status.textContent = `Loading ${points} Army Point setup.`;
   show(elements.status);
   try {
-    const item = await getScenario(slug, points, controller.signal);
+    const [item, faq] = await Promise.all([
+      getScenario(slug, points, controller.signal),
+      fetchReviewedFaqRulings(`scenario:${slug}`, {
+        scenarioId: `scenario:${slug}`, signal: controller.signal,
+      }).catch((error) => {
+        if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+        return { items: [] };
+      }),
+    ]);
     if (controller.signal.aborted || pageController.signal.aborted) return;
-    render(item);
+    render(item, faq.items || []);
   } catch (error) {
     if (controller.signal.aborted || pageController.signal.aborted) return;
     if (error.name === "AbortError") return;

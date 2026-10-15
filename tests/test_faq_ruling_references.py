@@ -14,7 +14,13 @@ from infinity_db.rules_database import RulesDatabase, export_rules_database
 
 @pytest.fixture(scope="module")
 def base_documents() -> list[tuple[Path, dict]]:
-    return load_curated_directory(Path("data/curated"))
+    # Synthetic current FAQ fixtures intentionally replace the real pilot
+    # collection; preserve canonical core and hacking sources as reference targets.
+    return [
+        (path, document)
+        for path, document in load_curated_directory(Path("data/curated"))
+        if document["collection"]["id"] != "n5-faq-v0.1"
+    ]
 
 
 def _ruling(
@@ -411,3 +417,116 @@ def test_faq_api_uses_explicit_context_without_merging_base_rules(
         status, result = query(invalid)
         assert status == 400, invalid
         assert "error" in result
+
+
+@pytest.fixture(scope="module")
+def published_pilot(tmp_path_factory: pytest.TempPathFactory) -> RulesDatabase:
+    """Real reviewed FAQ sources, separate from the synthetic validation fixture."""
+    path = tmp_path_factory.mktemp("faq-pilot") / "rules.db"
+    export_rules_database(load_curated_directory(Path("data/curated")), path)
+    db = RulesDatabase(path)
+    db.validate()
+    return db
+
+
+def test_published_faq_pilot_retains_selected_and_spanish_source_evidence(
+    published_pilot: RulesDatabase,
+) -> None:
+    records = published_pilot.records_by_kind("faq-ruling")
+    assert {record["id"] for record in records} == {
+        "faq-ruling:hacking-device-firewall-disabled",
+        "faq-ruling:undeployed-ancillary-not-killed",
+    }
+    for record in records:
+        assert record["review"]["status"] == "reviewed"
+        assert record["facts"]["originalPublication"]["version"] == "0.1"
+        assert record["facts"]["originalPublication"]["publishedDate"] == "2026-09-01"
+        assert {citation["source_id"] for citation in record["citations"]} == {
+            "n5-faq-v0.1-en-pdf", "n5-faq-v0.1-es-pdf",
+        }
+        assert record["facts"]["conflictingCitations"] == []
+        assert record["facts"]["supersedes"] == []
+
+    general = published_pilot.faq_rulings_for_topic(
+        "equipment:hacking-device", rules_revision="5.3", as_of="2026-09-01",
+    )
+    assert [item["id"] for item in general] == [
+        "faq-ruling:hacking-device-firewall-disabled",
+    ]
+    assert general[0]["selected_citation"] == {
+        "sourceId": "n5-faq-v0.1-en-pdf", "page": 1,
+    }
+    assert "Isolated" in general[0]["answer"] and "Null State" in general[0]["answer"]
+    assert general[0]["selected_source"]["version"] == "0.1"
+    assert general[0]["selected_source"]["published_date"] == "2026-09-01"
+    assert published_pilot.faq_rulings_for_topic(
+        "equipment:hacking-device", rules_revision="5.3", as_of="2026-08-31",
+    ) == []
+
+    contextual = published_pilot.faq_rulings_for_topic(
+        "scenario:annihilation", rules_revision="5.3",
+        as_of="2026-09-01", scenario_id="scenario:annihilation",
+    )
+    assert [item["id"] for item in contextual] == [
+        "faq-ruling:undeployed-ancillary-not-killed",
+    ]
+    assert contextual[0]["selected_citation"]["page"] == 4
+    assert "was deployed" in contextual[0]["answer"]
+    assert contextual[0]["matched_applicability"][0]["scenarioIds"] == [
+        "scenario:annihilation",
+    ]
+    assert published_pilot.faq_rulings_for_topic(
+        "scenario:annihilation", rules_revision="5.3", as_of="2026-09-01",
+    ) == []
+    assert published_pilot.faq_rulings_for_topic(
+        "scenario:annihilation", rules_revision="5.3",
+        as_of="2026-09-01", scenario_id="scenario:domination",
+    ) == []
+
+
+def test_published_faq_pilot_reaches_api_with_unmodified_base_reference(
+    published_pilot: RulesDatabase,
+) -> None:
+    import json
+    from urllib.parse import urlencode
+    from wsgiref.util import setup_testing_defaults
+
+    from infinity_db.web import create_app
+    from infinity_db.web.presentation import ASSETS
+
+    assert "/static/faq-rulings.js" in ASSETS
+    assert published_pilot.composed_record("equipment:hacking-device") is not None
+    assert published_pilot.composed_record("scenario:annihilation") is not None
+    app = create_app(Path("data/generated/infinity.db"), published_pilot.path)
+
+    def request(topic: str, **extra: str) -> tuple[int, dict]:
+        query = urlencode({
+            "topic_id": topic, "rules_revision": "5.3",
+            "as_of": "2026-09-01", **extra,
+        })
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(
+            PATH_INFO="/api/faq-rulings", QUERY_STRING=query,
+            REQUEST_METHOD="GET",
+        )
+        statuses: list[str] = []
+        body = b"".join(app(
+            environ, lambda status, headers, exc_info=None: statuses.append(status),
+        ))
+        return int(statuses[0].split()[0]), json.loads(body)
+
+    status, response = request("equipment:hacking-device")
+    assert status == 200
+    assert response["items"][0]["id"] == "faq-ruling:hacking-device-firewall-disabled"
+    assert response["items"][0]["selected_source"]["published_date"] == "2026-09-01"
+    assert response["items"][0]["selected_citation"]["page"] == 1
+    status, response = request(
+        "scenario:annihilation", scenario_id="scenario:annihilation",
+    )
+    assert status == 200
+    assert response["items"][0]["id"] == "faq-ruling:undeployed-ancillary-not-killed"
+    status, response = request(
+        "scenario:annihilation", scenario_id="scenario:domination",
+    )
+    assert status == 200 and response["items"] == []

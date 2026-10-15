@@ -2,6 +2,7 @@ import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
 import { getCatalogItem, visibleUnitIds } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { tableViewport } from "./view-components.js";
 import {
@@ -24,6 +25,8 @@ const rangeModifierClasses = {
   "-6": "range-modifier-minus-6",
 };
 let currentItem;
+let displayedItem;
+let faqItems = [];
 const pageController = new AbortController();
 
 function displayWikiUrl(url) {
@@ -578,6 +581,7 @@ function hackingProgramsSection(programs) {
 }
 
 function render(item) {
+  displayedItem = item;
   document.title = `${item.name} · InfinityDB`;
   name.firstChild.textContent = item.name;
   if (meta) {
@@ -616,6 +620,7 @@ function render(item) {
     ...(catalog === "equipment" && item.hacking_programs?.length
       ? [hackingProgramsSection(item.hacking_programs)] : []),
     ...(sections.length ? [catalog === "traits" ? traitUsageSectionGroup(item) : usageSectionGroup(sections)] : []),
+    ...(faqItems.length ? [faqRulingsSection(faqItems)] : []),
   );
   content.hidden = false;
   status.hidden = true;
@@ -648,6 +653,17 @@ window.addEventListener("distanceunitchange", () => {
 getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
   currentItem = item;
   render(item);
+  if (catalog === "equipment") {
+    fetchReviewedFaqRulings(`equipment:${itemId}`, { signal: pageController.signal })
+      .then((payload) => {
+        if (pageController.signal.aborted) return;
+        faqItems = payload.items || [];
+        if (faqItems.length && displayedItem) render(displayedItem);
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+      });
+  }
   requestAnimationFrame(revealHashTarget);
   if (catalog === "states") return null;
   return visibleUnitIds(optionalUnitFilters(), pageController.signal).then((ids) => render(withVisibleUnits(item, ids)));

@@ -32,7 +32,10 @@ DEFAULT_CHECKLIST_PATH = PROJECT_ROOT / "docs" / "rules-interaction-checklist.md
 DEFAULT_CATALOG_SCOPE_PATH = (
     PROJECT_ROOT / "data" / "curated" / "rules-interactions" / "catalog-scope.json"
 )
-EXCLUDED_RECORD_KINDS = frozenset({"declaration-category"})
+# FAQ rulings are dated, scoped explanatory overlays, not independent
+# source-native mechanics or outgoing graph edges. The FAQ contract and
+# applicable-topic links have their own validated publication/selection tests.
+EXCLUDED_RECORD_KINDS = frozenset({"declaration-category", "faq-ruling"})
 REVIEW_STATUSES = frozenset({"pending", "reviewed", "inherited"})
 FUTURE_STATUSES = frozenset({"deferred", "planned", "blocked"})
 COMPLETE_STATUSES = frozenset({"reviewed", "inherited"})

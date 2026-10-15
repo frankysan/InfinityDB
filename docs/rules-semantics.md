@@ -3749,6 +3749,15 @@ this all-Null check with the minimum-Victory-Points rule in other scenarios.
 The corrected 350-point bands are **not** printed in the English N5.3 table;
 they are printed in the official Spanish N5.3 table (p. 153).
 
+**FAQ v0.1 exception (distinct from the core Killing definition):** The
+English and Spanish FAQ on printed p. 4 explicitly state that an undeployed
+Peripheral (Ancillary) does **not** count as Killed for scenario objectives;
+it counts only when deployed and then entering Dead State or remaining Null
+at the end of the game. The reviewed FAQ pilot is linked to Annihilation as a
+conservative initial scenario scope, without rewriting the shared Killing
+record or claiming that the FAQ is limited to Annihilation. The canonical
+FAQ ruling has its own original publication and source citations.
+
 ### RS-SCN-DOM-001 — Domination keeps scenario-specific SWC and minimum-VP values
 
 **Classification:** source-native game-size values retained by the typed mission reference.

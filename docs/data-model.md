@@ -597,10 +597,23 @@ and matched applicability, separate from the unmodified base Rule/Skill.
 that projection. The API requires `topic_id`, `rules_revision`, and
 `as_of`, with optional paired `season_id`/`season_revision` and
 `scenario_id`; it never defaults to the newest publication. Queries
-currently return no rulings because no verified FAQ records are authored.
+currently return source-verified rulings only for the published pilot topics.
+Two reviewed FAQ v0.1 entries are now published from
+`data/curated/rules/n5-faq-v0.1.json`: the Hacking Device Firewall
+clarification (general) and the exception for undeployed Peripherals
+(Ancillary) counted as Killed, shown conservatively on Annihilation.
+The read model exposes their selected English FAQ v0.1 PDF citation and
+corroborating Spanish citation without changing the existing Hacking
+Device or Killing definitions. The shared browser card appears alongside
+base Equipment and Scenario rules, explicitly labeled as a later FAQ,
+using pinned N5.3/as-of-2026-09-01 context rather than today's date.
+The scenario restriction on the pilot is an intentionally narrow
+presentation scope; the FAQ itself discusses scenario kill objectives
+more generally.
+
 Historical collection replay, full ITS season-revision publication
-verification, and player-facing topic/scenario FAQ presentation remain
-future 1.0 work.
+verification, remaining FAQ inventory coverage, and dynamic date/season
+selection in the browser remain future 1.0 work.
 The generic supplement mechanism must not auto-attach a ruling to
 a core topic by name or by a newer collection date.
 

@@ -1127,12 +1127,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       require explicit version/date context, reject unknown or partial
       season contexts, and preserve selected source provenance. Verification
       of season revisions not in the published rules corpus, replay of
-      archived ruling editions, curated pilot examples and browser
-      publication remain requirements.
-  - [ ] Deliver one core clarification and one scenario/season-scoped ruling through validation,
-    export, repository/API composition, and browser presentation before curating the remaining
-    inventory. Show linked questions/answers with dates and affected concepts alongside the base
-    rule; choose a discoverable reference entry point without requiring a new top-level FAQ domain.
+      archived ruling editions, and broader FAQ coverage remain requirements.
+      The two source-verified pilot rulings and initial browser publication
+      were delivered without replacing canonical rule definitions.
+  - [x] Deliver a general Hacking Device Firewall clarification and a
+    scenario-scoped Annihilation Peripheral (Ancillary) kill-scoring exception
+    through validation, export, API, and browser. Both are verified against
+    matching English/Spanish FAQ v0.1 pages, display dated source citations,
+    and remain separate from the canonical underlying rules. The scoped
+    example is deliberately narrower than the FAQ's general mention of
+    scenario objectives; wider application is a follow-up curation decision.
+    Discoverable cards live on existing Equipment and Scenario pages without
+    introducing a new top-level FAQ area.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.
