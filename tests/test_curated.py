@@ -1910,6 +1910,42 @@ def test_rea038_direct_vs_delegated_recovery_source_scope() -> None:
         assert pdf_pages >= {51}
 
 
+def test_rea010_immunity_arm_bts_trait_baseline_and_printed_examples() -> None:
+    path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
+    records = {r["id"]: r for r in load_curated_document(path)["records"]}
+    immunity = records["skill:immunity"]
+    baseline = next(x for x in immunity["facts"]["effects"] if "non-Comms" in x)
+    assert "using the matching Saving Roll Attribute" in baseline
+    for ref in (
+        "[[trait:state|States]]", "[[trait:continuous-damage|Continuous Damage]]",
+        "[[trait:arm-0|ARM = 0]]", "[[trait:bts-0|BTS = 0]]",
+        "[[ammunition:normal|Normal]]",
+    ):
+        assert ref in baseline
+    assert "neither protection removes the ordinary Saving Roll" in baseline
+    monofilament = immunity["facts"]["clarifications"][0]
+    assert "[[weapon-property:monofilament|Monofilament]]" in monofilament
+    assert "[[trait:arm-0|ARM = 0]]" in monofilament
+    assert "[[trait:state|State: Dead]]" in monofilament
+    assert "full ARM" in monofilament
+    assert "two ARM Saving Rolls" in monofilament
+    assert "[[skill:immunity|Immunity (Critical)]]" in monofilament
+    flash = immunity["facts"]["clarifications"][1]
+    assert "[[weapon:flash-pulse|Flash Pulse]]" in flash
+    assert "Saving Roll stays BTS, not ARM" in flash
+    assert "[[trait:non-lethal|Non-Lethal]]" in flash
+    assert "[[state:stunned|Stunned]] only on a failed BTS roll" in flash
+    assert immunity["facts"]["immunityInteraction"]["reviewedWeaponCases"][0][
+        "evidence"
+    ] == "explicit-pinned-wiki-example"
+    assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 3
+    cited = {(c["sourceId"], c.get("page")) for c in immunity["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 95), ("n5-core-v5.3-pdf", 96),
+        ("n5-core-v5.3-es-pdf", 99),
+    }
+
+
 def test_rea009_positive_before_negative_recovery_is_canonical_and_crosslinked() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     records = {r["id"]: r for r in load_curated_document(path)["records"]}

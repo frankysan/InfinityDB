@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Immunity (ARM/BTS) now highlights its separate protection against
+  applicable weapon Traits, with linked examples; the printed Monofilament
+  Critical case and Flash Pulse's Non-Lethal/Stunned exceptions are clearer.
 - Recovery and re-infliction in the same Order are now explained with
   the Engineer/Riotstopper example: cancel IMM-A first, then resolve a
   new PARA Saving Roll, which can inflict IMM-A again.
@@ -176,6 +179,11 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Complete REA-010 Immunity reference
+  acceptance with linked Trait-protection examples, Monofilament
+  one-/two-roll wording, and bilingual N5.3 source verification.
+  Preserve conditional Immunity cases, evidence labels, imported weapons,
+  and the existing Flash Pulse source-conflict disclosure.
 - **Data processing + Web frontend:** Complete REA-009 State/recovery
   timing reference acceptance with bilingual N5.3 p. 15 sources,
   an explicit positive-before-negative resolution example, and links

@@ -1533,3 +1533,32 @@ release rules DB and locally rebuilt rules DB. The Order, Engineer,
 Doctor and IMM-A pages had no overflow at any checked width. The
 private verifier, screenshots and diagnostics live under ignored
 `local/audits/`. No game-state timing engine was introduced.
+
+
+## 1.0 general Immunity and printed examples (REA-010)
+
+**Reviewed 2026-10-15, `dev/v1.0.0`.** English N5.3 pp. 95-96 and
+Spanish N5.3 p. 99 explicitly provide *two independent* protections for
+non-Comms ARM/BTS attacks using the matching Saving Roll Attribute:
+covered Ammunition becomes Normal, and applicable Weapon/Skill/Equipment
+Traits causing States, Wounds or Attribute reduction are ignored.
+Neither changes the ordinary Saving Roll or automatically removes an
+additional Critical save. The Immunity effects now link to State,
+Continuous Damage, ARM=0, and BTS=0 as concrete representative Traits.
+
+Printed Example 2: Monofilament versus Immunity (ARM) ignores ARM=0 and
+State: Dead, with one ARM save (two for Critical unless also Immunity
+(Critical)). Printed Example 4: Immunity (BTS) versus Flash Pulse keeps
+the BTS save and preserves Non-Lethal and State: Stunned on failed save.
+The Spanish Wiki Flash Pulse Weapon Chart contradiction remains
+separately described in `weapon:flash-pulse` source notes; the published
+N5.3 bilingual PDFs agree on one roll and both Traits. No interaction
+arrays, evidence labels or gameplay mechanics were changed.
+
+Source and composed-rules regression checks verify these conditions,
+provenance and unchanged five reviewed Immunity interactions. Browser
+acceptance checks Immunity, Flash Pulse, the linked Trait pages and
+semantic navigation at 1440, 390 and 320 px against a freshly rebuilt
+local rules DB. **30/30 Chromium content/navigation checks passed** with
+no JavaScript errors or page horizontal overflow. The private verifier,
+screenshots and results remain in ignored `local/audits/`.

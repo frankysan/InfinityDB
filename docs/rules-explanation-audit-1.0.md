@@ -739,6 +739,35 @@ Saving Attribute and non-Comms attack. Then link the exceptions and examples.
 design, not an invented generic algorithm. **Dependencies:** REA-004, REA-011,
 REA-024, REA-027. Flash Pulse's current outcome is a positive finding.
 
+**Acceptance follow-up (2026-10-15): Locally resolved for the general
+Immunity reference; no new combat logic.** The original "Current"
+description predates the checked-in `skill:immunity` `facts.effects`:
+Immunity (ARM)/(BTS) already treats ammunition using the matching
+Saving Roll Attribute as Normal, and **independently** ignores covered
+Weapon/Skill/Equipment Traits causing States, inflicting Wounds or
+reducing Attributes on eligible non-Comms Attacks. It retains the
+ordinary Saving Roll; neither general Immunity nor ammunition conversion
+alone suppresses the Critical-added Saving Roll.
+
+The existing baseline now explicitly links representative covered Traits:
+State, Continuous Damage, ARM=0 for ARM saves and BTS=0 for BTS saves.
+The player-facing **printed Monofilament example** confirms that Immunity
+(ARM) ignores ARM=0 and State: Dead while still requiring one ARM save,
+or **two ARM saves for a Critical** unless Immunity (Critical) applies
+(English N5.3 p. 96; Spanish N5.3 p. 99). The preexisting Flash Pulse
+example remains the counterexample to general Trait protection:
+Non-Lethal prevents Wounds and State: Stunned applies only if the BTS
+Saving Roll fails, despite covered STUN becoming Normal. The result is
+explicit in both language editions (English p. 96; Spanish p. 99).
+
+All five previously stored reviewed Immunity interactions and evidence
+labels remain unchanged, as do Army profiles, source-conflict notes and
+typed relations. Chromium acceptance passed **30/30** content/navigation
+checks at 1440/390/320 px across the Immunity and Flash Pulse cards,
+linked Traits and reciprocal references, with no JavaScript errors or
+horizontal overflow. This is source-backed explanation and reference
+acceptance, not a general Immunity/Weapon eligibility algorithm.
+
 ### REA-011 - Stored Immunity cases are only partly presented
 
 **Classification:** presentation, completeness. **Severity:** Medium. **Priority:** P1.

@@ -647,9 +647,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Chromium acceptance passed 33/33 content/navigation checks at
       1440/390/320 px; preexisting 6 px PARA overflow at 320 px was
       verified against the release database.
-    - [ ] **REA-010 — General Immunity:** Verify the Immunity (ARM/BTS)
-      protection, printed Monofilament exception, and existing Flash Pulse
-      example in the browser.
+    - [x] **REA-010 ? General Immunity:** Confirmed existing
+      Immunity (ARM/BTS) prose already separated Ammunition-as-N from
+      conditional Trait protection, matched to the Saving Roll Attribute
+      and excluding Comms Attacks. Clarified the linked State, Continuous
+      Damage, ARM=0 and BTS=0 examples; added the printed two-roll
+      Monofilament Critical outcome. Verified the Flash Pulse Non-Lethal
+      and State: Stunned exceptions against bilingual N5.3 p. 95-96/99.
+      No stored interaction cases or combat mechanics changed.
+      Chromium browser acceptance passed 30/30 checks at 1440/390/320 px
+      without JavaScript errors or horizontal overflow.
     - [ ] **REA-011 — Reviewed Immunity interactions:** Check the dedicated
       player-facing presentation of five cases for applicability and
       explicit/derived labels, including keyboard, mobile, and browser

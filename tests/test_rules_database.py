@@ -377,6 +377,41 @@ def test_guts_roll_reference_and_source_exceptions_are_composed(
         assert "[[rule:guts-roll|Guts Roll]]" in json.dumps(record), entity_id
 
 
+def test_rea010_published_immunity_protection_and_source_examples(
+    current_rules_database: RulesDatabase,
+) -> None:
+    immunity = current_rules_database.composed_record("skill:immunity")
+    flash = current_rules_database.composed_record("weapon:flash-pulse")
+    continuous = current_rules_database.composed_record("trait:continuous-damage")
+    arm_zero = current_rules_database.composed_record("trait:arm-0")
+    bts_zero = current_rules_database.composed_record("trait:bts-0")
+    assert immunity is not None and flash is not None
+    assert continuous is not None and arm_zero is not None and bts_zero is not None
+    baseline = next(x for x in immunity["facts"]["effects"] if "non-Comms" in x)
+    for ref in (
+        "[[trait:continuous-damage|Continuous Damage]]", "[[trait:arm-0|ARM = 0]]",
+        "[[trait:bts-0|BTS = 0]]", "[[ammunition:normal|Normal]]",
+    ):
+        assert ref in baseline
+    assert "neither protection removes the ordinary Saving Roll" in baseline
+    mono, pulse = immunity["facts"]["clarifications"][:2]
+    assert "two ARM Saving Rolls" in mono
+    assert "[[skill:immunity|Immunity (Critical)]]" in mono
+    assert "[[weapon:flash-pulse|Flash Pulse]]" in pulse
+    assert "Saving Roll stays BTS, not ARM" in pulse
+    assert "[[state:stunned|Stunned]] only on a failed BTS roll" in pulse
+    assert "one BTS Saving Roll per hit" in flash["summary"]
+    assert "Non-Lethal" in flash["summary"]
+    assert "Stunned" in flash["summary"]
+    assert "[[skill:immunity]]" in continuous["summary"]
+    assert len(immunity["facts"]["immunityInteraction"]["reviewedCombinedCases"]) == 3
+    cited = {(c["source_id"], c.get("page")) for c in immunity["citations"]}
+    assert cited >= {
+        ("n5-core-v5.3-pdf", 95), ("n5-core-v5.3-pdf", 96),
+        ("n5-core-v5.3-es-pdf", 99),
+    }
+
+
 def test_rea009_shared_timing_example_and_recovery_links_are_published(
     current_rules_database: RulesDatabase,
 ) -> None:

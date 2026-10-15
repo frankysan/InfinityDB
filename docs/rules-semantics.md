@@ -2434,8 +2434,10 @@ weapon's State/Attribute Traits are ignored, and neither protection removes the
 ordinary Saving Roll. N5.3 printed Example 2 makes this distinction concrete:
 against a Monofilament weapon requiring ARM, Immunity (ARM) ignores ARM=0 and
 State: Dead, so the target rolls with full ARM and does not enter Dead from that
-Trait on failure. An otherwise covered Critical still requires the additional
-Saving Roll with Normal effects; only Immunity (Critical) suppresses that extra
+Trait on failure. The published Skill now explicitly links the corresponding
+State/Continuous Damage/ARM=0/BTS=0 examples to the Attribute-specific
+baseline. The printed Monofilament example takes **one ARM save on a hit,
+two on a Critical**; only Immunity (Critical) cancels the Critical-added
 roll. General Immunity does not
 apply to Comms Attacks (except Immunity (State)), and does not negate the
 Non-Lethal or State: Stunned Traits. Those Traits still require their own
