@@ -3658,6 +3658,31 @@ def test_mobile_unit_composite_options_preserve_full_names(app: Callable) -> Non
     assert "white-space: normal;\n    overflow-wrap: break-word;" in narrow
 
 
+def test_narrow_unit_army_profile_rows_preserve_readable_values(app: Callable) -> None:
+    """Army profile attributes and loadout names must not compete for narrow columns."""
+    status, _, body = request(app, "/static/components.css")
+    assert status == 200
+    css = body.decode("utf-8").replace("\r\n", "\n")
+    narrow = css.rsplit("@media (max-width: 400px) {", 1)[1]
+
+    assert ".unit-detail .army-profile .profile-details-table tbody," in narrow
+    assert ".unit-detail .army-profile .loadout-table tbody {" in narrow
+    assert "grid-template-columns: minmax(0, 1fr);" in narrow
+    assert (
+        ".unit-detail .army-profile .loadout-table .profile-summary {\n"
+        "    grid-template-columns: repeat(2, minmax(0, 1fr));"
+    ) in narrow
+    assert (
+        ".unit-detail .army-profile .loadout-table .profile-summary> :first-child {\n"
+        "    grid-column: 1 / -1;\n    width: auto;\n    white-space: normal;"
+    ) in narrow
+    assert_css_rule(
+        body,
+        ".unit-detail .army-profile .loadout-table .profile-item-label",
+        {"width": "auto"},
+    )
+
+
 def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> None:
     status, headers, body = request(app, "/api/armies")
 

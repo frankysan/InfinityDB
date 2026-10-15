@@ -4322,9 +4322,25 @@ html[data-distance-unit="in"] .unit-extended-statline {
 
   .unit-detail .army-profile .loadout-table .profile-summary> :first-child {
     grid-column: auto;
+    width: auto;
     padding-top: 8px;
     color: inherit;
     font-size: var(--font-size-xs);
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  .unit-detail .army-profile .loadout-table .order-symbol-name {
+    flex-wrap: wrap;
+  }
+
+  .unit-detail .army-profile .profile-item-label,
+  .unit-detail .army-profile .profile-attributes-label {
+    padding-left: 12px;
+  }
+
+  .unit-detail .army-profile .loadout-table .profile-item-label {
+    width: auto;
   }
 
   .profile-attributes-label {
@@ -4462,6 +4478,54 @@ html[data-distance-unit="in"] .unit-extended-statline {
   }
 
   h1 {
+    overflow-wrap: break-word;
+  }
+
+  /* Narrow Army profile details need their own full-width value rows. */
+  .unit-detail .army-profile .profile-details-table,
+  .unit-detail .army-profile .profile-details-table tbody,
+  .unit-detail .army-profile .loadout-table,
+  .unit-detail .army-profile .loadout-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .unit-detail .army-profile .loadout-table {
+    margin-left: 0;
+  }
+
+  .unit-detail .army-profile .profile-details-table tbody tr:not(.profile-summary),
+  .unit-detail .army-profile .loadout-table tbody tr:not(.profile-summary) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .unit-detail .army-profile .profile-details-table tbody tr:not(.profile-summary)>*,
+  .unit-detail .army-profile .loadout-table tbody tr:not(.profile-summary)>* {
+    min-width: 0;
+    width: auto;
+  }
+
+  .unit-detail .army-profile .profile-details-table .profile-item-label,
+  .unit-detail .army-profile .loadout-table .profile-item-label,
+  .unit-detail .army-profile .profile-details-table .profile-attributes-label {
+    padding: 10px 12px 2px;
+  }
+
+  .unit-detail .army-profile .profile-details-table .profile-item-list,
+  .unit-detail .army-profile .loadout-table .profile-item-list,
+  .unit-detail .army-profile .profile-details-table .profile-attributes {
+    padding: 4px 12px 12px;
+  }
+
+  .unit-detail .army-profile .loadout-table .profile-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .unit-detail .army-profile .loadout-table .profile-summary> :first-child {
+    grid-column: 1 / -1;
+    width: auto;
+    white-space: normal;
     overflow-wrap: break-word;
   }
 

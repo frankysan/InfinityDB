@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Dense Unit profiles and loadouts remain readable on narrow screens: Attributes,
+  Skills, Equipment and Includes no longer crowd adjacent content, and long
+  loadout names can wrap without losing Points or SWC.
 - Narrow rules-reference pages no longer clip the breadcrumb's
   "Rules reference" tag on 320 px screens.
 - Shared Weapon rules such as Mines are now discoverable in the Glossary,
@@ -310,6 +313,9 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Web frontend:** Give narrow Unit profile attributes and loadout details
+  full-width rows; preserve wrapping names and the Points/SWC labels in
+  320–400 px cards, with less cramped mobile labels up to 600 px.
 - **Web frontend:** Wrap long composite Unit-option names within narrow Unit
   detail cards instead of clipping their order symbols or displayed names.
 - **Data processing:** Repeater now cites the current reviewed Hacking Area

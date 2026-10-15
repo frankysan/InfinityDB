@@ -1270,11 +1270,13 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     source occupancy separately; the pinned Army ZIP was also checked
     directly (59 JSON documents, no populated flagged fields). Re-run against
     changed release inputs before claiming the final 1.0 gate.
-  - [ ] Review dense Unit profile/loadout subrow readability at 320 px.
-    Source content remains present but some statlines and Skills/Equipment/
-    Includes rows overlap within the narrow card (observed on Scylla's Army
-    views); this is distinct from the 39 empty source fields. Fix the shared
-    presentation before declaring normal Unit-page usability complete.
+  - [x] Resolve dense Unit profile/loadout subrow readability at 320 px.
+    Army profile Attributes, Skills, Equipment and Includes now use full-width
+    stacked rows on very narrow screens, while loadout names take a full row
+    above their Points/SWC values. Corrected the shared mobile label sizing and
+    wrapping up to 600 px. Served-browser inspection of Scylla's expanded Army
+    views checks row/cell geometry and overflow at 320, 390, 400, 600 and 768 px;
+    this resolves the presentation defect, not the broader 1.0 browser gate.
   - [ ] Close the 1.0 interaction-review target in the maintained ledger, regenerate the checklist,
     and require the following check to pass. Never edit the generated checklist manually:
 
