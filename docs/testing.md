@@ -1881,3 +1881,32 @@ Private browser scripts, screenshots and check results remain ignored in
 `local/audits/visibility-ammunition-browser/`. This closes the specific
 browser interaction/layout gate; it does not close the final 1.0 source
 completeness gate or change any curated rules interpretations.
+
+## 1.0 Repeater/Cube source-to-browser enrichment reconciliation
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** The Repeater citation was checked
+against the current N5.3 rules PDF (printed pp. 55-56), pinned English Wiki
+Repeater and Hacking Area pages, and the archived Hacking Area oldid 3974.
+The older revision remains separately preserved as historical source evidence;
+Repeater's current reference now cites the Hacking Area page in the verified
+English Wiki snapshot alongside the N5.3 rulebook and Repeater page. The
+mechanics and imported Army Equipment values were not changed.
+
+The `tools/audit_enrichment_coverage.py` baseline now uses the same
+`EquipmentCatalog` as the published `/api/equipment` endpoints, covering Army
+Equipment, profile-symbol-encoded Cube/Cube 2.0 and curated-only Firewall.
+The rebuilt current-rules/Army enrichment audit reported **0 release blockers**
+and **0 unresolved related-item links**. It still reports **81** Weapon
+identities without standalone curated definitions plus the independently
+classified older Flash Pulse citation; this is **not** overall 1.0 completeness.
+A regression test checks public Equipment IDs and real Cube/Sepsitor relations.
+
+Headless Chromium verified `/equipment/repeater`, `/rules/hacking-area`,
+`/equipment/cube`, `/equipment/cube-2`, `/weapons/sepsitor`, and
+`/weapons/sepsitor-plus` against rebuilt curated rules. **117/117** checks
+passed at 1440/390/320 px and touch-enabled 390 px: content rendered,
+semantic links showed reference previews, keyboard and touch navigation
+reached the public destination, and no page-level horizontal overflow or
+JavaScript exceptions occurred. The 320 px Repeater screenshot was reviewed.
+Private source-inventory reports, browser results and screenshots remain in
+ignored `local/audits/gate-1.0/`.

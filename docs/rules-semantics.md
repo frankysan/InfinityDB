@@ -1831,7 +1831,11 @@ preserves the exact source-symbol occurrence and resolves it through the maintai
 `equipment-presentation-encodings.json` map to the canonical Cube/Cube 2.0 Equipment
 identity. The Equipment catalog, detail usage, Unit API references, and Equipment filter
 consume that mapping without inventing a textual Army Equipment row or treating the
-symbol's asset grouping as a rules taxonomy.
+symbol's asset grouping as a rules taxonomy. The rules-enrichment coverage audit
+must enumerate this same public Equipment catalog, including encoded Cube/Cube 2.0
+and curated-only Equipment such as Firewall. Auditing only the raw Army Equipment
+rows incorrectly reports valid canonical Sepsitor-to-Cube relationships as
+unresolved; this is a source-to-browser coverage obligation, not a new rule.
 
 Sources:
 

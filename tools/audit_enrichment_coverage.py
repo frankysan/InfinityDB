@@ -14,6 +14,7 @@ from typing import Any
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database
+from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
@@ -470,6 +471,7 @@ def audit_coverage(
         classification_policy = _load_classification_policy(classification_path)
         matched_overrides: set[tuple[str, ...]] = set()
         skill_catalog = SkillCatalog(database, rules)
+        equipment_catalog = EquipmentCatalog(database, rules)
         catalog_rules = CatalogRules(rules)
         trait_catalog = TraitCatalog(database, rules)
         state_catalog = StateCatalog(rules)
@@ -486,6 +488,8 @@ def audit_coverage(
                 sources = state_catalog.list_states()
             elif catalog == "skills":
                 sources = skill_catalog.list_skills()
+            elif catalog == "equipment":
+                sources = equipment_catalog.list_equipment()
             else:
                 sources = database.list_catalog_items(catalog)
 
@@ -501,11 +505,17 @@ def audit_coverage(
                     ]
                     family_ids, exact_ids = _surface_rule_ids(detail)
                 elif catalog in {"equipment", "weapons"}:
-                    raw = database.get_catalog_item(catalog, int(source["id"])) or {}
-                    if raw:
-                        attach_public_catalog_slug(database, catalog, raw)
+                    if catalog == "equipment":
+                        # The public Equipment catalog also contains Cube symbols
+                        # and curated-only Equipment, not just Army text rows.
+                        raw = equipment_catalog.get_equipment(source["id"]) or {}
+                        slug = str(source["slug"])
+                    else:
+                        raw = database.get_catalog_item(catalog, int(source["id"])) or {}
+                        if raw:
+                            attach_public_catalog_slug(database, catalog, raw)
+                        slug = database.application_slug(catalog, int(source["id"]))
                     detail = catalog_rules.enrich_catalog_item(catalog, raw)
-                    slug = database.application_slug(catalog, int(source["id"]))
                     source_ids = [int(value) for value in source.get("source_ids", [])]
                     family_ids, exact_ids = _surface_rule_ids(detail)
                 elif catalog == "traits":

@@ -1257,13 +1257,6 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     category from source citation through maintained representation and generated storage to a
     usable normal browser surface; schema coverage, passing validators, and an API route alone
     are insufficient evidence. Re-review exclusions against the canonical completeness definition.
-  - [ ] Adjudicate the current enrichment audit's release-blocker findings:
-    `equipment:repeater` still cites the N5.2 Hacking Area Wiki revision;
-    `weapon:sepsitor` and `weapon:sepsitor-plus` reference `equipment:cube`
-    without a resolved public catalog target. Confirm current authoritative
-    mechanics and browser presentation before changing the citation or link
-    classification. The 81 remaining missing Weapon family definitions and
-    annex-scoped Commlink have separate source-scope dispositions.
   - [ ] Review the source-presentation audit's 39 fields marked
     `unrepresented_player_information`, especially option Skill/Weapon/Equipment
     relationships and profile notes, against actual source occupancy and normal
