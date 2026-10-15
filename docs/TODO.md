@@ -311,10 +311,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [x] Publish individually reviewed Mine effect/reference links from the
       curated family definition to the Weapon profile, including ammunition
       and applicable State/Skill links; do not infer effects for unreviewed weapons.
-    - [ ] Manually verify Mines/Cybermine/Chest Mine browser detail cards, rule
-      links, citation rendering, and both Chest Mine modes; then reconcile any
-      resulting navigation/presentation defects. Source-backed API enrichment
-      alone does not establish browser acceptance.
+    - [x] Browser-verify seven named Mine profiles and both Chest Mine
+      modes at 1440, 390 and 320 px: 171/171 assertions passed for
+      rule cards, profiles, citations, missing family inheritance,
+      JavaScript errors and overflow. Cross-page Mines glossary/WildParrot
+      navigation and local anchors passed 42/42 checks at the same widths.
+      Evidence is retained under ignored local/audits/.
+    - [ ] Complete human visual inspection of Mines/Cybermine/Chest Mine
+      detail cards, especially both Chest Mine modes and responsive citation
+      presentation. Automated browser and API checks do not replace
+      visual review; reconcile any discovered defects.
     - [x] Reconcile the initial 119 unresolved Army Weapon enrichment entries
       against the exact N5 v5.3 PDF chart evidence and retained catalog categories
       using `tools/audit_weapon_definition_gaps.py`. The pinned Army database
@@ -648,9 +654,26 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       (Spanish Wiki). Their current player-facing source notes retain
       the discrepancies; closing source-coverage review does not imply
       that Corvus Belli has resolved the underlying publication conflicts.
-    - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
-      prose clause by clause; identify missing facts, relationships, and browser
-      coverage separately from raw source notation differences.
+    - [x] Extend the N5.3 auxiliary object-profile audit beyond Disco Ball
+      to all 14 printed four-Attribute profiles on pp. 181/186. All resolve
+      to Army identities: seven full matches and seven S-only conflicts.
+      Both PDF languages specify S0 for six named Mines while Army gives S1;
+      Dazer is English S1 versus Spanish/Army S0. See RR-AW-OBJECT-002.
+    - [ ] Reconcile the seven auxiliary Silhouette source differences with
+      authoritative provenance before changing imported profiles or
+      declaring gameplay interpretation. S0 itself is a valid N5.3
+      template (25 mm base, 3 mm height; general rules p. 18), also
+      present in N5.1/N5.2: do not classify these differences as
+      impossible or inherited solely from an older edition.
+    - [x] Make S0/SX discoverable in the Glossary alongside S1-S8
+      diagrams and in unit Silhouette previews. State S0's fixed
+      25 mm by 3 mm geometry and SX's Prone-only 3 mm height with
+      inherited base width. Preserve the shared-scale S1-S8 diagrams
+      without inventing SVG assets for the other templates.
+    - [ ] Continue the broader auxiliary/equipment-object and special-weapon
+      prose review, including entries without four printed Attributes.
+      Identify missing facts, relationships and browser coverage separately
+      from source notation differences.
     - [ ] Reconcile remaining Wiki Weapon Chart *text-name* mismatches as aliases,
       multi-mode entries, or source-specific rules (including Chest Mine and SymbioBomb).
       This earlier Wiki text-match audit is separate from the complete 171-row N5 PDF

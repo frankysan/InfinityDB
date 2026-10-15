@@ -653,6 +653,52 @@ Sources:
 - Wiki: <https://infinitythewiki.com/SymbioBomb>
 - PDF: Infinity N5 V5.3, printed page 74
 
+### RR-AW-OBJECT-002 - Auxiliary Weapon Chart profiles preserve conflicting Silhouettes
+
+**Project domain:** Data processing. **Scope:** core N5 v5.3 source
+reconciliation; no ITS content or imported Army normalization.
+
+The expanded read-only audit of 14 supplementary four-Attribute object
+profiles (English N5.3 Weapon Chart pp. 181/186, including Disco Ball and
+Drop Bears Deployable Mode) resolves all 14 to unique existing Army
+Weapon/mode identities. Seven fully match; seven differ only on the
+printed Silhouette. None is evidence of a missing attack profile.
+
+**S0 is valid in N5.3, not an obsolete or impossible Silhouette.** The
+Silhouette Templates table (English and Spanish N5.3 p. 18) explicitly
+defines S0 as a 25 mm base with 3 mm height, distinct from S1
+(25 mm base, 25 mm height) and SX (base-height template with
+base width inherited from the Trooper). N5.1 and N5.2 English p. 18
+also define S0; both printed Mine profile tables specify S0.
+The S1-S8 *illustrations* do not exhaust the rules table.
+The same six named Mine profiles print S0 in the English N5.1 p. 177,
+N5.2 p. 180 and N5.3 p. 181. Dazer prints S1 in English N5.1
+p. 182, N5.2 p. 185 and N5.3 p. 186. This repeated source history
+makes an accidental carryover from a previous N5 edition unlikely,
+though it does not explain why Army and the PDF tables disagree.
+Therefore the seven differences are real published attribute mismatches,
+not invalid S0 source rows or proof that old rules survived accidentally.
+
+- **AP, E/M, Monofilament, PARA, Shock and Viral Mines:** English N5.3
+  p. 181 and Spanish N5.3 pp. 190-191 specify S0; pinned Army specifies
+  S1 for these six named Mine profiles.
+- **Dazer:** English N5.3 p. 186 specifies S1; Spanish N5.3 p. 195 and
+  Army specify S0. This is a **cross-language PDF disagreement**.
+- **Cybermine and Drop Bears Deployable Mode:** English chart and Army
+  specify S0.
+- **WildParrot, Crazykoala, Deployable Repeater, Disco Ball and
+  FastPanda:** English chart and Army specify S1.
+
+The evidence is reproducible with tools/audit_weapon_chart_profiles.py.
+Its full report stays in ignored local/audits/. No PDF or Army data is
+modified. The comparison does not establish which disputed value governs
+gameplay; official correction/provenance is still required before changing
+player-facing object Silhouette, LoF or size guidance.
+
+Sources: pinned N5 v5.3 English and Spanish core rules PDFs in
+data/pdf/rules/; pinned Army database in data/generated/infinity.db.
+This is a source/profile audit, not a gameplay ruling.
+
 ### RR-AW-SCENERY-001 — Anti-materiel effects connect Weapon rules to scenery
 
 **Scope:** core N5.

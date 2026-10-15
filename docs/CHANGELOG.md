@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Silhouette help now explains the valid S0 and SX templates alongside
+  the existing S1-S8 comparison diagrams, without treating their absence
+  from the illustrations as a missing rule.
+
 - AP Thunderbolt, AP+EXP CC Weapon and Stun Pistol now disclose conflicting
   Wiki chart values beside the current N5.3/Army weapon rules; the imported
   profiles and gameplay effects remain unchanged.

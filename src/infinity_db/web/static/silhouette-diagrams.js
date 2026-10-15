@@ -73,6 +73,10 @@ export function silhouetteReferenceSet() {
   copy.className = "silhouette-reference-copy";
   copy.textContent = "S1–S8 are shown at the same scale so their relative sizes can be compared directly.";
 
+  const otherTemplates = document.createElement("p");
+  otherTemplates.className = "silhouette-reference-copy";
+  otherTemplates.textContent = "The rules also define S0 (25 mm base, 3 mm high) and SX (3 mm high while Prone; base width follows the Trooper's Silhouette). These are not depicted in the diagrams below.";
+
   const viewport = document.createElement("div");
   viewport.className = "silhouette-reference-viewport";
   viewport.tabIndex = 0;
@@ -83,14 +87,17 @@ export function silhouetteReferenceSet() {
     GLOSSARY_PIXELS_PER_MM,
   ));
 
-  section.append(heading, copy, viewport);
+  section.append(heading, copy, otherTemplates, viewport);
   return section;
 }
 
 export function silhouetteValuePreview(value) {
-  const id = Number(value);
+  const raw = String(value ?? "").trim().toUpperCase();
+  if (!raw) return null;
+  const id = raw === "X" || raw === "SX" ? "X" : Number(raw);
   const selected = Number.isInteger(id) ? SILHOUETTE_BY_ID.get(id) : null;
-  if (!selected) return null;
+  if (!selected && id !== 0 && id !== "X") return null;
+  const designation = id === "X" ? "SX" : "S" + id;
 
   const wrapper = document.createElement("span");
   wrapper.className = "maintained-reference-wrap silhouette-preview-wrap";
@@ -98,37 +105,48 @@ export function silhouetteValuePreview(value) {
   const trigger = document.createElement("button");
   trigger.type = "button";
   trigger.className = "silhouette-preview-trigger";
-  trigger.textContent = String(id);
-  trigger.setAttribute("aria-label", `Show S${id} silhouette reference`);
+  trigger.textContent = id === "X" ? "X" : String(id);
+  trigger.setAttribute("aria-label", "Show " + designation + " silhouette reference");
 
   const tooltip = document.createElement("span");
   tooltipSequence += 1;
-  tooltip.id = `silhouette-preview-tooltip-${tooltipSequence}`;
+  tooltip.id = "silhouette-preview-tooltip-" + tooltipSequence;
   tooltip.className = "maintained-reference-tooltip silhouette-preview-tooltip";
   tooltip.role = "tooltip";
   tooltip.setAttribute("popover", "manual");
 
   const title = document.createElement("strong");
   title.className = "silhouette-preview-title";
-  title.textContent = `Silhouette S${id}`;
+  title.textContent = "Silhouette " + designation;
   tooltip.append(title);
 
-  const comparison = id === 2 ? [selected] : [selected, SILHOUETTE_BY_ID.get(2)];
-  tooltip.append(diagramRow(
-    comparison,
-    (item) => ({
-      pixelsPerMm: PREVIEW_PIXELS_PER_MM,
-      reference: item.id === 2 && id !== 2,
-      visibleCaption: true,
-    }),
-    PREVIEW_PIXELS_PER_MM,
-  ));
-
-  if (id !== 2) {
+  if (id === 0 || id === "X") {
+    // No supplied source SVG for S0/SX: show the rules geometry without
+    // substituting an unrelated S1-S8 diagram.
     const note = document.createElement("span");
     note.className = "silhouette-preview-note";
-    note.textContent = "S2 is shown at the same scale for reference.";
+    note.textContent = id === 0
+      ? "25 mm base, 3 mm high (base height). S0 is a defined template."
+      : "3 mm high while Prone; base width follows the Trooper's Silhouette Attribute.";
     tooltip.append(note);
+  } else {
+    const comparison = id === 2 ? [selected] : [selected, SILHOUETTE_BY_ID.get(2)];
+    tooltip.append(diagramRow(
+      comparison,
+      (item) => ({
+        pixelsPerMm: PREVIEW_PIXELS_PER_MM,
+        reference: item.id === 2 && id !== 2,
+        visibleCaption: true,
+      }),
+      PREVIEW_PIXELS_PER_MM,
+    ));
+
+    if (id !== 2) {
+      const note = document.createElement("span");
+      note.className = "silhouette-preview-note";
+      note.textContent = "S2 is shown at the same scale for reference.";
+      tooltip.append(note);
+    }
   }
 
   wrapper.append(trigger, tooltip);

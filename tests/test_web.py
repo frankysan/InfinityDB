@@ -497,7 +497,12 @@ def test_silhouette_diagrams_use_shared_scale_and_player_surfaces(app: Callable)
         in renderer
     )
     assert b'reference: item.id === 2 && id !== 2' in renderer
-    assert b'if (!selected) return null' in renderer
+    assert b'if (!selected && id !== 0 && id !== "X") return null' in renderer
+    assert b'raw === "X" || raw === "SX"' in renderer
+    assert b"otherTemplates.textContent" in renderer
+    assert b"The rules also define S0 (25 mm base, 3 mm high) and SX" in renderer
+    assert b'if (id === 0 || id === "X")' in renderer
+    assert b'No supplied source SVG for S0/SX' in renderer
 
     expected_viewboxes = {
         1: (149.027, 155.329),

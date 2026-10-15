@@ -435,12 +435,15 @@ heights.
 InfinityDB may store/display the source `S` code compactly, but contextual help,
 geometry-aware filtering, or future tabletop tools should resolve that code
 through the rules-defined template mapping rather than treating `S=2` as a
-literal dimension.
+literal dimension. N5.3 p. 18 explicitly defines S0 as a 25 mm base
+with a 3 mm height; S0 is not absent merely because the illustrations
+show S1-S8.
 
-The current Glossary and Unit previews publish the maintained S1–S8 templates through
-`static/silhouette-diagrams.js`. Comparisons use one physical scale; other supported templates
-include an S2 reference, while S2 is shown alone. This implements reference presentation, not live
-tabletop geometry or Silhouette-based filtering.
+The Glossary publishes S1-S8 diagrams at one physical scale and explains S0
+and SX using their printed dimensions without inventing extra artwork. The
+Unit preview handles S0 and SX with explanatory text and keeps the scale-
+preserving S1-S8 comparisons (S2 as a reference). This implements reference
+presentation, not live tabletop geometry or Silhouette-based filtering.
 
 Sources:
 
