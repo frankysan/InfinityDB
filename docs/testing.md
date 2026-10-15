@@ -1762,3 +1762,35 @@ The private verifier, result JSON, and screenshots remain Git-ignored under
 five-card browser acceptance in `docs/TODO.md`. Fireteam interactions,
 scenario selection/maps, and Visibility Zone/Immunity input-method
 acceptance remain open; this was not a full release/UI audit.
+
+## 1.0 Fireteam cross-surface browser acceptance
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** Headless Chromium against the
+current Army database and a fresh, private curated rules database checked
+the Fireteams landing and Army-scoped views at 1440, 390 and 320 px.
+The general unscoped quick reference shows DUO/HARIS/CORE formation
+limits, Coherency, Team Leader duties, whole-team cancellation,
+individual member departure, rejoining, FT Master exceptions and
+Fireteam Level bonuses. It links to canonical Skills including FT Master.
+The general reference is intentionally hidden while an Army is selected.
+
+**167/167 browser checks passed.** The Shock Army of Acontecimento chart
+shows four Wildcard-augmented teams (38 member rows, 20 Wildcard badges)
+with the setting enabled. Disabling it restores the five separate team
+entries (23 rows); enabling it restores the merged projection without
+changing the selected Army URL. Army-specific type limits, minimum/
+maximum/exact member requirements, and resolved Unit links were checked.
+A member link was activated using the keyboard, the Unit page was opened,
+and browser back restored the selected chart. Opening the versioned
+share URL directly reproduced the correct Army; changing to Military
+Orders, navigating back, and clearing the selection produced the intended
+states. No JavaScript errors or page-level horizontal overflow occurred.
+At 320 px, the member table's independent horizontal scrolling was
+verified and its full-page screenshot reviewed.
+
+The private test script, diagnostics and screenshots remain ignored under
+`local/audits/final-fireteam-browser/`. This closes the Fireteam browser
+acceptance item in `docs/TODO.md`, not the separate REA-020 Fireteam
+mechanics/source review, scenario interaction acceptance or final
+source-to-storage-to-browser completeness gate. No frontend or curated
+mechanics were changed in this acceptance pass.

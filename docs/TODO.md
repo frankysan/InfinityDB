@@ -1205,10 +1205,16 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     definitions remain scoped to their Weapon. Chromium passed 42/42
     Glossary-to-family, local-card and cross-page navigation checks at
     1440/390/320 px. No synthetic Mines product or duplicate rules route.
-- [ ] **Web frontend — Fireteam browser acceptance:** Select an Army, verify
-  Fireteam formation requirements and ongoing-integrity help, change Wildcard
-  settings and navigate between Fireteams, Units and references. Test desktop
-  and narrow screens; keep remaining REA-020 mechanics separately tracked.
+- [x] **Web frontend - Fireteam browser acceptance:** Chromium verified the
+  general formation and ongoing-integrity reference, Army selection,
+  Wildcard eligibility projection, chart limits and member requirements,
+  canonical FT Master and Unit navigation, shareable scoped URLs,
+  back/forward scope changes and returning to the unscoped overview.
+  **167/167** checks passed at 1440, 390 and 320 px, including switching
+  Wildcards off/on, loading a saved Army URL directly, and scrolling
+  contained member tables horizontally at 320 px. No JavaScript errors
+  or page-level overflow. This is browser acceptance, not a Fireteam
+  list builder or a resolution of separately tracked REA-020 mechanics.
 - [ ] **Web frontend — core-scenario browser acceptance:** Browse all four
   Scenarios, change Army Points rapidly, follow scoped rules links, navigate
   away/back, and check maps in both themes and distance units. Exercise
