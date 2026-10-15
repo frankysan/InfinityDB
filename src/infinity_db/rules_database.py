@@ -225,6 +225,8 @@ def _create_schema(connection: sqlite3.Connection) -> None:
 
 
 def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
+    from infinity_db.faq_rulings import validate_faq_ruling_references
+
     collection_ids: set[str] = set()
     scenario_collection_titles: dict[str, tuple[str, Path]] = {}
     scenario_collection_revisions: dict[tuple[str, str], Path] = {}
@@ -316,6 +318,8 @@ def _validate_documents(documents: list[tuple[Path, dict[str, Any]]]) -> None:
                             f"Current variant rule reference {record_id!r} -> "
                             f"{target_id!r} in {path} does not resolve"
                         )
+
+    validate_faq_ruling_references(documents, definitions_by_id)
 
     # Weapon Properties are reviewed application vocabulary, not rules records.
     # Validate these explicit references against their maintained registry,

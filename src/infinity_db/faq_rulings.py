@@ -8,6 +8,7 @@ applicability/supersession resolution.
 from __future__ import annotations
 
 from datetime import date
+from pathlib import Path
 from typing import Any
 
 from .domain_slugs import validate_typed_domain_id
@@ -171,3 +172,120 @@ def validate_faq_ruling_facts(
     supersedes = _ids(obj["supersedes"], f"{context}.supersedes", domain="faq-ruling", empty=True)
     if record_id in supersedes:
         raise ValueError(f"{context}.supersedes: cannot supersede itself")
+
+
+def _scope_overlap(first: dict[str, Any], second: dict[str, Any]) -> bool:
+    """Whether a successor and predecessor could apply in the same context."""
+    if first["rulesRevision"] != second["rulesRevision"]:
+        return False
+    first_season = first.get("season")
+    second_season = second.get("season")
+    if first_season is not None and second_season is not None:
+        if first_season != second_season:
+            return False
+    first_scenarios = set(first.get("scenarioIds", []))
+    second_scenarios = set(second.get("scenarioIds", []))
+    if first_scenarios and second_scenarios and not first_scenarios & second_scenarios:
+        return False
+    if first.get("effectiveUntil", "9999-12-31") < second["effectiveFrom"]:
+        return False
+    if second.get("effectiveUntil", "9999-12-31") < first["effectiveFrom"]:
+        return False
+    return True
+
+
+def validate_faq_ruling_references(
+    documents: list[tuple[Path, dict[str, Any]]],
+    current_definitions: dict[str, tuple[Path, dict[str, Any]]],
+) -> None:
+    """Validate publication-wide FAQ target identities and explicit supersession graph.
+
+    Current FAQ topics must resolve to a current canonical definition. Historic
+    FAQ predecessors may be retained in superseded collections as evidence.
+    Nothing here selects a ruling for a particular reader, date or game context.
+    """
+    historical: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
+    current_rulings: dict[str, tuple[Path, dict[str, Any]]] = {}
+    for path, document in documents:
+        for record in document["records"]:
+            if record["kind"] != "faq-ruling" or record["composition"]["role"] != "definition":
+                continue
+            historical.setdefault(record["id"], []).append((path, record))
+            if document["collection"]["status"] == "current":
+                current_rulings[record["id"]] = (path, record)
+
+    # One carried-forward identity may appear across archived editions. Its
+    # original publication must not silently drift when the citation is reposted.
+    for ruling_id, versions in historical.items():
+        origins = {
+            (
+                item["facts"]["originalPublication"]["collectionId"],
+                item["facts"]["originalPublication"]["sourceId"],
+                item["facts"]["originalPublication"]["version"],
+                item["facts"]["originalPublication"]["publishedDate"],
+                item["facts"]["originalPublication"]["page"],
+            )
+            for _, item in versions
+        }
+        if len(origins) != 1:
+            raise ValueError(
+                f"FAQ ruling {ruling_id!r} has conflicting originalPublication across collections"
+            )
+
+    edges: dict[str, set[str]] = {ruling_id: set() for ruling_id in historical}
+    for ruling_id, versions in historical.items():
+        for path, record in versions:
+            facts = record["facts"]
+            if ruling_id in current_rulings:
+                # A current ruling must refer to current topics, not a leftover
+                # obsolete skill or a scenario from a missing ITS collection.
+                if record is current_rulings[ruling_id][1]:
+                    for topic in facts["topicIds"]:
+                        if topic not in current_definitions:
+                            raise ValueError(
+                                f"FAQ ruling {ruling_id!r} in {path} topic {topic!r} "
+                                "does not resolve to a current canonical definition"
+                            )
+                    for scope in facts["applicability"]:
+                        for scenario_id in scope.get("scenarioIds", []):
+                            target = current_definitions.get(scenario_id)
+                            if target is None or target[1]["kind"] != "scenario":
+                                raise ValueError(
+                                    f"FAQ ruling {ruling_id!r} in {path} scenario "
+                                    f"{scenario_id!r} is not a current published Scenario"
+                                )
+            for predecessor_id in facts["supersedes"]:
+                earlier = historical.get(predecessor_id)
+                if earlier is None:
+                    raise ValueError(
+                        f"FAQ ruling {ruling_id!r} in {path} supersedes "
+                        f"missing ruling {predecessor_id!r}"
+                    )
+                if not any(
+                    _scope_overlap(new_scope, old_scope)
+                    for new_scope in facts["applicability"]
+                    for _, preceding in earlier
+                    for old_scope in preceding["facts"]["applicability"]
+                ):
+                    raise ValueError(
+                        f"FAQ ruling {ruling_id!r} in {path} supersedes "
+                        f"{predecessor_id!r} without overlapping applicability"
+                    )
+                edges[ruling_id].add(predecessor_id)
+
+    visiting: set[str] = set()
+    completed: set[str] = set()
+
+    def visit(ruling_id: str) -> None:
+        if ruling_id in visiting:
+            raise ValueError(f"FAQ supersession cycle involving {ruling_id!r}")
+        if ruling_id in completed:
+            return
+        visiting.add(ruling_id)
+        for predecessor_id in sorted(edges[ruling_id]):
+            visit(predecessor_id)
+        visiting.remove(ruling_id)
+        completed.add(ruling_id)
+
+    for ruling_id in sorted(edges):
+        visit(ruling_id)

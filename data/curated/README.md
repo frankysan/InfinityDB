@@ -448,10 +448,12 @@ source collection rather than inside a core Rule summary. Validated
   `conflictingCitations` lists any other individually cited conflicting
   pages, rather than silently joining their answers or automatically
   preferring the newest upload.
-- `supersedes`: unique stable `faq-ruling:*` IDs. Self-supersession is
-  rejected; referencing a predecessor is not a blanket applicability
-  override. Confirm target existence, scope overlap and acyclic ordering
-  when the publication resolver is implemented.
+- `supersedes`: unique stable `faq-ruling:*` IDs. Self-supersession
+  and unknown predecessors are rejected at export. Historical predecessor
+  definitions are allowed; every predecessor must have a potentially
+  overlapping rules revision, time window and season/scenario scope.
+  Cycles are rejected. A predecessor is superseded only within the
+  verified overlap, not across its entire history.
 
 **Precedence policy:** The source-native core definition remains intact.
 An applicable official FAQ/erratum is a dated clarification layer, not a
@@ -466,10 +468,18 @@ without a reviewed selected citation and reason are **not** resolved by
 document order, language, or publication recency.
 
 **Implementation status:** `src/infinity_db/faq_rulings.py` validates this
-authored contract as part of normal curated-document loading. Actual
-cross-collection target/supersession resolution, date-scoped selection,
-database read APIs, and topic/scenario browser presentation are **not yet
-implemented**. No FAQ records are authored in the shipped collection yet.
+authored contract during curated-document loading. Rules export additionally
+checks that each current ruling's `topicIds` and `scenarioIds` resolve to
+current canonical definitions (scenario IDs must reference actual Scenarios),
+that predecessor IDs exist in retained current/historical definitions,
+that original publication metadata does not drift across editions of one
+ruling, and that supersession is acyclic and has an overlapping
+rules-revision/season/scenario/date scope. Missing ITS scenarios are rejected
+rather than silently accepted as published targets. These validations do
+**not** determine which ruling applies to a runtime game context: effective
+date/season publication selection, cross-posting presentation, database
+read APIs and topic/scenario browser presentation are **not yet implemented**.
+No FAQ records are authored in the shipped collection yet.
 The synthetic tests are not source rulings. Until the pilot is complete,
 these fields must not be treated as an automatically published answer.
 

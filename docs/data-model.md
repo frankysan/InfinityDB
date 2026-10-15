@@ -577,9 +577,17 @@ supersession has effect only where applicability overlaps and the cited
 predecessor has been verified; it must not delete historical evidence.
 
 Currently `curated.py` validates this **authoring contract** for FAQ
-definitions. A scoped publication resolver, cross-record target/supersession
-graph validation, dated database/API selection, and player-facing
-FAQ presentation are future 1.0 tasks; no FAQ records are yet shipped.
+definitions, and the rules exporter validates FAQ links across collections:
+current canonical topic and scenario targets, retained historical FAQ
+predecessor identities, consistent cross-posted original provenance,
+acyclic supersession and overlapping revision/date/season/scenario scopes.
+Supersession is explicit and limited to potentially overlapping contexts;
+a later document date by itself still grants no precedence.
+
+An applicability-aware **runtime selection** mechanism, checks for which
+unpublished ITS season revisions exist outside the rules corpus,
+date-scoped database/API selection and player-facing FAQ presentation
+remain future 1.0 work; no FAQ records are yet shipped.
 The generic supplement mechanism must not auto-attach a ruling to
 a core topic by name or by a newer collection date.
 

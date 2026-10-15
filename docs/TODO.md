@@ -1119,8 +1119,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       effective dates, original publication identity/date, selected official
       source citation/reason, conflicting citations and typed supersession
       references. See `docs/data-model.md` and `data/curated/README.md`.
-      This does not yet publish an answer or validate cross-collection target
-      existence/supersession cycles; those remain pilot requirements.
+      The export pipeline now also checks cross-collection topic/scenario
+      target existence, historical predecessor references, consistent
+      original publication identities, scope overlap and supersession cycles.
+      The dated runtime selector, unsupported season-revision verification
+      and browser publication remain pilot requirements.
   - [ ] Deliver one core clarification and one scenario/season-scoped ruling through validation,
     export, repository/API composition, and browser presentation before curating the remaining
     inventory. Show linked questions/answers with dates and affected concepts alongside the base
