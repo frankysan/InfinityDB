@@ -310,6 +310,8 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Web frontend:** Wrap long composite Unit-option names within narrow Unit
+  detail cards instead of clipping their order symbols or displayed names.
 - **Data processing:** Repeater now cites the current reviewed Hacking Area
   Wiki snapshot rather than an older revision on its rules-reference card.
 - **Web backend:** Show upcoming-release notes on **What's changed** when the changelog uses its bracketed `Unreleased` heading, but omit that section when it contains no actual changes.

@@ -57,6 +57,53 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
     assert _field(report, "peripherals", "mercs")["status"] == audit.REDUNDANT
 
 
+def test_source_presentation_audit_distinguishes_empty_source_from_missing_ui(
+    tmp_path: Path,
+) -> None:
+    """The synthetic source deliberately populates option fields, so flag them."""
+    report = audit.audit_database(_runtime_database(tmp_path))
+    evidence = report["rawEvidence"]
+    candidates = evidence["unrepresentedFieldOccupancy"]
+    assert len(candidates) == 39
+    assert evidence["occupiedUnrepresentedFieldCount"] == 24
+    assert report["summary"]["occupiedUnrepresentedFieldCount"] == 24
+    assert ("profiles", "notes") in {
+        (entry["table"], entry["field"]) for entry in candidates
+    }
+    assert ("unit_option_skills", "item_id") in {
+        (entry["table"], entry["field"]) for entry in candidates
+    }
+    occupied = {
+        (entry["table"], entry["field"])
+        for entry in candidates if entry["occupiedCount"] > 0
+    }
+    assert ("unit_option_skills", "item_id") in occupied
+    assert ("unit_option_weapons", "item_id") in occupied
+    assert ("unit_option_equipment", "item_id") in occupied
+    assert ("profiles", "notes") not in occupied
+
+
+def test_source_presentation_occupancy_distinguishes_zero_empty_and_value() -> None:
+    connection = sqlite3.connect(":memory:")
+    try:
+        connection.execute('CREATE TABLE profiles (notes TEXT)')
+        connection.executemany(
+            'INSERT INTO profiles (notes) VALUES (?)',
+            [(None,), ("",), ("   ",), ("Source note",)],
+        )
+        assert audit._occupied_field_count(connection, "profiles", "notes") == 1
+        connection.execute('CREATE TABLE unit_option_skills (quantity INTEGER)')
+        connection.executemany(
+            'INSERT INTO unit_option_skills (quantity) VALUES (?)',
+            [(None,), (0,), (1,)],
+        )
+        assert audit._occupied_field_count(
+            connection, "unit_option_skills", "quantity"
+        ) == 2
+    finally:
+        connection.close()
+
+
 def test_source_presentation_audit_rejects_mismatched_raw_generation(
     tmp_path: Path,
 ) -> None:

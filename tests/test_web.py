@@ -3643,6 +3643,21 @@ def test_narrow_reference_breadcrumb_retains_tag_without_overflow(
     assert ".catalog-tag {\n    flex-shrink: 0;" in small_screen
 
 
+def test_mobile_unit_composite_options_preserve_full_names(app: Callable) -> None:
+    """Mobile composite-option cards must wrap names rather than clipping them."""
+    status, _, body = request(app, "/static/components.css")
+    assert status == 200
+    css = body.decode("utf-8")
+    narrow = css.split("@media (max-width: 600px) {", 1)[1]
+    assert ".unit-detail .composite-option-table tbody {" in narrow
+    assert ".unit-detail .composite-option-table .profile-summary {" in narrow
+    assert (
+        ".unit-detail .composite-option-table .order-symbol-name {\n    flex-wrap: wrap;"
+        in narrow
+    )
+    assert "white-space: normal;\n    overflow-wrap: break-word;" in narrow
+
+
 def test_catalog_api_etag_revalidates_the_current_snapshot(app: Callable) -> None:
     status, headers, body = request(app, "/api/armies")
 

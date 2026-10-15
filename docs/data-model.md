@@ -463,6 +463,14 @@ Top-level source options that combine multiple loadouts remain source-context bu
 preserves their cost, miniature count, Order contribution, included loadouts, and source/Army
 context. Source-local option IDs are not canonical cross-Army identities unless separately reviewed.
 
+The paired raw database preserves normalized source fields that are not yet published
+through these bundles (for example, direct Unit-option Skills/Equipment/Weapons,
+and profile/group notes). The source-to-presentation audit keeps such fields
+classified as potential presentation gaps even when empty in the selected source
+snapshot, and separately reports **how many source values are actually populated**.
+Newly populated fields must be reviewed before a data-completeness claim; absence
+in one pinned snapshot does not justify permanently excluding their semantics.
+
 ### Selection and dependency constraints
 
 Reviewed source selectors and same-Unit profile/loadout dependencies are materialized only when their

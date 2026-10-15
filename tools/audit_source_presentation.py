@@ -420,6 +420,39 @@ def _gap_evidence(connection: sqlite3.Connection) -> dict[str, int | None]:
     }
 
 
+def _occupied_field_count(connection: sqlite3.Connection, table: str, field: str) -> int:
+    """Count populated source values without interpreting zero/false as absent."""
+    name = quote(field)
+    return int(connection.execute(
+        f"SELECT COUNT(*) FROM {quote(table)} WHERE {name} IS NOT NULL "
+        f"AND (typeof({name}) != 'text' OR length(trim({name})) > 0)"
+    ).fetchone()[0])
+
+
+def _unrepresented_field_occupancy(
+    connection: sqlite3.Connection,
+) -> list[dict[str, Any]]:
+    """Retain potential gaps even when the pinned source provides no values."""
+    result: list[dict[str, Any]] = []
+    for table, fields in sorted(_schema_fields().items()):
+        for field in fields:
+            policy = FIELD_OVERRIDES.get((table, field), TABLE_POLICY[table])
+            if policy["status"] != UNREPRESENTED:
+                continue
+            total = _count(connection, table)
+            if total is None:
+                raise SourcePresentationAuditError(
+                    f"Paired raw database is missing source table {table!r}"
+                )
+            result.append({
+                "table": table,
+                "field": field,
+                "sourceRowCount": total,
+                "occupiedCount": _occupied_field_count(connection, table, field),
+            })
+    return result
+
+
 def _raw_evidence(path: Path) -> dict[str, Any]:
     raw_path = raw_database_path(path)
     if not raw_path.is_file():
@@ -431,8 +464,13 @@ def _raw_evidence(path: Path) -> dict[str, Any]:
     connection = sqlite3.connect(raw_path.resolve().as_uri() + "?mode=ro", uri=True)
     try:
         tables = _table_names(connection)
+        unrepresented = _unrepresented_field_occupancy(connection)
         return {
             "status": "available",
+            "unrepresentedFieldOccupancy": unrepresented,
+            "occupiedUnrepresentedFieldCount": sum(
+                item["occupiedCount"] > 0 for item in unrepresented
+            ),
             "path": str(raw_path),
             "fireteamCount": _count(connection, "fireteams"),
             "fireteamMemberCount": _count(connection, "fireteam_members"),
@@ -478,6 +516,7 @@ def audit_database(path: Path) -> dict[str, Any]:
     finally:
         connection.close()
 
+    raw_evidence = _raw_evidence(path)
     return {
         "format": FORMAT,
         "formatVersion": FORMAT_VERSION,
@@ -488,12 +527,15 @@ def audit_database(path: Path) -> dict[str, Any]:
             "confirmedGapCount": len(CONFIRMED_GAPS),
             "deferredOutOfScopeCount": len(DEFERRED_OUT_OF_SCOPE),
             "fieldStatusCounts": counts,
+            "occupiedUnrepresentedFieldCount": raw_evidence.get(
+                "occupiedUnrepresentedFieldCount"
+            ),
         },
         "inventory": inventory,
         "confirmedGaps": list(CONFIRMED_GAPS),
         "deferredOutOfScope": list(DEFERRED_OUT_OF_SCOPE),
         "applicationEvidence": evidence,
-        "rawEvidence": _raw_evidence(path),
+        "rawEvidence": raw_evidence,
     }
 
 
@@ -515,6 +557,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(
         f"Completeness: {report['summary']['confirmedGapCount']} confirmed gap families | "
         f"{report['summary']['deferredOutOfScopeCount']} explicit scope decisions"
+    )
+    occupied = report["summary"]["occupiedUnrepresentedFieldCount"]
+    print(
+        f"Source occupancy: {occupied} of "
+        f"{report['summary']['fieldStatusCounts'][UNREPRESENTED]} potential "
+        "unrepresented fields populated"
+        if occupied is not None else "Source occupancy: paired raw database unavailable"
     )
     return 0
 

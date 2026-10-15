@@ -1910,3 +1910,53 @@ reached the public destination, and no page-level horizontal overflow or
 JavaScript exceptions occurred. The 320 px Repeater screenshot was reviewed.
 Private source-inventory reports, browser results and screenshots remain in
 ignored `local/audits/gate-1.0/`.
+
+## 1.0 flagged source-field occupancy and Unit browser acceptance
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** The source-presentation audit was
+rerun against the published Army database and its checksum-matched paired
+normalized raw database. All **39** fields statically classified as
+`unrepresented_player_information` were inspected for occupied source values.
+**None was populated.** The original pinned Army ZIP was also checked directly:
+its 59 JSON documents contain 4,137 source Unit occurrences, 4,748 profile
+groups, 5,020 profiles and 162 top-level composite-option occurrences across
+Army contexts; none supplies values for the flagged note or direct
+Unit-option Skill/Equipment/Weapon/Characteristic fields. The seven
+`unit_option_*` Skills, Weapons, Equipment, extras and Characteristics
+relation tables contain zero rows; both
+`profile_groups.notes` (4,748 groups) and `profiles.notes` (5,020 profiles)
+contain zero nonempty values. The audit retains all 39 candidates rather than
+misclassifying them as implemented; its new `rawEvidence.unrepresentedFieldOccupancy`
+reports source row counts and occupied values by table/field, and summary
+`occupiedUnrepresentedFieldCount` is `0` for this snapshot (or unknown if a
+validated raw pair is unavailable). A synthetic populated source fixture
+asserts that an occupied candidate is surfaced, including numeric zero.
+
+The independently populated source structures have distinct semantics:
+**18** composite Unit-option occurrences belong to **7** logical Unit pages,
+and **30** source Unit-note occurrences belong to **28** logical Unit pages.
+The current application DB projects included loadout relationships (322
+Army-scoped target rows) and composite-option Order contributions (33 source
+rows). The published API returns those fields in each owning Army context,
+and renders them in normal Unit pages rather than treating absent direct
+Unit-option Skill/Equipment/Weapon rows as missing presentations.
+
+**510/510 source/API/browser acceptance checks passed.** Headless Chromium
+checked actual option names, source unit/option IDs, points, SWC, resolved
+included-loadout anchors, Orders, miniature counts and source notes, at
+1440, 390 and 320 px. Every Army detail with composite options was opened
+for the mobile table-width check. No JavaScript errors or document-level
+horizontal overflow were detected. Visual inspection found that long
+composite-option names were clipped inside a narrow card despite fitting at
+document level; the mobile table body/name now wraps without truncating the
+source label, and a served-CSS regression protects this presentation.
+Separately, dense normal Unit profile/loadout subrows can still overlap in
+320 px layouts (observed on Scylla); that independent readability issue is
+tracked for the remaining 1.0 browser gate rather than counted as one of the
+39 absent source fields. Evidence, scripts and screenshots are ignored under
+`local/audits/gate-1.0/source-fields-browser/`.
+
+This closes the **39-field review for the current pinned source set only**,
+not the overall 1.0 release gate. A new Army source version may populate any
+candidate and must be reaudited before tagging; the current report's zero
+confirmed gap families does not independently prove browser completeness.

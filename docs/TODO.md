@@ -1257,11 +1257,24 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     category from source citation through maintained representation and generated storage to a
     usable normal browser surface; schema coverage, passing validators, and an API route alone
     are insufficient evidence. Re-review exclusions against the canonical completeness definition.
-  - [ ] Review the source-presentation audit's 39 fields marked
-    `unrepresented_player_information`, especially option Skill/Weapon/Equipment
-    relationships and profile notes, against actual source occupancy and normal
-    Unit pages. The existing audit reports zero *confirmed* gap families; that
-    classification alone is not sufficient 1.0 browser-completeness evidence.
+  - [x] Review the 39 schema-level `unrepresented_player_information` fields
+    against paired, pinned raw Army storage: **0 fields have populated values**.
+    All seven composite Unit-option relationship/extras tables have zero rows,
+    and neither 4,748 profile groups nor 5,020 profiles supplies a note.
+    Independently verified the populated *different* source structures:
+    **18** composite-option occurrences on **7** Unit identities, including
+    linked loadouts and Orders, and **30** Unit-note occurrences on **28**
+    logical Units. Normal Unit pages and API passed **510** source/parity/browser
+    checks at desktop and mobile sizes. Mobile composite-option names now wrap
+    instead of being clipped. The audit retains every potential gap and reports
+    source occupancy separately; the pinned Army ZIP was also checked
+    directly (59 JSON documents, no populated flagged fields). Re-run against
+    changed release inputs before claiming the final 1.0 gate.
+  - [ ] Review dense Unit profile/loadout subrow readability at 320 px.
+    Source content remains present but some statlines and Skills/Equipment/
+    Includes rows overlap within the narrow card (observed on Scylla's Army
+    views); this is distinct from the 39 empty source fields. Fix the shared
+    presentation before declaring normal Unit-page usability complete.
   - [ ] Close the 1.0 interaction-review target in the maintained ledger, regenerate the checklist,
     and require the following check to pass. Never edit the generated checklist manually:
 
