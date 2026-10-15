@@ -1184,11 +1184,15 @@ The 0.10.1 offline checks and later REA-017/026 scoped Chrome reviews do not
 prove the four cross-surface browser interactions below. These incomplete
 acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
 
-- [ ] **Web frontend — reference-card browser acceptance:** Inspect IMP-2,
-  Stealth, Deployable Cover, TinBot and Kobra CC on desktop and narrow screens.
-  Follow rules, Attribute and source links; confirm readability and navigation.
-  The earlier offline 52/52 tests and seven-view responsive check were not
-  substitutes for these interactions.
+- [x] **Web frontend - reference-card browser acceptance:** IMP-2,
+  Stealth, Deployable Cover, TinBot and Kobra CC were exercised in Chromium
+  at 1440, 390 and 320 px against a freshly generated rules database.
+  **93/93** real browser checks passed for published text, keyboard-focusable
+  rule navigation, the Kobra CC Attribute link into Glossary, cited-source
+  links opening their intended URLs in new tabs, and absence of JavaScript
+  errors and horizontal overflow. The 320 px screenshots were reviewed for
+  readability. External source responses were mocked; live third-party
+  availability and the other final 1.0 interaction areas remain separate.
   - [x] **Web backend + Web frontend - shared weapon-family navigation:**
     Verified the canonical `weapon:mines` destination is already
     `/weapons/ap-mine#rule-weapon-mines`; `/weapons/mines` is an unsupported

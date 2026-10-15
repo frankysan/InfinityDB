@@ -1736,3 +1736,29 @@ cross-page Mines reference. No JavaScript exceptions or new horizontal
 clipping of the Mines card were found. Private browser scripts/results
 are ignored under `local/audits/`. Other final cross-surface reference
 acceptance items remain open.
+
+## 1.0 five-card cross-surface reference browser acceptance
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** Headless Chromium exercised
+IMP-2, Stealth, Deployable Cover, TinBot, and Kobra Pistol (including its
+CC-mode rules) on 1440 px desktop and 390/320 px narrow layouts. A fresh
+private `rules.db` was built from the current curated sources; the tracked
+0.10.1 release database intentionally does not yet contain all current
+Stealth/TinBot explanations. No release database was replaced.
+
+**93/93 browser checks passed**: each card rendered its relevant conditions;
+rule and Trait links were focusable and activated using Enter; the Kobra CC
+Attribute link opened `Glossary#attribute-cc`; and reviewed source citation
+links opened the intended URL in a separate tab. External HTTPS responses
+were stubbed to test navigation deterministically, **not** third-party
+availability or the accuracy of a live remote page. The pinned N5.3 Wiki
+revision citations were checked separately from legacy, Army-supplied Wiki
+URLs. No JavaScript exceptions, horizontal overflow, or narrow-card clipping
+were observed. The 320 px screenshots of the longer Deployable Cover,
+TinBot, and Kobra CC cards were inspected for readability.
+
+The private verifier, result JSON, and screenshots remain Git-ignored under
+`local/audits/final-reference-cards-browser/`. This completes only the
+five-card browser acceptance in `docs/TODO.md`. Fireteam interactions,
+scenario selection/maps, and Visibility Zone/Immunity input-method
+acceptance remain open; this was not a full release/UI audit.
