@@ -2374,6 +2374,12 @@ is the target of a BS Attack through a Zero Visibility Zone. This does
 not change the standalone MSV1 LoF -6 MOD or imply a general Smoke,
 Eclipse, Visibility Zone or MOD-cancellation evaluator.
 
+REA-012 browser acceptance (2026-10-15) verified these authored
+boundaries on Smoke, Eclipse, Multispectral Visor, Reflective and Dodge
+at 1440/390/320 px with 33/33 content/navigation checks. The only
+observed overflow, 6 px in the shared Ammunition breadcrumb at 320 px,
+predates this reference and is separately tracked for final layout work.
+
 Sources: English N5 v5.3, pp. 64 and 66 (including the Smoke example),
 MSV p. 125; Spanish N5 v5.3, pp. 64-65 and 130; FAQ v0.1, p. 2
 (for the separately scoped Sixth Sense/MSV1 interaction).

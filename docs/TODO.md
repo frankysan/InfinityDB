@@ -665,9 +665,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       layout and Tab/Enter keyboard navigation with visible focus.
       Kept all source cases unchanged; no unsupported Plasma/Enhanced
       case or attack evaluator was added.
-    - [ ] **REA-012 — Smoke/Eclipse:** Review browser Clarifications and
-      examples for rolled LoF opposition, MSV/Reflective exceptions,
-      unopposed placement, Dodge, and Criticals.
+    - [x] **REA-012 ? Smoke/Eclipse:** Accepted the existing linked
+      player-facing examples for rolled LoF opposition, multiple attackers,
+      normal Dodge, unopposed placement, Smoke Criticals, and the
+      Reflective/MSV exception. Confirmed source provenance and unchanged
+      zone semantics; Chromium passed 33/33 content/navigation checks at
+      1440/390/320 px. At 320 px Smoke and Eclipse retain an independently
+      verified, pre-existing 6 px breadcrumb overflow tracked by the final
+      shared-layout acceptance item.
     - [ ] **REA-013 — AP, E/M, and T2:** Verify the Ammunition pages explain
       rounding up halved defenses and identifying original-hit versus
       extra-Critical T2 dice before rolling; typed values remain unchanged.

@@ -861,7 +861,6 @@ release acceptance or certification of every peripheral gameplay scenario.
 The N5.3 pp. 106-108 behavior is represented as linked explanations; Army
 Peripheral relationships and execution/evaluation logic were not changed.
 
-
 ## 1.0 Hacking baseline REA-018 browser acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** The six published Hacking Area,
@@ -884,7 +883,6 @@ The source-based API regression assertions remain in
 `tests/test_rules_database.py`; ignored local browser evidence is
 stored under `local/audits/rea018-browser/`. Related cross-source
 scope and Program-specific cases remain independent 1.0 audit work.
-
 
 ## 1.0 Negative Feedback REA-019 browser acceptance
 
@@ -912,7 +910,6 @@ under `local/audits/rea019-browser/` and `local/audits/`.
 This is bounded reference acceptance, not generalized NFB interaction
 simulation.
 
-
 ## 1.0 Special Dice REA-021 browser acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** The public Special Dice General
@@ -935,7 +932,6 @@ Private evidence is under `local/audits/rea021-browser/` and
 `local/audits/rea021-source-scan-2026-10-14.txt`. The unresolved
 Spanish Fireteam maximum-dice wording conflict remains independently
 tracked under REA-041. No general dice or Burst evaluator was added.
-
 
 ## 1.0 Recovery Kits and Disposable REA-022 browser acceptance
 
@@ -963,7 +959,6 @@ source extracts remain in `local/audits/rea022-browser/` and other
 ignored `local/audits/` files. This is a reviewed reference baseline;
 it does not add a general dice or recovery outcome evaluator.
 
-
 ## 1.0 REA-023 placement geometry browser acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Canonical Place Deployable,
@@ -988,7 +983,6 @@ Focused tests live in `tests/test_rules_database.py`. Private source
 excerpts, rendered screenshots and browser results remain ignored under
 `local/audits/` and `local/audits/rea023-browser/`.
 No runtime geometry simulation or generic rule evaluator was added.
-
 
 ## 1.0 REA-024 BioWeapon and Viral Mine acceptance
 
@@ -1026,7 +1020,6 @@ N/BTS/one-roll property mapping. No general ammunition-combination
 or Immunity evaluator was added. Private source extracts and browser
 results stay under `local/audits/`.
 
-
 ## 1.0 REA-020 Fireteam ownership and integrity acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** The shared Fireteam quick
@@ -1055,7 +1048,6 @@ under `local/audits/rea020-browser/` and `local/audits/`.
 This is source and reference-card acceptance; the separate Fireteam
 Army selection, Wildcard and keyboard/touch workflow remains in
 the final 1.0 acceptance checklist.
-
 
 ## 1.0 REA-027 Flash Pulse source-conflict acceptance
 
@@ -1098,7 +1090,6 @@ browser images and results are Git-ignored under `local/audits/`
 and `local/audits/rea027-browser/`. No game mechanics, imported
 weapon profiles, or general Immunity algorithm were changed.
 
-
 ## 1.0 REA-028 Kobra Pistol source-conflict acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** The Kobra Pistol shared
@@ -1134,7 +1125,6 @@ Private PDF/HTML extractions, 320 px screenshots and browser results
 remain in `local/audits/` and `local/audits/rea028-browser/`.
 No raw source archives, new universal rule evaluator, or guessed
 profile correction were added.
-
 
 ## 1.0 REA-030 FAQ scope and selected applicability acceptance
 
@@ -1173,7 +1163,6 @@ for authoritative clarification. Private extracts, screenshots and
 results are retained under Git-ignored `local/audits/` and
 `local/audits/rea030-browser/`.
 
-
 ## 1.0 TinBot REA-039 browser acceptance
 
 **Verified 2026-10-14, `dev/v1.0.0`.** N5.3 p. 127 and the six
@@ -1192,7 +1181,6 @@ reference; they are not standalone Equipment URL routes.
 Private results, screenshots and the verification script are Git-ignored
 under `local/audits/rea039-browser/` and `local/audits/`.
 This does not imply a generic MOD combination/Fireteam evaluator.
-
 
 ## 1.0 Request SpecBall REA-040 browser acceptance
 
@@ -1216,7 +1204,6 @@ No JavaScript errors or page-level horizontal overflow were observed.
 rules DB are in `local/audits/`. This is bounded reference/browser
 acceptance, not a complete Spec-Ops Chart/list builder or a rule engine.
 
-
 ## 1.0 Fireteam Special Dice discrepancy (REA-041)
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Compared official English N5.3
@@ -1238,7 +1225,6 @@ unchanged Fireteam Level 2 bonus. Private browser verifier, 320 px
 screenshots, result JSON and temporary rules DB remain under ignored
 `local/audits/`. Official erratum remains unresolved; the browser does
 not silently apply a new Fireteam rolled-dice cap.
-
 
 ## 1.0 Dodge (ARM+3) source reconciliation (REA-042)
 
@@ -1264,7 +1250,6 @@ local temporary DB remain under Git-ignored `local/audits/`.
 This does not imply a full simultaneous combat resolver or an
 unverified official erratum.
 
-
 ## 1.0 Doctor/Engineer direct versus delegated target scope (REA-038)
 
 **Reviewed 2026-10-14, `dev/v1.0.0`.** Checked the N5.3 English
@@ -1288,7 +1273,6 @@ screenshots, generated rules DB and results are private and ignored in
 `local/audits/`. A future official ruling or explicit project decision
 is required to adjudicate non-Allied direct targeting fully.
 
-
 ## 1.0 Armed Turret Silhouette source conflict (REA-037)
 
 **Verified 2026-10-14, `dev/v1.0.0`.** English N5.3 detailed p. 70
@@ -1307,7 +1291,6 @@ conflict note in `.rules-source-note`, absence of JS errors and
 horizontal overflow. Screenshots and private verification outputs
 remain ignored under `local/audits/`. The separate REA-045 E/Mitter
 Saving Roll issue is not altered by this acceptance.
-
 
 ## 1.0 Armed Turret E/Mitter Saving Roll discrepancy (REA-045)
 
@@ -1335,7 +1318,6 @@ against the preexisting release rules DB and is already recorded
 under REA-024 TODO; not introduced by this change. Screenshots and
 diagnostics remain private in Git-ignored `local/audits/`.
 
-
 ## 1.0 Fireteam Level 3 printed-example disagreement (REA-034)
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Both English N5.3 p. 138 and
@@ -1357,7 +1339,6 @@ horizontal overflow. Private script, result JSON, and 320 px screenshot
 remain Git-ignored under `local/audits/`.
 The outstanding official erratum remains an external decision.
 
-
 ## 1.0 Engineer recovery and target eligibility (REA-001)
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Compared English N5.3 Engineer
@@ -1377,7 +1358,6 @@ semantic links. No JavaScript errors or horizontal overflow. Private
 acceptance script, screenshots and result JSON are Git-ignored under
 `local/audits/`. General recovery simulation and an official ruling
 on non-Allied direct treatment are outside this acceptance scope.
-
 
 ## 1.0 Doctor recovery and scoped exceptions (REA-002)
 
@@ -1401,7 +1381,6 @@ no JavaScript page errors or horizontal overflow. Private script,
 `local/audits/`. This is reference acceptance, not a general healing
 simulation or complete non-Allied eligibility adjudication.
 
-
 ## 1.0 Intuitive Attack source and browser acceptance (REA-003)
 
 **Reviewed 2026-10-14, `dev/v1.0.0`.** Compared English N5.3 p. 49,
@@ -1417,7 +1396,6 @@ canonical Trait link and both printed-page citations. The browser
 acceptance script and locally rebuilt rules database are private in
 `local/audits/`; tests include desktop and 390/320 px widths and
 semantic navigation to the shared roll and placement references.
-
 
 ## 1.0 Continuous Damage Critical and Immunity acceptance (REA-004)
 
@@ -1441,7 +1419,6 @@ links. No JS errors or page-level horizontal overflow. Verification
 script, screenshots and results remain ignored in `local/audits/`.
 This acceptance is not a complete damage or Immunity simulator.
 
-
 ## 1.0 BS Weapon (WIP) named Skill restrictions (REA-005)
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Compared English N5.3 BS Weapon
@@ -1460,7 +1437,6 @@ Shock Ammunition and Targeted links. No JS errors or horizontal overflow.
 Private script, screenshots and result JSON are kept under ignored
 `local/audits/`. No exact attack variants, new restriction edges or
 gameplay changes were introduced.
-
 
 ## 1.0 Controlled Jump declaration and cancellation (REA-006)
 
@@ -1486,7 +1462,6 @@ horizontal overflow. Private verifier, screenshots and results remain
 under Git-ignored `local/audits/`. REA-007 keeps its separate
 Speedball-specific reference acceptance task.
 
-
 ## 1.0 Speedball FAQ exclusion and PH 15 example (REA-007)
 
 **Verified 2026-10-14, `dev/v1.0.0`.** Official English N5.3 Request
@@ -1506,7 +1481,6 @@ and 1440/390/320 px overflow. **18/18 Chromium checks passed** with
 no JavaScript errors or page-level horizontal overflow. Private verifier,
 screenshots, result JSON and rebuilt rules DB stay Git-ignored in
 `local/audits/`.
-
 
 ## 1.0 simultaneous recovery and re-infliction (REA-009)
 
@@ -1533,7 +1507,6 @@ release rules DB and locally rebuilt rules DB. The Order, Engineer,
 Doctor and IMM-A pages had no overflow at any checked width. The
 private verifier, screenshots and diagnostics live under ignored
 `local/audits/`. No game-state timing engine was introduced.
-
 
 ## 1.0 general Immunity and printed examples (REA-010)
 
@@ -1563,7 +1536,6 @@ local rules DB. **30/30 Chromium content/navigation checks passed** with
 no JavaScript errors or page horizontal overflow. The private verifier,
 screenshots and results remain in ignored `local/audits/`.
 
-
 ## 1.0 reviewed Immunity interactions browser acceptance (REA-011)
 
 **Verified 2026-10-15, `dev/v1.0.0`.** The shared Immunity-case renderer
@@ -1588,3 +1560,29 @@ and no synthesized Plasma example. Two existing API test assertions were
 brought back into sync with prior changes: the REA-010 Immunity
 ordinary-roll wording and the fourth Dodge clarification added earlier.
 No renderer, source facts or rule mechanics needed changing.
+
+## 1.0 Smoke and Eclipse browser acceptance (REA-012)
+
+**Verified 2026-10-15, `dev/v1.0.0`.** Official English N5.3 p. 66
+requires a rolled enemy Attack and crossing LoF to oppose Smoke
+placement; the user must win every applicable Face to Face Roll, while
+an affected enemy Dodge is Normal and Smoke Critical adds no effect.
+English p. 64 makes Eclipse's Reflective exception apply to qualifying
+MSV attacks through its zone, without overriding unopposed placement
+or the ordinary Smoke rules. MSV Levels (p. 125) remain independent.
+The maintained clarifications and visibility-zone fact objects were
+already present, with cited EN/ES N5.3 source pages and shared links.
+
+Expanded the published/API regression test to assert the exact
+rolled-LoF, multi-opponent, Critical, Dodge, unopposed, MSV/Reflective
+and zone-fact branches. Headless Chromium against a newly built rules
+DB passed **33/33** render/navigation checks at 1440, 390 and 320 px
+covering the Smoke, Eclipse, MSV, Reflective and Dodge references,
+including cross-links to the Poor Visibility glossary entry.
+No JavaScript errors were observed. A known **6 px** breadcrumb
+`catalog-tag` overflow affects Smoke and Eclipse at 320 px; it
+reproduced identically in both the existing release and rebuilt rules
+DBs. This is already tracked for the shared reference layout, not
+claimed to be resolved by REA-012. Private acceptance script,
+screenshots and result JSON remain ignored under `local/audits/`.
+No game mechanics, source data or frontend renderer were modified.

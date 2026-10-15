@@ -811,6 +811,7 @@ stored or displayed: its ordinary ARM+BTS profile remains separate.
 
 Headless Chromium against a freshly rebuilt local rules DB accepted
 all five cases at desktop (1440 px) and narrow widths (390/320 px):
+
 - Flash Pulse/BTS, including the failed BTS save, Stunned, Non-Lethal
   exception, and **explicit source** evidence label;
 - Enhanced plus Vulnerability (Viral), scoped to Viral in the **weapon
@@ -869,6 +870,43 @@ remain unchanged and no general attack/roll evaluator was added. Primary
 English and Spanish N5.3 PDF citations are included. Source-specific Sixth
 Sense/MSV1 interactions (REA-019) and all scenery geometries remain separate.
 Browser acceptance is pending.
+
+**Browser acceptance (2026-10-15): Resolved; no new mechanics or curated
+text required.** The 2026-10-10 implementation follow-up already
+superseded the initial finding: both `ammunition:smoke` and
+`ammunition:eclipse` publish three maintained clarifications with shared
+semantic links and separate `facts.visibilityZone` properties. Direct
+source review of official English N5.3 pp. 64, 66 and 125 confirms:
+
+- Ordinary Smoke opposes only an enemy Attack requiring a Roll and LoF
+  through its Template's Zero Visibility Zone; an enemy shooter without
+  crossing LoF makes a Normal Roll, and a Visor user is not opposed.
+- Smoke must win **every** applicable Face to Face Roll to leave its
+  Template; an unopposed failure removes it. Smoke Critical adds no
+  effect beyond winning opposition. An enemy Dodge within the Template
+  makes a Normal Roll, not Face to Face against Smoke.
+- Eclipse otherwise follows Smoke but Reflective explicitly allows
+  opposition to qualifying MSV attacks crossing its zone. Once
+  established it blocks LoF even for MSV, irrespective of Level, and
+  prevents the Visor reducing the relevant Poor Visibility MOD.
+
+The real player-facing pages for Smoke, Eclipse, MSV, Reflective and
+Dodge passed **33/33 Chromium content/navigation checks** at 1440,
+390 and 320 px. Their required explanations, cross-references and
+linked glossary Poor Visibility term were visible, with no JavaScript
+errors. The sole narrow-layout issue was the **pre-existing 6 px
+`catalog-tag`/breadcrumb overflow** on Smoke/Eclipse at 320 px;
+release and rebuilt rules databases reproduce it identically. It is
+already tracked under the separate shared-layout acceptance checklist
+in `docs/TODO.md`, not an Ammunition rule defect.
+
+An extended API regression protects exact rolled-LoF, MSV, Dodge,
+Critical, all-opponents, unopposed and zone-expiry branches. No
+new roll evaluator, changes to scenery geometry or unverified broad
+protection from attacks were introduced. The FAQ's separately scoped
+Sixth Sense/MSV1 case remains independent (REA-019/REA-030).
+This closes **REA-012 reference acceptance**, not final shared-layout
+acceptance.
 
 ### REA-013 - AP rounding and T2 die identification are missing player actions
 
@@ -1573,6 +1611,7 @@ from Multispectral Visor. MSV1 alone retains its printed -6; no universal
 visibility or MOD cancellation is inferred.
 
 **ITS-specific answers — scoped, not generalized:**
+
 - FAQ printed p. 3: Telemetry and HVT: Designation Classified Objectives
   use the required successful Spotlight Rolls, without needing Targeted State
   to be entered. Targeted State retains its general rules; its source note

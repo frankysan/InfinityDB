@@ -1068,6 +1068,36 @@ def test_smoke_eclipse_opposition_and_msv_exception_reach_api(
     assert "Once established" in eclipse_text
     assert "[[term:poor-visibility-zone|Poor Visibility]] MOD" in eclipse_text
     assert "[[trait:reflective|Reflective]]" in eclipse_text
+    # REA-012: presence is not enough; protect each opponent/ARO branch,
+    # the distinct MSV outcome, Critical/Dodge resolution and zone facts.
+    for fragment in (
+        "whose rolled Attack has LoF crossing",
+        "whose LoF does not cross the Template makes an unopposed Roll",
+        "win every applicable Face to Face Roll",
+        "A Critical has no additional effect",
+        "enemy [[skill:dodge|Dodge]] reaction",
+        "empty point is an unopposed Roll",
+        "remove the Template at the Effects step",
+    ):
+        assert fragment in smoke_text, fragment
+    for fragment in (
+        "Attack requiring a Roll whose LoF crosses",
+        "[[skill:dodge|Dodge]] inside the Template is also an unopposed Roll",
+        "can oppose a rolled Attack by an enemy using a "
+        "[[equipment:multispectral-visor|Multispectral Visor]]",
+        "[[trait:reflective|Reflective]] zone",
+        "blocks LoF even for Visors, regardless of Level",
+        "must win every applicable Face to Face Roll",
+        "[[term:poor-visibility-zone|Poor Visibility]] MOD",
+    ):
+        assert fragment in eclipse_text, fragment
+    for record, visor in ((smoke, "can-draw-lof"), (eclipse, "blocked")):
+        zone = record["facts"]["visibilityZone"]
+        assert zone == {
+            "visibility": "zero", "template": "circular", "height": "infinite",
+            "expires": "start-of-states-phase", "multispectralVisor": visor,
+        }
+        assert "ammunitionResolution" not in record["facts"]
 
 
 def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
