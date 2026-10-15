@@ -4632,6 +4632,64 @@ Sources: N5 FAQ v0.1 English and Spanish,
 `data/pdf/faq/esp-faqs-n5-v0-1.pdf`; comparison to the
 pinned English v0.0 PDF under `data/pdf/faq/`.
 
+### RS-FAQ-V00-003 — Original FAQ identity persists through v0.1 republication
+
+**Classification:** source-native historical provenance plus current applicability,
+reviewed 2026-10-15.
+
+Eight general clarifications occur in both official English FAQ v0.0 and
+English/Spanish v0.1. The same ruling identity is reused. The
+`originalPublication` citation points to historical English v0.0;
+`selectedCitation` points to current English v0.1, and the Spanish
+v0.1 citation retains its own printed page. These are corroborating
+sources for one ruling, not independent mechanics or supersession events:
+
+- Prone eligibility: `state:prone` (v0.0 EN p. 1;
+  v0.1 EN/ES p. 1). Movement Label allows entry/cancellation,
+  except Jump and Berserk.
+- Vaulting with Climb/Jump: `skill:climb` and `skill:jump`
+  (v0.0 EN p. 1; v0.1 EN/ES p. 1). Both use general
+  Movement vaulting rules.
+- Direct Template corners: `trait:direct-template`
+  (v0.0 EN p. 1; v0.1 EN/ES p. 1). Secondary targets cannot
+  be hit by firing around corners beyond the attacker's LoF.
+- Occupied Place Deployable position: `skill:place-deployable`
+  (v0.0 EN p. 1; v0.1 EN/ES p. 2). Reposition legally
+  or lose the Deployable; rolled Deployable weapons are included.
+- Multiple Surprise Attack users: `skill:surprise-attack`
+  (v0.0 EN p. 1; v0.1 EN/ES p. 2). MODs are
+  applied separately, not stacked.
+- Sixth Sense plus MSV1: `skill:sixth-sense` and
+  `equipment:multispectral-visor` (v0.0 EN p. 2;
+  v0.1 EN/ES p. 2). The combined user ignores the -6
+  Zero Visibility LoF MOD when attacked through that zone.
+- Excess Protheion failed Saves: `skill:protheion`
+  (v0.0 EN p. 2; v0.1 EN/ES p. 2). No additional
+  benefit beyond the failures required for Dead State.
+- Camouflage (1 Use): `skill:camouflage` and
+  `skill:infiltration` (v0.0 EN p. 2; v0.1 EN/ES p. 2).
+  Deployment as Model does not expend the use, but
+  failing Infiltration after attempting Marker deployment does.
+
+The original v0.0 source's `2025-10-15` date is a version-associated
+official update anchor from the source history; the PDF creation
+metadata agrees, but its exact release/upload day has not been
+independently verified. The current 2026-09-01 v0.1 date similarly
+remains the documented release-era anchor. Do not promote either
+to a precision claim in the browser. The browser presents the
+selected v0.1 source plus an explicit earlier v0.0 origin/date anchor.
+All eight carry-forwards are currently scoped to N5.3 from the
+v0.1 source, **not** automatically to prior gameplay revisions.
+
+Remaining original v0.0 and ITS-specific questions are not covered
+by this batch; ITS rulings require their own scenario/season scopes.
+
+Sources: pinned FAQ PDFs
+`data/pdf/faq/n5-faqs-v0-0-en.pdf`,
+`data/pdf/faq/n5-faqs-v0-1-en.pdf`, and
+`data/pdf/faq/esp-faqs-n5-v0-1.pdf`;
+source chronology in `docs/n5-source-history.md`.
+
 ## ITS FAQ
 
 ### RS-FAQ-SCOPE-001 — Ruling publication identity and ITS applicability are separate axes

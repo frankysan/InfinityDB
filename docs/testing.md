@@ -1939,6 +1939,38 @@ unpublished pending English/Spanish example reconciliation. This
 batch does not assert complete FAQ v0.0, ITS, or historical
 cross-post inventory coverage.
 
+## 1.0 FAQ v0.0 carry-forward provenance and presentation
+
+**Verified 2026-10-15 on `dev/v1.0.0`.** Eight additional
+N5 FAQ entries were compared against English FAQ v0.0,
+English FAQ v0.1, and Spanish FAQ v0.1, bringing the authored
+current FAQ collection to **16**. The carried-forward records preserve
+their original v0.0 printed pages/version separately from the selected
+current v0.1 source and independent Spanish v0.1 citations. No canonical
+rules, Skills or Army source data are rewritten.
+
+Source boundaries include the separate English v0.0/v0.1 printed
+pages for Place Deployable and Surprise Attack (1/2), the
+historically associated but not independently confirmed
+2025-10-15 v0.0 source date, exact N5.3-only current
+applicability, and no automatic ITS season applicability.
+Eight parameterized regressions verify source triplets,
+original/current versions, applicable dates and revisions;
+an additional count test ensures 8 current v0.1-origin and
+8 carried v0.0-origin identities without duplicates.
+
+Private headless-browser checker
+`local/audits/verify_faq_carried_forward_browser.py` tested
+**33/33** topic views (eight primary reference pages plus three
+additional multi-topic/cross-link pages, each at 1440/390/320 px),
+including the selected v0.1 citation, earlier v0.0 source label, and
+two separate rulings on Jump without duplicated identities;
+no JavaScript errors or horizontal overflow.
+
+**Limit:** This batch does not complete the original v0.0
+inventory, season-scoped ITS rulings, historical FAQ edition
+replay, or the unresolved bilingual Fireteam-type example.
+
 ## 1.0 Visibility Zone and Ammunition/Immunity browser acceptance
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** Headless Chromium used a freshly

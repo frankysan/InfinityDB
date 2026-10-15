@@ -506,17 +506,25 @@ The default read model does not replay superseded historical collections;
 historical publication selection and verification of ITS season revisions
 not yet present in the corpus remain future work.
 
-Eight source-reviewed rulings now live in `rules/n5-faq-v0.1.json`.
-Two initial examples concern Hacking Device Firewall and undeployed
-Peripherals (Ancillary) counted as Killed; the latter is conservatively
-shown only on Annihilation, a *subset* of its broader FAQ wording.
-The additional six clarify Skill declaration details and target position,
-fired Deployables on vertical surfaces, Peripheral declarations when a
-Controller cannot act, Camouflaged Markers in Total Cover, Special Dice in
-Coordinated Orders, and Fireteam minimums after creation. Each ruling
-retains its English and Spanish FAQ v0.1 printed-page evidence and an
-explicitly selected English citation. The differing pagination of the
-translations is preserved; source text is not duplicated in base rules.
+Sixteen source-reviewed rulings now live in `rules/n5-faq-v0.1.json`.
+Eight were introduced in FAQ v0.1: Hacking Device Firewall, undeployed
+Peripherals (Ancillary) counted as Killed (initially Annihilation only),
+Skill declaration details, fired Deployables on vertical surfaces,
+Peripheral declarations, Camouflaged Markers in Total Cover, Special Dice
+in Coordinated Orders, and Fireteam minimums after creation.
+
+Eight more were **first recorded in official English FAQ v0.0** and
+carried into v0.1: Prone entry restrictions; vaulting while Climbing or
+Jumping; Direct Template line-of-fire limits; occupied Place Deployable
+locations; multiple Surprise Attack MODs; Sixth Sense with MSV1 in Zero
+Visibility; Protheion overkill; and Camouflage (1 Use) after Infiltration.
+These eight retain three citations **per ruling**: original v0.0 English
+at its own printed page, and current v0.1 English/Spanish at their
+respective actual printed pages. `originalPublication` names v0.0,
+while `selectedCitation` names reviewed current v0.1; no new identity
+is created merely because a publication repeats a ruling. The v0.0
+source date uses the 2025-10-15 version-associated official update
+anchor, not an independently verified PDF upload/publication day.
 
 The shared **FAQ clarifications** cards appear beside affected Equipment,
 Scenario, Skill, Trait, State, General Rule, and Fireteam references.
@@ -531,9 +539,11 @@ verified PDF publication day.
 after member loss* examples do not align (the Spanish Haris example
 contains inconsistent member counts). Do not publish a consolidated
 answer for that example without resolving/documenting the discrepancy.
-Further v0.0-origin and ITS rulings need exact historical provenance,
-season-context review and wider topic coverage. Synthetic test rulings
-are never published. FAQ records remain distinct from base definitions.
+The remaining v0.0-origin and ITS-scoped FAQ entries still need
+source-by-source review, historical identity and applicability checks.
+No general-rule cards are created from ITS-only answers without a
+verified season context. Synthetic test rulings are never published.
+FAQ records remain distinct from base definitions.
 
 Collections that contain scenario definitions also require `scenarioCollection`. Its `id` is the
 stable scenario-set identity (for example `n5-core`), `revision` is the exact revision within that

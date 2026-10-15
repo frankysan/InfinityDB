@@ -37,9 +37,81 @@
       "pageCount": 5,
       "authority": "primary",
       "url": "https://experience.corvusbelli.com/en/infinity/resources"
+    },
+    {
+      "id": "n5-faq-v0.0-en-pdf",
+      "kind": "pdf",
+      "title": "N5 FAQs ? English (historical)",
+      "version": "0.0",
+      "publishedDate": "2025-10-15",
+      "localPath": "data/pdf/faq/n5-faqs-v0-0-en.pdf",
+      "pageCount": 4,
+      "authority": "primary",
+      "url": "https://downloads.corvusbelli.com/infinity/rules/infinity-faq-n5-en-v5.0.0.pdf"
     }
   ],
   "records": [
+    {
+      "id": "faq-ruling:camouflage-one-use-infiltration-failure",
+      "kind": "faq-ruling",
+      "name": "Camouflage (1 Use) and failed Infiltration",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "Can Camouflage (1 Use) be used later after deploying as a Model or failing Infiltration?",
+        "answer": "Deploying as a Model preserves the ability to enter Camouflaged State later. Attempting to deploy as a Camouflaged Marker and failing an Infiltration Roll uses up the one use, so the Trooper cannot enter the State later.",
+        "topicIds": [
+          "skill:camouflage",
+          "skill:infiltration"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
     {
       "id": "faq-ruling:camouflaged-marker-total-cover",
       "kind": "faq-ruling",
@@ -149,6 +221,66 @@
           "page": 2
         },
         "selectionReason": "Official English FAQ v0.1 selected and independently cross-checked against the corresponding Spanish FAQ v0.1 answer; no material conflict identified.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:direct-template-secondary-target-los",
+      "kind": "faq-ruling",
+      "name": "Direct Template Weapons and corners",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Can a Direct Template Weapon hit secondary targets around corners outside the attacker?s Line of Fire?",
+        "answer": "No. A Direct Template Weapon cannot fire around a corner to hit a secondary target that is outside the firing Trooper?s Line of Fire.",
+        "topicIds": [
+          "trait:direct-template"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
         "conflictingCitations": [],
         "supersedes": []
       }
@@ -379,6 +511,249 @@
       }
     },
     {
+      "id": "faq-ruling:place-deployable-space-occupied",
+      "kind": "faq-ruling",
+      "name": "Place Deployable position occupied before Conclusion",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "What if another Trooper occupies the declared Place Deployable location before the Order concludes?",
+        "answer": "The Trooper declaring Place Deployable may place the Deployable in another legal position. If no legal placement is possible, the Deployable is lost. The same applies to successful weapon attacks that place a Deployable, including Disco Ballers, Pitchers and Drop Bears (BS Mode).",
+        "topicIds": [
+          "skill:place-deployable"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:prone-movement-label",
+      "kind": "faq-ruling",
+      "name": "Prone State and Movement declarations",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Which Skills and AROs allow a Trooper to enter or cancel Prone State?",
+        "answer": "A Trooper can enter or cancel Prone State through a Skill or ARO with the Movement Label, except Jump and Berserk.",
+        "topicIds": [
+          "state:prone",
+          "skill:jump",
+          "skill:berserk"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:protheion-excess-saving-rolls",
+      "kind": "faq-ruling",
+      "name": "Protheion and excess failed Saving Rolls",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "Does Protheion benefit from failed Saving Rolls beyond those needed to put its target into Dead State?",
+        "answer": "No. Further failed Saving Rolls have no effect after the target enters Dead State and provide no additional benefit to the Protheion user.",
+        "topicIds": [
+          "skill:protheion"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:sixth-sense-msv1-zero-visibility",
+      "kind": "faq-ruling",
+      "name": "Sixth Sense with Multispectral Visor Level 1",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "How do Sixth Sense and Multispectral Visor Level 1 interact with a Zero Visibility Zone?",
+        "answer": "When a Trooper with both Sixth Sense and Multispectral Visor Level 1 is targeted by a BS Attack through a Zero Visibility Zone, they ignore the -6 MOD for drawing Line of Fire through the zone.",
+        "topicIds": [
+          "skill:sixth-sense",
+          "equipment:multispectral-visor"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 2
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
       "id": "faq-ruling:skill-declaration-target-position",
       "kind": "faq-ruling",
       "name": "Skill declaration details and target position",
@@ -430,6 +805,66 @@
           "page": 1
         },
         "selectionReason": "Official English FAQ v0.1 selected and independently cross-checked against the corresponding Spanish FAQ v0.1 answer; no material conflict identified.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:surprise-attack-multiple-users",
+      "kind": "faq-ruling",
+      "name": "Surprise Attack MODs from multiple Troopers",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 2
+        }
+      ],
+      "facts": {
+        "question": "Do Surprise Attack MODs from multiple attacking Troopers stack on one target?",
+        "answer": "No. Each Trooper?s Surprise Attack MOD applies separately, including during a Coordinated Order or when a Controller and Peripheral attack the same target.",
+        "topicIds": [
+          "skill:surprise-attack"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 2
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
         "conflictingCitations": [],
         "supersedes": []
       }
@@ -490,6 +925,67 @@
           "page": 4
         },
         "selectionReason": "English FAQ v0.1 primary text cross-checked against Spanish FAQ v0.1 at the same printed page; no contradictory interpretation identified.",
+        "conflictingCitations": [],
+        "supersedes": []
+      }
+    },
+    {
+      "id": "faq-ruling:vault-during-climb-and-jump",
+      "kind": "faq-ruling",
+      "name": "Vaulting while Climbing or Jumping",
+      "summary": "Carried-forward clarification first recorded in N5 FAQ v0.0, retained in v0.1.",
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "current"
+        ]
+      },
+      "composition": {
+        "role": "definition"
+      },
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-10-15"
+      },
+      "citations": [
+        {
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        {
+          "sourceId": "n5-faq-v0.1-es-pdf",
+          "page": 1
+        }
+      ],
+      "facts": {
+        "question": "Can a Trooper vault while Climbing or Jumping?",
+        "answer": "Yes. Climb and Jump follow the General Movement Rules, including vaulting.",
+        "topicIds": [
+          "skill:climb",
+          "skill:jump"
+        ],
+        "applicability": [
+          {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01"
+          }
+        ],
+        "originalPublication": {
+          "collectionId": "n5-faq-v0.0",
+          "sourceId": "n5-faq-v0.0-en-pdf",
+          "version": "0.0",
+          "publishedDate": "2025-10-15",
+          "page": 1
+        },
+        "selectedCitation": {
+          "sourceId": "n5-faq-v0.1-en-pdf",
+          "page": 1
+        },
+        "selectionReason": "Answer first located in official English N5 FAQ v0.0; matching meaning independently checked in current English and Spanish v0.1. 2025-10-15 denotes the version-associated official update date, not an independently verified original PDF publication day.",
         "conflictingCitations": [],
         "supersedes": []
       }

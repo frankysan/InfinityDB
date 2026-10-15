@@ -1101,10 +1101,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     flatten it into the base-rule summary. This preserves the distinction
     between a rule and a later clarification, and permits an answer to be
     superseded cleanly.
-    - [ ] Give each ruling a canonical identity independent of wiki page
-      placement. Store the original FAQ publication version/date separately from
-      current rules/ITS-season/scenario applicability so cross-posted or
-      carried-forward rulings are linked rather than duplicated.
+    - [x] Give each ruling a canonical identity independent of wiki page
+      placement. Store original FAQ source/version/page separately from
+      current N5/ITS-season/scenario applicability, so retained and
+      carried-forward citations share one ruling identity. The first eight
+      v0.0-origin examples now exercise that contract.
   - [ ] Prioritize links to features already represented by the app: deployment
     and private-information handling; BS Attack/MOD and template behavior;
     hacking Firewall; Marker, Camouflage, Peripheral, and State interactions;
@@ -1150,6 +1151,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     Haris example has inconsistent member counts. Then continue the
     remaining v0.0-origin, carried-forward, and ITS-scoped FAQ inventory.
     Do not infer original publication version from current PDF occurrence.
+  - [x] Reconcile eight general-gameplay **FAQ v0.0 carry-forwards** against
+    English v0.0 and English/Spanish v0.1: Prone, vaulting, Direct Template
+    targeting, occupied Deployable placement, Surprise Attack MODs,
+    Sixth Sense/MSV1, Protheion, and Camouflage (1 Use). Persist the
+    original v0.0 citation separately from the selected v0.1 source;
+    preserve distinct printed pages and the historically associated
+    (not independently confirmed) v0.0 source date. Confirm typed
+    provenance/API and responsive browser presentation.
+  - [ ] Continue the remaining original v0.0 gameplay/ITS rulings.
+    Source-native ITS entries require a verified season/scenario publication
+    context; do not promote them to universal N5 clarifications or
+    backfill source dates from current FAQ reprints.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.

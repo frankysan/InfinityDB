@@ -55,7 +55,7 @@ export function faqRulingsSection(items) {
     if (citation) source.append(rulesCitationNode(citation));
     else source.append("Source page unavailable");
     if (publication.version !== selected.version) {
-      source.append(` · originally published v${publication.version} on ${publication.publishedDate}`);
+      source.append(` · first documented v${publication.version} (date anchor ${publication.publishedDate})`);
     }
     card.append(source);
     group.append(card);

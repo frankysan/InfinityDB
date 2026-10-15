@@ -442,14 +442,30 @@ def test_published_faq_pilot_retains_selected_and_spanish_source_evidence(
         "faq-ruling:camouflaged-marker-total-cover",
         "faq-ruling:coordinated-order-special-dice",
         "faq-ruling:fireteam-required-member-lost",
+        "faq-ruling:prone-movement-label",
+        "faq-ruling:vault-during-climb-and-jump",
+        "faq-ruling:direct-template-secondary-target-los",
+        "faq-ruling:place-deployable-space-occupied",
+        "faq-ruling:surprise-attack-multiple-users",
+        "faq-ruling:sixth-sense-msv1-zero-visibility",
+        "faq-ruling:protheion-excess-saving-rolls",
+        "faq-ruling:camouflage-one-use-infiltration-failure",
     }
     for record in records:
         assert record["review"]["status"] == "reviewed"
-        assert record["facts"]["originalPublication"]["version"] == "0.1"
-        assert record["facts"]["originalPublication"]["publishedDate"] == "2026-09-01"
-        assert {citation["source_id"] for citation in record["citations"]} == {
-            "n5-faq-v0.1-en-pdf", "n5-faq-v0.1-es-pdf",
-        }
+        origin = record["facts"]["originalPublication"]
+        sources = {citation["source_id"] for citation in record["citations"]}
+        if origin["version"] == "0.0":
+            assert origin["collectionId"] == "n5-faq-v0.0"
+            assert origin["publishedDate"] == "2025-10-15"
+            assert origin["sourceId"] == "n5-faq-v0.0-en-pdf"
+            assert sources == {
+                "n5-faq-v0.0-en-pdf", "n5-faq-v0.1-en-pdf", "n5-faq-v0.1-es-pdf",
+            }
+        else:
+            assert origin["version"] == "0.1"
+            assert origin["publishedDate"] == "2026-09-01"
+            assert sources == {"n5-faq-v0.1-en-pdf", "n5-faq-v0.1-es-pdf"}
         assert record["facts"]["conflictingCitations"] == []
         assert record["facts"]["supersedes"] == []
 
@@ -581,3 +597,104 @@ def test_expanded_faq_v01_topic_page_and_applicability(
     assert published_pilot.faq_rulings_for_topic(
         topic_id, rules_revision="5.2", as_of="2026-10-15",
     ) == []
+
+
+@pytest.mark.parametrize(
+    ("topic_id", "ruling", "original_page", "current_page", "spanish_page", "key_phrase"),
+    [
+        ("state:prone", "prone-movement-label", 1, 1, 1, "Jump and Berserk"),
+        ("skill:climb", "vault-during-climb-and-jump", 1, 1, 1, "vaulting"),
+        ("trait:direct-template", "direct-template-secondary-target-los",
+         1, 1, 1, "Line of Fire"),
+        ("skill:place-deployable", "place-deployable-space-occupied",
+         1, 2, 2, "lost"),
+        ("skill:surprise-attack", "surprise-attack-multiple-users",
+         1, 2, 2, "separately"),
+        ("skill:sixth-sense", "sixth-sense-msv1-zero-visibility",
+         2, 2, 2, "-6 MOD"),
+        ("skill:protheion", "protheion-excess-saving-rolls",
+         2, 2, 2, "Dead State"),
+        ("skill:camouflage", "camouflage-one-use-infiltration-failure",
+         2, 2, 2, "one use"),
+    ],
+)
+def test_v00_carried_forward_rulings_preserve_original_and_current_sources(
+    published_pilot: RulesDatabase,
+    topic_id: str,
+    ruling: str,
+    original_page: int,
+    current_page: int,
+    spanish_page: int,
+    key_phrase: str,
+) -> None:
+    result = published_pilot.faq_rulings_for_topic(
+        topic_id, rules_revision="5.3", as_of="2026-09-01",
+    )
+    assert len(result) == 1
+    item = result[0]
+    assert item["id"] == f"faq-ruling:{ruling}"
+    assert key_phrase in item["answer"]
+    assert item["selected_source"]["id"] == "n5-faq-v0.1-en-pdf"
+    assert item["selected_source"]["version"] == "0.1"
+    assert item["selected_citation"] == {
+        "sourceId": "n5-faq-v0.1-en-pdf", "page": current_page,
+    }
+    assert item["original_publication"] == {
+        "collectionId": "n5-faq-v0.0",
+        "sourceId": "n5-faq-v0.0-en-pdf",
+        "version": "0.0",
+        "publishedDate": "2025-10-15",
+        "page": original_page,
+    }
+    assert {
+        (source["source_id"], source["page"])
+        for source in item["citations"]
+    } == {
+        ("n5-faq-v0.0-en-pdf", original_page),
+        ("n5-faq-v0.1-en-pdf", current_page),
+        ("n5-faq-v0.1-es-pdf", spanish_page),
+    }
+    assert "not an independently verified" in item["selection_reason"]
+    assert item["matched_applicability"] == [{
+        "rulesRevision": "5.3", "effectiveFrom": "2026-09-01",
+    }]
+    assert published_pilot.faq_rulings_for_topic(
+        topic_id, rules_revision="5.3", as_of="2025-10-15",
+    ) == []
+    assert published_pilot.faq_rulings_for_topic(
+        topic_id, rules_revision="5.2", as_of="2026-10-15",
+    ) == []
+
+
+def test_earlier_faq_identity_is_not_inferred_from_current_publication(
+    published_pilot: RulesDatabase,
+) -> None:
+    records = published_pilot.records_by_kind("faq-ruling")
+    assert len(records) == 16
+    assert sum(
+        record["facts"]["originalPublication"]["version"] == "0.0"
+        for record in records
+    ) == 8
+    assert sum(
+        record["facts"]["originalPublication"]["version"] == "0.1"
+        for record in records
+    ) == 8
+    assert published_pilot.composed_record("skill:climb") is not None
+
+
+def test_carried_forward_ruling_identity_reused_for_multiple_topics(
+    published_pilot: RulesDatabase,
+) -> None:
+    def ids(topic: str) -> set[str]:
+        return {
+            item["id"]
+            for item in published_pilot.faq_rulings_for_topic(
+                topic, rules_revision="5.3", as_of="2026-09-01",
+            )
+        }
+    assert ids("skill:jump") == {
+        "faq-ruling:prone-movement-label",
+        "faq-ruling:vault-during-climb-and-jump",
+    }
+    assert ids("equipment:multispectral-visor") == ids("skill:sixth-sense")
+    assert ids("skill:infiltration") == ids("skill:camouflage")

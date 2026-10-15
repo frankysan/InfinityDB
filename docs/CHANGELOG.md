@@ -16,8 +16,11 @@ are not retroactively relabeled.
   Annihilation, Skill, Trait, State, General Rule and Fireteam references.
   New entries explain Skill declaration, fired Deployables, Peripheral
   restrictions, Camouflaged Markers in Total Cover, Special Dice in
-  Coordinated Orders, and Fireteam creation minimums. Each card
-  identifies its FAQ source/version/date.
+  Coordinated Orders, and Fireteam creation minimums. Eight additional
+  carried-forward v0.0 clarifications cover Prone, Climb/Jump, template
+  LoF, Deployables, Surprise Attack, Sixth Sense/MSV1, Protheion and
+  Camouflage (1 Use), displaying their earlier source version alongside
+  the selected current FAQ v0.1 citation.
 - Domination's 350-point SWC displays the English-source 6, with an explicit
   discrepancy: official Spanish N5.3 says 7. The Annihilation 350-point
   survival bands are now corroborated by official Spanish N5.3 rather than
@@ -218,12 +221,13 @@ are not retroactively relabeled.
   missing topic/scenario/predecessor targets, cycles, non-overlapping
   supersession and inconsistent carried-forward origins. Add an
   applicability-aware read model and explicit-context FAQ API, retaining
-  reviewed source provenance and conditional supersession. The first two
-  eight reviewed FAQ v0.1 entries now reach their owning Equipment,
-  Scenario, Skill, Trait, State, General Rule and Fireteam browser
-  surfaces through a shared dated clarification card. The Fireteam
-  detail is shown on the Fireteams page instead of inventing a rule
-  route. Base rules remain unchanged.
+  reviewed source provenance and conditional supersession. Sixteen
+  reviewed FAQ entries now reach their owning Equipment, Scenario, Skill,
+  Trait, State, General Rule and Fireteam browser surfaces through shared
+  dated clarification cards. Eight entries retain v0.0 original source
+  citations and current EN/ES v0.1 evidence, without duplicating rulings.
+  The Fireteam detail stays on the Fireteams page rather than inventing
+  a rule route. Base rules remain unchanged.
 - **Data processing + Web backend:** Confirm ITS-inspired split Deployment
   Zones and asymmetric scoring applicability survive typed validation and
   catalog projection; preserve the core N5.3 scope and leave ITS-specific

@@ -596,10 +596,15 @@ and matched applicability, separate from the unmodified base Rule/Skill.
 `RulesDatabase.faq_rulings_for_topic` and `GET /api/faq-rulings` provide
 that projection. The API requires `topic_id`, `rules_revision`, and
 `as_of`, with optional paired `season_id`/`season_revision` and
-`scenario_id`; it never defaults to the newest publication. Eight reviewed FAQ v0.1 entries are now published from
-`data/curated/rules/n5-faq-v0.1.json`. They retain the selected English
-FAQ PDF citation, matching Spanish evidence at its actual printed page,
-an explicit N5.3 effective date and their own independent identities.
+`scenario_id`; it never defaults to the newest publication. Sixteen reviewed FAQ entries are now published from
+`data/curated/rules/n5-faq-v0.1.json`: eight first recorded in v0.1 and
+eight **carried forward from v0.0**. Each carried ruling retains original
+English v0.0 source/version/page separately from the currently selected
+English v0.1 page, and a corroborating Spanish v0.1 citation. The
+v0.0 record date 2025-10-15 is the associated official update anchor;
+the exact PDF publication day is not independently verified. All
+currently selected rulings require explicit N5.3 applicability, and
+the stable ruling ID is reused across the cited publications.
 The shared browser presentation now covers affected Equipment,
 Scenario, Skills, Traits, States, and General Rules, with Fireteam
 FAQs appearing on the Fireteams page rather than a competing rule route.
