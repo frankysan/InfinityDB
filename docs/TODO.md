@@ -1114,10 +1114,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   - [ ] Define an explicit source-precedence and effective-date policy. An on-screen
     answer must show its source date/version and never silently blend conflicting
     documents.
-    - [ ] Reuse the current definition/supplement boundary. Define the additional ruling identity,
-      applicability, supersession, and source-selection fields needed by FAQ data before authoring
-      batches; publication recency alone must not imply universal applicability. Record accepted
-      semantics in the canonical data model and curated contract.
+    - [x] Define and validate the canonical FAQ authoring contract: stable
+      ruling IDs, per-rules-revision/season/scenario applicability and
+      effective dates, original publication identity/date, selected official
+      source citation/reason, conflicting citations and typed supersession
+      references. See `docs/data-model.md` and `data/curated/README.md`.
+      This does not yet publish an answer or validate cross-collection target
+      existence/supersession cycles; those remain pilot requirements.
   - [ ] Deliver one core clarification and one scenario/season-scoped ruling through validation,
     export, repository/API composition, and browser presentation before curating the remaining
     inventory. Show linked questions/answers with dates and affected concepts alongside the base

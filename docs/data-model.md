@@ -552,6 +552,37 @@ A semantic record has a stable typed ID such as `skill:move`, `state:targeted`, 
   composition; and
 - applicability/review/source provenance remains explicit.
 
+### Dated FAQ/errata layer (authoring foundation, not yet published)
+
+FAQ rulings use independent `faq-ruling:*` semantic identities. The base
+Rule/Skill/State definition is not rewritten when a later FAQ clarifies it.
+The existing collection/definition boundary retains the source document's
+identity, authority, effective date, citations and history; individual
+rulings add a required validated `facts` contract (see
+`data/curated/README.md`): question, answer, affected `topicIds`,
+original publication identity/version/date/page, exact applicability by
+rules revision plus effective date and optional ITS season revision/scenarios,
+selected official citation with editorial selection reason, explicit
+conflicting citations and predecessor `supersedes` IDs.
+
+**Source precedence is applicability-first, not newest-first.** Core
+definitions remain authoritative baseline material. Only a ruling explicitly
+reviewed for the requested rules revision, effective date, and applicable
+season/scenario may be considered as an additional clarification; newer
+documents cannot retroactively or globally override unrelated source
+contexts. Cross-posted/carried-forward answers preserve one identity and
+original publication date, not duplicate FAQ entities. Disagreements are
+separate evidence with a reviewed source choice and explanation. An explicit
+supersession has effect only where applicability overlaps and the cited
+predecessor has been verified; it must not delete historical evidence.
+
+Currently `curated.py` validates this **authoring contract** for FAQ
+definitions. A scoped publication resolver, cross-record target/supersession
+graph validation, dated database/API selection, and player-facing
+FAQ presentation are future 1.0 tasks; no FAQ records are yet shipped.
+The generic supplement mechanism must not auto-attach a ruling to
+a core topic by name or by a newer collection date.
+
 ### Domain ownership
 
 The application-domain registry determines which semantic records receive player-facing routes.

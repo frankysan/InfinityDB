@@ -91,6 +91,168 @@ def valid_document() -> dict:
     }
 
 
+def _faq_ruling_document() -> dict:
+    """Synthetic dated FAQ data; no unverified ruling is authored for release."""
+    document = valid_document()
+    document["collection"].update(
+        id="n5-faq-v0.1", domain="faq", effectiveFrom="2026-09-01"
+    )
+    document["sources"][0].update(
+        id="n5-faq-v0.1-pdf", title="N5 FAQ", version="0.1",
+        publishedDate="2026-09-01",
+    )
+    for source in document["vocabularySources"].values():
+        source[0]["sourceId"] = "n5-faq-v0.1-pdf"
+    document["records"] = [{
+        "id": "faq-ruling:example-faq-answer",
+        "kind": "faq-ruling",
+        "name": "Example ruling",
+        "summary": "A dated clarification, separate from canonical rule text.",
+        "scope": {"game": "N5", "seasons": ["current"]},
+        "composition": {"role": "definition"},
+        "review": {"status": "draft", "reviewedOn": "2026-10-15"},
+        "citations": [{"sourceId": "n5-faq-v0.1-pdf", "page": 3}],
+        "facts": {
+            "question": "Can the example action be attempted again?",
+            "answer": "This answer is intentionally synthetic for validation.",
+            "topicIds": ["skill:camouflage"],
+            "applicability": [{"rulesRevision": "5.3", "effectiveFrom": "2026-09-01"}],
+            "originalPublication": {
+                "collectionId": "n5-faq-v0.1",
+                "sourceId": "n5-faq-v0.1-pdf",
+                "version": "0.1",
+                "publishedDate": "2026-09-01",
+                "page": 3,
+            },
+            "selectedCitation": {"sourceId": "n5-faq-v0.1-pdf", "page": 3},
+            "selectionReason": "Explicit manual comparison for test fixture.",
+            "conflictingCitations": [],
+            "supersedes": [],
+        },
+    }]
+    return document
+
+
+def test_faq_ruling_contract_preserves_identity_scope_and_manual_source_choice(
+    tmp_path: Path,
+) -> None:
+    document = _faq_ruling_document()
+    ruling = document["records"][0]["facts"]
+    ruling["applicability"].extend([
+        {
+            "rulesRevision": "5.3",
+            "effectiveFrom": "2026-09-01",
+            "season": {"id": "its-18", "revision": "2026.09.01"},
+            "scenarioIds": ["scenario:double-bind"],
+        },
+    ])
+    document["sources"].append({
+        **document["sources"][0],
+        "id": "n5-faq-v0.1-es-pdf",
+        "title": "Spanish FAQ",
+    })
+    document["records"][0]["citations"].append({
+        "sourceId": "n5-faq-v0.1-es-pdf", "page": 3,
+    })
+    ruling["conflictingCitations"] = [
+        {"sourceId": "n5-faq-v0.1-es-pdf", "page": 3}
+    ]
+    path = tmp_path / "faq.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    result = load_curated_document(path)["records"][0]
+    assert result["id"] == "faq-ruling:example-faq-answer"
+    assert result["facts"]["applicability"][1]["season"]["id"] == "its-18"
+    assert result["facts"]["selectedCitation"]["sourceId"] == "n5-faq-v0.1-pdf"
+    assert result["facts"]["conflictingCitations"][0]["sourceId"] == "n5-faq-v0.1-es-pdf"
+
+
+@pytest.mark.parametrize(
+    ("path", "value", "problem"),
+    [
+        (("question",), "", "question"),
+        (("answer",), " ", "answer"),
+        (("topicIds",), [], "topicIds"),
+        (("topicIds",), ["skill:camouflage", "skill:camouflage"], "duplicate"),
+        (("topicIds",), ["not-a-reference"], "topicIds"),
+        (("applicability",), [], "applicability"),
+        (
+            ("applicability",),
+            [
+                {"rulesRevision": "5.3", "effectiveFrom": "2026-09-01"},
+                {"rulesRevision": "5.3", "effectiveFrom": "2026-09-02"},
+            ],
+            "duplicate",
+        ),
+        (
+            ("applicability",),
+            [
+                {
+                    "rulesRevision": "5.3",
+                    "effectiveFrom": "2026-09-01",
+                    "season": {"id": "its-18"},
+                }
+            ],
+            "season",
+        ),
+        (
+            ("applicability",),
+            [{
+                "rulesRevision": "5.3",
+                "effectiveFrom": "2026-09-01",
+                "scenarioIds": ["skill:camouflage"],
+            }],
+            "scenarioIds",
+        ),
+        (("applicability",), [{"rulesRevision": "5.3"}], "effectiveFrom"),
+        (
+            ("applicability",),
+            [{
+                "rulesRevision": "5.3", "effectiveFrom": "2026-10-01",
+                "effectiveUntil": "2026-09-01",
+            }],
+            "effectiveUntil precedes effectiveFrom",
+        ),
+        (("topicIds",), ["faq-ruling:other"], "unsupported reference"),
+        (("originalPublication", "version"), "0.2", "version/date mismatch"),
+        (("originalPublication", "publishedDate"), "2026-02-31", "date"),
+        (("originalPublication", "page"), 5, "not in the record citations"),
+        (("selectedCitation",), {"sourceId": "n5-faq-v0.1-pdf", "page": 8}, "selectedCitation"),
+        (("selectionReason",), "", "selectionReason"),
+        (
+            ("conflictingCitations",),
+            [{"sourceId": "n5-faq-v0.1-pdf", "page": 3}],
+            "duplicate or selected",
+        ),
+        (("supersedes",), ["faq-ruling:example-faq-answer"], "cannot supersede itself"),
+        (("supersedes",), ["skill:camouflage"], "supersedes"),
+        (("unreviewedField",), "unvalidated", "expected"),
+    ],
+)
+def test_faq_ruling_contract_rejects_implicit_or_conflicting_facts(
+    tmp_path: Path, path: tuple[str, ...], value: object, problem: str,
+) -> None:
+    document = _faq_ruling_document()
+    target = document["records"][0]["facts"]
+    for part in path[:-1]:
+        target = target[part]
+    target[path[-1]] = value
+    filepath = tmp_path / "faq.json"
+    filepath.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match=problem):
+        load_curated_document(filepath)
+
+
+def test_faq_ruling_is_not_silently_attached_as_an_unscoped_supplement(
+    tmp_path: Path,
+) -> None:
+    document = _faq_ruling_document()
+    document["records"][0]["composition"]["role"] = "supplement"
+    path = tmp_path / "faq.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="require a definition"):
+        load_curated_document(path)
+
+
 def test_load_curated_document_requires_provenance(tmp_path: Path) -> None:
     path = tmp_path / "rules.json"
     path.write_text(json.dumps(valid_document()), encoding="utf-8")

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
+from infinity_db.faq_rulings import validate_faq_ruling_facts
 from infinity_db.maintained_text import validate_maintained_text_syntax
 from infinity_db.rule_relations import RULE_RELATION_TYPES
 from infinity_db.scenario_definition import (
@@ -1131,6 +1132,15 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                         f"{context}.facts.visibilityZone: must not mix with Saving Roll facts"
                     )
                 _validate_ammunition_visibility_zone(zone, f"{context}.facts.visibilityZone")
+        if record["kind"] == "faq-ruling":
+            validate_faq_ruling_facts(
+                record.get("facts"),
+                record_id=record["id"],
+                record_role=composition_role,
+                citations=record["citations"],
+                sources=sources,
+                context=f"{context}.facts",
+            )
         if record["kind"] == "skill":
             facts = record.get("facts")
             if composition_role == "definition":

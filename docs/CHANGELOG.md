@@ -206,6 +206,10 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing:** Introduce validated dated FAQ ruling authoring fields
+  for exact applicability, original provenance, reviewed source selection,
+  conflicts and explicit supersession references. No FAQ rulings are
+  published yet, and existing base rules are unchanged.
 - **Data processing + Web backend:** Confirm ITS-inspired split Deployment
   Zones and asymmetric scoring applicability survive typed validation and
   catalog projection; preserve the core N5.3 scope and leave ITS-specific

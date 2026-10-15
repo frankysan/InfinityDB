@@ -422,6 +422,57 @@ retain their own scope, facts, citations, relations, and publication provenance 
 than being field-merged by load order. Related concepts use typed one-way `relations`;
 reverse navigation is derived by `rules.db`.
 
+### Dated FAQ ruling authoring contract (foundation)
+
+`faq-ruling:<stable-slug>` is a canonical ruling identity, independent of
+the page on which it first appeared. FAQ material lives in its own versioned
+source collection rather than inside a core Rule summary. Validated
+`faq-ruling` definitions have a required `facts` object:
+
+- `question` and concise `answer`: non-empty authored text, distinct
+  from the canonical topic's definition/Effects.
+- `topicIds`: unique typed references to the affected rule, Skill,
+  State, Hacking Program, scenario, or other supported topic.
+- `applicability`: non-empty exact scope entries with `rulesRevision`,
+  `effectiveFrom` (ISO date), optional `effectiveUntil` (not before the
+  start), optional `season: {id, revision}`, and optional
+  `scenarioIds`. Missing season/scenario restrictions mean the author
+  deliberately chose general applicability **at the named Rules revision**,
+  not applicability to every edition or future ITS season.
+- `originalPublication`: `collectionId`, `sourceId`, `version`,
+  `publishedDate` and positive printed `page`. The source must be a
+  declared PDF and the original page must be in the record's citations;
+  the version/date must match the source metadata.
+- `selectedCitation: {sourceId, page}` and non-empty `selectionReason`:
+  exact manually reviewed current official primary PDF evidence.
+  `conflictingCitations` lists any other individually cited conflicting
+  pages, rather than silently joining their answers or automatically
+  preferring the newest upload.
+- `supersedes`: unique stable `faq-ruling:*` IDs. Self-supersession is
+  rejected; referencing a predecessor is not a blanket applicability
+  override. Confirm target existence, scope overlap and acyclic ordering
+  when the publication resolver is implemented.
+
+**Precedence policy:** The source-native core definition remains intact.
+An applicable official FAQ/erratum is a dated clarification layer, not a
+field-wise overwrite. A source is eligible only after exact rules-revision
+and effective-date matching, plus matching season revision and scenario
+where declared. Cross-posting/carry-forward must preserve the same ruling
+identity and original publication, with additional citations; creating a
+new ruling ID merely because another PDF repeats the answer is prohibited.
+An expressly superseding ruling can replace another only for its verified
+overlapping scope; otherwise both remain evidence. Conflicting answers
+without a reviewed selected citation and reason are **not** resolved by
+document order, language, or publication recency.
+
+**Implementation status:** `src/infinity_db/faq_rulings.py` validates this
+authored contract as part of normal curated-document loading. Actual
+cross-collection target/supersession resolution, date-scoped selection,
+database read APIs, and topic/scenario browser presentation are **not yet
+implemented**. No FAQ records are authored in the shipped collection yet.
+The synthetic tests are not source rulings. Until the pilot is complete,
+these fields must not be treated as an automatically published answer.
+
 Collections that contain scenario definitions also require `scenarioCollection`. Its `id` is the
 stable scenario-set identity (for example `n5-core`), `revision` is the exact revision within that
 set (for example `5.3`), and ordered `members` must match the scenario definitions in that source
