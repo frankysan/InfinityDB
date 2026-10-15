@@ -254,6 +254,18 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing:** Accept five additional source-verified,
+  profile-hash-pinned shared-only Weapons: Tactical Bow, Ohotnik,
+  T2 CC Weapon, AP+DA CC Weapon and AP+Shock CC Weapon. Reuse
+  canonical Ammunition, Trait and Weapon Property explanations,
+  preserving one-versus-two Saving Roll differences. Pending Weapon
+  source reviews fall to 23 without adding duplicate rule cards.
+- **Data processing:** Review Red Fury, AP Red Fury and Thunderbolt as
+  source-pinned shared-effect profiles, using existing Shock, AP, Normal
+  Ammunition and Suppressive Fire references. Retain AP Thunderbolt as
+  a pending source discrepancy: official N5.3 and Army print AP,
+  while archived English and Spanish Wiki charts print N. Remaining
+  Weapon source reviews decrease to 28 with no gameplay-data changes.
 - **Data processing:** Reconcile Weapon definition gaps against a freshly built
   rules database and N5.3 source-chart evidence. Explicitly accept Breaker Rifle,
   Viral Combi Rifle, Viral Rifle, Viral Pistol and Viral Tactical Bow as

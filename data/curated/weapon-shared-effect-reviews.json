@@ -306,6 +306,70 @@
       "profileSha256": "c2d2dd1292652939238a63ce236eba66dae5e3b4cac308cdf56ee70077dad66f",
       "reviewedOn": "2026-10-15",
       "reason": "N5.3 p. 176: PS 8/B1, printed N/BTS/one roll, BioWeapon (DA+Shock), Silent (-6) and Bow range bands; no Suppressive Fire. Published Viral, BioWeapon and Silent references suffice without a new standalone rule."
+    },
+    {
+      "slug": "red-fury",
+      "name": "Red Fury",
+      "chartPage": 183,
+      "profileSha256": "dcf2cb47c279e6a4272ad92c5ed3e09e00d35cd54d95483fa285af02dc0c44cb",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 183 and archived EN/ES Wiki agree with imported Army: PS 7/B4, Shock Ammunition, one ARM Saving Roll, Suppressive Fire and Red Fury range bands. Canonical Shock and Suppressive Fire rules cover the profile; no extra Red Fury mechanic is published. Keep Shock distinct from the AP and MULTI Red Fury variants."
+    },
+    {
+      "slug": "ap-red-fury",
+      "name": "AP Red Fury",
+      "chartPage": 183,
+      "profileSha256": "63915a3e6a9c1207f53ea1ebe0379d7c5625e85616df62a590aafde5bc794c4d",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 183 and archived EN/ES Wiki agree with imported Army: PS 7/B4, AP Ammunition, one ARM/2 Saving Roll, Suppressive Fire and the same ranges as standard Red Fury. Canonical AP and Suppressive Fire explain the effects without a duplicated Weapon definition. Never inherit the standard Red Fury's Shock Ammunition."
+    },
+    {
+      "slug": "thunderbolt",
+      "name": "Thunderbolt",
+      "chartPage": 186,
+      "profileSha256": "34da8f3837b7ccbde536c65ab5d7a2ea43a09b98bc5f526a6d5af86f9ab920a6",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 186 and archived EN/ES Wiki agree with imported Army: PS 6/B2, Normal Ammunition, one ARM Saving Roll, no Traits, and the printed -3/0/+3/0 Thunderbolt range bands. Canonical Normal Ammunition and source profile cover this Weapon. AP Thunderbolt remains a separate pending source review because both captured Wiki languages show N/ARM/2 while official N5.3 and Army list AP/ARM/2."
+    },
+    {
+      "slug": "tactical-bow",
+      "name": "Tactical Bow",
+      "chartPage": 176,
+      "profileSha256": "303cd9431c44bd494a0cdb165894767edc64ae62e71290f1060cbed242a1e61b",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 176 and EN Wiki Weapon Chart agree with Army: PS 8/B1, DA Ammunition, two ARM Saving Rolls, Anti-materiel and Silent (-6), short Bow range bands. Canonical DA, Anti-materiel and Silent rules explain the effects; unlike Viral Tactical Bow this variant does not use BioWeapon or BTS."
+    },
+    {
+      "slug": "t2-cc-weapon",
+      "name": "T2 CC Weapon",
+      "chartPage": 177,
+      "profileSha256": "16c0caead040c1d9def718043d6ec6a3a8c4723e43997219ef4996866fa6aa46",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 Weapon Chart p. 177 and EN/ES Wiki agree: CC Weapon PS 8/B1, T2 Ammunition, one printed ARM Saving Roll, Anti-materiel and CC; no ranged modifiers. Canonical T2 and CC/Anti-materiel references explain effects, with T2 Wound result distinct from printed roll count."
+    },
+    {
+      "slug": "ohotnik",
+      "name": "Ohotnik",
+      "chartPage": 187,
+      "profileSha256": "0d29c058166a8282ea7afe0a4e766398c70a561974b05c5291f4be63011632b6",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 187, EN/ES Wiki and Army agree: Ohotnik PS 6/B2, T2 Ammunition, one printed ARM Saving Roll and Anti-materiel. Seven source range bands match; canonical T2 and Anti-materiel already explain effects. No unique firing mode or independent Weapon rule is printed."
+    },
+    {
+      "slug": "ap-da-cc-weapon",
+      "name": "AP + DA CC Weapon",
+      "chartPage": 177,
+      "profileSha256": "88df75c8d2f37c67585d6843bf264cbca599b575ddf6ea074ec8d5cd6660b2aa",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 177 and EN/ES Wiki agree with Army: PS 8/B1, AP+DA, ARM/2, two printed Saving Rolls, Anti-materiel and CC. Canonical AP and DA Ammunition plus the existing AP+DA Weapon Property explain combined halving and two rolls without duplicating effects or stacking separate attack modes."
+    },
+    {
+      "slug": "ap-shock-cc-weapon",
+      "name": "AP + Shock CC Weapon",
+      "chartPage": 177,
+      "profileSha256": "5ab2b45f50448190ad9e1ff2de8e44a776274c7bcacc6286049ecce0b15aa967",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 177 and EN/ES Wiki agree with Army: PS 8/B1, AP+Shock, ARM/2, one Saving Roll and CC, without Anti-materiel. Canonical AP and Shock Ammunition and the AP+Shock Weapon Property cover the combined effect, with no DA-style second save."
     }
   ]
 }

@@ -575,13 +575,30 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       AP/Normal Ammunition, BioWeapon, Silent and Suppressive Fire rules
       suffice; record five profile-hash-pinned shared-only decisions
       without duplicating rules or altering imported Weapon profiles.
+    - [x] Review Red Fury, AP Red Fury, and Thunderbolt against the N5.3
+      Weapon Chart, archived English/Spanish Wiki charts and imported
+      Army profiles. Each has source-exact Ammo, Saving Roll, range
+      and canonical effect links; record three hash-pinned shared-only
+      decisions rather than duplicating definitions. Preserve the
+      AP Thunderbolt N-versus-AP source discrepancy separately:
+      N5.3 and Army show AP/ARM/2, while both archived Wiki charts
+      show N/ARM/2. Do not treat that identity as source-reconciled.
+    - [x] Source-review Tactical Bow, Ohotnik, T2 CC Weapon, AP+DA
+      CC Weapon and AP+Shock CC Weapon against the N5.3 chart,
+      imported Army and captured Wiki. Their existing DA/T2/AP/Shock,
+      Anti-materiel, Silent and CC links and AP+DA/AP+Shock Weapon
+      Properties explain the printed profiles, including two rolls
+      for DA but only one for T2 and AP+Shock. Record five full-profile-
+      hash-pinned shared-only decisions; no new rule cards or profile
+      rewrites are necessary.
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. Current source-bound triage:
-      70 classified gaps = 38 accepted shared-effects, 1 accepted
-      historical citation, and 31 pending source reviews (including
-      8 multi-profile candidates). These audit gap codes are not
-      automatically 1.0 gameplay defects. Reconcile remaining candidates
-      by source and browser behavior before adding standalone rules.
+      70 classified gaps = 46 accepted shared-effects, 1 accepted
+      historical citation, and 23 pending source reviews (including
+      8 multi-profile candidates and AP Thunderbolt). These audit gap
+      codes are not automatically 1.0 gameplay defects. Reconcile
+      remaining candidates by source and browser behavior before
+      adding standalone rules.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.

@@ -887,6 +887,110 @@ def test_reviewed_breaker_and_viral_source_profiles_use_shared_rules(
 
 
 @pytest.mark.parametrize(
+    ("slug", "ps", "burst", "ammo", "save", "rolls", "traits",
+     "effects", "property_id", "ranges"),
+    [
+        ("tactical-bow", "8", "1", "DA", "ARM", "2",
+         ["Anti-materiel", "Silent (-6)"], ["ammunition:da"], None,
+         {"short": {"max": 20, "mod": "+3"},
+          "med": {"max": 40, "mod": "0"},
+          "long": {"max": 60, "mod": "-6"}}),
+        ("t2-cc-weapon", "8", "1", "T2", "ARM", "1",
+         ["Anti-materiel", "CC"], ["ammunition:t2"], None, {}),
+        ("ohotnik", "6", "2", "T2", "ARM", "1",
+         ["Anti-materiel"], ["ammunition:t2"], None,
+         {"short": {"max": 20, "mod": "0"},
+          "med": {"max": 80, "mod": "+3"},
+          "long": {"max": 100, "mod": "0"},
+          "xlong": {"max": 120, "mod": "-3"},
+          "max": {"max": 240, "mod": "-6"}}),
+        ("ap-da-cc-weapon", "8", "1", "AP+DA", "ARM/2", "2",
+         ["Anti-materiel", "CC"], ["ammunition:ap", "ammunition:da"],
+         "weapon-property:ap-da", {}),
+        ("ap-shock-cc-weapon", "8", "1", "AP+Shock", "ARM/2", "1",
+         ["CC"], ["ammunition:ap", "ammunition:shock"],
+         "weapon-property:ap-shock", {}),
+    ],
+)
+def test_reviewed_tactical_bow_t2_and_combined_cc_profiles_use_shared_effects(
+    weaponry_app: Callable, slug: str, ps: str, burst: str,
+    ammo: str, save: str, rolls: str, traits: list[str],
+    effects: list[str], property_id: str | None,
+    ranges: dict[str, dict[str, int | str]],
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []
+    (profile,) = payload["profiles"]
+    assert (profile["mode"], profile["damage"], profile["burst"]) == (
+        None, ps, burst,
+    )
+    assert (
+        profile["ammunition"], profile["saving"], profile["saving_num"],
+    ) == (ammo, save, rolls)
+    assert profile["ranges"] == ranges
+    assert profile["traits"] == traits
+    assert [t["label"] for t in profile["trait_references"]] == traits
+    assert [e["record_id"] for e in profile["ammunition_effects"]] == effects
+    assert all(e["summary"] and e["citations"] for e in profile["ammunition_effects"])
+    assert [p["id"] for p in profile.get("weapon_properties", [])] == (
+        [property_id] if property_id else []
+    )
+
+
+@pytest.mark.parametrize(
+    ("slug", "ps", "burst", "ammo", "saving", "traits", "ranges", "effect"),
+    [
+        ("red-fury", "7", "4", "Shock", "ARM", ["Suppressive Fire"],
+         {"short": {"max": 20, "mod": "0"}, "med": {"max": 60, "mod": "+3"},
+          "long": {"max": 100, "mod": "-3"}, "max": {"max": 120, "mod": "-6"}},
+         "ammunition:shock"),
+        ("ap-red-fury", "7", "4", "AP", "ARM/2", ["Suppressive Fire"],
+         {"short": {"max": 20, "mod": "0"}, "med": {"max": 60, "mod": "+3"},
+          "long": {"max": 100, "mod": "-3"}, "max": {"max": 120, "mod": "-6"}},
+         "ammunition:ap"),
+        ("thunderbolt", "6", "2", "N", "ARM", [],
+         {"short": {"max": 20, "mod": "-3"}, "med": {"max": 40, "mod": "0"},
+          "long": {"max": 80, "mod": "+3"}, "max": {"max": 120, "mod": "0"}},
+         "ammunition:normal"),
+    ],
+)
+def test_reviewed_red_fury_and_thunderbolt_preserve_source_only_profiles(
+    weaponry_app: Callable, slug: str, ps: str, burst: str,
+    ammo: str, saving: str, traits: list[str],
+    ranges: dict[str, dict[str, int | str]], effect: str,
+) -> None:
+    payload = _weapon_detail(weaponry_app, slug)
+    assert payload.get("rules", []) == []
+    (profile,) = payload["profiles"]
+    assert (profile["mode"], profile["damage"], profile["burst"]) == (
+        None, ps, burst,
+    )
+    assert (
+        profile["ammunition"], profile["saving"], profile["saving_num"],
+    ) == (ammo, saving, "1")
+    assert profile["ranges"] == ranges
+    assert profile["traits"] == traits
+    assert [r["label"] for r in profile["trait_references"]] == traits
+    assert [r["record_id"] for r in profile["ammunition_effects"]] == [effect]
+    assert profile["ammunition_effects"][0]["citations"]
+    assert not profile.get("weapon_properties")
+
+
+def test_ap_thunderbolt_remains_unreviewed_due_to_wiki_source_conflict(
+    weaponry_app: Callable,
+) -> None:
+    payload = _weapon_detail(weaponry_app, "ap-thunderbolt")
+    (profile,) = payload["profiles"]
+    # Official N5.3 and imported Army agree on AP/ARM/2, but the
+    # September 26 EN Wiki and October 9 ES Wiki both print N/ARM/2.
+    assert (profile["ammunition"], profile["saving"], profile["saving_num"]) == (
+        "AP", "ARM/2", "1",
+    )
+    assert profile["ammunition_effects"][0]["record_id"] == "ammunition:ap"
+    assert payload.get("rules", []) == []
+
+
+@pytest.mark.parametrize(
     ("slug", "ammo", "saving", "rule_id"),
     [
         ("submachine-gun", "N", "ARM", "ammunition:normal"),
