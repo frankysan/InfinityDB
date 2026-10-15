@@ -1838,8 +1838,9 @@
     {
       "recordId": "ammunition:ap",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 p. 63, Spanish N5.3 p. 66 and pinned English Wiki AP revision 2990 confirm one ARM/2 or BTS/2 Saving Roll per hit, upward rounding with positive minimum 1, one Wound per failed roll and an additional modified roll for a Critical. The owning Immunity rule conditionally covers AP for applicable non-Comms attacks: Immunity (AP) leaves DA rolls intact on AP+DA, whereas Immunity (ARM/BTS) may treat covered Ammunition as Normal. No unconditional outgoing relation from AP to Immunity or combined components is warranted."
     },
     {
       "recordId": "ammunition:da",
@@ -1858,8 +1859,9 @@
     {
       "recordId": "ammunition:em",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English/Spanish N5.3 p. 64 and pinned English Wiki E/M revision 3418 confirm two BTS/2 rolls per hit (a third for a Critical), Isolated on a failed roll and additional Immobilized-B only for HI, TAG, REM, VH. Those conditional causes-state relations remain in the graph. E/M alone does not inflict Wounds; Normal in N+E/M has separate effects. After a failed E/M roll a usual Guts Roll applies unless inapplicable: affected HI/TAG/REM/VH now IMM-B cannot roll, while Courage/equivalent can ignore it. Immunity depends on matching type and attack classification, not an unconditional E/M relationship."
     },
     {
       "recordId": "ammunition:exp",

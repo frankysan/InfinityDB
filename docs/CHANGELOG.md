@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- AP Ammunition now explains its Saving Rolls and conditional Immunity cases;
+  E/M explains when a failed save causes Isolated/Immobilized-B and why
+  some affected troops cannot make the ordinary Guts Roll.
 - DA Ammunition now explains why its second Saving Roll is still required after
   the first fails or causes Unconscious. Smoke now explains how scenery blocks
   portions of its otherwise infinite-height Template; Eclipse links to the
@@ -317,6 +320,9 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing + Web frontend:** Clarify AP's Critical and conditional
+  Immunity interactions, and E/M's BTS/2 Critical rolls, troop-specific States,
+  and Guts Roll exceptions. Preserve the existing typed Ammunition mechanics.
 - **Data processing + Web frontend:** Clarify DA's mandatory second Saving Roll
   and Smoke's scenery-blocked volume in the player-facing reference. Eclipse
   now links to its inherited Smoke mechanics without losing its distinct

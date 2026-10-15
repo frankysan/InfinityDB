@@ -1279,14 +1279,14 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     this resolves the presentation defect, not the broader 1.0 browser gate.
   - [ ] Close the 1.0 interaction-review target in the maintained ledger, regenerate the checklist,
     and require the following check to pass. Never edit the generated checklist manually.
-    The current gate reports 11 pending supporting identities: seven Ammunition
-    records (AP, E/M, EXP, PARA, Shock, Stun, T2) and the four core Scenarios.
-    Normal, DA, Smoke and Eclipse outgoing interactions have been reconciled with
-    the pinned N5.3 rules and English Wiki revisions; the curated DA and Smoke
-    explanations now retain mandatory Saving Rolls and scenery clipping, and
-    Eclipse explicitly inherits Smoke while preserving its visor exception.
-    Its failure output lists exact remaining IDs. Review those rules and scoped
-    interactions rather than marking them complete from browser/API coverage:
+    The current gate reports nine pending supporting identities: five Ammunition
+    records (EXP, PARA, Shock, Stun, T2) and the four core Scenarios.
+    Normal, DA, Smoke, Eclipse, AP, and E/M have been reviewed against pinned
+    N5.3 rules/Wiki sources. Recent batches clarified DA Saving Rolls, Smoke
+    geometry, Eclipse inheritance, AP's conditional Immunity interaction, and
+    E/M's target-specific States and Guts Roll exceptions. The failure output
+    lists exact remaining IDs; close them only after source/interaction review,
+    not merely because the reference appears in the browser:
 
     ```text
     python tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md --require-release 1.0.0

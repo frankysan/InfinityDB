@@ -962,10 +962,25 @@ def test_ap_em_rounding_and_t2_critical_die_identification_reach_api(
     for slug, case in expected.items():
         record = rules_db.composed_record(f"ammunition:{slug}")
         assert record is not None
-        assert len(record["facts"]["clarifications"]) == 1
-        text = record["facts"]["clarifications"][0]
+        clarification_rows = record["facts"]["clarifications"]
+        expected_count = 1 if slug == "t2" else 3
+        assert len(clarification_rows) == expected_count
+        text = " ".join(clarification_rows)
         for fragment in case["fragments"]:
             assert fragment in text
+        if slug == "ap":
+            assert "Each failed roll inflicts one Wound" in text
+            assert "Critical adds one more Saving Roll" in text
+            assert "Immunity (AP)" in text and "AP+DA" in text
+            assert "[[ammunition:da|DA]]" in text
+        elif slug == "em":
+            assert "third BTS/2 Saving Roll" in text
+            assert "at least one Saving Roll fails" in text
+            assert "[[state:isolated|Isolated State]]" in text
+            assert "[[state:immobilized-b|Immobilized-B State]]" in text
+            assert "cannot make that Guts Roll" in text
+            assert "[[skill:courage|Courage]]" in text
+            assert "not Wounds caused by E/M itself" in text
         en_page, es_page = case["sourcePages"]
         assert {
             (source["source_id"], source.get("page"))
@@ -989,7 +1004,16 @@ def test_ap_em_rounding_and_t2_critical_die_identification_reach_api(
         payload = json.loads(b"".join(response))
         rule = payload["rules"][0]
         assert rule["facts"]["clarifications"] == record["facts"]["clarifications"]
-        assert len(rule["fact_tokens"]["clarifications"]) == 1
+        assert len(rule["fact_tokens"]["clarifications"]) == expected_count
+        if slug == "em":
+            resolved = {
+                token["target"]
+                for tokens in rule["fact_tokens"]["clarifications"]
+                for token in tokens
+                if token["type"] == "reference"
+            }
+            assert {"state:isolated", "state:immobilized-b", "rule:guts-roll",
+                    "skill:courage", "skill:immunity"} <= resolved
         assert rule["facts"]["ammunitionResolution"] == record["facts"][
             "ammunitionResolution"
         ]

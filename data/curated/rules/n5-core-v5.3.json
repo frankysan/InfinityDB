@@ -20089,7 +20089,9 @@
             "summary": "Armor-piercing Ammunition that reduces the target’s applicable ARM or BTS value by half for its Saving Roll.",
             "facts": {
                 "clarifications": [
-                    "Halve the ARM or BTS Attribute specified by the weapon and round up before each Saving Roll. For example, ARM 5 becomes ARM 3; a positive ARM or BTS cannot be reduced below 1 by AP."
+                    "Halve the ARM or BTS Attribute specified by the weapon and round up before each Saving Roll. For example, ARM 5 becomes ARM 3; a positive ARM or BTS cannot be reduced below 1 by AP.",
+                    "Each successful AP hit requires one Saving Roll against the weapon’s selected ARM or BTS Attribute. Each failed roll inflicts one Wound. A Critical adds one more Saving Roll using that same halved Attribute.",
+                    "On a qualifying attack, [[skill:immunity|Immunity (AP)]] ignores AP’s halving but does not cancel the other effects of combined Ammunition: [[ammunition:da|DA]] still requires two rolls for an AP+DA hit. [[skill:immunity|Immunity (ARM/BTS)]] has different, Saving Attribute-dependent coverage and can treat the covered Ammunition as [[ammunition:normal|Normal]]; its Comms Attack and Critical exceptions remain governed by the [[skill:immunity|Immunity]] rule. These conditional cases are rule-derived, not new AP mechanics."
                 ],
                 "ammunitionResolution": {
                     "criticalAdditionalSavingRolls": 1,
@@ -20233,7 +20235,9 @@
             "summary": "Electromagnetic Ammunition that forces multiple reduced-BTS Saving Rolls and can disable affected targets.",
             "facts": {
                 "clarifications": [
-                    "Both Saving Rolls from each E/M hit use half the target’s BTS, rounded up. For example, BTS 5 becomes BTS 3; a positive BTS value cannot be reduced below 1 by E/M."
+                    "Both Saving Rolls from each E/M hit use half the target’s BTS, rounded up. For example, BTS 5 becomes BTS 3; a positive BTS value cannot be reduced below 1 by E/M.",
+                    "A Critical E/M hit requires a third BTS/2 Saving Roll. If at least one Saving Roll fails, the target enters [[state:isolated|Isolated State]]; Heavy Infantry (HI), TAGs, Remotes (REM), and Vehicles (VH) also enter [[state:immobilized-b|Immobilized-B State]]. These are conditional [[trait:state|State]] effects, not Wounds caused by E/M itself; the [[ammunition:normal|Normal Ammunition]] component of a combined [[weapon-property:n-em|N+E/M]] attack has its own Wound effect.",
+                    "A Trooper failing an E/M Saving Roll normally makes the usual [[rule:guts-roll|Guts Roll]], if applicable. HI, TAGs, REMs, and VHs that become [[state:immobilized-b|Immobilized-B]] cannot make that Guts Roll; [[skill:courage|Courage]] or an equivalent Skill can also remove that requirement. Any [[skill:immunity|Immunity]] exception depends on its listed type and the Attack, not merely on the presence of E/M Ammunition."
                 ],
                 "ammunitionResolution": {
                     "criticalAdditionalSavingRolls": 1,

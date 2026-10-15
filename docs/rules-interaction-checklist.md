@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **168/179** complete, **11** pending.
+- Supporting semantic identities: **170/179** complete, **9** pending.
 - Current authored outgoing relations: **444**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -872,15 +872,15 @@ review. `declaration-category` projection records are excluded.
 
 ### 1.0.0
 
-#### Ammunition (4/11)
+#### Ammunition (6/11)
 
-- [ ] **Armor Piercing (AP) Ammunition** (`ammunition:ap`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Armor Piercing (AP) Ammunition** (`ammunition:ap`) — reviewed: English N5.3 p. 63, Spanish N5.3 p. 66 and pinned English Wiki AP revision 2990 confirm one ARM/2 or BTS/2 Saving Roll per hit, upward rounding with positive minimum 1, one Wound per failed roll and an additional modified roll for a Critical. The owning Immunity rule conditionally covers AP for applicable non-Comms attacks: Immunity (AP) leaves DA rolls intact on AP+DA, whereas Immunity (ARM/BTS) may treat covered Ammunition as Normal. No unconditional outgoing relation from AP to Immunity or combined components is warranted.
   - outgoing: none
 - [x] **Double Action (DA) Ammunition** (`ammunition:da`) — reviewed: N5.3 English p. 64 and pinned English Wiki DA revision 2991 confirm two mandatory Saving Rolls per hit even after a failed first roll or Unconscious, one Wound per failed roll and a third roll for a Critical. Related BioWeapon/Immunity/combined-Ammunition behavior remains owned and conditioned by those rules; DA itself has no additional outgoing graph edge.
   - outgoing: none
 - [x] **Eclipse Ammunition** (`ammunition:eclipse`) — reviewed: N5.3 English p. 64, Spanish p. 64 and pinned English Wiki Eclipse revision 3789 confirm Smoke inheritance, Reflective zero-visibility/MSV exception and BS Attack visibility-MOD exception. The outgoing uses-effects-of relation targets Smoke while the explicit clarifications and typed visibility facts preserve Eclipse's visor exception; no unconditional visor-negation edge is implied.
   - `uses-effects-of` → Smoke Ammunition (`ammunition:smoke`)
-- [ ] **Electromagnetic (E/M) Ammunition** (`ammunition:em`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Electromagnetic (E/M) Ammunition** (`ammunition:em`) — reviewed: English/Spanish N5.3 p. 64 and pinned English Wiki E/M revision 3418 confirm two BTS/2 rolls per hit (a third for a Critical), Isolated on a failed roll and additional Immobilized-B only for HI, TAG, REM, VH. Those conditional causes-state relations remain in the graph. E/M alone does not inflict Wounds; Normal in N+E/M has separate effects. After a failed E/M roll a usual Guts Roll applies unless inapplicable: affected HI/TAG/REM/VH now IMM-B cannot roll, while Courage/equivalent can ignore it. Immunity depends on matching type and attack classification, not an unconditional E/M relationship.
   - `causes-state` → Isolated State (`state:isolated`)
   - `causes-state` → Immobilized-B State (`state:immobilized-b`)
 - [ ] **Explosive (EXP) Ammunition** (`ammunition:exp`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
