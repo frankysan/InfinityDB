@@ -16,6 +16,9 @@ are not retroactively relabeled.
   published ITS missions. Season 18 starts with Battleground, including
   its end-of-game Sectors, size-dependent map, 2/3/5-point scoring and
   special rules. Shared scenario links retain the exact season and game size.
+- Pitcher and Mine Dispenser now explain what their successful shots
+  place on the table, how those deployed objects behave, and how launcher
+  Traits and charge counts differ from the resulting Equipment or Mines.
 - Marksman Rifle profiles now explain their shared range/PS baseline, with
   direct links to each variant's Ammunition and Traits. MULTI modes stay
   separate, and Breaker keeps its own BTS-based AP explanation.
@@ -197,6 +200,12 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing + Web backend + Web frontend:** Add source-reviewed
+  Pitcher and Mine Dispenser references. Pitcher deploys Repeaters without
+  a damaging Saving Roll; Mine Dispenser inherits Drop Bears BS-mode
+  placement, not Drop Bears' PH or Shock Mine profile. Link canonical
+  targetless, ammunition/Equipment, Disposable and Double Shot rules,
+  with cited placement and source-profile qualifications.
 - **Data processing + Web backend + Web frontend:** Publish shared N5.3
   Marksman Rifle guidance for six single-mode source identities and one
   separate MULTI three-mode reference. Use exact source profiles and

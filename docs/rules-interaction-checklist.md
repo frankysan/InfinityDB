@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **184/184** complete, **0** pending.
-- Current authored outgoing relations: **454**.
+- Supporting semantic identities: **186/186** complete, **0** pending.
+- Current authored outgoing relations: **468**.
 - Explicitly tracked future/deferred interactions: **111**.
 
 ## 0.7.0 primary catalog review
@@ -980,7 +980,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (53/53)
+#### Weapon (55/55)
 
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1106,6 +1106,14 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
 - [x] **Marksman Rifles** (`weapon:marksman-rifles`) — reviewed: N5.3 chart p. 180, September 26 archived English Weapon Chart and pinned Army: all eight Marksman types have PS 7 and identical range bands; six previously undefined single-mode variants now link to this shared family. Each of those six retains its own Ammunition, Saving Roll Attribute, Trait and scoped navigation associations. Breaker and MULTI retain separate authoritative Weapon definitions to avoid ambiguous family mappings. No ammunition or Trait is inherited universally, especially not by MULTI Anti-Material Mode.
   - outgoing: none
+- [x] **Mine Dispenser** (`weapon:mine-dispenser`) — reviewed: N5.3 pp. 71-72/181 and pinned Wiki: Mine Dispenser uses its own BS Weapon Chart profile, but adopts the Drop Bears BS Mode Mine Token placement procedure, including Conclusion timing, no same-Order detonation and placement restrictions. Mine subtype is supplied by bracketed Unit Profile; do not inherit Drop Bears PH roll or Shock subtype. Double Shot optionally expends both Disposable (2) charges for B2. Army savingNum=1 is non-operative with no Saving Roll Attribute or Ammunition; no damaging launcher attack is inferred.
+  - `modifies-use-of` → Drop Bears (`weapon:drop-bears`)
+  - `uses-effects-of` → Mines (`weapon:mines`)
+  - `uses-effects-of` → Targetless (`trait:targetless`)
+  - `uses-effects-of` → Speculative Attack (`trait:speculative-attack`)
+  - `uses-effects-of` → Double Shot (`trait:double-shot`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `enables-use-of` → Speculative Attack (`skill:speculative-attack`)
 - [x] **Mines** (`weapon:mines`) — reviewed: Shared Mine mechanics: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary.
   - `uses-effects-of` → Deployable (`trait:deployable`)
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
@@ -1168,6 +1176,14 @@ review. `declaration-category` projection records are excluded.
 - [x] **Pistol** (`weapon:pistol`) — reviewed: N5.3 p. 182: PS 9, B2, Normal ammo and one ARM Saving Roll. No special effect inferred.
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
   - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+- [x] **Pitcher** (`weapon:pitcher`) — reviewed: N5.3 pp. 73/187 and pinned Wiki Pitcher (N5.2 corrected ranges): successful BS/Targetless shot places a Deployable Repeater Token at impact. No damaging PS, Ammunition or Saving Rolls; the Repeater equipment owns its Hacking Area effect. Disposable (2), Speculative Attack, Indiscriminate, Non-Lethal and the carried-forward FAQ on occupied placement apply. A Pitcher shot is not Place Deployable.
+  - `uses-effects-of` → Deployable Repeater (`equipment:deployable-repeater`)
+  - `uses-effects-of` → Targetless (`trait:targetless`)
+  - `uses-effects-of` → Speculative Attack (`trait:speculative-attack`)
+  - `uses-effects-of` → Disposable (X) (`trait:disposable-x`)
+  - `uses-effects-of` → Indiscriminate (`trait:indiscriminate`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+  - `enables-use-of` → Speculative Attack (`skill:speculative-attack`)
 - [x] **Plasma Sniper Rifle** (`weapon:plasma-sniper-rifle`) — reviewed: N5.3 chart p. 185 and Combined Saving Roll p. 67: Blast Mode has N, PS 6/B2, ARM and BTS one roll each, circular Impact Template; Hit Mode has N, PS 5/B2, one ARM and one BTS roll and no Template. A Critical adds one ARM roll only. This is Combined Saving Roll, not combined Ammunition.
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
   - `uses-effects-of` → Impact Template (`trait:impact-template`)

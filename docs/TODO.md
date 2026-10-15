@@ -557,12 +557,20 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Missing Weapon definitions decrease from 79 to 72 with no ambiguous
       family mappings. API and responsive browser regression evidence is
       recorded privately under `local/audits/`.
+    - [x] Publish Pitcher and Mine Dispenser as source-specific support
+      Weapon definitions. Pitcher places Deployable Repeater Equipment,
+      while Mine Dispenser applies Drop Bears BS-mode placement with a
+      profile-specified Mine subtype and the launcher's own BS/Double Shot
+      profile. Preserve no-damage/no-Saving-Roll semantics and the imported
+      Mine Dispenser non-operative savingNum=1 value. The N5.3 PDF, pinned
+      Wiki, Army and applicable FAQ support the descriptions; missing
+      Weapon definitions decrease from 72 to 70 with no new blocker.
     - [ ] Continue source-specific Weapon review without duplicating
       canonical Ammunition or Trait rules. Earlier triage found
       47 actionable reviews, 33 accepted shared-only identities,
       and 9 multi-profile candidates; reconcile those classifications
-      with the now-published Flamethrower and Marksman batches. Pitcher
-      and Mine Dispenser still require missing-effect source reviews.
+      with the now-published Flamethrower, Marksman and support-weapon
+      batches.
     - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
       prose clause by clause; identify missing facts, relationships, and browser
       coverage separately from raw source notation differences.
@@ -1359,10 +1367,11 @@ acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
     views checks row/cell geometry and overflow at 320, 390, 400, 600 and 768 px;
     this resolves the presentation defect, not the broader 1.0 browser gate.
   - [x] Complete the maintained 1.0 interaction-review target, regenerate the
-    checklist, and verify the release-scoped audit gate passes. All 184 supporting
+    checklist, and verify the release-scoped audit gate passes. All 186 supporting
     identities are now reviewed, including the shared Flamethrower and
-    Marksman Rifle families, the MULTI Marksman mode reference, all eleven
-    Ammunition records, and the four N5.3 core Scenarios. The final Supplies review confirms pickup,
+    Marksman Rifle families, the MULTI Marksman mode reference, the
+    Pitcher and Mine Dispenser support weapons, all eleven Ammunition
+    records, and the four N5.3 core Scenarios. The final Supplies review confirms pickup,
     transfer, carrier and scoring restrictions, edge-based marker placement,
     shared Specialist eligibility, and the minimum-VP early ending against
     N5.3/N5.2 and pinned Wiki sources. This closes the interaction-review

@@ -4712,6 +4712,177 @@
             }
         },
         {
+          "id": "weapon:pitcher",
+          "kind": "weapon",
+          "name": "Pitcher",
+          "summary": "The Pitcher uses [[skill:bs-attack|BS Attack]] and [[trait:targetless|Targetless]] to fire at a chosen location. A successful BS Roll places a [[equipment:deployable-repeater|Deployable Repeater]] Token labelled [[equipment:repeater|REPEATER]] at the point of impact. The Token provides [[equipment:repeater|Repeater]] effects, not damage.\n\nThe launcher has Burst 1, [[trait:disposable-x|Disposable (2)]], [[trait:speculative-attack|Speculative Attack]], [[trait:indiscriminate|Indiscriminate]] and [[trait:non-lethal|Non-Lethal]]. Use the linked [[skill:speculative-attack|Speculative Attack]] rules for attacks without LoF. The Pitcher profile lists no PS, Ammunition or Saving Roll.\n\nFiring a Pitcher is not the [[skill:place-deployable|Place Deployable]] Skill. The reviewed FAQ explains that when another Trooper occupies the intended placement before Conclusion, a different legal position can be chosen. If none is legal, the deployed Equipment is lost.",
+          "facts": {
+            "sourceNotes": [
+              "The September 2026 N5.3 chart, pinned Army snapshot and English Wiki's N5.2-updated Pitcher chart share the revised range bands. The Wiki retains the older chart as historical text; it is not the current weapon profile."
+            ]
+          },
+          "composition": {
+            "role": "definition"
+          },
+          "scope": {
+            "game": "N5",
+            "seasons": [
+              "current"
+            ]
+          },
+          "armyLinks": [
+            {
+              "entity": "weapon",
+              "id": "pitcher"
+            }
+          ],
+          "variantSemantics": {
+            "inheritance": "family"
+          },
+          "relations": [
+            {
+              "type": "uses-effects-of",
+              "recordId": "equipment:deployable-repeater"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "trait:targetless"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "trait:speculative-attack"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "trait:disposable-x"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "trait:indiscriminate"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "trait:non-lethal"
+            },
+            {
+              "type": "enables-use-of",
+              "recordId": "skill:speculative-attack"
+            }
+          ],
+          "citations": [
+            {
+              "sourceId": "n5-core-v5.3-pdf",
+              "page": 73,
+              "section": "Pitcher"
+            },
+            {
+              "sourceId": "n5-core-v5.3-pdf",
+              "page": 187,
+              "section": "Weapon Chart: Pitcher"
+            },
+            {
+              "sourceId": "wiki-en-20260926-200832",
+              "member": "Pitcher",
+              "heading": "Pitcher"
+            },
+            {
+              "sourceId": "n5-faq-v0.1-en-pdf",
+              "page": 2,
+              "section": "Place Deployable position occupied before Conclusion"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-10-15"
+          }
+        },
+        {
+          "id": "weapon:mine-dispenser",
+          "kind": "weapon",
+          "name": "Mine Dispenser",
+          "summary": "The Mine Dispenser is a [[skill:bs-attack|BS Attack]] Weapon that fires [[weapon:mines|Mines]], not an attack with its own damaging Ammunition or Saving Roll. The deployed Mine type is specified in brackets after the Weapon name on the Trooper's Unit Profile; use that Mine's printed effects rather than inventing a default type.\n\nIt uses the **BS Mode** placement rules of [[weapon:drop-bears|Drop Bears]], but uses the user's BS Attribute, not [[trait:bs-weapon-ph|BS Weapon (PH)]]. A successful shot places a visible MINE (-3) Token in the Conclusion step. As for [[weapon:drop-bears|Drop Bears]] BS Mode, the Token cannot detonate during the Order in which it was fired.\n\nLike [[weapon:drop-bears|Drop Bears]] BS Mode, placement is restricted if an enemy [[skill:camouflage|Camouflage]] Marker is within the intended Trigger Area, unless a valid non-camouflaged enemy is there too. After placement the Token follows the relevant [[weapon:mines|Mines]] rules and the selected Mine type's own Ammunition and effects.\n\nThe launcher has [[trait:targetless|Targetless]], [[trait:speculative-attack|Speculative Attack]], [[trait:double-shot|Double Shot]] and [[trait:disposable-x|Disposable (2)]]. During the Active Turn, the optional +1 Burst consumes both remaining charges; with only one charge left, a legal Burst 1 use remains possible.",
+          "facts": {
+            "sourceNotes": [
+              "Army stores savingNum=1 while the N5.3 Weapon Chart prints no Saving Roll for the Mine Dispenser launcher. Its saving Attribute and Ammunition are also blank; do not treat the imported non-operative number as a roll against a Trooper.",
+              "[[weapon:drop-bears|Drop Bears]] BS Mode supplies the published placement procedure, not [[weapon:drop-bears|Drop Bears]]' PH throw modifier or its Shock Mine subtype. The Mine Dispenser uses BS and each Trooper's explicitly specified bracketed Mine type."
+            ]
+          },
+          "composition": {
+            "role": "definition"
+          },
+          "scope": {
+            "game": "N5",
+            "seasons": [
+              "current"
+            ]
+          },
+          "armyLinks": [
+            {
+              "entity": "weapon",
+              "id": "mine-dispenser"
+            }
+          ],
+          "variantSemantics": {
+            "inheritance": "family"
+          },
+          "relations": [
+            {
+              "type": "modifies-use-of",
+              "recordId": "weapon:drop-bears"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "weapon:mines"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "trait:targetless"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "trait:speculative-attack"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "trait:double-shot"
+            },
+            {
+              "type": "uses-effects-of",
+              "recordId": "trait:disposable-x"
+            },
+            {
+              "type": "enables-use-of",
+              "recordId": "skill:speculative-attack"
+            }
+          ],
+          "citations": [
+            {
+              "sourceId": "n5-core-v5.3-pdf",
+              "page": 72,
+              "section": "Mine Dispenser"
+            },
+            {
+              "sourceId": "n5-core-v5.3-pdf",
+              "page": 71,
+              "section": "Drop Bears BS Mode"
+            },
+            {
+              "sourceId": "n5-core-v5.3-pdf",
+              "page": 181,
+              "section": "Weapon Chart: Mine Dispenser"
+            },
+            {
+              "sourceId": "wiki-en-20260926-200832",
+              "member": "Mine_Dispenser",
+              "heading": "Mine Dispenser"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-10-15"
+          }
+        },
+        {
             "id": "weapon:drop-bears",
             "kind": "weapon",
             "name": "Drop Bears",
