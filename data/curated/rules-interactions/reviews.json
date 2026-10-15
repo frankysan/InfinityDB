@@ -1866,8 +1866,9 @@
     {
       "recordId": "ammunition:exp",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English and Spanish N5.3 p. 65 and pinned Wiki EXP revision 2994 confirm three mandatory Saving Rolls per hit even after Unconscious; each failed roll inflicts one Wound, and a Critical adds one roll (four total). N5.3 p. 67 combined AP+EXP example applies AP's half ARM/BTS to all four rolls. The existing conditional Immunity (ARM) AP+EXP case replaces covered ammunition effects with Normal for a non-Comms ARM attack; Critical remains unless Immunity (Critical) applies. There is no unconditional outgoing relation from base EXP to AP or Immunity."
     },
     {
       "recordId": "ammunition:normal",
@@ -1904,8 +1905,9 @@
     {
       "recordId": "ammunition:t2",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 p. 67, Spanish p. 67 and pinned Wiki T2 revision 2999 confirm two Wounds on a failed hit Saving Roll and only one on failure of the additional Critical roll; players must identify dice before rolling. Cross-source wording differs: English PDF specifies ARM Roll, Spanish PDF and English Wiki say Saving Roll without an Attribute. Retain the weapon's authoritative printed Saving Roll Attribute and expose the discrepancy in sourceNotes. Applicable Immunity (T2) reduces covered failed-hit effects to Normal, without automatically removing a Critical roll; this is derived, not printed specifically for T2. No unconditional outgoing relation is justified."
     },
     {
       "recordId": "scenario:domination",

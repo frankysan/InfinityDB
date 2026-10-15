@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **170/179** complete, **9** pending.
+- Supporting semantic identities: **172/179** complete, **7** pending.
 - Current authored outgoing relations: **444**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -872,7 +872,7 @@ review. `declaration-category` projection records are excluded.
 
 ### 1.0.0
 
-#### Ammunition (6/11)
+#### Ammunition (8/11)
 
 - [x] **Armor Piercing (AP) Ammunition** (`ammunition:ap`) — reviewed: English N5.3 p. 63, Spanish N5.3 p. 66 and pinned English Wiki AP revision 2990 confirm one ARM/2 or BTS/2 Saving Roll per hit, upward rounding with positive minimum 1, one Wound per failed roll and an additional modified roll for a Critical. The owning Immunity rule conditionally covers AP for applicable non-Comms attacks: Immunity (AP) leaves DA rolls intact on AP+DA, whereas Immunity (ARM/BTS) may treat covered Ammunition as Normal. No unconditional outgoing relation from AP to Immunity or combined components is warranted.
   - outgoing: none
@@ -883,7 +883,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Electromagnetic (E/M) Ammunition** (`ammunition:em`) — reviewed: English/Spanish N5.3 p. 64 and pinned English Wiki E/M revision 3418 confirm two BTS/2 rolls per hit (a third for a Critical), Isolated on a failed roll and additional Immobilized-B only for HI, TAG, REM, VH. Those conditional causes-state relations remain in the graph. E/M alone does not inflict Wounds; Normal in N+E/M has separate effects. After a failed E/M roll a usual Guts Roll applies unless inapplicable: affected HI/TAG/REM/VH now IMM-B cannot roll, while Courage/equivalent can ignore it. Immunity depends on matching type and attack classification, not an unconditional E/M relationship.
   - `causes-state` → Isolated State (`state:isolated`)
   - `causes-state` → Immobilized-B State (`state:immobilized-b`)
-- [ ] **Explosive (EXP) Ammunition** (`ammunition:exp`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **Explosive (EXP) Ammunition** (`ammunition:exp`) — reviewed: English and Spanish N5.3 p. 65 and pinned Wiki EXP revision 2994 confirm three mandatory Saving Rolls per hit even after Unconscious; each failed roll inflicts one Wound, and a Critical adds one roll (four total). N5.3 p. 67 combined AP+EXP example applies AP's half ARM/BTS to all four rolls. The existing conditional Immunity (ARM) AP+EXP case replaces covered ammunition effects with Normal for a non-Comms ARM attack; Critical remains unless Immunity (Critical) applies. There is no unconditional outgoing relation from base EXP to AP or Immunity.
   - outgoing: none
 - [x] **Normal (N) Ammunition** (`ammunition:normal`) — reviewed: N5.3 English p. 63 and pinned English Wiki Normal revision 2989 confirm one Saving Roll per hit, one Wound per failed roll and one extra Saving Roll for a Critical. The weapon specifies ARM/BTS/other Saving Attribute; Normal adds no further condition or outgoing rules relation. Combined Saving Rolls and Immunity exceptions belong to their owning rules, not this base Ammunition.
   - outgoing: none
@@ -895,7 +895,7 @@ review. `declaration-category` projection records are excluded.
   - outgoing: none
 - [ ] **Stun Ammunition** (`ammunition:stun`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
   - `causes-state` → Stunned State (`state:stunned`)
-- [ ] **T2 Ammunition** (`ammunition:t2`) — pending: The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work.
+- [x] **T2 Ammunition** (`ammunition:t2`) — reviewed: English N5.3 p. 67, Spanish p. 67 and pinned Wiki T2 revision 2999 confirm two Wounds on a failed hit Saving Roll and only one on failure of the additional Critical roll; players must identify dice before rolling. Cross-source wording differs: English PDF specifies ARM Roll, Spanish PDF and English Wiki say Saving Roll without an Attribute. Retain the weapon's authoritative printed Saving Roll Attribute and expose the discrepancy in sourceNotes. Applicable Immunity (T2) reduces covered failed-hit effects to Normal, without automatically removing a Critical roll; this is derived, not printed specifically for T2. No unconditional outgoing relation is justified.
   - outgoing: none
 
 #### Equipment (1/1)

@@ -20311,8 +20311,12 @@
             "id": "ammunition:exp",
             "kind": "ammunition",
             "name": "Explosive (EXP) Ammunition",
-            "summary": "Explosive Ammunition that requires three Saving Rolls for each successful hit.",
+            "summary": "Explosive Ammunition requiring three Saving Rolls per successful hit. All three are mandatory even if an earlier failed roll leaves the target [[state:unconscious|Unconscious]]. Each failed Saving Roll inflicts 1 Wound; a Critical adds one more Saving Roll, making four total.",
             "facts": {
+                "clarifications": [
+                    "In the printed [[ammunition:ap|AP]]+EXP example, the three hit rolls and the one extra Critical roll use the weapon’s applicable halved ARM or BTS. This is one extra Critical roll for the combined Ammunition, not one per component.",
+                    "For a covered non-Comms attack that uses ARM, [[skill:immunity|Immunity (ARM)]] treats the combined Ammunition as [[ammunition:normal|Normal]]: one Saving Roll per hit and one more on a Critical, unless [[skill:immunity|Immunity (Critical)]] also applies. This is derived from the general rules and the existing reviewed AP+EXP case, not a standalone EXP exception."
+                ],
                 "ammunitionResolution": {
                     "criticalAdditionalSavingRolls": 1,
                     "rollsPerHit": 3
@@ -20332,6 +20336,16 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "heading": "Explosive (EXP) Ammunition",
                     "member": "Explosive_(EXP)_Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 65,
+                    "heading": "Explosive (EXP) Ammunition"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-es-pdf",
+                    "page": 65,
+                    "heading": "Munición Explosiva (EXP)"
                 }
             ],
             "review": {
@@ -20548,10 +20562,14 @@
             "id": "ammunition:t2",
             "kind": "ammunition",
             "name": "T2 Ammunition",
-            "summary": "High-damage Ammunition whose failed Saving Rolls normally inflict two Wounds.",
+            "summary": "High-damage Ammunition whose failed Saving Rolls normally inflict two Wounds. Its additional Critical Saving Roll inflicts only one Wound if failed; distinguish the two rolls before rolling.",
             "facts": {
                 "clarifications": [
-                    "On a Critical, identify which die represents the hit’s Saving Roll and which represents the extra Critical Saving Roll before rolling. A failed hit roll inflicts 2 Wounds; a failed extra Critical roll inflicts only 1 Wound."
+                    "On a Critical, identify which die represents the hit’s Saving Roll and which represents the extra Critical Saving Roll before rolling. A failed hit roll inflicts 2 Wounds; a failed extra Critical roll inflicts only 1 Wound.",
+                    "When applicable [[skill:immunity|Immunity (T2)]] treats T2 as [[ammunition:normal|Normal]], the two-Wound effect of a failed hit Saving Roll is replaced by the ordinary one-Wound effect. The additional Critical Saving Roll still applies unless [[skill:immunity|Immunity (Critical)]] also applies. This is derived from the general rules, not a printed T2-specific example."
+                ],
+                "sourceNotes": [
+                    "Source wording differs: the English N5.3 PDF p. 67 specifies an ARM Roll for a T2 hit. The Spanish N5.3 PDF p. 67 and pinned English Wiki T2 revision 2999 instead say Saving Roll without naming an Attribute. Preserve each weapon’s printed Saving Roll Attribute; do not generalize the English wording without further evidence."
                 ],
                 "ammunitionResolution": {
                     "criticalAdditionalSavingRolls": 1,

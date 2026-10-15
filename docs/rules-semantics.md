@@ -2668,6 +2668,21 @@ not one per component. No generic composition engine is introduced.
 The separately imported Armed Turret E/Mitter mode lists only one BTS/2
 Saving Roll and must not be rewritten based on generic E/M facts.
 
+The EXP definition (English and Spanish N5.3 p. 65; pinned English Wiki
+revision 2994) requires all three Saving Rolls even after the first failure
+or Unconscious. A Critical adds one roll, not three more; the printed AP+EXP
+example (English N5.3 p. 67) applies AP's defense reduction across the
+resulting four rolls. A qualifying Immunity (ARM) interaction can instead
+treat covered AP+EXP as Normal, as already documented in RS-AW-IMM-001.
+
+T2 has a cross-source wording discrepancy on its base Saving Roll:
+English N5.3 p. 67 specifies an **ARM Roll**, whereas Spanish N5.3 p. 67 and
+the pinned English Wiki T2 revision 2999 say **Saving Roll** without specifying
+the Attribute. All agree that a failed hit roll inflicts two Wounds while
+failure of the additional Critical roll inflicts only one. The maintained
+source note preserves the discrepancy; InfinityDB does not infer an
+Attribute override for individual Weapon profiles from either wording.
+
 Sources:
 
 - Curated Wiki snapshot `wiki-en-20260926-200832`: AP, DA, E/M, EXP, PARA,

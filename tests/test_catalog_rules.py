@@ -963,7 +963,7 @@ def test_ap_em_rounding_and_t2_critical_die_identification_reach_api(
         record = rules_db.composed_record(f"ammunition:{slug}")
         assert record is not None
         clarification_rows = record["facts"]["clarifications"]
-        expected_count = 1 if slug == "t2" else 3
+        expected_count = 2 if slug == "t2" else 3
         assert len(clarification_rows) == expected_count
         text = " ".join(clarification_rows)
         for fragment in case["fragments"]:
@@ -1043,6 +1043,72 @@ def test_ap_em_rounding_and_t2_critical_die_identification_reach_api(
                 ("state:isolated", "failed-saving-roll"),
                 ("state:immobilized-b", "failed-saving-roll"),
             }
+
+
+def test_exp_t2_reviewed_rolls_and_source_discrepancy_reach_api(tmp_path: Path) -> None:
+    """Retain EXP/T2 Critical distinctions and T2's N5.3 wording conflict."""
+    rules_db = _rules_database(tmp_path)
+    app = create_app(
+        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
+        rules_database_path=rules_db.path,
+    )
+    for slug in ("exp", "t2"):
+        record = rules_db.composed_record(f"ammunition:{slug}")
+        assert record is not None
+        if slug == "exp":
+            assert "All three are mandatory" in record["summary"]
+            assert "four total" in record["summary"]
+            assert "[[state:unconscious|Unconscious]]" in record["summary"]
+            assert "[[ammunition:ap|AP]]+EXP" in " ".join(
+                record["facts"]["clarifications"]
+            )
+            assert "[[skill:immunity|Immunity (ARM)]]" in " ".join(
+                record["facts"]["clarifications"]
+            )
+            assert record["facts"]["ammunitionResolution"] == {
+                "criticalAdditionalSavingRolls": 1,
+                "rollsPerHit": 3,
+            }
+            assert {(c["source_id"], c.get("page")) for c in record["citations"]} >= {
+                ("n5-core-v5.3-pdf", 65),
+                ("n5-core-v5.3-es-pdf", 65),
+            }
+        else:
+            assert "distinguish the two rolls" in record["summary"]
+            assert "Immunity (T2)" in " ".join(record["facts"]["clarifications"])
+            note = record["facts"]["sourceNotes"][0]
+            assert "English N5.3 PDF p. 67 specifies an ARM Roll" in note
+            assert "Spanish N5.3 PDF p. 67" in note
+            assert "Wiki T2 revision 2999" in note
+            assert "weapon’s printed Saving Roll Attribute" in note
+            assert record["facts"]["ammunitionResolution"]["woundsPerFailedSave"] == {
+                "hit": 2,
+                "criticalAdditionalRoll": 1,
+            }
+
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=f"/api/ammunition/{slug}", REQUEST_METHOD="GET")
+        statuses: list[str] = []
+        response = app(
+            environ,
+            lambda status, headers, exc_info=None, _statuses=statuses: _statuses.append(
+                status
+            ),
+        )
+        assert statuses == ["200 OK"]
+        published = json.loads(b"".join(response))["rules"][0]
+        assert published["summary"] == record["summary"]
+        assert published["facts"]["clarifications"] == record["facts"]["clarifications"]
+        if slug == "exp":
+            assert any(
+                token["target"] == "ammunition:ap"
+                for tokens in published["fact_tokens"]["clarifications"]
+                for token in tokens
+                if token["type"] == "reference"
+            )
+        else:
+            assert published["facts"]["sourceNotes"] == record["facts"]["sourceNotes"]
 
 
 def test_smoke_eclipse_opposition_and_msv_exception_reach_api(

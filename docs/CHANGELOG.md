@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- EXP now explains its mandatory three Saving Rolls and fourth Critical roll,
+  including AP+EXP. T2 distinguishes its two-Wound hit from its one-Wound
+  additional Critical roll and retains a source-language discrepancy.
 - AP Ammunition now explains its Saving Rolls and conditional Immunity cases;
   E/M explains when a failed save causes Isolated/Immobilized-B and why
   some affected troops cannot make the ordinary Guts Roll.
@@ -320,6 +323,9 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing + Web frontend:** Clarify EXP's mandatory Saving Rolls
+  and combined AP+EXP example; record T2's distinct Critical roll and explicit
+  English/Spanish/Wiki Saving Attribute discrepancy without overriding Weapon data.
 - **Data processing + Web frontend:** Clarify AP's Critical and conditional
   Immunity interactions, and E/M's BTS/2 Critical rolls, troop-specific States,
   and Guts Roll exceptions. Preserve the existing typed Ammunition mechanics.
