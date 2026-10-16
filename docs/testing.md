@@ -509,6 +509,18 @@ overwrite imported Army data. The regression module exercises parsers using
 synthetic inputs and conditionally validates the pinned source matrix when
 those local source files are available.
 
+For the older Wiki Weapon Chart name inventory, use the read-only
+explicit-alias audit. It preserves repeated alternative tables and reports
+unresolved identities independently from source-profile value differences.
+The pinned Wiki and Army files are private, not committed:
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_wiki_weapon_chart_names --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --army-db data/generated/infinity.db --curated-rules data/curated/rules/n5-core-v5.3.json --json-output local/audits/wiki-weapon-names.json --markdown-output local/audits/wiki-weapon-names.md
+```
+
+A name alias is not a new Weapon rule or corrected Weapon Chart profile.
+Different-valued alternative rows remain separately reviewable.
+
 To reconcile unresolved Weapon rule enrichment without inventing definitions,
 combine the existing enrichment and chart reports in a separate deterministic
 source-to-reference triage:

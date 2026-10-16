@@ -731,6 +731,50 @@ pinned English and Spanish Wiki snapshots (Weapon Chart, Mines and
 Dazer pages), and pinned Army metadata, all held as separate versions
 outside Git. This is a source/profile audit, not a gameplay ruling.
 
+### RR-AW-WIKI-NAMES-001 — Wiki chart names are not missing Weapon profiles
+
+**Project domain:** Data processing. **Scope:** N5 v5.3 Weaponry;
+the pinned English Wiki Weapon Chart and imported Army snapshot.
+
+The read-only identity audit identifies **208 Wiki Weapon-profile rows**,
+including repeated alternative table sections, but only **174 unique
+names/modes**. All 174 have an explicit classification: 162 exact Army
+name/mode identities, ten name aliases, one mode-name alias, and one
+editorial row that is not a Weapon profile. No unexplained chart-name
+identity remains.
+
+- **Plural names:** The nine Wiki Mine rows (including Chest Mine's
+  two modes) and CrazyKoalas correspond to singular Army Weapon names.
+  These are explicit *source-name aliases*, not separate weapon types.
+- **Feuerbach (Blast Mode):** The archived Wiki name corresponds to
+  Army/PDF **Feuerbach (Explosive Mode)**. Both source profiles use
+  PS 6, B1, EXP, three ARM Saving Rolls. Do not invent another mode.
+- **Suppressive Fire Mode:** The Wiki's asterisked generic firing-mode
+  row is an editorial chart reference, not an independently cataloged
+  Weapon with a fixed ammunition or damage value.
+- **Repeated chart rows:** 34 additional occurrences are mostly
+  identical duplicated alternative tables. Four repeated mode names
+  actually have different values between tables: Trench-Hammer BS/CC
+  and Kobra Pistol BS/CC. Their source differences remain tracked by
+  the separate mode/profile audits; identity matching does not make
+  their mechanics equivalent.
+- **SymbioBomb:** The source provides an assignment and one-use
+  Pheroware rule but no standalone Weapon Chart or Army attack profile.
+  It already has a source-cited weapon:symbiobomb rule. A missing
+  chart row is not a missing gameplay definition.
+
+The reproducible tools/audit_wiki_weapon_chart_names.py report pins
+the Wiki member, archive and Army database hashes, preserves alternate
+table occurrences, and fails closed on unresolved identities. Its JSON
+and Markdown outputs stay in ignored local/audits/ and do not
+normalize upstream data. This **closes the name-identity inventory
+only**; it does not assert complete special-weapon prose, browser
+coverage or definitive source precedence.
+
+Sources: pinned English Wiki Weapon_Chart and original Army metadata;
+official N5.3 pp. 68?74 and 176?188 are independent profile/prose
+references. No ITS mission content was considered.
+
 ### RR-AW-SCENERY-001 — Anti-materiel effects connect Weapon rules to scenery
 
 **Scope:** core N5.

@@ -686,12 +686,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       prose review, including entries without four printed Attributes.
       Identify missing facts, relationships and browser coverage separately
       from source notation differences.
-    - [ ] Reconcile remaining Wiki Weapon Chart *text-name* mismatches as aliases,
-      multi-mode entries, or source-specific rules (including Chest Mine and SymbioBomb).
-      This earlier Wiki text-match audit is separate from the complete 171-row N5 PDF
-      profile alignment and its single chart-absent catalog identity. Reconcile the
-      source prose (pp. 68–74), printed profiles (pp. 176–188), and API/browser
-      coverage before classifying genuine missing facts, relationships, or definitions.
+    - [x] Classify the archived English Wiki Weapon Chart text-name mismatches
+      against pinned Army identities: 208 rows, 174 distinct names/modes,
+      162 exact matches, ten explicitly identified plural aliases, one
+      Feuerbach Blast/Explosive Mode name alias and one generic non-Weapon
+      Suppressive Fire row; zero unresolved identities. Preserve the four
+      different-valued duplicate modes (Trench-Hammer BS/CC and Kobra BS/CC)
+      for their separate source/profile reviews. SymbioBomb is source-prose
+      only without an Army/Chart attack profile. See RR-AW-WIKI-NAMES-001.
+    - [ ] Continue the clause-level special-weapon prose audit (N5.3
+      pp. 68-74) and profile-to-API/browser relationships. The Wiki name
+      reconciliation does not establish complete effects or gameplay.
     - [ ] Register the supplied FAQ v0.1 as its own pinned source publication and
       reconcile core versus ITS-season applicability before curating rulings. Its
       content hash and the core PDF/history ZIP hashes are available in the local
