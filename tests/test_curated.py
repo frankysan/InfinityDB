@@ -1949,6 +1949,102 @@ def test_n5_declaration_source_headings_match_pinned_pdf() -> None:
             assert re.search(pattern, document[page - 1].get_text(), re.I), page
 
 
+def test_n5_deployment_and_long_skill_categories_use_own_headings() -> None:
+    root = Path(__file__).parents[1]
+    document = load_curated_document(root / "data/curated/rules/n5-core-v5.3.json")
+    expected: dict[str, tuple[str, int]] = {
+        "infiltration": ("deployment-skill", 97),
+        "forward-deployment": ("deployment-skill", 92),
+        "impersonation": ("deployment-skill", 96),
+        "hidden-deployment": ("deployment-skill", 95),
+        "minelayer": ("deployment-skill", 102),
+        "climb": ("long-skill", 32),
+        "jump": ("long-skill", 34),
+        "combat-jump": ("long-skill", 89),
+        "parachutist": ("long-skill", 105),
+        "triangulated-fire": ("long-skill", 118),
+        "berserk": ("long-skill", 86),
+    }
+    records = {record["id"]: record for record in document["records"]}
+    categories = [
+        record
+        for record in document["records"]
+        if record["kind"] == "declaration-category"
+    ]
+    for skill, (category, page) in expected.items():
+        matches = [
+            record for record in categories
+            if any(link == {"entity": "skill", "id": skill} for link in record["armyLinks"])
+            and record["facts"]["typeId"] == category
+        ]
+        assert len(matches) == 1, skill
+        category_slug = "deployment" if category == "deployment-skill" else "long-skill"
+        assert matches[0]["id"] == f"declaration-category:{category_slug}:p{page}"
+        assert matches[0]["citations"] == [
+            {"sourceId": "n5-core-v5.3-pdf", "page": page}
+        ]
+        definition = records[f"skill:{skill}"]
+        assert category in definition["facts"]["typeIds"], skill
+        if skill in {
+            "infiltration", "impersonation", "hidden-deployment",
+            "climb", "jump", "combat-jump", "parachutist",
+        }:
+            assert any(
+                citation["sourceId"] == "n5-core-v5.3-pdf"
+                and citation["page"] == page
+                for citation in definition["citations"]
+            ), skill
+    sapper = [
+        record for record in categories
+        if any(link == {"entity": "skill", "id": "sapper"} for link in record["armyLinks"])
+    ]
+    assert {
+        (record["facts"]["typeId"], record["citations"][0]["page"])
+        for record in sapper
+    } == {("deployment-skill", 111), ("long-skill", 111)}
+    assert len(sapper) == 2
+    for retired in (
+        "declaration-category:deployment:p89",
+        "declaration-category:deployment:p93",
+        "declaration-category:deployment:p94",
+        "declaration-category:long-skill:p25",
+    ):
+        assert retired not in records
+
+
+def test_n5_deployment_and_long_skill_headings_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    provenance = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text(
+            encoding="utf8"
+        )
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == provenance["corePdfSha256"]
+    patterns = {
+        32: r"CLIMB\s+LONG SKILL",
+        34: r"JUMP\s+LONG SKILL",
+        86: r"BERSERK\s+LONG SKILL",
+        89: r"COMBAT JUMP\s+LONG SKILL",
+        92: r"FORWARD DEPLOYMENT\s+DEPLOYMENT SKILL",
+        95: r"HIDDEN DEPLOYMENT\s+DEPLOYMENT SKILL",
+        96: r"IMPERSONATION\s+DEPLOYMENT SKILL",
+        97: r"INFILTRATION\s+DEPLOYMENT SKILL",
+        102: r"MINELAYER\s+DEPLOYMENT SKILL",
+        105: r"PARACHUTIST\s+LONG SKILL",
+        111: r"SAPPER\s+DEPLOYMENT SKILL\s*/\s*LONG SKILL",
+        118: r"TRIANGULATED FIRE\s+LONG SKILL",
+    }
+    with pdf.open(source) as document:
+        for page, pattern in patterns.items():
+            assert re.search(pattern, document[page - 1].get_text(), re.I), page
+
+
 def test_checked_in_n5_collection_keeps_sensor_category_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

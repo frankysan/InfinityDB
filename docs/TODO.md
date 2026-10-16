@@ -1227,9 +1227,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Preserve the original 367-row audit snapshot and record the
         retired identity crosswalk in the N5.3 reconciliation;
         this is source screening, not full record approval.
-      - [ ] Audit the remaining original declaration-category and
+      - [x] Reconcile the original six Deployment and five Long Skill
+        metadata entries against actual N5.3 headings. Correct the
+        Infiltration, Impersonation and Hidden Deployment pages; split
+        Jump/Climb and Combat Jump/Parachutist into distinct page-scoped
+        records. Pinned source and responsive browser checks passed.
+        The 367-record historical inventory is unchanged; see the
+        N5.3 reconciliation for retired-ID provenance.
+      - [ ] Audit the remaining original Automatic, Short Skill and
         numerical-replacement S-tier records individually against their
-        actual source heading and any conditional action permissions.
+        actual source headings, Army profiles and conditional permissions.
     - [ ] **Visibility Zone inventory additions:** Include the five
       newer Visibility Zone Game terms in final record acceptance;
       they postdate the frozen 367-record explanation-audit inventory.

@@ -8701,7 +8701,7 @@
             }
         },
         {
-            "id": "declaration-category:deployment:p89",
+            "id": "declaration-category:deployment:p97",
             "kind": "declaration-category",
             "name": "Deployment",
             "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
@@ -8727,12 +8727,12 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 89
+                    "page": 97
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -8771,7 +8771,7 @@
             }
         },
         {
-            "id": "declaration-category:deployment:p93",
+            "id": "declaration-category:deployment:p96",
             "kind": "declaration-category",
             "name": "Deployment",
             "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
@@ -8797,16 +8797,16 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 93
+                    "page": 96
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
-            "id": "declaration-category:deployment:p94",
+            "id": "declaration-category:deployment:p95",
             "kind": "declaration-category",
             "name": "Deployment",
             "summary": "The linked Army entries are classified as Deployment in the cited N5 rules.",
@@ -8832,12 +8832,12 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 94
+                    "page": 95
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -9366,7 +9366,42 @@
             }
         },
         {
-            "id": "declaration-category:long-skill:p25",
+            "id": "declaration-category:long-skill:p32",
+            "kind": "declaration-category",
+            "name": "Long Skill",
+            "summary": "The linked Army entries are classified as Long Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "typeId": "long-skill",
+                "order": 50
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "climb"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 32
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-16"
+            }
+        },
+        {
+            "id": "declaration-category:long-skill:p34",
             "kind": "declaration-category",
             "name": "Long Skill",
             "summary": "The linked Army entries are classified as Long Skill in the cited N5 rules.",
@@ -9387,21 +9422,17 @@
                 {
                     "entity": "skill",
                     "id": "jump"
-                },
-                {
-                    "entity": "skill",
-                    "id": "climb"
                 }
             ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 25
+                    "page": 34
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -9426,10 +9457,6 @@
                 {
                     "entity": "skill",
                     "id": "combat-jump"
-                },
-                {
-                    "entity": "skill",
-                    "id": "parachutist"
                 }
             ],
             "citations": [
@@ -9440,7 +9467,42 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
+            }
+        },
+        {
+            "id": "declaration-category:long-skill:p105",
+            "kind": "declaration-category",
+            "name": "Long Skill",
+            "summary": "The linked Army entries are classified as Long Skill in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "typeId": "long-skill",
+                "order": 50
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "parachutist"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 105
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -12307,7 +12369,7 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 94,
+                    "page": 95,
                     "section": "Hidden Deployment"
                 },
                 {
@@ -13239,6 +13301,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 32,
+                    "section": "Climb"
+                },
+                {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Climb",
                     "heading": "Climb"
@@ -13393,6 +13460,11 @@
                 "no-roll"
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 34,
+                    "section": "Jump"
+                },
                 {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Jump",
@@ -15663,6 +15735,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 89,
+                    "section": "Combat Jump"
+                },
+                {
                     "sourceId": "wiki-combat-jump-oldid-3456",
                     "heading": "Combat Jump"
                 }
@@ -15773,6 +15850,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 96,
+                    "section": "Impersonation"
+                },
+                {
                     "sourceId": "wiki-impersonation-oldid-3303",
                     "heading": "Impersonation"
                 }
@@ -15836,6 +15918,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 97,
+                    "section": "Infiltration"
+                },
                 {
                     "sourceId": "wiki-infiltration-oldid-3909",
                     "heading": "Infiltration"
@@ -15951,6 +16038,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 105,
+                    "section": "Parachutist"
+                },
                 {
                     "sourceId": "wiki-parachutist-oldid-4047",
                     "heading": "Parachutist"

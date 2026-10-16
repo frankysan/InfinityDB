@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Deployment and Long Skill declarations now cite their correct N5.3
+  definition pages. Jump and Climb, and Combat Jump and Parachutist,
+  each retain their own source provenance rather than sharing a
+  citation from a different Skill.
 - BS Attack, CC Attack and Discover now cite their actual N5.3
   definition pages; Morpho-Scan is classified only as a Short Skill,
   not as a Basic Short Skill or ARO. Profile-specific numeric Skill

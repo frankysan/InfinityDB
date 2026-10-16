@@ -203,6 +203,44 @@ N5.3 headings and verify downstream declaration projections. The
 remaining declaration families, exceptional ARO permissions and final
 browser/completeness gate must be evaluated independently.
 
+## Deployment and Long Skill source-heading reconciliation (2026-10-16)
+
+A second bounded audit inspected all six currently published Deployment
+mappings and all five original Long Skill mapping records against the
+heading declarations of the pinned English N5.3 rulebook. It corrects
+source provenance, not Skill mechanics or Army profile data.
+
+- Infiltration is a Deployment Skill at p. 97 (previously p. 89);
+  Impersonation at p. 96 (previously p. 93); Hidden Deployment at
+  p. 95 (previously p. 94).
+- Climb and Jump are separate Long Skill headings at pp. 32 and 34.
+  Their former shared p. 25 declaration identity was retired and
+  replaced by one page-scoped record per Skill.
+- Combat Jump remains Long Skill p. 89, while Parachutist is
+  Long Skill p. 105; the former combined p. 89 record was split.
+- Forward Deployment p. 92, Minelayer p. 102, Sapper p. 111,
+  Triangulated Fire p. 118 and Berserk p. 86 were checked and
+  retained. Sapper correctly has both Deployment and Long Skill
+  classifications.
+
+The seven affected full Skill records now cite their correct N5.3
+headings in addition to any existing source revisions. There are
+**61 current declaration-category records**, up from 59, because
+the two shared-source records were split. This is an additive
+current-data change, not a revision of the historical denominator:
+the **367-record original audit inventory stays frozen** and retains
+its original identifiers and S-tier dispositions. Climbing Plus
+and Super-Jump can modify how Climb and Jump are declared; these
+conditional enhancements are not modeled as universally available
+Basic Short Skill declarations here.
+
+Source-pinned regression tests check the twelve owning heading
+declarations and one-to-one source mappings; the rebuilt database
+and eight representative published Skill pages were also checked
+in responsive browsers. Automatic and remaining Short Skill
+category mappings, numerical Army replacement values, conditional
+permissibility, and whole-corpus acceptance remain open.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

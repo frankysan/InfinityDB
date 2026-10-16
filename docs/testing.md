@@ -2249,3 +2249,30 @@ The frozen 367-record explanation audit was not renumbered. This is
 selected declaration source/projection/browser verification, not
 acceptance of every declaration option or any numerical replacement
 variant, and not final whole-corpus acceptance.
+
+## 1.0 Deployment and Long Skill source/browser reconciliation
+
+**Verified 2026-10-16 on the current 1.0 development branch.**
+Deployment and Long Skill declaration metadata was compared with
+the exact headings in the pinned English N5.3 PDF (pp. 32, 34, 86,
+89, 92, 95-97, 102, 105, 111 and 118). Three stale Deployment pages
+were corrected and the shared Jump/Climb and Combat Jump/Parachutist
+mappings split. The unchanged classifications of the other selected
+source headings were checked in the same pass. Seven affected Skill
+definitions now link to their relevant primary-source headings.
+
+The resulting curated data exports 61 declaration-category records.
+Focused tests verify page-scoped mappings, Skill type membership,
+the pinned source headings and the new total of 461 published rules
+database records. Headless Chromium checked eight Skill detail pages
+(Infiltration, Impersonation, Hidden Deployment, Climb, Jump,
+Combat Jump, Parachutist and Sapper) at 1440/390/320 px:
+**24/24 checks passed** for visible declaration badges, absent
+inapplicable ARO/Basic badges, HTTP responses, console errors and
+document overflow. The private verifier, database, reports and
+screenshots are under ignored local/audits/declaration-source-2/.
+
+These are selected metadata and presentation acceptance results,
+not a validation of the 367-record frozen explanation inventory,
+conditional Climbing Plus/Super-Jump use, remaining declaration
+families or whole-corpus release readiness.
