@@ -3103,8 +3103,7 @@ def test_modifiers_explained_player_reference_and_mixed_weapon_navigation(
 def test_modifiers_explained_pinned_page75_scope() -> None:
     import hashlib
 
-    pytest.importorskip("pymupdf")
-    import pymupdf
+    pymupdf = pytest.importorskip("pymupdf")
 
     pdf = Path(__file__).resolve().parents[1] / (
         "data/pdf/rules/n5-rules-v5-3-en.pdf"

@@ -11,6 +11,7 @@ import hashlib
 import html
 import json
 import re
+from importlib import import_module
 from pathlib import Path
 from typing import Any
 from zipfile import ZipFile
@@ -135,7 +136,7 @@ def read_member(archive: ZipFile, name: str) -> tuple[str, str]:
 
 def audit(pdf_en: Path, pdf_es: Path, wiki_en: Path, wiki_es: Path, army_db: Path) -> dict:
     try:
-        import pymupdf
+        pymupdf = import_module("pymupdf")
     except ImportError as exc:
         raise WeaponChartAuditError("pymupdf is required") from exc
 
