@@ -241,6 +241,39 @@ in responsive browsers. Automatic and remaining Short Skill
 category mappings, numerical Army replacement values, conditional
 permissibility, and whole-corpus acceptance remain open.
 
+## Five incorrect Automatic/Deployment mappings (2026-10-16)
+
+The pinned English N5.3 PDF explicitly labels five Skills as
+**Deployment Skill, Optional**, although the additional declaration
+metadata classified them as Automatic:
+
+- Booty: p. 86; removed from the shared Automatic p. 87 entry.
+- Decoy: p. 90; retired the lone Automatic p. 89 identity.
+- MetaChemistry: p. 101; removed from Automatic p. 98.
+- Remdriver: p. 110; removed from Automatic p. 110.
+- Strategic Deployment: p. 112; removed from Automatic p. 112.
+
+Each now has one page-specific Deployment declaration identity and
+a primary-source PDF citation on the owning Skill, preserving the
+earlier Wiki revision evidence. Its underlying Skill type and
+gameplay mechanics were already correct; this fixes the independent
+declaration-category projection only. Existing unrelated Automatic
+mappings in the shared records remain intact.
+
+This bounded correction increases the **current** declaration-category
+record count from 61 to 65, and the exported rules DB from 461 to 465.
+It does not modify or increase the frozen 367-record explanation-audit
+baseline or retroactively grant complete clause acceptance. The other
+Automatic/Short Skill page and ownership mappings still require
+individual source verification. The retained historical
+Automatic p. 93 mapping to Regular is also pending classification
+against the canonical Training rather than being removed without
+a source/consumer audit.
+
+A pinned-source test proves the five exact heading/declaration pairs,
+a curated test prevents reintroduction of the Automatic mappings,
+and browser checks verify all five public Skill category badges.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

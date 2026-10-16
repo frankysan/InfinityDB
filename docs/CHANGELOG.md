@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Booty, Decoy, MetaChemistry, Remdriver and Strategic Deployment now
+  display their correct Deployment Skill category instead of Automatic,
+  with direct N5.3 source citations.
 - Deployment and Long Skill declarations now cite their correct N5.3
   definition pages. Jump and Climb, and Combat Jump and Parachutist,
   each retain their own source provenance rather than sharing a

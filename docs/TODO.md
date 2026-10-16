@@ -1234,9 +1234,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         records. Pinned source and responsive browser checks passed.
         The 367-record historical inventory is unchanged; see the
         N5.3 reconciliation for retired-ID provenance.
+      - [x] Correct five source-confirmed Deployment Skills incorrectly
+        mapped as Automatic: Booty, Decoy, MetaChemistry, Remdriver and
+        Strategic Deployment. Preserve existing Skill mechanics and
+        Wiki evidence; add primary PDF citations, regression tests and
+        responsive category-badge acceptance (15/15 browser cases).
       - [ ] Audit the remaining original Automatic, Short Skill and
         numerical-replacement S-tier records individually against their
         actual source headings, Army profiles and conditional permissions.
+        The Automatic source screening still finds stale page/group
+        candidates; classify the Regular mapping against Training
+        ownership before changing or deleting it.
     - [ ] **Visibility Zone inventory additions:** Include the five
       newer Visibility Zone Game terms in final record acceptance;
       they postdate the frozen 367-record explanation-audit inventory.

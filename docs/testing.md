@@ -2276,3 +2276,27 @@ These are selected metadata and presentation acceptance results,
 not a validation of the 367-record frozen explanation inventory,
 conditional Climbing Plus/Super-Jump use, remaining declaration
 families or whole-corpus release readiness.
+
+## 1.0 Deployment-only Skills wrongly labeled Automatic
+
+**Verified 2026-10-16 against the pinned N5.3 English PDF.** Booty
+(p. 86), Decoy (p. 90), MetaChemistry (p. 101), Remdriver (p. 110)
+and Strategic Deployment (p. 112) each use an explicit Deployment
+Skill heading, not an Automatic heading. Their five independent
+curated declaration mappings now point to the correct source
+pages, while the owning Skills retain their existing mechanics and
+prior Wiki revisions. Regression checks enforce the exact category
+and page and pin the source PDF checksum.
+
+A freshly built rules DB was checked in headless Chrome at 1440,
+390 and 320 px. All five Skill pages displayed exactly one
+Deployment category badge. **15/15 page checks passed** with no
+JavaScript exceptions or document-level horizontal overflow.
+Private evidence and the verifier are under ignored
+local/audits/declaration-automatic-reconciliation/.
+
+The current declaration catalog has 65 records and the rules
+database has 465 total records. The frozen 367-record explanation
+inventory was not modified; this is selected metadata/browser
+acceptance only. Other Automatic category page mismatches and
+training-vs-Skill attribution remain unreviewed.

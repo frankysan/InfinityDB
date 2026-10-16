@@ -2045,6 +2045,69 @@ def test_n5_deployment_and_long_skill_headings_match_pinned_pdf() -> None:
             assert re.search(pattern, document[page - 1].get_text(), re.I), page
 
 
+def test_n5_deployment_only_skills_are_not_automatic_metadata() -> None:
+    path = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+    declarations = [
+        record for record in document["records"]
+        if record["kind"] == "declaration-category"
+    ]
+    expected = {
+        "booty": 86,
+        "decoy": 90,
+        "metachemistry": 101,
+        "remdriver": 110,
+        "strategic-deployment": 112,
+    }
+    assert len(declarations) == 65
+    for slug, page in expected.items():
+        found = [
+            record for record in declarations
+            if {"entity": "skill", "id": slug} in record["armyLinks"]
+        ]
+        assert len(found) == 1, slug
+        item = found[0]
+        assert item["id"] == f"declaration-category:deployment:p{page}"
+        assert item["facts"] == {"typeId": "deployment-skill", "order": 20}
+        assert item["citations"] == [{"sourceId": "n5-core-v5.3-pdf", "page": page}]
+        definition = records[f"skill:{slug}"]
+        assert definition["facts"]["typeIds"] == ["deployment-skill"]
+        assert any(
+            citation["sourceId"] == "n5-core-v5.3-pdf"
+            and citation["page"] == page
+            for citation in definition["citations"]
+        ), slug
+    assert "declaration-category:automatic:p89" not in records
+
+
+def test_n5_deployment_only_headings_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    provenance = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text(
+            encoding="utf8"
+        )
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == provenance["corePdfSha256"]
+    headings = {
+        86: "BOOTY",
+        90: "DECOY",
+        101: "METACHEMISTRY",
+        110: "REMDRIVER",
+        112: "STRATEGIC DEPLOYMENT",
+    }
+    with pdf.open(source) as document:
+        for page, heading in headings.items():
+            pattern = rf"(?<![A-Za-z]){re.escape(heading)}\s+DEPLOYMENT SKILL\s+Optional"
+            assert re.search(pattern, document[page - 1].get_text(), re.I), page
+
+
 def test_checked_in_n5_collection_keeps_sensor_category_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
