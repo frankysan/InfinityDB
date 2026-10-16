@@ -986,12 +986,48 @@
       "reviewedOn": "2026-10-13",
       "note": "N5.3 p. 71 and matching archived Wiki page: source-only Short Skill, Deactivator and allied-ball requirements, LoF/ZoC, WIP+3 Normal Roll with range MODs, Eclipse placement/removal. No Army Skill identity synthesized."
     },
-    {"recordId":"weapon:cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: PS 8, Burst 1, Normal N, one ARM Saving Roll and CC; generic CC Weapon requirements elsewhere do not mean this specific catalog identity."},
-    {"recordId":"weapon:para-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: PARA uses a PH-6 Saving Roll and Immobilized-A rather than Wounds; printed PS is a dash, with Non-Lethal and CC retained."},
-    {"recordId":"weapon:da-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: DA requires two ARM Saving Rolls; PS 8 and Anti-materiel/CC Traits remain distinct from the roll count."},
-    {"recordId":"weapon:ap-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP."},
-    {"recordId":"weapon:shock-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: Shock uses the printed one ARM Saving Roll; conditional Shock effects belong to the linked Ammunition definition."},
-    {"recordId":"weapon:e-m-cc-weapon","targetRelease":"1.0.0","status":"reviewed","reviewedOn":"2026-10-14","note":"N5.3 p.177: preserve N+E/M printed notation and two BTS/2 rolls; E/M target-dependent states remain linked. Do not synthesize an unlisted extra ARM roll."},
+    {
+      "recordId": "weapon:cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: PS 8, Burst 1, Normal N, one ARM Saving Roll and CC; generic CC Weapon requirements elsewhere do not mean this specific catalog identity."
+    },
+    {
+      "recordId": "weapon:para-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: PARA uses a PH-6 Saving Roll and Immobilized-A rather than Wounds; printed PS is a dash, with Non-Lethal and CC retained."
+    },
+    {
+      "recordId": "weapon:da-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: DA requires two ARM Saving Rolls; PS 8 and Anti-materiel/CC Traits remain distinct from the roll count."
+    },
+    {
+      "recordId": "weapon:ap-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP."
+    },
+    {
+      "recordId": "weapon:shock-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: Shock uses the printed one ARM Saving Roll; conditional Shock effects belong to the linked Ammunition definition."
+    },
+    {
+      "recordId": "weapon:e-m-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: preserve N+E/M printed notation and two BTS/2 rolls; E/M target-dependent states remain linked. Do not synthesize an unlisted extra ARM roll."
+    },
     {
       "recordId": "weapon:exp-cc-weapon",
       "targetRelease": "1.0.0",
@@ -1006,31 +1042,181 @@
       "reviewedOn": "2026-10-14",
       "note": "N5.3 p. 177 and archived BioWeapon Trait distinguish the printed N/BTS/one-save baseline from DA+Shock against VITA. Two BTS saves versus VITA and the STR exception are derived from the component rules, not independently printed modes. Shock applies only under its conditions. Preserve unresolved Immunity subtleties and the exact Army profile."
     },
-    {"recordId": "weapon:pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: PS 9, B2, Normal ammo and one ARM Saving Roll. No special effect inferred."},
-    {"recordId": "weapon:heavy-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: PS 6 and B2 with Shock ammo and one ARM Saving Roll. Source distinguishes Shock effects from PS."},
-    {"recordId": "weapon:boarding-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: Blast Mode has small Direct Template, Intuitive Attack and B1; Hit Mode has range bands, B2 and no Blast-only Traits. Both use N/ARM/one roll."},
-    {"recordId": "weapon:breaker-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: AP applies to BTS/2 rather than ARM/2, B2 with one Saving Roll; do not infer a second roll."},
-    {"recordId": "weapon:marksman-rifles", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-15", "note": "N5.3 chart p. 180, September 26 archived English Weapon Chart and pinned Army: all eight Marksman types have PS 7 and identical range bands; six previously undefined single-mode variants now link to this shared family. Each of those six retains its own Ammunition, Saving Roll Attribute, Trait and scoped navigation associations. Breaker and MULTI retain separate authoritative Weapon definitions to avoid ambiguous family mappings. No ammunition or Trait is inherited universally, especially not by MULTI Anti-Material Mode."},
-    {"recordId": "weapon:multi-marksman-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-15", "note": "N5.3 Weapon Chart p. 180: Anti-Materiel (Army spells Anti-Material) Mode uses B1 DA, two ARM Saving Rolls, Anti-materiel and no Suppressive Fire; AP/Shock alternatives use B3, one ARM/2 or ARM roll and Suppressive Fire. All PS 7, same range breaks; profiles do not stack modes or receive generic family variant-link inheritance."},
-    {"recordId": "weapon:breaker-marksman-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 180 and pinned Army metadata source 225: AP applies against BTS/2 (not ARM/2), PS 7, B3, one Saving Roll, Suppressive Fire. The English update's Sniper label does not establish another source profile. Shared AP and Suppressive Fire links cover effects; do not invent unit usage or a new ammunition type."},
-    {"recordId": "weapon:assault-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: N/ARM, PS 7 and B4. Burst is not additional Saving Rolls on one hit."},
-    {"recordId": "weapon:ap-heavy-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: AP/ARM/2 with PS 6, B2, and one Saving Roll. Contrast Breaker Pistol BTS/2 without transferring defense attributes."},
-    {"recordId": "weapon:silenced-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 pp. 67, 175, 182: combined AP+Shock yields one BTS/2 Saving Roll with conditional Shock effect; Silent (-6) affects enemy Face to Face Dodge only while user is in ZoC and outside LoF."},
-    {"recordId": "weapon:multi-pistol", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 182: AP B2 ARM/2 one roll, Shock B2 ARM one roll, Anti-Materiel DA B1 ARM two rolls with mode-specific Anti-materiel. Modes are alternatives and their effects do not stack."},
-    {"recordId": "weapon:multi-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 183: AP and Shock modes B3 with Suppressive Fire, Anti-Materiel DA mode B1 with two ARM Saving Rolls and no Suppressive Fire; all PS 7. Source mode traits do not transfer."},
-    {"recordId": "weapon:k1-combi-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 183: preserves N Ammunition with ARM=0, one Saving Roll, PS 7/B3, Anti-materiel and Suppressive Fire. K1 is no distinct Ammunition identity; Immunity must be separately evaluated."},
-    {"recordId": "weapon:feuerbach", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 186: Burst Mode uses B2 AP+DA with two ARM/2 Saving Rolls, Explosive Mode uses B1 EXP with three ARM Saving Rolls. PS 6 and Anti-materiel apply to each; ammunition and roll counts never combine across modes."},
-    {"recordId": "weapon:hyper-rapid-magnetic-cannon", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 187: DA Anti-Materiel Mode uses B1 and two ARM Saving Rolls; AP and Shock modes use B5 with Suppressive Fire and one ARM/2 or ARM Saving Roll respectively. PS 5 throughout, with mode-dependent Traits."},
-    {"recordId": "weapon:multi-heavy-machine-gun", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 179: EXP Anti-materiel mode has B1, 3 ARM Saving Rolls; AP and Shock modes have B4 and Suppressive Fire, with ARM/2 and ARM respectively for one Saving Roll. All are PS 5 with identical ranges. Do not combine modes or transfer Traits."},
-    {"recordId": "weapon:pitcher", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-15", "note": "N5.3 pp. 73/187 and pinned Wiki Pitcher (N5.2 corrected ranges): successful BS/Targetless shot places a Deployable Repeater Token at impact. No damaging PS, Ammunition or Saving Rolls; the Repeater equipment owns its Hacking Area effect. Disposable (2), Speculative Attack, Indiscriminate, Non-Lethal and the carried-forward FAQ on occupied placement apply. A Pitcher shot is not Place Deployable."},
-    {"recordId": "weapon:mine-dispenser", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-15", "note": "N5.3 pp. 71-72/181 and pinned Wiki: Mine Dispenser uses its own BS Weapon Chart profile, but adopts the Drop Bears BS Mode Mine Token placement procedure, including Conclusion timing, no same-Order detonation and placement restrictions. Mine subtype is supplied by bracketed Unit Profile; do not inherit Drop Bears PH roll or Shock subtype. Double Shot optionally expends both Disposable (2) charges for B2. Army savingNum=1 is non-operative with no Saving Roll Attribute or Ammunition; no damaging launcher attack is inferred."},
-    {"recordId": "weapon:flamethrowers", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-15", "note": "N5.3 Flamethrowers chart p. 178 and pinned English Wiki Weapon Chart agree with Army profiles: Heavy is PS 6 / Large Teardrop, Light is PS 7 / Small Teardrop; both use N, B1, one ARM Saving Roll, Intuitive Attack and Continuous Damage. Shared canonical links own the underlying template, activation and repeat-roll mechanics. No additional variant effects or Army source corrections are inferred."},
-    {"recordId": "weapon:flammenspeer", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 chart p. 178: Blast Mode N/ARM, one Saving Roll, circular Impact Template; Hit Mode AP/ARM/2, one Saving Roll, no Template. Both have PS 6, Burst 1, Continuous Damage, shared Disposable (2) charges. Modes are alternatives; template does not transfer."},
-    {"recordId": "weapon:multi-spitfire", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 Weapon Chart p. 185: Anti-Materiel Mode has DA, Burst 1, two ARM Saving Rolls and Anti-materiel. Army labels the mode Anti-Material Mode; its spelling is retained in source profiles. AP and Shock modes use Burst 4, one ARM/2 or ARM Saving Roll respectively, and Suppressive Fire. All are PS 6 with identical ranges; never combine modes or transfer their Traits."},
-    {"recordId": "weapon:multi-sniper-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 chart p. 185: all three alternative modes use PS 5/B2; Anti-Materiel uses DA, two ARM Saving Rolls and the mode-only Anti-materiel Trait, AP uses one ARM/2 roll, Shock one ARM roll. No mode combines Ammunition or inherits another mode's Trait."},
-    {"recordId": "weapon:k1-sniper-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 chart p. 185: one Saving Roll at ARM=0 and printed N Ammunition, PS 7/B2, Anti-materiel but no Suppressive Fire. Do not invent K1 Ammunition, AP halving or transfer K1 Combi Rifle Traits."},
-    {"recordId": "weapon:viral-sniper-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 p. 185 prints N/BTS/one roll, PS 5/B2 and BioWeapon; archived BioWeapon Trait applies DA+Shock only to VITA. Two BTS rolls against VITA is a rule-derived consequence, not a printed second firing mode; against STR, one BTS roll remains. Shock and Immunity exceptions require their own conditions."},
-    {"recordId": "weapon:plasma-sniper-rifle", "targetRelease": "1.0.0", "status": "reviewed", "reviewedOn": "2026-10-14", "note": "N5.3 chart p. 185 and Combined Saving Roll p. 67: Blast Mode has N, PS 6/B2, ARM and BTS one roll each, circular Impact Template; Hit Mode has N, PS 5/B2, one ARM and one BTS roll and no Template. A Critical adds one ARM roll only. This is Combined Saving Roll, not combined Ammunition."},
+    {
+      "recordId": "weapon:pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: PS 9, B2, Normal ammo and one ARM Saving Roll. No special effect inferred."
+    },
+    {
+      "recordId": "weapon:heavy-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: PS 6 and B2 with Shock ammo and one ARM Saving Roll. Source distinguishes Shock effects from PS."
+    },
+    {
+      "recordId": "weapon:boarding-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: Blast Mode has small Direct Template, Intuitive Attack and B1; Hit Mode has range bands, B2 and no Blast-only Traits. Both use N/ARM/one roll."
+    },
+    {
+      "recordId": "weapon:breaker-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: AP applies to BTS/2 rather than ARM/2, B2 with one Saving Roll; do not infer a second roll."
+    },
+    {
+      "recordId": "weapon:marksman-rifles",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 chart p. 180, September 26 archived English Weapon Chart and pinned Army: all eight Marksman types have PS 7 and identical range bands; six previously undefined single-mode variants now link to this shared family. Each of those six retains its own Ammunition, Saving Roll Attribute, Trait and scoped navigation associations. Breaker and MULTI retain separate authoritative Weapon definitions to avoid ambiguous family mappings. No ammunition or Trait is inherited universally, especially not by MULTI Anti-Material Mode."
+    },
+    {
+      "recordId": "weapon:multi-marksman-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 Weapon Chart p. 180: Anti-Materiel (Army spells Anti-Material) Mode uses B1 DA, two ARM Saving Rolls, Anti-materiel and no Suppressive Fire; AP/Shock alternatives use B3, one ARM/2 or ARM roll and Suppressive Fire. All PS 7, same range breaks; profiles do not stack modes or receive generic family variant-link inheritance."
+    },
+    {
+      "recordId": "weapon:breaker-marksman-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 180 and pinned Army metadata source 225: AP applies against BTS/2 (not ARM/2), PS 7, B3, one Saving Roll, Suppressive Fire. The English update's Sniper label does not establish another source profile. Shared AP and Suppressive Fire links cover effects; do not invent unit usage or a new ammunition type."
+    },
+    {
+      "recordId": "weapon:assault-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: N/ARM, PS 7 and B4. Burst is not additional Saving Rolls on one hit."
+    },
+    {
+      "recordId": "weapon:ap-heavy-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: AP/ARM/2 with PS 6, B2, and one Saving Roll. Contrast Breaker Pistol BTS/2 without transferring defense attributes."
+    },
+    {
+      "recordId": "weapon:silenced-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 pp. 67, 175, 182: combined AP+Shock yields one BTS/2 Saving Roll with conditional Shock effect; Silent (-6) affects enemy Face to Face Dodge only while user is in ZoC and outside LoF."
+    },
+    {
+      "recordId": "weapon:multi-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: AP B2 ARM/2 one roll, Shock B2 ARM one roll, Anti-Materiel DA B1 ARM two rolls with mode-specific Anti-materiel. Modes are alternatives and their effects do not stack."
+    },
+    {
+      "recordId": "weapon:multi-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 183: AP and Shock modes B3 with Suppressive Fire, Anti-Materiel DA mode B1 with two ARM Saving Rolls and no Suppressive Fire; all PS 7. Source mode traits do not transfer."
+    },
+    {
+      "recordId": "weapon:k1-combi-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 183: preserves N Ammunition with ARM=0, one Saving Roll, PS 7/B3, Anti-materiel and Suppressive Fire. K1 is no distinct Ammunition identity; Immunity must be separately evaluated."
+    },
+    {
+      "recordId": "weapon:feuerbach",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 186: Burst Mode uses B2 AP+DA with two ARM/2 Saving Rolls, Explosive Mode uses B1 EXP with three ARM Saving Rolls. PS 6 and Anti-materiel apply to each; ammunition and roll counts never combine across modes."
+    },
+    {
+      "recordId": "weapon:hyper-rapid-magnetic-cannon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 187: DA Anti-Materiel Mode uses B1 and two ARM Saving Rolls; AP and Shock modes use B5 with Suppressive Fire and one ARM/2 or ARM Saving Roll respectively. PS 5 throughout, with mode-dependent Traits."
+    },
+    {
+      "recordId": "weapon:multi-heavy-machine-gun",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 179: EXP Anti-materiel mode has B1, 3 ARM Saving Rolls; AP and Shock modes have B4 and Suppressive Fire, with ARM/2 and ARM respectively for one Saving Roll. All are PS 5 with identical ranges. Do not combine modes or transfer Traits."
+    },
+    {
+      "recordId": "weapon:pitcher",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 pp. 73/187 and pinned Wiki Pitcher (N5.2 corrected ranges): successful BS/Targetless shot places a Deployable Repeater Token at impact. No damaging PS, Ammunition or Saving Rolls; the Repeater equipment owns its Hacking Area effect. Disposable (2), Speculative Attack, Indiscriminate, Non-Lethal and the carried-forward FAQ on occupied placement apply. A Pitcher shot is not Place Deployable."
+    },
+    {
+      "recordId": "weapon:mine-dispenser",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 pp. 71-72/181 and pinned Wiki: Mine Dispenser uses its own BS Weapon Chart profile, but adopts the Drop Bears BS Mode Mine Token placement procedure, including Conclusion timing, no same-Order detonation and placement restrictions. Mine subtype is supplied by bracketed Unit Profile; do not inherit Drop Bears PH roll or Shock subtype. Double Shot optionally expends both Disposable (2) charges for B2. Army savingNum=1 is non-operative with no Saving Roll Attribute or Ammunition; no damaging launcher attack is inferred."
+    },
+    {
+      "recordId": "weapon:flamethrowers",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 Flamethrowers chart p. 178 and pinned English Wiki Weapon Chart agree with Army profiles: Heavy is PS 6 / Large Teardrop, Light is PS 7 / Small Teardrop; both use N, B1, one ARM Saving Roll, Intuitive Attack and Continuous Damage. Shared canonical links own the underlying template, activation and repeat-roll mechanics. No additional variant effects or Army source corrections are inferred."
+    },
+    {
+      "recordId": "weapon:flammenspeer",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 chart p. 178: Blast Mode N/ARM, one Saving Roll, circular Impact Template; Hit Mode AP/ARM/2, one Saving Roll, no Template. Both have PS 6, Burst 1, Continuous Damage, shared Disposable (2) charges. Modes are alternatives; template does not transfer."
+    },
+    {
+      "recordId": "weapon:multi-spitfire",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 185: Anti-Materiel Mode has DA, Burst 1, two ARM Saving Rolls and Anti-materiel. Army labels the mode Anti-Material Mode; its spelling is retained in source profiles. AP and Shock modes use Burst 4, one ARM/2 or ARM Saving Roll respectively, and Suppressive Fire. All are PS 6 with identical ranges; never combine modes or transfer their Traits."
+    },
+    {
+      "recordId": "weapon:multi-sniper-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 chart p. 185: all three alternative modes use PS 5/B2; Anti-Materiel uses DA, two ARM Saving Rolls and the mode-only Anti-materiel Trait, AP uses one ARM/2 roll, Shock one ARM roll. No mode combines Ammunition or inherits another mode's Trait."
+    },
+    {
+      "recordId": "weapon:k1-sniper-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 chart p. 185: one Saving Roll at ARM=0 and printed N Ammunition, PS 7/B2, Anti-materiel but no Suppressive Fire. Do not invent K1 Ammunition, AP halving or transfer K1 Combi Rifle Traits."
+    },
+    {
+      "recordId": "weapon:viral-sniper-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 185 prints N/BTS/one roll, PS 5/B2 and BioWeapon; archived BioWeapon Trait applies DA+Shock only to VITA. Two BTS rolls against VITA is a rule-derived consequence, not a printed second firing mode; against STR, one BTS roll remains. Shock and Immunity exceptions require their own conditions."
+    },
+    {
+      "recordId": "weapon:plasma-sniper-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 chart p. 185 and Combined Saving Roll p. 67: Blast Mode has N, PS 6/B2, ARM and BTS one roll each, circular Impact Template; Hit Mode has N, PS 5/B2, one ARM and one BTS roll and no Template. A Critical adds one ARM roll only. This is Combined Saving Roll, not combined Ammunition."
+    },
     {
       "recordId": "weapon:d-charges",
       "targetRelease": "1.0.0",
@@ -2154,15 +2340,49 @@
       "status": "reviewed",
       "reviewedOn": "2026-10-15",
       "note": "General N5.3 Deployment Phase sequence authored from official printed page 15. The dated FAQ repositioning/measurement boundary has its own FAQ ruling and never changes the core rule or any particular Deployment Skill. Scenario-specific deployment rules remain scoped separately."
+    },
+    {
+      "recordId": "scenario:battleground",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "Official ITS Season 18: Overheat English version 2026.09.01, printed pp. 121-123. Battleground is a distinct Direct Action mission: three end-of-game Zones of Operations with 2 OP near, 3 OP central and 5 OP far from the player's own Deployment Zone; the opposite side's near/far semantics are explicitly separated in the read model. The Sectors are identified only at the end of the game. At 150 Army Points each is 4 inches deep, with two outer Sectors 2 inches from the central line; at 200-400 each is 8 inches deep, with two outer Sectors 4 inches from the central line. Source diagram shows the three 24x32, 32x48 and 48x48 table sizes; rear Deployment Zones follow normal 8/12-inch sizes. Scoring relies on correct Zone Domination (Models/Markers, Proxies, Peripherals, Null exclusion except Shasvastii) plus Baggage +20 VP; Killing, HVT/Classified exclusion, and end-of-third-Round remain scenario-local prose. Current revision/source identity remains distinct from Core; no claimed historical replay or ITS FAQ publication."
+    },
+    {
+      "recordId": "rule:modifiers-explained",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-16",
+      "note": "N5.3 pp. 68/75 distinguishes entry-local MODs, positive/negative MOD recipients, Automatic versus non-Automatic negative MODs, one-die ReRoll, and Burst versus Special Dice. Linked explanations preserve mode selection and FTF conditions."
+    },
+    {
+      "recordId": "weapon:ap-exp-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-16",
+      "note": "N5.3 English p. 177, Spanish p. 184 and pinned Army 227 agree on AP+EXP with three ARM/2 Saving Rolls; archived Spanish Wiki charts report two, a retained unresolved source conflict. AP and EXP remain separate canonical Ammunition effects, not independent attack modes."
+    },
+    {
+      "recordId": "weapon:ap-thunderbolt",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-16",
+      "note": "N5.3 English p. 186, Spanish p. 193 and pinned Army 230 specify AP Ammunition, PS 6, Burst 2, ARM/2. Archived English and Spanish Wiki chart entries instead name N Ammunition; discrepancy retained without inventing another effect."
+    },
+    {
+      "recordId": "weapon:mixed-weapons",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-16",
+      "note": "N5.3 p. 68 gives distinct BS and CC Weapon Modes; their printed profiles do not combine. CC uses CC, BS uses BS unless a specific Trait such as BS Weapon (PH) changes its Attribute. Links to MOD rules and Kobra are descriptive, not inheritance of profile effects."
+    },
+    {
+      "recordId": "weapon:stun-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-16",
+      "note": "N5.3 English p. 182, Spanish p. 191 and Army 92 specify one BTS/PB Saving Roll with Non-Lethal and State: Stunned. Archived Spanish Wiki charts list two rolls and omit the State Trait; documented as unresolved publication conflict without changing canonical Stun mechanics."
     }
-,
-{
-    "recordId": "scenario:battleground",
-    "targetRelease": "1.0.0",
-    "status": "reviewed",
-    "reviewedOn": "2026-10-15",
-    "note": "Official ITS Season 18: Overheat English version 2026.09.01, printed pp. 121-123. Battleground is a distinct Direct Action mission: three end-of-game Zones of Operations with 2 OP near, 3 OP central and 5 OP far from the player's own Deployment Zone; the opposite side's near/far semantics are explicitly separated in the read model. The Sectors are identified only at the end of the game. At 150 Army Points each is 4 inches deep, with two outer Sectors 2 inches from the central line; at 200-400 each is 8 inches deep, with two outer Sectors 4 inches from the central line. Source diagram shows the three 24x32, 32x48 and 48x48 table sizes; rear Deployment Zones follow normal 8/12-inch sizes. Scoring relies on correct Zone Domination (Models/Markers, Proxies, Peripherals, Null exclusion except Shasvastii) plus Baggage +20 VP; Killing, HVT/Classified exclusion, and end-of-third-Round remain scenario-local prose. Current revision/source identity remains distinct from Core; no claimed historical replay or ITS FAQ publication."
-  }
   ],
   "futureInteractions": [
     {

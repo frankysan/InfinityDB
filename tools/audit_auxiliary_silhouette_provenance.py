@@ -267,8 +267,8 @@ def main() -> int:
         parser.error(str(exc))
     args.json_output.parent.mkdir(parents=True, exist_ok=True)
     args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
-    args.json_output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    args.markdown_output.write_text(markdown_report(report), encoding="utf-8")
+    args.json_output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
+    args.markdown_output.write_text(markdown_report(report), encoding="utf-8", newline="\n")
     print(markdown_report(report))
     return 0
 

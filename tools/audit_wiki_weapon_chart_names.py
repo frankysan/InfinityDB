@@ -283,8 +283,9 @@ def main() -> int:
     args.json_output.write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
-    args.markdown_output.write_text(markdown_report(report), encoding="utf-8")
+    args.markdown_output.write_text(markdown_report(report), encoding="utf-8", newline="\n")
     print(markdown_report(report))
     return 0
 

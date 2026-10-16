@@ -31,8 +31,8 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **186/186** complete, **0** pending.
-- Current authored outgoing relations: **468**.
+- Supporting semantic identities: **191/191** complete, **0** pending.
+- Current authored outgoing relations: **483**.
 - Explicitly tracked future/deferred interactions: **111**.
 
 ## 0.7.0 primary catalog review
@@ -731,6 +731,7 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → 360º Visor (`equipment:360o-visor`)
   - `enables-use-of` → BS Attack (`skill:bs-attack`)
   - `enables-use-of` → CC Attack (`skill:cc-attack`)
+  - `enables-use-of` → Place Deployable (`skill:place-deployable`)
   - `uses-effects-of` → Total Reaction (`skill:total-reaction`)
 
 ### 0.8.0
@@ -903,7 +904,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Firewall** (`equipment:firewall`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 
-#### Rule (18/18)
+#### Rule (19/19)
 
 - [x] **Carrying Supply Boxes** (`rule:scenario:carrying-supply-boxes`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
   - outgoing: none
@@ -926,6 +927,8 @@ review. `declaration-category` projection records are excluded.
 - [x] **Hacking Area** (`rule:hacking-area`) — reviewed: Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed.
   - outgoing: none
 - [x] **Killing** (`rule:scenario:killing`) — reviewed: Reviewed N5.3 scenario Rule scope and cited gameplay facts. Shared definition references, defined Skills and Specialist qualifiers are validated typed fields; the source-specific effects remain confined to included scenarios.
+  - outgoing: none
+- [x] **Modifiers Explained (MODs)** (`rule:modifiers-explained`) — reviewed: N5.3 pp. 68/75 distinguishes entry-local MODs, positive/negative MOD recipients, Automatic versus non-Automatic negative MODs, one-die ReRoll, and Burst versus Special Dice. Linked explanations preserve mode selection and FTF conditions.
   - outgoing: none
 - [x] **Order Expenditure Sequence** (`rule:order-expenditure-sequence`) — reviewed: N5.3 pp.14-15 declaration, ARO checks, requirements and simultaneous effects; descriptive timing links do not implement a universal declaration evaluator.
   - outgoing: none
@@ -980,12 +983,19 @@ review. `declaration-category` projection records are excluded.
 - [x] **Zero Visibility Zone** (`term:zero-visibility-zone`) — reviewed: Source-reviewed N5.3 visibility-condition vocabulary (English p. 144; Spanish p. 148). No authored outgoing interaction edges; the distinct variants remain searchable Game terms.
   - outgoing: none
 
-#### Weapon (55/55)
+#### Weapon (59/59)
 
+- [x] **AP + EXP CC Weapon** (`weapon:ap-exp-cc-weapon`) — reviewed: N5.3 English p. 177, Spanish p. 184 and pinned Army 227 agree on AP+EXP with three ARM/2 Saving Rolls; archived Spanish Wiki charts report two, a retained unresolved source conflict. AP and EXP remain separate canonical Ammunition effects, not independent attack modes.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+  - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
+  - `uses-effects-of` → CC (`trait:cc`)
+  - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
 - [x] **AP CC Weapon** (`weapon:ap-cc-weapon`) — reviewed: N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
   - `uses-effects-of` → CC (`trait:cc`)
 - [x] **AP Heavy Pistol** (`weapon:ap-heavy-pistol`) — reviewed: N5.3 p. 182: AP/ARM/2 with PS 6, B2, and one Saving Roll. Contrast Breaker Pistol BTS/2 without transferring defense attributes.
+  - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
+- [x] **AP Thunderbolt** (`weapon:ap-thunderbolt`) — reviewed: N5.3 English p. 186, Spanish p. 193 and pinned Army 230 specify AP Ammunition, PS 6, Burst 2, ARM/2. Archived English and Spanish Wiki chart entries instead name N Ammunition; discrepancy retained without inventing another effect.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
 - [x] **Assault Pistol** (`weapon:assault-pistol`) — reviewed: N5.3 p. 182: N/ARM, PS 7 and B4. Burst is not additional Saving Rolls on one hit.
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
@@ -1100,7 +1110,7 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Normal (N) Ammunition (`ammunition:normal`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
 - [x] **Kobra Pistol** (`weapon:kobra-pistol`) — reviewed: N5.3 Mixed Weapons rules distinguish BS and CC modes and their ammunition; shared mode description does not assign mode-specific Traits or Saving Rolls.
-  - outgoing: none
+  - `uses-effects-of` → Mixed Weapons (`weapon:mixed-weapons`)
 - [x] **Kobra Pistol (CC Mode)** (`weapon:kobra-pistol-cc`) — reviewed: Current N5.3 DA ammunition semantics require two ARM Saving Rolls in CC Mode, despite the one-roll printed chart cell. Army and Wiki list Anti-materiel, which the PDF omits; this mode-scoped reference preserves the conflict without adjudicating the Trait or changing Army values.
   - `variant-of` → Kobra Pistol (`weapon:kobra-pistol`)
   - `uses-effects-of` → Double Action (DA) Ammunition (`ammunition:da`)
@@ -1117,6 +1127,7 @@ review. `declaration-category` projection records are excluded.
 - [x] **Mines** (`weapon:mines`) — reviewed: Shared Mine mechanics: Deployable, Direct Template, Mimetism and Place Deployable relations reviewed; placement/trigger restrictions remain in the family summary.
   - `uses-effects-of` → Deployable (`trait:deployable`)
   - `uses-effects-of` → Direct Template (`trait:direct-template`)
+  - `uses-effects-of` → Camouflaged State (`state:camouflaged`)
   - `uses-effects-of` → Mimetism (`skill:mimetism`)
   - `uses-effects-of` → Place Deployable (`skill:place-deployable`)
 - [x] **Missile Launcher** (`weapon:missile-launcher`) — reviewed: N5.3 p. 187: Blast EXP/Impact Template three ARM saves versus Hit AP+EXP without circular template and three ARM/2 saves. Profiles stay separate and both retain Anti-materiel.
@@ -1124,6 +1135,11 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
   - `uses-effects-of` → Impact Template (`trait:impact-template`)
   - `uses-effects-of` → Anti-materiel (`trait:anti-materiel`)
+- [x] **Mixed Weapons** (`weapon:mixed-weapons`) — reviewed: N5.3 p. 68 gives distinct BS and CC Weapon Modes; their printed profiles do not combine. CC uses CC, BS uses BS unless a specific Trait such as BS Weapon (PH) changes its Attribute. Links to MOD rules and Kobra are descriptive, not inheritance of profile effects.
+  - `uses-effects-of` → BS Attack (`skill:bs-attack`)
+  - `uses-effects-of` → CC Attack (`skill:cc-attack`)
+  - `uses-effects-of` → CC (`trait:cc`)
+  - `uses-effects-of` → Modifiers Explained (MODs) (`rule:modifiers-explained`)
 - [x] **MULTI Heavy Machine Gun** (`weapon:multi-heavy-machine-gun`) — reviewed: N5.3 Weapon Chart p. 179: EXP Anti-materiel mode has B1, 3 ARM Saving Rolls; AP and Shock modes have B4 and Suppressive Fire, with ARM/2 and ARM respectively for one Saving Roll. All are PS 5 with identical ranges. Do not combine modes or transfer Traits.
   - `uses-effects-of` → Explosive (EXP) Ammunition (`ammunition:exp`)
   - `uses-effects-of` → Armor Piercing (AP) Ammunition (`ammunition:ap`)
@@ -1213,6 +1229,10 @@ review. `declaration-category` projection records are excluded.
   - `uses-effects-of` → Shock Ammunition (`ammunition:shock`)
   - `uses-effects-of` → Silent (X) (`trait:silent-x`)
   - `uses-effects-of` → Dodge (`skill:dodge`)
+- [x] **Stun Pistol** (`weapon:stun-pistol`) — reviewed: N5.3 English p. 182, Spanish p. 191 and Army 92 specify one BTS/PB Saving Roll with Non-Lethal and State: Stunned. Archived Spanish Wiki charts list two rolls and omit the State Trait; documented as unresolved publication conflict without changing canonical Stun mechanics.
+  - `uses-effects-of` → Stun Ammunition (`ammunition:stun`)
+  - `uses-effects-of` → Non-Lethal (`trait:non-lethal`)
+  - `uses-effects-of` → State (`trait:state`)
 - [x] **SymbioBomb** (`weapon:symbiobomb`) — reviewed: N5.3 p. 74 and the archived English Wiki distinguish the listed owner from the Deployment-assigned user. The single use permits Endgame, Eraser or Mirrorball; the -3 target MOD applies only to Endgame/Eraser. Only the selected Pheroware Tactic supplies attack-profile facts; no stand-alone SymbioBomb chart statistics or lasting assignment relationship are inferred.
   - `uses-effects-of` → Pheroware Tactics (PT) (`weapon:pt`)
 - [x] **Viral CC Weapon** (`weapon:viral-cc-weapon`) — reviewed: N5.3 p. 177 and archived BioWeapon Trait distinguish the printed N/BTS/one-save baseline from DA+Shock against VITA. Two BTS saves versus VITA and the STR exception are derived from the component rules, not independently printed modes. Shock applies only under its conditions. Preserve unresolved Immunity subtleties and the exact Army profile.

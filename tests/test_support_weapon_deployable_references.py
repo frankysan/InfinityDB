@@ -77,7 +77,7 @@ def test_pitcher_places_repeater_without_a_saving_roll(app: Callable) -> None:
     text = rule["summary"]
     assert "successful BS Roll" in text
     assert "Deployable Repeater" in text
-    assert "different legal position" in text
+    assert "choose another legal position" in text
     assert "no PS, Ammunition or Saving Roll" in text
     assert "not the [[skill:place-deployable|Place Deployable]] Skill" in text
     assert {"equipment:deployable-repeater", "trait:indiscriminate", "trait:non-lethal",

@@ -243,10 +243,23 @@ def test_weapon_source_mode_rules_do_not_leak_between_same_id_profiles(
         if document["collection"]["id"] == "n5-core-v5.3"
     )
     test_core = copy.deepcopy(core)
-    # Keep this synthetic fixture independent of the now-published Kobra records.
+    # Isolate the synthetic records and retain canonical reference integrity.
     test_core["records"] = [
         record for record in test_core["records"]
         if record["id"] not in {"weapon:kobra-pistol", "weapon:kobra-pistol-cc"}
+    ]
+    # Mixed Weapons links to canonical Kobra; retarget that reference to the
+    # synthetic family rather than weakening maintained-link validation.
+    mixed = next(
+        record for record in test_core["records"]
+        if record["id"] == "weapon:mixed-weapons"
+    )
+    mixed["summary"] = mixed["summary"].replace(
+        "[[weapon:kobra-pistol|", "[[weapon:kobra-pistol-test|"
+    )
+    mixed["armyLinks"] = [
+        link for link in mixed["armyLinks"]
+        if link["id"] != "kobra-pistol"
     ]
     shared = {
         "kind": "weapon",
