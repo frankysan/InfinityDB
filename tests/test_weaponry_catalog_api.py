@@ -2496,3 +2496,52 @@ def test_published_weapon_source_conflicts_preserve_official_profiles(
             "Stun", "BTS", "1",
         )
         assert {"Non-lethal", "State: Stunned"} <= set(profile["traits"])
+
+@pytest.mark.parametrize(
+    "slug",
+    (
+        "ap-mine", "e-m-mine", "monofilament-mine", "para-mine",
+        "shock-mine", "viral-mine", "cybermine",
+    ),
+)
+def test_mines_camouflage_marker_s2_is_separate_from_object_silhouette(
+    source_discrepancy_app: Callable, slug: str,
+) -> None:
+    """A concealing Marker is S2; the object is a separate source conflict."""
+    payload = _weapon_detail(source_discrepancy_app, slug)
+    record = _weapon_rules(payload)["weapon:mines"]
+    summary = record["summary"]
+    assert "that Marker uses Silhouette S2" in summary
+    assert "not automatically to the revealed MINE (-3) Token" in summary
+    assert "The object profile has a separate published Silhouette value" in summary
+    note = record["facts"]["sourceNotes"][0]
+    assert "S0 for AP, E/M, Monofilament, PARA, Shock, and Viral" in note
+    assert "Army metadata gives S1" in note
+    assert "No official correction or source precedence has been confirmed" in note
+    assert {
+        ("n5-core-v5.3-pdf", 157),
+        ("n5-core-v5.3-pdf", 175),
+        ("n5-core-v5.3-es-pdf", 190),
+        ("n5-core-v5.3-es-pdf", 191),
+    } <= {(c["source_id"], c["page"]) for c in record["citations"]}
+    assert any(
+        r["direction"] == "outbound"
+        and r["record"]["id"] == "state:camouflaged"
+        for r in record["display_relations"]
+    )
+    assert any(
+        t["type"] == "reference"
+        and t["target"] == "state:camouflaged"
+        and t["public_reference"]
+        for t in record["summary_tokens"]
+    )
+    assert len(payload["profiles"]) == 1
+
+
+def test_chest_mine_does_not_inherit_camouflaged_mines_silhouette_guidance(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(source_discrepancy_app, "chest-mine")
+    assert "weapon:mines" not in _weapon_rules(payload)
+    assert len(payload["profiles"]) == 2
+    assert "Silhouette S2" not in _weapon_rules(payload)["weapon:chest-mine"]["summary"]

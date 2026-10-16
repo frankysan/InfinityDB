@@ -672,6 +672,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       active-object geometry ruling. S0 itself remains a valid N5.3
       template (25 mm base, 3 mm high; general rules p. 18), also
       present in N5.1/N5.2.
+    - [x] Explain N5.3's separate S2 rule for Weapon/Equipment
+      Camouflaged Markers on the shared Mines card (pp. 157/175),
+      without assigning S2 to revealed MINE Tokens or resolving their
+      S0/S1 publication discrepancy. Preserve Chest Mine's separate
+      behavior and add cited API regression coverage.
     - [x] Make S0/SX discoverable in the Glossary alongside S1-S8
       diagrams and in unit Silhouette previews. State S0's fixed
       25 mm by 3 mm geometry and SX's Prone-only 3 mm height with

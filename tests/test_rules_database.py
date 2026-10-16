@@ -1661,6 +1661,7 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         ("reveals-state", "inbound", "skill:discover"),
         ("reveals-state", "inbound", "skill:sensor"),
         ("uses-effects-of", "inbound", "trait:concealed"),
+        ("uses-effects-of", "inbound", "weapon:mines"),
         ("cancels-state", "inbound", "skill:frenzy"),
         ("cancels-state", "inbound", "state:retreat"),
     }
@@ -1701,6 +1702,18 @@ def test_rules_database_exposes_reverse_typed_relations(tmp_path: Path) -> None:
         ("reveals-state", "inbound", "Discover", (("skill", "discover"),)),
         ("reveals-state", "inbound", "Sensor", (("skill", "sensor"),)),
         ("uses-effects-of", "inbound", "Concealed", ()),
+        (
+            "uses-effects-of", "inbound", "Mines",
+            (
+                ("weapon", "ap-mine"),
+                ("weapon", "e-m-mine"),
+                ("weapon", "monofilament-mine"),
+                ("weapon", "para-mine"),
+                ("weapon", "shock-mine"),
+                ("weapon", "viral-mine"),
+                ("weapon", "cybermine"),
+            ),
+        ),
         ("cancels-state", "inbound", "Frenzy", (("skill", "frenzy"),)),
         ("cancels-state", "inbound", "Retreat! State", ()),
     }

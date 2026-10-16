@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Mines now distinguish a concealing CAMO Marker (S2) from the revealed
+  Mine object, whose S0/S1 values conflict across published sources.
+  The distinction does not change any Weapon profile or Chest Mine rules.
 - Silhouette help now explains the valid S0 and SX templates alongside
   the existing S1-S8 comparison diagrams, without treating their absence
   from the illustrations as a missing rule.
