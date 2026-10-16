@@ -1251,11 +1251,13 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         dictionaries and seventeen faction-file loadout occurrences;
         preserve the distinct core-action citations and separate the
         Army-derived values from rulebook mechanics.
-      - [ ] Verify remaining Automatic conditional exceptions and
-        special-case Skill declaration permissions, plus all other
-        numerical replacement S-tier variants against exact Army
-        profiles. The selected source verifications do not certify
-        the entire 1.0 corpus.
+      - [x] Verify Climbing Plus/Climb and Super-Jump/Jump conditional
+        declarations against N5.3 pp. 88/113, retaining the base
+        Long Skill types and documenting trajectory, LoF, Impetuous
+        use and the Jet Propulsion exception.
+      - [ ] Verify other conditional declaration permissions and
+        remaining numerical Army replacement variants. Selected
+        checks do not certify the full 1.0 corpus.
     - [ ] **Visibility Zone inventory additions:** Include the five
       newer Visibility Zone Game terms in final record acceptance;
       they postdate the frozen 367-record explanation-audit inventory.

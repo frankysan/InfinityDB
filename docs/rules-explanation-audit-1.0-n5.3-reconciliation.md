@@ -349,6 +349,27 @@ bounded Short Skill heading and three named source-identity checks,
 but **does not** close conditional declaration semantics or the
 full 1.0 whole-corpus gate.
 
+## Conditional movement declarations (2026-10-16)
+
+N5.3 p. 88 allows Climbing Plus to make Climb a Basic Short Skill
+only when declared first; p. 113 establishes the corresponding
+exception for Super-Jump and Jump. Both helper Skills remain
+Automatic, while Climb (p. 32) and Jump (p. 34) remain Long.
+There is no general category reclassification or universal ARO.
+
+The Climbing Plus record now cites the primary PDF alongside its
+Wiki revision and covers declared trajectory, 360-degree LoF,
+vertical underside base contact and Impetuous use. Super-Jump
+now expressly covers the second MOV value when Move follows,
+trajectory/LoF, Impetuous use, automatic Prone cancellation
+when Jump is declared and mid-air redirection limited to the
+named Jet Propulsion profile variant. Existing once-per-Order
+and no Partial Cover restrictions are preserved.
+
+Pinned PDF and curated tests plus a 6/6 responsive browser check
+provide bounded evidence for these two exceptions. The frozen
+367-record inventory and other 1.0 acceptance tasks remain open.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

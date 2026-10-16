@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Climbing Plus and Super-Jump now explain conditional Short Skill
+  declarations, trajectory and 360-degree LoF, Impetuous use,
+  and the Jet Propulsion limitation.
 - Sensor now cites its actual N5.3 Short Skill definition (p. 111).
   The named BS=11, BS=12 and CC=21 Army variants retain their exact
   numerical replacements and links to BS Attack and CC Attack.

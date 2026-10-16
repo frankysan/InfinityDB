@@ -2706,10 +2706,17 @@
                 "requirements": [],
                 "effects": [
                     "If [[skill:jump]] is declared as the first Basic Short Skill of the Order, Super-Jump turns [[skill:jump]] from a Long Skill into a Basic Short Skill and allows another compatible Basic Short or Short Skill in the same Order.",
-                    "A Long Skill [[skill:jump|Jump]] uses the first MOV value plus [[distance:4:inch]]; when Super-Jump has a Unit Profile distance, a Short Skill [[skill:jump]] adds that distance instead of [[skill:jump]]'s usual [[distance:2:inch]]."
+                    "A Long Skill [[skill:jump|Jump]] uses the first MOV value plus [[distance:4:inch]]; when Super-Jump has a Unit Profile distance, a Short Skill [[skill:jump]] adds that distance instead of [[skill:jump]]'s usual [[distance:2:inch]].",
+                    "A Trooper that is or becomes [[skill:impetuous|Impetuous]] may use [[skill:super-jump|Super-Jump]] during the [[skill:impetuous|Impetuous]] Phase."
                 ],
                 "restrictions": [
-                    "[[skill:jump]] can be declared as a Basic Short Skill only once per Order, and the user cannot benefit from Partial Cover MODs while declaring [[skill:jump]]."
+                    "[[skill:jump]] can be declared as a Basic Short Skill only once per Order, and the user cannot benefit from Partial Cover MODs while declaring [[skill:jump]].",
+                    "When [[skill:jump|Jump]] is declared as a Basic Short Skill and [[skill:move]] is declared second, that [[skill:move]] uses the second MOV value."
+                ],
+                "clarifications": [
+                    "When declaring [[skill:super-jump|Super-Jump]], specify the entire exact trajectory before [[trait:aro|ARO]] declarations; the Trooper has 360° LoF throughout that trajectory.",
+                    "If the Unit Profile lists Super-Jump (Jet Propulsion), the Trooper may freely change heading and direction in mid-air throughout the [[skill:jump|Jump]]; this is a named variant, not a general benefit of Super-Jump.",
+                    "Declaring [[skill:jump|Jump]] automatically cancels [[state:prone]], including when its declaration is modified by Super-Jump."
                 ]
             },
             "armyLinks": [
@@ -16936,7 +16943,8 @@
                     "If declared as the first Basic Short Skill of the Order, [[skill:climb]] is treated as a Basic Short Skill instead of a Long Skill.",
                     "The user may move on vertical surfaces as though they were horizontal while declaring [[skill:move]] or [[skill:dodge]], and while moving because of a failed Guts Roll.",
                     "The user may declare other compatible Basic Short Skills or Short Skills while moving on a vertical surface or hanging from a height.",
-                    "During the Reactive Turn, the user may declare an ARO while on a vertical surface when otherwise permitted."
+                    "During the Reactive Turn, the user may declare an ARO while on a vertical surface when otherwise permitted.",
+                    "A Trooper that is or becomes [[skill:impetuous|Impetuous]] may use [[skill:climbing-plus|Climbing Plus]] during the [[skill:impetuous|Impetuous]] Phase."
                 ],
                 "restrictions": [
                     "[[skill:climb]] can be declared as a Basic Short Skill only once per Order; a following [[skill:move]] uses the second MOV value.",
@@ -16944,7 +16952,9 @@
                     "Troopers cannot deploy on vertical surfaces during the Deployment Phase or during the game."
                 ],
                 "clarifications": [
-                    "The vertical movement permission also applies during movement required by a failed [[rule:guts-roll|Guts Roll]]."
+                    "The vertical movement permission also applies during movement required by a failed [[rule:guts-roll|Guts Roll]].",
+                    "When declaring [[skill:climbing-plus|Climbing Plus]], specify the entire exact movement trajectory before [[trait:aro|ARO]] declarations; the Trooper has 360° LoF throughout that trajectory.",
+                    "When traversing a vertical surface, keep at least half the base's underside in contact with it, following the General Movement and Moving and Measuring rules."
                 ]
             },
             "labelIds": [
@@ -16958,6 +16968,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 88,
+                    "section": "Climbing Plus"
+                },
                 {
                     "sourceId": "wiki-climbing-plus-oldid-3993",
                     "heading": "Climbing Plus"

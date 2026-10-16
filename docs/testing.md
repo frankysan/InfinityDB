@@ -2353,3 +2353,17 @@ overflow. The private verifier, database, results and screenshot
 remain under ignored local/audits/short-skill-numeric-provenance/.
 The frozen 367-record audit is unchanged; the 1.0 whole-corpus
 signoff and conditional permissions are still open.
+
+## 1.0 conditional movement browser checks
+
+**Verified 2026-10-16 against the pinned N5.3 PDF.**
+Climbing Plus (p. 88) and Super-Jump (p. 113) retain
+Automatic types; Climb and Jump retain Long Skill types.
+Pinned source tests verify conditional Basic Short declaration,
+trajectory, 360-degree LoF, Impetuous and Jet Propulsion.
+The curated tests verify source references and restrictions.
+
+The public Skill pages passed 6/6 headless Chrome cases at
+1440, 390 and 320 px with no console errors or overflow.
+Private evidence is in ignored local/audits/conditional-mobility-browser/.
+This does not complete the frozen 367-record audit or whole-corpus 1.0 gate.

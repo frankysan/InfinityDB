@@ -1601,6 +1601,85 @@ def test_checked_in_n5_collection_keeps_expanded_special_skill_labels_source_fai
     assert "plus [[distance:4:inch]]" in super_jump["effects"][1]
 
 
+def test_n5_conditional_climb_jump_declarations_keep_base_types() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {record["id"]: record for record in document["records"]}
+    assert records["skill:climb"]["facts"]["typeIds"] == ["long-skill"]
+    assert records["skill:jump"]["facts"]["typeIds"] == ["long-skill"]
+    for helper, page in (
+        ("climbing-plus", 88),
+        ("super-jump", 113),
+    ):
+        record = records[f"skill:{helper}"]
+        facts = record["facts"]
+        assert facts["typeIds"] == ["automatic"]
+        assert record["citations"][0] == {
+            "sourceId": "n5-core-v5.3-pdf",
+            "page": page,
+            "section": "Climbing Plus" if helper == "climbing-plus" else "Super-Jump",
+        }
+        assert "Basic Short Skill" in facts["effects"][0]
+        assert "first Basic Short Skill" in facts["effects"][0]
+        assert any("once per Order" in rule for rule in facts["restrictions"])
+        assert any("[[skill:impetuous|Impetuous]] Phase" in item for item in facts["effects"])
+        assert any(
+            "entire exact" in item and ("360" + chr(176) + " LoF") in item
+            for item in facts["clarifications"]
+        )
+    climbing = records["skill:climbing-plus"]["facts"]
+    assert any("base's underside" in note for note in climbing["clarifications"])
+    assert any("vertical surface" in effect and "ARO" in effect
+               for effect in climbing["effects"])
+    jumping = records["skill:super-jump"]["facts"]
+    assert any("second MOV value" in rule for rule in jumping["restrictions"])
+    assert any("Jet Propulsion" in note and "Unit Profile" in note
+               for note in jumping["clarifications"])
+    assert any("[[state:prone]]" in note for note in jumping["clarifications"])
+
+
+def test_n5_conditional_movement_clauses_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    provenance = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text(
+            encoding="utf8"
+        )
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == provenance["corePdfSha256"]
+    with pdf.open(source) as book:
+        climb = " ".join(book[87].get_text().split())
+        jump = " ".join(book[112].get_text().split())
+    for fragment in (
+        "CLIMBING PLUS AUTOMATIC SKILL",
+        "Climbing Plus turns the Climb Long Skill into a Basic Short Skill",
+        "if declared as the first Basic Short Skill of the Order",
+        "half of their base",
+        "use Climbing Plus in the Impetuous Phase",
+        "complete and exact trajectory",
+        "360" + chr(176) + " LoF",
+    ):
+        assert fragment.casefold() in climb.casefold(), fragment
+    for fragment in (
+        "SUPER-JUMP AUTOMATIC SKILL",
+        "Jump Long Skill is turned into a Basic Short Skill",
+        "if declared as the first Basic Short Skill of the Order",
+        "second value of their MOV Attribute",
+        "use Super-Jump in the Impetuous Phase",
+        "Super-Jump (Jet Propulsion)",
+        "complete and exact trajectory",
+        "360" + chr(176) + " LoF",
+        "Prone State is automatically cancelled",
+    ):
+        assert fragment.casefold() in jump.casefold(), fragment
+
+
 def test_checked_in_n5_collection_models_combat_reaction_skill_slice() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
