@@ -740,6 +740,51 @@ including the linked clarification and no horizontal overflow.
 This automated evidence is not a human visual review or a
 runtime spatial simulation.
 
+### RR-WPN-DEPLOYABLE-EXCEPTIONS-002 - Boost placement and marker eligibility
+
+**Scope:** pinned English N5.3 pp. 49, 69, 71-72 and 82.
+Source PDF SHA-256:
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`.
+
+Three distinct conditions must not be merged into one rule:
+
+- **Placement:** Ordinary Place Deployable forbids placing a
+  Deployable Weapon with only an enemy CAMO Marker in its
+  Trigger Area; the official CrazyKoala example explicitly
+  permits placement where a valid non-Camouflaged enemy is
+  also present (p. 69). The alternative Intuitive Attack
+  exception on p. 82 requires a *legally available* Skill;
+  the Boost Trait alone does not grant Intuitive Attack.
+- **Later activation:** The item is placed at the Conclusion
+  of its Order; it becomes available only for subsequent
+  Orders/AROs (p. 82, CrazyKoala example p. 69). A legal
+  placement does not cause a Boost trigger during that Order.
+- **Targeting:** Boost reacts to eligible **enemy Models**,
+  not CAMO, IMP-1, IMP-2, or other excluded Markers; it must
+  be able to travel into Silhouette contact before
+  detonating (p. 69). Mines instead test an enemy Model
+  **or Marker** using their Small Teardrop Template and
+  allied-safety restrictions (p. 72). This difference
+  persists even when a non-Camouflaged enemy permits a
+  Boost weapon to be placed near a CAMO Marker.
+
+The Boost reference links to Place Deployable, Perimeter,
+Intuitive Attack, Camouflaged State, and Mines. These are
+source-backed context links, not a new typed relationship
+that would make Boost and Mines inherit each other's
+trigger mechanics. Drop Bears' BS placement and WildParrot
+remain their own published exceptions.
+
+PDF-hash-pinned and curated-data regressions are maintained
+in `tests/test_deployable_trigger_cross_rules.py`; the Glossary
+API regression checks destination links on `trait:boost`.
+Automated headless Chrome validation passed **60/60
+assertions** at 1440, 390 and 320 px on the Boost,
+Place Deployable and AP Mine pages. This does not verify
+live tabletop state or constitute a human visual review.
+
+No Army data, weapon profiles, or upstream source rows changed.
+
 ## Ammunition and Weaponry / Broader research
 
 ### RR-AW-ZONE-001 — Smoke and Eclipse create transient visibility zones

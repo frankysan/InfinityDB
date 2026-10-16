@@ -6781,3 +6781,37 @@ def test_catalog_detail_reveals_async_rule_fragment_after_render(app: Callable) 
     assert b'requestAnimationFrame(revealHashTarget)' in script
     assert b'window.addEventListener("hashchange", revealHashTarget' in script
     assert b'content.contains(target)' in script
+
+
+def test_glossary_boost_exposes_distinct_placement_and_triggering_references(
+    app: Callable, tmp_path: Path,
+) -> None:
+    """Boost's linked comparison must reach canonical rules without inventing mechanics."""
+    rules_path = tmp_path / "rules.db"
+    export_rules_database(load_curated_directory(Path("data/curated")), rules_path)
+    rules_app = create_app(app.database.path, rules_database_path=rules_path)
+    status, _, body = request(rules_app, "/api/glossary")
+    assert status == 200
+    boost = next(
+        item for item in json.loads(body)["items"]
+        if item["id"] == "trait:boost"
+    )
+    assert boost["href"] == "/traits/boost"
+    description = boost["description"]
+    assert "**Placing is not triggering:**" in description
+    assert "the Marker remains exempt from Boost" in description
+    assert "Boost alone does not grant that Skill" in description
+    assert "becomes active at its Conclusion" in description
+    assert "Models **or Markers**" in description
+    links = {
+        token["target"]
+        for token in boost["description_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "skill:place-deployable", "skill:intuitive-attack",
+        "trait:perimeter", "weapon:mines", "state:camouflaged",
+    } <= links
+    status, _, body = request(rules_app, "/traits/boost")
+    assert status == 200
+    assert b"<main" in body

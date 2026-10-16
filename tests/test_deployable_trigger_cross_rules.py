@@ -105,3 +105,97 @@ def test_pinned_pdf_explicit_trigger_exceptions_if_source_available(
     with pdf.open(SOURCE) as doc:
         page_text = _normalized_text(doc[page - 1].get_text())
     assert _normalized_text(source_excerpt) in page_text, (page, source_excerpt)
+
+
+def test_boost_placement_exception_is_not_marker_trigger_permission() -> None:
+    records = _records()
+    boost = records["trait:boost"]
+    mines = records["weapon:mines"]
+    place = records["skill:place-deployable"]["facts"]
+    intuitive = records["skill:intuitive-attack"]["facts"]
+
+    summary = boost["summary"]
+    assert "**Placing is not triggering:**" in summary
+    assert "valid non-camouflaged enemy in that area permits placement" in summary
+    assert "the Marker remains exempt from Boost" in summary
+    assert "[[skill:intuitive-attack|Intuitive Attack]]" in summary
+    assert "Boost alone does not grant that Skill" in summary
+    assert "becomes active at its Conclusion" in summary
+    assert "subsequent Orders or [[trait:aro|AROs]]" in summary
+    assert "[[weapon:mines|Mines]] can trigger" in summary
+    assert "Models **or Markers**" in summary
+    assert "does not affect allies" in summary
+    assert "enemy Model declares or performs an Order" in summary
+    assert "enemy Model or Marker declares or executes a Skill" in mines["summary"]
+
+    assert any(
+        "enemy Camouflaged Marker inside its Trigger Area" in item
+        for item in place["restrictions"]
+    )
+    assert any(
+        "a valid non-camouflaged enemy" in item
+        and "[[skill:intuitive-attack|Intuitive Attack]]" in item
+        for item in place["restrictions"]
+    )
+    assert any(
+        "active only in subsequent Orders" in item
+        for item in place["effects"]
+    )
+    assert any(
+        "[[trait:intuitive-attack|Intuitive Attack]] Trait" in item
+        for item in intuitive["requirements"]
+    )
+    assert {49, 69, 72, 82} <= {
+        item.get("page") for item in boost["citations"]
+        if item["sourceId"] == "n5-core-v5.3-pdf"
+    }
+    assert not any(
+        item["recordId"] == "weapon:mines"
+        for item in boost.get("relations", [])
+    ), "The two triggering mechanics must not inherit one another"
+
+
+def test_boost_and_mine_representations_stay_separate() -> None:
+    records = _records()
+    boost = records["trait:boost"]["summary"]
+    mine = records["weapon:mines"]["summary"]
+    drop_bears = records["weapon:drop-bears"]["summary"]
+    wildparrot = records["weapon:wildparrot"]["summary"]
+
+    assert "[[state:camouflaged|CAMO]]" in boost
+    assert "[[state:impersonation-1|IMP-1]]" in boost
+    assert "obstacle or too-small gap" in boost
+    assert "Small Teardrop Template" in mine
+    assert "without affecting any ally" in mine
+    assert "cannot detonate during the Order" in drop_bears
+    assert "a visible Mine Token" in drop_bears
+    assert "they work like [[weapon:mines|E/M Mines]]" in wildparrot
+    assert "WildParrots do not have that Trait" in wildparrot
+
+
+@pytest.mark.parametrize(
+    ("page", "source_excerpt"),
+    (
+        (49, "BS Weapon with the Intuitive Attack Trait"),
+        (69, "when an enemy Model declares or performs an Order or ARO"),
+        (69, "weapon is not triggered by Camouflage Markers (CAMO)"),
+        (69, "there is also a non-Camouflaged Enemy inside its Zone of Control"),
+        (69, "when the Order concludes, the CrazyKoala is considered to be in play"),
+        (71, "A Drop Bear cannot detonate during the Order it is used in BS Mode"),
+        (72, "enemy Model or Marker declares or executes a Skill or ARO"),
+        (82, "A Deployable Weapon cannot be placed if there is an enemy Camouflage Marker"),
+        (82, "there is a valid, non-camouflaged enemy inside the Trigger Area"),
+        (82, "or an Intuitive Attack was made"),
+        (82, "can be used in subsequent Orders/AROs"),
+    ),
+)
+def test_boost_mine_source_conditions_if_pinned_pdf_is_available(
+    page: int, source_excerpt: str,
+) -> None:
+    pdf = pytest.importorskip("pymupdf")
+    if not SOURCE.exists():
+        pytest.skip("Pinned N5.3 source PDF unavailable in checkout")
+    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(SOURCE) as document:
+        printed = _normalized_text(document[page - 1].get_text())
+    assert _normalized_text(source_excerpt) in printed, (page, source_excerpt)

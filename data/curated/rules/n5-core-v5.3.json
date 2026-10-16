@@ -2929,7 +2929,7 @@
             "id": "trait:boost",
             "kind": "trait",
             "name": "Boost",
-            "summary": "Once in play, a Boost weapon must trigger when an enemy Model declares or performs an Order or Automatic Reaction Order in its [[trait:zone-of-control-zc|Zone of Control]]; it advances into Silhouette contact, detonates, and is removed.\n\nOnly a successful [[skill:dodge]] Roll resolved without opposition avoids this attack.\n\nThe weapon does not trigger if an obstacle or too-small gap blocks its path, or for [[state:camouflaged|CAMO]], [[state:impersonation-1|IMP-1]], [[state:impersonation-2|IMP-2]], and other exempt Markers.\n\nBecause it is [[trait:deployable|Deployable]], it cannot activate other [[trait:deployable|Deployable]] Weapons or Equipment.",
+            "summary": "Once in play, a Boost weapon must trigger when an enemy Model declares or performs an Order or Automatic Reaction Order in its [[trait:zone-of-control-zc|Zone of Control]]; it advances into Silhouette contact, detonates, and is removed.\n\nOnly a successful [[skill:dodge]] Roll resolved without opposition avoids this attack.\n\nThe weapon does not trigger if an obstacle or too-small gap blocks its path, or for [[state:camouflaged|CAMO]], [[state:impersonation-1|IMP-1]], [[state:impersonation-2|IMP-2]], and other exempt Markers.\n\n**Placing is not triggering:** [[skill:place-deployable|Place Deployable]] restricts placing a Boost device with an enemy [[state:camouflaged|CAMO]] Marker inside its Trigger Area. A valid non-camouflaged enemy in that area permits placement, but the Marker remains exempt from Boost.\n\nThe other placement exception requires a *legally declared* [[skill:intuitive-attack|Intuitive Attack]]; Boost alone does not grant that Skill. A [[trait:perimeter|Perimeter]] device placed during an Order becomes active at its Conclusion and can react only to subsequent Orders or [[trait:aro|AROs]].\n\nUnlike Boost, [[weapon:mines|Mines]] can trigger from eligible enemy Models **or Markers** within their own template-based Trigger Area, provided their template does not affect allies.\n\nBecause it is [[trait:deployable|Deployable]], it cannot activate other [[trait:deployable|Deployable]] Weapons or Equipment.",
             "composition": {
                 "role": "definition"
             },
@@ -2948,6 +2948,21 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 69,
                     "section": "Perimeter Weapons and the Boost Trait"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Intuitive Attack: Requirements"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 72,
+                    "section": "Mines: Trigger Area"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable: placement and activation"
                 }
             ],
             "review": {

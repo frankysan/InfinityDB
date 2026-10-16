@@ -12,6 +12,11 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Boost now distinguishes placing a device near a CAMO Marker from
+  triggering it later. The clarification covers the non-Camouflaged
+  enemy placement exception, legal Intuitive Attack eligibility,
+  activation timing and the different Mine trigger rules.
+
 - Mines now explain why a qualifying Dodge declaration may trigger
   them, while subsequent Dodge or failed-Guts movement cannot;
   canonical Dodge, Guts Roll and Stealth references remain linked.

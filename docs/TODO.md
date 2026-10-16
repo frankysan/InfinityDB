@@ -725,6 +725,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       preserve canonical Dodge/Guts/Stealth owners. The responsive
       browser check passed 297/297 assertions at 1440, 390 and 320 px.
       See RR-WPN-DEPLOYABLE-EXCEPTIONS-001.
+    - [x] Reconcile Boost Model-only triggers against Mines' Model-or-Marker
+      Trigger Area and the independent Place Deployable restrictions.
+      A CAMO Marker alone remains ineligible for Boost and limits
+      placement, even though a valid non-Camouflaged enemy in the
+      area permits legal placement. Intuitive Attack is an exception
+      only when it can legally be declared. Boost begins triggering
+      only after activation at the Order's Conclusion. Add player-facing
+      links, pinned source/API regressions and responsive browser checks.
+      See RR-WPN-DEPLOYABLE-EXCEPTIONS-002.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
       API/browser relationships. The 75 selected clauses and twelve

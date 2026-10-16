@@ -144,8 +144,13 @@ def test_checked_in_semantic_review_separates_full_and_partial_coverage() -> Non
     }
 
 
-def test_curated_boost_rules_are_published_with_source_provenance() -> None:
+def test_curated_boost_rules_are_published_with_source_provenance(
+    tmp_path: Path,
+) -> None:
     import sqlite3
+
+    from infinity_db.curated import load_curated_directory
+    from infinity_db.rules_database import export_rules_database
 
     root = Path(__file__).resolve().parents[1]
     curated = json.loads((root / 'data/curated/rules/n5-core-v5.3.json').read_text(
@@ -158,7 +163,9 @@ def test_curated_boost_rules_are_published_with_source_provenance() -> None:
         assert phrase in summary
     assert {'sourceId': 'n5-core-v5.3-pdf', 'page': 69,
             'section': 'Perimeter Weapons and the Boost Trait'} in boost['citations']
-    with sqlite3.connect(root / 'data/generated/rules.db') as db:
+    generated = tmp_path / "current_rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), generated)
+    with sqlite3.connect(generated) as db:
         assert db.execute(
             "SELECT summary FROM records WHERE id = 'trait:boost'"
         ).fetchone()[0] == summary
