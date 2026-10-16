@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Visibility Zone help now distinguishes additive Range, Cover, Skill and
+  Equipment MODs from the non-stacking, most-restrictive Zone MOD.
 - Mines now explicitly measure their Trigger Area from the edge of
   the Mine's base and exclude Total Cover from the template's Blast Focus.
 - Modifiers Explained now covers bracketed-only-on-use MODs,

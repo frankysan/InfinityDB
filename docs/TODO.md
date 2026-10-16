@@ -1223,6 +1223,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] **Visibility Zone inventory additions:** Include the five
       newer Visibility Zone Game terms in final record acceptance;
       they postdate the frozen 367-record explanation-audit inventory.
+      - [x] Reconcile the five published Glossary/search identities with
+        N5.3 p. 144 (Low/Poor/Zero/White Noise and the shared
+        Visibility Zone), including the Dodge exception, additive
+        non-Visibility MODs and most-restrictive-Zone rule. Keep the
+        original 367-record inventory frozen; source-pinned and API
+        regression tests verify these later additions.
+      - [ ] Complete responsive browser and accessible navigation
+        acceptance of all five terms before claiming final record
+        acceptance; source/text/API tests alone are insufficient.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not

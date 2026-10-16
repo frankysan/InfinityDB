@@ -5584,6 +5584,51 @@ def test_visibility_zones_are_discoverable_in_glossary_and_global_search(
         assert record["facts"]["scope"] == "visibility-condition"
         assert record["citations"][0]["page"] == 144
 
+    base = records["term:visibility-zone"]["summary"]
+    for fragment in (
+        "from, into, or through the area",
+        "[[skill:dodge|Dodge]] is excluded",
+        "[[term:low-visibility-zone|Low Visibility]] applies -3",
+        "[[term:poor-visibility-zone|Poor Visibility]] applies -6",
+        "[[term:zero-visibility-zone|Zero Visibility]] blocks Line of Fire",
+        "[[skill:bs-attack|BS Attack]] exception",
+        "[[term:white-noise-zone|White Noise]] restricts sight",
+        "**stack with applicable other MODs**",
+        "Range, Partial Cover, Special Skills, and Equipment",
+        "**never stack with other [[term:visibility-zone|Visibility Zone]] MODs**",
+        "most restrictive [[term:visibility-zone|Visibility Zone]] MOD",
+    ):
+        assert fragment in base, fragment
+
+def test_visibility_zone_five_term_explanations_match_pinned_n5_3_source() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned English N5.3 PDF unavailable")
+    review = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == review["corePdfSha256"]
+    with pdf.open(source) as document:
+        page = " ".join(document[143].get_text().split()).casefold()
+    for excerpt in (
+        "Low Visibility Zones apply a MOD of -3",
+        "Poor Visibility Zones apply a MOD of -6",
+        "LoF cannot be drawn into, through, or out of a Zero Visibility Zone",
+        "A White Noise Zone acts as a Zero Visibility Zone",
+        "This MOD for Visibility stacks with other MODs",
+        "Partial Cover, Range... but never with other Zone of Visibility MODs",
+        "Visibility Zone MODs never stack with other Visibility Zone MODs",
+        "always the most restrictive one",
+    ):
+        assert excerpt.casefold() in page, excerpt
+
+
 def test_visibility_zone_inline_links_have_glossary_previews(
     app: Callable, tmp_path: Path,
 ) -> None:

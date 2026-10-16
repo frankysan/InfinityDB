@@ -2274,7 +2274,7 @@
                 "Visibility Condition",
                 "Visibility Conditions"
             ],
-            "summary": "An area that modifies Rolls requiring Line of Fire through it.\n\n[[term:low-visibility-zone|Low Visibility]] gives -3, [[term:poor-visibility-zone|Poor Visibility]] gives -6, and [[term:zero-visibility-zone|Zero Visibility]] blocks Line of Fire, subject to its attack exception. The fourth category affects only specified users.\n\n[[term:visibility-zone|Visibility Zone]] MODs never stack: apply only the most restrictive one.",
+            "summary": "[[term:visibility-zone|Visibility Zones]] affect Rolls made with Skills, Special Skills, or Equipment that require Line of Fire from, into, or through the area. [[skill:dodge|Dodge]] is excluded.\n\n[[term:low-visibility-zone|Low Visibility]] applies -3 and [[term:poor-visibility-zone|Poor Visibility]] applies -6. [[term:zero-visibility-zone|Zero Visibility]] blocks Line of Fire, subject to its [[skill:bs-attack|BS Attack]] exception. [[term:white-noise-zone|White Noise]] restricts sight only for specified Troopers.\n\n[[term:visibility-zone|Visibility Zone]] MODs **stack with applicable other MODs**, including Range, Partial Cover, Special Skills, and Equipment. They **never stack with other [[term:visibility-zone|Visibility Zone]] MODs**: use only the most restrictive [[term:visibility-zone|Visibility Zone]] MOD when more than one Zone affects a Roll.",
             "composition": {
                 "role": "definition"
             },
