@@ -695,9 +695,50 @@ edges, and zero missing concept IDs.
 This does not establish full relationship coverage or a new
 source-precedence decision, and it is not a human visual review.
 The Dodge and failed-Guts movement exemption for Deployable triggers
-is already curated under its canonical Skill/rule owners rather
-than duplicated on each Weapon card. All generated evidence stays
-under ignored local/audits/.
+is curated under its canonical Skill/rule owners; the shared Mines
+card now links those owners where their exceptions interact with
+Mine triggering. The audit does not create a context-free typed
+restriction edge. Generated evidence stays under ignored local/audits/.
+
+### RR-WPN-DEPLOYABLE-EXCEPTIONS-001 - Trigger declarations versus exempt movement
+
+**Scope:** official N5.3 EN pp. 38, 69, 72, 79-80, 82, 112.
+Source PDF SHA-256:
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`.
+
+Confirmed distinction: declaring a Dodge ARO while inside a
+Mine's legal Trigger Area can trigger it (Dodge example, p. 80).
+A triggering Mine still needs a legal Small Teardrop Template
+reaching the declared Model or Marker without affecting allies
+(p. 72). Subsequent *Dodge movement* is exempt from triggering
+Deployables or generating AROs (p. 79), as is movement arising
+from a failed Guts Roll (p. 38; p. 72 reminder).
+
+Stealth does not disable Deployable triggers (p. 112).
+The Boost rules (p. 69) operate on eligible enemy Models,
+with distinct exempt Markers and blocked-path checks; they
+must not be collapsed into Mines' Model-or-Marker Trigger
+Area rule. Place Deployable (p. 82) activates newly placed
+items at the Conclusion of the Order, not during their own
+placement.
+
+The shared Mines reference now explains the declaration/movement
+distinction with direct links to Dodge, Guts Roll and Stealth.
+Their full mechanics remain on their canonical Skill/rule
+entries. No context-free Dodge-to-Deployable typed edge was
+added: such an edge would wrongly imply that a Dodge declaration
+itself is exempt. This batch does not change imported Army
+profiles or resolve any upstream object Silhouette conflict.
+
+The pinned source extracts and current curated facts are
+regression-tested in
+`tests/test_deployable_trigger_cross_rules.py`, with separate
+weapon-page API link/citation coverage. A headless Chrome
+check passed 297/297 assertions on the seven Mine variants
+and the separate Chest Mine page, at 1440, 390 and 320 px,
+including the linked clarification and no horizontal overflow.
+This automated evidence is not a human visual review or a
+runtime spatial simulation.
 
 ## Ammunition and Weaponry / Broader research
 

@@ -2545,3 +2545,24 @@ def test_chest_mine_does_not_inherit_camouflaged_mines_silhouette_guidance(
     assert "weapon:mines" not in _weapon_rules(payload)
     assert len(payload["profiles"]) == 2
     assert "Silhouette S2" not in _weapon_rules(payload)["weapon:chest-mine"]["summary"]
+
+@pytest.mark.parametrize("slug", (
+    "ap-mine", "e-m-mine", "monofilament-mine", "para-mine",
+    "shock-mine", "viral-mine", "cybermine",
+))
+def test_mines_declaration_vs_movement_cross_rule_links(
+    source_discrepancy_app: Callable, slug: str,
+) -> None:
+    rule = _weapon_rules(_weapon_detail(source_discrepancy_app, slug))["weapon:mines"]
+    assert "Declaring [[skill:dodge|Dodge]] as an [[trait:aro|ARO]]" in rule["summary"]
+    assert "movement does **not** itself trigger" in rule["summary"]
+    assert "failed [[rule:guts-roll|Guts Roll]]" in rule["summary"]
+    targets = {
+        t["target"] for t in rule["summary_tokens"]
+        if t["type"] == "reference" and t["public_reference"]
+    }
+    assert {"skill:dodge", "rule:guts-roll", "skill:stealth", "trait:deployable"} <= targets
+    assert {38, 79, 80, 112} <= {
+        c["page"] for c in rule["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }

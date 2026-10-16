@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Mines now explain why a qualifying Dodge declaration may trigger
+  them, while subsequent Dodge or failed-Guts movement cannot;
+  canonical Dodge, Guts Roll and Stealth references remain linked.
+
 - SymbioBomb now explicitly identifies its three printed Traits:
   Assignable (Transmutation), Comms Attack and Optional. Its published
   Pheroware behavior is unchanged.

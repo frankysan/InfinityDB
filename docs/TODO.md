@@ -715,6 +715,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       edges; regression tests cover real and deliberately missing
       relations. This adds relationship evidence without changing
       curated rules or Army source profiles. See RR-WPN-FAMILY-004.
+    - [x] Verify the source-backed Deployable trigger exception:
+      an otherwise qualifying Dodge ARO declaration can trigger a
+      Mine, but Dodge movement and movement caused by failed Guts
+      Rolls cannot trigger Deployables or create new AROs. Stealth
+      does not disable Mine triggering, while Boost has distinct
+      enemy Model / exempt Marker rules. Add links and source cites
+      to the shared Mines card plus PDF-pinned and API regressions;
+      preserve canonical Dodge/Guts/Stealth owners. The responsive
+      browser check passed 297/297 assertions at 1440, 390 and 320 px.
+      See RR-WPN-DEPLOYABLE-EXCEPTIONS-001.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
       API/browser relationships. The 75 selected clauses and twelve

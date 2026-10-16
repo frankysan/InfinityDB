@@ -5244,7 +5244,7 @@
             "id": "weapon:mines",
             "kind": "weapon",
             "name": "Mines",
-            "summary": "Mine types governed by these shared rules use [[skill:place-deployable]] to put down a [[skill:camouflage|CAMO]] (-3) Marker, which becomes a MINE (-3) Token when Discovered; both receive [[skill:mimetism]] (-3).\n\nWhile the Mine is represented by a [[skill:camouflage|CAMO]] Marker, **that Marker uses Silhouette S2** under [[state:camouflaged|Camouflaged State]] because it conceals a Weapon. This S2 applies to the Marker, **not automatically to the revealed MINE (-3) Token or the Mine object**. The object profile has a separate published Silhouette value.\n\nMines have 360º LoF. Their Trigger Area is the Small Teardrop Template projected from the base, excluding Total Cover.\n\nWhen an enemy Model or Marker declares or executes a Skill or [[trait:aro|ARO]] within it, a Mine must trigger if its Small Teardrop Template reaches that enemy without affecting any ally, including [[state:unconscious|Unconscious]] allies. If the target is outside the Trigger Area, the Mine remains hidden and does not detonate.\n\nEach named Mine has its own Weapon Chart ammunition, PS, Saving Rolls, and Traits; a triggered Mine applies its own profile and is then removed. Mines that can be Dodged impose -3 PH on [[skill:dodge]] attempts.\n\nA Mine cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid non-camouflaged enemy is also inside it or a [[trait:intuitive-attack|Intuitive Attack]] was declared.\n\n[[weapon:cybermine|Cybermines]] replace the [[skill:dodge|Dodge]] response with [[skill:reset]]; [[weapon:chest-mine|Chest Mines]] do not use these shared Mine rules.\n\n**Viral Mine:** Its printed [[ammunition:normal|N]] / BTS / one-Saving-Roll profile is the baseline. Its [[trait:bioweapon|BioWeapon]] has target-dependent effects; the [[weapon-property:viral|shared Viral Weapon Property]] explains the derived VITA-versus-STR outcome without changing the source profile.",
+            "summary": "Mine types governed by these shared rules use [[skill:place-deployable]] to put down a [[skill:camouflage|CAMO]] (-3) Marker, which becomes a MINE (-3) Token when Discovered; both receive [[skill:mimetism]] (-3).\n\nWhile the Mine is represented by a [[skill:camouflage|CAMO]] Marker, **that Marker uses Silhouette S2** under [[state:camouflaged|Camouflaged State]] because it conceals a Weapon. This S2 applies to the Marker, **not automatically to the revealed MINE (-3) Token or the Mine object**. The object profile has a separate published Silhouette value.\n\nMines have 360º LoF. Their Trigger Area is the Small Teardrop Template projected from the base, excluding Total Cover.\n\nWhen an enemy Model or Marker declares or executes a Skill or [[trait:aro|ARO]] within it, a Mine must trigger if its Small Teardrop Template reaches that enemy without affecting any ally, including [[state:unconscious|Unconscious]] allies. If the target is outside the Trigger Area, the Mine remains hidden and does not detonate.\n\n**Declaration versus movement:** Declaring [[skill:dodge|Dodge]] as an [[trait:aro|ARO]] can trigger a Mine if its usual Trigger Area and allied-safety conditions are met. The later [[skill:dodge|Dodge]] movement does **not** itself trigger [[trait:deployable|Deployable]] Weapons or Equipment or generate another [[trait:aro|ARO]].\n\nMovement resulting from a failed [[rule:guts-roll|Guts Roll]] is likewise exempt. [[skill:stealth|Stealth]] does not disable Mine triggering from an otherwise qualifying Skill declaration; this differs from its limits on ordinary enemy [[trait:aro|AROs]].\n\nEach named Mine has its own Weapon Chart ammunition, PS, Saving Rolls, and Traits; a triggered Mine applies its own profile and is then removed. Mines that can be Dodged impose -3 PH on [[skill:dodge]] attempts.\n\nA Mine cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid non-camouflaged enemy is also inside it or a [[trait:intuitive-attack|Intuitive Attack]] was declared.\n\n[[weapon:cybermine|Cybermines]] replace the [[skill:dodge|Dodge]] response with [[skill:reset]]; [[weapon:chest-mine|Chest Mines]] do not use these shared Mine rules.\n\n**Viral Mine:** Its printed [[ammunition:normal|N]] / BTS / one-Saving-Roll profile is the baseline. Its [[trait:bioweapon|BioWeapon]] has target-dependent effects; the [[weapon-property:viral|shared Viral Weapon Property]] explains the derived VITA-versus-STR outcome without changing the source profile.",
             "facts": {
                 "sourceNotes": [
                     "**Unresolved Mine object Silhouette source conflict:** English and Spanish N5.3 Weapon Charts print S0 for AP, E/M, Monofilament, PARA, Shock, and Viral Mine objects, while the pinned imported Army metadata gives S1. S0 is a valid template. The explicitly defined S2 of the concealing [[state:camouflaged|Camouflage]] Marker applies to that Marker only and does not settle the S0/S1 source discrepancy for the revealed Mine Token. No official correction or source precedence has been confirmed."
@@ -5350,6 +5350,26 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 72,
                     "section": "Mines"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 38,
+                    "section": "Guts Roll: movement exemption"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 79,
+                    "section": "Dodge: movement exemption"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 80,
+                    "section": "Example of Dodge and Deployable Weapon"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 112,
+                    "section": "Stealth: Deployable Weapons"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",
