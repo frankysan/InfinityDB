@@ -7,6 +7,7 @@ from copy import deepcopy
 from typing import Any
 from urllib.parse import quote
 
+from infinity_db.skill_config import load_skill_source_config
 from infinity_db.unit_filter_config import load_unit_filter_config
 
 OPTIONAL_AVAILABILITY_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
@@ -502,6 +503,24 @@ def enrich_unit_list_presentation(items: list[dict[str, Any]]) -> list[dict[str,
     return items
 
 
+def _separate_loadout_attribute_overrides(
+    specific_items: dict[str, list[dict[str, Any]]],
+    override_slugs: set[str],
+) -> None:
+    """Present configured attribute overrides separately from real Skills."""
+    overrides = [
+        item for item in specific_items["skills"]
+        if item.get("slug") in override_slugs
+    ]
+    if not overrides:
+        return
+    specific_items["skills"] = [
+        item for item in specific_items["skills"]
+        if item.get("slug") not in override_slugs
+    ]
+    specific_items["attribute_overrides"] = overrides
+
+
 def enrich_unit_presentation(
     unit: dict[str, Any],
     *,
@@ -518,6 +537,11 @@ def enrich_unit_presentation(
     optional_filters = {
         flag: True for flag in OPTIONAL_AVAILABILITY_FLAGS
     } | (optional_filters or {})
+    attribute_override_slugs = {
+        str(item.skill_ref)
+        for item in load_skill_source_config()
+        if item.classification == "attribute-override"
+    }
     armies = [army for army in unit.get("armies", ()) if isinstance(army, dict)]
     unit["peripheral_types"] = [
         {"id": type_id, "label": _PERIPHERAL_TYPE_LABELS.get(type_id, str(type_id))}
@@ -657,12 +681,14 @@ def enrich_unit_presentation(
             }
             general_order_type = general_rows[0]["order_type"] if general_rows else None
             for loadout in loadouts:
-                loadout["specific_items"] = {
+                specific_items = {
                     property_name: _without_shared(
                         loadout.get(property_name, ()), shared_by_property[property_name]
                     )
                     for property_name in ("skills", "equipment", "weapons")
                 }
+                _separate_loadout_attribute_overrides(specific_items, attribute_override_slugs)
+                loadout["specific_items"] = specific_items
                 loadout_order_type = _prominent_order_type([loadout])
                 symbol_types: list[str] = []
                 if loadout_order_type and loadout_order_type != general_order_type:

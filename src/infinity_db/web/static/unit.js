@@ -370,9 +370,11 @@ function profileItems(items, catalog, fallbackLabel) {
     const label = item.quantity != null && Number(item.quantity) !== 1
       ? `${decoratedName} ×${item.quantity}`
       : decoratedName;
-    const link = document.createElement("a");
-    const routeId = item.slug || item.id;
-    link.href = `/${catalog}/${encodeURIComponent(routeId)}`;
+    const link = document.createElement(catalog ? "a" : "span");
+    if (catalog) {
+      const routeId = item.slug || item.id;
+      link.href = `/${catalog}/${encodeURIComponent(routeId)}`;
+    }
     link.textContent = label;
     if (hiddenIds.length) {
       const details = document.createElement("span");
@@ -1049,6 +1051,21 @@ function loadoutTable(loadouts, anchorScope, anchoredPayloads) {
           },
           {
             content: profileItems(items, property, fallbackLabel),
+            className: "profile-item-list",
+            colSpan: 2,
+          },
+        ]);
+      }
+      const attributeOverrides = loadout.specific_items?.attribute_overrides || [];
+      if (attributeOverrides.length) {
+        rows.push([
+          {
+            content: "Attribute overrides",
+            header: true,
+            className: "data-label profile-item-label",
+          },
+          {
+            content: profileItems(attributeOverrides, null, "Attribute"),
             className: "profile-item-list",
             colSpan: 2,
           },

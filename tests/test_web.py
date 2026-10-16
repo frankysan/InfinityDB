@@ -4330,6 +4330,39 @@ def test_unit_details_api_owns_general_profile_shared_item_semantics(
     assert b"profile.shared_items" in script
 
 
+def test_unit_loadout_attribute_override_is_not_linked_as_a_skill(
+    app: Callable,
+) -> None:
+    from infinity_db.skill_config import load_skill_source_config
+    from infinity_db.unit_presentation import _separate_loadout_attribute_overrides
+
+    slugs = {
+        str(item.skill_ref)
+        for item in load_skill_source_config()
+        if item.classification == "attribute-override"
+    }
+    assert "bts-3" in slugs
+    source_items = [
+        {"id": 280, "slug": "bts-3", "name": "BTS=3"},
+        {"id": 278, "slug": "bs-12", "name": "BS=12"},
+    ]
+    specific_items = {
+        "skills": list(source_items),
+        "equipment": [],
+        "weapons": [],
+    }
+    _separate_loadout_attribute_overrides(specific_items, slugs)
+    assert source_items[0]["name"] == "BTS=3"
+    assert specific_items["attribute_overrides"] == [source_items[0]]
+    assert specific_items["skills"] == [source_items[1]]
+
+    status, _, script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'document.createElement(catalog ? "a" : "span")' in script
+    assert b'profileItems(attributeOverrides, null, "Attribute")' in script
+    assert b'content: "Attribute overrides"' in script
+
+
 def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callable) -> None:
     status, _, body = request(app, "/static/unit.js")
     assert status == 200

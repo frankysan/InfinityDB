@@ -3974,6 +3974,15 @@ override; and `Infinity Team-Ops` is a source marker for Team-Ops presentation. 
 preserves those raw occurrences for provenance and compatibility but excludes their application
 identities from the rules-backed Skill catalog when a valid `rules.db` is available.
 
+For Unit details, the known `BTS=3` occurrence is kept in
+the underlying Army Skill-bucket data, but its public
+loadout-specific presentation is separated into an
+**Attribute overrides** row, not linked to a Skill page.
+This preserves the canonical general-profile BTS value
+and the exact per-loadout BTS replacement without inventing
+an Automatic Skill or ARO. Other ordinary Skill and
+Equipment links remain unchanged.
+
 Conversely, rules-native Skills do not need an Army occurrence to be catalog identities. The
 current core catalog therefore includes the canonical Special Skill `Non-Hackable` with zero
 Army uses, just as Common Skills can exist without profile rows. The Reinforcements-only

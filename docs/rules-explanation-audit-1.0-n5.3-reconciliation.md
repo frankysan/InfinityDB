@@ -704,6 +704,44 @@ condition is not treated as a confirmed product defect.
 The original 367-record audit remains frozen, and full
 1.0 corpus acceptance is still open.
 
+## Army BTS=3 loadout-only replacement presentation (2026-10-16)
+
+The currently built Army Skill dictionary includes four
+`Attribute=value` source names: BS=11 (279), BS=12 (278),
+CC=21 (274), and BTS=3 (280). The first three are already
+curated as source-specific BS/CC Attack Skill variants.
+The fourth is **not an N5 Skill**. It is classified as
+`attribute-override` by
+`config/catalogs/skill-source-classifications.json`,
+and its absence from the rules-backed Skills catalog
+is correct.
+
+The built Army data associates BTS=3 with three distinct
+Corregidor Alguacil Gatta loadout payloads. Its shared
+Unit Profile has BTS 0; those loadouts carry the BTS=3
+source occurrence. Previously, the Unit page rendered
+each occurrence in the Skills row as a link to
+`/skills/bts-3`, although the catalog deliberately
+does not expose that Skill route.
+
+Unit presentation now consults the existing maintained
+source classifications and groups BTS=3 in a separate
+loadout **Attribute overrides** row, rendered as text.
+Raw Army occurrences, profile attributes, other loadout
+items, and the rules-backed Skills catalog remain intact.
+No Skill/ARO types or new rules mechanics are introduced.
+
+A synthetic regression verifies classification-driven
+separation and frontend nonlink presentation; existing
+tests continue to protect catalog exclusion. Browser
+acceptance on the real Gatta Unit page passed at
+1440/390/320 px (3/3), checking all three occurrences,
+no broken Skill links and no horizontal overflow.
+The count is derived from the currently built Army
+data, not an independent frozen Army archive.
+The original 367-record audit and final 1.0 acceptance
+gate remain open.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

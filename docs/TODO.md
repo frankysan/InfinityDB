@@ -1329,6 +1329,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         the delay/reveal condition for a Camouflaged Marker.
         Source-pinned tests and repeated responsive browser
         checks cover the selected examples; the rest remains open.
+      - [x] Confirm the Army Skill-bucket BTS=3 source item (ID 280)
+        is a loadout-specific BTS Attribute override, not a
+        declarable Skill or ARO. Corregidor Alguacil Gatta has
+        three source loadout payloads bearing it while the
+        shared profile remains BTS 0. Correct Unit presentation
+        to show it under Attribute overrides without a
+        non-existent /skills/bts-3 link; focused tests and
+        responsive browser acceptance passed (3/3).
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

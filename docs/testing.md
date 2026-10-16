@@ -2636,3 +2636,25 @@ ignored local/audits/hacking-area-aro/.
 
 This is bounded source-to-page verification, not acceptance
 of all conditional ARO rules or the frozen 367-record corpus.
+
+## 1.0 Army BTS attribute override presentation
+
+**Verified 2026-10-16 against current built Army data and
+maintained source classification policy.** A focused synthetic
+regression checks that configured `attribute-override`
+occurrences, including BTS=3, separate from actual Skills
+in the loadout-specific presentation without changing the
+original source items. Existing catalog tests continue to
+ensure non-Skills such as BTS=3 do not appear as independent
+rules-backed Skills.
+
+Headless Chrome tested the actual Corregidor Alguaciles
+Unit page at 1440, 390 and 320 px. **3/3 checks passed**:
+the three Gatta BTS=3 occurrences appeared under Attribute
+overrides, no `/skills/bts-3` links were generated, and
+there were no JavaScript errors or horizontal overflow.
+The private verifier, screenshots and results are under
+ignored `local/audits/bts-override/`.
+
+The frozen 367-record audit and remaining numerical
+variant/source acceptance are separate open tasks.
