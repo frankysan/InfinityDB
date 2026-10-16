@@ -1949,6 +1949,127 @@ def test_n5_declaration_source_headings_match_pinned_pdf() -> None:
             assert re.search(pattern, document[page - 1].get_text(), re.I), page
 
 
+def test_n5_short_skill_pages_match_source_headings() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    short = [
+        record for record in document["records"]
+        if record["kind"] == "declaration-category"
+        and record["facts"]["typeId"] == "short-skill"
+    ]
+    expected = {
+        "bs-attack": 39, "cc-attack": 51, "dodge": 79,
+        "doctor": 90, "engineer": 91, "forward-observer": 92,
+        "morpho-scan": 103, "sensor": 111, "deactivator": 121,
+        "gizmokit": 123, "medikit": 124,
+    }
+    assert len(short) == len(expected)
+    for record in short:
+        assert len(record["armyLinks"]) == 1
+        name = record["armyLinks"][0]["id"]
+        assert name in expected
+        page = expected[name]
+        assert record["id"] == f"declaration-category:short-skill:p{page}"
+        assert record["citations"] == [
+            {"sourceId": "n5-core-v5.3-pdf", "page": page}
+        ]
+    sensor = next(
+        record for record in document["records"]
+        if record["id"] == "skill:sensor"
+    )
+    assert any(
+        item["sourceId"] == "n5-core-v5.3-pdf" and item["page"] == 111
+        for item in sensor["citations"]
+    )
+
+
+def test_n5_short_skill_declarations_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    provenance = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text(
+            encoding="utf8"
+        )
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == provenance["corePdfSha256"]
+    headings = {
+        39: "BS ATTACK", 51: "CC ATTACK", 79: "DODGE", 90: "DOCTOR",
+        91: "ENGINEER", 92: "FORWARD OBSERVER", 103: "MORPHO SCAN",
+        111: "SENSOR", 121: "DEACTIVATOR", 123: "GIZMOKIT", 124: "MEDIKIT",
+    }
+    with pdf.open(source) as document:
+        for page, name in headings.items():
+            pattern = rf"(?<![A-Za-z]){re.escape(name)}\s+SHORT SKILL"
+            assert re.search(pattern, document[page - 1].get_text(), re.I), (page, name)
+
+
+def test_n5_numeric_replacement_variants_preserve_army_skill_ids() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {record["id"]: record for record in document["records"]}
+    expected = {
+        "bs-11": (279, "BS=11", "bs-attack", 39),
+        "bs-12": (278, "BS=12", "bs-attack", 39),
+        "cc-21": (274, "CC=21", "cc-attack", 51),
+    }
+    for slug, (source_id, name, parent, page) in expected.items():
+        record = records[f"skill:{slug}"]
+        assert record["name"] == name
+        assert record["armyLinks"] == [{"entity": "skill", "id": source_id}]
+        assert record["facts"]["typeIds"] == ["short-skill", "aro"]
+        assert {"type": "variant-of", "recordId": f"skill:{parent}"} in record["relations"]
+        assert record["citations"][0] == {
+            "sourceId": "n5-core-v5.3-pdf", "page": page,
+            "section": "BS Attack" if parent == "bs-attack" else "CC Attack",
+        }
+        assert "page" in record["citations"][1]
+    # These names and values originate in the Army source dictionary,
+    # not in independent named N5 rulebook entries.
+
+
+def test_n5_numeric_replacement_variants_match_pinned_army_snapshot() -> None:
+    import hashlib
+    import zipfile
+    from collections import Counter
+
+    archive = Path(__file__).parents[1] / "data/raw/JSON 20260929-114335.zip"
+    if not archive.exists():
+        pytest.skip("Pinned private Army snapshot is not installed")
+    assert hashlib.sha256(archive.read_bytes()).hexdigest() == (
+        "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75"
+    )
+    names = {274: "CC=21", 278: "BS=12", 279: "BS=11"}
+    counts: Counter[int] = Counter()
+    dictionary_ids: set[int] = set()
+    with zipfile.ZipFile(archive) as snapshot:
+        files = [name for name in snapshot.namelist() if name.endswith(".json")]
+        assert len(files) == 59
+        for filename in files:
+            data = json.loads(snapshot.read(filename))
+            for item in data.get("filters", {}).get("skills", []):
+                if item.get("id") in names:
+                    assert item["name"] == names[item["id"]], filename
+                    dictionary_ids.add(item["id"])
+            for unit in data.get("units", []):
+                for group in unit.get("profileGroups", []):
+                    for option in group.get("options", []):
+                        for item in option.get("skills", []):
+                            if item.get("id") in names:
+                                assert item.get("q") == 1, filename
+                                counts[item["id"]] += 1
+    assert dictionary_ids == set(names)
+    assert counts == {274: 6, 278: 9, 279: 2}
+    # Counts include repeat appearances in different faction files;
+    # they are not unique-unit counts.
+
+
 def test_n5_deployment_and_long_skill_categories_use_own_headings() -> None:
     root = Path(__file__).parents[1]
     document = load_curated_document(root / "data/curated/rules/n5-core-v5.3.json")

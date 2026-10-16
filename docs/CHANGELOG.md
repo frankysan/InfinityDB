@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Sensor now cites its actual N5.3 Short Skill definition (p. 111).
+  The named BS=11, BS=12 and CC=21 Army variants retain their exact
+  numerical replacements and links to BS Attack and CC Attack.
 - Automatic Skill categories now cite their correct N5.3 headings,
   including Hacker, Super-Jump and Surprise Attack. Regular is
   no longer incorrectly linked as an Automatic Skill.

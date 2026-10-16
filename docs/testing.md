@@ -2322,3 +2322,34 @@ ignored local/audits/automatic-page-reconciliation/.
 This bounded acceptance does not sign off exceptional Automatic
 activation, remaining Short Skill or named replacement-profile
 semantics. The 367-record explanation-audit snapshot remains frozen.
+
+## 1.0 Short Skill headings and Army replacement variants
+
+**Verified 2026-10-16 against pinned N5.3 and the 2026-09-29 Army
+snapshot.** Eleven current Short Skill declarations were screened
+against the rulebook's exact headings. Sensor now cites p. 111
+rather than p. 112 in both its declaration and full Skill definition.
+The source-pinned test checks all eleven pages, while an unconditionally
+runnable curated regression enforces the mapping.
+
+BS=11 (Skill ID 279), BS=12 (278) and CC=21 (274) were checked
+against the original ignored Army archive,
+JSON 20260929-114335.zip, SHA-256
+f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75.
+The source has 59 JSON files and 2/9/6 loadout occurrences for those
+identities respectively. Occurrences can repeat across factions;
+the source-defined values are not independently named N5 core rules.
+The core action references remain BS Attack p. 39 / CC Attack p. 51,
+with general MOD/value notation context at p. 75. A dedicated
+regression test checks dictionary IDs/names, unit-option occurrences,
+and pinned archive digest; **that test skips if the gitignored source
+archive is unavailable**, while the curated identity/parent tests
+still run.
+
+With a freshly rebuilt rules DB, the Sensor Skill page was tested
+in headless Chrome at 1440, 390 and 320 px: **3/3 checks passed**,
+including the Short Skill badge, no page errors and no horizontal
+overflow. The private verifier, database, results and screenshot
+remain under ignored local/audits/short-skill-numeric-provenance/.
+The frozen 367-record audit is unchanged; the 1.0 whole-corpus
+signoff and conditional permissions are still open.

@@ -308,6 +308,47 @@ Automatic conditional activation effects. The original
 numeric Army replacement, and wider corpus acceptance work
 still needs independent evidence.
 
+## Short Skill headings and named Army replacement values (2026-10-16)
+
+The eleven current **Short Skill** declaration entries were checked
+against their actual headings in the pinned English N5.3 rules
+(pp. 39, 51, 79, 90-92, 103, 111, 121 and 123-124). The only
+incorrect source citation was Sensor, which was labelled p. 112 in
+both the page-scoped declaration and Skill definition. The actual
+Sensor/Short Skill heading is on **p. 111**. Both references have
+been corrected, retaining the previous Wiki revision.
+
+The separately curated BS=11, BS=12 and CC=21 records were also
+cross-checked against the **2026-09-29 11:43:35 Army snapshot**,
+JSON 20260929-114335.zip (SHA-256
+f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75).
+All three exact ID/name pairs appear in its official source Skill
+dictionaries and in concrete unit-option loadouts:
+
+- BS=11: source Skill ID 279, two loadout occurrences.
+- BS=12: source Skill ID 278, nine loadout occurrences.
+- CC=21: source Skill ID 274, six loadout occurrences.
+
+These are **17 faction-file occurrences**, not 17 distinct units or
+independent official named core-rule entries. Examples include
+Polaris Team (BS=11), Streloks (BS=12), and Swiss Guard (CC=21).
+The numerical values are source-defined by the **Army variant
+names**, while their action mechanics link back to the core
+BS Attack (p. 39) and CC Attack (p. 51) definitions. N5.3 p. 75
+provides general MOD/value notation context, not separate BS=11,
+BS=12 or CC=21 entries. No separate mechanics or source-invented
+modifier were introduced.
+
+Tests pin the variant identity/parent-action associations regardless
+of local archive availability. A source-provenance test validates
+the exact ignored archive checksum, dictionary entries, and 17
+loadout occurrences **when the private archive is installed**;
+it skips in environments without that local evidence. The frozen
+367-record historical inventory is unchanged. This closes the
+bounded Short Skill heading and three named source-identity checks,
+but **does not** close conditional declaration semantics or the
+full 1.0 whole-corpus gate.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

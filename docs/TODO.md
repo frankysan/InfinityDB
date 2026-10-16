@@ -1245,9 +1245,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         the revised pages; canonical Training remains unchanged.
         See N5.3 reconciliation for page migrations; the historical
         367-record inventory is not renumbered or approved.
-      - [ ] Verify the remaining Automatic conditional exceptions,
-        Short Skill and numerical-replacement S-tier records against
-        source headings, current Army values and declaration conditions.
+      - [x] Pin all eleven current Short Skill headings and correct
+        Sensor from p. 112 to p. 111 in both the declaration and Skill.
+        Verify BS=11/BS=12/CC=21 against the 2026-09-29 Army snapshot
+        dictionaries and seventeen faction-file loadout occurrences;
+        preserve the distinct core-action citations and separate the
+        Army-derived values from rulebook mechanics.
+      - [ ] Verify remaining Automatic conditional exceptions and
+        special-case Skill declaration permissions, plus all other
+        numerical replacement S-tier variants against exact Army
+        profiles. The selected source verifications do not certify
+        the entire 1.0 corpus.
     - [ ] **Visibility Zone inventory additions:** Include the five
       newer Visibility Zone Game terms in final record acceptance;
       they postdate the frozen 367-record explanation-audit inventory.

@@ -9254,7 +9254,7 @@
             }
         },
         {
-            "id": "declaration-category:short-skill:p112",
+            "id": "declaration-category:short-skill:p111",
             "kind": "declaration-category",
             "name": "Short Skill",
             "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
@@ -9280,12 +9280,12 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 112
+                    "page": 111
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-24"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -12505,7 +12505,7 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 112,
+                    "page": 111,
                     "section": "Sensor"
                 },
                 {
