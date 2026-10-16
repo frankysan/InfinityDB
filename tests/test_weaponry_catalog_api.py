@@ -1819,11 +1819,11 @@ def test_para_mine_has_own_reference_without_rewriting_source_marker(
 
 
 def test_kobra_cc_mode_reference_preserves_anti_materiel_conflict(
-    weaponry_app: Callable,
+    mixed_weapons_app: Callable,
 ) -> None:
-    payload = _weapon_detail(weaponry_app, "kobra-pistol")
+    payload = _weapon_detail(mixed_weapons_app, "kobra-pistol")
     shared = _weapon_rules(payload)
-    assert set(shared) == {"weapon:kobra-pistol"}
+    assert set(shared) == {"weapon:kobra-pistol", "weapon:mixed-weapons"}
     assert "Shock Ammunition" in shared["weapon:kobra-pistol"]["summary"]
 
     profiles = {profile["mode"]: profile for profile in payload["profiles"]}
@@ -2376,9 +2376,12 @@ def test_reviewed_rocket_and_plasma_modes(
     ],
 )
 def test_remaining_multimode_shared_reviews_preserve_exact_profiles(
-    weaponry_app: Callable, slug: str, expected: list[tuple],
+    weaponry_app: Callable, mixed_weapons_app: Callable,
+    slug: str, expected: list[tuple],
 ) -> None:
-    payload = _weapon_detail(weaponry_app, slug)
+    payload = _weapon_detail(
+        mixed_weapons_app if slug == "trench-hammer" else weaponry_app, slug
+    )
     profiles = payload["profiles"]
     assert [
         (p["mode"], p["damage"], p["burst"], p["ammunition"],
@@ -2387,7 +2390,9 @@ def test_remaining_multimode_shared_reviews_preserve_exact_profiles(
         for p in profiles
     ] == expected
     assert all(a["citations"] for p in profiles for a in p["ammunition_effects"])
-    assert not _weapon_rules(payload)
+    assert set(_weapon_rules(payload)) == (
+        {"weapon:mixed-weapons"} if slug == "trench-hammer" else set()
+    )
     if slug == "trench-hammer":
         assert all("Disposable (3)" not in p["traits"] for p in profiles)
         assert profiles[0]["ranges"]["short"]["mod"] == "0"
@@ -2967,3 +2972,69 @@ def test_deactivator_api_keeps_same_order_device_trigger_families_separate(
     assert outgoing == {("ignores-modifiers-from", "skill:mimetism")}
     assert len(payload["profiles"]) == 1
     assert "BS Weapon (WIP)" in payload["profiles"][0]["traits"]
+
+
+
+@pytest.fixture(scope="module")
+def mixed_weapons_app(tmp_path_factory: pytest.TempPathFactory) -> Callable:
+    """A fresh curated rules build, not the previously generated deployment snapshot."""
+    root = Path(__file__).resolve().parents[1]
+    rules_path = tmp_path_factory.mktemp("mixed-weapons") / "rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated"), rules_path)
+    return create_app(root / "data/generated/infinity.db", rules_database_path=rules_path)
+
+
+def test_mixed_weapons_shared_modes_and_source_provenance(
+    mixed_weapons_app: Callable,
+) -> None:
+    trench = _weapon_detail(mixed_weapons_app, "trench-hammer")
+    kobra = _weapon_detail(mixed_weapons_app, "kobra-pistol")
+    assert {r["id"] for r in trench["rules"]} == {"weapon:mixed-weapons"}
+    assert {r["id"] for r in kobra["rules"]} == {
+        "weapon:mixed-weapons", "weapon:kobra-pistol"
+    }
+    shared = _weapon_rules(trench)["weapon:mixed-weapons"]
+    summary = shared["summary"]
+    assert "**two different attack Modes**" in summary
+    assert "**[[trait:cc|CC]] Weapon Mode:**" in summary
+    assert "[[attribute:cc|CC]] Attribute" in summary
+    assert "counts as a [[trait:cc|CC]] Weapon" in summary
+    assert "**BS Weapon Mode:**" in summary
+    assert "[[attribute:bs|BS]] Attribute" in summary
+    assert "printed Range MODs" in summary
+    assert "different Attribute" in summary
+    assert "**Trench-Hammer exception:**" in summary
+    assert "[[trait:bs-weapon-ph|BS Weapon (PH)]]" in summary
+    assert "[[weapon:kobra-pistol|Kobra Pistol]]" in summary
+    assert max(map(len, summary.split("\n\n"))) <= 350
+    assert any(
+        citation["source_id"] == "n5-core-v5.3-pdf"
+        and citation["page"] == 68 for citation in shared["citations"]
+    )
+    assert {
+        (r["type"], r["record"]["id"])
+        for r in shared["display_relations"] if r["direction"] == "outbound"
+    } == {
+        ("uses-effects-of", "skill:bs-attack"),
+        ("uses-effects-of", "skill:cc-attack"),
+        ("uses-effects-of", "trait:cc"),
+    }
+    assert {
+        (r["type"], r["record"]["id"])
+        for r in _weapon_rules(kobra)["weapon:kobra-pistol"]["display_relations"]
+        if r["direction"] == "outbound"
+    } == {("uses-effects-of", "weapon:mixed-weapons")}
+    assert [p["mode"] for p in trench["profiles"]] == ["BS Mode", "CC Mode"]
+    assert all(p["ammunition"] == "DA" and p["saving_num"] == "2"
+               for p in trench["profiles"])
+    assert "BS Weapon (PH)" in trench["profiles"][0]["traits"]
+    assert "CC" in trench["profiles"][1]["traits"]
+    assert all("Disposable (3)" not in p["traits"] for p in trench["profiles"])
+    assert "Shock" == kobra["profiles"][0]["ammunition"]
+    assert "DA" == kobra["profiles"][1]["ammunition"]
+    assert "2" == kobra["profiles"][1]["saving_num"]
+    assert "Anti-materiel" in kobra["profiles"][1]["traits"]
+    assert [r["id"] for r in kobra["profiles"][1]["rules"]] == [
+        "weapon:kobra-pistol-cc"
+    ]
+    assert len(kobra["profiles"][1]["rules"][0]["facts"]["sourceNotes"]) == 2

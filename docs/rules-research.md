@@ -700,6 +700,43 @@ card now links those owners where their exceptions interact with
 Mine triggering. The audit does not create a context-free typed
 restriction edge. Generated evidence stays under ignored local/audits/.
 
+### RR-WPN-FAMILY-005 - Mixed Weapons source procedure and two-mode profiles
+
+**Scope:** pinned English N5.3 p. 68 Mixed Weapons, the printed
+Trench-Hammer and Kobra Pistol examples, and the exact imported
+Army profiles. The source-hash-pinned family policy now covers
+**83 selected clauses across twelve sections**, with sixteen
+selected typed relationships present and no missing concepts.
+This remains a partial source inventory, not a complete audit
+of all Weaponry sentences.
+
+N5.3 makes a Mixed Weapon a BS Weapon or CC Weapon depending
+on its chosen **Mode**. In CC Mode it uses the Trooper's CC
+Attribute, has the CC Trait, and counts as a CC Weapon for all
+purposes. In BS Mode it uses the Trooper's BS Attribute,
+has Range MODs, and counts as a BS Weapon for all purposes,
+**unless a listed Trait specifies another Attribute**.
+Trench-Hammer's BS Mode lists BS Weapon (PH), and therefore
+uses PH; Kobra Pistol's BS Mode uses BS. The alternative
+Ammunition, Burst, PS, Saving Rolls and Traits remain
+attached to the printed Mode, not mixed between Modes.
+
+The new curated `weapon:mixed-weapons` family is linked to the
+two existing Army identities without rewriting either profile.
+The specific Kobra reference inherits the shared procedure
+through `uses-effects-of`; the shared family points to
+BS Attack, CC Attack and the CC Trait. Trench-Hammer's
+previously valid shared-only disposition is superseded by
+the new source-cited family reference. The separate
+Kobra CC Mode DA/two-Saving-Roll contradiction (N5.3 chart
+prints one) and disputed Anti-materiel Trait remain
+explicit and unadjudicated in the existing source notes.
+
+The family clause audit verifies eight new printed p. 68
+anchors, their current curated summary anchors, and four
+typed relationship edges. No Army source data, underlying
+gameplay logic or source precedence decision changed.
+
 ### RR-WPN-DEPLOYABLE-EXCEPTIONS-001 - Trigger declarations versus exempt movement
 
 **Scope:** official N5.3 EN pp. 38, 69, 72, 79-80, 82, 112.

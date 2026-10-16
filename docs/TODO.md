@@ -825,9 +825,18 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       guaranteed hits or new priority rules. Headless
       browser checks passed 99/99 at 1440, 390 and
       320 px. See RR-WPN-DEPLOYED-005.
+    - [x] Add N5.3 p. 68 Mixed Weapons as a shared source-cited
+      player reference for Trench-Hammer and Kobra Pistol. Explain
+      BS versus CC attributes, range/CC Traits, independent Mode
+      profiles and the Trench-Hammer BS Weapon (PH) exception.
+      Keep Kobra's two-roll DA chart discrepancy and Anti-materiel
+      publication conflict separate. Pin eight source clauses,
+      four typed relationships and both Army identities; retire
+      the superseded Trench-Hammer shared-only disposition.
+      See RR-WPN-FAMILY-005.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
-      API/browser relationships. The 75 selected clauses and twelve
+      API/browser relationships. The 83 selected clauses and sixteen
       typed edges are not an exhaustive N5.3 pp. 68-74 inventory.
     - [ ] Register the supplied FAQ v0.1 as its own pinned source publication and
       reconcile core versus ITS-season applicability before curating rulings. Its

@@ -4812,10 +4812,64 @@
             }
         },
         {
+            "id": "weapon:mixed-weapons",
+            "kind": "weapon",
+            "name": "Mixed Weapons",
+            "summary": "Mixed Weapons have **two different attack Modes**, chosen separately; the Modes do not combine their printed Ammunition, Burst, PS, Saving Rolls or Traits.\n\n**[[trait:cc|CC]] Weapon Mode:** Uses the Trooper's [[attribute:cc|CC]] Attribute, has the [[trait:cc|CC]] Trait and counts as a [[trait:cc|CC]] Weapon for all purposes.\n\n**BS Weapon Mode:** Uses the Trooper's [[attribute:bs|BS]] Attribute and the printed Range MODs, and counts as a BS Weapon for all purposes. If its Traits specify a different Attribute, use that instead.\n\n**Trench-Hammer exception:** Its BS Mode has [[trait:bs-weapon-ph|BS Weapon (PH)]], so the attack uses PH rather than BS. [[weapon:kobra-pistol|Kobra Pistol]] uses BS for its BS Mode. Each Mode keeps its separate printed attack profile.",
+            "composition": {
+                "role": "definition"
+            },
+            "variantSemantics": {
+                "inheritance": "family"
+            },
+            "armyLinks": [
+                {
+                    "entity": "weapon",
+                    "id": "trench-hammer"
+                },
+                {
+                    "entity": "weapon",
+                    "id": "kobra-pistol"
+                }
+            ],
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {},
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:bs-attack"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "skill:cc-attack"
+                },
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "trait:cc"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 68,
+                    "section": "Mixed Weapons: BS and CC Weapon Modes"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-16"
+            }
+        },
+        {
             "id": "weapon:kobra-pistol",
             "kind": "weapon",
             "name": "Kobra Pistol",
-            "summary": "Kobra Pistol is a Mixed Weapon with two separate modes.\n\n**BS Mode:** Uses [[ammunition:shock|Shock Ammunition]] and the Trooper’s BS Attribute.\n\n**[[trait:cc|CC]] Mode:** Uses [[ammunition:da|Double Action (DA) Ammunition]] and the Trooper’s [[attribute:cc|CC]] Attribute.\n\nThe individual mode profiles, not this shared description, determine their Traits and Saving Rolls.",
+            "summary": "Kobra Pistol follows [[weapon:mixed-weapons|Mixed Weapons]], with two separate modes.\n\n**BS Mode:** Uses [[ammunition:shock|Shock Ammunition]] and the Trooper’s BS Attribute.\n\n**[[trait:cc|CC]] Mode:** Uses [[ammunition:da|Double Action (DA) Ammunition]] and the Trooper’s [[attribute:cc|CC]] Attribute.\n\nThe individual mode profiles, not this shared description, determine their Traits and Saving Rolls.",
             "facts": {},
             "composition": {
                 "role": "definition"
@@ -4835,6 +4889,12 @@
             "variantSemantics": {
                 "inheritance": "family"
             },
+            "relations": [
+                {
+                    "type": "uses-effects-of",
+                    "recordId": "weapon:mixed-weapons"
+                }
+            ],
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
@@ -4855,7 +4915,7 @@
             "facts": {
                 "sourceNotes": [
                     "**Saving Rolls — mechanically established:** Both official N5.3 PDF charts (English pp. 68/182; Spanish pp. 68/191) print one Saving Roll for Kobra [[trait:cc|CC]] Mode. The [[ammunition:da|DA]] rule explicitly requires two, with a third on a Critical. The imported Army 221 profile and Wiki revisions 4077, 4082 and 4083 independently list two. This is a source-specific chart discrepancy, not an override of the DA rule.",
-                    "**[[trait:anti-materiel|Anti-materiel]] — publication conflict unresolved:** Both official N5.3 PDFs omit the Trait for Kobra [[trait:cc|CC]] Mode. Wiki Mixed Weapons revisions 4021 and 4077 also omit it, but revision 4082 adds it; Wiki Weapon Chart 4083 and Army 221 include it. The official N5.3 update notice only confirms the change to [[ammunition:shock|Shock]] in BS Mode and [[ammunition:da|DA]] in [[trait:cc|CC]] Mode. The later Wiki edit and DA itself do not establish why or whether [[trait:anti-materiel|Anti-materiel]] is authoritative. The imported Trait is preserved without adjudication."
+                    "**[[trait:anti-materiel|Anti-materiel]] — publication conflict unresolved:** Both official N5.3 PDFs omit the Trait for Kobra [[trait:cc|CC]] Mode. Wiki [[weapon:mixed-weapons|Mixed Weapons]] revisions 4021 and 4077 also omit it, but revision 4082 adds it; Wiki Weapon Chart 4083 and Army 221 include it. The official N5.3 update notice only confirms the change to [[ammunition:shock|Shock]] in BS Mode and [[ammunition:da|DA]] in [[trait:cc|CC]] Mode. The later Wiki edit and DA itself do not establish why or whether [[trait:anti-materiel|Anti-materiel]] is authoritative. The imported Trait is preserved without adjudication."
                 ]
             },
             "composition": {

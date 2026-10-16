@@ -12,23 +12,24 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Mixed Weapons now have one shared N5.3 source-backed rule
+  linked from Trench-Hammer and Kobra Pistol. The reference
+  explains distinct BS/CC modes and Trench-Hammer's PH-based
+  BS exception; existing Kobra source disputes remain visible.
 - Mine pages now show the weapon-specific profile before the long
   shared Mines rules; Cybermine and PARA Mine-specific cards
   also precede the family text. Cybermine displays absent
   ammunition as "--" rather than the imported numeric 0.
   Chest Mine BS/CC modes and source profiles are unchanged.
-
 - Deactivator now distinguishes same-Order Mine and
   Cybermine triggers, Boost contact attacks and Armed
   Turret reactions, including concealed Marker
   ineligibility and each item's existing conditions.
-
 - Deactivator now explains eligible enemy deployed targets,
   Range-only WIP removal, the same-Order trigger exception,
   and how removal ends persistent Dazer, Repeater and
   Deployable Cover effects. Allied Disco Ball activation
   remains a separate Skill.
-
 - Dazer now distinguishes ordinary placement from the
   persistent Difficult Terrain area it generates, including
   Conclusion activation and destruction/deactivation.
@@ -193,7 +194,8 @@ are not retroactively relabeled.
   when a drop can be requested, how the token is placed and collected,
   and when the Enhanced Profile takes effect. The separate Request Speedball
   and Season 18 TEAM-OPS rules remain distinct.
-- TinBot references now explain when their benefits are shared by a Fireteam, why matching bonuses do not stack, and how owner isolation, departure or death affects them.
+- TinBot references now explain when their benefits are shared by a Fireteam,
+  why matching bonuses do not stack, and how owner isolation, departure or death affects them.
 - Sixth Sense and Multispectral Visor now explain the FAQ's joint
   Level 1 exception for a target attacked through a Zero Visibility Zone.
   ITS Spotlight and Ancillary scoring clarifications remain explicitly

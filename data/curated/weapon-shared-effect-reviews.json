@@ -500,14 +500,6 @@
       "reason": "Official N5.3 pp. 67/176, imported Army and archived English/Spanish Wiki agree: Blast PS 7 and Hit PS 6, both B2 with Normal Ammunition and one ARM plus one BTS Saving Roll; only Blast has a Circular Impact Template. Neither mode has Suppressive Fire. A Critical adds one ARM roll only. Existing Plasma Weapon Property, Combined Saving Roll and Impact Template references suffice; do not inherit Plasma Rifle's Suppressive Fire."
     },
     {
-      "slug": "trench-hammer",
-      "name": "Trench-Hammer",
-      "chartPage": 177,
-      "profileSha256": "d2d9716e3368971c3a32a97de7fac787d3fd84c5df4a46e795954b6ee6e18409",
-      "reviewedOn": "2026-10-15",
-      "reason": "Official N5.3 pp. 68 and 177, Army and the current EN/ES Wiki Weapon Charts agree: the BS mode uses the BS Weapon (PH) Trait and a zero short-range MOD, while the CC mode uses CC; both have PS 6, B1, DA Ammunition, two ARM Saving Rolls, Anti-materiel, and source [*] notation. The official N5.3 update expressly removed Disposable (3) from both uses; older Wiki alternative entries retain that historical trait and must not be applied as current. The existing DA, Anti-materiel, BS Weapon (PH), CC and Mixed Weapons rules cover the mechanics."
-    },
-    {
       "slug": "vorpal-cc-weapon",
       "name": "Vorpal CC Weapon",
       "chartPage": 177,

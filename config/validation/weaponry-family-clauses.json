@@ -1230,6 +1230,149 @@
           "to": "skill:speculative-attack"
         }
       ]
+    },
+    {
+      "name": "Mixed Weapons",
+      "page": 68,
+      "armyExamples": [
+        "Trench-Hammer",
+        "Kobra Pistol"
+      ],
+      "clauses": [
+        {
+          "id": "mixed-modes",
+          "anchor": "These weapons can be used as both BS Weapons and CC Weapons",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "two different attack Modes"
+          }
+        },
+        {
+          "id": "mixed-cc-attribute",
+          "anchor": "Uses the Trooper’s CC Attribute",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "skill:cc-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "Trooper's [[attribute:cc|CC]] Attribute"
+          }
+        },
+        {
+          "id": "mixed-cc-trait",
+          "anchor": "Has the CC Trait",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "trait:cc"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "has the [[trait:cc|CC]] Trait"
+          }
+        },
+        {
+          "id": "mixed-cc-weapon",
+          "anchor": "Is a CC Weapon for all purposes",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "skill:cc-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "counts as a [[trait:cc|CC]] Weapon"
+          }
+        },
+        {
+          "id": "mixed-bs-attribute",
+          "anchor": "Uses the Trooper’s BS Attribute",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "skill:bs-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "Trooper's [[attribute:bs|BS]] Attribute"
+          }
+        },
+        {
+          "id": "mixed-range",
+          "anchor": "Has Range MODs",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "skill:bs-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "printed Range MODs"
+          }
+        },
+        {
+          "id": "mixed-bs-weapon",
+          "anchor": "Is a BS Weapon for all purposes",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "skill:bs-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "counts as a BS Weapon"
+          }
+        },
+        {
+          "id": "mixed-bs-exception",
+          "anchor": "other than BS to make BS Attacks, this will be listed in its Traits",
+          "relatedCuratedIds": [
+            "weapon:mixed-weapons",
+            "trait:bs-weapon-ph"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Published Mixed Weapons mode rule explicitly described in the shared family record.",
+            "curatedId": "weapon:mixed-weapons",
+            "summaryAnchor": "If its Traits specify a different Attribute"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:mixed-weapons",
+          "type": "uses-effects-of",
+          "to": "skill:bs-attack"
+        },
+        {
+          "from": "weapon:mixed-weapons",
+          "type": "uses-effects-of",
+          "to": "skill:cc-attack"
+        },
+        {
+          "from": "weapon:mixed-weapons",
+          "type": "uses-effects-of",
+          "to": "trait:cc"
+        },
+        {
+          "from": "weapon:kobra-pistol",
+          "type": "uses-effects-of",
+          "to": "weapon:mixed-weapons"
+        }
+      ]
     }
   ]
 }
