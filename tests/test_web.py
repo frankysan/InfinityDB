@@ -5629,6 +5629,15 @@ def test_visibility_zone_five_term_explanations_match_pinned_n5_3_source() -> No
         assert excerpt.casefold() in page, excerpt
 
 
+def test_mobile_glossary_hash_targets_clear_sticky_navigation(app: Callable) -> None:
+    status, _, styles = request(app, "/static/styles.css")
+    assert status == 200
+    assert b"@media (max-width: 920px)" in styles
+    assert b"The compact sticky navigation must not obscure glossary hash targets." in styles
+    assert b".glossary-entry {" in styles
+    assert b"scroll-margin-top: 6rem;" in styles
+
+
 def test_visibility_zone_inline_links_have_glossary_previews(
     app: Callable, tmp_path: Path,
 ) -> None:
@@ -6309,6 +6318,7 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     assert b'const viewportGutter = 12' in renderer
     assert b'tooltip.setAttribute("popover", "manual")' in renderer
     assert b'tooltip.showPopover()' in renderer
+    assert b'if (!link.isConnected || !tooltip?.isConnected)' in renderer
     assert b'tooltip.hidePopover()' in renderer
     assert b'link.addEventListener("pointerenter", (event) =>' in renderer
     assert b'link.addEventListener("pointerleave", (event) =>' in renderer
@@ -6331,6 +6341,16 @@ def test_maintained_text_tokens_resolve_links_distances_and_tooltips(
     assert b'calc(100vw - 24px)' in styles
     assert b".maintained-review-needed" in styles
     assert b"var(--color-status-warning-surface)" in styles
+
+
+def test_detached_reference_preview_does_not_open_popover() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable")
+    harness = Path(__file__).resolve().parent / "maintained_reference_lifecycle_harness.mjs"
+    result = subprocess.run([node, str(harness)], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert "detached reference prevented popover reopening" in result.stdout
 
 
 def test_rules_summary_rendering_preserves_links_emphasis_and_source_notes() -> None:

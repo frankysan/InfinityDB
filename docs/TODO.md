@@ -1229,9 +1229,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         non-Visibility MODs and most-restrictive-Zone rule. Keep the
         original 367-record inventory frozen; source-pinned and API
         regression tests verify these later additions.
-      - [ ] Complete responsive browser and accessible navigation
-        acceptance of all five terms before claiming final record
-        acceptance; source/text/API tests alone are insufficient.
+      - [x] Verify all five responsive glossary and global-search
+        destinations, pointer/keyboard previews, hash-target focus,
+        touch first-tap preview/second-tap navigation, and no JavaScript
+        exceptions or horizontal overflow at 1440, 390 and 320 px.
+        Corrected detached preview reopening and sticky-header
+        obstruction for narrow-screen glossary deep links. See
+        the bounded acceptance evidence in docs/testing.md.
+      - [ ] Include these five post-inventory records explicitly in
+        final 1.0 whole-corpus acceptance; do not silently expand
+        the frozen 367-record explanation-audit denominator.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not

@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Glossary deep links now keep headings visible below the compact
+  navigation bar; reference previews no longer reopen detached
+  tooltips when moving between pages.
 - Visibility Zone help now distinguishes additive Range, Cover, Skill and
   Equipment MODs from the non-stacking, most-restrictive Zone MOD.
 - Mines now explicitly measure their Trigger Area from the edge of

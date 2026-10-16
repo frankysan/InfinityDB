@@ -3665,6 +3665,11 @@ html[data-distance-unit="in"] .unit-extended-statline {
 }
 
 @media (max-width: 920px) {
+  /* The compact sticky navigation must not obscure glossary hash targets. */
+  .glossary-entry {
+    scroll-margin-top: 6rem;
+  }
+
   .unit-extended-profile-body {
     grid-template-columns: 1fr;
   }

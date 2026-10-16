@@ -2110,6 +2110,40 @@ Private browser scripts, screenshots and check results remain ignored in
 browser interaction/layout gate; it does not close the final 1.0 source
 completeness gate or change any curated rules interpretations.
 
+## 1.0 five Visibility Zone Game terms browser acceptance
+
+**Verified 2026-10-16 on `dev/v1.0.0`.** A freshly rebuilt rules database
+was used with the current application and Army snapshot. The five
+post-inventory N5.3 p. 144 Game terms (Visibility, Low, Poor, Zero and
+White Noise Zones) were checked at 1440, 390 and 320 px, including
+direct Glossary hash URLs, term descriptions, global-search result
+links, pointer and keyboard reference previews, accessible tooltip
+descriptions, actual keyboard navigation and focused hash targets.
+An isolated touch-enabled 390 px context checked first-tap preview
+and second-tap navigation from the shared term to all four variants.
+
+The first full browser pass reported **314/314 passing interaction,
+navigation and overflow checks**. During manual inspection of the
+320 px White Noise screenshot, a sticky-navigation overlap was
+identified: the heading was partly obscured. A separate browser
+measurement confirmed the defect at both narrow widths. A responsive
+Glossary scroll offset now clears the sticky navigation; the
+post-correction narrow-screen pass reported **229/229 checks passed**,
+including explicit unobstructed-heading assertions for every term
+at 390 and 320 px. The corrected 320 px White Noise screenshot was
+inspected and its heading is visible.
+
+The same browser work also reproduced JavaScript errors when
+a detached maintained-reference tooltip was reopened during
+navigation. The shared preview code now ignores disconnected
+elements, with a Node-based regression for a connected-to-detached
+reference lifecycle. The accepted browser passes have no page errors
+or horizontal document overflow. This closes the bounded five-term
+browser interaction requirement, not the frozen 367-record source
+review or the final 1.0 whole-corpus release gate. Private scripts,
+screenshots, a rebuilt rules DB and check results remain under
+ignored `local/audits/visibility-five-terms-browser/`.
+
 ## 1.0 Repeater/Cube source-to-browser enrichment reconciliation
 
 **Verified 2026-10-15 on `dev/v1.0.0`.** The Repeater citation was checked
