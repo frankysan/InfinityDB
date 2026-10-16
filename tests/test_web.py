@@ -6023,8 +6023,8 @@ def test_skill_api_adds_curated_rules_from_separate_database(app: Callable, tmp_
         {
             "id": "automatic",
             "name": "Automatic",
-            "source": "Infinity Wiki snapshot (English) v20260926-200832",
-            "page": None,
+            "source": "N5 Core Rules v5.3",
+            "page": 77,
         }
     ]
     assert alert["variants"] == []

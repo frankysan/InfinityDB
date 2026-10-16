@@ -4978,3 +4978,19 @@ independent. The exceptions concern **eligibility to react**,
 not changing Cautious Movement's category or waiving other
 reaction requirements. The owning Skill and linked source pages
 provide the player-facing explanation.
+
+## 1.0 Alert! automatic Conclusion
+
+**N5.3 p. 77:** Alert! is an Optional Automatic Common
+Skill, not an ARO that its user declares. To be eligible,
+a Trooper must not have activated through an Order or ARO
+during the current Order, and must itself have been attacked
+or have an allied Trooper inside its Zone of Control that
+was attacked. Eligible Troopers may adjust facing at
+Conclusion, **after all Saving Rolls**, without moving
+position, making a Roll, or granting further AROs.
+
+Unlike Look Out!'s declared allied Dodge ARO, Alert! gives
+only a late automatic facing adjustment to non-activated
+Troopers. Its source-dependent trigger and conclusion
+timing must not be converted into a generic out-of-LoF ARO.

@@ -560,6 +560,35 @@ also passed 3/3 headless browser checks at 1440/390/320 px.
 The original 367-record audit remains frozen and does not
 become accepted on the strength of this bounded verification.
 
+## Alert! and automatic Conclusion timing (2026-10-16)
+
+Pinned English N5.3 p. 77 identifies Alert! as an Optional,
+No Roll **Automatic Skill**, not an ARO. The current Trooper
+must not have been activated by an Order **or an ARO** in
+the same Order. The Trooper or an allied Trooper inside its
+ZoC must have been the target of an Attack. At Conclusion,
+**after Saving Rolls**, eligible Troopers may turn on the
+spot to change their LoF angle without displacement,
+additional Rolls or generating new AROs.
+
+The existing curated clarification incorrectly said Alert!
+requirements were checked "when it is declared"; the
+automatic rule is not declared. Its corrected explanation
+and requirement explicitly exclude previous AROs, preserve
+the original source-reviewed requirement and turn clauses,
+and separate this effect from the declared allied Dodge
+ARO of Look Out!. The record retains its Automatic type,
+Optional/No Roll labels and historical Wiki reference,
+while adding N5.3 p. 77 as direct provenance.
+
+Both curated and pinned-PDF tests passed. A newly built
+rules DB was checked in the browser at 1440, 390 and 320
+px: 3/3 Skill page checks passed for the Automatic badge,
+the new scope and timing clauses, and no page errors or
+horizontal overflow. This is bounded acceptance; the
+frozen 367-record inventory is unchanged and full 1.0
+corpus acceptance remains open.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

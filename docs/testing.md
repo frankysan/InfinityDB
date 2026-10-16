@@ -2524,3 +2524,26 @@ are under ignored local/audits/cautious-movement-aro/.
 This is bounded source-to-page acceptance. The frozen
 367-record inventory and remaining conditional ARO and
 Army-variant acceptance tasks remain open.
+
+## 1.0 Alert! automatic Conclusion
+
+**Verified 2026-10-16 against the SHA-256-pinned English
+N5.3 PDF p. 77.** The curated regression checks Optional,
+No Roll and Automatic classification, the Order/ARO
+activation exclusion, allied Attack/ZoC requirement,
+after-Saving-Rolls Conclusion timing and absence of
+additional reactions. The original reviewed text and
+historical Wiki reference remain, alongside the new
+primary-source citation. A separate pinned-PDF test
+checks the heading and all associated conditions.
+
+A newly built rules DB passed **3/3 headless Chrome
+Skill-page checks** at 1440, 390 and 320 px for the
+Automatic badge, visible eligibility and timing text,
+no JavaScript exceptions and no document overflow.
+The verifier, results, database and screenshot are
+private under ignored local/audits/alert-conclusion-audit/.
+
+The original 367-record audit remains frozen; other
+conditional ARO permissions and the whole-corpus gate
+remain open.

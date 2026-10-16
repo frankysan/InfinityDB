@@ -13371,14 +13371,17 @@
                 ],
                 "requirements": [
                     "The user or an Allied Trooper in its Zone of Control was the target of an Attack.",
-                    "The user has not activated in the same Order."
+                    "The user has not activated in the same Order.",
+                    "The user must not have declared an [[trait:aro|ARO]] during that Order either; a prior [[trait:aro|ARO]] declaration prevents [[skill:alert|Alert!]] from taking effect."
                 ],
                 "effects": [
-                    "At the end of the Order, the user may turn on the spot without changing position or generating AROs."
+                    "At the end of the Order, the user may turn on the spot without changing position or generating AROs.",
+                    "This automatic, No Roll change of LoF angle resolves during the Conclusion Step, after [[rule:saving-rolls|Saving Rolls]], and does not grant a new [[trait:aro|ARO]]."
                 ],
                 "restrictions": [],
                 "clarifications": [
-                    "Unlike most Skills, check the Requirements of [[skill:alert|Alert!]] when it is declared. Its effects occur at the conclusion of the [[rule:order-expenditure-sequence|Order Expenditure Sequence]]."
+                    "[[skill:alert|Alert!]] is an Optional Automatic Common Skill, **not a declared [[trait:aro|ARO]]**. Check the eligibility conditions at the Order's Conclusion in the [[rule:order-expenditure-sequence|Order Expenditure Sequence]], after [[rule:saving-rolls|Saving Rolls]]; an ally being the target of an Attack alone is not enough if the potential [[skill:alert|Alert!]] user has activated or declared an [[trait:aro|ARO]] during that Order.",
+                    "A Trooper that did not activate in the Order may qualify because an allied Trooper in its [[trait:zone-of-control-zc|Zone of Control]] was the target of an Attack. Its change of facing is performed without displacement and cannot create a new [[trait:aro|ARO]]."
                 ]
             },
             "labelIds": [
@@ -13387,6 +13390,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 77,
+                    "section": "Alert!"
+                },
+                {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Alert",
                     "heading": "Alert"
@@ -13394,7 +13402,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-23"
+                "reviewedOn": "2026-10-16"
             }
         },
         {

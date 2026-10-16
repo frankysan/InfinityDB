@@ -1297,6 +1297,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Stealth's exception without granting reactions through
         LoF. Source-pinned tests and responsive browser checks
         passed (3/3); original 367-record inventory unchanged.
+      - [x] Reconcile Alert! (N5.3 p. 77) as an Optional
+        Automatic Common Skill, not a declared ARO. Eligibility
+        excludes Troopers activated by an Order or ARO in the
+        same Order; after Saving Rolls, eligible Troopers may
+        turn in place during Conclusion without new reactions.
+        Pinned-source tests and 3/3 responsive browser checks pass.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

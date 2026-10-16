@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Alert! now correctly explains its automatic eligibility
+  and after-Saving-Rolls facing adjustment, rather than
+  treating it as a declared ARO.
 - Cautious Movement now explains when it suppresses AROs,
   including Hackable Troopers, Stealth, Hidden Deployment,
   and the importance of both movement endpoints.

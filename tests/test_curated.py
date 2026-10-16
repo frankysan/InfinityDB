@@ -1395,6 +1395,75 @@ def test_checked_in_n5_collection_has_peripheral_rules_foundation() -> None:
     }
 
 
+def test_n5_alert_is_optional_automatic_conclusion_not_an_aro() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {record["id"]: record for record in document["records"]}
+    record = records["skill:alert"]
+    facts = record["facts"]
+    assert facts["category"] == "common-skill"
+    assert facts["typeIds"] == ["automatic"]
+    assert record["labelIds"] == ["optional", "no-roll"]
+    assert record["citations"][0] == {
+        "sourceId": "n5-core-v5.3-pdf",
+        "page": 77,
+        "section": "Alert!",
+    }
+    assert record["citations"][1]["sourceId"] == "wiki-en-20260926-200832"
+    assert any("Allied Trooper" in rule and "Zone of Control" in rule
+               for rule in facts["requirements"])
+    assert any("has not activated in the same Order" in rule
+               for rule in facts["requirements"])
+    assert any("declared an [[trait:aro|ARO]]" in rule
+               for rule in facts["requirements"])
+    assert any("during the Conclusion Step" in item
+               and "[[rule:saving-rolls|Saving Rolls]]" in item
+               for item in facts["effects"])
+    assert any("without changing position or generating AROs" in item
+               for item in facts["effects"])
+    assert any("not a declared [[trait:aro|ARO]]" in text
+               and "at the Order's Conclusion" in text
+               for text in facts["clarifications"])
+    assert any("not activate in the Order" in text
+               and "allied Trooper" in text
+               for text in facts["clarifications"])
+    assert not facts["restrictions"]
+
+
+def test_n5_alert_conclusion_and_activation_rules_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    manifest = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text(
+            encoding="utf8"
+        )
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == manifest["corePdfSha256"]
+    with pdf.open(source) as document:
+        page = document[76].get_text()
+        start = page.index("ALERT!\nAUTOMATIC SKILL")
+        end = page.index("BS ATTACK\nCommon Skill", start)
+        alert = " ".join(page[start:end].split())
+    for clause in (
+        "ALERT! AUTOMATIC SKILL Optional, No Roll",
+        "not have been activated by an Order or ARO in the same Order",
+        "an Allied Trooper within their Zone of Control",
+        "has been the target of an Attack",
+        "at the end of the Order, during its Conclusion",
+        "after performing any Saving Rolls",
+        "turn on the spot, without changing position",
+        "movement is automatic, it does not require a Roll",
+        "does not generate AROs",
+    ):
+        assert clause.casefold() in alert.casefold(), clause
+
+
 def test_checked_in_n5_collection_keeps_common_skill_labels_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)
