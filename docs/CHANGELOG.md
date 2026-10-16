@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Mines now explicitly measure their Trigger Area from the edge of
+  the Mine's base and exclude Total Cover from the template's Blast Focus.
 - Modifiers Explained now covers bracketed-only-on-use MODs,
   positive/negative recipients and one-die ReRoll, with a
   link to existing Special Dice rules. Mixed Weapons also

@@ -844,9 +844,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       retire Vorpal's superseded shared-only disposition, and
       pin five more source clauses and one relationship.
       See RR-WPN-FAMILY-006.
+    - [x] Pin the N5.3 Mine Trigger Area's base-edge measurement and
+      Blast Focus Total Cover exclusion as two additional reviewed
+      source-to-summary clauses; preserve distinct Marker and object
+      Silhouettes and all unresolved S0/S1 publication differences.
+      The selected audit now covers 90 clauses and seventeen typed edges;
+      this does not certify the complete Weaponry section.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
-      API/browser relationships. The 88 selected clauses and seventeen
+      API/browser relationships. The 90 selected clauses and seventeen
       typed edges are not an exhaustive N5.3 pp. 68-74 inventory.
     - [ ] Register the supplied FAQ v0.1 as its own pinned source publication and
       reconcile core versus ITS-season applicability before curating rulings. Its

@@ -194,6 +194,32 @@
           }
         },
         {
+          "id": "mine-trigger-area-base-edge",
+          "anchor": "extended out from the edge of the base of the Mine",
+          "relatedCuratedIds": [
+            "weapon:mines"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "N5.3 p. 72 explicitly defines the Mine Trigger Area origin and exclusion.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "edge of the Mine's base"
+          }
+        },
+        {
+          "id": "mine-trigger-area-total-cover",
+          "anchor": "excludes any areas in Total Cover from the Blast Focus",
+          "relatedCuratedIds": [
+            "weapon:mines"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "N5.3 p. 72 explicitly defines the Mine Trigger Area origin and exclusion.",
+            "curatedId": "weapon:mines",
+            "summaryAnchor": "Total Cover from the Template's Blast Focus"
+          }
+        },
+        {
           "id": "mine-allied-safety",
           "anchor": "A Mine never triggers if the Small Teardrop Template would affect an ally",
           "relatedCuratedIds": [
