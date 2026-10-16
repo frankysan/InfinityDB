@@ -304,10 +304,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       values and identify the distinct ammunition/trait/state effect owners.
       Evidence: `config/validation/mine-variant-effects.json` and
       `docs/rules-research.md` RR-WPN-MINE-002; PARA footnote remains unresolved.
-    - [ ] Complete an individual-variant review for AP, E/M, Monofilament, PARA,
-      Shock, Viral, and Cybermines against the N5 Weapon Chart, ammunition and
-      State rules, and Army profiles. Shared placement/trigger rules must not be
-      mistaken for identical weapon effects or complete per-variant semantics.
+    - [x] Complete a bounded, source-pinned individual-variant review of AP,
+      E/M, Monofilament, PARA, Shock, Viral and Cybermines against the N5.3
+      chart, owning Ammunition/State rules and Army profiles. Seven
+      printed profile anchors and eleven distinct effect clauses are now
+      tested, including AP rounding, E/M target types, Monofilament ARM=0,
+      PARA missing-PH immunity, VITA-conditional Shock/BioWeapon, and the
+      Cybermine Reset exception. Six Mine-object S0/S1 and the PARA [*]/[**]
+      source discrepancies remain explicit and unresolved. Shared Mines
+      placement/trigger behavior is still separate from variant effects;
+      this is not a game-state simulator or exhaustive N5 rules proof.
+      See RR-WPN-MINE-003 and config/validation/mine-variant-effects.json.
     - [x] Publish individually reviewed Mine effect/reference links from the
       curated family definition to the Weapon profile, including ammunition
       and applicable State/Skill links; do not infer effects for unreviewed weapons.

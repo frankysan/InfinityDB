@@ -1943,6 +1943,47 @@ The corrected definition prohibits Wounds without suppressing the rolls used
 to determine non-Wound effects. Citation: pinned `wiki-traits-oldid-4110`,
 Non-Lethal heading; compare the N5.3 Weapon Chart p. 181.
 
+### RR-WPN-MINE-003 - Mine-variant source effects and object geometry
+
+**Scope:** pinned English N5.3 pp. 63-65, 72, 174 and 181;
+existing Army and curated rule-owner evidence. ITS excluded.
+The policy `config/validation/mine-variant-effects.json` v2 pins
+seven Weapon Chart profile anchors and eleven selected
+effect clauses to their printed page and maintained rule owner.
+This extends RR-WPN-MINE-002 without duplicating ammunition
+rules in each Mine card.
+
+- **AP:** ARM/2 and rounding up (including positive ARM minimum 1)
+  are governed by AP Ammunition, not a new Mine-specific modifier.
+- **E/M:** two BTS/2 Saving Rolls, Isolated on failure and
+  Immobilized-B only for the printed HI/TAG/REM/VH classes;
+  the normal Guts Roll exceptions remain owned by E/M.
+- **Monofilament:** N/ARM=0/one Saving Roll and the independent
+  `State: Dead` Trait. This is not AP Ammunition.
+- **PARA:** PH-6/one Saving Roll can cause Immobilized-A,
+  and targets without PH ignore PARA entirely; no PS applies.
+- **Shock:** ARM/one Saving Roll, with direct-to-Dead applying
+  only to failed Shock Saves against VITA 1 targets.
+- **Viral:** the printed N/BTS/one-roll base remains unchanged.
+  BioWeapon adds DA+Shock only against VITA, not STR.
+- **Cybermine:** the blank Ammunition field, PS 5 and two BTS
+  Saves remain intact; Reset (-3 WIP) replaces Dodge and
+  Stunned/Immobilized-B is conditional on target type.
+
+**Unresolved publications:** the printed object profile is S0
+for all seven; pinned Army uses S1 for AP, E/M, Monofilament,
+PARA, Shock and Viral but S0 for Cybermine. The separate
+CAMO Marker S2 rule does not resolve these object values
+(see RR-AW-OBJECT-002). The N5.3 PARA Mine source `[*]`
+notation versus Army `[**]` is also preserved. The E/M Mine
+uses `[**]` in both sources; it is **not** part of that discrepancy.
+
+The audit checks exact source excerpts, existing player-facing
+canonical owner text and imported profile/trait values, including
+the source-hash invariant. It does not change gameplay, decide
+which conflicting publication overrides another, or claim all
+possible interactions have been exhaustively adjudicated.
+
 ### Sepsitor and Sepsitor Plus (N5.3; 2026-10-09)
 
 **Project domain:** Data processing

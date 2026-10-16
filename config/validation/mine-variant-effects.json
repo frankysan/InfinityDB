@@ -1,5 +1,5 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "scope": "Selected named N5.3 Mines, not a complete Weaponry audit or an assertion that these effects have executable game logic.",
   "sources": {
     "corePdfVersion": "5.3",
@@ -11,6 +11,13 @@
       "https://infinitythewiki.com/Mines",
       "https://infinitythewiki.com/Weapon_Chart",
       "https://infinitythewiki.com/Traits"
+    ],
+    "effectRulePrintedPages": [
+      63,
+      64,
+      65,
+      72,
+      174
     ]
   },
   "variants": [
@@ -30,7 +37,20 @@
         "Concealed",
         "Deployable"
       ],
-      "interpretation": "ARM halved by AP Ammunition."
+      "interpretation": "ARM halved by AP Ammunition.",
+      "chartRowExcerpt": "AP MINES ARM=0 | BTS=0 | STR=1 | S=0 7 1 AP ARM/2 1",
+      "nextChartRowHeading": "CHEST MINES",
+      "chartFootnote": "[*]",
+      "armyObjectS": 1,
+      "chartObjectS": 0,
+      "effectEvidence": [
+        {
+          "pdfPage": 63,
+          "pdfExcerpt": "rounding up",
+          "ruleOwnerId": "ammunition:ap",
+          "maintainedExcerpt": "round up"
+        }
+      ]
     },
     {
       "slug": "e-m-mine",
@@ -51,7 +71,26 @@
         "Non-lethal",
         "Deployable"
       ],
-      "interpretation": "E/M forces two BTS/2 Saves; failures cause Isolated, and IMM-B for specified target types; it does not inflict Wounds."
+      "interpretation": "E/M forces two BTS/2 Saves; failures cause Isolated, and IMM-B for specified target types; it does not inflict Wounds.",
+      "chartRowExcerpt": "E/M MINES ARM=0 | BTS=0 | STR=1 | S=0 7 1 E/M BTS/2 2",
+      "nextChartRowHeading": "MINE DISPENSER",
+      "chartFootnote": "[**]",
+      "armyObjectS": 1,
+      "chartObjectS": 0,
+      "effectEvidence": [
+        {
+          "pdfPage": 64,
+          "pdfExcerpt": "make two Saving Rolls per hit suffered",
+          "ruleOwnerId": "ammunition:em",
+          "maintainedExcerpt": "Both Saving Rolls"
+        },
+        {
+          "pdfPage": 64,
+          "pdfExcerpt": "Heavy Infantry (HI), a TAG, a Remote (REM), or a Vehicle (VH)",
+          "ruleOwnerId": "ammunition:em",
+          "maintainedExcerpt": "Immobilized-B"
+        }
+      ]
     },
     {
       "slug": "monofilament-mine",
@@ -71,7 +110,26 @@
         "State: Dead",
         "Deployable"
       ],
-      "interpretation": "N Ammunition, ARM=0 against the Saving Roll, with the separate State: Dead Trait; not AP Ammunition."
+      "interpretation": "N Ammunition, ARM=0 against the Saving Roll, with the separate State: Dead Trait; not AP Ammunition.",
+      "chartRowExcerpt": "MONOFILAMENT MINES ARM=0 | BTS=0 | STR=1 | S=0 8 1 N ARM=0 1",
+      "nextChartRowHeading": "PARA MINES",
+      "chartFootnote": "[*]",
+      "armyObjectS": 1,
+      "chartObjectS": 0,
+      "effectEvidence": [
+        {
+          "pdfPage": 174,
+          "pdfExcerpt": "Reduces the ARM Attribute of the Target to 0",
+          "ruleOwnerId": "trait:arm-0",
+          "maintainedExcerpt": "Reduces the target"
+        },
+        {
+          "pdfPage": 181,
+          "pdfExcerpt": "DEPLOYABLE, State: DEAD",
+          "ruleOwnerId": "state:dead",
+          "maintainedExcerpt": "An irreversible Null State"
+        }
+      ]
     },
     {
       "slug": "para-mine",
@@ -91,7 +149,20 @@
         "Non-lethal",
         "Deployable"
       ],
-      "interpretation": "PARA uses a PH-6 Saving Roll and IMM-A on failure; PS is inapplicable."
+      "interpretation": "PARA uses a PH-6 Saving Roll and IMM-A on failure; PS is inapplicable.",
+      "chartRowExcerpt": "PARA MINES ARM=0 | BTS=0 | STR=1 | S=0 -- 1 PARA PH-6 1",
+      "nextChartRowHeading": "SHOCK MINES",
+      "chartFootnote": "[*]",
+      "armyObjectS": 1,
+      "chartObjectS": 0,
+      "effectEvidence": [
+        {
+          "pdfPage": 65,
+          "pdfExcerpt": "This Ammunition has no effect on targets that have no PH Attribute",
+          "ruleOwnerId": "ammunition:para",
+          "maintainedExcerpt": "no PH Attribute"
+        }
+      ]
     },
     {
       "slug": "shock-mine",
@@ -109,7 +180,20 @@
         "Concealed",
         "Deployable"
       ],
-      "interpretation": "Shock Ammunition resolves its own special effect."
+      "interpretation": "Shock Ammunition resolves its own special effect.",
+      "chartRowExcerpt": "SHOCK MINES ARM=0 | BTS=0 | STR=1 | S=0 7 1 SHOCK ARM 1",
+      "nextChartRowHeading": "VIRAL MINES",
+      "chartFootnote": "[*]",
+      "armyObjectS": 1,
+      "chartObjectS": 0,
+      "effectEvidence": [
+        {
+          "pdfPage": 65,
+          "pdfExcerpt": "If the target has the VITA Attribute, with a value of 1",
+          "ruleOwnerId": "ammunition:shock",
+          "maintainedExcerpt": "[[attribute:vita|VITA]] 1"
+        }
+      ]
     },
     {
       "slug": "viral-mine",
@@ -128,7 +212,26 @@
         "Bioweapon (DA+SHOCK)",
         "Deployable"
       ],
-      "interpretation": "N Ammunition and BioWeapon (DA+Shock) against targets with VITA; source chart still prints one initial BTS Save."
+      "interpretation": "N Ammunition and BioWeapon (DA+Shock) against targets with VITA; source chart still prints one initial BTS Save.",
+      "chartRowExcerpt": "VIRAL MINES ARM=0 | BTS=0 | STR=1 | S=0 7 1 N BTS 1",
+      "nextChartRowHeading": "WILDPARROT",
+      "chartFootnote": "[*]",
+      "armyObjectS": 1,
+      "chartObjectS": 0,
+      "effectEvidence": [
+        {
+          "pdfPage": 174,
+          "pdfExcerpt": "BioWeapon. This weapon applies the combination of DA+Shock",
+          "ruleOwnerId": "trait:bioweapon",
+          "maintainedExcerpt": "[[ammunition:da|DA]]"
+        },
+        {
+          "pdfPage": 181,
+          "pdfExcerpt": "N BTS 1 INTUITIVE ATTACK, BIOWEAPON",
+          "ruleOwnerId": "trait:bioweapon",
+          "maintainedExcerpt": "not [[attribute:str|STR]]"
+        }
+      ]
     },
     {
       "slug": "cybermine",
@@ -150,7 +253,26 @@
         "Comms. Attack",
         "Non-lethal"
       ],
-      "interpretation": "No ammunition designation in Army/Weapon Chart; bespoke Comms Attack requires Reset and applies Stunned or IMM-B."
+      "interpretation": "No ammunition designation in Army/Weapon Chart; bespoke Comms Attack requires Reset and applies Stunned or IMM-B.",
+      "chartRowExcerpt": "CYBERMINES ARM=0 | BTS=0 | STR=1 | S=0 5 1 -- BTS 2",
+      "nextChartRowHeading": "DROP BEARS",
+      "chartFootnote": "[*]",
+      "armyObjectS": 0,
+      "chartObjectS": 0,
+      "effectEvidence": [
+        {
+          "pdfPage": 72,
+          "pdfExcerpt": "they can only be evaded with a Reset, rather than a Dodge",
+          "ruleOwnerId": "weapon:cybermine",
+          "maintainedExcerpt": "[[skill:reset]] at -3 WIP"
+        },
+        {
+          "pdfPage": 72,
+          "pdfExcerpt": "must make two Saving Rolls against BTS, with PS 5",
+          "ruleOwnerId": "weapon:cybermine",
+          "maintainedExcerpt": "two BTS Saving Rolls against PS 5"
+        }
+      ]
     }
   ],
   "unresolved": [
@@ -158,5 +280,17 @@
       "slug": "para-mine",
       "issue": "PDF/Wiki p181 use [*] for Weaponry; Army profile uses [**] for Ammunition. No source string is overwritten."
     }
-  ]
+  ],
+  "unresolvedObjectGeometry": {
+    "issue": "Six named Mine objects have S0 in the pinned N5.3 Weapon Chart and S1 in the imported Army profile; Cybermine is S0 in both. The S2 CAMO Marker geometry does not resolve object geometry.",
+    "slugs": [
+      "ap-mine",
+      "e-m-mine",
+      "monofilament-mine",
+      "para-mine",
+      "shock-mine",
+      "viral-mine"
+    ],
+    "sourceResearch": "RR-AW-OBJECT-002"
+  }
 }
