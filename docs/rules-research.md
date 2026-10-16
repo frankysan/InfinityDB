@@ -1091,6 +1091,53 @@ and Deactivator, without JavaScript errors or horizontal
 overflow. This does not constitute a human visual
 review or live turn-resolution simulation.
 
+### RR-WPN-DEPLOYED-004 - Deactivator versus persistent equipment
+
+**Scope:** pinned English N5.3 pp. 56, 71, 121-122 and
+the existing curated deployed-equipment records. ITS
+content excluded.
+
+The Deactivator is a Short Skill (Attack) against an
+**enemy** deployed Weapon/Equipment with the Deployable
+Trait, only when in the user's LoF or Zone of Control.
+Camouflage Markers are not legal targets. The roll
+is a Normal WIP Roll with **Range MODs only** (not
+Mimetism, other Special Skill MODs or Cover), and
+success removes the item from the table (p. 121).
+Passing does **not** prevent a Deployable from
+triggering during the current Order. Removal should
+not be misread as retroactively cancelling attacks
+or as an unqualified statement about the timing of
+every persistent effect during that same Order.
+
+Deactivation/removal and continuing benefits are
+distinct mechanisms. Removal of a Dazer stops its
+ongoing Difficult Terrain area; removal of FastPanda
+or a Deployable Repeater stops the removed Token's
+Repeater contribution to allied Hacking Areas;
+removal of Deployable Cover stops its scenery-based
+Cover benefits. These consequences derive from
+removing the element that supplies the effect,
+not from a separate disabling mechanic assigned
+to each piece of Equipment. Placement restrictions,
+imported object profiles and source conflicts are
+unchanged.
+
+Activate Disco Ball instead uses the Deactivator
+piece of Equipment to reactivate an **allied** Ball
+with WIP +3 and Range MODs, restoring an Eclipse
+Template at the Conclusion step (p. 71). It is a
+different named Skill, not a mode in which the
+enemy-removal Deactivator Skill changes targets.
+
+The canonical Deactivator summary now explains
+the eligibility, resolution, ongoing-effect
+consequences and allied-action distinction, with
+links to owning rules rather than duplicate effects
+on all equipment cards. No new typed causal edges,
+source profile overrides, or game-state simulation
+were added.
+
 ## Ammunition and Weaponry / Broader research
 
 ### RR-AW-ZONE-001 — Smoke and Eclipse create transient visibility zones

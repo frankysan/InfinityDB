@@ -12,6 +12,12 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Deactivator now explains eligible enemy deployed targets,
+  Range-only WIP removal, the same-Order trigger exception,
+  and how removal ends persistent Dazer, Repeater and
+  Deployable Cover effects. Allied Disco Ball activation
+  remains a separate Skill.
+
 - Dazer now distinguishes ordinary placement from the
   persistent Difficult Terrain area it generates, including
   Conclusion activation and destruction/deactivation.

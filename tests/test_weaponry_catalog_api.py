@@ -2877,3 +2877,51 @@ def test_dazer_equipment_api_preserves_army_silhouette_discrepancy(
         and edge["record"]["id"] == "trait:perimeter"
         for edge in rule.get("display_relations", [])
     )
+
+
+
+def test_deactivator_api_separates_enemy_removal_and_allied_reactivation(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(
+        source_discrepancy_app, "deactivator", catalog="equipment"
+    )
+    rule = _weapon_rules(payload)["equipment:deactivator"]
+    summary = rule["summary"]
+    assert "**Enemy removal:**" in summary
+    assert "never a [[state:camouflaged|Camouflage Marker]]" in summary
+    assert "Range MODs only" in summary
+    assert "does **not** prevent" in summary
+    assert "triggering during that same Order" in summary
+    assert "[[equipment:dazer|Dazer]]" in summary
+    assert "[[equipment:fastpanda|FastPanda]]" in summary
+    assert "[[equipment:deployable-repeater|Deployable Repeater]]" in summary
+    assert "[[equipment:deployable-cover|Deployable Cover]]" in summary
+    assert "[[skill:activate-disco-ball|Activate Disco Ball]]" in summary
+    assert "reactivate an **allied** Ball" in summary
+    assert {56, 71, 121, 122} <= {
+        c["page"] for c in rule["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    refs = {
+        token["target"]
+        for token in rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "trait:deployable", "trait:zone-of-control-zc",
+        "state:camouflaged", "skill:place-deployable",
+        "skill:mimetism", "equipment:dazer", "equipment:fastpanda",
+        "equipment:deployable-repeater", "equipment:deployable-cover",
+        "equipment:repeater", "skill:activate-disco-ball",
+    } <= refs
+    assert len(payload["profiles"]) == 1
+    assert "BS Weapon (WIP)" in payload["profiles"][0]["traits"]
+    assert "Disposable" not in payload["profiles"][0]["traits"]
+    outbound = {
+        (edge["type"], edge["record"]["id"])
+        for edge in rule.get("display_relations", [])
+        if edge["direction"] == "outbound"
+    }
+    assert ("ignores-modifiers-from", "skill:mimetism") in outbound
+    assert ("enables-use-of", "skill:activate-disco-ball") not in outbound

@@ -791,6 +791,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       publication conflict; do not change source profiles.
       Browser acceptance passed 75/75 across desktop and mobile
       widths. See RR-WPN-DEPLOYED-003.
+    - [x] Audit Deactivator versus persistent deployed support
+      effects. Preserve enemy-only deployed-item/LoF-or-ZoC
+      targeting, CAMO Marker exclusion, Normal WIP with Range
+      MODs only, removal on success, and the current-Order
+      triggering exception. Clarify that removing Dazer,
+      FastPanda, Deployable Repeater or Deployable Cover
+      ends its respective continuing effect; keep allied
+      Activate Disco Ball separate. See RR-WPN-DEPLOYED-004.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
       API/browser relationships. The 75 selected clauses and twelve

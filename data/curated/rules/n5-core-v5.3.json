@@ -14492,7 +14492,7 @@
             "labelIds": [
                 "attack"
             ],
-            "summary": "A Short Skill Equipment action that removes enemy deployed Weapons or Equipment after a successful WIP Roll.",
+            "summary": "**Enemy removal:** A Deactivator can select an enemy deployed [[trait:deployable|Deployable]] Weapon or Equipment in the user's LoF or [[trait:zone-of-control-zc|Zone of Control]], but never a [[state:camouflaged|Camouflage Marker]]. This is a Short Skill (Attack), not [[skill:place-deployable|Place Deployable]].\n\n**Resolution:** Make a WIP [[rule:face-to-face-rolls|Normal Roll]], applying Range MODs only, not [[skill:mimetism|Mimetism]] or Cover. Success removes the enemy item from the table, but does **not** prevent an eligible device from triggering during that same Order.\n\n**Ongoing effects:** Removing [[equipment:dazer|Dazer]] ends its persistent area effect; removing [[equipment:fastpanda|FastPanda]] or [[equipment:deployable-repeater|Deployable Repeater]] ends that item's [[equipment:repeater|Repeater]] extension. Removing [[equipment:deployable-cover|Deployable Cover]] removes its scenery-based Cover effect.\n\n**Separate allied action:** [[skill:activate-disco-ball|Activate Disco Ball]] uses Deactivator Equipment to reactivate an **allied** Ball with WIP +3 and Range MODs. It does not remove the Ball and does not change Deactivator's enemy-only targeting rule.",
             "composition": {
                 "role": "definition"
             },
@@ -14528,6 +14528,26 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 121,
+                    "section": "Deactivator requirements, Roll, removal and current-Order restriction"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 71,
+                    "section": "Activate Disco Ball is a different allied Skill"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 56,
+                    "section": "Repeater and Deployable Repeater object effects"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 122,
+                    "section": "Deployable Cover persistent scenery effect"
+                },
                 {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Deactivator",

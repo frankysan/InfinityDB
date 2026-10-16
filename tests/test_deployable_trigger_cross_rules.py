@@ -674,3 +674,85 @@ def test_dazer_lifecycle_matches_pinned_english_core(
     with pdf.open(SOURCE) as document:
         printed = _normalized_text(document[page - 1].get_text())
     assert _normalized_text(excerpt) in printed, (page, excerpt)
+
+
+
+def test_deactivator_removal_and_persistent_effects_stay_distinct() -> None:
+    records = _records()
+    deactivator = records["equipment:deactivator"]
+    summary = deactivator["summary"]
+
+    assert "enemy deployed [[trait:deployable|Deployable]]" in summary
+    assert "the user's LoF or [[trait:zone-of-control-zc|Zone of Control]]" in summary
+    assert "never a [[state:camouflaged|Camouflage Marker]]" in summary
+    assert "not [[skill:place-deployable|Place Deployable]]" in summary
+    assert "WIP [[rule:face-to-face-rolls|Normal Roll]]" in summary
+    assert "Range MODs only" in summary
+    assert "not [[skill:mimetism|Mimetism]] or Cover" in summary
+    assert "does **not** prevent" in summary
+    assert "triggering during that same Order" in summary
+    assert "[[equipment:dazer|Dazer]] ends its persistent area effect" in summary
+    assert "[[equipment:fastpanda|FastPanda]]" in summary
+    assert "[[equipment:deployable-repeater|Deployable Repeater]]" in summary
+    assert "[[equipment:deployable-cover|Deployable Cover]]" in summary
+    assert "removes its scenery-based Cover effect" in summary
+    assert "[[skill:activate-disco-ball|Activate Disco Ball]]" in summary
+    assert "reactivate an **allied** Ball" in summary
+    assert "It does not remove the Ball" in summary
+    assert "does not change Deactivator's enemy-only targeting rule" in summary
+    assert {71, 56, 121, 122} <= {
+        c["page"] for c in deactivator["citations"]
+        if c["sourceId"] == "n5-core-v5.3-pdf"
+    }
+    assert max(map(len, summary.split("\n\n"))) <= 350
+
+    req = deactivator["facts"]["requirements"]
+    eff = deactivator["facts"]["effects"]
+    restrictions = deactivator["facts"]["restrictions"]
+    assert any("enemy Weapon or piece of Equipment" in x for x in req)
+    assert any("cannot be a Camouflage Marker" in x for x in req)
+    assert any("removed from the game table" in x for x in eff)
+    assert any("Range MODs only" in x for x in restrictions)
+    assert any("triggering during the current Order" in x for x in restrictions)
+
+    assert "no longer generates Difficult Terrain" in records["equipment:dazer"]["summary"]
+    assert "Hacking Area extension cease" in records["equipment:fastpanda"]["summary"]
+    assert "no longer extends a Hacking Area" in (
+        records["equipment:deployable-repeater"]["summary"]
+    )
+    assert "Scenery Element" in records["equipment:deployable-cover"]["summary"]
+    activate = records["skill:activate-disco-ball"]
+    assert "allied" in activate["summary"]
+    assert "Enemy Disco Balls cannot be activated" in activate["summary"]
+    assert "WIP +3" in activate["summary"]
+    assert "The Template is removed at the start of the next States Phase" in (
+        activate["summary"]
+    )
+
+
+@pytest.mark.parametrize(
+    ("page", "excerpt"),
+    (
+        (121, "LoF or ZoC"),
+        (121, "only target enemy Deployable Weapons"),
+        (121, "but never Camouflage Markers"),
+        (121, "by passing a Normal WIP Roll"),
+        (121, "Deployable Cover, Deployable"),
+        (121, "triggering during the current Order"),
+        (121, "MODs for Range"),
+        (121, "removed from the game table"),
+        (71, "Only allied Disco Balls can be Activated this way"),
+        (71, "By making a successful WIP +3 Normal Roll"),
+        (175, "Deployable. This weapon or piece of Equipment may be deployed"),
+    ),
+)
+def test_deactivator_and_allied_activation_pinned_source_clauses(
+    page: int, excerpt: str,
+) -> None:
+    pdf = pytest.importorskip("pymupdf")
+    if not SOURCE.exists():
+        pytest.skip("Pinned N5.3 English PDF unavailable")
+    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(SOURCE) as document:
+        text = _normalized_text(document[page - 1].get_text())
+    assert _normalized_text(excerpt) in text, (page, excerpt)
