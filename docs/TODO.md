@@ -659,12 +659,19 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       to Army identities: seven full matches and seven S-only conflicts.
       Both PDF languages specify S0 for six named Mines while Army gives S1;
       Dazer is English S1 versus Spanish/Army S0. See RR-AW-OBJECT-002.
-    - [ ] Reconcile the seven auxiliary Silhouette source differences with
-      authoritative provenance before changing imported profiles or
-      declaring gameplay interpretation. S0 itself is a valid N5.3
-      template (25 mm base, 3 mm height; general rules p. 18), also
-      present in N5.1/N5.2: do not classify these differences as
-      impossible or inherited solely from an older edition.
+    - [x] Reconcile the seven disputed supplementary object Silhouettes
+      across pinned EN/ES N5.3 PDFs, EN/ES Wiki Weapon Charts, dedicated
+      Dazer pages and imported Army metadata in a reproducible offline
+      provenance matrix. All six named Mines agree on S0 in both PDFs
+      and Wiki charts while Army gives S1; Dazer has additional
+      contradictions within the Wiki itself. Keep publication contexts
+      distinct and retain source hashes under ignored local/audits/.
+    - [ ] Establish official precedence or corrections for the six Mine
+      S0-versus-Army-S1 discrepancies and Dazer's cross-publication
+      S0/S1 conflict before modifying profiles or publishing a definitive
+      active-object geometry ruling. S0 itself remains a valid N5.3
+      template (25 mm base, 3 mm high; general rules p. 18), also
+      present in N5.1/N5.2.
     - [x] Make S0/SX discoverable in the Glossary alongside S1-S8
       diagrams and in unit Silhouette previews. State S0's fixed
       25 mm by 3 mm geometry and SX's Prone-only 3 mm height with

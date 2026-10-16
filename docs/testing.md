@@ -493,6 +493,22 @@ prose semantics, and API/browser projection still need review. The chart report
 also records the exact Army database SHA-256 so it can be safely combined with
 enrichment evidence from the same snapshot.
 
+For the seven supplementary object Silhouette conflicts, cross-check both
+N5.3 language PDFs and both archived Wiki Weapon Charts as **distinct
+publications**. The read-only provenance audit additionally distinguishes
+each Dazer-specific Wiki equipment page from its language's chart and pins
+all input hashes. It requires the locally retained source archives, PyMuPDF,
+and the generated Army database (none are added to Git):
+
+```powershell
+.venv\Scripts\python.exe -m tools.audit_auxiliary_silhouette_provenance --pdf-en data/pdf/rules/n5-rules-v5-3-en.pdf --pdf-es data/pdf/rules/esp-n5-update-5-3.pdf --wiki-en "data/wiki/WIKI-en 20260926-200832.zip" --wiki-es "data/wiki/WIKI-es 20261009-211304.zip" --army-db data/generated/infinity.db --json-output local/audits/auxiliary-silhouette-provenance.json --markdown-output local/audits/auxiliary-silhouette-provenance.md
+```
+
+The output reports source values, **not** a gameplay ruling or permission to
+overwrite imported Army data. The regression module exercises parsers using
+synthetic inputs and conditionally validates the pinned source matrix when
+those local source files are available.
+
 To reconcile unresolved Weapon rule enrichment without inventing definitions,
 combine the existing enrichment and chart reports in a separate deterministic
 source-to-reference triage:
