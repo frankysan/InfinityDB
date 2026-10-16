@@ -1756,6 +1756,71 @@ def test_checked_in_n5_collection_models_combat_reaction_skill_slice() -> None:
     ]
 
 
+def test_n5_guard_aerial_unconscious_exception_is_conditional() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {r["id"]: r for r in document["records"]}
+    aerial = records["skill:aerial"]
+    guard = records["skill:guard"]
+    unconscious = records["state:unconscious"]
+    assert aerial["facts"]["typeIds"] == ["automatic"]
+    assert guard["facts"]["typeIds"] == ["automatic"]
+    assert aerial["labelIds"] == ["obligatory"]
+    assert guard["labelIds"] == ["optional"]
+    assert aerial["citations"][0] == {
+        "sourceId": "n5-core-v5.3-pdf", "page": 86, "section": "Aerial"
+    }
+    assert {"sourceId": "n5-core-v5.3-pdf", "page": 86,
+            "section": "Aerial: Guard exception"} in guard["citations"]
+    assert {"sourceId": "n5-core-v5.3-pdf", "page": 172,
+            "section": "Unconscious State: Automatic Skills"} in guard["citations"]
+    assert any(c["sourceId"] == "wiki-aerial-oldid-4040" for c in aerial["citations"])
+    assert {"type": "restricts-use-of", "recordId": "skill:guard"} in aerial["relations"]
+    assert {"type": "enables-use-of", "recordId": "skill:cc-attack"} in guard["relations"]
+    assert "Line of Fire and Zone of Control" in guard["facts"]["requirements"][0]
+    assert "[[state:unconscious|Unconscious]]" in guard["facts"]["restrictions"][0]
+    assert any("independently of Silhouette contact" in x
+               for x in guard["facts"]["clarifications"])
+    assert any("requires the target" in x and "Zone of Control" in x
+               for x in guard["facts"]["clarifications"])
+    assert any("Silhouette-contact requirement" in x
+               for x in aerial["facts"]["clarifications"])
+    assert any("Automatic Special Skills" in x and "have no effect" in x
+               for x in unconscious["facts"]["effects"])
+
+
+def test_n5_guard_aerial_exception_matches_pinned_pdf() -> None:
+    import hashlib
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    config = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == config["corePdfSha256"]
+    with pdf.open(source) as document:
+        aerial = " ".join(document[85].get_text().split())
+        guard = " ".join(document[94].get_text().split())
+        unconscious = " ".join(document[171].get_text().split())
+    for clause in (
+        "AERIAL AUTOMATIC SKILL Obligatory",
+        "Guard Special Skill may not be used against Troopers with the Aerial",
+        "unless they are in Unconscious State",
+        "never in Silhouette contact",
+    ):
+        assert clause in aerial, clause
+    for clause in (
+        "GUARD AUTOMATIC SKILL Optional",
+        "target of the CC Attack must be in LoF and ZoC",
+        "no need to reach or be in Silhouette contact",
+    ):
+        assert clause in guard, clause
+    assert "Automatic Special Skills and Automatic Equipment have no effect" in unconscious
+
+
 def test_checked_in_n5_collection_models_mobility_environment_skill_slice() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

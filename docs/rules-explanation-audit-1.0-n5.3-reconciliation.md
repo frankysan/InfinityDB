@@ -393,6 +393,32 @@ between these Skills, remove the separate Aerial restriction
 on Guard, or close all reactive/Automatic exceptions. The
 original 367-record explanation audit remains frozen.
 
+## Guard versus Aerial exception (2026-10-16)
+
+The pinned English N5.3 PDF establishes a three-source
+interaction: Guard (p. 95, Optional Automatic) permits CC Attack
+inside LoF and ZoC without Silhouette contact; Aerial (p. 86,
+Obligatory Automatic) explicitly prohibits Guard against an
+Aerial target unless it is Unconscious; Unconscious State
+(p. 172) disables Automatic Special Skills while active.
+Guard's permission to ignore contact does not override the
+separate Aerial prohibition. Against an Unconscious target,
+the prohibition is lifted but Guard still requires LoF and ZoC.
+
+The curated outcome and Aerial-owned restricts-use-of relation
+were already correct. Added p. 86 PDF provenance to Aerial and
+both exception and Unconscious citations to Guard. Linked
+clarifications explain the prohibition and limited exception.
+Historical Wiki sources, Skill types, existing relations and
+gameplay mechanics were preserved.
+
+Pinned PDF and curated tests cover the three clauses. Two
+Skill pages passed 6/6 responsive browser cases at 1440, 390
+and 320 px, with no page errors or overflow. This bounded
+exception acceptance does not close other ARO permissions,
+Automatic interactions, or the whole-corpus 1.0 gate.
+The historical 367-record inventory remains frozen.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

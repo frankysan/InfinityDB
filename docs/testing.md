@@ -2389,3 +2389,23 @@ local/audits/reactive-combat-browser/.
 This is a selected provenance and browser check. It does not
 cover combined Burst effects, every ARO eligibility condition,
 or the final 1.0 whole-corpus acceptance gate.
+
+## 1.0 Guard versus Aerial conditional eligibility
+
+**Verified 2026-10-16 against the pinned N5.3 English PDF.**
+Aerial p. 86 prohibits Guard against a non-Unconscious Aerial
+target, independently of the Silhouette-contact exception in
+Guard p. 95. Unconscious p. 172 disables Automatic Skills.
+Against an Unconscious Aerial target, Guard's LoF and ZoC
+requirements still apply.
+
+A pinned-PDF test checks all three clauses. The curated
+regression verifies the page citations, category types,
+Aerial-owned restriction relation and conditional explanations.
+A rebuilt rules DB powered headless Chrome checks of Aerial
+and Guard at 1440, 390 and 320 px: **6/6 browser cases passed**,
+with no JavaScript exceptions or page-level overflow.
+Private evidence is under ignored local/audits/guard-aerial-browser/.
+
+This closes the bounded Guard/Aerial exception review, not the
+original frozen 367-record audit or full 1.0 acceptance gate.

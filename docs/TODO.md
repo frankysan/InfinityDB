@@ -1260,6 +1260,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         preserve Optional vs Obligatory, LoF/ZoC requirements,
         active/reactive Burst constraints, and single-target ARO
         scope. Add direct citations and source-pinned tests.
+      - [x] Reconcile Guard-versus-Aerial (N5.3 pp. 86/95 and
+        Unconscious p. 172): active Aerial prohibits Guard even
+        within LoF and ZoC; Unconscious exempts the target but
+        Guard's other requirements remain. Verified source tests
+        and responsive browser acceptance.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

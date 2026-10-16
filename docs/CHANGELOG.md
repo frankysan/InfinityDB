@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Guard and Aerial now explain their targeting exception: active
+  Aerial targets prohibit Guard, whereas Unconscious targets
+  remain eligible subject to Guard's LoF and ZoC requirements.
 - Guard and Neurocinetics now link directly to their N5.3 definitions,
   alongside their historical Wiki citations.
 - Climbing Plus and Super-Jump now explain conditional Short Skill

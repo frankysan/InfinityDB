@@ -16630,6 +16630,10 @@
                 ],
                 "restrictions": [
                     "Guard cannot be used against an active [[skill:aerial]] Trooper unless that Trooper is [[state:unconscious|Unconscious]]."
+                ],
+                "clarifications": [
+                    "An [[skill:aerial|Aerial]] target that is not [[state:unconscious|Unconscious]] cannot be attacked with [[skill:guard|Guard]] even when it is inside Line of Fire and [[trait:zone-of-control-zc|Zone of Control]]. The [[skill:aerial|Aerial]] rule explicitly prohibits [[skill:guard|Guard]] independently of Silhouette contact.",
+                    "Against an [[state:unconscious|Unconscious]] [[skill:aerial|Aerial]] target, the prohibition is lifted, but [[skill:guard|Guard]] still requires the target to be in the user's Line of Fire and [[trait:zone-of-control-zc|Zone of Control]]. The exception does not independently grant an [[trait:aro|ARO]]."
                 ]
             },
             "labelIds": [
@@ -16646,6 +16650,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 95,
                     "section": "Guard"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 86,
+                    "section": "Aerial: Guard exception"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 172,
+                    "section": "Unconscious State: Automatic Skills"
                 },
                 {
                     "sourceId": "wiki-guard-oldid-3952",
@@ -16880,6 +16894,10 @@
                     "The user cannot declare [[skill:cautious-movement]].",
                     "[[skill:guard]] cannot be used against the user unless the user is [[state:unconscious|Unconscious]].",
                     "Weapons with the [[trait:boost|Boost]] Trait do not activate against the user."
+                ],
+                "clarifications": [
+                    "The prohibition on [[skill:guard|Guard]] against Aerial targets is separate from the usual Silhouette-contact requirement for [[skill:cc-attack|CC Attack]]. [[skill:guard|Guard]]'s ability to ignore contact does not override that explicit restriction.",
+                    "The Aerial restriction explicitly exempts targets in [[state:unconscious|Unconscious State]]. Automatic Special Skills have no effect while their user is [[state:unconscious|Unconscious]], but any [[skill:guard|Guard]] attack still requires the target to be inside Line of Fire and [[trait:zone-of-control-zc|Zone of Control]]."
                 ]
             },
             "labelIds": [
@@ -16892,6 +16910,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 86,
+                    "section": "Aerial"
+                },
                 {
                     "sourceId": "wiki-aerial-oldid-4040",
                     "heading": "Aerial"
