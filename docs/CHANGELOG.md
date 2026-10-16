@@ -12,6 +12,10 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- BS Attack, CC Attack and Discover now cite their actual N5.3
+  definition pages; Morpho-Scan is classified only as a Short Skill,
+  not as a Basic Short Skill or ARO. Profile-specific numeric Skill
+  values remain sourced separately from their action rules.
 - Glossary deep links now keep headings visible below the compact
   navigation bar; reference previews no longer reopen detached
   tooltips when moving between pages.

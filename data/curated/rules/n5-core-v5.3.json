@@ -2663,7 +2663,7 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 78,
+                    "page": 77,
                     "section": "Discover"
                 },
                 {
@@ -8911,7 +8911,7 @@
             }
         },
         {
-            "id": "declaration-category:short-skill:p40",
+            "id": "declaration-category:short-skill:p39",
             "kind": "declaration-category",
             "name": "Short Skill",
             "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
@@ -8937,16 +8937,16 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 40
+                    "page": 39
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
-            "id": "declaration-category:short-skill:p45",
+            "id": "declaration-category:short-skill:p51",
             "kind": "declaration-category",
             "name": "Short Skill",
             "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
@@ -8972,16 +8972,16 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 45
+                    "page": 51
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
-            "id": "declaration-category:basic-short-skill:p78",
+            "id": "declaration-category:basic-short-skill:p77",
             "kind": "declaration-category",
             "name": "Basic Short Skill",
             "summary": "The linked Army entries are classified as Basic Short Skill in the cited N5 rules.",
@@ -9007,12 +9007,12 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 78
+                    "page": 77
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -9156,10 +9156,10 @@
             }
         },
         {
-            "id": "declaration-category:basic-short-skill:p103",
+            "id": "declaration-category:short-skill:p103",
             "kind": "declaration-category",
-            "name": "Basic Short Skill",
-            "summary": "The linked Army entries are classified as Basic Short Skill in the cited N5 rules.",
+            "name": "Short Skill",
+            "summary": "The linked Army entries are classified as Short Skill in the cited N5 rules.",
             "composition": {
                 "role": "definition"
             },
@@ -9170,8 +9170,8 @@
                 ]
             },
             "facts": {
-                "typeId": "basic-short-skill",
-                "order": 30
+                "typeId": "short-skill",
+                "order": 40
             },
             "armyLinks": [
                 {
@@ -9187,7 +9187,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -9514,7 +9514,7 @@
             }
         },
         {
-            "id": "declaration-category:aro:p40",
+            "id": "declaration-category:aro:p39",
             "kind": "declaration-category",
             "name": "ARO",
             "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
@@ -9540,16 +9540,16 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 40
+                    "page": 39
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
-            "id": "declaration-category:aro:p45",
+            "id": "declaration-category:aro:p51",
             "kind": "declaration-category",
             "name": "ARO",
             "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
@@ -9575,16 +9575,16 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 45
+                    "page": 51
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
-            "id": "declaration-category:aro:p78",
+            "id": "declaration-category:aro:p77",
             "kind": "declaration-category",
             "name": "ARO",
             "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
@@ -9610,12 +9610,12 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 78
+                    "page": 77
                 }
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -9681,41 +9681,6 @@
                 {
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 92
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
-            "id": "declaration-category:aro:p103",
-            "kind": "declaration-category",
-            "name": "ARO",
-            "summary": "The linked Army entries are classified as ARO in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
-                "typeId": "aro",
-                "order": 60
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "morpho-scan"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 103
                 }
             ],
             "review": {
@@ -11052,7 +11017,7 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 40,
+                    "page": 39,
                     "section": "BS Attack"
                 },
                 {
@@ -11100,7 +11065,7 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 40,
+                    "page": 39,
                     "section": "BS Attack"
                 },
                 {
@@ -11159,7 +11124,7 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 40,
+                    "page": 39,
                     "section": "BS Attack"
                 },
                 {
@@ -11233,7 +11198,7 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 45,
+                    "page": 51,
                     "section": "CC Attack"
                 },
                 {
@@ -11281,7 +11246,7 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 45,
+                    "page": 51,
                     "section": "CC Attack"
                 },
                 {
@@ -20160,6 +20125,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 103,
+                    "section": "Morpho Scan"
+                },
                 {
                     "sourceId": "wiki-morpho-scan-oldid-3106",
                     "heading": "Morpho-Scan"

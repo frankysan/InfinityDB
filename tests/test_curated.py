@@ -1875,6 +1875,80 @@ def test_checked_in_n5_collection_models_morale_behavior_skill_slice() -> None:
     assert "relations" not in records["skill:religious-troop"]
 
 
+def test_n5_declaration_categories_follow_exact_source_headings() -> None:
+    path = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    document = load_curated_document(path)
+    mapping: dict[str, list[tuple[str, int]]] = {}
+    for record in document["records"]:
+        if record["kind"] != "declaration-category":
+            continue
+        source = record["citations"][0]
+        assert source["sourceId"] == "n5-core-v5.3-pdf"
+        assert record["id"].endswith(f":p{source['page']}")
+        for link in record["armyLinks"]:
+            if link["entity"] == "skill":
+                mapping.setdefault(str(link["id"]), []).append(
+                    (record["facts"]["typeId"], source["page"])
+                )
+    expected = {
+        "bs-attack": {("short-skill", 39), ("aro", 39)},
+        "cc-attack": {("short-skill", 51), ("aro", 51)},
+        "discover": {("basic-short-skill", 77), ("aro", 77)},
+        "dodge": {("short-skill", 79), ("aro", 79)},
+        "forward-observer": {("short-skill", 92), ("aro", 92)},
+        "morpho-scan": {("short-skill", 103)},
+    }
+    for skill, types in expected.items():
+        assert set(mapping[skill]) == types, skill
+        assert len(mapping[skill]) == len(types), skill
+        record = next(r for r in document["records"] if r["id"] == f"skill:{skill}")
+        assert set(record["facts"]["typeIds"]) == {type_id for type_id, _ in types}
+        pages = {
+            citation["page"] for citation in record["citations"]
+            if citation["sourceId"] == "n5-core-v5.3-pdf"
+        }
+        if skill in {"bs-attack", "cc-attack", "discover", "morpho-scan"}:
+            assert {page for _, page in types} <= pages, skill
+    for retired in (
+        "declaration-category:short-skill:p40",
+        "declaration-category:aro:p40",
+        "declaration-category:short-skill:p45",
+        "declaration-category:aro:p45",
+        "declaration-category:basic-short-skill:p78",
+        "declaration-category:aro:p78",
+        "declaration-category:basic-short-skill:p103",
+        "declaration-category:aro:p103",
+    ):
+        assert retired not in {r["id"] for r in document["records"]}
+
+
+def test_n5_declaration_source_headings_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    provenance = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text(
+            encoding="utf8"
+        )
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == provenance["corePdfSha256"]
+    patterns = {
+        39: r"BS ATTACK\s+SHORT SKILL\s*/\s*ARO",
+        51: r"CC ATTACK\s+SHORT SKILL\s*/\s*ARO",
+        77: r"DISCOVER\s+BASIC SHORT SKILL\s*/\s*ARO",
+        79: r"DODGE\s+SHORT SKILL\s*/\s*ARO",
+        92: r"FORWARD OBSERVER\s+SHORT SKILL\s*/\s*ARO",
+        103: r"MORPHO SCAN\s+SHORT SKILL\s+Comms Attack",
+    }
+    with pdf.open(source) as document:
+        for page, pattern in patterns.items():
+            assert re.search(pattern, document[page - 1].get_text(), re.I), page
+
+
 def test_checked_in_n5_collection_keeps_sensor_category_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

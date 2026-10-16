@@ -2222,3 +2222,30 @@ This closes the **39-field review for the current pinned source set only**,
 not the overall 1.0 release gate. A new Army source version may populate any
 candidate and must be reaudited before tagging; the current report's zero
 confirmed gap families does not independently prove browser completeness.
+
+## 1.0 selected declaration-category source and browser reconciliation
+
+**Verified 2026-10-16 on dev/v1.0.0.** BS Attack (p. 39), CC Attack
+(p. 51), Discover (p. 77), Dodge (p. 79), Forward Observer (p. 92)
+and Morpho-Scan (p. 103) were checked against their exact declaration
+headings in the pinned N5.3 English rulebook. The first three have
+corrected page-scoped declaration IDs and full Skill citations;
+Morpho-Scan now has only a Short Skill mapping and the primary PDF
+citation. Existing BS=11, BS=12 and CC=21 action-heading citations
+were corrected without claiming validation of their numeric source
+variants. The source-to-metadata tests verify the six actual headings
+and prevent restoration of the eight retired ARO/Basic IDs.
+
+A privately rebuilt current rules DB backed headless Chrome checks
+of the four changed Skill pages at 1440, 390 and 320 px. **12/12
+browser checks passed**, including the exact visible category badges
+(BS/CC Short Skill + ARO, Discover Basic Short Skill + ARO and
+Morpho-Scan Short Skill only), no JavaScript errors and no page-level
+overflow. The Morpho-Scan 320 px screenshot was inspected for
+readability. Private verifier, results and screenshot are ignored
+under local/audits/declaration-source-browser/.
+
+The frozen 367-record explanation audit was not renumbered. This is
+selected declaration source/projection/browser verification, not
+acceptance of every declaration option or any numerical replacement
+variant, and not final whole-corpus acceptance.

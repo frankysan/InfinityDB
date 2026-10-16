@@ -160,6 +160,49 @@ season overview, mission additions and digital publication format are ITS
 publication context, not additional N5.3 rulebook bullets. Historical ITS,
 Reinforcements annex and Spanish FAQ remain outside completed source verification.
 
+## Declaration-category source-heading reconciliation (2026-10-16)
+
+This is a **selected source-to-metadata correction**, not the
+367-record explanation-audit signoff. N5.3 English pp. 39, 51, 77,
+79, 92 and 103 were checked against the actual heading and declaration
+line, not merely a page containing an example of the Skill:
+
+- **BS Attack:** Short Skill / ARO, p. 39. Both declaration identities
+  migrate from p40 to p39; the full Skill and BS=11/BS=12
+  variant records now cite the owning heading.
+- **CC Attack:** Short Skill / ARO, p. 51. Both declaration identities
+  migrate from p45 to p51; the full Skill and CC=21 variant
+  record now cite the owning heading.
+- **Discover:** Basic Short Skill / ARO, p. 77. Both declaration
+  identities migrate from p78 to p77; its full Skill citation
+  now points to the definition rather than the continuation example.
+- **Dodge:** Short Skill / ARO, p. 79; unchanged.
+- **Forward Observer:** Short Skill / ARO, p. 92; unchanged.
+- **Morpho-Scan:** Short Skill, p. 103, **not** Basic Short Skill
+  and **not** ARO. The former basic-short-skill:p103 identity is
+  replaced by short-skill:p103; the incorrect aro:p103 identity
+  is retired. The full Skill was already correctly typed and now
+  also cites the primary PDF. Its target's option to declare Reset
+  as an ARO does not make Morpho-Scan an ARO.
+
+The exact page is part of a declaration identity. The **frozen
+367-record inventory retains all eight original S-tier identities**
+as historical audit evidence; it is not rewritten or silently
+renumbered. The eight original ARO/Basic identities correspond to
+seven current records: five AROs, Discover's Basic Short Skill and
+Morpho-Scan's Short Skill. Other affected Short Skill page citations
+were corrected separately. The crosswalk above records the retired
+and successor IDs and the changed source pages. This does **not** promote those original inventory records to
+full material-mechanics acceptance or validate all 60 declaration
+metadata identities. BS=11/BS=12/CC=21 source values remain subject to
+their own Army-profile variant audit; a corrected BS/CC action citation
+is not evidence for a numerical replacement.
+
+Regression tests compare the complete current mappings with the
+N5.3 headings and verify downstream declaration projections. The
+remaining declaration families, exceptional ARO permissions and final
+browser/completeness gate must be evaluated independently.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

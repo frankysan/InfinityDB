@@ -1220,6 +1220,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       [inventory gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate).
       The 304 selected clause reviews and 63 screening-only records
       do not constitute 367 full approvals.
+      - [x] Reconcile the original six ARO and two Basic Short Skill
+        source-heading mappings against N5.3 pp. 39/51/77/79/92/103:
+        correct BS Attack, CC Attack, Discover and Morpho-Scan metadata,
+        linked Skill citations and numerical-variant action citations.
+        Preserve the original 367-row audit snapshot and record the
+        retired identity crosswalk in the N5.3 reconciliation;
+        this is source screening, not full record approval.
+      - [ ] Audit the remaining original declaration-category and
+        numerical-replacement S-tier records individually against their
+        actual source heading and any conditional action permissions.
     - [ ] **Visibility Zone inventory additions:** Include the five
       newer Visibility Zone Game terms in final record acceptance;
       they postdate the frozen 367-record explanation-audit inventory.
