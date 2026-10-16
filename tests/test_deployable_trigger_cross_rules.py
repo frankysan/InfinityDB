@@ -199,3 +199,70 @@ def test_boost_mine_source_conditions_if_pinned_pdf_is_available(
     with pdf.open(SOURCE) as document:
         printed = _normalized_text(document[page - 1].get_text())
     assert _normalized_text(source_excerpt) in printed, (page, source_excerpt)
+
+
+def test_drop_bears_uses_and_rolls_differ_by_deployment_mode() -> None:
+    records = _records()
+    drop = records["weapon:drop-bears"]
+    text = drop["summary"]
+    assert "three shared [[trait:disposable-x|Disposable (3)]] uses" in text
+    assert "**[[trait:deployable|Deployable]] Mode** needs no Roll" in text
+    assert "a legal [[skill:intuitive-attack|Intuitive Attack]] uses an unmodified WIP Roll" in text
+    assert "places no Token but expends one shared" in text
+    assert "The BS Mode throw instead uses a [[trait:bs-weapon-ph|PH-based BS Attack]] Roll" in text
+    assert "A failed throw also spends one use, without deploying a Token" in text
+    assert "new Drop Bear cannot detonate during the same Order" in text
+    assert "valid non-camouflaged enemy in the Trigger Area" in text
+
+    intuitive = records["skill:intuitive-attack"]["facts"]
+    placement = records["skill:place-deployable"]["facts"]
+    disposable = records["trait:disposable-x"]["summary"]
+    perimeter = records["trait:perimeter"]["facts"]
+    assert any(
+        "On a failed WIP Roll, do not place the weapon" in clause
+        and "spend one use" in clause
+        for clause in intuitive["effects"]
+    )
+    assert any(
+        "without a Roll" in clause and "Conclusion of the Order" in clause
+        for clause in placement["effects"]
+    )
+    assert "failed or invalid declaration" in disposable
+    assert "Modes share charges" in disposable
+    assert any(
+        "replaces the usual Silhouette contact" in clause
+        for clause in perimeter["requirements"]
+    )
+    assert any(
+        "remains stationary" in clause and "Conclusion" in clause
+        for clause in perimeter["effects"]
+    )
+    assert {49, 71, 82, 175, 181} <= {
+        cite["page"] for cite in drop["citations"]
+        if cite["sourceId"] == "n5-core-v5.3-pdf"
+    }
+
+
+@pytest.mark.parametrize(
+    ("page", "source_excerpt"),
+    (
+        (49, "If the WIP Roll is failed, the Deployable Weapon is not placed"),
+        (49, "one use must be considered spent"),
+        (71, "A Drop Bear cannot detonate during the Order it is used in BS Mode"),
+        (71, "Disposable (3) Trait is shared between all Modes"),
+        (82, "with no Roll required"),
+        (82, "can be used in subsequent Orders/AROs"),
+        (175, "regardless of the success or failure of the Roll involved"),
+        (175, "BS Weapon (PH). This weapon can make BS Attacks"),
+    ),
+)
+def test_drop_bears_source_clauses_if_pinned_pdf_available(
+    page: int, source_excerpt: str,
+) -> None:
+    pdf = pytest.importorskip("pymupdf")
+    if not SOURCE.exists():
+        pytest.skip("Pinned N5.3 core rules unavailable")
+    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(SOURCE) as document:
+        page_text = _normalized_text(document[page - 1].get_text())
+    assert _normalized_text(source_excerpt) in page_text, (page, source_excerpt)

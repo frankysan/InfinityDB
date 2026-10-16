@@ -734,6 +734,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       only after activation at the Order's Conclusion. Add player-facing
       links, pinned source/API regressions and responsive browser checks.
       See RR-WPN-DEPLOYABLE-EXCEPTIONS-002.
+    - [x] Distinguish the three relevant Deployable resolution paths:
+      no-Roll Place Deployable in Drop Bears Deployable Mode; legal
+      Intuitive Attack placement using unmodified WIP, where a failed
+      Roll places no Token but spends one Disposable use; and BS Mode
+      throwing using PH-based BS Attack, where failure likewise spends
+      a shared use. Preserve both modes' common Disposable (3) pool,
+      the Order's Conclusion activation, and the BS-mode no-same-Order
+      detonation restriction. Automated browser checks passed
+      66/66 assertions across desktop and mobile widths.
+      See RR-WPN-PLACEMENT-001.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
       API/browser relationships. The 75 selected clauses and twelve

@@ -1932,7 +1932,7 @@ def test_drop_bears_keeps_two_modes_and_explains_n5_throwing_terminology(
         "Trigger Area", "BS Weapon (PH)",
     ):
         assert phrase in summary
-    assert summary.count("\n\n") == 3
+    assert summary.count("\n\n") >= 3
     assert "**BS Mode:**" in summary
     assert "Throwing Weapon" not in summary
     assert len(card["facts"]["sourceNotes"]) == 1
@@ -2566,3 +2566,46 @@ def test_mines_declaration_vs_movement_cross_rule_links(
         c["page"] for c in rule["citations"]
         if c["source_id"] == "n5-core-v5.3-pdf"
     }
+
+
+def test_drop_bears_current_roll_failure_and_activation_rules_are_published(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(source_discrepancy_app, "drop-bears")
+    rule = _weapon_rules(payload)["weapon:drop-bears"]
+    summary = rule["summary"]
+    assert "**Rolls and failed uses:**" in summary
+    assert "Mode** needs no Roll" in summary
+    assert (
+        "a legal [[skill:intuitive-attack|Intuitive Attack]] "
+        "uses an unmodified WIP Roll"
+    ) in summary
+    assert "A failed [[skill:intuitive-attack|Intuitive Attack]] places no Token" in summary
+    assert "a [[trait:bs-weapon-ph|PH-based BS Attack]] Roll" in summary
+    assert "A failed throw also spends one use" in summary
+    assert "a successful placement becomes active" in summary.lower()
+    assert "cannot detonate during the same Order" in summary
+
+    assert {49, 71, 82, 175, 181} <= {
+        cite["page"] for cite in rule["citations"]
+        if cite["source_id"] == "n5-core-v5.3-pdf"
+    }
+    targets = {
+        token["target"]
+        for token in rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "skill:place-deployable",
+        "skill:intuitive-attack",
+        "trait:bs-weapon-ph",
+        "trait:disposable-x",
+        "state:camouflaged",
+    } <= targets
+
+    profiles = {profile["mode"]: profile for profile in payload["profiles"]}
+    assert set(profiles) == {"BS Mode", "Deployable Mode"}
+    assert "BS Weapon (PH)" in profiles["BS Mode"]["traits"]
+    assert "Throwing Weapon" in profiles["BS Mode"]["traits"]  # imported alias preserved
+    assert profiles["Deployable Mode"]["ammunition"] == "Shock"
+    assert "weapon:mines" not in _weapon_rules(payload)

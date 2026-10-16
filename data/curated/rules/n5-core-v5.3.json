@@ -5110,7 +5110,7 @@
             "id": "weapon:drop-bears",
             "kind": "weapon",
             "name": "Drop Bears",
-            "summary": "Drop Bears have two different deployment modes, with three shared [[trait:disposable-x|Disposable (3)]] uses.\n\n**[[trait:deployable|Deployable]] Mode:** Use [[skill:place-deployable|Place Deployable]] or [[skill:intuitive-attack|Intuitive Attack]] to place a visible Mine Token (Mine -3), not a [[skill:camouflage|Camouflage]] Marker. The deployed Drop Bear uses its own [[ammunition:shock|Shock]] weapon profile.\n\n**BS Mode:** Throw the Drop Bear using [[trait:bs-weapon-ph|BS Weapon (PH)]]; [[trait:targetless|Targetless]] means no target is needed. A successful Roll deploys the Mine Token during the Conclusion step; it cannot detonate during the Order in which it was thrown.\n\nIn BS Mode, it cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid, non-camouflaged enemy is also inside. After placement the Token functions as a Mine, subject to these Drop Bear-specific exceptions.",
+            "summary": "Drop Bears have two different deployment modes, with three shared [[trait:disposable-x|Disposable (3)]] uses.\n\n**[[trait:deployable|Deployable]] Mode:** Use [[skill:place-deployable|Place Deployable]] or [[skill:intuitive-attack|Intuitive Attack]] to place a visible Mine Token (Mine -3), not a [[skill:camouflage|Camouflage]] Marker. The deployed Drop Bear uses its own [[ammunition:shock|Shock]] weapon profile.\n\n**BS Mode:** Throw the Drop Bear using [[trait:bs-weapon-ph|BS Weapon (PH)]]; [[trait:targetless|Targetless]] means no target is needed. A successful Roll deploys the Mine Token during the Conclusion step; it cannot detonate during the Order in which it was thrown.\n\nIn BS Mode, it cannot be placed with an enemy [[skill:camouflage|Camouflage]] Marker inside its Trigger Area unless a valid, non-camouflaged enemy is also inside. After placement the Token functions as a Mine, subject to these Drop Bear-specific exceptions.\n\n**Rolls and failed uses:** Ordinary [[skill:place-deployable|Place Deployable]] in **[[trait:deployable|Deployable]] Mode** needs no Roll. When a [[state:camouflaged|CAMO]] Marker is present and there is no valid non-camouflaged enemy in the Trigger Area, a legal [[skill:intuitive-attack|Intuitive Attack]] uses an unmodified WIP Roll.\n\nA failed [[skill:intuitive-attack|Intuitive Attack]] places no Token but expends one shared [[trait:disposable-x|Disposable (3)]] use. The BS Mode throw instead uses a [[trait:bs-weapon-ph|PH-based BS Attack]] Roll, not the [[skill:intuitive-attack|Intuitive Attack]] WIP Roll. A failed throw also spends one use, without deploying a Token.\n\n**Timing:** A successful placement becomes active at the Order's Conclusion; the new Drop Bear cannot detonate during the same Order.",
             "facts": {
                 "sourceNotes": [
                     "The N5 v5.3 chart classifies the thrown mode as [[trait:bs-weapon-ph|BS Weapon (PH)]], but Army additionally retains the legacy [[trait:bs-weapon-ph|Throwing Weapon]] label. That older label is source metadata, not an additional N5 effect."
@@ -5169,6 +5169,21 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 71,
                     "section": "Drop Bears"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 49,
+                    "section": "Intuitive Attack: failed WIP and Disposable"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 82,
+                    "section": "Place Deployable: no Roll and Conclusion timing"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Disposable (X) and BS Weapon (PH)"
                 },
                 {
                     "sourceId": "n5-core-v5.3-pdf",

@@ -785,6 +785,53 @@ live tabletop state or constitute a human visual review.
 
 No Army data, weapon profiles, or upstream source rows changed.
 
+### RR-WPN-PLACEMENT-001 ? Drop Bears mode resolution and Disposable timing
+
+**Scope:** official N5.3 English pp. 49, 71, 82 and 175,
+including the published Drop Bears Weapon Chart p. 181;
+ITS content excluded.
+
+The same item supports different deployment procedures:
+
+- **Direct Deployable Mode:** A legal ordinary Place Deployable
+  declaration places one Token without a Roll, with placement
+  resolved at the Conclusion of the Order (p. 82).
+- **Intuitive Attack placement:** If the enemy CAMO Marker is
+  inside the prospective Trigger Area without another valid
+  non-camouflaged enemy, the *eligible* Deployable Mode can use
+  Intuitive Attack. This is an unmodified WIP Roll; failure
+  places no Token but consumes a Disposable use (p. 49).
+  Intuitive Attack must be legal; it is not a generic extra
+  option conferred on every Deployable Weapon.
+- **Thrown BS Mode:** The Targetless throw uses its own
+  BS Weapon (PH) Roll, not the Intuitive Attack WIP Roll.
+  A failed throw also consumes a use under the general
+  Disposable (X) rule, even though no Token is deployed
+  (pp. 71, 175). Modes share a total of three uses.
+  Successful BS-mode deployment happens at the Conclusion
+  and cannot detonate within that Order (p. 71).
+
+The canonical Intuitive Attack, Place Deployable, Perimeter,
+BS Weapon (PH) and Disposable rules remain authoritative.
+Perimeter changes the permitted placement location and
+passable-path requirements; it does not independently
+grant a WIP Roll or the Intuitive Attack Skill.
+
+The Drop Bears reference now links those already-curated
+mechanics and explains how failure and consumption differ
+between modes. No Attack profile, imported Army alias,
+shared mine mechanics or source-order precedence changed.
+
+Source-pinned direct tests and current rules-database/API
+regressions verify roll/charge/timing semantics. A headless
+Chrome pass checked the Drop Bears, Intuitive Attack,
+Place Deployable and Perimeter pages at 1440, 390 and
+320 px: **66/66 assertions passed**, with no page errors
+or horizontal overflow. This is not a human visual review
+or a simulation of live tabletop targeting.
+The multi-mode rule is a **player-facing explanation**,
+not a new official Weapon Property or game mechanic.
+
 ## Ammunition and Weaponry / Broader research
 
 ### RR-AW-ZONE-001 — Smoke and Eclipse create transient visibility zones

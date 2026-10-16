@@ -12,6 +12,12 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Drop Bears now explain why direct placement requires no Roll,
+  Intuitive Attack placement uses WIP and consumes a charge on
+  failure, and throwing uses a PH-based Roll with the same
+  shared Disposable pool. Activation remains at the Order's
+  Conclusion; imported weapon profiles are unchanged.
+
 - Boost now distinguishes placing a device near a CAMO Marker from
   triggering it later. The clarification covers the non-Camouflaged
   enemy placement exception, legal Intuitive Attack eligibility,
