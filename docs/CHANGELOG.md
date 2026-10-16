@@ -12,58 +12,52 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Dazer now distinguishes ordinary placement from the
+  persistent Difficult Terrain area it generates, including
+  Conclusion activation and destruction/deactivation.
+  The published S0/S1 Silhouette disagreement remains visible.
 - FastPanda and WildParrot now distinguish Perimeter placement
   from later Repeater or E/M Mine effects, with visible object
   Attributes and Conclusion-step timing. WildParrot explains
   failed Intuitive Attack consumption; its Non-Lethal source
   discrepancy remains explicitly unresolved.
-
 - Deployable Repeater now distinguishes ordinary Place Deployable
   placement from Pitcher delivery, explains the resulting Token's
   Hacking Area effects, and links canonical Repeater targeting
   and removal rules. Disco Ball lifecycle tests confirm that
   deactivation preserves the Ball while destruction removes it.
-
 - Pitcher and Disco Baller now explain launcher charge consumption,
   deployed-object Attributes, legal landing locations and
   occupied-position corrections. Disco Ball reactivation remains
   a separate Deactivator action, not another launcher shot.
-
 - Mine Dispenser now explains inherited Drop Bears BS Mode
   restrictions, the shared CAMO placement exception, and
   failed-roll Disposable consumption without granting Drop
   Bears' separate Deployable or Intuitive Attack options.
-
 - Drop Bears now explain why direct placement requires no Roll,
   Intuitive Attack placement uses WIP and consumes a charge on
   failure, and throwing uses a PH-based Roll with the same
   shared Disposable pool. Activation remains at the Order's
   Conclusion; imported weapon profiles are unchanged.
-
 - Boost now distinguishes placing a device near a CAMO Marker from
   triggering it later. The clarification covers the non-Camouflaged
   enemy placement exception, legal Intuitive Attack eligibility,
   activation timing and the different Mine trigger rules.
-
 - Mines now explain why a qualifying Dodge declaration may trigger
   them, while subsequent Dodge or failed-Guts movement cannot;
   canonical Dodge, Guts Roll and Stealth references remain linked.
-
 - SymbioBomb now explicitly identifies its three printed Traits:
   Assignable (Transmutation), Comms Attack and Optional. Its published
   Pheroware behavior is unchanged.
-
 - Armed Turret now explains Disposable (1), Non-Reloadable, and
   Perimeter placement inside the deploying Trooper's Zone of Control,
   with a direct Place Deployable reference. Source disputes remain.
-
 - Mines now distinguish a concealing CAMO Marker (S2) from the revealed
   Mine object, whose S0/S1 values conflict across published sources.
   The distinction does not change any Weapon profile or Chest Mine rules.
 - Silhouette help now explains the valid S0 and SX templates alongside
   the existing S1-S8 comparison diagrams, without treating their absence
   from the illustrations as a missing rule.
-
 - AP Thunderbolt, AP+EXP CC Weapon and Stun Pistol now disclose conflicting
   Wiki chart values beside the current N5.3/Army weapon rules; the imported
   profiles and gameplay effects remain unchanged.

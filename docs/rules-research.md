@@ -1040,6 +1040,57 @@ no JavaScript errors, and no horizontal overflow.
 This is not a human visual review or runtime
 simulation of Hacking or Mine detonation.
 
+### RR-WPN-DEPLOYED-003 - Dazer placement versus ongoing terrain effect
+
+**Scope:** pinned English N5.3 pp. 82, 121, 175 and 186;
+Army Dazer equipment metadata; archived English Wiki
+Dazer revision 3436. ITS content excluded.
+
+**Placement:** Dazer's printed Traits are Disposable (3),
+Deployable and Zone of Control, **not Perimeter**. A legal
+ordinary Place Deployable declaration places its Token
+in Silhouette contact with no Roll (p. 82), spending one
+Disposable use. The Zone of Control determines the
+**affected terrain area**, not an alternative placement
+range. Placement resolves and the object becomes active
+at the Order's Conclusion.
+
+**Persistent area:** While the independent Dazer remains
+on the table, it creates Difficult Terrain of infinite
+height throughout its Zone of Control (p. 121). Troopers
+with Terrain (Total) ignore its effects and receive the
+published MOD for qualifying Movement-Label Skills.
+Its effect does not imply movement, a Boost trigger, or
+direct damage. The object has ARM 0, BTS 0 and STR 1;
+Deployable destruction/removal ends its area effect.
+A legal enemy Deactivator success can remove an
+eligible deployed item (p. 121); the existing Deactivator
+rules own its targeting, WIP and current-Order caveats.
+
+**Unresolved object Silhouette:** N5.3 English p. 121
+and pinned Army give S0, while the English Weapon Chart
+p. 186 gives S1. Spanish and archived Wiki sources
+contradict one another and sometimes their own charts;
+see RR-AW-OBJECT-002 for full bilingual provenance.
+The UI retains the imported Army S0, and the new
+curated source note expressly disclaims official
+precedence. No source values or model geometry changed.
+
+Two current unlinked "Difficult Terrain" occurrences
+were reviewed as terrain types rather than references
+to the Terrain Special Skill. The old single occurrence
+fingerprint was superseded and the former unlinked
+"Zone of Control" was replaced by a canonical link;
+all other maintained-text reviews remain intact.
+The canonical Place Deployable, Terrain, Deployable,
+Disposable and Deactivator rules are linked, not copied.
+
+Headless Chrome passed **75/75 assertions** at 1440,
+390 and 320 px for Dazer, Place Deployable, Terrain
+and Deactivator, without JavaScript errors or horizontal
+overflow. This does not constitute a human visual
+review or live turn-resolution simulation.
+
 ## Ammunition and Weaponry / Broader research
 
 ### RR-AW-ZONE-001 — Smoke and Eclipse create transient visibility zones

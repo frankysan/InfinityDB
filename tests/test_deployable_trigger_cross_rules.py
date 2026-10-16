@@ -601,3 +601,76 @@ def test_fastpanda_wildparrot_mechanics_match_pinned_core(
     with pdf.open(SOURCE) as doc:
         found = _normalized_text(doc[page - 1].get_text())
     assert _normalized_text(excerpt) in found, (page, excerpt)
+
+
+
+def test_dazer_support_equipment_placement_and_persistent_effects() -> None:
+    records = _records()
+    dazer = records["equipment:dazer"]
+    summary = dazer["summary"]
+    effects = dazer["facts"]["effects"]
+    source_note = dazer["facts"]["sourceNotes"][0]
+    assert "[[trait:deployable|Deployable]]" in summary
+    assert "[[trait:disposable-x|Disposable (3)]]" in summary
+    assert "[[skill:place-deployable|Place Deployable]]" in summary
+    assert "in Silhouette contact without a Roll" in summary
+    assert "Dazer lacks [[trait:perimeter|Perimeter]]" in summary
+    assert "effect area, not the placement distance" in summary
+    assert "at the Order's Conclusion" in summary
+    assert "Difficult Terrain of infinite height" in summary
+    assert "[[skill:terrain|Terrain]] (Total)" in summary
+    assert "with the Movement Label" in summary
+    assert "ARM 0, BTS 0 and STR 1" in summary
+    assert "An eligible enemy [[equipment:deactivator|Deactivator]]" in summary
+    assert "After removal, it no longer generates Difficult Terrain" in summary
+    assert "until the end of the game or until destroyed" in " ".join(effects)
+    assert "English N5.3 detailed profile (p. 121) specify S0" in source_note
+    assert "English chart (p. 186) specifies S1" in source_note
+    assert "No official correction" in source_note
+    assert {82, 121, 175, 186} <= {
+        cite["page"] for cite in dazer["citations"]
+        if cite["sourceId"] == "n5-core-v5.3-pdf"
+    }
+    assert not any(
+        item["recordId"] == "trait:perimeter"
+        for item in dazer.get("relations", [])
+    )
+    assert max(map(len, summary.split("\n\n"))) <= 350
+    place = records["skill:place-deployable"]["facts"]["effects"]
+    assert any(
+        "without a Roll" in clause and "Conclusion" in clause
+        for clause in place
+    )
+    deactivator = records["equipment:deactivator"]["facts"]
+    assert any(
+        "[[trait:deployable]]" in clause
+        for clause in deactivator["requirements"]
+    )
+
+
+@pytest.mark.parametrize(
+    ("page", "excerpt"),
+    (
+        (82, "place a single Token or Model on the game table"),
+        (82, "with no Roll required"),
+        (82, "Silhouette contact"),
+        (82, "Once the Token has been placed on the table"),
+        (121, "The Dazer is Deployable Equipment that creates a Terrain Zone"),
+        (121, "Difficult Terrain area of infinite"),
+        (121, "Troopers with the Terrain (Total) Special Skill"),
+        (121, "A deployed Dazer remains on the table until the end"),
+        (121, "A Deactivator can only target enemy Deployable Weapons"),
+        (175, "Deployable item enters Unconscious State"),
+        (186, "DAZER"),
+    ),
+)
+def test_dazer_lifecycle_matches_pinned_english_core(
+    page: int, excerpt: str,
+) -> None:
+    pdf = pytest.importorskip("pymupdf")
+    if not SOURCE.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(SOURCE) as document:
+        printed = _normalized_text(document[page - 1].get_text())
+    assert _normalized_text(excerpt) in printed, (page, excerpt)

@@ -2828,3 +2828,52 @@ def test_fastpanda_and_wildparrot_api_preserve_distinct_deployed_effects(
         "trait:disposable-x", "skill:intuitive-attack",
     } <= wild_refs
     assert "equipment:repeater" not in wild_refs
+
+
+
+def test_dazer_equipment_api_preserves_army_silhouette_discrepancy(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(
+        source_discrepancy_app, "dazer", catalog="equipment"
+    )
+    assert len(payload["profiles"]) == 1
+    profile = payload["profiles"][0]
+    assert profile["profile"] == "ARM=0, BTS=0, STR=1, S=0"
+    assert "Disposable (3)" in profile["traits"]
+    assert "Deployable" in profile["traits"]
+    assert "Zone of Control" in profile["traits"]
+    assert "Perimeter" not in profile["traits"]
+    assert "Boost" not in profile["traits"]
+    assert "Intuitive Attack" not in profile["traits"]
+
+    rule = _weapon_rules(payload)["equipment:dazer"]
+    summary = rule["summary"]
+    assert "**Placement:**" in summary
+    assert "in Silhouette contact without a Roll" in summary
+    assert "not the placement distance" in summary
+    assert "at the Order's Conclusion" in summary
+    assert "Difficult Terrain of infinite height" in summary
+    assert "After removal, it no longer generates Difficult Terrain" in summary
+    assert "No official correction or precedence is established" in (
+        rule["facts"]["sourceNotes"][0]
+    )
+    refs = {
+        token["target"]
+        for token in rule["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "skill:place-deployable", "skill:terrain",
+        "trait:disposable-x", "trait:perimeter",
+        "trait:zone-of-control-zc", "equipment:deactivator",
+    } <= refs
+    assert {82, 121, 175, 186} <= {
+        cite["page"] for cite in rule["citations"]
+        if cite["source_id"] == "n5-core-v5.3-pdf"
+    }
+    assert not any(
+        edge["type"] == "uses-effects-of"
+        and edge["record"]["id"] == "trait:perimeter"
+        for edge in rule.get("display_relations", [])
+    )

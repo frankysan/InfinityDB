@@ -14424,7 +14424,7 @@
             "kind": "equipment",
             "name": "Dazer",
             "labelIds": [],
-            "summary": "Equipment with the [[trait:deployable]] Trait that creates a Difficult Terrain area inside its Zone of Control.",
+            "summary": "**Placement:** [[trait:deployable|Deployable]], [[trait:disposable-x|Disposable (3)]] Equipment. [[skill:place-deployable|Place Deployable]] places one Token in Silhouette contact without a Roll. Dazer lacks [[trait:perimeter|Perimeter]]: its [[trait:zone-of-control-zc|Zone of Control]] determines the effect area, not the placement distance.\n\n**Activation and effect:** The Token becomes active at the Order's Conclusion. While present, Dazer creates Difficult Terrain of infinite height throughout its [[trait:zone-of-control-zc|Zone of Control]].\n\nTroopers with [[skill:terrain|Terrain]] (Total) ignore the effect and receive their [[skill:terrain|Terrain]] MOD when declaring Skills with the Movement Label.\n\n**Object and removal:** The Dazer has ARM 0, BTS 0 and STR 1; Silhouette sources disagree (see source note). The independent [[trait:deployable|Deployable]] can be attacked and is removed if destroyed. An eligible enemy [[equipment:deactivator|Deactivator]] can also remove it. After removal, it no longer generates Difficult Terrain.",
             "composition": {
                 "role": "definition"
             },
@@ -14439,6 +14439,9 @@
                     "A deployed Dazer generates a Difficult Terrain area of infinite height inside its Zone of Control.",
                     "Troopers with [[skill:terrain]] (Total) ignore the Dazer and apply their [[skill:terrain]] MOD when declaring Skills with the Movement Label.",
                     "A deployed Dazer remains on the table until the end of the game or until destroyed."
+                ],
+                "sourceNotes": [
+                    "**Unresolved Dazer Silhouette conflict:** Army and the English N5.3 detailed profile (p. 121) specify S0; the English chart (p. 186) specifies S1. The Spanish and Wiki sources also disagree, including within the Wiki itself. No official correction or precedence is established; the imported Army S0 remains unchanged. See RR-AW-OBJECT-002."
                 ]
             },
             "armyLinks": [
@@ -14448,6 +14451,26 @@
                 }
             ],
             "citations": [
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 121,
+                        "section": "Dazer equipment and object profile"
+                    },
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 82,
+                        "section": "Place Deployable placement and activation"
+                    },
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 175,
+                        "section": "Disposable and Deployable traits"
+                    },
+                    {
+                        "sourceId": "n5-core-v5.3-pdf",
+                        "page": 186,
+                        "section": "Dazer chart profile discrepancy"
+                    },
                 {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Dazer",

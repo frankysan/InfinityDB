@@ -782,6 +782,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Keep the printed WildParrot Non-Lethal vs Army omission
       unresolved. Browser checks passed 60/60 at
       1440, 390 and 320 px. See RR-WPN-DEPLOYED-002.
+    - [x] Review Dazer as persistent Deployable support Equipment:
+      normal Place Deployable Silhouette-contact placement, not
+      Perimeter positioning; Disposable (3) charges, Conclusion
+      activation, infinite-height Difficult Terrain within its own
+      ZoC, Terrain (Total) exception, and removal/destruction ending
+      the effect. Show Army's S0 alongside the unresolved S0/S1
+      publication conflict; do not change source profiles.
+      Browser acceptance passed 75/75 across desktop and mobile
+      widths. See RR-WPN-DEPLOYED-003.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
       API/browser relationships. The 75 selected clauses and twelve
