@@ -763,6 +763,16 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       Preserve source profile modes and established relationship owners.
       Browser checks passed 75/75 at desktop and mobile widths.
       See RR-WPN-DELIVERY-001.
+    - [x] Audit the deployed Deployable Repeater rather than only
+      Pitcher's launcher: distinguish Place Deployable from Pitcher
+      BS delivery, explicitly link the live Token's Hacking Area
+      extension and enemy-Repeater/Firewall/ARO restrictions to
+      their canonical owners, and explain removal and loss of
+      that extension. Check Disco Ball States Phase deactivation
+      against destruction and separate Deactivator reactivation
+      without copying mechanics onto the launcher. See
+      RR-WPN-DEPLOYED-001. Headless Chrome passed 78/78
+      assertions across desktop and mobile widths.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
       API/browser relationships. The 75 selected clauses and twelve

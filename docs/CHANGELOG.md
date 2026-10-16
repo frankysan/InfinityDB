@@ -12,6 +12,12 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Deployable Repeater now distinguishes ordinary Place Deployable
+  placement from Pitcher delivery, explains the resulting Token's
+  Hacking Area effects, and links canonical Repeater targeting
+  and removal rules. Disco Ball lifecycle tests confirm that
+  deactivation preserves the Ball while destruction removes it.
+
 - Pitcher and Disco Baller now explain launcher charge consumption,
   deployed-object Attributes, legal landing locations and
   occupied-position corrections. Disco Ball reactivation remains

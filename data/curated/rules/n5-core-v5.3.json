@@ -14629,7 +14629,7 @@
             "labelIds": [
                 "comms-equipment"
             ],
-            "summary": "Comms Equipment with the [[trait:deployable]] Trait that places a [[equipment:repeater]] on the battlefield using [[skill:place-deployable]].",
+            "summary": "A [[trait:deployable|Deployable]] [[equipment:repeater|Repeater]] Token. A [[skill:place-deployable|Place Deployable]] action places it in Silhouette contact. A successful [[weapon:pitcher|Pitcher]] [[skill:bs-attack|BS Attack]] instead delivers the same Token to its impact location without declaring [[skill:place-deployable|Place Deployable]].\n\nThe Token extends allied [[rule:hacking-area|Hacking Areas]] through its [[trait:zone-of-control-zc|Zone of Control]]. Enemy use, target restrictions, [[equipment:firewall|Firewall]] MODs and [[trait:aro|AROs]] follow the [[equipment:repeater|Repeater]] and Hacking Area rules. The Token itself does not declare Hacking Programs.\n\nThe Token has ARM 0, BTS 0, STR 1 and S 1. This independent [[trait:deployable|Deployable]] can be attacked; entering [[state:unconscious|Unconscious State]] instead causes [[state:dead|Dead State]] and removal. The destroyed Token no longer extends a Hacking Area.",
             "composition": {
                 "role": "definition"
             },
@@ -14642,7 +14642,9 @@
             "facts": {
                 "effects": [
                     "[[skill:place-deployable]] places a Deployable Repeater Token on the game table.",
-                    "The deployed Equipment contains a [[equipment:repeater]] and applies the [[equipment:repeater]] rule while active. Without [[trait:perimeter|Perimeter]], the standard [[skill:place-deployable|Place Deployable]] Silhouette-contact placement applies."
+                    "The deployed Equipment contains a [[equipment:repeater]] and applies the [[equipment:repeater]] rule while active. Without [[trait:perimeter|Perimeter]], the standard [[skill:place-deployable|Place Deployable]] Silhouette-contact placement applies.",
+                    "A successful [[weapon:pitcher|Pitcher]] [[skill:bs-attack|BS Attack]] can also deliver this Token at impact, without declaring [[skill:place-deployable|Place Deployable]].",
+                    "The Token contains a [[equipment:repeater|Repeater]] extending allied [[rule:hacking-area|Hacking Areas]] while on the table. Destruction removes the Token and that extension."
                 ]
             },
             "armyLinks": [
@@ -14662,6 +14664,31 @@
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Deployable_Repeater",
                     "heading": "Deployable Repeater"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 56,
+                    "section": "Repeater and Deployable Repeater"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 55,
+                    "section": "Hacking Area and enemy Repeater restrictions"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 73,
+                    "section": "Pitcher BS delivery"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 175,
+                    "section": "Deployable independence and removal"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 186,
+                    "section": "Deployable Repeater object Attributes"
                 }
             ],
             "review": {

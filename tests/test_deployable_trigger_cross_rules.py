@@ -350,7 +350,7 @@ def test_pitcher_and_disco_delivery_lifecycle_keeps_objects_separate() -> None:
     assert "never on a vertical surface" in p
     assert "If none remains, the Equipment is lost" in p
     assert "without requiring a Saving Roll" not in p
-    assert "[[skill:place-deployable]]" in repeater["summary"]
+    assert "[[skill:place-deployable|Place Deployable]]" in repeater["summary"]
     assert {
         ("n5-faq-v0.1-en-pdf", 2), ("n5-faq-v0.1-en-pdf", 3),
         ("n5-core-v5.3-pdf", 73), ("n5-core-v5.3-pdf", 175),
@@ -430,3 +430,91 @@ def test_delivery_lifecycle_is_printed_in_pinned_core(
     with pdf.open(SOURCE) as document:
         found = _normalized_text(document[page - 1].get_text())
     assert _normalized_text(excerpt) in found, (page, excerpt)
+
+
+
+def test_deployed_repeater_fired_and_placed_paths_share_object_rules() -> None:
+    """Delivery Skill differs; the battlefield token still uses Repeater rules."""
+    records = _records()
+    equipment = records["equipment:deployable-repeater"]
+    text = equipment["summary"]
+    pitcher = records["weapon:pitcher"]["summary"]
+    hacking = records["rule:hacking-area"]
+    repeater = records["equipment:repeater"]
+
+    assert "[[skill:place-deployable|Place Deployable]] action" in text
+    assert "[[weapon:pitcher|Pitcher]]" in text
+    assert "[[skill:bs-attack|BS Attack]]" in text
+    assert "without declaring [[skill:place-deployable|Place Deployable]]" in text
+    assert "ARM 0, BTS 0, STR 1 and S 1" in text
+    assert "[[state:unconscious|Unconscious State]]" in text
+    assert "[[state:dead|Dead State]]" in text
+    assert "destroyed Token no longer extends a Hacking Area" in text
+    assert "[[rule:hacking-area|Hacking Areas]]" in text
+    assert "[[equipment:firewall|Firewall]]" in text
+    assert "The Token itself does not declare Hacking Programs" in text
+    assert "not the [[skill:place-deployable|Place Deployable]] Skill" in pitcher
+    assert "enemy [[equipment:repeater]] or [[equipment:deployable-repeater]]" in (
+        hacking["summary"]
+    )
+    assert "When an enemy [[skill:hacker]] uses this" in " ".join(
+        repeater["facts"]["effects"]
+    )
+    assert {55, 56, 73, 175, 186} <= {
+        cite["page"] for cite in equipment["citations"]
+        if cite["sourceId"] == "n5-core-v5.3-pdf"
+    }
+    assert equipment["relations"] == [
+        {"type": "uses-effects-of", "recordId": "equipment:repeater"}
+    ]
+    assert max(map(len, text.split("\n\n"))) <= 350
+
+
+def test_disco_ball_states_phase_removes_template_not_ball() -> None:
+    records = _records()
+    disco = records["weapon:disco-baller"]["summary"]
+    activation = records["skill:activate-disco-ball"]
+
+    assert "At the start of the States Phase the Disco Ball deactivates" in disco
+    assert "the deployed Ball remains until it is destroyed or the game ends" in disco
+    assert "A failed activation WIP Roll does not restore the Eclipse Template" in disco
+    assert "not another launcher charge" in disco
+    assert "WIP +3" in activation["summary"]
+    assert "Enemy Disco Balls cannot be activated" in activation["summary"]
+    assert "Conclusion Step" in activation["summary"]
+    assert "The Template is removed at the start of the next States Phase" in (
+        activation["summary"]
+    )
+    assert any(
+        "when the Ball is destroyed" in clause
+        for clause in activation["facts"]["effects"]
+    )
+    assert "Disposable" not in activation["summary"]
+
+
+@pytest.mark.parametrize(
+    ("page", "excerpt"),
+    (
+        (55, "Zone of Control of Repeaters and Deployable Repeaters"),
+        (55, "any ARO or Hacking Program using the Enemy Repeater"),
+        (56, "There can be no reaction against a Repeater"),
+        (56, "The Deployable Repeater is a piece of Equipment that contains a"),
+        (56, "ARM"),
+        (71, "At the start of the States Phase, the Disco Ball deactivates"),
+        (71, "A deployed Disco Ball remains on the table until the end"),
+        (71, "If the Disco Ball is destroyed remove the Circular Template"),
+        (73, "A successful BS Roll allows players to place a Deployable Repeater"),
+        (175, "Deployable item enters Unconscious State"),
+        (186, "DEPLOYABLE"),
+    ),
+)
+def test_deployed_repeater_and_disco_ball_lifecycle_has_pinned_sources(
+    page: int, excerpt: str,
+) -> None:
+    pdf = pytest.importorskip("pymupdf")
+    if not SOURCE.exists():
+        pytest.skip("Pinned English N5.3 source PDF unavailable")
+    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == PINNED_PDF_SHA256
+    with pdf.open(SOURCE) as doc:
+        normalized = _normalized_text(doc[page - 1].get_text())
+    assert _normalized_text(excerpt) in normalized, (page, excerpt)

@@ -2728,3 +2728,42 @@ def test_activate_disco_ball_does_not_reuse_launcher_charges(
         r["record"]["id"] == "equipment:deactivator"
         for r in record["display_relations"]
     )
+
+
+
+def test_deployed_repeater_equipment_page_links_both_delivery_routes(
+    source_discrepancy_app: Callable,
+) -> None:
+    payload = _weapon_detail(
+        source_discrepancy_app, "deployable-repeater", catalog="equipment"
+    )
+    record = _weapon_rules(payload)["equipment:deployable-repeater"]
+    summary = record["summary"]
+    assert "A [[skill:place-deployable|Place Deployable]] action" in summary
+    assert "[[weapon:pitcher|Pitcher]]" in summary
+    assert "without declaring [[skill:place-deployable|Place Deployable]]" in summary
+    assert "The Token itself does not declare Hacking Programs" in summary
+    assert "The destroyed Token no longer extends a Hacking Area" in summary
+    assert "ARM 0, BTS 0, STR 1 and S 1" in summary
+    refs = {
+        token["target"]
+        for token in record["summary_tokens"]
+        if token["type"] == "reference" and token.get("public_reference")
+    }
+    assert {
+        "weapon:pitcher", "skill:place-deployable", "skill:bs-attack",
+        "rule:hacking-area", "equipment:repeater", "equipment:firewall",
+        "state:dead", "state:unconscious", "trait:deployable",
+    } <= refs
+    assert {55, 56, 73, 175, 186} <= {
+        c["page"] for c in record["citations"]
+        if c["source_id"] == "n5-core-v5.3-pdf"
+    }
+    outgoing = {
+        (edge["type"], edge["record"]["id"])
+        for edge in record["display_relations"]
+        if edge["direction"] == "outbound"
+    }
+    assert ("uses-effects-of", "equipment:repeater") in outgoing
+    assert ("enables-use-of", "skill:place-deployable") not in outgoing
+    assert ("enables-use-of", "skill:bs-attack") not in outgoing

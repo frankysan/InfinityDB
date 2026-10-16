@@ -936,6 +936,54 @@ JavaScript errors and horizontal overflow. This is
 automated behavior evidence, **not** a human visual
 review or a tabletop state-resolution simulation.
 
+### RR-WPN-DEPLOYED-001 - Deployed Repeater and Disco Ball lifecycle
+
+**Scope:** pinned English N5.3 pp. 55-56, 71, 73, 175,
+186 and current curated rules. ITS mission material excluded.
+
+**Deployable Repeater:** The equipment exists independently
+of its carrier (ARM 0, BTS 0, STR 1, S 1). Its standard
+Place Deployable action and successful Pitcher BS delivery
+produce the same Token but use **different declaration
+and placement rules** (pp. 56, 73). Neither route gives
+the other weapon/Skill an extra action. While on the table,
+the Token provides a Repeater, whose Zone of Control
+extends allied Hacking Areas (pp. 55-56). Enemy use,
+Hacker-only reach, Firewall MODs and AROs remain defined
+on Repeater and Hacking Area, not reimplemented in this
+object's data. A destroyed Deployable is removed per
+the Deployable Trait (p. 175), so it can no longer extend
+the Hacking Area. This is not the same as an enemy Hacker
+using a Repeater and does not imply targeting the Token
+with a Hacking Program.
+
+**Disco Ball:** Delivery creates a separate ARM 0,
+BTS 0, STR 1, S 1 object and Eclipse Template. The
+States Phase removes only the Template; the Ball remains
+available for allied Activate Disco Ball using Deactivator,
+LoF or ZoC and WIP +3. Destruction removes the Template
+and the Ball is no longer available for activation
+(p. 71). Launcher Disposable charges do not fund
+reactivation. Existing curated weapon and Skill records
+already stated those rules, so this pass adds focused
+cross-record regressions instead of repeated prose.
+
+The Deployable Repeater card previously described only
+the Place Deployable path. It now links Pitcher delivery
+and canonical Hacking Area, Repeater, Firewall and
+Deployable destruction semantics, backed by PDF citations.
+No imported Army profile or rules authority was changed.
+
+Source-pinned, curated-identity and API tests distinguish
+the two delivery paths and the two Disco Ball outcomes.
+Headless Chrome passed **78/78 assertions** across the
+Deployable Repeater, Pitcher, Disco Baller, and Activate
+Disco Ball pages at 1440, 390 and 320 px, with no
+JavaScript errors or horizontal overflow. This is
+automated page acceptance, not a human visual review.
+The tests do not simulate Orders, Hacking Program
+targeting, or destruction events on a live game state.
+
 ## Ammunition and Weaponry / Broader research
 
 ### RR-AW-ZONE-001 — Smoke and Eclipse create transient visibility zones
