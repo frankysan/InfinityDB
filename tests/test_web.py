@@ -4359,8 +4359,54 @@ def test_unit_loadout_attribute_override_is_not_linked_as_a_skill(
     status, _, script = request(app, "/static/unit.js")
     assert status == 200
     assert b'document.createElement(catalog ? "a" : "span")' in script
-    assert b'profileItems(attributeOverrides, null, "Attribute")' in script
-    assert b'content: "Attribute overrides"' in script
+    assert b'appendClassifiedNonSkillRows(' in script
+    assert b'["attribute_overrides", "Attribute overrides", "Attribute"]' in script
+
+
+def test_non_skill_army_source_items_use_presentation_categories(app: Callable) -> None:
+    from infinity_db.skill_config import load_skill_source_config
+    from infinity_db.unit_presentation import _classify_skill_source_presentations
+
+    classifications = {
+        str(item.skill_ref): item.classification
+        for item in load_skill_source_config()
+    }
+    source_skills = [
+        {"id": 254, "slug": "gizmokit", "name": "Gizmokit"},
+        {"id": 273, "slug": "medikit", "name": "MediKit"},
+        {"id": 266, "slug": "bangbomb", "name": "Bangbomb"},
+        {"id": 258, "slug": "regular", "name": "Regular"},
+        {"id": 282, "slug": "infinity-team-ops", "name": "Infinity Team-Ops"},
+        {"id": 280, "slug": "bts-3", "name": "BTS=3"},
+        {"id": 278, "slug": "bs-12", "name": "BS=12"},
+    ]
+    native_bangbomb = {"id": 246, "slug": "bangbomb", "name": "Bangbomb"}
+    items = {
+        "skills": list(source_skills),
+        "equipment": [native_bangbomb],
+        "weapons": [],
+    }
+
+    _classify_skill_source_presentations(items, classifications)
+
+    assert [item["name"] for item in items["skills"]] == ["BS=12"]
+    assert [item["name"] for item in items["equipment"]] == [
+        "Bangbomb", "Gizmokit", "MediKit"
+    ]
+    assert items["equipment"][0] is native_bangbomb
+    assert all(item["source_classification"] == "equipment" for item in items["equipment"][1:])
+    assert [item["name"] for item in items["attribute_overrides"]] == ["BTS=3"]
+    assert [item["name"] for item in items["training"]] == ["Regular"]
+    assert [item["name"] for item in items["source_markers"]] == ["Infinity Team-Ops"]
+    assert len(source_skills) == 7  # input Army identities are preserved
+
+    status, _, script = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'profileItems(classifiedItems, null, fallbackLabel)' in script
+    assert b'["training", "Training", "Training"]' in script
+    assert b'["attribute_overrides", "Attribute overrides", "Attribute"]' in script
+    # The source-only Team-Ops marker remains available in API data, not as a Skill link.
+    assert b'["source_markers"' not in script
 
 
 def test_unit_details_frontend_links_catalog_items_to_their_details(app: Callable) -> None:

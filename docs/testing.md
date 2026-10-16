@@ -2658,3 +2658,13 @@ ignored `local/audits/bts-override/`.
 
 The frozen 367-record audit and remaining numerical
 variant/source acceptance are separate open tasks.
+
+## 1.0 non-Skill Army Unit presentation
+
+**Focused regression, 2026-10-16.** Known Army source classifications
+are projected into Unit Equipment, Training, and Attribute overrides.
+The source-only Infinity Team-Ops marker is not presented as a Skill.
+Native Bangbomb Equipment takes precedence over its duplicate source
+occurrence, while raw Army items remain intact. Source classification
+is maintained in config/catalogs/skill-source-classifications.json.
+Synthetic regression passed; whole-corpus browser acceptance is open.

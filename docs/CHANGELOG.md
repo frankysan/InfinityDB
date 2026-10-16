@@ -12,9 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Loadout-specific Army Attribute overrides such as BTS=3
-  now appear separately from Skills in Unit details, without
-  linking to an unrelated or non-existent Skill page.
+- Army source items now appear in their proper Unit categories:
+  Equipment, Training and loadout Attribute overrides.
+  Source-only markers no longer generate non-existent Skill links.
 - Hacking Area now cites the correct N5.3 page and explains
   when a Hacker, a Comms Attack target, or a delayed
   Camouflaged Marker can generate separate ARO opportunities.

@@ -1337,6 +1337,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         to show it under Attribute overrides without a
         non-existent /skills/bts-3 link; focused tests and
         responsive browser acceptance passed (3/3).
+      - [x] Reconcile known Army skill-bucket exceptions in Unit presentation.
+        GizmoKit, MediKit and Bangbomb project as Equipment, Regular
+        as Training; Infinity Team-Ops remains source-only without
+        a broken Skill link. Native Bangbomb Equipment wins duplicates.
+        Raw source occurrences remain intact; browser review remains open.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.
