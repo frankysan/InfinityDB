@@ -1239,12 +1239,15 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         Strategic Deployment. Preserve existing Skill mechanics and
         Wiki evidence; add primary PDF citations, regression tests and
         responsive category-badge acceptance (15/15 browser cases).
-      - [ ] Audit the remaining original Automatic, Short Skill and
-        numerical-replacement S-tier records individually against their
-        actual source headings, Army profiles and conditional permissions.
-        The Automatic source screening still finds stale page/group
-        candidates; classify the Regular mapping against Training
-        ownership before changing or deleting it.
+      - [x] Correct fourteen stale Automatic Skill source pages and
+        remove the invalid Regular-as-Skill declaration link.
+        Pinned source tests and responsive browser acceptance confirm
+        the revised pages; canonical Training remains unchanged.
+        See N5.3 reconciliation for page migrations; the historical
+        367-record inventory is not renumbered or approved.
+      - [ ] Verify the remaining Automatic conditional exceptions,
+        Short Skill and numerical-replacement S-tier records against
+        source headings, current Army values and declaration conditions.
     - [ ] **Visibility Zone inventory additions:** Include the five
       newer Visibility Zone Game terms in final record acceptance;
       they postdate the frozen 367-record explanation-audit inventory.

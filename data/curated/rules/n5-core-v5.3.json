@@ -2720,6 +2720,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 113,
+                    "section": "Super-Jump"
+                },
+                {
                     "sourceId": "wiki-super-jump-oldid-4075",
                     "heading": "Super-Jump"
                 }
@@ -7500,6 +7505,41 @@
             }
         },
         {
+            "id": "declaration-category:automatic:p54",
+            "kind": "declaration-category",
+            "name": "Automatic",
+            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "typeId": "automatic",
+                "order": 10
+            },
+            "armyLinks": [
+                {
+                    "entity": "skill",
+                    "id": "hacker"
+                }
+            ],
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 54
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-10-16"
+            }
+        },
+        {
             "id": "declaration-category:automatic:p86",
             "kind": "declaration-category",
             "name": "Automatic",
@@ -7556,6 +7596,10 @@
                 {
                     "entity": "skill",
                     "id": "camouflage"
+                },
+                {
+                    "entity": "skill",
+                    "id": "chain-of-command"
                 }
             ],
             "citations": [
@@ -7629,10 +7673,6 @@
                 },
                 {
                     "entity": "skill",
-                    "id": "surprise-attack"
-                },
-                {
-                    "entity": "skill",
                     "id": "combat-instinct"
                 }
             ],
@@ -7644,7 +7684,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -7703,10 +7743,6 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": "chain-of-command"
-                },
-                {
-                    "entity": "skill",
                     "id": "courage"
                 },
                 {
@@ -7726,7 +7762,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -7751,10 +7787,6 @@
                 {
                     "entity": "skill",
                     "id": "dogged"
-                },
-                {
-                    "entity": "skill",
-                    "id": "no-wound-incapacitation"
                 }
             ],
             "citations": [
@@ -7765,7 +7797,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -7832,11 +7864,11 @@
                 },
                 {
                     "entity": "skill",
-                    "id": "regular"
+                    "id": "ft-master"
                 },
                 {
                     "entity": "skill",
-                    "id": "ft-master"
+                    "id": "g-jumper"
                 }
             ],
             "citations": [
@@ -7847,42 +7879,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
-            "id": "declaration-category:automatic:p94",
-            "kind": "declaration-category",
-            "name": "Automatic",
-            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
-                "typeId": "automatic",
-                "order": 10
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "g-jumper"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 94
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -7910,7 +7907,7 @@
                 },
                 {
                     "entity": "skill",
-                    "id": "hacker"
+                    "id": "immunity"
                 }
             ],
             "citations": [
@@ -7921,42 +7918,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
-            "id": "declaration-category:automatic:p96",
-            "kind": "declaration-category",
-            "name": "Automatic",
-            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
-                "typeId": "automatic",
-                "order": 10
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "immunity"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 96
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -8090,6 +8052,10 @@
                 {
                     "entity": "skill",
                     "id": "journalist"
+                },
+                {
+                    "entity": "skill",
+                    "id": "lieutenant"
                 }
             ],
             "citations": [
@@ -8100,7 +8066,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -8147,41 +8113,6 @@
             }
         },
         {
-            "id": "declaration-category:automatic:p101",
-            "kind": "declaration-category",
-            "name": "Automatic",
-            "summary": "The linked Army entries are classified as Automatic in the cited N5 rules.",
-            "composition": {
-                "role": "definition"
-            },
-            "scope": {
-                "game": "N5",
-                "seasons": [
-                    "current"
-                ]
-            },
-            "facts": {
-                "typeId": "automatic",
-                "order": 10
-            },
-            "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "natural-born-warrior"
-                }
-            ],
-            "citations": [
-                {
-                    "sourceId": "n5-core-v5.3-pdf",
-                    "page": 101
-                }
-            ],
-            "review": {
-                "status": "reviewed",
-                "reviewedOn": "2026-09-17"
-            }
-        },
-        {
             "id": "declaration-category:automatic:p102",
             "kind": "declaration-category",
             "name": "Automatic",
@@ -8203,10 +8134,6 @@
                 {
                     "entity": "skill",
                     "id": "mimetism"
-                },
-                {
-                    "entity": "skill",
-                    "id": "remote-presence"
                 }
             ],
             "citations": [
@@ -8217,7 +8144,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -8242,6 +8169,10 @@
                 {
                     "entity": "skill",
                     "id": "mnemonica"
+                },
+                {
+                    "entity": "skill",
+                    "id": "natural-born-warrior"
                 }
             ],
             "citations": [
@@ -8252,7 +8183,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -8281,6 +8212,10 @@
                 {
                     "entity": "skill",
                     "id": "nco"
+                },
+                {
+                    "entity": "skill",
+                    "id": "no-wound-incapacitation"
                 }
             ],
             "citations": [
@@ -8291,7 +8226,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -8390,6 +8325,10 @@
                 {
                     "entity": "skill",
                     "id": "protheion"
+                },
+                {
+                    "entity": "skill",
+                    "id": "regeneration"
                 }
             ],
             "citations": [
@@ -8400,7 +8339,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -8425,6 +8364,10 @@
                 {
                     "entity": "skill",
                     "id": "religious-troop"
+                },
+                {
+                    "entity": "skill",
+                    "id": "remote-presence"
                 }
             ],
             "citations": [
@@ -8495,6 +8438,10 @@
                 {
                     "entity": "skill",
                     "id": "shasvastii"
+                },
+                {
+                    "entity": "skill",
+                    "id": "sixth-sense"
                 }
             ],
             "citations": [
@@ -8505,7 +8452,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -8527,10 +8474,6 @@
                 "order": 10
             },
             "armyLinks": [
-                {
-                    "entity": "skill",
-                    "id": "sixth-sense"
-                },
                 {
                     "entity": "skill",
                     "id": "stealth"
@@ -8611,7 +8554,7 @@
                 },
                 {
                     "entity": "skill",
-                    "id": "lieutenant"
+                    "id": "super-jump"
                 }
             ],
             "citations": [
@@ -8622,7 +8565,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -8646,7 +8589,7 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": "super-jump"
+                    "id": "surprise-attack"
                 }
             ],
             "citations": [
@@ -8657,7 +8600,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -8724,11 +8667,15 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": "regeneration"
+                    "id": "technorganic"
                 },
                 {
                     "entity": "skill",
-                    "id": "technorganic"
+                    "id": "terrain"
+                },
+                {
+                    "entity": "skill",
+                    "id": "total-reaction"
                 }
             ],
             "citations": [
@@ -8739,7 +8686,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -8798,14 +8745,6 @@
             "armyLinks": [
                 {
                     "entity": "skill",
-                    "id": "terrain"
-                },
-                {
-                    "entity": "skill",
-                    "id": "total-reaction"
-                },
-                {
-                    "entity": "skill",
                     "id": "vulnerability"
                 },
                 {
@@ -8821,7 +8760,7 @@
             ],
             "review": {
                 "status": "reviewed",
-                "reviewedOn": "2026-09-17"
+                "reviewedOn": "2026-10-16"
             }
         },
         {
@@ -12199,6 +12138,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 111,
+                    "section": "Sixth Sense"
+                },
+                {
                     "sourceId": "wiki-sixth-sense-oldid-3901",
                     "heading": "Sixth Sense"
                 },
@@ -12364,6 +12308,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 114,
+                    "section": "Surprise Attack"
+                },
                 {
                     "sourceId": "wiki-surprise-attack-oldid-3943",
                     "heading": "Surprise Attack"
@@ -12810,7 +12759,7 @@
             "citations": [
                 {
                     "sourceId": "n5-core-v5.3-pdf",
-                    "page": 101,
+                    "page": 103,
                     "section": "Natural Born Warrior"
                 },
                 {
@@ -16799,6 +16748,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 116,
+                    "section": "Total Reaction"
+                },
+                {
                     "sourceId": "wiki-total-reaction-oldid-3147",
                     "heading": "Total Reaction"
                 }
@@ -17071,6 +17025,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 116,
+                    "section": "Terrain"
+                },
                 {
                     "sourceId": "wiki-terrain-oldid-3146",
                     "heading": "Terrain"
@@ -18167,6 +18126,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 104,
+                    "section": "No Wound Incapacitation"
+                },
+                {
                     "sourceId": "wiki-no-wound-incapacitation-oldid-3813",
                     "heading": "No Wound Incapacitation"
                 }
@@ -18233,6 +18197,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 110,
+                    "section": "Remote Presence"
+                },
                 {
                     "sourceId": "wiki-remote-presence-oldid-3126",
                     "heading": "Remote Presence"
@@ -18348,6 +18317,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 109,
+                    "section": "Regeneration"
+                },
                 {
                     "sourceId": "wiki-regeneration-oldid-3123",
                     "heading": "Regeneration"
@@ -18725,6 +18699,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 87,
+                    "section": "Chain Of Command"
+                },
+                {
                     "sourceId": "wiki-chain-of-command-oldid-3799",
                     "heading": "Chain of Command"
                 }
@@ -18915,6 +18894,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 99,
+                    "section": "Lieutenant"
+                },
                 {
                     "sourceId": "wiki-lieutenant-oldid-3667",
                     "heading": "Lieutenant"
@@ -20141,6 +20125,11 @@
             ],
             "citations": [
                 {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 93,
+                    "section": "G: Jumper"
+                },
+                {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "G__Jumper",
                     "heading": "G: Jumper"
@@ -20536,6 +20525,11 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 54,
+                    "section": "Hacker"
+                },
                 {
                     "sourceId": "wiki-hacker-oldid-3646",
                     "heading": "Hacker"

@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Automatic Skill categories now cite their correct N5.3 headings,
+  including Hacker, Super-Jump and Surprise Attack. Regular is
+  no longer incorrectly linked as an Automatic Skill.
 - Booty, Decoy, MetaChemistry, Remdriver and Strategic Deployment now
   display their correct Deployment Skill category instead of Automatic,
   with direct N5.3 source citations.

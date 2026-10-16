@@ -2300,3 +2300,25 @@ database has 465 total records. The frozen 367-record explanation
 inventory was not modified; this is selected metadata/browser
 acceptance only. Other Automatic category page mismatches and
 training-vs-Skill attribution remain unreviewed.
+
+## 1.0 Automatic Skill heading and Regular ownership audit
+
+**Verified 2026-10-16 against the pinned N5.3 English PDF.**
+Fourteen Automatic declarations were reconciled to source headings
+on pp. 54, 87, 93, 95, 99, 103-104, 109-111, 113-114 and 116.
+Regression tests pin the owning headings, the exact curated
+page mappings and related Skill source citations. The unrelated
+Regular/Automatic link was removed; canonical Training ownership
+and the existing Order rules are preserved.
+
+The catalog now has 28 Automatic groups and 63 total declaration
+records; the exported rules database has 463 records. A freshly
+rebuilt rules DB was used to verify fourteen public Skill pages
+in headless Chrome at 1440, 390 and 320 px: **42/42 checks passed**,
+with the expected Automatic badges and no page errors or horizontal
+overflow. Private verifier, output and screenshots are stored under
+ignored local/audits/automatic-page-reconciliation/.
+
+This bounded acceptance does not sign off exceptional Automatic
+activation, remaining Short Skill or named replacement-profile
+semantics. The 367-record explanation-audit snapshot remains frozen.

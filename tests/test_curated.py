@@ -2060,7 +2060,7 @@ def test_n5_deployment_only_skills_are_not_automatic_metadata() -> None:
         "remdriver": 110,
         "strategic-deployment": 112,
     }
-    assert len(declarations) == 65
+    assert len(declarations) == 63
     for slug, page in expected.items():
         found = [
             record for record in declarations
@@ -2106,6 +2106,87 @@ def test_n5_deployment_only_headings_match_pinned_pdf() -> None:
         for page, heading in headings.items():
             pattern = rf"(?<![A-Za-z]){re.escape(heading)}\s+DEPLOYMENT SKILL\s+Optional"
             assert re.search(pattern, document[page - 1].get_text(), re.I), page
+
+
+def test_n5_automatic_category_pages_reconcile_to_actual_skill_headings() -> None:
+    path = Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    document = load_curated_document(path)
+    records = {record["id"]: record for record in document["records"]}
+    automatics = [
+        record for record in document["records"]
+        if record["kind"] == "declaration-category"
+        and record["facts"]["typeId"] == "automatic"
+    ]
+    assert len(automatics) == 28
+    pages = {
+        "surprise-attack": 114, "chain-of-command": 87,
+        "no-wound-incapacitation": 104, "g-jumper": 93, "hacker": 54,
+        "immunity": 95, "natural-born-warrior": 103,
+        "remote-presence": 110, "sixth-sense": 111,
+        "lieutenant": 99, "super-jump": 113, "regeneration": 109,
+        "terrain": 116, "total-reaction": 116,
+    }
+    for name, page in pages.items():
+        mapping = [
+            r for r in automatics
+            if {"entity": "skill", "id": name} in r["armyLinks"]
+        ]
+        assert len(mapping) == 1, name
+        assert mapping[0]["id"] == f"declaration-category:automatic:p{page}"
+        assert mapping[0]["citations"] == [
+            {"sourceId": "n5-core-v5.3-pdf", "page": page}
+        ]
+        definition = records[f"skill:{name}"]
+        assert "automatic" in definition["facts"]["typeIds"]
+        assert any(
+            c["sourceId"] == "n5-core-v5.3-pdf" and c["page"] == page
+            for c in definition["citations"]
+        ), name
+    for mapping in automatics:
+        assert mapping["id"].endswith(f":p{mapping['citations'][0]['page']}")
+        assert mapping["armyLinks"]
+        assert {"entity": "skill", "id": "regular"} not in mapping["armyLinks"]
+    assert records["training:regular"]["facts"]["orderType"] == "regular"
+    assert "skill:regular" not in records
+    for obsolete in (
+        "declaration-category:automatic:p94",
+        "declaration-category:automatic:p96",
+        "declaration-category:automatic:p101",
+    ):
+        assert obsolete not in records
+
+
+def test_n5_reconciled_automatic_heading_pages_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    provenance = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text(
+            encoding="utf8"
+        )
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == provenance["corePdfSha256"]
+    headings = {
+        54: "HACKER", 87: "CHAIN OF COMMAND",
+        93: "G: JUMPER", 95: "IMMUNITY",
+        99: "LIEUTENANT", 103: "NATURAL BORN WARRIOR",
+        104: "NO WOUND INCAPACITATION", 109: "REGENERATION",
+        110: "REMOTE PRESENCE", 111: "SIXTH SENSE",
+        113: "SUPER-JUMP", 114: "SURPRISE ATTACK",
+        116: "TERRAIN",
+    }
+    with pdf.open(source) as document:
+        for page, heading in headings.items():
+            pattern = rf"(?<![A-Za-z]){re.escape(heading)}\s+AUTOMATIC SKILL"
+            assert re.search(pattern, document[page - 1].get_text(), re.I), page
+        assert re.search(
+            r"TOTAL REACTION\s+AUTOMATIC SKILL",
+            document[115].get_text(), re.I,
+        )
 
 
 def test_checked_in_n5_collection_keeps_sensor_category_source_faithful() -> None:

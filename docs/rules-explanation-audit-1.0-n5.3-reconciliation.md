@@ -274,6 +274,40 @@ A pinned-source test proves the five exact heading/declaration pairs,
 a curated test prevents reintroduction of the Automatic mappings,
 and browser checks verify all five public Skill category badges.
 
+## Automatic heading pages and Regular ownership (2026-10-16)
+
+Fourteen Automatic Skill mappings pointed to stale printed pages
+in the pinned English N5.3 PDF, even though their type was correct:
+
+- Surprise Attack p. 88 to 114; Chain of Command p. 90 to 87;
+  No Wound Incapacitation p. 91 to 104; G: Jumper p. 94 to 93.
+- Hacker p. 95 to 54; Immunity p. 96 to 95; Natural Born
+  Warrior p. 101 to 103; Remote Presence p. 102 to 110;
+  Sixth Sense p. 112 to 111.
+- Lieutenant p. 113 to 99; Super-Jump p. 114 to 113;
+  Regeneration p. 116 to 109; Terrain and Total Reaction
+  p. 118 to 116.
+
+Each mapping now cites the actual heading, reusing existing
+page groups where appropriate. Hacker gained a new p. 54 group;
+obsolete empty groups p. 94, p. 96 and p. 101 were removed.
+Owning Skill citations were added/corrected while preserving
+other-source references and distinct Immunity examples.
+
+The Automatic p. 93 record additionally linked Regular as if it
+were a Skill. Regular is actually a Training Characteristic,
+represented by the canonical training:regular record (N5.3 p. 11).
+The invalid link was removed without altering Training or Order
+semantics. The current declaration catalog has **28 Automatic
+groups and 63 declaration-category records**, and rules.db has
+**463 total records**. No gameplay mechanics were changed.
+
+This is source/projection reconciliation, not acceptance of all
+Automatic conditional activation effects. The original
+367-record audit inventory remains frozen. Remaining Short Skill,
+numeric Army replacement, and wider corpus acceptance work
+still needs independent evidence.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an
