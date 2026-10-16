@@ -12069,6 +12069,10 @@
                 "requirements": [],
                 "restrictions": [
                     "The Skill affects only [[skill:surprise-attack]] MODs and [[skill:stealth]]; other MODs and ARO conditions still apply."
+                ],
+                "clarifications": [
+                    "When [[skill:stealth|Stealth]] is ineffective against the user, its suppression of otherwise eligible [[trait:aro|AROs]] no longer applies. A Trooper moving outside LoF may still be reacted to through ordinary [[trait:zone-of-control-zc|Zone of Control]] eligibility, but Combat Instinct does not create LoF or waive the declared reaction's own requirements.",
+                    "Unlike [[skill:sixth-sense|Sixth Sense]], Combat Instinct does not grant an outside-LoF response to an incoming Attack or a 360-degree LoF arc. It separately ignores the MODs imposed by [[skill:surprise-attack|Surprise Attack]], not other modifiers."
                 ]
             },
             "armyLinks": [
@@ -12078,6 +12082,21 @@
                 }
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 88,
+                    "section": "Combat Instinct"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 112,
+                    "section": "Stealth: counters"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 20,
+                    "section": "Zone of Control and AROs"
+                },
                 {
                     "sourceId": "wiki-combat-instinct-oldid-3135",
                     "heading": "Combat Instinct"
@@ -12134,7 +12153,8 @@
                     "The Skill's response and MOD exceptions apply only in the situations it specifies."
                 ],
                 "clarifications": [
-                    "**Official FAQ v0.1 (general Special Skills ruling):** When the Trooper has both [[equipment:multispectral-visor|Multispectral Visor Level 1]] and Sixth Sense, and is the target of a [[skill:bs-attack|BS Attack]] through a [[term:zero-visibility-zone|Zero Visibility Zone]], the -6 MOD for drawing LoF through the Zone is ignored. MSV1 by itself still has its printed -6 LoF requirement; this FAQ does not cancel other MODs or grant an unconditional LoF exception."
+                    "**Official FAQ v0.1 (general Special Skills ruling):** When the Trooper has both [[equipment:multispectral-visor|Multispectral Visor Level 1]] and Sixth Sense, and is the target of a [[skill:bs-attack|BS Attack]] through a [[term:zero-visibility-zone|Zero Visibility Zone]], the -6 MOD for drawing LoF through the Zone is ignored. MSV1 by itself still has its printed -6 LoF requirement; this FAQ does not cancel other MODs or grant an unconditional LoF exception.",
+                    "The 360-degree LoF arc and the permission to react from outside LoF apply only to Attacks directed at the user, not arbitrary movement outside LoF. The separate rule that [[skill:stealth|Stealth]] is ineffective against Sixth Sense restores otherwise eligible [[trait:aro|AROs]] (for example, inside [[trait:zone-of-control-zc|Zone of Control]]) without granting unrestricted LoF or waiving the reaction's requirements."
                 ]
             },
             "armyLinks": [
@@ -12148,6 +12168,16 @@
                     "sourceId": "n5-core-v5.3-pdf",
                     "page": 111,
                     "section": "Sixth Sense"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 112,
+                    "section": "Stealth: counters"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 20,
+                    "section": "Zone of Control and AROs"
                 },
                 {
                     "sourceId": "wiki-sixth-sense-oldid-3901",

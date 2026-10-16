@@ -419,6 +419,33 @@ exception acceptance does not close other ARO permissions,
 Automatic interactions, or the whole-corpus 1.0 gate.
 The historical 367-record inventory remains frozen.
 
+## Stealth counters and outside-LoF reaction scope (2026-10-16)
+
+Pinned English N5.3 p. 112 explicitly exempts Troopers with
+Combat Instinct and Sixth Sense from Stealth's reaction
+suppression. Combat Instinct p. 88 separately ignores Surprise
+Attack MODs, but does not grant special outside-LoF reaction
+permission. Sixth Sense p. 111 allows a 360-degree LoF arc and
+outside-LoF reaction **only for Attacks directed at the user**,
+not non-Attack movement. The general Zone of Control reaction
+trigger on p. 20 still requires a valid ARO and eligible action.
+
+The existing source-native inverse relations from Combat Instinct
+and Sixth Sense to Stealth remain unchanged. Combat Instinct
+gained primary N5.3 citations (pp. 88, 112, 20) while retaining
+its pinned Wiki revision; Sixth Sense gained the Stealth/ZoC
+citations alongside its existing FAQ and Wiki provenance.
+Player-facing clarifications now distinguish cancellation of
+Stealth protection from granting LoF or waiving reaction
+requirements. No rule mechanism or ARO engine was introduced.
+
+Source-pinned and curated regression tests passed; the three
+published Skill pages passed 9/9 headless Chrome cases at
+1440/390/320 px, checking rendered content and no script errors
+or overflow. This verifies the selected counter-Skill boundary,
+not every possible Stealth/mixed-activation exception. The
+frozen 367-record inventory remains unchanged.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

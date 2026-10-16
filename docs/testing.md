@@ -2409,3 +2409,29 @@ Private evidence is under ignored local/audits/guard-aerial-browser/.
 
 This closes the bounded Guard/Aerial exception review, not the
 original frozen 367-record audit or full 1.0 acceptance gate.
+
+## 1.0 Combat Instinct, Sixth Sense and Stealth ARO scope
+
+**Verified 2026-10-16 against pinned English N5.3 pp. 20, 88
+and 111-112.** A curated regression preserves optional Automatic
+categories and the existing directed Stealth-counter relations,
+with Combat Instinct's independent Surprise Attack modifier
+exception. A SHA-256-pinned PDF regression checks Combat
+Instinct's two clauses, Sixth Sense's attack-only outside-LoF
+permission, Stealth's counter exceptions, and ordinary ZoC
+reaction eligibility. Historical Wiki/FAQ citations remain
+intact; Combat Instinct acquired a primary PDF citation.
+
+A freshly built rules database was used in headless Chrome to
+verify the Combat Instinct, Sixth Sense and Stealth Skill pages
+at 1440, 390 and 320 px. **9/9 checks passed** for visible
+Automatic badges, the newly authored scoped explanations,
+source-counter names, HTTP response, no JavaScript page
+errors, and no horizontal document overflow. The verifier,
+result JSON, rebuilt DB and screenshot are private under
+ignored local/audits/stealth-counter-aros/.
+
+This is bounded source-to-page acceptance, not an engine-level
+general ARO permission or 367-record corpus signoff. The
+original inventory remains frozen; conditional ARO and
+numerical Army variant work remains open.

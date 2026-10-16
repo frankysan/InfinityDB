@@ -1717,6 +1717,93 @@ def test_reactive_combat_automatic_conditions_match_n53_pdf() -> None:
             assert clause in body
 
 
+def test_n5_stealth_counters_preserve_attack_only_sixth_sense_scope() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {r["id"]: r for r in document["records"]}
+    combat = records["skill:combat-instinct"]
+    sixth = records["skill:sixth-sense"]
+    stealth = records["skill:stealth"]
+    assert combat["facts"]["typeIds"] == ["automatic"]
+    assert sixth["facts"]["typeIds"] == ["automatic"]
+    assert stealth["facts"]["typeIds"] == ["automatic"]
+    assert combat["labelIds"] == sixth["labelIds"] == ["optional"]
+    assert combat["citations"][0] == {
+        "sourceId": "n5-core-v5.3-pdf",
+        "page": 88,
+        "section": "Combat Instinct",
+    }
+    for record in (combat, sixth):
+        assert any(
+            c["sourceId"] == "n5-core-v5.3-pdf" and c["page"] == 112
+            for c in record["citations"]
+        )
+        assert any(
+            c["sourceId"] == "n5-core-v5.3-pdf" and c["page"] == 20
+            for c in record["citations"]
+        )
+        assert {"type": "negates-effects-of", "recordId": "skill:stealth"} in (
+            record["relations"]
+        )
+    assert {
+        "type": "ignores-modifiers-from", "recordId": "skill:surprise-attack"
+    } in combat["relations"]
+    assert not any(
+        r["recordId"] == "skill:surprise-attack"
+        for r in sixth["relations"]
+    )
+    assert any(
+        "does not grant" in note and "360-degree LoF" in note
+        for note in combat["facts"]["clarifications"]
+    )
+    assert any(
+        "only to Attacks directed at the user" in note
+        and "[[skill:stealth|Stealth]]" in note
+        and "[[trait:zone-of-control-zc|Zone of Control]]" in note
+        for note in sixth["facts"]["clarifications"]
+    )
+    assert any(
+        c["sourceId"] == "wiki-combat-instinct-oldid-3135"
+        for c in combat["citations"]
+    )
+    assert any(
+        c["sourceId"] == "wiki-sixth-sense-oldid-3901"
+        for c in sixth["citations"]
+    )
+
+
+def test_n5_stealth_counter_scope_matches_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    config = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == config["corePdfSha256"]
+    with pdf.open(source) as book:
+        combat = " ".join(book[87].get_text().split())
+        sixth = " ".join(book[110].get_text().split())
+        stealth = " ".join(book[111].get_text().split())
+        zoc = " ".join(book[19].get_text().split())
+    assert "COMBAT INSTINCT AUTOMATIC SKILL Optional" in combat
+    assert "user ignores Surprise Attack MODs from attackers" in combat
+    assert "Stealth Special Skill is not effective" in combat
+    assert "SIXTH SENSE AUTOMATIC SKILL Optional" in sixth
+    assert "respond to Attacks (and only Attacks) directed at" in sixth
+    assert "360" in sixth and "LoF arc" in sixth
+    assert "STEALTH AUTOMATIC SKILL Optional" in stealth
+    assert "they only grant AROs to enemies that have LoF to them" in stealth
+    assert "not effective against Troopers with the Combat Instinct" in stealth
+    assert "Sixth Sense Special Skills" in stealth
+    assert "Enemies entering or acting inside the Zone of Control" in zoc
+    assert "while remaining outside that Trooper" in zoc
+
+
 def test_checked_in_n5_collection_models_combat_reaction_skill_slice() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

@@ -1265,6 +1265,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         within LoF and ZoC; Unconscious exempts the target but
         Guard's other requirements remain. Verified source tests
         and responsive browser acceptance.
+      - [x] Verify Combat Instinct/Sixth Sense against Stealth for
+        ARO entitlement and LoF scope (N5.3 pp. 20, 88, 111-112):
+        both counter Stealth, but only Sixth Sense grants an
+        attack-only outside-LoF/360-degree-LoF response.
+        Added primary Combat Instinct source, focused source and
+        curated tests, and responsive browser acceptance (9/9).
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Combat Instinct and Sixth Sense now distinguish their separate
+  Stealth counters: only Sixth Sense grants an attack-only
+  outside-LoF response, not a general ARO against movement.
 - Guard and Aerial now explain their targeting exception: active
   Aerial targets prohibit Guard, whereas Unconscious targets
   remain eligible subject to Guard's LoF and ZoC requirements.

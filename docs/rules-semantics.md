@@ -1453,6 +1453,19 @@ Attack identifies Combat Instinct without maintaining reciprocal curated rows. T
 expresses only the documented interaction; activation requirements, exceptions, and the
 rest of each Skill remain in that Skill's own facts.
 
+**Scoped ARO eligibility (N5.3 pp. 20, 88, 111-112):** Stealth's
+suppression of certain outside-LoF AROs does not apply to Troopers
+with Combat Instinct or Sixth Sense. This restores otherwise eligible
+reactions, such as those triggered inside Zone of Control, but does
+not remove the reacting Skill's requirements. Combat Instinct also
+ignores Surprise Attack MODs; it does not grant an outside-LoF
+attack reaction or a 360-degree LoF arc. Sixth Sense separately grants
+an outside-LoF/360-degree-LoF response **only to Attacks directed
+at the user**. An enemy's movement without an Attack does not
+activate that permission. These are distinct rules, not a general
+ARO or LoF grant. Existing inverse relation navigation remains
+unchanged; the distinctions are explained in each counter-Skill.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Stealth&oldid=3914>
