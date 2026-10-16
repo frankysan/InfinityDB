@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.domain_slugs import require_domain_slug, validate_typed_domain_id
+from infinity_db.faq_rulings import validate_faq_ruling_facts
 from infinity_db.maintained_text import validate_maintained_text_syntax
 from infinity_db.rule_relations import RULE_RELATION_TYPES
 from infinity_db.scenario_definition import (
@@ -734,6 +735,9 @@ def _validate_peripheral_type_facts(facts: object, context: str) -> set[str]:
         "maxPerController",
         "operatingDistance",
         "profileModes",
+        "effects",
+        "restrictions",
+        "clarifications",
     }
     unknown = set(facts) - allowed
     if unknown:
@@ -764,6 +768,18 @@ def _validate_peripheral_type_facts(facts: object, context: str) -> set[str]:
             raise ValueError(
                 f"{context}.profileModes: must be a unique non-empty subset of "
                 "['connected', 'autonomous']"
+            )
+    for field in ("effects", "restrictions", "clarifications"):
+        clauses = facts.get(field)
+        if clauses is None:
+            continue
+        if (
+            not isinstance(clauses, list)
+            or not clauses
+            or any(not isinstance(clause, str) or not clause.strip() for clause in clauses)
+        ):
+            raise ValueError(
+                f"{context}.{field}: expected non-empty maintained-text strings"
             )
     return skill_ids
 
@@ -851,10 +867,12 @@ def _validate_fireteam_general_facts(facts: object, context: str) -> None:
 def _validate_fireteam_level_facts(facts: object, context: str) -> None:
     if not isinstance(facts, dict):
         raise ValueError(f"{context}: Fireteam Level facts must be an object")
-    expected = {"category", "basis", "cumulative", "levels"}
-    if set(facts) != expected:
+    required = {"category", "basis", "cumulative", "levels"}
+    allowed = required | {"sourceNotes"}
+    if not required.issubset(facts) or set(facts) - allowed:
         raise ValueError(
-            f"{context}: Fireteam Level facts must contain exactly {sorted(expected)}"
+            f"{context}: Fireteam Level facts require {sorted(required)}; "
+            "only optional 'sourceNotes' is supported"
         )
     if facts["category"] != "fireteam-level-bonuses":
         raise ValueError(f"{context}.category: must be 'fireteam-level-bonuses'")
@@ -1114,6 +1132,15 @@ def load_curated_document(path: Path) -> dict[str, Any]:
                         f"{context}.facts.visibilityZone: must not mix with Saving Roll facts"
                     )
                 _validate_ammunition_visibility_zone(zone, f"{context}.facts.visibilityZone")
+        if record["kind"] == "faq-ruling":
+            validate_faq_ruling_facts(
+                record.get("facts"),
+                record_id=record["id"],
+                record_role=composition_role,
+                citations=record["citations"],
+                sources=sources,
+                context=f"{context}.facts",
+            )
         if record["kind"] == "skill":
             facts = record.get("facts")
             if composition_role == "definition":

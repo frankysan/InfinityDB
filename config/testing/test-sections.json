@@ -6,6 +6,7 @@
       "modules": [
         "test_application_rule_references",
         "test_audit_1_0_reference_inputs",
+        "test_audit_auxiliary_silhouette_provenance",
         "test_audit_army_faction_semantics",
         "test_audit_database_separation",
         "test_audit_enrichment_coverage",
@@ -22,9 +23,12 @@
         "test_audit_source_presentation",
         "test_audit_unit_semantics",
         "test_audit_weapon_chart_profiles",
+        "test_audit_weapon_definition_gaps",
         "test_audit_weapon_trait_cross_sources",
+        "test_audit_wiki_weapon_chart_names",
         "test_audit_weapon_traits_prose",
         "test_audit_weaponry_family_clauses",
+        "test_deployable_trigger_cross_rules",
         "test_availability",
         "test_availability_schema",
         "test_catalog_rules",
@@ -34,6 +38,7 @@
         "test_distance_semantics",
         "test_domain_slugs",
         "test_equipment_config",
+        "test_faq_ruling_references",
         "test_fireteam_relationships",
         "test_hacking_program_catalog",
         "test_identities",
@@ -55,7 +60,8 @@
         "test_scenario_map_svg",
         "test_skill_config",
         "test_state_catalog",
-        "test_weapon_config"
+        "test_weapon_config",
+        "test_weapon_properties"
       ]
     },
     "web": {
@@ -64,6 +70,9 @@
         "test_api",
         "test_app_cli",
         "test_benchmark_runtime",
+        "test_flamethrower_reference",
+        "test_marksman_rifle_reference",
+        "test_support_weapon_deployable_references",
         "test_release_notes",
         "test_runtime_import_boundary",
         "test_scenario_api",

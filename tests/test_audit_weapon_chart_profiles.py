@@ -353,3 +353,82 @@ def test_disco_ball_is_separate_auxiliary_mode_profile() -> None:
     })
     assert len(matched) == 1
     assert matched[0]["status"] == "fields-match"
+
+def test_auxiliary_extractor_preserves_wrapped_object_identities() -> None:
+    from tools.audit_weapon_chart_profiles import _printed_auxiliary_profiles
+
+    words = [
+        (21.6, 545.6, "MONOFILAMENT"), (38.9, 555.2, "MINES"),
+        (124.4, 550.4, "ARM=0"), (158.0, 550.4, "BTS=0"),
+        (193.0, 550.4, "STR=1"), (232.0, 550.4, "S=0"),
+        (28.8, 495.1, "DEPLOYABLE"), (33.1, 504.7, "REPEATER"),
+        (125.9, 499.9, "ARM=0"), (159.0, 499.9, "BTS=0"),
+        (194.0, 499.9, "STR=1"), (230.0, 499.9, "S=1"),
+    ]
+    rows = _printed_auxiliary_profiles(words, 181)
+    assert [row["name"] for row in rows] == [
+        "DEPLOYABLE REPEATER", "MONOFILAMENT MINES",
+    ]
+    assert rows[1]["profile"] == "ARM=0 BTS=0 STR=1 S=0"
+
+
+def test_auxiliary_object_comparison_resolves_mines_modes_and_discrepancies() -> None:
+    from tools.audit_weapon_chart_profiles import compare_auxiliary_profiles
+
+    rows = [
+        {"page": 181, "name": "AP MINES",
+         "profile": "ARM=0 | BTS=0 | STR=1 | S=0"},
+        {"page": 181, "name": "DROP BEARS (Deployable Mode)",
+         "profile": "ARM=0 | BTS=0 | STR=1 | S=0"},
+        {"page": 186, "name": "DAZER",
+         "profile": "ARM=0 | BTS=0 | STR=1 | S=1"},
+        {"page": 186, "name": "DISCO BALL",
+         "profile": "ARM=0 | BTS=0 | STR=1 | S=1"},
+        {"page": 186, "name": "UNKNOWN OBJECT",
+         "profile": "ARM=0 | BTS=0 | STR=1 | S=1"},
+    ]
+    metadata = {
+        "apmine": [{**_army_row("AP Mine"), "profile": "ARM=0, BTS=0, STR=1, S=1"}],
+        "dropbears": [
+            {**_army_row("Drop Bears"), "mode": "BS Mode", "profile": ""},
+            {**_army_row("Drop Bears"), "mode": "Deployable Mode",
+             "profile": "ARM=0, BTS=0, STR=1, S=0"},
+        ],
+        "dazer": [{**_army_row("Dazer"), "profile": "ARM=0, BTS=0, STR=1, S=0"}],
+        "discoballer": [{**_army_row("Disco Baller"), "mode": "Disco Ball",
+                         "profile": "ARM=0, BTS=0, STR=1, S=1"}],
+    }
+    compared = compare_auxiliary_profiles(rows, metadata)
+    assert [row["status"] for row in compared] == [
+        "candidate-discrepancy", "fields-match", "candidate-discrepancy",
+        "fields-match", "unresolved-auxiliary-identity",
+    ]
+    assert compared[0]["armyName"] == "AP Mine"
+    assert compared[0]["differences"] == [{"field": "S", "pdf": 0, "army": 1}]
+    assert compared[1]["armyMode"] == "Deployable Mode"
+    assert compared[2]["differences"] == [{"field": "S", "pdf": 1, "army": 0}]
+    assert compared[3]["armyName"] == "Disco Baller"
+    assert compared[4]["armyName"] is None
+    assert compared[4]["printedAttributes"] == {
+        "ARM": 0, "BTS": 0, "STR": 1, "S": 1,
+    }
+
+
+def test_auxiliary_markdown_report_includes_field_provenance() -> None:
+    from tools.audit_weapon_chart_profiles import compare_auxiliary_profiles
+
+    compared = compare_auxiliary_profiles(
+        [{"page": 186, "name": "DAZER",
+          "profile": "ARM=0 | BTS=0 | STR=1 | S=1"}],
+        {"dazer": [{**_army_row("Dazer"),
+                    "profile": "ARM=0, BTS=0, STR=1, S=0"}]},
+    )
+    report = {
+        "corePdfSha256": "abc", "armyMetadataProfiles": 1,
+        "comparison": compare_rows([], {}),
+        "auxiliaryProfiles": compared,
+        "notCompared": [],
+    }
+    markdown = markdown_report(report)
+    assert "attribute discrepancies: **1**" in markdown
+    assert "S: PDF 1 vs Army 0" in markdown

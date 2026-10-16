@@ -1,4 +1,13 @@
 .git/
+node_modules/
+local/
+reports/
+docs/audits/
+image_overrides/
+data/pdf/
+data/wiki/
+.infinity-db-deploy.env
+AGENTS.local.md
 .venv/
 .pytest_cache/
 .ruff_cache/

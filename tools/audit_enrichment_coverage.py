@@ -14,6 +14,7 @@ from typing import Any
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database
+from infinity_db.equipment_catalog import EquipmentCatalog
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
@@ -378,6 +379,47 @@ def _rules_index(path: Path) -> tuple[dict[str, dict[str, Any]], dict[tuple[str,
     return records, links
 
 
+def _layered_family_root(
+    candidate_ids: set[str], records: dict[str, dict[str, Any]]
+) -> str | None:
+    """Find an explicit one-to-many uses-effects-of rule hierarchy.
+
+    An unrelated overlap or a cycle must remain an ambiguous mapping.
+    """
+    if len(candidate_ids) < 2:
+        return None
+    if len({records[record_id]["kind"] for record_id in candidate_ids}) != 1:
+        return None
+    edges = {
+        record_id: {
+            relation["recordId"] for relation in records[record_id]["relations"]
+            if relation["type"] == "uses-effects-of"
+            and relation["recordId"] in candidate_ids
+        }
+        for record_id in candidate_ids
+    }
+
+    def reachable(start: str) -> set[str]:
+        found: set[str] = set()
+        pending = list(edges[start])
+        while pending:
+            target = pending.pop()
+            if target in found:
+                continue
+            found.add(target)
+            pending.extend(edges[target] - found)
+        return found
+
+    closures = {record_id: reachable(record_id) for record_id in candidate_ids}
+    if any(record_id in reach for record_id, reach in closures.items()):
+        return None
+    roots = [
+        record_id for record_id, reach in closures.items()
+        if reach == candidate_ids - {record_id}
+    ]
+    return roots[0] if len(roots) == 1 else None
+
+
 def _record_gap_codes(record: dict[str, Any]) -> list[str]:
     gaps: list[str] = []
     reviews = record.get("reviewContributions", [])
@@ -429,6 +471,7 @@ def audit_coverage(
         classification_policy = _load_classification_policy(classification_path)
         matched_overrides: set[tuple[str, ...]] = set()
         skill_catalog = SkillCatalog(database, rules)
+        equipment_catalog = EquipmentCatalog(database, rules)
         catalog_rules = CatalogRules(rules)
         trait_catalog = TraitCatalog(database, rules)
         state_catalog = StateCatalog(rules)
@@ -445,6 +488,8 @@ def audit_coverage(
                 sources = state_catalog.list_states()
             elif catalog == "skills":
                 sources = skill_catalog.list_skills()
+            elif catalog == "equipment":
+                sources = equipment_catalog.list_equipment()
             else:
                 sources = database.list_catalog_items(catalog)
 
@@ -460,11 +505,17 @@ def audit_coverage(
                     ]
                     family_ids, exact_ids = _surface_rule_ids(detail)
                 elif catalog in {"equipment", "weapons"}:
-                    raw = database.get_catalog_item(catalog, int(source["id"])) or {}
-                    if raw:
-                        attach_public_catalog_slug(database, catalog, raw)
+                    if catalog == "equipment":
+                        # The public Equipment catalog also contains Cube symbols
+                        # and curated-only Equipment, not just Army text rows.
+                        raw = equipment_catalog.get_equipment(source["id"]) or {}
+                        slug = str(source["slug"])
+                    else:
+                        raw = database.get_catalog_item(catalog, int(source["id"])) or {}
+                        if raw:
+                            attach_public_catalog_slug(database, catalog, raw)
+                        slug = database.application_slug(catalog, int(source["id"]))
                     detail = catalog_rules.enrich_catalog_item(catalog, raw)
-                    slug = database.application_slug(catalog, int(source["id"]))
                     source_ids = [int(value) for value in source.get("source_ids", [])]
                     family_ids, exact_ids = _surface_rule_ids(detail)
                 elif catalog == "traits":
@@ -515,7 +566,8 @@ def audit_coverage(
                                 exact_candidates.setdefault(ref, []).append(record_id)
                             elif inheritance != "source":
                                 family_candidates.add(record_id)
-                    if len(family_candidates) > 1:
+                    layered_root = _layered_family_root(family_candidates, records)
+                    if len(family_candidates) > 1 and layered_root is None:
                         gap_codes.add("ambiguous_family_mapping")
                     ambiguous_sources = {
                         source_id: sorted(set(record_ids))
@@ -531,6 +583,8 @@ def audit_coverage(
                             for source_id, record_ids in sorted(exact_candidates.items())
                         },
                     }
+                    if layered_root is not None:
+                        mapping["layeredFamilyRootId"] = layered_root
                     if ambiguous_sources:
                         mapping["ambiguousSourceRecordIds"] = {
                             str(key): value for key, value in ambiguous_sources.items()

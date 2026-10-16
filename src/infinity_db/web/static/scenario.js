@@ -2,6 +2,7 @@ import { getScenario, getScenarios } from "./api.js";
 import { distanceUnit } from "./preferences.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { rulesCitationNode, rulesReferenceArticle } from "./rules-reference.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { readShareState, writeShareState } from "./share-state.js";
 import { createPanelSwitcher } from "./view-components.js";
 
@@ -24,6 +25,11 @@ const summaryController = new AbortController();
 let detailController = null;
 let summary = null;
 const slug = decodeURIComponent(window.location.pathname.split("/").filter(Boolean).at(-1) || "");
+const initialShare = readShareState("scenario");
+const selectedPublication = {
+  collection: initialShare.params.get("collection") || "",
+  revision: initialShare.params.get("revision") || "",
+};
 const show = createPanelSwitcher({
   container: elements.state,
   loading: elements.status,
@@ -40,7 +46,11 @@ function selectedArmyPointsFromUrl() {
 function setSelectedArmyPoints(value, { replace = true } = {}) {
   writeShareState(
     "scenario",
-    value ? { army_points: String(value) } : {},
+    {
+      ...(value ? { army_points: String(value) } : {}),
+      ...(selectedPublication.collection ? { collection: selectedPublication.collection } : {}),
+      ...(selectedPublication.revision ? { revision: selectedPublication.revision } : {}),
+    },
     { replace },
   );
 }
@@ -48,6 +58,11 @@ function setSelectedArmyPoints(value, { replace = true } = {}) {
 function updateDocumentIdentity(item) {
   elements.name.replaceChildren(document.createTextNode(item.name), Object.assign(document.createElement("span"), { textContent: "." }));
   elements.description.replaceChildren();
+  if (item.publication?.collection_id && item.publication.collection_id !== "n5-core") {
+    const edition = document.createElement("strong");
+    edition.textContent = `${item.publication.collection_title} · v${item.publication.revision}`;
+    elements.description.append(edition, " — ");
+  }
   appendMaintainedText(elements.description, item.description_tokens, item.description);
   document.title = `${item.name} · Scenarios · InfinityDB`;
 }
@@ -158,6 +173,8 @@ function mapCard(item) {
   const params = new URLSearchParams({
     army_points: String(item.selected_army_points), distance_unit: distanceUnit(),
   });
+  if (selectedPublication.collection) params.set("collection", selectedPublication.collection);
+  if (selectedPublication.revision) params.set("revision", selectedPublication.revision);
   image.src = `/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?${params}`;
   figure.append(heading, image);
   // <img> SVGs cannot inherit theme variables. Inline the same-origin generated
@@ -207,9 +224,16 @@ function conditionNode(condition) {
     return node;
   }
   if (kind === "dominated-region-comparison") {
-    node.textContent = condition.comparison === "greater"
-      ? "Dominate more Quadrants than the opponent"
-      : `Dominate the same number of Quadrants as the opponent${condition.minimum ? ` (at least ${condition.minimum})` : ""}`;
+    const regions = condition.elementIds || [];
+    if (regions.length === 1 && regions[0].startsWith("sector-")) {
+      node.textContent = "Dominate this Sector";
+    } else {
+      const label = regions.every((id) => id.startsWith("quadrant-"))
+        ? "Quadrants" : "scoring regions";
+      node.textContent = condition.comparison === "greater"
+        ? `Dominate more ${label} than the opponent`
+        : `Dominate the same number of ${label} as the opponent${condition.minimum ? ` (at least ${condition.minimum})` : ""}`;
+    }
     return node;
   }
   if (kind === "element-status-count") {
@@ -268,10 +292,29 @@ function objectivesSection(item) {
   return section("Objectives", grid);
 }
 
+function inlineScenarioRuleArticle(inclusion) {
+  const article = document.createElement("article");
+  article.className = "surface surface--subtle detail-section scenario-inline-rule";
+  const header = document.createElement("header");
+  header.className = "surface-titlebar surface-titlebar--ruled rules-card-titlebar";
+  const heading = document.createElement("h3");
+  appendMaintainedText(heading, inclusion.name_tokens, inclusion.name);
+  header.append(heading);
+  article.append(header);
+  for (const [index, paragraph] of (inclusion.paragraphs || []).entries()) {
+    const text = document.createElement("p");
+    text.className = "detail-copy";
+    appendMaintainedText(text, inclusion.paragraph_tokens?.[index], paragraph);
+    article.append(text);
+  }
+  return article;
+}
+
 function rulesSection(item) {
   const cards = [];
   for (const inclusion of item.special_rules || []) {
     if (inclusion.rule) cards.push(rulesReferenceArticle(inclusion.rule, { includeApplicability: false }));
+    else cards.push(inlineScenarioRuleArticle(inclusion));
   }
   for (const skill of item.skills || []) cards.push(rulesReferenceArticle(skill, { includeApplicability: false }));
   if (!cards.length) return null;
@@ -355,7 +398,7 @@ function provenanceSection(item) {
   return wrapper;
 }
 
-function render(item) {
+function render(item, faqItems = []) {
   updateDocumentIdentity(item);
   const placement = document.createElement("div");
   placement.className = "scenario-setup-grid";
@@ -364,6 +407,7 @@ function render(item) {
     section("Setup", placement),
     objectivesSection(item),
     rulesSection(item),
+    faqRulingsSection(faqItems),
     endSection(item),
     issuesSection(item),
     sourcesSection(item),
@@ -381,9 +425,20 @@ async function loadDetail(points) {
   elements.status.textContent = `Loading ${points} Army Point setup.`;
   show(elements.status);
   try {
-    const item = await getScenario(slug, points, controller.signal);
+    const [item, faq] = await Promise.all([
+      getScenario(slug, points, controller.signal, selectedPublication),
+      fetchReviewedFaqRulings(`scenario:${slug}`, {
+        scenarioId: `scenario:${slug}`,
+        seasonId: selectedPublication.collection === "n5-core" ? "" : selectedPublication.collection,
+        seasonRevision: selectedPublication.collection === "n5-core" ? "" : selectedPublication.revision,
+        signal: controller.signal,
+      }).catch((error) => {
+        if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+        return { items: [] };
+      }),
+    ]);
     if (controller.signal.aborted || pageController.signal.aborted) return;
-    render(item);
+    render(item, faq.items || []);
   } catch (error) {
     if (controller.signal.aborted || pageController.signal.aborted) return;
     if (error.name === "AbortError") return;
@@ -413,7 +468,7 @@ function choose(points) {
 async function initialize() {
   show(elements.status);
   try {
-    const payload = await getScenarios(summaryController.signal);
+    const payload = await getScenarios(summaryController.signal, selectedPublication);
     summary = (payload.items || []).find((item) => item.slug === slug);
     if (!summary) {
       elements.errorMessage.textContent = "Scenario not found.";

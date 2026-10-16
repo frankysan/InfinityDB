@@ -104,8 +104,10 @@ class WeaponAmmunitionReferences:
         self._mapping = load_ammunition_reference_map()
         self._resolved: dict[int, list[dict[str, Any]]] = {}
         self._compositions: dict[int, dict[str, Any]] = {}
+        self._effects: dict[int, list[dict[str, Any]]] = {}
         for source_id, entry in self._mapping.items():
             segments = []
+            effects = []
             for segment in entry["segments"]:
                 result: dict[str, Any] = {"text": segment["text"]}
                 if rule_id := segment.get("ruleId"):
@@ -121,9 +123,17 @@ class WeaponAmmunitionReferences:
                     if reference is None:
                         raise ValueError(f"Ammunition target lacks public route {rule_id!r}")
                     result["public_reference"] = reference
+                    effects.append({
+                        "record_id": rule_id,
+                        "name": record["name"],
+                        "summary": record["summary"],
+                        "public_reference": reference,
+                        "citations": deepcopy(record["citations"]),
+                    })
                 segments.append(result)
             if segments:
                 self._resolved[source_id] = segments
+                self._effects[source_id] = effects
                 if "components" in entry:
                     component_segments = segments[::2]
                     self._compositions[source_id] = {
@@ -159,6 +169,13 @@ class WeaponAmmunitionReferences:
         if source_id is None:
             return None
         return [segment.copy() for segment in self._resolved[source_id]]
+
+    def effects_for_profile(self, profile: dict[str, Any]) -> list[dict[str, Any]] | None:
+        """Reuse canonical source summaries; never calculate combined attack effects."""
+        source_id = self._matched_id(profile)
+        if source_id is None:
+            return None
+        return deepcopy(self._effects[source_id])
 
     def composition_for_profile(self, profile: dict[str, Any]) -> dict[str, Any] | None:
         """Return explicitly reviewed composition, never derived from display syntax."""

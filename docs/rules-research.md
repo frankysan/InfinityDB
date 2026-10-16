@@ -172,7 +172,7 @@ in `config/validation/weapon-trait-wiki-review.json`; the live N5 Wiki
 WildParrot page currently identifies revision 3610, but that live page is not
 a substitute for the pinned PDF or historical source evidence.
 
-The PDF-hash-pinned 21-clause inventory now classifies **all 21 selected clauses
+The initial PDF-hash-pinned 21-clause inventory classified **all 21 selected clauses
 as explicitly represented** in the curated summaries, rather than inferring
 coverage from neighbouring generic concepts. Its scope remains bounded: the
 inventory does not establish complete Weaponry prose coverage. Seven verified
@@ -215,9 +215,11 @@ rechecked for this audit, and no older N5 snapshot delta is inferred.
 
 The maintained read-only source anchors and concept associations are in
 `config/validation/weaponry-family-clauses.json`. Reproduce the current
-snapshot comparison using `tools/audit_weaponry_family_clauses.py`. The 21
-reviewed anchors are **not** a complete clause inventory of Weaponry pp. 68–74,
-and a represented summary is not proof of complete relations or browser coverage.
+snapshot comparison using `tools/audit_weaponry_family_clauses.py`.
+The current 75 reviewed anchors and twelve required typed relations
+are **selected evidence**, not a complete clause or relationship
+inventory of Weaponry pp. 68-74. See RR-WPN-FAMILY-004;
+summary matches do not establish browser acceptance.
 
 Sources: N5 v5.3 PDF, printed pp. 69 (Perimeter Weapons/Boost), 72 (Mines,
 Cybermines, Chest Mines), PDF SHA-256
@@ -591,6 +593,695 @@ Sources:
 - Wiki: <https://infinitythewiki.com/Combat_Module>
 - PDF: Infinity N5 V5.3, printed pages 36-62
 
+### RR-WPN-FAMILY-002 - Armed Turret and D-Charges source clauses
+
+**Project domain:** Weaponry. **Scope:** official N5.3 p. 70 and current
+curated rules; ITS content excluded.
+
+The PDF-hash-pinned clause review now covers **38 selected clauses**:
+Perimeter Weapons (7), Mines (14), Armed Turret (8), D-Charges (9).
+All have matched explicit source text and reviewed curated-summary
+evidence, with zero missing curated concepts. This does not establish
+complete N5.3 Weaponry prose or browser acceptance.
+
+Armed Turret now explicitly names Disposable (1), Non-Reloadable,
+and Perimeter placement entirely inside the deploying Trooper's
+Zone of Control rather than in Silhouette contact. The typed
+Place Deployable relationship supports discovery. Its S1/S2 source
+contradiction and E/Mitter Saving Roll discrepancy remain unresolved.
+
+D-Charges clauses cover legal targets and contact for both modes,
+placement and no ARO in Demolition Mode, resolution without a Roll,
+shared Disposable (3) uses, Improvised's CC penalty, and the fact
+that detonation does not affect the user. Existing curated summaries
+already represent these mechanics.
+
+Four outdated Mines/Chest Mine evidence anchors were aligned with
+the current equivalent curated wording. The checked-in policy and
+read-only family audit generate a source-backed report under private
+local/audits/. The 38 clauses are not an exhaustive inventory of
+N5.3 pp. 68-74; see RR-WPN-FAMILY-003 for the subsequent extension.
+
+### RR-WPN-FAMILY-003 - Additional special-weapon prose clauses
+
+**Project domain:** Weaponry. **Scope:** pinned English N5.3 core rules
+pp. 71-74; ITS mission content excluded.
+
+At this checkpoint, the hash-pinned family review covered **68 selected clauses across
+ten sections**. This pass adds 30 source-to-summary evidence anchors:
+
+- Disco Baller: 8 clauses covering targetless deployment, the Eclipse
+  template, deactivation/persistence, allied-only activation, WIP +3
+  and Deactivator range MODs. The Activate Disco Ball Skill carries
+  activation-specific clauses rather than repeating them as new rules.
+- Drop Bears: 6 clauses covering two modes, visible Mine Token
+  placement, Targetless BS use, delayed detonation, CAMO restrictions,
+  and the shared Disposable (3) pool.
+- Mine Dispenser: 2 clauses covering inherited Drop Bears BS placement
+  and the unit-profile-specified Mine type.
+- Sepsitor: 5 clauses covering eligible Cube targets, Direct Template
+  behavior, Saving Rolls, Critical hits, and Sepsitorized State.
+  Sepsitor Plus retains a separate Weapon Chart profile.
+- SymbioBomb: 6 clauses covering single use, same-army assignment,
+  printed Traits, Pheroware selection, the conditional -3 target MOD,
+  and removal after use. Its curated reference now explicitly labels
+  **Assignable (Transmutation)**, **Comms Attack**, and **Optional**.
+  SymbioBomb has no standalone Army Weapon Chart attack profile, so
+  none was synthesized.
+- WildParrot: 3 clauses covering placement with Place Deployable or
+  Intuitive Attack, Perimeter positioning in Zone of Control, and
+  visible E/M Mine behavior instead of CAMO Marker placement.
+
+All 68 clauses in this checkpoint matched their printed anchors and
+the curated summaries, with zero unresolved referenced concept IDs. This
+is a bounded source-to-summary review and **does not** certify complete
+prose coverage, game-state interactions, source precedence, or visual
+browser acceptance. A separate headless Chrome pass checked 132/132
+rule-card, citation, profile-preservation, error and overflow
+assertions on the seven relevant weapon pages (including Sepsitor
+Plus), at 1440, 390 and 320 px. This confirms automated
+presentation behavior, **not human visual review or exhaustive
+interaction coverage**. No imported Army profiles changed.
+
+Reproduce with the existing source-hash-pinned
+`config/validation/weaponry-family-clauses.json` and
+`tools/audit_weaponry_family_clauses.py`; generated evidence remains
+private under `local/audits/`.
+
+### RR-WPN-FAMILY-004 - Pitcher clauses and typed relationship checks
+
+**Project domain:** Weaponry. **Scope:** pinned English N5.3 p. 73
+and current curated rules; ITS content excluded.
+
+The source-hash-pinned audit now checks **75 selected clauses across
+eleven Weaponry sections**. Seven new Pitcher clauses cover Targetless
+BS Attack, Deployable Repeater delivery, placement at impact, and
+the printed Disposable (2), Indiscriminate, Non-Lethal and Speculative
+Attack Traits. They already have explicit curated-summary evidence;
+no duplicated mechanics or profile normalization was needed.
+
+It now verifies **twelve selected typed relationships** in a freshly
+built rules database, including Pitcher to Deployable Repeater,
+Mine Dispenser to Drop Bears, Disco Baller to Activate Disco Ball,
+SymbioBomb to Pheroware Tactics, and Sepsitor to Sepsitorized State.
+This catches missing links that matching prose cannot detect.
+
+Policy validation rejects malformed or duplicate required edges.
+Missing relation input fails closed; absent actual edges are
+reported as missing instead of treated as a pass. The pinned
+audit reports 75 represented clauses, twelve present required
+edges, and zero missing concept IDs.
+
+This does not establish full relationship coverage or a new
+source-precedence decision, and it is not a human visual review.
+The Dodge and failed-Guts movement exemption for Deployable triggers
+is curated under its canonical Skill/rule owners; the shared Mines
+card now links those owners where their exceptions interact with
+Mine triggering. The audit does not create a context-free typed
+restriction edge. Generated evidence stays under ignored local/audits/.
+
+### RR-WPN-FAMILY-005 - Mixed Weapons source procedure and two-mode profiles
+
+**Scope:** pinned English N5.3 p. 68 Mixed Weapons, the printed
+Trench-Hammer and Kobra Pistol examples, and the exact imported
+Army profiles. The source-hash-pinned family policy now covers
+**83 selected clauses across twelve sections**, with sixteen
+selected typed relationships present and no missing concepts.
+This remains a partial source inventory, not a complete audit
+of all Weaponry sentences.
+
+N5.3 makes a Mixed Weapon a BS Weapon or CC Weapon depending
+on its chosen **Mode**. In CC Mode it uses the Trooper's CC
+Attribute, has the CC Trait, and counts as a CC Weapon for all
+purposes. In BS Mode it uses the Trooper's BS Attribute,
+has Range MODs, and counts as a BS Weapon for all purposes,
+**unless a listed Trait specifies another Attribute**.
+Trench-Hammer's BS Mode lists BS Weapon (PH), and therefore
+uses PH; Kobra Pistol's BS Mode uses BS. The alternative
+Ammunition, Burst, PS, Saving Rolls and Traits remain
+attached to the printed Mode, not mixed between Modes.
+
+The new curated `weapon:mixed-weapons` family is linked to the
+two existing Army identities without rewriting either profile.
+The specific Kobra reference inherits the shared procedure
+through `uses-effects-of`; the shared family points to
+BS Attack, CC Attack and the CC Trait. Trench-Hammer's
+previously valid shared-only disposition is superseded by
+the new source-cited family reference. The separate
+Kobra CC Mode DA/two-Saving-Roll contradiction (N5.3 chart
+prints one) and disputed Anti-materiel Trait remain
+explicit and unadjudicated in the existing source notes.
+
+The family clause audit verifies eight new printed p. 68
+anchors, their current curated summary anchors, and four
+typed relationship edges. No Army source data, underlying
+gameplay logic or source precedence decision changed.
+
+### RR-WPN-FAMILY-006 - Weaponry MOD scope and Vorpal mixed modes
+
+**Source:** pinned English N5.3 p. 68 (Weaponry Important) and
+p. 75 (Modifiers Explained), with Vorpal CC Weapon's BS/CC
+profiles printed on p. 177. The source-hash-pinned family
+audit now checks **88 selected clauses across thirteen sections**
+and **seventeen selected typed relations**, all present. Five
+new page-68 clauses cover bracketed MOD scope, both recipients
+and one-die ReRoll. This remains selective clause evidence,
+not a full N5.3 Weaponry approval.
+
+A MOD or replacement Attribute in round brackets applies only
+when using the named Skill, Weapon or Equipment. Positive
+MODs benefit its user and negative MODs affect enemies.
+Page 75 further distinguishes negative MODs from Automatic
+Skills/Equipment (which follow their own rules) from those
+of other Skills/Weapons/Equipment (only in Face to Face Rolls).
+A bracketed ReRoll permits rerolling **one die** from that
+use, not every die nor a general reroll ability. The canonical
+`rule:modifiers-explained` links to the existing
+`rule:special-dice` for +1 SD limitations, avoiding
+duplicating its separate review and unresolved Fireteam
+wording conflict.
+
+The shared `weapon:mixed-weapons` rule now also applies to
+Vorpal CC Weapon, whose printed BS Mode uses
+BS Weapon (PH), Normal Ammunition and one ARM=0 Saving
+Roll with State: Dead; CC Mode uses CC with the same
+printed Ammunition/Saving baseline. Trench-Hammer remains
+PH-based in BS Mode; Kobra Pistol uses BS and retains
+its independently documented CC-mode DA/Anti-materiel
+publication disputes. The new Modifiers rule is accessible
+from all three Weapon pages. Vorpal's previous hash-pinned
+shared-only decision is superseded by the family reference;
+the other 64 shared-only reviews remain unchanged.
+
+No imported Army profile, ammunition resolution, or
+source-precedence decision was modified. The audit validates
+only explicitly selected clauses and typed links.
+Private browser evidence is kept under ignored local/audits/.
+
+### RR-WPN-DEPLOYABLE-EXCEPTIONS-001 - Trigger declarations versus exempt movement
+
+**Scope:** official N5.3 EN pp. 38, 69, 72, 79-80, 82, 112.
+Source PDF SHA-256:
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`.
+
+Confirmed distinction: declaring a Dodge ARO while inside a
+Mine's legal Trigger Area can trigger it (Dodge example, p. 80).
+A triggering Mine still needs a legal Small Teardrop Template
+reaching the declared Model or Marker without affecting allies
+(p. 72). Subsequent *Dodge movement* is exempt from triggering
+Deployables or generating AROs (p. 79), as is movement arising
+from a failed Guts Roll (p. 38; p. 72 reminder).
+
+Stealth does not disable Deployable triggers (p. 112).
+The Boost rules (p. 69) operate on eligible enemy Models,
+with distinct exempt Markers and blocked-path checks; they
+must not be collapsed into Mines' Model-or-Marker Trigger
+Area rule. Place Deployable (p. 82) activates newly placed
+items at the Conclusion of the Order, not during their own
+placement.
+
+The shared Mines reference now explains the declaration/movement
+distinction with direct links to Dodge, Guts Roll and Stealth.
+Their full mechanics remain on their canonical Skill/rule
+entries. No context-free Dodge-to-Deployable typed edge was
+added: such an edge would wrongly imply that a Dodge declaration
+itself is exempt. This batch does not change imported Army
+profiles or resolve any upstream object Silhouette conflict.
+
+The pinned source extracts and current curated facts are
+regression-tested in
+`tests/test_deployable_trigger_cross_rules.py`, with separate
+weapon-page API link/citation coverage. A headless Chrome
+check passed 297/297 assertions on the seven Mine variants
+and the separate Chest Mine page, at 1440, 390 and 320 px,
+including the linked clarification and no horizontal overflow.
+This automated evidence is not a human visual review or a
+runtime spatial simulation.
+
+### RR-WPN-DEPLOYABLE-EXCEPTIONS-002 - Boost placement and marker eligibility
+
+**Scope:** pinned English N5.3 pp. 49, 69, 71-72 and 82.
+Source PDF SHA-256:
+`53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`.
+
+Three distinct conditions must not be merged into one rule:
+
+- **Placement:** Ordinary Place Deployable forbids placing a
+  Deployable Weapon with only an enemy CAMO Marker in its
+  Trigger Area; the official CrazyKoala example explicitly
+  permits placement where a valid non-Camouflaged enemy is
+  also present (p. 69). The alternative Intuitive Attack
+  exception on p. 82 requires a *legally available* Skill;
+  the Boost Trait alone does not grant Intuitive Attack.
+- **Later activation:** The item is placed at the Conclusion
+  of its Order; it becomes available only for subsequent
+  Orders/AROs (p. 82, CrazyKoala example p. 69). A legal
+  placement does not cause a Boost trigger during that Order.
+- **Targeting:** Boost reacts to eligible **enemy Models**,
+  not CAMO, IMP-1, IMP-2, or other excluded Markers; it must
+  be able to travel into Silhouette contact before
+  detonating (p. 69). Mines instead test an enemy Model
+  **or Marker** using their Small Teardrop Template and
+  allied-safety restrictions (p. 72). This difference
+  persists even when a non-Camouflaged enemy permits a
+  Boost weapon to be placed near a CAMO Marker.
+
+The Boost reference links to Place Deployable, Perimeter,
+Intuitive Attack, Camouflaged State, and Mines. These are
+source-backed context links, not a new typed relationship
+that would make Boost and Mines inherit each other's
+trigger mechanics. Drop Bears' BS placement and WildParrot
+remain their own published exceptions.
+
+PDF-hash-pinned and curated-data regressions are maintained
+in `tests/test_deployable_trigger_cross_rules.py`; the Glossary
+API regression checks destination links on `trait:boost`.
+Automated headless Chrome validation passed **60/60
+assertions** at 1440, 390 and 320 px on the Boost,
+Place Deployable and AP Mine pages. This does not verify
+live tabletop state or constitute a human visual review.
+
+No Army data, weapon profiles, or upstream source rows changed.
+
+### RR-WPN-PLACEMENT-001 ? Drop Bears mode resolution and Disposable timing
+
+**Scope:** official N5.3 English pp. 49, 71, 82 and 175,
+including the published Drop Bears Weapon Chart p. 181;
+ITS content excluded.
+
+The same item supports different deployment procedures:
+
+- **Direct Deployable Mode:** A legal ordinary Place Deployable
+  declaration places one Token without a Roll, with placement
+  resolved at the Conclusion of the Order (p. 82).
+- **Intuitive Attack placement:** If the enemy CAMO Marker is
+  inside the prospective Trigger Area without another valid
+  non-camouflaged enemy, the *eligible* Deployable Mode can use
+  Intuitive Attack. This is an unmodified WIP Roll; failure
+  places no Token but consumes a Disposable use (p. 49).
+  Intuitive Attack must be legal; it is not a generic extra
+  option conferred on every Deployable Weapon.
+- **Thrown BS Mode:** The Targetless throw uses its own
+  BS Weapon (PH) Roll, not the Intuitive Attack WIP Roll.
+  A failed throw also consumes a use under the general
+  Disposable (X) rule, even though no Token is deployed
+  (pp. 71, 175). Modes share a total of three uses.
+  Successful BS-mode deployment happens at the Conclusion
+  and cannot detonate within that Order (p. 71).
+
+The canonical Intuitive Attack, Place Deployable, Perimeter,
+BS Weapon (PH) and Disposable rules remain authoritative.
+Perimeter changes the permitted placement location and
+passable-path requirements; it does not independently
+grant a WIP Roll or the Intuitive Attack Skill.
+
+The Drop Bears reference now links those already-curated
+mechanics and explains how failure and consumption differ
+between modes. No Attack profile, imported Army alias,
+shared mine mechanics or source-order precedence changed.
+
+Source-pinned direct tests and current rules-database/API
+regressions verify roll/charge/timing semantics. A headless
+Chrome pass checked the Drop Bears, Intuitive Attack,
+Place Deployable and Perimeter pages at 1440, 390 and
+320 px: **66/66 assertions passed**, with no page errors
+or horizontal overflow. This is not a human visual review
+or a simulation of live tabletop targeting.
+The multi-mode rule is a **player-facing explanation**,
+not a new official Weapon Property or game mechanic.
+
+### RR-WPN-PLACEMENT-002 - Mine Dispenser inherits BS Mode only
+
+**Scope:** pinned English N5.3 pp. 49, 71-72, 82 and 175,
+Weapon Chart p. 181; ITS content excluded.
+
+Mine Dispenser uses Drop Bears' **BS Mode placement procedure**
+(N5.3 p. 72), not its Deployable Mode. The launcher makes
+BS-based Targetless attacks, **not** the PH-based BS Weapon
+profile of Drop Bears. Successful delivery places a visible
+Mine Token of the bracketed Mine subtype from the unit
+profile. Placement occurs at the Order's Conclusion;
+the new Token cannot detonate during that Order. The same
+CAMO Marker restriction and valid non-camouflaged enemy
+exception govern placement (pp. 71-72).
+
+A **failed individual BS Roll** places no Token for that Roll
+but consumes the declared Disposable use, per the canonical
+Disposable (X) Trait (p. 175). The Mine Dispenser's own
+**Disposable (2)** and **Double Shot** apply: the optional
++1 Burst requires both remaining uses and spends both,
+even when both attack Rolls fail. A failed Roll does not
+retroactively cancel another successful Roll in the Burst.
+
+The inherited BS Mode procedure does **not** grant the
+ordinary no-Roll Place Deployable action, Drop Bears'
+separate Deployable Mode, Intuitive Attack, PH-based
+throws or its Shock Mine subtype. Neither an invented
+extra attack profile nor additional source mechanics are
+published. The non-operative imported savingNum=1
+discrepancy remains preserved separately.
+
+The reference links the existing Drop Bears, Mines,
+Disposable, Double Shot, BS Attack and placement rules.
+Source-pinned checks and the current weapon-detail API
+test verify these distinctions; current Army profiles
+are unchanged. Headless Chrome passed **57/57 checks**
+at 1440, 390 and 320 px on Mine Dispenser and Drop
+Bears, including profile counts, explained rules and
+absence of horizontal overflow. This is automated
+presentation evidence, not a human visual review.
+The batch does not declare complete Weaponry
+source coverage or override unresolved cross-source
+profiles.
+
+### RR-WPN-DELIVERY-001 - Fired delivery versus deployed object lifecycle
+
+**Project domain:** Weaponry. **Scope:** pinned English N5.3
+pp. 71, 73, 175, 186-187, and N5 FAQ v0.1 English pp. 2-3.
+ITS scenario content excluded.
+
+The core rules distinguish a *delivery BS Attack* from the
+subsequently deployed game element:
+
+- **Pitcher:** The launcher expends a Disposable (2) use on a
+  declared attack, whether the BS Roll succeeds or fails.
+  A successful Roll produces a separate Deployable Repeater
+  Token at the impact location. The deployed object's
+  ARM 0, BTS 0, STR 1 and S 1 are from the object
+  profile (N5.3 p. 186), not the launcher's attack
+  profile (p. 187). This is neither a damaging hit
+  nor the user's Place Deployable Skill.
+- **Disco Baller:** Failed delivery Rolls spend the declared
+  launcher use but place no Disco Ball. Double Shot's
+  optional +1 Burst expends both unspent Disposable (2)
+  uses if selected (p. 175). Successful delivery places
+  a Ball with independent ARM 0, BTS 0, STR 1 and S 1
+  (pp. 71, 186) and centers an Eclipse Template on it.
+  The Template deactivates at the States Phase; destroying
+  the Ball removes it. Later allied reactivation instead
+  uses the Deactivator and a WIP +3 Skill (p. 71),
+  independently of the launcher's remaining shots.
+
+**FAQ placement:** FAQ v0.1 p. 2 requires fired
+Deployables to be fully supported, not on vertical
+surfaces. FAQ p. 3 explicitly extends the Place
+Deployable occupied-position correction to Pitcher,
+Disco Baller and Drop Bears (BS Mode): after another
+Trooper occupies the intended position before the
+Conclusion step, select another legal location or
+lose the item if none is legal. This is not permission
+to invoke the Place Deployable Skill when firing.
+
+The curated summaries now state these outcomes with
+links to the existing Disposable, Double Shot,
+Repeater, Eclipse, Deactivator and activation owners.
+The older Pitcher FAQ p. 2 citation was labeled as
+the occupancy ruling; its label is corrected, and
+FAQ p. 3 is cited independently. Previously approved
+plain-text mentions of "States Phase" retain their
+review rationale; the two occurrence hashes were
+updated for their changed passage context. No
+imported Army profiles or upstream source facts
+were normalized.
+
+Source-pinned tests and live weapon-detail API
+regressions distinguish launcher charge/profile
+semantics from deployed objects. Headless Chrome
+passed **75/75 assertions** across Pitcher, Disco Baller
+and Activate Disco Ball at 1440, 390 and 320 px,
+including distinct object profiles, absence of
+JavaScript errors and horizontal overflow. This is
+automated behavior evidence, **not** a human visual
+review or a tabletop state-resolution simulation.
+
+### RR-WPN-DEPLOYED-001 - Deployed Repeater and Disco Ball lifecycle
+
+**Scope:** pinned English N5.3 pp. 55-56, 71, 73, 175,
+186 and current curated rules. ITS mission material excluded.
+
+**Deployable Repeater:** The equipment exists independently
+of its carrier (ARM 0, BTS 0, STR 1, S 1). Its standard
+Place Deployable action and successful Pitcher BS delivery
+produce the same Token but use **different declaration
+and placement rules** (pp. 56, 73). Neither route gives
+the other weapon/Skill an extra action. While on the table,
+the Token provides a Repeater, whose Zone of Control
+extends allied Hacking Areas (pp. 55-56). Enemy use,
+Hacker-only reach, Firewall MODs and AROs remain defined
+on Repeater and Hacking Area, not reimplemented in this
+object's data. A destroyed Deployable is removed per
+the Deployable Trait (p. 175), so it can no longer extend
+the Hacking Area. This is not the same as an enemy Hacker
+using a Repeater and does not imply targeting the Token
+with a Hacking Program.
+
+**Disco Ball:** Delivery creates a separate ARM 0,
+BTS 0, STR 1, S 1 object and Eclipse Template. The
+States Phase removes only the Template; the Ball remains
+available for allied Activate Disco Ball using Deactivator,
+LoF or ZoC and WIP +3. Destruction removes the Template
+and the Ball is no longer available for activation
+(p. 71). Launcher Disposable charges do not fund
+reactivation. Existing curated weapon and Skill records
+already stated those rules, so this pass adds focused
+cross-record regressions instead of repeated prose.
+
+The Deployable Repeater card previously described only
+the Place Deployable path. It now links Pitcher delivery
+and canonical Hacking Area, Repeater, Firewall and
+Deployable destruction semantics, backed by PDF citations.
+No imported Army profile or rules authority was changed.
+
+Source-pinned, curated-identity and API tests distinguish
+the two delivery paths and the two Disco Ball outcomes.
+Headless Chrome passed **78/78 assertions** across the
+Deployable Repeater, Pitcher, Disco Baller, and Activate
+Disco Ball pages at 1440, 390 and 320 px, with no
+JavaScript errors or horizontal overflow. This is
+automated page acceptance, not a human visual review.
+The tests do not simulate Orders, Hacking Program
+targeting, or destruction events on a live game state.
+
+### RR-WPN-DEPLOYED-002 - FastPanda and WildParrot object lifecycle
+
+**Scope:** pinned English N5.3 pp. 49, 56, 69, 74,
+82, 175 and 186, archived English Wiki revisions
+FastPanda 3437 and WildParrot 3610, and the pinned
+Army snapshot. ITS mission content excluded.
+
+**FastPanda:** Army and the archived Wiki agree on the
+equipment profile: Disposable (1), Indiscriminate,
+Perimeter, Deployable, Zone of Control, with ARM 0,
+BTS 0, STR 1 and S 1. Place Deployable and Perimeter
+permit a destination completely inside the user's
+Zone of Control, but only if an S1-sized path is
+passable (N5.3 p. 82). There is no Roll for ordinary
+placement; the static equipment activates at
+Conclusion. It contains a Repeater, which extends
+allied Hacking Areas while present; removing the
+object removes that extension. It does not gain
+Boost movement/triggering or Intuitive Attack from
+other Perimeter devices. Indiscriminate remains a
+separate canonical Trait.
+
+**WildParrot:** The N5.3 p. 74 and archived Wiki
+identify a Disposable (1), S1 Perimeter weapon
+deployed with Place Deployable or eligible Intuitive
+Attack. The latter uses an unmodified WIP Roll;
+failure consumes the use without placing a Token
+(p. 49). Conclusion-step activation means the
+new object cannot trigger in its own placement
+Order (p. 82). The visible ARM 0/BTS 0/STR 1
+Token uses its E/M, BTS/2, two-Saving-Roll profile
+and the E/M Mines procedure, never Boost movement.
+Destroying the object invokes Deployable removal
+(p. 175). These facts must not be generalized to
+FastPanda.
+
+**Unresolved source conflict:** N5.3 p. 74 and Wiki
+revision 3610 print the WildParrot Non-Lethal Trait;
+Army's pinned profile omits it. The existing source
+note and imported profile are preserved without an
+inferred source-precedence decision.
+
+The previously approved unlinked FastPanda
+"Zone of Control" surface is now an explicit canonical
+reference. Its obsolete maintained-text review hash
+was retired; other review decisions remain unchanged.
+The changes are explanatory curation and source
+citations, not new mechanics or Army normalization.
+
+Automated headless Chrome acceptance passed **60/60
+assertions** across FastPanda and WildParrot at
+1440, 390 and 320 px, including the linked summaries,
+no JavaScript errors, and no horizontal overflow.
+This is not a human visual review or runtime
+simulation of Hacking or Mine detonation.
+
+### RR-WPN-DEPLOYED-003 - Dazer placement versus ongoing terrain effect
+
+**Scope:** pinned English N5.3 pp. 82, 121, 175 and 186;
+Army Dazer equipment metadata; archived English Wiki
+Dazer revision 3436. ITS content excluded.
+
+**Placement:** Dazer's printed Traits are Disposable (3),
+Deployable and Zone of Control, **not Perimeter**. A legal
+ordinary Place Deployable declaration places its Token
+in Silhouette contact with no Roll (p. 82), spending one
+Disposable use. The Zone of Control determines the
+**affected terrain area**, not an alternative placement
+range. Placement resolves and the object becomes active
+at the Order's Conclusion.
+
+**Persistent area:** While the independent Dazer remains
+on the table, it creates Difficult Terrain of infinite
+height throughout its Zone of Control (p. 121). Troopers
+with Terrain (Total) ignore its effects and receive the
+published MOD for qualifying Movement-Label Skills.
+Its effect does not imply movement, a Boost trigger, or
+direct damage. The object has ARM 0, BTS 0 and STR 1;
+Deployable destruction/removal ends its area effect.
+A legal enemy Deactivator success can remove an
+eligible deployed item (p. 121); the existing Deactivator
+rules own its targeting, WIP and current-Order caveats.
+
+**Unresolved object Silhouette:** N5.3 English p. 121
+and pinned Army give S0, while the English Weapon Chart
+p. 186 gives S1. Spanish and archived Wiki sources
+contradict one another and sometimes their own charts;
+see RR-AW-OBJECT-002 for full bilingual provenance.
+The UI retains the imported Army S0, and the new
+curated source note expressly disclaims official
+precedence. No source values or model geometry changed.
+
+Two current unlinked "Difficult Terrain" occurrences
+were reviewed as terrain types rather than references
+to the Terrain Special Skill. The old single occurrence
+fingerprint was superseded and the former unlinked
+"Zone of Control" was replaced by a canonical link;
+all other maintained-text reviews remain intact.
+The canonical Place Deployable, Terrain, Deployable,
+Disposable and Deactivator rules are linked, not copied.
+
+Headless Chrome passed **75/75 assertions** at 1440,
+390 and 320 px for Dazer, Place Deployable, Terrain
+and Deactivator, without JavaScript errors or horizontal
+overflow. This does not constitute a human visual
+review or live turn-resolution simulation.
+
+### RR-WPN-DEPLOYED-004 - Deactivator versus persistent equipment
+
+**Scope:** pinned English N5.3 pp. 56, 71, 121-122 and
+the existing curated deployed-equipment records. ITS
+content excluded.
+
+The Deactivator is a Short Skill (Attack) against an
+**enemy** deployed Weapon/Equipment with the Deployable
+Trait, only when in the user's LoF or Zone of Control.
+Camouflage Markers are not legal targets. The roll
+is a Normal WIP Roll with **Range MODs only** (not
+Mimetism, other Special Skill MODs or Cover), and
+success removes the item from the table (p. 121).
+Passing does **not** prevent a Deployable from
+triggering during the current Order. Removal should
+not be misread as retroactively cancelling attacks
+or as an unqualified statement about the timing of
+every persistent effect during that same Order.
+
+Deactivation/removal and continuing benefits are
+distinct mechanisms. Removal of a Dazer stops its
+ongoing Difficult Terrain area; removal of FastPanda
+or a Deployable Repeater stops the removed Token's
+Repeater contribution to allied Hacking Areas;
+removal of Deployable Cover stops its scenery-based
+Cover benefits. These consequences derive from
+removing the element that supplies the effect,
+not from a separate disabling mechanic assigned
+to each piece of Equipment. Placement restrictions,
+imported object profiles and source conflicts are
+unchanged.
+
+Activate Disco Ball instead uses the Deactivator
+piece of Equipment to reactivate an **allied** Ball
+with WIP +3 and Range MODs, restoring an Eclipse
+Template at the Conclusion step (p. 71). It is a
+different named Skill, not a mode in which the
+enemy-removal Deactivator Skill changes targets.
+
+The canonical Deactivator summary now explains
+the eligibility, resolution, ongoing-effect
+consequences and allied-action distinction, with
+links to owning rules rather than duplicate effects
+on all equipment cards. No new typed causal edges,
+source profile overrides, or game-state simulation
+were added.
+
+### RR-WPN-DEPLOYED-005 - Deactivator versus automatic weapon attacks
+
+**Scope:** pinned English N5.3 pp. 69-70, 72 and 121,
+the reviewed Mine, Cybermine, Boost and Armed Turret
+references, and the current Deactivator record.
+ITS content excluded.
+
+**General rule:** Deactivator p. 121 permits targeting
+a deployed enemy Weapon/Equipment with the Deployable
+Trait in LoF/ZoC, but **not a Camouflage Marker**.
+A successful Normal WIP Roll removes the item yet
+**does not prevent it from triggering in the same
+Order**. This is a timing exception, not permission
+to ignore an item's normal attack conditions, not a
+claim that every target necessarily attacks, and not
+a new simultaneous-resolution procedure.
+
+**Mines and Cybermines:** A Mine concealed as a
+CAMO(-3) Marker cannot itself be a Deactivator
+target; a revealed MINE(-3) Token may be targeted.
+Mine triggering still requires a qualifying
+enemy Model/Marker within its Small Teardrop
+Template Trigger Area and a template that affects
+no allies, including Unconscious allies (p. 72).
+Cybermines reuse those trigger conditions,
+but their evasion is Reset at -3 WIP, not
+the ordinary Mine Dodge attempt. Deactivator
+does not erase a legally established trigger.
+
+**Crazykoalas and MadTraps:** Both use the Boost
+Trait and their own attack profiles. Boost p. 69
+requires an eligible enemy Model to declare or
+perform an Order/ARO in ZoC and a passable route
+for the device to reach Silhouette contact.
+CAMO/IMP Markers remain exempt. Only successful
+Normal Dodge avoids a triggered Boost attack;
+these requirements survive a successful
+Deactivator Roll in the same Order.
+
+**Armed Turrets:** N5.3 p. 70 permits their
+BS/CC declarations against an active enemy
+Model, never a Marker, within LoF or Silhouette
+contact. This is not a Mine template trigger
+or Boost detonation. The Deactivator same-Order
+exception does not erase a legal turret
+declaration, nor grant a turret extra attacks
+outside its published conditions.
+
+These distinctions now appear as canonical
+links in the Deactivator reference with direct
+source citations. Its established enemy-removal
+rules and typed Mimetism relationship are
+unchanged. The Armed Turret silhouette and
+E/Mitter Saving Rolls source conflicts remain
+separate and unresolved. No Army profiles,
+same-Order engine, or new source-precedence
+decision changed.
+
+Source-pinned and curated/API regressions check the
+distinct conditions. Headless Chrome passed **99/99
+assertions** across Deactivator, AP Mine, Cybermine,
+Boost and Armed Turret pages at 1440, 390 and 320 px,
+with no JavaScript errors or horizontal overflow.
+This does not simulate simultaneous actions or replace
+human visual review.
+
 ## Ammunition and Weaponry / Broader research
 
 ### RR-AW-ZONE-001 — Smoke and Eclipse create transient visibility zones
@@ -640,15 +1331,140 @@ single-use item to another eligible same-army Trooper who becomes its user.
 During play that user can invoke one of the permitted Pheroware Tactics, after
 which the SymbioBomb is removed.
 
-This is a strong future example for a session/list relationship layer:
-catalog/loadout ownership is static source data, assignment is deployment state,
-and the selected use is action state. Those identities/scopes should not be
-collapsed into one permanent Unit relationship.
+The 1.0 curated `weapon:symbiobomb` reference now describes the
+source-backed assignment and action sequence on the Weapon detail page and
+links to Pheroware Tactics. This does **not** implement a live session/list
+assignment model: catalog/loadout ownership remains static, assignment is
+deployment state, and use is action state. They must not be collapsed into
+one permanent Unit relationship. The official rules do not give SymbioBomb
+a standalone Weapon Chart attack profile.
 
 Sources:
 
 - Wiki: <https://infinitythewiki.com/SymbioBomb>
 - PDF: Infinity N5 V5.3, printed page 74
+
+### RR-AW-OBJECT-002 - Auxiliary Weapon Chart profiles preserve conflicting Silhouettes
+
+**Project domain:** Data processing. **Scope:** core N5 v5.3 source
+reconciliation; no ITS content or imported Army normalization.
+
+The expanded read-only audit of 14 supplementary four-Attribute object
+profiles (English N5.3 Weapon Chart pp. 181/186, including Disco Ball and
+Drop Bears Deployable Mode) resolves all 14 to unique existing Army
+Weapon/mode identities. Seven fully match; seven differ only on the
+printed Silhouette. None is evidence of a missing attack profile.
+
+**S0 is valid in N5.3, not an obsolete or impossible Silhouette.** The
+Silhouette Templates table (English and Spanish N5.3 p. 18) explicitly
+defines S0 as a 25 mm base with 3 mm height, distinct from S1
+(25 mm base, 25 mm height) and SX (base-height template with
+base width inherited from the Trooper). N5.1 and N5.2 English p. 18
+also define S0; both printed Mine profile tables specify S0.
+The S1-S8 *illustrations* do not exhaust the rules table.
+The same six named Mine profiles print S0 in the English N5.1 p. 177,
+N5.2 p. 180 and N5.3 p. 181. Dazer prints S1 in English N5.1
+p. 182, N5.2 p. 185 and N5.3 p. 186. This repeated source history
+makes an accidental carryover from a previous N5 edition unlikely,
+though it does not explain why Army and the PDF tables disagree.
+Therefore the seven differences are real published attribute mismatches,
+not invalid S0 source rows or proof that old rules survived accidentally.
+
+- **AP, E/M, Monofilament, PARA, Shock and Viral Mines:** English N5.3
+  p. 181, Spanish N5.3 pp. 190-191, and both pinned Wiki Weapon Chart
+  captures consistently specify S0; pinned Army specifies S1 for these
+  six named Mine profiles. The archived dedicated Mines family pages
+  also describe their common Mine object as S0.
+- **Dazer:** English N5.3 p. 186 and both pinned Wiki Weapon Chart tables
+  specify S1. Spanish N5.3 p. 195, the English dedicated Wiki Dazer page
+  and Army specify S0. The *Spanish dedicated Wiki Dazer page* instead
+  specifies S1. This is a **cross-publication conflict**, including
+  disagreement between a Wiki chart and an equipment-specific Wiki page;
+  it cannot be summarized as a bilingual PDF difference alone.
+- **Cybermine and Drop Bears Deployable Mode:** English chart and Army
+  specify S0.
+
+- **WildParrot, Crazykoala, Deployable Repeater, Disco Ball and
+  FastPanda:** English chart and Army specify S1.
+
+**Do not conflate a concealed Marker with the Mine object.** N5.3
+pp. 157 and 175 expressly make a Camouflaged Marker representing a
+Weapon or Equipment **S2**. On Mine deployment that is the CAMO (-3)
+Marker; the corresponding MINE (-3) Token replaces it upon discovery
+(N5.3 p. 72). The S2 rule governs the marker representation, while
+the printed Mine object profiles and imported Army data remain
+separate, still-disputed source values. InfinityDB now explains this
+on the shared Mines reference rather than treating S2 as a resolution
+of S0 versus S1. Chest Mines do not inherit those shared rules.
+
+The official N5.3 change announcement dated 2026-09-01 documents
+several Weapon changes but lists no Mine or Dazer Silhouette
+correction. Its silence is **not proof** of the intended active
+profile or precedence. See:
+<https://infinityuniverse.com/en/news/infinity-rules-update-5-3>.
+The full 14-object comparison is reproducible with
+tools/audit_weapon_chart_profiles.py. The seven disputed profiles now
+also have a separate reproducible source-provenance matrix generated by
+tools/audit_auxiliary_silhouette_provenance.py. This second audit pins
+the input hashes and the English/Spanish N5.3 PDF page, archived Wiki
+chart member, dedicated Dazer member and Army database for each quoted
+value. The resulting evidence stays in ignored local/audits/.
+
+None of the inputs were modified. The matrix does not decide which
+disputed value governs gameplay or establish that Corvus Belli has
+issued a correction. The printed PDF and Wiki chart agreement is
+strong evidence for S0 as the published Mine object template, but
+InfinityDB must still retain the conflicting Army source rather than
+normalizing it silently. Dazer remains unresolved separately.
+
+Sources: pinned N5 v5.3 English and Spanish core rules PDFs,
+pinned English and Spanish Wiki snapshots (Weapon Chart, Mines and
+Dazer pages), and pinned Army metadata, all held as separate versions
+outside Git. This is a source/profile audit, not a gameplay ruling.
+
+### RR-AW-WIKI-NAMES-001 — Wiki chart names are not missing Weapon profiles
+
+**Project domain:** Data processing. **Scope:** N5 v5.3 Weaponry;
+the pinned English Wiki Weapon Chart and imported Army snapshot.
+
+The read-only identity audit identifies **208 Wiki Weapon-profile rows**,
+including repeated alternative table sections, but only **174 unique
+names/modes**. All 174 have an explicit classification: 162 exact Army
+name/mode identities, ten name aliases, one mode-name alias, and one
+editorial row that is not a Weapon profile. No unexplained chart-name
+identity remains.
+
+- **Plural names:** The nine Wiki Mine rows (including Chest Mine's
+  two modes) and CrazyKoalas correspond to singular Army Weapon names.
+  These are explicit *source-name aliases*, not separate weapon types.
+- **Feuerbach (Blast Mode):** The archived Wiki name corresponds to
+  Army/PDF **Feuerbach (Explosive Mode)**. Both source profiles use
+  PS 6, B1, EXP, three ARM Saving Rolls. Do not invent another mode.
+- **Suppressive Fire Mode:** The Wiki's asterisked generic firing-mode
+  row is an editorial chart reference, not an independently cataloged
+  Weapon with a fixed ammunition or damage value.
+- **Repeated chart rows:** 34 additional occurrences are mostly
+  identical duplicated alternative tables. Four repeated mode names
+  actually have different values between tables: Trench-Hammer BS/CC
+  and Kobra Pistol BS/CC. Their source differences remain tracked by
+  the separate mode/profile audits; identity matching does not make
+  their mechanics equivalent.
+- **SymbioBomb:** The source provides an assignment and one-use
+  Pheroware rule but no standalone Weapon Chart or Army attack profile.
+  It already has a source-cited weapon:symbiobomb rule. A missing
+  chart row is not a missing gameplay definition.
+
+The reproducible tools/audit_wiki_weapon_chart_names.py report pins
+the Wiki member, archive and Army database hashes, preserves alternate
+table occurrences, and fails closed on unresolved identities. Its JSON
+and Markdown outputs stay in ignored local/audits/ and do not
+normalize upstream data. This **closes the name-identity inventory
+only**; it does not assert complete special-weapon prose, browser
+coverage or definitive source precedence.
+
+Sources: pinned English Wiki Weapon_Chart and original Army metadata;
+official N5.3 pp. 68?74 and 176?188 are independent profile/prose
+references. No ITS mission content was considered.
 
 ### RR-AW-SCENERY-001 — Anti-materiel effects connect Weapon rules to scenery
 
@@ -1204,6 +2020,81 @@ skip Saving Rolls, contradicting the E/M, PARA, and Cybermine source profiles.
 The corrected definition prohibits Wounds without suppressing the rolls used
 to determine non-Wound effects. Citation: pinned `wiki-traits-oldid-4110`,
 Non-Lethal heading; compare the N5.3 Weapon Chart p. 181.
+
+### RR-WPN-MINE-003 - Mine-variant source effects and object geometry
+
+**Scope:** pinned English N5.3 pp. 63-65, 72, 174 and 181;
+existing Army and curated rule-owner evidence. ITS excluded.
+The policy `config/validation/mine-variant-effects.json` v2 pins
+seven Weapon Chart profile anchors and eleven selected
+effect clauses to their printed page and maintained rule owner.
+This extends RR-WPN-MINE-002 without duplicating ammunition
+rules in each Mine card.
+
+- **AP:** ARM/2 and rounding up (including positive ARM minimum 1)
+  are governed by AP Ammunition, not a new Mine-specific modifier.
+- **E/M:** two BTS/2 Saving Rolls, Isolated on failure and
+  Immobilized-B only for the printed HI/TAG/REM/VH classes;
+  the normal Guts Roll exceptions remain owned by E/M.
+- **Monofilament:** N/ARM=0/one Saving Roll and the independent
+  `State: Dead` Trait. This is not AP Ammunition.
+- **PARA:** PH-6/one Saving Roll can cause Immobilized-A,
+  and targets without PH ignore PARA entirely; no PS applies.
+- **Shock:** ARM/one Saving Roll, with direct-to-Dead applying
+  only to failed Shock Saves against VITA 1 targets.
+- **Viral:** the printed N/BTS/one-roll base remains unchanged.
+  BioWeapon adds DA+Shock only against VITA, not STR.
+- **Cybermine:** the blank Ammunition field, PS 5 and two BTS
+  Saves remain intact; Reset (-3 WIP) replaces Dodge and
+  Stunned/Immobilized-B is conditional on target type.
+
+**Unresolved publications:** the printed object profile is S0
+for all seven; pinned Army uses S1 for AP, E/M, Monofilament,
+PARA, Shock and Viral but S0 for Cybermine. The separate
+CAMO Marker S2 rule does not resolve these object values
+(see RR-AW-OBJECT-002). The N5.3 PARA Mine source `[*]`
+notation versus Army `[**]` is also preserved. The E/M Mine
+uses `[**]` in both sources; it is **not** part of that discrepancy.
+
+The audit checks exact source excerpts, existing player-facing
+canonical owner text and imported profile/trait values, including
+the source-hash invariant. It does not change gameplay, decide
+which conflicting publication overrides another, or claim all
+possible interactions have been exhaustively adjudicated.
+
+### RR-WPN-MINE-004 - Named Mine detail-page visual review
+
+**Scope:** seven reviewed Mine names and Chest Mine BS/CC modes,
+desktop 1440 px and narrow 390/320 px Chrome renderings, using
+the existing Army and N5.3 curated rules databases. Source
+interpretation and imported profiles are unchanged.
+
+Screenshot examination found no card clipping, sideways overflow,
+overlapping citation links, or collapsed/misidentified Chest Mine
+mode rows. However, the long shared Mines reference pushed the
+specific Weapon profile far below the title on narrow screens;
+Cybermine exposed the Army numeric 0 sentinel as "Ammunition 0".
+These were real presentation issues rather than source-rule conflicts.
+
+The weapon-detail renderer now displays named Mine chart profiles
+**before** the shared Mines reference. A Mine-specific rules card
+(Cybermine or PARA Mine) is presented before the shared family card.
+This exception is keyed by the published `weapon:mines` rule ID,
+so Chest Mine and unrelated Weapon details retain their existing
+presentation. Cybermine with the numeric 0 ammunition source value
+shows "--" in the statline; the API retains 0 and no Ammunition
+type is invented. Its Comms Attack, Reset and two BTS Saves remain
+separate from shared Mine triggers.
+
+The visual/browser acceptance covers all eight page identities at
+1440, 390 and 320 px, including citation presence, variant-specific
+rule priority, profile ordering, expanding linked Ammunition effects,
+two Chest Mine modes, absence of JavaScript errors and horizontal
+overflow: **225/225 assertions**. Full-page screenshots and the
+capture/verification helpers remain under ignored `local/audits`.
+The selected screenshots were reviewed visually; independent human
+sign-off remains a separate release decision. Source discrepancies
+for Mine object S0/S1 and PARA `[*]`/`[**]` remain unresolved.
 
 ### Sepsitor and Sepsitor Plus (N5.3; 2026-10-09)
 

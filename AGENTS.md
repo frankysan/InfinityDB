@@ -37,14 +37,16 @@ Virtual-environment interpreters are normally:
 
 Use `tools/run_checks.py` as the standard entry point for repository checks. It
 invokes pytest, Ruff, Pyright type checking, Army data-build validation, and
-curated rules-database validation through the same Python
-interpreter that launched the runner and keeps stage selection/reporting
-consistent across local development and agent handoffs. Examples:
+curated rules-database validation through the same Python interpreter that launched
+it. The separate `docs` stage invokes Markdownlint through a lockfile-pinned local
+npm dependency. All stages share check selection/reporting across local development
+and agent handoffs. Examples:
 
 ```text
 <venv-python> tools/run_checks.py --profile code
 <venv-python> tools/run_checks.py --profile data
 <venv-python> tools/run_checks.py --all
+<venv-python> tools/run_checks.py --stage docs
 <venv-python> tools/run_checks.py --stage test tests/test_availability.py
 <venv-python> tools/run_checks.py --profile code --report
 <venv-python> tools/run_checks.py --stage test --assets off
@@ -55,7 +57,10 @@ With `--report` and no path, the runner writes an ignored repository-local
 `reports/CHECKS YYYYMMDD-HHMMSS.txt` file using the same run-start timestamp as
 the report header. An explicit report path overrides that convention. Requested
 stages continue after failures by default; use `--fail-fast` when appropriate.
-See `docs/testing.md` for the complete contract.
+For `--stage docs` or `--all`, bootstrap the lockfile-pinned Node.js Markdownlint
+dependency with `npm ci --ignore-scripts --no-audit --no-fund` first (Node.js 22+).
+The check stage itself works offline and does not install packages. The `code`
+profile remains Python-only. See `docs/testing.md` for the complete contract.
 
 Direct pytest/Ruff/Pyright commands remain appropriate when debugging those
 tools in isolation, and package installation still runs through the virtual-environment
@@ -70,6 +75,34 @@ Python, for example:
 
 Local developer wrappers or command-launching tools may be used, but repository
 instructions must not depend on a particular user's machine configuration.
+
+## Repository access and change delivery
+
+- Check whether the agent has authorized direct access to the current local
+  checkout before relying on uploaded archives or remote repository content.
+  A connected filesystem/terminal is a normal working tree, regardless of which
+  agent uses it. Do not assume local access is unavailable based on an earlier
+  session or workflow.
+- When direct access is available, inspect the actual branch, HEAD, working-tree
+  status, relevant files, and existing local instructions first. Treat that
+  checkout as the source of truth; use remote Git services only for information
+  that cannot be established locally or for explicitly requested remote work.
+- Edit and validate directly in the authorized working tree. Preserve unrelated
+  tracked and untracked changes. Do not require a repository ZIP or produce an
+  apply-yourself patch as the primary delivery when the files are already edited.
+  Generate a Git-native patch only when requested or needed for transfer/review.
+- When direct access is unavailable, request an appropriate repository snapshot
+  or use an authorized remote-read workflow; validate any proposed patch against
+  its actual base before claiming applicability. Do not infer current local
+  state from a stale archive or a remote branch alone.
+- After local edits, inspect the actual diff and status, run relevant checks, and
+  report exact validation outcomes and whether the changes are already in the
+  checkout. Do not stage, commit, push, deploy, or publish without authorization.
+- Keep machine-specific configuration, operational diagnostics, and private
+  evidence out of tracked files. The Git-ignored `local/` workspace is the
+  preferred location for private notes; ignore rules alone are not access
+  controls. Review the public diff and generated artifacts for accidental
+  disclosures before delivery.
 
 ## Repository rules
 
@@ -133,7 +166,7 @@ When adding or consolidating changelog entries:
 - Write from the perspective of a user or operator of InfinityDB.
 - Describe the resulting capability, behavior, correctness improvement, or upgrade consequence rather than the implementation steps that produced it.
 - Consolidate related engineering changes into a single outcome-oriented entry where they form one coherent improvement.
-- Begin every release, including `Unreleased`, with a `Player summary` section. Keep it concise and include only changes that are visible or directly useful to players; use `No player-facing changes.` when a release has none. The browser publishes this section openly and keeps the fuller release detail collapsed by default.
+- Begin every nonempty release with a `Player summary` section. Keep it concise and include only changes that are visible or directly useful to players; use `No player-facing changes.` when a release has operator-only changes. The browser publishes this section openly and keeps the fuller release detail collapsed by default. A completely empty `Unreleased` section may be left as a bare heading (or an empty Player summary) and must not appear on **What's changed**. A lone `No player-facing changes.` placeholder without detailed entries also counts as empty; released versions must still contain notes.
 - Keep `Added`, `Changed`, and `Fixed` as the normal detailed categories. Use an `Upgrade notes` section when a release requires an explicit action such as rebuilding generated databases.
 - Keep wording understandable without requiring knowledge of InfinityDB's internal architecture, build pipeline, CI setup, or implementation tools.
 - Retain technical terminology only when it identifies a meaningful user-visible concept or is necessary for an operator to act on the change.
@@ -165,6 +198,13 @@ Before finalizing **any release**, follow the canonical checklist in `docs/relea
   invariant or development constraint.
 - Add identified future work to `docs/TODO.md`.
 - Record meaningful changes under `Unreleased` in `docs/CHANGELOG.md`.
+  Do this as part of the work that delivers the outcome, not as a deferred
+  release-preparation task. Before reporting a substantive task complete,
+  review its actual diff for documentation impact: update the canonical
+  behavior/design owner, `Unreleased` if users or operators experience a
+  meaningful change, and `docs/TODO.md` only for remaining work. If a change
+  is internal-only and warrants no changelog entry, explicitly state that
+  decision in the handoff instead of adding implementation noise.
 - Label new or materially revised change/feature/design/backlog documentation with
   its canonical project domain. Use the exact labels and multi-domain rules from
   `docs/project-domains.md`; do not invent near-synonyms.

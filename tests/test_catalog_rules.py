@@ -243,10 +243,23 @@ def test_weapon_source_mode_rules_do_not_leak_between_same_id_profiles(
         if document["collection"]["id"] == "n5-core-v5.3"
     )
     test_core = copy.deepcopy(core)
-    # Keep this synthetic fixture independent of the now-published Kobra records.
+    # Isolate the synthetic records and retain canonical reference integrity.
     test_core["records"] = [
         record for record in test_core["records"]
         if record["id"] not in {"weapon:kobra-pistol", "weapon:kobra-pistol-cc"}
+    ]
+    # Mixed Weapons links to canonical Kobra; retarget that reference to the
+    # synthetic family rather than weakening maintained-link validation.
+    mixed = next(
+        record for record in test_core["records"]
+        if record["id"] == "weapon:mixed-weapons"
+    )
+    mixed["summary"] = mixed["summary"].replace(
+        "[[weapon:kobra-pistol|", "[[weapon:kobra-pistol-test|"
+    )
+    mixed["armyLinks"] = [
+        link for link in mixed["armyLinks"]
+        if link["id"] != "kobra-pistol"
     ]
     shared = {
         "kind": "weapon",
@@ -357,6 +370,7 @@ def test_reviewed_combined_ammunition_critical_is_not_per_component(
     }
     refs = WeaponAmmunitionReferences(_rules_database(tmp_path))
     expected = {
+        (5, "N+E/M"): ("normal", "em", 2),
         (10, "AP+DA"): ("ap", "da", 2),
         (13, "AP+Exp"): ("ap", "exp", 3),
         (30, "AP+Shock"): ("ap", "shock", 1),
@@ -389,7 +403,7 @@ def test_reviewed_combined_ammunition_critical_is_not_per_component(
 
 def test_reviewed_ammunition_references_preserve_exact_army_identity(tmp_path: Path) -> None:
     mapping = load_ammunition_reference_map()
-    assert len(mapping) == 15
+    assert len(mapping) == 16
     refs = WeaponAmmunitionReferences(_rules_database(tmp_path))
     assert refs.for_profile({"ammunition_source_id": 10, "ammunition": "AP+DA"}) == [
         {"text": "AP", "public_reference": {"catalog": "ammunition", "id": "ap"}},
@@ -433,6 +447,49 @@ def test_reviewed_ammunition_references_preserve_exact_army_identity(tmp_path: P
     }), encoding="utf-8")
     with pytest.raises(ValueError, match="reproduce source name"):
         load_ammunition_reference_map(invalid)
+
+
+def test_canonical_ammunition_explanations_reuse_validated_source_records(
+    tmp_path: Path,
+) -> None:
+    rules = _rules_database(tmp_path)
+    refs = WeaponAmmunitionReferences(rules)
+    ap = rules.composed_record("ammunition:ap")
+    shock = rules.composed_record("ammunition:shock")
+    assert ap is not None and shock is not None
+
+    for saving in ("ARM/2", "BTS/2"):
+        result = refs.effects_for_profile({
+            "ammunition_source_id": 3, "ammunition": "AP", "saving": saving,
+        })
+        assert result is not None and len(result) == 1
+        assert result[0]["summary"] == ap["summary"]
+        assert result[0]["citations"] == ap["citations"]
+
+    combined = refs.effects_for_profile({
+        "ammunition_source_id": 30, "ammunition": "AP+Shock",
+        "saving": "BTS/2", "saving_num": "1",
+    })
+    assert combined is not None
+    assert [item["record_id"] for item in combined] == [
+        "ammunition:ap", "ammunition:shock",
+    ]
+    assert [item["summary"] for item in combined] == [
+        ap["summary"], shock["summary"],
+    ]
+    assert "saving_num" not in combined[0]
+    combined[0]["summary"] = "mutated"
+    again = refs.effects_for_profile({
+        "ammunition_source_id": 30, "ammunition": "AP+Shock",
+    })
+    assert again is not None and again[0]["summary"] == ap["summary"]
+
+    assert refs.effects_for_profile({
+        "ammunition_source_id": 3, "ammunition": "AP+Shock",
+    }) is None
+    assert refs.effects_for_profile({
+        "ammunition_source_id": 0, "ammunition": 0,
+    }) is None
 
 
 @pytest.mark.parametrize(
@@ -918,10 +975,25 @@ def test_ap_em_rounding_and_t2_critical_die_identification_reach_api(
     for slug, case in expected.items():
         record = rules_db.composed_record(f"ammunition:{slug}")
         assert record is not None
-        assert len(record["facts"]["clarifications"]) == 1
-        text = record["facts"]["clarifications"][0]
+        clarification_rows = record["facts"]["clarifications"]
+        expected_count = 2 if slug == "t2" else 3
+        assert len(clarification_rows) == expected_count
+        text = " ".join(clarification_rows)
         for fragment in case["fragments"]:
             assert fragment in text
+        if slug == "ap":
+            assert "Each failed roll inflicts one Wound" in text
+            assert "Critical adds one more Saving Roll" in text
+            assert "Immunity (AP)" in text and "AP+DA" in text
+            assert "[[ammunition:da|DA]]" in text
+        elif slug == "em":
+            assert "third BTS/2 Saving Roll" in text
+            assert "at least one Saving Roll fails" in text
+            assert "[[state:isolated|Isolated State]]" in text
+            assert "[[state:immobilized-b|Immobilized-B State]]" in text
+            assert "cannot make that Guts Roll" in text
+            assert "[[skill:courage|Courage]]" in text
+            assert "not Wounds caused by E/M itself" in text
         en_page, es_page = case["sourcePages"]
         assert {
             (source["source_id"], source.get("page"))
@@ -945,7 +1017,16 @@ def test_ap_em_rounding_and_t2_critical_die_identification_reach_api(
         payload = json.loads(b"".join(response))
         rule = payload["rules"][0]
         assert rule["facts"]["clarifications"] == record["facts"]["clarifications"]
-        assert len(rule["fact_tokens"]["clarifications"]) == 1
+        assert len(rule["fact_tokens"]["clarifications"]) == expected_count
+        if slug == "em":
+            resolved = {
+                token["target"]
+                for tokens in rule["fact_tokens"]["clarifications"]
+                for token in tokens
+                if token["type"] == "reference"
+            }
+            assert {"state:isolated", "state:immobilized-b", "rule:guts-roll",
+                    "skill:courage", "skill:immunity"} <= resolved
         assert rule["facts"]["ammunitionResolution"] == record["facts"][
             "ammunitionResolution"
         ]
@@ -962,6 +1043,183 @@ def test_ap_em_rounding_and_t2_critical_die_identification_reach_api(
         assert ammunition is not None
         modifier = ammunition["facts"]["ammunitionResolution"]["defenseModifier"]
         assert modifier == {"operation": "halve", "attributes": attrs}
+        # The attacker?s weapon still selects which Attribute is saved; AP
+        # never changes BTS to ARM, and E/M uses BTS for both hit saves.
+        resolution = ammunition["facts"]["ammunitionResolution"]
+        assert resolution["criticalAdditionalSavingRolls"] == 1
+        if slug == "em":
+            assert resolution["rollsPerHit"] == 2
+            assert {
+                (state["stateId"], state["condition"])
+                for state in resolution["stateEffects"]
+            } == {
+                ("state:isolated", "failed-saving-roll"),
+                ("state:immobilized-b", "failed-saving-roll"),
+            }
+
+
+def test_exp_t2_reviewed_rolls_and_source_discrepancy_reach_api(tmp_path: Path) -> None:
+    """Retain EXP/T2 Critical distinctions and T2's N5.3 wording conflict."""
+    rules_db = _rules_database(tmp_path)
+    app = create_app(
+        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
+        rules_database_path=rules_db.path,
+    )
+    for slug in ("exp", "t2"):
+        record = rules_db.composed_record(f"ammunition:{slug}")
+        assert record is not None
+        if slug == "exp":
+            assert "All three are mandatory" in record["summary"]
+            assert "four total" in record["summary"]
+            assert "[[state:unconscious|Unconscious]]" in record["summary"]
+            assert "[[ammunition:ap|AP]]+EXP" in " ".join(
+                record["facts"]["clarifications"]
+            )
+            assert "[[skill:immunity|Immunity (ARM)]]" in " ".join(
+                record["facts"]["clarifications"]
+            )
+            assert record["facts"]["ammunitionResolution"] == {
+                "criticalAdditionalSavingRolls": 1,
+                "rollsPerHit": 3,
+            }
+            assert {(c["source_id"], c.get("page")) for c in record["citations"]} >= {
+                ("n5-core-v5.3-pdf", 65),
+                ("n5-core-v5.3-es-pdf", 65),
+            }
+        else:
+            assert "distinguish the two rolls" in record["summary"]
+            assert "Immunity (T2)" in " ".join(record["facts"]["clarifications"])
+            note = record["facts"]["sourceNotes"][0]
+            assert "English N5.3 PDF p. 67 specifies an ARM Roll" in note
+            assert "Spanish N5.3 PDF p. 67" in note
+            assert "Wiki T2 revision 2999" in note
+            assert "weapon’s printed Saving Roll Attribute" in note
+            assert record["facts"]["ammunitionResolution"]["woundsPerFailedSave"] == {
+                "hit": 2,
+                "criticalAdditionalRoll": 1,
+            }
+
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=f"/api/ammunition/{slug}", REQUEST_METHOD="GET")
+        statuses: list[str] = []
+        response = app(
+            environ,
+            lambda status, headers, exc_info=None, _statuses=statuses: _statuses.append(
+                status
+            ),
+        )
+        assert statuses == ["200 OK"]
+        published = json.loads(b"".join(response))["rules"][0]
+        assert published["summary"] == record["summary"]
+        assert published["facts"]["clarifications"] == record["facts"]["clarifications"]
+        if slug == "exp":
+            assert any(
+                token["target"] == "ammunition:ap"
+                for tokens in published["fact_tokens"]["clarifications"]
+                for token in tokens
+                if token["type"] == "reference"
+            )
+        else:
+            assert published["facts"]["sourceNotes"] == record["facts"]["sourceNotes"]
+
+
+def test_reviewed_para_shock_stun_conditions_reach_rules_and_api(
+    tmp_path: Path,
+) -> None:
+    """N5.3 source conditions stay distinct from unconditional graph relations."""
+    rules_db = _rules_database(tmp_path)
+    app = create_app(
+        Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
+        rules_database_path=rules_db.path,
+    )
+    pages = {
+        "para": (65, 66),
+        "shock": (65, 67),
+        "stun": (67, 63),
+    }
+    for slug, (en_page, es_page) in pages.items():
+        record = rules_db.composed_record(f"ammunition:{slug}")
+        assert record is not None
+        assert {
+            (c["source_id"], c.get("page")) for c in record["citations"]
+        } >= {
+            ("n5-core-v5.3-pdf", en_page),
+            ("n5-core-v5.3-es-pdf", es_page),
+        }
+        facts = record["facts"]
+        assert facts["ammunitionResolution"]["criticalAdditionalSavingRolls"] == 1
+        clarifications = " ".join(facts["clarifications"])
+        if slug == "para":
+            assert facts["ammunitionResolution"]["savingRoll"] == {
+                "attribute": "PH", "modifier": -6, "missingAttribute": "no-effect",
+            }
+            assert facts["ammunitionResolution"]["stateEffects"] == [{
+                "stateId": "state:immobilized-a", "condition": "failed-saving-roll",
+            }]
+            assert "no PH Attribute" in clarifications
+            assert "without inflicting a Wound" in clarifications
+            assert "PH 12 becomes PH 6" in clarifications
+            assert "[[skill:engineer|Engineer]]" in clarifications
+            expected_state = "state:immobilized-a"
+        elif slug == "shock":
+            assert facts["ammunitionResolution"]["stateEffects"] == [{
+                "stateId": "state:dead",
+                "condition": "failed-saving-roll",
+                "targetAttribute": {"name": "VITA", "equals": 1},
+                "application": "bypass-unconscious",
+            }]
+            assert "[[skill:dogged|Dogged]]" in clarifications
+            assert "[[skill:no-wound-incapacitation|No Wound Incapacitation]]" in clarifications
+            assert "[[skill:explode|Explode]] does not trigger" in clarifications
+            assert "Immunity (Shock)" in clarifications
+            expected_state = "state:dead"
+        else:
+            assert facts["ammunitionResolution"]["stateEffects"] == [{
+                "stateId": "state:stunned", "condition": "failed-saving-roll",
+            }]
+            assert facts["ammunitionResolution"]["gutsEffect"] == {
+                "condition": "failed-saving-roll",
+                "result": "automatic-failure",
+                "exception": "courage-or-equivalent",
+            }
+            assert "[[weapon:flash-pulse|Flash Pulse]]" in clarifications
+            assert "[[trait:non-lethal|Non-Lethal]]" in clarifications
+            assert "[[trait:state|State: Stunned]]" in clarifications
+            assert "The Saving Roll remains BTS" in clarifications
+            assert "Do not generalize" in clarifications
+            expected_state = "state:stunned"
+
+        assert ("causes-state", "outbound", expected_state) in {
+            (r["type"], r["direction"], r["record"]["id"])
+            for r in record["display_relations"]
+        }
+        environ: dict[str, Any] = {}
+        setup_testing_defaults(environ)
+        environ.update(PATH_INFO=f"/api/ammunition/{slug}", REQUEST_METHOD="GET")
+        statuses: list[str] = []
+        response = app(
+            environ,
+            lambda status, headers, exc_info=None, _statuses=statuses: _statuses.append(
+                status
+            ),
+        )
+        assert statuses == ["200 OK"]
+        published = json.loads(b"".join(response))["rules"][0]
+        assert published["summary"] == record["summary"]
+        assert published["facts"] == facts
+        assert len(published["fact_tokens"]["clarifications"]) == len(
+            facts["clarifications"]
+        )
+        linked = {
+            token["target"]
+            for tokens in published["fact_tokens"]["clarifications"]
+            for token in tokens
+            if token["type"] == "reference"
+        }
+        assert expected_state in linked
+        if slug == "stun":
+            assert {"weapon:flash-pulse", "trait:non-lethal", "skill:immunity"} <= linked
 
 
 def test_smoke_eclipse_opposition_and_msv_exception_reach_api(
@@ -1003,8 +1261,16 @@ def test_smoke_eclipse_opposition_and_msv_exception_reach_api(
         assert statuses == ["200 OK"]
         payload = json.loads(b"".join(response))
         rule = payload["rules"][0]
-        assert len(rule["facts"]["clarifications"]) == 3
-        assert len(rule["fact_tokens"]["clarifications"]) == 3
+        expected_clarifications = 4 if slug == "smoke" else 3
+        assert len(rule["facts"]["clarifications"]) == expected_clarifications
+        assert len(rule["fact_tokens"]["clarifications"]) == expected_clarifications
+        if slug == "smoke":
+            assert any(
+                token["target"] == "term:scenery-element"
+                for tokens in rule["fact_tokens"]["clarifications"]
+                for token in tokens
+                if token["type"] == "reference"
+            )
         assert any(
             token["target"] == "equipment:multispectral-visor"
             for tokens in rule["fact_tokens"]["clarifications"]
@@ -1024,6 +1290,36 @@ def test_smoke_eclipse_opposition_and_msv_exception_reach_api(
     assert "Once established" in eclipse_text
     assert "[[term:poor-visibility-zone|Poor Visibility]] MOD" in eclipse_text
     assert "[[trait:reflective|Reflective]]" in eclipse_text
+    # REA-012: presence is not enough; protect each opponent/ARO branch,
+    # the distinct MSV outcome, Critical/Dodge resolution and zone facts.
+    for fragment in (
+        "whose rolled Attack has LoF crossing",
+        "whose LoF does not cross the Template makes an unopposed Roll",
+        "win every applicable Face to Face Roll",
+        "A Critical has no additional effect",
+        "enemy [[skill:dodge|Dodge]] reaction",
+        "empty point is an unopposed Roll",
+        "remove the Template at the Effects step",
+    ):
+        assert fragment in smoke_text, fragment
+    for fragment in (
+        "Attack requiring a Roll whose LoF crosses",
+        "[[skill:dodge|Dodge]] inside the Template is also an unopposed Roll",
+        "can oppose a rolled Attack by an enemy using a "
+        "[[equipment:multispectral-visor|Multispectral Visor]]",
+        "[[trait:reflective|Reflective]] zone",
+        "blocks LoF even for Visors, regardless of Level",
+        "must win every applicable Face to Face Roll",
+        "[[term:poor-visibility-zone|Poor Visibility]] MOD",
+    ):
+        assert fragment in eclipse_text, fragment
+    for record, visor in ((smoke, "can-draw-lof"), (eclipse, "blocked")):
+        zone = record["facts"]["visibilityZone"]
+        assert zone == {
+            "visibility": "zero", "template": "circular", "height": "infinite",
+            "expires": "start-of-states-phase", "multispectralVisor": visor,
+        }
+        assert "ammunitionResolution" not in record["facts"]
 
 
 def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
@@ -1039,7 +1335,7 @@ def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
     assert (
         "separate from treating Ammunition as [[ammunition:normal|Normal]]" in effects
     )
-    assert "ordinary Saving Roll still happens" in effects
+    assert "neither protection removes the ordinary Saving Roll" in effects
     assert "Printed Example 2" not in effects
     assert "The printed [[weapon:flash-pulse|Flash Pulse]] example" not in effects
     assert "For the reviewed [[ammunition:ap|AP]]" not in effects
@@ -1077,7 +1373,7 @@ def test_immunity_arm_bts_trait_protection_and_printed_example_reach_api(
     payload = json.loads(b"".join(response))
     assert statuses == ["200 OK"]
     assert payload["rules"][0]["id"] == "skill:immunity"
-    assert "ordinary Saving Roll still happens" in " ".join(
+    assert "neither protection removes the ordinary Saving Roll" in " ".join(
         payload["rules"][0]["facts"]["effects"]
     )
     assert "Printed Example 2" in " ".join(
@@ -1122,13 +1418,14 @@ def test_flash_pulse_immunity_example_reaches_rules_and_weapon_api(
     assert {citation["source_version"] for citation in flash["citations"]} == {
         "5.3", "N5.3 / oldid 4083", "N5.3 / oldid 3643",
         "N5.2 / oldid 3677 (es)", "N5.3 / oldid 3987 (es)",
+        "N5.3 / oldid 3988 (es)",
     }
     assert "Saving Roll remains BTS, not ARM" in flash["summary"]
     assert "explicitly exempts these two Traits" in flash["summary"]
     assert "only if the BTS Saving Roll fails" in flash["summary"]
     assert "two PB/BTS Saving Rolls" in flash["facts"]["sourceNotes"][0]
     assert "Spanish N5.3 PDF Weapon Chart (p. 196) confirms one" in (
-        flash["facts"]["sourceNotes"][0]
+        flash["facts"]["sourceNotes"][1]
     )
     assert "Saving Roll stays BTS, not ARM" in " ".join(
         immunity["facts"]["clarifications"]
@@ -1247,8 +1544,14 @@ def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(
     reset = rules_db.composed_record("skill:reset")
     engaged = rules_db.composed_record("state:engaged")
     bangbomb = rules_db.composed_record("equipment:bangbomb")
+    isolated = rules_db.composed_record("state:isolated")
+    imm_b = rules_db.composed_record("state:immobilized-b")
+    targeted = rules_db.composed_record("state:targeted")
+    sixth_sense = rules_db.composed_record("skill:sixth-sense")
     assert dodge is not None and reset is not None
     assert engaged is not None and bangbomb is not None
+    assert isolated is not None and imm_b is not None
+    assert targeted is not None and sixth_sense is not None
 
     dodge_text = " ".join(dodge["facts"]["clarifications"])
     assert "only one -3 PH MOD" in dodge_text
@@ -1274,6 +1577,26 @@ def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(
     assert "no [[skill:dodge|Dodge]] movement" in (
         " ".join(bangbomb["facts"]["clarifications"])
     )
+    # Each State keeps its own WIP penalty; only qualifying Reset/Engineer
+    # cancels it. Sixth Sense retains the explicit IMM-B/Isolated exceptions.
+    assert "WIP -9" in " ".join(isolated["facts"]["effects"])
+    assert "-3 WIP MOD" in " ".join(imm_b["facts"]["effects"])
+    assert "-3 WIP MOD" in " ".join(targeted["facts"]["effects"])
+    for state in (isolated, imm_b, targeted):
+        assert "[[skill:reset]]" in " ".join(state["facts"]["effects"])
+        assert "[[skill:engineer]]" in " ".join(state["facts"]["effects"])
+    sixth_text = " ".join(sixth_sense["facts"]["effects"])
+    assert "[[skill:dodge]] and [[skill:reset]] ignore negative MODs except" in sixth_text
+    for ref in (
+        "[[state:immobilized-a|Immobilized-A]]",
+        "[[state:immobilized-b|Immobilized-B]]",
+        "[[state:isolated]]",
+    ):
+        assert ref in sixth_text
+    assert "different PH Success Values" in " ".join(bangbomb["facts"]["clarifications"])
+    assert "against the Combi Rifle but fails to evade an E/Marat Template" in (
+        " ".join(bangbomb["facts"]["clarifications"])
+    )
 
     for record, english_pages, spanish_pages in (
         (dodge, {79, 80, 160}, {80, 81, 164}),
@@ -1296,7 +1619,10 @@ def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(
         Path(__file__).resolve().parents[1] / "data/generated/infinity.db",
         rules_database_path=rules_db.path,
     )
-    for slug, target in (("dodge", "state:engaged"), ("reset", "skill:sixth-sense")):
+    for slug, target, count in (
+        ("dodge", "state:engaged", 4),
+        ("reset", "skill:sixth-sense", 3),
+    ):
         environ: dict[str, Any] = {}
         setup_testing_defaults(environ)
         environ.update(PATH_INFO=f"/api/skills/{slug}", REQUEST_METHOD="GET")
@@ -1308,8 +1634,8 @@ def test_dodge_reset_multi_effect_clarifications_reach_rules_and_api(
         assert statuses == ["200 OK"]
         payload = json.loads(b"".join(response))
         rule = next(r for r in payload["rules"] if r["id"] == f"skill:{slug}")
-        assert len(rule["facts"]["clarifications"]) == 3
-        assert len(rule["fact_tokens"]["clarifications"]) == 3
+        assert len(rule["facts"]["clarifications"]) == count
+        assert len(rule["fact_tokens"]["clarifications"]) == count
         assert any(
             token["target"] == target
             for paragraph in rule["fact_tokens"]["clarifications"]
@@ -1357,6 +1683,29 @@ def test_state_cancellation_clarifications_are_scoped_and_published(
     assert "[[state:impersonation-2|IMP-2]]" in " ".join(
         impersonation["facts"]["clarifications"]
     )
+
+    # Keep distinct revelation, cancellation and recovery routes visible.
+    cases = {
+        "state:camouflaged": ("only permitted AROs", "entire declared Order"),
+        "state:hidden-deployment": ("another Marker status", "recorded position"),
+        "state:holoecho": ("holographic duplicate disappears separately",
+                            "before measuring movement"),
+        "state:holomask": ("imitated Model with the real Model", "end of that Order"),
+        "state:impersonation-1": ("only to [[state:impersonation-2|IMP-2]]",
+                                   "against a disguised Marker"),
+        "state:impersonation-2": ("reveals the actual Model", "ordinary Range, Cover"),
+        "state:prone": ("[[skill:berserk|Berserk]]", "automatically canceled"),
+        "state:disconnected": ("Controller recovers", "passing a Coherency Check",
+                               "Autonomous instead"),
+        "state:retreat": ("army leaves the Retreat! situation", "Command Token"),
+        "state:suppressive-fire": ("[[rule:guts-roll|Guts Roll]]",
+                                     "joins a Fireteam"),
+    }
+    for identity, expected in cases.items():
+        rule = database.composed_record(identity)
+        assert rule is not None
+        details = " ".join(rule["facts"]["clarifications"])
+        assert all(fragment in details for fragment in expected), identity
 
     app = create_app(
         Path(__file__).resolve().parents[1] / "data/generated/infinity.db",

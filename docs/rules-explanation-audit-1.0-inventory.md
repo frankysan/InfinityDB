@@ -7,6 +7,11 @@ originally examining `859823f8d2899405a40cf126883d2adf5763db7c` and extended
 against `c5400ab1b950990fdacc509be91c110fe85431fb` on 2026-10-09.
 The inputs and record order are unchanged.
 It is not generated runtime data or a replacement interaction ledger.
+The D/S classifications and original finding titles are historical evidence,
+**not the current implementation status**. In particular, REA-008, REA-017,
+and REA-026 have subsequently been completed within their stated scopes;
+consult the [current backlog](TODO.md#rules-and-reference-completeness)
+and the main audit's follow-up notes before treating a finding as open.
 
 ## Coverage totals
 
@@ -61,33 +66,34 @@ It is not generated runtime data or a replacement interaction ledger.
 | [REA-015](rules-explanation-audit-1.0.md#rea-015---several-state-cards-lack-their-operative-cancellation-conditions) | High | P1 | Several State cards lack their operative cancellation conditions |
 | [REA-016](rules-explanation-audit-1.0.md#rea-016---stealth-omits-deployables-and-multi-trooper-reaction-reasoning) | High | P1 | Stealth omits Deployables and multi-Trooper reaction reasoning |
 | [REA-017](rules-explanation-audit-1.0.md#rea-017---peripheral-subtype-identities-do-not-explain-their-operation) | High | P1 | Peripheral subtype identities do not explain their operation |
-| [REA-018](rules-explanation-audit-1.0.md#rea-018---firewall-hacking-area-and-supportware-have-no-adequate-baseline-owner) | High | P1 | Firewall, Hacking Area, and Supportware have no adequate baseline owner |
-| [REA-019](rules-explanation-audit-1.0.md#rea-019---nfbs-label-does-not-explain-suppression-and-duration) | Medium | P1 | NFB's label does not explain suppression and duration |
-| [REA-020](rules-explanation-audit-1.0.md#rea-020---fireteam-basics-omit-action-ownership-and-integrity-exceptions) | High | P1 | Fireteam basics omit action ownership and integrity exceptions |
-| [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning) | High | P1 | Fireteam and Martial Arts bonuses need Special Dice reasoning |
-| [REA-022](rules-explanation-audit-1.0.md#rea-022---kit-recovery-and-disposable-spending-need-multi-roll-rules) | High | P1 | Kit recovery and Disposable spending need multi-roll rules |
-| [REA-023](rules-explanation-audit-1.0.md#rea-023---placement-cards-defer-essential-geometry-and-deployment-restrictions) | High | P1 | Placement cards defer essential geometry and deployment restrictions |
-| [REA-024](rules-explanation-audit-1.0.md#rea-024---bioweapon-needs-a-target-conditioned-explanation-alongside-the-chart) | Medium | P1 | BioWeapon needs a target-conditioned explanation alongside the chart |
-| [REA-025](rules-explanation-audit-1.0.md#rea-025---nem-is-absent-from-the-reviewed-composition-map) | High | P1 | N+E/M is absent from the reviewed composition map |
-| [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content) | Medium | P1 | Useful general mechanics remain research rather than linked reference content |
-| [REA-027](rules-explanation-audit-1.0.md#rea-027---flash-pulses-spanish-chart-disagrees-on-rolls-and-traits) | High | P1 | Flash Pulse's Spanish chart disagrees on rolls and Traits |
-| [REA-028](rules-explanation-audit-1.0.md#rea-028---kobras-two-issues-require-separate-source-decisions) | High | P1 | Kobra's two issues require separate source decisions |
+| [REA-018](rules-explanation-audit-1.0.md#rea-018---firewall-hacking-area-and-supportware-have-no-adequate-baseline-owner) | High | P1 resolved | Resolved (2026-10-14): existing canonical Hacking Area, Firewall and Supportware references verified against N5.3/FAQ and 18 responsive browser checks; source and program-specific exceptions remain separate |
+| [REA-019](rules-explanation-audit-1.0.md#rea-019---nfbs-label-does-not-explain-suppression-and-duration) | Medium | P1 resolved | Resolved (2026-10-14): same-Trooper NFB replacement, Cybermask/White Noise lifetimes and Label-to-Program navigation source-verified in 15 browser checks |
+| [REA-020](rules-explanation-audit-1.0.md#rea-020---fireteam-basics-omit-action-ownership-and-integrity-exceptions) | High | P1 resolved | Resolved (2026-10-14): Fireteam Leader-only action ownership, shared ARO, individual exit vs cancellation, States Phase rejoining and FT Master/Number 2/NCO exceptions source-checked and browser verified |
+| [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning) | High | P1 resolved | Resolved (2026-10-14): reviewed +1 SD allocation/discard and exceptions, linked Fireteam Level 2 bonus, verified 39 browser checks; Spanish Fireteam cap conflict remains REA-041 |
+| [REA-022](rules-explanation-audit-1.0.md#rea-022---kit-recovery-and-disposable-spending-need-multi-roll-rules) | High | P1 resolved | Resolved (2026-10-14): mixed-result MediKit/GizmoKit recovery and B versus SD Disposable examples source-cited, with Double Shot charge prerequisite |
+| [REA-023](rules-explanation-audit-1.0.md#rea-023---placement-cards-defer-essential-geometry-and-deployment-restrictions) | High | P1 resolved | Resolved (2026-10-14): placement path/contact, Minelayer exclusion, Perimeter geometry, lifecycle and item exceptions source-linked and browser verified; Armed Turret source conflicts remain REA-037/045 |
+| [REA-024](rules-explanation-audit-1.0.md#rea-024---bioweapon-needs-a-target-conditioned-explanation-alongside-the-chart) | Medium | P1 resolved | Resolved (2026-10-14): VITA/STR BioWeapon condition and separate DA/Shock effects linked; Viral Mine N/BTS/one-roll source retained; partial Immunity remains independent |
+| [REA-025](rules-explanation-audit-1.0.md#rea-025---nem-is-absent-from-the-reviewed-composition-map) | High | P1 | Resolved (2026-10-14): N+E/M has an exact-source component mapping and reviewed Property; general combination/Immunity evaluation still excluded |
+| [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics) | Medium | P1 | Useful general mechanics remain research rather than linked reference content |
+| [REA-027](rules-explanation-audit-1.0.md#rea-027---flash-pulses-spanish-chart-disagrees-on-rolls-and-traits) | High | P1 reviewed; external conflict open | Verified 2026-10-14: one-roll bilingual PDF/Army baseline; Spanish Wiki chart revisions 3987/3988 still two rolls without State; correction/erratum outstanding |
+| [REA-028](rules-explanation-audit-1.0.md#rea-028---kobras-two-issues-require-separate-source-decisions) | High | P1 reviewed; external conflict open | DA's two-roll rule confirmed, N5.3 chart one-roll mismatch and Anti-materiel omission preserved; Wiki revision 4021/4077/4082 edit sequence pinned; authoritative Trait ruling outstanding |
 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | Medium | P1 | The collections' exact Wiki archive is unavailable locally |
-| [REA-030](rules-explanation-audit-1.0.md#rea-030---faq-publication-and-scenario-applicability-remain-uncurated) | Medium | P1 | FAQ publication and scenario applicability remain uncurated |
+| [REA-030](rules-explanation-audit-1.0.md#rea-030---faq-publication-and-scenario-applicability-remain-uncurated) | Medium | P1 locally reviewed; core applicability unresolved | FAQ English already registered, Spanish v0.1 newly cited; general Sixth Sense/MSV1 and ITS-only Spotlight/Ancillary adjudicated; core scenario mechanics unchanged and full FAQ collection deferred |
 | [REA-031](rules-explanation-audit-1.0.md#rea-031---kobras-cc-attribute-link-points-to-the-weapon-trait) | Low | P2 | Kobra's CC Attribute link points to the Weapon Trait |
 | [REA-032](rules-explanation-audit-1.0.md#rea-032---profile-changing-and-assignable-families-lack-actionable-qualifiers) | Medium | P1 | Profile-changing and assignable families lack actionable qualifiers |
 | [REA-033](rules-explanation-audit-1.0.md#rea-033---reviewed-graph-status-cannot-stand-in-for-explanation-acceptance) | Medium | P1 | Reviewed graph status cannot stand in for explanation acceptance |
 | [REA-034](rules-explanation-audit-1.0.md#rea-034---the-printed-fireteam-level-3-example-includes-a-level-4-bonus) | Medium | P1 | The printed Fireteam Level 3 example includes a Level 4 bonus |
-| [REA-035](rules-explanation-audit-1.0.md#rea-035---impersonation-2s-unmodified-discover-wording-overstates-the-exception) | High | P0 | Impersonation-2's "unmodified" Discover wording overstates the exception |
-| [REA-036](rules-explanation-audit-1.0.md#rea-036---deployable-cover-names-a-cap-without-giving-its-value-or-conditions) | High | P1 | Deployable Cover names a cap without giving its value or conditions |
+| [REA-035](rules-explanation-audit-1.0.md#rea-035---impersonation-2s-unmodified-discover-wording-overstates-the-exception) | High | P0 resolved | Resolved (2026-10-14): IMP-2 modifiers, retry restriction, ordinary Discover range and Biometric exception explained and browser verified |
+| [REA-036](rules-explanation-audit-1.0.md#rea-036---deployable-cover-names-a-cap-without-giving-its-value-or-conditions) | High | P1 resolved | Resolved (2026-10-14): Vitroferro cap before PS, partial-cover conditions, non-stacking, S3, Disposable (2) and Perimeter are source-linked and browser verified |
 | [REA-037](rules-explanation-audit-1.0.md#rea-037---armed-turret-has-conflicting-silhouette-values-within-the-pdf) | Medium | P1 | Armed Turret has conflicting Silhouette values within the PDF |
 | [REA-038](rules-explanation-audit-1.0.md#rea-038---direct-doctorengineer-target-allegiance-is-not-established) | High | P0 source decision | Direct Doctor/Engineer target allegiance is not established |
 | [REA-039](rules-explanation-audit-1.0.md#rea-039---tinbot-omits-operational-eligibility-and-fireteam-sharing) | High | P1 | TinBot omits operational eligibility and Fireteam sharing |
 | [REA-040](rules-explanation-audit-1.0.md#rea-040---infinity-spec-ops-links-an-absent-specball-procedure) | High | P1 | Infinity Spec-Ops links an absent SpecBall procedure |
 | [REA-041](rules-explanation-audit-1.0.md#rea-041---spanish-fireteam-dice-reminder-conflicts-with-its-general-sd-rule) | High | P1 | Spanish Fireteam dice reminder conflicts with its general SD rule |
 | [REA-042](rules-explanation-audit-1.0.md#rea-042---dodge-arm3-has-incompatible-englishspanish-conditions) | High | P1 | Dodge (ARM+3) has incompatible English/Spanish conditions |
-| [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | High | P0 | Counterintelligence gives the relaxed limit to the wrong player |
-| [REA-044](rules-explanation-audit-1.0.md#rea-044---breaker-marksman-is-metadata-only-despite-its-current-official-profile) | High | P1 | Breaker Marksman is metadata-only despite its current official profile |
+| [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | High | P0 resolved | Resolved (2026-10-14): Counterintelligence protects the owning player from the opponent's first-Turn Strategic Use effects; corrected text and browser presentation verified at three widths |
+| [REA-044](rules-explanation-audit-1.0.md#rea-044---breaker-marksman-is-metadata-only-despite-its-current-official-profile) | High | P1 | Resolved (2026-10-14): Breaker Marksman published from reviewed metadata with numeric/slug lookup and source-cited profile, without widening the catalog to unused historical weapons |
+| [REA-045](rules-explanation-audit-1.0.md#rea-045---armed-turret-emitter-disagrees-with-standard-em-saving-rolls) | Medium | P1 | Armed Turret's imported E/Mitter mode has one BTS/2 save while both N5.3 charts and canonical E/M require two; conflict displayed, ruling unresolved |
 
 ## Audit-completion gate
 
@@ -329,10 +335,10 @@ being listed does not mean the individual record is factually wrong.
 | `skill:strategos` | C | D | 0 | - | S1 pp. 113 |
 | `skill:strategos-l1` | C | D | 1 | - | S1 pp. 113 |
 | `skill:strategos-l2` | C | D | 1 | - | S1 pp. 113 |
-| `skill:bs-attack` | C | D | 0 | [REA-005](rules-explanation-audit-1.0.md#rea-005---bs-weapon-wip-omits-explicit-prohibited-combinations), [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning), [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content) | S1 pp. 39-41, 75 |
+| `skill:bs-attack` | C | D | 0 | [REA-005](rules-explanation-audit-1.0.md#rea-005---bs-weapon-wip-omits-explicit-prohibited-combinations), [REA-021](rules-explanation-audit-1.0.md#rea-021---fireteam-and-martial-arts-bonuses-need-special-dice-reasoning), [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics) | S1 pp. 39-41, 75 |
 | `skill:bs-12` | C | S | 1 | - | n5-core-v5.3-pdf p. 40 |
 | `skill:bs-11` | C | S | 1 | - | n5-core-v5.3-pdf p. 40 |
-| `skill:cc-attack` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content) | S1 pp. 54, 95, 100, 103 (selected modifiers) |
+| `skill:cc-attack` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics) | S1 pp. 54, 95, 100, 103 (selected modifiers) |
 | `skill:cc-21` | C | S | 1 | - | n5-core-v5.3-pdf p. 45 |
 | `equipment:cube` | C | D | 1 | [REA-002](rules-explanation-audit-1.0.md#rea-002---doctor-omits-its-ordinary-recovery-gate-and-lethal-failure), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 121 |
 | `equipment:cube-2` | C | D | 4 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 73, 121 |
@@ -365,10 +371,10 @@ being listed does not mean the individual record is factually wrong.
 | `skill:cautious-movement` | C | D | 0 | - | S1 pp. 32, 112 |
 | `skill:alert` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 77 |
 | `skill:climb` | C | D | 0 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 32-33, 88 |
-| `skill:idle` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 p. 80: activation/ARO, invalid requirements become Idle; Disposable spending and Marker revelation |
+| `skill:idle` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 p. 80: activation/ARO, invalid requirements become Idle; Disposable spending and Marker revelation |
 | `skill:intuitive-attack` | C | D | 0 | [REA-003](rules-explanation-audit-1.0.md#rea-003---intuitive-attack-appears-to-require-a-second-attack-roll), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 49 |
 | `skill:jump` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 34, 113 |
-| `skill:move` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 28-31 |
+| `skill:move` | C | D | 0 | [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 28-31 |
 | `skill:look-out` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 81 |
 | `skill:place-deployable` | C | D | 0 | [REA-023](rules-explanation-audit-1.0.md#rea-023---placement-cards-defer-essential-geometry-and-deployment-restrictions), [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally), [REA-036](rules-explanation-audit-1.0.md#rea-036---deployable-cover-names-a-cap-without-giving-its-value-or-conditions) | S1 pp. 82-83 |
 | `skill:reload` | C | D | 1 | [REA-029](rules-explanation-audit-1.0.md#rea-029---the-collections-exact-wiki-archive-is-unavailable-locally) | S1 pp. 83, 120 |
@@ -453,7 +459,7 @@ being listed does not mean the individual record is factually wrong.
 | `rule:irregular-order` | C | D | 0 | - | S1 p. 11: own Order retained, same-group Regular Orders still usable |
 | `rule:special-lieutenant-order` | C | D | 0 | - | S1 p. 11: separate Lieutenant use and Open Information |
 | `rule:tactical-order` | C | D | 0 | - | S1 p. 11: own Order plus explicit advanced/Fireteam uses |
-| `rule:command-token-strategic-use` | C | D | 2 | [REA-026](rules-explanation-audit-1.0.md#rea-026---useful-general-mechanics-remain-research-rather-than-linked-reference-content), [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | S1 p. 128: first/second-player actors, timing, >10 Order threshold, two strategic-use modes |
+| `rule:command-token-strategic-use` | C | D | 2 | [REA-026](rules-explanation-audit-1.0.md#rea-026---complete-shared-general-rules-mechanics), [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | S1 p. 128: first/second-player actors, timing, >10 Order threshold, two strategic-use modes |
 | `skill:chain-of-command` | C | D | 2 | - | S1 p. 87: Lieutenant succession conditions and automatic priority |
 | `skill:counterintelligence` | C | D | 1 | [REA-043](rules-explanation-audit-1.0.md#rea-043---counterintelligence-gives-the-relaxed-limit-to-the-wrong-player) | S1 p. 90 and p. 128: enemy Order reduction versus user Command Token allowance |
 | `skill:inspiring-leadership` | C | D | 3 | - | S1 pp. 99 |

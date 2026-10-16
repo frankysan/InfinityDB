@@ -1,4 +1,5 @@
 import { getFireteamArmies, getFireteamChart } from "./api.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { fireteamsIncludeWildcards } from "./preferences.js";
 import { readShareState, writeShareState } from "./share-state.js";
@@ -18,6 +19,7 @@ const elements = {
   content: byId("fireteam-content"),
   reference: byId("fireteam-reference"),
   referenceContent: byId("fireteam-reference-content"),
+  faq: byId("fireteam-faq"),
   chartName: byId("fireteam-chart-name"),
   description: byId("fireteam-chart-description"),
   limits: byId("fireteam-chart-limits"),
@@ -415,6 +417,13 @@ function renderReference(reference) {
     cumulative,
   );
 
+  for (const [index, note] of (levelFacts.sourceNotes || []).entries()) {
+    const paragraph = document.createElement("p");
+    paragraph.className = "rules-source-note";
+    appendMaintainedText(paragraph, levels.fact_tokens?.sourceNotes?.[index], note);
+    fragment.append(paragraph);
+  }
+
   const terminology = generalFacts.terminology || [];
   if (terminology.length) {
     const terminologyHeading = document.createElement("h4");
@@ -495,6 +504,22 @@ async function loadChart(value) {
 
 async function initialize() {
   show(elements.loading);
+  Promise.all([
+    fetchReviewedFaqRulings("rule:fireteam-general", { signal: pageController.signal }),
+    fetchReviewedFaqRulings("rule:fireteam-level-bonuses", { signal: pageController.signal }),
+  ])
+    .then((payloads) => {
+      if (pageController.signal.aborted) return;
+      const rulings = new Map();
+      for (const payload of payloads) {
+        for (const ruling of payload.items || []) rulings.set(ruling.id, ruling);
+      }
+      const section = faqRulingsSection([...rulings.values()]);
+      if (section) elements.faq.replaceChildren(section);
+    })
+    .catch((error) => {
+      if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+    });
   try {
     const payload = await getFireteamArmies(pageController.signal);
     populateArmies(payload.items || []);

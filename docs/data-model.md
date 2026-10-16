@@ -68,6 +68,28 @@ Single Ammunition profiles do not receive a synthetic composition. Alternative
 (`/`), absent, or mismatched values remain source text; they are not guessed
 from punctuation. Saving Roll notation (`ARM/2`, `x2`, etc.) remains a distinct,
 unchanged source field and is never interpreted as Ammunition composition.
+For exact reviewed source ID/name pairs, Weapon profiles additionally expose
+`ammunition_effects`: ordered canonical `ammunition:*` IDs, names, current
+summaries, citations and routes, copied from `rules.db` at response time.
+The API resolves maintained inline references in these summaries to
+`summary_tokens` with navigable public references; the browser renders
+those tokens rather than exposing raw `[[...]]` source notation.
+The Weapon profile displays these in a collapsible **Ammunition effects
+(shared rules)** section, while its original PS, Burst, Saving Roll,
+Traits and modes remain untouched. The `ammunition_effects` projection
+is omitted for unreviewed/mismatched source ammunition; its existence
+establishes only reusable component coverage, **not** exception/interaction
+completeness. Component texts and citations are never authored in the mapping
+or inferred from notation. Combined components remain distinct, not
+a resolved attack result.
+The Weapon source-review audit has a separate maintained decision file,
+`data/curated/weapon-shared-effect-reviews.json`, for individually verified
+Weapon profiles whose shared components and published Traits already suffice.
+Those approvals are pinned to full Army profile SHA-256 fingerprints and the
+official chart page. They are not inferred from the mere presence of an
+ammunition link, and a changed profile reopens review. Unreviewed and
+mode-specific Weapon behavior remains in the triage; explicitly reviewed
+shared-only identities do not require fabricated standalone rule records.
 The first reviewed Ammunition effect pilot now lives on canonical `ammunition:*`
 records, not on Army mapping entries. The validated, non-executable
 `facts.ammunitionResolution` object can describe halving the applicable ARM/BTS
@@ -108,8 +130,19 @@ reference pages. Nine roll-bearing base Ammunition records now also carry
 `criticalAdditionalSavingRolls: 1`. This represents the single extra Saving
 Roll from a Critical, not a multiplicative roll count per combined component.
 Smoke and Eclipse retain only visibility-zone facts and no Saving Roll facts.
-For the four reviewed Combined Ammunition forms, the component mapping still
-publishes identities only: it does not add, multiply, or adjudicate those rolls.
+For the five reviewed Combined Ammunition forms (four AP-based plus
+`N+E/M`), the component mapping still publishes identities only: it does not
+add, multiply, or adjudicate those rolls. `N+E/M` is explicitly printed in the
+N5.3 Combined Ammunition example (p. 67) and mapped from exact Army source ID 5,
+not inferred from the `+` in its name. E/M CC Weapon retains two BTS/2 Saving
+Rolls per hit and no additional ARM Saving Roll; its standalone Property
+explains Normal's potential Wounds alongside E/M's conditional State effects.
+The imported Armed Turret E/Mitter mode remains a separate source profile
+listing one BTS/2 Saving Roll, and is not rewritten to match the generic E/M
+Ammunition facts. Both English and Spanish N5.3 charts give the standard
+E/Mitter two Saving Rolls; the conflict is confirmed and visibly noted in the
+curated Armed Turret reference (REA-045), not reclassified as an authorized
+special rule.
 The additional roll retains applicable constituent effects; T2's
 `woundsPerFailedSave.criticalAdditionalRoll` remains distinct from its regular
 hit effect. Combined Saving Rolls (including Plasma's ARM/BTS case) have a
@@ -128,6 +161,30 @@ annotation, not a roll evaluator, an Ammunition effect, or an inferred
 `ammunition_composition`. Other Weapon Saving Roll notations remain untouched.
 Full cross-source Combined Saving Roll coverage and immunity interactions remain
 open.
+
+**Weapon Properties (current):** InfinityDB maintains a separate, descriptive
+`weapon-property:*` vocabulary in `config/catalogs/weapon-properties.json`.
+It does not redefine Ammunition, Traits, source Army `properties` (Traits), or
+weapon-specific rules. Each entry has a player-readable explanation and an
+explicit list of canonical rule-record origins (with their role and domain),
+or an exact official source section when there is no standalone canonical
+rules record. Reviewed memberships pin Weapon source ID, exact source name,
+mode, Ammunition source ID/name, Saving Roll fields, and source Traits.
+The runtime projection only attaches a Property to a profile matching that
+whole signature; weapon names and punctuation are never parsed to grant
+mechanics. Properties are displayed on matching Weapon profiles and indexed
+as embedded Glossary/global-search concepts, without a separate top-level
+catalog or a new rule evaluator. Twelve reviewed definitions currently cover
+Plasma, Viral, Breaker, K1, MULTI, Monofilament, Silenced, the four
+AP-based combinations and the distinct `N+E/M` source combination.
+Standalone E/M remains canonical Ammunition, not a duplicate Weapon Property.
+Curated rules prose can link explicitly to
+`[[weapon-property:...]]`: the rules exporter validates each target against
+the maintained registry, and the runtime resolves it to a Glossary entry and
+summary preview without creating a second canonical rules record. Source
+profiles, Ammunition composition, Combined Saving Roll, and Traits remain
+independent. This maintained configuration is included in installed packages,
+following the existing runtime catalog-configuration pattern.
 
 A bounded Immunity cross-reference now publishes `skill:immunity`'s validated
 `facts.immunityInteraction` (N5.3 Wiki Immunity `oldid=3643`). It describes
@@ -328,6 +385,24 @@ Where a domain has a stable slug:
 Rules/reference semantic IDs (`skill:...`, `equipment:...`, etc.) remain distinct from public route
 slugs even when they correspond one-to-one.
 
+**Reviewed metadata-only Weapon publication:** The upstream `weapons` table
+describes usage-derived source catalog entries; `metadata_weapons` also contains
+official profiles with no current Unit use. Those unreferenced profiles are
+**not** published wholesale. Build-time policy in
+`config/catalogs/metadata-only-weapons.json` explicitly identifies approved
+source IDs, names, categories and complete profile signatures (Ammunition,
+modes, ranges, Traits, Saving Rolls). When present, a matching metadata-only
+profile receives an ordinary `application_catalog_items` identity and
+`application_catalog_sources` provenance, without creating a synthetic
+upstream `weapons` row or Unit use. A changed profile fails the build instead
+of silently adopting new rules. Absent profiles in older snapshots are skipped;
+source entries already present in the upstream `weapons` table are not
+duplicated. The first reviewed case is Breaker Marksman Rifle (source 225);
+its numeric and slug routes share one application identity, with zero Unit
+usage until an actual source relationship exists. A curated weapon rule records
+the printed profile's provenance and the different English update-notice label.
+Do not infer a Breaker Sniper Rifle from that notice.
+
 ## Availability and membership
 
 InfinityDB distinguishes several relationships that source data often places near each other:
@@ -388,6 +463,14 @@ Top-level source options that combine multiple loadouts remain source-context bu
 preserves their cost, miniature count, Order contribution, included loadouts, and source/Army
 context. Source-local option IDs are not canonical cross-Army identities unless separately reviewed.
 
+The paired raw database preserves normalized source fields that are not yet published
+through these bundles (for example, direct Unit-option Skills/Equipment/Weapons,
+and profile/group notes). The source-to-presentation audit keeps such fields
+classified as potential presentation gaps even when empty in the selected source
+snapshot, and separately reports **how many source values are actually populated**.
+Newly populated fields must be reviewed before a data-completeness claim; absence
+in one pinned snapshot does not justify permanently excluding their semantics.
+
 ### Selection and dependency constraints
 
 Reviewed source selectors and same-Unit profile/loadout dependencies are materialized only when their
@@ -430,6 +513,9 @@ application chart per supported Army/source context while preserving:
 Reinforcement parent limits remain separate through the application Army graph rather than being
 silently merged into a child chart. General Fireteam rules/Level bonuses live in curated rules data
 and are composed by the Fireteams application surface; they are not source Army chart rows.
+Fireteam Level curated facts allow an optional `sourceNotes` list for
+provenance and rules-publication conflicts. These notes are displayed as
+secondary text without affecting Level requirements or bonuses.
 
 ## Relationship model
 
@@ -465,6 +551,86 @@ A semantic record has a stable typed ID such as `skill:move`, `state:targeted`, 
 - historical/superseded collections remain source evidence but are excluded from normal current
   composition; and
 - applicability/review/source provenance remains explicit.
+
+### Dated FAQ/errata layer (authoring foundation, not yet published)
+
+FAQ rulings use independent `faq-ruling:*` semantic identities. The base
+Rule/Skill/State definition is not rewritten when a later FAQ clarifies it.
+The existing collection/definition boundary retains the source document's
+identity, authority, effective date, citations and history; individual
+rulings add a required validated `facts` contract (see
+`data/curated/README.md`): question, answer, affected `topicIds`,
+original publication identity/version/date/page, exact applicability by
+rules revision plus effective date and optional ITS season revision/scenarios,
+selected official citation with editorial selection reason, explicit
+conflicting citations and predecessor `supersedes` IDs.
+
+**Source precedence is applicability-first, not newest-first.** Core
+definitions remain authoritative baseline material. Only a ruling explicitly
+reviewed for the requested rules revision, effective date, and applicable
+season/scenario may be considered as an additional clarification; newer
+documents cannot retroactively or globally override unrelated source
+contexts. Cross-posted/carried-forward answers preserve one identity and
+original publication date, not duplicate FAQ entities. Disagreements are
+separate evidence with a reviewed source choice and explanation. An explicit
+supersession has effect only where applicability overlaps and the cited
+predecessor has been verified; it must not delete historical evidence.
+
+Currently `curated.py` validates this **authoring contract** for FAQ
+definitions, and the rules exporter validates FAQ links across collections:
+current canonical topic and scenario targets, retained historical FAQ
+predecessor identities, consistent cross-posted original provenance,
+acyclic supersession and overlapping revision/date/season/scenario scopes.
+Supersession is explicit and limited to potentially overlapping contexts;
+a later document date by itself still grants no precedence.
+
+The **read-model and explicit-context API foundation** now selects only
+reviewed, current FAQ identities matching topic ID, exact rules revision,
+date, optional season ID/revision and optional scenario. It requires that
+the chosen source, original publication and current collection already
+exist on the requested date. An active scoped successor suppresses an
+applicable predecessor only for the same topic; recency alone does not.
+The result retains independently cited answer/provenance/conflict evidence
+and matched applicability, separate from the unmodified base Rule/Skill.
+
+`RulesDatabase.faq_rulings_for_topic` and `GET /api/faq-rulings` provide
+that projection. The API requires `topic_id`, `rules_revision`, and
+`as_of`, with optional paired `season_id`/`season_revision` and
+`scenario_id`; it never defaults to the newest publication.
+
+Twenty-seven reviewed FAQ entries are now published from
+`data/curated/rules/n5-faq-v0.1.json`: eight first recorded in v0.1 and
+nineteen **carried forward from v0.0**. Each carried ruling retains original
+English v0.0 source/version/page separately from the currently selected
+English v0.1 page, and a corroborating Spanish v0.1 citation. The
+v0.0 record date 2025-10-15 is the associated official update anchor;
+the exact PDF publication day is not independently verified. All
+currently selected rulings require explicit N5.3 applicability, and
+the stable ruling ID is reused across the cited publications.
+The shared browser presentation now covers affected Equipment,
+Scenario, Skills, Traits, States, General Rules and Hacking Programs,
+with Fireteam FAQs appearing on the Fireteams page rather than a
+competing rule route. A single topic may have multiple applicable
+clarifications, and the same ruling may be discoverable from
+several referenced topics without cloning its identity.
+The N5.3 Basic Rules `rule:deployment-phase` is now a canonical
+General Rules identity, cited to N5.3 printed p. 15. The v0.0-origin
+FAQ about repositioning before Roll/measurement is attached to that
+general rule, not to a specific Deployment Skill, and remains a
+separate dated explanatory overlay. Existing Skill/Army data are unchanged.
+
+The Annihilation-only Ancillary ruling is intentionally a subset of the
+FAQ's general scenario-objective wording. The source label
+`2026-09-01` is the project-documented announcement-era anchor, not
+a separately established document publication date. The divergent
+Fireteam-type-after-member-loss examples in English and Spanish FAQ
+v0.1 remain pending rather than being silently reconciled.
+
+Historical collection replay, full ITS season-revision publication
+verification, remaining FAQ inventory coverage, and dynamic date/season
+selection in the browser remain future 1.0 work.
+The generic supplement mechanism must not auto-attach a ruling to
+a core topic by name or by a newer collection date.
 
 ### Domain ownership
 
@@ -512,7 +678,7 @@ passage fingerprints so changed wording reopens review.
 
 The maintained policy is documented in `data/curated/README.md`.
 
-## Planned scenario model (1.0)
+## Scenario model (implemented core and future extensions)
 
 ### Current scenario foundation
 
@@ -540,6 +706,14 @@ ending, and minimum-VP ending are shared. Domination retains its explicit 350-po
 Objective definitions use the same reference mechanism; geometry titles come from the including
 scenario as presentation metadata. Unsupported fields and mismatched component kinds fail closed.
 References are collection-local; cross-collection historical/season selection remains future work.
+The validated foundation accepts a Side with multiple Deployment Zone
+element references and different objective `sideIds` (needed by
+`Crossing Lines` and `Critical Intervention` respectively); both survive
+normal catalog detail projection. This does **not** mean current geometry
+v1 can render ITS-only radius/Safe Areas, or that the system models
+Classified Objective choices, `Double Bind`'s selectable objective sets, or
+multiple active season revisions. Those remain future opt-in features and
+cannot be inferred from core scenario records.
 
 Specialist Troops uses one shared Rule, `rule:specialist-troops:standard`, with
 `facts.specialists.anyOfSkills` as a JSON array of complete Skill IDs. Scenario inclusions author
@@ -637,9 +811,11 @@ Points. Geometry references must resolve in every applicable configuration. `nee
 marks unresolved source uncertainty; `reviewed-resolution` records a maintained interpretation after
 review. Only an objective-scoped `needs-verification` issue may acknowledge an otherwise-invalid
 overlap, while game-size, geometry, and reviewed-resolution notes cannot excuse one. Domination
-preserves the source-specific 6 SWC at 350 points from printed page 151, with a game-size
-`needs-verification` note because the value differs from Annihilation's 7 SWC and the usual progression
-but may be intentional. Printed pages 151–152 cite the mission rules.
+preserves the English N5.3 value of 6 SWC at 350 points from printed page 151,
+with a game-size `needs-verification` note because Spanish N5.3 printed page 155
+instead has 7 CAP/SWC for that same Domination row. This is an unresolved
+official cross-language conflict, not merely a possible progression exception.
+Printed English pages 151–152 cite the mission rules.
 
 Supplies uses the written placement consistently at every game size: printed page 153 places the
 outer boxes `8 inches` from the table edges. Re-review of the 300–400-point illustration on page 154
@@ -667,7 +843,29 @@ publications backed by `current` source collections. Historical revisions requir
 collection/revision pair. Unknown selections return no match, malformed or ambiguous selections fail
 explicitly, and no other season/revision is substituted. The player-facing `/scenarios` catalog and
 detail pages consume `ScenarioCatalog` through the JSON API, require an explicit Army Points selection,
-and render the selected maintained geometry through the deterministic SVG endpoint. Browser selection
+and render the selected maintained geometry through the deterministic SVG endpoint.
+
+**Explicit published-set selection:** `ScenarioCatalog.list_scenarios(collection=...,
+revision=...)` and `get_scenario(..., collection=..., revision=...)` filter current
+composed scenario publications by the exact stable scenario-set ID and revision. The public
+`GET /api/scenarios`, `GET /api/scenarios/:slug?army_points=...`, and
+`GET /api/scenarios/:slug/map.svg?army_points=...` endpoints accept the same optional
+`collection` and `revision` parameters **only as a pair**. Unknown pairs give an
+empty list or HTTP 404 for detail/map; malformed/partial/repeated selectors give HTTP
+400. Omitted selectors keep the legacy current-catalog behavior. This prevents an
+explicit ITS season request from silently returning N5 Core information. The API
+currently exposes only modeled **current** publications; the existing
+`RulesDatabase.resolve_scenario_publication` historical membership lookup is not
+yet a historical compositional detail/map API.
+
+**Current publication boundary:** The only shipped current scenario set remains
+`n5-core@5.3` (four fully curated scenarios). Source-confirmed Season 18 mission
+names, including Crossing Lines, Akial Interference and Area of Interest, are
+**not** yet published as selectable/renderable scenario definitions. For example
+`GET /api/scenarios?collection=its-18&revision=2026.09.01` currently returns
+`items: []` rather than substituting a Core mission. The selection API is
+the prerequisite for season-specific curation and user-visible season choices,
+not a claim that a Season 18 mission catalog or historical-season UI exists. Browser selection
 state uses the common versioned share-state token; legacy explicit `army_points` input remains readable.
 Element/feature vocabulary extensions and source-discrepancy resolution remain unfinished work in the
 [1.0 backlog](TODO.md#rules-and-reference-completeness).

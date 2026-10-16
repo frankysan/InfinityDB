@@ -3434,8 +3434,8 @@ def test_skill_catalog_uses_curated_declaration_categories(
     mixed = catalog.get_skill(278)
     assert mixed is not None
     assert mixed["categories"] == [
-        {"id": "short-skill", "name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 40},
-        {"id": "aro", "name": "ARO", "source": "N5 Core Rules v5.3", "page": 40},
+        {"id": "short-skill", "name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 39},
+        {"id": "aro", "name": "ARO", "source": "N5 Core Rules v5.3", "page": 39},
     ]
     bs_variants = {
         int(variant["skill_id"]): variant
@@ -3455,9 +3455,17 @@ def test_skill_catalog_uses_curated_declaration_categories(
     cc = catalog.get_skill(274)
     assert cc is not None
     assert cc["categories"] == [
-        {"id": "short-skill", "name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 45},
-        {"id": "aro", "name": "ARO", "source": "N5 Core Rules v5.3", "page": 45},
+        {"id": "short-skill", "name": "Short Skill", "source": "N5 Core Rules v5.3", "page": 51},
+        {"id": "aro", "name": "ARO", "source": "N5 Core Rules v5.3", "page": 51},
     ]
+    # The raw declaration projection must not expose an invented Morpho-scan ARO.
+    morpho_declarations = [
+        (row["type_id"], row["page"])
+        for row in RulesDatabase(rules_path).declaration_categories("skill")
+        if row["army_ref"] == "morpho-scan"
+    ]
+    assert morpho_declarations == [("short-skill", 103)]
+
     cc_variant = next(
         variant for variant in cc["variants"] if int(variant["skill_id"]) == 274
     )
@@ -3622,7 +3630,7 @@ def test_skill_catalog_rules_view_excludes_known_non_skills_and_adds_rules_only_
         {
             "id": "automatic",
             "name": "Automatic",
-            "source": "Infinity Wiki snapshot (English) v20260918-130233",
+            "source": "Infinity Wiki snapshot (English) v20260926-200832",
             "page": None,
         }
     ]

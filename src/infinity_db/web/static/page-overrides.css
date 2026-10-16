@@ -581,9 +581,32 @@ html:not([data-developer-mode="true"])
   }
 }
 
+/* Reviewed FAQ source discrepancies */
+.faq-source-discrepancy {
+  margin-top: 12px;
+  font-size: var(--font-size-sm);
+}
+
+.faq-source-discrepancy summary {
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.faq-source-discrepancy .detail-source {
+  margin: 8px 0 0;
+}
+
 /* Scenario browser */
 .scenario-catalog {
   width: min(1040px, 100%);
+}
+
+.scenario-collection-controls {
+  padding: 20px 24px 0;
+}
+
+.scenario-collection-field {
+  width: min(100%, 400px);
 }
 
 .scenario-grid {

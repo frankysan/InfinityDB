@@ -1,0 +1,519 @@
+{
+  "format": "InfinityDB Weapon shared-effects source reviews",
+  "version": 1,
+  "sourceId": "n5-core-v5.3-pdf",
+  "reviews": [
+    {
+      "slug": "combi-rifle",
+      "name": "Combi Rifle",
+      "chartPage": 183,
+      "profileSha256": "dd38d8a0f0d0b6224dba5323a5632c551530b91329a7299467d887e040702b16",
+      "reviewedOn": "2026-10-14",
+      "reason": "Normal Ammunition, one ARM Saving Roll and Suppressive Fire have canonical links; the source range and Burst are already published."
+    },
+    {
+      "slug": "rifle",
+      "name": "Rifle",
+      "chartPage": 183,
+      "profileSha256": "8f2bec059734ea434c273232bb94fcbab3237c7cabb8d29cc3551578f3b05be2",
+      "reviewedOn": "2026-10-14",
+      "reason": "Normal Ammunition, one ARM Saving Roll and Suppressive Fire have canonical links. Its range bands differ from Combi Rifle and remain in the Army profile."
+    },
+    {
+      "slug": "adhesive-launcher-rifle",
+      "name": "Adhesive Launcher Rifle",
+      "chartPage": 183,
+      "profileSha256": "88c27523b7b7c54597263c100142d7ec4a2418a5126125226200a1f1ede8e7eb",
+      "reviewedOn": "2026-10-14",
+      "reason": "PARA Ammunition, PH-6, Non-Lethal and Immobilized-A mechanics are canonical; the printed PS dash, B2 and range bands remain source data."
+    },
+    {
+      "slug": "breaker-combi-rifle",
+      "name": "Breaker Combi Rifle",
+      "chartPage": 183,
+      "profileSha256": "f7ae10a1966d4bcc869295b4fbf99c02f0f87368afd52ab3c8a9ef154339fef0",
+      "reviewedOn": "2026-10-14",
+      "reason": "AP against BTS/2 is defined by shared AP plus the printed Saving Roll Attribute; Suppressive Fire and Combi range are linked."
+    },
+    {
+      "slug": "ap-rifle",
+      "name": "AP Rifle",
+      "chartPage": 183,
+      "profileSha256": "b1273e8df4ddb69659ccf115491bcfe6cf8874661de1202ad921b58082d199e1",
+      "reviewedOn": "2026-10-14",
+      "reason": "AP against ARM/2 uses the same canonical AP effect as other AP Weapons; Rifle range and Suppressive Fire are source profile details."
+    },
+    {
+      "slug": "t2-rifle",
+      "name": "T2 Rifle",
+      "chartPage": 183,
+      "profileSha256": "bac04e06bfbec4edc6942829483297e4ee8381a8aab802fce2baf2d85ef4d18a",
+      "reviewedOn": "2026-10-14",
+      "reason": "T2 Wound and Critical distinctions use the existing canonical T2 rule; Anti-materiel, Suppressive Fire and source range remain independently linked."
+    },
+    {
+      "slug": "boarding-shotgun",
+      "name": "Boarding Shotgun",
+      "chartPage": 184,
+      "profileSha256": "eef991899b20fb2671719fbe8771380b6fd6c18514d984a51763dd0b252d5c53",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed single-mode PS 6/B2 profile uses AP/ARM/2 with one Saving Roll. Canonical AP supplies the halving effect; no Direct Template or other Shotgun-specific Trait is listed in the N5.3 chart."
+    },
+    {
+      "slug": "light-shotgun",
+      "name": "Light Shotgun",
+      "chartPage": 184,
+      "profileSha256": "95a8d262016c865e60499217a53330d0c596e90b166269ac877286ef31dc23a2",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed single-mode PS 7/B2 profile uses Normal Ammunition, ARM and one Saving Roll. The source lists no Traits or Direct Template; range bands and damage remain in the Army profile."
+    },
+    {
+      "slug": "vulkan-shotgun",
+      "name": "Vulkan Shotgun",
+      "chartPage": 184,
+      "profileSha256": "ca8caecd0e6e05c7cc8cbe7a097ea4315f03f3d28c3d959a75fae05a890aba2d",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed single-mode PS 6/B2 profile uses AP/ARM/2 with one Saving Roll and Continuous Damage. The Army source spells the Trait Continous Damage, but its exact reviewed alias resolves to the canonical Continuous Damage reference. This does not imply a Direct Template."
+    },
+    {
+      "slug": "heavy-shotgun",
+      "name": "Heavy Shotgun",
+      "chartPage": 184,
+      "profileSha256": "5e40e5a8c7f70a7efa18e737a9a83c99822d556301964a65c0043d92b927424f",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed single-mode PS 5/B2 profile uses AP/ARM/2 with one Saving Roll. Compared with Boarding Shotgun, its PS differs; no Direct Template or extra Trait is printed."
+    },
+    {
+      "slug": "t2-boarding-shotgun",
+      "name": "T2 Boarding Shotgun",
+      "chartPage": 184,
+      "profileSha256": "1f605ced587d2a08426055f7be1a0fbe3167b8bc74e4081869ffc041e3d4c862",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed single-mode PS 6/B2 profile uses T2/ARM with one Saving Roll and Anti-materiel. Canonical T2 and the linked Trait supply the effects; the printed Shotgun has no Direct Template."
+    },
+    {
+      "slug": "submachine-gun",
+      "name": "Submachine Gun",
+      "chartPage": 185,
+      "profileSha256": "f40bb984769aceb2cb2fccb5676dc578f6d894d5ff1eb2ff6a9339cca96197dc",
+      "reviewedOn": "2026-10-14",
+      "reason": "Printed N5.3 p. 185 single profile with N Ammunition, ARM, one Saving Roll, PS 7, Burst 3, Suppressive Fire, and the source range bands. Canonical Normal Ammunition and the linked Suppressive Fire Trait cover its effects; no independent profile exception or standalone rule is needed."
+    },
+    {
+      "slug": "ap-submachine-gun",
+      "name": "AP Submachine Gun",
+      "chartPage": 185,
+      "profileSha256": "57a7b11f51d4b33c1421a174d636ba7ccb63ba2b2115a17255f26ebdd1d3845b",
+      "reviewedOn": "2026-10-14",
+      "reason": "Printed N5.3 p. 185 single profile with AP Ammunition, ARM/2, one Saving Roll, PS 7, Burst 3, Suppressive Fire, and the same range bands as the standard Submachine Gun. The reviewed AP and Suppressive Fire references cover its rules; the ARM/2 Saving Roll remains a source profile fact, not a separate ammunition mechanic."
+    },
+    {
+      "slug": "e-marat",
+      "name": "E/Marat",
+      "chartPage": 186,
+      "profileSha256": "1228ce588fc71e330f33f57ff1a5bc871a37d265e94496284d9d8c96c06507c4",
+      "reviewedOn": "2026-10-14",
+      "reason": "The source chart lists E/M with two BTS/2 Saving Rolls, B1, PS 7, a Large Teardrop Direct Template, Intuitive Attack, and Non-Lethal. Its exact E/M and Trait references cover applicable States and the template without a unique effect or a separate firing mode."
+    },
+    {
+      "slug": "mk12",
+      "name": "Mk12",
+      "chartPage": 187,
+      "profileSha256": "f1d20ed3452b0d90bd9ab166520a21941c12113598e42fc2b648648631f65c51",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed PS 5/B3 Normal Ammunition and ARM/one-Saving-Roll profile has Suppressive Fire and distinct range bands. Canonical Normal Ammunition and the linked Trait suffice; no special weapon effect is listed."
+    },
+    {
+      "slug": "zapper",
+      "name": "Zapper",
+      "chartPage": 188,
+      "profileSha256": "8d2bf487fdcf83b9b99a2922e0bd892ac8977e112861396edba38e1d2e7b327a",
+      "reviewedOn": "2026-10-14",
+      "reason": "The source lists E/M with two BTS/2 Saving Rolls, B1, PS 7, a Small Teardrop Direct Template, Intuitive Attack, and Non-Lethal. It shares E/Marat rules but uses a different template size, already preserved in its source Traits."
+    },
+    {
+      "slug": "contender",
+      "name": "Contender",
+      "chartPage": 186,
+      "profileSha256": "e5c24208755c40c731a16a9a58b40561b250e317cd5d439a0cc2de35dabf6c36",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed PS 7/B2 T2 Ammunition, ARM/one-Saving-Roll profile includes Anti-materiel and its own range bands. Canonical T2 and the separate Trait already explain their effects."
+    },
+    {
+      "slug": "crazykoala",
+      "name": "Crazykoala",
+      "chartPage": 186,
+      "profileSha256": "c5a45f10f81614f43ab38de81af145f850ca677b114b33a4180c6c1c3e2f2d0a",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed profile gives ARM=0/BTS=0/STR=1/S=1, Shock, PS 5/B1 and one ARM Saving Roll, Disposable (2), Boost, Perimeter and Deployable. Boost owns triggering and movement/contact/detonation; Perimeter owns placement and Shock owns damage. Do not inherit WildParrot or Mines rules."
+    },
+    {
+      "slug": "madtraps",
+      "name": "Madtraps",
+      "chartPage": 187,
+      "profileSha256": "0d8f39f182b84426bca01ce49f89f5a39af2cacb40f8f02234682190c7889f39",
+      "reviewedOn": "2026-10-14",
+      "reason": "The printed ARM=0/BTS=0/STR=1/S=1 profile uses PARA, PH-6, one Saving Roll, PS dash/B1, Disposable (2), Boost, Non-Lethal, Perimeter and Deployable. Boost owns movement/contact/detonation; PARA and Non-Lethal own the target outcome. Do not inherit WildParrot or Mines rules."
+    },
+    {
+      "slug": "heavy-machine-gun",
+      "name": "Heavy Machine Gun",
+      "chartPage": 179,
+      "profileSha256": "7d48f0d1f5fd5c37f056299448083574b97d3b71121ace5ecf4ac0c4d849a827",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 179 prints Normal Ammunition, ARM, one Saving Roll, PS 5, Burst 4, Suppressive Fire and HMG range bands. The canonical Normal Ammunition and Suppressive Fire references cover its effects; no additional Weapon-specific mechanics are given."
+    },
+    {
+      "slug": "ap-heavy-machine-gun",
+      "name": "AP Heavy Machine Gun",
+      "chartPage": 179,
+      "profileSha256": "49014866f780d1e5bf698215d70972b887b90a7360dc7ebb7ecf774af9dd8fcf",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 179 prints AP Ammunition, ARM/2, one Saving Roll, PS 5, Burst 4, Suppressive Fire and identical range bands to the standard Heavy Machine Gun. AP and Suppressive Fire are explained by canonical references; the ARM/2 attribute is preserved as a profile fact."
+    },
+    {
+      "slug": "panzerfaust",
+      "name": "Panzerfaust",
+      "chartPage": 178,
+      "profileSha256": "70be7ba9e6bad2f7b0b9600af61c1ca1d032e5bffd27f158cdb6d8352ce48baa",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 chart p. 178 specifies PS 6/B1 with AP+EXP and three ARM/2 Saving Rolls per hit, Anti-materiel and Disposable (2). The two exact canonical ammunition components, Anti-materiel and shared Disposable (X) usage/charge rules already cover the profile. Do not add a separate Normal ARM roll or multiply total rolls across components."
+    },
+    {
+      "slug": "blitzen",
+      "name": "Blitzen",
+      "chartPage": 178,
+      "profileSha256": "993479b8c5ff79cc728be8b02b5c1f7d67bf71e81490585492ecc4ee615d236b",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 chart p. 178 specifies E/M, two BTS/2 Saving Rolls, PS 6/B1, Disposable (2), Non-Lethal and [**]. The [**] footnote directs to Ammunition, already linked to canonical E/M; it is not an additional Weapon mechanic. The Disposable and Non-Lethal Traits remain separately linked."
+    },
+    {
+      "slug": "akrylat-kanone",
+      "name": "Akrylat-Kanone",
+      "chartPage": 178,
+      "profileSha256": "3ee5fd4e07f5ddc138393701341c59ad0ea80365cd30e754af8e9af44ea54ce1",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 chart p. 178 specifies PARA, PH-6, one Saving Roll, PS dash/B1, Disposable (2), State: Immobilized-A and Non-Lethal. The canonical PARA effect links Immobilized-A and the conditional no-PH exception, while the printed State marker and Disposable/Non-Lethal Trait references are preserved. No additional Weapon-specific outcome is printed."
+    },
+    {
+      "slug": "spitfire",
+      "name": "Spitfire",
+      "chartPage": 185,
+      "profileSha256": "b2c26ed0177457a33603877920fb46a5f2f0f1817fd3ab8caec6fe23a9f8eb20",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 185 prints Normal Ammunition, ARM with one Saving Roll, PS 6, Burst 4, Suppressive Fire and Spitfire range bands. The source-listed traits and canonical Normal ammunition cover its effects; it requires no independent Weapon summary."
+    },
+    {
+      "slug": "ap-spitfire",
+      "name": "AP Spitfire",
+      "chartPage": 185,
+      "profileSha256": "ee89d7a04e8ca5b09325d3951373e9ebd52a852c793e11f5c5e99c6dc5cb82d1",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 185 prints AP Ammunition, ARM/2 with one Saving Roll, PS 6, Burst 4, Suppressive Fire and ranges identical to the standard Spitfire. Shared AP and Suppressive Fire definitions supply the mechanics; no other Weapon-specific exception is printed."
+    },
+    {
+      "slug": "smoke-grenades",
+      "name": "Smoke Grenades",
+      "chartPage": 178,
+      "profileSha256": "fae2678a787bfbe1b94447f221a4244ea74384a64625c888a67247fd32975dcd",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 p. 178: Smoke Ammunition, no PS or Saving Roll, B1, short range MOD 0 and -3 at medium range; Speculative Attack, BS Weapon (PH), circular Impact Template, Non-lethal, Targetless, and [**] Ammunition footnote. The canonical Smoke visibility-zone rule, not an ARM/BTS attack, owns the zero-visibility placement and opposed-roll conditions. The Trait links own PH-based attacks, Speculative Attack, Targetless and Template placement."
+    },
+    {
+      "slug": "grenades",
+      "name": "Grenades",
+      "chartPage": 178,
+      "profileSha256": "1fcf0947de69269028595ee368416ff91720b9fc946be2bb3d89c011d7165bf0",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 p. 178: Normal Ammunition, PS 7/B1, one ARM Saving Roll, +3 short-range MOD; Speculative Attack, BS Weapon (PH), circular Impact Template, without Non-lethal or Targetless. The canonical Normal Ammunition and individually linked Traits supply all published mechanics."
+    },
+    {
+      "slug": "e-m-grenades",
+      "name": "E/M Grenades",
+      "chartPage": 178,
+      "profileSha256": "648913a03be192dae48df92d7070d96c750ecc57f37f1d7348a494ed52cf5374",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 p. 178: E/M Ammunition, PS 7/B1, two BTS/2 Saving Rolls, +3 short-range MOD; Speculative Attack, BS Weapon (PH), circular Impact Template, Non-lethal and [**] Ammunition footnote. E/M target effects and non-Wound State outcomes are covered by canonical E/M and Non-lethal references; [**] does not create an extra attack effect."
+    },
+    {
+      "slug": "eclipse-grenades",
+      "name": "Eclipse Grenades",
+      "chartPage": 178,
+      "profileSha256": "c4c86e1c342568df0cd0132ca042f5bb908c412ea550f052550c0ea3657c53d9",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 p. 178: Eclipse Ammunition, no PS or Saving Roll, B1, short-range MOD 0; Speculative Attack, BS Weapon (PH), circular Impact Template, Non-lethal, Reflective, Targetless and [**] Ammunition footnote. Canonical Eclipse visibility-zone rules explicitly handle Reflective blocking of MSV, separate from Smoke; the source Traits and ranges are preserved without a new grenade-specific rule."
+    },
+    {
+      "slug": "sniper-rifle",
+      "name": "Sniper Rifle",
+      "chartPage": 185,
+      "profileSha256": "12753c8b51a86e21957c0f05c8695fa45095633ca3390238622da70b8401631b",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 185: Shock Ammunition, PS 5, Burst 2 and one ARM Saving Roll, with no additional Traits. The published long-range MODs and the canonical Shock Ammunition rule already describe this single-mode profile; do not substitute Normal Ammunition."
+    },
+    {
+      "slug": "ap-sniper-rifle",
+      "name": "AP Sniper Rifle",
+      "chartPage": 185,
+      "profileSha256": "9172b24ecd77006ac9068dc6a3071b86585753d0168d1f0ea7c4fd6da8bce75e",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 185: AP Ammunition, PS 5, Burst 2 and one ARM/2 Saving Roll without additional Traits. Shared AP covers the halving effect and the distinct Sniper Rifle ranges remain in the original profile."
+    },
+    {
+      "slug": "t2-sniper-rifle",
+      "name": "T2 Sniper Rifle",
+      "chartPage": 185,
+      "profileSha256": "3c8ef707ac029b1debad4ac007d3d4311e2db0a1e5e06370fb282fd37cac2f6d",
+      "reviewedOn": "2026-10-14",
+      "reason": "N5.3 Weapon Chart p. 185: T2 Ammunition, PS 5, Burst 2, one ARM Saving Roll and Anti-materiel. The canonical T2 and Anti-materiel definitions cover those effects; no additional firing mode or Sniper Rifle-specific exception is printed."
+    },
+    {
+      "slug": "breaker-rifle",
+      "name": "Breaker Rifle",
+      "chartPage": 183,
+      "profileSha256": "c98aeaf25ba52dfd3ee50a90fdd8f6a37647a005a87a2da0dad76eb19458ce81",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 183: PS 7/B3 AP, one BTS/2 Saving Roll, Suppressive Fire and Rifle range bands. The Breaker Weapon Property and canonical AP and Suppressive Fire rules fully describe BTS halving and the source Traits. Do not substitute ARM or duplicate the rules."
+    },
+    {
+      "slug": "viral-combi-rifle",
+      "name": "Viral Combi Rifle",
+      "chartPage": 183,
+      "profileSha256": "0fbbe7f104457855b5fc4e55d7917383dc9f5fa102c9e1f292e2c275bcaf247a",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 183: PS 7/B3, printed N/BTS/one roll, BioWeapon (DA+Shock), Suppressive Fire and Combi ranges. Canonical Normal, BioWeapon and the Viral Weapon Property cover target-dependent VITA/STR results. Do not introduce separate Viral Ammunition or overwrite the printed one-roll profile."
+    },
+    {
+      "slug": "viral-rifle",
+      "name": "Viral Rifle",
+      "chartPage": 183,
+      "profileSha256": "8f5ed77d42e826fb24ba0133486f4b8e2db1d2dfed6ef52f4840eec4838e80a6",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 183: PS 7/B3, printed N/BTS/one roll, BioWeapon (DA+Shock), Suppressive Fire and distinct Rifle ranges. Canonical Normal, BioWeapon and Viral Weapon Property explain VITA/STR interaction, without another standalone Rifle mechanic or source-profile correction."
+    },
+    {
+      "slug": "viral-pistol",
+      "name": "Viral Pistol",
+      "chartPage": 182,
+      "profileSha256": "c559a30e01e9564affb9731f0aa0948e0b7d6919911dccb60d150da0b290a2ec",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 182: PS 8/B2, printed N/BTS/one roll, BioWeapon (DA+Shock) and Pistol range bands; no Suppressive Fire. The published Viral Weapon Property and BioWeapon already explain conditional effects and derived rolls while retaining source Saving Rolls."
+    },
+    {
+      "slug": "viral-tactical-bow",
+      "name": "Viral Tactical Bow",
+      "chartPage": 176,
+      "profileSha256": "c2d2dd1292652939238a63ce236eba66dae5e3b4cac308cdf56ee70077dad66f",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 176: PS 8/B1, printed N/BTS/one roll, BioWeapon (DA+Shock), Silent (-6) and Bow range bands; no Suppressive Fire. Published Viral, BioWeapon and Silent references suffice without a new standalone rule."
+    },
+    {
+      "slug": "red-fury",
+      "name": "Red Fury",
+      "chartPage": 183,
+      "profileSha256": "dcf2cb47c279e6a4272ad92c5ed3e09e00d35cd54d95483fa285af02dc0c44cb",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 183 and archived EN/ES Wiki agree with imported Army: PS 7/B4, Shock Ammunition, one ARM Saving Roll, Suppressive Fire and Red Fury range bands. Canonical Shock and Suppressive Fire rules cover the profile; no extra Red Fury mechanic is published. Keep Shock distinct from the AP and MULTI Red Fury variants."
+    },
+    {
+      "slug": "ap-red-fury",
+      "name": "AP Red Fury",
+      "chartPage": 183,
+      "profileSha256": "63915a3e6a9c1207f53ea1ebe0379d7c5625e85616df62a590aafde5bc794c4d",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 183 and archived EN/ES Wiki agree with imported Army: PS 7/B4, AP Ammunition, one ARM/2 Saving Roll, Suppressive Fire and the same ranges as standard Red Fury. Canonical AP and Suppressive Fire explain the effects without a duplicated Weapon definition. Never inherit the standard Red Fury's Shock Ammunition."
+    },
+    {
+      "slug": "thunderbolt",
+      "name": "Thunderbolt",
+      "chartPage": 186,
+      "profileSha256": "34da8f3837b7ccbde536c65ab5d7a2ea43a09b98bc5f526a6d5af86f9ab920a6",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 186 and archived EN/ES Wiki agree with imported Army: PS 6/B2, Normal Ammunition, one ARM Saving Roll, no Traits, and the printed -3/0/+3/0 Thunderbolt range bands. Canonical Normal Ammunition and source profile cover this Weapon. AP Thunderbolt remains a separate pending source review because both captured Wiki languages show N/ARM/2 while official N5.3 and Army list AP/ARM/2."
+    },
+    {
+      "slug": "tactical-bow",
+      "name": "Tactical Bow",
+      "chartPage": 176,
+      "profileSha256": "303cd9431c44bd494a0cdb165894767edc64ae62e71290f1060cbed242a1e61b",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 176 and EN Wiki Weapon Chart agree with Army: PS 8/B1, DA Ammunition, two ARM Saving Rolls, Anti-materiel and Silent (-6), short Bow range bands. Canonical DA, Anti-materiel and Silent rules explain the effects; unlike Viral Tactical Bow this variant does not use BioWeapon or BTS."
+    },
+    {
+      "slug": "t2-cc-weapon",
+      "name": "T2 CC Weapon",
+      "chartPage": 177,
+      "profileSha256": "16c0caead040c1d9def718043d6ec6a3a8c4723e43997219ef4996866fa6aa46",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 Weapon Chart p. 177 and EN/ES Wiki agree: CC Weapon PS 8/B1, T2 Ammunition, one printed ARM Saving Roll, Anti-materiel and CC; no ranged modifiers. Canonical T2 and CC/Anti-materiel references explain effects, with T2 Wound result distinct from printed roll count."
+    },
+    {
+      "slug": "ohotnik",
+      "name": "Ohotnik",
+      "chartPage": 187,
+      "profileSha256": "0d29c058166a8282ea7afe0a4e766398c70a561974b05c5291f4be63011632b6",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 187, EN/ES Wiki and Army agree: Ohotnik PS 6/B2, T2 Ammunition, one printed ARM Saving Roll and Anti-materiel. Seven source range bands match; canonical T2 and Anti-materiel already explain effects. No unique firing mode or independent Weapon rule is printed."
+    },
+    {
+      "slug": "ap-da-cc-weapon",
+      "name": "AP + DA CC Weapon",
+      "chartPage": 177,
+      "profileSha256": "88df75c8d2f37c67585d6843bf264cbca599b575ddf6ea074ec8d5cd6660b2aa",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 177 and EN/ES Wiki agree with Army: PS 8/B1, AP+DA, ARM/2, two printed Saving Rolls, Anti-materiel and CC. Canonical AP and DA Ammunition plus the existing AP+DA Weapon Property explain combined halving and two rolls without duplicating effects or stacking separate attack modes."
+    },
+    {
+      "slug": "ap-shock-cc-weapon",
+      "name": "AP + Shock CC Weapon",
+      "chartPage": 177,
+      "profileSha256": "5ab2b45f50448190ad9e1ff2de8e44a776274c7bcacc6286049ecce0b15aa967",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 p. 177 and EN/ES Wiki agree with Army: PS 8/B1, AP+Shock, ARM/2, one Saving Roll and CC, without Anti-materiel. Canonical AP and Shock Ammunition and the AP+Shock Weapon Property cover the combined effect, with no DA-style second save."
+    },
+    {
+      "slug": "e-m-carbine",
+      "name": "E/M Carbine",
+      "chartPage": 176,
+      "profileSha256": "eea2b19d24fbdc7479c442e465b278c3375fe514bdb39c5314caf7ff9e2802d5",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 176 and captured English/Spanish Wiki charts agree with the Army source: PS 7, B2, E/M Ammunition, two BTS/2 Saving Rolls, Non-Lethal, and the bracketed Ammunition note [**]. Canonical E/M Ammunition and Non-Lethal Trait already describe its effects; the note is source notation rather than a second attack mode."
+    },
+    {
+      "slug": "ap-t2-cc-weapon",
+      "name": "AP + T2 CC Weapon",
+      "chartPage": 177,
+      "profileSha256": "ba533c7378242b0c7006679ebcfee4ce89c2f819ff6bba9c91dc10bc4f1aa123",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 chart p. 177, Army and English/Spanish Wiki agree: PS 8, B1, AP+T2, one printed ARM/2 Saving Roll, Anti-materiel and CC. The existing AP+T2 Weapon Property and canonical AP/T2 Ammunition explain halving and the T2 Wound result; do not invent additional printed rolls or an independent mode."
+    },
+    {
+      "slug": "monofilament-cc-weapon",
+      "name": "Monofilament CC Weapon",
+      "chartPage": 177,
+      "profileSha256": "acba00383b1ff1f458583986dc1628b21187274abf353f4b5e97308050eb827c",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 chart p. 177, Army and both Wiki languages agree: PS 8, B1, Normal Ammunition, ARM=0, one printed Saving Roll, CC and State: Dead. The existing Monofilament Weapon Property and Normal Ammunition explain ARM=0 and the state outcome, without changing the source ammunition to a fabricated Monofilament ammo type."
+    },
+    {
+      "slug": "light-riotstopper",
+      "name": "Light Riotstopper",
+      "chartPage": 184,
+      "profileSha256": "1fa381551d1e0393740172c00c867e2707f9f0bfcbbdf02d018a70c715e64a2d",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 chart p. 184, Army and English/Spanish Wiki agree: B1, PARA Ammunition, one PH-6 Saving Roll, no PS or range bands, Non-Lethal, Intuitive Attack, State: IMM-A and Small Teardrop Direct Template. Canonical PARA, Direct Template and Intuitive Attack cover the rules; do not inherit a damaging attack or the Heavy variant's Large Template."
+    },
+    {
+      "slug": "heavy-riotstopper",
+      "name": "Heavy Riotstopper",
+      "chartPage": 184,
+      "profileSha256": "d05aea006681a3b31f01c588bc6efcd008841b70596c0244d5c36dffd24418f7",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 chart p. 184, Army and English/Spanish Wiki agree: B1, PARA Ammunition, one PH-6 Saving Roll, no PS or range bands, Non-Lethal, Intuitive Attack, State: IMM-A and Large Teardrop Direct Template. Canonical PARA, Direct Template and Intuitive Attack cover the rules; do not inherit the Light variant's Small Template or a damaging PS."
+    },
+    {
+      "slug": "smoke-grenade-launcher",
+      "name": "Smoke Grenade Launcher",
+      "chartPage": 179,
+      "profileSha256": "ab971d9bfc64ba9e9413b0b6a14ba92c5cb9be6524de0d5f9bd11de6df068359",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 179, Army and captured English/Spanish Wiki agree: PS --, B1, Smoke Ammunition, no Saving Roll, Circular Impact Template, Speculative Attack, Targetless, Non-Lethal and [**] notation. The canonical Smoke Ammunition and target/impact/template rules cover this placement effect; do not infer a damaging hit or ARM/BTS Saving Roll."
+    },
+    {
+      "slug": "grenade-launcher",
+      "name": "Grenade Launcher",
+      "chartPage": 179,
+      "profileSha256": "e59dab06860050c13739391e456f3e22c4827ec64260faafdbf11bab40a2bde5",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 179, Army and captured English/Spanish Wiki agree: PS 7, B1, Normal Ammunition, one ARM Saving Roll, Speculative Attack and Circular Impact Template, without Targetless. Canonical Normal Ammunition, Speculative Attack and Impact Template supply all printed mechanics; no separate Launcher-specific effect is required."
+    },
+    {
+      "slug": "e-m-grenade-launcher",
+      "name": "E/M Grenade Launcher",
+      "chartPage": 179,
+      "profileSha256": "d7256c6d598ba39f3ffe3912883249c615002108959c0134ff9a37baf850d3b0",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 179, Army and captured English/Spanish Wiki agree: PS 7, B1, E/M Ammunition, two BTS/2 Saving Rolls, Non-Lethal, Speculative Attack, Circular Impact Template and [**] notation. The existing E/M and Trait references explain the effects. This version is not Targetless and does not inherit the Smoke launcher properties."
+    },
+    {
+      "slug": "eclipse-grenade-launcher",
+      "name": "Eclipse Grenade Launcher",
+      "chartPage": 179,
+      "profileSha256": "a49b73bb251965f5a8b63d7997c974946690d2ec45f6e0aa74413be9eed165cc",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 179, Army and captured English/Spanish Wiki agree: PS --, B1, Eclipse Ammunition, no Saving Roll, Reflective, Non-Lethal, Speculative Attack, Targetless and Circular Impact Template. Army retains savingNum=1 but saving Attribute is blank; official PDF and Wikis print no Saving Roll, so the number is non-operative. Canonical Eclipse and linked Traits cover its effects without duplicating rules."
+    },
+    {
+      "slug": "portable-autocannon",
+      "name": "Portable Autocannon",
+      "chartPage": 187,
+      "profileSha256": "69b9e2377b90793cb62e01fe3e74c503d6ef9ccdb095409a4aead239cb582924",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 p. 187, Army and archived English Wiki agree: PS 5, B2, AP+EXP, three ARM/2 Saving Rolls, Anti-materiel and the printed Autocannon range bands. The canonical AP and EXP rules and existing AP+EXP Weapon Property describe these combined effects, not separate firing modes. No unique standalone Autocannon mechanics were found."
+    },
+    {
+      "slug": "jammer",
+      "name": "Jammer",
+      "chartPage": 187,
+      "profileSha256": "2563e6e1c4a4375ef235fd84962ac4e93ca16f3a4eb2dc51cd9af16246dfb9ed",
+      "reviewedOn": "2026-10-15",
+      "reason": "N5.3 Weapon Chart p. 187, imported Army, and captured English and Spanish Wiki chart rows agree on WIP-based PS 7/B1, Normal Ammunition, one BTS Saving Roll, BS Weapon (WIP), Comms Attack, Intuitive Attack, Disposable (2), Isolated, Non-Lethal, No LoF and Zone of Control. The canonical BS Weapon (WIP), Intuitive Attack, Disposable and Non-Lethal Traits, Comms Attack and No LoF Labels, and Isolated State are public linked references. Comms Attack is countered with Reset rather than Dodge; no Jammer-only effect or targeting mode is printed. Null Trait slugs on Labels and State are intentional; public_reference resolves them."
+    },
+    {
+      "slug": "katyusha-mrl",
+      "name": "Katyusha MRL",
+      "chartPage": 187,
+      "profileSha256": "66d06a2d26e836947712cfe8fa4b7fca1e87f4efa8585f1cdb4a0c73c4a573ff",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 Weapon Chart p. 187 and imported Army agree: PS 6, B1, DA Ammunition, two ARM Saving Rolls, Anti-materiel, Speculative Attack and Circular Impact Template. Army and captured English/Spanish Wiki charts agree on range modifiers -3/+3/+3/0/0/-6. The PDF's unsigned 3 is a confirmed missing plus sign per pinned RR-SRC-N53-003 and config/validation/weapon-range-source-review.json; preserve the raw printed source anomaly. Canonical DA and linked Traits cover all effects; no unique Katyusha-only mechanic."
+    },
+    {
+      "slug": "heavy-rocket-launcher",
+      "name": "Heavy Rocket Launcher",
+      "chartPage": 184,
+      "profileSha256": "09aee6331657e1824cdd1d228afa7ed9e2a5f0ddcee2a6a8a0d054a6a2fe6efd",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 p. 184, imported Army and archived English/Spanish Wiki agree: Blast PS 6 and Hit PS 5, both B2/N/ARM/one Saving Roll with Continuous Damage; only Blast has a Circular Impact Template. The Heavy Rocket Launcher uses -3/0/+3/-3 range bands. Existing Normal Ammunition, Continuous Damage and Impact Template references cover the modes without a new rule card. Preserve the Army 'Continous Damage' source spelling and its correct canonical Trait alias."
+    },
+    {
+      "slug": "light-rocket-launcher",
+      "name": "Light Rocket Launcher",
+      "chartPage": 184,
+      "profileSha256": "88cb92121160de0739c95a256902308c75339927ff8b896160f183a559334cb5",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 p. 184, imported Army and archived English/Spanish Wiki agree: Blast PS 7 and Hit PS 6, both B2/N/ARM/one Saving Roll with Continuous Damage; only Blast has a Circular Impact Template. Light range bands are 0/+3/-3/-6, distinct from Heavy. Existing Normal Ammunition, Continuous Damage and Impact Template references cover the modes; preserve the Army Trait spelling as source evidence."
+    },
+    {
+      "slug": "plasma-rifle",
+      "name": "Plasma Rifle",
+      "chartPage": 183,
+      "profileSha256": "beed558091e475d05f3867d2599ced357ab79019442548371131a9c47ae4b974",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 pp. 67/183, imported Army and archived English/Spanish Wiki agree: Blast PS 7 and Hit PS 6, both B3 with Normal Ammunition, one ARM plus one BTS Saving Roll, and Suppressive Fire; only Blast has a Circular Impact Template. A Critical adds one ARM roll, not BTS. Both modes already resolve the shared Plasma Weapon Property and typed Combined Saving Roll; no duplicated Plasma Rifle-specific mechanics are needed."
+    },
+    {
+      "slug": "plasma-carbine",
+      "name": "Plasma Carbine",
+      "chartPage": 176,
+      "profileSha256": "e395f6a6bebff51d9c6512c4bc4964ab4dc5b6a20f018001792ca96e9dc77f61",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 pp. 67/176, imported Army and archived English/Spanish Wiki agree: Blast PS 7 and Hit PS 6, both B2 with Normal Ammunition and one ARM plus one BTS Saving Roll; only Blast has a Circular Impact Template. Neither mode has Suppressive Fire. A Critical adds one ARM roll only. Existing Plasma Weapon Property, Combined Saving Roll and Impact Template references suffice; do not inherit Plasma Rifle's Suppressive Fire."
+    },
+    {
+      "slug": "multi-red-fury",
+      "name": "MULTI Red Fury",
+      "chartPage": 183,
+      "profileSha256": "db437d61e41212e044d1ecb73646c5c00eddad1f0d7e101d737e36dc6414a833",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 p. 183, Army and EN/ES Wiki Weapon Charts agree: Anti-materiel mode PS 7, B1, DA, two ARM Saving Rolls and Anti-materiel; AP mode PS 7, B4, AP/ARM/2 with one roll; Shock mode PS 7, B4, Shock/ARM with one roll. Suppressive Fire appears only in AP and Shock modes. All three share 0/+3/-3/-6 range bands. The existing MULTI Weapon Property and linked DA/AP/Shock Ammunition and Traits describe each alternative firing mode; do not transfer Suppressive Fire to the DA mode."
+    },
+    {
+      "slug": "uragan-mrl",
+      "name": "Uragan MRL",
+      "chartPage": 188,
+      "profileSha256": "c8ea44a1290cf5ac4f036ec8c717050fba5e62c741b6ba9bc4e5bed6be08e03b",
+      "reviewedOn": "2026-10-15",
+      "reason": "Official N5.3 p. 188, Army and EN/ES Wiki Weapon Charts agree on Blast PS 6 and Hit PS 5, both B3 with combined AP+Shock Ammunition, one ARM/2 Saving Roll, and Burst: Single Target. Blast adds Speculative Attack and Circular Impact Template; Hit does not. Canonical AP+Shock Weapon Property and linked Traits cover the separate modes. The Spanish Wiki names Hit Mode 'Uragan MTL' instead of MRL; preserve this as a source text-name discrepancy, not evidence of a new weapon identity. Burst: Single Target restricts all B3 shots to one target, not B1."
+    }
+  ]
+}

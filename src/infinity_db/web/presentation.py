@@ -79,6 +79,7 @@ ASSETS = {
     "/static/skill.js": ("skill.js", "text/javascript; charset=utf-8"),
     "/static/unit-list.js": ("unit-list.js", "text/javascript; charset=utf-8"),
     "/static/catalog-detail.js": ("catalog-detail.js", "text/javascript; charset=utf-8"),
+    "/static/faq-rulings.js": ("faq-rulings.js", "text/javascript; charset=utf-8"),
     "/static/search.js": ("search.js", "text/javascript; charset=utf-8"),
     "/static/scenarios.js": ("scenarios.js", "text/javascript; charset=utf-8"),
     "/static/scenario.js": ("scenario.js", "text/javascript; charset=utf-8"),

@@ -5,7 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
-from infinity_db.domain_slugs import route_slug_from_typed_domain_id
+from infinity_db.domain_slugs import require_domain_slug, route_slug_from_typed_domain_id
 from infinity_db.rules_database import RulesDatabase
 
 
@@ -103,8 +103,53 @@ class ScenarioCatalog:
         self._records_cache = records
         return records
 
-    def list_scenarios(self) -> list[dict[str, Any]]:
-        """Return current scenario identities in maintained collection order."""
+    def _selected_records(
+        self, *, collection: str | None, revision: str | None
+    ) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+        """Select one exact published set without falling back to Core or another season."""
+        if (collection is None) != (revision is None):
+            raise ValueError("Scenario collection and revision must be provided together")
+        if collection is not None:
+            require_domain_slug(collection, context="scenario collection")
+        if revision is not None and (
+            not isinstance(revision, str) or not revision.strip() or revision != revision.strip()
+        ):
+            raise ValueError("scenario revision must be a non-empty trimmed string")
+        return [
+            (record, publication)
+            for record, publication in self._records()
+            if (
+                publication["collection"] == "n5-core"
+                if collection is None
+                else (
+                    publication["collection"] == collection
+                    and publication["revision"] == revision
+                )
+            )
+        ]
+
+    def list_collections(self) -> list[dict[str, Any]]:
+        """Return only current scenario sets with readable published missions."""
+        collections: dict[tuple[str, str], dict[str, Any]] = {}
+        for _record, publication in self._records():
+            key = (publication["collection"], publication["revision"])
+            if key not in collections:
+                collections[key] = {
+                    "id": key[0],
+                    "revision": key[1],
+                    "title": publication["collection_title"],
+                    "scenario_count": 0,
+                }
+            collections[key]["scenario_count"] += 1
+        return sorted(
+            collections.values(),
+            key=lambda item: (item["id"] != "n5-core", item["title"], item["revision"]),
+        )
+
+    def list_scenarios(
+        self, *, collection: str | None = None, revision: str | None = None
+    ) -> list[dict[str, Any]]:
+        """Return current scenarios; explicit selection never falls back to another set."""
 
         return [
             {
@@ -115,10 +160,15 @@ class ScenarioCatalog:
                 "supported_army_points": _supported_army_points(record),
                 "publication": _publication_model(publication),
             }
-            for record, publication in self._records()
+            for record, publication in self._selected_records(
+                collection=collection, revision=revision
+            )
         ]
 
-    def get_scenario(self, slug: str, *, army_points: int) -> dict[str, Any] | None:
+    def get_scenario(
+        self, slug: str, *, army_points: int,
+        collection: str | None = None, revision: str | None = None,
+    ) -> dict[str, Any] | None:
         """Return one current scenario projected to one exact supported Army Points value."""
 
         rules_database = self.rules_database
@@ -126,7 +176,9 @@ class ScenarioCatalog:
             return None
 
         selected: tuple[dict[str, Any], dict[str, Any]] | None = None
-        for record, publication in self._records():
+        for record, publication in self._selected_records(
+            collection=collection, revision=revision
+        ):
             if _scenario_slug(record) == slug:
                 selected = (record, publication)
                 break

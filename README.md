@@ -74,10 +74,13 @@ its application metrics.
   legacy Army references, and direct links into pre-filtered Unit Explorer rosters.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
   Ammunition, Traits, Labels, States, Hacking Programs, and General Rules reference
-  catalogs, with reverse Unit usage links where that relationship applies. Search and filter state
+  catalogs, including reviewed current weapons not yet used by an Army Unit,
+  with reverse Unit usage links where that relationship applies. Search and filter state
   uses compact self-contained share links while legacy explicit query parameters remain readable.
 - Includes global search and a federated Glossary across player-facing reference domains, with
-  embedded Attributes and scoped Game terms routed back to their canonical owning surfaces.
+  embedded Attributes, scoped Game terms and searchable Weapon Properties (such as Viral,
+  Plasma and combined Ammunition). Weapon Properties link to their underlying canonical
+  rules instead of redefining the effects.
 - Includes a browsable core **Scenarios** reference with explicit Army Points selection, structured
   setup/objectives/scoring, scenario Rules and Skills, source-verification notes, and deterministic
   deployment maps generated from the same maintained geometry as the scenario data.
@@ -141,15 +144,14 @@ The current direction is deliberately incremental:
   gaps and made the result searchable, navigable, and understandable.
 - **0.10.x — Stabilize & harden:** completed the application consistency and scenario
   architecture reviews, frontend/theme work, and release/operations hardening.
-- **0.10.1 — Interim reference consistency (release preparation):** release the completed
-  core Scenarios, Ammunition and rules-reference improvements alongside the stabilization
-  fixes. Remaining acceptance and publication gates are tracked in
-  [`docs/TODO.md`](docs/TODO.md#0101--interim-reference-consistency).
-- **1.0.0 — Player data-complete (temporarily paused):** resume after this interim release;
-  ensure every useful in-scope game datum collected by InfinityDB has a maintained
-  representation and a meaningful, usable place in the
-  web reference, including the current core-rules scenarios. ITS season/tournament
-  content remains a later extension of the same scenario model.
+- **0.10.1 — Interim reference consistency (released 2026-10-10):**
+  published the core Scenarios, Ammunition and rules-reference improvements,
+  with stabilization fixes. See the [release notes](docs/CHANGELOG.md#0101---2026-10-10).
+- **1.0.0 — Player data-complete (current milestone):** complete remaining
+  in-scope source-to-browser coverage and final scenario acceptance.
+  Incomplete cross-surface interaction tests from 0.10.1 now belong to
+  [1.0 final acceptance](docs/TODO.md#final-10-acceptance).
+  ITS season/tournament content remains a later scenario-model extension.
 
 In short: **0.6 built the foundation → 0.7 added context → 0.8 connected the data →
 0.9 closed application gaps → 0.10 hardened and polished → 1.0 completes the reference.**
@@ -347,7 +349,8 @@ installation to another host.
 ## Project layout
 
 ```text
-docs/                       # Tracked project docs; docs/audits/ is local audit evidence
+docs/                       # Tracked project documentation
+local/                      # Private untracked workspace, excluded from Docker builds
 src/
   infinity_army_data/       # Army merge, normalization, metadata, and validation
   infinity_db/              # SQLite storage, application services, API, and browser
@@ -379,7 +382,13 @@ python tools/run_checks.py --profile code
 # Data/build validation
 python tools/run_checks.py --profile data
 
-# All stages
+# Markdownlint dependencies (one-time/when package-lock.json changes)
+npm ci --ignore-scripts --no-audit --no-fund
+
+# Markdown documentation checks
+python tools/run_checks.py --stage docs
+
+# All stages (including Markdownlint)
 python tools/run_checks.py --all
 
 # Targeted checks

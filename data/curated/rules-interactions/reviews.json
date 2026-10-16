@@ -938,6 +938,307 @@
       "note": "Uses the shared Mine mechanics but substitutes Reset and adds conditional Stunned/Immobilized-B effects; conditions remain in curated prose."
     },
     {
+      "recordId": "weapon:chain-colt",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 186: Small Teardrop Direct Template, Normal N ammunition with ARM Saving Roll; Intuitive Attack linked to its actual Common Skill. No added or inferred ammunition effect."
+    },
+    {
+      "recordId": "weapon:chain-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 186: Large Teardrop Direct Template with Normal N ammunition and ARM saves; distinct from Chain-colt's small template. Retains Intuitive Attack and Army statistics."
+    },
+    {
+      "recordId": "weapon:nanopulser",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 187: Small Direct Template with Normal N ammo but BTS Saving Roll from the printed profile. Do not infer ARM from Normal ammo or add Bioweapon effects."
+    },
+    {
+      "recordId": "weapon:pulzar",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 187: Large Direct Template with Normal N ammo and BTS Saving Roll; explicit template and save-attribute distinctions without invented special effects."
+    },
+    {
+      "recordId": "weapon:missile-launcher",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 187: Blast EXP/Impact Template three ARM saves versus Hit AP+EXP without circular template and three ARM/2 saves. Profiles stay separate and both retain Anti-materiel."
+    },
+    {
+      "recordId": "weapon:e-mitter",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 186: printed E/M with two BTS/2 Saving Rolls and Non-Lethal; the ammunition reference controls target-specific effects. Source ranges/Burst retained."
+    },
+    {
+      "recordId": "skill:activate-disco-ball",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 71 and matching archived Wiki page: source-only Short Skill, Deactivator and allied-ball requirements, LoF/ZoC, WIP+3 Normal Roll with range MODs, Eclipse placement/removal. No Army Skill identity synthesized."
+    },
+    {
+      "recordId": "weapon:cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: PS 8, Burst 1, Normal N, one ARM Saving Roll and CC; generic CC Weapon requirements elsewhere do not mean this specific catalog identity."
+    },
+    {
+      "recordId": "weapon:para-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: PARA uses a PH-6 Saving Roll and Immobilized-A rather than Wounds; printed PS is a dash, with Non-Lethal and CC retained."
+    },
+    {
+      "recordId": "weapon:da-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: DA requires two ARM Saving Rolls; PS 8 and Anti-materiel/CC Traits remain distinct from the roll count."
+    },
+    {
+      "recordId": "weapon:ap-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: AP halves ARM for one Saving Roll; no additional roll is inferred from AP."
+    },
+    {
+      "recordId": "weapon:shock-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: Shock uses the printed one ARM Saving Roll; conditional Shock effects belong to the linked Ammunition definition."
+    },
+    {
+      "recordId": "weapon:e-m-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p.177: preserve N+E/M printed notation and two BTS/2 rolls; E/M target-dependent states remain linked. Do not synthesize an unlisted extra ARM roll."
+    },
+    {
+      "recordId": "weapon:exp-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 177: the EXP close-combat profile keeps PS 8 and three ARM Saving Rolls per hit. EXP and Anti-materiel are separate effects; no profile changes or additional roll mechanics inferred."
+    },
+    {
+      "recordId": "weapon:viral-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 177 and archived BioWeapon Trait distinguish the printed N/BTS/one-save baseline from DA+Shock against VITA. Two BTS saves versus VITA and the STR exception are derived from the component rules, not independently printed modes. Shock applies only under its conditions. Preserve unresolved Immunity subtleties and the exact Army profile."
+    },
+    {
+      "recordId": "weapon:pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: PS 9, B2, Normal ammo and one ARM Saving Roll. No special effect inferred."
+    },
+    {
+      "recordId": "weapon:heavy-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: PS 6 and B2 with Shock ammo and one ARM Saving Roll. Source distinguishes Shock effects from PS."
+    },
+    {
+      "recordId": "weapon:boarding-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: Blast Mode has small Direct Template, Intuitive Attack and B1; Hit Mode has range bands, B2 and no Blast-only Traits. Both use N/ARM/one roll."
+    },
+    {
+      "recordId": "weapon:breaker-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: AP applies to BTS/2 rather than ARM/2, B2 with one Saving Roll; do not infer a second roll."
+    },
+    {
+      "recordId": "weapon:marksman-rifles",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 chart p. 180, September 26 archived English Weapon Chart and pinned Army: all eight Marksman types have PS 7 and identical range bands; six previously undefined single-mode variants now link to this shared family. Each of those six retains its own Ammunition, Saving Roll Attribute, Trait and scoped navigation associations. Breaker and MULTI retain separate authoritative Weapon definitions to avoid ambiguous family mappings. No ammunition or Trait is inherited universally, especially not by MULTI Anti-Material Mode."
+    },
+    {
+      "recordId": "weapon:multi-marksman-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 Weapon Chart p. 180: Anti-Materiel (Army spells Anti-Material) Mode uses B1 DA, two ARM Saving Rolls, Anti-materiel and no Suppressive Fire; AP/Shock alternatives use B3, one ARM/2 or ARM roll and Suppressive Fire. All PS 7, same range breaks; profiles do not stack modes or receive generic family variant-link inheritance."
+    },
+    {
+      "recordId": "weapon:breaker-marksman-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 180 and pinned Army metadata source 225: AP applies against BTS/2 (not ARM/2), PS 7, B3, one Saving Roll, Suppressive Fire. The English update's Sniper label does not establish another source profile. Shared AP and Suppressive Fire links cover effects; do not invent unit usage or a new ammunition type."
+    },
+    {
+      "recordId": "weapon:assault-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: N/ARM, PS 7 and B4. Burst is not additional Saving Rolls on one hit."
+    },
+    {
+      "recordId": "weapon:ap-heavy-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: AP/ARM/2 with PS 6, B2, and one Saving Roll. Contrast Breaker Pistol BTS/2 without transferring defense attributes."
+    },
+    {
+      "recordId": "weapon:silenced-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 pp. 67, 175, 182: combined AP+Shock yields one BTS/2 Saving Roll with conditional Shock effect; Silent (-6) affects enemy Face to Face Dodge only while user is in ZoC and outside LoF."
+    },
+    {
+      "recordId": "weapon:multi-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 182: AP B2 ARM/2 one roll, Shock B2 ARM one roll, Anti-Materiel DA B1 ARM two rolls with mode-specific Anti-materiel. Modes are alternatives and their effects do not stack."
+    },
+    {
+      "recordId": "weapon:multi-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 183: AP and Shock modes B3 with Suppressive Fire, Anti-Materiel DA mode B1 with two ARM Saving Rolls and no Suppressive Fire; all PS 7. Source mode traits do not transfer."
+    },
+    {
+      "recordId": "weapon:k1-combi-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 183: preserves N Ammunition with ARM=0, one Saving Roll, PS 7/B3, Anti-materiel and Suppressive Fire. K1 is no distinct Ammunition identity; Immunity must be separately evaluated."
+    },
+    {
+      "recordId": "weapon:feuerbach",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 186: Burst Mode uses B2 AP+DA with two ARM/2 Saving Rolls, Explosive Mode uses B1 EXP with three ARM Saving Rolls. PS 6 and Anti-materiel apply to each; ammunition and roll counts never combine across modes."
+    },
+    {
+      "recordId": "weapon:hyper-rapid-magnetic-cannon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 187: DA Anti-Materiel Mode uses B1 and two ARM Saving Rolls; AP and Shock modes use B5 with Suppressive Fire and one ARM/2 or ARM Saving Roll respectively. PS 5 throughout, with mode-dependent Traits."
+    },
+    {
+      "recordId": "weapon:multi-heavy-machine-gun",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 179: EXP Anti-materiel mode has B1, 3 ARM Saving Rolls; AP and Shock modes have B4 and Suppressive Fire, with ARM/2 and ARM respectively for one Saving Roll. All are PS 5 with identical ranges. Do not combine modes or transfer Traits."
+    },
+    {
+      "recordId": "weapon:pitcher",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 pp. 73/187 and pinned Wiki Pitcher (N5.2 corrected ranges): successful BS/Targetless shot places a Deployable Repeater Token at impact. No damaging PS, Ammunition or Saving Rolls; the Repeater equipment owns its Hacking Area effect. Disposable (2), Speculative Attack, Indiscriminate, Non-Lethal and the carried-forward FAQ on occupied placement apply. A Pitcher shot is not Place Deployable."
+    },
+    {
+      "recordId": "weapon:mine-dispenser",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 pp. 71-72/181 and pinned Wiki: Mine Dispenser uses its own BS Weapon Chart profile, but adopts the Drop Bears BS Mode Mine Token placement procedure, including Conclusion timing, no same-Order detonation and placement restrictions. Mine subtype is supplied by bracketed Unit Profile; do not inherit Drop Bears PH roll or Shock subtype. Double Shot optionally expends both Disposable (2) charges for B2. Army savingNum=1 is non-operative with no Saving Roll Attribute or Ammunition; no damaging launcher attack is inferred."
+    },
+    {
+      "recordId": "weapon:flamethrowers",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 Flamethrowers chart p. 178 and pinned English Wiki Weapon Chart agree with Army profiles: Heavy is PS 6 / Large Teardrop, Light is PS 7 / Small Teardrop; both use N, B1, one ARM Saving Roll, Intuitive Attack and Continuous Damage. Shared canonical links own the underlying template, activation and repeat-roll mechanics. No additional variant effects or Army source corrections are inferred."
+    },
+    {
+      "recordId": "weapon:flammenspeer",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 chart p. 178: Blast Mode N/ARM, one Saving Roll, circular Impact Template; Hit Mode AP/ARM/2, one Saving Roll, no Template. Both have PS 6, Burst 1, Continuous Damage, shared Disposable (2) charges. Modes are alternatives; template does not transfer."
+    },
+    {
+      "recordId": "weapon:multi-spitfire",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 Weapon Chart p. 185: Anti-Materiel Mode has DA, Burst 1, two ARM Saving Rolls and Anti-materiel. Army labels the mode Anti-Material Mode; its spelling is retained in source profiles. AP and Shock modes use Burst 4, one ARM/2 or ARM Saving Roll respectively, and Suppressive Fire. All are PS 6 with identical ranges; never combine modes or transfer their Traits."
+    },
+    {
+      "recordId": "weapon:multi-sniper-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 chart p. 185: all three alternative modes use PS 5/B2; Anti-Materiel uses DA, two ARM Saving Rolls and the mode-only Anti-materiel Trait, AP uses one ARM/2 roll, Shock one ARM roll. No mode combines Ammunition or inherits another mode's Trait."
+    },
+    {
+      "recordId": "weapon:k1-sniper-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 chart p. 185: one Saving Roll at ARM=0 and printed N Ammunition, PS 7/B2, Anti-materiel but no Suppressive Fire. Do not invent K1 Ammunition, AP halving or transfer K1 Combi Rifle Traits."
+    },
+    {
+      "recordId": "weapon:viral-sniper-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 p. 185 prints N/BTS/one roll, PS 5/B2 and BioWeapon; archived BioWeapon Trait applies DA+Shock only to VITA. Two BTS rolls against VITA is a rule-derived consequence, not a printed second firing mode; against STR, one BTS roll remains. Shock and Immunity exceptions require their own conditions."
+    },
+    {
+      "recordId": "weapon:plasma-sniper-rifle",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "N5.3 chart p. 185 and Combined Saving Roll p. 67: Blast Mode has N, PS 6/B2, ARM and BTS one roll each, circular Impact Template; Hit Mode has N, PS 5/B2, one ARM and one BTS roll and no Template. A Critical adds one ARM roll only. This is Combined Saving Roll, not combined Ammunition."
+    },
+    {
+      "recordId": "weapon:d-charges",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "The N5.3 printed p. 70 rules distinguish Demolition and CC contact requirements, Demolition-only Place Deployable, the ARO restriction and no-roll resolution, and a shared three-charge pool. The CC Improvised -6 modifier is mode-specific; the user's immunity to detonation applies to both. Profile ammunition and attack rolls remain in the two Army mode profiles."
+    },
+    {
+      "recordId": "weapon:disco-baller",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 71 governs targetless BS deployment, Eclipse placement and States Phase expiry, the persistent deployed Ball, and allied-only Deactivator activation with its own WIP+3 and range conditions. Its chart profile, Double Shot, and Disposable (2) remain distinct from the deployed ARM/BTS/STR/S profile. Activate Disco Ball is still prose rather than a standalone catalog Skill."
+    },
+    {
+      "recordId": "weapon:symbiobomb",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p. 74 and the archived English Wiki distinguish the listed owner from the Deployment-assigned user. The single use permits Endgame, Eraser or Mirrorball; the -3 target MOD applies only to Endgame/Eraser. Only the selected Pheroware Tactic supplies attack-profile facts; no stand-alone SymbioBomb chart statistics or lasting assignment relationship are inferred."
+    },
+    {
       "recordId": "weapon:chest-mine",
       "targetRelease": "1.0.0",
       "status": "reviewed",
@@ -1728,92 +2029,107 @@
     {
       "recordId": "ammunition:ap",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 p. 63, Spanish N5.3 p. 66 and pinned English Wiki AP revision 2990 confirm one ARM/2 or BTS/2 Saving Roll per hit, upward rounding with positive minimum 1, one Wound per failed roll and an additional modified roll for a Critical. The owning Immunity rule conditionally covers AP for applicable non-Comms attacks: Immunity (AP) leaves DA rolls intact on AP+DA, whereas Immunity (ARM/BTS) may treat covered Ammunition as Normal. No unconditional outgoing relation from AP to Immunity or combined components is warranted."
     },
     {
       "recordId": "ammunition:da",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 English p. 64 and pinned English Wiki DA revision 2991 confirm two mandatory Saving Rolls per hit even after a failed first roll or Unconscious, one Wound per failed roll and a third roll for a Critical. Related BioWeapon/Immunity/combined-Ammunition behavior remains owned and conditioned by those rules; DA itself has no additional outgoing graph edge."
     },
     {
       "recordId": "ammunition:eclipse",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 English p. 64, Spanish p. 64 and pinned English Wiki Eclipse revision 3789 confirm Smoke inheritance, Reflective zero-visibility/MSV exception and BS Attack visibility-MOD exception. The outgoing uses-effects-of relation targets Smoke while the explicit clarifications and typed visibility facts preserve Eclipse's visor exception; no unconditional visor-negation edge is implied."
     },
     {
       "recordId": "ammunition:em",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English/Spanish N5.3 p. 64 and pinned English Wiki E/M revision 3418 confirm two BTS/2 rolls per hit (a third for a Critical), Isolated on a failed roll and additional Immobilized-B only for HI, TAG, REM, VH. Those conditional causes-state relations remain in the graph. E/M alone does not inflict Wounds; Normal in N+E/M has separate effects. After a failed E/M roll a usual Guts Roll applies unless inapplicable: affected HI/TAG/REM/VH now IMM-B cannot roll, while Courage/equivalent can ignore it. Immunity depends on matching type and attack classification, not an unconditional E/M relationship."
     },
     {
       "recordId": "ammunition:exp",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English and Spanish N5.3 p. 65 and pinned Wiki EXP revision 2994 confirm three mandatory Saving Rolls per hit even after Unconscious; each failed roll inflicts one Wound, and a Critical adds one roll (four total). N5.3 p. 67 combined AP+EXP example applies AP's half ARM/BTS to all four rolls. The existing conditional Immunity (ARM) AP+EXP case replaces covered ammunition effects with Normal for a non-Comms ARM attack; Critical remains unless Immunity (Critical) applies. There is no unconditional outgoing relation from base EXP to AP or Immunity."
     },
     {
       "recordId": "ammunition:normal",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 English p. 63 and pinned English Wiki Normal revision 2989 confirm one Saving Roll per hit, one Wound per failed roll and one extra Saving Roll for a Critical. The weapon specifies ARM/BTS/other Saving Attribute; Normal adds no further condition or outgoing rules relation. Combined Saving Rolls and Immunity exceptions belong to their owning rules, not this base Ammunition."
     },
     {
       "recordId": "ammunition:para",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 p. 65, Spanish p. 66 and pinned English Wiki PARA revision 3419 confirm one PH-6 Saving Roll per hit and one additional roll for a Critical, IMM-A only after failure, and no roll/effect where PH does not exist. The Heavy Riotstopper PH 12 example and the order-sequencing Engineer/Dodge re-infliction case remain conditional. The existing causes-state relation to Immobilized-A is intentionally qualified by the typed condition and missing-PH rule, not unconditional; PARA does not inflict a Wound."
     },
     {
       "recordId": "ammunition:shock",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 p. 65, Spanish p. 67 and pinned English Wiki Shock revision 3074 confirm one Saving Roll per hit, one Wound per failure, and one extra roll for a Critical. Direct-to-Dead via bypassing Unconscious forms, Dogged and NWI applies only when a target with VITA 1 fails a Shock save; it is not a blanket outcome for STR or other VITA values. Pinned Wiki also says Explode does not activate on direct Dead. Conditional Immunity (Shock) can treat this as Normal on eligible non-Comms Attacks while a Critical bonus persists unless Immunity (Critical) applies. The outgoing causes-state edge remains conditioned, with no unconditional relation to those Skills."
     },
     {
       "recordId": "ammunition:smoke",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 English p. 66, Spanish p. 65 and pinned English Wiki Smoke revision 3642 confirm the unopposed/Face-to-Face conditions, MSV exclusion, Dodge exception, Critical, removal, infinite-height volume and horizontal/vertical scenery clipping. Conditional LoF interactions are described with linked references; no blanket outgoing effect edge is justified. Eclipse's distinct MSV exception is reviewed separately."
     },
     {
       "recordId": "ammunition:stun",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 p. 67, Spanish p. 63 and pinned English Wiki Stun revision 3420 confirm one Saving Roll per hit, an extra roll for a Critical, Stunned on failure, and automatically failed subsequent eligible Guts Roll absent Courage/equivalent. Stun alone does not grant a Guts Roll to ineligible targets. The printed pinned Immunity (BTS) versus Flash Pulse case is weapon-specific: a BTS roll still occurs; Non-Lethal prevents Wounds and State: Stunned survives the normal Immunity trait protection. Do not generalize that printed weapon case to all Stun attacks; the outgoing causes-state relation remains conditional."
     },
     {
       "recordId": "ammunition:t2",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The 0.9 Ammunition domain establishes canonical identity and basic reference text; complete interaction-graph review remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 p. 67, Spanish p. 67 and pinned Wiki T2 revision 2999 confirm two Wounds on a failed hit Saving Roll and only one on failure of the additional Critical roll; players must identify dice before rolling. Cross-source wording differs: English PDF specifies ARM Roll, Spanish PDF and English Wiki say Saving Roll without an Attribute. Retain the weapon's authoritative printed Saving Roll Attribute and expose the discrepancy in sourceNotes. Applicable Immunity (T2) reduces covered failed-hit effects to Normal, without automatically removing a Critical roll; this is derived, not printed specifically for T2. No unconditional outgoing relation is justified."
     },
     {
       "recordId": "scenario:domination",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, objective interactions, and other scenario rule semantics remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "N5.3 pp. 151-152 and pinned Wiki Domination revision 3264 confirm the six Army Points sizes and all Quadrant, Console, Specialist and mission-ending conditions. Quadrants use round-end Victory Points: equal with at least one held scores 1 OP, greater scores 2, maximum 6 across three rounds. Consoles score 1 OP each at game end and ownership goes to the last successful Hacker or other Specialist using Hack Consoles; the Skill needs Silhouette contact, Normal WIP, repeatable attempts and gives Hackers +3. Shasvastii Embryo is counted despite the ordinary Null exclusion; equipment does not count. The seven qualifying Specialist Skills and Peripheral restriction are shared references. English N5.2 p. 150, English N5.3 p. 151 and the pinned Wiki print 6 SWC at 350 points, but official Spanish N5.3 Domination p. 155 prints 7. The explicit cross-language source conflict remains unresolved; the maintained game-size value remains the English 6 pending authoritative clarification. No unconditional global graph edges are implied by scoped mission components."
     },
     {
       "recordId": "scenario:supplies",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Supply Box interactions, Specialist Troop rules, and other scenario semantics remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 pp. 153-154, N5.2 p. 152 and pinned English Wiki Supplies revision 3266 agree on the three additive end-game objectives: 2 OP per controlled box (maximum 6), 2 for controlling strictly more than the opponent, and 2 extra for controlling all three. Placement is three 25 mm Supply Box Markers on the center line, the outer two 8 inches measured from table edge to marker edge; the diagram's 12-inch label is not a competing box-placement rule. Deployment in Silhouette contact is forbidden. The scenario-only Pick Up Supply Boxes Attack Short Skill is restricted to Specialists in contact with an uncarried Token, any Null Model carrying one, or an allied Normal Model carrying one; it costs a Short Skill without a Roll. Only Models can carry boxes (one per Specialist), and Tokens persist when their carriers become Null. At game end control requires a non-Null Model carrier not in Silhouette contact with an enemy Model; merely picking up, carrying while Null, or representing the carrier by a Marker does not score. The seven Specialist qualifiers, Non Specialist Chain of Command exception and Doctor/Engineer Peripheral restriction are shared. Three-round expiration and the game-size minimum-VP Tactical Phase/end-of-Player-Turn early ending are distinct. All six Army Points, SWC and minimum-VP rows are supported. Interactions are scoped through typed mission components and do not require unconditional graph relations or game-state persistence."
     },
     {
       "recordId": "scenario:annihilation",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, force-destruction objectives, and other scenario rule semantics remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 pp. 149-150 verify all six Army Points configurations (150/200/250/300/350/400), SWC and deployment references, three exclusive end-of-game bands for killed enemy Army Points (maximum 4 OP), three for surviving Victory Points (maximum 4 OP), and 2 OP for the enemy Lieutenant killed. Shared Killing correctly includes entering Dead, remaining Null at game end and never-deployed enemy Troopers. The three-round limit and tactical-phase all-Null early ending remain separate shared conditions. The English 350-point survival table has a gap at 151-175 and overlap at 251-270; official Spanish N5.3 Aniquilación (printed p. 153) explicitly prints 85-175/176-270/more-than-270. The maintained reviewed-resolution is thus corroborated by the other N5.3 language edition, not solely inferred from continuity. No new graph edges are implied by typed mission component references; scoring requires game-state context."
     },
     {
       "recordId": "scenario:firefight",
       "targetRelease": "1.0.0",
-      "status": "pending",
-      "note": "The maintained N5.3 scenario record currently establishes canonical identity and map geometry. Complete review of scoring, Classified Objective interactions, and other scenario rule semantics remains 1.0 work."
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "English N5.3 pp. 155-156, N5.2 p. 154 and pinned English Wiki Firefight revision 3267 agree on all six deployment configurations and four end-game comparative objectives: more surviving Specialists (2 OP), more enemy Specialists killed (1 OP), more enemy Lieutenants killed (3 OP), and more enemy Army Points killed (4 OP). All comparisons require strictly greater values, not ties. There is no Classified Objective in these sources. Shared Killing counts Dead, remaining Null at end of game and never-deployed enemy Troopers. Reinforced Tactical Link is Firefight-only: Lieutenant identity always Open, must deploy at first Round start, replacement at the start of the active Tactical Phase if absent or Null costs no Order, and the replacement must be on-table. Designated Landing Area applies to the whole table, grants cumulative +3 on Combat Jump PH, and removes enemy Deployment Zone restrictions for Airborne Deployment-labeled Skills. The seven Specialist qualifiers, Non Specialist Chain of Command exclusion and Doctor/Engineer Peripheral restriction remain shared. Three-round and all-Null Tactical Phase/end-of-turn ending conditions remain distinct. The scenario-only overlays do not modify the canonical Lieutenant or Combat Jump rules and require no unconditional outgoing graph edges."
     },
     {
       "recordId": "rule:scenario:carrying-supply-boxes",
@@ -1947,6 +2263,125 @@
       "status": "reviewed",
       "reviewedOn": "2026-10-09",
       "note": "Reviewed N5.3 Weapon Chart Stun/BTS/Non-Lethal/Stunned semantics and the printed Immunity (BTS) exception (Wiki Immunity oldid 3643, Example 4). No generic state or immunity resolution is inferred."
+    },
+    {
+      "recordId": "rule:hacking-area",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed."
+    },
+    {
+      "recordId": "equipment:firewall",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed."
+    },
+    {
+      "recordId": "rule:supportware",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "Shared N5.3 baseline reference; activation, effects and exceptions are source-cited prose. No unqualified outgoing simulation relations are claimed."
+    },
+    {
+      "recordId": "rule:special-dice",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "Shared N5.3 SD resolution, Fireteam/CC applicability and Berserk exception are source-cited prose; no universal Burst or Disposable relation is inferred."
+    },
+    {
+      "recordId": "rule:face-to-face-rolls",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p.25 baseline for opposed successes, ties and Criticals; linked mechanics do not infer generic Attack resolution edges."
+    },
+    {
+      "recordId": "rule:saving-rolls",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p.37 baseline for PS, defense and Critical Saving Rolls; Profile-specific Ammunition exceptions remain separate reviewed facts."
+    },
+    {
+      "recordId": "rule:guts-roll",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 p.38 baseline for Guts timing, movement hierarchy and exception-scoped linked references; no state-transition evaluator is implied."
+    },
+    {
+      "recordId": "rule:order-expenditure-sequence",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 pp.14-15 declaration, ARO checks, requirements and simultaneous effects; descriptive timing links do not implement a universal declaration evaluator."
+    },
+    {
+      "recordId": "rule:coordinated-orders",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-13",
+      "note": "N5.3 pp.129-131 and N5 FAQ v0.1 p.3 baseline for Command Token cost, Spearhead, Burst, targeting, recovery, Hacking and Special Dice; no unqualified simulation relations."
+    },
+    {
+      "recordId": "skill:request-specball",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-14",
+      "note": "Standalone core N5.3 Request SpecBall procedure published with Combat Jump relation and reviewed bilingual PDF/ITS scope."
+    },
+    {
+      "recordId": "rule:deployment-phase",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "General N5.3 Deployment Phase sequence authored from official printed page 15. The dated FAQ repositioning/measurement boundary has its own FAQ ruling and never changes the core rule or any particular Deployment Skill. Scenario-specific deployment rules remain scoped separately."
+    },
+    {
+      "recordId": "scenario:battleground",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-15",
+      "note": "Official ITS Season 18: Overheat English version 2026.09.01, printed pp. 121-123. Battleground is a distinct Direct Action mission: three end-of-game Zones of Operations with 2 OP near, 3 OP central and 5 OP far from the player's own Deployment Zone; the opposite side's near/far semantics are explicitly separated in the read model. The Sectors are identified only at the end of the game. At 150 Army Points each is 4 inches deep, with two outer Sectors 2 inches from the central line; at 200-400 each is 8 inches deep, with two outer Sectors 4 inches from the central line. Source diagram shows the three 24x32, 32x48 and 48x48 table sizes; rear Deployment Zones follow normal 8/12-inch sizes. Scoring relies on correct Zone Domination (Models/Markers, Proxies, Peripherals, Null exclusion except Shasvastii) plus Baggage +20 VP; Killing, HVT/Classified exclusion, and end-of-third-Round remain scenario-local prose. Current revision/source identity remains distinct from Core; no claimed historical replay or ITS FAQ publication."
+    },
+    {
+      "recordId": "rule:modifiers-explained",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-16",
+      "note": "N5.3 pp. 68/75 distinguishes entry-local MODs, positive/negative MOD recipients, Automatic versus non-Automatic negative MODs, one-die ReRoll, and Burst versus Special Dice. Linked explanations preserve mode selection and FTF conditions."
+    },
+    {
+      "recordId": "weapon:ap-exp-cc-weapon",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-16",
+      "note": "N5.3 English p. 177, Spanish p. 184 and pinned Army 227 agree on AP+EXP with three ARM/2 Saving Rolls; archived Spanish Wiki charts report two, a retained unresolved source conflict. AP and EXP remain separate canonical Ammunition effects, not independent attack modes."
+    },
+    {
+      "recordId": "weapon:ap-thunderbolt",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-16",
+      "note": "N5.3 English p. 186, Spanish p. 193 and pinned Army 230 specify AP Ammunition, PS 6, Burst 2, ARM/2. Archived English and Spanish Wiki chart entries instead name N Ammunition; discrepancy retained without inventing another effect."
+    },
+    {
+      "recordId": "weapon:mixed-weapons",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-16",
+      "note": "N5.3 p. 68 gives distinct BS and CC Weapon Modes; their printed profiles do not combine. CC uses CC, BS uses BS unless a specific Trait such as BS Weapon (PH) changes its Attribute. Links to MOD rules and Kobra are descriptive, not inheritance of profile effects."
+    },
+    {
+      "recordId": "weapon:stun-pistol",
+      "targetRelease": "1.0.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-10-16",
+      "note": "N5.3 English p. 182, Spanish p. 191 and Army 92 specify one BTS/PB Saving Roll with Non-Lethal and State: Stunned. Archived Spanish Wiki charts list two rolls and omit the State Trait; documented as unresolved publication conflict without changing canonical Stun mechanics."
     }
   ],
   "futureInteractions": [
@@ -2735,22 +3170,6 @@
       "reason": "Infinity Spec-Ops list construction selects two options from the Spec-Ops Chart. Model the chart as a structured rules/reference identity so selected options remain list/session configuration rather than immutable Unit facts."
     },
     {
-      "sourceRecordId": "skill:infinity-spec-ops",
-      "targetRecordId": "skill:request-specball",
-      "relationType": "enables-use-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Infinity Spec-Ops provides the profile transition reached through the Request SpecBall rules, but Request SpecBall is not yet a canonical Skill/action identity."
-    },
-    {
-      "sourceRecordId": "skill:request-specball",
-      "targetRecordId": "skill:combat-jump",
-      "relationType": "uses-effects-of",
-      "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "Request SpecBall explicitly deploys the SpecBall by applying Combat Jump rules; materialize this edge when Request SpecBall receives its own canonical action identity."
-    },
-    {
       "sourceRecordId": "skill:morpho-scan",
       "targetRecordId": "attribute:vita",
       "relationType": null,
@@ -2843,8 +3262,8 @@
       "targetRecordId": "rule:hacking-area",
       "relationType": null,
       "targetRelease": "post-0.7.0",
-      "status": "planned",
-      "reason": "A Hacker operates through their own Zone of Control plus eligible Repeater networks, but Hacking Area is a runtime geometry/network concept that is not yet a canonical rules identity."
+      "status": "deferred",
+      "reason": "The canonical Hacking Area reference now exists. A typed geometry/network edge still cannot express activation-time reach, enemy-Repeater eligibility, or ARO measurement conditions; keep the semantic link in Hacker prose without inventing unconditional network relations."
     },
     {
       "sourceRecordId": "skill:hacker",

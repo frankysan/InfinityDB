@@ -35,6 +35,15 @@ release/audit narrative belongs in the changelog and Git history.
   not to Army source-ID navigation mappings. The initial AP/DA/E/M typed pilot
   is descriptive and non-executable; combined Ammunition components and
   Combined Saving Roll notation are separate source/profile dimensions.
+- Weapon Properties (`weapon-property:*`) are a reviewed, searchable embedded
+  vocabulary projected from exact Army profile signatures. Their explicit
+  origin references point back to canonical Ammunition/Traits/Rules or pinned
+  source sections; the Property itself never owns new game mechanics. Do not
+  confuse these with Army's existing source `properties` Trait field or
+  infer membership from prefixes. Explicit `[[weapon-property:...]]`
+  links in curated prose resolve against the validated registry, not rules
+  record IDs; the exporter checks IDs and runtime links to Glossary.
+  See `docs/data-model.md`.
 - Combined Saving Roll Criticals are distinct from combined Ammunition
   Criticals. The six reviewed Plasma Hit/Blast profiles have source-exact
   `combined_saving_roll` annotations: one ARM and one BTS roll, plus one
@@ -105,14 +114,36 @@ release/audit narrative belongs in the changelog and Git history.
 - Slugs are the preferred application-facing identifiers when a domain has a stable slug; numeric
   IDs remain compatibility/provenance forms.
 - Browser code renders backend-owned semantics rather than recreating data-model policy.
+- The Weapons catalog normally derives identities from the upstream usage
+  table, but explicitly reviewed metadata-only source profiles may be
+  published through `config/catalogs/metadata-only-weapons.json`, with
+  exact ID, name, ammo, Saving, Trait and range matching at build time.
+  Current pinned exception: Breaker Marksman Rifle source 225, even with
+  no Unit usage. Do not publish all unused metadata or fabricate a
+  Breaker Sniper profile from a conflicting English update label.
 - Weapon Ammunition navigation maps exact Army metadata identity/name pairs to
   reviewed base reference segments, without client-side parsing or inference from
   Saving Roll notation. The maintained map (version 2) records ordered components
-  for the four reviewed combined forms (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`);
+  for five reviewed combined forms (`AP+DA`, `AP+Exp`, `AP+Shock`,
+  `AP+T2`, `N+E/M`);
   their API `ammunition_composition` field is only present on exact matching
-  source profiles. Alternatives remain unlinked. Curated `ammunitionResolution`
-  remains a non-executable, source-cited fact contract: all eleven base
-  Ammunition identities are reviewed. PARA's no-PH exception, T2's reduced Wound
+  source profiles. `N+E/M` source ID 5 is supported by the printed N5.3
+  Combined Ammunition example (p. 67); its two BTS/2 Saving Rolls, Normal
+  Wounds and E/M States remain separately source-cited, not calculated.
+  E/M-only source profiles, including the Armed Turret E/Mitter mode with
+  one listed roll, are not mapped to `N+E/M`. That imported mode's one
+  BTS/2 roll conflicts with the standard E/Mitter's two in both N5.3
+  charts and six historical Army snapshots; the visible warning is
+  source-cited and **not** a confirmed gameplay exception (REA-045).
+  Alternatives remain unlinked.
+  Those same exact source matches
+  project canonical summaries/citations as `ammunition_effects` for Weapon pages,
+  not resolved combined effects or automatic completeness. Omitting a standalone
+  Weapon definition requires an explicit source-profile-pinned review recorded
+  in `data/curated/weapon-shared-effect-reviews.json`, not just linked ammunition.
+  Curated `ammunitionResolution` remains a non-executable, source-cited fact
+  contract: all eleven base Ammunition identities are reviewed. PARA's no-PH
+  exception, T2's reduced Wound
   outcome for an *additional Critical roll*, Shock's VITA-1 exception, and Stun's
   Guts/Courage exception cannot be dropped when consuming facts. Smoke/Eclipse
   use separate `facts.visibilityZone` data with distinct MSV behavior; do not
@@ -311,8 +342,10 @@ When a change alters a durable contract:
 - update the canonical owner, not every document that happens to mention the topic;
 - keep `AI_CONTEXT.md` to non-obvious invariants and links;
 - add unfinished work only to `docs/TODO.md`;
-- add meaningful user/operator outcomes to `docs/CHANGELOG.md` under `Unreleased` during normal
-  development;
+- record meaningful user/operator outcomes in `docs/CHANGELOG.md` under `Unreleased`
+  when the corresponding work is completed, not only at release time; verify
+  documentation impact against the actual diff before handing off (see
+  `AGENTS.md` for the canonical workflow);
 - update README only for public capabilities/setup/major workflow changes; and
 - prefer a small explicit compatibility layer to silently breaking old identifiers, URLs, or source
   artifacts.

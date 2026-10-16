@@ -152,6 +152,10 @@ will actively guide later work.
 
 ## 3. Prepare release notes and metadata
 
+- [ ] Cross-check `Unreleased` against substantive player/operator changes in Git
+  history since the previous release and the last changelog update. Restore
+  missing outcomes, but do not turn commits, tests or internal refactors into
+  individual release-note entries.
 - [ ] Review the complete `Unreleased` section of `docs/CHANGELOG.md` as one release:
   make its `Player summary` concise and player-visible only, merge overlapping detailed entries,
   remove implementation-only detail, and make upgrade consequences explicit.
@@ -175,7 +179,9 @@ checkouts use the existing `+dev` display-version mechanism until release prepar
 - [ ] Run `python tools/verify_deployment_assets.py` and require the tracked Army database,
   rules database, processed SVG publication, and publication snapshot provenance to pass as one
   release set.
-- [ ] Run the complete local validation suite with `python tools/run_checks.py --all`.
+- [ ] Install the pinned Markdownlint dependency with
+  `npm ci --ignore-scripts --no-audit --no-fund` (Node.js 22+), then run the complete local
+  validation suite with `python tools/run_checks.py --all`, including the `docs` stage.
 - [ ] When the release is intended for a local/full-asset deployment, validate the
   complete published asset set with the `required` asset mode as documented in
   `docs/testing.md`.

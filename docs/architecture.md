@@ -137,7 +137,7 @@ renderer owns labels, links, list formatting, and ordinary Skill detail structur
 are excluded from default core help, and cannot grant permanent Army profile facts. Runtime reads
 consume the materialized `rules.db`, independently of curation files.
 
-[The data model](data-model.md#planned-scenario-model-10) owns the implemented contract. Dedicated
+[The data model](data-model.md#scenario-model-implemented-core-and-future-extensions) owns the implemented contract. Dedicated
 scenario collection/publication indexes and central revision-aware selection live in `rules.db`. The
 JSON API exposes the current list plus exact Army-Points detail projections, and `/scenarios` plus
 `/scenarios/<slug>` provide the corresponding player-facing catalog/detail surface. The backend
@@ -198,7 +198,7 @@ pairing, rankings, and mutable match state remain outside
 it.
 
 The detailed accepted scenario model belongs to
-[the data model](data-model.md#planned-scenario-model-10). Source comparison and rationale remain in
+[the data model](data-model.md#scenario-model-implemented-core-and-future-extensions). Source comparison and rationale remain in
 `docs/rules-semantics.md`; concrete implementation tasks remain in `docs/TODO.md`.
 
 ## Identifiers and routing

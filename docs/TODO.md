@@ -1,7 +1,7 @@
 # InfinityDB backlog
 
 This is the working implementation backlog. Every unchecked item belongs to exactly
-one release bucket: **0.10.1**, **1.0.0**, or **post-1.0**.
+one release bucket: **1.0.0** or **post-1.0**.
 The buckets are planning commitments, not a promise that a minor release cannot move a
 low-risk item earlier or defer a non-gating item when evidence changes.
 
@@ -22,68 +22,39 @@ when all contained work shares the same owner.
 
 **Project domain:** Project infrastructure
 
-Version **0.10.0** is released and deployed. The immediate milestone is **0.10.1 —
-interim reference consistency**, followed by **1.0.0 — current-reference completeness**.
-The 0.10.1 candidate includes completed core Scenarios, Ammunition and rules-reference
-improvements developed since 0.10.0, plus the verified stabilization corrections.
-Broader 1.0 development is temporarily paused until this interim release is published;
-the 1.0 acceptance definition and remaining commitments are unchanged.
+Version **0.10.1** was released and deployed on 2026-10-10. The current
+development milestone is **1.0.0 — current-reference completeness**.
+Completed Scenarios, Ammunition, rules-reference and stabilization changes
+belong to the [0.10.1 changelog](CHANGELOG.md#0101---2026-10-10), not a
+pending release checklist.
+
+**0.10.1 release evidence:** [PR #19](https://github.com/frankysan/InfinityDB/pull/19)
+merged to main at 0b83a3b2fef7, and the
+[GitHub release](https://github.com/frankysan/InfinityDB/releases/tag/v0.10.1)
+was published on October 10. For that exact commit, GitHub shows successful
+[Source checks](https://github.com/frankysan/InfinityDB/actions/runs/38057014539)
+(including cross-platform determinism),
+[Installed wheel smoke](https://github.com/frankysan/InfinityDB/actions/runs/38057014543),
+and [Deployment smoke](https://github.com/frankysan/InfinityDB/actions/runs/38057014518).
+Production deployment is user-confirmed. The v0.10.1 tag exists but is
+**lightweight**, rather than annotated as the old checklist requested. Keep
+annotated-tag acceptance for 1.0; do not reopen a published minor release.
+
+The old offline 52/52 browser checks and seven-view responsive check did not
+establish the full real-browser interaction acceptance specified for 0.10.1.
+The later REA-017/026 browser acceptance is narrower as well. Those unverified
+cross-surface checks are now individual tasks under
+[final 1.0 acceptance](#final-10-acceptance).
 
 General performance/storage experiments, major pipeline refactors,
-persistent-user-data features, ITS season/tournament tooling, and native applications are explicitly
-post-1.0 unless they become necessary to correct a release-blocking defect. Core-rules scenarios are
-part of the 1.0 completeness target; their accepted architecture guides the 1.0 implementation.
+persistent-user-data features, ITS content/season/tournament tooling and native
+applications remain post-1.0 unless needed to fix release-critical defects.
+Previously implemented ITS content is retained but is not a 1.0 requirement or
+release blocker. The four N5 core-rules scenarios remain in 1.0 scope.
 
-The public roadmap summary lives in `README.md`; the durable 1.0 acceptance
-definition lives in `docs/releasing.md`. The sections below contain the remaining implementation
-and release work for 0.10.1, 1.0 and later milestones. Completed substeps are retained only under an
-open parent item.
-
-## 0.10.1 — interim reference consistency
-
-**Project domains:** Data processing, Web frontend, Project infrastructure
-
-Implementation stabilization is complete at `7f2923a`. The six corrected areas are
-IMP-2 Discover, Stealth/Deployables, Deployable Cover, TinBot, Fireteam formation
-requirements and Kobra's CC Attribute link; their durable outcomes are recorded in
-`CHANGELOG.md`. This release also publishes the completed improvements since 0.10.0;
-it does not claim 1.0 completeness or require unfinished 1.0 features.
-
-**Candidate status:** Metadata and release notes are prepared for **0.10.1** dated
-2026-10-10. Full local checks, required tracked assets, byte-identical runtime
-database rebuilds and isolated installed-wheel smoke have passed. Real-browser
-acceptance and exact-commit hosted validation remain open; it is not published or
-certified release-ready. Follow the complete
-[release checklist](releasing.md), including the project-wide documentation audit.
-
-- [ ] **Web frontend + Project infrastructure:** Complete real-browser acceptance.
-  The prior offline harness passed 52/52 focused tests and rendered seven affected
-  views at 320, 390, 768 and 1440 pixels without JavaScript exceptions or overflow;
-  that evidence does not verify real navigation or interaction. In a real browser:
-  - inspect IMP-2, Stealth, Deployable Cover, TinBot and Kobra CC reference cards on
-    desktop and narrow screens; follow their rule/Attribute links and source citations;
-  - select an Army on Fireteams, verify formation labels and ongoing-integrity help,
-    change the Wildcard setting, and check navigation back to Unit/reference pages;
-  - browse all four Scenarios, change Army Points quickly, follow scoped rules links,
-    navigate away/back, and check maps in both themes and distance units with
-    keyboard and touch; verify loading/empty/error handling where practical;
-  - open Visibility Zone tooltips and Ammunition/Immunity cross-links by pointer,
-    keyboard and touch; confirm readable sections and no horizontal clipping.
-- [ ] **Project infrastructure:** Land the candidate through the protected-main PR
-  workflow after acceptance/local validation; require successful Source checks
-  (including cross-platform determinism), Installed wheel smoke and Deployment
-  smoke test for the exact final SHA. The checksum-pinned external Full-asset
-  checks workflow is optional unless that bundle is selected as release evidence.
-  Collect hosted evidence, create an annotated `v0.10.1` tag and publish only with
-  explicit authorization. Deployment and post-release verification follow separately.
-
-**Deferred intentionally to 1.0:** the remainder of REA-016/020 and the
-broader Peripheral (REA-017), Hacking/Supportware (REA-018/019), Special Dice
-(REA-021), General Rules (REA-026), weapon-composition/metadata (REA-025/044),
-Spec-Ops (REA-040), full source reconciliation and completeness inventory.
-Explicitly unresolved source disagreements (including Kobra Anti-materiel),
-source-normalization baselines and optional enhancements are not new 0.10.1
-regressions. The 1.0 plan below remains the owning backlog for those tasks.
+The public roadmap lives in README.md; the durable 1.0 release gate
+lives in docs/releasing.md. All unchecked tasks below belong to 1.0
+or post-1.0.
 
 ## 1.0.0 — current-reference completeness gate
 
@@ -135,11 +106,35 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     baseline, separate from the shared local Wiki snapshot; report local source-file
     hash comparisons only when exact bytes are available and distinguish missing and
     unpinned artifacts from verified ones.
-  - [x] Reconcile all 103 currently published Wiki `oldid` identities with exact
-    historical page payloads in the separately supplied 2026-09-28 history archive.
-    `tools/audit_1_0_reference_inputs.py` checks each page title and embedded revision
-    ID, including historical Protheion 3908. This establishes source **availability**,
-    not curation completeness or equivalence to the pinned 2026-09-18 Wiki snapshot.
+  - [x] Reconcile the initial 103 English Wiki `oldid` identities with exact
+    historical page payloads in the 2026-09-28 history archive. The maintained
+    source audit verifies each page title and embedded revision ID, including
+    historical Protheion 3908. This establishes source **availability**,
+    not curation completeness or equivalence to the removed September 18 capture.
+  - [x] Re-run the 1.0 source-input audit using separate English and Spanish
+    Wiki history archives and the September 26 curated Wiki capture. All 110
+    currently published `oldid` identities verify against language-matched history
+    payloads; the refreshed capture audit now resolves 80 curated
+    citation/vocabulary references across 68 pages (including Activate Disco
+    Ball) with all 80 headings and page revision IDs
+    verified. The audit checks exact
+    local archive hashes, but does not establish historical content equivalence,
+    rules correctness or browser completeness.
+  - [x] Replace the unavailable September 18 English Wiki citation snapshot with
+    the validated September 26 capture, correcting three changed member paths.
+    All cited headings and September 28 archived page revision IDs were verified;
+    retain the missing original as a historical evidence limitation.
+  - [x] Revalidate the current bilingual source-input baseline with the 1.0
+    audit against newly built rules storage: all **113/113** pinned historical
+    Wiki revisions, **82/82** English snapshot references across 70 pages and
+    **2/2** Spanish references across two pages verify with their own archive
+    hashes, member/headings (including dated errata), and language-matched
+    histories. The shipped Army archive hash also matches its publication
+    pin. Evidence is ignored under `local/audits/`; correctness, FAQ scope,
+    relationships and normal browser completeness still require review.
+  - [ ] Review any change-sensitive curated interpretations that cannot be
+    established from the available September 26 capture; the missing original
+    cannot be used to prove earlier content equivalence.
   - [ ] Pin the intended Army snapshot, rules/FAQ/annex PDF versions, and supported wiki evidence.
     Record archive/content hashes as appropriate, publication dates separately from acquisition
     dates, and the generated database/publication identities. A later source refresh reopens the
@@ -309,25 +304,556 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       values and identify the distinct ammunition/trait/state effect owners.
       Evidence: `config/validation/mine-variant-effects.json` and
       `docs/rules-research.md` RR-WPN-MINE-002; PARA footnote remains unresolved.
-    - [ ] Complete an individual-variant review for AP, E/M, Monofilament, PARA,
-      Shock, Viral, and Cybermines against the N5 Weapon Chart, ammunition and
-      State rules, and Army profiles. Shared placement/trigger rules must not be
-      mistaken for identical weapon effects or complete per-variant semantics.
+    - [x] Complete a bounded, source-pinned individual-variant review of AP,
+      E/M, Monofilament, PARA, Shock, Viral and Cybermines against the N5.3
+      chart, owning Ammunition/State rules and Army profiles. Seven
+      printed profile anchors and eleven distinct effect clauses are now
+      tested, including AP rounding, E/M target types, Monofilament ARM=0,
+      PARA missing-PH immunity, VITA-conditional Shock/BioWeapon, and the
+      Cybermine Reset exception. Six Mine-object S0/S1 and the PARA [*]/[**]
+      source discrepancies remain explicit and unresolved. Shared Mines
+      placement/trigger behavior is still separate from variant effects;
+      this is not a game-state simulator or exhaustive N5 rules proof.
+      See RR-WPN-MINE-003 and config/validation/mine-variant-effects.json.
     - [x] Publish individually reviewed Mine effect/reference links from the
       curated family definition to the Weapon profile, including ammunition
       and applicable State/Skill links; do not infer effects for unreviewed weapons.
-    - [ ] Manually verify Mines/Cybermine/Chest Mine browser detail cards, rule
-      links, citation rendering, and both Chest Mine modes; then reconcile any
-      resulting navigation/presentation defects. Source-backed API enrichment
-      alone does not establish browser acceptance.
-    - [ ] Reconcile auxiliary/equipment object profiles and special-weapon
-      prose clause by clause; identify missing facts, relationships, and browser
-      coverage separately from raw source notation differences.
-    - [ ] Review the six unmatched chart-text names as aliases, multi-mode entries,
-      or source-specific rules (including Chest Mine and SymbioBomb). Reconcile all
-      Weapon Chart rows and special-weapon text against N5 v5.3 pp. 68–74 and 176–188,
-      published Weapon identities and their API/browser profiles; classify each gap
-      as missing facts, relationships, or merely missing a standalone definition.
+    - [x] Browser-verify seven named Mine profiles and both Chest Mine
+      modes at 1440, 390 and 320 px: 171/171 assertions passed for
+      rule cards, profiles, citations, missing family inheritance,
+      JavaScript errors and overflow. Cross-page Mines glossary/WildParrot
+      navigation and local anchors passed 42/42 checks at the same widths.
+      Evidence is retained under ignored local/audits/.
+    - [x] Visually inspect desktop/mobile browser screenshots of the seven
+      named Mines and both Chest Mine modes, including citations and responsive
+      typography. The review found Cybermine rendering numeric 0 as its
+      Ammunition and long shared Mines text hiding specific profiles. Display
+      absent Ammunition as "--", place named-Mine profiles first and put
+      variant-specific references before shared Mines rules. Chest Mine BS/CC
+      presentation is unchanged. Headless Chrome passed 225/225 assertions
+      across all eight pages at 1440/390/320 px. See RR-WPN-MINE-004.
+    - [ ] Obtain independent human visual acceptance if required for the 1.0
+      release; agent-reviewed screenshots and automated browser assertions
+      are evidence, not a human sign-off.
+    - [x] Reconcile the initial 119 unresolved Army Weapon enrichment entries
+      against the exact N5 v5.3 PDF chart evidence and retained catalog categories
+      using `tools/audit_weapon_definition_gaps.py`. The pinned Army database
+      and 171 compared chart rows agree on the source identity. Results:
+      115 chart-listed Weapons without standalone reviewed definitions,
+      2 existing family-rule mapping ambiguities (Cybermine and PARA Mine),
+      1 stale citation source (Flash Pulse), and 1 chart-absent source identity
+      (SymbioBomb). This is source/profile availability evidence, **not**
+      115 verified missing gameplay facts or completed browser coverage.
+      The initial 29 review batches were generated under ignored `local/audits/`;
+      subsequent fixes reduced the current total as recorded below.
+    - [x] Reconcile the original three existing-reference flags. Cybermine and
+      PARA Mine intentionally layer specific effects over `weapon:mines` through
+      `uses-effects-of`; the coverage audit now recognizes a unique, acyclic
+      specific-to-shared chain while retaining both cards and rejecting unrelated
+      overlaps. Flash Pulse retains the reviewed Spanish N5.2 Immunity revision
+      as comparative evidence, with a narrow accepted-historical-source policy
+      override; the distinct Spanish N5.3 Wiki Weapon Chart conflict (REA-027)
+      remains open. Neither rule text nor upstream Army profiles were rewritten.
+    - [x] Publish a standalone, cited SymbioBomb Weapon reference from N5.3
+      p. 74 and the pinned English Wiki page. Differentiate Unit Profile owner
+      from Deployment-assigned user, the three permitted Pheroware Tactics,
+      Endgame/Eraser's -3 Face to Face MOD, and end-of-Order removal. The
+      catalog entry has no independent Weapon Chart attack profile, so none
+      was synthesized; the existing owner/loadout records remain unchanged.
+    - [x] Refresh the Weapon triage after these corrections: 115 chart-listed
+      definition-review items, 1 explicitly accepted historical citation,
+      no ambiguous family mappings and no chart-absent unrepresented entry.
+      Source-based batch planning now produces 26 definition-review batches
+      plus 1 retained citation-evidence batch; local reports are ignored.
+    - [x] Browser-accept SymbioBomb at 1440, 390 and 320 px in headless Chrome,
+      with source citations, no horizontal overflow or JS exceptions, desktop
+      and keyboard navigation to PT, and preview-first/two-tap mobile links.
+      Desktop and 320 px full-page screenshots were visually inspected. No
+      independent attack profile is shown; real session assignment remains
+      outside this static reference. Evidence stays under ignored local/audits/.
+    - [x] Complete the first eight-identity Uncategorized Weapon batch.
+      D-Charges (N5.3 pp. 70/186) and Disco Baller (pp. 71/186) retain their
+      specific mode, charge, deployment, and activation rules. Nanopulser,
+      Pulzar, Chain Rifle, Chain-colt, E/Mitter and Missile Launcher now have
+      source-cited summaries and typed ammunition/trait/Skill links matching
+      their exact printed chart profiles (pp. 186–187). The template size,
+      ARM versus BTS Saving Roll, E/M disabling effects and Hit versus Blast
+      Mode are explicit; no Army statistics were rewritten. Updated source
+      triage: 107 remaining definition-review Weapons, 1 reviewed historical
+      citation, and 25 definition-review batches plus the citation-evidence batch.
+    - [ ] Browser-review the new D-Charges and Disco Baller cards (both source
+      modes, related reference links, mobile layout and citations); API coverage
+      does not substitute for this acceptance.
+    - [x] Create source-only `skill:activate-disco-ball` with verified N5.3
+      p. 71 and matching English Wiki evidence. Keep its Deactivator, allied
+      Ball, LoF/ZoC, WIP +3, range MOD and Eclipse timing requirements
+      explicit; add inline and related-rule navigation from Disco Baller.
+      It has no fabricated Army Skill profile. Browser acceptance passed
+      23/23 scenarios (seven reference pages × three viewport widths,
+      desktop click and touch preview-then-navigation).
+    - [x] Complete the first eight-identity CC Weapon batch (CC, PARA, DA,
+      AP, Shock, E/M, EXP and Viral). All eight have curated N5.3 p. 177
+      definitions, unchanged Army profiles, typed effect relationships and
+      reviewed interaction entries. Viral's BioWeapon (DA+Shock) VITA-versus-STR
+      resolution is explicitly **derived** from the source Trait and printed
+      N/BTS/one-save baseline; unresolved Immunity combinations are not certified.
+      N+E/M preserves its printed two BTS/2 saves without an invented extra ARM
+      Roll. A generic CC Weapon requirement remains distinct from the named
+      Army Weapon entry. Browser acceptance passed 26/26 viewport/navigation
+      checks, with 320 px EXP/Viral screenshots reviewed; evidence is Git-ignored.
+      The refreshed triage has 99 definition-review Weapons in 24 bounded
+      batches plus Flash Pulse's accepted historical citation.
+    - [x] Complete the eight-identity Pistol batch (Pistol, Heavy, Boarding,
+      Breaker, Assault, AP Heavy, Silenced and MULTI). The N5.3 p. 182 profiles
+      remain unmodified; the player-facing rules now distinguish Boarding
+      Blast/Hit traits, AP against ARM versus BTS, Shock, the conditional
+      Silent (-6) Dodge modifier (p. 175), combined AP+Shock (p. 67), and
+      MULTI's three non-stacking modes. Related ammunition/trait/Skill links
+      and interaction reviews are current. Browser acceptance passed 26/26
+      scenarios across three viewport widths and two navigation behaviors;
+      320 px Boarding/Silenced/MULTI screenshots were inspected.
+      The refreshed triage shows 91 definition-review Weapons in 23 batches,
+      plus Flash Pulse's accepted historical citation.
+    - [x] Introduce canonical ammunition-summary reuse on Weapon profiles:
+      exact source ID/name matches project each published component's summary,
+      citations and route as display-only `ammunition_effects`. The UI offers
+      expandable shared explanations, without deriving combined Saving Rolls,
+      Immunity outcomes or mode effects. AP CC Weapon, AP Heavy Pistol,
+      Breaker Pistol and Silenced Pistol now keep only profile-specific prose;
+      AP Rifle demonstrates reuse without a standalone curated Weapon rule.
+      The initial UI/API pilot passed focused regression and browser checks.
+    - [x] Split the Weapon gap triage into **pending review categories** rather
+      than implying every absent Weapon paragraph is a missing rule.
+      The refreshed source-bound audit (v2) has 92 unresolved entries:
+      89 with all canonical ammunition components linked, 2 special objects
+      requiring separate effect/source review (Pitcher, Mine Dispenser), and
+      Flash Pulse's accepted historical citation. 17 multi-profile Weapons
+      require explicit mode-by-mode review. Batching: 22 shared-effects-review
+      batches, 2 missing-effect-links batches, and 1 historical-citation batch.
+      The previous 91-item report was stale; both the committed and current
+      rules databases independently report 92 entries.
+    - [x] Review the initial eight Rifle identities against the N5.3 p. 183
+      chart. MULTI Rifle and K1 Combi Rifle require dedicated source-cited
+      explanations for mode-specific Traits/Saving Rolls and the printed
+      N with ARM=0 respectively. Combi Rifle, Rifle, Adhesive Launcher Rifle,
+      Breaker Combi Rifle, AP Rifle and T2 Rifle reuse canonical ammunition
+      and source Trait links without six duplicated Weapon descriptions.
+      Those six decisions are pinned to exact Army profile hashes in
+      `data/curated/weapon-shared-effect-reviews.json` and invalidated if a
+      source profile changes; the triage keeps reviewed decisions visible.
+      The source audit now reports 83 remaining actionable Weapon reviews,
+      6 explicitly accepted shared-only identities, and 16 pending
+      multi-profile candidates. Browser acceptance passed 26/26 viewport and
+      navigation checks, with mobile first-tap preview and three 320 px
+      screenshots reviewed. Private evidence is under ignored `local/audits/`.
+      The remaining batch order begins with Shotguns.
+    - [x] Complete source-specific review of the five N5.3 p. 184 Shotguns
+      (Boarding, Light, Vulkan, Heavy, T2 Boarding) without duplicating
+      canonical Ammunition explanations. The source lists no Direct Template
+      for these profiles. Vulkan's Army spelling `Continous Damage` resolves
+      through its reviewed alias to the Continuous Damage Trait; T2 Boarding
+      retains Anti-materiel. All five are pinned by source profile hash in
+      `data/curated/weapon-shared-effect-reviews.json`, with no new
+      standalone Weapon definition required.
+    - [x] Review both N5.3 p. 185 Submachine Guns. The standard
+      Submachine Gun (N/ARM) and AP Submachine Gun (AP/ARM/2) share
+      PS 7, Burst 3, Range MODs and Suppressive Fire. Their existing
+      canonical ammunition and Trait references are sufficient; no
+      standalone Weapon explanation is required. Both decisions are
+      pinned to the exact Army source profiles in
+      `data/curated/weapon-shared-effect-reviews.json`.
+      Browser acceptance passed 8/8 checks across 1440/390/320 px,
+      including desktop Trait and mobile Ammunition navigation.
+    - [x] Review the next eight Uncategorized Weapons against N5.3
+      chart pp. 186–188. Feuerbach and Hyper-Rapid Magnetic Cannon
+      now have distinct, source-cited explanations for mutually exclusive
+      modes and their different Burst, Saving Rolls and Traits. E/Marat,
+      Mk12, Zapper, Contender, Crazykoala and Madtraps reuse canonical
+      Ammunition/Traits without duplicating prose; those six decisions
+      are pinned to exact Army profile hashes in the shared-review policy.
+      E/Marat/Zapper retain distinct template sizes, while Crazykoala
+      and Madtraps inherit Boost movement/contact only through Boost,
+      never WildParrot or Mines effects. Browser checks passed 26/26
+      across three viewport widths, including desktop and mobile links.
+    - [x] Review the three N5.3 p. 179 Heavy Machine Guns without
+      duplicating shared rules. Standard HMG (N/ARM) and AP HMG (AP/ARM/2)
+      use source-pinned shared Ammunition/Suppressive Fire explanations
+      with PS 5, Burst 4 and identical ranges. MULTI HMG has a cited,
+      mode-specific reference: EXP/Anti-materiel B1 with three ARM Rolls
+      versus AP or Shock B4 with one Roll and Suppressive Fire. The
+      review ledger and 11/11 viewport/navigation browser checks are
+      current; 320 px screenshots were inspected.
+    - [x] Review the four N5.3 p. 178 Disposable Support Weapons.
+      Panzerfaust, Blitzen and Akrylat-Kanone reuse source-linked
+      Ammunition, Disposable and other Traits; each shared-only decision
+      is pinned to its exact Army profile hash. Panzerfaust's AP+EXP
+      profile retains three ARM/2 Rolls, Blitzen's [**] source footnote
+      refers to E/M effects, and Akrylat-Kanone retains PARA/PH-6
+      with the IMM-A source notation. Flammenspeer has a dedicated
+      source-cited rules card: its Blast Mode uses N/ARM with an
+      Impact Template; Hit Mode uses AP/ARM/2 without a Template.
+      Continuous Damage and Disposable (2) apply to both modes.
+      Browser acceptance passed 14/14 checks with narrow screenshots
+      and desktop/touch navigation reviewed.
+    - [x] Review N5.3 p. 185 Spitfires. Standard (N/ARM) and AP
+      (AP/ARM/2) Spitfires reuse Normal/AP Ammunition and Suppressive
+      Fire with PS 6, Burst 4 and identical ranges. Their shared-only
+      source profiles are fingerprinted in
+      `data/curated/weapon-shared-effect-reviews.json`. MULTI Spitfire
+      now has its own cited explanation: DA Anti-Materiel B1/two ARM
+      Saving Rolls versus AP/ARM/2 and Shock/ARM B4/one Saving Roll
+      with Suppressive Fire. Army's source mode spelling
+      `Anti-Material Mode` is preserved; the official chart uses
+      `Anti-Materiel Mode`. Browser checks passed 11/11,
+      including desktop Trait and mobile DA preview/navigation.
+    - [x] Reconcile the four N5.3 p. 178 Grenades (Smoke,
+      standard, E/M and Eclipse). The original single-mode profiles
+      retain Speculative Attack, BS Weapon (PH), circular Impact
+      Template, their distinct range MODs and Saving Rolls, and
+      optional Non-lethal/Targetless/Reflective/[**] Traits.
+      Smoke and Eclipse reuse their separately reviewed visibility-
+      zone rules; E/M uses two BTS/2 Saving Rolls and standard
+      Grenades one ARM Saving Roll. No standalone Weapon text
+      is necessary. All four decisions are pinned to exact Army
+      source profiles; browser acceptance passed 14/14 checks.
+      Also correct reused Ammunition descriptions to render
+      maintained-text links rather than raw [[reference]] syntax.
+    - [x] Review the remaining four N5.3 p. 185 Sniper Rifles. MULTI
+      retains distinct DA/ARM two-roll Anti-Materiel, AP/ARM/2 and Shock/ARM
+      modes at Burst 2; K1 has Normal Ammunition with ARM=0; Viral retains
+      conditional BioWeapon effects for VITA versus STR; Plasma Blast and Hit
+      retain one ARM plus one BTS Saving Roll, with a Critical adding only one
+      extra ARM roll. All four have source-cited references and interaction
+      reviews, without rewriting the Army profiles. API regression checks
+      preserve mode-specific Traits and linked reusable effects.
+    - [x] Browser-review the four new Sniper Rifle cards at 1440, 390 and
+      320 px, including source citations, shared-effect links and mode-specific
+      explanations. Desktop BioWeapon navigation and mobile DA preview/two-tap
+      navigation passed (14/14 checks). All four 320 px screenshots were
+      inspected; no horizontal overflow or JavaScript errors were observed.
+      Private evidence is under `local/audits/sniper-rifles-browser/`.
+    - [ ] Continue extending the reviewed Weapon Properties inventory beyond
+      Plasma, Viral, Breaker, K1, MULTI, Monofilament, Silenced, four
+      AP-based combinations and the reviewed N+E/M form. Review further
+      name/Traits exceptions and
+      consolidate repeated weapon prose where source/mode-specific information
+      remains intact. Initial Viral CC/Sniper, Plasma Sniper, Silenced Pistol
+      and the printed Monofilament Immunity example now link their relevant
+      Properties directly in maintained-text prose; the E/M CC Weapon
+      now links its printed N+E/M combination. Other candidates still
+      need source-by-source review.
+    - [x] **REA-045 ? Armed Turret E/Mitter source disclosure:**
+      Verified that all six captured Army Turret E/Mitter modes use one
+      BTS/2 Saving Roll versus two for standalone E/Mitter, both N5.3
+      Weapon Charts and canonical E/M. Keep the imported source profile
+      unchanged; its source-cited conflict is published in secondary
+      source notes with links to E/Mitter and E/M Ammunition, separate
+      from the REA-037 Silhouette conflict. Focused database, regression
+      and browser checks cover the discrepancy and related links.
+    - [ ] **REA-045 ? Official Armed Turret E/Mitter ruling:** Seek an
+      applicable Corvus Belli erratum/FAQ or scoped confirmation of
+      whether the Turret profile's one Saving Roll is intentional or
+      the two-roll canonical E/Mitter applies. Do not infer a unique
+      turret E/M rule or overwrite Army source data in the meantime.
+    - [x] Browser-review all twelve current Weapon Properties and rule-origin
+      navigation at 1440, 390 and 320 px, plus global search at 1440 and
+      320 px, including touch preview/second-tap navigation, 76 passing
+      browser checks, no overflow/JavaScript errors, and inspection of
+      representative narrow-screen screenshots. Private
+      evidence is in `local/audits/weapon-properties-browser/`.
+    - [x] Curate the N5.3 Light/Heavy Flamethrowers as one shared Weapon family,
+      preserving PS 7/Small Teardrop and PS 6/Large Teardrop profiles. Linked
+      Direct Template, Intuitive Attack, Continuous Damage and Normal Ammunition
+      rules are reused rather than duplicated. Official N5.3 p. 178, the
+      September 26 Wiki Weapon Chart, and Army metadata agree. The missing
+      Weapon-definition audit decreases from 81 to 79; API and responsive
+      browser checks cover both versions without affecting Flammenspeer.
+    - [x] Complete the N5.3 Marksman Rifle batch: six previously undefined
+      single-mode variants share one source-backed family and per-variant
+      rule navigation, while Breaker retains its independent definition and
+      MULTI receives a distinct three-mode definition. The official N5.3
+      Weapon Chart, pinned Wiki and imported Army profiles agree; the
+      general family does not override mode-specific Ammunition or Traits.
+      Missing Weapon definitions decrease from 79 to 72 with no ambiguous
+      family mappings. API and responsive browser regression evidence is
+      recorded privately under `local/audits/`.
+    - [x] Publish Pitcher and Mine Dispenser as source-specific support
+      Weapon definitions. Pitcher places Deployable Repeater Equipment,
+      while Mine Dispenser applies Drop Bears BS-mode placement with a
+      profile-specified Mine subtype and the launcher's own BS/Double Shot
+      profile. Preserve no-damage/no-Saving-Roll semantics and the imported
+      Mine Dispenser non-operative savingNum=1 value. The N5.3 PDF, pinned
+      Wiki, Army and applicable FAQ support the descriptions; missing
+      Weapon definitions decrease from 72 to 70 with no new blocker.
+    - [x] Reconcile the current post-support-weapon gap triage against
+      a freshly built rules database, not the stale generated rules.db.
+      Of the remaining 70 classified Weapon gaps, 33 existing reviewed
+      shared-effects decisions and one accepted historical citation were
+      already non-actionable. Review Breaker Rifle, Viral Combi Rifle,
+      Viral Rifle, Viral Pistol and Viral Tactical Bow against N5.3 chart,
+      pinned Army profiles and canonical Weapon Properties. Their linked
+      AP/Normal Ammunition, BioWeapon, Silent and Suppressive Fire rules
+      suffice; record five profile-hash-pinned shared-only decisions
+      without duplicating rules or altering imported Weapon profiles.
+    - [x] Review Red Fury, AP Red Fury, and Thunderbolt against the N5.3
+      Weapon Chart, archived English/Spanish Wiki charts and imported
+      Army profiles. Each has source-exact Ammo, Saving Roll, range
+      and canonical effect links; record three hash-pinned shared-only
+      decisions rather than duplicating definitions. Preserve the
+      AP Thunderbolt N-versus-AP source discrepancy separately:
+      N5.3 and Army show AP/ARM/2, while both archived Wiki charts
+      show N/ARM/2. Do not treat that identity as source-reconciled.
+    - [x] Source-review Tactical Bow, Ohotnik, T2 CC Weapon, AP+DA
+      CC Weapon and AP+Shock CC Weapon against the N5.3 chart,
+      imported Army and captured Wiki. Their existing DA/T2/AP/Shock,
+      Anti-materiel, Silent and CC links and AP+DA/AP+Shock Weapon
+      Properties explain the printed profiles, including two rolls
+      for DA but only one for T2 and AP+Shock. Record five full-profile-
+      hash-pinned shared-only decisions; no new rule cards or profile
+      rewrites are necessary.
+    - [x] Source-review E/M Carbine, AP+T2 CC Weapon, Monofilament
+      CC Weapon, and Light/Heavy Riotstoppers against the N5.3 PDF,
+      imported Army and archived English/Spanish Wiki charts. Reuse
+      canonical E/M, AP+T2, Monofilament and PARA descriptions;
+      keep the two Riotstopper template sizes distinct. Add five
+      profile-hash-pinned shared-only decisions without duplicating
+      rule cards or changing gameplay.
+      The AP+EXP CC Weapon and Stun Pistol Spanish Wiki Saving Roll
+      conflicts (and missing Stunned Trait) are now published with
+      official N5.3 and Army baseline; official correction is pending.
+    - [x] Source-review Smoke, standard, E/M and Eclipse Grenade
+      Launchers plus Portable Autocannon against N5.3, pinned Army
+      and archived English/Spanish Wiki where available. The four
+      launchers reuse their exact canonical Ammunition, Speculative
+      Attack and Impact Template rules; the Autocannon reuses
+      AP+EXP with Anti-materiel. Preserve the Army Eclipse
+      savingNum=1 field but treat it as non-operative with no
+      Saving Roll Attribute, as in the printed source chart.
+      Record five full-profile-hash-pinned shared-only decisions.
+    - [x] Source-review Katyusha MRL and Jammer as hash-pinned
+      shared-effects-only Weapons. The existing RR-SRC-N53-003
+      review establishes Katyusha's PDF unsigned `3` as an omitted
+      plus sign; Army and both Wiki languages show `+3`.
+      Jammer's Comms Attack/No LoF Labels and Isolated State
+      resolve through `public_reference` rather than Trait slugs;
+      canonical WIP, Intuitive Attack, Disposable and Non-Lethal
+      rules provide the remaining linked behavior.
+    - [x] Source-review Heavy/Light Rocket Launchers and Plasma
+      Rifle/Carbine against N5.3 pp. 67, 176, 183 and 184, pinned Army,
+      and captured English/Spanish Wiki. All four have paired Blast/Hit
+      modes with distinct PS and Blast-only Circular Impact Template;
+      Rockets retain Continuous Damage, while Plasma uses shared
+      Combined Saving Rolls and only the Rifle has Suppressive Fire.
+      Record four profile-hash-pinned shared-only reviews and preserve
+      imported Army 'Continous Damage' as a source alias.
+    - [x] Source-review Trench-Hammer, Vorpal CC Weapon, MULTI Red Fury
+      and Uragan MRL against N5.3 pp. 68, 177, 183 and 188, imported Army,
+      archived EN/ES Wiki and the dated official N5.3 change notice.
+      Preserve BS/CC and mode-specific effects, remove no source fields,
+      and record four profile-hash-pinned shared-only decisions.
+      Trench-Hammer is not Disposable (3) in N5.3; older alternative Wiki
+      entries retain that historical Trait. Uragan's Spanish 'MTL' Hit
+      Mode name is a source typo, not an additional Weapon.
+    - [x] Publish source-cited Weapon references for AP Thunderbolt,
+      AP+EXP CC Weapon and Stun Pistol, showing the bilingual N5.3 PDF
+      and Army baseline alongside conflicting archived Wiki chart rows.
+      Keep AP versus N, three versus two EXP Saving Rolls, and Stun's
+      one versus two rolls/missing Stunned Trait distinct and explicit.
+      No Army fields or canonical Ammunition mechanics were changed.
+      The rebuilt source-bound triage now reports 67 classified Weapon
+      entries: 66 accepted shared-effects, 1 accepted historical citation,
+      0 pending source/effect/mode reviews, and 0 missing effect links.
+    - [ ] Seek authoritative publication corrections for AP Thunderbolt
+      (both Wiki languages), AP+EXP CC Weapon (Spanish Wiki) and Stun Pistol
+      (Spanish Wiki). Their current player-facing source notes retain
+      the discrepancies; closing source-coverage review does not imply
+      that Corvus Belli has resolved the underlying publication conflicts.
+    - [x] Extend the N5.3 auxiliary object-profile audit beyond Disco Ball
+      to all 14 printed four-Attribute profiles on pp. 181/186. All resolve
+      to Army identities: seven full matches and seven S-only conflicts.
+      Both PDF languages specify S0 for six named Mines while Army gives S1;
+      Dazer is English S1 versus Spanish/Army S0. See RR-AW-OBJECT-002.
+    - [x] Reconcile the seven disputed supplementary object Silhouettes
+      across pinned EN/ES N5.3 PDFs, EN/ES Wiki Weapon Charts, dedicated
+      Dazer pages and imported Army metadata in a reproducible offline
+      provenance matrix. All six named Mines agree on S0 in both PDFs
+      and Wiki charts while Army gives S1; Dazer has additional
+      contradictions within the Wiki itself. Keep publication contexts
+      distinct and retain source hashes under ignored local/audits/.
+    - [ ] Establish official precedence or corrections for the six Mine
+      S0-versus-Army-S1 discrepancies and Dazer's cross-publication
+      S0/S1 conflict before modifying profiles or publishing a definitive
+      active-object geometry ruling. S0 itself remains a valid N5.3
+      template (25 mm base, 3 mm high; general rules p. 18), also
+      present in N5.1/N5.2.
+    - [x] Explain N5.3's separate S2 rule for Weapon/Equipment
+      Camouflaged Markers on the shared Mines card (pp. 157/175),
+      without assigning S2 to revealed MINE Tokens or resolving their
+      S0/S1 publication discrepancy. Preserve Chest Mine's separate
+      behavior and add cited API regression coverage.
+    - [x] Make S0/SX discoverable in the Glossary alongside S1-S8
+      diagrams and in unit Silhouette previews. State S0's fixed
+      25 mm by 3 mm geometry and SX's Prone-only 3 mm height with
+      inherited base width. Preserve the shared-scale S1-S8 diagrams
+      without inventing SVG assets for the other templates.
+    - [ ] Continue the broader auxiliary/equipment-object and special-weapon
+      prose review, including entries without four printed Attributes.
+      Identify missing facts, relationships and browser coverage separately
+      from source notation differences.
+    - [x] Classify the archived English Wiki Weapon Chart text-name mismatches
+      against pinned Army identities: 208 rows, 174 distinct names/modes,
+      162 exact matches, ten explicitly identified plural aliases, one
+      Feuerbach Blast/Explosive Mode name alias and one generic non-Weapon
+      Suppressive Fire row; zero unresolved identities. Preserve the four
+      different-valued duplicate modes (Trench-Hammer BS/CC and Kobra BS/CC)
+      for their separate source/profile reviews. SymbioBomb is source-prose
+      only without an Army/Chart attack profile. See RR-AW-WIKI-NAMES-001.
+    - [x] Extend the pinned family clause audit from 21 to 38 selected
+      clauses: Perimeter (7), Mines (14), Armed Turret (8), and
+      D-Charges (9). All have source and curated-summary evidence.
+      Refresh four drifted Mines/Chest Mine anchors. Armed Turret now
+      names Disposable (1), Non-Reloadable, Zone of Control placement,
+      and links to Place Deployable. See RR-WPN-FAMILY-002.
+    - [x] Extend the pinned N5.3 selected-clause review by 30 clauses
+      across Disco Baller (8), Drop Bears (6), Mine Dispenser (2),
+      Sepsitor (5), SymbioBomb (6), and WildParrot (3), reaching
+      68 reviewed clauses in ten sections with no missing curated
+      concepts. Publish SymbioBomb's three printed Traits without
+      fabricating an Army attack profile. Automated browser assertions
+      passed 132/132 across 1440, 390 and 320 px for seven weapon pages.
+      See RR-WPN-FAMILY-003.
+    - [x] Add Pitcher to the pinned family audit (seven clauses on
+      N5.3 p. 73) and verify twelve selected outgoing typed relations
+      from ten Weaponry sections against a freshly generated rules DB.
+      Fail closed on absent relation input or invalid/duplicate policy
+      edges; regression tests cover real and deliberately missing
+      relations. This adds relationship evidence without changing
+      curated rules or Army source profiles. See RR-WPN-FAMILY-004.
+    - [x] Verify the source-backed Deployable trigger exception:
+      an otherwise qualifying Dodge ARO declaration can trigger a
+      Mine, but Dodge movement and movement caused by failed Guts
+      Rolls cannot trigger Deployables or create new AROs. Stealth
+      does not disable Mine triggering, while Boost has distinct
+      enemy Model / exempt Marker rules. Add links and source cites
+      to the shared Mines card plus PDF-pinned and API regressions;
+      preserve canonical Dodge/Guts/Stealth owners. The responsive
+      browser check passed 297/297 assertions at 1440, 390 and 320 px.
+      See RR-WPN-DEPLOYABLE-EXCEPTIONS-001.
+    - [x] Reconcile Boost Model-only triggers against Mines' Model-or-Marker
+      Trigger Area and the independent Place Deployable restrictions.
+      A CAMO Marker alone remains ineligible for Boost and limits
+      placement, even though a valid non-Camouflaged enemy in the
+      area permits legal placement. Intuitive Attack is an exception
+      only when it can legally be declared. Boost begins triggering
+      only after activation at the Order's Conclusion. Add player-facing
+      links, pinned source/API regressions and responsive browser checks.
+      See RR-WPN-DEPLOYABLE-EXCEPTIONS-002.
+    - [x] Distinguish the three relevant Deployable resolution paths:
+      no-Roll Place Deployable in Drop Bears Deployable Mode; legal
+      Intuitive Attack placement using unmodified WIP, where a failed
+      Roll places no Token but spends one Disposable use; and BS Mode
+      throwing using PH-based BS Attack, where failure likewise spends
+      a shared use. Preserve both modes' common Disposable (3) pool,
+      the Order's Conclusion activation, and the BS-mode no-same-Order
+      detonation restriction. Automated browser checks passed
+      66/66 assertions across desktop and mobile widths.
+      See RR-WPN-PLACEMENT-001.
+    - [x] Confirm Mine Dispenser inherits the BS Mode procedure
+      of Drop Bears, not its PH Weapon Trait, Deployable Mode
+      or Intuitive Attack. Failed BS Rolls place no Token but
+      still expend their declared Disposable uses; Double Shot
+      consumes both remaining uses when selected. The launched
+      Mine Token remains visible and follows the CAMO/valid-enemy
+      placement exception and no-same-Order-detonation timing.
+      Preserve the bracketed Mine subtype and imported profile.
+      Automated browser checks pass 57/57 at desktop/mobile widths.
+      See RR-WPN-PLACEMENT-002.
+    - [x] Review Pitcher and Disco Baller as delivery weapons versus
+      separate deployed objects: successful BS delivery, failed-Roll
+      Disposable consumption, independent object Attributes/effects,
+      Conclusion-step placement, and the FAQ's non-vertical-surface
+      and occupied-landing exceptions. Disco Baller reactivation is
+      a separate Deactivator/WIP Skill, not another launcher use.
+      Preserve source profile modes and established relationship owners.
+      Browser checks passed 75/75 at desktop and mobile widths.
+      See RR-WPN-DELIVERY-001.
+    - [x] Audit the deployed Deployable Repeater rather than only
+      Pitcher's launcher: distinguish Place Deployable from Pitcher
+      BS delivery, explicitly link the live Token's Hacking Area
+      extension and enemy-Repeater/Firewall/ARO restrictions to
+      their canonical owners, and explain removal and loss of
+      that extension. Check Disco Ball States Phase deactivation
+      against destruction and separate Deactivator reactivation
+      without copying mechanics onto the launcher. See
+      RR-WPN-DEPLOYED-001. Headless Chrome passed 78/78
+      assertions across desktop and mobile widths.
+    - [x] Review the independent FastPanda and WildParrot object
+      lifecycles. FastPanda's one-use Indiscriminate Perimeter
+      placement deploys a static Repeater (not Boost) after
+      Conclusion; WildParrot has one E/M Mine use, legal
+      Intuitive Attack WIP/failure handling, a visible S1
+      Token, and no trigger during the placement Order.
+      Keep the printed WildParrot Non-Lethal vs Army omission
+      unresolved. Browser checks passed 60/60 at
+      1440, 390 and 320 px. See RR-WPN-DEPLOYED-002.
+    - [x] Review Dazer as persistent Deployable support Equipment:
+      normal Place Deployable Silhouette-contact placement, not
+      Perimeter positioning; Disposable (3) charges, Conclusion
+      activation, infinite-height Difficult Terrain within its own
+      ZoC, Terrain (Total) exception, and removal/destruction ending
+      the effect. Show Army's S0 alongside the unresolved S0/S1
+      publication conflict; do not change source profiles.
+      Browser acceptance passed 75/75 across desktop and mobile
+      widths. See RR-WPN-DEPLOYED-003.
+    - [x] Audit Deactivator versus persistent deployed support
+      effects. Preserve enemy-only deployed-item/LoF-or-ZoC
+      targeting, CAMO Marker exclusion, Normal WIP with Range
+      MODs only, removal on success, and the current-Order
+      triggering exception. Clarify that removing Dazer,
+      FastPanda, Deployable Repeater or Deployable Cover
+      ends its respective continuing effect; keep allied
+      Activate Disco Ball separate. See RR-WPN-DEPLOYED-004.
+    - [x] Review the Deactivator same-Order exception separately
+      for Mines/Cybermines, Crazykoala/MadTrap Boost and Armed
+      Turrets. Concealed Mine CAMO Markers are ineligible
+      Deactivator targets; revealed Mines still require legal
+      template and allied-safety conditions; Cybermines
+      are evaded by Reset. Boost needs a valid enemy Model
+      and passable route, whereas Armed Turrets have
+      distinct active-Model LoF/contact attack eligibility.
+      Preserve current-Order triggering without implying
+      guaranteed hits or new priority rules. Headless
+      browser checks passed 99/99 at 1440, 390 and
+      320 px. See RR-WPN-DEPLOYED-005.
+    - [x] Add N5.3 p. 68 Mixed Weapons as a shared source-cited
+      player reference for Trench-Hammer and Kobra Pistol. Explain
+      BS versus CC attributes, range/CC Traits, independent Mode
+      profiles and the Trench-Hammer BS Weapon (PH) exception.
+      Keep Kobra's two-roll DA chart discrepancy and Anti-materiel
+      publication conflict separate. Pin eight source clauses,
+      four typed relationships and both Army identities; retire
+      the superseded Trench-Hammer shared-only disposition.
+      See RR-WPN-FAMILY-005.
+    - [x] Publish the shared N5.3 pp. 68/75 Modifiers Explained
+      reference for bracketed-only-on-use MODs, positive/negative
+      recipient rules, Automatic versus Face to Face penalties,
+      and one-die ReRoll; reuse the separate Special Dice rule.
+      Link it from Mixed Weapons and include the printed Vorpal
+      CC Weapon BS/CC modes and BS Weapon (PH) exception. Keep
+      imported profiles and Kobra source disagreements intact,
+      retire Vorpal's superseded shared-only disposition, and
+      pin five more source clauses and one relationship.
+      See RR-WPN-FAMILY-006.
+    - [x] Pin the N5.3 Mine Trigger Area's base-edge measurement and
+      Blast Focus Total Cover exclusion as two additional reviewed
+      source-to-summary clauses; preserve distinct Marker and object
+      Silhouettes and all unresolved S0/S1 publication differences.
+      The selected audit now covers 90 clauses and seventeen typed edges;
+      this does not certify the complete Weaponry section.
+    - [ ] Continue auditing remaining Weaponry source clauses,
+      unreviewed exceptions, exact profile semantics and
+      API/browser relationships. The 90 selected clauses and seventeen
+      typed edges are not an exhaustive N5.3 pp. 68-74 inventory.
     - [ ] Register the supplied FAQ v0.1 as its own pinned source publication and
       reconcile core versus ITS-season applicability before curating rulings. Its
       content hash and the core PDF/history ZIP hashes are available in the local
@@ -360,56 +886,484 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     Verify conditions, the general rule, modifiers, explicit exceptions, the
     resulting game effect, and source certainty; do not generalize a printed
     example into an undocumented rules engine. Sample the normal browser view
-    as well as the authored text, and keep source conflicts visible.
-    - [ ] Review and implement accepted batches from the
-      [1.0 explanation audit](rules-explanation-audit-1.0.md#prioritized-remediation-plan).
-      The confirmed recovery/Intuitive Attack explanations (REA-001/002/003/009/022)
-      have been revised in curated data and need player-facing review. Adjudicate
-      direct Doctor/Engineer target allegiance (REA-038) before closing eligibility;
-      Counterintelligence's actor correction (REA-043) is implemented in curated
-      data; verify its player-facing wording in the browser. The Continuous Damage
-      Critical exception (REA-004) and BS Weapon (WIP) Skill restrictions (REA-005)
-      are now documented in curated Trait summaries; verify their player-facing
-      wording and keep deferred typed-variant edges separate. Controlled Jump
-      (REA-006) now explains immediate declaration, optional table-wide ARO,
-      opposing-Program cancellation, and preservation of separate scenario MODs;
-      verify the player-facing Program page. Request Speedball's FAQ exclusion
-      (REA-007) is now explained in both curated records; verify the player-facing
-      Skill and Program cards. Protheion (REA-008) now states the FAQ overkill limit,
-      profile-listed enemy Attribute MOD, and recovery order; verify its player-facing
-      Skill card (player-verified). The general Immunity (ARM/BTS) Trait
-      protection and printed Monofilament exception (REA-010) are now explained
-      alongside the existing Flash Pulse example; verify both in the browser.
-      The five structured reviewed Immunity interactions (REA-011) now have a
-      dedicated player-facing section with applicability and explicit/derived
-      labels; verify keyboard, mobile and browser layout before accepting the UI.
-      No new Plasma/Enhanced case was added to the reviewed arrays.
-      Smoke/Eclipse (REA-012) now distinguishes ordinary rolled LoF opposition,
-      MSV/Reflective exceptions, unopposed placement, Dodge, and Criticals in
-      curated Clarifications and examples; verify the browser pages.
-      AP/E/M and T2 (REA-013) now clarify rounding up halved defenses and
-      marking the original-hit versus extra-Critical T2 die before rolling;
-      verify their player-facing Ammunition pages. Typed values are unchanged.
-      Dodge/Reset (REA-014) now explain per-Attack evasion, movement after
-      qualifying Dodge, Engaged exit position, cumulative Reset State MODs,
-      and the Sixth Sense exception; verify the Dodge, Reset, Engaged and
-      Bangbomb browser cards. REA-015 now has source-cited State-specific cancellation explanations, pending browser review; REA-026 remains separate.
-      Targeted MSV1/Sixth Sense FAQ questions (REA-019) stay separate.
-      Common Supportware rules (REA-018) remain separate work.
-      Separately decide source conflicts and FAQ applicability before dependent curation.
-      Use the [source manifest](rules-explanation-audit-1.0-sources.md) and
+    as well as the authored text, and keep source conflicts visible. Track
+    the [1.0 explanation audit](rules-explanation-audit-1.0.md#prioritized-remediation-plan)
+    through the individual checks below; published cards still require the
+    stated browser/source acceptance before their findings can be closed.
+    - [x] **REA-001 ? Engineer target and recovery:** Reviewed the
+      separate STR repair and eligible State-cancellation branches, success
+      versus failed WIP outcomes, self-use and Stunned exceptions. Added
+      an allied VITA Targeted example that does not require STR, and checked
+      the published Engineer/Targeted/Stunned/Doctor references and links.
+      Responsive browser acceptance passed 18/18; non-Allied eligibility
+      remains independently open under REA-038.
+    - [x] **REA-002 ? Doctor recovery:** Reviewed ordinary Unconscious
+      VITA/contact recovery, lethal failure, 2W and ReRoll WIP variants,
+      and the Command Token reroll distinction. Published source-linked
+      examples for conscious wounded targets, Stunned VITA versus STR,
+      No Wound Incapacitation self-treatment, and Technorganic STR recovery
+      only while Unconscious. Browser acceptance passed 21/21 at 1440,
+      390 and 320 px; non-Allied target eligibility remains REA-038.
+    - [x] **REA-003 ? Intuitive Attack:** Verified the single unmodified
+      WIP Roll as the B1 Attack resolution, eligible Face to Face AROs,
+      Main Target-only Critical effect, and special Deployable placement.
+      Added three worked examples with English/Spanish N5.3 citations,
+      source/database regressions and responsive browser acceptance.
+      No additional BS Roll or gameplay rule was introduced.
+    - [x] **REA-004 - Continuous Damage Critical exception:** Confirmed
+      the existing rule summary already excludes Continuous Damage from the
+      additional Critical Saving Roll. Added source-linked examples of a
+      failed ordinary hit save versus failed Critical-only save, and
+      condition-specific Immunity effects. Pinned English/Spanish N5.3
+      pp. 175/182 and Immunity pp. 95/99; browser acceptance 15/15.
+      No unconditional Dead graph edge or runtime mechanic added.
+    - [x] **REA-005 - BS Weapon (WIP) prohibited variants:** Verified
+      that BS Attack (Shock) and BS Attack (Guided) cannot use WIP weapons.
+      Added examples separating these named Skills from ordinary WIP-based
+      BS Attack and from Shock Ammunition in a weapon profile. Retained
+      the existing modifier and Fireteam semantics, source weapon data,
+      and deferred exact-variant edges; cited EN N5.3 pp. 39/175 and
+      ES N5.3 p. 39. Responsive browser acceptance passed 21/21.
+    - [x] **REA-006 ? Controlled Jump:** Verified immediate declaration
+      before Resolution, the optional table-wide ARO affecting the same
+      Combat Jump PH Roll (including non-Hackable Troopers), opposing
+      Programs canceling only their own effects, and Firefight's separate
+      +3 Designated Landing Area MOD. Published three practical examples,
+      including the FAQ's Speedball Token exclusion, with EN N5.3 p. 59,
+      ES N5.3 p. 61 and FAQ v0.1 sources. Chromium acceptance 18/18;
+      no runtime or source mechanics changed.
+    - [x] **REA-007 ? Request Speedball FAQ exclusion:** Verified both
+      player-facing references already link to each other and cite the
+      N5 FAQ v0.1 ruling that Controlled Jump affects Troopers, not
+      Speedball Tokens. Added a focused PH 15 example rejecting
+      Controlled Jump +3/-3 (PH 18/12), without claiming immunity to
+      unrelated scenario MODs. Existing placement, PH 15, FAQ citations
+      and Combat Jump relation remain unchanged. Browser acceptance
+      passed 18/18 at 1440/390/320 px.
+    - [x] **REA-008 — Protheion:** The Skill card explains the FAQ overkill
+      limit, profile-listed enemy Attribute MOD, and recovery order;
+      player-facing wording has been verified.
+    - [x] **REA-009 ? Simultaneous recovery:** Confirmed English and
+      Spanish N5.3 p. 15 require positive-before-negative resolution.
+      Expanded the shared Order Expenditure Sequence reference with
+      all Engineer/Riotstopper outcomes: original IMM-A stays if Engineer
+      fails, cancellation persists if PARA succeeds, or IMM-A is newly
+      inflicted if PARA fails. Linked Engineer, Doctor and IMM-A to that
+      rule, preserving source mechanics and State graph semantics.
+      Chromium acceptance passed 33/33 content/navigation checks at
+      1440/390/320 px; preexisting 6 px PARA overflow at 320 px was
+      verified against the release database.
+    - [x] **REA-010 ? General Immunity:** Confirmed existing
+      Immunity (ARM/BTS) prose already separated Ammunition-as-N from
+      conditional Trait protection, matched to the Saving Roll Attribute
+      and excluding Comms Attacks. Clarified the linked State, Continuous
+      Damage, ARM=0 and BTS=0 examples; added the printed two-roll
+      Monofilament Critical outcome. Verified the Flash Pulse Non-Lethal
+      and State: Stunned exceptions against bilingual N5.3 p. 95-96/99.
+      No stored interaction cases or combat mechanics changed.
+      Chromium browser acceptance passed 30/30 checks at 1440/390/320 px
+      without JavaScript errors or horizontal overflow.
+    - [x] **REA-011 ? Reviewed Immunity interactions:** Accepted the
+      five existing player-facing cases (Flash Pulse, Viral Vulnerability,
+      ARM/AP+DA, ARM/AP+EXP and AP/AP+DA). Verified the conditions,
+      exact hit/Critical Saving Roll counts, two explicit-source versus
+      three rule-derived evidence labels, semantic links, responsive
+      layout and Tab/Enter keyboard navigation with visible focus.
+      Kept all source cases unchanged; no unsupported Plasma/Enhanced
+      case or attack evaluator was added.
+    - [x] **REA-012 ? Smoke/Eclipse:** Accepted the existing linked
+      player-facing examples for rolled LoF opposition, multiple attackers,
+      normal Dodge, unopposed placement, Smoke Criticals, and the
+      Reflective/MSV exception. Confirmed source provenance and unchanged
+      zone semantics; Chromium passed 33/33 content/navigation checks at
+      1440/390/320 px. At 320 px Smoke and Eclipse retain an independently
+      verified, pre-existing 6 px breadcrumb overflow tracked by the final
+      shared-layout acceptance item.
+    - [x] **REA-013 ? AP/E/M and T2:** Accepted the published rounding
+      examples (ARM/BTS 5 becomes 3), matching Attribute selection and
+      the pre-roll original-hit versus extra-Critical T2 die labels (2
+      versus 1 Wound on failure). Validated unchanged typed facts and
+      bilingual N5.3 provenance: EN pp. 63-64/67, ES pp. 64/66-67.
+      Chromium passed 18/18 render/API checks at 1440/390/320 px.
+      The independently reproduced 6 px catalog-tag overflow at 320 px
+      belongs to the already tracked shared reference layout issue.
+    - [x] **REA-014 ? Dodge/Reset:** Accepted eight existing player-facing
+      references (Dodge, Reset, Engaged, IMM-B, Isolated, Targeted,
+      Sixth Sense, Bangbomb) for per-Attack evasion and different Success
+      Values, shared Dodge -3, movement after successful evasion,
+      Engaged cancellation by valid exit position, additive Reset WIP
+      penalties capped at -12, and Sixth Sense exceptions. Chromium
+      passed 48/48 render/navigation checks at 1440/390/320 px with no
+      JavaScript errors or horizontal overflow. No mechanics changed;
+      separate REA-015 and REA-026 State tasks remain independent.
+    - [x] **REA-015 - State cancellation:** Accepted all ten N5.3-cited
+      State-specific cancellation and revelation references. Chromium
+      passed 66/66 content/navigation checks at 1440/390/320 px;
+      published/API tests cover distinct Marker, Holoecho, Prone,
+      Disconnected, Retreat! and Suppressive Fire conditions. Corrected
+      an IMP-1 ARO sentence and updated its reviewed-text fingerprint.
+      No unconditional State transitions or REA-026 baseline changes.
+    - [x] **REA-016 - Stealth and Deployables:** Source-backed examples
+      now distinguish independent Mine triggering from ARO entitlement,
+      a Controller/Peripheral mixed-activation reaction becoming Idle,
+      and announcing optional Stealth while represented by a Marker.
+      Confirmed official N5.3 EN p. 112 / ES p. 114 and FAQ v0.1 p. 2.
+      Chromium passed 39/39 content/navigation checks at 1440/390/320 px
+      with no JavaScript errors or horizontal overflow. Sixth Sense and
+      Combat Instinct remain explicit counter-Skills; no ARO engine added.
+      The separate generic `weapon:mines` navigation bug is tracked below.
+    - [x] **REA-017 — Peripheral subtypes:** Shared activation, Coherency,
+      Roll ownership, Servant/Connected Cyberplug Doctor/Engineer contact,
+      Control Spearhead, Ancillary deployment/Fireteam exceptions, and
+      Cyberplug Autonomous behavior are published in linked, source-cited
+      references. Chrome acceptance on 2026-10-13 passed 24 page/viewport
+      cases (1440/390/320 px), six links, keyboard/touch navigation,
+      with no JavaScript errors or horizontal clipping; see
+      [development checks](testing.md#10-peripheral-rea-017-browser-acceptance).
+      Dependent source-specific exceptions remain separately tracked.
+    - [x] **REA-018 — Hacking Area, Firewall, Supportware:** The existing
+      source-linked cards match N5.3 pp. 55–56 and 60 and FAQ v0.1 p. 1:
+      enemy Repeater Hacker-only targeting and Idle, 8-inch ARO measurements,
+      a disabled Hacking Device's Firewall, and whole-Program Fairy Dust
+      replacement. Browser acceptance passed 18/18 cases at 1440/390/320 px,
+      with no errors or overflow. Related program-specific exceptions remain
+      under their owning audit findings.
+    - [x] **REA-019 — Negative Feedback:** Verified the shared Label's
+      same-Trooper cancellation and the distinct Cybermask/White Noise
+      lifetimes against N5.3 pp. 59, 61, 76 and 174. Chromium acceptance
+      covered three cards and Label-to-Program links at 1440/390/320 px
+      (15/15 passed); no JavaScript errors or horizontal overflow.
+      Other NFB interactions remain scoped to their owning rules.
+    - [x] **REA-020 — Fireteam ownership and integrity:** The published
+      shared baseline now distinguishes Active Leader-only actions, common
+      Movement/Reset, individual reactive rolls and ARO majority selection,
+      ordinary departure versus cancellation, rejoining at the next States
+      Phase and formation-only Type minimums. FT Master, Number 2, NCO,
+      Tactical Awareness and Peripheral conditions link to their owners.
+      Source and browser acceptance passed 33/33 checks at 1440/390/320 px;
+      final chart selection/Wildcard/keyboard/touch workflow remains separate.
+    - [x] **REA-021 — Special Dice:** Verified +1 SD versus Burst,
+      allocation/discard, Disposable charges, ranged Kits, Martial Arts
+      Levels 3/5, Berserk's Long Skill exception, Fireteam Levels 2/4,
+      and the Discover distinction against N5.3 and FAQ v0.1. The
+      Fireteam Level 2 table now links the shared Special Dice rule.
+      Browser acceptance passed 39/39 route/navigation checks at
+      1440/390/320 px. The separate official Spanish reminder conflict
+      remains unresolved under REA-041.
+    - [x] **REA-022 — Recovery Kits and Disposable:** Verified same-Order
+      multiple MediKit/GizmoKit hits, one-success PH recovery, Remote
+      Presence's Unconscious exception, and B versus SD charge use
+      against N5.3 pp. 75, 123–124 and 175. The reference cards now
+      explain mixed PH results and the two-unspent-charge Double Shot
+      prerequisite with focused regression examples.
+    - [x] **REA-023 — Deployable placement geometry:** Reviewed the
+      Place Deployable Active/Reactive contact, surface, timing and FAQ
+      occupied-location rule; Perimeter's passable path; Minelayer's
+      Trigger Area/ZoC enemy exclusions; and Deployable lifecycle and
+      item-specific placement. All nine published reference pages
+      passed browser validation at 1440, 390 and 320 px (39/39).
+      Armed Turret's printed Silhouette and E/Mitter conflicts remain
+      separate under REA-037 and REA-045.
+    - [x] **REA-024 — BioWeapon and Viral Mine:** Linked the VITA-only
+      DA+Shock effect and its derived Saving Roll conditions to canonical
+      Ammunition, Shock and Immunity references. Viral Mine retains the
+      pinned N/BTS/one-roll source profile and reuses the reviewed Viral
+      Weapon Property. No new universal Immunity interpretation was made.
+      Source/API and browser acceptance verified; a separate pre-existing
+      320 px Ammunition header overflow remains in final UI acceptance.
+    - [x] **REA-026 — Shared General Rules:** Face to Face Rolls, Saving
+      Rolls, Guts Rolls, Order Expenditure Sequence, and Coordinated
+      Orders are published, linked, and source-cited. Chrome acceptance
+      on 2026-10-13 covered all five at 1440/390/320 px, link
+      navigation, keyboard, touch previews, and citations without
+      page errors or horizontal overflow. See
+      [development checks](testing.md#10-general-rules-rea-026-browser-acceptance).
+      Broader source and release acceptance remains under the 1.0 gate.
+    - [x] **REA-027 — Flash Pulse source reconciliation:** Verified the
+      pinned Army weapon 72 and English/Spanish N5.3 PDF weapon charts
+      retain STUN, one BTS/PB Saving Roll, Non-Lethal and State: Stunned.
+      The printed Immunity examples independently require a failed
+      Saving Roll to cause Stunned. Both Spanish Wiki Weapon Charts
+      (revisions 3987/3988) still show two PB rolls without the Trait,
+      confirmed by direct live/oldid retrieval on 2026-10-14.
+      The conflicting publications, revision identities, source URLs
+      and accepted one-roll profile now have regression and browser
+      acceptance coverage; no roll or gameplay data were overwritten.
+      - [ ] **External publication correction pending:** Seek an
+        authoritative Wiki correction or erratum for both Spanish
+        charts. The source conflict remains explicitly unresolved;
+        do not reinterpret the rules from revision chronology alone.
+    - [x] **REA-028 — Kobra Pistol CC source decisions:** Confirmed DA's
+      two ARM Saving Rolls (three on a Critical) against both N5.3
+      PDF one-roll cells, the pinned Army profile and exact Wiki edits.
+      Mode-scoped reference now separately flags the still-disputed
+      Anti-materiel Trait. Wiki history 4021/4077/4082 records the
+      roll correction before the Trait addition; current Army data and
+      the BS Shock mode are unchanged.
+      - [ ] **External Anti-materiel ruling pending:** Seek official
+        clarification on Kobra CC's Trait in the bilingual printed
+        chart versus Army/current Wiki. Do not infer the Trait from DA
+        or infer that a later Wiki revision settles the discrepancy.
+    - [x] **REA-030 — General versus ITS FAQ applicability:** Reviewed
+      English and Spanish N5 FAQ v0.1. Source registration already
+      existed in English; Spanish v0.1 is now pinned. Sixth Sense/MSV1
+      explains the conditional -6 LoF exception when targeted through
+      a Zero Visibility Zone. ITS Spotlight Classified scoring and
+      undeployed Ancillary scoring are annotated with their exact scope.
+      Core Supplies, Annihilation and Firefight mechanics remain unchanged.
+      - [ ] **External scope ruling:** Determine whether the ITS
+        scenario-element Marker-State answer and undeployed Ancillary
+        Killed exception also apply to the four core N5.3 scenarios.
+      - [ ] **Future full FAQ collection:** The selected ruling
+        references do not constitute a complete versioned FAQ/ITS
+        data collection; do not mix all ITS decisions into core rules.
+    - [x] **REA-034 ? Fireteam Level 3 printed example:** Preserve the
+      bilingual N5.3 pp. 138/142 Morat CORE Case 2 contradiction and
+      explain the correct table-derived Level 3 bonus in the public
+      Fireteams reference, without granting Level 4 +1 BS/CD. Source
+      notes and citations are distinct from REA-041's dice reminder.
+      Focused rules tests and responsive browser acceptance passed 9/9.
+    - [ ] **REA-034 ? Official example correction:** Seek an official
+      correction for the Level 3 Morat example granting Level 4's +1
+      BS/CD in both printed languages. Do not infer that the example
+      overrides the Fireteam Level table in the meantime.
+    - [x] **REA-035 — Impersonation Discover:** Verified ordinary Discover
+      Range/Cover/Mimetism MODs versus IMP-1's additional -3, first/second
+      stage, Biometric Visor, one-Order and failed-retry limits against
+      the N5.3 sources. Browser acceptance passed at 1440/390/320 px.
+    - [x] **REA-036 — Deployable Cover:** Published and verified
+      contact/obscuration requirements, variant/non-stacking conditions,
+      Vitroferro's cap before PS, and S3/Disposable (2)/Indiscriminate/
+      Perimeter source properties. Browser acceptance passed at all three
+      widths; broader placement and FAQ scope remain separate tasks.
+    - [x] **REA-037 ? Armed Turret Silhouette source presentation:**
+      Verified detailed S2 against English/Spanish N5.3 pp. 70/74 and
+      both pinned Wiki detailed profiles; confirmed conflicting S1 in
+      English summary pp. 74/195 and Spanish p. 203. Retain the existing
+      detailed S2 stat and publish the explicit discrepancy, complete
+      source references and LoF/clearance consequences. Chromium
+      acceptance passed at desktop/390/320 px (3/3).
+    - [ ] **REA-037 ? Official Armed Turret Silhouette ruling:**
+      Seek a scoped Corvus Belli correction or approved precedence
+      decision for S2 detailed profiles versus S1 summary tables.
+      Do not change the existing S2 value solely from the summary or
+      treat its use as an authoritative resolution.
+    - [x] **REA-038 ? Doctor/Engineer direct-use scope:** Reconcile
+      direct Skill contact/State requirements against EN N5.3 pp. 90-91,
+      close-combat restrictions pp. 51/160, locally scoped Allied gates
+      for Kits pp. 123-124 and Servant/Cyberplug pp. 106-107, plus
+      English/Spanish captured Wiki Skills. Publish clear source-cited
+      direct-versus-delegated eligibility and Engaged conditions without
+      introducing an unsupported universal target-allegiance rule.
+    - [ ] **REA-038 ? Non-Allied direct-target ruling:** Obtain a scoped
+      current N5 ruling or explicit project decision on the *derived*
+      interpretation for non-Allied Unconscious/Immobilized, Neutral,
+      Hostile, and scenario-specific targets. Absence of an Allied gate
+      in direct Skill text alone is not a verified universal permission.
+      Do not change gameplay eligibility beyond confirmed clauses until
+      this source decision is made.
+    - [x] **REA-039 — TinBot sharing:** N5.3 p. 127 operational eligibility,
+      Fireteam-wide benefits, same-advantage MOD selection, owner departure,
+      nonblocking/untargetable State Token status and Dead State removal
+      are linked from the family and Fireteam references. All six named
+      options retain source-specific effects. Focused source/API tests and
+      responsive browser acceptance passed 12/12 checks at 1440/390/320 px.
+    - [x] **REA-040 — Request SpecBall:** Published the core N5.3
+      Skill with Game Round/Active Turn/once-per-game eligibility, one
+      55 mm Combat Jump/PH 15 Token, different item selection, contact
+      pickup, Marker cancellation, end-of-Order Enhanced Profile and
+      SpecBot placement. Linked Infinity Spec-Ops and Combat Jump, kept
+      Request Speedball and Season 18 TEAM-OPS/Tacball separate, and
+      pinned the English printed-name discrepancy against Spanish N5.3.
+      Source/database and responsive browser acceptance passed (24/24).
+      Complete chart/list configurators remain post-1.0.
+    - [x] **REA-041 ? Fireteam dice source review:** English N5.3
+      pp. 75/136 and Spanish p. 75 agree that B6 caps Burst, not the
+      extra Special Dice rolled and discarded. Spanish p. 140 contradicts
+      that rule by imposing a six-dice inclusive reminder; English/Spanish
+      evidence and the unsolved discrepancy are now visible as linked
+      source notes on Special Dice and Fireteams. Responsive browser
+      acceptance passed (15/15). No gameplay cap was changed.
+    - [ ] **REA-041 ? Official Fireteam dice clarification:** Obtain an
+      authoritative erratum or scoped ruling for Spanish N5.3 p. 140
+      versus p. 75 and English pp. 75/136. Keep the contradiction
+      explicit meanwhile; this external dependency does not block the
+      locally reviewed 1.0 reference explanation.
+    - [x] **REA-042 — Dodge (ARM+3) player reference:** Explain the
+      profile-listed +3 ARM Saving Roll modifier from English and Spanish
+      N5.3 p. 75, never +3 PH or a universal Dodge bonus. Pin the
+      contrasting failed-PH condition in both English and Spanish Wiki
+      snapshots, including Spanish history revision 4012. Add bilingual
+      PDF/Wiki source notes, tests, and responsive browser acceptance
+      (12/12); preserve the printed profile without a mechanics rewrite.
+    - [ ] **REA-042 — Official Dodge modifier clarification:** Seek an
+      authoritative correction for the PDF-versus-Wiki failed-PH
+      condition. The unresolved external source disagreement is visible
+      to players and is not a remaining 1.0 implementation blocker.
+    - [x] **REA-043 — Counterintelligence:** Verified against N5.3
+      pp. 90/128 and in the rendered Skill reference at 1440, 390 and
+      320 px. Both Strategic Use branches retain their first-Turn
+      conditions; the relaxed Command Token limit benefits the Skill
+      owner, not the opposing player. Browser acceptance passed 6/6.
+    - [x] **REA-044 — Metadata-only Weapons:** Publish the reviewed
+      Breaker Marksman Rifle from Army source 225 with exact source-profile
+      validation, numeric/slug lookup, standalone weapon rule reference
+      and zero Unit usage. Other unused historical metadata remains unpublished;
+      a comprehensive metadata inventory is not a 1.0 blocker.
+    - [ ] **Cross-source applicability:** Resolve material source
+      conflicts and FAQ scope before dependent curation. Use the
+      [source manifest](rules-explanation-audit-1.0-sources.md) and
       [N5.3 reconciliation](rules-explanation-audit-1.0-n5.3-reconciliation.md).
-      Complete the [coverage gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate):
-      304 selected clause reviews and 63 screening-only records are not 367 full
-      approvals. Track TinBot sharing/SpecBall (REA-039/040), official Spanish PDF
-      source contradictions (REA-034/037/041), and Spanish Wiki-versus-PDF
-      discrepancies (REA-027/042). Preserve the S17/S21 provenance and seek
-      scoped errata rather than silently normalizing conflicting publications.
-      Also track targeted current metadata-only Weapon publication
-      (REA-044) without promoting optional exhaustive research into a release blocker.
-      The report remains an assessment, not accepted replacement semantics.
-      Include the five new Visibility Zone Game terms in the final record acceptance
-      review; they postdate the frozen 367-record explanation-audit inventory.
+      Preserve the S17/S21 provenance and seek scoped errata instead
+      of treating the audit's assessment as replacement semantics.
+    - [ ] **Clause-review coverage gate:** Complete the
+      [inventory gate](rules-explanation-audit-1.0-inventory.md#audit-completion-gate).
+      The 304 selected clause reviews and 63 screening-only records
+      do not constitute 367 full approvals.
+      - [x] Reconcile the original six ARO and two Basic Short Skill
+        source-heading mappings against N5.3 pp. 39/51/77/79/92/103:
+        correct BS Attack, CC Attack, Discover and Morpho-Scan metadata,
+        linked Skill citations and numerical-variant action citations.
+        Preserve the original 367-row audit snapshot and record the
+        retired identity crosswalk in the N5.3 reconciliation;
+        this is source screening, not full record approval.
+      - [x] Reconcile the original six Deployment and five Long Skill
+        metadata entries against actual N5.3 headings. Correct the
+        Infiltration, Impersonation and Hidden Deployment pages; split
+        Jump/Climb and Combat Jump/Parachutist into distinct page-scoped
+        records. Pinned source and responsive browser checks passed.
+        The 367-record historical inventory is unchanged; see the
+        N5.3 reconciliation for retired-ID provenance.
+      - [x] Correct five source-confirmed Deployment Skills incorrectly
+        mapped as Automatic: Booty, Decoy, MetaChemistry, Remdriver and
+        Strategic Deployment. Preserve existing Skill mechanics and
+        Wiki evidence; add primary PDF citations, regression tests and
+        responsive category-badge acceptance (15/15 browser cases).
+      - [x] Correct fourteen stale Automatic Skill source pages and
+        remove the invalid Regular-as-Skill declaration link.
+        Pinned source tests and responsive browser acceptance confirm
+        the revised pages; canonical Training remains unchanged.
+        See N5.3 reconciliation for page migrations; the historical
+        367-record inventory is not renumbered or approved.
+      - [x] Pin all eleven current Short Skill headings and correct
+        Sensor from p. 112 to p. 111 in both the declaration and Skill.
+        Verify BS=11/BS=12/CC=21 against the 2026-09-29 Army snapshot
+        dictionaries and seventeen faction-file loadout occurrences;
+        preserve the distinct core-action citations and separate the
+        Army-derived values from rulebook mechanics.
+      - [x] Verify Climbing Plus/Climb and Super-Jump/Jump conditional
+        declarations against N5.3 pp. 88/113, retaining the base
+        Long Skill types and documenting trajectory, LoF, Impetuous
+        use and the Jet Propulsion exception.
+      - [x] Reconcile Guard, Neurocinetics, and Total Reaction as
+        separate reactive combat exceptions (N5.3 pp. 95/104/116):
+        preserve Optional vs Obligatory, LoF/ZoC requirements,
+        active/reactive Burst constraints, and single-target ARO
+        scope. Add direct citations and source-pinned tests.
+      - [x] Reconcile Guard-versus-Aerial (N5.3 pp. 86/95 and
+        Unconscious p. 172): active Aerial prohibits Guard even
+        within LoF and ZoC; Unconscious exempts the target but
+        Guard's other requirements remain. Verified source tests
+        and responsive browser acceptance.
+      - [x] Verify Combat Instinct/Sixth Sense against Stealth for
+        ARO entitlement and LoF scope (N5.3 pp. 20, 88, 111-112):
+        both counter Stealth, but only Sixth Sense grants an
+        attack-only outside-LoF/360-degree-LoF response.
+        Added primary Combat Instinct source, focused source and
+        curated tests, and responsive browser acceptance (9/9).
+      - [x] Verify Look Out! (N5.3 p. 81) as an exceptional
+        allied Dodge (PH-3) ARO: user LoF, allied selection,
+        no previous ARO, unopposed versus Face to Face
+        Dodge and no general ARO grant. Source tests and
+        3/3 responsive browser checks passed.
+      - [x] Verify Reload, Baggage, and Place Deployable ARO
+        eligibility and timing against N5.3 pp. 82-83/120:
+        reactive LoF/ZoC requirements, Perimeter placement,
+        Conclusion activation, Order-limited Reload recovery
+        versus automatic States Phase recovery. Preserve
+        reviewed mechanics and FAQ; pinned source tests and
+        responsive browser acceptance passed (6/6).
+      - [x] Reconcile Discover declaration and failed-Marker
+        retry restrictions against N5.3 p. 77: mandatory LoF,
+        one Discover attempt per target per Order, failed-roll
+        lockout for any same Marker until next Player Turn,
+        independent attempts by other Troopers or on different
+        Markers, and Discover + Attack when an enemy reveals
+        by ARO. Source tests and 3/3 browser checks passed.
+      - [x] Reconcile Cautious Movement ARO suppression (N5.3
+        pp. 32/112): ordinary start/end LoF and ZoC checks,
+        Hackable Model-only enemy Hacking Area restriction,
+        non-Hackable and Hidden Deployment distinctions, and
+        Stealth's exception without granting reactions through
+        LoF. Source-pinned tests and responsive browser checks
+        passed (3/3); original 367-record inventory unchanged.
+      - [x] Reconcile Alert! (N5.3 p. 77) as an Optional
+        Automatic Common Skill, not a declared ARO. Eligibility
+        excludes Troopers activated by an Order or ARO in the
+        same Order; after Saving Rolls, eligible Troopers may
+        turn in place during Conclusion without new reactions.
+        Pinned-source tests and 3/3 responsive browser checks pass.
+      - [x] Verify Controller and Peripheral (Cyberplug) ARO exceptions
+        from N5.3 pp. 107-108: a Connected Controller resolves Idle
+        but remains an activated, eligible ARO target; alternatively
+        the Controller may react itself while both Cyberplugs operate
+        autonomously. Add pinned-source tests and responsive UI
+        acceptance (3/3). Preserve existing REA-017 subtype coverage.
+      - [x] Verify Speculative Attack's Circular Template
+        ARO sequence against N5.3 p. 48: Main Target,
+        legal impact point, affected Troopers and their
+        reactions before range measurement and Rolls.
+        Confirm the behind-cover Dodge (-3) Face to Face
+        example, preserving Long Skill and existing MODs.
+        Source tests and 3/3 responsive browser checks pass.
+      - [x] Verify Suppressive Fire Long Skill versus State ARO
+        scope and G: Jumper Proxy exception against N5.3
+        pp. 85/171. The State permits single-target B3 BS
+        Attack AROs; activating a different Proxy does not
+        itself cancel the first Proxy's Suppressive Fire.
+        Pinned-source tests and 6/6 responsive browser
+        checks passed; ordinary State cancellation remains.
+      - [x] Correct Hacking Area's primary N5.3 source from
+        p. 56 to its actual p. 55 heading. Verify the p. 57
+        separate reactive windows for an Active Hacker and
+        the delay/reveal condition for a Camouflaged Marker.
+        Source-pinned tests and repeated responsive browser
+        checks cover the selected examples; the rest remains open.
+      - [x] Confirm the Army Skill-bucket BTS=3 source item (ID 280)
+        is a loadout-specific BTS Attribute override, not a
+        declarable Skill or ARO. Corregidor Alguacil Gatta has
+        three source loadout payloads bearing it while the
+        shared profile remains BTS 0. Correct Unit presentation
+        to show it under Attribute overrides without a
+        non-existent /skills/bts-3 link; focused tests and
+        responsive browser acceptance passed (3/3).
+      - [x] Reconcile known Army skill-bucket exceptions in Unit presentation.
+        GizmoKit, MediKit and Bangbomb project as Equipment, Regular
+        as Training; Infinity Team-Ops remains source-only without
+        a broken Skill link. Native Bangbomb Equipment wins duplicates.
+        Raw source occurrences remain intact; browser review remains open.
+      - [ ] Verify other conditional declaration permissions and
+        remaining numerical Army replacement variants. Selected
+        checks do not certify the full 1.0 corpus.
+    - [ ] **Visibility Zone inventory additions:** Include the five
+      newer Visibility Zone Game terms in final record acceptance;
+      they postdate the frozen 367-record explanation-audit inventory.
+      - [x] Reconcile the five published Glossary/search identities with
+        N5.3 p. 144 (Low/Poor/Zero/White Noise and the shared
+        Visibility Zone), including the Dodge exception, additive
+        non-Visibility MODs and most-restrictive-Zone rule. Keep the
+        original 367-record inventory frozen; source-pinned and API
+        regression tests verify these later additions.
+      - [x] Verify all five responsive glossary and global-search
+        destinations, pointer/keyboard previews, hash-target focus,
+        touch first-tap preview/second-tap navigation, and no JavaScript
+        exceptions or horizontal overflow at 1440, 390 and 320 px.
+        Corrected detached preview reopening and sticky-header
+        obstruction for narrow-screen glossary deep links. See
+        the bounded acceptance evidence in docs/testing.md.
+      - [ ] Include these five post-inventory records explicitly in
+        final 1.0 whole-corpus acceptance; do not silently expand
+        the frozen 367-record explanation-audit denominator.
   - [ ] Expand remaining canonical rule identities across Skills, Equipment,
     Ammunition, Traits, States, Fireteam concepts, glossary terms, and other useful
     rule domains, retaining rulebook version and printed-page citation. Do not
@@ -437,8 +1391,9 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       references and source-defined `AP+DA`, using exact Army metadata IDs and names.
       Keep unreviewed forms unlinked and Saving Roll notation independent; this does
       not complete typed Ammunition effects or the quick-reference view.
-    - [x] Represent the four reviewed combined Army Ammunition source forms
-      (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`) with exact, ordered canonical
+    - [x] Represent the five reviewed combined Army Ammunition source forms
+      (`AP+DA`, `AP+Exp`, `AP+Shock`, `AP+T2`, `N+E/M`) with exact,
+      ordered canonical
       component identities and project those identities into Weapon API profiles.
       Validate against source ID/name and source display notation; keep alternate
       ammunition choices and Saving Roll expressions out of composition semantics.
@@ -461,7 +1416,7 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [x] Record the single additional Critical Saving Roll on all nine
       roll-bearing base Ammunition facts, preserving T2's one-Wound Critical
       exception and excluding Smoke/Eclipse. Do not sum the Critical extra roll
-      per component or infer totals from the four combined source mappings.
+      per component or infer totals from the five combined source mappings.
     - [x] Publish a bounded, exact-source Combined Saving Roll Critical reference
       for the six Plasma Weapon Hit/Blast profiles: one ARM plus one BTS Saving
       Roll, with one additional ARM roll on a Critical. Keep the reviewed source
@@ -499,18 +1454,14 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     - [ ] Validate every published base identity and reviewed combined form against the pinned
       source; prove that weapon links, Ammunition detail, and later comparison views consume the
       same facts without conflating composition with roll notation.
-  - [ ] Include scenario-defined catalog concepts needed for the general rules
-    reference, including scenario-only Skills, Equipment when present, contextual
-    roles such as Specialist Troop, and the scenario elements those concepts act
-    on. Preserve scenario/season scope and keep temporary effects out of static
-    Unit/Profile facts. Include the scoped action identities surfaced by the
-    current ITS FAQ where their owning scenarios classify them as Skills/AROs,
-    including `Activate Communication Antenna`, `Oppose Activation`, and `Emit
-    Akial Interference`. Keep semantic identity, source publication provenance, and
-    applicability separate so the same canonical concept can be cited or overlaid
-    by core, scenario, FAQ, or season material without duplication or collection-
-    load-order semantics. This catalog coverage is in scope for 1.0 and should share
-    identities/scope with the core-scenario model rather than becoming a parallel representation.
+  - [ ] Include scenario-defined catalog concepts needed for the core-rules
+    scenario reference, including core-scenario Skills, contextual roles such as
+    Specialist Troop, and the scenario elements those concepts act on. Preserve
+    scenario scope and keep temporary effects out of static Unit/Profile facts.
+    Keep semantic identity, source publication provenance, and applicability
+    separate so one canonical concept can be cited or overlaid by core scenarios
+    and FAQ material without duplication or collection-load-order semantics.
+    ITS-only actions and season-specific rules remain post-1.0.
     - [ ] Reuse current scoped definitions/supplements, then identify any missing applicability
       validation or presentation contract using one concept shared by core and scenario material.
       Prove that scope is visible and unrelated scenario/season overlays do not leak into core help.
@@ -538,22 +1489,42 @@ as unimplemented and distinguish them from the published core-scenario foundatio
   shared definition v2, scoped Rules/Skills, relational publication indexes, list/detail
   APIs, browser selection and deterministic theme/distance-aware maps are implemented
   and included in 0.10.1. The current contract belongs in
-  [the data model](data-model.md#planned-scenario-model-10).
-  - [ ] Reconcile scenario facts, scoring, scoped concepts and source issues with the
-    final 1.0 source inventory for all six supported Army Points values. This is
-    source-completeness review, not a request to reimplement the published domain.
-  - [ ] Verify **Domination's 350-point SWC row** against authoritative clarification.
-    N5.3 page 151 prints 6 SWC, unlike Annihilation's 7 at the same Army Points.
-    Retain the printed value and visible uncertainty until clarified; this existing
-    source disagreement does not block 0.10.1.
-  - [ ] Confirm the current model remains source/scope-aware against the reviewed ITS
-    variation during final completeness review. ITS content, ITS-only geometry,
-    tournament tooling and an interactive scenario editor remain post-1.0.
-  - [ ] Incorporate the real-browser keyboard/touch, rapid selection, theme/distance,
-    direct/soft navigation and loading/empty/error acceptance from the
-    [0.10.1 checklist](#0101--interim-reference-consistency) into 1.0 closeout.
-    The 2026-10-08 user-confirmed visual review and automated lifecycle/responsive
-    coverage do not replace interaction acceptance.
+  [the data model](data-model.md#scenario-model-implemented-core-and-future-extensions).
+  - [x] Reconcile the pinned core-scenario source inventory across all six
+    supported Army Points values (24 mission selections). Compared the N5.3
+    English charts, Spanish scenario tables, maintained mission components,
+    generated Rules database, and public API; all 24 published size/deployment
+    rows are covered by source-anchored regression tests. Earlier four-scenario
+    browser acceptance exercised all 24 selections at three viewport widths.
+    Verified the Spanish N5.3 Annihilation 350-point survival bands corroborate
+    the maintained correction. A separate official Spanish/English conflict
+    remains for Domination 350-point SWC. Re-run with changed release inputs
+    before final sign-off; this is a bounded scenario-domain finding, not the
+    project-wide final source inventory.
+  - [ ] Resolve **Domination's 350-point SWC cross-language source conflict**
+    with authoritative clarification. English N5.3 p. 151, English N5.2 p. 150
+    and pinned English Wiki revision 3264 print 6 SWC; official Spanish N5.3
+    p. 155 prints **7 CAP/SWC** for the same scenario and Army Points.
+    Retain the published English-source 6 with a visible `needs-verification`
+    issue until clarification; do not silently override one official edition.
+    This specific discrepancy does not itself require changing the scenario
+    model or reopening the completed 1.0 interaction-review ledger.
+  - [x] Verify the current model remains source/scope-aware against
+    representative ITS Season 18 variations. Source-backed synthetic regression
+    coverage confirms that split Deployment Zones and asymmetric Attacker/
+    Defender objectives survive typed validation and scenario-catalog
+    projection without polluting the N5.3 core publication. ITS-only
+    radius-based geometry, Classified/Objectives choice systems, historical
+    season selection, tournament tooling and an editor remain post-1.0.
+    Detailed source evidence is private under `local/audits/`; this closes
+    the compatibility check, not the separate Domination source conflict
+    or project-wide 1.0 release gate.
+  - **Browser acceptance:** The separate
+    [1.0 core-scenario browser checklist](#final-10-acceptance) owns
+    keyboard/touch, rapid selection, theme/distance, direct/soft navigation,
+    and loading/empty/error states. The 2026-10-08 user-confirmed visual
+    review and automated lifecycle/responsive tests do not replace
+    interactive browser acceptance.
   - **Completion:** the final source inventory accounts for every in-scope fact and
     scoped concept, and all four scenarios remain understandable and navigable in
     every supported configuration. No mutable match state or live scoring engine is required.
@@ -565,27 +1536,78 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     flatten it into the base-rule summary. This preserves the distinction
     between a rule and a later clarification, and permits an answer to be
     superseded cleanly.
-    - [ ] Give each ruling a canonical identity independent of wiki page
-      placement. Store the original FAQ publication version/date separately from
-      current rules/ITS-season/scenario applicability so cross-posted or
-      carried-forward rulings are linked rather than duplicated.
+    - [x] Give each ruling a canonical identity independent of wiki page
+      placement. Store original FAQ source/version/page separately from
+      current N5/ITS-season/scenario applicability, so retained and
+      carried-forward citations share one ruling identity. The first eight
+      v0.0-origin examples now exercise that contract.
   - [ ] Prioritize links to features already represented by the app: deployment
     and private-information handling; BS Attack/MOD and template behavior;
     hacking Firewall; Marker, Camouflage, Peripheral, and State interactions;
-    Coordinated Orders; and Fireteam creation/bonuses/integrity. The FAQ also
-    contains scenario-specific rulings, so scope them to the relevant ITS
-    season and mission rather than presenting them as universal core rules.
+    Coordinated Orders; and Fireteam creation/bonuses/integrity. Defer
+    ITS-only FAQ rulings and season-specific scenarios to post-1.0; do not
+    present their outcomes as universal core rules.
   - [ ] Define an explicit source-precedence and effective-date policy. An on-screen
     answer must show its source date/version and never silently blend conflicting
     documents.
-    - [ ] Reuse the current definition/supplement boundary. Define the additional ruling identity,
-      applicability, supersession, and source-selection fields needed by FAQ data before authoring
-      batches; publication recency alone must not imply universal applicability. Record accepted
-      semantics in the canonical data model and curated contract.
-  - [ ] Deliver one core clarification and one scenario/season-scoped ruling through validation,
-    export, repository/API composition, and browser presentation before curating the remaining
-    inventory. Show linked questions/answers with dates and affected concepts alongside the base
-    rule; choose a discoverable reference entry point without requiring a new top-level FAQ domain.
+    - [x] Define and validate the canonical FAQ authoring contract: stable
+      ruling IDs, per-rules-revision/season/scenario applicability and
+      effective dates, original publication identity/date, selected official
+      source citation/reason, conflicting citations and typed supersession
+      references. See `docs/data-model.md` and `data/curated/README.md`.
+      The export pipeline now also checks cross-collection topic/scenario
+      target existence, historical predecessor references, consistent
+      original publication identities, scope overlap and supersession cycles.
+      The dated runtime selector and `/api/faq-rulings` read model are
+      now implemented and tested with synthetic reviewed records. They
+      require explicit version/date context, reject unknown or partial
+      season contexts, and preserve selected source provenance. Verification
+      of season revisions not in the published rules corpus, replay of
+      archived ruling editions, and broader FAQ coverage remain requirements.
+      The first two source-verified pilot rulings and six additional
+      general-gameplay rulings are now delivered through the same
+      publication path, without replacing canonical rule definitions.
+  - [x] Deliver a general Hacking Device Firewall clarification and a
+    scenario-scoped Annihilation Peripheral (Ancillary) kill-scoring exception
+    through validation, export, API, and browser. Both are verified against
+    matching English/Spanish FAQ v0.1 pages, display dated source citations,
+    and remain separate from the canonical underlying rules. The scoped
+    example is deliberately narrower than the FAQ's general mention of
+    scenario objectives; wider application is a follow-up curation decision.
+    Discoverable cards live on existing Equipment and Scenario pages without
+    introducing a new top-level FAQ area.
+  - [x] Publish six more FAQ v0.1 general-gameplay clarifications
+    on Skill declaration, fired Deployables, Controller/Peripheral actions,
+    Camouflaged Markers in Total Cover, Special Dice in Coordinated Orders,
+    and Fireteam creation minimums. Link them to their owned Skill/Trait/
+    State/General Rule/Fireteams pages, with exact EN/ES source pages.
+  - [x] Publish the N5.3 Fireteam Type persistence FAQ after reviewing both
+    v0.1 language editions. English gives the consistent HARIS 3-to-2-member
+    example; the Spanish example contradicts its own member count but agrees
+    on the rule. Retain the Spanish citation as conflicting illustration
+    evidence, without changing the conclusion or inferring an earlier v0.0
+    origin. Continue remaining core/general FAQ reconciliation separately.
+  - [x] Reconcile eight general-gameplay **FAQ v0.0 carry-forwards** against
+    English v0.0 and English/Spanish v0.1: Prone, vaulting, Direct Template
+    targeting, occupied Deployable placement, Surprise Attack MODs,
+    Sixth Sense/MSV1, Protheion, and Camouflage (1 Use). Persist the
+    original v0.0 citation separately from the selected v0.1 source;
+    preserve distinct printed pages and the historically associated
+    (not independently confirmed) v0.0 source date. Confirm typed
+    provenance/API and responsive browser presentation.
+  - [x] Reconcile ten more general-gameplay FAQ v0.0 carry-forwards:
+    private deployment checks; Prone distance; BS Attack MODs;
+    Controlled Jump/Speedballs; Marker State automatic declarations;
+    Aerial/Boost; Stealth AROs; Deployable Cover; Disconnected/
+    Unconscious interactions; and Discover/Fireteam bonuses. Preserve
+    the three exact source pages and one ruling ID per item. Expose
+    Controlled Jump on its Hacking Program page and the bonus ruling
+    on both Discover and Fireteams.
+  - [x] Add the source-backed `rule:deployment-phase` General Rules
+    identity from N5.3 printed p. 15, with a distinct v0.0-origin
+    FAQ clarification about repositioning before Roll/measurement
+    fixes an element in place (EN v0.0/v0.1 and ES v0.1 p. 1).
+    Do not attach the general timing ruling to an arbitrary Skill.
   - **Completion:** cover carried-forward/cross-posted rulings, supersession, conflicting sources,
     missing targets, and out-of-scope seasons. Every in-scope ruling is discoverable from its topic
     or scenario, and the reader can distinguish base rules from applicable clarifications.
@@ -670,6 +1692,65 @@ as unimplemented and distinguish them from the published core-scenario foundatio
 
 ### Final 1.0 acceptance
 
+The 0.10.1 offline checks and later REA-017/026 scoped Chrome reviews do not
+prove the four cross-surface browser interactions below. These incomplete
+acceptance tasks move forward to 1.0 rather than blocking the published 0.10.1:
+
+- [x] **Web frontend - reference-card browser acceptance:** IMP-2,
+  Stealth, Deployable Cover, TinBot and Kobra CC were exercised in Chromium
+  at 1440, 390 and 320 px against a freshly generated rules database.
+  **93/93** real browser checks passed for published text, keyboard-focusable
+  rule navigation, the Kobra CC Attribute link into Glossary, cited-source
+  links opening their intended URLs in new tabs, and absence of JavaScript
+  errors and horizontal overflow. The 320 px screenshots were reviewed for
+  readability. External source responses were mocked; live third-party
+  availability and the other final 1.0 interaction areas remain separate.
+  - [x] **Web backend + Web frontend - shared weapon-family navigation:**
+    Verified the canonical `weapon:mines` destination is already
+    `/weapons/ap-mine#rule-weapon-mines`; `/weapons/mines` is an unsupported
+    *Army catalog* slug, not the generated link. Audited all 51 current
+    curated Weapon definitions: 51/51 resolve to existing Army Weapon
+    pages containing their corresponding rules cards. Fixed the actual
+    discovery gap: the Glossary bulk query lacked opt-in Army links and
+    silently omitted those definitions. The Glossary now includes 49
+    routable non-source-variant Weapon concepts; source-specific mode
+    definitions remain scoped to their Weapon. Chromium passed 42/42
+    Glossary-to-family, local-card and cross-page navigation checks at
+    1440/390/320 px. No synthetic Mines product or duplicate rules route.
+- [x] **Web frontend - Fireteam browser acceptance:** Chromium verified the
+  general formation and ongoing-integrity reference, Army selection,
+  Wildcard eligibility projection, chart limits and member requirements,
+  canonical FT Master and Unit navigation, shareable scoped URLs,
+  back/forward scope changes and returning to the unscoped overview.
+  **167/167** checks passed at 1440, 390 and 320 px, including switching
+  Wildcards off/on, loading a saved Army URL directly, and scrolling
+  contained member tables horizontally at 320 px. No JavaScript errors
+  or page-level overflow. This is browser acceptance, not a Fireteam
+  list builder or a resolution of separately tracked REA-020 mechanics.
+- [x] **Web frontend - core-scenario browser acceptance:** All four core
+  Scenarios were exercised against current curated rules at 1440, 390 and
+  320 px. **805/805** browser checks passed across the six supported Army
+  Points values, rapid selection, scoped rules links, history navigation,
+  light/dark themes, inch/cm SVG labels and table measurements, keyboard
+  and touch interaction (including first-tap preview/second-tap follow),
+  and controlled loading/empty/API error/recovery states. No JavaScript
+  errors or page-level overflow; narrow maps were visually reviewed.
+  This closes browser acceptance only. The separate six-size scenario
+  source-inventory review, scoped concepts and unresolved Domination
+  350-point SWC discrepancy remain explicitly open.
+- [x] **Web frontend - Visibility Zone and Ammunition/Immunity acceptance:**
+  Chromium verified Visibility Zone previews, canonical Glossary anchors,
+  Ammunition/Immunity rule cross-links and their destinations with pointer,
+  keyboard and touch. **469/469** content, preview, focus, navigation and
+  layout checks passed at 1440, 390 and 320 px. First touch previews and
+  second touch follows; tooltip text and horizontal bounds remained readable.
+  Reviewed selected narrow layouts and confirmed no JavaScript errors.
+  - [x] Corrected the shared 320 px breadcrumb overflow, previously 6 px on
+    Normal, DA, Shock, Smoke and Eclipse Ammunition. Shared small-screen
+    breadcrumb wrapping/gap now keeps the "Rules reference" tag visible,
+    rather than clipping it or hiding it. Other reference pages were checked.
+    A focused served-CSS regression guards the layout contract.
+
 - [ ] **Data processing + Web backend + Web frontend + Project infrastructure:**
   Execute the final 1.0 source-to-storage-to-browser completeness gate defined by
   `docs/releasing.md` against pinned current Army, rules, wiki, database, and symbol
@@ -680,8 +1761,37 @@ as unimplemented and distinguish them from the published core-scenario foundatio
     category from source citation through maintained representation and generated storage to a
     usable normal browser surface; schema coverage, passing validators, and an API route alone
     are insufficient evidence. Re-review exclusions against the canonical completeness definition.
-  - [ ] Close the 1.0 interaction-review target in the maintained ledger, regenerate the checklist,
-    and require the following check to pass. Never edit the generated checklist manually:
+  - [x] Review the 39 schema-level `unrepresented_player_information` fields
+    against paired, pinned raw Army storage: **0 fields have populated values**.
+    All seven composite Unit-option relationship/extras tables have zero rows,
+    and neither 4,748 profile groups nor 5,020 profiles supplies a note.
+    Independently verified the populated *different* source structures:
+    **18** composite-option occurrences on **7** Unit identities, including
+    linked loadouts and Orders, and **30** Unit-note occurrences on **28**
+    logical Units. Normal Unit pages and API passed **510** source/parity/browser
+    checks at desktop and mobile sizes. Mobile composite-option names now wrap
+    instead of being clipped. The audit retains every potential gap and reports
+    source occupancy separately; the pinned Army ZIP was also checked
+    directly (59 JSON documents, no populated flagged fields). Re-run against
+    changed release inputs before claiming the final 1.0 gate.
+  - [x] Resolve dense Unit profile/loadout subrow readability at 320 px.
+    Army profile Attributes, Skills, Equipment and Includes now use full-width
+    stacked rows on very narrow screens, while loadout names take a full row
+    above their Points/SWC values. Corrected the shared mobile label sizing and
+    wrapping up to 600 px. Served-browser inspection of Scylla's expanded Army
+    views checks row/cell geometry and overflow at 320, 390, 400, 600 and 768 px;
+    this resolves the presentation defect, not the broader 1.0 browser gate.
+  - [x] Complete the maintained 1.0 interaction-review target, regenerate the
+    checklist, and verify the release-scoped audit gate passes. All 186 supporting
+    identities are now reviewed, including the shared Flamethrower and
+    Marksman Rifle families, the MULTI Marksman mode reference, the
+    Pitcher and Mine Dispenser support weapons, all eleven Ammunition
+    records, and the four N5.3 core Scenarios. The final Supplies review confirms pickup,
+    transfer, carrier and scoring restrictions, edge-based marker placement,
+    shared Specialist eligibility, and the minimum-VP early ending against
+    N5.3/N5.2 and pinned Wiki sources. This closes the interaction-review
+    ledger only; it does not replace the wider 1.0 data and release acceptance
+    gates. Never edit the generated checklist manually:
 
     ```text
     python tools/audit_rules_interactions.py --check-output docs/rules-interaction-checklist.md --require-release 1.0.0
@@ -889,9 +1999,20 @@ pipeline and artifact lifecycle are described in [data guidance](../data/README.
   - [ ] Treat the official Army app/site as the authority for army-list legality.
     InfinityDB may provide read-only explanation and planning support, but must
     label its snapshot/date and avoid claiming tournament validation.
+  - [ ] Publish ITS-only FAQ clarifications after verifying each exact
+    season/scenario identity, version and bilingual source citation. Model
+    seasonal action identities such as `Activate Communication Antenna`,
+    `Oppose Activation`, and `Emit Akial Interference` only in their reviewed
+    mission context. Confirm none leak into core or other seasons; avoid
+    universalizing tournament-specific outcomes.
 
-- [ ] Extend the 1.0 scenario domain with ITS scenario list/detail coverage backed by
-  curated seasonal data, rather than creating a separate ITS-only model or using PDF excerpts.
+- [ ] Extend the existing core-scenario foundation with remaining ITS scenario
+  list/detail coverage backed by versioned seasonal data; retain the already
+  published Season 18 Battleground pilot without treating it as a 1.0 gate.
+  - [ ] Curate the remaining Season 18 mission identities and complete
+    source-backed definitions under `its-18@2026.09.01`; extend typed
+    geometry, scoring and card/classified choices only where the mission
+    needs them. Unpublished missions must fail closed.
   - [ ] Capture structured, cited scenario facts: objectives and scoring, game
     rounds/end conditions, force/point/SWC/table/deployment configuration,
     deployment map or geometry, exclusion zones, token types/diameters,

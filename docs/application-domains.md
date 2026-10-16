@@ -13,8 +13,8 @@ are related concerns, but they are not the same concern.
 The capability registry described below is **Current** in
 `src/infinity_db/application_domains.py`. Ammunition, Labels, and General Rules are published
 catalog domains, Armies is a published overview domain, Fireteams follows the shared landing/scoped
-interaction contract, and Attributes plus scoped Game terms are published embedded vocabularies
-projected through contextual help, global search, and the federated Glossary.
+interaction contract, and Attributes, scoped Game terms and Weapon Properties are published embedded vocabularies
+projected through contextual help where applicable, global search, and the federated Glossary.
 Concrete unfinished work remains in `docs/TODO.md`.
 
 ## Principles
@@ -63,7 +63,7 @@ army-scoped view rather than a conventional item catalog.
 Embedded vocabularies contain canonical typed concepts that are useful for semantic links, tooltips,
 glossary entries, filtering, or search, but do not warrant their own catalog/detail browser.
 
-**Current.** Attributes and Game terms use this model. Canonical Attribute identities such as
+**Current.** Attributes, Game terms and Weapon Properties use this model. Canonical Attribute identities such as
 `attribute:mov`, `attribute:bs`, and `attribute:wip` own reviewed definitions and can participate in
 semantic relationships without creating `/attributes` or individual Attribute pages. Scoped
 `term:*` identities cover source-native terminology such as Trooper, Marker, Token, Peripheral,
@@ -72,6 +72,13 @@ Victory Points, Null State, Alignment terms, and Visibility Zone variants. Each 
 can coexist with a Label or Trait of the same name without merging identities. Neither vocabulary
 has a standalone catalog/detail hierarchy; both project through Glossary/search, while Attributes
 also participate in contextual Unit-profile help/tooltips.
+
+Weapon Properties (`weapon-property:*`) are an InfinityDB-owned embedded
+vocabulary for reviewed named characteristics such as Plasma, Viral, MULTI
+and AP+DA. They are linked from exact Weapon profiles and show their canonical
+Ammunition, Trait, General Rule or source-section origins. They are searchable
+standalone Glossary entries, not new official Ammunition types or independent
+sources of mechanics.
 
 Other finite vocabularies may use the same model when a player-facing catalog would add little
 value. Do not promote a vocabulary to a top-level domain merely because it has typed identities.
@@ -85,6 +92,12 @@ domains of their own.
 - Glossary provides a terminology-oriented view across both top-level domains and embedded
   vocabularies.
 - A glossary entry backed by a browsable concept links to that concept's normal detail surface.
+- Curated Weapon definitions participate using their existing Army Weapon pages.
+  Shared families have an in-page rules-card destination: for example, `weapon:mines`
+  opens `/weapons/ap-mine#rule-weapon-mines`, rather than inventing a generic
+  `/weapons/mines` Army catalog item. Source-specific mode rules remain on their
+  Weapon cards, not separate Glossary identities; resolving the links requires
+  the opt-in Army associations from the current rules database.
 - An embedded concept can present its definition/context directly in Glossary or a tooltip without
   inventing an otherwise-useless detail route.
 

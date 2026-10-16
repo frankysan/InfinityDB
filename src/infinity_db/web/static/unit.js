@@ -370,9 +370,11 @@ function profileItems(items, catalog, fallbackLabel) {
     const label = item.quantity != null && Number(item.quantity) !== 1
       ? `${decoratedName} ×${item.quantity}`
       : decoratedName;
-    const link = document.createElement("a");
-    const routeId = item.slug || item.id;
-    link.href = `/${catalog}/${encodeURIComponent(routeId)}`;
+    const link = document.createElement(catalog ? "a" : "span");
+    if (catalog) {
+      const routeId = item.slug || item.id;
+      link.href = `/${catalog}/${encodeURIComponent(routeId)}`;
+    }
     link.textContent = label;
     if (hiddenIds.length) {
       const details = document.createElement("span");
@@ -913,6 +915,25 @@ function renderPeripheralRelationships(unit) {
   return section;
 }
 
+
+function appendClassifiedNonSkillRows(rows, items, labelClass, itemClass, colSpan = null) {
+  for (const [property, label, fallbackLabel] of [
+    ["attribute_overrides", "Attribute overrides", "Attribute"],
+    ["training", "Training", "Training"],
+  ]) {
+    const classifiedItems = items?.[property] || [];
+    if (!classifiedItems.length) continue;
+    rows.push([
+      { content: label, header: true, className: labelClass },
+      {
+        content: profileItems(classifiedItems, null, fallbackLabel),
+        className: itemClass,
+        ...(colSpan ? { colSpan } : {}),
+      },
+    ]);
+  }
+}
+
 function generalProfileTableRows(profiles) {
   const rows = [];
   for (const profile of profiles) {
@@ -955,6 +976,9 @@ function generalProfileTableRows(profiles) {
         },
       ]);
     }
+    appendClassifiedNonSkillRows(
+      rows, profile.shared_items, "data-label general-item-label", "general-item-list",
+    );
   }
   return rows;
 }
@@ -991,6 +1015,9 @@ function profileTableRows(profiles, generalByIdentity, anchorScope) {
         },
       ]);
     }
+    appendClassifiedNonSkillRows(
+      rows, profile.specific_items, "data-label profile-item-label", "profile-item-list",
+    );
     appendIncludeRows(rows, profile, anchorScope);
     appendPeripheralRows(rows, profile);
     return rows;
@@ -1054,6 +1081,9 @@ function loadoutTable(loadouts, anchorScope, anchoredPayloads) {
           },
         ]);
       }
+      appendClassifiedNonSkillRows(
+        rows, loadout.specific_items, "data-label profile-item-label", "profile-item-list", 2,
+      );
       appendIncludeRows(rows, loadout, anchorScope, 2);
       appendPeripheralRows(rows, loadout, 2);
       return rows;

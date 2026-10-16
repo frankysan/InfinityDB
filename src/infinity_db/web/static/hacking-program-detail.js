@@ -1,4 +1,5 @@
 import { getCatalogItem } from "./api.js";
+import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { rulesReferenceArticle } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 import { tableViewport } from "./view-components.js";
@@ -150,7 +151,20 @@ document.addEventListener(
   { once: true },
 );
 getCatalogItem("hacking-programs", itemId, pageController.signal)
-  .then(render)
+  .then((program) => {
+    render(program);
+    fetchReviewedFaqRulings(`hacking-program:${itemId}`, {
+      signal: pageController.signal,
+    })
+      .then((payload) => {
+        if (pageController.signal.aborted) return;
+        const section = faqRulingsSection(payload.items);
+        if (section) content.append(section);
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
+      });
+  })
   .catch((error) => {
     if (error.name === "AbortError") return;
     name.firstChild.textContent = "Hacking Program unavailable";

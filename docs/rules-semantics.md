@@ -435,12 +435,15 @@ heights.
 InfinityDB may store/display the source `S` code compactly, but contextual help,
 geometry-aware filtering, or future tabletop tools should resolve that code
 through the rules-defined template mapping rather than treating `S=2` as a
-literal dimension.
+literal dimension. N5.3 p. 18 explicitly defines S0 as a 25 mm base
+with a 3 mm height; S0 is not absent merely because the illustrations
+show S1-S8.
 
-The current Glossary and Unit previews publish the maintained S1–S8 templates through
-`static/silhouette-diagrams.js`. Comparisons use one physical scale; other supported templates
-include an S2 reference, while S2 is shown alone. This implements reference presentation, not live
-tabletop geometry or Silhouette-based filtering.
+The Glossary publishes S1-S8 diagrams at one physical scale and explains S0
+and SX using their printed dimensions without inventing extra artwork. The
+Unit preview handles S0 and SX with explanatory text and keeps the scale-
+preserving S1-S8 comparisons (S2 as a reference). This implements reference
+presentation, not live tabletop geometry or Silhouette-based filtering.
 
 Sources:
 
@@ -763,6 +766,13 @@ arbitrating multiple attacks or cancelling States.
 Sources: English N5.3 pp. 24, 79–80, 85, 111, 120, 160, 165, 168, 171;
 Spanish N5.3 pp. 80–82, 113, 124, 164, 179.
 
+REA-014 reference acceptance (2026-10-15) verified all eight connected
+Dodge, Reset, Engaged, Isolated, IMM-B, Targeted, Sixth Sense and
+Bangbomb cards in Chromium at 1440/390/320 px (48/48 render/navigation
+checks). The authored restrictions, cumulative MOD rules, per-attack
+outcomes and State relationships were unchanged; no new cancellation
+engine was introduced. REA-015/026 remain separately scoped.
+
 ### RS-GSG-STATE-005F — State cancellation is source-specific, including Marker lifecycles
 
 **Classification:** source-native interaction; reviewed player-facing explanation (REA-015).
@@ -791,6 +801,12 @@ The State reference pages now expose their individual cancellation procedures in
 These are non-executable player explanations. Existing typed relations do not
 become unconditional state transitions; overlapping source conditions must
 still be evaluated within the applicable Order and State rules.
+
+REA-015 browser acceptance (2026-10-15) verified all ten State cards
+and twelve cross-reference routes at 1440/390/320 px (66/66 checks).
+The IMP-1 ARO sentence also received a grammar-only correction with
+its exact reviewed-plain occurrence fingerprint refreshed; the existing
+non-Trait classification remains unchanged. REA-026 is separately scoped.
 
 Sources: English N5.3 pp. 29, 97, 157–171; Spanish N5.3 pp. 30,
 96, 162–178. See the detailed per-record citations and REA-015.
@@ -1437,6 +1453,19 @@ Attack identifies Combat Instinct without maintaining reciprocal curated rows. T
 expresses only the documented interaction; activation requirements, exceptions, and the
 rest of each Skill remain in that Skill's own facts.
 
+**Scoped ARO eligibility (N5.3 pp. 20, 88, 111-112):** Stealth's
+suppression of certain outside-LoF AROs does not apply to Troopers
+with Combat Instinct or Sixth Sense. This restores otherwise eligible
+reactions, such as those triggered inside Zone of Control, but does
+not remove the reacting Skill's requirements. Combat Instinct also
+ignores Surprise Attack MODs; it does not grant an outside-LoF
+attack reaction or a 360-degree LoF arc. Sixth Sense separately grants
+an outside-LoF/360-degree-LoF response **only to Attacks directed
+at the user**. An enemy's movement without an Attack does not
+activate that permission. These are distinct rules, not a general
+ARO or LoF grant. Existing inverse relation navigation remains
+unchanged; the distinctions are explained in each counter-Skill.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/index.php?title=Stealth&oldid=3914>
@@ -1460,6 +1489,18 @@ legal or suppresses every ARO condition; it exposes the specific enabling relati
 leaving geometry, LoF, Active-Turn, Hackable, and other conditions in the owning rule facts.
 `rules.db` derives the reverse navigation so Cautious Movement can identify Stealth as a
 rule that expands where it may be used.
+
+**REA-016 acceptance:** Stealth does not suppress valid Deployable
+triggering (for example, a Mine whose own Trigger Area and Template
+requirements are met). In a mixed activation, another Trooper can
+generate an ARO aimed at the Stealth user, but it becomes Idle unless
+that user declares a Skill permitting the reaction. Optional Stealth
+must be announced even when used by a Marker. These are distinct
+procedures, not universal ARO-generation or Marker-reveal edges.
+The maintained examples cite N5.3 EN p. 112 / ES p. 114 and FAQ v0.1
+EN/ES p. 2; 39/39 desktop/mobile browser checks passed on 2026-10-15.
+The broken generic `weapon:mines` catalog route is separately tracked
+for the 1.0 cross-surface reference gate.
 
 Sources:
 
@@ -1527,18 +1568,22 @@ PH or WIP for the corresponding weapon. InfinityDB therefore authors
 `modifies-rolls-for` from each Trait to the canonical BS Attack Skill; the exact replacement
 Attribute remains part of the Trait definition rather than being encoded in the edge.
 
-The BS Weapon (WIP) curated summary explicitly states that BS Attack (Shock) and BS Attack
-(Guided) cannot use weapons with this Trait. This restriction applies to the named attack
-Skills, not automatically to Shock Ammunition. The exact attack forms still lack separate
-canonical rule identities, so their typed restriction edges remain in the future-interaction
-ledger. Neither is flattened into a restriction on ordinary BS Attack.
+The BS Weapon (WIP) summary excludes the named BS Attack (Shock) and BS Attack
+(Guided) Skills, not ordinary BS Attack or a profile's Shock Ammunition.
+The player-facing Clarifications distinguish: Flash Pulse as an ordinary BS
+Attack with WIP substituted for BS; the named Shock Skill versus a weapon's
+ammunition; and Guided's prohibition even when the enemy is Targeted and
+Guided would otherwise waive LoF. Exact attack variants still lack separate
+canonical record identities, so typed restriction edges remain in the future
+interaction ledger. Do not flatten these into restrictions on ordinary BS Attack.
+(REA-005 reference acceptance, 2026-10-14.)
 
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Traits#BS_Weapon_.28PH.29>
 - Wiki: <https://infinitythewiki.com/Traits#BS_Weapon_.28WIP.29>
 - Wiki: <https://infinitythewiki.com/BS_Attack#Guided_Mode>
-- PDF: Infinity N5 V5.3, printed pages 33 and 174
+- PDF: Infinity N5 V5.3 English pp. 39/175; Spanish p. 39
 
 ### RS-GSG-TRAIT-008 — CC and Non-Reloadable expose direct Skill relationships
 
@@ -1576,9 +1621,13 @@ retains them explicitly instead of creating broader current edges:
 - Indiscriminate bypasses the normal restriction created by Camouflage and Hiding Markers in
   its Area of Effect; and
 - Continuous Damage repeats Saving Rolls after a failed ordinary hit save until success or
-  Dead State, but its additional Critical Saving Roll never starts that repetition. Applicable
-  Immunity can suppress this Trait. The indirect Dead outcome is not equivalent to an
-  unconditional `causes-state` edge.
+  Dead State. Its additional Critical Saving Roll is separate: a failure can inflict an ordinary
+  Wound but does not trigger additional rolls. Applicable Immunity (Trait) or a matching
+  non-Comms Immunity (ARM)/(BTS) can suppress the repeated-roll Trait effect without
+  automatically removing the ordinary hit or Critical-added Saving Roll; only Immunity
+  (Critical) removes the extra Critical roll. Two player-facing examples now distinguish
+  these outcomes (REA-004). The indirect Dead outcome is not an unconditional
+  `causes-state` edge.
 
 This is the same fail-closed policy used elsewhere in the rules graph: keep exact behavior in
 the owning definition and preserve unresolved relationships in the future queue until both
@@ -1632,6 +1681,37 @@ Source:
 
 - Wiki: <https://infinitythewiki.com/Armed_Turret>
 
+### RS-GSG-WEAPON-002 — Armed Turret E/Mitter Saving Roll disagreement
+
+**Classification:** confirmed cross-source discrepancy, unresolved precedence;
+not a new Ammunition rule.
+
+The imported Army `Armed Turret` source weapon 226, mode `E/Mitter`,
+lists E/M, BTS/2 and **one** Saving Roll. All six locally preserved Army
+snapshots dated 2026-09-10 through 2026-09-29 agree. The separate Army
+`E/Mitter` source weapon 25 lists **two** BTS/2 Saving Rolls. The English
+N5.3 Weapon Chart (p. 186), Spanish N5.3 chart (p. 195), corresponding
+captured Wiki charts, and canonical E/M Ammunition all specify two.
+The Armed Turret rule (N5.3 p. 70) identifies the BS Weapon by name but
+does not give a special Saving Roll count. Reviewed English/Spanish N5
+FAQ v0.1 texts contain no turret/E/Mitter exception.
+
+InfinityDB retains the imported Army mode's **one** roll without
+inferring a turret-specific E/M exception or a correction to two.
+The Armed Turret reference preserves the underlying gameplay summary,
+with the conflicting values and cross-links to E/Mitter and E/M
+Ammunition in `facts.sourceNotes`, next to but independent of REA-037's
+S1/S2 Silhouette note. This is *source disclosure*, not a judgement
+that the imported one-roll count is official or intentional. A scoped
+Corvus Belli clarification remains the only way to settle the conflict.
+See REA-045 in `docs/rules-explanation-audit-1.0.md`.
+
+Sources: N5.3 English pp. 70, 186; Spanish p. 195; captured official Army
+metadata from 2026-09-10 through 2026-09-29; English Wiki capture
+`WIKI-en 20260926-200832` (Weapon Chart, Armed Turret, E/M Ammunition);
+Spanish Wiki capture `WIKI-es 20261009-211304` (Tabla de Armas);
+English/Spanish N5 FAQ v0.1.
+
 ### RS-SE-ROLL-001 — Skill-to-Skill roll effects use `modifies-rolls-for`
 
 **Classification:** source-native cross-rule gameplay relationship semantics.
@@ -1674,6 +1754,33 @@ InfinityDB therefore authors `modifies-rolls-for` from Look Out to Dodge and
 `ignores-modifiers-from` from Speculative Attack to Mimetism. `rules.db` derives inverse
 navigation so Dodge and Mimetism expose those interactions without reciprocal curated rows.
 The exact PH-3 and Speculative Attack -6 values remain in the owning Skill facts.
+
+**Discover is a Basic Short Skill/ARO with target-specific limits
+(N5.3 p. 77):** The declaring Trooper must have LoF to the
+target Marker and cannot declare Discover twice against the
+same target in one Order. On a failed Roll, that Trooper may
+not retry the same Marker until the next Player Turn; another
+Trooper may still try it, and the original Trooper may target
+a different Marker. A revealed Trooper later re-entering
+Camouflaged or Impersonation Marker State counts as a new Marker.
+Discover + Attack is legal because Discover is a Basic Short
+Skill. If the Camouflaged target reveals itself by declaring
+an ARO, no Discover Roll is needed before resolving the
+declared Attack; otherwise Discover must succeed first.
+These are target-specific declaration and resolution rules,
+not a general exception to LoF or ARO entitlement.
+
+**Look Out! is a scoped allied ARO permission (N5.3 p. 81):**
+The reacting user needs LoF to the active enemy. After
+Look Out! is declared, the Reactive Player selects other
+allied Troopers for Dodge (PH-3) in that same Order. Those
+Troopers count as declaring an ARO even if the enemy is
+outside their own LoF and ZoC, provided they have not
+already declared another ARO. The roll is unopposed unless
+an incoming Attack can be opposed by a Face to Face Dodge.
+Successful alerted Troopers can adjust facing without
+displacement. This is not a general permission for other
+ARO Skills; the existing Dodge-modifier relation stays scoped.
 
 The BS Attack labels on Intuitive Attack and Speculative Attack remain source-native labels,
 not graph edges: the current relation vocabulary describes gameplay effects between records,
@@ -1767,7 +1874,11 @@ preserves the exact source-symbol occurrence and resolves it through the maintai
 `equipment-presentation-encodings.json` map to the canonical Cube/Cube 2.0 Equipment
 identity. The Equipment catalog, detail usage, Unit API references, and Equipment filter
 consume that mapping without inventing a textual Army Equipment row or treating the
-symbol's asset grouping as a rules taxonomy.
+symbol's asset grouping as a rules taxonomy. The rules-enrichment coverage audit
+must enumerate this same public Equipment catalog, including encoded Cube/Cube 2.0
+and curated-only Equipment such as Firewall. Auditing only the raw Army Equipment
+rows incorrectly reports valid canonical Sepsitor-to-Cube relationships as
+unresolved; this is a source-to-browser coverage obligation, not a new rule.
 
 Sources:
 
@@ -1832,20 +1943,44 @@ Sources:
 
 Doctor's ordinary recovery requires Silhouette contact, a VITA target and
 Unconscious State. A successful WIP Roll removes one Wound and cancels
-Unconscious; failure causes Dead. Other State/Skill rules, such as Stunned,
-No Wound Incapacitation and Technorganic, provide specific exceptions.
+Unconscious; failure causes Dead. Other State/Skill rules provide explicit, separately scoped exceptions:
+Stunned cancellation accepts Doctor on VITA or Engineer on STR;
+No Wound Incapacitation allows a Trooper with Doctor to treat itself
+while ignoring the Unconscious Null restrictions; and Technorganic
+allows Doctor to recover an Unconscious STR Trooper, but does not grant
+continued ordinary Doctor Wound healing after Unconscious ends.
+A merely wounded operational VITA Trooper does not satisfy the ordinary
+Unconscious requirement. These cases are explained on the Doctor card
+(REA-002); they are not generic extensions of ordinary healing.
 Engineer instead has separate effects: repair an STR target (a failed WIP Roll
 inflicts a Wound), or cancel eligible non-Unconscious States (failure has no
-negative consequence). The Stunned cancellation rule distinguishes VITA
-(Doctor) from STR (Engineer). Direct target **allegiance** remains under
-investigation (REA-038); the explicit Allied restrictions on MediKit/GizmoKit
-cannot be silently generalized to the Skills.
+negative consequence). Thus an allied **VITA Trooper in Targeted** can
+receive Engineer condition cancellation without STR or Wound repair; a
+failed cancellation WIP Roll is harmless, unlike failed STR repair.
+The Stunned cancellation rule distinguishes VITA (Doctor) from STR
+(Engineer). These checked examples are published in the Engineer card.
+The direct Doctor/Engineer requirements contain no universal Allied-only
+clause; the explicit Allied target gates of MediKit/GizmoKit and the
+Servant/Connected Cyberplug contact exception do not generalize to the
+underlying Skills. Engaged State and Interacting with a Close Combat
+separately prohibit their declarations/target treatment in the applicable
+close-combat situations. This is now explained in the player references;
+whether non-Allied Unconscious/Immobilized, Neutral, Hostile or scenario
+targets qualify for direct Skill use remains an unconfirmed source decision
+(REA-038), not an inferred blanket permission.
 
 MediKit and GizmoKit resolve target PH Rolls, not Saving Rolls. If multiple
 successful hits/uses occur in one Order, any successful target PH Roll gives
 at most one ordinary recovered Wound; Remote Presence and other explicit
-exceptions can alter that outcome. For simultaneous positive and negative
-State/Wound changes, apply recovery first, then the new detrimental effect.
+exceptions can alter that outcome. The canonical
+`rule:order-expenditure-sequence` now owns the complete simultaneous
+recovery example (REA-009): a WIP Roll first cancels existing IMM-A,
+then a Riotstopper PARA PH-6 Saving Roll can inflict a new IMM-A.
+Successful saving leaves the old IMM-A canceled; failed Engineer WIP
+leaves the old IMM-A in place. The sequence is source-native English
+and Spanish N5.3 p. 15, and is cross-linked from Engineer, Doctor and
+IMM-A. It describes outcome ordering, not action/declaration timing
+or a new general state-machine resolver.
 A Disposable Burst increase spends more charges; a Special Die does not.
 Double Shot with Disposable (2) needs both charges unspent.
 
@@ -1869,6 +2004,16 @@ Critical. Placing a Deployable with a Camouflaged enemy Marker in its Trigger
 Area uses this Skill unless a valid non-camouflaged enemy Model is also there;
 failed placement does not put the weapon on the table and spends one
 Disposable use when applicable.
+
+The published Skill card also provides three source-reviewed examples:
+a CAMO Marker that declines its ARO (successful WIP is the actual Attack
+Roll, followed by its ordinary Saving Roll), a valid reacting Marker and
+other Template-affected Trooper (eligible opposition uses the same WIP
+Roll; only the Main Target suffers Critical), and a Deployable placed in
+a Trigger Area with a CAMO Marker (failed WIP prevents placement and
+consumes a Disposable use; a valid non-CAMO enemy Model exempts that
+specific placement condition). These examples document the rule, not
+new independent game mechanics.
 
 **Current consumer:** `skill:intuitive-attack` curated reference. Do not
 extrapolate placement requirements to unrelated Deployables.
@@ -2110,6 +2255,18 @@ Repeaters and Deployable Repeaters, with additional rules for interacting throug
 enemy Repeaters. It can create ARO/target relationships without LoF and outside
 the Hacker's own ZoC.
 
+**Reactive declaration windows (N5.3 pp. 55, 57):** Hacking
+Area can give a reactive Hacker an ARO against an Active Hacker
+outside ordinary LoF/ZoC, but another Trooper does not gain an
+ARO against the Active Hacker's initial Idle solely by being a
+possible target of a later Program. If subsequently targeted by
+a Comms Attack, that Trooper can declare Reset. A Camouflaged
+Marker acting inside a Hacker's Hacking Area can instead cause
+the Hacker to delay its ARO; in the official example, the
+Hacker can declare an ARO only if that Marker reveals itself
+during the second Short Skill. Neither Hacking Area presence
+nor a delayed declaration overrides the Program's Requirements.
+
 Hacking Area is therefore not a fixed range value that belongs on a Hacker's
 canonical Unit Profile. InfinityDB may document which entities extend or use the
 area, but an actual live Hacking Area requires game positions, Repeater state,
@@ -2184,6 +2341,14 @@ that opposing MODs cancel. Independent rules remain effective; Firefight's
 Designated Landing Area +3 is explicitly cumulative with other MODs. A
 player can have only one Controlled Jump Program active.
 
+**Accepted examples (REA-006):** The Program card now shows the
+reactive Hacker declaration affecting that same Combat Jump PH Roll,
+two opposing Programs canceling one another's effects while Firefight's
++3 remains applicable, and the full-table Trooper scope versus
+Speedball Tokens excluded by FAQ. This complements, rather than changes,
+the existing Supportware effects and their timing. Both English N5.3
+p. 59 and Spanish p. 61 explicitly support the same interpretation.
+
 The maintained text links Combat Jump and Hacker where canonical identities
 exist. Scenario-rule identities are not currently valid maintained-text link
 targets, so the Firefight example remains plain text with a PDF citation.
@@ -2194,7 +2359,12 @@ expressly limits Controlled Jump to Troopers, so neither its +3 nor its -3
 modifies Speedball rolls. The `uses-effects-of` link from Request Speedball to
 Combat Jump is not a claim that every Trooper-only modifier applies to it.
 This is an explicit FAQ exception (v0.1, printed p. 1), not a general rule
-about every other Combat Jump modifier (REA-007).
+about every other Combat Jump modifier. **REA-007 acceptance:** The Speedball
+Skill now includes a PH 15 example showing that allied/enemy Controlled Jump
+cannot turn that Roll into PH 18/12; the Program and Skill cards both retain
+their reciprocal links and FAQ provenance. Other possible scenario modifiers
+are outside the scope of this exclusion. No `uses-effects-of` relation or
+Program mechanics were changed.
 The FAQ source is cited as `n5-faq-v0.1-en-pdf` on both cards. Its
 `publishedDate` uses the official 2026-09-01 N5.3/FAQ announcement as a
 release-era source anchor; the FAQ PDF's exact separate publication date is
@@ -2282,8 +2452,17 @@ These are conditions for placing and opposing the Template, not a generic
 promise that Smoke or Eclipse prevents every Attack. The structured
 `facts.visibilityZone` properties remain separate from the curated
 `facts.clarifications` explanations; neither represents a roll evaluator.
-The targeted Sixth Sense/MSV1 FAQ qualification remains within REA-019,
-not silently generalized into this interaction.
+The REA-030 review now publishes the FAQ's narrow Sixth Sense/MSV1
+exception on their owning reference cards: both are present and the user
+is the target of a BS Attack through a Zero Visibility Zone. This does
+not change the standalone MSV1 LoF -6 MOD or imply a general Smoke,
+Eclipse, Visibility Zone or MOD-cancellation evaluator.
+
+REA-012 browser acceptance (2026-10-15) verified these authored
+boundaries on Smoke, Eclipse, Multispectral Visor, Reflective and Dodge
+at 1440/390/320 px with 33/33 content/navigation checks. The only
+observed overflow, 6 px in the shared Ammunition breadcrumb at 320 px,
+predates this reference and is separately tracked for final layout work.
 
 Sources: English N5 v5.3, pp. 64 and 66 (including the Smoke example),
 MSV p. 125; Spanish N5 v5.3, pp. 64-65 and 130; FAQ v0.1, p. 2
@@ -2322,8 +2501,8 @@ pages <https://infinitythewiki.com/Combined_Ammunition>,
 <https://infinitythewiki.com/Combined_Saving_Roll>, and
 <https://infinitythewiki.com/Ammunition_Summary_Chart>.
 
-Sources: N5 v5.3 Ammunition definitions, pinned Wiki snapshot
-`wiki-en-20260918-130233` (Normal, Shock, Stun, Smoke, Eclipse); current N5.3
+Sources: N5 v5.3 Ammunition definitions, curated Wiki snapshot
+`wiki-en-20260926-200832` (Normal, Shock, Stun, Smoke, Eclipse); current N5.3
 Wiki pages <https://infinitythewiki.com/N>,
 <https://infinitythewiki.com/SHOCK>,
 <https://infinitythewiki.com/Stun_Ammunition>,
@@ -2345,8 +2524,10 @@ weapon's State/Attribute Traits are ignored, and neither protection removes the
 ordinary Saving Roll. N5.3 printed Example 2 makes this distinction concrete:
 against a Monofilament weapon requiring ARM, Immunity (ARM) ignores ARM=0 and
 State: Dead, so the target rolls with full ARM and does not enter Dead from that
-Trait on failure. An otherwise covered Critical still requires the additional
-Saving Roll with Normal effects; only Immunity (Critical) suppresses that extra
+Trait on failure. The published Skill now explicitly links the corresponding
+State/Continuous Damage/ARM=0/BTS=0 examples to the Attribute-specific
+baseline. The printed Monofilament example takes **one ARM save on a hit,
+two on a Critical**; only Immunity (Critical) cancels the Critical-added
 roll. General Immunity does not
 apply to Comms Attacks (except Immunity (State)), and does not negate the
 Non-Lethal or State: Stunned Traits. Those Traits still require their own
@@ -2409,6 +2590,10 @@ derived), and linked rule identities visible. It uses the stored outcomes withou
 evaluating arbitrary attacks. No Plasma/Enhanced combination is stored in these
 reviewed-case arrays; the existing Plasma discussion is not a sixth reviewed case.
 The ordinary curated explanation and the cited source links remain available.
+REA-011 browser acceptance verified all five cards at 1440/390/320 px,
+including each explicit/derived evidence label, per-case applicability,
+roll counts, semantic link navigation, Tab/Enter operation, visible focus
+and mobile width. No unreviewed Plasma/Enhanced result was added.
 
 Other component-specific Immunities, BTS-based Combined Ammunition, additional
 Weapon Traits and conditional State interactions remain unresolved. Do not
@@ -2492,6 +2677,15 @@ below 1. The underlying Saving Roll Attribute still comes from the weapon
 profile. These instructions are published as `facts.clarifications` while
 `defenseModifier` remains the non-executable `halve` operation.
 
+REA-013 browser acceptance (2026-10-15) verified the existing AP/E/M
+round-up examples (5 becomes 3), their weapon-defined Saving Roll
+Attributes, and the T2 instruction to distinguish its 2-Wound hit die
+from its 1-Wound extra Critical die **before** rolling. The maintained
+`facts.ammunitionResolution` continues to preserve all of these
+operations independently. At 320 px, the three pages share the
+previously tracked 6 px `catalog-tag` layout overflow; this is not a
+rules/curation defect.
+
 The reviewed EXP rule requires three Saving Rolls per hit. PARA requires a PH-6
 Saving Roll and applies Immobilized-A on failure, but has no effect when a target
 has no PH Attribute. T2 inflicts two Wounds for a failed hit Saving Roll; a failed
@@ -2519,9 +2713,34 @@ Plasma Carbine uses Normal Ammunition and a combined `ARM and BTS` Saving Roll;
 there must be no `ammunition_composition` inferred from that notation. The
 existing profile/API pilot enforces these different ownership boundaries.
 
+The N5.3 Combined Ammunition example (p. 67) also explicitly combines
+Normal (N) and E/M for E/M CC Weapon, source Ammunition ID 5. The reviewed
+map links the ordered canonical components; `weapon-property:n-em` explains
+potential Normal Wounds and E/M's conditional State effects. The Weapon
+Chart still specifies **two BTS/2 Saving Rolls per hit** without an
+additional ARM roll. A Critical adds one Saving Roll for the combination,
+not one per component. No generic composition engine is introduced.
+The separately imported Armed Turret E/Mitter mode lists only one BTS/2
+Saving Roll and must not be rewritten based on generic E/M facts.
+
+The EXP definition (English and Spanish N5.3 p. 65; pinned English Wiki
+revision 2994) requires all three Saving Rolls even after the first failure
+or Unconscious. A Critical adds one roll, not three more; the printed AP+EXP
+example (English N5.3 p. 67) applies AP's defense reduction across the
+resulting four rolls. A qualifying Immunity (ARM) interaction can instead
+treat covered AP+EXP as Normal, as already documented in RS-AW-IMM-001.
+
+T2 has a cross-source wording discrepancy on its base Saving Roll:
+English N5.3 p. 67 specifies an **ARM Roll**, whereas Spanish N5.3 p. 67 and
+the pinned English Wiki T2 revision 2999 say **Saving Roll** without specifying
+the Attribute. All agree that a failed hit roll inflicts two Wounds while
+failure of the additional Critical roll inflicts only one. The maintained
+source note preserves the discrepancy; InfinityDB does not infer an
+Attribute override for individual Weapon profiles from either wording.
+
 Sources:
 
-- Pinned Wiki revision `wiki-en-20260918-130233`: AP, DA, E/M, EXP, PARA,
+- Curated Wiki snapshot `wiki-en-20260926-200832`: AP, DA, E/M, EXP, PARA,
   and T2 Ammunition.
 - Current N5.3 Wiki: <https://infinitythewiki.com/EXP>,
   <https://infinitythewiki.com/Paralysis_(PARA)_Ammunition>, and
@@ -2646,6 +2865,24 @@ Troopers with Cube or equivalent Equipment.
 If InfinityDB exposes these interactions, they should be represented as cited
 target/effect predicates tied to rules identities. They must not be promoted to
 unconditional static properties of every Weapon occurrence.
+
+The 1.0 Ammunition review confirms that PARA has no Saving Roll or effect for
+targets without PH; a failed PH-6 roll causes IMM-A only if the target can make
+that roll. Successful Engineer/Dodge recovery does not protect against
+re-infliction by a new failed PARA roll during the same Order. Shock causes
+one Wound per failed Saving Roll, but the direct-to-Dead exception and
+cancellation of Unconscious forms (including Dogged, NWI and Shasvastii-Embryo)
+require **VITA 1** and a failed save. The pinned Shock Wiki also excludes
+Explode when the target goes straight to Dead without entering Unconscious.
+Stun imposes Stunned only after a failed Saving Roll; it automatically fails
+an otherwise eligible subsequent Guts Roll unless Courage or equivalent
+protection applies. The printed Flash Pulse versus Immunity (BTS) case retains
+Non-Lethal and State: Stunned, but does not establish a generic immunity rule
+for every Stun weapon. See RS-AW-IMM-001 for that exact exception boundary.
+
+Evidence: English N5.3 pp. 65, 67; Spanish N5.3 pp. 63, 66–67; pinned
+English Wiki PARA revision 3419, Shock revision 3074, Stun revision 3420,
+and Immunity revision 3643.
 
 Sources:
 
@@ -2874,11 +3111,22 @@ This equivalence is scoped to Fireteam bonus calculation. A chart label such as
 logical-Unit layer or become a generic Unit alias. It is a Fireteam-context
 equivalence relationship.
 
+**Reviewed exception (REA-034):** Five CORE members do not imply
+Level 5 or Level 4. The published N5.3 Morat Case 2 (3 matching Vanguard,
+Kyosot, Zabuk) qualifies for Level 3 and cumulative bonuses through
+Level 3. Both English p. 138 and Spanish p. 142 examples incorrectly
+include Level 4's +1 BS/CD; the corresponding tables reserve it for
+four equivalent members (English pp. 135?136; Spanish pp. 139?140).
+InfinityDB publishes the table interpretation and labels the unresolved
+printed example contradiction in `facts.sourceNotes`. Do not reinterpret
+Unit identity or create a Fireteam-specific bonus override from the
+example; await a scoped official correction.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Fireteam_Bonuses>
 - Wiki: <https://infinitythewiki.com/Fireteam_Examples>
-- PDF: Infinity N5 V5.3, printed pages 135 and 138
+- PDF: Infinity N5 V5.3 English pp. 135?136/138, Spanish pp. 139?140/142
 
 ### RS-FT-NOTE-001 — Fireteam chart notes can override general Fireteam rules
 
@@ -3496,6 +3744,26 @@ where applicable, season) scope and link to the general concepts they modify.
 InfinityDB must not rewrite static Unit/Profile data or the base-rule record to
 make a mission-local exception appear universal.
 
+The 1.0 Firefight review compared N5.3 printed pp. 155–156 with English
+N5.2 printed p. 154 and pinned English Wiki Firefight revision 3267. Its
+four end-of-game comparisons award **2** Objective Points for more surviving
+Specialists, **1** for more enemy Specialists killed, **3** for more enemy
+Lieutenants killed, and **4** for more enemy Army Points killed. Ties do not
+earn these awards. The sources do **not** define a Classified Objective for
+Firefight; no inferred Classified Objective interaction is added.
+
+Shared Killing includes Troopers in Dead, those remaining Null at game end,
+and enemy Troopers never deployed as Models or Markers. Reinforced Tactical
+Link makes the Lieutenant identity Open, requires deployment before the first
+round and permits an on-table replacement without Order expenditure at the
+start of the active Tactical Phase when no valid Lieutenant remains.
+Designated Landing Area applies table-wide, adds a cumulative +3 Combat
+Jump PH modifier and removes the enemy Deployment Zone restriction for
+Airborne Deployment-labeled Skills. These exceptions are mission-scoped,
+not overrides to the canonical Lieutenant or Combat Jump definitions.
+The three-round ending and separate all-Null early ending retain their
+distinct Tactical Phase and end-of-Player-Turn timings.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Firefight>
@@ -3511,14 +3779,39 @@ more than 250 gives 4. This leaves 151–175 uncovered and gives two awards for 
 column for killed enemy Army Points uses 85–175, 176–270, and more than 270, and the surrounding
 game-size rows consistently form contiguous increasing bands.
 
-Reviewed interpretation: the two inconsistent boundaries are typographical errors. InfinityDB uses
-85–175 for 1 Objective Point, 176–270 for 3, and more than 270 for 4. A `reviewed-resolution` source
-note retains the printed values and the basis for the correction so the discrepancy is not silently
-erased. This reviewed note does not act as an overlap waiver: maintained exclusive score ranges must
-remain unambiguous.
+The Spanish N5.3 Aniquilación table (printed page 153) explicitly gives
+85–175 for 1 Objective Point, 176–270 for 3, and more than 270 for 4.
+This independently corroborates InfinityDB's existing resolution; it is not
+just an inference from the English table's surrounding progression.
+The `reviewed-resolution` note retains both published variants so the English
+discrepancy is not silently erased. It is not an overlap waiver: maintained
+exclusive score ranges must remain unambiguous.
 
-Source: N5 Core Rules v5.3 (2026-08-10), `data/pdf/rules/n5-rules-v5-3-en.pdf`, printed page 149.
-The pilot's setup, Killing definition, and end conditions are cited to printed page 150.
+Sources: English N5 Core Rules v5.3 (2026-08-10), printed page 149
+(`data/pdf/rules/n5-rules-v5-3-en.pdf`); official Spanish N5.3,
+`data/pdf/rules/esp-n5-update-5-3.pdf`, printed page 153 (Anexos /
+Aniquilación). The pilot's setup, Killing definition, and end conditions
+are cited to English printed page 150.
+The 1.0 review verifies all six source scoring bands (killed enemy Army Points
+and surviving Victory Points as **separate** end-of-game measures), the two
+Objective Points for killing the enemy Lieutenant, and their exclusively
+selected thresholds. The shared Killing definition counts enemy Troopers
+entering Dead or remaining Null at game end, and enemy Troopers never deployed
+as Models or Markers. The mission normally ends after Game Round three, but
+the separate early-ending condition is checked during the active player's
+Tactical Phase and finishes at the **end of that Player Turn**. Do not confuse
+this all-Null check with the minimum-Victory-Points rule in other scenarios.
+The corrected 350-point bands are **not** printed in the English N5.3 table;
+they are printed in the official Spanish N5.3 table (p. 153).
+
+**FAQ v0.1 exception (distinct from the core Killing definition):** The
+English and Spanish FAQ on printed p. 4 explicitly state that an undeployed
+Peripheral (Ancillary) does **not** count as Killed for scenario objectives;
+it counts only when deployed and then entering Dead State or remaining Null
+at the end of the game. The reviewed FAQ pilot is linked to Annihilation as a
+conservative initial scenario scope, without rewriting the shared Killing
+record or claiming that the FAQ is limited to Annihilation. The canonical
+FAQ ruling has its own original publication and source citations.
 
 ### RS-SCN-DOM-001 — Domination keeps scenario-specific SWC and minimum-VP values
 
@@ -3528,16 +3821,32 @@ The Domination Forces and Deployment chart in N5 Core Rules v5.3 (2026-08-10), p
 gives 3, 4, 5, 6, 6, and 8 SWC for 150, 200, 250, 300, 350, and 400 Army Points. The 350-point
 6 SWC row differs from the 7 SWC in Annihilation on printed page 150. Neither another mission's
 chart nor an inferred Points-to-SWC formula authorizes rewriting Domination's value. The maintained
-record retains 6 SWC and a source issue scoped to the 350-point `swc` field. The difference is
-not treated as an obvious error: it may be intentional, but it is noteworthy because the otherwise
-expected progression would suggest 7 SWC. Verification therefore remains open without rewriting the
-scenario-specific printed value.
+record retains 6 SWC and a source issue scoped to the 350-point `swc` field.
+The English N5.2 chart (printed p. 150) and pinned English Wiki Domination
+revision 3264 also print 6 SWC. **The official Spanish N5.3 Domination
+chart (printed p. 155) instead prints 7 CAP/SWC at 350 Army Points.**
+This is a genuine conflict between current official editions, not simply
+a question of why an otherwise consistent chart deviates from a progression.
+InfinityDB retains the English-source value of 6 for now, explicitly flags
+the conflicting Spanish value, and awaits authoritative clarification rather
+than silently treating one language as a universal correction.
 
 The same chart gives minimum Victory Points of 38, 50, 63, 75, 88, and 100 respectively. Printed
 page 152 ends the mission at the end of the active Player Turn if the Tactical Phase count of
 non-Null Troopers' Victory Points is below that row's minimum. This is distinct from both the
 three-Game-Round limit and Annihilation's all-Null condition. The maintained definition keeps literal
 thresholds and separate check/finish timings rather than deriving a threshold from Army Points.
+
+Domination's interaction review confirms the two mutually exclusive
+round-end Quadrant awards: 1 Objective Point only when both players dominate
+the same number and the scoring player dominates at least one; 2 for dominating
+more, capped at 6 across three rounds. More than half a Trooper's base must
+occupy the Quadrant, and only eligible non-Null Trooper Models/Markers count,
+except Shasvastii-Embryo. Equipment markers cannot score. Four Consoles
+score at game end for the **last successful** player's Hack, not every
+historical success. Hack Consoles is restricted to qualifying Specialists in
+Silhouette contact, with repeatable Normal WIP rolls (+3 for Hackers), and
+Doctors/Engineers cannot delegate Specialist tasks to Peripherals.
 
 Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed pages 150–152. Domination's
 objectives, control rules, Consoles, and Hack Consoles are on page 151; Specialist eligibility
@@ -3565,6 +3874,20 @@ controlled boxes than the opponent, and 2 extra for all three. Control requires 
 excludes Null carriers and enemy Model contact, and is distinct from the pickup/carriage procedures.
 These are scenario-local reference facts, not permanent Unit/Profile capabilities or stored match
 state.
+
+The final 1.0 interaction review corroborates the maintained text with English
+N5.2 p. 152 and pinned English Wiki Supplies revision 3266. A qualifying
+Specialist may use Pick Up Supply Boxes as an Attack Short Skill without a Roll
+when touching an uncarried Token, any Null Model with a box, or an allied
+Normal Model with a box. Only Models carry boxes, at most one per Specialist;
+the Token stays on the table when its carrier becomes Null. At game end,
+control requires a non-Null Model carrier not touching an enemy Model.
+The three scoring awards are additive but are all checked at game end,
+not when a box is picked up. Shared Specialist qualification excludes
+delegating the task to Doctor/Engineer Peripherals. The three-round end
+condition and the Tactical Phase minimum-VP check (ending at the Player
+Turn's end) stay distinct. No game-state tracker or unconditional effect
+relationship is implied by these mission-local rules.
 
 Source: `data/pdf/rules/n5-rules-v5-3-en.pdf`, N5 v5.3 printed pages 153–154. Page 153 owns
 objectives, placement prose, pickup, carrying, control, and the deployment-contact restriction;
@@ -3650,6 +3973,15 @@ that current N5.3 does not classify as Common or Special Skills. `Bangbomb`, `Gi
 override; and `Infinity Team-Ops` is a source marker for Team-Ops presentation. InfinityDB
 preserves those raw occurrences for provenance and compatibility but excludes their application
 identities from the rules-backed Skill catalog when a valid `rules.db` is available.
+
+For Unit details, the known `BTS=3` occurrence is kept in
+the underlying Army Skill-bucket data, but its public
+loadout-specific presentation is separated into an
+**Attribute overrides** row, not linked to a Skill page.
+This preserves the canonical general-profile BTS value
+and the exact per-loadout BTS replacement without inventing
+an Automatic Skill or ARO. Other ordinary Skill and
+Equipment links remain unchanged.
 
 Conversely, rules-native Skills do not need an Army occurrence to be catalog identities. The
 current core catalog therefore includes the canonical Special Skill `Non-Hackable` with zero
@@ -3778,18 +4110,23 @@ carrier/loadout relationship separate, and cross-link the relevant rule and
 Unit uses. Deployables need not be forced into one catalog domain merely to share
 a profile table.
 
-The V5.3 sources currently conflict for Armed Turret Silhouette: its detailed
-profile on printed page 70 and the current wiki give **S2**, while the page-195
-Deployable Profiles summary gives **S1**. InfinityDB's existing curated Armed
-Turret profile follows the owning detailed rule (S2). Preserve this source
-discrepancy explicitly; do not overwrite the curated value from the summary
-chart without an official clarification/erratum or a reviewed precedence
-decision.
+The V5.3 sources conflict for Armed Turret Silhouette in **both languages**:
+English detailed p. 70 and Spanish detailed p. 74 give **S2**, while the
+English deployable summaries pp. 74/195 and Spanish p. 203 give **S1**.
+Pinned English and Spanish Wiki detailed profiles corroborate S2.
+According to the N5.3 English Silhouette chart p. 18, both share a 25 mm
+base, but S1 is 25 mm tall versus S2 at 40 mm, affecting LoF and
+clearance. InfinityDB retains S2 from the authored detailed profile
+and **now displays a source-conflict note** on the Armed Turret Weapon
+reference. This is a provisional publication baseline, not an official
+precedence or an excuse to rewrite imported data. Do not change the
+Silhouette without a scoped Corvus Belli ruling or an accepted, recorded
+source-precedence decision (REA-037).
 
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Armed_Turret>
-- PDF: Infinity N5 V5.3, printed pages 70 and 195
+- PDF: Infinity N5 V5.3 English pp. 18, 70, 74, 195; Spanish pp. 74, 203
 - Source/correction boundary: `config/catalogs/weapon-overrides.json` and
   `data/curated/rules/n5-core-v5.3.json`
 
@@ -4304,10 +4641,242 @@ independent game rule inferred from shared wording.
 The canonical records keep their distinct identities and relations: Baggage enables Reload and both
 can cancel Unloaded State where their requirements and restrictions are satisfied.
 
+**ARO versus phase timing (N5.3 pp. 83, 120):** Reload is a
+Short Skill/ARO and still requires ordinary reaction eligibility,
+a valid expended or Unloaded item, and a suitable non-Null
+Baggage holder inside whose Zone of Control the user stands.
+Its effect reaches one allied Trooper per Order. Baggage separately
+grants automatic recovery during the States Phase, without a
+Reload ARO declaration. This later recovery must not be mistaken
+for an extra Reload declaration or used to retroactively restore
+deployed weapons in an earlier Order.
+
+**Reactive placement (N5.3 p. 82):** Place Deployable requires LoF
+to the Active Trooper in the Reactive Turn. The combination of
+Deployable and Perimeter changes placement from Silhouette
+contact to a valid location entirely in Zone of Control with a
+passable path; it does not waive that reactive LoF requirement.
+The placed item arrives at the Conclusion of the Order and can
+only operate in later Orders/AROs. The existing FAQ occupied-spot
+exception remains independent of the original declaration.
+
 Sources:
 
 - Wiki: <https://infinitythewiki.com/Baggage>, reviewed 2026-09-23
 - Wiki: <https://infinitythewiki.com/Reload>, reviewed 2026-09-23
+
+## N5 FAQ v0.1 general clarification curation
+
+### RS-FAQ-V01-002 — Dated general FAQ rulings remain separate from base mechanics
+
+**Classification:** source-backed supplemental interpretation,
+reviewed 2026-10-15.
+
+Six newly curated general-gameplay rulings supplement the earlier
+Firewall/Ancillary pilots. Their canonical references and printed
+FAQ page positions are:
+
+- Skill declaration / target position: `skill:bs-attack` (EN/ES p. 1).
+  Choose the target position in Resolution before measuring Range;
+  declare the other Skill details, and let the active player choose
+  declaration order where necessary.
+- Fired Deployables on vertical surfaces: `trait:deployable`
+  (EN p. 1, ES p. 2). The Token must have full supporting surface;
+  this is not a global alteration of placing other Deployables.
+- Controller unable to declare: `skill:peripheral` (EN/ES p. 2).
+  Controller and Peripherals declare the same Skill; any participant
+  who cannot declare it substitutes Idle.
+- Camouflaged Marker in Total Cover: `state:camouflaged`
+  (EN/ES p. 3). A BS Attack that forces a Saving Roll reveals
+  the Marker, but does not hit the covered element.
+- Special Dice in Coordinated Orders: `rule:coordinated-orders`
+  and `rule:special-dice` (EN p. 2, ES p. 3). Special Dice do
+  not alter Burst values and therefore still apply.
+- Fireteam required member lost: `rule:fireteam-general`
+  (EN/ES p. 3). Chart minimum membership applies at creation;
+  the FT Master Special Skill can add its own requirements.
+
+These entries are absent from the pinned English FAQ v0.0 and
+first appear in the available English v0.1 publication. They
+use the official 2026-09-01 announcement as the project's
+existing date anchor; this does not establish the exact PDF
+upload date. The source-specific English/Spanish printed-page
+differences are preserved as separate citations.
+
+**Deferred:** The separate FAQ question about Fireteam type after
+losing a member has a contradictory Spanish example: a Haris is
+described as having two members before and after losing one.
+The English example uses three followed by two. Do not infer
+the Spanish example was intended to match English silently;
+retain this discrepancy for further source review.
+
+Sources: N5 FAQ v0.1 English and Spanish,
+`data/pdf/faq/n5-faqs-v0-1-en.pdf` and
+`data/pdf/faq/esp-faqs-n5-v0-1.pdf`; comparison to the
+pinned English v0.0 PDF under `data/pdf/faq/`.
+
+### RS-FAQ-V00-003 — Original FAQ identity persists through v0.1 republication
+
+**Classification:** source-native historical provenance plus current applicability,
+reviewed 2026-10-15.
+
+Eight general clarifications occur in both official English FAQ v0.0 and
+English/Spanish v0.1. The same ruling identity is reused. The
+`originalPublication` citation points to historical English v0.0;
+`selectedCitation` points to current English v0.1, and the Spanish
+v0.1 citation retains its own printed page. These are corroborating
+sources for one ruling, not independent mechanics or supersession events:
+
+- Prone eligibility: `state:prone` (v0.0 EN p. 1;
+  v0.1 EN/ES p. 1). Movement Label allows entry/cancellation,
+  except Jump and Berserk.
+- Vaulting with Climb/Jump: `skill:climb` and `skill:jump`
+  (v0.0 EN p. 1; v0.1 EN/ES p. 1). Both use general
+  Movement vaulting rules.
+- Direct Template corners: `trait:direct-template`
+  (v0.0 EN p. 1; v0.1 EN/ES p. 1). Secondary targets cannot
+  be hit by firing around corners beyond the attacker's LoF.
+- Occupied Place Deployable position: `skill:place-deployable`
+  (v0.0 EN p. 1; v0.1 EN/ES p. 2). Reposition legally
+  or lose the Deployable; rolled Deployable weapons are included.
+- Multiple Surprise Attack users: `skill:surprise-attack`
+  (v0.0 EN p. 1; v0.1 EN/ES p. 2). MODs are
+  applied separately, not stacked.
+- Sixth Sense plus MSV1: `skill:sixth-sense` and
+  `equipment:multispectral-visor` (v0.0 EN p. 2;
+  v0.1 EN/ES p. 2). The combined user ignores the -6
+  Zero Visibility LoF MOD when attacked through that zone.
+- Excess Protheion failed Saves: `skill:protheion`
+  (v0.0 EN p. 2; v0.1 EN/ES p. 2). No additional
+  benefit beyond the failures required for Dead State.
+- Camouflage (1 Use): `skill:camouflage` and
+  `skill:infiltration` (v0.0 EN p. 2; v0.1 EN/ES p. 2).
+  Deployment as Model does not expend the use, but
+  failing Infiltration after attempting Marker deployment does.
+
+The original v0.0 source's `2025-10-15` date is a version-associated
+official update anchor from the source history; the PDF creation
+metadata agrees, but its exact release/upload day has not been
+independently verified. The current 2026-09-01 v0.1 date similarly
+remains the documented release-era anchor. Do not promote either
+to a precision claim in the browser. The browser presents the
+selected v0.1 source plus an explicit earlier v0.0 origin/date anchor.
+All eight carry-forwards are currently scoped to N5.3 from the
+v0.1 source, **not** automatically to prior gameplay revisions.
+
+Remaining original v0.0 and ITS-specific questions are not covered
+by this batch; ITS rulings require their own scenario/season scopes.
+
+Sources: pinned FAQ PDFs
+`data/pdf/faq/n5-faqs-v0-0-en.pdf`,
+`data/pdf/faq/n5-faqs-v0-1-en.pdf`, and
+`data/pdf/faq/esp-faqs-n5-v0-1.pdf`;
+source chronology in `docs/n5-source-history.md`.
+
+### RS-FAQ-V00-004 — Further general FAQ carry-forwards and scope boundaries
+
+**Classification:** source-native current clarification with retained
+original-publication evidence, reviewed 2026-10-15.
+
+Ten further gameplay Q&A entries in English FAQ v0.0 recur in English
+and Spanish FAQ v0.1 without a verified material answer change:
+
+- Minelayer/Decoy/Holoecho private deployment checks: `skill:minelayer`,
+  `skill:decoy`, `state:holoecho` (v0.0 EN p. 1, v0.1 EN/ES p. 1).
+  ZoC/Coherency is checked while the opponent looks away; this does not
+  make the check or hidden placement public.
+- Prone at the end of movement: `state:prone` (v0.0 EN p. 1,
+  v0.1 EN/ES p. 1). Entering Prone at the end does not shorten the move.
+- BS Attack Rolls/Label MODs: `skill:bs-attack`,
+  `skill:intuitive-attack`, `skill:speculative-attack` (v0.0 EN p. 1,
+  v0.1 EN/ES p. 1). They count as BS Attacks for relevant MODs;
+  +1 SD does not apply to Long Skills.
+- Controlled Jump versus Speedballs: `hacking-program:controlled-jump`,
+  `skill:request-speedball` (v0.0 EN p. 1, v0.1 EN/ES p. 1).
+  Controlled Jump affects Troopers, not Speedballs.
+- Automatic Skill/Equipment declarations in Marker State:
+  `state:camouflaged`, `skill:stealth` (v0.0 EN p. 2, v0.1 EN/ES p. 2).
+  Declare only those which change activation or restrict AROs.
+- Aerial Troopers and Boost: `skill:aerial`, `trait:boost`
+  (v0.0 EN p. 2, v0.1 EN/ES p. 2).
+  Lack of Silhouette contact prevents activation of Boost.
+- Stealth and grouped AROs: `skill:stealth` (v0.0 EN p. 2,
+  v0.1 EN/ES p. 2). ARO targeting a Stealth user is permitted
+  initially, but becomes Idle if the declared Skill does not permit AROs.
+- Deployable Cover: `equipment:deployable-cover` (v0.0 EN p. 2,
+  v0.1 EN p. 2, ES p. 3). Nothing may be placed or end movement on it.
+- Disconnected/Unconscious: `state:disconnected`,
+  `state:unconscious`, `skill:cautious-movement`
+  (v0.0 EN p. 2, v0.1 EN p. 2, ES p. 3).
+  These Troopers do not block Marker re-entry or cancel Cautious Movement.
+- Discover bonuses: `skill:discover`,
+  `rule:fireteam-level-bonuses` (v0.0 EN p. 2, v0.1 EN/ES p. 3).
+  Neither BS Attack (+1 SD) nor a Fireteam +1 BS bonus applies to Discover.
+
+The initial owner of each dated FAQ is a canonical Skill, State,
+Equipment, Trait, Hacking Program or the existing Fireteams surface;
+there is no new mechanics category or source rewrite. The same FAQ ID
+can be linked from multiple appropriate canonical topics and therefore
+several pages. Dates remain version-associated source anchors, not
+independently established PDF upload days.
+
+**Later follow-up:** The broader Deployment Phase repositioning ruling
+now belongs to `rule:deployment-phase`, not a misleading Special Skill.
+Season-scoped ITS rulings and the disputed Fireteam-type examples remain
+separate unresolved inventories.
+
+Sources: the three pinned N5 FAQ PDFs identified in
+RS-FAQ-V00-003 and the private dated reconciliation in
+`local/audits/`.
+
+### RS-FAQ-V00-005 — General Deployment Phase timing has its own canonical owner
+
+**Classification:** official N5.3 Basic Rules plus a separately cited
+carried-forward FAQ clarification, reviewed 2026-10-15.
+
+The canonical `rule:deployment-phase` summarizes the Deployment
+order/sequence and applicable reserve-rule exceptions from N5.3,
+English printed p. 15. It is a General Rules detail and can be
+found independently of Minelayer, Strategos, Forward Deployment,
+or any other individual deployment Skill.
+
+Official English FAQ v0.0 p. 1 establishes that game elements may be
+repositioned within the player's main Deployment Phase step *until*
+a Roll or measurement is made for the affected element. Affected
+elements then retain their positions for the remainder of Deployment.
+Checking a Fireteam's Coherency and adjusting its members illustrates
+the boundary. English and Spanish FAQ v0.1 p. 1 corroborate that
+answer, with original publication and selected source recorded
+separately on `faq-ruling:deployment-phase-reposition-after-measurement`.
+
+This timing clarification applies to the general phase, not only
+to the placement of Minelayer items or any particular scenario.
+It is separate from the canonical N5.3 sequence and does not
+rewrite any deployment Skill, scoped scenario configuration, or
+Army Unit deployment fact.
+
+### RS-FAQ-ITS-001 — Season 18 names confirmed, publication deliberately deferred
+
+**Classification:** verified source applicability with an open
+publication dependency, reviewed 2026-10-15.
+
+The official Season 18 PDF (version 2026.09.01) confirms
+Crossing Lines (p. 61), Akial Interference (pp. 86–89), and
+Area of Interest (pp. 113–115) as active ITS mission contexts
+referenced in the N5 FAQ. Nine ITS-specific FAQ rulings appear
+in the English v0.0 and are carried forward into v0.1; the
+separate Ancillary exception first appears in v0.1.
+
+**No new ITS FAQ entry is published by this review.** The
+current scenario catalog publishes N5 Core scenario identities
+but not those three Season 18 missions. The exporter correctly
+rejects unresolvable scenario targets, and the default browser
+read model does not implicitly choose ITS season/revision.
+Such rulings must retain exact season, mission, Classified
+Objective/card and source context, rather than overriding the
+base N5 rule for all games. The detailed source crosswalk and
+dependency ordering are private under
+`local/audits/faq-its-season18-source-scope-20261015.md`.
 
 ## ITS FAQ
 
@@ -4410,3 +4979,39 @@ legend). InfinityDB exposes both rule owners, preserving the source-marker
 conflict. This does not establish why Army chose the marker or adjudicate an
 upstream data correction. N5 v5.3 printed pp. 72, 176, 181; PDF SHA-256
 `53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f`.
+
+## 1.0 Cautious Movement and ARO suppression
+
+**N5.3 pp. 32 and 112:** Cautious Movement remains a Long Skill,
+not an ARO. Ordinarily it prevents reactions only when both start
+and end positions are outside all enemy Model/Marker LoF and ZoC.
+For Hackable Troopers in Model form, those positions must also be
+outside enemy Hacking Areas; a non-Hackable Trooper's presence
+inside a Hacking Area alone does not generate AROs. Hidden
+Deployment Troopers are neither Models nor Markers for this
+LoF/ZoC trigger.
+
+Stealth allows the Active Trooper to declare Cautious Movement
+within enemy ZoC and Hacking Areas without granting those
+reactions, but enemies with LoF may still react. Combat Instinct
+and Sixth Sense counter Stealth; Deployable triggers are also
+independent. The exceptions concern **eligibility to react**,
+not changing Cautious Movement's category or waiving other
+reaction requirements. The owning Skill and linked source pages
+provide the player-facing explanation.
+
+## 1.0 Alert! automatic Conclusion
+
+**N5.3 p. 77:** Alert! is an Optional Automatic Common
+Skill, not an ARO that its user declares. To be eligible,
+a Trooper must not have activated through an Order or ARO
+during the current Order, and must itself have been attacked
+or have an allied Trooper inside its Zone of Control that
+was attacked. Eligible Troopers may adjust facing at
+Conclusion, **after all Saving Rolls**, without moving
+position, making a Roll, or granting further AROs.
+
+Unlike Look Out!'s declared allied Dodge ARO, Alert! gives
+only a late automatic facing adjustment to non-activated
+Troopers. Its source-dependent trigger and conclusion
+timing must not be converted into a generic out-of-LoF ARO.
