@@ -88,7 +88,7 @@ def test_markdown_report_does_not_assert_semantic_completeness() -> None:
     assert 'Not verified in the browser' in text
 
 
-def test_checked_in_policy_has_68_distinct_reviewed_source_clauses() -> None:
+def test_checked_in_policy_has_75_distinct_reviewed_source_clauses() -> None:
     path = Path(__file__).resolve().parents[1] / (
         'config/validation/weaponry-family-clauses.json'
     )
@@ -97,12 +97,13 @@ def test_checked_in_policy_has_68_distinct_reviewed_source_clauses() -> None:
     assert [family['name'] for family in policy['families']] == [
         'Perimeter Weapons', 'Mines', 'Armed Turret', 'D-Charges',
         'Disco Baller', 'Drop Bears', 'Mine Dispenser',
-        'Sepsitor', 'SymbioBomb', 'WildParrot',
+        'Sepsitor', 'SymbioBomb', 'WildParrot', 'Pitcher',
     ]
     assert [len(family['clauses']) for family in policy['families']] == [
-        7, 14, 8, 9, 8, 6, 2, 5, 6, 3,
+        7, 14, 8, 9, 8, 6, 2, 5, 6, 3, 7,
     ]
-    assert len({clause['id'] for f in policy['families'] for clause in f['clauses']}) == 68
+    assert len({clause['id'] for f in policy['families'] for clause in f['clauses']}) == 75
+    assert sum(len(f.get('requiredRelations', [])) for f in policy['families']) == 12
     assert all(
         clause['semanticReview']['status'] == 'represented'
         for family in policy['families'] for clause in family['clauses']
@@ -139,7 +140,7 @@ def test_checked_in_semantic_review_separates_full_and_partial_coverage() -> Non
     statuses = [clause['semanticReview']['status']
                 for family in raw['families'] for clause in family['clauses']]
     assert {status: statuses.count(status) for status in set(statuses)} == {
-        'represented': 68,
+        'represented': 75,
     }
 
 
@@ -322,3 +323,75 @@ def test_symbiobomb_printed_traits_have_cited_nonprofile_reference() -> None:
         c['sourceId'] == 'n5-core-v5.3-pdf' and c['page'] == 74
         for c in record['citations']
     )
+
+
+def test_required_typed_relation_is_reported_when_missing() -> None:
+    policy, pages = _fixture()
+    policy['families'][0]['requiredRelations'] = [
+        {'from': 'weapon:pitcher', 'type': 'uses-effects-of',
+         'to': 'equipment:deployable-repeater'},
+    ]
+    with pytest.raises(WeaponryFamilyAuditError, match='typed-relation input'):
+        compare_family_clauses(policy, pages, [], [])
+    unrelated = [
+        ('n5-core-v5.3', 'weapon:pitcher', 'uses-effects-of', 'equipment:repeater')
+    ]
+    result = compare_family_clauses(policy, pages, [], [], unrelated)
+    assert result[0]['requiredRelationChecks'] == [
+        {'from': 'weapon:pitcher', 'type': 'uses-effects-of',
+         'to': 'equipment:deployable-repeater', 'present': False},
+    ]
+    present = [
+        ('n5-core-v5.3', 'weapon:pitcher', 'uses-effects-of',
+         'equipment:deployable-repeater'),
+    ]
+    assert compare_family_clauses(
+        policy, pages, [], [], present
+    )[0]['requiredRelationChecks'][0]['present']
+
+
+def test_required_relation_schema_rejects_malformed_and_duplicate_edges(
+    tmp_path: Path,
+) -> None:
+    policy, _ = _fixture()
+    policy['corePdfSha256'] = 'a' * 64
+    path = tmp_path / 'relation_policy.json'
+    relation = {'from': 'weapon:pitcher', 'type': 'uses-effects-of',
+                'to': 'equipment:deployable-repeater'}
+    policy['families'][0]['requiredRelations'] = [relation, relation]
+    path.write_text(json.dumps(policy), encoding='utf-8', newline='\n')
+    with pytest.raises(WeaponryFamilyAuditError, match='Duplicate required relation'):
+        _read_policy(path, 'a' * 64)
+    policy['families'][0]['requiredRelations'] = [{'from': 'weapon:pitcher'}]
+    path.write_text(json.dumps(policy), encoding='utf-8', newline='\n')
+    with pytest.raises(WeaponryFamilyAuditError, match='Invalid relation evidence'):
+        _read_policy(path, 'a' * 64)
+
+
+def test_checked_in_required_relations_exist_in_current_curated_data() -> None:
+    root = Path(__file__).resolve().parents[1]
+    policy = json.loads((root / 'config/validation/weaponry-family-clauses.json').read_text(
+        encoding='utf-8'
+    ))
+    curated = json.loads((root / 'data/curated/rules/n5-core-v5.3.json').read_text(
+        encoding='utf-8'
+    ))
+    actual = {
+        (record['id'], rel['type'], rel['recordId'])
+        for record in curated['records'] for rel in record.get('relations', [])
+    }
+    required = {
+        (r['from'], r['type'], r['to'])
+        for family in policy['families'] for r in family.get('requiredRelations', [])
+    }
+    assert len(required) == 12
+    assert required <= actual
+    assert {
+        ('weapon:pitcher', 'uses-effects-of', 'equipment:deployable-repeater'),
+        ('weapon:mine-dispenser', 'modifies-use-of', 'weapon:drop-bears'),
+        ('weapon:symbiobomb', 'uses-effects-of', 'weapon:pt'),
+        ('weapon:sepsitor', 'causes-state', 'state:sepsitorized'),
+    } <= required
+    pitcher = next(f for f in policy['families'] if f['name'] == 'Pitcher')
+    assert pitcher['page'] == 73 and len(pitcher['clauses']) == 7
+    assert pitcher['armyExamples'] == ['Pitcher']

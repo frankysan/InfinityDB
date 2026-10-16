@@ -215,9 +215,11 @@ rechecked for this audit, and no older N5 snapshot delta is inferred.
 
 The maintained read-only source anchors and concept associations are in
 `config/validation/weaponry-family-clauses.json`. Reproduce the current
-snapshot comparison using `tools/audit_weaponry_family_clauses.py`. The current 68
-reviewed anchors are **not** a complete clause inventory of Weaponry pp. 68–74,
-and a represented summary is not proof of complete relations or browser coverage.
+snapshot comparison using `tools/audit_weaponry_family_clauses.py`.
+The current 75 reviewed anchors and twelve required typed relations
+are **selected evidence**, not a complete clause or relationship
+inventory of Weaponry pp. 68-74. See RR-WPN-FAMILY-004;
+summary matches do not establish browser acceptance.
 
 Sources: N5 v5.3 PDF, printed pp. 69 (Perimeter Weapons/Boost), 72 (Mines,
 Cybermines, Chest Mines), PDF SHA-256
@@ -625,7 +627,7 @@ N5.3 pp. 68-74; see RR-WPN-FAMILY-003 for the subsequent extension.
 **Project domain:** Weaponry. **Scope:** pinned English N5.3 core rules
 pp. 71-74; ITS mission content excluded.
 
-The hash-pinned family review now covers **68 selected clauses across
+At this checkpoint, the hash-pinned family review covered **68 selected clauses across
 ten sections**. This pass adds 30 source-to-summary evidence anchors:
 
 - Disco Baller: 8 clauses covering targetless deployment, the Eclipse
@@ -650,8 +652,8 @@ ten sections**. This pass adds 30 source-to-summary evidence anchors:
   Intuitive Attack, Perimeter positioning in Zone of Control, and
   visible E/M Mine behavior instead of CAMO Marker placement.
 
-All 68 reviewed clauses match their printed anchors and current
-curated summaries, with zero unresolved referenced concept IDs. This
+All 68 clauses in this checkpoint matched their printed anchors and
+the curated summaries, with zero unresolved referenced concept IDs. This
 is a bounded source-to-summary review and **does not** certify complete
 prose coverage, game-state interactions, source precedence, or visual
 browser acceptance. A separate headless Chrome pass checked 132/132
@@ -665,6 +667,37 @@ Reproduce with the existing source-hash-pinned
 `config/validation/weaponry-family-clauses.json` and
 `tools/audit_weaponry_family_clauses.py`; generated evidence remains
 private under `local/audits/`.
+
+### RR-WPN-FAMILY-004 - Pitcher clauses and typed relationship checks
+
+**Project domain:** Weaponry. **Scope:** pinned English N5.3 p. 73
+and current curated rules; ITS content excluded.
+
+The source-hash-pinned audit now checks **75 selected clauses across
+eleven Weaponry sections**. Seven new Pitcher clauses cover Targetless
+BS Attack, Deployable Repeater delivery, placement at impact, and
+the printed Disposable (2), Indiscriminate, Non-Lethal and Speculative
+Attack Traits. They already have explicit curated-summary evidence;
+no duplicated mechanics or profile normalization was needed.
+
+It now verifies **twelve selected typed relationships** in a freshly
+built rules database, including Pitcher to Deployable Repeater,
+Mine Dispenser to Drop Bears, Disco Baller to Activate Disco Ball,
+SymbioBomb to Pheroware Tactics, and Sepsitor to Sepsitorized State.
+This catches missing links that matching prose cannot detect.
+
+Policy validation rejects malformed or duplicate required edges.
+Missing relation input fails closed; absent actual edges are
+reported as missing instead of treated as a pass. The pinned
+audit reports 75 represented clauses, twelve present required
+edges, and zero missing concept IDs.
+
+This does not establish full relationship coverage or a new
+source-precedence decision, and it is not a human visual review.
+The Dodge and failed-Guts movement exemption for Deployable triggers
+is already curated under its canonical Skill/rule owners rather
+than duplicated on each Weapon card. All generated evidence stays
+under ignored local/audits/.
 
 ## Ammunition and Weaponry / Broader research
 

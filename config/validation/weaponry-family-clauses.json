@@ -443,6 +443,13 @@
             "summaryAnchor": "cannot activate other"
           }
         }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:armed-turret",
+          "type": "enables-use-of",
+          "to": "skill:place-deployable"
+        }
       ]
     },
     {
@@ -575,6 +582,13 @@
             "summaryAnchor": "does not affect the user"
           }
         }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:d-charges",
+          "type": "uses-effects-of",
+          "to": "skill:place-deployable"
+        }
       ]
     },
     {
@@ -693,6 +707,13 @@
             "summaryAnchor": "Deactivator]]'s Range MODs"
           }
         }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:disco-baller",
+          "type": "uses-effects-of",
+          "to": "skill:activate-disco-ball"
+        }
       ]
     },
     {
@@ -784,6 +805,13 @@
             "summaryAnchor": "three shared [[trait:disposable-x|Disposable (3)]] uses"
           }
         }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:drop-bears",
+          "type": "modifies-use-of",
+          "to": "weapon:mines"
+        }
       ]
     },
     {
@@ -820,6 +848,18 @@
             "curatedId": "weapon:mine-dispenser",
             "summaryAnchor": "Mine type is specified in brackets"
           }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:mine-dispenser",
+          "type": "modifies-use-of",
+          "to": "weapon:drop-bears"
+        },
+        {
+          "from": "weapon:mine-dispenser",
+          "type": "uses-effects-of",
+          "to": "weapon:mines"
         }
       ]
     },
@@ -898,6 +938,18 @@
             "curatedId": "weapon:sepsitor",
             "summaryAnchor": "failure causes [[state:sepsitorized|Sepsitorized State]]"
           }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:sepsitor",
+          "type": "causes-state",
+          "to": "state:sepsitorized"
+        },
+        {
+          "from": "weapon:sepsitor-plus",
+          "type": "causes-state",
+          "to": "state:sepsitorized"
         }
       ]
     },
@@ -988,6 +1040,13 @@
             "summaryAnchor": "Remove the SymbioBomb at the end of the Order"
           }
         }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:symbiobomb",
+          "type": "uses-effects-of",
+          "to": "weapon:pt"
+        }
       ]
     },
     {
@@ -1040,6 +1099,135 @@
             "curatedId": "weapon:wildparrot",
             "summaryAnchor": "visible WildParrot Token or Model"
           }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:wildparrot",
+          "type": "modifies-use-of",
+          "to": "weapon:mines"
+        }
+      ]
+    },
+    {
+      "name": "Pitcher",
+      "page": 73,
+      "armyExamples": [
+        "Pitcher"
+      ],
+      "clauses": [
+        {
+          "id": "pitcher-targetless",
+          "anchor": "BS Attack, Targetless.",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "skill:bs-attack",
+            "trait:targetless"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "The Pitcher uses [[skill:bs-attack|BS Attack]] and [[trait:targetless|Targetless]]"
+          }
+        },
+        {
+          "id": "pitcher-support-amplifier",
+          "anchor": "a range amplifier for Hackers",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "equipment:deployable-repeater",
+            "equipment:repeater"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "The Token provides [[equipment:repeater|Repeater]] effects"
+          }
+        },
+        {
+          "id": "pitcher-bs-success",
+          "anchor": "A successful BS Roll allows players to place a Deployable Repeater",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "equipment:deployable-repeater"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "A successful BS Roll places a [[equipment:deployable-repeater|Deployable Repeater]] Token"
+          }
+        },
+        {
+          "id": "pitcher-impact-location",
+          "anchor": "at the point of impact",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "equipment:deployable-repeater"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "at the point of impact"
+          }
+        },
+        {
+          "id": "pitcher-disposable",
+          "anchor": "Disposable (2), Indiscriminate, Non-Lethal,",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "trait:disposable-x"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "[[trait:disposable-x|Disposable (2)]]"
+          }
+        },
+        {
+          "id": "pitcher-non-lethal",
+          "anchor": "Indiscriminate, Non-Lethal, Speculative Attack,",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "trait:indiscriminate",
+            "trait:non-lethal"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "[[trait:indiscriminate|Indiscriminate]] and [[trait:non-lethal|Non-Lethal]]"
+          }
+        },
+        {
+          "id": "pitcher-speculative",
+          "anchor": "Speculative Attack, Targetless, [*]",
+          "relatedCuratedIds": [
+            "weapon:pitcher",
+            "trait:speculative-attack"
+          ],
+          "semanticReview": {
+            "status": "represented",
+            "reason": "Source clause explicitly represented by current Pitcher summary.",
+            "curatedId": "weapon:pitcher",
+            "summaryAnchor": "[[trait:speculative-attack|Speculative Attack]]"
+          }
+        }
+      ],
+      "requiredRelations": [
+        {
+          "from": "weapon:pitcher",
+          "type": "uses-effects-of",
+          "to": "equipment:deployable-repeater"
+        },
+        {
+          "from": "weapon:pitcher",
+          "type": "enables-use-of",
+          "to": "skill:speculative-attack"
         }
       ]
     }

@@ -708,10 +708,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       fabricating an Army attack profile. Automated browser assertions
       passed 132/132 across 1440, 390 and 320 px for seven weapon pages.
       See RR-WPN-FAMILY-003.
+    - [x] Add Pitcher to the pinned family audit (seven clauses on
+      N5.3 p. 73) and verify twelve selected outgoing typed relations
+      from ten Weaponry sections against a freshly generated rules DB.
+      Fail closed on absent relation input or invalid/duplicate policy
+      edges; regression tests cover real and deliberately missing
+      relations. This adds relationship evidence without changing
+      curated rules or Army source profiles. See RR-WPN-FAMILY-004.
     - [ ] Continue auditing remaining Weaponry source clauses,
       unreviewed exceptions, exact profile semantics and
-      API/browser relationships. The 68 selected clauses are not
-      an exhaustive N5.3 pp. 68-74 prose inventory.
+      API/browser relationships. The 75 selected clauses and twelve
+      typed edges are not an exhaustive N5.3 pp. 68-74 inventory.
     - [ ] Register the supplied FAQ v0.1 as its own pinned source publication and
       reconcile core versus ITS-season applicability before curating rulings. Its
       content hash and the core PDF/history ZIP hashes are available in the local
