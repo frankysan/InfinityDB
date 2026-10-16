@@ -84,6 +84,12 @@ function ruleReferenceHref(reference) {
 }
 
 function appendWeaponAmmunition(cell, profile, fallbackReference) {
+  // Army uses numeric 0 for an absent ammunition type (for example Cybermine).
+  // Preserve the API value, but display the Weapon Chart's empty-field notation.
+  if (profile.ammunition === 0) {
+    cell.textContent = "--";
+    return;
+  }
   if (Array.isArray(profile.ammunition_parts)) {
     // All parts come from reviewed metadata IDs, never parsed from display notation.
     for (const part of profile.ammunition_parts) {
@@ -606,15 +612,24 @@ function render(item) {
   const sections = usageSections(item);
   const variantRules = gameplayVariantRules(item.variants);
   const levelEffects = levelEffectsSection(item.rules);
+  const profiles = catalog === "weapons" && item.weapon_variants?.length
+    ? weaponVariants(item.weapon_variants) : null;
+  // Named Mines need their specific Weapon Chart profile before the long
+  // shared family reference. Chest Mine does not use that family rule.
+  const mineFamily = catalog === "weapons"
+    && item.rules?.some((rule) => rule.id === "weapon:mines");
+  const rules = mineFamily
+    ? [...item.rules].sort((a, b) => Number(a.id === "weapon:mines") - Number(b.id === "weapon:mines"))
+    : item.rules;
   content.replaceChildren(
-    ...(item.rules?.length ? [rulesReferenceSection(item.rules)] : []),
+    ...(mineFamily && profiles ? [profiles] : []),
+    ...(rules?.length ? [rulesReferenceSection(rules)] : []),
     ...(levelEffects ? [levelEffects] : []),
     ...(variantRules.length ? [rulesReferenceSection(variantRules, "Variant rules")] : []),
     ...(catalog === "traits" && item.description && !item.rules?.length
       ? [traitDescription(item.description)] : []),
     ...(catalog === "weapons" && item.special_profile ? [specialWeaponProfile(item.special_profile)] : []),
-    ...(catalog === "weapons" && item.weapon_variants?.length
-      ? [weaponVariants(item.weapon_variants)] : []),
+    ...(!mineFamily && profiles ? [profiles] : []),
     ...(catalog === "equipment" && item.profiles?.length
       ? [weaponVariants([{ id: item.id, name: item.name, profiles: item.profiles }])] : []),
     ...(catalog === "equipment" && item.hacking_programs?.length

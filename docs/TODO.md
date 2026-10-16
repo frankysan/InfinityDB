@@ -324,10 +324,17 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       JavaScript errors and overflow. Cross-page Mines glossary/WildParrot
       navigation and local anchors passed 42/42 checks at the same widths.
       Evidence is retained under ignored local/audits/.
-    - [ ] Complete human visual inspection of Mines/Cybermine/Chest Mine
-      detail cards, especially both Chest Mine modes and responsive citation
-      presentation. Automated browser and API checks do not replace
-      visual review; reconcile any discovered defects.
+    - [x] Visually inspect desktop/mobile browser screenshots of the seven
+      named Mines and both Chest Mine modes, including citations and responsive
+      typography. The review found Cybermine rendering numeric 0 as its
+      Ammunition and long shared Mines text hiding specific profiles. Display
+      absent Ammunition as "--", place named-Mine profiles first and put
+      variant-specific references before shared Mines rules. Chest Mine BS/CC
+      presentation is unchanged. Headless Chrome passed 225/225 assertions
+      across all eight pages at 1440/390/320 px. See RR-WPN-MINE-004.
+    - [ ] Obtain independent human visual acceptance if required for the 1.0
+      release; agent-reviewed screenshots and automated browser assertions
+      are evidence, not a human sign-off.
     - [x] Reconcile the initial 119 unresolved Army Weapon enrichment entries
       against the exact N5 v5.3 PDF chart evidence and retained catalog categories
       using `tools/audit_weapon_definition_gaps.py`. The pinned Army database

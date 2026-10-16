@@ -12,6 +12,12 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Mine pages now show the weapon-specific profile before the long
+  shared Mines rules; Cybermine and PARA Mine-specific cards
+  also precede the family text. Cybermine displays absent
+  ammunition as "--" rather than the imported numeric 0.
+  Chest Mine BS/CC modes and source profiles are unchanged.
+
 - Deactivator now distinguishes same-Order Mine and
   Cybermine triggers, Boost contact attacks and Armed
   Turret reactions, including concealed Marker

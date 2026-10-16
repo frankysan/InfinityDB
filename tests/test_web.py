@@ -6815,3 +6815,31 @@ def test_glossary_boost_exposes_distinct_placement_and_triggering_references(
     status, _, body = request(rules_app, "/traits/boost")
     assert status == 200
     assert b"<main" in body
+
+
+
+def test_mine_detail_profile_order_and_absent_ammunition_source_preservation(
+    app: Callable,
+) -> None:
+    """The browser fixes presentation without rewriting published Army fields."""
+    status, _, body = request(app, "/static/catalog-detail.js")
+    assert status == 200
+    text = body.decode("utf-8")
+    assert 'if (profile.ammunition === 0) {' in text
+    assert 'cell.textContent = "--";' in text
+    assert 'item.rules?.some((rule) => rule.id === "weapon:mines")' in text
+    assert '...(mineFamily && profiles ? [profiles] : [])' in text
+    assert '...(!mineFamily && profiles ? [profiles] : [])' in text
+    assert 'Number(a.id === "weapon:mines") - Number(b.id === "weapon:mines")' in text
+
+    root = Path(__file__).resolve().parents[1]
+    catalog_app = create_app(
+        root / "data/generated/infinity.db",
+        rules_database_path=root / "data/generated/rules.db",
+    )
+    status, _, body = request(catalog_app, "/api/weapons/cybermine")
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["profiles"][0]["ammunition"] == 0
+    assert payload["profiles"][0]["saving"] == "BTS"
+    assert payload["profiles"][0]["saving_num"] == "2"

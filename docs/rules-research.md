@@ -1984,6 +1984,40 @@ the source-hash invariant. It does not change gameplay, decide
 which conflicting publication overrides another, or claim all
 possible interactions have been exhaustively adjudicated.
 
+### RR-WPN-MINE-004 - Named Mine detail-page visual review
+
+**Scope:** seven reviewed Mine names and Chest Mine BS/CC modes,
+desktop 1440 px and narrow 390/320 px Chrome renderings, using
+the existing Army and N5.3 curated rules databases. Source
+interpretation and imported profiles are unchanged.
+
+Screenshot examination found no card clipping, sideways overflow,
+overlapping citation links, or collapsed/misidentified Chest Mine
+mode rows. However, the long shared Mines reference pushed the
+specific Weapon profile far below the title on narrow screens;
+Cybermine exposed the Army numeric 0 sentinel as "Ammunition 0".
+These were real presentation issues rather than source-rule conflicts.
+
+The weapon-detail renderer now displays named Mine chart profiles
+**before** the shared Mines reference. A Mine-specific rules card
+(Cybermine or PARA Mine) is presented before the shared family card.
+This exception is keyed by the published `weapon:mines` rule ID,
+so Chest Mine and unrelated Weapon details retain their existing
+presentation. Cybermine with the numeric 0 ammunition source value
+shows "--" in the statline; the API retains 0 and no Ammunition
+type is invented. Its Comms Attack, Reset and two BTS Saves remain
+separate from shared Mine triggers.
+
+The visual/browser acceptance covers all eight page identities at
+1440, 390 and 320 px, including citation presence, variant-specific
+rule priority, profile ordering, expanding linked Ammunition effects,
+two Chest Mine modes, absence of JavaScript errors and horizontal
+overflow: **225/225 assertions**. Full-page screenshots and the
+capture/verification helpers remain under ignored `local/audits`.
+The selected screenshots were reviewed visually; independent human
+sign-off remains a separate release decision. Source discrepancies
+for Mine object S0/S1 and PARA `[*]`/`[**]` remain unresolved.
+
 ### Sepsitor and Sepsitor Plus (N5.3; 2026-10-09)
 
 **Project domain:** Data processing
