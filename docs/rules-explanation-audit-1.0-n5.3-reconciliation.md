@@ -589,6 +589,33 @@ horizontal overflow. This is bounded acceptance; the
 frozen 367-record inventory is unchanged and full 1.0
 corpus acceptance remains open.
 
+## Cyberplug Controller ARO split (2026-10-16)
+
+Pinned English N5.3 pp. 107-108 distinguish activating a
+Connected Peripheral (Cyberplug) from having the Controller
+perform an independent reaction. During an Active Turn, the
+Controller still activates but resolves the shared action as
+Idle; an enemy with a valid ARO can target that Controller,
+and an attack against the Idling Controller is a Normal Roll
+(p. 108, example 1). The Connected Peripheral's separate
+attack does not oppose an attack targeting the Controller.
+
+During the Reactive Turn, selecting a Connected Cyberplug
+causes the Controller to declare the ARO but perform Idle;
+the other Autonomous Cyberplug may react independently.
+Alternatively, the Controller performs its own ARO while
+both Cyberplugs operate as Autonomous, each subject to
+ordinary ARO eligibility (pp. 107-108, examples 2-3).
+Neither choice creates an ARO without a qualifying trigger.
+
+The prior REA-017 subtype model and relationships already
+represented this correctly. Two clarifications were added to
+the Cyberplug subtype; no activation engine, profile mode,
+Army source, or shared Peripheral rule was changed.
+Two source/curation regressions and responsive browser
+checks provide bounded verification. The frozen 367-record
+inventory and the whole-corpus acceptance gate remain open.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

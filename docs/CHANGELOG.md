@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Peripheral (Cyberplug) now explains why a Connected Controller
+  may be attacked while performing Idle and how its own ARO
+  changes Connected/Autonomous reactions.
 - Alert! now correctly explains its automatic eligibility
   and after-Saving-Rolls facing adjustment, rather than
   treating it as a declared ARO.

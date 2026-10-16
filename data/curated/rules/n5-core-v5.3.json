@@ -10484,7 +10484,9 @@
                 ],
                 "clarifications": [
                     "A Connected unit is an exception to the Controller's usual [[skill:idle|Idle]] when the Controller declares [[skill:doctor|Doctor]] or [[skill:engineer|Engineer]]. The Controller then performs the recovery Skill and makes the Roll through the unit's Silhouette contact with an allied target; only one target can be treated per Order.",
-                    "For missions and scenarios, this subtype inherits restrictions applied to [[rule:peripheral-type:servant|Servant]] (including those concerning Specialist Troops). Its Autonomous fallback on Controller isolation or Null is an explicit exception to the general [[skill:peripheral|Peripheral]] [[state:disconnected|Disconnected]] rule."
+                    "For missions and scenarios, this subtype inherits restrictions applied to [[rule:peripheral-type:servant|Servant]] (including those concerning Specialist Troops). Its Autonomous fallback on Controller isolation or Null is an explicit exception to the general [[skill:peripheral|Peripheral]] [[state:disconnected|Disconnected]] rule.",
+                    "During the Active Turn, a Connected [[skill:cyberplug|Cyberplug]] and its Controller are activated by the same Order. The Controller performs [[skill:idle|Idle]] but remains a valid target for an eligible enemy [[trait:aro|ARO]]. An Attack against that Idling Controller is an unopposed Roll rather than a Face to Face Roll (N5.3 p. 108, example 1).",
+                    "In the Reactive Turn, the Controller may select a Connected [[skill:cyberplug|Cyberplug]], declare an [[trait:aro|ARO]], and resolve [[skill:idle|Idle]] while an Autonomous [[skill:cyberplug|Cyberplug]] reacts independently. Alternatively, the Controller may perform its own eligible [[trait:aro|ARO]] and both [[skill:cyberplug|Cyberplugs]] become Autonomous and react independently. Neither Profile grants an [[trait:aro|ARO]] without ordinary reaction eligibility (N5.3 pp. 107-108, examples 2-3)."
                 ]
             },
             "citations": [

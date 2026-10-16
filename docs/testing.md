@@ -2547,3 +2547,24 @@ private under ignored local/audits/alert-conclusion-audit/.
 The original 367-record audit remains frozen; other
 conditional ARO permissions and the whole-corpus gate
 remain open.
+
+## 1.0 Cyberplug Controller ARO split
+
+**Verified 2026-10-16 against the SHA-256-pinned N5.3 English
+PDF pp. 107-108.** The curated regression asserts the existing
+Automatic Peripheral Skill, Cyberplug Connected/Autonomous
+profiles, common-Order activation, separate reactive eligibility
+and Controller-as-Idle behavior. A PDF-pinned regression checks
+the official active and reactive examples.
+
+With a freshly rebuilt rules DB, the published Cyberplug
+subtype reference passed **3/3 headless Chrome checks** at
+1440, 390 and 320 px. The new explanations were visible,
+with no JavaScript errors or horizontal overflow. Private
+verifier, screenshot, results and rules database remain under
+ignored local/audits/cyberplug-aro-browser/ and
+local/audits/cyberplug-aro-audit.db.
+
+The original REA-017 foundation and frozen 367-record audit
+are unchanged. This is selected ARO clarification, not a new
+rules engine or whole-corpus 1.0 acceptance.

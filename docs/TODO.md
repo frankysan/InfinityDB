@@ -1303,6 +1303,12 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         same Order; after Saving Rolls, eligible Troopers may
         turn in place during Conclusion without new reactions.
         Pinned-source tests and 3/3 responsive browser checks pass.
+      - [x] Verify Controller and Peripheral (Cyberplug) ARO exceptions
+        from N5.3 pp. 107-108: a Connected Controller resolves Idle
+        but remains an activated, eligible ARO target; alternatively
+        the Controller may react itself while both Cyberplugs operate
+        autonomously. Add pinned-source tests and responsive UI
+        acceptance (3/3). Preserve existing REA-017 subtype coverage.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

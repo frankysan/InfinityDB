@@ -1395,6 +1395,65 @@ def test_checked_in_n5_collection_has_peripheral_rules_foundation() -> None:
     }
 
 
+def test_n5_cyberplug_connected_controller_idle_and_reactive_split() -> None:
+    document = load_curated_document(
+        Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
+    )
+    records = {r["id"]: r for r in document["records"]}
+    peripheral = records["skill:peripheral"]
+    subtype = records["rule:peripheral-type:cyberplug"]
+    facts = subtype["facts"]
+    assert peripheral["facts"]["typeIds"] == ["automatic"]
+    assert facts["profileModes"] == ["connected", "autonomous"]
+    assert facts["maxPerController"] == 2
+    pages = {c["page"] for c in subtype["citations"] if c["sourceId"] == "n5-core-v5.3-pdf"}
+    assert pages >= {107, 108}
+    assert "separate [[trait:aro|ARO]] entitlements" in peripheral["facts"]["effects"][3]
+    assert "Controller declares a reaction but performs [[skill:idle|Idle]]" in facts["effects"][2]
+    assert "both units become Autonomous" in facts["effects"][2]
+    assert "A Connected unit is an exception" in facts["clarifications"][0]
+    active, reactive = facts["clarifications"][2:]
+    assert "are activated by the same Order" in active
+    assert "valid target" in active and "unopposed Roll" in active
+    assert "Face to Face Roll" in active
+    assert "declare an [[trait:aro|ARO]]" in reactive
+    assert "both [[skill:cyberplug|Cyberplugs]] become Autonomous" in reactive
+    assert "without ordinary reaction eligibility" in reactive
+
+
+def test_n5_cyberplug_aro_examples_match_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    manifest = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == manifest["corePdfSha256"]
+    with pdf.open(source) as book:
+        reactive = " ".join(book[106].get_text().split())
+        examples = " ".join(book[107].get_text().split())
+    for fragment in (
+        "Controller performs an Idle instead of any ARO they declare",
+        "other Peripheral uses its Autonomous Profile",
+        "Controller can declare and perform an ARO normally",
+        "Peripherals switch to their Autonomous Profiles",
+    ):
+        assert fragment in reactive, fragment
+    for fragment in (
+        "PERIPHERAL (CYBERPLUG) EXAMPLES",
+        "The Controller has been activated by the Order",
+        "If the ARO is an Attack, it is a Normal Roll",
+        "the Controller is performing an Idle",
+        "the Autonomous Peripheral declares a Dodge",
+        "the two Peripherals (Cyberplug) switch to their Autonomous Profiles",
+    ):
+        assert fragment in examples, fragment
+
+
 def test_n5_alert_is_optional_automatic_conclusion_not_an_aro() -> None:
     document = load_curated_document(
         Path(__file__).parents[1] / "data/curated/rules/n5-core-v5.3.json"
