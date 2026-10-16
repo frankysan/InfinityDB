@@ -12,6 +12,14 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- SymbioBomb now explicitly identifies its three printed Traits:
+  Assignable (Transmutation), Comms Attack and Optional. Its published
+  Pheroware behavior is unchanged.
+
+- Armed Turret now explains Disposable (1), Non-Reloadable, and
+  Perimeter placement inside the deploying Trooper's Zone of Control,
+  with a direct Place Deployable reference. Source disputes remain.
+
 - Mines now distinguish a concealing CAMO Marker (S2) from the revealed
   Mine object, whose S0/S1 values conflict across published sources.
   The distinction does not change any Weapon profile or Chest Mine rules.

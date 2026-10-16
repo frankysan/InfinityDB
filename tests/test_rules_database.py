@@ -4171,3 +4171,25 @@ def test_rea030_general_faq_and_its_only_scope_stay_separate(
             citation["sourceId"] for citation in record["citations"]
         })
         assert "sourceNotes" not in record["facts"]
+
+
+def test_armed_turret_source_placement_clauses_are_published(
+    current_rules_database: RulesDatabase,
+) -> None:
+    record = current_rules_database.composed_record('weapon:armed-turret')
+    assert record is not None
+    assert '[[trait:disposable-x|Disposable (1)]]' in record['summary']
+    assert '[[trait:non-reloadable|Non-Reloadable]]' in record['summary']
+    assert 'totally inside the deploying Trooper' in record['summary']
+    assert '[[trait:zone-of-control-zc|Zone of Control]]' in record['summary']
+    assert record['facts']['specialProfile']['stats'][-1] == ['S', '2']
+    assert any(
+        rel['type'] == 'enables-use-of'
+        and rel['record_id'] == 'skill:place-deployable'
+        for rel in record['relations']
+    )
+    assert any(
+        source['source_id'] == 'n5-core-v5.3-pdf'
+        and source['page'] == 70
+        for source in record['citations']
+    )

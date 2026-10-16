@@ -694,9 +694,24 @@ as unimplemented and distinguish them from the published core-scenario foundatio
       different-valued duplicate modes (Trench-Hammer BS/CC and Kobra BS/CC)
       for their separate source/profile reviews. SymbioBomb is source-prose
       only without an Army/Chart attack profile. See RR-AW-WIKI-NAMES-001.
-    - [ ] Continue the clause-level special-weapon prose audit (N5.3
-      pp. 68-74) and profile-to-API/browser relationships. The Wiki name
-      reconciliation does not establish complete effects or gameplay.
+    - [x] Extend the pinned family clause audit from 21 to 38 selected
+      clauses: Perimeter (7), Mines (14), Armed Turret (8), and
+      D-Charges (9). All have source and curated-summary evidence.
+      Refresh four drifted Mines/Chest Mine anchors. Armed Turret now
+      names Disposable (1), Non-Reloadable, Zone of Control placement,
+      and links to Place Deployable. See RR-WPN-FAMILY-002.
+    - [x] Extend the pinned N5.3 selected-clause review by 30 clauses
+      across Disco Baller (8), Drop Bears (6), Mine Dispenser (2),
+      Sepsitor (5), SymbioBomb (6), and WildParrot (3), reaching
+      68 reviewed clauses in ten sections with no missing curated
+      concepts. Publish SymbioBomb's three printed Traits without
+      fabricating an Army attack profile. Automated browser assertions
+      passed 132/132 across 1440, 390 and 320 px for seven weapon pages.
+      See RR-WPN-FAMILY-003.
+    - [ ] Continue auditing remaining Weaponry source clauses,
+      unreviewed exceptions, exact profile semantics and
+      API/browser relationships. The 68 selected clauses are not
+      an exhaustive N5.3 pp. 68-74 prose inventory.
     - [ ] Register the supplied FAQ v0.1 as its own pinned source publication and
       reconcile core versus ITS-season applicability before curating rulings. Its
       content hash and the core PDF/history ZIP hashes are available in the local

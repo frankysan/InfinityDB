@@ -1461,6 +1461,7 @@ def test_checked_in_n5_collection_links_armed_turret_rule_dependencies() -> None
         ("uses-effects-of", "skill:total-reaction"),
         ("enables-use-of", "skill:bs-attack"),
         ("enables-use-of", "skill:cc-attack"),
+        ("enables-use-of", "skill:place-deployable"),
     }
 
 

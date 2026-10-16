@@ -172,7 +172,7 @@ in `config/validation/weapon-trait-wiki-review.json`; the live N5 Wiki
 WildParrot page currently identifies revision 3610, but that live page is not
 a substitute for the pinned PDF or historical source evidence.
 
-The PDF-hash-pinned 21-clause inventory now classifies **all 21 selected clauses
+The initial PDF-hash-pinned 21-clause inventory classified **all 21 selected clauses
 as explicitly represented** in the curated summaries, rather than inferring
 coverage from neighbouring generic concepts. Its scope remains bounded: the
 inventory does not establish complete Weaponry prose coverage. Seven verified
@@ -215,7 +215,7 @@ rechecked for this audit, and no older N5 snapshot delta is inferred.
 
 The maintained read-only source anchors and concept associations are in
 `config/validation/weaponry-family-clauses.json`. Reproduce the current
-snapshot comparison using `tools/audit_weaponry_family_clauses.py`. The 21
+snapshot comparison using `tools/audit_weaponry_family_clauses.py`. The current 68
 reviewed anchors are **not** a complete clause inventory of Weaponry pp. 68–74,
 and a represented summary is not proof of complete relations or browser coverage.
 
@@ -590,6 +590,81 @@ Sources:
 
 - Wiki: <https://infinitythewiki.com/Combat_Module>
 - PDF: Infinity N5 V5.3, printed pages 36-62
+
+### RR-WPN-FAMILY-002 - Armed Turret and D-Charges source clauses
+
+**Project domain:** Weaponry. **Scope:** official N5.3 p. 70 and current
+curated rules; ITS content excluded.
+
+The PDF-hash-pinned clause review now covers **38 selected clauses**:
+Perimeter Weapons (7), Mines (14), Armed Turret (8), D-Charges (9).
+All have matched explicit source text and reviewed curated-summary
+evidence, with zero missing curated concepts. This does not establish
+complete N5.3 Weaponry prose or browser acceptance.
+
+Armed Turret now explicitly names Disposable (1), Non-Reloadable,
+and Perimeter placement entirely inside the deploying Trooper's
+Zone of Control rather than in Silhouette contact. The typed
+Place Deployable relationship supports discovery. Its S1/S2 source
+contradiction and E/Mitter Saving Roll discrepancy remain unresolved.
+
+D-Charges clauses cover legal targets and contact for both modes,
+placement and no ARO in Demolition Mode, resolution without a Roll,
+shared Disposable (3) uses, Improvised's CC penalty, and the fact
+that detonation does not affect the user. Existing curated summaries
+already represent these mechanics.
+
+Four outdated Mines/Chest Mine evidence anchors were aligned with
+the current equivalent curated wording. The checked-in policy and
+read-only family audit generate a source-backed report under private
+local/audits/. The 38 clauses are not an exhaustive inventory of
+N5.3 pp. 68-74; see RR-WPN-FAMILY-003 for the subsequent extension.
+
+### RR-WPN-FAMILY-003 - Additional special-weapon prose clauses
+
+**Project domain:** Weaponry. **Scope:** pinned English N5.3 core rules
+pp. 71-74; ITS mission content excluded.
+
+The hash-pinned family review now covers **68 selected clauses across
+ten sections**. This pass adds 30 source-to-summary evidence anchors:
+
+- Disco Baller: 8 clauses covering targetless deployment, the Eclipse
+  template, deactivation/persistence, allied-only activation, WIP +3
+  and Deactivator range MODs. The Activate Disco Ball Skill carries
+  activation-specific clauses rather than repeating them as new rules.
+- Drop Bears: 6 clauses covering two modes, visible Mine Token
+  placement, Targetless BS use, delayed detonation, CAMO restrictions,
+  and the shared Disposable (3) pool.
+- Mine Dispenser: 2 clauses covering inherited Drop Bears BS placement
+  and the unit-profile-specified Mine type.
+- Sepsitor: 5 clauses covering eligible Cube targets, Direct Template
+  behavior, Saving Rolls, Critical hits, and Sepsitorized State.
+  Sepsitor Plus retains a separate Weapon Chart profile.
+- SymbioBomb: 6 clauses covering single use, same-army assignment,
+  printed Traits, Pheroware selection, the conditional -3 target MOD,
+  and removal after use. Its curated reference now explicitly labels
+  **Assignable (Transmutation)**, **Comms Attack**, and **Optional**.
+  SymbioBomb has no standalone Army Weapon Chart attack profile, so
+  none was synthesized.
+- WildParrot: 3 clauses covering placement with Place Deployable or
+  Intuitive Attack, Perimeter positioning in Zone of Control, and
+  visible E/M Mine behavior instead of CAMO Marker placement.
+
+All 68 reviewed clauses match their printed anchors and current
+curated summaries, with zero unresolved referenced concept IDs. This
+is a bounded source-to-summary review and **does not** certify complete
+prose coverage, game-state interactions, source precedence, or visual
+browser acceptance. A separate headless Chrome pass checked 132/132
+rule-card, citation, profile-preservation, error and overflow
+assertions on the seven relevant weapon pages (including Sepsitor
+Plus), at 1440, 390 and 320 px. This confirms automated
+presentation behavior, **not human visual review or exhaustive
+interaction coverage**. No imported Army profiles changed.
+
+Reproduce with the existing source-hash-pinned
+`config/validation/weaponry-family-clauses.json` and
+`tools/audit_weaponry_family_clauses.py`; generated evidence remains
+private under `local/audits/`.
 
 ## Ammunition and Weaponry / Broader research
 

@@ -4198,7 +4198,7 @@
             "id": "weapon:armed-turret",
             "kind": "weapon",
             "name": "Armed Turret",
-            "summary": "A stationary [[trait:deployable|Deployable]] Weapon that reacts to enemy Orders. Its bracketed weapon name identifies the BS Weapon it uses.\n\nThe Turret declares a [[skill:bs-attack|BS Attack]] or [[skill:cc-attack|CC Attack]] only against an active enemy **Model**, not a Marker, within its LoF or in Silhouette contact.\n\nIt is immobile, is removed when Wounds equal or exceed its STR, and cannot activate other [[trait:deployable|Deployable]] Weapons or Equipment. It uses [[skill:place-deployable|Place Deployable]] with [[trait:perimeter|Perimeter]] positioning.",
+            "summary": "A stationary [[trait:deployable|Deployable]] Weapon with [[trait:disposable-x|Disposable (1)]] and [[trait:non-reloadable|Non-Reloadable]] that reacts to enemy Orders. Its bracketed weapon name identifies the BS Weapon it uses.\n\nThe Turret declares a [[skill:bs-attack|BS Attack]] or [[skill:cc-attack|CC Attack]] only against an active enemy **Model**, not a Marker, within its LoF or in Silhouette contact.\n\nIt is immobile, is removed when Wounds equal or exceed its STR, and cannot activate other [[trait:deployable|Deployable]] Weapons or Equipment.\n\nIt uses [[skill:place-deployable|Place Deployable]] with [[trait:perimeter|Perimeter]] positioning, placing the Turret totally inside the deploying Trooper's [[trait:zone-of-control-zc|Zone of Control]] instead of in Silhouette contact.",
             "composition": {
                 "role": "definition"
             },
@@ -4289,6 +4289,10 @@
                 {
                     "type": "enables-use-of",
                     "recordId": "skill:cc-attack"
+                },
+                {
+                    "type": "enables-use-of",
+                    "recordId": "skill:place-deployable"
                 },
                 {
                     "type": "uses-effects-of",
@@ -7228,7 +7232,7 @@
             "id": "weapon:symbiobomb",
             "kind": "weapon",
             "name": "SymbioBomb",
-            "summary": "SymbioBomb is a single-use Weapon listed on its owner's Unit Profile. During Deployment, its owner assigns it to another Trooper in the same Army; that Trooper becomes the user. The assignment does not transfer the owner's Unit Profile entry.\n\nBy spending one Short Skill or [[trait:aro|ARO]], the user may use one of these [[weapon:pt|Pheroware Tactics]]: Endgame, Eraser, or Mirrorball. With Endgame or Eraser, the target receives a -3 MOD in any Face to Face Roll against this Comms Attack; this MOD does not apply to Mirrorball.\n\nRemove the SymbioBomb at the end of the Order in which it was used. The SymbioBomb has its own use and assignment rules, but no separate attack profile in the Weapon Chart: refer to the chosen Pheroware Tactic for its profile and effects.",
+            "summary": "SymbioBomb is a single-use Weapon listed on its owner's Unit Profile. During Deployment, its owner assigns it to another Trooper in the same Army; that Trooper becomes the user. The assignment does not transfer the owner's Unit Profile entry.\n\nIts printed Traits are **Assignable ([[skill:transmutation|Transmutation]])**, **Comms Attack**, and **Optional**. These describe the SymbioBomb and do not create an additional standalone attack profile.\n\nBy spending one Short Skill or [[trait:aro|ARO]], the user may use one of these [[weapon:pt|Pheroware Tactics]]: Endgame, Eraser, or Mirrorball. With Endgame or Eraser, the target receives a -3 MOD in any Face to Face Roll against this Comms Attack; this MOD does not apply to Mirrorball.\n\nRemove the SymbioBomb at the end of the Order in which it was used. The SymbioBomb has its own use and assignment rules, but no separate attack profile in the Weapon Chart: refer to the chosen Pheroware Tactic for its profile and effects.",
             "facts": {},
             "composition": {
                 "role": "definition"

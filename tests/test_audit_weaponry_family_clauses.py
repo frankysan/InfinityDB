@@ -88,17 +88,25 @@ def test_markdown_report_does_not_assert_semantic_completeness() -> None:
     assert 'Not verified in the browser' in text
 
 
-def test_checked_in_policy_has_21_distinct_reviewed_source_clauses() -> None:
+def test_checked_in_policy_has_68_distinct_reviewed_source_clauses() -> None:
     path = Path(__file__).resolve().parents[1] / (
         'config/validation/weaponry-family-clauses.json'
     )
     raw = json.loads(path.read_text(encoding='utf-8'))
     policy = _read_policy(path, raw['corePdfSha256'])
     assert [family['name'] for family in policy['families']] == [
-        'Perimeter Weapons', 'Mines',
+        'Perimeter Weapons', 'Mines', 'Armed Turret', 'D-Charges',
+        'Disco Baller', 'Drop Bears', 'Mine Dispenser',
+        'Sepsitor', 'SymbioBomb', 'WildParrot',
     ]
-    assert [len(family['clauses']) for family in policy['families']] == [7, 14]
-    assert len({clause['id'] for f in policy['families'] for clause in f['clauses']}) == 21
+    assert [len(family['clauses']) for family in policy['families']] == [
+        7, 14, 8, 9, 8, 6, 2, 5, 6, 3,
+    ]
+    assert len({clause['id'] for f in policy['families'] for clause in f['clauses']}) == 68
+    assert all(
+        clause['semanticReview']['status'] == 'represented'
+        for family in policy['families'] for clause in family['clauses']
+    )
 
 
 def test_represented_clause_requires_current_curated_summary_anchor() -> None:
@@ -131,7 +139,7 @@ def test_checked_in_semantic_review_separates_full_and_partial_coverage() -> Non
     statuses = [clause['semanticReview']['status']
                 for family in raw['families'] for clause in family['clauses']]
     assert {status: statuses.count(status) for status in set(statuses)} == {
-        'represented': 21,
+        'represented': 68,
     }
 
 
@@ -238,3 +246,79 @@ def test_mines_family_summaries_cover_general_and_exception_mechanics() -> None:
                  '[[skill:cc-attack|CC attack]]', 'two uses',
                  'does not affect the bearer'):
         assert text in chest
+
+
+def test_turret_and_d_charges_clauses_are_pinned_to_distinct_family_records() -> None:
+    root = Path(__file__).resolve().parents[1]
+    policy = json.loads((root / 'config/validation/weaponry-family-clauses.json').read_text(
+        encoding='utf-8'
+    ))
+    families = {f['name']: f for f in policy['families']}
+    for name, record_id in (
+        ('Armed Turret', 'weapon:armed-turret'),
+        ('D-Charges', 'weapon:d-charges'),
+    ):
+        family = families[name]
+        assert family['page'] == 70
+        assert len(family['clauses']) >= 8
+        assert all(record_id in clause['relatedCuratedIds'] for clause in family['clauses'])
+        assert all(
+            clause['semanticReview']['curatedId'] == record_id
+            for clause in family['clauses']
+        )
+    ids = {c['id'] for c in families['Armed Turret']['clauses']}
+    assert {'turret-deployable-traits', 'turret-place-in-zoc',
+            'turret-model-not-marker', 'turret-stationary'} <= ids
+    dc_ids = {c['id'] for c in families['D-Charges']['clauses']}
+    assert {'dcharges-share-disposable', 'dcharges-resolution-no-roll',
+            'dcharges-improvised-mod'} <= dc_ids
+
+
+def test_selected_special_weapon_clauses_have_distinct_source_owners() -> None:
+    """Do not conflate the six family mechanics or invent a SymbioBomb profile."""
+    policy = json.loads(Path('config/validation/weaponry-family-clauses.json').read_text(
+        encoding='utf-8'
+    ))
+    families = {f['name']: f for f in policy['families']}
+    expected = {
+        'Disco Baller': (71, 8),
+        'Drop Bears': (71, 6),
+        'Mine Dispenser': (72, 2),
+        'Sepsitor': (73, 5),
+        'SymbioBomb': (74, 6),
+        'WildParrot': (74, 3),
+    }
+    for name, (page, count) in expected.items():
+        family = families[name]
+        assert family['page'] == page
+        assert len(family['clauses']) == count
+        assert all(clause['semanticReview']['status'] == 'represented'
+                   for clause in family['clauses'])
+    symbio = families['SymbioBomb']
+    assert symbio['armyExamples'] == ['SymbioBomb']
+    assert {c['semanticReview']['curatedId'] for c in symbio['clauses']} == {
+        'weapon:symbiobomb',
+    }
+    disco = families['Disco Baller']['clauses']
+    assert {c['semanticReview']['curatedId'] for c in disco} == {
+        'weapon:disco-baller', 'skill:activate-disco-ball',
+    }
+
+
+def test_symbiobomb_printed_traits_have_cited_nonprofile_reference() -> None:
+    root = Path(__file__).resolve().parents[1]
+    curated = json.loads((root / 'data/curated/rules/n5-core-v5.3.json').read_text(
+        encoding='utf-8'
+    ))
+    record = next(r for r in curated['records'] if r['id'] == 'weapon:symbiobomb')
+    summary = record['summary']
+    assert 'Assignable ([[skill:transmutation|Transmutation]])' in summary
+    assert '**Comms Attack**' in summary
+    assert '**Optional**' in summary
+    assert 'no separate attack profile in the Weapon Chart' in summary
+    # The link provides a stable detail page, not an imported attack profile.
+    assert record['armyLinks'] == [{'entity': 'weapon', 'id': 'symbiobomb'}]
+    assert any(
+        c['sourceId'] == 'n5-core-v5.3-pdf' and c['page'] == 74
+        for c in record['citations']
+    )
