@@ -446,6 +446,30 @@ or overflow. This verifies the selected counter-Skill boundary,
 not every possible Stealth/mixed-activation exception. The
 frozen 367-record inventory remains unchanged.
 
+## Look Out! as an exceptional allied ARO (2026-10-16)
+
+N5.3 English p. 81 permits a Trooper with LoF to an enemy
+declaring or performing an Order to declare Look Out! as
+an ARO. The Reactive Player selects other allied Troopers
+immediately; those allies may make Dodge (PH-3) Rolls to
+adjust LoF/facing without displacement and are counted
+as having declared an ARO. The source example explicitly
+includes an ally outside the enemy's LoF and ZoC. They
+cannot already have declared another ARO. Their Dodge
+roll is normally unopposed, but may be Face to Face when
+subject to an Attack that Dodge can oppose.
+
+The prior curated explanation omitted selection timing,
+special ARO eligibility and roll opposition. The owning
+record now cites N5.3 p. 81 directly, preserving its Wiki
+revision, No Roll ARO category and Dodge-modifier relation.
+This grant is restricted to the specified Dodge action.
+
+Pinned PDF and curated tests plus 3/3 browser checks
+at 1440/390/320 px pass. The frozen 367-record audit
+is not changed or marked complete. Other conditional
+ARO permissions and numerical variants remain open.
+
 ## Implementation and completion handoff
 
 The independent errors found here are REA-039/040/043/044; allegiance is an

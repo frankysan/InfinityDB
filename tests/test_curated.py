@@ -2595,6 +2595,73 @@ def test_checked_in_n5_collection_keeps_sensor_category_source_faithful() -> Non
     ] == [("short-skill", 40)]
 
 
+def test_n5_look_out_alerted_aro_is_dodge_only_and_conditional() -> None:
+    root = Path(__file__).resolve().parents[1]
+    document = load_curated_document(root / "data/curated/rules/n5-core-v5.3.json")
+    records = {r["id"]: r for r in document["records"]}
+    skill = records["skill:look-out"]
+    facts = skill["facts"]
+    assert facts["typeIds"] == ["aro"]
+    assert skill["labelIds"] == ["no-roll"]
+    assert skill["citations"][0] == {
+        "sourceId": "n5-core-v5.3-pdf",
+        "page": 81,
+        "section": "Look Out!",
+    }
+    assert skill["citations"][1]["sourceId"] == "wiki-en-20260926-200832"
+    assert skill["relations"] == [
+        {"type": "modifies-rolls-for", "recordId": "skill:dodge"}
+    ]
+    assert "LoF to an enemy Trooper or Marker" in facts["requirements"][0]
+    assert "[[skill:dodge]] (PH-3)" in facts["effects"][0]
+    assert "other allied Troopers" in facts["effects"][0]
+    assert "Reactive Player names" in facts["effects"][0]
+    assert "same Order" in facts["effects"][0]
+    assert "outside their LoF" in facts["effects"][0]
+    assert "Zone of Control" in facts["effects"][0]
+    assert "without changing position" in facts["effects"][0]
+    assert "Face to Face Roll" in facts["effects"][1]
+    assert "unopposed PH Roll" in facts["effects"][1]
+    assert "not declared another ARO" in facts["restrictions"][0]
+    assert "not a general permission" in facts["restrictions"][1]
+    assert "neither LoF" in facts["clarifications"][0]
+    assert "Face to Face" in facts["clarifications"][1]
+    assert "without displacing it" in facts["clarifications"][1]
+    assert records["skill:dodge"]["facts"]["typeIds"] == ["short-skill", "aro"]
+
+
+def test_n5_look_out_aro_procedure_matches_pinned_pdf() -> None:
+    import hashlib
+
+    pdf = pytest.importorskip("pymupdf")
+    root = Path(__file__).resolve().parents[1]
+    source = root / "data/pdf/rules/n5-rules-v5-3-en.pdf"
+    if not source.exists():
+        pytest.skip("Pinned N5.3 PDF unavailable")
+    provenance = json.loads(
+        (root / "config/validation/weaponry-family-clauses.json").read_text("utf8")
+    )
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == provenance["corePdfSha256"]
+    with pdf.open(source) as document:
+        page = " ".join(document[80].get_text().split())
+    clauses = (
+        "LOOK OUT! ARO No Roll",
+        "The user must have LoF to an enemy Trooper or Marker",
+        "all other Troopers of the same player to modify their LoF",
+        "without displacing",
+        "considered as if the Troopers modifying their LoF had declared an ARO",
+        "Normal or Face to Face Dodge (PH-3) Roll",
+        "unless the alerted Trooper has been targeted by an Attack",
+        "as long as they had not declared any other previous ARO",
+        "Reactive Player must indicate which Troopers will modify their LoF",
+        "All the other Troopers",
+        "same Order as the Trooper using the Look Out! ARO",
+        "outside his Line of Fire and Zone of Control",
+    )
+    for clause in clauses:
+        assert clause in page, clause
+
+
 def test_checked_in_n5_collection_keeps_new_common_skill_facts_source_faithful() -> None:
     path = Path(__file__).parents[1] / "data" / "curated" / "rules" / "n5-core-v5.3.json"
     document = load_curated_document(path)

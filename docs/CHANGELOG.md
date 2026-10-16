@@ -12,6 +12,9 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Look Out! now explains its special allied Dodge (PH-3)
+  ARO, ally selection, roll opposition and scope, with
+  a direct citation to N5.3.
 - Combat Instinct and Sixth Sense now distinguish their separate
   Stealth counters: only Sixth Sense grants an attack-only
   outside-LoF response, not a general ARO against movement.

@@ -13662,16 +13662,27 @@
                     "The user must have LoF to an enemy Trooper or Marker that declares or performs an Order."
                 ],
                 "effects": [
-                    "Other Troopers of the same player may modify their LoF by making [[skill:dodge]] (PH-3) Rolls in the same Order."
+                    "After the Look Out! [[trait:aro|ARO]] is declared, the Reactive Player names which other allied Troopers will adjust their LoF without changing position. These alerted Troopers each declare a [[skill:dodge]] (PH-3) Roll in the same Order, counted as their [[trait:aro|ARO]] even if the active enemy is outside their LoF and [[trait:zone-of-control-zc|Zone of Control]].",
+                    "An alerted Trooper's [[skill:dodge|Dodge]] (PH-3) is an unopposed PH Roll unless the Trooper is subject to an Attack that the [[skill:dodge|Dodge]] can oppose in a Face to Face Roll."
                 ],
                 "restrictions": [
-                    "An alerted Trooper may make the [[skill:dodge]] (PH-3) Roll only if it has not declared another ARO."
+                    "An alerted Trooper may make the [[skill:dodge]] (PH-3) Roll only if it has not declared another ARO.",
+                    "Look Out! is itself an [[trait:aro|ARO]], not a general permission for alerted Troopers to declare any Skill; it permits the specified [[skill:dodge|Dodge]] (PH-3) facing adjustment."
+                ],
+                "clarifications": [
+                    "**Outside-LoF/ZoC example:** A Trooper with LoF to an active enemy declares Look Out! and designates a different ally who has neither LoF nor [[trait:zone-of-control-zc|Zone of Control]] to the enemy. That ally can still declare the Look Out!-granted [[skill:dodge|Dodge]] (PH-3), even though it would not otherwise have an [[trait:aro|ARO]] against that movement.",
+                    "**When the alerted Trooper is attacked:** The alerted Trooper uses a Face to Face [[skill:dodge|Dodge]] (PH-3) Roll only if the incoming Attack can be opposed by [[skill:dodge|Dodge]]; otherwise the PH Roll is unopposed. A successful Roll may turn the Trooper to face the enemy without displacing it."
                 ]
             },
             "labelIds": [
                 "no-roll"
             ],
             "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 81,
+                    "section": "Look Out!"
+                },
                 {
                     "sourceId": "wiki-en-20260926-200832",
                     "member": "Look_Out",

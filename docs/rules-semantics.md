@@ -1755,6 +1755,18 @@ InfinityDB therefore authors `modifies-rolls-for` from Look Out to Dodge and
 navigation so Dodge and Mimetism expose those interactions without reciprocal curated rows.
 The exact PH-3 and Speculative Attack -6 values remain in the owning Skill facts.
 
+**Look Out! is a scoped allied ARO permission (N5.3 p. 81):**
+The reacting user needs LoF to the active enemy. After
+Look Out! is declared, the Reactive Player selects other
+allied Troopers for Dodge (PH-3) in that same Order. Those
+Troopers count as declaring an ARO even if the enemy is
+outside their own LoF and ZoC, provided they have not
+already declared another ARO. The roll is unopposed unless
+an incoming Attack can be opposed by a Face to Face Dodge.
+Successful alerted Troopers can adjust facing without
+displacement. This is not a general permission for other
+ARO Skills; the existing Dodge-modifier relation stays scoped.
+
 The BS Attack labels on Intuitive Attack and Speculative Attack remain source-native labels,
 not graph edges: the current relation vocabulary describes gameplay effects between records,
 not an `is-a` or label-membership relationship.

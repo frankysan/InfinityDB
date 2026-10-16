@@ -1271,6 +1271,11 @@ as unimplemented and distinguish them from the published core-scenario foundatio
         attack-only outside-LoF/360-degree-LoF response.
         Added primary Combat Instinct source, focused source and
         curated tests, and responsive browser acceptance (9/9).
+      - [x] Verify Look Out! (N5.3 p. 81) as an exceptional
+        allied Dodge (PH-3) ARO: user LoF, allied selection,
+        no previous ARO, unopposed versus Face to Face
+        Dodge and no general ARO grant. Source tests and
+        3/3 responsive browser checks passed.
       - [ ] Verify other conditional declaration permissions and
         remaining numerical Army replacement variants. Selected
         checks do not certify the full 1.0 corpus.

@@ -2435,3 +2435,24 @@ This is bounded source-to-page acceptance, not an engine-level
 general ARO permission or 367-record corpus signoff. The
 original inventory remains frozen; conditional ARO and
 numerical Army variant work remains open.
+
+## 1.0 Look Out! exceptional allied Dodge ARO
+
+**Verified 2026-10-16 against pinned N5.3 English p. 81.**
+A curated regression checks Look Out!'s ARO-only and No
+Roll type, original reviewed restriction, Dodge relationship,
+primary PDF citation, and allied selection, special ARO,
+unopposed/Face to Face, and no-prior-ARO conditions.
+A SHA-256-pinned source test checks all relevant clauses
+and the outside-LoF/ZoC example.
+
+The rebuilt rules database powered headless Chrome checks
+of the Look Out! Skill page at 1440, 390 and 320 px.
+**3/3 checks passed** for ARO badge, visible explanation,
+no JavaScript page errors and no horizontal overflow.
+Private verifier, rebuilt DB and screenshots are under
+ignored local/audits/look-out-aro-browser/.
+
+This is bounded ARO procedure acceptance. The original
+367-record inventory is unchanged, and other conditional
+AROs and the whole-corpus gate remain open.
